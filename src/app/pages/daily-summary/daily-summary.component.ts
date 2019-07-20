@@ -7,7 +7,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
-import {IPC_SHUTDOWN_NOW} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
 import {NoteService} from '../../features/note/note.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
@@ -194,8 +194,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
             this._finishDayForGood(() => {
-              // this._electronService.ipcRenderer.send(IPC_SHUTDOWN);
-              this._electronService.ipcRenderer.send(IPC_SHUTDOWN_NOW);
+              // this._electronService.ipcRenderer.send(IPC.SHUTDOWN);
+              this._electronService.ipcRenderer.send(IPC.SHUTDOWN_NOW);
             });
           } else if (isConfirm === false) {
             this._finishDayForGood(() => {

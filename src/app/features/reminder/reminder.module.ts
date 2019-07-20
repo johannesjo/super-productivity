@@ -5,7 +5,7 @@ import {NoteModule} from '../note/note.module';
 import {MatDialog} from '@angular/material/dialog';
 import {ElectronService} from 'ngx-electron';
 import {IS_ELECTRON} from '../../app.constants';
-import {IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {DialogViewNoteReminderComponent} from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
 import {TasksModule} from '../tasks/tasks.module';
 import {DialogViewTaskReminderComponent} from '../tasks/dialog-view-task-reminder/dialog-view-task-reminder.component';
@@ -32,7 +32,7 @@ export class ReminderModule {
       filter((reminder) => this._matDialog.openDialogs.length === 0 && !!reminder),
     ).subscribe((reminder: Reminder) => {
       if (IS_ELECTRON) {
-        this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+        this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
       }
 
       if (reminder.type === 'NOTE') {

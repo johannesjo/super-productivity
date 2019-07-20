@@ -4,7 +4,7 @@ import {environment} from '../../../environments/environment';
 import {IS_ELECTRON} from '../../app.constants';
 import {IS_MOBILE} from '../../util/is-mobile';
 import {ElectronService} from 'ngx-electron';
-import {IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {TranslateService} from '@ngx-translate/core';
 
 @Injectable({
@@ -59,7 +59,7 @@ export class NotifyService {
         instance.onclick = () => {
           instance.close();
           if (IS_ELECTRON) {
-            this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+            this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
           }
         };
         setTimeout(() => {

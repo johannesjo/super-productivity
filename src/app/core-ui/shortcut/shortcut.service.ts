@@ -10,7 +10,7 @@ import {TaskService} from '../../features/tasks/task.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogAddNoteComponent} from '../../features/note/dialog-add-note/dialog-add-note.component';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
-import {IPC_TASK_TOGGLE_START} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 
 
 @Injectable({
@@ -39,7 +39,7 @@ export class ShortcutService {
 
     // GLOBAL SHORTCUTS
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.on(IPC_TASK_TOGGLE_START, () => this._taskService.toggleStartTask());
+      this._electronService.ipcRenderer.on(IPC.TASK_TOGGLE_START, () => this._taskService.toggleStartTask());
     }
   }
 

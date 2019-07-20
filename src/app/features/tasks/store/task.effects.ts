@@ -28,7 +28,7 @@ import {Task, TaskWithSubTasks} from '../task.model';
 import {TaskState} from './task.reducer';
 import {EMPTY, Observable, of} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
-import {IPC_CURRENT_TASK_UPDATED, IPC_SET_PROGRESS_BAR} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {ReminderService} from '../../reminder/reminder.service';
 import {GlobalConfigState, MiscConfig} from '../../config/global-config.model';
@@ -245,7 +245,7 @@ export class TaskEffects {
       withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
       tap(([action, current]) => {
         if (IS_ELECTRON) {
-          this._electronService.ipcRenderer.send(IPC_CURRENT_TASK_UPDATED, {current});
+          this._electronService.ipcRenderer.send(IPC.CURRENT_TASK_UPDATED, {current});
         }
       })
     );
@@ -395,7 +395,7 @@ export class TaskEffects {
       filter(() => IS_ELECTRON),
       tap((act: SetCurrentTask) => {
         if (!act.payload) {
-          this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress: 0});
+          this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress: 0});
         }
       }),
     );
@@ -412,7 +412,7 @@ export class TaskEffects {
       switchMap(([act]) => this._taskService.getById$(act.payload.id)),
       tap((task: Task) => {
         const progress = task.timeSpent / task.timeEstimate;
-        this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress});
+        this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress});
       }),
     );
 

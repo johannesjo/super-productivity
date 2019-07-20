@@ -8,7 +8,7 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {ElectronService} from 'ngx-electron';
 import {KeyboardConfig} from '../global-config.model';
-import {IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {T} from '../../../t.const';
 import {LanguageService} from '../../../core/language/language.service';
@@ -51,7 +51,7 @@ export class GlobalConfigEffects {
       filter((action: UpdateGlobalConfigSection) => IS_ELECTRON && action.payload.sectionKey === 'keyboard'),
       tap((action: UpdateGlobalConfigSection) => {
         const keyboardCfg: KeyboardConfig = action.payload.sectionCfg as KeyboardConfig;
-        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+        this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
 
@@ -63,7 +63,7 @@ export class GlobalConfigEffects {
       filter(() => IS_ELECTRON),
       tap((action: LoadGlobalConfig) => {
         const keyboardCfg: KeyboardConfig = action.payload.cfg.keyboard;
-        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+        this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
 

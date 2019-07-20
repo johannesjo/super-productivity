@@ -11,22 +11,7 @@ import {getGitLog} from './git-log';
 import {initGoogleAuth} from './google-auth';
 import {errorHandler} from './error-handler';
 import {initDebug} from './debug';
-import {
-  IPC_BACKUP,
-  IPC_EXEC,
-  IPC_GIT_LOG,
-  IPC_IDLE_TIME,
-  IPC_JIRA_MAKE_REQUEST_EVENT,
-  IPC_JIRA_SETUP_IMG_HEADERS,
-  IPC_LOCK_SCREEN,
-  IPC_ON_BEFORE_QUIT,
-  IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT,
-  IPC_SET_PROGRESS_BAR,
-  IPC_SHOW_OR_FOCUS,
-  IPC_SHUTDOWN,
-  IPC_SHUTDOWN_NOW,
-  IPC_TASK_TOGGLE_START
-} from './ipc-events.const';
+import {IPC} from './ipc-events.const';
 import {backupData} from './backup';
 import {JiraCfg} from '../src/app/features/issue/jira/jira';
 import {KeyboardConfig} from '../src/app/features/config/global-config.model';
@@ -118,7 +103,7 @@ app_.on('ready', () => {
 
     // don't update if the user is about to close
     if (!app_.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
-      mainWin.webContents.send(IPC_IDLE_TIME, idleTime);
+      mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
     }
   };
 
@@ -186,15 +171,15 @@ app_.on('will-quit', () => {
 
 // FRONTEND EVENTS
 // ---------------
-ipcMain.on(IPC_SHUTDOWN_NOW, quitAppNow);
+ipcMain.on(IPC.SHUTDOWN_NOW, quitAppNow);
 
-ipcMain.on(IPC_SHUTDOWN, quitApp);
+ipcMain.on(IPC.SHUTDOWN, quitApp);
 
-ipcMain.on(IPC_EXEC, exec);
+ipcMain.on(IPC.EXEC, exec);
 
-ipcMain.on(IPC_BACKUP, backupData);
+ipcMain.on(IPC.BACKUP, backupData);
 
-ipcMain.on(IPC_LOCK_SCREEN, () => {
+ipcMain.on(IPC.LOCK_SCREEN, () => {
   if (isLocked) {
     return;
   }
@@ -206,30 +191,30 @@ ipcMain.on(IPC_LOCK_SCREEN, () => {
   }
 });
 
-ipcMain.on(IPC_SET_PROGRESS_BAR, (ev, {progress, mode}) => {
+ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, {progress, mode}) => {
   if (mainWin) {
     mainWin.setProgressBar(Math.min(Math.max(progress, 0), 1), {mode});
   }
 });
 
 
-ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
+ipcMain.on(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
   registerShowAppShortCuts(cfg);
 });
 
-ipcMain.on(IPC_JIRA_SETUP_IMG_HEADERS, (ev, jiraCfg: JiraCfg) => {
+ipcMain.on(IPC.JIRA_SETUP_IMG_HEADERS, (ev, jiraCfg: JiraCfg) => {
   setupRequestHeadersForImages(jiraCfg);
 });
 
-ipcMain.on(IPC_JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
+ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
   sendJiraRequest(request);
 });
 
-ipcMain.on(IPC_GIT_LOG, (ev, cwd) => {
+ipcMain.on(IPC.GIT_LOG, (ev, cwd) => {
   getGitLog(cwd);
 });
 
-ipcMain.on(IPC_SHOW_OR_FOCUS, () => {
+ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
   showOrFocus(mainWin);
 });
 
@@ -286,7 +271,7 @@ function registerShowAppShortCuts(cfg: KeyboardConfig) {
 
           case 'globalToggleTaskStart':
             actionFn = () => {
-              mainWin.webContents.send(IPC_TASK_TOGGLE_START);
+              mainWin.webContents.send(IPC.TASK_TOGGLE_START);
             };
             break;
         }
@@ -306,7 +291,7 @@ function showApp() {
 }
 
 function quitApp() {
-  mainWin.webContents.send(IPC_ON_BEFORE_QUIT);
+  mainWin.webContents.send(IPC.ON_BEFORE_QUIT);
 }
 
 function quitAppNow() {

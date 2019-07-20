@@ -10,11 +10,7 @@ import {GlobalConfigService} from '../config/global-config.service';
 import {GoogleSession} from '../config/global-config.model';
 import {catchError, concatMap, filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {combineLatest, EMPTY, from, merge, Observable, of, throwError, timer} from 'rxjs';
-import {
-  IPC_GOOGLE_AUTH_TOKEN,
-  IPC_GOOGLE_AUTH_TOKEN_ERROR,
-  IPC_TRIGGER_GOOGLE_AUTH
-} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../../core/banner/banner.service';
 import {BannerId} from '../../core/banner/banner.model';
@@ -89,9 +85,9 @@ export class GoogleApiService {
         return new Promise((resolve) => resolve(true));
       }
 
-      this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, session.refreshToken);
+      this._electronService.ipcRenderer.send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
       return new Promise((resolve, reject) => {
-        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
+        this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
@@ -100,7 +96,7 @@ export class GoogleApiService {
           showSuccessMsg();
           resolve(data);
         });
-        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
+        this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
           reject(err);
         });
       });

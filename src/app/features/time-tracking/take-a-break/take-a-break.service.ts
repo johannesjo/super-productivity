@@ -26,7 +26,7 @@ import {ProjectService} from '../../project/project.service';
 import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
 import {T} from '../../../t.const';
 import {ElectronService} from 'ngx-electron';
-import {IPC_LOCK_SCREEN, IPC_SHOW_OR_FOCUS} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -155,7 +155,7 @@ export class TakeABreakService {
 
     this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
       if (IS_ELECTRON) {
-        this._electronService.ipcRenderer.send(IPC_LOCK_SCREEN);
+        this._electronService.ipcRenderer.send(IPC.LOCK_SCREEN);
       }
     });
 
@@ -181,7 +181,7 @@ export class TakeABreakService {
         this._triggerLockScreenCounter$.next(true);
       }
       if (IS_ELECTRON && cfg.takeABreak.isFocusWindow) {
-        this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+        this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
       }
 
       this._bannerService.open({

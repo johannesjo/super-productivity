@@ -19,7 +19,7 @@ import {Observable} from 'rxjs';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {IS_ELECTRON} from '../../../app.constants';
-import {IPC_SET_PROGRESS_BAR} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 import {ElectronService} from 'ngx-electron';
 import {T} from '../../../t.const';
 
@@ -166,7 +166,7 @@ export class PomodoroEffects {
     // we display pomodoro progress for pomodoro
     filter(([progress, cfg]: [number, PomodoroConfig]) => cfg && cfg.isEnabled),
     tap(([progress, cfg]) => {
-      this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress});
+      this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress});
     }),
   );
 

@@ -19,11 +19,7 @@ import {
 import {JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser} from './jira-api-responses';
 import {JiraCfg} from './jira';
 import {ElectronService} from 'ngx-electron';
-import {
-  IPC_JIRA_CB_EVENT,
-  IPC_JIRA_MAKE_REQUEST_EVENT,
-  IPC_JIRA_SETUP_IMG_HEADERS
-} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {IS_ELECTRON} from '../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
@@ -62,13 +58,13 @@ export class JiraApiService {
       this._cfg = cfg;
 
       if (IS_ELECTRON && this._isMinimalSettings(cfg)) {
-        this._electronService.ipcRenderer.send(IPC_JIRA_SETUP_IMG_HEADERS, cfg);
+        this._electronService.ipcRenderer.send(IPC.JIRA_SETUP_IMG_HEADERS, cfg);
       }
     });
 
     // set up callback listener for electron
     if (this._electronService.isElectronApp) {
-      this._electronService.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
+      this._electronService.ipcRenderer.on(IPC.JIRA_CB_EVENT, (ev, res) => {
         this._handleResponse(res);
       });
     }
@@ -300,7 +296,7 @@ export class JiraApiService {
 
     // send to electron
     if (this._electronService.isElectronApp) {
-      this._electronService.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
+      this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, request);
     } else if (this._isExtension) {
       this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', {
         requestId: request.requestId,

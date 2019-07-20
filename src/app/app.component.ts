@@ -17,12 +17,7 @@ import {GlobalConfigService} from './features/config/global-config.service';
 import {blendInOutAnimation} from './ui/animations/blend-in-out.ani';
 import {LayoutService} from './core-ui/layout/layout.service';
 import {ElectronService} from 'ngx-electron';
-import {
-  IPC_APP_READY,
-  IPC_ERROR,
-  IPC_TRANSFER_SETTINGS_REQUESTED,
-  IPC_TRANSFER_SETTINGS_TO_ELECTRON
-} from '../../electron/ipc-events.const';
+import {IPC} from '../../electron/ipc-events.const';
 import {SnackService} from './core/snack/snack.service';
 import {IS_ELECTRON} from './app.constants';
 import {GoogleDriveSyncService} from './features/google/google-drive-sync.service';
@@ -135,13 +130,13 @@ export class AppComponent implements OnInit {
     this._initHandlersForOtherBodyClasses();
 
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.send(IPC_APP_READY);
+      this._electronService.ipcRenderer.send(IPC.APP_READY);
       this._initElectronErrorHandler();
       this._initMousewheelZoomForElectron();
 
 
-      this._electronService.ipcRenderer.on(IPC_TRANSFER_SETTINGS_REQUESTED, () => {
-        this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
+      this._electronService.ipcRenderer.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
+        this._electronService.ipcRenderer.send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
       });
     } else {
       // WEB VERSION
@@ -312,7 +307,7 @@ export class AppComponent implements OnInit {
   }
 
   private _initElectronErrorHandler() {
-    this._electronService.ipcRenderer.on(IPC_ERROR, (ev, data: {
+    this._electronService.ipcRenderer.on(IPC.ERROR, (ev, data: {
       error: string,
       stack: any,
     }) => {

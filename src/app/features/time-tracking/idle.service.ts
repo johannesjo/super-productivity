@@ -4,7 +4,7 @@ import {ChromeExtensionInterfaceService} from '../../core/chrome-extension-inter
 import {ProjectService} from '../project/project.service';
 import {ElectronService} from 'ngx-electron';
 import {TaskService} from '../tasks/task.service';
-import {IPC_IDLE_TIME, IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {MatDialog} from '@angular/material/dialog';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {DialogIdleComponent} from './dialog-idle/dialog-idle.component';
@@ -12,7 +12,6 @@ import {GlobalConfigService} from '../config/global-config.service';
 import {Task} from '../tasks/task.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
-import {T} from '../../t.const';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -47,12 +46,12 @@ export class IdleService {
 
   init() {
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.on(IPC_IDLE_TIME, (ev, idleTimeInMs) => {
+      this._electronService.ipcRenderer.on(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     }
     this._chromeExtensionInterface.onReady$.subscribe(() => {
-      this._chromeExtensionInterface.addEventListener(IPC_IDLE_TIME, (ev, idleTimeInMs) => {
+      this._chromeExtensionInterface.addEventListener(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     });
@@ -79,7 +78,7 @@ export class IdleService {
 
       if (!this.isIdleDialogOpen) {
         if (IS_ELECTRON) {
-          this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+          this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
         }
 
         if (this._taskService.currentTaskId) {

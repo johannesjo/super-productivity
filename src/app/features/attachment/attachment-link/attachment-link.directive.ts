@@ -3,7 +3,7 @@ import {IS_ELECTRON} from '../../../app.constants';
 import {AttachmentType} from '../attachment.model';
 import {ElectronService} from 'ngx-electron';
 import {SnackService} from '../../../core/snack/snack.service';
-import {IPC_EXEC} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 import {T} from '../../../t.const';
 
 
@@ -64,6 +64,6 @@ export class AttachmentLinkDirective {
   }
 
   private _exec(command) {
-    this._electronService.ipcRenderer.send(IPC_EXEC, command);
+    this._electronService.ipcRenderer.send(IPC.EXEC, command);
   }
 }
