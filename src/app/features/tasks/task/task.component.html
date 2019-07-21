@@ -85,6 +85,7 @@
       <div #editOnClickEl
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
            [value]="task.title"
+           [isResetAfterEdit]="true"
            class="task-title"
            contenteditable="true"
            editOnClick

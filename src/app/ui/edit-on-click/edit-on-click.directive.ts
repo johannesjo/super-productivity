@@ -9,8 +9,10 @@ import {Directive, ElementRef, EventEmitter, Input, OnInit, Output} from '@angul
   selector: '[editOnClick]',
 })
 export class EditOnClickDirective implements OnInit {
+  @Input() isResetAfterEdit = false;
   @Output() editFinished: EventEmitter<any> = new EventEmitter();
   private _lastDomValue: string;
+  private _lastOutsideVal: string;
   private readonly _el: HTMLElement;
 
   constructor(el: ElementRef) {
@@ -20,7 +22,7 @@ export class EditOnClickDirective implements OnInit {
   private _value: string;
 
   @Input() set value(_val) {
-    this._value = _val;
+    this._value = this._lastOutsideVal = _val;
     // also update last dom value because that's how check for changes
     this._lastDomValue = _val;
     this._refreshView();
@@ -104,6 +106,11 @@ export class EditOnClickDirective implements OnInit {
       $taskEl: this._el.closest('.task'),
       event,
     });
+
+    if (this.isResetAfterEdit) {
+      this._value = this._lastOutsideVal;
+      this._refreshView();
+    }
   }
 
   private _setValueFromElement() {
