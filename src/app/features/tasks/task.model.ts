@@ -81,3 +81,4 @@ export const DEFAULT_TASK: Task = {
   _currentTab: 0,
 };
 
+export const SHORT_SYNTAX_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;

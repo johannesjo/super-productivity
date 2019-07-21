@@ -15,6 +15,7 @@ import {Observable} from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
+  SHORT_SYNTAX_REG_EX,
   ShowSubTasksMode,
   Task,
   TaskWithIssueData,
@@ -651,16 +652,12 @@ export class TaskService {
     if (!task.title) {
       return task;
     }
-    const timeEstimateRegExp = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
-    const matches = timeEstimateRegExp.exec(task.title);
+    const matches = SHORT_SYNTAX_REG_EX.exec(task.title);
 
     if (matches && matches.length >= 3) {
-      let full;
-      let timeSpent;
-      let timeEstimate;
-      full = matches[0];
-      timeSpent = matches[2];
-      timeEstimate = matches[4];
+      const full = matches[0];
+      const timeSpent = matches[2];
+      const timeEstimate = matches[4];
 
       return {
         ...task,
