@@ -740,6 +740,8 @@
       "FOCUS_LAST_ACTIVE_TASK": "Focus last active task",
       "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
+      "GLOBAL_ADD_NOTE": "Add new note",
+      "GLOBAL_ADD_TASK": "Add new task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
       "GO_TO_FOCUS_MODE": "Go to Focus Mode",
       "GO_TO_SETTINGS": "Go to Settings",

@@ -43,6 +43,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   keyboard: {
     globalShowHide: 'Ctrl+Shift+X',
     globalToggleTaskStart: null,
+    globalAddNote: null,
+    globalAddTask: null,
     addNewTask: 'Shift+A',
     addNewNote: 'n',
     openProjectNotes: 'Shift+N',

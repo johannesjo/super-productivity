@@ -33,6 +33,20 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
           templateOptions: {
             label: T.GCF.KEYBOARD.GLOBAL_TOGGLE_TASK_START
           },
+        },
+        {
+          key: 'globalAddNote',
+          type: 'keyboard',
+          templateOptions: {
+            label: T.GCF.KEYBOARD.GLOBAL_ADD_NOTE
+          },
+        },
+        {
+          key: 'globalAddTask',
+          type: 'keyboard',
+          templateOptions: {
+            label: T.GCF.KEYBOARD.GLOBAL_ADD_TASK
+          },
         }
       ]
       : []) as LimitedFormlyFieldConfig<KeyboardConfig>[],

@@ -249,11 +249,16 @@ function createMainWin() {
 function registerShowAppShortCuts(cfg: KeyboardConfig) {
   // unregister all previous
   globalShortcut.unregisterAll();
-  const GLOBAL_KEY_CFG_KEYS: string[] = ['globalShowHide', 'globalToggleTaskStart'];
+  const GLOBAL_KEY_CFG_KEYS: (keyof KeyboardConfig)[] = [
+    'globalShowHide',
+    'globalToggleTaskStart',
+    'globalAddNote',
+    'globalAddTask',
+  ];
 
   if (cfg) {
     Object.keys(cfg)
-      .filter(key => GLOBAL_KEY_CFG_KEYS.includes(key))
+      .filter((key: (keyof KeyboardConfig)) => GLOBAL_KEY_CFG_KEYS.includes(key))
       .forEach((key) => {
         let actionFn: () => void;
         const shortcut = cfg[key];
@@ -272,6 +277,21 @@ function registerShowAppShortCuts(cfg: KeyboardConfig) {
           case 'globalToggleTaskStart':
             actionFn = () => {
               mainWin.webContents.send(IPC.TASK_TOGGLE_START);
+            };
+            break;
+
+          case 'globalAddNote':
+            actionFn = () => {
+              showOrFocus(mainWin);
+              mainWin.webContents.send(IPC.ADD_NOTE);
+            };
+            break;
+
+          case 'globalAddTask':
+            actionFn = () => {
+              showOrFocus(mainWin);
+              // NOTE: delay slightly to make sure app is ready
+              mainWin.webContents.send(IPC.ADD_TASK);
             };
             break;
         }
