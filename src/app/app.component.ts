@@ -19,7 +19,7 @@ import {LayoutService} from './core-ui/layout/layout.service';
 import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../electron/ipc-events.const';
 import {SnackService} from './core/snack/snack.service';
-import {IS_ELECTRON} from './app.constants';
+import {BodyClass, IS_ELECTRON} from './app.constants';
 import {GoogleDriveSyncService} from './features/google/google-drive-sync.service';
 import {SwUpdate} from '@angular/service-worker';
 import {BookmarkService} from './features/bookmark/bookmark.service';
@@ -127,7 +127,7 @@ export class AppComponent implements OnInit {
     this._migrateService.checkForUpdate();
 
     // INIT Services and global handlers
-    this._initHandlersForOtherBodyClasses();
+    this._initHandlersForInitialBodyClasses();
 
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC.APP_READY);
@@ -231,29 +231,30 @@ export class AppComponent implements OnInit {
     return outlet.activatedRouteData['page'] || 'one';
   }
 
-  private _initHandlersForOtherBodyClasses() {
-    this.document.body.classList.add('isNoJira');
+  private _initHandlersForInitialBodyClasses() {
+    this.document.body.classList.add(BodyClass.isNoJira);
 
     if (IS_MAC) {
-      this.document.body.classList.add('isMac');
+      this.document.body.classList.add(BodyClass.isMac);
     } else {
-      this.document.body.classList.add('isNoMac');
+      this.document.body.classList.add(BodyClass.isNoMac);
     }
 
     if (IS_ELECTRON) {
-      this.document.body.classList.add('isElectron');
-      this.document.body.classList.remove('isNoJira');
+      this.document.body.classList.add(BodyClass.isElectron);
+      this.document.body.classList.remove(BodyClass.isNoJira);
     } else {
+      this.document.body.classList.add(BodyClass.isWeb);
       this._chromeExtensionInterface.onReady$.pipe(take(1)).subscribe(() => {
-        this.document.body.classList.add('isExtension');
-        this.document.body.classList.remove('isNoJira');
+        this.document.body.classList.add(BodyClass.isExtension);
+        this.document.body.classList.remove(BodyClass.isNoJira);
       });
     }
 
     if (isTouch()) {
-      this.document.body.classList.add('isTouchDevice');
+      this.document.body.classList.add(BodyClass.isTouchDevice);
     } else {
-      this.document.body.classList.add('isNoTouchDevice');
+      this.document.body.classList.add(BodyClass.isNoTouchDevice);
     }
   }
 
@@ -266,19 +267,19 @@ export class AppComponent implements OnInit {
     }
 
     if (isDarkTheme) {
-      this.document.body.classList.remove('isLightTheme');
-      this.document.body.classList.add('isDarkTheme');
+      this.document.body.classList.remove(BodyClass.isLightTheme);
+      this.document.body.classList.add(BodyClass.isDarkTheme);
     } else {
-      this.document.body.classList.remove('isDarkTheme');
-      this.document.body.classList.add('isLightTheme');
+      this.document.body.classList.remove(BodyClass.isDarkTheme);
+      this.document.body.classList.add(BodyClass.isLightTheme);
     }
 
     if (isReducedTheme) {
-      this.document.body.classList.remove('isNoReducedTheme');
-      this.document.body.classList.add('isReducedTheme');
+      this.document.body.classList.remove(BodyClass.isNoReducedTheme);
+      this.document.body.classList.add(BodyClass.isReducedTheme);
     } else {
-      this.document.body.classList.remove('isReducedTheme');
-      this.document.body.classList.add('isNoReducedTheme');
+      this.document.body.classList.remove(BodyClass.isReducedTheme);
+      this.document.body.classList.add(BodyClass.isNoReducedTheme);
     }
 
     this._currentTheme = theme;

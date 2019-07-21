@@ -48,6 +48,21 @@ export enum LanguageCodeMomentMap {
   zh = 'zh-cn',
 }
 
+export enum BodyClass {
+  isElectron = 'isElectron',
+  isWeb = 'isWeb',
+  isMac = 'isMac',
+  isNoMac = 'isNoMac',
+  isExtension = 'isExtension',
+  isNoJira = 'isNoJira',
+  isTouchDevice = 'isTouchDevice',
+  isNoTouchDevice = 'isNoTouchDevice',
+  isLightTheme = 'isLightTheme',
+  isDarkTheme = 'isDarkTheme',
+  isReducedTheme = 'isReducedTheme',
+  isNoReducedTheme = 'isNoReducedTheme',
+}
+
 // we're assuming that the other language speakers are likely to speak english
 // and as english offers most likely the best experience, we use it as default
 export const AUTO_SWITCH_LNGS: LanguageCode[] = [
