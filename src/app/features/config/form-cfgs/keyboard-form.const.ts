@@ -1,6 +1,7 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection, KeyboardConfig} from '../global-config.model';
+import {ConfigFormSection, KeyboardConfig, LimitedFormlyFieldConfig} from '../global-config.model';
 import {T} from '../../../t.const';
+import {IS_ELECTRON} from '../../../app.constants';
 
 export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
   title: T.GCF.KEYBOARD.TITLE,
@@ -8,29 +9,33 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
   help: T.GCF.KEYBOARD.HELP,
   items: [
     // SYSTEM WIDE
-    {
-      type: 'tpl',
-      className: 'tpl',
-      templateOptions: {
-        tag: 'h3',
-        class: 'sub-section-heading',
-        text: T.GCF.KEYBOARD.SYSTEM_SHORTCUTS,
-      },
-    },
-    {
-      key: 'globalShowHide',
-      type: 'keyboard',
-      templateOptions: {
-        label: T.GCF.KEYBOARD.GLOBAL_SHOW_HIDE
-      },
-    },
-    {
-      key: 'globalToggleTaskStart',
-      type: 'keyboard',
-      templateOptions: {
-        label: T.GCF.KEYBOARD.GLOBAL_TOGGLE_TASK_START
-      },
-    },
+    ...((IS_ELECTRON)
+      ? [
+        {
+          type: 'tpl',
+          className: 'tpl',
+          templateOptions: {
+            tag: 'h3',
+            class: 'sub-section-heading',
+            text: T.GCF.KEYBOARD.SYSTEM_SHORTCUTS,
+          },
+        },
+        {
+          key: 'globalShowHide',
+          type: 'keyboard',
+          templateOptions: {
+            label: T.GCF.KEYBOARD.GLOBAL_SHOW_HIDE
+          },
+        },
+        {
+          key: 'globalToggleTaskStart',
+          type: 'keyboard',
+          templateOptions: {
+            label: T.GCF.KEYBOARD.GLOBAL_TOGGLE_TASK_START
+          },
+        }
+      ]
+      : []) as LimitedFormlyFieldConfig<KeyboardConfig>[],
     // APP WIDE
     {
       type: 'tpl',

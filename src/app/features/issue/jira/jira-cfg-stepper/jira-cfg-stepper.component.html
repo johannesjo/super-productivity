@@ -6,8 +6,8 @@
             [formGroup]="credentialsFormGroup">
         <ng-template matStepLabel>{{T.F.JIRA.STEPPER.CREDENTIALS|translate}}</ng-template>
 
-        <p class="isHideWhenJiraSupport"
-           [innerHTML]="T.F.JIRA.EXTENSION_INFO|translate:{url:'https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}">
+        <p [ngClass]="HelperClasses.isHideForAdvancedFeatures"
+           [innerHTML]="T.G.EXTENSION_INFO|translate">
         </p>
 
         <formly-form (modelChange)="jiraCfg=$event"
@@ -23,7 +23,7 @@
                  class="user-avatar">
             <div class="welcome-txt">
               {{T.F.JIRA.STEPPER.LOGIN_SUCCESS|translate}}<br>
-              {{T.F.JIRA.STEPPER.WELCOME_USER|translate:{user:user.displayName} }}<br>
+              {{T.F.JIRA.STEPPER.WELCOME_USER|translate:{user: user.displayName} }}<br>
             </div>
           </div>
 

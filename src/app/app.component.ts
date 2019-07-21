@@ -232,7 +232,7 @@ export class AppComponent implements OnInit {
   }
 
   private _initHandlersForInitialBodyClasses() {
-    this.document.body.classList.add(BodyClass.isNoJira);
+    this.document.body.classList.add(BodyClass.isNoAdvancedFeatures);
 
     if (IS_MAC) {
       this.document.body.classList.add(BodyClass.isMac);
@@ -242,12 +242,14 @@ export class AppComponent implements OnInit {
 
     if (IS_ELECTRON) {
       this.document.body.classList.add(BodyClass.isElectron);
-      this.document.body.classList.remove(BodyClass.isNoJira);
+      this.document.body.classList.add(BodyClass.isAdvancedFeatures);
+      this.document.body.classList.remove(BodyClass.isNoAdvancedFeatures);
     } else {
       this.document.body.classList.add(BodyClass.isWeb);
       this._chromeExtensionInterface.onReady$.pipe(take(1)).subscribe(() => {
         this.document.body.classList.add(BodyClass.isExtension);
-        this.document.body.classList.remove(BodyClass.isNoJira);
+        this.document.body.classList.add(BodyClass.isAdvancedFeatures);
+        this.document.body.classList.remove(BodyClass.isNoAdvancedFeatures);
       });
     }
 

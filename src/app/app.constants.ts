@@ -54,13 +54,19 @@ export enum BodyClass {
   isMac = 'isMac',
   isNoMac = 'isNoMac',
   isExtension = 'isExtension',
-  isNoJira = 'isNoJira',
+  isAdvancedFeatures = 'isAdvancedFeatures',
+  isNoAdvancedFeatures = 'isNoAdvancedFeatures',
   isTouchDevice = 'isTouchDevice',
   isNoTouchDevice = 'isNoTouchDevice',
   isLightTheme = 'isLightTheme',
   isDarkTheme = 'isDarkTheme',
   isReducedTheme = 'isReducedTheme',
   isNoReducedTheme = 'isNoReducedTheme',
+}
+
+export enum HelperClasses {
+  isHideForAdvancedFeatures = 'isHideForAdvancedFeatures',
+  isHideForNoAdvancedFeatures = 'isHideForNoAdvancedFeatures',
 }
 
 // we're assuming that the other language speakers are likely to speak english

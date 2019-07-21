@@ -17,6 +17,7 @@ import {expandAnimation} from '../../../../ui/animations/expand.ani';
 import {catchError} from 'rxjs/operators';
 import {Subscription, throwError} from 'rxjs';
 import {T} from '../../../../t.const';
+import {HelperClasses} from '../../../../app.constants';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -27,6 +28,7 @@ import {T} from '../../../../t.const';
 })
 export class JiraCfgStepperComponent implements OnDestroy {
   T = T;
+  HelperClasses = HelperClasses;
   credentialsFormGroup: FormGroup = new FormGroup({});
   credentialsFormConfig: FormlyFieldConfig[] = [];
 

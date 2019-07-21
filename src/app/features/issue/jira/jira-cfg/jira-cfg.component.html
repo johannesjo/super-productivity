@@ -1,9 +1,9 @@
-<div class="isHideWhenJiraSupport">
-  <p [innerHTML]="T.F.JIRA.EXTENSION_INFO|translate:{url:'https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}">
-  </p>
+<div [ngClass]="HelperClasses.isHideForAdvancedFeatures">
+  <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>
 </div>
 
 <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
+                  [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
                   name="isEnabled"
                   style="margin-bottom: 8px;">
   {{T.F.JIRA.CFG_CMP.ENABLE|translate}}
@@ -11,7 +11,7 @@
 
 <form (ngSubmit)="submit()"
       [formGroup]="form"
-      class="isShowWhenJiraSupport">
+      [ngClass]="HelperClasses.isHideForNoAdvancedFeatures">
 
   <div *ngIf="cfg.isEnabled">
     <formly-form (modelChange)="cfg=$event"

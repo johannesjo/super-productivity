@@ -234,7 +234,6 @@ export const T = {
       'DIALOG_WORKdLOG': {
         'TITLE': 'F.JIRA.DIALOG_WORKdLOG.TITLE'
       },
-      'EXTENSION_INFO': 'F.JIRA.EXTENSION_INFO',
       'FORM': {
         'IS_AUTO_ADD_TO_BACKLOG': 'F.JIRA.FORM.IS_AUTO_ADD_TO_BACKLOG',
         'IS_AUTO_POLL': 'F.JIRA.FORM.IS_AUTO_POLL',
@@ -707,7 +706,8 @@ export const T = {
     'SAVE': 'G.SAVE',
     'TITLE': 'G.TITLE',
     'UNDO': 'G.UNDO',
-    'UPDATE': 'G.UPDATE'
+    'UPDATE': 'G.UPDATE',
+    'EXTENSION_INFO': 'G.EXTENSION_INFO'
   },
   'GCF': {
     'AUTO_BACKUPS': {
@@ -938,12 +938,12 @@ export const T = {
   'V': {
     'E_1TO10': 'V.E_1TO10',
     'E_DATETIME': 'V.E_DATETIME',
-    'E_REQUIRED': 'V.E_REQUIRED',
-    'E_PATTERN': 'V.E_PATTERN',
-    'E_MIN_LENGTH': 'V.E_MIN_LENGTH',
+    'E_MAX': 'V.E_MAX',
     'E_MAX_LENGTH': 'V.E_MAX_LENGTH',
     'E_MIN': 'V.E_MIN',
-    'E_MAX': 'V.E_MAX'
+    'E_MIN_LENGTH': 'V.E_MIN_LENGTH',
+    'E_PATTERN': 'V.E_PATTERN',
+    'E_REQUIRED': 'V.E_REQUIRED'
   },
   'WW': {
     'ADD_MORE': 'WW.ADD_MORE',
