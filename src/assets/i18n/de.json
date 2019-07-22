@@ -87,7 +87,7 @@
         "AT": "am",
         "DESCRIPTION": "Beschreibung",
         "LABELS": "Etiketten",
-        "MARK_AS_CHECKED": "Markiere Updates als markiert",
+        "MARK_AS_CHECKED": "Update ausblenden",
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung",
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
@@ -440,7 +440,7 @@
       "BANNER": {
         "FINISH_DAY": {
           "FINISH_DAY": "Tag beenden",
-          "MSG": "Sie haben vergessen, Ihren Tag am {{dayStr}}zu beenden."
+          "MSG": "Sie haben vergessen, Ihren Tag am {{dayStr}} zu beenden."
         }
       },
       "D_CREATE": {
@@ -466,8 +466,8 @@
         "E_EXISTS": "Projekt \"{{title}}\" existiert bereits",
         "E_INVALID_FILE": "Ungültige Daten für Projektdatei",
         "ISSUE_PROVIDER_UPDATED": "Aktualisierte Projekteinstellungen für <strong>{{issueProviderKey}}</strong>",
-        "UNARCHIVED": "Nicht archiviertes Projekt",
-        "UPDATED": "Aktualisierte Projekteinstellungen"
+        "UNARCHIVED": "Projekt dearchiviert",
+        "UPDATED": "Projekteinstellungen aktualisiert"
       }
     },
     "REMINDER": {
