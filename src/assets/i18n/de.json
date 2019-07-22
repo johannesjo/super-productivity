@@ -546,8 +546,8 @@
         "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
         "EDIT": "Erinnerung bearbeiten",
         "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
-        "SCHEDULE": "Zeitplan",
-        "UNSCHEDULE": "Nicht terminieren"
+        "SCHEDULE": "Planen",
+        "UNSCHEDULE": "Erinnerung entfernen"
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "Erinnerung verwerfen",
