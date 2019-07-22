@@ -143,8 +143,8 @@ export class GithubIssueService {
           const lastComment = matchingNewIssue.comments && matchingNewIssue.comments[0];
 
           const wasUpdated = (cfg.filterUsername && cfg.filterUsername.length > 1)
-            ? (isNewComment && (lastComment.user.login !== cfg.filterUsername)
-              || isIssueChanged && matchingNewIssue.user.login !== cfg.filterUsername)
+            ? ((isNewComment && (lastComment.user.login !== cfg.filterUsername))
+              || (isIssueChanged && matchingNewIssue.user.login !== cfg.filterUsername))
             : isNewComment || isIssueChanged;
 
           if (isNewComment && isNotify) {
