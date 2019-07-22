@@ -62,6 +62,12 @@ body .mat-form-field {
   display: block;
 }
 
+.polling-snack {
+  &.mat-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
+    padding-bottom: 8px;
+  }
+}
+
 // FORMS
 // -----
 .mat-form-field {

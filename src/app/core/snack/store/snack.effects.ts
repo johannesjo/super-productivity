@@ -51,10 +51,11 @@ export class SnackEffects {
       _destroy$.next(true);
       _destroy$.unsubscribe();
     };
-    const {msg, actionStr, actionId, actionPayload, config, type, isSubtle, isSkipTranslate, translateParams} = action.payload;
+    const {msg, actionStr, actionId, actionPayload, config, type, isSkipTranslate, translateParams, showWhile$, promise, isSpinner} = action.payload;
     const cfg = {
       ...DEFAULT_SNACK_CFG,
       ...config,
+      duration: 900000000,
       data: {
         ...action.payload,
         msg: (isSkipTranslate)
@@ -62,8 +63,9 @@ export class SnackEffects {
           : this._translateService.instant(msg, translateParams),
       },
     };
-    if (isSubtle) {
-      cfg.panelClass = 'subtle';
+
+    if (showWhile$ || promise || isSpinner) {
+      cfg.panelClass = 'polling-snack';
     }
 
     switch (type) {

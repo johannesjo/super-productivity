@@ -435,7 +435,6 @@ export class GoogleDriveSyncEffects {
       type: 'CUSTOM',
       ico: 'file_upload',
       msg: msg,
-      isSubtle: true,
       config: {duration: 60000},
       showWhile$,
     });

@@ -65,7 +65,7 @@ export class GithubIssueEffects {
         this._snackService.open({
           msg: T.F.GITHUB.S.POLLING,
           svgIco: 'github',
-          isSubtle: true,
+          isSpinner: true,
         });
         this._githubIssueService.updateIssuesFromApi(issues, githubCfg, true);
       }
@@ -128,7 +128,6 @@ export class GithubIssueEffects {
         this._snackService.open({
           msg: T.F.GITHUB.S.MISSING_ISSUE_DATA,
           svgIco: 'github',
-          isSubtle: true,
         });
         tasks.forEach((task) => this._githubIssueService.loadMissingIssueData(task.issueId));
       })
@@ -174,7 +173,6 @@ export class GithubIssueEffects {
             issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
           },
           msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
-          isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
@@ -183,7 +181,6 @@ export class GithubIssueEffects {
             issueLength: issuesToAdd.length
           },
           msg: T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES,
-          isSubtle: true,
         });
       }
     });

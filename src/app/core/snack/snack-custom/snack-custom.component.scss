@@ -1,14 +1,22 @@
 @import '../../../../variables';
 
+:host{
+  background: inherit;
+}
+
 .wrapper {
   display: flex;
   align-items: center;
   justify-content: stretch;
   min-height: 48px;
+  //background: inherit;
 }
 
 .snack-icon {
   margin-right: $s;
+  position: relative;
+  z-index: 2;
+  //background: inherit;
 
   .success & {
     color: $green;
@@ -53,7 +61,7 @@ button {
 
 mat-progress-bar {
   position: absolute;
-  bottom: -1* $s;
+  bottom: 2px;
   left: 0;
   right: 0;
 }

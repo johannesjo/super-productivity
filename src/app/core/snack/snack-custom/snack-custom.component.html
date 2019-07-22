@@ -36,6 +36,6 @@
     <mat-icon>close</mat-icon>
   </button>
 
-  <mat-progress-bar *ngIf="data.promise||data.showWhile$"
+  <mat-progress-bar *ngIf="data.promise||data.showWhile$||data.isSpinner"
                     mode="indeterminate"></mat-progress-bar>
 </div>

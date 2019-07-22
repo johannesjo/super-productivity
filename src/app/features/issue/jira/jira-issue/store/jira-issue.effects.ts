@@ -186,7 +186,7 @@ export class JiraIssueEffects {
             restoreFocus: true,
             data: {
               okTxt: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.OK,
-              translateParams:{
+              translateParams: {
                 summary: issue.summary,
                 assignee: assignee ? assignee.displayName : 'nobody'
               },
@@ -307,7 +307,7 @@ export class JiraIssueEffects {
         this._snackService.open({
           msg: T.F.JIRA.S.POLLING,
           svgIco: 'jira',
-          isSubtle: true,
+          isSpinner: true,
         });
         issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
       }
@@ -365,7 +365,6 @@ export class JiraIssueEffects {
                     issueKey: `${issue.key}`,
                     chosenTransition: `${chosenTransition.name}`,
                   },
-                  isSubtle: true,
                 });
                 this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
               })
@@ -422,7 +421,6 @@ export class JiraIssueEffects {
           },
           msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
           ico: 'cloud_download',
-          isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
@@ -431,7 +429,6 @@ export class JiraIssueEffects {
           },
           msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
           ico: 'cloud_download',
-          isSubtle: true,
         });
       }
     });
