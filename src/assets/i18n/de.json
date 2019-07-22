@@ -120,8 +120,8 @@
         "LAST_SYNC": "Letzte Synchronisierung",
         "LOCAL": "Lokal",
         "LOCAL_REMOTE": "lokal <=> entfernt",
-        "OVERWRITE_LOCAL": "Lokale Daten überschreiben",
-        "OVERWRITE_REMOTE": "Remote-Daten überschreiben",
+        "OVERWRITE_LOCAL": "Lokal überschreiben",
+        "OVERWRITE_REMOTE": "Remote überschreiben",
         "REMOTE": "Remote",
         "TEXT": "<p>Update von Google Drive Backup. <strong>Lokale Daten scheinen neuer zu sein</strong> als die Remote-Daten. Nicht gespeicherte lokale Änderungen überschreiben? <strong>Alle Daten gehen für immer verloren</strong>.</p>",
         "TITLE": "Lokale Daten mit GDrive Update überschreiben?"
@@ -131,8 +131,8 @@
         "LAST_SYNC": "Letzte Synchronisierung",
         "LOCAL": "Lokal",
         "LOCAL_REMOTE": "lokal <=> entfernt",
-        "OVERWRITE_LOCAL": "Lokale Daten überschreiben",
-        "OVERWRITE_REMOTE": "Remote-Daten überschreiben",
+        "OVERWRITE_LOCAL": "Lokale überschreiben",
+        "OVERWRITE_REMOTE": "Remote überschreiben",
         "REMOTE": "Remote",
         "TEXT": "  <p>In Google Drive scheinen sich einige Änderungen ergeben zu haben, die lokal nicht vorliegen. Möchten Sie sie trotzdem überschreiben?</p>",
         "TITLE": "Nicht gespeicherte Daten in Google Drive überschreiben?"
