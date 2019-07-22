@@ -138,7 +138,15 @@ export class GithubIssueService {
         if (matchingNewIssue) {
           const isNewComment = matchingNewIssue.comments.length !== (oldIssue.comments && oldIssue.comments.length);
           const isIssueChanged = (matchingNewIssue.updated_at !== oldIssue.updated_at);
-          const wasUpdated = isNewComment || isIssueChanged;
+
+          // NOTE: comments are reversed
+          const lastComment = matchingNewIssue.comments && matchingNewIssue.comments[0];
+
+          const wasUpdated = (cfg.filterUsername && cfg.filterUsername.length > 1)
+            ? (isNewComment && (lastComment.user.login !== cfg.filterUsername)
+              || isIssueChanged && matchingNewIssue.user.login !== cfg.filterUsername)
+            : isNewComment || isIssueChanged;
+
           if (isNewComment && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',

@@ -238,6 +238,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
+        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
       },
       "FORM_ADV": {
