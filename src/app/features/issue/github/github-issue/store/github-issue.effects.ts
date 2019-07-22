@@ -178,7 +178,7 @@ export class GithubIssueEffects {
         this._snackService.open({
           ico: 'cloud_download',
           translateParams: {
-            issueLength: issuesToAdd.length
+            issuesLength: issuesToAdd.length
           },
           msg: T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES,
         });
