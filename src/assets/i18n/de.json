@@ -73,13 +73,13 @@
         "TITLE": "Richten Sie Github für Project ein"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Backlog hinzu",
-        "IS_AUTO_POLL": "Importierte Git-Probleme automatisch nach Änderungen abfragen",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Probleme von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
+        "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GithHub-Probleme für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
+        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GithHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
         "TITLE": "github"
       },
       "ISSUE_CONTENT": {
@@ -96,14 +96,14 @@
         "ERR_NETWORK": "Github: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
         "ERR_NOT_CONFIGURED": "Github: Ist nicht richtig konfiguriert",
         "ERR_REQUEST": "Github: API hat {{statusCode}}zurückgegeben. {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} neue Probleme von Git in das Backlog importiert",
-        "IMPORTED_SINGLE_ISSUE": "Github: Importiertes Problem \"{{issueText}}\" von Git zu Backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Das Problem \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
+        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} neue Issues von Git in das Backlog importiert",
+        "IMPORTED_SINGLE_ISSUE": "Github: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Github: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
         "ISSUE_UPDATE": "Github: Aktualisierte Daten für \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aktualisierte Daten für \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
         "NEW_COMMENT": "Github: Neuer Kommentar für \"{{issueText}}\"",
-        "POLLING": "Github: Änderungen für Probleme abrufen",
+        "POLLING": "Github: Änderungen für Issues abrufen",
         "SHOW_ISSUE_BTN": "Zeige mir"
       }
     },
@@ -205,7 +205,7 @@
         "MAP_CUSTOM_FIELDS": "Benutzerdefinierte Felder zuordnen",
         "MAP_CUSTOM_FIELDS_INFO": "Leider werden einige Daten von Jira in benutzerdefinierten Feldern gespeichert, die für jede Installation unterschiedlich sind. Wenn Sie diese Daten einschließen möchten, müssen Sie das entsprechende benutzerdefinierte Feld auswählen.",
         "OPEN": "Status für pausierende Aufgabe",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Wählen Sie Problem, um verfügbare Übergänge zu laden",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Wählen Sie Issue, um verfügbare Übergänge zu laden",
         "STORY_POINTS": "Story-Punkte"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
@@ -236,17 +236,17 @@
       },
       "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"{{url}}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Backlog hinzu",
-        "IS_AUTO_POLL": "Importierte Git-Probleme automatisch nach Änderungen abfragen",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Probleme von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
+        "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL wird zum automatischen Hinzufügen von Aufgaben zum Backlog verwendet",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Öffnen Sie das Dialogfeld, um das Worklog an jira zu senden, wenn die Unteraufgabe abgeschlossen ist",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie dem Jira-Backlog automatisch Probleme hinzu",
-        "IS_AUTO_POLL_TICKETS": "Überprüfen Sie importierte Probleme automatisch auf Änderungen und benachrichtigen Sie",
-        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Prüfen Sie, ob das aktuell bearbeitete Problem dem aktuellen Benutzer zugeordnet ist",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie dem Jira-Backlog automatisch Issues hinzu",
+        "IS_AUTO_POLL_TICKETS": "Überprüfen Sie importierte Issues automatisch auf Änderungen und benachrichtigen Sie",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Prüfen Sie, ob das aktuell bearbeitete Issue dem aktuellen Benutzer zugeordnet ist",
         "IS_WORKLOG_ENABLED": "Öffnen Sie das Dialogfeld, um das Arbeitsprotokoll an jira zu senden, wenn die Aufgabe erledigt ist",
         "SEARCH_JQL_QUERY": "JQL-Abfrage für, um die Sucheraufgaben einzuschränken",
         "USER_ASSIGNEE_NAME": "Name des zu überprüfenden Empfängers"
@@ -268,7 +268,7 @@
           "P1_3": "Sie können auch konfigurieren, ob Sie automatisch (z. B. jedes Mal, wenn Sie die Planungsansicht aufrufen) alle neuen Aufgaben, die durch eine benutzerdefinierte JQL-Abfrage angegeben wurden, zum Backlog hinzufügen möchten.",
           "P1_4": "Eine weitere Option ist \"Überprüfen, ob das aktuelle Ticket dem aktuellen Benutzer zugewiesen ist\". Wenn aktiviert und Sie starten, wird geprüft, ob Sie diesem Ticket in Jira zugewiesen sind. Wenn dies nicht der Fall ist, wird ein Dialogfeld angezeigt, in dem Sie das Ticket selbst zuweisen können.",
           "P2_1": "Es gibt verschiedene Möglichkeiten, um festzulegen, wann und wie Sie ein Arbeitsprotokoll senden möchten. Durch Aktivieren von <em>'Dialogfeld \"Arbeitsprotokoll öffnen\" zum Hinzufügen eines Arbeitsprotokolls zu Jira nach Abschluss der Aufgabe'</em> wird ein Dialogfeld zum Hinzufügen eines Arbeitsprotokolls jedes Mal geöffnet, wenn Sie eine Jira-Aufgabe als erledigt markieren. Denken Sie also daran, dass Worklogs zu allen bisher erfassten Daten hinzugefügt werden. Wenn Sie also eine Aufgabe zum zweiten Mal als erledigt markieren, möchten Sie möglicherweise nicht die gesamte Arbeitszeit für die Aufgabe erneut senden.",
-          "P2_2": "<em>'Arbeitsprotokolldialog öffnen, wenn eine Unteraufgabe erledigt ist und nicht für Aufgaben mit Unteraufgaben selbst'</em> öffnet jedes Mal ein Arbeitsprotokolldialogfeld, wenn Sie eine Unteraufgabe eines Jira-Problems als erledigt markieren. Da Sie Ihre Zeit bereits über die Unteraufgaben nachverfolgen, wird kein Dialogfeld geöffnet, sobald Sie die Jira-Aufgabe selbst als erledigt markieren.",
+          "P2_2": "<em>'Arbeitsprotokolldialog öffnen, wenn eine Unteraufgabe erledigt ist und nicht für Aufgaben mit Unteraufgaben selbst'</em> öffnet jedes Mal ein Arbeitsprotokolldialogfeld, wenn Sie eine Unteraufgabe eines Jira-Issues als erledigt markieren. Da Sie Ihre Zeit bereits über die Unteraufgaben nachverfolgen, wird kein Dialogfeld geöffnet, sobald Sie die Jira-Aufgabe selbst als erledigt markieren.",
           "P2_3": "<em>'Aktualisierungen automatisch ohne Dialog an das Worklog senden'</em> macht, was es sagt. Da das mehrmalige Markieren einer Aufgabe dazu führt, dass die gesamte Arbeitszeit zweimal erfasst wird, wird dies nicht empfohlen.",
           "P3_1": "Hier können Sie Ihre Standardübergänge neu konfigurieren. Jira ermöglicht eine umfassende Konfiguration von Übergängen, die normalerweise als unterschiedliche Spalten auf Ihrem Jira Agile Board wirksam werden. Wir können nicht davon ausgehen, wo und wann Sie Ihre Aufgaben übertragen müssen und müssen sie manuell einstellen."
         }
@@ -293,7 +293,7 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Worklog für {{issueKey}}hinzugefügt",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension nicht geladen. Das Neuladen der Seite könnte helfen",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} neue Probleme von Jira in das Backlog importiert",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} neue Issues von Jira in das Backlog importiert",
         "IMPORTED_SINGLE_ISSUE": "Jira: Importierte Ausgabe \"{{issueText}}\" von Jira in das Backlog",
         "INSUFFICIENT_SETTINGS": "Unzureichende Einstellungen für Jira",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" ist bereits aktuell",
@@ -301,11 +301,11 @@
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Aktualisierte Daten für \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
         "NO_VALID_TRANSITION": "Jira: Kein gültiger Übergang konfiguriert",
-        "POLLING": "Jira: Änderungen für Probleme abrufen",
+        "POLLING": "Jira: Änderungen für Issues abrufen",
         "TIMED_OUT": "Jira: Zeitüberschreitung bei der Anforderung",
-        "TRANSITION": "Jira: Setzen Sie das Problem \"{{issueKey}}\" auf \"{{name}}\".",
+        "TRANSITION": "Jira: Setzen Sie das Issue \"{{issueKey}}\" auf \"{{name}}\".",
         "TRANSITIONS_LOADED": "Jira: Übergänge geladen. Verwenden Sie die unten stehenden Auswahlmöglichkeiten, um sie zuzuweisen",
-        "TRANSITION_SUCCESS": "Jira: Setzen Sie das Problem {{issueKey}} auf <strong>{{chosenTransition}}</strong>.",
+        "TRANSITION_SUCCESS": "Jira: Setzen Sie das Issue {{issueKey}} auf <strong>{{chosenTransition}}</strong>.",
         "UNABLE_TO_REASSIGN": "Jira: Ticket kann nicht neu zugewiesen werden, da Sie keinen Benutzernamen angegeben haben. Bitte besuchen Sie die Einstellungen."
       },
       "STEPPER": {
@@ -422,7 +422,7 @@
       "H1": "Schneiden Sie sich etwas lockerer!",
       "P1": "Zunächst einmal entspannen! Jeder tut es ab und zu. Und wenn Sie nicht das tun, was Sie sollten, sollten Sie es zumindest genießen! In den folgenden Abschnitten finden Sie hilfreiche Informationen.",
       "P2": "Wenn Sie hier mehr über die Wissenschaft erfahren möchten, kann ich Ihnen <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">diesen Artikel</a> empfehlen, aus dem einige der Übungen stammen.",
-      "P3": "Denken Sie daran: Aufschub ist ein Problem der Emotionsregulation, kein Problem des Zeitmanagements.",
+      "P3": "Denken Sie daran: Prokrastination ist ein Problem der Emotionsregulation, kein Problem des Zeitmanagements.",
       "REFRAME": {
         "INTRO": "Überlegen Sie, was trotz allem an der Aufgabe positiv sein könnte.",
         "TITLE": "Aktualisieren",
@@ -526,7 +526,7 @@
         "MOVE_TO_OTHER_PROJECT": "In ein anderes Projekt verschieben",
         "MOVE_TO_TODAY": "Zur heutigen Liste wechseln",
         "OPEN_ATTACH": "Datei oder Link anhängen",
-        "OPEN_ISSUE": "Öffnen Sie das Problem in einem neuen Browser-Tab",
+        "OPEN_ISSUE": "Öffnen Sie das Issue in einem neuen Browser-Tab",
         "OPEN_TASK_MENU": "Aufgabenmenü öffnen",
         "OPEN_TIME": "Zeit schätzen / Zeit hinzufügen",
         "REPEAT_EDIT": "Bearbeiten Task wiederholen Konfig",
@@ -539,7 +539,7 @@
         "TOGGLE_SUB_TASK_VISIBILITY": "Schaltet die Sichtbarkeit von Unteraufgaben um",
         "TRACK_TIME": "Starten Sie die Verfolgung der Zeit",
         "TRACK_TIME_STOP": "Verfolgungszeit anhalten",
-        "UPDATE_ISSUE_DATA": "Problemdaten aktualisieren"
+        "UPDATE_ISSUE_DATA": "Issuedaten aktualisieren"
       },
       "D_REMINDER_ADD": {
         "ADD": "Task planen",
