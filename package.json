@@ -156,7 +156,7 @@
     "@types/moment-duration-format": "^2.2.2",
     "@types/node": "^12.0.4",
     "all-contributors-cli": "^6.8.0",
-    "angular2-promise-buttons": "^3.0.1",
+    "angular2-promise-buttons": "^4.0.0",
     "chart.js": "^2.8.0",
     "clipboard": "^2.0.1",
     "codelyzer": "^5.0.1",
