@@ -41,11 +41,13 @@ import {SyncService} from '../../../imex/sync/sync.service';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {DEFAULT_SYNC_FILE_NAME} from '../google.const';
 import {DialogConfirmDriveSyncSaveComponent} from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {DialogConfirmDriveSyncLoadComponent} from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
 import {selectIsGoogleDriveSaveInProgress} from './google-drive-sync.reducer';
 import {CompressionService} from '../../../core/compression/compression.service';
+import {TranslateService} from '@ngx-translate/core';
+import {T} from '../../../t.const';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -82,7 +84,7 @@ export class GoogleDriveSyncEffects {
     ),
     tap(() => this._showAsyncToast(
       this._store$.select(selectIsGoogleDriveSaveInProgress),
-      'Syncing to Google Drive'
+      T.F.GOOGLE.S.SYNCING
       )
     ),
     map(() => new SaveToGoogleDriveFlow({isSkipSnack: true})),
@@ -100,19 +102,19 @@ export class GoogleDriveSyncEffects {
     concatMap((isUpdate): any => {
       if (isUpdate) {
         this._snackService.open({
-          msg: `DriveSync: There is a remote update! Downloading...`,
+          msg: T.F.GOOGLE.S.DOWNLOADING_UPDATE,
           ico: 'file_download',
         });
         return of(new LoadFromGoogleDriveFlow());
       } else {
         return of(new SnackOpen({
-          msg: `DriveSync: No updated required`,
+          msg: T.F.GOOGLE.S.NO_UPDATE_REQUIRED,
         }));
       }
     }),
     catchError(() => of(new SnackOpen({
       type: 'ERROR',
-      msg: `DriveSync: Error while trying to import data initially`,
+      msg: T.F.GOOGLE.S.ERROR_INITIAL_IMPORT,
     }))),
   );
 
@@ -129,7 +131,8 @@ export class GoogleDriveSyncEffects {
           if (filesFound.length && filesFound.length > 1) {
             return of(new SnackOpen({
               type: 'ERROR',
-              msg: `Multiple files with the name "${newFileName}" found. Please delete all but one or choose a different name.`
+              msg: T.F.GOOGLE.S.MULTIPLE_SYNC_FILES_WITH_SAME_NAME,
+              translateParams: {newFileName},
             }));
           } else if (!filesFound || filesFound.length === 0) {
             return this._confirmSaveNewFile(newFileName).pipe(
@@ -202,7 +205,7 @@ export class GoogleDriveSyncEffects {
               if (!action.payload || !action.payload.isSkipSnack) {
                 this._snackService.open({
                   type: 'SUCCESS',
-                  msg: `DriveSync: Remote data already up to date`
+                  msg: T.F.GOOGLE.S.REMOTE_UP_TO_DATE,
                 });
               }
               return of(new SaveToGoogleDriveCancel());
@@ -262,7 +265,7 @@ export class GoogleDriveSyncEffects {
       if (!p.isSkipSnack) {
         this._snackService.open({
           type: 'SUCCESS',
-          msg: 'Google Drive: Successfully saved backup'
+          msg: T.F.GOOGLE.S.SUCCESS,
         });
       }
     }),
@@ -314,7 +317,7 @@ export class GoogleDriveSyncEffects {
               // TODO refactor optional message to cancel
               this._snackService.open({
                 type: 'SUCCESS',
-                msg: `DriveSync: Local data already up to date`
+                msg: T.F.GOOGLE.S.LOCAL_UP_TO_DATE,
               });
               return of(new LoadFromGoogleDriveCancel());
             }
@@ -359,6 +362,7 @@ export class GoogleDriveSyncEffects {
     private _googleApiService: GoogleApiService,
     private _configService: GlobalConfigService,
     private _snackService: SnackService,
+    private _translateService: TranslateService,
     private _compressionService: CompressionService,
     private _matDialog: MatDialog,
     private _syncService: SyncService,
@@ -373,7 +377,9 @@ export class GoogleDriveSyncEffects {
     const errTxt = (typeof err === 'string' && err) || (err.toString && err.toString()) || 'Unknown';
     this._snackService.open({
       type: 'ERROR',
-      msg: 'Google Drive Sync Error: ' + errTxt
+      msg: T.F.GOOGLE.S.ERROR,
+      translateParams: {errTxt}
+
     });
     return of(new LoadFromGoogleDriveCancel());
   }
@@ -429,18 +435,18 @@ export class GoogleDriveSyncEffects {
       type: 'CUSTOM',
       ico: 'file_upload',
       msg: msg,
-      isSubtle: true,
       config: {duration: 60000},
       showWhile$,
     });
   }
 
+
   private _confirmSaveNewFile(fileName): Observable<boolean> {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        message: `DriveSync: No file with the name <strong>"${fileName}"</strong> was found.
-<strong>Create</strong> it as sync file on Google Drive?`,
+        message: T.F.GOOGLE.DIALOG.CREATE_SYNC_FILE,
+        translateParams: {fileName},
       }
     }).afterClosed();
   }
@@ -449,9 +455,8 @@ export class GoogleDriveSyncEffects {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        message: `
-DriveSync: Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
-If not please change the Sync file name.`,
+        message: T.F.GOOGLE.DIALOG.USE_EXISTING_SYNC_FILE,
+        translateParams: {fileName},
       }
     }).afterClosed();
   }

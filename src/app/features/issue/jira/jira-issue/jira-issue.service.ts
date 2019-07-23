@@ -11,6 +11,8 @@ import {SnackService} from '../../../../core/snack/snack.service';
 import {IssueData} from '../../issue';
 import {take} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
+import {T} from '../../../../t.const';
+import {JIRA_TYPE} from '../../issue.const';
 
 
 @Injectable({
@@ -28,10 +30,11 @@ export class JiraIssueService {
   ) {
   }
 
+
   // META
   // ----
   async loadStateForProject(projectId: string) {
-    const lsJiraIssueState = await this._persistenceService.loadIssuesForProject(projectId, 'JIRA') as JiraIssueState;
+    const lsJiraIssueState = await this._persistenceService.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState;
     if (lsJiraIssueState) {
       this.loadState(lsJiraIssueState);
     }
@@ -127,9 +130,21 @@ export class JiraIssueService {
         this.update(issueId, changedFields, oldIssueData);
 
         if (wasUpdated && isNotifyOnUpdate) {
-          this._snackService.open({msg: `Jira: ${updatedIssue.key} was updated`, ico: 'cloud_download'});
+          this._snackService.open({
+            msg: T.F.JIRA.S.ISSUE_UPDATE,
+            translateParams: {
+              issueText: `${updatedIssue.key}`
+            },
+            ico: 'cloud_download',
+          });
         } else if (isNotifyOnNoUpdateRequired) {
-          this._snackService.open({msg: `Jira: ${updatedIssue.key} already up to date`, ico: 'cloud_download'});
+          this._snackService.open({
+            msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
+            translateParams: {
+              issueText: `${updatedIssue.key}`
+            },
+            ico: 'cloud_download',
+          });
         }
       });
   }

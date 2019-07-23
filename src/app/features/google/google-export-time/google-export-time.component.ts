@@ -16,7 +16,7 @@ import {ProjectService} from '../../project/project.service';
 import {TaskService} from '../../tasks/task.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {takeUntil} from 'rxjs/operators';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
 import 'moment-duration-format';
 import {msToClockString} from '../../../ui/duration/ms-to-clock-string.pipe';
@@ -25,6 +25,8 @@ import {SS_GOOGLE_TIME_SUBMITTED} from '../../../core/persistence/ls-keys.const'
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {momentRoundTime} from '../../../util/round-time';
 import {roundDuration} from '../../../util/round-duration';
+import {T} from '../../../t.const';
+import {TranslateService} from '@ngx-translate/core';
 
 // TODO refactor to Observables
 @Component({
@@ -37,6 +39,8 @@ import {roundDuration} from '../../../util/round-duration';
 export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   @Input() day: string = getWorklogStr();
   @Output() saveData = new EventEmitter();
+
+  T = T;
 
   opts: GoogleTimeSheetExportCopy = {
     spreadsheetId: undefined,
@@ -58,9 +62,9 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   isSubmitted = loadFromSessionStorage(SS_GOOGLE_TIME_SUBMITTED) || false;
 
   roundTimeOptions = [
-    {id: 'QUARTER', title: 'full quarters'},
-    {id: 'HALF', title: 'full half hours'},
-    {id: 'HOUR', title: 'full hours'},
+    {id: 'QUARTER', title: T.F.GOOGLE.EXPORT_TIME.ROUND_QUARTER},
+    {id: 'HALF', title: T.F.GOOGLE.EXPORT_TIME.ROUND_HALF},
+    {id: 'HOUR', title: T.F.GOOGLE.EXPORT_TIME.ROUND_HOUR},
   ];
 
   loginPromise: Promise<any>;
@@ -82,6 +86,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     private _projectService: ProjectService,
     private _taskService: TaskService,
     private _snackService: SnackService,
+    private _translateService: TranslateService,
     private _cd: ChangeDetectorRef,
   ) {
   }
@@ -180,13 +185,13 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     };
 
     if (arraysEqual(this.actualValues, this.lastRow)) {
-      this._snackService.open('Current values and the last saved row have equal values, that is probably not what you want.');
+      this._snackService.open(this._translateService.instant(T.F.GOOGLE.EXPORT_TIME.S_EQUAL_VALUES));
     } else {
 
       this.savePromise = this.googleApiService.appendRow$(this.opts.spreadsheetId, this.actualValues).toPromise();
       this.savePromise.then(() => {
         this._snackService.open({
-          msg: 'Row successfully appended',
+          msg: T.F.GOOGLE.EXPORT_TIME.S_ROW_APPENDED,
           type: 'SUCCESS'
         });
 

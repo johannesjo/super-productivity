@@ -21,3 +21,61 @@ export const ALL_THEMES = [
 ];
 
 export const HANDLED_ERROR = '--HANDLED_ERROR--';
+
+export enum LanguageCode {
+  en = 'en',
+  es = 'es',
+  de = 'de',
+  ar = 'ar',
+  fr = 'fr',
+  ja = 'ja',
+  ko = 'ko',
+  ru = 'ru',
+  tr = 'tr',
+  zh = 'zh',
+}
+
+export enum LanguageCodeMomentMap {
+  en = 'en',
+  es = 'es',
+  de = 'de',
+  ar = 'ar',
+  fr = 'fr',
+  ja = 'ja',
+  ko = 'ko',
+  ru = 'ru',
+  tr = 'tr',
+  zh = 'zh-cn',
+}
+
+export enum BodyClass {
+  isElectron = 'isElectron',
+  isWeb = 'isWeb',
+  isMac = 'isMac',
+  isNoMac = 'isNoMac',
+  isExtension = 'isExtension',
+  isAdvancedFeatures = 'isAdvancedFeatures',
+  isNoAdvancedFeatures = 'isNoAdvancedFeatures',
+  isTouchDevice = 'isTouchDevice',
+  isNoTouchDevice = 'isNoTouchDevice',
+  isLightTheme = 'isLightTheme',
+  isDarkTheme = 'isDarkTheme',
+  isReducedTheme = 'isReducedTheme',
+  isNoReducedTheme = 'isNoReducedTheme',
+}
+
+export enum HelperClasses {
+  isHideForAdvancedFeatures = 'isHideForAdvancedFeatures',
+  isHideForNoAdvancedFeatures = 'isHideForNoAdvancedFeatures',
+}
+
+// we're assuming that the other language speakers are likely to speak english
+// and as english offers most likely the best experience, we use it as default
+export const AUTO_SWITCH_LNGS: LanguageCode[] = [
+  LanguageCode.zh,
+  LanguageCode.ar,
+  LanguageCode.ja,
+  LanguageCode.ko,
+  LanguageCode.ru,
+  LanguageCode.tr,
+];

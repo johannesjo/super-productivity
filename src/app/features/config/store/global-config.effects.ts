@@ -8,8 +8,10 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {ElectronService} from 'ngx-electron';
 import {KeyboardConfig} from '../global-config.model';
-import {IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
+import {T} from '../../../t.const';
+import {LanguageService} from '../../../core/language/language.service';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -34,7 +36,8 @@ export class GlobalConfigEffects {
         if (isPublicPropUpdated && isPublicSection) {
           this._store.dispatch(new SnackOpen({
             type: 'SUCCESS',
-            msg: `Updated settings for <strong>${sectionKey}</strong>`,
+            msg: T.F.CONFIG.S.UPDATE_SECTION,
+            translateParams: {sectionKey}
           }));
         }
       })
@@ -48,7 +51,7 @@ export class GlobalConfigEffects {
       filter((action: UpdateGlobalConfigSection) => IS_ELECTRON && action.payload.sectionKey === 'keyboard'),
       tap((action: UpdateGlobalConfigSection) => {
         const keyboardCfg: KeyboardConfig = action.payload.sectionCfg as KeyboardConfig;
-        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+        this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
 
@@ -60,14 +63,39 @@ export class GlobalConfigEffects {
       filter(() => IS_ELECTRON),
       tap((action: LoadGlobalConfig) => {
         const keyboardCfg: KeyboardConfig = action.payload.cfg.keyboard;
-        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+        this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
+    );
+
+  @Effect({dispatch: false}) selectLanguageOnChange: any = this._actions$
+    .pipe(
+      ofType(
+        GlobalConfigActionTypes.UpdateGlobalConfigSection,
+      ),
+      filter((action: UpdateGlobalConfigSection) => action.payload.sectionKey === 'lang'),
+      filter((action: UpdateGlobalConfigSection) => action.payload.sectionCfg && action.payload.sectionCfg['lng']),
+      tap((action: UpdateGlobalConfigSection) => {
+        this._languageService.setLng(action.payload.sectionCfg['lng']);
+
+      })
+    );
+
+  @Effect({dispatch: false}) selectLanguageOnLoad: any = this._actions$
+    .pipe(
+      ofType(
+        GlobalConfigActionTypes.LoadGlobalConfig,
+      ),
+      tap((action: LoadGlobalConfig) => {
+        const lng = action.payload.cfg && action.payload.cfg.lang && action.payload.cfg.lang.lng;
+        this._languageService.setLng(lng);
+      })
     );
 
   constructor(
     private _actions$: Actions,
     private _persistenceService: PersistenceService,
     private _electronService: ElectronService,
+    private _languageService: LanguageService,
     private _store: Store<any>
   ) {
   }

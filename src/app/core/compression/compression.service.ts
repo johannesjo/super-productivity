@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {SnackService} from '../snack/snack.service';
 import shortid from 'shortid';
+import {T} from '../../t.const';
 
 const WORKER_PATH = 'assets/web-workers/lz.js';
 
@@ -82,6 +83,6 @@ export class CompressionService {
 
   private _handleError(err: any) {
     console.error(err);
-    this._snackService.open({type: 'ERROR', msg: 'Error for compression interface'});
+    this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_COMPRESSION});
   }
 }

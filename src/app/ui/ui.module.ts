@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {ErrorHandler, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {InputDurationDirective} from './duration/input-duration.directive';
 import {DurationFromStringPipe} from './duration/duration-from-string.pipe';
@@ -31,8 +31,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MarkdownModule, MarkdownService} from 'ngx-markdown';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {FormlyMaterialModule} from '@ngx-formly/material';
-import {FormlyModule} from '@ngx-formly/core';
+import {FORMLY_CONFIG, FormlyModule} from '@ngx-formly/core';
 import {ThemeSelectComponent} from './theme-select/theme-select.component';
 import {MsToStringPipe} from './duration/ms-to-string.pipe';
 import {StringToMsPipe} from './duration/string-to-ms.pipe';
@@ -45,7 +44,6 @@ import {SplitModule} from '../pages/work-view/split/split.module';
 import {SimpleDownloadDirective} from './simple-download/simple-download.directive';
 import {Angular2PromiseButtonModule} from 'angular2-promise-buttons';
 import {DialogConfirmComponent} from './dialog-confirm/dialog-confirm.component';
-import {FormlyMatToggleModule} from '@ngx-formly/material/toggle';
 import {InputDurationFormlyComponent} from './duration/input-duration-formly/input-duration-formly.component';
 import {EnlargeImgDirective} from './enlarge-img/enlarge-img.directive';
 import {DragulaModule} from 'ng2-dragula';
@@ -62,6 +60,16 @@ import {ChipListInputComponent} from './chip-list-input/chip-list-input.componen
 import {ValidationModule} from './validation/validation.module';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.component';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {FormlyMaterialModule} from '@ngx-formly/material';
+import {GlobalErrorHandler} from '../core/error-handler/global-error-handler.class';
+import {HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
+import {MyHammerConfig} from '../../hammer-config.class';
+import {registerTranslateExtension} from './formly-translate-extension/formly-translate-extension';
+import {FormlyTranslatedTemplateComponent} from './formly-translated-template/formly-translated-template.component';
+import {MatMomentDateModule} from '@angular/material-moment-adapter';
+import {FormlyValidationService} from './formly-translate-extension/formly-validation.service';
+
 
 @NgModule({
   imports: [
@@ -75,10 +83,15 @@ import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.co
         component: InputDurationFormlyComponent,
         extends: 'input',
         wrappers: ['form-field'],
-      }]
+      }, {
+        name: 'tpl',
+        component: FormlyTranslatedTemplateComponent,
+      }],
+      extras: {
+        immutable: true
+      },
     }),
     FormlyMaterialModule,
-    FormlyMatToggleModule,
 
     Angular2PromiseButtonModule.forRoot({
       // handleCurrentBtnOnly: true,
@@ -113,9 +126,11 @@ import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.co
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
+    MatMomentDateModule,
     ValidationModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
+    TranslateModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -146,6 +161,7 @@ import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.co
     InlineInputComponent,
     ChipListInputComponent,
     FullPageSpinnerComponent,
+    FormlyTranslatedTemplateComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -214,16 +230,33 @@ import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.co
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
+    MatMomentDateModule,
 
     ReactiveFormsModule,
     FormlyModule,
     FormlyMaterialModule,
     MarkdownModule,
     ValidationModule,
-  ]
+    TranslateModule,
+  ],
+  providers: [
+    {provide: ErrorHandler, useClass: GlobalErrorHandler},
+    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
+    {
+      provide: FORMLY_CONFIG,
+      multi: true,
+      useFactory: registerTranslateExtension,
+      deps: [TranslateService],
+    },
+  ],
 })
 export class UiModule {
-  constructor(private _markdownService: MarkdownService) {
+  constructor(
+    private _markdownService: MarkdownService,
+    private _formlyValidationService: FormlyValidationService,
+  ) {
+    this._formlyValidationService.init();
+
     const linkRenderer = _markdownService.renderer.link;
     _markdownService.renderer.link = (href, title, text) => {
       const html = linkRenderer.call(_markdownService.renderer, href, title, text);

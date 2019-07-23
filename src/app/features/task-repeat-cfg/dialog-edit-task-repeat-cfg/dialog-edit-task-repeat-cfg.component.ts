@@ -9,6 +9,7 @@ import {Subscription} from 'rxjs';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
 import {TASK_REPEAT_CFG_FORM_CFG} from './task-repeat-cfg-form.const';
+import {T} from '../../../t.const';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -18,6 +19,7 @@ import {TASK_REPEAT_CFG_FORM_CFG} from './task-repeat-cfg-form.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
+  T = T;
   task: Task = this.data.task;
 
   taskRepeatCfg: TaskRepeatCfgCopy = {

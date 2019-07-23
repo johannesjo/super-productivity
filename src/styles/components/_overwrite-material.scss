@@ -1,24 +1,7 @@
+// DIALOGS
 body .mat-dialog-content {
   @include scroll;
 }
-
-.mat-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
-  padding: 0 16px !important;
-  pointer-events: all;
-  min-height: 48px;
-  width: auto;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-body .mat-snack-bar-handset {
-  pointer-events: none;
-}
-
-body .mat-form-field {
-  display: block;
-}
-
 
 .big {
   height: auto;
@@ -36,20 +19,9 @@ body .mat-form-field {
   }
 }
 
-.mat-form-field {
-  font-size: 16px;
-}
-
 // overwrite mat typography
 .mat-dialog-title.mat-dialog-title {
   font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
-}
-
-.mat-flat-button,
-.mat-stroked-button,
-.mat-raised-button,
-.mat-button {
-  text-transform: uppercase;
 }
 
 // NOTE: not really an overwrite but helpful
@@ -70,3 +42,49 @@ body .mat-form-field {
     margin-top: 3px;
   }
 }
+
+// SNACK
+// -----
+.mat-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
+  padding: 0 16px !important;
+  pointer-events: all;
+  min-height: 48px;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body .mat-snack-bar-handset {
+  pointer-events: none;
+}
+
+body .mat-form-field {
+  display: block;
+}
+
+.polling-snack {
+  &.mat-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
+    padding-bottom: 8px;
+  }
+}
+
+// FORMS
+// -----
+.mat-form-field {
+  font-size: 16px;
+}
+
+.mat-checkbox-layout {
+  white-space: normal !important;
+}
+
+
+// BUTTONS
+// -------
+.mat-flat-button,
+.mat-stroked-button,
+.mat-raised-button,
+.mat-button {
+  text-transform: uppercase;
+}
+

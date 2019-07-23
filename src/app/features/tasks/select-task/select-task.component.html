@@ -1,9 +1,8 @@
 <mat-form-field>
   <input [formControl]="taskSelectCtrl"
          [matAutocomplete]="auto"
-         aria-label="Select or create task"
          matInput
-         placeholder="Select or create task"
+         [placeholder]="T.F.TASK.SELECT_OR_CREATE|translate"
          required>
   <mat-icon *ngIf="!isCreate"
             matSuffix="">track_changes

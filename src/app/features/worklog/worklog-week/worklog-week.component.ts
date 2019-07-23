@@ -9,6 +9,7 @@ import {getDateRangeForWeek} from '../../../util/get-date-range-for-week';
 import {getWeekNumber} from '../../../util/get-week-number';
 import {Task} from '../../tasks/task.model';
 import {TaskService} from '../../tasks/task.service';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'worklog-week',
@@ -19,6 +20,7 @@ import {TaskService} from '../../tasks/task.service';
 })
 export class WorklogWeekComponent {
   visibility: boolean[] = [];
+  T = T;
 
   constructor(
     public readonly worklogService: WorklogService,

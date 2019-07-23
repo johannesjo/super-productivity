@@ -2,6 +2,9 @@ import {GlobalConfigState} from './global-config.model';
 
 const minute = 60 * 1000;
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
+  lang: {
+    lng: null
+  },
   misc: {
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
@@ -17,6 +20,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   takeABreak: {
     isTakeABreakEnabled: false,
+    isLockScreen: false,
+    isFocusWindow: false,
     /* tslint:disable-next-line */
     takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
     takeABreakMinWorkingTime: 60 * minute,
@@ -38,6 +43,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   keyboard: {
     globalShowHide: 'Ctrl+Shift+X',
     globalToggleTaskStart: null,
+    globalAddNote: null,
+    globalAddTask: null,
     addNewTask: 'Shift+A',
     addNewNote: 'n',
     openProjectNotes: 'Shift+N',

@@ -7,6 +7,7 @@ import {Observable, Subscription} from 'rxjs';
 import {ReminderService} from '../../reminder/reminder.service';
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'dialog-view-note-reminder',
@@ -15,6 +16,7 @@ import {Project} from '../../project/project.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogViewNoteReminderComponent implements OnDestroy {
+  T = T;
   note$: Observable<Note> = this._noteService.getById$(this.data.reminder.relatedId);
   reminder: Reminder = this.data.reminder;
   isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);

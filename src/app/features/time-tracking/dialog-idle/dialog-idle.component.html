@@ -4,15 +4,16 @@
 <form (submit)="track()">
   <div class="dialog-content"
        mat-dialog-content>
-    <p>You have been idle for:</p>
+    <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
     <div class="time">{{data.idleTime$|async|msToString:true}}</div>
 
     <select-task (taskChange)="onTaskChange($event)"
                  [initialTask]="selectedTask"></select-task>
 
     <div class="track-to-label">
-      <span *ngIf="!isCreate">Track to:</span>
-      <span *ngIf="isCreate"><em>Create</em> and track to:</span>
+      <span *ngIf="!isCreate">{{T.F.TIME_TRACKING.D_IDLE.TRACK_TO|translate}}</span>
+      <span *ngIf="isCreate"
+            [innerHTML]="T.F.TIME_TRACKING.D_IDLE.CREATE_AND_TRACK|translate"></span>
     </div>
   </div>
 
@@ -24,7 +25,7 @@
             mat-button
             type="button">
       <mat-icon>skip_next</mat-icon>
-      Skip
+      {{T.F.TIME_TRACKING.D_IDLE.SKIP|translate}}
     </button>
 
     <button (click)="trackAsBreak()"
@@ -32,7 +33,7 @@
             mat-stroked-button
             type="button">
       <mat-icon>free_breakfast</mat-icon>
-      Break
+      {{T.F.TIME_TRACKING.D_IDLE.BREAK|translate}}
     </button>
 
     <button [disabled]="!(selectedTask||newTaskTitle)"
@@ -41,7 +42,7 @@
             type="submit">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
-      Task
+      {{T.F.TIME_TRACKING.D_IDLE.TASK|translate}}
     </button>
 
     <button (click)="track(true)"
@@ -53,7 +54,7 @@
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
       <!--      <mat-icon style="margin-left: -4px;">free_breakfast</mat-icon>-->
-      Task+Break
+      {{T.F.TIME_TRACKING.D_IDLE.TASK_BREAK|translate}}
       <mat-icon>free_breakfast</mat-icon>
     </button>
   </div>

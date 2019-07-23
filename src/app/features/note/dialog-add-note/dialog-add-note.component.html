@@ -7,13 +7,13 @@
                 [(ngModel)]="noteContent"
                 matTextareaAutosize
                 name="noteContent"
-                placeholder="Enter some text to save as note..."
+                [placeholder]="T.F.NOTE.D_ADD.NOTE_LABEL|translate"
                 rows="6"></textarea>
     </div>
     <datetime-input (modelChange)="reminderDate=$event"
                     [model]="reminderDate"
                     name="reminderData"
-                    placeholder="Datetime for reminder (optional)"
+                    [placeholder]="T.F.NOTE.D_ADD.DATETIME_LABEL|translate"
                     style="width: 100%;"></datetime-input>
   </div>
 
@@ -24,14 +24,14 @@
               color="primary"
               mat-button
               type="button">
-        Cancel
+        {{T.G.CANCEL|translate}}
       </button>
       <button class="btn btn-primary submit-button"
               color="primary"
               mat-stroked-button
               type="submit">
         <mat-icon>save</mat-icon>
-        Save
+        {{T.G.SAVE|translate}}
       </button>
     </div>
   </mat-dialog-actions>

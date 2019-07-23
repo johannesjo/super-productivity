@@ -22,13 +22,13 @@ import {
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {initialTaskState, TaskState} from '../../features/tasks/store/task.reducer';
+import {initialTaskState, taskReducer, TaskState} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
 import {Task, TaskArchive, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
-import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
-import {NoteState} from '../../features/note/store/note.reducer';
+import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
+import {attachmentReducer, AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from './database.service';
@@ -40,11 +40,20 @@ import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-is
 import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
-import {MetricState} from '../../features/metric/metric.model';
-import {ImprovementState} from '../../features/metric/improvement/improvement.model';
-import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
-import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import {TagState} from '../../features/tag/store/tag.reducer';
+import {tagReducer, TagState} from '../../features/tag/store/tag.reducer';
+import {Metric, MetricState} from '../../features/metric/metric.model';
+import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
+import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
+import {TaskRepeatCfg, TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import {Attachment} from '../../features/attachment/attachment.model';
+import {Bookmark} from '../../features/bookmark/bookmark.model';
+import {Note} from '../../features/note/note.model';
+import {Action} from '@ngrx/store';
+import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import {metricReducer} from '../../features/metric/store/metric.reducer';
+import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
+import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
+import {Tag} from '../../features/tag/tag.model';
 
 
 @Injectable({
@@ -62,16 +71,58 @@ export class PersistenceService {
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig');
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
-  task = this._cmProject<TaskState>(LS_TASK_STATE, 'task');
-  taskRepeatCfg = this._cmProject<TaskRepeatCfgState>(LS_TASK_REPEAT_CFG_STATE, 'taskRepeatCfg');
-  taskArchive = this._cmProject<TaskArchive>(LS_TASK_ARCHIVE, 'taskArchive');
-  taskAttachment = this._cmProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
-  bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
-  note = this._cmProject<NoteState>(LS_NOTE_STATE, 'note');
-  taskTag = this._cmProject<TagState>(LS_TASK_TAG_STATE, 'taskTag');
-  metric = this._cmProject<MetricState>(LS_METRIC_STATE, 'metric');
-  improvement = this._cmProject<ImprovementState>(LS_IMPROVEMENT_STATE, 'improvement');
-  obstruction = this._cmProject<ObstructionState>(LS_OBSTRUCTION_STATE, 'obstruction');
+  taskTag = this._cmProject<TagState, Tag>(
+    LS_TASK_TAG_STATE,
+    'taskTag',
+    tagReducer);
+  task = this._cmProject<TaskState, Task>(
+    LS_TASK_STATE,
+    'task',
+    taskReducer,
+  );
+  taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
+    LS_TASK_REPEAT_CFG_STATE,
+    'taskRepeatCfg',
+    taskRepeatCfgReducer,
+  );
+
+  taskArchive = this._cmProject<TaskArchive, TaskWithSubTasks>(
+    LS_TASK_ARCHIVE,
+    'taskArchive',
+    // NOTE: this might be problematic, as we don't really have reducer logic for the archive
+    // TODO add a working reducer for task archive
+    taskReducer,
+  );
+  taskAttachment = this._cmProject<AttachmentState, Attachment>(
+    LS_TASK_ATTACHMENT_STATE,
+    'taskAttachment',
+    attachmentReducer,
+  );
+  bookmark = this._cmProject<BookmarkState, Bookmark>(
+    LS_BOOKMARK_STATE,
+    'bookmark',
+    bookmarkReducer,
+  );
+  note = this._cmProject<NoteState, Note>(
+    LS_NOTE_STATE,
+    'note',
+    noteReducer,
+  );
+  metric = this._cmProject<MetricState, Metric>(
+    LS_METRIC_STATE,
+    'metric',
+    metricReducer,
+  );
+  improvement = this._cmProject<ImprovementState, Improvement>(
+    LS_IMPROVEMENT_STATE,
+    'improvement',
+    improvementReducer,
+  );
+  obstruction = this._cmProject<ObstructionState, Obstruction>(
+    LS_OBSTRUCTION_STATE,
+    'obstruction',
+    obstructionReducer,
+  );
 
 
   constructor(
@@ -364,15 +415,84 @@ export class PersistenceService {
     return model;
   }
 
-  private _cmProject<T>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<T> {
+  // TODO maybe refactor to class?
+  // TODO maybe find a way to exec effects here as well
+  private _cmProject<S, M>(
+    lsKey: string,
+    appDataKey: keyof AppDataForProjects,
+    reducerFn: (state: S, action: Action) => S
+  ): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
       load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
       save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
       remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
+
+      // NOTE: side effects are not executed!!!
+      update: async (projectId: string, adjustFn: (sate: S) => S): Promise<S> => {
+        const state = await model.load(projectId);
+        const newState = adjustFn(state);
+        await model.save(projectId, newState, false);
+        return newState;
+      },
+      ent: {
+        getById: async (projectId: string, id: string): Promise<M> => {
+          const state = await model.load(projectId);
+          return state && state.entities && state.entities[id] || null;
+        },
+        getByIds: async (projectId: string, ids: string[]): Promise<M[]> => {
+          const state = await model.load(projectId);
+          if (state && state.entities) {
+            return ids
+              .map(id => state.entities[id])
+              // filter out broken entries
+              .filter((model_: M) => !!model_);
+          }
+          return null;
+        },
+
+        // NOTE: side effects are not executed!!!
+        execAction: async (projectId: string, action: Action): Promise<S> => {
+          const state = await model.load(projectId);
+          const newState = reducerFn(state, action);
+          await model.save(projectId, newState, false);
+          return newState;
+        },
+        // NOTE: side effects are not executed!!!
+        bulkUpdate: async (projectId: string, adjustFn: (model: M) => M): Promise<S> => {
+          const state = await model.load(projectId);
+          const ids = state.ids as string[];
+          const newState = {
+            ...state,
+            entities: ids.reduce((acc, key) => {
+              return {
+                ...acc,
+                [key]: adjustFn(state.entity[key]),
+              };
+            }, {})
+          };
+          await model.save(projectId, newState, false);
+          return newState;
+        },
+      },
+      entAllProjects: {
+        // NOTE: side effects are not executed!!!
+        bulkUpdate: async (adjustFn: (model: M) => M): Promise<any> => {
+          const projectIds = await this._getProjectIds();
+          return Promise.all(projectIds.map(async (projectId) => {
+            return model.ent.bulkUpdate(projectId, adjustFn);
+          }));
+        }
+      }
     };
+
     this._projectModels.push(model);
     return model;
+  }
+
+  private async _getProjectIds(): Promise<string[]> {
+    const projectState = await this.project.load();
+    return projectState.ids as string[];
   }
 
   private async _loadIssueDataForProject(projectId: string): Promise<IssueStateMap> {

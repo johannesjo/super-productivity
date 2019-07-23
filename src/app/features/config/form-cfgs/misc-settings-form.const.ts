@@ -1,48 +1,46 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection} from '../global-config.model';
+import {ConfigFormSection, MiscConfig} from '../global-config.model';
+import {T} from '../../../t.const';
 
-export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
-  title: 'Misc Settings',
+
+export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
+  title: T.GCF.MISC.TITLE,
   key: 'misc',
-  help: `
-  <div>
-      <p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.
-</p>
-  </div>`,
+  help: T.GCF.MISC.HELP,
   items: [
     {
       key: 'isConfirmBeforeExit',
       type: 'checkbox',
       templateOptions: {
-        label: 'Confirm before exiting the app',
+        label: T.GCF.MISC.IS_CONFIRM_BEFORE_EXIT,
       },
     },
     {
       key: 'isNotifyWhenTimeEstimateExceeded',
       type: 'checkbox',
       templateOptions: {
-        label: 'Notify when time estimate was exceeded',
+        label: T.GCF.MISC.IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED,
       },
     },
     {
       key: 'isHideNav',
       type: 'checkbox',
       templateOptions: {
-        label: 'Hide navigation until main header is hovered (desktop only)',
+        label: T.GCF.MISC.IS_HIDE_NAV,
       },
     },
     {
       key: 'isAutMarkParentAsDone',
       type: 'checkbox',
       templateOptions: {
-        label: 'Mark parent task as done, when all sub tasks are done',
+        label: T.GCF.MISC.IS_AUTO_MARK_PARENT_AS_DONE,
       },
     },
     {
       key: 'isDisableRemindWhenForgotToFinishDay',
       type: 'checkbox',
       templateOptions: {
-        label: 'Disable reminder about forgotten finish day',
+        label: T.GCF.MISC.IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY,
       },
     },
   ]

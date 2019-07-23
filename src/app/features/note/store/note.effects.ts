@@ -16,6 +16,7 @@ import {
 import {selectNoteFeatureState} from './note.reducer';
 import {ReminderService} from '../../reminder/reminder.service';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {T} from '../../../t.const';
 
 @Injectable()
 export class NoteEffects {
@@ -85,7 +86,7 @@ export class NoteEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            msg: `Added reminder for note`,
+            msg: T.F.NOTE.S.ADDED_REMINDER,
             ico: 'schedule',
           }),
         ];
@@ -105,7 +106,7 @@ export class NoteEffects {
         });
         return new SnackOpen({
           type: 'SUCCESS',
-          msg: `Updated reminder for note`,
+          msg: T.F.NOTE.S.UPDATED_REMINDER,
           ico: 'schedule',
         });
       })
@@ -129,7 +130,7 @@ export class NoteEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            msg: `Deleted reminder for note`,
+            msg: T.F.NOTE.S.DELETED_REMINDER,
             ico: 'schedule',
           }),
         ];

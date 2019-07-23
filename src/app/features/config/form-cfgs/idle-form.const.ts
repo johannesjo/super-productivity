@@ -1,44 +1,55 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection} from '../global-config.model';
+import {ConfigFormSection, IdleConfig} from '../global-config.model';
+import {T} from '../../../t.const';
+import {HelperClasses} from '../../../app.constants';
 
-export const IDLE_FORM_CFG: ConfigFormSection = {
-  title: 'Idle Handling',
+export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
+  title: T.GCF.IDLE.TITLE,
   key: 'idle',
-  help: `
-  <div>
-    <p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when
-      you have been idle.</p>
-  </div>`,
+  help: T.GCF.IDLE.HELP,
   items: [
     {
+      type: 'tpl',
+      className: `tpl ${HelperClasses.isHideForAdvancedFeatures}`,
+      templateOptions: {
+        tag: 'p',
+        class: 'sub-section-heading',
+        text: T.G.EXTENSION_INFO,
+      },
+    },
+    {
       key: 'isEnableIdleTimeTracking',
+      className: HelperClasses.isHideForNoAdvancedFeatures,
       type: 'checkbox',
       templateOptions: {
-        label: 'Enable idle time handling',
+        label: T.GCF.IDLE.IS_ENABLE_IDLE_TIME_TRACKING,
       },
     },
     {
       key: 'minIdleTime',
+      className: HelperClasses.isHideForNoAdvancedFeatures,
       type: 'duration',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: 'Trigger idle after X',
+        label: T.GCF.IDLE.MIN_IDLE_TIME,
       },
     },
     {
       key: 'isOnlyOpenIdleWhenCurrentTask',
+      className: HelperClasses.isHideForNoAdvancedFeatures,
       type: 'checkbox',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: 'Only trigger idle time dialog when a current task is selected',
+        label: T.GCF.IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
       },
     },
     {
       key: 'isUnTrackedIdleResetsBreakTimer',
+      className: HelperClasses.isHideForNoAdvancedFeatures,
       type: 'checkbox',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: 'Untracked idle time resets take a break timer',
+        label: T.GCF.IDLE.IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER,
       },
     },
   ]

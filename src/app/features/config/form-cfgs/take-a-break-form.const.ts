@@ -1,21 +1,31 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection} from '../global-config.model';
+import {ConfigFormSection, TakeABreakConfig} from '../global-config.model';
+import {T} from '../../../t.const';
 
-export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection = {
-  title: 'Break Reminder',
+export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
+  title: T.GCF.TAKE_A_BREAK.TITLE,
   key: 'takeABreak',
-  help: `
-  <div>
-    <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking
-      a break.</p>
-    <p>You can modify the message displayed. \${duration} will be replaced with the time spent without a break.</p>
-  </div>`,
+  help: T.GCF.TAKE_A_BREAK.HELP,
   items: [
     {
       key: 'isTakeABreakEnabled',
       type: 'checkbox',
       templateOptions: {
-        label: 'Enable take a break reminder',
+        label: T.GCF.TAKE_A_BREAK.IS_ENABLED
+      },
+    },
+    {
+      key: 'isLockScreen',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.IS_LOCK_SCREEN
+      },
+    },
+    {
+      key: 'isFocusWindow',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.IS_FOCUS_WINDOW
       },
     },
     {
@@ -23,16 +33,15 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection = {
       type: 'duration',
       hideExpression: '!model.isTakeABreakEnabled',
       templateOptions: {
-        label: 'Trigger take a break notification after X working without one',
+        label: T.GCF.TAKE_A_BREAK.MIN_WORKING_TIME
       },
     }, {
       key: 'takeABreakMessage',
       type: 'textarea',
       hideExpression: '!model.isTakeABreakEnabled',
       templateOptions: {
-        label: 'Take a break message',
+        label: T.GCF.TAKE_A_BREAK.MESSAGE
       },
     },
-
   ]
 };

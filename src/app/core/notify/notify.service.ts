@@ -4,7 +4,8 @@ import {environment} from '../../../environments/environment';
 import {IS_ELECTRON} from '../../app.constants';
 import {IS_MOBILE} from '../../util/is-mobile';
 import {ElectronService} from 'ngx-electron';
-import {IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ import {IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
 export class NotifyService {
   constructor(
     private _electronService: ElectronService,
+    private _translateService: TranslateService,
   ) {
   }
 
@@ -22,9 +24,12 @@ export class NotifyService {
   }
 
   async notify(options: NotifyModel): Promise<Notification> {
+    const title = this._translateService.instant(options.title, options.translateParams);
+    const body = options.body && this._translateService.instant(options.body, options.translateParams);
+
     if (this._isServiceWorkerAvailable()) {
       const reg = await navigator.serviceWorker.getRegistration('ngsw-worker.js');
-      reg.showNotification(options.title, {
+      reg.showNotification(title, {
         icon: 'assets/icons/icon-128x128.png',
         vibrate: [100, 50, 100],
         silent: false,
@@ -33,6 +38,7 @@ export class NotifyService {
           primaryKey: 1
         },
         ...options,
+        body,
       });
 
     } else if (this._isBasicNotificationSupport()) {
@@ -40,7 +46,7 @@ export class NotifyService {
       // not supported for basic notifications so we delete them
       delete options.actions;
       if (permission === 'granted') {
-        const instance = new Notification(options.title, {
+        const instance = new Notification(title, {
           icon: 'assets/icons/icon-128x128.png',
           vibrate: [100, 50, 100],
           data: {
@@ -48,11 +54,12 @@ export class NotifyService {
             primaryKey: 1
           },
           ...options,
+          body,
         });
         instance.onclick = () => {
           instance.close();
           if (IS_ELECTRON) {
-            this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+            this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
           }
         };
         setTimeout(() => {

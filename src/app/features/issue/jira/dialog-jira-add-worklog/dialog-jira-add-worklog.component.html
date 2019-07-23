@@ -5,21 +5,20 @@
   <h1 mat-dialog-title>
     <mat-icon class="dialog-header-icon"
               svgIcon="jira"></mat-icon>
-    <span>Jira: Submit Worklog</span>
+    <span>{{T.F.JIRA.DIALOG_WORKLOG.TITLE|translate}}</span>
   </h1>
 
   <mat-dialog-content>
-    <p>Submit a worklog to Jira for <strong>{{issue.key}} {{issue.summary}}</strong>.</p>
-    <p>Currently logged time: <strong>{{(issue.timespent * 1000)|msToString}}</strong></p>
+    <p>{{T.F.JIRA.DIALOG_WORKLOG.SUBMIT_WORKLOG_FOR|translate}} <strong>{{issue.key}} {{issue.summary}}</strong>.</p>
+    <p>{{T.F.JIRA.DIALOG_WORKLOG.CURRENTLY_LOGGED|translate}} <strong>{{(issue.timespent * 1000)|msToString}}</strong></p>
 
     <div class="form-wrapper">
       <mat-form-field>
         <input [(ngModel)]="timeSpent"
-               aria-label="Time Spent"
                inputDuration="optional"
                matInput
                name="timeSpent"
-               placeholder="Time Spent"
+               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate"
                required
                type="text">
 
@@ -30,10 +29,10 @@
         <input [(ngModel)]="started"
                matInput
                name="date"
-               placeholder="Started"
+               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.STARTED|translate "
                required
                type="datetime-local">
-        <mat-error>The entered value is not a date!</mat-error>
+        <mat-error>{{T.F.JIRA.DIALOG_WORKLOG.INVALID_DATE|translate}}</mat-error>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Comment</mat-label>
@@ -54,14 +53,15 @@
               class="btn btn-primary submit-button"
               color="primary"
               mat-button
-              type="button">Cancel
+              type="button">
+        {{T.G.CANCEL|translate}}
       </button>
       <button class="btn btn-primary submit-button"
               color="primary"
               mat-stroked-button
               type="submit">
         <mat-icon>save</mat-icon>
-        Save Worklog
+        {{T.F.JIRA.DIALOG_WORKLOG.SAVE_WORKLOG|translate}}
       </button>
     </div>
   </mat-dialog-actions>

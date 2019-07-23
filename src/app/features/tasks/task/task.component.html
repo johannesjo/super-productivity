@@ -36,7 +36,7 @@
             class="check-done"
             mat-icon-button=""
             tabindex="2"
-            title="un-/mark as done">
+            [title]="T.F.TASK.CMP.TOGGLE_DONE|translate">
       <mat-icon @swirl
                 class="undo">undo
       </mat-icon>
@@ -58,7 +58,7 @@
               color="accent"
               mat-icon-button
               tabindex="2"
-              title="Show updates">
+              [title]="T.F.TASK.CMP.SHOW_UPDATES|translate">
         <mat-icon class="update update-icon">update</mat-icon>
       </button>
 
@@ -69,7 +69,7 @@
          mat-icon-button
          tabindex="2"
          target="_blank"
-         title="Open issue in a new browser tab">
+         [title]="T.F.TASK.CMP.OPEN_ISSUE|translate">
         <div *ngIf="task.issueData?.storyPoints"
              class="mini-badge bg-primary color-contrast">{{task.issueData?.storyPoints}}</div>
         <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
@@ -85,6 +85,7 @@
       <div #editOnClickEl
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
            [value]="task.title"
+           [isResetAfterEdit]="true"
            class="task-title"
            contenteditable="true"
            editOnClick
@@ -120,7 +121,7 @@
                   color=""
                   mat-icon-button
                   tabindex="2"
-                  title="Start tracking time">
+                  [title]="T.F.TASK.CMP.TRACK_TIME|translate">
             <mat-icon class="play-icon"
                       svgIcon="play"></mat-icon>
           </button>
@@ -131,7 +132,7 @@
                   color=""
                   mat-icon-button
                   tabindex="2"
-                  title="Stop tracking time">
+                  [title]="T.F.TASK.CMP.TRACK_TIME_STOP|translate">
             <mat-icon>pause</mat-icon>
           </button>
           <button (click)="toggleTaskDone()"
@@ -139,7 +140,7 @@
                   color=""
                   mat-icon-button
                   tabindex="2"
-                  title="Mark as done/undone">
+                  [title]="T.F.TASK.CMP.TOGGLE_DONE|translate">
             <mat-icon *ngIf="task.isDone">undo</mat-icon>
             <mat-icon *ngIf="!task.isDone">check</mat-icon>
           </button>
@@ -149,7 +150,7 @@
                   color=""
                   mat-icon-button
                   tabindex="2"
-                  title="Estimate time/Add time spent">
+                  [title]="T.F.TASK.CMP.OPEN_TIME|translate">
             <mat-icon>access_time</mat-icon>
           </button>
           <button (click)="toggleShowAdditionalInfoOpen()"
@@ -159,7 +160,7 @@
                   color=""
                   mat-icon-button
                   tabindex="2"
-                  title="Show/Hide additional info">
+                  [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate">
             <mat-icon>chat_bubble_outline</mat-icon>
           </button>
         </div>
@@ -170,7 +171,7 @@
                 color=""
                 mat-icon-button
                 tabindex="2"
-                title="Edit reminder">
+                [title]="T.F.TASK.CMP.EDIT_REMINDER|translate">
           <mat-icon>alarm</mat-icon>
         </button>
         <button (click)="toggleShowAdditionalInfoOpen()"
@@ -180,7 +181,7 @@
                 color=""
                 mat-icon-button
                 tabindex="2"
-                title="Show/Hide additional info">
+                [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate">
           <mat-icon>chat</mat-icon>
         </button>
 
@@ -191,7 +192,7 @@
                 color=""
                 mat-icon-button
                 tabindex="2"
-                title="Show/Hide attachments">
+                [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate">
           <mat-icon>attach_file</mat-icon>
         </button>
 
@@ -202,9 +203,10 @@
                 class="ico-btn menu-trigger"
                 color=""
                 mat-icon-button
-                title="Open task menu">
+                [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate">
           <mat-icon>more_vert</mat-icon>
         </button>
+
         <mat-menu #menu="matMenu">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
@@ -213,7 +215,7 @@
                   tabindex="2">
             <mat-icon class="play-icon"
                       svgIcon="play"></mat-icon>
-            Start tracking task
+            {{T.F.TASK.CMP.TRACK_TIME|translate}}
           </button>
           <button (click)="pauseTask()"
                   *ngIf="!task.isDone && isCurrent && !task.subTasks"
@@ -221,7 +223,7 @@
                   mat-menu-item
                   tabindex="2">
             <mat-icon>pause</mat-icon>
-            Pause tracking task
+            {{T.F.TASK.CMP.TRACK_TIME_STOP|translate}}
           </button>
 
           <button (click)="toggleTaskDone()"
@@ -231,12 +233,12 @@
             <ng-container *ngIf="task.isDone">
               <mat-icon>undo
               </mat-icon>
-              Mark as undone
+              {{T.F.TASK.CMP.MARK_UNDONE|translate}}
             </ng-container>
             <ng-container *ngIf="!task.isDone">
               <mat-icon>check
               </mat-icon>
-              Mark as done
+              {{T.F.TASK.CMP.MARK_DONE|translate}}
             </ng-container>
           </button>
 
@@ -246,23 +248,22 @@
                   mat-menu-item>
             <ng-container *ngIf="!task.reminderId">
               <mat-icon>alarm_add</mat-icon>
-              Schedule task
+              {{T.F.TASK.CMP.SCHEDULE|translate}}
             </ng-container>
             <ng-container *ngIf="task.reminderId">
               <mat-icon>alarm</mat-icon>
-              Edit reminder
+              {{T.F.TASK.CMP.EDIT_REMINDER|translate}}
             </ng-container>
           </button>
 
           <button (click)="toggleShowAdditionalInfoOpen()"
+                  class="show-touch-only"
                   [class.isActive]="task._isAdditionalInfoOpen"
                   mat-menu-item
                   tabindex="2">
-
-            <mat-icon *ngIf="task.notes||task.issueData">chat
-            </mat-icon>
+            <mat-icon *ngIf="task.notes||task.issueData">chat</mat-icon>
             <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
-            Show/Hide additional info
+            {{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}}
           </button>
 
           <button (click)="addSubTask();"
@@ -270,14 +271,14 @@
                   mat-menu-item=""
                   tabindex="2">
             <mat-icon>playlist_add</mat-icon>
-            Add sub task
+            {{T.F.TASK.CMP.ADD_SUB_TASK|translate}}
           </button>
 
           <button (click)="addAttachment();"
                   mat-menu-item=""
                   tabindex="2">
             <mat-icon>attachment</mat-icon>
-            Attach file or link
+            {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
           </button>
 
           <button (click)="updateIssueData()"
@@ -285,7 +286,7 @@
                   mat-menu-item=""
                   tabindex="2">
             <mat-icon>cloud_download</mat-icon>
-            Update issue data
+            {{T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate}}
           </button>
 
           <button (click)="moveToBacklog();"
@@ -293,7 +294,7 @@
                   mat-menu-item=""
                   tabindex="2">
             <mat-icon>arrow_downward</mat-icon>
-            Move to backlog
+            {{T.F.TASK.CMP.MOVE_TO_BACKLOG|translate}}
           </button>
 
           <button (click)="moveToToday();"
@@ -301,7 +302,7 @@
                   mat-menu-item=""
                   tabindex="2">
             <mat-icon>arrow_upward</mat-icon>
-            Move to today's list
+            {{T.F.TASK.CMP.MOVE_TO_TODAY|translate}}
           </button>
 
           <button (click)="deleteTask()"
@@ -311,14 +312,14 @@
 
             <mat-icon style="color:#e15d63;">delete_forever
             </mat-icon>
-            Delete Task
+            {{T.F.TASK.CMP.DELETE|translate}}
           </button>
 
           <button mat-menu-item=""
                   tabindex="2"
                   *ngIf="!task.parentId && !task.issueId"
                   [matMenuTriggerFor]="advMenu">
-            Advanced
+            {{T.F.TASK.CMP.ADVANCED|translate}}
           </button>
         </mat-menu>
 
@@ -327,21 +328,21 @@
                   [matMenuTriggerFor]="projectMenu"
                   *ngIf="!task.parentId && !task.issueId && !task.repeatCfgId">
             <mat-icon>forward</mat-icon>
-            Move to other Project
+            {{T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT|translate}}
           </button>
 
-          <button mat-menu-item
-                  *ngIf="task.parentId">
-            <mat-icon>low_priority</mat-icon>
-            Convert to parent Task
-          </button>
+          <!--          <button mat-menu-item-->
+          <!--                  *ngIf="task.parentId">-->
+          <!--            <mat-icon>low_priority</mat-icon>-->
+          <!--            {{T.F.TASK.CMP.CONVERT_TO_PARENT_TASK|translate}}-->
+          <!--          </button>-->
 
           <button (click)="editTaskRepeatCfg()"
                   *ngIf="!task.parentId && !task.issueId"
                   mat-menu-item="">
             <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
-            <span *ngIf="!task.repeatCfgId">Repeat task</span>
-            <span *ngIf="task.repeatCfgId">Edit repeat task config</span>
+            <span *ngIf="!task.repeatCfgId">{{T.F.TASK.CMP.REPEAT_TASK|translate}}</span>
+            <span *ngIf="task.repeatCfgId">{{T.F.TASK.CMP.REPEAT_EDIT|translate}}</span>
           </button>
         </mat-menu>
 
@@ -378,7 +379,7 @@
             color=""
             mat-mini-fab=""
             tabindex="2"
-            title="Toggle sub task visibility">
+            [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">
       <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)">add
       </mat-icon>
       <mat-icon *ngIf="(task._showSubTasksMode!==ShowSubTasksMode.HideAll)"
@@ -398,6 +399,6 @@
   <div *ngIf="isDragOver"
        class="bg-accent color-contrast drag-over-msg">
     <mat-icon>add</mat-icon>
-    Drop here to attach to "{{task.title}}"
+    {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
   </div>
 </div>

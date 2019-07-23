@@ -4,7 +4,7 @@ import {ChromeExtensionInterfaceService} from '../../core/chrome-extension-inter
 import {ProjectService} from '../project/project.service';
 import {ElectronService} from 'ngx-electron';
 import {TaskService} from '../tasks/task.service';
-import {IPC_IDLE_TIME, IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {MatDialog} from '@angular/material/dialog';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {DialogIdleComponent} from './dialog-idle/dialog-idle.component';
@@ -20,14 +20,14 @@ const IDLE_POLL_INTERVAL = 1000;
   providedIn: 'root',
 })
 export class IdleService {
-  public isIdle = false;
+  isIdle = false;
   private _isIdle$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(distinctUntilChanged(), shareReplay());
+  isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(distinctUntilChanged(), shareReplay());
 
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
-  public idleTime$: Observable<number> = this._idleTime$.asObservable();
+  idleTime$: Observable<number> = this._idleTime$.asObservable();
   private _triggerResetBreakTimer$ = new Subject<boolean>();
-  public triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
+  triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
 
 
   private lastCurrentTaskId: string;
@@ -46,12 +46,12 @@ export class IdleService {
 
   init() {
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.on(IPC_IDLE_TIME, (ev, idleTimeInMs) => {
+      this._electronService.ipcRenderer.on(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     }
     this._chromeExtensionInterface.onReady$.subscribe(() => {
-      this._chromeExtensionInterface.addEventListener(IPC_IDLE_TIME, (ev, idleTimeInMs) => {
+      this._chromeExtensionInterface.addEventListener(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     });
@@ -78,7 +78,7 @@ export class IdleService {
 
       if (!this.isIdleDialogOpen) {
         if (IS_ELECTRON) {
-          this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+          this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
         }
 
         if (this._taskService.currentTaskId) {

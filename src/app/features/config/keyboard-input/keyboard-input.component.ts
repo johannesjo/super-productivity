@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, ViewChild} from '@angular/core';
-import {FieldType} from '@ngx-formly/material/form-field';
 import {MatInput} from '@angular/material/input';
+import {FieldType} from '@ngx-formly/material';
 
 @Component({
   selector: 'keyboard-input',

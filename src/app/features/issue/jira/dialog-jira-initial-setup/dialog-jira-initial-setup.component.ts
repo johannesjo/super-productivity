@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {JiraCfg} from '../jira';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'dialog-jira-initial-setup',
@@ -9,6 +10,7 @@ import {JiraCfg} from '../jira';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraInitialSetupComponent {
+  T = T;
   jiraCfg: JiraCfg;
 
   constructor(

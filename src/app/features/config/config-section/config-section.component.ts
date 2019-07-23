@@ -20,6 +20,7 @@ import {JiraCfgComponent} from '../../issue/jira/jira-cfg/jira-cfg.component';
 import {FileImexComponent} from '../../../imex/file-imex/file-imex.component';
 import {ProjectService} from '../../project/project.service';
 import {Subscription} from 'rxjs';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'config-section',
@@ -29,7 +30,7 @@ import {Subscription} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
-  @Input() section: ConfigFormSection;
+  @Input() section: ConfigFormSection<{ [key: string]: any }>;
   @Input() cfg: any;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
@@ -43,6 +44,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
     private _componentFactoryResolver: ComponentFactoryResolver,
     private _projectService: ProjectService,
+    private _translateService: TranslateService,
   ) {
   }
 
@@ -50,6 +52,11 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     if (this.section && this.section.customSection) {
       this._loadCustomSection(this.section.customSection);
     }
+
+    // mark for check manually to make translations work with ngx formly
+    this._subs.add(this._translateService.onLangChange.subscribe(() => {
+      this._cd.detectChanges();
+    }));
 
     // mark for check manually to make it work with ngx formly
     this._subs.add(this._projectService.onProjectChange$.subscribe(() => {

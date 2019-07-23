@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'datetime-input',
@@ -13,6 +14,7 @@ export class DatetimeInputComponent {
   @Output() modelChange = new EventEmitter<number>();
   nrValue: number;
   strValue: string;
+  T = T;
 
   constructor() {
   }

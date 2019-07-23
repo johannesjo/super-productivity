@@ -35,6 +35,7 @@ import {BannerId} from '../../../core/banner/banner.model';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {TagService} from '../../tag/tag.service';
+import {T} from '../../../t.const';
 
 @Injectable()
 export class ProjectEffects {
@@ -131,9 +132,12 @@ export class ProjectEffects {
         this._bannerService.open({
           id: BannerId.ForgotToFinishDay,
           ico: 'info',
-          msg: `You forgot to finish your day on ${dayStr}`,
+          msg: T.F.PROJECT.BANNER.FINISH_DAY.MSG,
+          translateParams: {
+            dayStr
+          },
           action: {
-            label: 'Finish Day',
+            label: T.F.PROJECT.BANNER.FINISH_DAY.FINISH_DAY,
             fn: () => {
               this._router.navigate(['/daily-summary', dayStr]);
             }
@@ -210,7 +214,8 @@ export class ProjectEffects {
         return new SnackOpen({
           ico: 'add',
           type: 'SUCCESS',
-          msg: `Created project <strong>${action.payload.project.title}</strong>. You can select it from the menu on the top left.`
+          msg: T.F.PROJECT.S.CREATED,
+          translateParams: {title: action.payload.project.title}
         });
       }),
     );
@@ -223,7 +228,7 @@ export class ProjectEffects {
       map((action: DeleteProject) => {
         return new SnackOpen({
           ico: 'delete_forever',
-          msg: `Deleted project <strong>${action.payload.id}</strong>`
+          msg: T.F.PROJECT.S.DELETED
         });
       }),
     );
@@ -251,7 +256,7 @@ export class ProjectEffects {
         this._reminderService.removeReminderByProjectId(action.payload.id);
         this._snackService.open({
           ico: 'archive',
-          msg: `Archived project <strong>${action.payload.id}</strong>`
+          msg: T.F.PROJECT.S.ARCHIVED,
         });
       }),
     );
@@ -266,7 +271,7 @@ export class ProjectEffects {
 
         this._snackService.open({
           ico: 'unarchive',
-          msg: `Unarchived project <strong>${action.payload.id}</strong>`
+          msg: T.F.PROJECT.S.UNARCHIVED
         });
       }),
     );
@@ -279,7 +284,10 @@ export class ProjectEffects {
       map((action: UpdateProjectIssueProviderCfg) => {
         return new SnackOpen({
           type: 'SUCCESS',
-          msg: `Updated project settings for <strong>${action.payload.issueProviderKey}</strong>`,
+          msg: T.F.PROJECT.S.ISSUE_PROVIDER_UPDATED,
+          translateParams: {
+            issueProviderKey: action.payload.issueProviderKey
+          }
         });
       })
     );
@@ -292,7 +300,7 @@ export class ProjectEffects {
       map((action: UpdateProject) => {
         return new SnackOpen({
           type: 'SUCCESS',
-          msg: `Updated project settings`,
+          msg: T.F.PROJECT.S.UPDATED,
         });
       })
     );

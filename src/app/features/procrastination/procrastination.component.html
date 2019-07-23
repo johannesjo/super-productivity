@@ -1,28 +1,20 @@
 <div class="page-wrapper component-wrapper">
-  <h1 style="margin-top: 16px; text-align: center;">Cut yourself some slack!</h1>
-  <p>First of all relax! Everybody does it once in a while. And if you're not doing what you
-    should, you should at least enjoy it! Then check out the sections below for something helpful.</p>
-  <p>If you want to know more about the science behind all here I can recommend
-    <a href="https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html"
-       target="_blank">this article</a> from which are some of the exercises.</p>
-  <p>Remember: Procrastination is an emotion regulation problem, not a time management problem.</p>
+  <h1 style="margin-top: 16px; text-align: center;">{{T.F.PROCRASTINATION.H1|translate}}</h1>
+  <p>{{T.F.PROCRASTINATION.P1|translate}}</p>
+  <p [innerHTML]="T.F.PROCRASTINATION.P2|translate"></p>
+  <p>{{T.F.PROCRASTINATION.P3|translate}}</p>
 
 
   <mat-tab-group dynamicHeight>
-    <mat-tab label="Curiosity">
+    <mat-tab [label]="T.F.PROCRASTINATION.CUR.TITLE|translate">
       <section class="tab-inner">
-        <p>Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at
-          all. But still everybody does it. Enjoy and explore!</p>
+        <p>{{T.F.PROCRASTINATION.CUR.INTRO|translate}}</p>
         <ul>
-          <li>What feelings are eliciting your temptation to procrastinate?</li>
-          <li>Where do you feel them in your body?</li>
-          <li>What do they remind you of?</li>
-          <li>What happens to the thought of procrastinating as you observe it?
-            Does it intensify?
-            Dissipate?
-            Cause other emotions to arise?
-          </li>
-          <li>How are the sensations in your body shifting as you continue to rest your awareness on them?</li>
+          <li>{{T.F.PROCRASTINATION.CUR.L1|translate}}</li>
+          <li>{{T.F.PROCRASTINATION.CUR.L2|translate}}</li>
+          <li>{{T.F.PROCRASTINATION.CUR.L3|translate}}</li>
+          <li>{{T.F.PROCRASTINATION.CUR.L4|translate}}</li>
+          <li>{{T.F.PROCRASTINATION.CUR.L5|translate}}</li>
         </ul>
 
         <!--        <mat-form-field>-->
@@ -53,57 +45,50 @@
     </mat-tab>
 
 
-    <mat-tab label="Self Compassion">
+    <mat-tab [label]="T.F.PROCRASTINATION.COMP.TITLE|translate">
       <section class="tab-inner">
-        <p>Showing yourself some compassion is always a great idea. It improves your feeling of self-worth, fosters
-          positive emotions and can help you overcome procrastination, of course. Try a little exercise:</p>
+        <p>{{T.F.PROCRASTINATION.COMP.INTRO|translate}}</p>
         <ul>
-          <li>Sit down for bit and stretch yourself, if you like, calm down a little bit</li>
-          <li>Try to listen to the thoughts and feelings that arise</li>
-          <li>Are you responding to yourself in a way that you would respond to a friend?</li>
-          <li>If the answer is no, imagine your friend in your situation. What you would say to them? What you
-            would do for them?
-          </li>
+          <li>{{T.F.PROCRASTINATION.COMP.L1|translate}}</li>
+          <li>{{T.F.PROCRASTINATION.COMP.L2|translate}}</li>
+          <li>{{T.F.PROCRASTINATION.COMP.L3|translate}}</li>
+          <li>{{T.F.PROCRASTINATION.COMP.L4|translate}}</li>
         </ul>
 
-        <p>More exercises <a href="https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion"
-                             target="_blank">can be found here</a> or on
-          <a href="https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8"
-             target="_blank">google</a>.</p>
+        <p [innerHTML]="T.F.PROCRASTINATION.COMP.OUTRO|translate"></p>
       </section>
     </mat-tab>
 
 
-    <mat-tab label="Reframing">
+    <mat-tab [label]="T.F.PROCRASTINATION.REFRAME.TITLE|translate">
       <section class="tab-inner">
-        <p>Think about what might be positive about the task despite its flaws.</p>
+        <p>{{T.F.PROCRASTINATION.REFRAME.INTRO|translate}}
+          flaws.</p>
 
         <mat-form-field>
           <textarea matInput
-                    placeholder="What might be interesting about it?"></textarea>
+                    [placeholder]="T.F.PROCRASTINATION.REFRAME.TL1|translate"></textarea>
         </mat-form-field>
         <mat-form-field>
           <textarea matInput
-                    placeholder="What is to gain if you complete it?"></textarea>
+                    [placeholder]="T.F.PROCRASTINATION.REFRAME.TL2|translate"></textarea>
         </mat-form-field>
         <mat-form-field>
           <textarea matInput
-                    placeholder="How will you feel about it if you complete it?"></textarea>
+                    [placeholder]="T.F.PROCRASTINATION.REFRAME.TL3|translate"></textarea>
         </mat-form-field>
       </section>
     </mat-tab>
 
 
     <mat-tab *ngIf="(taskService.currentTaskOrCurrentParent$|async) as currentTask"
-             label="Split it up!">
+             [label]="T.F.PROCRASTINATION.SPLIT_UP.TITLE|translate">
       <section class="tab-inner no-box">
-        <p>Split up the task into as many small chunks as you can.</p>
+        <p>{{T.F.PROCRASTINATION.SPLIT_UP.INTRO|translate}}</p>
 
         <task [task]="currentTask"></task>
 
-        <p style="margin-top: 16px;">Done? Then think about it. What would be – strictly theoretical – the first thing
-          you would do <i>if</i> you
-          were to start working on the task? Just think about it...</p>
+        <p style="margin-top: 16px;" [innerHTML]="T.F.PROCRASTINATION.SPLIT_UP.OUTRO|translate"></p>
       </section>
     </mat-tab>
   </mat-tab-group>
@@ -112,7 +97,7 @@
     <button color="primary"
             mat-raised-button=""
             routerLink="/work-view">
-      Back to work!
+      {{T.F.PROCRASTINATION.BACK_TO_WORK|translate}}
     </button>
   </div>
 </div>

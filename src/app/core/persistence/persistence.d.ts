@@ -1,4 +1,5 @@
 import {AppBaseData, AppDataForProjects} from '../../imex/sync/sync.model';
+import {Action} from '@ngrx/store';
 
 export type ProjectDataLsKey
   = 'CFG'
@@ -24,12 +25,36 @@ export interface PersistenceBaseModel<T> {
   save(state: T, isForce?: boolean): Promise<any>;
 }
 
-export interface PersistenceForProjectModel<T> {
+export interface EntityModelHelpers<S, M> {
+  getById(projectId: string, id: string): Promise<M>;
+
+  getByIds(projectId: string, id: string[]): Promise<M[]>;
+
+  // NOTE: side effects are not executed!!!
+  bulkUpdate(projectId: string, adjustFn: (model: M) => M): Promise<S>;
+
+  // NOTE: side effects are not executed!!!
+  execAction(projectId: string, action: Action): Promise<S>;
+}
+
+export interface EntityModelHelpersForAllProjects<S, M> {
+  // NOTE: side effects are not executed!!!
+  bulkUpdate(adjustFn: (model: M) => M): Promise<any>;
+}
+
+export interface PersistenceForProjectModel<S, M> {
   appDataKey: keyof AppDataForProjects;
 
-  load(projectId: string): Promise<T>;
+  ent: EntityModelHelpers<S, M>;
 
-  save(projectId: string, state: T, isForce?: boolean): Promise<any>;
+  entAllProjects: EntityModelHelpersForAllProjects<S, M>;
+
+  load(projectId: string): Promise<S>;
+
+  save(projectId: string, state: S, isForce?: boolean): Promise<any>;
+
+  // NOTE: side effects are not executed!!!
+  update(projectId: string, adjustFn: (state: S) => S): Promise<S>;
 
   remove(projectId: string): Promise<any>;
 }

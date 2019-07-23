@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 import {IS_ELECTRON} from '../../app.constants';
 import {checkKeyCombo} from '../../util/check-key-combo';
 import {GlobalConfigService} from '../../features/config/global-config.service';
@@ -10,7 +10,7 @@ import {TaskService} from '../../features/tasks/task.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogAddNoteComponent} from '../../features/note/dialog-add-note/dialog-add-note.component';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
-import {IPC_TASK_TOGGLE_START} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 
 
 @Injectable({
@@ -29,6 +29,7 @@ export class ShortcutService {
     private _taskService: TaskService,
     private _activatedRoute: ActivatedRoute,
     private _bookmarkService: BookmarkService,
+    private _ngZone: NgZone,
   ) {
     this._activatedRoute.queryParams
       .subscribe((params) => {
@@ -39,7 +40,23 @@ export class ShortcutService {
 
     // GLOBAL SHORTCUTS
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.on(IPC_TASK_TOGGLE_START, () => this._taskService.toggleStartTask());
+      this._electronService.ipcRenderer.on(IPC.TASK_TOGGLE_START, () => {
+        this._ngZone.run(() => {
+          this._taskService.toggleStartTask();
+        });
+      });
+      this._electronService.ipcRenderer.on(IPC.ADD_TASK, () => {
+        this._ngZone.run(() => {
+          this._layoutService.showAddTaskBar();
+        });
+      });
+      this._electronService.ipcRenderer.on(IPC.ADD_NOTE, () => {
+        if (this._matDialog.openDialogs.length === 0) {
+          this._ngZone.run(() => {
+            this._matDialog.open(DialogAddNoteComponent);
+          });
+        }
+      });
     }
   }
 

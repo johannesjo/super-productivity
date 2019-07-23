@@ -1,27 +1,26 @@
 <h1 mat-dialog-title>
   <mat-icon class="dialog-header-icon">alarm</mat-icon>
-  <span>Scheduled Task</span>
+  <span>{{T.F.TASK.D_REMINDER_VIEW.TITLE|translate}}</span>
 </h1>
-
 
 <mat-dialog-content>
   <div *ngIf="!isError"
        class="content">
     <h3>"{{task?.title || reminder.title}}"</h3>
 
-    <p *ngIf="isForCurrentProject">Task is due. Do you want to start working on it?</p>
+    <p *ngIf="isForCurrentProject">{{T.F.TASK.D_REMINDER_VIEW.FOR_CURRENT|translate}}</p>
 
     <div *ngIf="!isForCurrentProject"
          class="for-project">
-      <p>From Project</p>
+      <p>{{T.F.TASK.D_REMINDER_VIEW.FROM_PROJECT|translate}}</p>
       <h3>{{(targetProject$|async)?.title}}</h3>
-      <p>Task is due. Do you want to start working on it?</p>
+      <p>{{T.F.TASK.D_REMINDER_VIEW.FOR_OTHER|translate}}</p>
     </div>
   </div>
 
   <div *ngIf="isError"
        style="color: red">
-    There was a reminder scheduled for the task <strong>{{reminder.title}}</strong>, but it seems to be lost.
+    {{T.F.TASK.D_REMINDER_VIEW.ERR_LOST|translate:{title: reminder.title} }}
   </div>
 </mat-dialog-content>
 
@@ -34,7 +33,7 @@
             mat-stroked-button
             type="button">
       <mat-icon>clear</mat-icon>
-      Dismiss Reminder
+      {{T.F.TASK.D_REMINDER_VIEW.DISMISS|translate}}
     </button>
 
     <ng-container *ngIf="!isError">
@@ -44,7 +43,7 @@
               mat-button
               type="button">
         <mat-icon>snooze</mat-icon>
-        Snooze 10m
+        {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate:{time: '10m'} }}
       </button>
 
       <button (click)="dismiss()"
@@ -54,7 +53,7 @@
               mat-stroked-button
               type="button">
         <mat-icon>clear</mat-icon>
-        Dismiss
+        {{T.G.DISMISS|translate}}
       </button>
 
       <button (click)="play()"
@@ -63,7 +62,9 @@
               mat-stroked-button
               type="button">
         <mat-icon>play_arrow</mat-icon>
-        {{!isForCurrentProject ? 'Switch Project &' : ''}} Start Task
+        {{!isForCurrentProject
+        ? (T.F.TASK.D_REMINDER_VIEW.SWITCH_PROJECT_START|translate)
+        : (T.F.TASK.D_REMINDER_VIEW.START|translate)}}
       </button>
     </ng-container>
   </div>

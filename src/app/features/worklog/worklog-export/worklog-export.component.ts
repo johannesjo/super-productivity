@@ -5,7 +5,7 @@ import {Subscription} from 'rxjs';
 import {WorkStartEnd} from '../../project/project.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import 'moment-duration-format';
 import {unique} from '../../../util/unique';
 import {msToString} from '../../../ui/duration/ms-to-string.pipe';
@@ -16,6 +16,7 @@ import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
 import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
+import {T} from '../../../t.const';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -49,6 +50,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   @Output() cancel = new EventEmitter();
 
+  T = T;
   isShowAsText = false;
   headlineCols: string[] = [];
   formattedRows: (string | number)[][];
@@ -56,30 +58,30 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   txt: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
-    {id: 'QUARTER', title: 'full quarters'},
-    {id: 'HALF', title: 'full half hours'},
-    {id: 'HOUR', title: 'full hours'},
+    {id: 'QUARTER', title: T.F.WORKLOG.EXPORT.O.FULL_QUARTERS},
+    {id: 'HALF', title: T.F.WORKLOG.EXPORT.O.FULL_HALF_HOURS},
+    {id: 'HOUR', title: T.F.WORKLOG.EXPORT.O.FULL_HOURS},
   ];
 
   colOpts = [
-    {id: 'DATE', title: 'Date'},
-    {id: 'START', title: 'Started Working'},
-    {id: 'END', title: 'Ended Working'},
-    {id: 'TITLES', title: 'Parent Task Titles only'},
-    {id: 'TITLES_INCLUDING_SUB', title: 'Titles and Sub Task Titles'},
-    {id: 'TIME_MS', title: 'Time as milliseconds'},
-    {id: 'TIME_STR', title: 'Time as string (e.g. 5h 23m)'},
-    {id: 'TIME_CLOCK', title: 'Time as clock (e.g. 5:23)'},
-    {id: 'ESTIMATE_MS', title: 'Estimate as milliseconds'},
-    {id: 'ESTIMATE_STR', title: 'Estimate as string (e.g. 5h 23m)'},
-    {id: 'ESTIMATE_CLOCK', title: 'Estimate as clock (e.g. 5:23)'},
+    {id: 'DATE', title: T.F.WORKLOG.EXPORT.O.DATE},
+    {id: 'START', title: T.F.WORKLOG.EXPORT.O.STARTED_WORKING},
+    {id: 'END', title: T.F.WORKLOG.EXPORT.O.ENDED_WORKING},
+    {id: 'TITLES', title: T.F.WORKLOG.EXPORT.O.PARENT_TASK_TITLES_ONLY},
+    {id: 'TITLES_INCLUDING_SUB', title: T.F.WORKLOG.EXPORT.O.TITLES_AND_SUB_TASK_TITLES},
+    {id: 'TIME_MS', title: T.F.WORKLOG.EXPORT.O.TIME_AS_MILLISECONDS},
+    {id: 'TIME_STR', title: T.F.WORKLOG.EXPORT.O.TIME_AS_STRING},
+    {id: 'TIME_CLOCK', title: T.F.WORKLOG.EXPORT.O.TIME_AS_CLOCK},
+    {id: 'ESTIMATE_MS', title: T.F.WORKLOG.EXPORT.O.ESTIMATE_AS_MILLISECONDS},
+    {id: 'ESTIMATE_STR', title: T.F.WORKLOG.EXPORT.O.ESTIMATE_AS_STRING},
+    {id: 'ESTIMATE_CLOCK', title: T.F.WORKLOG.EXPORT.O.ESTIMATE_AS_CLOCK},
   ];
 
   groupByOptions = [
-    {id: WorklogGrouping.DATE, title: 'Date'},
-    {id: WorklogGrouping.TASK, title: 'Task/Subtask'},
-    {id: WorklogGrouping.PARENT, title: 'Parent Task'},
-    {id: WorklogGrouping.WORKLOG, title: 'Work Log'}
+    {id: WorklogGrouping.DATE, title: T.F.WORKLOG.EXPORT.O.DATE},
+    {id: WorklogGrouping.TASK, title: T.F.WORKLOG.EXPORT.O.TASK_SUBTASK},
+    {id: WorklogGrouping.PARENT, title: T.F.WORKLOG.EXPORT.O.PARENT_TASK},
+    {id: WorklogGrouping.WORKLOG, title: T.F.WORKLOG.EXPORT.O.WORKLOG}
   ];
 
   private _subs: Subscription = new Subscription();
@@ -147,7 +149,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     const clipboard = new Clipboard('#clipboard-btn');
     clipboard.on('success', (e: any) => {
       this._snackService.open({
-        msg: 'Copied to clipboard',
+        msg: T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD,
         type: 'SUCCESS'
       });
       e.clearSelection();

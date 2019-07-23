@@ -330,29 +330,34 @@ export function taskReducer(
     // Task Actions
     // ------------
     case TaskActionTypes.AddTask: {
+      const task = {
+        ...action.payload.task,
+        timeSpent: calcTotalTimeSpent(action.payload.task.timeSpentOnDay),
+      };
+
       return {
-        ...taskAdapter.addOne(action.payload.task, state),
+        ...taskAdapter.addOne(task, state),
         ...(
           action.payload.isAddToBacklog
             ? {
               backlogTaskIds: action.payload.isAddToBottom
                 ? [
-                  action.payload.task.id,
+                  task.id,
                   ...state.backlogTaskIds
                 ]
                 : [
                   ...state.backlogTaskIds,
-                  action.payload.task.id,
+                  task.id,
                 ]
             }
             : {
               todaysTaskIds: action.payload.isAddToBottom
                 ? [
                   ...state.todaysTaskIds,
-                  action.payload.task.id,
+                  task.id,
                 ]
                 : [
-                  action.payload.task.id,
+                  task.id,
                   ...state.todaysTaskIds
                 ]
             }

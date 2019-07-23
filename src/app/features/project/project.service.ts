@@ -48,6 +48,7 @@ import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
 import {WorklogExportSettings} from '../worklog/worklog.model';
+import {T} from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -298,13 +299,17 @@ export class ProjectService {
     if (isValidProjectExport(data)) {
       const state = await this._persistenceService.project.load();
       if (state.entities[project.id]) {
-        this._snackService.open({type: 'ERROR', msg: `Project "${project.title}" already exists`});
+        this._snackService.open({
+          type: 'ERROR',
+          msg: T.F.PROJECT.S.E_EXISTS,
+          translateParams: {title: project.title}
+        });
       } else {
         await this._persistenceService.restoreCompleteRelatedDataForProject(project.id, relatedModels);
         this.upsert(project);
       }
     } else {
-      this._snackService.open({type: 'ERROR', msg: 'Invalid data for project file'});
+      this._snackService.open({type: 'ERROR', msg: T.F.PROJECT.S.E_INVALID_FILE});
     }
   }
 

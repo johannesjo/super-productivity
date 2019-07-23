@@ -4,7 +4,7 @@
          mat-table>
     <ng-container matColumnDef="title">
       <th *matHeaderCellDef
-          mat-header-cell> Task
+          mat-header-cell>{{T.F.TASK.SUMMARY_TABLE.TASK|translate}}
       </th>
       <td *matCellDef="let task"
           mat-cell>
@@ -21,7 +21,7 @@
 
     <ng-container matColumnDef="timeSpentToday">
       <th *matHeaderCellDef
-          mat-header-cell> Spent Today
+          mat-header-cell>{{T.F.TASK.SUMMARY_TABLE.SPENT_TODAY|translate}}
       </th>
       <td *matCellDef="let task"
           mat-cell>
@@ -37,7 +37,7 @@
 
     <ng-container matColumnDef="timeSpentTotal">
       <th *matHeaderCellDef
-          mat-header-cell> Spent Total
+          mat-header-cell> {{T.F.TASK.SUMMARY_TABLE.SPENT_TOTAL|translate}}
       </th>
       <td *matCellDef="let task"
           mat-cell>
@@ -47,7 +47,7 @@
 
     <ng-container matColumnDef="timeEstimate">
       <th *matHeaderCellDef
-          mat-header-cell> Estimate
+          mat-header-cell> {{T.F.TASK.SUMMARY_TABLE.ESTIMATE|translate}}
       </th>
       <td *matCellDef="let task"
           mat-cell>
@@ -66,7 +66,7 @@
                 class="check-done"
                 mat-icon-button=""
                 tabindex="2"
-                title="un-/mark as done">
+                [title]="T.F.TASK.SUMMARY_TABLE.TOGGLE_DONE|translate">
           <mat-icon aria-label="Mark as undone"
                     class="undo">undo
           </mat-icon>

@@ -11,6 +11,7 @@ import {GithubCfg} from '../github';
 import {Observable} from 'rxjs';
 import {GITHUB_TYPE} from '../../issue.const';
 import {truncate} from '../../../../util/truncate';
+import {T} from '../../../../t.const';
 
 
 @Injectable({
@@ -119,7 +120,10 @@ export class GithubIssueService {
       this.upsert(issue);
       this._snackService.open({
         ico: 'cloud_download',
-        msg: `Github: Updated data for ${issue.number} "${issue.title}"`
+        translateParams: {
+          issueText: this._formatIssueTitle(issue.number, issue.title)
+        },
+        msg: T.F.GITHUB.S.MANUAL_UPDATE_ISSUE_SUCCESS,
       });
     });
   }
@@ -134,16 +138,30 @@ export class GithubIssueService {
         if (matchingNewIssue) {
           const isNewComment = matchingNewIssue.comments.length !== (oldIssue.comments && oldIssue.comments.length);
           const isIssueChanged = (matchingNewIssue.updated_at !== oldIssue.updated_at);
-          const wasUpdated = isNewComment || isIssueChanged;
+
+          // NOTE: comments are reversed
+          const lastComment = matchingNewIssue.comments && matchingNewIssue.comments[0];
+
+          const wasUpdated = (cfg.filterUsername && cfg.filterUsername.length > 1)
+            ? (isNewComment && (lastComment.user.login !== cfg.filterUsername)
+              || isIssueChanged && matchingNewIssue.user.login !== cfg.filterUsername)
+            : isNewComment || isIssueChanged;
+
           if (isNewComment && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              msg: `Github: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              translateParams: {
+                issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
+              },
+              msg: T.F.GITHUB.S.ISSUE_UPDATE,
             });
           } else if (isIssueChanged && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              msg: `Github: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              translateParams: {
+                issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
+              },
+              msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
             });
           }
 
@@ -156,8 +174,11 @@ export class GithubIssueService {
           this._snackService.open({
             type: 'CUSTOM',
             svgIco: 'github',
-            msg: `Github: Issue ${oldIssue.number} "${truncate(oldIssue.title)}" seems to be deleted or closed on git`,
-            actionStr: 'Show me',
+            translateParams: {
+              issueText: this._formatIssueTitle(oldIssue.number, oldIssue.title)
+            },
+            msg: T.F.GITHUB.S.ISSUE_DELETED_OR_CLOSED,
+            actionStr: T.F.GITHUB.S.SHOW_ISSUE_BTN,
             actionFn: () => {
               this._fineWithDeletionIssueIds.push(oldIssue.id);
               window.open(oldIssue.url, '_blank');
@@ -166,5 +187,9 @@ export class GithubIssueService {
         }
       });
     });
+  }
+
+  private _formatIssueTitle(id: number, title: string): string {
+    return `#${id} ${truncate(title)}`;
   }
 }

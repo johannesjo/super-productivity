@@ -220,7 +220,9 @@ h2 {
     flex-wrap: wrap;
 
     button {
-      width: 150px;
+      width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
       margin-left: $s;
       margin-bottom: $s;
 

@@ -5,6 +5,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SnackService} from '../../../../core/snack/snack.service';
 import {JiraIssue} from '../jira-issue/jira-issue.model';
 import {Task} from '../../../tasks/task.model';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -13,6 +14,7 @@ import {Task} from '../../../tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraAddWorklogComponent {
+  T = T;
   timeSpent: number;
   started: string;
   comment: string;
@@ -48,7 +50,8 @@ export class DialogJiraAddWorklogComponent {
       ).subscribe(res => {
         this._snackService.open({
           type: 'SUCCESS',
-          msg: `Jira: Added worklog for ${this.issue.key}`,
+          msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
+          translateParams: {issueKey: this.issue.key}
         });
         // TODO not ideal...
         this._jiraIssueService.updateIssueFromApi(this.issue.id, this.issue, false, false);

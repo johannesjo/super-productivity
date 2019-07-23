@@ -5,13 +5,13 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="color-contrast">library_books</mat-icon>
-      <span class="tab-label-text color-contrast">Backlog
+      <span class="tab-label-text color-contrast">{{T.BL.TITLE|translate}}
         ({{taskService.estimateRemainingBacklog$|async|msToString}})</span>
     </ng-template>
 
     <div class="tab-wrapper bg-400">
       <div class="task-list-wrapper">
-        <task-list [noTasksMsg]="'There are currently no tasks in your backlog'"
+        <task-list [noTasksMsg]="T.BL.NO_TASKS|translate"
                    [tasks]="taskService.backlogTasks$|async"
                    [isBacklog]="true"
                    class="isHidePlayBtn"
@@ -25,7 +25,7 @@
     <ng-template mat-tab-label>
       <mat-icon class="color-contrast">alarm</mat-icon>
       <span
-        class="tab-label-text color-contrast">Scheduled
+        class="tab-label-text color-contrast">{{T.BL.SCHEDULED|translate}}
         ({{(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length}})</span>
     </ng-template>
 
@@ -33,8 +33,7 @@
       <div class="component-wrapper page-wrapper">
         <p *ngIf="!(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
            class="no-scheduled-tasks">
-          There are currently no scheduled tasks. You can schedule a task by choosing "Schedule Task" in the task
-          context menu. To open it click on the 3 little dots on the right of a task.
+          {{T.BL.NO_SCHEDULED|translate}}
         </p>
 
         <div [@standardList]="(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
@@ -74,7 +73,7 @@
         <ng-container *ngIf="(scheduledTaskService.scheduledTasksForOtherProjects$|async) as scheduledTasksForOtherProjects">
           <section *ngIf="scheduledTasksForOtherProjects?.length">
             <h2 class="mat-h2"
-                style="text-align: center; margin-top: 16px;">From other Projects</h2>
+                style="text-align: center; margin-top: 16px;">{{T.BL.FROM_OTHER_PROJECTS|translate}}</h2>
             <div [@standardList]="scheduledTasksForOtherProjects?.length"
                  class="tasks">
               <mat-card

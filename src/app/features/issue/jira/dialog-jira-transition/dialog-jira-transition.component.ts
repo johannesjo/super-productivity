@@ -8,6 +8,7 @@ import {JiraApiService} from '../jira-api.service';
 import {JiraOriginalTransition} from '../jira-api-responses';
 import {SnackService} from '../../../../core/snack/snack.service';
 import {take} from 'rxjs/operators';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -16,6 +17,7 @@ import {take} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraTransitionComponent {
+  T = T;
   availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraApiService.getTransitionsForIssue$(this.data.issue.id);
 
   chosenTransition: JiraOriginalTransition;
@@ -44,7 +46,8 @@ export class DialogJiraTransitionComponent {
           this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false, false);
           this._snackService.open({
             type: 'SUCCESS',
-            msg: `Jira: Set issue ${this.data.issue.key} to <strong>${this.chosenTransition.name}</strong>`
+            msg: T.F.JIRA.S.TRANSITION,
+            translateParams: {issueKey: this.data.issue.key, name: this.chosenTransition.name}
           });
           this.close();
         });

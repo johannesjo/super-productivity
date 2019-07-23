@@ -1,56 +1,50 @@
 <div class="dialog-content"
      mat-dialog-content="">
-
-        <textarea [(ngModel)]="tasksTxt"
-                  [hidden]="!options.isShowAsText"
-                  class="simple-textarea mat-elevation-z2"
-                  id="task-textarea"
-                  name="tasksTxt"
-                  rows="10"
-                  tabindex="-1"></textarea>
+  <textarea [(ngModel)]="tasksTxt"
+            [hidden]="!options.isShowAsText"
+            class="simple-textarea mat-elevation-z2"
+            id="task-textarea"
+            name="tasksTxt"
+            rows="10"
+            tabindex="-1"></textarea>
 
   <div *ngIf="!options.isShowAsText"
        [innerHTML]="tasksHtml"
        class="table-wrapper material-table"></div>
 
-
   <section class="options">
     <div class="row">
       <div class="col">
         <div class="md-caption"
-             style="margin: 10px 0;">Options
+             style="margin: 10px 0;">{{T.F.SIMPLE_TASK_EXPORT.OPTIONS|translate}}
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isShowAsText"
-                            aria-label="Show as text"
                             name="isShowAsText">
-            Show as text
+            {{T.F.SIMPLE_TASK_EXPORT.SHOW_AS_TEXT|translate}}
           </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isListSubTasks"
-                            aria-label="List sub tasks"
                             name="isListSubTasks">
-            List sub tasks
+            {{T.F.SIMPLE_TASK_EXPORT.LIST_SUB_TASKS|translate}}
           </mat-slide-toggle>
         </div>
 
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isWorkedOnTodayOnly"
-                            aria-label="List worked on today tasks only"
                             name="isWorkedOnTodayOnly">
-            List worked on today tasks only
+            {{T.F.SIMPLE_TASK_EXPORT.LIST_WORKED_ON_TODAY_TASKS_ONLY|translate}}
           </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isListDoneOnly"
-                            aria-label="List done tasks only"
                             name="isListDoneOnly">
-            List done tasks only
+            {{T.F.SIMPLE_TASK_EXPORT.LIST_DONE_TASKS_ONLY|translate}}
           </mat-slide-toggle>
         </div>
 
@@ -61,58 +55,54 @@
             <mat-option><em>don't round</em></mat-option>
             <mat-option *ngFor="let roundOption of roundTimeOptions"
                         [value]="roundOption.id">
-              {{roundOption.title}}
+              {{roundOption.title|translate}}
             </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
       <div class="col">
         <div class="md-caption"
-             style="margin: 10px 0;">Fields to display
+             style="margin: 10px 0;">{{T.F.SIMPLE_TASK_EXPORT.FIELDS_TO_DISPLAY|translate}}
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isShowDate"
-                            aria-label="Date"
                             name="showDate">
-            Date
+            {{T.F.SIMPLE_TASK_EXPORT.DATE|translate}}
           </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isShowTimeSpent"
-                            aria-label="Time Spent"
                             name="showTimeSpent">
-            Time Spent
+            {{T.F.SIMPLE_TASK_EXPORT.TIME_SPENT|translate}}
           </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isShowTimeEstimate"
-                            aria-label="Time Estimate"
                             name="showTimeSpent">
-            Time Estimate
+            {{T.F.SIMPLE_TASK_EXPORT.TIME_ESTIMATE|translate}}
           </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isShowTitle"
-                            aria-label="Title"
                             name="showTitle">
-            Title
+            {{T.F.SIMPLE_TASK_EXPORT.TITLE|translate}}
           </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isTimesAsMilliseconds"
                             [disabled]="!options.isShowTimeSpent"
-                            aria-label="Show time as milliseconds"
                             name="isTimeSpentAsMilliseconds">
-            Time as milliseconds
+            {{T.F.SIMPLE_TASK_EXPORT.TIME_AS_MILLISECONDS|translate}}
           </mat-slide-toggle>
         </div>
         <mat-form-field class="md-block">
-          <label>Separate fields by</label>
+          <label>{{T.F.SIMPLE_TASK_EXPORT.SEPARATE_FIELDS_BY|translate}}
+          </label>
           <input (change)="onOptionsChange()"
                  [(ngModel)]="options.separateFieldsBy"
                  matInput=""
@@ -131,7 +121,7 @@
           color="primary"
           mat-button=""
           type="button">
-    Close
+    {{T.F.SIMPLE_TASK_EXPORT.CLOSE|translate}}
   </button>
   <button *ngIf="options.isShowAsText"
           color="primary"
@@ -140,13 +130,13 @@
           id="clipboard-btn"
           mat-stroked-button="">
     <mat-icon>content_paste</mat-icon>
-    Copy to clipboard
+    {{T.F.SIMPLE_TASK_EXPORT.COPY_TO_CLIPBOARD|translate}}
   </button>
   <a [simpleDownloadData]="tasksTxt"
      [simpleDownload]="fileName"
      color="primary"
      mat-stroked-button="">
     <mat-icon>file_download</mat-icon>
-    Save to file
+    {{T.F.SIMPLE_TASK_EXPORT.SAVE_TO_FILE|translate}}
   </a>
 </div>

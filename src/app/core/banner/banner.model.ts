@@ -21,6 +21,7 @@ export interface Banner {
   ico?: string;
   svgIco?: string;
   type?: BannerType;
+  translateParams?: { [key: string]: string | number };
   action?: BannerAction;
   action2?: BannerAction;
   action3?: BannerAction;

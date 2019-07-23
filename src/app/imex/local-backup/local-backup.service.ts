@@ -5,7 +5,7 @@ import {LocalBackupConfig} from '../../features/config/global-config.model';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {SyncService} from '../sync/sync.service';
 import {ElectronService} from 'ngx-electron';
-import {IPC_BACKUP} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 
 const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 
@@ -33,6 +33,6 @@ export class LocalBackupService {
 
   private async _backup() {
     const data = await this._syncService.getCompleteSyncData();
-    this._electronService.ipcRenderer.send(IPC_BACKUP, data);
+    this._electronService.ipcRenderer.send(IPC.BACKUP, data);
   }
 }

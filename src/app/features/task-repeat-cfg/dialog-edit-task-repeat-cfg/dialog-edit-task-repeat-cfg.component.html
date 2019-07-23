@@ -1,17 +1,15 @@
 <form (submit)="save()"
       class="dialog-help-wrapper">
-  <h1 mat-dialog-title>{{isEdit ? 'Edit Repeat Task Config' : 'Add Repeat Task Config'}}</h1>
+  <h1 mat-dialog-title>{{isEdit
+    ? (T.F.TASK_REPEAT.D_EDIT.EDIT|translate)
+    : (T.F.TASK_REPEAT.D_EDIT.ADD|translate)}}</h1>
 
   <mat-dialog-content>
     <!--    <h3 class="mat-h3">{{task.title}}</h3>-->
     <help-section>
-      <p>Repeating tasks are meant for daily chores, e.g.: "Organization", "Daily Meeting", "Code Review", "Checking
-        emails" or similar tasks which are likely to occur again and again.</p>
-      <p>Once configured a repeating task will be recreated on every day selected below as soon as you open your project
-        and will be automatically marked as completed at the end of the day. They will be handled as different
-        instances. So you can freely add sub tasks etc.</p>
-      <p>Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating
-        task.</p>
+      <p>{{T.F.TASK_REPEAT.D_EDIT.HELP1|translate}}</p>
+      <p>{{T.F.TASK_REPEAT.D_EDIT.HELP2|translate}}</p>
+      <p>{{T.F.TASK_REPEAT.D_EDIT.HELP3|translate}}</p>
     </help-section>
 
     <div class="form-wrapper">
@@ -29,7 +27,7 @@
             color="primary"
             mat-button
             type="button">
-      Cancel
+      {{T.G.CANCEL|translate}}
     </button>
 
     <button (click)="remove()"
@@ -38,7 +36,7 @@
             mat-stroked-button
             type="button">
       <mat-icon>delete_forever</mat-icon>
-      Remove
+      {{T.G.REMOVE|translate}}
     </button>
 
     <button [disabled]="!form.valid"
@@ -46,7 +44,7 @@
             mat-stroked-button
             type="submit">
       <mat-icon>save</mat-icon>
-      Save
+      {{T.G.SAVE|translate}}
     </button>
   </mat-dialog-actions>
 </form>

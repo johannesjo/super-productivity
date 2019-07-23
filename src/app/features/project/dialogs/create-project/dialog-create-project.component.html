@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>
-  <span *ngIf="projectData.id">Edit Project</span>
-  <span *ngIf="!projectData.id">Create Project</span>
+  <span *ngIf="projectData.id">{{T.F.PROJECT.D_CREATE.EDIT|translate}}</span>
+  <span *ngIf="!projectData.id">{{T.F.PROJECT.D_CREATE.CREATE|translate}}</span>
 </h1>
 
 
@@ -17,7 +17,7 @@
 
 
     <div class="issue-provider-cfg">
-      <h3>Issue Provider Configs (optional)</h3>
+      <h3>{{T.F.PROJECT.D_CREATE.ISSUE_PROVIDER_CFGS|translate}}</h3>
       <div class="item">
         <button (click)="openJiraCfg()"
                 color="primary"
@@ -26,7 +26,7 @@
           <mat-icon *ngIf="!jiraCfg?.isEnabled"
                     svgIcon="jira"></mat-icon>
           <mat-icon *ngIf="jiraCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px;">Setup Jira Integration</span>
+          <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_JIRA|translate}}</span>
         </button>
       </div>
       <div class="item">
@@ -37,7 +37,7 @@
           <mat-icon *ngIf="!githubCfg?.repo"
                     svgIcon="github"></mat-icon>
           <mat-icon *ngIf="githubCfg?.repo">checkmark</mat-icon>
-          <span style="padding-left: 8px;">Setup Github Integration</span>
+          <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_GIT|translate}}</span>
         </button>
       </div>
       <!--<div class="item">-->
@@ -58,13 +58,15 @@
               class="btn btn-primary submit-button"
               color="primary"
               mat-button
-              type="button">Cancel
+              type="button">
+        {{T.G.CANCEL|translate}}
       </button>
       <button [disabled]="!form.valid"
               class="btn btn-primary submit-button"
               color="primary"
               mat-stroked-button
-              type="submit">Save
+              type="submit">
+        {{T.G.SAVE|translate}}
       </button>
     </div>
   </mat-dialog-actions>

@@ -2,7 +2,7 @@
   <button class="app-icon hide-xs"
           mat-icon-button
           routerLink="work-view"
-          title="Go to task list">
+          [title]="T.MH.GO_TO_TASK_LIST|translate">
     <mat-icon svgIcon="sp">sp</mat-icon>
   </button>
 
@@ -30,37 +30,37 @@
     <button mat-menu-item
             routerLink="work-view">
       <mat-icon>playlist_play</mat-icon>
-      Task List ({{(taskService.undoneTasks$|async)?.length || 0}})
+      {{T.MH.TASK_LIST|translate}} ({{(taskService.undoneTasks$|async)?.length || 0}})
     </button>
     <button mat-menu-item
             routerLink="worklog-and-calendar">
       <mat-icon>today</mat-icon>
-      Worklog
+      {{T.MH.WORKLOG|translate}}
     </button>
 
     <button mat-menu-item
             routerLink="metrics">
       <mat-icon>insert_chart</mat-icon>
-      Metrics
+      {{T.MH.METRICS|translate}}
     </button>
 
     <button mat-menu-item
             routerLink="projects">
       <mat-icon>list</mat-icon>
-      Projects
+      {{T.MH.PROJECTS|translate}}
     </button>
 
     <button mat-menu-item
             routerLink="config"
             routerLinkActive>
       <mat-icon>settings</mat-icon>
-      Settings
+      {{T.MH.SETTINGS|translate}}
     </button>
     <button mat-menu-item
             routerLink="procrastination"
             routerLinkActive>
       <mat-icon>verified_user</mat-icon>
-      Procrastinate
+      {{T.MH.PROCRASTINATE|translate}}
     </button>
 
   </mat-menu>
@@ -71,7 +71,7 @@
           (menuClosed)="isProjectMenuDisabled = false"
           class="project-btn"
           mat-button
-          title="Project Menu">
+          [title]="T.MH.PROJECT_MENU|translate">
     <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>
     <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
   </button>
@@ -86,12 +86,12 @@
     <button mat-menu-item
             routerLink="projects">
       <mat-icon>list</mat-icon>
-      Manage Projects
+      {{T.MH.MANAGE_PROJECTS|translate}}
     </button>
     <button (click)="addProject()"
             mat-menu-item>
       <mat-icon>add</mat-icon>
-      Create Project
+      {{T.MH.CREATE_PROJECT|translate}}
     </button>
   </mat-menu>
 
@@ -100,24 +100,24 @@
     <button mat-button
             routerLink="work-view"
             routerLinkActive="isActive">
-      <span class="text">Tasks ({{(taskService.undoneTasks$|async)?.length || 0}})</span>
+      <span class="text">{{T.MH.TASKS|translate}} ({{(taskService.undoneTasks$|async)?.length || 0}})</span>
     </button>
     <button mat-button
             routerLink="worklog-and-calendar"
             routerLinkActive="isActive">
-      <span class="text">Worklog</span>
+      <span class="text">{{T.MH.WORKLOG|translate}}</span>
     </button>
 
     <button mat-button
             routerLink="metrics"
             routerLinkActive="isActive">
-      <span class="text">Metrics</span>
+      <span class="text">{{T.MH.METRICS|translate}}</span>
     </button>
 
     <button mat-button
             routerLink="config"
             routerLinkActive="isActive">
-      <span class="text">Settings</span>
+      <span class="text">{{T.MH.SETTINGS|translate}}</span>
     </button>
   </nav>
 
@@ -126,7 +126,7 @@
             class="bg-200"
             color="lighter"
             mat-mini-fab
-            title="Add new Task">
+            [title]="T.MH.ADD_NEW_TASK|translate">
       <mat-icon>add</mat-icon>
     </button>
 
@@ -134,14 +134,14 @@
             class="bg-200 show-xs-only"
             color="lighter"
             mat-mini-fab
-            title="Show/Hide Bookmarks">
+            [title]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
       <mat-icon>bookmark</mat-icon>
     </button>
 
     <button (click)="toggleShowNotes()"
             color="lighter"
             mat-mini-fab
-            title="Show/Hide Project Notes">
+            [title]="T.MH.TOGGLE_SHOW_NOTES|translate">
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
                 class="note-ico">note
       </mat-icon>
@@ -152,7 +152,7 @@
               [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
               class="play-btn"
               mat-fab
-              title="Start/Stop tracking time">
+              [title]="T.MH.TOGGLE_TRACK_TIME|translate">
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
         <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
         <svg class="circle-svg"
@@ -195,11 +195,10 @@
 
   <button (click)="bookmarkService.toggleBookmarks()"
           [class.is-open]="bookmarkService.isShowBookmarks$|async"
-          aria-label="Show Help for section"
           class="show-bookmarks-btn hide-xs"
           color="primary"
           mat-mini-fab=""
-          title="Show/Hide Bookmarks">
+          [title]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
     <mat-icon>bookmark</mat-icon>
   </button>
 </div>

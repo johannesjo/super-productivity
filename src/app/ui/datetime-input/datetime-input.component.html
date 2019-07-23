@@ -12,7 +12,7 @@
            [ngModel]="strValue"
            [owlDateTime]="dt1"
            class="fake">
-    <mat-error>The entered value is not a datetime!</mat-error>
+    <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
     <mat-icon [owlDateTimeTrigger]="dt1"
               matSuffix=""
               style="cursor: pointer;">alarm
@@ -21,10 +21,10 @@
   <owl-date-time #dt1></owl-date-time>
 
   <mat-chip-list>
-    <mat-chip (click)="setCommonVal('15M')">in 15m</mat-chip>
-    <mat-chip (click)="setCommonVal('1H')">in 1h</mat-chip>
-    <mat-chip (click)="setCommonVal('2H')">in 2h</mat-chip>
-    <mat-chip (click)="setCommonVal('5H')">in 5h</mat-chip>
-    <mat-chip (click)="setCommonVal('TOMORROW_11')">tomorrow 11:00</mat-chip>
+    <mat-chip (click)="setCommonVal('15M')">{{T.DATETIME_INPUT.IN|translate:{time:'15m'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('1H')">{{T.DATETIME_INPUT.IN|translate:{time:'1h'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('2H')">{{T.DATETIME_INPUT.IN|translate:{time:'2h'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('5H')">{{T.DATETIME_INPUT.IN|translate:{time:'5h'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('TOMORROW_11')">{{T.DATETIME_INPUT.TOMORROW|translate:{time:'11:00'} }}</mat-chip>
   </mat-chip-list>
 </div>

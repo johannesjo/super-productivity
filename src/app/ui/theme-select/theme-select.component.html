@@ -1,8 +1,8 @@
 <mat-form-field>
-  <mat-select placeholder="Select theme">
+  <mat-select [placeholder]="T.THEMES.SELECT_THEME|translate">
     <mat-option *ngFor="let theme of themes"
                 [value]="theme">
-      {{theme}}
+      {{theme|translate}}
     </mat-option>
   </mat-select>
 </mat-form-field>

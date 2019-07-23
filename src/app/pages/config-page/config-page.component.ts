@@ -9,7 +9,7 @@ import {
   GlobalConfigState
 } from '../../features/config/global-config.model';
 import {Subscription} from 'rxjs';
-import {Project, ProjectAdvancedCfg, ProjectCfgFormKey} from '../../features/project/project.model';
+import {Project, ProjectAdvancedCfg, ProjectBasicCfg, ProjectCfgFormKey} from '../../features/project/project.model';
 import {
   BASIC_PROJECT_CONFIG_FORM_CONFIG,
   PROJECT_CONFIG_FORM_CONFIG
@@ -20,6 +20,7 @@ import {DEFAULT_JIRA_CFG} from '../../features/issue/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../features/issue/github/github.const';
 import {IS_ELECTRON} from '../../app.constants';
 import {environment} from '../../../environments/environment';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'config-page',
@@ -28,7 +29,8 @@ import {environment} from '../../../environments/environment';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
-  basicProjectSettingsFormCfg: ConfigFormSection;
+  T = T;
+  basicProjectSettingsFormCfg: ConfigFormSection<ProjectBasicCfg>;
   projectConfigFormCfg: ConfigFormConfig;
   issueIntegrationFormCfg: ConfigFormConfig;
   globalConfigFormCfg: ConfigFormConfig;
@@ -79,7 +81,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  trackBySectionKey(i: number, section: ConfigFormSection) {
+  trackBySectionKey(i: number, section: ConfigFormSection<{ [key: string]: any }>) {
     return section.key;
   }
 

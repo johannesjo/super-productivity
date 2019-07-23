@@ -9,8 +9,6 @@ import {ImprovementService} from '../improvement/improvement.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImprovementBannerComponent {
-
-
   constructor(
     public improvementService: ImprovementService,
   ) {

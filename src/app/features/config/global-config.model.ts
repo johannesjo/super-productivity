@@ -1,8 +1,11 @@
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {ProjectCfgFormKey} from '../project/project.model';
+import {LanguageCode} from '../../app.constants';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
+  globalAddNote: string,
+  globalAddTask: string,
   toggleBacklog: string,
   goToWorkView: string,
   goToFocusMode: string,
@@ -55,6 +58,8 @@ export type IdleConfig = Readonly<{
 
 export type TakeABreakConfig = Readonly<{
   isTakeABreakEnabled: boolean;
+  isLockScreen: boolean;
+  isFocusWindow: boolean;
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
 }>;
@@ -106,8 +111,13 @@ export type LocalBackupConfig = Readonly<{
   isEnabled: boolean,
 }>;
 
+export type LanguageConfig = Readonly<{
+  lng: LanguageCode,
+}>;
+
 
 export type GlobalConfigState = Readonly<{
+  lang: LanguageConfig;
   misc: MiscConfig;
   idle: IdleConfig;
   takeABreak: TakeABreakConfig;
@@ -129,17 +139,23 @@ export type GlobalSectionConfig
   | GoogleSession
   | UiHelperSettings
   ;
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldConfig, 'key'> {
+  key?: keyof FormModel;
+}
 
 // Intermediate model
-export interface ConfigFormSection {
+export interface ConfigFormSection<FormModel> {
   title: string;
   key: GlobalConfigSectionKey | ProjectCfgFormKey;
   help?: string;
+  helpArr?: { h?: string; p: string; p2?: string; p3?: string; p4?: string; }[];
   customSection?: string;
-  items?: FormlyFieldConfig[];
+  items?: LimitedFormlyFieldConfig<FormModel>[];
   isElectronOnly?: boolean;
 }
 
-export type ConfigFormConfig = Readonly<ConfigFormSection[]>;
+export type ConfigFormConfig = Readonly<ConfigFormSection<{ [key: string]: any }>[]>;
 
 

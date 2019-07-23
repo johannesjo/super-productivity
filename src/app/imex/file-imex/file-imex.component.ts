@@ -5,6 +5,7 @@ import {AppDataComplete} from '../sync/sync.model';
 import {OldDataExport} from '../migrate/migrate.model';
 import {MigrateService} from '../migrate/migrate.service';
 import {download} from '../../util/download';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'file-imex',
@@ -14,6 +15,7 @@ import {download} from '../../util/download';
 })
 export class FileImexComponent {
   @ViewChild('fileInput', {static: true}) fileInputRef: ElementRef;
+  T = T;
 
   constructor(
     private _syncService: SyncService,
@@ -34,7 +36,7 @@ export class FileImexComponent {
       try {
         data = oldData = JSON.parse(textData.toString());
       } catch (e) {
-        this._snackService.open({type: 'ERROR', msg: 'Import failed: Invalid JSON'});
+        this._snackService.open({type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA});
       }
 
       if (oldData.config && Array.isArray(oldData.tasks)) {

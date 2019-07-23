@@ -12,6 +12,8 @@ import {JiraApiService} from '../jira-api.service';
 import {DEFAULT_JIRA_CFG} from '../jira.const';
 import {JiraIssue} from '../jira-issue/jira-issue.model';
 import {SnackService} from '../../../../core/snack/snack.service';
+import {T} from '../../../../t.const';
+import {HelperClasses} from '../../../../app.constants';
 
 @Component({
   selector: 'jira-cfg',
@@ -21,11 +23,14 @@ import {SnackService} from '../../../../core/snack/snack.service';
   animations: [expandAnimation]
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
-  @Input() section: ConfigFormSection;
+  @Input() section: ConfigFormSection<JiraCfg>;
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() cfg: JiraCfg = DEFAULT_JIRA_CFG;
 
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+
+  T = T;
+  HelperClasses = HelperClasses;
 
   issueSuggestionsCtrl: FormControl = new FormControl();
   customFieldSuggestionsCtrl: FormControl = new FormControl();
@@ -136,7 +141,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
             this.cfg.availableTransitions = val;
             this._snackService.open({
               type: 'SUCCESS',
-              msg: 'Jira: Transitions loaded. Use the selects below to assign them',
+              msg: T.F.JIRA.S.TRANSITIONS_LOADED,
             });
           })
       );

@@ -4,6 +4,7 @@ import {AttachmentService} from '../attachment.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogEditAttachmentComponent} from '../dialog-edit-attachment/dialog-edit-attachment.component';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'attachment-list',
@@ -16,6 +17,7 @@ export class AttachmentListComponent implements OnInit {
   @Input() attachments: Attachment[];
   @Input() isDisableControls = false;
 
+  T = T;
   isError: boolean[] = [];
 
   constructor(

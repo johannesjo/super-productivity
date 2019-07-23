@@ -28,7 +28,7 @@ import {Task, TaskWithSubTasks} from '../task.model';
 import {TaskState} from './task.reducer';
 import {EMPTY, Observable, of} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
-import {IPC_CURRENT_TASK_UPDATED, IPC_SET_PROGRESS_BAR} from '../../../../../electron/ipc-events.const';
+import {IPC} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {ReminderService} from '../../reminder/reminder.service';
 import {GlobalConfigState, MiscConfig} from '../../config/global-config.model';
@@ -38,6 +38,7 @@ import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
+import {T} from '../../../t.const';
 
 // TODO send message to electron when current task changes here
 
@@ -127,7 +128,10 @@ export class TaskEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            msg: `Scheduled task "${truncate(title)}"`,
+            translateParams: {
+              title: truncate(title)
+            },
+            msg: T.F.TASK.S.REMINDER_ADDED,
             ico: 'schedule',
           }),
           ...(isMoveToBacklog ? [new MoveToBacklog({id})] : []),
@@ -149,7 +153,10 @@ export class TaskEffects {
       }),
       map((a: UpdateTaskReminder) => new SnackOpen({
         type: 'SUCCESS',
-        msg: `Updated reminder for task "${truncate(a.payload.title)}"`,
+        translateParams: {
+          title: truncate(a.payload.title)
+        },
+        msg: T.F.TASK.S.REMINDER_UPDATED,
         ico: 'schedule',
       })),
     );
@@ -172,7 +179,7 @@ export class TaskEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            msg: `Deleted reminder for task`,
+            msg: T.F.TASK.S.REMINDER_DELETED,
             ico: 'schedule',
           }),
         ];
@@ -187,9 +194,12 @@ export class TaskEffects {
       map((action_: DeleteTask) => {
         const action = action_ as DeleteTask;
         return new SnackOpen({
-          msg: `Deleted task "${truncate(action.payload.task.title)}"`,
+          translateParams: {
+            title: truncate(action.payload.task.title)
+          },
+          msg: T.F.TASK.S.DELETED,
           config: {duration: 5000},
-          actionStr: 'Undo',
+          actionStr: T.G.UNDO,
           actionId: TaskActionTypes.UndoDeleteTask
         });
       })
@@ -235,7 +245,7 @@ export class TaskEffects {
       withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
       tap(([action, current]) => {
         if (IS_ELECTRON) {
-          this._electronService.ipcRenderer.send(IPC_CURRENT_TASK_UPDATED, {current});
+          this._electronService.ipcRenderer.send(IPC.CURRENT_TASK_UPDATED, {current});
         }
       })
     );
@@ -385,7 +395,7 @@ export class TaskEffects {
       filter(() => IS_ELECTRON),
       tap((act: SetCurrentTask) => {
         if (!act.payload) {
-          this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress: 0});
+          this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress: 0});
         }
       }),
     );
@@ -402,7 +412,7 @@ export class TaskEffects {
       switchMap(([act]) => this._taskService.getById$(act.payload.id)),
       tap((task: Task) => {
         const progress = task.timeSpent / task.timeEstimate;
-        this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress});
+        this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress});
       }),
     );
 
@@ -495,17 +505,21 @@ export class TaskEffects {
     if (globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
       && ct && ct.timeEstimate > 0
       && ct.timeSpent > ct.timeEstimate) {
+      const title = truncate(ct.title);
+
       this._notifyService.notify({
-        title: 'Time estimate exceeded!',
-        body: `You exceeded your estimated time for "${truncate(ct.title)}".`,
+        title: T.F.TASK.N.ESTIMATE_EXCEEDED,
+        body: T.F.TASK.N.ESTIMATE_EXCEEDED_BODY,
+        translateParams: {title},
       });
 
       this._bannerService.open({
-        msg: `Time estimate exceeded for "${truncate(ct.title)}"`,
+        msg: T.F.TASK.B.ESTIMATE_EXCEEDED,
         id: BannerId.TimeEstimateExceeded,
         ico: 'timer',
+        translateParams: {title},
         action: {
-          label: 'Add 1/2 hour',
+          label: T.F.TASK.B.ADD_HALF_HOUR,
           fn: () => this._taskService.update(ct.id, {
             timeEstimate: (ct.timeSpent + 30 * 60000)
           })

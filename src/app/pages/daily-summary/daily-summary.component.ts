@@ -7,7 +7,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
-import {IPC_SHUTDOWN_NOW} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
 import {NoteService} from '../../features/note/note.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
@@ -17,8 +17,9 @@ import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operato
 import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {RoundTimeOption} from '../../features/project/project.model';
+import {T} from '../../t.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -29,6 +30,8 @@ const SUCCESS_ANIMATION_DURATION = 500;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
+  T = T;
+
   cfg = {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
@@ -183,16 +186,16 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       this._matDialog.open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
-          okTxt: 'Aye aye! Shutdown!',
-          cancelTxt: 'No, just clear the tasks',
-          message: `You work is done. Time to go home!`,
+          okTxt: T.PDS.D_CONFIRM_APP_CLOSE.OK,
+          cancelTxt: T.PDS.D_CONFIRM_APP_CLOSE.CANCEL,
+          message: T.PDS.D_CONFIRM_APP_CLOSE.MSG,
         }
       }).afterClosed()
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
             this._finishDayForGood(() => {
-              // this._electronService.ipcRenderer.send(IPC_SHUTDOWN);
-              this._electronService.ipcRenderer.send(IPC_SHUTDOWN_NOW);
+              // this._electronService.ipcRenderer.send(IPC.SHUTDOWN);
+              this._electronService.ipcRenderer.send(IPC.SHUTDOWN_NOW);
             });
           } else if (isConfirm === false) {
             this._finishDayForGood(() => {

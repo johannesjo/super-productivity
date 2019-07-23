@@ -2,7 +2,7 @@
    color="primary"
    mat-stroked-button>
   <mat-icon>file_upload</mat-icon>
-  Export Data
+  {{T.FILE_IMEX.EXPORT_DATA|translate}}
 </a>
 
 <button (click)="fileInput.click()"
@@ -10,7 +10,7 @@
         mat-stroked-button
         type="button">
   <mat-icon>file_download</mat-icon>
-  Import from file
+  {{T.FILE_IMEX.IMPORT_FROM_FILE|translate}}
 </button>
 <input #fileInput
        (change)="handleFileInput($event)"

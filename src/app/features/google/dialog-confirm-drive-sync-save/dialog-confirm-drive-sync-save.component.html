@@ -1,22 +1,22 @@
-<h1 mat-dialog-title>Overwrite unsaved data on Google Drive?</h1>
+<h1 mat-dialog-title>{{T.F.GOOGLE.D_CONFIRM_SAVE.TITLE|translate}}</h1>
 
 <mat-dialog-content>
-  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them
-    anyway?</p>
+  <div [innerHTML]="T.F.GOOGLE.D_CONFIRM_SAVE.TEXT|translate"></div>
+
   <table>
     <tr>
-      <td>remote</td>
-      <td>last modification:</td>
+      <td>{{T.F.GOOGLE.D_CONFIRM_SAVE.REMOTE|translate}}</td>
+      <td>{{T.F.GOOGLE.D_CONFIRM_SAVE.LAST_MOD|translate}}</td>
       <td>{{data.remoteModified}}</td>
     </tr>
     <tr>
-      <td>local</td>
-      <td>last modification:</td>
+      <td>{{T.F.GOOGLE.D_CONFIRM_SAVE.LOCAL|translate}}</td>
+      <td>{{T.F.GOOGLE.D_CONFIRM_SAVE.LAST_MOD|translate}}</td>
       <td>{{data.lastActiveLocal}}</td>
     </tr>
     <tr>
-      <td>local <=> remote</td>
-      <td>last sync</td>
+      <td>{{T.F.GOOGLE.D_CONFIRM_SAVE.LOCAL_REMOTE|translate}}</td>
+      <td>{{T.F.GOOGLE.D_CONFIRM_SAVE.LAST_SYNC|translate}}</td>
       <td>{{data.lastSync}}</td>
     </tr>
   </table>
@@ -26,18 +26,18 @@
   <button (click)="close()"
           color="primary"
           mat-button="">
-    Cancel
+    {{T.G.CANCEL|translate}}
   </button>
   <button (click)="data.saveToRemote();close()"
           color="primary"
           mat-stroked-button="">
     <mat-icon>file_upload</mat-icon>
-    Overwrite remote data
+    {{T.F.GOOGLE.D_CONFIRM_LOAD.OVERWRITE_REMOTE|translate}}
   </button>
   <button (click)="data.loadFromRemote();close()"
           color="primary"
           mat-stroked-button="">
     <mat-icon>file_download</mat-icon>
-    Overwrite local data
+    {{T.F.GOOGLE.D_CONFIRM_LOAD.OVERWRITE_LOCAL|translate}}
   </button>
 </mat-dialog-actions>

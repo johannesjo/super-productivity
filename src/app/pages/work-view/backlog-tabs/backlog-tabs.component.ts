@@ -6,6 +6,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {TaskWithReminderData} from '../../../features/tasks/task.model';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {ScheduledTaskService} from '../../../features/tasks/scheduled-task.service';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'backlog-tabs',
@@ -16,6 +17,7 @@ import {ScheduledTaskService} from '../../../features/tasks/scheduled-task.servi
 })
 export class BacklogTabsComponent {
   selectedIndex = 0;
+  T = T;
 
   @Output() closeBacklog = new EventEmitter<any>();
 

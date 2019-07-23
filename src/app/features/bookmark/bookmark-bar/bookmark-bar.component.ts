@@ -7,6 +7,7 @@ import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {DragulaService} from 'ng2-dragula';
 import {Subscription} from 'rxjs';
 import {slideAnimation} from '../../../ui/animations/slide.ani';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'bookmark-bar',
@@ -23,6 +24,7 @@ export class BookmarkBarComponent implements OnDestroy {
   isEditMode = false;
   dragEnterTarget: HTMLElement;
   LIST_ID = 'BOOKMARKS';
+  T = T;
 
   bookmarkBarHeight = 50;
 

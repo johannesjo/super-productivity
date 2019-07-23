@@ -3,6 +3,7 @@ import {Note} from '../note.model';
 import {NoteService} from '../note.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogAddNoteReminderComponent} from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'note',
@@ -15,6 +16,8 @@ export class NoteComponent {
   @Input() isFocus: boolean;
 
   @ViewChild('markdownEl', {static: false}) markdownEl: HTMLElement;
+
+  T = T;
 
   constructor(
     private readonly _matDialog: MatDialog,

@@ -33,12 +33,15 @@ import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-co
 import {DialogJiraAddWorklogComponent} from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
 import {isEmail} from '../../../../../util/is-email';
+import {T} from '../../../../../t.const';
+import {truncate} from '../../../../../util/truncate';
 
 const isEnabled_ = (jiraCfg) => jiraCfg && jiraCfg.isEnabled;
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => isEnabled_(jiraCfg);
 
 @Injectable()
 export class JiraIssueEffects {
+
   @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
     .pipe(
       ofType(
@@ -173,7 +176,7 @@ export class JiraIssueEffects {
         if (isEmail(currentUserName)) {
           this._snackService.open({
             svgIco: 'jira',
-            msg: 'Jira: Unable to reassign ticket to yourself, because you didn\'t specify a username. Please visit the settings.',
+            msg: T.F.JIRA.S.UNABLE_TO_REASSIGN,
           });
           return EMPTY;
         } else if (!issue) {
@@ -182,9 +185,12 @@ export class JiraIssueEffects {
           return this._matDialog.open(DialogConfirmComponent, {
             restoreFocus: true,
             data: {
-              okTxt: 'Do it!',
-              // tslint:disable-next-line
-              message: `<strong>${issue.summary}</strong> is currently assigned to <strong>${assignee ? assignee.displayName : 'nobody'}</strong>. Do you want to assign it to yourself?`,
+              okTxt: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.OK,
+              translateParams: {
+                summary: issue.summary,
+                assignee: assignee ? assignee.displayName : 'nobody'
+              },
+              message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT,
             }
           }).afterClosed()
             .pipe(
@@ -257,9 +263,8 @@ export class JiraIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
         this._snackService.open({
-          msg: 'Jira: Tasks with missing issue data found. Reloading',
+          msg: T.F.JIRA.S.MISSING_ISSUE_DATA,
           svgIco: 'jira',
-          isSubtle: true,
         });
         tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
       })
@@ -300,9 +305,9 @@ export class JiraIssueEffects {
       const issueIds = issueIds_ as string[];
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
-          msg: 'Jira: Polling Changes for issues',
+          msg: T.F.JIRA.S.POLLING,
           svgIco: 'jira',
-          isSubtle: true,
+          isSpinner: true,
         });
         issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
       }
@@ -340,7 +345,10 @@ export class JiraIssueEffects {
         return this._openTransitionDialog(issue, localState);
       default:
         if (!chosenTransition || !chosenTransition.id) {
-          this._snackService.open({type: 'ERROR', msg: 'Jira: No valid transition configured'});
+          this._snackService.open({
+            msg: T.F.JIRA.S.NO_VALID_TRANSITION,
+            type: 'ERROR',
+          });
           // NOTE: we would kill the whole effect chain if we do this
           // return throwError({handledError: 'Jira: No valid transition configured'});
           return timer(2000).pipe(concatMap(() => this._openTransitionDialog(issue, localState)));
@@ -352,8 +360,11 @@ export class JiraIssueEffects {
               tap(() => {
                 this._snackService.open({
                   type: 'SUCCESS',
-                  msg: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`,
-                  isSubtle: true,
+                  msg: T.F.JIRA.S.TRANSITION_SUCCESS,
+                  translateParams: {
+                    issueKey: `${issue.key}`,
+                    chosenTransition: `${chosenTransition.name}`,
+                  },
                 });
                 this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
               })
@@ -405,15 +416,19 @@ export class JiraIssueEffects {
 
       if (issuesToAdd.length === 1) {
         this._snackService.open({
-          msg: `Jira: Imported issue "${issuesToAdd[0].key} ${issuesToAdd[0].summary}" from git to backlog`,
+          translateParams: {
+            issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
+          },
+          msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
           ico: 'cloud_download',
-          isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
-          msg: `Jira: Imported ${issuesToAdd.length} new issues from Jira to backlog`,
+          translateParams: {
+            issuesLength: issuesToAdd.length
+          },
+          msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
           ico: 'cloud_download',
-          isSubtle: true,
         });
       }
     });

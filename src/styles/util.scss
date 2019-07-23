@@ -54,3 +54,19 @@
     display: none !important;
   }
 }
+
+.isWebVersion .isHideForWebVersion {
+  display: none !important;
+}
+
+.isElectron .isHideForElectron {
+  display: none !important;
+}
+
+.isNoAdvancedFeatures .isHideForNoAdvancedFeatures {
+  display: none !important;
+}
+
+.isAdvancedFeatures .isHideForAdvancedFeatures {
+    display: none !important;
+}

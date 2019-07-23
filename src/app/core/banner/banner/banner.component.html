@@ -8,7 +8,7 @@
     <mat-icon *ngIf="banner.svgIco"
               [svgIcon]="banner.svgIco"></mat-icon>
 
-    <div [innerHTML]="banner.msg"
+    <div [innerHTML]="banner.msg|translate:banner.translateParams"
          class="message"></div>
   </div>
 
@@ -16,23 +16,23 @@
     <button (click)="dismiss(banner.id)"
             *ngIf="!banner.action2"
             color="primary"
-            mat-button>Dismiss
+            mat-button>{{T.G.DISMISS|translate}}
     </button>
 
     <button (click)="action(banner.id, banner.action)"
             *ngIf="banner.action"
             color="primary"
-            mat-button>{{banner.action.label}}
+            mat-button>{{banner.action.label|translate:banner.translateParams}}
     </button>
     <button (click)="action(banner.id, banner.action2)"
             *ngIf="banner.action2"
             color="primary"
-            mat-button>{{banner.action2.label}}
+            mat-button>{{banner.action2.label|translate:banner.translateParams}}
     </button>
     <button (click)="action(banner.id, banner.action3)"
             *ngIf="banner.action3"
             color="primary"
-            mat-button>{{banner.action3.label}}
+            mat-button>{{banner.action3.label|translate:banner.translateParams}}
     </button>
   </div>
 </div>

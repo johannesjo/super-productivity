@@ -18,7 +18,7 @@ import {DialogAddNoteComponent} from './dialog-add-note/dialog-add-note.componen
     CommonModule,
     FormsModule,
     UiModule,
-    StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.reducer),
+    StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.noteReducer),
     EffectsModule.forFeature([NoteEffects]),
   ],
   declarations: [

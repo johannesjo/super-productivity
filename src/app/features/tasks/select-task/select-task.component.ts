@@ -4,6 +4,7 @@ import {Task} from '../task.model';
 import {map, startWith, takeUntil, withLatestFrom} from 'rxjs/operators';
 import {TaskService} from '../task.service';
 import {Subject} from 'rxjs';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'select-task',
@@ -12,6 +13,7 @@ import {Subject} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
+  T = T;
   taskSelectCtrl: FormControl = new FormControl();
   filteredTasks: Task[];
   isCreate = false;

@@ -6,6 +6,7 @@ import {getTodayStr} from '../util/get-today-str';
 import {createTaskCopy} from '../util/create-task-copy';
 import {DialogAddTimeEstimateForOtherDayComponent} from '../dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
 import {getWorklogStr} from '../../../util/get-work-log-str';
+import {T} from '../../../t.const';
 
 
 @Component({
@@ -15,6 +16,7 @@ import {getWorklogStr} from '../../../util/get-work-log-str';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogTimeEstimateComponent {
+  T = T;
   todayStr: string;
   task: Task;
   taskCopy: TaskCopy;

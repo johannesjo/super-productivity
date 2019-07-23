@@ -14,6 +14,7 @@ import {WorklogService} from './worklog.service';
 import {getDateRangeForMonth} from '../../util/get-date-range-for-month';
 import {getDateRangeForWeek} from '../../util/get-date-range-for-week';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'worklog',
@@ -23,6 +24,7 @@ import {fadeAnimation} from '../../ui/animations/fade.ani';
   animations: [expandFadeAnimation, standardListAnimation, fadeAnimation]
 })
 export class WorklogComponent {
+  T = T;
   expanded: { [key: string]: boolean } = {};
 
   constructor(
@@ -55,8 +57,9 @@ export class WorklogComponent {
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        okTxt: 'Do it!',
-        message: `Are you sure you want to move the task <strong>"${task.title}"</strong> into your todays task list?`,
+        okTxt: T.G.DO_IT,
+        message: T.F.WORKLOG.D_CONFIRM_RESTORE,
+        translateParams: {title: task.title}
       }
     }).afterClosed()
       .subscribe((isConfirm: boolean) => {

@@ -1,9 +1,9 @@
-import { BrowserWindow, ipcMain, Menu, shell } from 'electron';
-import { errorHandler } from './error-handler';
-import { join, normalize } from 'path';
-import { format } from 'url';
-import { getSettings } from './get-settings';
-import { IPC_APP_READY } from './ipc-events.const';
+import {BrowserWindow, ipcMain, Menu, shell} from 'electron';
+import {errorHandler} from './error-handler';
+import {join, normalize} from 'path';
+import {format} from 'url';
+import {getSettings} from './get-settings';
+import {IPC} from './ipc-events.const';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 
 let mainWin;
@@ -77,7 +77,7 @@ export const createWindow = function (params) {
   mainWinModule.win = mainWin;
 
   // listen for app ready
-  ipcMain.on(IPC_APP_READY, () => {
+  ipcMain.on(IPC.APP_READY, () => {
     mainWinModule.isAppReady = true;
   });
 

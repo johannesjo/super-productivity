@@ -8,6 +8,7 @@ import {Store} from '@ngrx/store';
 import {SnackCustomComponent} from '../snack-custom/snack-custom.component';
 import {DEFAULT_SNACK_CFG} from '../snack.const';
 import {ProjectActionTypes} from '../../../features/project/store/project.actions';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable()
 export class SnackEffects {
@@ -39,6 +40,7 @@ export class SnackEffects {
   private _ref: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
 
   constructor(private actions$: Actions,
+              private _translateService: TranslateService,
               private store$: Store<any>,
               private matSnackBar: MatSnackBar) {
   }
@@ -49,14 +51,21 @@ export class SnackEffects {
       _destroy$.next(true);
       _destroy$.unsubscribe();
     };
-    const {msg, actionStr, actionId, actionPayload, config, type, isSubtle} = action.payload;
+    const {msg, actionStr, actionId, actionPayload, config, type, isSkipTranslate, translateParams, showWhile$, promise, isSpinner} = action.payload;
     const cfg = {
       ...DEFAULT_SNACK_CFG,
       ...config,
-      data: action.payload,
+      duration: 900000000,
+      data: {
+        ...action.payload,
+        msg: (isSkipTranslate)
+          ? msg
+          : this._translateService.instant(msg, translateParams),
+      },
     };
-    if (isSubtle) {
-      cfg.panelClass = 'subtle';
+
+    if (showWhile$ || promise || isSpinner) {
+      cfg.panelClass = 'polling-snack';
     }
 
     switch (type) {

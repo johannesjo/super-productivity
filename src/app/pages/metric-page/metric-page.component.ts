@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'metric-page',
@@ -7,6 +8,7 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricPageComponent {
+  T = T;
   constructor() {
   }
 }

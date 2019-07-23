@@ -9,7 +9,7 @@
              class="caption"
              mat-ripple>
           <div><span *ngIf="visibility[i]"
-                     [@fade]>Title</span></div>
+                     [@fade]>{{T.F.WORKLOG.WEEK.TITLE|translate}}</span></div>
           <div>
             <div class="title">
               <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
@@ -58,11 +58,10 @@
 
   <div style="text-align: center; margin-top: 12px;">
     <button (click)="exportData(currentWeek)"
-            aria-label="export data"
             color=""
             mat-button>
       <mat-icon>call_made</mat-icon>
-      Export Week Data
+      {{T.F.WORKLOG.WEEK.EXPORT|translate}}
     </button>
   </div>
 </div>

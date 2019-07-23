@@ -5,6 +5,7 @@ import {Color} from 'ng2-charts';
 import {Observable} from 'rxjs';
 import {LineChartData} from './metric.model';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'metric',
@@ -14,24 +15,26 @@ import {fadeAnimation} from '../../ui/animations/fade.ani';
   animations: [fadeAnimation],
 })
 export class MetricComponent {
-  public productivityHappiness$: Observable<LineChartData> = this.metricService.getProductivityHappinessChartData$();
+  T = T;
 
-  public pieChartOptions: ChartOptions = {
+  productivityHappiness$: Observable<LineChartData> = this.metricService.getProductivityHappinessChartData$();
+
+  pieChartOptions: ChartOptions = {
     responsive: true,
     legend: {
       position: 'top',
     },
   };
-  public pieChartType: ChartType = 'pie';
-  public pieChartPlugins = [];
+  pieChartType: ChartType = 'pie';
+  pieChartPlugins = [];
 
-  public lineChartOptions: ChartOptions = {
+  lineChartOptions: ChartOptions = {
     responsive: true,
   };
-  public lineChartColors: Color[] = [];
-  public lineChartLegend = true;
-  public lineChartType: ChartType = 'line';
-  public lineChartPlugins = [];
+  lineChartColors: Color[] = [];
+  lineChartLegend = true;
+  lineChartType: ChartType = 'line';
+  lineChartPlugins = [];
 
   constructor(
     public metricService: MetricService,

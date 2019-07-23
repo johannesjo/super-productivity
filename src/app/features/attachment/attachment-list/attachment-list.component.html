@@ -6,15 +6,13 @@
     <a [class.isImage]="attachment?.type==='IMG' && !isError[i]"
        [href]="attachment?.path"
        [type]="isError[i] ? 'LINK': attachment?.type"
-       aria-label="open global attachment"
        attachmentLink
        class="attachment-link mat-elevation-z3 bg-400"
        draggable="false"
        tabindex="1"
        target="_blank">
       <ng-container *ngIf="attachment?.type!=='IMG' || isError[i]">
-        <mat-icon *ngIf="attachment?.icon"
-                  aria-label="Open">{{attachment?.icon}}
+        <mat-icon *ngIf="attachment?.icon">{{attachment?.icon}}
         </mat-icon>
         <div class="title">{{attachment?.title || attachment?.path}}</div>
       </ng-container>
@@ -28,14 +26,12 @@
     <div *ngIf="!isDisableControls"
          class="controls">
       <button (click)="openEditDialog(attachment)"
-              aria-label="open edit dialog"
               class="edit-btn"
               color="primary"
               mat-mini-fab="">
         <mat-icon>edit</mat-icon>
       </button>
       <button (click)="remove(attachment?.id)"
-              aria-label="remove attachment"
               class="trash-btn"
               color="warn"
               mat-mini-fab="">
@@ -44,4 +40,4 @@
     </div>
   </li>
 </ul>
-<div *ngIf="!attachments?.length">There are currently no attachments</div>
+<div *ngIf="!attachments?.length">{{T.F.ATTACHMENT.LIST.NO_ATTACHMENTS|translate}}</div>

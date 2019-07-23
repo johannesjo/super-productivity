@@ -5,7 +5,8 @@ export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM' | 'JIRA_UNBLOCK';
 
 export interface SnackParams {
   msg: string;
-  isSubtle?: boolean;
+  isSkipTranslate?: boolean;
+  translateParams?: { [key: string]: string | number };
   type?: SnackType;
   ico?: string;
   svgIco?: string;
@@ -14,6 +15,7 @@ export interface SnackParams {
   actionFn?: Function;
   actionPayload?: any;
   config?: MatSnackBarConfig;
+  isSpinner?: boolean;
   promise?: Promise<any>;
   showWhile$?: Observable<any>;
 }

@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
 import {TaskService} from '../../tasks/task.service';
 import {TimeTrackingService} from '../time-tracking.service';
-import {from, merge, Observable, Subject, timer} from 'rxjs';
+import {EMPTY, from, merge, Observable, of, Subject, timer} from 'rxjs';
 import {
+  delay,
   distinctUntilChanged,
   filter,
   map,
@@ -23,8 +24,14 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {ProjectService} from '../../project/project.service';
 import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
+import {T} from '../../../t.const';
+import {ElectronService} from 'ngx-electron';
+import {IPC} from '../../../../../electron/ipc-events.const';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
+const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
+const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
+const LOCK_SCREEN_DELAY = 30 * 1000;
 
 // required because typescript freaks out
 const reduceBreak = (acc, tick) => {
@@ -115,6 +122,19 @@ export class TakeABreakService {
     shareReplay(),
   );
 
+  private _triggerLockScreenCounter$ = new Subject<boolean>();
+  private _triggerLockScreenThrottledAndDelayed$ = this._triggerLockScreenCounter$.pipe(
+    filter(() => IS_ELECTRON),
+    distinctUntilChanged(),
+    switchMap((v) => !!(v)
+      ? of(v).pipe(
+        throttleTime(LOCK_SCREEN_THROTTLE),
+        delay(LOCK_SCREEN_DELAY),
+      )
+      : EMPTY,
+    ),
+  );
+
 
   constructor(
     private _taskService: TaskService,
@@ -122,6 +142,7 @@ export class TakeABreakService {
     private _idleService: IdleService,
     private _configService: GlobalConfigService,
     private _projectService: ProjectService,
+    private _electronService: ElectronService,
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
@@ -132,7 +153,12 @@ export class TakeABreakService {
       this._bannerService.dismiss(BANNER_ID);
     });
 
-    const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
+    this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
+      if (IS_ELECTRON) {
+        this._electronService.ipcRenderer.send(IPC.LOCK_SCREEN);
+      }
+    });
+
     this.timeWorkingWithoutABreak$.pipe(
       withLatestFrom(
         this._configService.cfg$,
@@ -151,24 +177,36 @@ export class TakeABreakService {
       throttleTime(PING_UPDATE_BANNER_INTERVAL),
     ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
+      if (IS_ELECTRON && cfg.takeABreak.isLockScreen) {
+        this._triggerLockScreenCounter$.next(true);
+      }
+      if (IS_ELECTRON && cfg.takeABreak.isFocusWindow) {
+        this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
+      }
+
       this._bannerService.open({
         id: BANNER_ID,
         ico: 'free_breakfast',
         msg,
+        translateParams: {
+          time: '15m'
+        },
         action: {
-          label: 'I already did',
+          label: T.F.TIME_TRACKING.B.ALREADY_DID,
           fn: () => this.resetTimerAndCountAsBreak()
         },
         action2: {
-          label: 'Snooze 15m',
+          label: T.F.TIME_TRACKING.B.SNOOZE,
           fn: () => this.snooze()
         },
       });
+
     });
   }
 
   snooze(snoozeTime = 15 * 60 * 1000) {
     this._triggerSnooze$.next(snoozeTime);
+    this._triggerLockScreenCounter$.next(false);
   }
 
   resetTimer() {
@@ -179,6 +217,8 @@ export class TakeABreakService {
     const min5 = 1000 * 60 * 5;
     this._projectService.addToBreakTime(undefined, undefined, min5);
     this.resetTimer();
+
+    this._triggerLockScreenCounter$.next(false);
   }
 
   private _createMessage(duration: number, cfg: TakeABreakConfig) {

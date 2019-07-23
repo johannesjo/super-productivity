@@ -2,6 +2,8 @@
 import {JiraCfg} from './jira';
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
+import {T} from '../../../t.const';
+import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../config/global-config.model';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -76,7 +78,7 @@ export const JIRA_REDUCED_ISSUE_FIELDS = [
   'timespent',
 ];
 
-export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
+export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
   {
     key: 'host',
     type: 'input',
@@ -85,7 +87,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
       /* tslint:disable-next-line */
       pattern: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/i,
       required: true,
-      label: 'Host (e.g.: http://my-host.de:1234)',
+      label: T.F.JIRA.FORM_CRED.HOST,
     },
   },
   {
@@ -93,7 +95,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
     type: 'input',
     templateOptions: {
       required: true,
-      label: 'Email / Username',
+      label: T.F.JIRA.FORM_CRED.USER_NAME,
     },
   },
   {
@@ -101,33 +103,34 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
     type: 'input',
     templateOptions: {
       required: true,
-      label: 'Token / Password',
+      label: T.F.JIRA.FORM_CRED.PASSWORD,
       type: 'password',
-      description: 'See https://confluence.atlassian.com/cloud/api-tokens-938839638.html'
+      description: '* https://confluence.atlassian.com/cloud/api-tokens-938839638.html'
     },
   },
 ];
 
-export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
+
+export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
   {
     key: 'isAutoPollTickets',
     type: 'checkbox',
     templateOptions: {
-      label: 'Check imported issues for changes automatically and notify',
+      label: T.F.JIRA.FORM_ADV.IS_AUTO_POLL_TICKETS
     },
   },
   {
     key: 'isCheckToReAssignTicketOnTaskStart',
     type: 'checkbox',
     templateOptions: {
-      label: 'Check if the currently worked on issue is assigned to current user',
+      label: T.F.JIRA.FORM_ADV.IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START
     },
   },
   {
     key: 'userAssigneeName',
     type: 'input',
     templateOptions: {
-      label: 'Assignee name to check for',
+      label: T.F.JIRA.FORM_ADV.USER_ASSIGNEE_NAME,
       required: true,
     },
     hideExpression: '!model.isCheckToReAssignTicketOnTaskStart',
@@ -136,35 +139,82 @@ export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
     templateOptions: {
-      label: 'Automatically add issues to Jira backlog',
+      label: T.F.JIRA.FORM_ADV.IS_AUTO_ADD_TO_BACKLOG
     },
   },
   {
     key: 'autoAddBacklogJqlQuery',
     type: 'input',
     templateOptions: {
-      label: 'JQL used for adding tasks automatically to backlog',
+      label: T.F.JIRA.FORM_ADV.AUTO_ADD_BACKLOG_JQL_QUERY
     },
   },
   {
     key: 'searchJqlQuery',
     type: 'input',
     templateOptions: {
-      label: 'JQL Query for to limit the searcher tasks',
+      label: T.F.JIRA.FORM_ADV.SEARCH_JQL_QUERY
     },
   },
   {
     key: 'isWorklogEnabled',
     type: 'checkbox',
     templateOptions: {
-      label: 'Open dialog to submit worklog to jira when task is done',
+      label: T.F.JIRA.FORM_ADV.IS_WORKLOG_ENABLED
     },
   },
   {
     key: 'isAddWorklogOnSubTaskDone',
     type: 'checkbox',
     templateOptions: {
-      label: 'Open dialog to submit worklog to jira when sub task is done',
+      label: T.F.JIRA.FORM_ADV.IS_ADD_WORKLOG_ON_SUB_TASK_DONE
     },
   },
 ];
+
+export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<JiraCfg> = {
+  title: 'Jira',
+  key: 'JIRA',
+  customSection: 'JIRA_CFG',
+  helpArr: [
+    {
+      h: T.F.JIRA.FORM_SECTION.HELP_ARR.H1,
+      p: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_1,
+      p2: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_2,
+      p3: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_3,
+      p4: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_4,
+    },
+    {
+      h: T.F.JIRA.FORM_SECTION.HELP_ARR.H2,
+      p: T.F.JIRA.FORM_SECTION.HELP_ARR.P2_1,
+      p2: T.F.JIRA.FORM_SECTION.HELP_ARR.P2_2,
+      p3: T.F.JIRA.FORM_SECTION.HELP_ARR.P2_3,
+    },
+    {
+      h: T.F.JIRA.FORM_SECTION.HELP_ARR.H3,
+      p: T.F.JIRA.FORM_SECTION.HELP_ARR.P3_1,
+    },
+  ],
+  items: [
+    {
+      type: 'tpl',
+      className: 'tpl',
+      templateOptions: {
+        tag: 'h3',
+        class: 'sub-section-heading',
+        text: T.F.JIRA.FORM_SECTION.CREDENTIALS
+      },
+    },
+    ...JIRA_CREDENTIALS_FORM_CFG,
+    {
+      type: 'tpl',
+      className: 'tpl',
+      templateOptions: {
+        tag: 'h3',
+        class: 'sub-section-heading',
+        text: T.F.JIRA.FORM_SECTION.ADV_CFG
+      },
+    },
+    ...JIRA_ADVANCED_FORM_CFG,
+  ]
+};

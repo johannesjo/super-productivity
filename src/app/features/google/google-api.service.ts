@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {GOOGLE_DEFAULT_FIELDS_FOR_DRIVE, GOOGLE_DISCOVERY_DOCS, GOOGLE_SCOPES, GOOGLE_SETTINGS} from './google.const';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {IS_ELECTRON} from '../../app.constants';
 import {MultiPartBuilder} from './util/multi-part-builder';
 import {HttpClient, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
@@ -10,14 +10,11 @@ import {GlobalConfigService} from '../config/global-config.service';
 import {GoogleSession} from '../config/global-config.model';
 import {catchError, concatMap, filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {combineLatest, EMPTY, from, merge, Observable, of, throwError, timer} from 'rxjs';
-import {
-  IPC_GOOGLE_AUTH_TOKEN,
-  IPC_GOOGLE_AUTH_TOKEN_ERROR,
-  IPC_TRIGGER_GOOGLE_AUTH
-} from '../../../../electron/ipc-events.const';
+import {IPC} from '../../../../electron/ipc-events.const';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../../core/banner/banner.service';
 import {BannerId} from '../../core/banner/banner.model';
+import {T} from '../../t.const';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -78,7 +75,7 @@ export class GoogleApiService {
   login(isSkipSuccessMsg = false): Promise<any> {
     const showSuccessMsg = () => {
       if (!(isSkipSuccessMsg)) {
-        this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+        this._snackIt('SUCCESS', T.F.GOOGLE.S_API.SUCCESS_LOGIN);
       }
     };
 
@@ -88,9 +85,9 @@ export class GoogleApiService {
         return new Promise((resolve) => resolve(true));
       }
 
-      this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, session.refreshToken);
+      this._electronService.ipcRenderer.send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
       return new Promise((resolve, reject) => {
-        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
+        this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
@@ -99,7 +96,7 @@ export class GoogleApiService {
           showSuccessMsg();
           resolve(data);
         });
-        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
+        this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
           reject(err);
         });
       });
@@ -202,7 +199,7 @@ export class GoogleApiService {
 
   getFileInfo$(fileId): Observable<any> {
     if (!fileId) {
-      this._snackIt('ERROR', 'GoogleApi: No file id specified');
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       throwError({handledError: 'No file id given'});
     }
 
@@ -219,7 +216,7 @@ export class GoogleApiService {
 
   findFile$(fileName): Observable<any> {
     if (!fileName) {
-      this._snackIt('ERROR', 'GoogleApi: No file name specified');
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_NAME);
       return throwError({handledError: 'No file name given'});
     }
 
@@ -237,7 +234,7 @@ export class GoogleApiService {
   // NOTE: file will always be returned as text (makes sense)
   loadFile$(fileId): Observable<any> {
     if (!fileId) {
-      this._snackIt('ERROR', 'GoogleApi: No file id specified');
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       throwError({handledError: 'No file id given'});
     }
 
@@ -358,11 +355,11 @@ export class GoogleApiService {
   private _handleUnAuthenticated(err) {
     this.logout();
     this._bannerService.open({
-      msg: 'GoogleApi: Failed to authenticate please try logging in again!',
+      msg: T.F.GOOGLE.BANNER.AUTH_FAIL,
       ico: 'cloud_off',
       id: BannerId.GoogleLogin,
       action: {
-        label: 'Login',
+        label: T.G.LOGIN,
         fn: () => this.login()
       }
     });
@@ -386,14 +383,15 @@ export class GoogleApiService {
       this._handleUnAuthenticated(err);
     } else {
       console.warn(err);
-      this._snackIt('ERROR', 'GoogleApi Error' + errStr);
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR, {errStr});
     }
   }
 
-  private _snackIt(snackType: SnackType, msg: string) {
+  private _snackIt(type: SnackType, msg: string, translateParams = null) {
     this._snackService.open({
-      msg: msg,
-      type: snackType,
+      msg,
+      type,
+      translateParams,
     });
   }
 

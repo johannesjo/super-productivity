@@ -14,10 +14,9 @@ import {reducers} from './root-store';
 import {CoreModule} from './core/core.module';
 import {ReactiveFormsModule} from '@angular/forms';
 import {FormlyModule} from '@ngx-formly/core';
-import {FormlyMaterialModule} from '@ngx-formly/material';
 import {PagesModule} from './pages/pages.module';
 import {MainHeaderModule} from './core-ui/main-header/main-header.module';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {TasksModule} from './features/tasks/tasks.module';
 import {TimeTrackingModule} from './features/time-tracking/time-tracking.module';
@@ -30,6 +29,15 @@ import {GlobalErrorHandler} from './core/error-handler/global-error-handler.clas
 import {MyHammerConfig} from '../hammer-config.class';
 import {ProcrastinationModule} from './features/procrastination/procrastination.module';
 import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
+import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import {LanguageCode} from './app.constants';
+import {LanguageService} from './core/language/language.service';
+
+// NOTE: export required for aot to work
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 @NgModule({
   declarations: [
@@ -52,6 +60,7 @@ import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.mo
     ReminderModule,
     MigrateModule,
     CoreUiModule,
+    NoteModule,
 
     // External
     BrowserModule,
@@ -72,15 +81,26 @@ import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.mo
         {name: 'pattern', message: 'Invalid input'},
       ],
     }),
-    FormlyMaterialModule,
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
-    NoteModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: createTranslateLoader,
+        deps: [HttpClient]
+      }
+    })
   ],
   bootstrap: [AppComponent],
   providers: [
     {provide: ErrorHandler, useClass: GlobalErrorHandler},
-    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig}
+    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
   ],
 })
 export class AppModule {
+  constructor(
+    private _languageService: LanguageService,
+  ) {
+    this._languageService.setDefault(LanguageCode.en);
+    this._languageService.setFromBrowserLngIfAutoSwitchLng();
+  }
 }

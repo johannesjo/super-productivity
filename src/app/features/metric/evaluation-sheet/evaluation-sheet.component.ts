@@ -18,6 +18,7 @@ import {NoteService} from '../../note/note.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ProjectService} from '../../project/project.service';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -32,6 +33,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
 
   @Output() save = new EventEmitter<any>();
 
+  T = T;
   tomorrowsNote: string;
   metricForDay: MetricCopy;
 

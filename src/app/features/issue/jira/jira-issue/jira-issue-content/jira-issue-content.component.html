@@ -1,5 +1,3 @@
-<!-- TODO list changes -->
-
 <div class="wrapper">
 
   <div *ngIf="issueData.wasUpdated"
@@ -9,15 +7,18 @@
       <button (click)="hideUpdates()"
               color="accent"
               mat-raised-button>
-        Mark updates as checked
+        {{T.F.JIRA.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
       </button>
     </div>
 
-    <h3 class="mat-h3">List of changes</h3>
+    <h3 class="mat-h3">{{T.F.JIRA.ISSUE_CONTENT.LIST_OF_CHANGES|translate}}</h3>
     <ul class="changelog">
       <li *ngFor="let entry of issueData.changelog">
-        <em *ngIf="entry.author">{{entry.author.displayName}}</em> changed
-        <strong>{{entry.field}}</strong> on {{entry.created|date:'short'}}
+        <em *ngIf="entry.author">{{entry.author.displayName}}</em>
+        {{T.F.JIRA.ISSUE_CONTENT.CHANGED|translate}}
+        <strong>{{entry.field}}</strong>
+        {{T.F.JIRA.ISSUE_CONTENT.ON|translate}}
+        {{entry.created|date:'short'}}
       </li>
     </ul>
   </div>
@@ -25,44 +26,43 @@
   <table [class.isFocusDescription]="isFocusDescription"
          class="issue-table">
     <tr>
-      <th>Summary</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.SUMMARY|translate}}</th>
       <td class="summary"><strong><a [href]="issueData.url"
                                      target="_blank">{{issueData.key}} {{issueData.summary}}</a></strong></td>
     </tr>
     <tr>
-      <th>Status</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.STATUS|translate}}</th>
       <td>
         <!--<img [src]="issueData?.status?.iconUrl"-->
         <!--*ngIf="issueData?.status?.iconUrl">-->
         {{issueData.status?.name}}</td>
     </tr>
     <tr *ngIf="issueData.storyPoints">
-      <th>Story Points</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.STORY_POINTS|translate}}</th>
       <td>{{issueData.storyPoints}}</td>
     </tr>
     <tr>
-      <th>Assignee</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
       <td>{{issueData.assignee?.displayName || '–'}}</td>
     </tr>
     <tr *ngIf="issueData.timespent || issueData.timeestimate">
-      <th>Worklog</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.WORKLOG|translate}}</th>
       <td>{{(issueData.timespent * 1000)|msToString}} / {{(issueData.timeestimate * 1000)|msToString}}</td>
     </tr>
     <tr *ngIf="issueData.components?.length">
-      <th>Components</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.COMPONENTS|translate}}</th>
       <td>
         <mat-chip-list>
           <mat-chip *ngFor="let component of issueData.components"
-                    title="{{component.description}}">{{component.name}}
+                    [title]="component.description">{{component.name}}
           </mat-chip>
         </mat-chip-list>
       </td>
     </tr>
     <tr *ngIf="issueData?.description"
         class="description-row">
-      <th (click)="isFocusDescription=!isFocusDescription">Description</th>
+      <th (click)="isFocusDescription=!isFocusDescription">{{T.F.JIRA.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
       <td>
-        <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
         <div *ngIf="issueData.description"
              [data]="issueData?.description"
              class="description markdown"
@@ -70,24 +70,17 @@
       </td>
     </tr>
     <tr *ngIf="attachments?.length">
-      <th>Attachments</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.ATTACHMENTS|translate}}</th>
       <td>
         <div [class.hasAttachments]="attachments?.length"
              class="attachments">
           <attachment-list [attachments]="attachments"
                            [isDisableControls]="true"></attachment-list>
-          <!--<div class="attachment"-->
-          <!--*ngFor="let attachment of issueData.attachments">-->
-          <!--<div class="file-name">-->
-          <!--<a [href]="attachment.content"-->
-          <!--target="_blank">{{attachment.filename}}</a>-->
-          <!--</div>-->
-          <!--</div>-->
         </div>
       </td>
     </tr>
     <tr *ngIf="issueData.comments">
-      <th>Comments</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.COMMENTS|translate}}</th>
       <td>
         <div *ngFor="let comment of issueData.comments"
              class="comment">
@@ -96,7 +89,8 @@
                class="author-avatar">
           <div class="name-and-comment-content">
             <div><span class="author-name">{{comment.author.displayName}}</span>
-              <span class="when">at {{comment.created|date:'short'}}</span>
+              <span class="when">{{T.F.JIRA.ISSUE_CONTENT.AT|translate}}
+                {{comment.created|date:'short'}}</span>
             </div>
             <div *ngIf="comment.body"
                  [innerHTML]="comment.body|markdown"></div>
@@ -107,13 +101,8 @@
            mat-stroked-button=""
            target="_blank">
           <mat-icon>textsms</mat-icon>
-          Write a comment</a>
+          {{T.F.JIRA.ISSUE_CONTENT.WRITE_A_COMMENT|translate}}</a>
       </td>
     </tr>
   </table>
-
-  <!--<pre><code>-->
-  <!--{{issueData|json}}-->
-  <!--</code></pre>-->
-
 </div>
