@@ -645,7 +645,7 @@
         "TOTAL_TIME": "Insgesamt aufgewendete Zeit:",
         "TOTAL_TIME_PROJECT": "Gesamtdauer des Projekts",
         "WEEK_NR": "Woche {{nr}}",
-        "WORKED": "Hat funktioniert"
+        "WORKED": "Gearbeitet"
       },
       "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?",
       "D_EXPORT_TITLE": "Worklog-Export",
