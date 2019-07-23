@@ -55,7 +55,6 @@ export class SnackEffects {
     const cfg = {
       ...DEFAULT_SNACK_CFG,
       ...config,
-      duration: 900000000,
       data: {
         ...action.payload,
         msg: (isSkipTranslate)
