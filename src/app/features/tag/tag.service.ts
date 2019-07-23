@@ -6,7 +6,14 @@ import {Observable} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {take} from 'rxjs/operators';
-import {initialTagState, selectAllTags, selectTagById, selectTagsByIds, TagState} from './store/tag.reducer';
+import {
+  initialTagState,
+  selectAllTags,
+  selectTagById,
+  selectTagByName,
+  selectTagsByIds,
+  TagState
+} from './store/tag.reducer';
 import shortid from 'shortid';
 
 @Injectable({
@@ -26,6 +33,10 @@ export class TagService {
 
   getByIds$(ids: string[]): Observable<Tag[]> {
     return this._store$.pipe(select(selectTagsByIds, {ids}));
+  }
+
+  getByName$(name: string): Observable<Tag> {
+    return this._store$.pipe(select(selectTagByName, {name}));
   }
 
   public async loadStateForProject(projectId) {

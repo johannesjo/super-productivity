@@ -13,7 +13,7 @@ import {MatDialog} from '@angular/material';
 import {Tag} from '../tag.model';
 import {TagService} from '../tag.service';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {first, subscribeOn, switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'tag-list',
@@ -66,8 +66,18 @@ export class TagListComponent implements OnInit, AfterViewInit {
   }
 
   addTagToTask($event: string) {
-    const tagId = this._tagService.addTag({name: $event});
-    this.addedTagsToTask.emit([tagId]);
+    console.log('adding tag...');
+    const subscription = this._tagService.getByName$($event).subscribe(tag => {
+      console.log(tag);
+      if ( tag ) {
+        // TODO: Show proper error message
+        console.error('ERROR: A tag with that name already exists!');
+        return;
+      }
+      console.log('Adding tag...');
+      const tagId = this._tagService.addTag({name: $event});
+      this.addedTagsToTask.emit([tagId]);
+    });
   }
 
   resetNewTagEdit() {

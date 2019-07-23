@@ -31,6 +31,15 @@ export const selectTagById = createSelector(
   (state, props: {id: string}) => state.entities[props.id]
 );
 
+export const selectTagByName = createSelector(
+  selectTagFeatureState,
+  (state, props: {name: string}): Tag | undefined => {
+    const results = <Tag[]> Object.values(state.entities).filter(
+      (tag: Tag) => tag.name === props.name);
+    return results.length ? results[0] : undefined;
+  }
+);
+
 export function tagReducer(
   state = initialTagState,
   action: TagActions
