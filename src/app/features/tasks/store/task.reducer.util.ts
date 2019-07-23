@@ -185,25 +185,23 @@ export const deleteTask = (state: TaskState,
 };
 
 
-export const moveItemInList = (itemId: string, completeList: string[], partialList: string[]): string[] => {
+export const moveItemInList = (itemId: string, completeList: string[], partialList: string[], emptyListVal = 0): string[] => {
   let newIndex;
   const curInUpdateListIndex = partialList.indexOf(itemId);
   const prevItemId = partialList[curInUpdateListIndex - 1];
   const nextItemId = partialList[curInUpdateListIndex + 1];
   const newCompleteList = completeList.filter((id) => id !== itemId);
 
-  // console.log(completeList, partialList);
-
   if (prevItemId) {
     newIndex = newCompleteList.indexOf(prevItemId) + 1;
   } else if (nextItemId) {
     newIndex = newCompleteList.indexOf(nextItemId);
+  } else if (partialList.length === 1) {
+    newIndex = emptyListVal;
   } else {
     throw new Error('Drop Model Error');
   }
 
-  // console.log('prev', !!prevItemId, newIndex);
   newCompleteList.splice(newIndex, 0, itemId);
-  console.log(completeList, newCompleteList);
   return newCompleteList;
 };

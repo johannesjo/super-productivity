@@ -310,26 +310,14 @@ export function taskReducer(
       switch (targetModelId) {
         case 'DONE':
         case 'UNDONE':
-          let newIndex;
-          const curInUpdateListIndex = newOrderedIds.indexOf(taskId);
-          const prevItemId = newOrderedIds[curInUpdateListIndex - 1];
-          const nextItemId = newOrderedIds[curInUpdateListIndex + 1];
-
-          if (prevItemId) {
-            newIndex = newState.todaysTaskIds.indexOf(prevItemId) + 1;
-          } else if (nextItemId) {
-            newIndex = newState.todaysTaskIds.indexOf(nextItemId);
-          } else if (targetModelId === 'DONE') {
-            newIndex = newState.todaysTaskIds.length;
-          } else if (targetModelId === 'UNDONE') {
-            newIndex = 0;
-          }
           const isDone = (targetModelId === 'DONE');
-          const newIds = [...newState.todaysTaskIds];
-          newIds.splice(newIndex, 0, taskId);
+          // NOTE: move to end of complete list for done tasks
+          const emptyListVal = (targetModelId === 'DONE')
+            ? newState.todaysTaskIds.length
+            : 0;
           return {
             ...newState,
-            todaysTaskIds: newIds,
+            todaysTaskIds: moveItemInList(taskId, newState.todaysTaskIds, newOrderedIds, emptyListVal),
             entities: {
               ...newState.entities,
               [taskId]: {
