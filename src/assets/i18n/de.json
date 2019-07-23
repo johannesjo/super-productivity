@@ -518,7 +518,7 @@
         "ADVANCED": "Erweitert",
         "CONVERT_TO_PARENT_TASK": "In übergeordnete Aufgabe konvertieren",
         "DELETE": "Aufgabe löschen",
-        "DROP_ATTACHMENT": "Hier ablegen und an \"{{task.title}}\" anhängen",
+        "DROP_ATTACHMENT": "Hier ablegen und an \"{{title}}\" anhängen",
         "EDIT_REMINDER": "Erinnerung bearbeiten",
         "MARK_DONE": "Als erledigt markieren",
         "MARK_UNDONE": "Als rückgängig machen markieren",

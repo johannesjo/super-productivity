@@ -518,7 +518,7 @@
         "ADVANCED": "Advanced",
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
         "DELETE": "Delete Task",
-        "DROP_ATTACHMENT": "Drop here to attach to \"{{task.title}}\"",
+        "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
         "EDIT_REMINDER": "Edit reminder",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",

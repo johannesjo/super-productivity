@@ -518,7 +518,7 @@
         "ADVANCED": "高级",
         "CONVERT_TO_PARENT_TASK": "转换为父任务",
         "DELETE": "删除任务",
-        "DROP_ATTACHMENT": "放在此处以附加到“{{task.title}}”",
+        "DROP_ATTACHMENT": "放在此处以附加到“{{title}}”",
         "EDIT_REMINDER": "编辑提醒",
         "MARK_DONE": "标为已完成",
         "MARK_UNDONE": "标记为撤消",

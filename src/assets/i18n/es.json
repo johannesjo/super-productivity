@@ -518,7 +518,7 @@
         "ADVANCED": "Avanzado",
         "CONVERT_TO_PARENT_TASK": "Convertir a tarea principal",
         "DELETE": "Eliminar tarea",
-        "DROP_ATTACHMENT": "Suelta aquí para adjuntar a \"{{task.title}}\"",
+        "DROP_ATTACHMENT": "Suelta aquí para adjuntar a \"{{title}}\"",
         "EDIT_REMINDER": "Editar recordatorio",
         "MARK_DONE": "marcar como hecho",
         "MARK_UNDONE": "Marcar como deshecho",

@@ -518,7 +518,7 @@
         "ADVANCED": "İleri",
         "CONVERT_TO_PARENT_TASK": "Üst Göreve Dönüştür",
         "DELETE": "Görevi Sil",
-        "DROP_ATTACHMENT": "\"{{task.title}}\" öğesine eklemek için buraya bırakın",
+        "DROP_ATTACHMENT": "\"{{title}}\" öğesine eklemek için buraya bırakın",
         "EDIT_REMINDER": "Hatırlatıcıyı düzenle",
         "MARK_DONE": "tamamlandı olarak işaretle",
         "MARK_UNDONE": "Bitti olarak işaretle",

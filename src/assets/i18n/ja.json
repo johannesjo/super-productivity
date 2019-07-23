@@ -518,7 +518,7 @@
         "ADVANCED": "高度な",
         "CONVERT_TO_PARENT_TASK": "親タスクに変換",
         "DELETE": "タスクを削除",
-        "DROP_ATTACHMENT": "ここにドロップして \"{{task.title}}\"に添付します",
+        "DROP_ATTACHMENT": "ここにドロップして \"{{title}}\"に添付します",
         "EDIT_REMINDER": "リマインダーを編集",
         "MARK_DONE": "完了としてマークする",
         "MARK_UNDONE": "元に戻すとしてマーク",
