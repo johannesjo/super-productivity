@@ -11,6 +11,7 @@ import {
   filterStartableTasks,
   getTaskById,
   mapTaskWithSubTasksToTask,
+  moveItemInList,
   reCalcTimesForParentIfParent,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
@@ -355,7 +356,7 @@ export function taskReducer(
               ...newState.entities,
               [newPar.id]: {
                 ...newPar,
-                subTaskIds: newOrderedIds
+                subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
               },
               [taskId]: {
                 ...taskToMove,

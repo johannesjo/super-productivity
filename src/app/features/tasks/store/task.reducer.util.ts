@@ -183,3 +183,27 @@ export const deleteTask = (state: TaskState,
     stateBefore: {...state, stateBefore: null}
   };
 };
+
+
+export const moveItemInList = (itemId: string, completeList: string[], partialList: string[]): string[] => {
+  let newIndex;
+  const curInUpdateListIndex = partialList.indexOf(itemId);
+  const prevItemId = partialList[curInUpdateListIndex - 1];
+  const nextItemId = partialList[curInUpdateListIndex + 1];
+  const newCompleteList = completeList.filter((id) => id !== itemId);
+
+  // console.log(completeList, partialList);
+
+  if (prevItemId) {
+    newIndex = newCompleteList.indexOf(prevItemId) + 1;
+  } else if (nextItemId) {
+    newIndex = newCompleteList.indexOf(nextItemId);
+  } else {
+    throw new Error('Drop Model Error');
+  }
+
+  // console.log('prev', !!prevItemId, newIndex);
+  newCompleteList.splice(newIndex, 0, itemId);
+  console.log(completeList, newCompleteList);
+  return newCompleteList;
+};

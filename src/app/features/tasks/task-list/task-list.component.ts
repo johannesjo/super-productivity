@@ -13,7 +13,7 @@ import {DragulaService} from 'ng2-dragula';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {expandFadeFastAnimation} from '../../../ui/animations/expand.ani';
-import {map} from 'rxjs/operators';
+import {map, share} from 'rxjs/operators';
 import {filterDoneTasks} from '../filter-done-tasks.pipe';
 import {T} from '../../../t.const';
 
@@ -33,14 +33,8 @@ export class TaskListComponent implements OnDestroy, OnInit {
   isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isHideAll_: boolean;
   isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest(
-    this.tasks$,
-    this.isHideDone$,
-    this.isHideAll$,
-    this._taskService.currentTaskId$,
-  ).pipe(map(([tasks, isHideDone, isHideAll, currentId]) =>
-    filterDoneTasks(tasks, currentId, isHideDone, isHideAll)
-  ));
+  filteredTasks: TaskWithSubTasks[];
+
   @Input() parentId: string;
   @Input() listId: string;
   @Input() listModelId: string;
@@ -56,6 +50,16 @@ export class TaskListComponent implements OnDestroy, OnInit {
 
   private _subs = new Subscription();
   private _blockAnimationTimeout: number;
+  private _filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest(
+    this.tasks$,
+    this.isHideDone$,
+    this.isHideAll$,
+    this._taskService.currentTaskId$,
+  ).pipe(
+    map(([tasks, isHideDone, isHideAll, currentId]) =>
+      filterDoneTasks(tasks, currentId, isHideDone, isHideAll)
+    ),
+  );
 
   constructor(
     private _taskService: TaskService,
@@ -85,6 +89,10 @@ export class TaskListComponent implements OnDestroy, OnInit {
   ngOnInit() {
     // block initial animation (method could be also used to set an initial animation)
     this._blockAnimation();
+
+    this._subs.add(this._filteredTasks$.subscribe((tasks) => {
+      this.filteredTasks = tasks;
+    }));
 
     this._subs.add(this._dragulaService.dropModel(this.listId)
       .subscribe((params: any) => {
