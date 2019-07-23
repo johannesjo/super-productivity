@@ -1,3 +1,4 @@
+// TODO sort by direction
 export enum IPC {
   SHUTDOWN = 'SHUTDOWN',
   SHUTDOWN_NOW = 'SHUTDOWN_NOW',
