@@ -37,6 +37,7 @@ export interface TaskCopy {
   attachmentIds: string[];
   reminderId?: string;
   repeatCfgId: string;
+  tagIds: string[];
 
   // ui model
   _isAdditionalInfoOpen: boolean;
@@ -70,6 +71,7 @@ export const DEFAULT_TASK: Task = {
   isDone: false,
   title: '',
   notes: '',
+  tagIds: [],
   parentId: null,
   issueId: null,
   issueType: null,

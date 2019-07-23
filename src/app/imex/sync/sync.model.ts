@@ -5,6 +5,7 @@ import {TaskArchive} from '../../features/tasks/task.model';
 import {IssueStateMap} from '../../features/issue/issue';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {NoteState} from '../../features/note/store/note.reducer';
+import {TagState} from '../../features/tag/store/tag.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {ProjectArchive} from '../../features/project/project.model';
 import {MetricState} from '../../features/metric/metric.model';
@@ -25,6 +26,9 @@ export interface AppBaseData {
 export interface AppDataForProjects {
   note?: {
     [key: string]: NoteState;
+  };
+  taskTag?: {
+    [key: string]: TagState
   };
   bookmark?: {
     [key: string]: BookmarkState;

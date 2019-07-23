@@ -31,6 +31,7 @@ import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
+import {unique} from '../../../util/unique';
 
 @Component({
   selector: 'task',
@@ -367,6 +368,26 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onTabIndexChange(newVal) {
     this._taskService.updateUi(this.task.id, {_currentTab: newVal || 0});
+  }
+
+  onTagsUpdated(tagIds: string[]) {
+    this._taskService.update(this.task.id, {tagIds: tagIds});
+  }
+
+  onTagsAdded(tagIds: string[]) {
+    this.onTagsUpdated(unique([...this.task.tagIds, ...tagIds]));
+  }
+
+  onTagsRemoved(tagIds: string[]) {
+    const newTags = [...this.task.tagIds];
+
+    tagIds.forEach(tag => {
+      if ( newTags.indexOf(tag) !== -1) {
+        newTags.slice(newTags.indexOf(tag), 1);
+      }
+    });
+
+    this.onTagsUpdated(newTags);
   }
 
   onPanStart(ev) {

@@ -1,0 +1,9 @@
+<ul class="tags">
+  <li *ngFor="let tag of tags$|async as tags" class="tag">
+    <div [style.color]="tag?.color">{{tag?.name}}</div>
+  </li>
+  <li class="tag add-tag" (click)="startEditNewTag()">
+    <div class="add-tag-button" *ngIf="!editingNewTag">+</div>
+    <input #newTagInputEl type="text" [class.hidden]="!editingNewTag" [(ngModel)]="newTag"/>
+  </li>
+</ul>

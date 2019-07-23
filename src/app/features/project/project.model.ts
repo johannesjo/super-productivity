@@ -9,6 +9,7 @@ import {MetricState} from '../metric/metric.model';
 import {ImprovementState} from '../metric/improvement/improvement.model';
 import {ObstructionState} from '../metric/obstruction/obstruction.model';
 import {WorklogExportSettings} from '../worklog/worklog.model';
+import {Tag} from '../tag/tag.model';
 
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -101,6 +102,7 @@ export interface ProjectArchivedRelatedData {
   task?: TaskState;
   taskArchive?: EntityState<Task>;
   taskAttachment?: EntityState<Attachment>;
+  taskTag?: EntityState<Tag>;
   issue?: IssueStateMap;
   metric?: MetricState;
   improvement?: ImprovementState;

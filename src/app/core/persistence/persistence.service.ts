@@ -15,6 +15,7 @@ import {
   LS_REMINDER,
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
+  LS_TASK_TAG_STATE,
   LS_TASK_REPEAT_CFG_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
@@ -43,6 +44,7 @@ import {MetricState} from '../../features/metric/metric.model';
 import {ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import {TagState} from '../../features/tag/store/tag.reducer';
 
 
 @Injectable({
@@ -66,6 +68,7 @@ export class PersistenceService {
   taskAttachment = this._cmProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
   bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
   note = this._cmProject<NoteState>(LS_NOTE_STATE, 'note');
+  taskTag = this._cmProject<TagState>(LS_TASK_TAG_STATE, 'taskTag');
   metric = this._cmProject<MetricState>(LS_METRIC_STATE, 'metric');
   improvement = this._cmProject<ImprovementState>(LS_IMPROVEMENT_STATE, 'improvement');
   obstruction = this._cmProject<ObstructionState>(LS_OBSTRUCTION_STATE, 'obstruction');

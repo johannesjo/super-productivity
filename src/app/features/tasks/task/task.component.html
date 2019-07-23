@@ -89,6 +89,12 @@
            contenteditable="true"
            editOnClick
            tabindex="2"></div>
+      <div class="spacer" style="width:10px; display: block; border-right-width: 1px; border-right-style: solid"></div>
+      <div class="tag-box">
+        <tag-list (addedTagsToTask)="onTagsAdded($event)"
+                  (removedTagsFromTask)="onTagsRemoved($event)"
+                  [tagIds]="task.tagIds"></tag-list>
+      </div>
     </div>
 
     <div class="all-controls-wrapper">
@@ -356,6 +362,8 @@
 
   <task-additional-info (tabIndexChange)="onTabIndexChange($event)"
                         (taskNotesChanged)="onTaskNotesChanged($event)"
+                        (removedTagsFromTask)="onTagsRemoved($event)"
+                        (addedTagsToTask)="onTagsAdded($event)"
                         *ngIf="task._isAdditionalInfoOpen"
                         [@expand]
                         [selectedIndex]="task._currentTab"
