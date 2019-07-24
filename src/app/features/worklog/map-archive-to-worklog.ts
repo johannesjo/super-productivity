@@ -5,7 +5,23 @@ import {getWeekNumber} from '../../util/get-week-number';
 import * as moment from 'moment';
 import {WorkStartEnd} from '../project/project.model';
 import {Worklog, WorklogDay, WorklogMonth, WorklogWeek, WorklogYear} from './worklog.model';
+import {getWorklogStr} from '../../util/get-work-log-str';
 
+// Provides defaults to display tasks without time spent on them
+const _getTimeSpentOnDay = (entities, task): { [key: string]: number } => {
+  const isTimeSpentTracked = (task.timeSpentOnDay && !!Object.keys(task.timeSpentOnDay).length);
+  if (isTimeSpentTracked) {
+    return task.timeSpentOnDay;
+  } else if (task.parentId) {
+    const parentSpentOnDay = task.parentId && entities[task.parentId].timeSpentOnDay;
+    const parentLogEntryDate = parentSpentOnDay && (
+      Object.keys(parentSpentOnDay)[0]
+      || getWorklogStr(entities[task.parentId].created));
+    return {[parentLogEntryDate]: 1};
+  } else {
+    return {[getWorklogStr(task.created)]: 1};
+  }
+};
 
 export const mapArchiveToWorklog = (
   taskState: EntityState<Task>,
@@ -19,8 +35,9 @@ export const mapArchiveToWorklog = (
   let totalTimeSpent = 0;
   Object.keys(entities).forEach(id => {
     const task = entities[id];
+    const timeSpentOnDay = _getTimeSpentOnDay(entities, task);
 
-    Object.keys(task.timeSpentOnDay).forEach(dateStr => {
+    Object.keys(timeSpentOnDay).forEach(dateStr => {
       const split = dateStr.split('-');
       const year = parseInt(split[0], 10);
       const month = parseInt(split[1], 10);
@@ -53,7 +70,7 @@ export const mapArchiveToWorklog = (
 
       }
       if (task.subTaskIds.length === 0) {
-        const timeSpentForTask = +task.timeSpentOnDay[dateStr];
+        const timeSpentForTask = +timeSpentOnDay[dateStr];
         worklog[year].ent[month].ent[day].timeSpent
           = worklog[year].ent[month].ent[day].timeSpent
           + timeSpentForTask;
@@ -70,7 +87,7 @@ export const mapArchiveToWorklog = (
         task: task,
         parentId: task.parentId,
         isNoRestore: noRestoreIds.includes(task.id),
-        timeSpent: task.timeSpentOnDay[dateStr]
+        timeSpent: timeSpentOnDay[dateStr]
       });
     });
   });
