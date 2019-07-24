@@ -124,7 +124,7 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "0.800.2",
     "@angular/animations": "^8.1.0",
-    "@angular/cdk": "^8.0.2",
+    "@angular/cdk": "^8.1.1",
     "@angular/cli": "^8.0.2",
     "@angular/common": "^8.1.0",
     "@angular/compiler": "^8.1.0",
@@ -132,7 +132,7 @@
     "@angular/core": "^8.1.0",
     "@angular/forms": "^8.1.0",
     "@angular/language-service": "^8.1.0",
-    "@angular/material": "^8.0.2",
+    "@angular/material": "^8.1.1",
     "@angular/material-moment-adapter": "^8.1.1",
     "@angular/platform-browser": "^8.1.0",
     "@angular/platform-browser-dynamic": "^8.1.0",
