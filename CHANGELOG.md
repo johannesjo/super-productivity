@@ -1,3 +1,49 @@
+## [2.10.2](https://github.com/johannesjo/super-productivity/compare/v2.10.1...v2.10.2) (2019-07-24)
+
+
+### Bug Fixes
+
+* circular dependency ([2163e32](https://github.com/johannesjo/super-productivity/commit/2163e32))
+* **github:** issue length not being displayed for snack ([e05ba3d](https://github.com/johannesjo/super-productivity/commit/e05ba3d))
+* **github:** wrong key breaking build ([f8d8629](https://github.com/johannesjo/super-productivity/commit/f8d8629))
+* **github:** wrong key breaking build ([2070ae2](https://github.com/johannesjo/super-productivity/commit/2070ae2))
+* **googleDrive:** wrong message for importing ([f1e267c](https://github.com/johannesjo/super-productivity/commit/f1e267c))
+* **i18n:** another german translation ([6033302](https://github.com/johannesjo/super-productivity/commit/6033302))
+* **i18n:** another german translation ([c3f4ffd](https://github.com/johannesjo/super-productivity/commit/c3f4ffd))
+* **i18n:** another german translation ([5040217](https://github.com/johannesjo/super-productivity/commit/5040217))
+* **i18n:** german translations ([12695dc](https://github.com/johannesjo/super-productivity/commit/12695dc))
+* **i18n:** german translations ([b69dbc2](https://github.com/johannesjo/super-productivity/commit/b69dbc2))
+* **i18n:** message for dropping attachment to task ([e5e516a](https://github.com/johannesjo/super-productivity/commit/e5e516a))
+* **i18n:** more german translations ([5359220](https://github.com/johannesjo/super-productivity/commit/5359220))
+* **i18n:** more translation stuff ([3bb2f47](https://github.com/johannesjo/super-productivity/commit/3bb2f47))
+* **i18n:** more translation stuff ([683464b](https://github.com/johannesjo/super-productivity/commit/683464b))
+* **i18n:** styling for add more task buttons ([f81be4c](https://github.com/johannesjo/super-productivity/commit/f81be4c))
+* **i18n:** weird german translations ([0770de2](https://github.com/johannesjo/super-productivity/commit/0770de2))
+* **snack:** remove endless duration ([02078e1](https://github.com/johannesjo/super-productivity/commit/02078e1))
+* **task:** drag and drop ordering when sub tasks are collapsed [#201](https://github.com/johannesjo/super-productivity/issues/201) ([9ec0d51](https://github.com/johannesjo/super-productivity/commit/9ec0d51))
+* **task:** short syntax not always being done after edit ([6834c63](https://github.com/johannesjo/super-productivity/commit/6834c63))
+* **task:** update time estimate correctly for short syntax ([114de15](https://github.com/johannesjo/super-productivity/commit/114de15))
+* remove double text ([0fbe54a](https://github.com/johannesjo/super-productivity/commit/0fbe54a))
+* **task:** remove string ([ad51569](https://github.com/johannesjo/super-productivity/commit/ad51569))
+* **tasks:** remove toggle for desktop ([318b43c](https://github.com/johannesjo/super-productivity/commit/318b43c))
+
+
+### Features
+
+* also display tasks with no tracked time in worklog ([9fcad55](https://github.com/johannesjo/super-productivity/commit/9fcad55))
+* **github:** add option to filter out own changes ([aa2d65f](https://github.com/johannesjo/super-productivity/commit/aa2d65f))
+* add global shortcuts for add note and add task ([7891ec5](https://github.com/johannesjo/super-productivity/commit/7891ec5))
+* beautify polling snacks ([9034846](https://github.com/johannesjo/super-productivity/commit/9034846))
+* **i18n:** add missing translations ([2671866](https://github.com/johannesjo/super-productivity/commit/2671866))
+* **i18n:** add translations for validation messages [#33](https://github.com/johannesjo/super-productivity/issues/33) ([8ba56c2](https://github.com/johannesjo/super-productivity/commit/8ba56c2))
+* **takeABreak:** add config for lock screen ([d751533](https://github.com/johannesjo/super-productivity/commit/d751533))
+* **takeABreak:** cancel lock screen timer on snooze and 'I already did' ([d556ee2](https://github.com/johannesjo/super-productivity/commit/d556ee2))
+* **takeABreak:** make lock screen feature work ([642a236](https://github.com/johannesjo/super-productivity/commit/642a236))
+* add model entity helpers for persistence service [#197](https://github.com/johannesjo/super-productivity/issues/197) ([9798d5b](https://github.com/johannesjo/super-productivity/commit/9798d5b))
+* improve model entity helpers for persistence service [#197](https://github.com/johannesjo/super-productivity/issues/197) ([24fa5f6](https://github.com/johannesjo/super-productivity/commit/24fa5f6))
+
+
+
 ## [2.10.1](https://github.com/johannesjo/super-productivity/compare/v2.10.0...v2.10.1) (2019-07-18)
 
 
