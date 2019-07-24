@@ -14,7 +14,6 @@ import {Tag} from '../tag.model';
 import {TagService} from '../tag.service';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
-import {UserInputService} from '../../../core/user-input/user-input.service';
 import {TaskService} from '../../tasks/task.service';
 
 @Component({
@@ -46,11 +45,10 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
   constructor(
     private readonly _tagService: TagService,
-    private readonly _taskService: TaskService,
-    private readonly _matDialog: MatDialog,
-    private readonly _userInputService: UserInputService
+    private readonly _matDialog: MatDialog
   ) {
   }
+
 
   ngOnInit(): void {
   }
@@ -96,11 +94,11 @@ export class TagListComponent implements OnInit, AfterViewInit {
     this.newTagInputEl.nativeElement.focus();
   }
 
-  handleClickOnTag($event: string) {
-    if (this._userInputService.isKeyPressed('Control') ) {
-      console.log($event);
-      // this._tagService.removeTag($event, this._taskService);
-      this.removedTagsFromTask.emit([$event]);
+  handleClickOnTag($event: MouseEvent, tagId: string) {
+    if ( $event.ctrlKey ) {
+      this.removedTagsFromTask.emit([tagId]);
+    } else {
+      // TODO: Edit tag
     }
   }
 }

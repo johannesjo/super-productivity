@@ -1,6 +1,6 @@
 <ul class="tags" #tagListEl>
   <li *ngFor="let tag of tags$|async as tags" class="tag"
-    (click)="handleClickOnTag(tag.id)">
+    (click)="handleClickOnTag($event, tag.id)">
     <div [style.color]="tag?.color">{{tag?.name}}</div>
   </li>
   <li class="tag add-tag" (click)="startEditNewTag()">
