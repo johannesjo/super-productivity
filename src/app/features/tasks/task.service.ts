@@ -76,7 +76,7 @@ import {
   selectTaskById,
   selectTaskByIssueId,
   selectTaskEntities,
-  selectTasksByRepeatConfigId,
+  selectTasksByRepeatConfigId, selectTasksByTag,
   selectTasksWithMissingIssueData,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId,
@@ -93,6 +93,7 @@ import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
 import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../issue/issue.const';
+import {TagService} from '../tag/tag.service';
 
 
 @Injectable({
@@ -250,6 +251,7 @@ export class TaskService {
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
     private readonly _issueService: IssueService,
+    private readonly _tagService: TagService,
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
@@ -328,6 +330,11 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks) {
+    this.removeTags(task, task.tagIds);
+    task.subTasks.forEach(subTask => this.removeTags(
+      subTask,
+      [...task.tagIds, ...subTask.tagIds]
+    ));
     this._store.dispatch(new DeleteTask({task}));
   }
 
@@ -338,6 +345,32 @@ export class TaskService {
     }));
   }
 
+  // TODO: Move logic away from service class (to actions)?
+  removeTags(task: Task, tagIdsToRemove: string[]) {
+    const newTags = [...task.tagIds];
+    tagIdsToRemove.forEach(tagId => {
+      const index = newTags.indexOf(tagId);
+      if ( index !== -1) {
+        newTags.splice(index, 1);
+      }
+    });
+    this.update(task.id, {tagIds: newTags});
+  }
+
+  // TODO: Move logic away from service class (to actions)?
+  // TODO: Should this reside in tagService?
+  purgeUnusedTags(tagIds: string[]) {
+    tagIds.forEach(tagId => {
+      this.getTasksByTag(tagId)
+        .pipe(take(1))
+        .subscribe(tasks => {
+          console.log(`Tag is present on ${tasks.length} tasks => ${tasks.length ? 'keeping...' : 'deleting...'}`);
+          if (tasks.length === 0) {
+            this._tagService.removeTag(tagId);
+          }
+        });
+    });
+  }
 
   updateUi(id: string, changes: Partial<Task>) {
     this._store.dispatch(new UpdateTaskUi({
@@ -483,6 +516,10 @@ export class TaskService {
 
   getTasksWorkedOnOrDoneFlat$(day: string = getWorklogStr()): Observable<TaskWithSubTasks[]> {
     return this._store.pipe(select(selectTasksWorkedOnOrDoneFlat, {day}));
+  }
+
+  getTasksByTag(tagId: string): Observable<TaskWithSubTasks[]> {
+    return this._store.pipe(select(selectTasksByTag, {tagId}));
   }
 
   // TODO could be done better

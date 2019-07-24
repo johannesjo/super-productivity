@@ -15,6 +15,7 @@ import {
   TagState
 } from './store/tag.reducer';
 import shortid from 'shortid';
+import {TaskService} from '../tasks/task.service';
 
 @Injectable({
   providedIn: 'root'
@@ -71,7 +72,7 @@ export class TagService {
     return id;
   }
 
-  public remove(id: string) {
+  public removeTag(id: string) {
     this._store$.dispatch(new DeleteTag({id}));
   }
 

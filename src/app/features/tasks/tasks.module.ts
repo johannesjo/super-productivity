@@ -20,6 +20,7 @@ import {DialogAddTaskReminderComponent} from './dialog-add-task-reminder/dialog-
 import {TaskSummaryTableComponent} from './task-summary-table/task-summary-table.component';
 import {DialogAddTimeEstimateForOtherDayComponent} from './dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
 import {TagModule} from '../tag/tag.module';
+import {TagService} from '../tag/tag.service';
 
 @NgModule({
   imports: [
@@ -58,7 +59,8 @@ import {TagModule} from '../tag/tag.module';
     DialogViewTaskReminderComponent,
     DialogAddTaskReminderComponent,
     DialogAddTimeEstimateForOtherDayComponent,
-  ]
+  ],
+  providers: [TagService]
 
 })
 export class TasksModule {

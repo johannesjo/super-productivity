@@ -13,7 +13,9 @@ import {MatDialog} from '@angular/material';
 import {Tag} from '../tag.model';
 import {TagService} from '../tag.service';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {first, subscribeOn, switchMap} from 'rxjs/operators';
+import {switchMap, take} from 'rxjs/operators';
+import {UserInputService} from '../../../core/user-input/user-input.service';
+import {TaskService} from '../../tasks/task.service';
 
 @Component({
   selector: 'tag-list',
@@ -31,6 +33,7 @@ export class TagListComponent implements OnInit, AfterViewInit {
   @Output() removedTagsFromTask: EventEmitter<string[]> = new EventEmitter();
 
   @ViewChild('newTagInputEl', {static: true}) newTagInputEl;
+  @ViewChild('tagListEl', {static: true}) tagListEl;
 
   counter = 0;
   editingNewTag = false;
@@ -42,8 +45,10 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
 
   constructor(
-    public readonly _tagService: TagService,
-    private readonly _matDialog: MatDialog
+    private readonly _tagService: TagService,
+    private readonly _taskService: TaskService,
+    private readonly _matDialog: MatDialog,
+    private readonly _userInputService: UserInputService
   ) {
   }
 
@@ -67,11 +72,12 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
   addTagToTask($event: string) {
     console.log('adding tag...');
-    const subscription = this._tagService.getByName$($event).subscribe(tag => {
+    this._tagService.getByName$($event)
+      .pipe(take(1))
+      .subscribe(tag => {
       console.log(tag);
       if ( tag ) {
-        // TODO: Show proper error message
-        console.error('ERROR: A tag with that name already exists!');
+        this.addedTagsToTask.emit([tag.id]);
         return;
       }
       console.log('Adding tag...');
@@ -85,13 +91,16 @@ export class TagListComponent implements OnInit, AfterViewInit {
     this.editingNewTag = false;
   }
 
-  removeTagFromTask($event: string) {
-    this.removedTagsFromTask.emit([$event]);
-  }
-
   startEditNewTag() {
     this.editingNewTag = true;
     this.newTagInputEl.nativeElement.focus();
   }
 
+  handleClickOnTag($event: string) {
+    if (this._userInputService.isKeyPressed('Control') ) {
+      console.log($event);
+      // this._tagService.removeTag($event, this._taskService);
+      this.removedTagsFromTask.emit([$event]);
+    }
+  }
 }

@@ -3,6 +3,7 @@ import {filterStartableTasks, TASK_FEATURE_NAME, taskAdapter, TaskState} from '.
 import {selectIssueEntityMap} from '../../issue/issue.selector';
 import {Task, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueProviderKey} from '../../issue/issue';
+import {create} from 'domain';
 
 const mapIssueDataToTask = (tasks_, issueEntityMap): TaskWithIssueData[] => {
   return tasks_ && tasks_.map((task) => {
@@ -235,3 +236,9 @@ export const selectTaskWithSubTasksByRepeatConfigId = createSelector(
   }
 );
 
+export const selectTasksByTag = createSelector(
+  selectAllTasksWithSubTasks,
+  (tasks: TaskWithSubTasks[], props: { tagId: string }) => {
+    return tasks.filter(task => task.tagIds.indexOf(props.tagId) !== -1);
+  }
+);

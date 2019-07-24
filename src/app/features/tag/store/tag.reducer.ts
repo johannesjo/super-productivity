@@ -2,6 +2,7 @@ import {Tag} from '../tag.model';
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {TagActions, TagActionTypes} from './tag.actions';
+import {act} from '@ngrx/effects';
 
 export interface TagState extends EntityState<Tag> {}
 
@@ -54,6 +55,15 @@ export function tagReducer(
       //   },
       //   ids: [action.payload.tag.id, ...state.ids] as string[] | number[]
       //   };
+    }
+    case TagActionTypes.DeleteTag: {
+      // action.payload.taskService.getTasksByTag(action.payload.id).subscribe(tasks => {
+      //   // const taskIdsToRemove = tasks.reduce((ids: string[], task) => {
+      //   //   return [...ids, ...task.subTasks.map(subTask => subTask.id), ...[task.id]];
+      //   // }, []);
+      //   tasks.forEach(task => action.payload.taskService.removeTags(task, [action.payload.id]));
+      // });
+      return adapter.removeOne(action.payload.id, state);
     }
     case TagActionTypes.LoadTagState:
       return {...action.payload.state};
