@@ -68,7 +68,17 @@ export function createTranslateLoader(http: HttpClient) {
     HttpClientModule,
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
     // NOTE: both need to be present to use forFeature stores
-    StoreModule.forRoot(reducers),
+    StoreModule.forRoot(reducers,
+      environment.production
+        ? {}
+        : {
+          runtimeChecks: {
+            strictStateImmutability: true,
+            strictActionImmutability: true,
+            strictStateSerializability: true,
+            strictActionSerializability: true,
+          },
+        }),
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     ReactiveFormsModule,
