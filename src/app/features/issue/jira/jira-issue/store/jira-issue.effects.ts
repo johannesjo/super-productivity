@@ -15,7 +15,7 @@ import {JiraIssue} from '../jira-issue.model';
 import {JiraCfg, JiraTransitionOption} from '../../jira';
 import {SnackService} from '../../../../../core/snack/snack.service';
 import {ProjectActionTypes} from '../../../../project/store/project.actions';
-import {Task} from '../../../../tasks/task.model';
+import {Task, TaskState} from '../../../../tasks/task.model';
 import {JIRA_TYPE} from '../../../issue.const';
 import {
   selectAllTasks,
@@ -25,7 +25,6 @@ import {
 } from '../../../../tasks/store/task.selectors';
 import {TaskService} from '../../../../tasks/task.service';
 import {EMPTY, Observable, of, throwError, timer} from 'rxjs';
-import {TaskState} from '../../../../tasks/store/task.reducer';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogJiraTransitionComponent} from '../../dialog-jira-transition/dialog-jira-transition.component';
 import {IssueLocalState} from '../../../issue';

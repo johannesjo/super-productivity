@@ -1,7 +1,6 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {DropListModelSource, Task, TaskWithSubTasks} from '../task.model';
-import {TaskState} from './task.reducer';
+import {DropListModelSource, Task, TaskState, TaskWithSubTasks} from '../task.model';
 import {IssueData} from '../../issue/issue';
 import {RoundTimeOption} from '../../project/project.model';
 

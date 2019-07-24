@@ -82,3 +82,29 @@ export const DEFAULT_TASK: Task = {
 };
 
 export const SHORT_SYNTAX_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
+
+export interface TaskState extends EntityState<Task> {
+  // overwrite entity model to avoid problems with typing
+  ids: string[];
+
+  // additional entities state properties
+  currentTaskId: string | null;
+  lastCurrentTaskId: string | null;
+  focusTaskId: string | null;
+  lastActiveFocusTaskId: string | null;
+
+  // NOTE: but it is not needed currently
+  todaysTaskIds: string[];
+  backlogTaskIds: string[];
+  stateBefore: TaskState;
+  isDataLoaded: boolean;
+
+  // TODO though this not so much maybe
+  // todayDoneTasks: string[];
+  // todayUnDoneTasks: string[];
+
+  // TODO maybe rework time spent updates etc. via
+  // BEWARE of the potential cleanup issues though
+  // lastDeletedTasks: string[];
+  // lastAffectedTasks: string[];
+}

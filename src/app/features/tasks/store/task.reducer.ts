@@ -1,6 +1,5 @@
-import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
 import {TaskActions, TaskActionTypes} from './task.actions';
-import {ShowSubTasksMode, Task, TaskWithSubTasks} from '../task.model';
+import {ShowSubTasksMode, TaskState, TaskWithSubTasks} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../../attachment/store/attachment.actions';
@@ -16,35 +15,9 @@ import {
   updateTimeEstimateForTask,
   updateTimeSpentForTask
 } from './task.reducer.util';
+import {taskAdapter} from './task.adapter';
 
 export const TASK_FEATURE_NAME = 'tasks';
-export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
-
-export interface TaskState extends EntityState<Task> {
-  // overwrite entity model to avoid problems with typing
-  ids: string[];
-
-  // additional entities state properties
-  currentTaskId: string | null;
-  lastCurrentTaskId: string | null;
-  focusTaskId: string | null;
-  lastActiveFocusTaskId: string | null;
-
-  // NOTE: but it is not needed currently
-  todaysTaskIds: string[];
-  backlogTaskIds: string[];
-  stateBefore: TaskState;
-  isDataLoaded: boolean;
-
-  // TODO though this not so much maybe
-  // todayDoneTasks: string[];
-  // todayUnDoneTasks: string[];
-
-  // TODO maybe rework time spent updates etc. via
-  // BEWARE of the potential cleanup issues though
-  // lastDeletedTasks: string[];
-  // lastAffectedTasks: string[];
-}
 
 
 // REDUCER

@@ -17,7 +17,7 @@ import {
   DropListModelSource,
   SHORT_SYNTAX_REG_EX,
   ShowSubTasksMode,
-  Task,
+  Task, TaskState,
   TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
@@ -52,7 +52,7 @@ import {
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
-import {initialTaskState, TaskState} from './store/task.reducer';
+import {initialTaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {IssueData, IssueProviderKey} from '../issue/issue';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';

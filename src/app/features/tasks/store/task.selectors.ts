@@ -1,9 +1,10 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {TASK_FEATURE_NAME, taskAdapter, TaskState} from './task.reducer';
+import {TASK_FEATURE_NAME} from './task.reducer';
 import {selectIssueEntityMap} from '../../issue/issue.selector';
-import {Task, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
+import {Task, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueProviderKey} from '../../issue/issue';
 import {filterStartableTasks} from './task.reducer.util';
+import {taskAdapter} from './task.adapter';
 
 const mapIssueDataToTask = (tasks_, issueEntityMap): TaskWithIssueData[] => {
   return tasks_ && tasks_.map((task) => {

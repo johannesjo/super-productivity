@@ -1,8 +1,8 @@
 // HELPER
 // ------
-import {DEFAULT_TASK, Task, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
+import {DEFAULT_TASK, Task, TaskState, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
-import {taskAdapter, TaskState} from './task.reducer';
+import {taskAdapter} from './task.adapter';
 
 export const getTaskById = (taskId: string, state: TaskState) => {
   if (!state.entities[taskId]) {

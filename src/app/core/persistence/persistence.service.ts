@@ -21,9 +21,9 @@ import {
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {initialTaskState, taskReducer, TaskState} from '../../features/tasks/store/task.reducer';
+import {initialTaskState, taskReducer} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
-import {Task, TaskArchive, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {Task, TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {attachmentReducer, AttachmentState} from '../../features/attachment/store/attachment.reducer';
