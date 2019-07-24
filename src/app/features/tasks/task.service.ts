@@ -331,10 +331,6 @@ export class TaskService {
 
   remove(task: TaskWithSubTasks) {
     this.removeTags(task, task.tagIds);
-    task.subTasks.forEach(subTask => this.removeTags(
-      subTask,
-      [...task.tagIds, ...subTask.tagIds]
-    ));
     this._store.dispatch(new DeleteTask({task}));
   }
 
