@@ -16,8 +16,6 @@ import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
 
-const WORKER_PATH = 'assets/web-workers/reminder.js';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -44,8 +42,11 @@ export class ReminderService {
   }
 
   async init() {
-    if ('Worker' in window) {
-      this._w = new Worker(WORKER_PATH);
+    if (typeof Worker !== 'undefined') {
+      this._w = new Worker('./reminder.worker', {
+        name: 'reminder',
+        type: 'module'
+      });
 
       // TODO we need a better solution for this
       // we do this to wait for syncing and the like
@@ -84,7 +85,6 @@ export class ReminderService {
       type,
       recurringConfig
     });
-    // this._persistenceService
     this._saveModel(this._reminders);
     return id;
   }
@@ -109,7 +109,7 @@ export class ReminderService {
       this._reminders.splice(i, 1);
       this._saveModel(this._reminders);
     } else {
-      throw new Error('Unable to find reminder with id ' + reminderIdToRemove);
+      // throw new Error('Unable to find reminder with id ' + reminderIdToRemove);
     }
   }
 

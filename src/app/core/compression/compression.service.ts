@@ -3,8 +3,6 @@ import {SnackService} from '../snack/snack.service';
 import shortid from 'shortid';
 import {T} from '../../t.const';
 
-const WORKER_PATH = 'assets/web-workers/lz.js';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -15,13 +13,18 @@ export class CompressionService {
   constructor(
     private readonly _snackService: SnackService,
   ) {
-    if ('Worker' in window) {
-      this._w = new Worker(WORKER_PATH);
-
+    if (typeof Worker !== 'undefined') {
+      // Create a new
+      this._w = new Worker('./lz.worker', {
+        name: 'lz',
+        type: 'module'
+      });
       this._w.addEventListener('message', this._onData.bind(this));
       this._w.addEventListener('error', this._handleError.bind(this));
     } else {
       console.error('No web workers supported :(');
+      // Web Workers are not supported in this environment.
+      // You should add a fallback so that your program still executes correctly.
     }
   }
 
@@ -53,7 +56,7 @@ export class CompressionService {
     });
   }
 
-  private _promisifyWorker(strToHandle): Promise<string> {
+  private _promisifyWorker(params: { type: string; strToHandle: string }): Promise<string> {
     const id = shortid();
 
     const promise = new Promise(((resolve, reject) => {
@@ -64,7 +67,7 @@ export class CompressionService {
     })) as Promise<string>;
 
     this._w.postMessage({
-      ...strToHandle,
+      ...params,
       id,
     });
     return promise;

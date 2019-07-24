@@ -1,11 +1,14 @@
+/// <reference lib="webworker" />
 const CHECK_INTERVAL_DURATION = 1000;
 const MESSAGE_INTERVAL_DURATION = 10000;
 let currentMessageTimerVal = 0;
 let checkInterval;
 
-self.onmessage = function (msg) {
-  reInitCheckInterval(msg.data);
-};
+addEventListener('message', ({data}) => {
+  // console.log('REMINDER WORKER', data);
+  reInitCheckInterval(data);
+});
+
 
 const reInitCheckInterval = (reminders) => {
   if (checkInterval) {
@@ -26,7 +29,7 @@ const reInitCheckInterval = (reminders) => {
 
     if (oldestDueReminder && oldestDueReminder.remindAt < Date.now()) {
       if (currentMessageTimerVal <= 0) {
-        self.postMessage(oldestDueReminder);
+        postMessage(oldestDueReminder);
         console.log('Worker postMessage', oldestDueReminder);
         currentMessageTimerVal = MESSAGE_INTERVAL_DURATION;
       } else {
