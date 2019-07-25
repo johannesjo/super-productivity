@@ -125,7 +125,7 @@ export class TaskEffects {
         msg: T.F.TASK.S.REMINDER_ADDED,
         ico: 'schedule',
       })),
-      map((a: AddTaskReminder) => {
+      mergeMap((a: AddTaskReminder) => {
         const {id, title, remindAt, isMoveToBacklog} = a.payload;
         const reminderId = this._reminderService.addReminder('TASK', id, title, remindAt);
 
