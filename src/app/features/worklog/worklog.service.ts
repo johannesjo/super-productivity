@@ -66,15 +66,17 @@ export class WorklogService {
 
     tasks = tasks.filter((task) => {
       const taskDate = new Date(task.dateStr);
-      return (taskDate > rangeStart && taskDate < rangeEnd);
+      return (taskDate >= rangeStart && taskDate <= rangeEnd);
     });
 
     if (isFilterOutTimeSpentOnOtherDays) {
       tasks = tasks.map((task): WorklogTask => {
+
         const timeSpentOnDay = {};
         Object.keys(task.timeSpentOnDay).forEach(dateStr => {
           const date = new Date(dateStr);
-          if (date > rangeStart && date < rangeEnd) {
+
+          if (date >= rangeStart && date <= rangeEnd) {
             timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
           }
         });
