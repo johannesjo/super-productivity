@@ -49,7 +49,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this._subs.add(this._projectService.advancedCfg$.subscribe((val) => {
-      this.options = val.simpleSummarySettings;
+      this.options = {...val.simpleSummarySettings};
 
       if (this.tasks) {
         this.tasksTxt = this._createTasksText(this.tasks);

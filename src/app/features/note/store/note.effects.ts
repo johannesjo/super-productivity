@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
-import {filter, map, mergeMap, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {
   AddNote,
@@ -15,8 +15,8 @@ import {
 } from './note.actions';
 import {selectNoteFeatureState} from './note.reducer';
 import {ReminderService} from '../../reminder/reminder.service';
-import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {T} from '../../../t.const';
+import {SnackService} from '../../../core/snack/snack.service';
 
 @Injectable()
 export class NoteEffects {
@@ -76,35 +76,32 @@ export class NoteEffects {
       ofType(
         NoteActionTypes.AddNoteReminder,
       ),
-      mergeMap((a: AddNoteReminder) => {
+      map((a: AddNoteReminder) => {
         const {id, title, remindAt} = a.payload;
         const reminderId = this._reminderService.addReminder('NOTE', id, title, remindAt);
-
-        return [
-          new UpdateNote({
-            note: {id, changes: {reminderId}}
-          }),
-          new SnackOpen({
-            type: 'SUCCESS',
-            msg: T.F.NOTE.S.ADDED_REMINDER,
-            ico: 'schedule',
-          }),
-        ];
-      })
+        return new UpdateNote({
+          note: {id, changes: {reminderId}}
+        });
+      }),
+      tap(() => this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.NOTE.S.ADDED_REMINDER,
+        ico: 'schedule',
+      })),
     );
 
-  @Effect() updateNoteReminder$: any = this._actions$
+  @Effect({dispatch: false}) updateNoteReminder$: any = this._actions$
     .pipe(
       ofType(
         NoteActionTypes.UpdateNoteReminder,
       ),
-      map((a: UpdateNoteReminder) => {
+      tap((a: UpdateNoteReminder) => {
         const {title, remindAt, reminderId} = a.payload;
         this._reminderService.updateReminder(reminderId, {
           remindAt,
           title,
         });
-        return new SnackOpen({
+        this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.NOTE.S.UPDATED_REMINDER,
           ico: 'schedule',
@@ -117,24 +114,22 @@ export class NoteEffects {
       ofType(
         NoteActionTypes.RemoveNoteReminder,
       ),
-      mergeMap((a: RemoveNoteReminder) => {
+      map((a: RemoveNoteReminder) => {
         const {id, reminderId} = a.payload;
         this._reminderService.removeReminder(reminderId);
-
-        return [
-          new UpdateNote({
-            note: {
-              id,
-              changes: {reminderId: null}
-            }
-          }),
-          new SnackOpen({
-            type: 'SUCCESS',
-            msg: T.F.NOTE.S.DELETED_REMINDER,
-            ico: 'schedule',
-          }),
-        ];
-      })
+        ;
+        return new UpdateNote({
+          note: {
+            id,
+            changes: {reminderId: null}
+          }
+        });
+      }),
+      tap(() => this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.NOTE.S.DELETED_REMINDER,
+        ico: 'schedule',
+      })),
     );
 
 
@@ -143,6 +138,7 @@ export class NoteEffects {
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
     private _reminderService: ReminderService,
+    private _snackService: SnackService,
   ) {
   }
 

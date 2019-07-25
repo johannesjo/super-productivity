@@ -19,7 +19,6 @@ import {filter, map, mergeMap, switchMap, tap, throttleTime, withLatestFrom} fro
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectCurrentTask, selectTaskFeatureState, selectTasksWorkedOnOrDoneFlat} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
-import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {TaskService} from '../task.service';
 import {selectConfigFeatureState, selectMiscConfig} from '../../config/store/global-config.reducer';
@@ -38,6 +37,7 @@ import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {T} from '../../../t.const';
+import {SnackService} from '../../../core/snack/snack.service';
 
 // TODO send message to electron when current task changes here
 
@@ -117,6 +117,14 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.AddTaskReminder,
       ),
+      tap((a: AddTaskReminder) => this._snackService.open({
+        type: 'SUCCESS',
+        translateParams: {
+          title: truncate(a.payload.title)
+        },
+        msg: T.F.TASK.S.REMINDER_ADDED,
+        ico: 'schedule',
+      })),
       mergeMap((a: AddTaskReminder) => {
         const {id, title, remindAt, isMoveToBacklog} = a.payload;
         const reminderId = this._reminderService.addReminder('TASK', id, title, remindAt);
@@ -125,20 +133,12 @@ export class TaskEffects {
           new UpdateTask({
             task: {id, changes: {reminderId}}
           }),
-          new SnackOpen({
-            type: 'SUCCESS',
-            translateParams: {
-              title: truncate(title)
-            },
-            msg: T.F.TASK.S.REMINDER_ADDED,
-            ico: 'schedule',
-          }),
           ...(isMoveToBacklog ? [new MoveToBacklog({id})] : []),
         ];
       })
     );
 
-  @Effect() updateTaskReminder$: any = this._actions$
+  @Effect({dispatch: false}) updateTaskReminder$: any = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.UpdateTaskReminder,
@@ -150,7 +150,7 @@ export class TaskEffects {
           title,
         });
       }),
-      map((a: UpdateTaskReminder) => new SnackOpen({
+      tap((a: UpdateTaskReminder) => this._snackService.open({
         type: 'SUCCESS',
         translateParams: {
           title: truncate(a.payload.title)
@@ -165,34 +165,32 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.RemoveTaskReminder,
       ),
-      mergeMap((a: RemoveTaskReminder) => {
+      map((a: RemoveTaskReminder) => {
         const {id, reminderId} = a.payload;
         this._reminderService.removeReminder(reminderId);
 
-        return [
-          new UpdateTask({
-            task: {
-              id,
-              changes: {reminderId: null}
-            }
-          }),
-          new SnackOpen({
-            type: 'SUCCESS',
-            msg: T.F.TASK.S.REMINDER_DELETED,
-            ico: 'schedule',
-          }),
-        ];
-      })
+        return new UpdateTask({
+          task: {
+            id,
+            changes: {reminderId: null}
+          }
+        });
+      }),
+      tap(() => this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.TASK.S.REMINDER_DELETED,
+        ico: 'schedule',
+      })),
     );
 
-  @Effect() snackDelete$: any = this._actions$
+  @Effect({dispatch: false}) snackDelete$: any = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.DeleteTask,
       ),
-      map((action_: DeleteTask) => {
+      tap((action_: DeleteTask) => {
         const action = action_ as DeleteTask;
-        return new SnackOpen({
+        this._snackService.open({
           translateParams: {
             title: truncate(action.payload.task.title)
           },
@@ -422,6 +420,7 @@ export class TaskEffects {
               private _configService: GlobalConfigService,
               private _bannerService: BannerService,
               private _reminderService: ReminderService,
+              private _snackService: SnackService,
               private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {
   }

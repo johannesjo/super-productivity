@@ -107,7 +107,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
       // NOTE: important that this is set only if we actually have a value
       // otherwise the default fallback will be overwritten
       if (this.cfg) {
-        ref.instance.cfg = this.cfg;
+        ref.instance.cfg = {...this.cfg};
       }
 
       ref.instance.section = this.section;

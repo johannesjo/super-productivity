@@ -38,7 +38,6 @@ import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {GoogleDriveSyncConfig} from '../../config/global-config.model';
 import {SyncService} from '../../../imex/sync/sync.service';
-import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {DEFAULT_SYNC_FILE_NAME} from '../google.const';
 import {DialogConfirmDriveSyncSaveComponent} from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import * as moment from 'moment';
@@ -107,15 +106,17 @@ export class GoogleDriveSyncEffects {
         });
         return of(new LoadFromGoogleDriveFlow());
       } else {
-        return of(new SnackOpen({
-          msg: T.F.GOOGLE.S.NO_UPDATE_REQUIRED,
-        }));
+        this._snackService.open(T.F.GOOGLE.S.NO_UPDATE_REQUIRED);
+        return EMPTY;
       }
     }),
-    catchError(() => of(new SnackOpen({
-      type: 'ERROR',
-      msg: T.F.GOOGLE.S.ERROR_INITIAL_IMPORT,
-    }))),
+    catchError(() => {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.GOOGLE.S.ERROR_INITIAL_IMPORT,
+      });
+      return EMPTY;
+    }),
   );
 
   @Effect() changeSyncFile$: any = this._actions$.pipe(
@@ -129,11 +130,12 @@ export class GoogleDriveSyncEffects {
         concatMap((res: any): any => {
           const filesFound = res.items;
           if (filesFound.length && filesFound.length > 1) {
-            return of(new SnackOpen({
+            this._snackService.open({
               type: 'ERROR',
               msg: T.F.GOOGLE.S.MULTIPLE_SYNC_FILES_WITH_SAME_NAME,
               translateParams: {newFileName},
-            }));
+            });
+            return EMPTY;
           } else if (!filesFound || filesFound.length === 0) {
             return this._confirmSaveNewFile(newFileName).pipe(
               concatMap((isSave) => {

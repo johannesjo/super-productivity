@@ -43,7 +43,7 @@ import {JiraCfg} from '../issue/jira/jira';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/github/github';
 import {Actions, ofType} from '@ngrx/effects';
-import {distinctUntilChanged, take} from 'rxjs/operators';
+import {distinctUntilChanged, shareReplay, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
@@ -63,8 +63,9 @@ export class ProjectService {
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
   currentProject$: Observable<Project> = this._store$.pipe(
     select(selectCurrentProject),
+    // filter(v => !!v),
     // TODO investigate share replay issues
-    // shareReplay(),
+    shareReplay(),
   );
   currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
     select(selectProjectJiraCfg),

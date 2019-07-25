@@ -5,14 +5,14 @@ import {Observable} from 'rxjs';
 import {
   GlobalConfigSectionKey,
   GlobalConfigState,
-  GlobalSectionConfig,
+  GlobalSectionConfig, GoogleDriveSyncConfig,
   GoogleSession,
   IdleConfig,
   MiscConfig,
   TakeABreakConfig
 } from './global-config.model';
 import {
-  selectConfigFeatureState,
+  selectConfigFeatureState, selectGoogleDriveSyncConfig,
   selectGoogleSession,
   selectIdleConfig,
   selectMiscConfig,
@@ -29,6 +29,12 @@ import {migrateGlobalConfigState} from './migrate-global-config.util';
 export class GlobalConfigService {
   cfg$: Observable<GlobalConfigState> = this._store.pipe(
     select(selectConfigFeatureState),
+    distinctUntilChanged(),
+    shareReplay(),
+  );
+
+  googleDriveSyncCfg$: Observable<GoogleDriveSyncConfig> = this._store.pipe(
+    select(selectGoogleDriveSyncConfig),
     distinctUntilChanged(),
     shareReplay(),
   );

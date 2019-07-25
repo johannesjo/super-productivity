@@ -28,11 +28,12 @@ import {MigrateModule} from './imex/migrate/migrate.module';
 import {GlobalErrorHandler} from './core/error-handler/global-error-handler.class';
 import {MyHammerConfig} from '../hammer-config.class';
 import {ProcrastinationModule} from './features/procrastination/procrastination.module';
-import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {LanguageCode} from './app.constants';
 import {LanguageService} from './core/language/language.service';
+import {ConfigModule} from './features/config/config.module';
+import {ProjectModule} from './features/project/project.module';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -44,23 +45,26 @@ export function createTranslateLoader(http: HttpClient) {
     AppComponent,
   ],
   imports: [
+    // Those features need to be included first for store not to mess up, probably because we use it initially at many places
+    ConfigModule,
+    ProjectModule,
+
     // Local
     CoreModule,
     UiModule,
     CoreUiModule,
     PagesModule,
     MainHeaderModule,
-    BookmarkModule,
     MatSidenavModule,
-    TasksModule,
-    TaskRepeatCfgModule,
     ProcrastinationModule,
     TimeTrackingModule,
-    NoteModule,
     ReminderModule,
     MigrateModule,
     CoreUiModule,
     NoteModule,
+    BookmarkModule,
+    TasksModule,
+
 
     // External
     BrowserModule,
@@ -70,7 +74,14 @@ export function createTranslateLoader(http: HttpClient) {
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers,
       environment.production
-        ? {}
+        ? {
+          runtimeChecks: {
+            strictStateImmutability: false,
+            strictActionImmutability: false,
+            strictStateSerializability: false,
+            strictActionSerializability: false,
+          },
+        }
         : {
           runtimeChecks: {
             strictStateImmutability: true,

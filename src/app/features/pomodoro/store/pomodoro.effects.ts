@@ -16,12 +16,12 @@ import {DialogPomodoroBreakComponent} from '../dialog-pomodoro-break/dialog-pomo
 import {select, Store} from '@ngrx/store';
 import {selectCurrentTaskId} from '../../tasks/store/task.selectors';
 import {Observable} from 'rxjs';
-import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {IS_ELECTRON} from '../../../app.constants';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {ElectronService} from 'ngx-electron';
 import {T} from '../../../t.const';
+import {SnackService} from '../../../core/snack/snack.service';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 
@@ -131,7 +131,7 @@ export class PomodoroEffects {
     }),
   );
 
-  @Effect()
+  @Effect({dispatch: false})
   sessionStartSnack$ = this._actions$.pipe(
     ofType(PomodoroActionTypes.FinishPomodoroSession),
     withLatestFrom(
@@ -150,8 +150,8 @@ export class PomodoroEffects {
     filter(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) =>
       !isBreak && !isPause
     ),
-    map(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) => {
-      return new SnackOpen({
+    tap(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) => {
+      this._snackService.open({
         ico: 'timer',
         msg: T.F.POMODORO.NOTIFICATION.SESSION_X_START,
         translateParams: {nr: `${currentCycle + 1}`}
@@ -177,6 +177,7 @@ export class PomodoroEffects {
     private _notifyService: NotifyService,
     private _matDialog: MatDialog,
     private _electronService: ElectronService,
+    private _snackService: SnackService,
     private _store$: Store<any>,
   ) {
   }

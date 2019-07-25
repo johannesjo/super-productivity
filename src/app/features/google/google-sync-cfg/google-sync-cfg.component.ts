@@ -47,9 +47,10 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this._configService.cfg$.subscribe((cfg) => {
-      this.cfg = cfg.googleDriveSync;
-      this.tmpSyncFile = cfg.googleDriveSync.syncFileName;
+    this._subs.add(this._configService.googleDriveSyncCfg$.subscribe((cfg) => {
+      console.log(cfg);
+      this.cfg = {...cfg};
+      this.tmpSyncFile = this.cfg.syncFileName;
       this._cd.detectChanges();
     }));
   }

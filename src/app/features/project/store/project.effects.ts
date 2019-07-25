@@ -21,7 +21,6 @@ import {AttachmentService} from '../../attachment/attachment.service';
 import {NoteService} from '../../note/note.service';
 import {IssueService} from '../../issue/issue.service';
 import {SnackService} from '../../../core/snack/snack.service';
-import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {TaskActionTypes} from '../../tasks/store/task.actions';
 import {ReminderService} from '../../reminder/reminder.service';
@@ -203,13 +202,13 @@ export class ProjectEffects {
       })
     );
 
-  @Effect() onProjectCreated: any = this._actions$
+  @Effect({dispatch: false}) onProjectCreated: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.AddProject,
       ),
-      map((action: AddProject) => {
-        return new SnackOpen({
+      tap((action: AddProject) => {
+        this._snackService.open({
           ico: 'add',
           type: 'SUCCESS',
           msg: T.F.PROJECT.S.CREATED,
@@ -218,13 +217,13 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect() showDeletionSnack: any = this._actions$
+  @Effect({dispatch: false}) showDeletionSnack: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.DeleteProject,
       ),
-      map((action: DeleteProject) => {
-        return new SnackOpen({
+      tap((action: DeleteProject) => {
+        this._snackService.open({
           ico: 'delete_forever',
           msg: T.F.PROJECT.S.DELETED
         });
@@ -274,13 +273,13 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect() snackUpdateIssueProvider$: any = this._actions$
+  @Effect({dispatch: false}) snackUpdateIssueProvider$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
-      map((action: UpdateProjectIssueProviderCfg) => {
-        return new SnackOpen({
+      tap((action: UpdateProjectIssueProviderCfg) => {
+        this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.PROJECT.S.ISSUE_PROVIDER_UPDATED,
           translateParams: {
@@ -290,13 +289,13 @@ export class ProjectEffects {
       })
     );
 
-  @Effect() snackUpdateBaseSettings$: any = this._actions$
+  @Effect({dispatch: false}) snackUpdateBaseSettings$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UpdateProject,
       ),
-      map((action: UpdateProject) => {
-        return new SnackOpen({
+      tap((action: UpdateProject) => {
+        this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.PROJECT.S.UPDATED,
         });
