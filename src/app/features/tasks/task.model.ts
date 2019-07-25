@@ -14,7 +14,7 @@ export interface TimeSpentOnDayCopy {
   [key: string]: number;
 }
 
-export type TaskArchive = EntityState<TaskWithSubTasks>;
+export type TaskArchive = EntityState<TaskWithIssueData>;
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 

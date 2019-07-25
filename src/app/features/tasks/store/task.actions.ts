@@ -1,6 +1,6 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {DropListModelSource, Task, TaskState, TaskWithSubTasks} from '../task.model';
+import {DropListModelSource, Task, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueData} from '../../issue/issue';
 import {RoundTimeOption} from '../../project/project.model';
 
@@ -180,7 +180,7 @@ export class StartFirstStartable implements Action {
 export class RestoreTask implements Action {
   readonly type = TaskActionTypes.RestoreTask;
 
-  constructor(public payload: { task: TaskWithSubTasks }) {
+  constructor(public payload: { task: TaskWithIssueData, subTasks: TaskWithIssueData[] }) {
   }
 }
 

@@ -53,7 +53,7 @@ export class WorklogComponent {
     });
   }
 
-  restoreTask(yearKey, monthKey, dayKey, task: TaskCopy) {
+  restoreTask(task: TaskCopy) {
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
@@ -62,10 +62,19 @@ export class WorklogComponent {
         translateParams: {title: task.title}
       }
     }).afterClosed()
-      .subscribe((isConfirm: boolean) => {
+      .subscribe(async (isConfirm: boolean) => {
           // because we navigate away we don't need to worry about updating the worklog itself
           if (isConfirm) {
-            this._taskService.restoreTask(task);
+            let subTasks;
+            if (task.subTaskIds && task.subTaskIds.length) {
+              const archiveState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
+              subTasks = task.subTaskIds
+                .map(id => archiveState.entities[id])
+                .filter(v => !!v);
+            }
+
+            console.log('RESTORE', task, subTasks);
+            this._taskService.restoreTask(task, subTasks);
             this._router.navigate(['/work-view']);
           }
         }

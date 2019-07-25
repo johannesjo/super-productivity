@@ -108,7 +108,7 @@
 
                             </td>
                             <td class="actions">
-                              <button (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);"
+                              <button (click)="restoreTask(logEntry.task);"
                                       *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
                                       aria-label="restore"
                                       color=""

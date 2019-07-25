@@ -17,7 +17,8 @@ import {
   DropListModelSource,
   SHORT_SYNTAX_REG_EX,
   ShowSubTasksMode,
-  Task, TaskState,
+  Task,
+  TaskState,
   TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
@@ -422,8 +423,8 @@ export class TaskService {
     this._store.dispatch(new ToggleStart());
   }
 
-  restoreTask(task: TaskWithSubTasks) {
-    this._store.dispatch(new RestoreTask({task}));
+  restoreTask(task: TaskWithIssueData, subTasks: TaskWithIssueData[]) {
+    this._store.dispatch(new RestoreTask({task, subTasks}));
   }
 
   roundTimeSpentForDay(day: string, roundTo: RoundTimeOption, isRoundUp = false) {
@@ -617,20 +618,29 @@ export class TaskService {
   }
 
   async checkForTaskWithIssue(issue: IssueData): Promise<{
-    task: TaskWithIssueData | TaskWithSubTasks,
+    task: TaskWithIssueData,
+    subTasks: TaskWithIssueData[],
     isFromArchive: boolean,
   }> {
-    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise() as TaskWithIssueData[];
-    const taskWithSameIssue: TaskWithIssueData = allTasks.find(task => task.issueId === issue.id);
+    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise() as Task[];
+    const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issue.id);
 
     if (taskWithSameIssue) {
-      return {task: taskWithSameIssue, isFromArchive: false};
+      return {
+        task: taskWithSameIssue,
+        isFromArchive: false,
+        subTasks: null,
+      };
     } else {
       const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
         const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issue.id);
-        return archiveTaskWithSameIssue && {task: archiveTaskWithSameIssue, isFromArchive: true};
+        return archiveTaskWithSameIssue && {
+          task: archiveTaskWithSameIssue,
+          subTasks: archiveTaskWithSameIssue.subTaskIds && archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState[id]),
+          isFromArchive: true
+        };
       }
     }
   }

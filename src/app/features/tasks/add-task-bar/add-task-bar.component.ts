@@ -142,7 +142,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {
-        this._taskService.restoreTask(res.task);
+        this._taskService.restoreTask(res.task, res.subTasks);
         this._snackService.open({
           ico: 'info',
           msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,

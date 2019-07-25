@@ -450,16 +450,17 @@ export class TaskEffects {
       ids: []
     };
     mainTasks.forEach((task: TaskWithSubTasks) => {
+      const {subTasks, ...taskWithoutSub} = task;
       archive.entities[task.id] = {
-        ...task,
+        ...taskWithoutSub,
         reminderId: undefined,
         isDone: true,
       };
-      if (task.reminderId) {
-        this._reminderService.removeReminder(task.reminderId);
+      if (taskWithoutSub.reminderId) {
+        this._reminderService.removeReminder(taskWithoutSub.reminderId);
       }
 
-      archive.ids.push(task.id);
+      archive.ids.push(taskWithoutSub.id);
       if (task.subTasks) {
         task.subTasks.forEach((subTask) => {
           archive.entities[subTask.id] = {

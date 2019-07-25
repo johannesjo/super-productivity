@@ -412,10 +412,11 @@ export function taskReducer(
 
     case TaskActionTypes.RestoreTask: {
       const task = {...action.payload.task, isDone: false};
+      const subTasks = action.payload.subTasks;
       const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
 
-      if (task.subTasks) {
-        task.subTasks.forEach((subTask: TaskWithSubTasks) => {
+      if (subTasks && subTasks.length) {
+        subTasks.forEach((subTask: TaskWithSubTasks) => {
           if (subTask && subTask.id) {
             tasksToAdd.push(mapTaskWithSubTasksToTask(subTask));
           }
