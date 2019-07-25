@@ -76,7 +76,7 @@ export function createTranslateLoader(http: HttpClient) {
             strictStateImmutability: true,
             strictActionImmutability: true,
             strictStateSerializability: true,
-            strictActionSerializability: true,
+            strictActionSerializability: false,
           },
         }),
     EffectsModule.forRoot([]),
