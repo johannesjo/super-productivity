@@ -74,7 +74,14 @@ export function createTranslateLoader(http: HttpClient) {
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers,
       environment.production
-        ? {}
+        ? {
+          runtimeChecks: {
+            strictStateImmutability: false,
+            strictActionImmutability: false,
+            strictStateSerializability: false,
+            strictActionSerializability: false,
+          },
+        }
         : {
           runtimeChecks: {
             strictStateImmutability: true,
