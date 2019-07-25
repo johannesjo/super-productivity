@@ -73,6 +73,7 @@
         "TITLE": "Configurer le github pour le projet"
       },
       "FORM": {
+        "FILTER_USER": "Nom d'utilisateur (par exemple, pour filtrer vous-même les modifications)",
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les problèmes non résolus de Github à l'arriéré",
         "IS_AUTO_POLL": "Interroger automatiquement les problèmes git importés pour connaître les modifications",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les problèmes de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
@@ -648,7 +649,7 @@
         "WORKED": "Travaille"
       },
       "D_CONFIRM_RESTORE": "Êtes-vous sûr de vouloir déplacer la tâche <strong>\"{{title}}\"</strong> dans votre liste de tâches actuelle?",
-      "D_EXPORT_TITLE": "Exportation du journal de travail",
+      "D_EXPORT_TITLE": "Exportation du journal de travail {{start}}-{{end}}",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "Copier dans le presse-papier",
         "DONT_ROUND": "ne pas arrondir",
@@ -698,6 +699,7 @@
     "DELETE": "Effacer",
     "DISMISS": "Rejeter",
     "DO_IT": "Fais le!",
+    "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> télécharger l'extension chromée</a> afin de permettre la communication avec Jira Api et la gestion du temps d'inactivité. Notez que cela ne fonctionne pas pour mobile.",
     "LOGIN": "S'identifier",
     "LOGOUT": "Connectez - Out",
     "NEXT": "Suivant",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "Réduire les sous-tâches",
       "EXPAND_SUB_TASKS": "Développer les sous-tâches",
       "FOCUS_LAST_ACTIVE_TASK": "Mettre au point la dernière tâche active",
+      "GLOBAL_ADD_NOTE": "Ajouter une nouvelle note",
+      "GLOBAL_ADD_TASK": "Ajouter une nouvelle tâche",
       "GLOBAL_SHOW_HIDE": "Afficher / masquer la super productivité",
       "GLOBAL_TOGGLE_TASK_START": "Basculer le suivi du temps pour la dernière tâche active",
       "GO_TO_DAILY_AGENDA": "Aller à l'agenda",

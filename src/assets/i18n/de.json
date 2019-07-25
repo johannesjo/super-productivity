@@ -73,6 +73,7 @@
         "TITLE": "Richten Sie Github für Project ein"
       },
       "FORM": {
+        "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
         "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
@@ -648,7 +649,7 @@
         "WORKED": "Gearbeitet"
       },
       "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?",
-      "D_EXPORT_TITLE": "Worklog-Export",
+      "D_EXPORT_TITLE": "Worklog-Export {{start}}-{{end}}",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
         "DONT_ROUND": "runde nicht",
@@ -698,6 +699,7 @@
     "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
     "DO_IT": "TU es!",
+    "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Idle Time Handling zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "LOGIN": "Anmeldung",
     "LOGOUT": "Ausloggen",
     "NEXT": "Nächster",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "Unteraufgaben reduzieren",
       "EXPAND_SUB_TASKS": "Erweitern Sie Unteraufgaben",
       "FOCUS_LAST_ACTIVE_TASK": "Letzte aktive Aufgabe fokussieren",
+      "GLOBAL_ADD_NOTE": "Neue Notiz hinzufügen",
+      "GLOBAL_ADD_TASK": "Neue Aufgabe hinzufügen",
       "GLOBAL_SHOW_HIDE": "Superproduktivität ein- / ausblenden",
       "GLOBAL_TOGGLE_TASK_START": "Schaltet die Zeiterfassung für die zuletzt aktive Aufgabe um",
       "GO_TO_DAILY_AGENDA": "Gehe zur Agenda",

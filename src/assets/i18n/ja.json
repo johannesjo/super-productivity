@@ -73,6 +73,7 @@
         "TITLE": "プロジェクト用Githubのセットアップ"
       },
       "FORM": {
+        "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
         "IS_AUTO_ADD_TO_BACKLOG": "未解決の問題をGithubからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの問題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの問題を提案として表示する",
@@ -648,7 +649,7 @@
         "WORKED": "働いた"
       },
       "D_CONFIRM_RESTORE": "タスク <strong>\"{{title}}\"</strong> を今日のタスクリストに移動しますか？",
-      "D_EXPORT_TITLE": "作業ログのエクスポート",
+      "D_EXPORT_TITLE": "作業ログのエクスポート {{start}} - {{end}}",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "クリップボードにコピー",
         "DONT_ROUND": "丸めない",
@@ -698,6 +699,7 @@
     "DELETE": "削除",
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
+    "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、クロム拡張</a> をダウンロード <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> してください。これはモバイルでは機能しないことに注意してください。",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
     "NEXT": "次",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "サブタスクを折りたたむ",
       "EXPAND_SUB_TASKS": "サブタスクを展開",
       "FOCUS_LAST_ACTIVE_TASK": "最後のアクティブタスクに焦点を当てる",
+      "GLOBAL_ADD_NOTE": "新しいメモを追加",
+      "GLOBAL_ADD_TASK": "新しいタスクを追加する",
       "GLOBAL_SHOW_HIDE": "スーパー生産性の表示/非表示",
       "GLOBAL_TOGGLE_TASK_START": "最後のアクティブタスクのタイムトラッキングを切り替えます",
       "GO_TO_DAILY_AGENDA": "議題に行く",

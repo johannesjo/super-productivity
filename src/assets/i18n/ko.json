@@ -73,6 +73,7 @@
         "TITLE": "프로젝트를위한 Github 설정"
       },
       "FORM": {
+        "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
         "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
@@ -648,7 +649,7 @@
         "WORKED": "근무한"
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> 작업을 현재 작업 목록으로 이동 하시겠습니까?",
-      "D_EXPORT_TITLE": "작업 로그 내보내기",
+      "D_EXPORT_TITLE": "작업 로그 내보내기 {{start}}-{{end}}",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "클립 보드에 복사",
         "DONT_ROUND": "돌지 마라.",
@@ -698,6 +699,7 @@
     "DELETE": "지우다",
     "DISMISS": "버리다",
     "DO_IT": "해!",
+    "EXTENSION_INFO": "Jira Api 및 Idle Time Handling과의 통신을 허용하려면 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
     "LOGIN": "로그인",
     "LOGOUT": "로그 아웃",
     "NEXT": "다음 것",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "하위 작업 축소",
       "EXPAND_SUB_TASKS": "하위 작업 확장",
       "FOCUS_LAST_ACTIVE_TASK": "마지막 활성 작업 집중",
+      "GLOBAL_ADD_NOTE": "새 메모 추가",
+      "GLOBAL_ADD_TASK": "새 작업 추가",
       "GLOBAL_SHOW_HIDE": "최고 생산성 표시 / 숨기기",
       "GLOBAL_TOGGLE_TASK_START": "마지막 활성 작업에 대한 시간 추적 토글",
       "GO_TO_DAILY_AGENDA": "일정 목록으로 이동",

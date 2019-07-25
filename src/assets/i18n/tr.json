@@ -73,6 +73,7 @@
         "TITLE": "Project için Github Kurulumu"
       },
       "FORM": {
+        "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Github'dan backlog'a ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
@@ -648,7 +649,7 @@
         "WORKED": "işlenmiş"
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?",
-      "D_EXPORT_TITLE": "Worklog Export",
+      "D_EXPORT_TITLE": " {{start}}-{{end}}Worklog Dışa Aktarma",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "Panoya kopyala",
         "DONT_ROUND": "yuvarlama",
@@ -698,6 +699,7 @@
     "DELETE": "silmek",
     "DISMISS": "Reddet",
     "DO_IT": "Yap!",
+    "EXTENSION_INFO": "Jira Api ve Idle Time Handling ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "NEXT": "Sonraki",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "Alt Görevleri Daralt",
       "EXPAND_SUB_TASKS": "Alt Görevler'i genişletin",
       "FOCUS_LAST_ACTIVE_TASK": "Son etkin görevi odakla",
+      "GLOBAL_ADD_NOTE": "Yeni not ekle",
+      "GLOBAL_ADD_TASK": "Yeni Görev ekle",
       "GLOBAL_SHOW_HIDE": "Süper Verimliliği Göster / Gizle",
       "GLOBAL_TOGGLE_TASK_START": "Son etkin görev için zaman izlemesini değiştir",
       "GO_TO_DAILY_AGENDA": "Gündeme Git",

@@ -73,6 +73,7 @@
         "TITLE": "Configurar Github para Proyecto"
       },
       "FORM": {
+        "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
         "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la acumulación",
         "IS_AUTO_POLL": "Encuestar automáticamente los problemas de git importados para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
@@ -648,7 +649,7 @@
         "WORKED": "Trabajo"
       },
       "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?",
-      "D_EXPORT_TITLE": "Exportación de trabajo",
+      "D_EXPORT_TITLE": "Exportar registro de trabajo {{start}}-{{end}}",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
         "DONT_ROUND": "no redondear",
@@ -698,6 +699,7 @@
     "DELETE": "Borrar",
     "DISMISS": "Despedir",
     "DO_IT": "¡Hazlo!",
+    "EXTENSION_INFO": "Descargue <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> la extensión de Chrome</a> para permitir la comunicación con Jira Api y Idle Time Handling. Tenga en cuenta que esto no funciona para móviles.",
     "LOGIN": "Iniciar sesión",
     "LOGOUT": "Cerrar sesión",
     "NEXT": "Siguiente",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "Contraer sub tareas",
       "EXPAND_SUB_TASKS": "Expandir sub tareas",
       "FOCUS_LAST_ACTIVE_TASK": "Enfoque última tarea activa",
+      "GLOBAL_ADD_NOTE": "Añadir nueva nota",
+      "GLOBAL_ADD_TASK": "Agregar nueva tarea",
       "GLOBAL_SHOW_HIDE": "Mostrar / Ocultar Super Productividad",
       "GLOBAL_TOGGLE_TASK_START": "Alternar el seguimiento de tiempo para la última tarea activa",
       "GO_TO_DAILY_AGENDA": "Ir a agenda",

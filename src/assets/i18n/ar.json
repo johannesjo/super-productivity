@@ -73,6 +73,7 @@
         "TITLE": "إعداد جيثب للمشروع"
       },
       "FORM": {
+        "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
         "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Github إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا git المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "إظهار المشكلات من git كاقتراحات عند إضافة مهام جديدة",
@@ -648,7 +649,7 @@
         "WORKED": "عمل"
       },
       "D_CONFIRM_RESTORE": "هل أنت متأكد من رغبتك في نقل المهمة <strong>\"{{title}}\"</strong> إلى قائمة مهام اليوم؟",
-      "D_EXPORT_TITLE": "تصدير العمل",
+      "D_EXPORT_TITLE": "تصدير  {{start}}-{{end}}",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "نسخ إلى الحافظة",
         "DONT_ROUND": "لا تدور",
@@ -698,6 +699,7 @@
     "DELETE": "حذف",
     "DISMISS": "رفض",
     "DO_IT": "افعلها!",
+    "EXTENSION_INFO": "يرجى <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> تنزيل ملحق chrome</a> للسماح بالتواصل مع Jira Api و Idle Time Handling. لاحظ أن هذا لا يعمل للجوال.",
     "LOGIN": "تسجيل الدخول",
     "LOGOUT": "الخروج",
     "NEXT": "التالى",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "طي المهام الفرعية",
       "EXPAND_SUB_TASKS": "توسيع المهام الفرعية",
       "FOCUS_LAST_ACTIVE_TASK": "التركيز المهمة النشطة الأخيرة",
+      "GLOBAL_ADD_NOTE": "إضافة ملاحظة جديدة",
+      "GLOBAL_ADD_TASK": "إضافة مهمة جديدة",
       "GLOBAL_SHOW_HIDE": "إظهار / إخفاء الإنتاجية الفائقة",
       "GLOBAL_TOGGLE_TASK_START": "تبديل تتبع الوقت لآخر مهمة نشطة",
       "GO_TO_DAILY_AGENDA": "انتقل إلى جدول الأعمال",

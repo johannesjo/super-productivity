@@ -73,10 +73,10 @@
         "TITLE": "Setup Github for Project"
       },
       "FORM": {
+        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
       },
       "FORM_SECTION": {
@@ -235,6 +235,7 @@
       "DIALOG_WORKdLOG": {
         "TITLE": ""
       },
+      "EXTENSION_INFO": "",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
@@ -698,6 +699,7 @@
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
+    "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "NEXT": "Next",
@@ -707,8 +709,7 @@
     "SAVE": "Save",
     "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "Update",
-    "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile."
+    "UPDATE": "Update"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -739,10 +740,10 @@
       "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
       "EXPAND_SUB_TASKS": "Expand Sub Tasks",
       "FOCUS_LAST_ACTIVE_TASK": "Focus last active task",
-      "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
-      "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GLOBAL_ADD_NOTE": "Add new note",
       "GLOBAL_ADD_TASK": "Add new task",
+      "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
+      "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
       "GO_TO_FOCUS_MODE": "Go to Focus Mode",
       "GO_TO_SETTINGS": "Go to Settings",

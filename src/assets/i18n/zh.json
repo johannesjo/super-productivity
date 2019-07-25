@@ -73,6 +73,7 @@
         "TITLE": "为项目设置Github"
       },
       "FORM": {
+        "FILTER_USER": "用户名（例如，自行过滤掉更改）",
         "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Github添加到待办事项",
         "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的问题显示为建议",
@@ -648,7 +649,7 @@
         "WORKED": "工作"
       },
       "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？",
-      "D_EXPORT_TITLE": "工作日志导出",
+      "D_EXPORT_TITLE": "工作日志导出 {{start}} - {{end}}",
       "EXPORT": {
         "COPY_TO_CLIPBOARD": "复制到剪贴板",
         "DONT_ROUND": "不圆",
@@ -698,6 +699,7 @@
     "DELETE": "删除",
     "DISMISS": "解雇",
     "DO_IT": "做吧！",
+    "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
     "LOGIN": "登录",
     "LOGOUT": "登出",
     "NEXT": "下一个",
@@ -738,6 +740,8 @@
       "COLLAPSE_SUB_TASKS": "折叠子任务",
       "EXPAND_SUB_TASKS": "展开子任务",
       "FOCUS_LAST_ACTIVE_TASK": "关注最后的活动任务",
+      "GLOBAL_ADD_NOTE": "添加新笔记",
+      "GLOBAL_ADD_TASK": "添加新任务",
       "GLOBAL_SHOW_HIDE": "显示/隐藏超级生产力",
       "GLOBAL_TOGGLE_TASK_START": "切换上次活动任务的时间跟踪",
       "GO_TO_DAILY_AGENDA": "转到议程",
