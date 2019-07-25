@@ -1,13 +1,13 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {mapTo, tap, withLatestFrom} from 'rxjs/operators';
+import {tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {MetricActionTypes} from './metric.actions';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectMetricFeatureState} from './metric.selectors';
-import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {T} from '../../../t.const';
+import {SnackService} from '../../../core/snack/snack.service';
 
 @Injectable()
 export class MetricEffects {
@@ -27,14 +27,14 @@ export class MetricEffects {
       tap(this._saveToLs.bind(this))
     );
 
-  @Effect() saveMetrics$: any = this._actions$
+  @Effect({dispatch: false}) saveMetrics$: any = this._actions$
     .pipe(
       ofType(
         MetricActionTypes.AddMetric,
         MetricActionTypes.UpsertMetric,
         MetricActionTypes.UpdateMetric,
       ),
-      mapTo(new SnackOpen({
+      tap(() => this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.METRIC.S.SAVE_METRIC
       })),
@@ -43,7 +43,8 @@ export class MetricEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _persistenceService: PersistenceService
+    private _persistenceService: PersistenceService,
+    private _snackService: SnackService,
   ) {
   }
 

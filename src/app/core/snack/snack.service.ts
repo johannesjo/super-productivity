@@ -1,25 +1,94 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {SnackClose, SnackOpen} from './store/snack.actions';
 import {SnackParams} from './snack.model';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
+import {DEFAULT_SNACK_CFG} from './snack.const';
+import {SnackCustomComponent} from './snack-custom/snack-custom.component';
+import {TranslateService} from '@ngx-translate/core';
+import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SnackService {
+  private _ref: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
+
   constructor(
     private _store$: Store<any>,
+    private _translateService: TranslateService,
+    private store$: Store<any>,
+    private matSnackBar: MatSnackBar
   ) {
   }
+
+  // @Effect() hideOnProjectChange$: Observable<any> = this.actions$
+  //   .pipe(
+  //     ofType(ProjectActionTypes.SetCurrentProject),
+  //     mapTo(new SnackClose()),
+  //   );
 
   open(params: SnackParams | string) {
     if (typeof params === 'string') {
       params = {msg: params};
     }
-    this._store$.dispatch(new SnackOpen(params));
+    this._openSnack(params);
   }
 
   close() {
-    this._store$.dispatch(new SnackClose());
+    if (this._ref) {
+      this._ref.dismiss();
+    }
+  }
+
+
+  private _openSnack(params: SnackParams) {
+    const _destroy$: Subject<boolean> = new Subject<boolean>();
+    const destroySubs = () => {
+      _destroy$.next(true);
+      _destroy$.unsubscribe();
+    };
+    const {msg, actionStr, actionId, actionPayload, config, type, isSkipTranslate, translateParams, showWhile$, promise, isSpinner} = params;
+    const cfg = {
+      ...DEFAULT_SNACK_CFG,
+      ...config,
+      data: {
+        ...params,
+        msg: (isSkipTranslate)
+          ? msg
+          : this._translateService.instant(msg, translateParams),
+      },
+    };
+
+    if (showWhile$ || promise || isSpinner) {
+      cfg.panelClass = 'polling-snack';
+    }
+
+    switch (type) {
+      case 'ERROR':
+      case 'CUSTOM':
+      case 'SUCCESS':
+      default: {
+        this._ref = this.matSnackBar.openFromComponent(SnackCustomComponent, cfg);
+        break;
+      }
+    }
+
+    if (actionStr && actionId) {
+      this._ref.onAction()
+        .pipe(takeUntil(_destroy$))
+        .subscribe(() => {
+          this.store$.dispatch({
+            type: actionId,
+            payload: actionPayload
+          });
+          destroySubs();
+        });
+      this._ref.afterDismissed()
+        .pipe(takeUntil(_destroy$))
+        .subscribe(() => {
+          destroySubs();
+        });
+    }
   }
 }
