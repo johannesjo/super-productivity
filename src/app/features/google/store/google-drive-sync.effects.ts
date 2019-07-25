@@ -370,7 +370,6 @@ export class GoogleDriveSyncEffects {
     private _syncService: SyncService,
   ) {
     this._configService.cfg$.subscribe((cfg) => {
-      console.log(cfg);
       this._config = cfg.googleDriveSync;
     });
   }

@@ -1,32 +1,32 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {SnackParams} from './snack.model';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {DEFAULT_SNACK_CFG} from './snack.const';
 import {SnackCustomComponent} from './snack-custom/snack-custom.component';
 import {TranslateService} from '@ngx-translate/core';
 import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material';
+import {Actions, ofType} from '@ngrx/effects';
+import {ProjectActionTypes} from '../../features/project/store/project.actions';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SnackService {
   private _ref: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
+  private _onProjectChange$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.SetCurrentProject));
 
   constructor(
     private _store$: Store<any>,
     private _translateService: TranslateService,
-    private store$: Store<any>,
-    private matSnackBar: MatSnackBar
+    private _actions$: Actions,
+    private _matSnackBar: MatSnackBar
   ) {
+    this._onProjectChange$.subscribe(() => {
+      this.close();
+    });
   }
-
-  // @Effect() hideOnProjectChange$: Observable<any> = this.actions$
-  //   .pipe(
-  //     ofType(ProjectActionTypes.SetCurrentProject),
-  //     mapTo(new SnackClose()),
-  //   );
 
   open(params: SnackParams | string) {
     if (typeof params === 'string') {
@@ -69,7 +69,7 @@ export class SnackService {
       case 'CUSTOM':
       case 'SUCCESS':
       default: {
-        this._ref = this.matSnackBar.openFromComponent(SnackCustomComponent, cfg);
+        this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
         break;
       }
     }
@@ -78,7 +78,7 @@ export class SnackService {
       this._ref.onAction()
         .pipe(takeUntil(_destroy$))
         .subscribe(() => {
-          this.store$.dispatch({
+          this._store$.dispatch({
             type: actionId,
             payload: actionPayload
           });
