@@ -1,3 +1,20 @@
+## [2.10.3](https://github.com/johannesjo/super-productivity/compare/v2.10.2...v2.10.3) (2019-07-25)
+
+
+### Bug Fixes
+
+* close snacks on project change ([a6c2266](https://github.com/johannesjo/super-productivity/commit/a6c2266))
+* remove strictActionSerializability for now ([82e813d](https://github.com/johannesjo/super-productivity/commit/82e813d))
+* several issue with new checks for development ([bdc4450](https://github.com/johannesjo/super-productivity/commit/bdc4450))
+* **worklog:** date export not always being right ([9a22814](https://github.com/johannesjo/super-productivity/commit/9a22814))
+
+
+### Features
+
+* **i18n:** add missing translations ([16ab134](https://github.com/johannesjo/super-productivity/commit/16ab134))
+
+
+
 ## [2.10.2](https://github.com/johannesjo/super-productivity/compare/v2.10.1...v2.10.2) (2019-07-24)
 
 
