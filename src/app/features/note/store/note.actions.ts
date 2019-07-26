@@ -1,150 +1,80 @@
-import {Action} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
 import {Note} from '../note.model';
 import {NoteState} from './note.reducer';
 
-export enum NoteActionTypes {
-  LoadNoteState = '[Note] Load Note State',
-  ToggleShowNotes = '[Note] ToggleShow Notes',
-  HideNotes = '[Note] Hide Notes',
+export const loadNoteState = createAction(
+  '[Note] Load Note State',
+  props<{ state: NoteState }>(),
+);
+export const toggleShowNotes = createAction(
+  '[Note] ToggleShow Notes',
+);
 
-  UpdateNoteOrder = '[Note] Update Note Order',
-  AddNote = '[Note] Add Note',
-  UpsertNote = '[Note] Upsert Note',
-  AddNotes = '[Note] Add Notes',
-  UpsertNotes = '[Note] Upsert Notes',
-  UpdateNote = '[Note] Update Note',
-  UpdateNotes = '[Note] Update Notes',
-  DeleteNote = '[Note] Delete Note',
-  DeleteNotes = '[Note] Delete Notes',
-  ClearNotes = '[Note] Clear Notes',
+export const hideNotes = createAction(
+  '[Note] Hide Notes',
+);
 
-  // Reminders
-  AddNoteReminder = '[Note] Add reminder',
-  UpdateNoteReminder = '[Note] Update reminder',
-  RemoveNoteReminder = '[Note] Remove reminder',
+export const updateNoteOrder = createAction(
+  '[Note] Update Note Order',
+  props<{ ids: string[] }>(),
+);
 
-}
+export const addNote = createAction(
+  '[Note] Add Note',
+  props<{ note: Note, isPreventFocus?: boolean, remindAt: number }>(),
+);
 
-export class LoadNoteState implements Action {
-  readonly type = NoteActionTypes.LoadNoteState;
+export const upsertNote = createAction(
+  '[Note] Upsert Note',
+  props<{ note: Note }>(),
+);
 
-  constructor(public payload: { state: NoteState }) {
-  }
-}
+export const addNotes = createAction(
+  '[Note] Add Notes',
+  props<{ notes: Note[] }>(),
+);
 
-export class ToggleShowNotes implements Action {
-  readonly type = NoteActionTypes.ToggleShowNotes;
-}
+export const upsertNotes = createAction(
+  '[Note] Upsert Notes',
+  props<{ notes: Note[] }>(),
+);
 
-export class HideNotes implements Action {
-  readonly type = NoteActionTypes.HideNotes;
-}
+export const updateNote = createAction(
+  '[Note] Update Note',
+  props<{ note: Update<Note> }>(),
+);
 
-export class UpdateNoteOrder implements Action {
-  readonly type = NoteActionTypes.UpdateNoteOrder;
+export const updateNotes = createAction(
+  '[Note] Update Notes',
+  props<{ notes: Update<Note> [] }>(),
+);
 
-  constructor(public payload: { ids: string[] }) {
-  }
-}
+export const deleteNote = createAction(
+  '[Note] Delete Note',
+  props<{ id: string }>(),
+);
 
-export class AddNote implements Action {
-  readonly type = NoteActionTypes.AddNote;
+export const deleteNotes = createAction(
+  '[Note] Delete Notes',
+  props<{ ids: string[] }>(),
+);
 
-  constructor(public payload: { note: Note, isPreventFocus?: boolean, remindAt: number }) {
-  }
-}
-
-export class UpsertNote implements Action {
-  readonly type = NoteActionTypes.UpsertNote;
-
-  constructor(public payload: { note: Note }) {
-  }
-}
-
-export class AddNotes implements Action {
-  readonly type = NoteActionTypes.AddNotes;
-
-  constructor(public payload: { notes: Note[] }) {
-  }
-}
-
-export class UpsertNotes implements Action {
-  readonly type = NoteActionTypes.UpsertNotes;
-
-  constructor(public payload: { notes: Note[] }) {
-  }
-}
-
-export class UpdateNote implements Action {
-  readonly type = NoteActionTypes.UpdateNote;
-
-  constructor(public payload: { note: Update<Note> }) {
-  }
-}
-
-export class UpdateNotes implements Action {
-  readonly type = NoteActionTypes.UpdateNotes;
-
-  constructor(public payload: { notes: Update<Note>[] }) {
-  }
-}
-
-export class DeleteNote implements Action {
-  readonly type = NoteActionTypes.DeleteNote;
-
-  constructor(public payload: { id: string }) {
-  }
-}
-
-export class DeleteNotes implements Action {
-  readonly type = NoteActionTypes.DeleteNotes;
-
-  constructor(public payload: { ids: string[] }) {
-  }
-}
-
-export class ClearNotes implements Action {
-  readonly type = NoteActionTypes.ClearNotes;
-}
-
+export const clearNotes = createAction(
+  '[Note] Clear Notes',
+);
 // Reminder Actions
-export class AddNoteReminder implements Action {
-  readonly type = NoteActionTypes.AddNoteReminder;
+export const addNoteReminder = createAction(
+  '[Note] Add reminder',
+  props<{ id: string, title: string, remindAt: number }>(),
+);
 
-  constructor(public payload: { id: string, title: string, remindAt: number }) {
-  }
-}
+export const updateNoteReminder = createAction(
+  '[Note] Update reminder',
+  props<{ id: string, title: string, reminderId: string, remindAt: number }>(),
+);
 
-export class UpdateNoteReminder implements Action {
-  readonly type = NoteActionTypes.UpdateNoteReminder;
-
-  constructor(public payload: { id: string, title: string, reminderId: string, remindAt: number }) {
-  }
-}
-
-export class RemoveNoteReminder implements Action {
-  readonly type = NoteActionTypes.RemoveNoteReminder;
-
-  constructor(public payload: { id: string, reminderId: string }) {
-  }
-}
-
-export type NoteActions =
-  LoadNoteState
-  | ToggleShowNotes
-  | HideNotes
-  | UpdateNoteOrder
-  | AddNote
-  | UpsertNote
-  | AddNotes
-  | UpsertNotes
-  | UpdateNote
-  | UpdateNotes
-  | DeleteNote
-  | DeleteNotes
-  | ClearNotes
-  | AddNoteReminder
-  | UpdateNoteReminder
-  | RemoveNoteReminder
-  ;
+export const removeNoteReminder = createAction(
+  '[Note] Remove reminder',
+  props<{ id: string, reminderId: string }>(),
+);

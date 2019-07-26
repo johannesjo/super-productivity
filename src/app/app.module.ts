@@ -34,6 +34,7 @@ import {LanguageCode} from './app.constants';
 import {LanguageService} from './core/language/language.service';
 import {ConfigModule} from './features/config/config.module';
 import {ProjectModule} from './features/project/project.module';
+import {EntityDataModule} from '@ngrx/data';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -109,7 +110,8 @@ export function createTranslateLoader(http: HttpClient) {
         useFactory: createTranslateLoader,
         deps: [HttpClient]
       }
-    })
+    }),
+    EntityDataModule
   ],
   bootstrap: [AppComponent],
   providers: [

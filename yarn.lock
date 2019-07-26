@@ -495,6 +495,11 @@
     typescript "2.4.1"
     yargs "8.0.2"
 
+"@ngrx/data@^8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/data/-/data-8.1.0.tgz#be9f1364420b957d095b085178700fdc06d7af53"
+  integrity sha512-0Pu3P7nzTL0pmty9GfhQZlQ0RHUCtyvT6z9PTt+bbqWZcprgv5gkqvCOBS0L/Sg9VSTfq4M6KrOeticG/WsZSA==
+
 "@ngrx/effects@^8.1.0":
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-8.1.0.tgz#76245d6d8658fbe84d610ade4016cc7d6091d09a"

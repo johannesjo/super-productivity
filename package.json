@@ -143,6 +143,7 @@
     "@biesbjerg/ngx-translate-extract": "^2.3.4",
     "@ngrx/effects": "^8.1.0",
     "@ngrx/entity": "^8.1.0",
+    "@ngrx/data": "^8.1.0",
     "@ngrx/schematics": "^8.1.0",
     "@ngrx/store": "8.1.0",
     "@ngrx/store-devtools": "^8.1.0",

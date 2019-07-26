@@ -3,22 +3,20 @@ import {Observable} from 'rxjs';
 import {Note} from './note.model';
 import {select, Store} from '@ngrx/store';
 import {
-  AddNote,
-  AddNoteReminder,
-  DeleteNote,
-  HideNotes,
-  LoadNoteState,
-  NoteActionTypes,
-  RemoveNoteReminder,
-  ToggleShowNotes,
-  UpdateNote,
-  UpdateNoteOrder,
-  UpdateNoteReminder
+  addNote,
+  addNoteReminder,
+  deleteNote,
+  hideNotes,
+  loadNoteState,
+  removeNoteReminder,
+  toggleShowNotes,
+  updateNote,
+  updateNoteOrder,
+  updateNoteReminder
 } from './store/note.actions';
 import shortid from 'shortid';
 import {initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNoteById} from './store/note.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {Actions, ofType} from '@ngrx/effects';
 import {take} from 'rxjs/operators';
 import {createFromDrop, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
 import {isImageUrl, isImageUrlSimple} from '../../util/is-image-url';
@@ -29,12 +27,10 @@ import {isImageUrl, isImageUrlSimple} from '../../util/is-image-url';
 export class NoteService {
   public isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
   public notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
-  public onNoteAdd$: Observable<any> = this._actions$.pipe(ofType(NoteActionTypes.AddNote));
 
   constructor(
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _actions$: Actions,
   ) {
   }
 
@@ -47,11 +43,11 @@ export class NoteService {
   }
 
   public toggleShow() {
-    this._store$.dispatch(new ToggleShowNotes());
+    this._store$.dispatch(toggleShowNotes());
   }
 
   public hide() {
-    this._store$.dispatch(new HideNotes());
+    this._store$.dispatch(hideNotes());
   }
 
   public async loadStateForProject(projectId) {
@@ -60,13 +56,13 @@ export class NoteService {
   }
 
   public loadState(state: NoteState) {
-    this._store$.dispatch(new LoadNoteState({state: state}));
+    this._store$.dispatch(loadNoteState({state: state}));
   }
 
   public add(note: Partial<Note> = {}, remindAt: number = null, isPreventFocus = false) {
     const id = shortid();
 
-    this._store$.dispatch(new AddNote({
+    this._store$.dispatch(addNote({
       note: {
         id,
         content: '',
@@ -80,11 +76,11 @@ export class NoteService {
   }
 
   public remove(id: string) {
-    this._store$.dispatch(new DeleteNote({id}));
+    this._store$.dispatch(deleteNote({id}));
   }
 
   public update(id, note: Partial<Note>) {
-    this._store$.dispatch(new UpdateNote({
+    this._store$.dispatch(updateNote({
       note: {
         id,
         changes: note,
@@ -104,21 +100,21 @@ export class NoteService {
   }
 
   public updateOrder(ids: string[]) {
-    this._store$.dispatch(new UpdateNoteOrder({ids}));
+    this._store$.dispatch(updateNoteOrder({ids}));
   }
 
   // REMINDER
   // --------
   addReminder(noteId: string, remindAt: number, title: string) {
-    this._store$.dispatch(new AddNoteReminder({id: noteId, remindAt, title}));
+    this._store$.dispatch(addNoteReminder({id: noteId, remindAt, title}));
   }
 
   updateReminder(noteId: string, reminderId: string, remindAt: number, title: string) {
-    this._store$.dispatch(new UpdateNoteReminder({id: noteId, reminderId, remindAt, title}));
+    this._store$.dispatch(updateNoteReminder({id: noteId, reminderId, remindAt, title}));
   }
 
   removeReminder(noteId: string, reminderId: string) {
-    this._store$.dispatch(new RemoveNoteReminder({id: noteId, reminderId}));
+    this._store$.dispatch(removeNoteReminder({id: noteId, reminderId}));
   }
 
   createFromDrop(ev) {
