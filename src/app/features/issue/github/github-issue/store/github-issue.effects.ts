@@ -22,8 +22,6 @@ import {GithubIssue} from '../github-issue.model';
 import {T} from '../../../../../t.const';
 import {ProjectService} from '../../../../project/project.service';
 
-const isRepoConfigured = (githubCfg) => githubCfg && githubCfg.repo && githubCfg.repo.length > 2;
-
 @Injectable()
 export class GithubIssueEffects {
   @Effect({dispatch: false}) refreshCachePoll$: any = this._actions$
@@ -34,18 +32,16 @@ export class GithubIssueEffects {
         GithubIssueActionTypes.LoadState,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectProjectGithubCfg)),
+        this._projectService.isGithubEnabled$,
+        this._projectService.currentGithubCfg$,
       ),
-      switchMap(([a, githubCfg]) => {
+      switchMap(([a, isEnabled, githubCfg]) => {
         // console.log('CACHE REFRESH', isRepoConfigured_(githubCfg) && (githubCfg.isAutoAddToBacklog || githubCfg.isAutoPoll));
-        return (isRepoConfigured(githubCfg) && (githubCfg.isAutoAddToBacklog || githubCfg.isAutoPoll))
+        return (isEnabled && (githubCfg.isAutoAddToBacklog || githubCfg.isAutoPoll))
           ? timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL)
             .pipe(
               tap(() => {
                 this._githubApiService.refreshIssuesCacheIfOld();
-                // trigger fake refresh for when issues are deleted or cache is more up to date
-                // then the data
-                // this._githubApiService.onCacheRefresh$.next(true);
               })
             )
           : EMPTY;
@@ -57,11 +53,11 @@ export class GithubIssueEffects {
         GithubIssueActionTypes.LoadState,
       ),
       withLatestFrom(
-        this._projectService.currentGithubCfg$,
+        this._projectService.isGithubEnabled$,
         this._taskService.allTasks$,
       ),
-      filter(([a, githubCfg]) => isRepoConfigured(githubCfg)),
-      mergeMap(([a, githubCfg, allTasks]: [LoadState, GithubCfg, Task[]]) => {
+      filter(([a, isEnabled]) => isEnabled),
+      mergeMap(([a, isEnabled, allTasks]: [LoadState, boolean, Task[]]) => {
         const ids = a.payload.state.ids as string[];
         const idsToRemove = allTasks.filter((task) => {
           return task.issueId && task.issueType === GITHUB_TYPE && !ids.includes(task.issueId);
@@ -78,7 +74,7 @@ export class GithubIssueEffects {
     delay(5000),
     throttleTime(10000),
     withLatestFrom(
-      this._store$.pipe(select(selectProjectGithubCfg)),
+      this._projectService.currentGithubCfg$,
       this._store$.pipe(select(selectAllGithubIssues)),
     ),
     filter(([a, githubCfg]) => githubCfg.isAutoPoll),
@@ -139,11 +135,11 @@ export class GithubIssueEffects {
   @Effect({dispatch: false}) loadMissingIssues$: any = this._taskService.tasksWithMissingIssueData$
     .pipe(
       withLatestFrom(
-        this._store$.pipe(select(selectProjectGithubCfg)),
+        this._projectService.isGithubEnabled$,
       ),
-      filter(([tasks, githubCfg]) => isRepoConfigured(githubCfg)),
+      filter(([tasks, isEnabled]) => isEnabled),
       throttleTime(60 * 1000),
-      map(([tasks, githubCfg]) => tasks.filter(task => task.issueId && task.issueType === GITHUB_TYPE)),
+      map(([tasks]) => tasks.filter(task => task.issueId && task.issueType === GITHUB_TYPE)),
       filter((tasks) => tasks && tasks.length > 0),
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR GITHUB', tasks);

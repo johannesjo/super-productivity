@@ -4,6 +4,8 @@ import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
 import {sortStringDates} from '../../../util/sortStringDates';
+import {JiraCfg} from '../../issue/jira/jira';
+import {GithubCfg} from '../../issue/github/github';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -47,8 +49,13 @@ export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
 );
 export const selectProjectIssueCfgs = createSelector(selectCurrentProject, (project) => project.issueIntegrationCfgs);
+
 export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.JIRA);
+export const selectProjectJiraIsEnabled = createSelector(selectProjectJiraCfg, (jiraCfg: JiraCfg): boolean => jiraCfg.isEnabled);
+
 export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.GITHUB);
+export const selectProjectGithubIsEnabled = createSelector(selectProjectGithubCfg, (gitCfg: GithubCfg): boolean => gitCfg && gitCfg.repo && gitCfg.repo.length > 2);
+
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);

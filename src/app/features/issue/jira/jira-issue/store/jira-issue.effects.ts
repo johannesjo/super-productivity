@@ -6,7 +6,6 @@ import {concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFr
 import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds} from './jira-issue.reducer';
-import {selectCurrentProjectId, selectProjectJiraCfg} from '../../../../project/store/project.reducer';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraIssueService} from '../jira-issue.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
@@ -34,9 +33,7 @@ import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTE
 import {isEmail} from '../../../../../util/is-email';
 import {T} from '../../../../../t.const';
 import {truncate} from '../../../../../util/truncate';
-
-const isEnabled_ = (jiraCfg) => jiraCfg && jiraCfg.isEnabled;
-const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => isEnabled_(jiraCfg);
+import {ProjectService} from '../../../../project/project.service';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -50,10 +47,11 @@ export class JiraIssueEffects {
         JiraIssueActionTypes.LoadState,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._projectService.isJiraEnabled$,
+        this._projectService.currentJiraCfg$,
       ),
-      switchMap(([a, jiraCfg]) => {
-        return (isEnabled([a, jiraCfg]) && jiraCfg.isAutoPollTickets)
+      switchMap(([a, isEnabled, jiraCfg]) => {
+        return (isEnabled && jiraCfg.isAutoPollTickets)
           ? this._pollChangesForIssues$
           : EMPTY;
       })
@@ -67,10 +65,11 @@ export class JiraIssueEffects {
         JiraIssueActionTypes.LoadState,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._projectService.isJiraEnabled$,
+        this._projectService.currentJiraCfg$,
       ),
-      switchMap(([a, jiraCfg]) => {
-        return (isEnabled([a, jiraCfg]) && jiraCfg.isAutoAddToBacklog)
+      switchMap(([a, isEnabled, jiraCfg]) => {
+        return (isEnabled && jiraCfg.isAutoAddToBacklog)
           ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
             // tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
             map(() => new AddOpenJiraIssuesToBacklog())
@@ -94,7 +93,7 @@ export class JiraIssueEffects {
         JiraIssueActionTypes.UpsertJiraIssue,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
+        this._projectService.currentId$,
         this._store$.pipe(select(selectJiraIssueFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
@@ -118,12 +117,13 @@ export class JiraIssueEffects {
         TaskActionTypes.UpdateTask,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._projectService.isJiraEnabled$,
+        this._projectService.currentJiraCfg$,
         this._store$.pipe(select(selectJiraIssueEntities)),
         this._store$.pipe(select(selectTaskEntities)),
       ),
-      filter(isEnabled),
-      tap(([act_, jiraCfg, jiraEntities, taskEntities]) => {
+      filter(([act_, isEnabled]) => isEnabled),
+      tap(([act_, isEnabled, jiraCfg, jiraEntities, taskEntities]) => {
         const act = act_ as UpdateTask;
         const taskId = act.payload.task.id;
         const isDone = act.payload.task.changes.isDone;
@@ -155,19 +155,20 @@ export class JiraIssueEffects {
         JiraIssueActionTypes.UpdateJiraIssue,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._projectService.isJiraEnabled$,
+        this._projectService.currentJiraCfg$,
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
-      filter(isEnabled),
-      filter(([action, jiraCfg, currentTaskOrParent, issueEntities]) =>
-        jiraCfg.isCheckToReAssignTicketOnTaskStart
+      filter(([action, isEnabled, jiraCfg, currentTaskOrParent]) =>
+        isEnabled
+        && jiraCfg.isCheckToReAssignTicketOnTaskStart
         && currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE),
       // show every 15s max to give time for updates
       throttleTime(15000),
       // TODO there is probably a better way to to do this
       // TODO refactor to actions
-      switchMap(([action, jiraCfg, currentTaskOrParent, issueEntities]) => {
+      switchMap(([action, isEnabled, jiraCfg, currentTaskOrParent, issueEntities]) => {
         const issue = issueEntities[currentTaskOrParent.issueId];
         const assignee = issue.assignee;
         const currentUserName = jiraCfg.userAssigneeName || jiraCfg.userName;
@@ -214,14 +215,15 @@ export class JiraIssueEffects {
         TaskActionTypes.SetCurrentTask,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._projectService.isJiraEnabled$,
+        this._projectService.currentJiraCfg$,
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
-      filter(isEnabled),
-      filter(([action, jiraCfg, curOrParTask, issueEntities]) =>
+      filter(([action, isEnabled]) => isEnabled),
+      filter(([action, isEnabled, jiraCfg, curOrParTask, issueEntities]) =>
         jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === JIRA_TYPE),
-      concatMap(([action, jiraCfg, curOrParTask, issueEntities]) => {
+      concatMap(([action, isEnabled, jiraCfg, curOrParTask, issueEntities]) => {
         const issueData = issueEntities[curOrParTask.issueId];
         return this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
       }),
@@ -234,17 +236,18 @@ export class JiraIssueEffects {
         TaskActionTypes.UpdateTask,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._projectService.isJiraEnabled$,
+        this._projectService.currentJiraCfg$,
         this._store$.pipe(select(selectTaskFeatureState)),
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
-      filter(isEnabled),
-      filter(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
-        const task = taskState.entities[action.payload.task.id];
+      filter(([a, isEnabled]) => isEnabled),
+      filter(([a, isEnabled, jiraCfg, taskState, issueEntities]: [UpdateTask, boolean, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
+        const task = taskState.entities[a.payload.task.id];
         return jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === JIRA_TYPE && task.isDone;
       }),
-      concatMap(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
-        const task = taskState.entities[action.payload.task.id];
+      concatMap(([a, isEnabled, jiraCfg, taskState, issueEntities]: [UpdateTask, boolean, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
+        const task = taskState.entities[a.payload.task.id];
         const issueData = issueEntities[task.issueId];
         return this._handleTransitionForIssue('DONE', jiraCfg, issueData);
       })
@@ -253,11 +256,11 @@ export class JiraIssueEffects {
   @Effect({dispatch: false}) loadMissingIssues$: any = this._taskService.tasksWithMissingIssueData$
     .pipe(
       withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._projectService.isJiraEnabled$,
       ),
-      filter(([tasks, jiraCfg]) => isEnabled_(jiraCfg)),
+      filter(([tasks, isEnabled]) => isEnabled),
       throttleTime(60 * 1000),
-      map(([tasks, jiraCfg]) => tasks.filter(task => task.issueId && task.issueType === JIRA_TYPE)),
+      map(([tasks]) => tasks.filter(task => task.issueId && task.issueType === JIRA_TYPE)),
       filter((tasks) => tasks && tasks.length > 0),
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
@@ -317,6 +320,7 @@ export class JiraIssueEffects {
               private readonly _store$: Store<any>,
               private readonly _configService: GlobalConfigService,
               private readonly _snackService: SnackService,
+              private readonly _projectService: ProjectService,
               private readonly _taskService: TaskService,
               private readonly _jiraApiService: JiraApiService,
               private readonly _jiraIssueService: JiraIssueService,

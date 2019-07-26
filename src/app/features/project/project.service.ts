@@ -30,7 +30,9 @@ import {
   selectProjectBreakTimeForDay,
   selectProjectById,
   selectProjectGithubCfg,
+  selectProjectGithubIsEnabled,
   selectProjectJiraCfg,
+  selectProjectJiraIsEnabled,
   selectProjectLastCompletedDay,
   selectProjectLastWorkEnd,
   selectProjectWorkEndForDay,
@@ -71,10 +73,18 @@ export class ProjectService {
     select(selectProjectJiraCfg),
     // shareReplay(),
   );
+  isJiraEnabled$: Observable<boolean> = this._store$.pipe(
+    select(selectProjectJiraIsEnabled),
+  );
+
   currentGithubCfg$: Observable<GithubCfg> = this._store$.pipe(
     select(selectProjectGithubCfg),
     // shareReplay(),
   );
+  isGithubEnabled$: Observable<boolean> = this._store$.pipe(
+    select(selectProjectGithubIsEnabled),
+  );
+
   advancedCfg$: Observable<ProjectAdvancedCfg> = this._store$.pipe(
     select(selectAdvancedProjectCfg),
     // shareReplay(),
