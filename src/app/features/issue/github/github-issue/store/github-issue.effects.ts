@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {GithubIssueActionTypes} from './github-issue.actions';
+import {DeleteGithubIssues, GithubIssueActionTypes, LoadState} from './github-issue.actions';
 import {select, Store} from '@ngrx/store';
-import {delay, filter, map, switchMap, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {delay, filter, map, mergeMap, switchMap, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {TaskActionTypes} from '../../../../tasks/store/task.actions';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {selectAllGithubIssues, selectGithubIssueFeatureState} from './github-issue.reducer';
@@ -15,14 +15,14 @@ import {TaskService} from '../../../../tasks/task.service';
 import {Task} from '../../../../tasks/task.model';
 import {ProjectActionTypes} from '../../../../project/store/project.actions';
 import {GITHUB_TYPE} from '../../../issue.const';
-import {EMPTY, timer} from 'rxjs';
+import {EMPTY, of, timer} from 'rxjs';
 import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../../github.const';
 import {GithubCfg} from '../../github';
 import {GithubIssue} from '../github-issue.model';
 import {T} from '../../../../../t.const';
+import {ProjectService} from '../../../../project/project.service';
 
-const isRepoConfigured_ = (githubCfg) => githubCfg && githubCfg.repo && githubCfg.repo.length > 2;
-const isRepoConfigured = ([a, githubCfg]) => isRepoConfigured_(githubCfg);
+const isRepoConfigured = (githubCfg) => githubCfg && githubCfg.repo && githubCfg.repo.length > 2;
 
 @Injectable()
 export class GithubIssueEffects {
@@ -38,7 +38,7 @@ export class GithubIssueEffects {
       ),
       switchMap(([a, githubCfg]) => {
         // console.log('CACHE REFRESH', isRepoConfigured_(githubCfg) && (githubCfg.isAutoAddToBacklog || githubCfg.isAutoPoll));
-        return (isRepoConfigured_(githubCfg) && (githubCfg.isAutoAddToBacklog || githubCfg.isAutoPoll))
+        return (isRepoConfigured(githubCfg) && (githubCfg.isAutoAddToBacklog || githubCfg.isAutoPoll))
           ? timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL)
             .pipe(
               tap(() => {
@@ -48,6 +48,28 @@ export class GithubIssueEffects {
                 // this._githubApiService.onCacheRefresh$.next(true);
               })
             )
+          : EMPTY;
+      })
+    );
+  @Effect({dispatch: false}) cleanup$: any = this._actions$
+    .pipe(
+      ofType(
+        GithubIssueActionTypes.LoadState,
+      ),
+      withLatestFrom(
+        this._projectService.currentGithubCfg$,
+        this._taskService.allTasks$,
+      ),
+      filter(([a, githubCfg]) => isRepoConfigured(githubCfg)),
+      mergeMap(([a, githubCfg, allTasks]: [LoadState, GithubCfg, Task[]]) => {
+        const ids = a.payload.state.ids as string[];
+        const idsToRemove = allTasks.filter((task) => {
+          return task.issueId && task.issueType === GITHUB_TYPE && !ids.includes(task.issueId);
+        })
+          .map(task => +task.issueId) as number[];
+        console.log('Autoclean Stale Github Issues:', idsToRemove);
+        return (idsToRemove && idsToRemove.length)
+          ? of(new DeleteGithubIssues({ids: idsToRemove}))
           : EMPTY;
       })
     );
@@ -119,7 +141,7 @@ export class GithubIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectGithubCfg)),
       ),
-      filter(([tasks, githubCfg]) => isRepoConfigured_(githubCfg)),
+      filter(([tasks, githubCfg]) => isRepoConfigured(githubCfg)),
       throttleTime(60 * 1000),
       map(([tasks, githubCfg]) => tasks.filter(task => task.issueId && task.issueType === GITHUB_TYPE)),
       filter((tasks) => tasks && tasks.length > 0),
@@ -137,6 +159,7 @@ export class GithubIssueEffects {
               private readonly _store$: Store<any>,
               private readonly _configService: GlobalConfigService,
               private readonly _snackService: SnackService,
+              private readonly _projectService: ProjectService,
               private readonly _githubApiService: GithubApiService,
               private readonly _taskService: TaskService,
               private readonly _githubIssueService: GithubIssueService,

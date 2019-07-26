@@ -69,11 +69,16 @@ export class GithubIssueService {
     });
   }
 
-  remove(githubIssueId: number) {
-    this._store.dispatch({
-      type: GithubIssueActionTypes.DeleteGithubIssue,
-      payload: {id: githubIssueId}
-    });
+  remove(idOrIds: number | number[]) {
+    (typeof idOrIds === 'number')
+      ? this._store.dispatch({
+        type: GithubIssueActionTypes.DeleteGithubIssue,
+        payload: {id: (idOrIds as number)}
+      })
+      : this._store.dispatch({
+        type: GithubIssueActionTypes.DeleteGithubIssues,
+        payload: {ids: (idOrIds as number[])}
+      });
   }
 
 

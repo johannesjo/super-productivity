@@ -60,6 +60,7 @@ import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
+  selectAllTasks,
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
@@ -242,6 +243,8 @@ export class TaskService {
     select(selectHasTasksToWorkOn),
     distinctUntilChanged(),
   );
+
+  allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
 
   private _allTasksWithIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(select(selectAllTasksWithIssueData));
