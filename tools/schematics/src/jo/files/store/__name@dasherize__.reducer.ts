@@ -1,7 +1,7 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { <%= classify(name)%>Actions, <%= classify(name)%>ActionTypes } from './<%= dasherize(name) %>.actions';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
+import * as <%= camelize(name)%>Actions from './<%= dasherize(name) %>.actions';
 import { <%= classify(name)%>, <%= classify(name)%>State } from '../<%= dasherize(name) %>.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { Action, createReducer, createFeatureSelector, createSelector, on } from '@ngrx/store';
 
 export const <%= underscore(name).toUpperCase()%>_FEATURE_NAME = '<%= camelize(name) %>';
 
@@ -20,38 +20,30 @@ export const initial<%= classify(name)%>State: <%= classify(name)%>State = adapt
     // additional entity state properties
 });
 
+
+const _reducer = createReducer<<%= classify(name)%>State>(
+  initial<%= classify(name)%>State,
+
+  on(<%= camelize(name)%>Actions.add<%= classify(name)%>, (state, {<%= camelize(name) %>}) => adapter.addOne(<%= camelize(name) %>, state)),
+
+  on(<%= camelize(name)%>Actions.update<%= classify(name)%>, (state, {<%= camelize(name) %>}) => adapter.updateOne(<%= camelize(name) %>, state)),
+
+  on(<%= camelize(name)%>Actions.upsert<%= classify(name)%>, (state, {<%= camelize(name) %>}) => adapter.upsertOne(<%= camelize(name) %>, state)),
+
+  on(<%= camelize(name)%>Actions.delete<%= classify(name)%>, (state, {id}) => adapter.removeOne(id, state)),
+
+  on(<%= camelize(name)%>Actions.delete<%= classify(name)%>s, (state, {ids}) => adapter.removeMany(ids, state)),
+
+  on(<%= camelize(name)%>Actions.load<%= classify(name)%>State, (oldState, {state}) => ({...oldState, ...state})),
+);
+
+
+
 export function <%= camelize(name) %>Reducer(
     state = initial<%= classify(name)%>State,
-    action: <%= classify(name)%>Actions
+    action: Action,
 ): <%= classify(name)%>State {
-    switch (action.type) {
-        case <%= classify(name)%>ActionTypes.Add<%= classify(name)%>: {
-            return adapter.addOne(action.payload.<%= camelize(name) %>, state);
-        }
-
-        case <%= classify(name)%>ActionTypes.Update<%= classify(name)%>: {
-            return adapter.updateOne(action.payload.<%= camelize(name) %>, state);
-        }
-
-        case <%= classify(name)%>ActionTypes.Upsert<%= classify(name)%>: {
-            return adapter.upsertOne(action.payload.<%= camelize(name) %>, state);
-        }
-
-        case <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>: {
-            return adapter.removeOne(action.payload.id, state);
-        }
-
-        case <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>s: {
-            return adapter.removeMany(action.payload.ids, state);
-        }
-
-        case <%= classify(name)%>ActionTypes.Load<%= classify(name)%>State:
-            return {...action.payload.state};
-
-        default: {
-            return state;
-        }
-    }
+  return _reducer(state, action);
 }
 
 

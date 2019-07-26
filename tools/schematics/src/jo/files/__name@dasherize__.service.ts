@@ -7,12 +7,12 @@ import {
     select<%= classify(name)%>ById,
 } from './store/<%= dasherize(name)%>.reducer';
 import {
-  Add<%= classify(name)%>,
-  Delete<%= classify(name)%>,
-  Delete<%= classify(name)%>s,
-  Load<%= classify(name)%>State,
-  Update<%= classify(name)%>,
-  Upsert<%= classify(name)%>,
+  add<%= classify(name)%>,
+  delete<%= classify(name)%>,
+  delete<%= classify(name)%>s,
+  load<%= classify(name)%>State,
+  update<%= classify(name)%>,
+  upsert<%= classify(name)%>,
 } from './store/<%= dasherize(name)%>.actions';
 import {Observable} from 'rxjs';
 import {<%= classify(name)%>, <%= classify(name)%>State} from './<%= dasherize(name)%>.model';
@@ -40,11 +40,11 @@ export class <%= classify(name)%>Service {
     }
 
     loadState(state: <%= classify(name)%>State) {
-        this._store$.dispatch(new Load<%= classify(name)%>State({state}));
+        this._store$.dispatch(load<%= classify(name)%>State({state}));
     }
 
     add<%= classify(name)%>(<%= camelize(name)%>: <%= classify(name)%>) {
-        this._store$.dispatch(new Add<%= classify(name)%>({
+        this._store$.dispatch(add<%= classify(name)%>({
             <%= camelize(name)%>: {
                 ...<%= camelize(name)%>,
                 id: shortid()
@@ -53,18 +53,18 @@ export class <%= classify(name)%>Service {
     }
 
     delete<%= classify(name)%>(id: string) {
-        this._store$.dispatch(new Delete<%= classify(name)%>({id}));
+        this._store$.dispatch(delete<%= classify(name)%>({id}));
     }
 
     delete<%= classify(name)%>s(ids: string[]) {
-        this._store$.dispatch(new Delete<%= classify(name)%>s({ids}));
+        this._store$.dispatch(delete<%= classify(name)%>s({ids}));
     }
 
     update<%= classify(name)%>(id: string, changes: Partial<<%= classify(name)%>>) {
-        this._store$.dispatch(new Update<%= classify(name)%>({<%= camelize(name)%>: {id, changes}}));
+        this._store$.dispatch(update<%= classify(name)%>({<%= camelize(name)%>: {id, changes}}));
     }
 
     upsert<%= classify(name)%>(<%= camelize(name)%>: <%= classify(name)%>) {
-      this._store$.dispatch(new Upsert<%= classify(name)%>({<%= camelize(name)%>}));
+      this._store$.dispatch(upsert<%= classify(name)%>({<%= camelize(name)%>}));
     }
 }

@@ -1,64 +1,33 @@
-import {Action} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {<%= classify(name)%>, <%= classify(name)%>State} from '../<%= dasherize(name)%>.model';
+import {<%= classify(name)%>, <%= classify(name)%>State } from '../<%= dasherize(name)%>.model';
 
-export enum <%= classify(name)%>ActionTypes {
-    Load<%= classify(name)%>State = '[<%= classify(name)%>] Load <%= classify(name)%> State',
-    Add<%= classify(name)%> = '[<%= classify(name)%>] Add <%= classify(name)%>',
-    Update<%= classify(name)%> = '[<%= classify(name)%>] Update <%= classify(name)%>',
-    Upsert<%= classify(name)%> = '[<%= classify(name)%>] Upsert <%= classify(name)%>',
-    Delete<%= classify(name)%> = '[<%= classify(name)%>] Delete <%= classify(name)%>',
-    Delete<%= classify(name)%>s = '[<%= classify(name)%>] Delete multiple <%= classify(name)%>s',
-}
+export const load<%= classify(name)%>State = createAction(
+  '[<%= classify(name)%>] Load <%= classify(name)%> State',
+  props<{ state: <%= classify(name)%>State }>(),
+);
 
-export class Load<%= classify(name)%>State implements Action {
-    readonly type = <%= classify(name)%>ActionTypes.Load<%= classify(name)%>State;
+export const add<%= classify(name)%> = createAction(
+  '[<%= classify(name)%>] Add <%= classify(name)%>',
+  props<{ <%= camelize(name)%>: <%= classify(name)%> }>(),
+);
 
-    constructor(public payload: { state: <%= classify(name)%>State }) {
-    }
-}
+export const update<%= classify(name)%> = createAction(
+  '[<%= classify(name)%>] Update <%= classify(name)%>',
+  props<{ <%= camelize(name)%>: Update<<%= classify(name)%>> }>(),
+);
 
-export class Add<%= classify(name)%> implements Action {
-    readonly type = <%= classify(name)%>ActionTypes.Add<%= classify(name)%>;
+export const upsert<%= classify(name)%> = createAction(
+  '[<%= classify(name)%>] Upsert <%= classify(name)%>',
+  props<{ <%= camelize(name)%>: <%= classify(name)%> }>(),
+);
 
-    constructor(public payload: { <%= camelize(name)%>: <%= classify(name)%> }) {
-    }
-}
+export const delete<%= classify(name)%> = createAction(
+  '[<%= classify(name)%>] Delete <%= classify(name)%>',
+  props<{ id: string }>(),
+);
 
-export class Update<%= classify(name)%> implements Action {
-    readonly type = <%= classify(name)%>ActionTypes.Update<%= classify(name)%>;
-
-    constructor(public payload: { <%= camelize(name)%>: Update<<%= classify(name)%>> }) {
-    }
-}
-
-export class Upsert<%= classify(name)%> implements Action {
-  readonly type = <%= classify(name)%>ActionTypes.Upsert<%= classify(name)%>;
-
-  constructor(public payload: {  <%= camelize(name)%>: <%= classify(name)%> }) {
-  }
-}
-
-export class Delete<%= classify(name)%> implements Action {
-    readonly type = <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>;
-
-    constructor(public payload: { id: string }) {
-    }
-}
-
-export class Delete<%= classify(name)%>s implements Action {
-    readonly type = <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>s;
-
-    constructor(public payload: { ids: string[] }) {
-    }
-}
-
-
-export type <%= classify(name)%>Actions =
-    Load<%= classify(name)%>State
-    | Add<%= classify(name)%>
-    | Update<%= classify(name)%>
-    | Upsert<%= classify(name)%>
-    | Delete<%= classify(name)%>
-    | Delete<%= classify(name)%>s
-    ;
+export const delete<%= classify(name)%>s = createAction(
+  '[<%= classify(name)%>] Delete multiple <%= classify(name)%>s',
+  props<{ ids: string[] }>(),
+);
