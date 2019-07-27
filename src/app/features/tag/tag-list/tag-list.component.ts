@@ -43,6 +43,7 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
   newTag: Partial<Tag> = {
     name: '',
+    color: '#000'
   };
 
 
@@ -65,6 +66,7 @@ export class TagListComponent implements OnInit, AfterViewInit {
       this.stopEditingTag();
     } else if ($event.key === 'Enter') {
       this.applyEdit();
+      this.stopEditingTag();
       $event.preventDefault();
     }
   }
@@ -99,10 +101,21 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
             });
         }
+
         this.stopEditingTag();
 
     });
 
+  }
+
+  applyColorEdit() {
+    const id = this.editingTag.id;
+    const color = this.editingTag.color;
+    if (id) {
+      console.log(`Updating color to ${color}`);
+      this._tagService.updateColor(id, color);
+      this.stopEditingTag();
+    }
   }
 
   stopEditingTag() {

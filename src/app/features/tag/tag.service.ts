@@ -1,6 +1,6 @@
 import {Tag} from './tag.model';
 
-import {AddTag, DeleteTag, LoadTagState} from './store/tag.actions';
+import {AddTag, DeleteTag, LoadTagState, UpdateTag} from './store/tag.actions';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {select, Store} from '@ngrx/store';
@@ -80,6 +80,10 @@ export class TagService {
 
   public removeTag(id: string) {
     this._store$.dispatch(new DeleteTag({id}));
+  }
+
+  public updateColor(id: string, color: string) {
+    this._store$.dispatch(new UpdateTag({id: id, changes: {color: color}}));
   }
 
 }

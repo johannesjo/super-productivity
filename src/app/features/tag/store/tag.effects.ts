@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {TaskActionTypes} from '../../tasks/store/task.actions';
 import {tap, withLatestFrom} from 'rxjs/operators';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {TagActionTypes} from './tag.actions';
@@ -14,12 +13,9 @@ export class TagEffects {
   @Effect({dispatch: false}) updateTags$: any = this._actions$
     .pipe(
       ofType(
-        TaskActionTypes.AddTask,
-        TaskActionTypes.RestoreTask,
-        TaskActionTypes.DeleteTask,
-        TaskActionTypes.MoveToArchive,
+        TagActionTypes.UpdateTag,
         TagActionTypes.AddTag,
-        TagActionTypes.DeleteTag
+        TagActionTypes.DeleteTag,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),

@@ -2,7 +2,6 @@ import {Tag} from '../tag.model';
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {TagActions, TagActionTypes} from './tag.actions';
-import {act} from '@ngrx/effects';
 
 export interface TagState extends EntityState<Tag> {}
 
@@ -65,7 +64,12 @@ export function tagReducer(
       // });
       return adapter.removeOne(action.payload.id, state);
     }
+    case TagActionTypes.UpdateTag: {
+      return adapter.updateOne(action.payload, state);
+    }
     case TagActionTypes.LoadTagState:
+      console.log('Loading tag state');
+      console.log(action.payload.state);
       return {...action.payload.state};
     default:
       return state;

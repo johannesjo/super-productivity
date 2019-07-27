@@ -1,11 +1,13 @@
 import {Action} from '@ngrx/store';
 import {Tag} from '../tag.model';
 import {TagState} from './tag.reducer';
+import {Update} from '@ngrx/entity';
 
 export enum TagActionTypes {
   LoadTagState = '[Tag] Load Tag State',
   AddTag = '[Tag] Add Tag',
-  DeleteTag = '[Tag] Delete Tag'
+  DeleteTag = '[Tag] Delete Tag',
+  UpdateTag = '[Tag] Update Tag'
 }
 
 export class LoadTagState implements Action {
@@ -28,7 +30,14 @@ export class DeleteTag implements Action {
   constructor(public payload: { id: string }) {}
 }
 
+export class UpdateTag implements Action {
+  readonly type = TagActionTypes.UpdateTag;
+
+  constructor(public payload: Update<Tag>) {}
+}
+
 export type TagActions =
   LoadTagState
   | AddTag
-  | DeleteTag;
+  | DeleteTag
+  | UpdateTag;
