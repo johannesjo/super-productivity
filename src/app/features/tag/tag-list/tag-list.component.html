@@ -1,10 +1,21 @@
 <ul class="tags" #tagListEl>
   <li *ngFor="let tag of tags$|async as tags" class="tag"
-    (click)="handleClickOnTag($event, tag.id)">
-    <div [style.color]="tag?.color">{{tag?.name}}</div>
+    (click)="handleClickOnTag($event, tag)">
+    <label [attr.for]="'tag-input-' + tag.id" [style.color]="tag?.color" *ngIf="editingTag?.id !== tag.id">{{tag?.name}}</label>
+    <input type="text"
+           [attr.id]="'tag-input-' + tag.id"
+           (blur)="stopEditingTag();"
+           (keydown)="onTagEditKeydown($event)"
+           *ngIf="editingTag?.id === tag.id"
+           [(ngModel)]="editingTag.name"/>
   </li>
-  <li class="tag add-tag" (click)="startEditNewTag()">
-    <div class="add-tag-button" *ngIf="!editingNewTag">+</div>
-    <input #newTagInputEl type="text" [class.hidden]="!editingNewTag" [(ngModel)]="newTag"/>
+  <li class="tag add-tag" (click)="handleClickOnTag($event, newTag)">
+    <label for="tag-input-newtag" class="add-tag-button" *ngIf="editingTag?.id !== undefined">+</label>
+    <input type="text"
+           id="tag-input-newtag"
+           (blur)="stopEditingTag();"
+           (keydown)="onTagEditKeydown($event)"
+           *ngIf="editingTag?.id === undefined"
+           [(ngModel)]="editingTag.name"/>
   </li>
 </ul>

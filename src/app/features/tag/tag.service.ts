@@ -46,6 +46,12 @@ export class TagService {
   }
 
   public loadState(state: TagState) {
+    Object.keys(state.entities).forEach((k, i) => {
+      if (!k) {
+        delete state.entities[i];
+        state.ids.splice(state.ids.indexOf(<string & number> k), 1);
+      }
+    });
     this._store$.dispatch(new LoadTagState({state}));
   }
 

@@ -94,6 +94,7 @@
       <div class="tag-box">
         <tag-list (addedTagsToTask)="onTagsAdded($event)"
                   (removedTagsFromTask)="onTagsRemoved($event)"
+                  (replacedTagForTask)="onTagReplaced($event)"
                   [tagIds]="task.tagIds"></tag-list>
       </div>
     </div>

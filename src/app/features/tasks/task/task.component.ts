@@ -20,7 +20,7 @@ import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-e
 import {expandAnimation} from '../../../ui/animations/expand.ani';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {checkKeyCombo} from '../../../util/check-key-combo';
-import {takeUntil} from 'rxjs/operators';
+import {take, takeUntil} from 'rxjs/operators';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {AttachmentService} from '../../attachment/attachment.service';
 import {IssueService} from '../../issue/issue.service';
@@ -137,6 +137,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    // this._taskService.removeTags(this.task, this.task.tagIds);
+    // this._tagService.tags$.pipe(take(1)).subscribe(tags => {
+    //   this._taskService.purgeUnusedTags(tags.map(tag => tag.id));
+    // });
+
     this._taskService.currentTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
@@ -394,6 +399,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this._taskService.removeTags(this.task, tagIds);
     this._taskService.purgeUnusedTags(tagIds);
+  }
+
+  onTagReplaced([oldTagId, newTagId]: string[]) {
+    const newTags = [...this.task.tagIds, newTagId];
+    const removeId = newTags.indexOf(oldTagId);
+    if (removeId !== -1) {
+      newTags.splice(removeId, 1);
+    }
+    this.onTagsUpdated(newTags);
   }
 
   onPanStart(ev) {

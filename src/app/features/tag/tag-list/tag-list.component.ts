@@ -30,17 +30,20 @@ export class TagListComponent implements OnInit, AfterViewInit {
   }
   @Output() addedTagsToTask: EventEmitter<string[]> = new EventEmitter();
   @Output() removedTagsFromTask: EventEmitter<string[]> = new EventEmitter();
+  @Output() replacedTagForTask: EventEmitter<string[]> = new EventEmitter();
 
-  @ViewChild('newTagInputEl', {static: true}) newTagInputEl;
   @ViewChild('tagListEl', {static: true}) tagListEl;
 
   counter = 0;
-  editingNewTag = false;
-  newTag = '';
+  editingTag: undefined|Partial<Tag> = undefined;
   private _tagIds;
   private _tagIds$ = new BehaviorSubject([]);
   tags$: Observable<Tag[]> = this._tagIds$.pipe(
     switchMap((ids) => this._tagService.getByIds$((ids))));
+
+  newTag: Partial<Tag> = {
+    name: '',
+  };
 
 
   constructor(
@@ -54,51 +57,67 @@ export class TagListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.newTagInputEl.nativeElement.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Escape') {
-          this.resetNewTagEdit();
-        } else if (ev.key === 'Enter') {
-          this.addTagToTask(this.newTag);
-          this.resetNewTagEdit();
-          ev.preventDefault();
-        }
-      });
-    });
 
   }
 
-  addTagToTask($event: string) {
-    console.log('adding tag...');
-    this._tagService.getByName$($event)
+  onTagEditKeydown($event: KeyboardEvent) {
+    if ($event.key === 'Escape') {
+      this.stopEditingTag();
+    } else if ($event.key === 'Enter') {
+      this.applyEdit();
+      $event.preventDefault();
+    }
+  }
+
+  applyEdit() {
+    const oldTagId = this.editingTag.id;
+    let newTagId: string;
+    delete this.editingTag.id;
+
+    this.tags$
       .pipe(take(1))
-      .subscribe(tag => {
-      console.log(tag);
-      if ( tag ) {
-        this.addedTagsToTask.emit([tag.id]);
-        return;
-      }
-      console.log('Adding tag...');
-      const tagId = this._tagService.addTag({name: $event});
-      this.addedTagsToTask.emit([tagId]);
+      .subscribe(tags => {
+        if (tags.map(t => t.name).indexOf(this.editingTag.name) !== -1) {
+          // TODO: Add proper feedback
+          console.log('Error: The requested tag is already present on this task!');
+        } else {
+          this._tagService.getByName$(this.editingTag.name)
+            .pipe(take(1))
+            .subscribe(match => {
+
+              if (match) {
+                newTagId = match.id;
+              } else {
+                newTagId = this._tagService.addTag(this.editingTag);
+              }
+
+              if (oldTagId) {
+                this.replacedTagForTask.emit([oldTagId, newTagId]);
+              } else {
+                this.addedTagsToTask.emit([newTagId]);
+              }
+
+            });
+        }
+        this.stopEditingTag();
+
     });
+
   }
 
-  resetNewTagEdit() {
-    this.newTag = '';
-    this.editingNewTag = false;
+  stopEditingTag() {
+    this.editingTag = undefined;
   }
 
-  startEditNewTag() {
-    this.editingNewTag = true;
-    this.newTagInputEl.nativeElement.focus();
-  }
-
-  handleClickOnTag($event: MouseEvent, tagId: string) {
-    if ( $event.ctrlKey ) {
-      this.removedTagsFromTask.emit([tagId]);
+  handleClickOnTag($event: MouseEvent, tag: Partial<Tag>) {
+    if ( $event.ctrlKey && tag.id ) {
+      this.removedTagsFromTask.emit([tag.id]);
     } else {
-      // TODO: Edit tag
+      // Clone tag (tags are immutable)
+      this.editingTag = {name: tag.name, id: tag.id || undefined};
+      if (tag.color) {
+        this.editingTag.color = tag.color;
+      }
     }
   }
 }

@@ -11,7 +11,8 @@ export enum TagActionTypes {
 export class LoadTagState implements Action {
   readonly type = TagActionTypes.LoadTagState;
 
-  constructor(public payload: { state: TagState }) {}
+  constructor(public payload: { state: TagState }) {
+  }
 }
 
 export class AddTag implements Action {
