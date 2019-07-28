@@ -1,20 +1,19 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import * as moment from 'moment';
 
-export const msToString = (value: any, showSeconds?: boolean, isHideEmptyPlaceholder?: boolean): string => {
-  const md = moment.duration(value);
-  let hours = 0;
-  if (+md.days() > 0) {
-    hours = (md.days() * 24);
-  }
-  if (+md.hours() > 0) {
-    hours += md.hours();
-  }
+const S = 1000;
+const M = S * 60;
+const H = M * 60;
+
+export const msToString = (value: any, isShowSeconds?: boolean, isHideEmptyPlaceholder?: boolean): string => {
+  const hours = Math.floor(value / H);
+  const minutes = Math.floor((value - hours * H) / H);
+  const seconds = isShowSeconds && Math.floor((value - (hours * H) - (minutes * M)) / H);
+
   const parsed =
     // ((+md.days() > 0) ? (md.days() + 'd ') : '')
     ((hours > 0) ? (hours + 'h ') : '')
-    + ((+md.minutes() > 0) ? (md.minutes() + 'm ') : '')
-    + (showSeconds && (+md.seconds() > 0) ? (md.seconds() + 's ') : '');
+    + ((minutes > 0) ? (minutes + 'm ') : '')
+    + (isShowSeconds && (seconds > 0) ? (seconds + 's ') : '');
   if (!isHideEmptyPlaceholder && parsed.trim() === '') {
     return '-';
   }
