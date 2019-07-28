@@ -38,3 +38,31 @@
   text-align: center;
   //background: #FFDAB9;
 }
+
+.tag input {
+  height: 1em;
+  box-sizing: content-box;
+  line-height: 1em;
+  font-size: 1em;
+  margin-top: -1px;
+  border-radius: 10%;
+}
+
+.tag input[type=text] {
+  min-width: 2.8em;
+}
+
+.tag input[type=color] {
+  width: 1.2em;
+  height: 1.4em;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0;
+}
+
+@-moz-document url-prefix() {
+  .tag input[type=color] {
+    width: 1em !important;
+    height: 1em !important;
+  }
+}

@@ -352,8 +352,7 @@
     </div>
   </div>
 
-    <tag-list *ngIf="task.tagIds.length"
-              (addedTagsToTask)="onTagsAdded($event)"
+    <tag-list (addedTagsToTask)="onTagsAdded($event)"
               (removedTagsFromTask)="onTagsRemoved($event)"
               (replacedTagForTask)="onTagReplaced($event)"
               [tagIds]="task.tagIds"></tag-list>
