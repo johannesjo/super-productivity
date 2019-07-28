@@ -39,6 +39,13 @@
   //background: #FFDAB9;
 }
 
+li.add-tag {
+  border-radius: 50%;
+  line-height: 1.2em;
+  border-style: solid;
+  border-width: 1px;
+}
+
 .tag input {
   height: 1em;
   box-sizing: content-box;
