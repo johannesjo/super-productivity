@@ -91,12 +91,6 @@
            editOnClick
            tabindex="2"></div>
       <div class="spacer" style="width:10px; display: block; border-right-width: 1px; border-right-style: solid"></div>
-      <div class="tag-box">
-        <tag-list (addedTagsToTask)="onTagsAdded($event)"
-                  (removedTagsFromTask)="onTagsRemoved($event)"
-                  (replacedTagForTask)="onTagReplaced($event)"
-                  [tagIds]="task.tagIds"></tag-list>
-      </div>
     </div>
 
     <div class="all-controls-wrapper">
@@ -357,6 +351,12 @@
       </div>
     </div>
   </div>
+
+    <tag-list *ngIf="task.tagIds.length"
+              (addedTagsToTask)="onTagsAdded($event)"
+              (removedTagsFromTask)="onTagsRemoved($event)"
+              (replacedTagForTask)="onTagReplaced($event)"
+              [tagIds]="task.tagIds"></tag-list>
 
   <progress-bar *ngIf="isCurrent"
                 [cssClass]="isCurrent?'bg-100':'bg-primary'"

@@ -70,7 +70,7 @@ export class TagService {
         name: tag.name,
         created: Date.now(),
         modified: Date.now(),
-        color: tag.color || '#000',
+        color: tag.color || '#FFDAB9',
         ...tag,
       }
     }));

@@ -1,3 +1,7 @@
+.tags-container {
+  position: relative;
+}
+
 .hidden {
   display: none;
 }
@@ -5,16 +9,32 @@
 
 .tags {
   list-style: none;
+  margin: 4px 0 0;
+}
+
+
+.tags li {
+  display: inline-block;
+  margin: 0 1px;
+
+}
+
+.tags-icon {
+  font-size: 1.2em;
+  line-height: 1.2em;
+  height: 1.4em;
 }
 
 .tag {
-  display: inline-block;
-  min-width: 40px;
-  background-color: white;
-  margin: 1px;
-  padding: 2px;
-  border-width: 1px;
-  border-color: black;
-  border-style: solid;
+  min-width: 1.4em  ;
+  padding: 0 4px;
+  //border-width: 1px;
+  //border-color: black;
+  //border-style: solid;
   border-radius: 10%;
+  font-size: 0.8em;
+  height: 1.4em;
+  line-height: 1.4em;
+  text-align: center;
+  //background: #FFDAB9;
 }

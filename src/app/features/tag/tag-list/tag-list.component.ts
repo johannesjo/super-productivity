@@ -43,7 +43,7 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
   newTag: Partial<Tag> = {
     name: '',
-    color: '#000'
+    color: '#FFDAB9'
   };
 
 

@@ -7,6 +7,7 @@ import {StoreModule} from '@ngrx/store';
 import {TAG_FEATURE_NAME, tagReducer} from './store/tag.reducer';
 import {EffectsModule} from '@ngrx/effects';
 import {TagEffects} from './store/tag.effects';
+import {FindContrastColorPipe} from './find-contrast-color.pipe';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import {TagEffects} from './store/tag.effects';
     EffectsModule.forFeature([TagEffects])
   ],
   declarations: [
-    TagListComponent
+    TagListComponent,
+    FindContrastColorPipe
   ],
   exports: [
     TagListComponent
