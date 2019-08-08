@@ -167,7 +167,7 @@ export class JiraIssueService {
 
       if (isCommentsChanged) {
         changelog.unshift({
-          created: lastUpdate.toISOString(),
+          created: new Date().toISOString(),
           author: null,
           field: 'Comments',
           from: oldCommentLength ? oldCommentLength.toString() : '0',
