@@ -1,3 +1,19 @@
+## [2.10.4](https://github.com/johannesjo/super-productivity/compare/v2.10.3...v2.10.4) (2019-08-08)
+
+
+### Bug Fixes
+
+* msToString for very large values ([a99daa0](https://github.com/johannesjo/super-productivity/commit/a99daa0))
+* **jira:** quick fix for jira changelog error [#202](https://github.com/johannesjo/super-productivity/issues/202) ([01f6315](https://github.com/johannesjo/super-productivity/commit/01f6315))
+* **task:** clean sub tasks from archive model ([7e6b24c](https://github.com/johannesjo/super-productivity/commit/7e6b24c))
+
+
+### Features
+
+* **github:** add better issue cleaning ([50a0d5d](https://github.com/johannesjo/super-productivity/commit/50a0d5d))
+
+
+
 ## [2.10.3](https://github.com/johannesjo/super-productivity/compare/v2.10.2...v2.10.3) (2019-07-25)
 
 
