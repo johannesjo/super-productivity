@@ -50,12 +50,12 @@ export class TaskListComponent implements OnDestroy, OnInit {
 
   private _subs = new Subscription();
   private _blockAnimationTimeout: number;
-  private _filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest(
+  private _filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
     this.tasks$,
     this.isHideDone$,
     this.isHideAll$,
     this._taskService.currentTaskId$,
-  ).pipe(
+  ]).pipe(
     map(([tasks, isHideDone, isHideAll, currentId]) =>
       filterDoneTasks(tasks, currentId, isHideDone, isHideAll)
     ),

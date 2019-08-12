@@ -250,7 +250,7 @@ export class GoogleApiService {
     });
     const metaData = this.getFileInfo$(fileId);
 
-    return combineLatest(metaData, loadFile)
+    return combineLatest([metaData, loadFile])
       .pipe(
         map((res) => {
           return {

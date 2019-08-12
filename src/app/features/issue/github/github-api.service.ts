@@ -60,10 +60,10 @@ export class GithubApiService {
     ) {
       return from([cachedIssues]);
     } else {
-      return combineLatest(
+      return combineLatest([
         this._getAllIssuesForRepo$(repo, isSkipCheck),
         this._getAllCommentsForRepo$(repo, isSkipCheck),
-      ).pipe(
+      ]).pipe(
         take(1),
         map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
         tap(issues => {
@@ -101,10 +101,10 @@ export class GithubApiService {
 
   getIssueWithCommentsByIssueNumber$(issueNumber: number): Observable<GithubIssue> {
     this._checkSettings();
-    return combineLatest(
+    return combineLatest([
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`),
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`),
-    ).pipe(
+    ]).pipe(
       catchError(this._handleRequestError$.bind(this)),
       map(([issue, comments]: [GithubOriginalIssue, GithubOriginalComment[]]) => {
         return {
@@ -138,14 +138,14 @@ export class GithubApiService {
     if (!isSkipCheck) {
       this._checkSettings();
     }
-    return combineLatest(
+    return combineLatest([
       // the last 500 should hopefully be enough
       this._getCommentsPageForRepo$(1, repo, isSkipCheck),
       this._getCommentsPageForRepo$(2, repo, isSkipCheck),
       this._getCommentsPageForRepo$(3, repo, isSkipCheck),
       this._getCommentsPageForRepo$(4, repo, isSkipCheck),
       this._getCommentsPageForRepo$(5, repo, isSkipCheck),
-    )
+    ])
       .pipe(
         catchError(this._handleRequestError$.bind(this)),
         map(([p1, p2, p3, p4, p5]) => [].concat(p1, p2, p3, p4, p5))

@@ -46,7 +46,7 @@ export class ChipListInputComponent {
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
   filteredSuggestions: Observable<Suggestion[]> = this.inputCtrl.valueChanges.pipe(
-    startWith(null),
+    startWith([null]),
     map((val: string | null) => val
       ? this._filter(val)
       : this.suggestions_.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))

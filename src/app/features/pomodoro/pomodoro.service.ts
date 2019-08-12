@@ -34,18 +34,18 @@ export class PomodoroService {
   isBreak$: Observable<boolean> = this._store$.pipe(select(selectIsBreak));
   currentCycle$: Observable<number> = this._store$.pipe(select(selectCurrentCycle));
 
-  isLongBreak$: Observable<boolean> = combineLatest(
+  isLongBreak$: Observable<boolean> = combineLatest([
     this.isBreak$,
     this.currentCycle$,
     this.cfg$,
-  ).pipe(map(([isBreak, currentCycle, cfg]) => {
+  ]).pipe(map(([isBreak, currentCycle, cfg]) => {
     return isBreak && cfg.cyclesBeforeLongerBreak && Number.isInteger(((currentCycle + 1) / cfg.cyclesBeforeLongerBreak));
   }));
 
-  isShortBreak$: Observable<boolean> = combineLatest(
+  isShortBreak$: Observable<boolean> = combineLatest([
     this.isBreak$,
     this.isLongBreak$,
-  ).pipe(map(([isBreak, isLongBreak]) => isBreak && !isLongBreak));
+  ]).pipe(map(([isBreak, isLongBreak]) => isBreak && !isLongBreak));
 
   timer$: Observable<number> = this._timeTrackingService.globalInterval$;
   tick$: Observable<number> = this.timer$.pipe(

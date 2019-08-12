@@ -71,7 +71,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   keypressHandler(ev: KeyboardEvent) {
     this.resizeTextareaToFit();
-    if (ev.keyCode === 10 && ev.ctrlKey) {
+    // TODO check if needed
+    if (ev['keyCode'] === 10 && ev.ctrlKey) {
       this.untoggleShowEdit();
     }
 

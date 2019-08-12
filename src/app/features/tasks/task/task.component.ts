@@ -120,8 +120,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
-    if (this._dragEnterTarget === (event.target as HTMLElement)) {
-      event.preventDefault();
+    if (this._dragEnterTarget === (ev.target as HTMLElement)) {
+      ev.preventDefault();
       ev.stopPropagation();
       this.isDragOver = false;
     }

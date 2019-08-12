@@ -68,8 +68,8 @@ export class BookmarkBarComponent implements OnDestroy {
   }
 
   @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
-    if (this.dragEnterTarget === (event.target as HTMLElement)) {
-      event.preventDefault();
+    if (this.dragEnterTarget === (ev.target as HTMLElement)) {
+      ev.preventDefault();
       this.isDragOver = false;
     }
   }

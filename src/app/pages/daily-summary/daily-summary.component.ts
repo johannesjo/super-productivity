@@ -36,10 +36,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
 
-  doneAndRepeatingTasks$: Observable<TaskWithSubTasks[]> = combineLatest(
+  doneAndRepeatingTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
     this._taskService.allRepeatableTasks$,
     this._taskService.doneTasks$,
-  ).pipe(
+  ]).pipe(
     map(([repeatableTasks, doneTasks]) => [
       ...repeatableTasks,
       ...doneTasks.filter(task => !task.repeatCfgId || task.repeatCfgId === null),
@@ -54,10 +54,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   dayStr = getWorklogStr();
 
-  dayStr$ = combineLatest(
+  dayStr$ = combineLatest([
     this._activatedRoute.paramMap,
     this._projectService.isRelatedDataLoadedForCurrentProject$,
-  ).pipe(
+  ]).pipe(
     filter(([route, isLoaded]) => isLoaded),
     map(([route]) => route),
     startWith({params: {dayStr: getWorklogStr()}}),
@@ -72,10 +72,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   );
 
   tasksWorkedOnOrDoneOrRepeatableFlat$ = this.dayStr$.pipe(
-    switchMap((dayStr) => combineLatest(
+    switchMap((dayStr) => combineLatest([
       this._taskService.allRepeatableTasksFlat$,
       this._taskService.getTasksWorkedOnOrDoneFlat$(dayStr)
-    )),
+    ])),
     map(([repeatableTasks, workedOnOrDoneTasks]) => [
       ...repeatableTasks,
       ...workedOnOrDoneTasks.filter(

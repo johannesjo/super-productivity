@@ -78,10 +78,10 @@ export class JiraApiService {
       });
 
     // fire a test request once there is enough config
-    const checkConnectionSub = combineLatest(
+    const checkConnectionSub = combineLatest([
       this._chromeExtensionInterface.onReady$,
       this._projectService.currentJiraCfg$,
-    ).subscribe(([isExtensionReady, cfg]) => {
+    ]).subscribe(([isExtensionReady, cfg]) => {
 
       if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
         this.getCurrentUser$()

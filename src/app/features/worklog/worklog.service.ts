@@ -23,10 +23,10 @@ export class WorklogService {
   private _archiveUpdateTrigger$ = new BehaviorSubject(true);
 
   // NOTE: task updates are not reflected
-  worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest(
+  worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest([
     this._projectService.currentProject$,
     this._archiveUpdateTrigger$,
-  ).pipe(
+  ]).pipe(
     switchMap(([curProject]) => {
       return this._loadForProject(curProject);
     }),

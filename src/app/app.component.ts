@@ -60,10 +60,10 @@ const SIDE_PANEL_BREAKPOINT = 900;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  isAllDataLoadedInitially$: Observable<boolean> = combineLatest(
+  isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._store.select(selectIsRelatedDataLoadedForCurrentProject),
     this._store.select(selectIsTaskDataLoaded),
-  ).pipe(
+  ]).pipe(
     map(([isProjectDataLoaded, isTaskDataLoaded]) => isProjectDataLoaded && isTaskDataLoaded),
     filter(isLoaded => isLoaded),
     take(1),
@@ -332,7 +332,7 @@ export class AppComponent implements OnInit {
       webFrame.setZoomFactor(this._configService.cfg._uiHelper._zoomFactor);
     }
 
-    document.addEventListener('mousewheel', (event: MouseWheelEvent) => {
+    document.addEventListener('mousewheel', (event: WheelEvent) => {
       if (event && event.ctrlKey) {
         let zoomFactor = webFrame.getZoomFactor();
         if (event.deltaY > 0) {

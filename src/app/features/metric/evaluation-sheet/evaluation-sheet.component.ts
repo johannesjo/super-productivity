@@ -40,10 +40,10 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   day$ = new BehaviorSubject<string>(getWorklogStr());
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
 
-  private _metricForDay$ = combineLatest(
+  private _metricForDay$ = combineLatest([
     this.day$,
     this._projectService.isRelatedDataLoadedForCurrentProject$,
-  ).pipe(
+  ]).pipe(
     filter(([day, isLoaded]) => isLoaded),
     switchMap(([day]) => this._metricService.getMetricForDay$(day)),
     withLatestFrom(this.day$),

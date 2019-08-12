@@ -60,12 +60,12 @@ export class GoogleDriveSyncEffects {
       GlobalConfigActionTypes.LoadGlobalConfig,
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
-    switchMap(() => combineLatest(
+    switchMap(() => combineLatest([
       this._googleApiService.isLoggedIn$,
       this.isEnabled$,
       this.isAutoSyncToRemote$,
       this.syncInterval$,
-    ).pipe(
+    ]).pipe(
       filter(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) =>
         isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000),
       switchMap(([a, b, c, syncInterval]) =>

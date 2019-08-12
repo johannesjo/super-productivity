@@ -9,10 +9,10 @@ import {ProjectService} from '../project/project.service';
   providedIn: 'root'
 })
 export class ScheduledTaskService {
-  allScheduledTasks$: Observable<any> = combineLatest(
+  allScheduledTasks$: Observable<any> = combineLatest([
     this._reminderService.reminders$,
     this._taskService.scheduledTasksWOData$,
-  ).pipe(
+  ]).pipe(
     // because we read the tasks from th database rather than from the store
     // we need to wait a little bit :/
     // TODO better solution
@@ -43,17 +43,17 @@ export class ScheduledTaskService {
     shareReplay(),
   );
 
-  scheduledTasksForOtherProjects$: Observable<any> = combineLatest(
+  scheduledTasksForOtherProjects$: Observable<any> = combineLatest([
     this._projectService.currentId$,
     this.allScheduledTasks$,
-  ).pipe(
+  ]).pipe(
     map(([currentProjectId, tasks]) => tasks.filter(task => task.reminderData.projectId !== currentProjectId))
   );
 
-  scheduledTasksForCurrentProject$: Observable<any> = combineLatest(
+  scheduledTasksForCurrentProject$: Observable<any> = combineLatest([
     this._projectService.currentId$,
     this.allScheduledTasks$,
-  ).pipe(
+  ]).pipe(
     map(([currentProjectId, tasks]) => tasks.filter(task => task.reminderData.projectId === currentProjectId))
   );
 

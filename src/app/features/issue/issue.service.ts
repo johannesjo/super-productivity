@@ -42,10 +42,10 @@ export class IssueService {
 
 
   public searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
-    return combineLatest(
+    return combineLatest([
       this.isJiraSearchEnabled$,
       this.isGithubSearchEnabled$,
-    ).pipe(
+    ]).pipe(
       switchMap(([isSearchJira, isSearchGithub]) => {
         const obs = [];
         obs.push(from([[]]));
