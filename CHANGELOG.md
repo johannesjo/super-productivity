@@ -1,3 +1,14 @@
+## [2.10.5](https://github.com/johannesjo/super-productivity/compare/v2.10.4...v2.10.5) (2019-08-12)
+
+
+### Bug Fixes
+
+* build ([abeb9ba](https://github.com/johannesjo/super-productivity/commit/abeb9ba))
+* linting warnings ([c958350](https://github.com/johannesjo/super-productivity/commit/c958350))
+* typing errors ([a8363bc](https://github.com/johannesjo/super-productivity/commit/a8363bc))
+
+
+
 ## [2.10.4](https://github.com/johannesjo/super-productivity/compare/v2.10.3...v2.10.4) (2019-08-08)
 
 
