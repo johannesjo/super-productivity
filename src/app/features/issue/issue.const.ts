@@ -1,4 +1,4 @@
-import {ConfigFormConfig} from '../config/global-config.model';
+import {ConfigFormConfig, GenericConfigFormSection} from '../config/global-config.model';
 import {DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION} from './jira/jira.const';
 import {IssueProviderKey} from './issue';
 import {DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM_SECTION} from './github/github.const';
@@ -22,6 +22,6 @@ export const DEFAULT_ISSUE_PROVIDER_CFGS = {
 };
 
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
-  GITHUB_CONFIG_FORM_SECTION,
-  JIRA_CONFIG_FORM_SECTION,
+  (GITHUB_CONFIG_FORM_SECTION as GenericConfigFormSection),
+  (JIRA_CONFIG_FORM_SECTION as GenericConfigFormSection),
 ];

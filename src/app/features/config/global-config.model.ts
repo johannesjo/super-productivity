@@ -156,6 +156,8 @@ export interface ConfigFormSection<FormModel> {
   isElectronOnly?: boolean;
 }
 
-export type ConfigFormConfig = Readonly<ConfigFormSection<{ [key: string]: any }>[]>;
+export type GenericConfigFormSection = ConfigFormSection<{ [key: string]: any }>;
+
+export type ConfigFormConfig = Readonly<GenericConfigFormSection[]>;
 
 
