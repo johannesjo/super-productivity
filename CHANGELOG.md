@@ -1,3 +1,12 @@
+## [2.10.6](https://github.com/johannesjo/super-productivity/compare/v2.10.5...v2.10.6) (2019-08-12)
+
+
+### Bug Fixes
+
+* quick fix to lower case error ([4a7cdcb](https://github.com/johannesjo/super-productivity/commit/4a7cdcb))
+
+
+
 ## [2.10.5](https://github.com/johannesjo/super-productivity/compare/v2.10.4...v2.10.5) (2019-08-12)
 
 
