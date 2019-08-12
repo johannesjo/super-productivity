@@ -46,7 +46,7 @@ export class ChipListInputComponent {
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
   filteredSuggestions: Observable<Suggestion[]> = this.inputCtrl.valueChanges.pipe(
-    startWith([null]),
+    startWith(''),
     map((val: string | null) => val
       ? this._filter(val)
       : this.suggestions_.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
@@ -120,9 +120,13 @@ export class ChipListInputComponent {
   }
 
   private _filter(val: string): Suggestion[] {
+    if (!val || val === null) {
+      return this.suggestions_;
+    }
+
     const filterValue = val.toLowerCase();
     return this.suggestions_.filter(
-      suggestion => suggestion.title.toLowerCase().indexOf(filterValue) === 0
+      suggestion => suggestion && suggestion.title.toLowerCase().indexOf(filterValue) === 0
         && !this._modelIds.includes(suggestion.id)
     );
   }
