@@ -6,14 +6,15 @@ const H = M * 60;
 
 export const msToString = (value: any, isShowSeconds?: boolean, isHideEmptyPlaceholder?: boolean): string => {
   const hours = Math.floor(value / H);
-  const minutes = Math.floor((value - hours * H) / H);
-  const seconds = isShowSeconds && Math.floor((value - (hours * H) - (minutes * M)) / H);
+  const minutes = Math.floor((value - hours * H) / M);
+  const seconds = isShowSeconds && Math.floor((value - (hours * H) - (minutes * M)) / S);
 
   const parsed =
     // ((+md.days() > 0) ? (md.days() + 'd ') : '')
     ((hours > 0) ? (hours + 'h ') : '')
     + ((minutes > 0) ? (minutes + 'm ') : '')
     + (isShowSeconds && (seconds > 0) ? (seconds + 's ') : '');
+
   if (!isHideEmptyPlaceholder && parsed.trim() === '') {
     return '-';
   }
