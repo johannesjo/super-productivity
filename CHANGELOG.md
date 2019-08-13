@@ -1,3 +1,12 @@
+## [2.10.7](https://github.com/johannesjo/super-productivity/compare/v2.10.6...v2.10.7) (2019-08-13)
+
+
+### Bug Fixes
+
+* msToString not showing minutes and seconds ([a257a2f](https://github.com/johannesjo/super-productivity/commit/a257a2f))
+
+
+
 ## [2.10.6](https://github.com/johannesjo/super-productivity/compare/v2.10.5...v2.10.6) (2019-08-12)
 
 
