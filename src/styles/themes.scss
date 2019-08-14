@@ -44,10 +44,6 @@ $accent: 'accent';
   background-color: get-mat-color($primary);
 }
 
-.bg-50 {
-  background-color: get-mat-color(50);
-}
-
 .bg-100 {
   background-color: get-mat-color(100);
 }
@@ -58,10 +54,6 @@ $accent: 'accent';
 
 .bg-400 {
   background-color: get-mat-color(400);
-}
-
-.bg-400i {
-  background-color: get-mat-color(400) !important;
 }
 
 .bg-600 {
@@ -91,24 +83,6 @@ $accent: 'accent';
 
 .color-contrast {
   color: get-mat-color($default, $contrast);
-}
-
-.color-light-primary {
-  color: get-mat-color(400);
-  stroke: get-mat-color(400);
-}
-
-.color-primary-after:after {
-  color: get-mat-color($primary);
-}
-
-.color-accent-after:after {
-  color: get-mat-color($accent);
-}
-
-.color-primary {
-  color: get-mat-color($primary);
-  stroke: get-mat-color($primary);
 }
 
 .border-color-primary {
