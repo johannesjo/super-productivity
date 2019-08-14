@@ -1026,6 +1026,13 @@ amdefine@>=0.0.4:
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
   integrity sha1-SlKCrBZHKek2Gbz9OtFR+BfOkfU=
 
+angular-material-css-vars@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/angular-material-css-vars/-/angular-material-css-vars-0.0.2.tgz#3450d90f83936e7c70df3cbfa89dd1f315f7523e"
+  integrity sha512-GOm3LI9YsJ16tm8TwAdopqCBLyWIICDoG4DVtIp2UfQXeXfIek19uoVEZdvT9HGhTjdCjcyiVcFMw/toZyhxAw==
+  dependencies:
+    tslib "^1.9.0"
+
 angular2-promise-buttons@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/angular2-promise-buttons/-/angular2-promise-buttons-4.0.0.tgz#b37c9f878ff39be78b055c02b347ae313747590c"
@@ -9364,6 +9371,11 @@ tiny-emitter@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/tiny-emitter/-/tiny-emitter-2.1.0.tgz#1d1a56edfc51c43e863cbb5382a72330e3555423"
   integrity sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==
+
+tinycolor2@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.4.1.tgz#f4fad333447bc0b07d4dc8e9209d8f39a8ac77e8"
+  integrity sha1-9PrTM0R7wLB9TcjpIJ2POaisd+g=
 
 tmp@0.0.30:
   version "0.0.30"

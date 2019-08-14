@@ -7,6 +7,7 @@ import {
   ArchiveProject,
   DeleteProject,
   LoadProjectRelatedDataSuccess,
+  LoadProjectState,
   ProjectActionTypes,
   UpdateProject,
   UpdateProjectIssueProviderCfg,
@@ -34,6 +35,9 @@ import {BannerId} from '../../../core/banner/banner.model';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {T} from '../../../t.const';
+import {MaterialCssVarsService} from 'angular-material-css-vars';
+import {Project} from '../project.model';
+import {THEME_COLOR_MAP} from '../../../app.constants';
 
 @Injectable()
 export class ProjectEffects {
@@ -152,6 +156,24 @@ export class ProjectEffects {
       tap(() => {
         this._bannerService.dismissIfExisting(BannerId.ForgotToFinishDay);
         this._bannerService.dismissIfExisting(BannerId.JiraUnblock);
+      }),
+    );
+
+  @Effect({dispatch: false}) changeThemeColor$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.LoadProjectState,
+        ProjectActionTypes.SetCurrentProject,
+        ProjectActionTypes.UpdateProject,
+      ),
+      withLatestFrom(this._projectService.currentProject$),
+      tap(([a, project]: [LoadProjectState, Project]) => {
+        const standardColor = THEME_COLOR_MAP[project.themeColor];
+        const color = (standardColor)
+          ? standardColor
+          : project.themeColor;
+
+        this._materialCssVarsService.changePrimary(color);
       }),
     );
 
@@ -321,6 +343,7 @@ export class ProjectEffects {
     private _obstructionService: ObstructionService,
     private _improvementService: ImprovementService,
     private _router: Router,
+    private _materialCssVarsService: MaterialCssVarsService,
   ) {
   }
 
