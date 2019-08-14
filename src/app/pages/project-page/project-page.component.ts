@@ -11,6 +11,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {download} from '../../util/download';
 import {SnackService} from '../../core/snack/snack.service';
 import {T} from '../../t.const';
+import {THEME_COLOR_MAP} from '../../app.constants';
 
 @Component({
   selector: 'project-page',
@@ -133,5 +134,13 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
 
   trackById(i: number, project: Project): string {
     return project.id;
+  }
+
+  getThemeColor(color: string): { [key: string]: string } {
+    const standardColor = THEME_COLOR_MAP[color];
+    const colorToUse = (standardColor)
+      ? standardColor
+      : color;
+    return {background: colorToUse};
   }
 }

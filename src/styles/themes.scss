@@ -21,8 +21,8 @@ $accent: 'accent';
 
   $color: map_get($palette, $key);
 
-  @debug $color;
-  @debug map_get($palette-primary, $key);
+  //@debug $color;
+  //@debug map_get($palette-primary, $key);
 
   @return rgba($color, 1);
 }
@@ -76,35 +76,21 @@ $accent: 'accent';
   background-color: get-mat-color(800);
 }
 
-// TODO check
-.bg-400-el {
-  background-color: get-mat-color(400);
-}
-
-
 // for buttons
+.isDarkTheme .mat-lighter,
 .mat-lighter {
   color: get-mat-color($default, $contrast);
   background-color: get-mat-color(300);
 }
 
+.isDarkTheme .mat-darker,
 .mat-darker {
   color: get-mat-color($default, $contrast);
   background-color: get-mat-color(600);
 }
 
-// TODO check
-.isLightTheme .bg-accented-light-theme {
-  background-color: get-mat-color(100);
-}
-
-
 .color-contrast {
   color: get-mat-color($default, $contrast);
-}
-
-.color-accent {
-  color: get-mat-color($accent)
 }
 
 .color-light-primary {

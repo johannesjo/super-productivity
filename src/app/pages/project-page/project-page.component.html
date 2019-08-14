@@ -9,8 +9,8 @@
          dragula="PROJECTS">
       <mat-card *ngFor="let project of (projectService.list$|async); trackBy:trackById;"
                 class="project">
-        <div [ngClass]="project.themeColor"
-             class="project-color bg-400-el drag-handle">
+        <div [ngStyle]="getThemeColor(project.themeColor)"
+             class="project-color drag-handle">
           <mat-icon class="color-contrast"
                     svgIcon="drag_handle">
           </mat-icon>
@@ -90,8 +90,8 @@
 
     <mat-card *ngFor="let project of (projectService.archived$|async); trackBy:trackById;"
               class="project">
-      <div [ngClass]="project.themeColor"
-           class="project-color bg-400-el">
+      <div [ngStyle]="getThemeColor(project.themeColor)"
+           class="project-color">
       </div>
 
       <div class="title">{{project.title}}</div>
