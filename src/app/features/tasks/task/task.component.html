@@ -5,7 +5,7 @@
      class="inner-wrapper">
 
   <div [class.bg-600]="isCurrent"
-       class="box bg-standard">
+       class="box bg-card">
   </div>
 
   <!-- TODO only bind pan etc when touch is available-->
@@ -107,7 +107,7 @@
 
       <div class="controls">
         <div [class.bg-600i]="isCurrent"
-             class="hover-controls bg-standard">
+             class="hover-controls bg-card">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                   class="ico-btn start-task-btn"
