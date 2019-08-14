@@ -85,6 +85,11 @@ $accent: 'accent';
   color: get-mat-color($default, $contrast);
 }
 
+.color-primary {
+  color: get-mat-color($primary);
+  stroke: get-mat-color($primary);
+}
+
 .border-color-primary {
   border-color: get-mat-color($primary) !important;
 }
