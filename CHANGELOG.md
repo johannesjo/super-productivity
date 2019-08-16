@@ -1,3 +1,12 @@
+## [2.10.8](https://github.com/johannesjo/super-productivity/compare/v2.10.7...v2.10.8) (2019-08-16)
+
+
+### Bug Fixes
+
+* task repeat dialog throwing error [#206](https://github.com/johannesjo/super-productivity/issues/206) ([b7c9eb4](https://github.com/johannesjo/super-productivity/commit/b7c9eb4))
+
+
+
 ## [2.10.7](https://github.com/johannesjo/super-productivity/compare/v2.10.6...v2.10.7) (2019-08-13)
 
 
