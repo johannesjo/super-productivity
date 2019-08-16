@@ -32,7 +32,7 @@
          class="global-bookmark-list-inner">
 
       <div *ngIf="!(bookmarkService.bookmarks$|async)?.length"
-           class="msg color-contrast">
+           class="msg">
         {{T.F.BOOKMARK.BAR.NO_BOOKMARKS|translate}}
       </div>
 
@@ -61,7 +61,7 @@
              class="controls">
           <mat-icon *ngIf="isEditMode"
                     @fade
-                    class="drag-handle bg-400 color-contrast"
+                    class="drag-handle bgc-400 color-contrast"
                     svgIcon="drag_handle"></mat-icon>
 
           <button (click)="openEditDialog(bookmark)"

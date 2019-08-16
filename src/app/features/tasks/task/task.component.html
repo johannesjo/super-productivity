@@ -1,12 +1,9 @@
-<div [class.color-contrast]="isCurrent"
-     [class.isAdditionalInfoOpen]="task._isAdditionalInfoOpen"
+<div [class.isAdditionalInfoOpen]="task._isAdditionalInfoOpen"
      [class.isCurrent]="isCurrent"
      [class.isDone]="task.isDone"
      class="inner-wrapper">
 
-  <div [class.bg-600]="isCurrent"
-       class="box bg-card">
-  </div>
+  <div class="box bg-card"></div>
 
   <!-- TODO only bind pan etc when touch is available-->
   <div (panend)="onPanEnd()"
@@ -70,7 +67,7 @@
          target="_blank"
          [title]="T.F.TASK.CMP.OPEN_ISSUE|translate">
         <div *ngIf="task.issueData?.storyPoints"
-             class="mini-badge bg-primary color-contrast">{{task.issueData?.storyPoints}}</div>
+             class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
         <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
       </a>
 
@@ -388,7 +385,7 @@
   </div>
 
   <div *ngIf="isDragOver"
-       class="bg-accent color-contrast drag-over-msg">
+       class="bgc-accent drag-over-msg">
     <mat-icon>add</mat-icon>
     {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
   </div>

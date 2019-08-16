@@ -1,4 +1,5 @@
 @import '../../../../variables';
+@import '~angular-material-css-vars/public-util';
 
 $task-shadow: $shadow-card-shadow;
 $sub-task-shadow: $whiteframe-shadow-1dp;
@@ -40,14 +41,21 @@ $z-time-btn-svg-wrapper: 5555;
   display: block;
   position: relative;
 
+  color: $light-theme-text-color;
+
   &.isCurrent {
     z-index: $z-is-current-host;
+    color: mat-css-contrast-color(600, $opacity: 1);
   }
 
   &:focus {
     z-index: $z-focus-host;
     outline: none;
   }
+}
+
+:host-context(.isDarkTheme) {
+  color: #fff;
 }
 
 .inner-wrapper {
@@ -85,9 +93,7 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
     border-color: $dark-theme-bg;
-    //border-color: rgb(55, 55, 55);
     border-bottom-color: transparent;
   }
 
@@ -107,6 +113,7 @@ $z-time-btn-svg-wrapper: 5555;
     box-shadow: $task-active-shadow;
     border-color: transparent;
     border-radius: $card-border-radius;
+    background: mat-css-primary-color(600);
   }
 
   :host:first-child > .inner-wrapper > & {

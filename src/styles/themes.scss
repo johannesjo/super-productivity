@@ -1,31 +1,8 @@
-@import '~angular-material-css-vars/init';
+@import '~angular-material-css-vars/public-util';
+@import '~angular-material-css-vars/main';
 
-$primary: 'primary';
-$default: 'default';
-$contrast: 'contrast';
-$accent: 'accent';
-
-@function get-mat-color($key, $parKey: null) {
-  $key: if($key == $primary, 500, $key);
-  $key: if($key == $default, 500, $key);
-
-  $palette: $palette-primary;
-  @if ($parKey == $contrast) {
-    $palette: map_get($palette-primary, $contrast);
-  } @else if ($key == $accent) {
-    $palette: $palette-accent;
-    $key: 500;
-  } @else {
-    $palette: $palette-primary;
-  }
-
-  $color: map_get($palette, $key);
-
-  //@debug $color;
-  //@debug map_get($palette-primary, $key);
-
-  @return rgba($color, 1);
-}
+// INIT THEMING
+@include initMaterialCssVars();
 
 
 .bg-card {
@@ -37,59 +14,78 @@ $accent: 'accent';
 }
 
 .bg-primary {
-  background-color: get-mat-color($primary);
+  background-color: mat-css-primary-color();
+}
+
+.bgc-primary {
+  @include mat-css-color-and-contrast(500);
 }
 
 .bg-accent {
-  background-color: get-mat-color($primary);
+  background-color: mat-css-accent-color();
+}
+
+.bgc-accent {
+  background-color: mat-css-accent-color();
+  color: var(--light-accent-text);
 }
 
 .bg-100 {
-  background-color: get-mat-color(100);
+  background-color: mat-css-primary-color(100);
 }
 
 .bg-200 {
-  background-color: get-mat-color(200);
+  background-color: mat-css-primary-color(200);
 }
 
 .bg-400 {
-  background-color: get-mat-color(400);
+  background-color: mat-css-primary-color(400);
+}
+
+.bgc-400 {
+  @include mat-css-color-and-contrast(400);
 }
 
 .bg-600 {
-  background-color: get-mat-color(600);
+  background-color: mat-css-primary-color(600);
+}
+
+.bgc-600 {
+  @include mat-css-color-and-contrast(600);
+}
+
+.cc-600 {
+  color: mat-css-contrast-color(600);
 }
 
 .bg-600i {
-  background-color: get-mat-color(600) !important;
+  background-color: mat-css-primary-color(600) !important;
 }
 
-.bg-800 {
-  background-color: get-mat-color(800);
+.bgc-800 {
+  @include mat-css-color-and-contrast(800);
 }
 
 // for buttons
 .isDarkTheme .mat-lighter,
 .mat-lighter {
-  color: get-mat-color($default, $contrast);
-  background-color: get-mat-color(300);
+  @include mat-css-color-and-contrast(300);
 }
 
 .isDarkTheme .mat-darker,
 .mat-darker {
-  color: get-mat-color($default, $contrast);
-  background-color: get-mat-color(600);
+  @include mat-css-color-and-contrast(600);
 }
 
 .color-contrast {
-  color: get-mat-color($default, $contrast);
+  color: mat-css-contrast-color();
 }
 
 .color-primary {
-  color: get-mat-color($primary);
-  stroke: get-mat-color($primary);
+  color: mat-css-primary-color();
+  stroke: mat-css-primary-color();
 }
 
 .border-color-primary {
-  border-color: get-mat-color($primary) !important;
+  border-color: mat-css-primary-color() !important;
 }

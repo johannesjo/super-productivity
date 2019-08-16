@@ -173,7 +173,8 @@ export class ProjectEffects {
           ? standardColor
           : project.themeColor;
 
-        this._materialCssVarsService.changePrimary(color);
+        console.log(color);
+        this._materialCssVarsService.changePrimaryColor(color);
       }),
     );
 

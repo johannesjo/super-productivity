@@ -1,15 +1,14 @@
 <mat-tab-group (selectedIndexChange)="indexChange($event)"
                [selectedIndex]="selectedIndex"
-               class="tab-group"
-               color="darker">
+               class="tab-group">
   <mat-tab>
     <ng-template mat-tab-label>
-      <mat-icon class="color-contrast">library_books</mat-icon>
-      <span class="tab-label-text color-contrast">{{T.BL.TITLE|translate}}
+      <mat-icon>library_books</mat-icon>
+      <span class="tab-label-text">{{T.BL.TITLE|translate}}
         ({{taskService.estimateRemainingBacklog$|async|msToString}})</span>
     </ng-template>
 
-    <div class="tab-wrapper bg-400">
+    <div class="tab-wrapper bgc-400">
       <div class="task-list-wrapper">
         <task-list [noTasksMsg]="T.BL.NO_TASKS|translate"
                    [tasks]="taskService.backlogTasks$|async"
@@ -23,13 +22,13 @@
 
   <mat-tab>
     <ng-template mat-tab-label>
-      <mat-icon class="color-contrast">alarm</mat-icon>
+      <mat-icon>alarm</mat-icon>
       <span
-        class="tab-label-text color-contrast">{{T.BL.SCHEDULED|translate}}
+        class="tab-label-text ">{{T.BL.SCHEDULED|translate}}
         ({{(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length}})</span>
     </ng-template>
 
-    <div class="tab-wrapper bg-400">
+    <div class="tab-wrapper bgc-400">
       <div class="component-wrapper page-wrapper">
         <p *ngIf="!(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
            class="no-scheduled-tasks">

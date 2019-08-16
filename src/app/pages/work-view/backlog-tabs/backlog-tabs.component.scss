@@ -1,5 +1,5 @@
 @import './../../../../_variables';
-
+@import '~angular-material-css-vars/public-util';
 
 :host {
   position: absolute;
@@ -21,11 +21,13 @@
     height: 100%;
     top: 0;
     left: 0;
+    @include mat-css-bg(200);
 
     > .mat-tab-header {
       position: relative;
       z-index: 4;
       box-shadow: $whiteframe-shadow-3dp;
+      border-bottom: 0;
 
       .mat-tab-label-active {
         opacity: 1 !important;
@@ -37,6 +39,8 @@
 
         .mat-tab-label {
           flex-grow: 1;
+          @include mat-css-color-and-contrast(600);
+
 
           mat-icon {
             margin-right: $s;
