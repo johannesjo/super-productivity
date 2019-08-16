@@ -19,6 +19,7 @@ import {DialogViewTaskReminderComponent} from './dialog-view-task-reminder/dialo
 import {DialogAddTaskReminderComponent} from './dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {TaskSummaryTableComponent} from './task-summary-table/task-summary-table.component';
 import {DialogAddTimeEstimateForOtherDayComponent} from './dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
+import {TaskRepeatCfgModule} from '../task-repeat-cfg/task-repeat-cfg.module';
 
 @NgModule({
   imports: [
@@ -28,6 +29,7 @@ import {DialogAddTimeEstimateForOtherDayComponent} from './dialog-add-time-estim
     FormsModule,
     AttachmentModule,
     ReactiveFormsModule,
+    TaskRepeatCfgModule,
     StoreModule.forFeature(TASK_FEATURE_NAME, taskReducer),
     EffectsModule.forFeature([TaskEffects]),
   ],
