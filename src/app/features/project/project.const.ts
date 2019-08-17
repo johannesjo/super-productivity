@@ -1,8 +1,9 @@
-import {GoogleTimeSheetExport, Project, SimpleSummarySettings} from './project.model';
+import {GoogleTimeSheetExport, Project, ProjectThemeCfg, SimpleSummarySettings} from './project.model';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {getYesterdaysDate} from '../../util/get-yesterdays-date';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {WorklogExportSettings, WorklogGrouping} from '../worklog/worklog.model';
+import {HueValue} from 'angular-material-css-vars';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   roundWorkTimeTo: null,
@@ -44,6 +45,15 @@ export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {
   ]
 };
 
+export const DEFAULT_PROJECT_THEME: ProjectThemeCfg = {
+  isDarkTheme: false,
+  primary: '',
+  huePrimary: '500',
+  accent: '#ff4081',
+  hueAccent: '500',
+  warn: '#e11826',
+  hueWarn: '500',
+};
 
 export const DEFAULT_PROJECT: Project = {
   id: null,
@@ -53,6 +63,7 @@ export const DEFAULT_PROJECT: Project = {
   isReducedTheme: false,
   isArchived: false,
   timeWorkedWithoutBreak: null,
+  theme: DEFAULT_PROJECT_THEME,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   advancedCfg: {
     googleTimeSheetExport: GOOGLE_TIME_SHEET_EXPORT_DEFAULTS,
@@ -73,8 +84,10 @@ export const FIRST_PROJECT: Project = {
   ...DEFAULT_PROJECT,
   id: DEFAULT_PROJECT_ID,
   title: 'Super Productivity',
-  themeColor: 'light-blue',
-  isDarkTheme: false,
   workStart: {},
   workEnd: {},
+  theme: {
+    ...DEFAULT_PROJECT_THEME,
+    primary: '#03a9f4',
+  }
 };

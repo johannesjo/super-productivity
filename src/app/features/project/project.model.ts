@@ -8,6 +8,7 @@ import {MetricState} from '../metric/metric.model';
 import {ImprovementState} from '../metric/improvement/improvement.model';
 import {ObstructionState} from '../metric/obstruction/obstruction.model';
 import {WorklogExportSettings} from '../worklog/worklog.model';
+import {HueValue} from 'angular-material-css-vars';
 
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -70,11 +71,24 @@ export type ProjectAdvancedCfg = Readonly<{
   worklogExportSettings: WorklogExportSettings;
 }>;
 
+export type ProjectThemeCfg = Readonly<{
+  isDarkTheme: boolean;
+  primary: string;
+  huePrimary: HueValue;
+  accent: string;
+  hueAccent: HueValue;
+  warn: string;
+  hueWarn: HueValue;
+}>;
+
 export interface ProjectBasicCfg {
   title: string;
-  themeColor: string;
-  isDarkTheme: boolean;
-  isReducedTheme: boolean;
+  /** @deprecated use new theme model instead. */
+  themeColor?: string;
+  /** @deprecated use new theme model instead. */
+  isDarkTheme?: boolean;
+  /** @deprecated use new theme model instead. */
+  isReducedTheme?: boolean;
   isArchived: boolean;
   timeWorkedWithoutBreak: number;
 }
@@ -90,6 +104,7 @@ export interface ProjectCopy extends ProjectBasicCfg {
   lastCompletedDay: string;
   breakTime: BreakTime;
   breakNr: BreakNr;
+  theme: ProjectThemeCfg;
 }
 
 export type Project = Readonly<ProjectCopy>;
@@ -113,7 +128,6 @@ export interface ExportedProject extends Project {
 export interface ProjectArchive {
   [key: string]: string;
 }
-
 
 export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic';
 
