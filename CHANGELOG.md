@@ -1,3 +1,14 @@
+## [2.10.9](https://github.com/johannesjo/super-productivity/compare/v2.10.8...v2.10.9) (2019-08-19)
+
+
+### Bug Fixes
+
+* jira settings not being loaded initially sometimes [#209](https://github.com/johannesjo/super-productivity/issues/209) ([311b555](https://github.com/johannesjo/super-productivity/commit/311b555))
+* potential jira stepper error ([b3f9e91](https://github.com/johannesjo/super-productivity/commit/b3f9e91))
+* project creation dialog sometimes failing ([79c2af7](https://github.com/johannesjo/super-productivity/commit/79c2af7))
+
+
+
 ## [2.10.8](https://github.com/johannesjo/super-productivity/compare/v2.10.7...v2.10.8) (2019-08-16)
 
 
