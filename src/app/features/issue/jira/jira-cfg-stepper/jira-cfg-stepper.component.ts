@@ -52,7 +52,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
 
   @Input() set cfg(cfg: JiraCfg) {
     if (cfg) {
-      this.jiraCfg = cfg;
+      this.jiraCfg = {...cfg};
     }
   }
 
