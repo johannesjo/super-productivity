@@ -10,7 +10,7 @@ import {
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ProjectService} from './features/project/project.service';
-import {Project} from './features/project/project.model';
+import {ProjectThemeCfg} from './features/project/project.model';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
 import {GlobalConfigService} from './features/config/global-config.service';
@@ -44,6 +44,7 @@ import {LS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
 import {BannerId} from './core/banner/banner.model';
 import {T} from './t.const';
 import {TranslateService} from '@ngx-translate/core';
+import {MaterialCssVarsService} from 'angular-material-css-vars';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -72,8 +73,6 @@ export class AppComponent implements OnInit {
     `(max-width: ${SIDE_PANEL_BREAKPOINT}px)`,
   ]).pipe(map(result => result.matches));
 
-  private _currentTheme: string;
-
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _configService: GlobalConfigService,
@@ -94,6 +93,7 @@ export class AppComponent implements OnInit {
     private _themeService: ThemeService,
     private _breakPointObserver: BreakpointObserver,
     private _store: Store<any>,
+    private _materialCssVarsService: MaterialCssVarsService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly noteService: NoteService,
@@ -205,23 +205,23 @@ export class AppComponent implements OnInit {
 
 
   ngOnInit() {
-    this._projectService.currentProject$.subscribe((cp: Project) => {
+    this._projectService.currentTheme$.subscribe((theme: ProjectThemeCfg) => {
       const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
         ? this._electronService.remote.systemPreferences.isDarkMode()
-        : cp.isDarkTheme;
+        : theme.isDarkTheme;
 
-      this._setTheme(cp.themeColor, isDarkTheme, cp.isReducedTheme);
+      this._setTheme(theme, isDarkTheme);
     });
 
     // TODO beautify code here
     if (IS_ELECTRON && this._electronService.isMacOS) {
       this._electronService.remote.systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
-        this._projectService.currentProject$.pipe(take(1)).subscribe(cp => {
+        this._projectService.currentTheme$.pipe(take(1)).subscribe(theme => {
           const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
             ? this._electronService.remote.systemPreferences.isDarkMode()
-            : cp.isDarkTheme;
+            : theme.isDarkTheme;
 
-          this._setTheme(cp.themeColor, isDarkTheme, cp.isReducedTheme);
+          this._setTheme(theme, isDarkTheme);
         });
       });
     }
@@ -260,23 +260,13 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private _setTheme(theme: string, isDarkTheme: boolean, isReducedTheme: boolean) {
-    if (this._currentTheme) {
-      this.document.body.classList.remove(this._currentTheme);
-    }
-    if (theme) {
-      this.document.body.classList.add(theme);
-    }
+  private _setTheme(theme: ProjectThemeCfg, isDarkTheme: boolean) {
+    this._materialCssVarsService.setPrimaryColor(theme.primary);
+    this._materialCssVarsService.setAccentColor(theme.accent);
+    this._materialCssVarsService.setWarnColor(theme.warn);
+    this._materialCssVarsService.setDarkTheme(theme.isDarkTheme);
 
-    if (isDarkTheme) {
-      this.document.body.classList.remove(BodyClass.isLightTheme);
-      this.document.body.classList.add(BodyClass.isDarkTheme);
-    } else {
-      this.document.body.classList.remove(BodyClass.isDarkTheme);
-      this.document.body.classList.add(BodyClass.isLightTheme);
-    }
-
-    if (isReducedTheme) {
+    if (theme.isReducedTheme) {
       this.document.body.classList.remove(BodyClass.isNoReducedTheme);
       this.document.body.classList.add(BodyClass.isReducedTheme);
     } else {
@@ -284,7 +274,6 @@ export class AppComponent implements OnInit {
       this.document.body.classList.add(BodyClass.isNoReducedTheme);
     }
 
-    this._currentTheme = theme;
     this._setChartTheme(isDarkTheme);
   }
 
