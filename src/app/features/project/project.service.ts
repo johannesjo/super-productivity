@@ -8,7 +8,7 @@ import {
   Project,
   ProjectAdvancedCfg,
   ProjectAdvancedCfgKey,
-  ProjectBasicCfg,
+  ProjectBasicCfg, ProjectThemeCfg,
   SimpleSummarySettings,
 } from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
@@ -34,7 +34,7 @@ import {
   selectProjectJiraCfg,
   selectProjectJiraIsEnabled,
   selectProjectLastCompletedDay,
-  selectProjectLastWorkEnd,
+  selectProjectLastWorkEnd, selectProjectThemeCfg,
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
   selectUnarchivedProjects,
@@ -68,6 +68,9 @@ export class ProjectService {
     // filter(v => !!v),
     // TODO investigate share replay issues
     shareReplay(),
+  );
+  currentTheme$: Observable<ProjectThemeCfg> = this._store$.pipe(
+    select(selectProjectThemeCfg),
   );
   currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
     select(selectProjectJiraCfg),

@@ -451,14 +451,17 @@
         "SETUP_GIT": "Setup Github Integration",
         "SETUP_JIRA": "Setup Jira Integration"
       },
-      "FORM": {
+      "FORM_THEME": {
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
-        "HELP": "Very basic settings for your project.",
+        "HELP": "Theme settings for your project.",
+        "L_COLOR_PRIMARY": "Primary Color",
+        "L_COLOR_ACCENT": "Accent Color",
+        "L_COLOR_WARN": "Warn/Error Color",
         "L_IS_DARK_THEME": "Use Dark Theme",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
         "L_THEME_COLOR": "Theme Color",
         "L_TITLE": "Title",
-        "TITLE": "Project Settings & Theme"
+        "TITLE": "Theme"
       },
       "S": {
         "ARCHIVED": "Archived Project",

@@ -168,13 +168,10 @@ export class ProjectEffects {
       ),
       withLatestFrom(this._projectService.currentProject$),
       tap(([a, project]: [LoadProjectState, Project]) => {
-        const standardColor = THEME_COLOR_MAP[project.themeColor];
-        const color = (standardColor)
-          ? standardColor
-          : project.themeColor;
-
-        console.log(color);
-        this._materialCssVarsService.setPrimaryColor(color);
+        const theme = project.theme;
+        this._materialCssVarsService.setPrimaryColor(theme.primary);
+        this._materialCssVarsService.setAccentColor(theme.accent);
+        this._materialCssVarsService.setWarnColor(theme.warn);
       }),
     );
 

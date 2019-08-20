@@ -1,55 +1,69 @@
-import {ConfigFormConfig, ConfigFormSection} from '../config/global-config.model';
-import {ALL_THEMES} from '../../app.constants';
+import {ConfigFormSection, GenericConfigFormSection} from '../config/global-config.model';
 import {T} from '../../t.const';
-import {ProjectBasicCfg} from './project.model';
-
-const themeOpts = ALL_THEMES.map((theme) => {
-  return {label: theme, value: theme};
-});
+import {ProjectThemeCfg} from './project.model';
 
 
-export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectBasicCfg> = {
-  title: T.F.PROJECT.FORM.TITLE,
+export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg> = {
+  title: T.F.PROJECT.FORM_THEME.TITLE,
   key: 'basic',
-  help: T.F.PROJECT.FORM.HELP,
+  help: T.F.PROJECT.FORM_THEME.HELP,
   items: [
     {
-      key: 'title',
+      key: 'primary',
       type: 'input',
       templateOptions: {
-        required: true,
-        label: T.F.PROJECT.FORM.L_TITLE,
+        label: T.F.PROJECT.FORM_THEME.L_COLOR_PRIMARY,
+        type: 'color',
       },
     },
     {
-      key: 'themeColor',
-      type: 'select',
+      key: 'accent',
+      type: 'input',
       templateOptions: {
-        required: true,
-        label: T.F.PROJECT.FORM.L_THEME_COLOR,
-        options: themeOpts,
-        valueProp: 'value',
-        labelProp: 'label',
-        placeholder: T.F.PROJECT.FORM.L_THEME_COLOR,
+        label: T.F.PROJECT.FORM_THEME.L_COLOR_ACCENT,
+        type: 'color',
+      },
+    },
+    {
+      key: 'warn',
+      type: 'input',
+      templateOptions: {
+        label: T.F.PROJECT.FORM_THEME.L_COLOR_WARN,
+        type: 'color',
       },
     },
     {
       key: 'isDarkTheme',
       type: 'checkbox',
       templateOptions: {
-        label: T.F.PROJECT.FORM.L_IS_DARK_THEME,
-        description: T.F.PROJECT.FORM.D_IS_DARK_THEME,
+        label: T.F.PROJECT.FORM_THEME.L_IS_DARK_THEME,
+        description: T.F.PROJECT.FORM_THEME.D_IS_DARK_THEME,
       },
     },
     {
       key: 'isReducedTheme',
       type: 'checkbox',
       templateOptions: {
-        label: T.F.PROJECT.FORM.L_IS_REDUCED_THEME,
+        label: T.F.PROJECT.FORM_THEME.L_IS_REDUCED_THEME,
       },
     },
   ]
 };
 
-export const PROJECT_CONFIG_FORM_CONFIG: ConfigFormConfig = [];
-
+export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<GenericConfigFormSection> = {
+  title: 'Project Settings & Theme',
+  key: 'basic',
+  /* tslint:disable */
+  help: `Very basic settings for your project.`,
+  /* tslint:enable */
+  items: [
+    {
+      key: 'title',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: 'Title',
+      },
+    },
+  ]
+};

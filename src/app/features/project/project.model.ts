@@ -73,6 +73,7 @@ export type ProjectAdvancedCfg = Readonly<{
 
 export type ProjectThemeCfg = Readonly<{
   isDarkTheme: boolean;
+  isReducedTheme: boolean;
   primary: string;
   huePrimary: HueValue;
   accent: string;
@@ -129,6 +130,6 @@ export interface ProjectArchive {
   [key: string]: string;
 }
 
-export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic';
+export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic' | 'theme';
 
 

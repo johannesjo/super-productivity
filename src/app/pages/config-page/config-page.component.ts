@@ -9,11 +9,8 @@ import {
   GlobalConfigState
 } from '../../features/config/global-config.model';
 import {Subscription} from 'rxjs';
-import {Project, ProjectAdvancedCfg, ProjectBasicCfg, ProjectCfgFormKey} from '../../features/project/project.model';
-import {
-  BASIC_PROJECT_CONFIG_FORM_CONFIG,
-  PROJECT_CONFIG_FORM_CONFIG
-} from '../../features/project/project-form-cfg.const';
+import {Project, ProjectAdvancedCfg, ProjectCfgFormKey, ProjectThemeCfg} from '../../features/project/project.model';
+import {PROJECT_THEME_CONFIG_FORM_CONFIG,} from '../../features/project/project-form-cfg.const';
 import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue';
 import {ISSUE_PROVIDER_FORM_CFGS} from '../../features/issue/issue.const';
 import {DEFAULT_JIRA_CFG} from '../../features/issue/jira/jira.const';
@@ -30,12 +27,12 @@ import {T} from '../../t.const';
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
   T = T;
-  basicProjectSettingsFormCfg: ConfigFormSection<ProjectBasicCfg>;
-  projectConfigFormCfg: ConfigFormConfig;
+  projectThemeSettingsFormCfg: ConfigFormSection<ProjectThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;
   globalConfigFormCfg: ConfigFormConfig;
 
   currentProject: Project;
+  currentProjectTheme: ProjectThemeCfg;
   projectCfg: ProjectAdvancedCfg;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   globalCfg: GlobalConfigState;
@@ -50,8 +47,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here
-    this.basicProjectSettingsFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
-    this.projectConfigFormCfg = PROJECT_CONFIG_FORM_CONFIG;
+    this.projectThemeSettingsFormCfg = PROJECT_THEME_CONFIG_FORM_CONFIG;
     this.issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
   }
@@ -63,6 +59,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.add(this.projectService.currentProject$.subscribe((project) => {
       this.currentProject = project;
       this.projectCfg = project.advancedCfg;
+      this.currentProjectTheme = project.theme;
       this.issueIntegrationCfgs = project.issueIntegrationCfgs;
 
       // Unfortunately needed, to make sure we have no empty configs
@@ -85,12 +82,14 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     return section.key;
   }
 
-  saveProjectBasicCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: Partial<Project> }) {
+  saveProjectThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: ProjectThemeCfg }) {
     if (!$event.config) {
       throw new Error('Not enough data');
     } else {
       this.projectService.update(this.currentProject.id, {
-        ...$event.config,
+        theme: {
+          ...$event.config,
+        }
       });
     }
   }

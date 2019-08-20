@@ -6,16 +6,9 @@
 
       <div>
         <section class="config-section mat-elevation-z2">
-          <config-section (save)="saveProjectBasicCfg($event)"
-                          [cfg]="projectService.basicCfg$|async"
-                          [section]="basicProjectSettingsFormCfg"></config-section>
-        </section>
-      </div>
-
-      <div *ngFor="let section of projectConfigFormCfg; trackBy:trackBySectionKey;">
-        <section class="config-section mat-elevation-z2">
-          <config-section [cfg]="projectCfg[section.key]"
-                          [section]="section"></config-section>
+          <config-section (save)="saveProjectThemCfg($event)"
+                          [cfg]="currentProjectTheme"
+                          [section]="projectThemeSettingsFormCfg"></config-section>
         </section>
       </div>
 
