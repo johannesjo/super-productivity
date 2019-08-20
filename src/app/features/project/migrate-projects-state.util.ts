@@ -46,7 +46,9 @@ const _updateThemeModel = (project: Project): Project => {
         ...project,
         theme: {
           ...DEFAULT_PROJECT_THEME,
-          primary: THEME_COLOR_MAP[project.themeColor],
+          primary: (project.themeColor)
+            ? THEME_COLOR_MAP[project.themeColor]
+            : DEFAULT_PROJECT_THEME.primary,
           isDarkTheme: project.isDarkTheme,
           isReducedTheme: project.isReducedTheme,
         }
