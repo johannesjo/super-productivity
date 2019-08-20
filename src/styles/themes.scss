@@ -26,8 +26,7 @@
 }
 
 .bgc-accent {
-  background-color: mat-css-color-accent();
-  color: var(--light-accent-text);
+  @include mat-css-color-and-contrast-accent(500);
 }
 
 .bg-100 {

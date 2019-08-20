@@ -4,7 +4,7 @@
      class="global-bookmark-list-outer">
   <div *ngIf="isDragOver"
        @fade
-       class="bg-accent drag-over-msg">
+       class="bgc-accent drag-over-msg">
     <mat-icon>add</mat-icon>
     {{T.F.BOOKMARK.BAR.DROP|translate}}
   </div>
@@ -51,8 +51,7 @@
            tabindex="1"
            target="_blank"
            type="{{bookmark.type}}">
-          <mat-icon *ngIf="bookmark.icon"
-                    class="color-contrast">{{bookmark.icon}}
+          <mat-icon *ngIf="bookmark.icon">{{bookmark.icon}}
           </mat-icon>
           {{bookmark.title}}
         </a>
@@ -61,7 +60,7 @@
              class="controls">
           <mat-icon *ngIf="isEditMode"
                     @fade
-                    class="drag-handle bgc-400 color-contrast"
+                    class="drag-handle bgc-400"
                     svgIcon="drag_handle"></mat-icon>
 
           <button (click)="openEditDialog(bookmark)"
