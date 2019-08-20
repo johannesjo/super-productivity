@@ -258,8 +258,8 @@
         "USER_NAME": "E-Mail / Benutzername"
       },
       "FORM_SECTION": {
-        "ADV_CFG": "Erweiterte Konfig",
-        "CREDENTIALS": "REFERENZEN",
+        "ADV_CFG": "Erweiterte Konfiguration",
+        "CREDENTIALS": "Zugangsdaten",
         "HELP_ARR": {
           "H1": "Grundlegende Einstellung",
           "H2": "Worklog-Einstellungen",

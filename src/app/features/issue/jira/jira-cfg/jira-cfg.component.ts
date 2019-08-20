@@ -27,7 +27,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: JiraCfg) {
-    this._cfg = cfg;
+    this._cfg = cfg
+      ? {...cfg}
+      : DEFAULT_JIRA_CFG;
+
     if (!this._cfg.transitionConfig) {
       this._cfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
     } else {
@@ -45,7 +48,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   get cfg() {
-    return this._cfg || DEFAULT_JIRA_CFG;
+    return this._cfg;
   }
 
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
