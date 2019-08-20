@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Project} from '../../project.model';
+import {Project, ProjectCopy} from '../../project.model';
 import {FormGroup} from '@angular/forms';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {ProjectService} from '../../project.service';
 import {DEFAULT_PROJECT} from '../../project.const';
 import {JiraCfg} from '../../../issue/jira/jira';
-import {BASIC_PROJECT_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
+import {BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_THEME_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
 import {IssueIntegrationCfgs} from '../../../issue/issue';
 import {DialogJiraInitialSetupComponent} from '../../../issue/jira/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import {SS_PROJECT_TMP} from '../../../../core/persistence/ls-keys.const';
@@ -25,17 +25,25 @@ import {T} from '../../../../t.const';
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   T = T;
-  projectData: Project | Partial<Project> = DEFAULT_PROJECT;
+  projectData: ProjectCopy | Partial<ProjectCopy> = DEFAULT_PROJECT;
   jiraCfg: JiraCfg;
   githubCfg: GithubCfg;
 
-  form = new FormGroup({});
-  formOptions: FormlyFormOptions = {
+  formBasic = new FormGroup({});
+  formTheme = new FormGroup({});
+  formOptionsBasic: FormlyFormOptions = {
     formState: {
       awesomeIsForced: false,
     },
   };
-  formCfg: FormlyFieldConfig[] = [];
+  formOptionsTheme: FormlyFormOptions = {
+    formState: {
+      awesomeIsForced: false,
+    },
+  };
+
+  basicSettingsFormCfg: FormlyFieldConfig[] = [];
+  themeFormCfg: FormlyFieldConfig[] = [];
 
   private _subs = new Subscription();
   private _isSaveTmpProject: boolean;
@@ -48,15 +56,20 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here,
-    this.formCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
+    this.basicSettingsFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
+    this.themeFormCfg = PROJECT_THEME_CONFIG_FORM_CONFIG.items;
   }
 
   ngOnInit() {
     if (this._project) {
-      this.projectData = Object.assign({}, this._project);
+      this.projectData = {...this._project};
+
     } else {
       if (loadFromSessionStorage(SS_PROJECT_TMP)) {
-        this.projectData = loadFromSessionStorage(SS_PROJECT_TMP);
+        this.projectData = {
+          ...DEFAULT_PROJECT,
+          ...loadFromSessionStorage(SS_PROJECT_TMP),
+        };
       }
       this._isSaveTmpProject = true;
 

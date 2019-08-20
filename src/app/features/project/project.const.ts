@@ -48,17 +48,12 @@ export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {
 export const DEFAULT_PROJECT_THEME: ProjectThemeCfg = {
   isDarkTheme: false,
   isReducedTheme: false,
-  primary: '',
+  primary: '#03a9f4',
   huePrimary: '500',
   accent: '#ff4081',
   hueAccent: '500',
   warn: '#e11826',
   hueWarn: '500',
-};
-
-export const DEFAULT_PROJECT_THEME_WITH_PRIMARY: ProjectThemeCfg = {
-  ...DEFAULT_PROJECT_THEME,
-  primary: '#03a9f4',
 };
 
 export const DEFAULT_PROJECT: Project = {
@@ -92,5 +87,5 @@ export const FIRST_PROJECT: Project = {
   title: 'Super Productivity',
   workStart: {},
   workEnd: {},
-  theme: DEFAULT_PROJECT_THEME_WITH_PRIMARY
+  theme: DEFAULT_PROJECT_THEME
 };

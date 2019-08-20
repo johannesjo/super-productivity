@@ -1,7 +1,7 @@
 import {ProjectState} from './store/project.reducer';
 import {Dictionary} from '@ngrx/entity';
 import {Project} from './project.model';
-import {DEFAULT_PROJECT, DEFAULT_PROJECT_THEME_WITH_PRIMARY} from './project.const';
+import {DEFAULT_PROJECT, DEFAULT_PROJECT_THEME} from './project.const';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {getYesterdaysDate} from '../../util/get-yesterdays-date';
@@ -40,21 +40,12 @@ const _addFirstEntryForDayCompleted = (project: Project): Project => {
 };
 
 const _updateThemeModel = (project: Project): Project => {
-    return {
-      ...project,
-      theme: {
-        ...DEFAULT_PROJECT_THEME_WITH_PRIMARY,
-        primary: THEME_COLOR_MAP[project.themeColor],
-        isDarkTheme: project.isDarkTheme,
-        isReducedTheme: project.isReducedTheme,
-      }
-    };
     return (project.hasOwnProperty('theme'))
       ? project
       : {
         ...project,
         theme: {
-          ...DEFAULT_PROJECT_THEME_WITH_PRIMARY,
+          ...DEFAULT_PROJECT_THEME,
           primary: THEME_COLOR_MAP[project.themeColor],
           isDarkTheme: project.isDarkTheme,
           isReducedTheme: project.isReducedTheme,
@@ -63,5 +54,4 @@ const _updateThemeModel = (project: Project): Project => {
 
     // TODO delete old theme properties later
   }
-;
 ;
