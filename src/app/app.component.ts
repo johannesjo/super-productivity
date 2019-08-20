@@ -176,8 +176,6 @@ export class AppComponent implements OnInit {
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(e: any) {
-    console.log('onBeforeInstallPrompt');
-
     if (IS_ELECTRON || loadFromLs(LS_WEB_APP_INSTALL)) {
       return;
     }
