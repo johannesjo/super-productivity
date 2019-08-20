@@ -447,7 +447,7 @@
       "D_CREATE": {
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
-        "ISSUE_PROVIDER_CFGS": "Providerkonfigurationen ausgeben (optional)",
+        "ISSUE_PROVIDER_CFGS": "Issue Provider (optional)",
         "SETUP_GIT": "Einrichten der Github-Integration",
         "SETUP_JIRA": "Jira-Integration einrichten"
       },
