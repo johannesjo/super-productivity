@@ -73,29 +73,6 @@ $summary-point-inner-margin: $s;
   font-size: 18px;
 }
 
-textarea {
-  padding: $s;
-  border: 1px solid #cccccc;
-  border-radius: $card-border-radius;
-  border-top-width: 1px !important;
-  border-left-width: 1px !important;
-  border-right-width: 1px !important;
-  font-size: 14px;
-
-  &:focus {
-    outline: 1px solid $c-accent;
-
-    @include mobileTouchDevice {
-      outline: none;
-    }
-  }
-
-  @include darkTheme {
-    color: #fff;
-  }
-
-}
-
 .finish-day-opts {
   margin-top: 10px;
 

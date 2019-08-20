@@ -1,4 +1,5 @@
 @import 'styles/config/shadows';
+@import '~angular-material-css-vars/public-util';
 
 $s: 8px;
 $card-border-radius: 4px;
@@ -14,14 +15,11 @@ $light-theme-text-color: #333333;
 $light-theme-extra-border-color: #dddddd;
 $dark-theme-extra-border-color: #333333;
 
-$dark-green: #30412d;
-$green: #4fa758;
-$light-green: #a9ed9f;
-$red: #e15d63;
-$red-danger: #e11826;
-$yellow: #fff400; // for sun
-$c-accent: #ff4081;
 
+$c-accent: mat-css-color-accent();
+$c-warn: mat-css-color-warn();
+$success-green: #4fa758;
+$yellow: #fff400; // for sun
 
 // LAYOUT
 // ------

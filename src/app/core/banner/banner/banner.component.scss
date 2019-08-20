@@ -40,7 +40,7 @@ $vertical-button-margin: $s;
     min-width: 20px;
 
     .isError & {
-      color: $red;
+      color: $c-warn;
     }
   }
 }

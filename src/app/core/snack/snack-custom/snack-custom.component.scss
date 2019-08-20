@@ -19,11 +19,11 @@
   //background: inherit;
 
   .success & {
-    color: $green;
+    color: $success-green;
   }
 
   .error & {
-    color: $red;
+    color: $c-warn;
   }
 }
 
