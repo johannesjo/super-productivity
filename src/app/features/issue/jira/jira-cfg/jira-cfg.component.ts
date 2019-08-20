@@ -24,8 +24,29 @@ import {HelperClasses} from '../../../../app.constants';
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<JiraCfg>;
+
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
-  @Input() cfg: JiraCfg = DEFAULT_JIRA_CFG;
+  @Input() set cfg(cfg: JiraCfg) {
+    this._cfg = cfg;
+    if (!this._cfg.transitionConfig) {
+      this._cfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
+    } else {
+      // CLEANUP keys that we're not using
+      Object.keys(this._cfg.transitionConfig).forEach((key) => {
+        if (!(key in DEFAULT_JIRA_CFG.transitionConfig)) {
+          delete this._cfg.transitionConfig[key];
+        }
+      });
+    }
+
+    if (!Array.isArray(this._cfg.availableTransitions)) {
+      this._cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
+    }
+  }
+
+  get cfg() {
+    return this._cfg || DEFAULT_JIRA_CFG;
+  }
 
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
@@ -67,6 +88,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   );
 
   private _subs = new Subscription();
+  private _cfg: JiraCfg;
 
   constructor(
     private _jiraApiService: JiraApiService,
@@ -76,20 +98,6 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.fields = this.section.items;
-    if (!this.cfg.transitionConfig) {
-      this.cfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
-    } else {
-      // CLEANUP keys that we're not using
-      Object.keys(this.cfg.transitionConfig).forEach((key) => {
-        if (!(key in DEFAULT_JIRA_CFG.transitionConfig)) {
-          delete this.cfg.transitionConfig[key];
-        }
-      });
-    }
-
-    if (!Array.isArray(this.cfg.availableTransitions)) {
-      this.cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
-    }
   }
 
   ngOnDestroy(): void {

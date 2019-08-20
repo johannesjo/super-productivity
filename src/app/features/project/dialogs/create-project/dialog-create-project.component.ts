@@ -93,10 +93,11 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   }
 
   submit() {
-    const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
+    const issueIntegrationCfgs: IssueIntegrationCfgs = {
+      ...this.projectData.issueIntegrationCfgs,
       JIRA: this.jiraCfg,
       GITHUB: this.githubCfg,
-    });
+    };
 
     const projectDataToSave: Project | Partial<Project> = {
       ...this.projectData,

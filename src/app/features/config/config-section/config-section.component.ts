@@ -31,7 +31,18 @@ import {TranslateService} from '@ngx-translate/core';
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<{ [key: string]: any }>;
-  @Input() cfg: any;
+
+  @Input() set cfg(v: any) {
+    this._cfg = v;
+    if (v && this._instance) {
+      this._instance.cfg = {...v};
+    }
+  }
+
+  get cfg() {
+    return this._cfg;
+  }
+
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
   @ViewChild('customForm', {read: ViewContainerRef, static: true}) customFormRef: ViewContainerRef;
@@ -39,6 +50,8 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   isExpanded = false;
 
   private _subs = new Subscription();
+  private _cfg: any;
+  private _instance;
 
   constructor(
     private _cd: ChangeDetectorRef,
@@ -107,7 +120,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
       // NOTE: important that this is set only if we actually have a value
       // otherwise the default fallback will be overwritten
       if (this.cfg) {
-        ref.instance.cfg = {...this.cfg};
+        ref.instance.cfg = this.cfg;
       }
 
       ref.instance.section = this.section;
@@ -118,6 +131,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
           this._cd.detectChanges();
         });
       }
+      this._instance = ref.instance;
     }
   }
 }
