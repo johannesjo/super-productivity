@@ -37,6 +37,11 @@ $z-time-btn-svg-wrapper: 5555;
 
 // TASK BOX STYLES
 // ---------------
+// needs to come first to be overwritten by :host.isCurrent
+:host-context(.isDarkTheme) {
+  color: #fff;
+}
+
 :host {
   display: block;
   position: relative;
@@ -45,7 +50,7 @@ $z-time-btn-svg-wrapper: 5555;
 
   &.isCurrent {
     z-index: $z-is-current-host;
-    color: mat-css-contrast-color(600, $opacity: 1);
+    color: mat-css-contrast-color(600);
   }
 
   &:focus {
@@ -54,9 +59,6 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
-:host-context(.isDarkTheme) {
-  color: #fff;
-}
 
 .inner-wrapper {
   position: relative;
