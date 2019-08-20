@@ -35,6 +35,7 @@ import {LanguageService} from './core/language/language.service';
 import {ConfigModule} from './features/config/config.module';
 import {ProjectModule} from './features/project/project.module';
 import {EntityDataModule} from '@ngrx/data';
+import {MaterialCssVarsModule} from 'angular-material-css-vars';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -65,7 +66,7 @@ export function createTranslateLoader(http: HttpClient) {
     NoteModule,
     BookmarkModule,
     TasksModule,
-
+    MaterialCssVarsModule.forRoot(),
 
     // External
     BrowserModule,

@@ -14,7 +14,7 @@
 }
 
 .bg-primary {
-  background-color: mat-css-primary-color();
+  background-color: mat-css-color-primary();
 }
 
 .bgc-primary {
@@ -22,24 +22,24 @@
 }
 
 .bg-accent {
-  background-color: mat-css-accent-color();
+  background-color: mat-css-color-accent();
 }
 
 .bgc-accent {
-  background-color: mat-css-accent-color();
+  background-color: mat-css-color-accent();
   color: var(--light-accent-text);
 }
 
 .bg-100 {
-  background-color: mat-css-primary-color(100);
+  background-color: mat-css-color-primary(100);
 }
 
 .bg-200 {
-  background-color: mat-css-primary-color(200);
+  background-color: mat-css-color-primary(200);
 }
 
 .bg-400 {
-  background-color: mat-css-primary-color(400);
+  background-color: mat-css-color-primary(400);
 }
 
 .bgc-400 {
@@ -47,7 +47,7 @@
 }
 
 .bg-600 {
-  background-color: mat-css-primary-color(600);
+  background-color: mat-css-color-primary(600);
 }
 
 .bgc-600 {
@@ -59,7 +59,7 @@
 }
 
 .bg-600i {
-  background-color: mat-css-primary-color(600) !important;
+  background-color: mat-css-color-primary(600) !important;
 }
 
 .bgc-800 {
@@ -82,10 +82,10 @@
 }
 
 .color-primary {
-  color: mat-css-primary-color();
-  stroke: mat-css-primary-color();
+  color: mat-css-color-primary();
+  stroke: mat-css-color-primary();
 }
 
 .border-color-primary {
-  border-color: mat-css-primary-color() !important;
+  border-color: mat-css-color-primary() !important;
 }

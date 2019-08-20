@@ -348,7 +348,7 @@
   </div>
 
   <progress-bar *ngIf="isCurrent"
-                [cssClass]="isCurrent?'bg-100':'bg-primary'"
+                [cssClass]="'bg-100'"
                 [progress]="progress"></progress-bar>
 
   <task-additional-info (tabIndexChange)="onTabIndexChange($event)"
