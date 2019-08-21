@@ -459,6 +459,10 @@
         "L_COLOR_WARN": "Warn/Error Color",
         "L_IS_DARK_THEME": "Use Dark Theme",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
+        "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
+        "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
+        "L_HUE_ACCENT": "Threshold for dark text on accent color background",
+        "L_HUE_WARN": "Threshold for dark text on warn color background",
         "L_THEME_COLOR": "Theme Color",
         "L_TITLE": "Title",
         "TITLE": "Theme"

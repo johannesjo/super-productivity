@@ -37,6 +37,14 @@ export class GlobalThemeService {
   }
 
   private _setTheme(theme: ProjectThemeCfg, isDarkTheme: boolean) {
+    this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
+
+    if (!theme.isAutoContrast) {
+      this._materialCssVarsService.changeContrastColorThresholdPrimary(theme.huePrimary);
+      this._materialCssVarsService.changeContrastColorThresholdAccent(theme.hueAccent);
+      this._materialCssVarsService.changeContrastColorThresholdWarn(theme.hueWarn);
+    }
+
     this._materialCssVarsService.setPrimaryColor(theme.primary);
     this._materialCssVarsService.setAccentColor(theme.accent);
     this._materialCssVarsService.setWarnColor(theme.warn);

@@ -2,6 +2,18 @@ import {ConfigFormSection, GenericConfigFormSection} from '../config/global-conf
 import {T} from '../../t.const';
 import {ProjectThemeCfg} from './project.model';
 
+const HUES = [
+  {value: '50', label: '50'},
+  {value: '100', label: '100'},
+  {value: '200', label: '200'},
+  {value: '300', label: '300'},
+  {value: '400', label: '400'},
+  {value: '500', label: '500'},
+  {value: '600', label: '600'},
+  {value: '700', label: '700'},
+  {value: '800', label: '800'},
+  {value: '900', label: '900'},
+];
 
 export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg> = {
   title: T.F.PROJECT.FORM_THEME.TITLE,
@@ -45,6 +57,52 @@ export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg
       type: 'checkbox',
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_IS_REDUCED_THEME,
+      },
+    },
+    {
+      key: 'isAutoContrast',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.F.PROJECT.FORM_THEME.L_IS_AUTO_CONTRAST,
+      },
+    },
+    {
+      key: 'huePrimary',
+      type: 'select',
+      hideExpression: 'model.isAutoContrast',
+      templateOptions: {
+        required: true,
+        label: T.F.PROJECT.FORM_THEME.L_HUE_PRIMARY,
+        options: HUES,
+        valueProp: 'value',
+        labelProp: 'label',
+        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_PRIMARY
+      },
+    },
+    {
+      key: 'hueAccent',
+      type: 'select',
+      hideExpression: 'model.isAutoContrast',
+      templateOptions: {
+        required: true,
+        label: T.F.PROJECT.FORM_THEME.L_HUE_ACCENT,
+        options: HUES,
+        valueProp: 'value',
+        labelProp: 'label',
+        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_ACCENT
+      },
+    },
+    {
+      key: 'hueWarn',
+      type: 'select',
+      hideExpression: 'model.isAutoContrast',
+      templateOptions: {
+        required: true,
+        label: T.F.PROJECT.FORM_THEME.L_HUE_WARN,
+        options: HUES,
+        valueProp: 'value',
+        labelProp: 'label',
+        placeholder: T.F.PROJECT.FORM_THEME.L_HUE_WARN
       },
     },
   ]

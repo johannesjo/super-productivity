@@ -74,6 +74,7 @@ export type ProjectAdvancedCfg = Readonly<{
 export type ProjectThemeCfg = Readonly<{
   isDarkTheme: boolean;
   isReducedTheme: boolean;
+  isAutoContrast: boolean;
   primary: string;
   huePrimary: HueValue;
   accent: string;
