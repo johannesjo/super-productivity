@@ -4,6 +4,8 @@ import {DEFAULT_GLOBAL_CONFIG} from './default-global-config.const';
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
   // NOTE: needs to run before default stuff
   globalConfigState = _migrateMiscToSeparateKeys(globalConfigState);
+
+  // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
   globalConfigState = _extendConfigDefaults(globalConfigState);
   return globalConfigState;
 };

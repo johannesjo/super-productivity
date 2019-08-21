@@ -10,9 +10,11 @@ import {THEME_COLOR_MAP} from '../../app.constants';
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   const projectEntities: Dictionary<Project> = {...projectState.entities};
   Object.keys(projectEntities).forEach((key) => {
-    projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
-    projectEntities[key] = _addFirstEntryForDayCompleted(projectEntities[key]);
     projectEntities[key] = _updateThemeModel(projectEntities[key]);
+    projectEntities[key] = _addFirstEntryForDayCompleted(projectEntities[key]);
+
+    // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
+    projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
   });
   return {...projectState, entities: projectEntities};
 };
@@ -40,7 +42,7 @@ const _addFirstEntryForDayCompleted = (project: Project): Project => {
 };
 
 const _updateThemeModel = (project: Project): Project => {
-    return (project.hasOwnProperty('theme'))
+    return (project.hasOwnProperty('theme') && project.theme.primary)
       ? project
       : {
         ...project,
