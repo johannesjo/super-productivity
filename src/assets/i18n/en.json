@@ -447,7 +447,6 @@
       "D_CREATE": {
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
-        "ISSUE_PROVIDER_CFGS": "Issue Provider (optional)",
         "SETUP_GIT": "Setup Github Integration",
         "SETUP_JIRA": "Setup Jira Integration"
       },

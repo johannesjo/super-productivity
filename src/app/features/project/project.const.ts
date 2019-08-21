@@ -3,7 +3,6 @@ import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {getYesterdaysDate} from '../../util/get-yesterdays-date';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {WorklogExportSettings, WorklogGrouping} from '../worklog/worklog.model';
-import {HueValue} from 'angular-material-css-vars';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   roundWorkTimeTo: null,

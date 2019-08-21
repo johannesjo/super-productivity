@@ -15,16 +15,8 @@
                  [options]="formOptionsBasic">
     </formly-form>
 
-    <formly-form (modelChange)="projectData.theme = $event"
-                 [fields]="themeFormCfg"
-                 [form]="formTheme"
-                 [model]="projectData.theme"
-                 [options]="formOptionsTheme">
-    </formly-form>
-
 
     <div class="issue-provider-cfg">
-      <h3>{{T.F.PROJECT.D_CREATE.ISSUE_PROVIDER_CFGS|translate}}</h3>
       <div class="item">
         <button (click)="openJiraCfg()"
                 color="primary"
