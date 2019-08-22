@@ -362,9 +362,10 @@ $z-time-btn-svg-wrapper: 5555;
     background: #fff;
 
     @include darkTheme() {
-      background: $dark-theme-bg-lighter;
+      background: $dark-theme-bg-lightest;
       border: 1px solid #ffffff;
       box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
+      //box-shadow: $whiteframe-shadow-13dp;
     }
   }
 
