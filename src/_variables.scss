@@ -8,8 +8,11 @@ $card-border-radius: 4px;
 // ------
 $dark-theme-bg-darker: rgb(39, 39, 39);
 $dark-theme-bg-lighter: rgb(70, 70, 70);
+$dark-theme-bg-lightest:rgb(84, 84, 84);
 $dark-theme-bg: rgb(48, 48, 48);
 $light-theme-bg: #fafafa;
+$light-theme-bg-darker: #f1f1f1;
+
 $dark-theme-text-color: #bdbdbd;
 $light-theme-text-color: #333333;
 $light-theme-extra-border-color: #dddddd;
@@ -37,7 +40,7 @@ $component-max-width: 800px;
 // ----------
 $standard-note-bg-light: #ffffff;
 $standard-note-fg-light: $light-theme-text-color;
-$standard-note-bg-dark: $dark-theme-bg-darker;
+$standard-note-bg-dark: $dark-theme-bg-lightest;
 $standard-note-fg-dark: #eeeeee;
 
 

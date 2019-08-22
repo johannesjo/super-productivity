@@ -7,7 +7,8 @@
       <ng-template mat-tab-label>
         <issue-header [task]="taskData"></issue-header>
       </ng-template>
-      <issue-content [task]="taskData"></issue-content>
+      <issue-content [task]="taskData"
+                     class="tab-wrapper issue-content-wrapper"></issue-content>
     </mat-tab>
 
     <mat-tab>
@@ -16,7 +17,7 @@
         <span class="tab-label-text">{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
       </ng-template>
 
-      <div class="mat-elevation-z1 notes-tab">
+      <div class="tab-wrapper note-wrapper">
         <inline-markdown (changed)="changeTaskNotes($event)"
                          [model]="taskData.notes"></inline-markdown>
       </div>
@@ -28,7 +29,7 @@
         <span class="tab-label-text">{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
       </ng-template>
 
-      <div class="attachment-list-tab">
+      <div class="tab-wrapper attachment-list-tab-wrapper">
         <ng-container *ngIf="taskData.issueType">
           <h3 class="mat-h3"
               style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: taskData.issueType} }}</h3>
