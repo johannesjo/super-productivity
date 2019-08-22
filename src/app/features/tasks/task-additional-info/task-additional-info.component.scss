@@ -100,11 +100,22 @@
 .tab-wrapper {
   border-radius: $card-border-radius;
   overflow: hidden;
+  margin: $s $s;
+  display: block;
+  box-shadow: $whiteframe-shadow-3dp;
+
+  @include lightTheme {
+    color: $standard-note-fg-light;
+    border: 1px solid #dddddd;
+    //background: $light-theme-bg-darker;
+    background-color: #fff;
+  }
+  @include darkTheme {
+    background: $standard-note-bg-dark;
+    color: #fff;
+  }
 
   &.issue-content-wrapper {
-    @include darkTheme {
-      //padding: $s 0;
-    }
   }
 
   &.attachment-list-tab-wrapper {
@@ -121,17 +132,6 @@
     box-shadow: $whiteframe-shadow-4dp;
   }
 
-  @include darkTheme {
-    background: $standard-note-bg-dark;
-    color: #fff;
-    margin: $s $s;
-    display: block;
-    box-shadow: $whiteframe-shadow-4dp;
-
-    //color: $standard-note-fg-light;
-    //background: #f1f1f1;
-  }
-
   ::ng-deep {
     .markdown-wrapper {
       min-height: 60px;
@@ -140,10 +140,8 @@
 
     .markdown-unparsed,
     .markdown-parsed {
-      //border: 1px solid #dddddd;
       @include standardThemeTextColor();
       @include lightTheme {
-        //background: $standard-note-bg-light;
         background: $light-theme-bg-darker;
         color: $standard-note-fg-light;
       }
@@ -151,7 +149,6 @@
       @include darkTheme {
         background: $standard-note-bg-dark;
         color: #fff;
-        border-color: #333333;
       }
     }
   }
