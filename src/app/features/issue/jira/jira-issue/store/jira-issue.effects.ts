@@ -190,7 +190,7 @@ export class JiraIssueEffects {
                 summary: issue.summary,
                 assignee: assignee ? assignee.displayName : 'nobody'
               },
-              message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT,
+              message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.MSG,
             }
           }).afterClosed()
             .pipe(

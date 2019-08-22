@@ -210,8 +210,8 @@
         "STORY_POINTS": "Story-Punkte"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary}}</strong> ist derzeit <strong>{{assignee}}</strong>zugewiesen. Möchten Sie es sich selbst zuweisen?",
-        "OK": "TU es!"
+        "MSG": "<strong>{{summary}}</strong> ist derzeit <strong>{{assignee}}</strong> zugewiesen. Möchten Sie es sich selbst zuweisen?",
+        "OK": "Ja, bitte!"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Richten Sie Jira für Project ein"
