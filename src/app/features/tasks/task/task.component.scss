@@ -653,6 +653,13 @@ progress-bar {
   }
 }
 
+.ico-btn {
+  color: inherit;
+
+  &.mat-accent {
+    color: $c-accent;
+  }
+}
 
 .toggle-sub-tasks-btn,
 .first-line .ico-btn {
@@ -660,7 +667,6 @@ progress-bar {
   margin: auto $task-button-spacer;
   padding: 0;
   z-index: $z-btn;
-  color: inherit;
 
   @extend %standardTaskOpacityChange;
 
