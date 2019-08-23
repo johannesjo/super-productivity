@@ -355,17 +355,11 @@ $z-time-btn-svg-wrapper: 5555;
     bottom: 0;
     left: 0;
     content: '';
-    box-shadow: $shadow-edit-on-click;
     opacity: 0;
     z-index: -1;
     pointer-events: none;
-    border-radius: $card-border-radius;
-    background: #fff;
 
-    @include darkTheme() {
-      background: $dark-theme-bg-lightest;
-      box-shadow: 0 0 4px 0 $dark-theme-bg-lightest, $whiteframe-shadow-13dp;
-    }
+    @include inlineEditElevation();
   }
 
 
