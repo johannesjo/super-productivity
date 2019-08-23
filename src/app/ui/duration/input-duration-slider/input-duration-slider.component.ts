@@ -191,7 +191,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.minutesBefore = minutesFromDegrees;
     this.setDots(hours);
     this._model = moment.duration({
-      hours: hours,
+      hours,
       minutes: minutesFromDegrees
     }).asMilliseconds();
 

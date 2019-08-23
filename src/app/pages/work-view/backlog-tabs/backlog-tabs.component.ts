@@ -60,7 +60,7 @@ export class BacklogTabsComponent {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {
-        task: task,
+        task,
       }
     });
   }

@@ -46,10 +46,10 @@ export const durationFromString = (strValue: any, args?: any): any => {
 
   if (isValid) {
     momentVal = moment.duration({
-      days: days,
-      hours: hours,
-      minutes: minutes,
-      seconds: seconds,
+      days,
+      hours,
+      minutes,
+      seconds,
     });
 
     if (momentVal.asSeconds() > 0) {

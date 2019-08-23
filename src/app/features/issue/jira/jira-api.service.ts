@@ -105,7 +105,7 @@ export class JiraApiService {
 
   search$(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<SearchResultItem[]> {
     const options = {
-      maxResults: maxResults,
+      maxResults,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
     };
     const searchQuery = `text ~ "${searchTerm}"`
@@ -138,7 +138,7 @@ export class JiraApiService {
 
   findAutoImportIssues$(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
     const options = {
-      maxResults: maxResults,
+      maxResults,
       fields: JIRA_ADDITIONAL_ISSUE_FIELDS,
     };
     const searchQuery = this._cfg.autoAddBacklogJqlQuery;
@@ -219,7 +219,7 @@ export class JiraApiService {
         {
           started: moment(started).format(JIRA_DATETIME_FORMAT),
           timeSpentSeconds: Math.floor(timeSpent / 1000),
-          comment: comment,
+          comment,
         }
       ]
     });

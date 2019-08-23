@@ -44,7 +44,7 @@ export class GithubIssueService {
     this._store.dispatch({
       type: GithubIssueActionTypes.LoadState,
       payload: {
-        state: state,
+        state,
       }
     });
   }
@@ -55,7 +55,7 @@ export class GithubIssueService {
     this._store.dispatch({
       type: GithubIssueActionTypes.AddGithubIssue,
       payload: {
-        githubIssue: githubIssue
+        githubIssue
       }
     });
   }
@@ -64,7 +64,7 @@ export class GithubIssueService {
     this._store.dispatch({
       type: GithubIssueActionTypes.UpsertGithubIssue,
       payload: {
-        githubIssue: githubIssue
+        githubIssue
       }
     });
   }

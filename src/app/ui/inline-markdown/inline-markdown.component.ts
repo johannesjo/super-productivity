@@ -72,6 +72,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   keypressHandler(ev: KeyboardEvent) {
     this.resizeTextareaToFit();
     // TODO check if needed
+    // tslint:disable-next-line
     if (ev['keyCode'] === 10 && ev.ctrlKey) {
       this.untoggleShowEdit();
     }

@@ -62,7 +62,7 @@ export const mapArchiveToWorklog = (
         worklog[year].ent[month].ent[day] = {
           timeSpent: 0,
           logEntries: [],
-          dateStr: dateStr,
+          dateStr,
           dayStr: moment(dateStr).format('ddd'),
           workStart: startEnd.workStart && startEnd.workStart[dateStr],
           workEnd: startEnd.workEnd && startEnd.workEnd[dateStr],
@@ -84,7 +84,7 @@ export const mapArchiveToWorklog = (
       }
 
       worklog[year].ent[month].ent[day].logEntries.push({
-        task: task,
+        task,
         parentId: task.parentId,
         isNoRestore: noRestoreIds.includes(task.id),
         timeSpent: timeSpentOnDay[dateStr]

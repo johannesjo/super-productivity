@@ -23,5 +23,5 @@ declare global {
   }
 }
 // fix mobile scrolling while dragging
-window.addEventListener('touchmove', function () {
+window.addEventListener('touchmove', () => {
 });

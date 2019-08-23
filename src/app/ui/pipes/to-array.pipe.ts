@@ -19,7 +19,7 @@ export class ToArrayPipe implements PipeTransform {
       const newArray = [];
       keys.forEach((key) => {
         newArray.push({
-          key: key,
+          key,
           value: obj[key]
         });
       });

@@ -73,10 +73,11 @@ export class GlobalConfigEffects {
         GlobalConfigActionTypes.UpdateGlobalConfigSection,
       ),
       filter((action: UpdateGlobalConfigSection) => action.payload.sectionKey === 'lang'),
+      // tslint:disable-next-line
       filter((action: UpdateGlobalConfigSection) => action.payload.sectionCfg && action.payload.sectionCfg['lng']),
       tap((action: UpdateGlobalConfigSection) => {
+        // tslint:disable-next-line
         this._languageService.setLng(action.payload.sectionCfg['lng']);
-
       })
     );
 

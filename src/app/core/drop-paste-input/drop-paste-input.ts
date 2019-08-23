@@ -54,7 +54,7 @@ function _createTextBookmark(text): null | DropPasteInput {
 
       return {
         title: _baseName(text),
-        path: path,
+        path,
         type: isImage ? 'IMG' : 'LINK',
         icon: isImage ? DropPasteIcons.IMG : DropPasteIcons.LINK,
       };
@@ -68,7 +68,7 @@ function _createFileBookmark(dataTransfer): null | DropPasteInput {
   if (path) {
     return {
       title: _baseName(path),
-      path: path,
+      path,
       type: 'FILE',
       icon: DropPasteIcons.FILE,
     };

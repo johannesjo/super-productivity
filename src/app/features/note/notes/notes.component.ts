@@ -63,7 +63,7 @@ export class NotesComponent implements OnInit, OnDestroy {
 
     this._dragulaService.createGroup('NOTES', {
       direction: 'vertical',
-      moves: function (el, container, handle) {
+      moves: (el, container, handle) => {
         return handle.className.indexOf && handle.className.indexOf('handle-drag') > -1;
       }
     });

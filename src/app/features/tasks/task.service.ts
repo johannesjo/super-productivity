@@ -323,7 +323,7 @@ export class TaskService {
     this._store.dispatch(new AddTask({
       task: this.createNewTaskWithDefaults(title, {
         issueId: issue && issue.id as string,
-        issueType: issueType,
+        issueType,
       }),
       issue,
       isAddToBacklog,
@@ -372,7 +372,7 @@ export class TaskService {
   addSubTaskTo(parentId) {
     this._store.dispatch(new AddSubTask({
       task: this.createNewTaskWithDefaults(''),
-      parentId: parentId
+      parentId
     }));
   }
 

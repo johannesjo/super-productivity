@@ -10,7 +10,7 @@ import {
 } from '../../features/config/global-config.model';
 import {Subscription} from 'rxjs';
 import {Project, ProjectAdvancedCfg, ProjectCfgFormKey, ProjectThemeCfg} from '../../features/project/project.model';
-import {PROJECT_THEME_CONFIG_FORM_CONFIG,} from '../../features/project/project-form-cfg.const';
+import {PROJECT_THEME_CONFIG_FORM_CONFIG} from '../../features/project/project-form-cfg.const';
 import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue';
 import {ISSUE_PROVIDER_FORM_CFGS} from '../../features/issue/issue.const';
 import {DEFAULT_JIRA_CFG} from '../../features/issue/jira/jira.const';
@@ -96,8 +96,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   saveIssueProviderCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: IssueIntegrationCfg }) {
     const {sectionKey, config} = $event;
-    const sectionKey_ = sectionKey as IssueProviderKey;
-    this.projectService.updateIssueProviderConfig(this.currentProject.id, sectionKey_, {
+    const sectionKeyIN = sectionKey as IssueProviderKey;
+    this.projectService.updateIssueProviderConfig(this.currentProject.id, sectionKeyIN, {
       ...config,
     }, true);
   }

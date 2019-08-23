@@ -446,7 +446,7 @@ export function taskReducer(
       // add item1
       const stateCopy = taskAdapter.addOne({
         ...task,
-        parentId: parentId,
+        parentId,
         // update timeSpent if first sub task and non present
         ...(
           (parentTask.subTaskIds.length === 0 && Object.keys(task.timeSpentOnDay).length === 0)

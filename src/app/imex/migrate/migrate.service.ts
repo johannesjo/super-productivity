@@ -41,8 +41,8 @@ import {GITHUB_TYPE} from '../../features/issue/issue.const';
 export class MigrateService {
 
   private _issueTypeMap = {
-    'GITHUB': 'GITHUB',
-    'JIRA': 'JIRA',
+    GITHUB: 'GITHUB',
+    JIRA: 'JIRA',
   };
 
   constructor(

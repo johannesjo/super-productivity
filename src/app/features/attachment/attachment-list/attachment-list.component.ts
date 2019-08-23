@@ -33,15 +33,15 @@ export class AttachmentListComponent implements OnInit {
     this._matDialog.open(DialogEditAttachmentComponent, {
       restoreFocus: true,
       data: {
-        attachment: attachment
+        attachment
       },
     }).afterClosed()
-      .subscribe((attachment_) => {
-        if (attachment_) {
-          if (attachment_.id) {
-            this.attachmentService.updateAttachment(attachment_.id, attachment_);
+      .subscribe((attachmentIN) => {
+        if (attachmentIN) {
+          if (attachmentIN.id) {
+            this.attachmentService.updateAttachment(attachmentIN.id, attachmentIN);
           } else {
-            this.attachmentService.addAttachment(attachment_);
+            this.attachmentService.addAttachment(attachmentIN);
           }
         }
       });

@@ -109,7 +109,7 @@ export class GithubApiService {
       map(([issue, comments]: [GithubOriginalIssue, GithubOriginalComment[]]) => {
         return {
           ...mapGithubIssue(issue),
-          comments: comments,
+          comments,
         };
       }),
     );

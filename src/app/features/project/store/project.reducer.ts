@@ -132,7 +132,7 @@ export function projectReducer(
   state: ProjectState = initialProjectState,
   action: ProjectActions
 ): ProjectState {
-
+  // tslint:disable-next-line
   const payload = action['payload'];
 
   switch (action.type) {

@@ -161,7 +161,7 @@ export class GoogleApiService {
       method: 'POST',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
       params: {
-        'key': GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS.API_KEY,
         insertDataOption: 'INSERT_ROWS',
         valueInputOption: 'USER_ENTERED'
       },
@@ -175,7 +175,7 @@ export class GoogleApiService {
       method: 'GET',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
       params: {
-        'key': GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS.API_KEY,
       },
     });
   }
@@ -207,7 +207,7 @@ export class GoogleApiService {
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
-        'key': GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS.API_KEY,
         supportsTeamDrives: true,
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
@@ -224,7 +224,7 @@ export class GoogleApiService {
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files`,
       params: {
-        'key': GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS.API_KEY,
         // should be called name officially instead of title
         q: `title='${fileName}' and trashed=false`,
       },
@@ -242,7 +242,7 @@ export class GoogleApiService {
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
-        'key': GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS.API_KEY,
         supportsTeamDrives: true,
         alt: 'media',
       },
@@ -287,10 +287,10 @@ export class GoogleApiService {
       .finish();
 
     return this._mapHttp$({
-      method: method,
+      method,
       url: `https://content.googleapis.com${path}`,
       params: {
-        'key': GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS.API_KEY,
         uploadType: 'multipart',
         supportsTeamDrives: true,
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
@@ -332,6 +332,7 @@ export class GoogleApiService {
 
     return new Promise((resolve, reject) => {
       this._loadJs(() => {
+        // tslint:disable-next-line
         this._gapi = window['gapi'];
         this._gapi.load('client:auth2', () => {
           this.initClient()
@@ -415,7 +416,7 @@ export class GoogleApiService {
             ...params_,
             headers: {
               ...(params_.headers || {}),
-              'Authorization': `Bearer ${this._session.accessToken}`,
+              Authorization: `Bearer ${this._session.accessToken}`,
             }
           };
 

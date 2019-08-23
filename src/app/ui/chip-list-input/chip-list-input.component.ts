@@ -25,11 +25,11 @@ export class ChipListInputComponent {
   @Input() label: string;
 
   @Input() set suggestions(val) {
-    this.suggestions_ = val.sort((a, b) => a.title.localeCompare(b.title));
+    this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
     this._updateModelItems(this._modelIds);
   }
 
-  suggestions_: Suggestion[];
+  suggestionsIn: Suggestion[];
 
   @Input() set model(v: string[]) {
     this._modelIds = v;
@@ -49,7 +49,7 @@ export class ChipListInputComponent {
     startWith(''),
     map((val: string | null) => val
       ? this._filter(val)
-      : this.suggestions_.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
+      : this.suggestionsIn.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
   );
 
   @ViewChild('inputElRef', {static: true}) fruitInput: ElementRef<HTMLInputElement>;
@@ -94,13 +94,13 @@ export class ChipListInputComponent {
   }
 
   private _updateModelItems(modelIds) {
-    this.modelItems = (modelIds && this.suggestions_ && this.suggestions_.length)
-      ? modelIds.map(id => this.suggestions_.find(suggestion => suggestion.id === id))
+    this.modelItems = (modelIds && this.suggestionsIn && this.suggestionsIn.length)
+      ? modelIds.map(id => this.suggestionsIn.find(suggestion => suggestion.id === id))
       : [];
   }
 
   private _getExistingSuggestionByTitle(v: string) {
-    return this.suggestions_.find(suggestion => suggestion.title === v);
+    return this.suggestionsIn.find(suggestion => suggestion.title === v);
   }
 
   private _add(id: string) {
@@ -121,11 +121,11 @@ export class ChipListInputComponent {
 
   private _filter(val: string): Suggestion[] {
     if (!val || val === null) {
-      return this.suggestions_;
+      return this.suggestionsIn;
     }
 
     const filterValue = val.toLowerCase();
-    return this.suggestions_.filter(
+    return this.suggestionsIn.filter(
       suggestion => suggestion && suggestion.title.toLowerCase().indexOf(filterValue) === 0
         && !this._modelIds.includes(suggestion.id)
     );

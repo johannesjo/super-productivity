@@ -1,14 +1,14 @@
 import {AbstractControl, ValidatorFn, Validators} from '@angular/forms';
 
-export const maxValidator = (max_: number): ValidatorFn => {
+export const maxValidator = (max: number): ValidatorFn => {
   return (control: AbstractControl): { [key: string]: any } => {
-    if (!max_ || Validators.required(control)) {
+    if (!max || Validators.required(control)) {
       return null;
     }
 
     const v: number = +control.value;
-    return v <= +max_
+    return v <= +max
       ? null
-      : {actualValue: v, requiredValue: +max_, max: true};
+      : {actualValue: v, requiredValue: +max, max: true};
   };
 };

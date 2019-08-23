@@ -14,7 +14,7 @@ export function isImageUrl(url): Promise<boolean> {
         resolve(false);
       }
     };
-    img.onload = function () {
+    img.onload = () => {
       if (!timedOut) {
         clearTimeout(timer);
         resolve(true);

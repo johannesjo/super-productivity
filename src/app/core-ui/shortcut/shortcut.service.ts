@@ -91,7 +91,7 @@ export class ShortcutService {
           backlogPos = 50;
       }
       this._router.navigate(['/work-view'], {
-        queryParams: {backlogPos: backlogPos}
+        queryParams: {backlogPos}
       });
 
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {

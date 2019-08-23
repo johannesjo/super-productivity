@@ -75,7 +75,7 @@ export class BannerService {
   }
 
   open(banner: Banner) {
-    const bannerToUpdate = this._banners.find(banner_ => banner_.id === banner.id);
+    const bannerToUpdate = this._banners.find(bannerIN => bannerIN.id === banner.id);
     if (bannerToUpdate) {
       Object.assign(bannerToUpdate, banner);
     } else {
@@ -85,14 +85,14 @@ export class BannerService {
   }
 
   dismiss(bannerId: BannerId) {
-    if (this._banners.find(banner_ => banner_.id === bannerId)) {
+    if (this._banners.find(bannerIN => bannerIN.id === bannerId)) {
       this._banners.shift();
       this._banners$.next(this._banners);
     }
   }
 
   dismissIfExisting(bannerId: BannerId) {
-    if (this._banners.find(banner_ => banner_.id === bannerId)) {
+    if (this._banners.find(bannerIN => bannerIN.id === bannerId)) {
       this._banners.shift();
       this._banners$.next(this._banners);
     }

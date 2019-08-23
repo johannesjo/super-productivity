@@ -44,7 +44,7 @@ export class JiraIssueService {
     this._store.dispatch({
       type: JiraIssueActionTypes.LoadState,
       payload: {
-        state: state,
+        state,
       }
     });
   }
@@ -55,7 +55,7 @@ export class JiraIssueService {
     this._store.dispatch({
       type: JiraIssueActionTypes.AddJiraIssue,
       payload: {
-        jiraIssue: jiraIssue
+        jiraIssue
       }
     });
   }
@@ -64,7 +64,7 @@ export class JiraIssueService {
     this._store.dispatch({
       type: JiraIssueActionTypes.UpsertJiraIssue,
       payload: {
-        jiraIssue: jiraIssue
+        jiraIssue
       }
     });
   }

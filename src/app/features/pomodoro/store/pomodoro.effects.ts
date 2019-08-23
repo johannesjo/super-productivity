@@ -44,7 +44,10 @@ export class PomodoroEffects {
     filter(([action, cfg, isBreak]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean]) =>
       !(isBreak && cfg.isStopTrackingOnBreak)),
     map(([action]): PomodoroActions => {
-      if (action['payload'] && action.type !== TaskActionTypes.UnsetCurrentTask) {
+      // tslint:disable-next-line
+      const payload = action['payload'];
+
+      if (payload && action.type !== TaskActionTypes.UnsetCurrentTask) {
         return new StartPomodoro();
       } else {
         return new PausePomodoro({isBreakEndPause: false});

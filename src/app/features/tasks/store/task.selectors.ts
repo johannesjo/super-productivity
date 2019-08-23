@@ -6,21 +6,21 @@ import {IssueProviderKey} from '../../issue/issue';
 import {filterStartableTasks} from './task.reducer.util';
 import {taskAdapter} from './task.adapter';
 
-const mapIssueDataToTask = (tasks_, issueEntityMap): TaskWithIssueData[] => {
-  return tasks_ && tasks_.map((task) => {
+const mapIssueDataToTask = (tasksIN, issueEntityMap): TaskWithIssueData[] => {
+  return tasksIN && tasksIN.map((task) => {
     const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType] && issueEntityMap[task.issueType][task.issueId];
-    return issueData ? {...task, issueData: issueData} : task;
+    return issueData ? {...task, issueData} : task;
   });
 };
 
-const mapSubTasksToTasks = (tasks__): TaskWithSubTasks[] => {
-  return tasks__.filter((task) => !task.parentId)
+const mapSubTasksToTasks = (tasksIN_): TaskWithSubTasks[] => {
+  return tasksIN_.filter((task) => !task.parentId)
     .map((task) => {
       if (task.subTaskIds && task.subTaskIds.length > 0) {
         return {
           ...task,
           subTasks: task.subTaskIds
-            .map((subTaskId) => tasks__.find((task_) => task_.id === subTaskId))
+            .map((subTaskId) => tasksIN_.find((task_) => task_.id === subTaskId))
         };
       } else {
         return task;
@@ -45,13 +45,13 @@ const mapEstimateRemaining = (tasks): number => tasks && tasks.length && tasks.r
 }, 0);
 
 
-const mapTasksFromIds = (tasks__, ids) => {
-  return ids.map(id => tasks__.find(task => task.id === id));
+const mapTasksFromIds = (tasksIN, ids) => {
+  return ids.map(id => tasksIN.find(task => task.id === id));
 };
 
-const flattenTasks = (tasks___): TaskWithIssueData[] => {
+const flattenTasks = (tasksIN): TaskWithIssueData[] => {
   let flatTasks = [];
-  tasks___.forEach(task => {
+  tasksIN.forEach(task => {
     flatTasks.push(task);
     if (task.subTasks) {
       flatTasks = flatTasks.concat(task.subTasks);

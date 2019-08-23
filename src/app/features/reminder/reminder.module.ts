@@ -40,7 +40,7 @@ export class ReminderModule {
           autoFocus: false,
           restoreFocus: true,
           data: {
-            reminder: reminder,
+            reminder,
           }
         });
       } else if (reminder.type === 'TASK') {
@@ -48,7 +48,7 @@ export class ReminderModule {
           autoFocus: false,
           restoreFocus: true,
           data: {
-            reminder: reminder,
+            reminder,
           }
         }).afterClosed();
       }

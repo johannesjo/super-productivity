@@ -144,6 +144,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     }
     return this._value
       ? null
-      : {'inputDurationParse': {'text': this._elementRef.nativeElement.value}};
+      : {inputDurationParse: {text: this._elementRef.nativeElement.value}};
   }
 }

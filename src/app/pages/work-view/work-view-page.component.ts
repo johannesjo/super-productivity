@@ -63,7 +63,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     if (!sub) {
       this._dragulaService.createGroup(SUB, {
         direction: 'vertical',
-        moves: function (el, container, handle) {
+        moves: (el, container, handle) => {
           return handle.className.indexOf && handle.className.indexOf('handle-sub') > -1;
         }
       });
@@ -71,7 +71,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     if (!par) {
       this._dragulaService.createGroup(PARENT, {
         direction: 'vertical',
-        moves: function (el, container, handle) {
+        moves: (el, container, handle) => {
           return handle.className.indexOf && handle.className.indexOf('handle-par') > -1;
         }
       });

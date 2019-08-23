@@ -436,7 +436,7 @@ export class GoogleDriveSyncEffects {
     this._snackService.open({
       type: 'CUSTOM',
       ico: 'file_upload',
-      msg: msg,
+      msg,
       config: {duration: 60000},
       showWhile$,
     });

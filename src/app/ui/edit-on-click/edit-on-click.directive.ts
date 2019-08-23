@@ -65,7 +65,7 @@ export class EditOnClickDirective implements OnInit {
     });
 
     // blur on enter
-    el.addEventListener('keypress', function (ev: KeyboardEvent) {
+    el.addEventListener('keypress', (ev: KeyboardEvent) => {
       if (ev.key === 'Enter') {
         // prevent keyboard shortcuts from firing when here
         ev.preventDefault();

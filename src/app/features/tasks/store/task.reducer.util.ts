@@ -96,10 +96,10 @@ export const updateTimeSpentForTask = (
   const timeSpent = calcTotalTimeSpent(newTimeSpentOnDay);
 
   const stateAfterUpdate = taskAdapter.updateOne({
-    id: id,
+    id,
     changes: {
       timeSpentOnDay: newTimeSpentOnDay,
-      timeSpent: timeSpent,
+      timeSpent,
     }
   }, state);
 

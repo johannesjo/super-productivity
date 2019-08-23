@@ -313,22 +313,22 @@ export class TaskEffects {
           }
 
           case TaskActionTypes.UpdateTask: {
-            const {isDone} = (<UpdateTask>action).payload.task.changes;
-            const oldId = (<UpdateTask>action).payload.task.id;
+            const {isDone} = (action as UpdateTask).payload.task.changes;
+            const oldId = (action as UpdateTask).payload.task.id;
             const isCurrent = (oldId === currentId);
             nextId = (isDone && isCurrent) ? this.findNextTask(state, oldId) : 'NO_UPDATE';
             break;
           }
 
           case TaskActionTypes.MoveToBacklog: {
-            const isCurrent = (currentId === (<MoveToBacklog>action).payload.id);
+            const isCurrent = (currentId === (action as MoveToBacklog).payload.id);
             nextId = (isCurrent) ? null : 'NO_UPDATE';
             break;
           }
 
           case TaskActionTypes.Move: {
-            const isCurrent = (currentId === (<Move>action).payload.taskId);
-            const isMovedToBacklog = ((<Move>action).payload.targetModelId === 'BACKLOG');
+            const isCurrent = (currentId === (action as Move).payload.taskId);
+            const isMovedToBacklog = ((action as Move).payload.targetModelId === 'BACKLOG');
             nextId = (isCurrent && isMovedToBacklog) ? null : 'NO_UPDATE';
             break;
           }

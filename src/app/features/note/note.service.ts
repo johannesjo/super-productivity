@@ -56,7 +56,7 @@ export class NoteService {
   }
 
   public loadState(state: NoteState) {
-    this._store$.dispatch(loadNoteState({state: state}));
+    this._store$.dispatch(loadNoteState({state}));
   }
 
   public add(note: Partial<Note> = {}, remindAt: number = null, isPreventFocus = false) {

@@ -106,7 +106,8 @@
               "tsconfig.worker.json"
             ],
             "exclude": [
-              "**/node_modules/**"
+              "**/node_modules/**",
+              "src/app/t.const.ts"
             ]
           }
         }

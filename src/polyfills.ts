@@ -18,7 +18,7 @@
  * BROWSER POLYFILLS
  */
 
-/** IE9, IE10 and IE11 requires all of the following polyfills. **/
+/* IE9, IE10 and IE11 requires all of the following polyfills. **/
 import 'core-js/es/symbol';
 import 'core-js/es/object';
 import 'core-js/es/function';
@@ -33,7 +33,7 @@ import 'core-js/es/regexp';
 import 'core-js/es/map';
 import 'core-js/es/weak-map';
 import 'core-js/es/set';
-/** Evergreen browsers require these. **/
+/* Evergreen browsers require these. **/
 // Used for reflect-metadata in JIT. If you use AOT (and only Angular decorators), you can remove.
 import 'core-js/es/reflect';
 /***************************************************************************************************
@@ -48,11 +48,12 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 // import 'core-js/es/reflect';
 
 
-/**
+/*
  * Web Animations `@angular/platform-browser/animations`
  * Only required if AnimationBuilder is used within the application and using IE/Edge or Safari.
  * Standard animation support in Angular DOES NOT require any polyfills (as of Angular 6.0).
- **/
+ */
+
 // import 'web-animations-js';  // Run `npm install --save web-animations-js`.
 
 /**

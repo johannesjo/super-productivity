@@ -83,15 +83,15 @@ export class BookmarkBarComponent implements OnDestroy {
     this._matDialog.open(DialogEditBookmarkComponent, {
       restoreFocus: true,
       data: {
-        bookmark: bookmark
+        bookmark
       },
     }).afterClosed()
-      .subscribe((bookmark_) => {
-        if (bookmark_) {
-          if (bookmark_.id) {
-            this.bookmarkService.updateBookmark(bookmark_.id, bookmark_);
+      .subscribe((bookmarkIN) => {
+        if (bookmarkIN) {
+          if (bookmarkIN.id) {
+            this.bookmarkService.updateBookmark(bookmarkIN.id, bookmarkIN);
           } else {
-            this.bookmarkService.addBookmark(bookmark_);
+            this.bookmarkService.addBookmark(bookmarkIN);
           }
         }
       });

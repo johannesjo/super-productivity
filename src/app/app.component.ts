@@ -164,7 +164,7 @@ export class AppComponent implements OnInit {
   }
 
   getPage(outlet) {
-    return outlet.activatedRouteData['page'] || 'one';
+    return outlet.activatedRouteData.page || 'one';
   }
 
 

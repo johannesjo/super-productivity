@@ -115,7 +115,7 @@ export class IdleService {
             if (task) {
               if (typeof task === 'string') {
                 this._taskService.add(task, false, {
-                  timeSpent: timeSpent,
+                  timeSpent,
                   timeSpentOnDay: {
                     [getWorklogStr()]: timeSpent
                   }
