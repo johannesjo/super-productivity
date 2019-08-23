@@ -48,6 +48,8 @@ div.material-table {
 
   .isDarkTheme & {
     background: $dark-theme-bg-lighter;
+    // NOTE: because we're on a lighter background
+    color: $dark-theme-text-color-more-intense;
   }
 
   tr {

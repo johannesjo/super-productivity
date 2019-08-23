@@ -37,9 +37,10 @@ $z-time-btn-svg-wrapper: 5555;
 
 // TASK BOX STYLES
 // ---------------
-// needs to come first to be overwritten by :host.isCurrent
+// NOTE: needs to come first to be overwritten by :host.isCurrent
+// NOTE: needs to be very light, because we're on a lighter background for the dark theme
 :host-context(.isDarkTheme) {
-  color: #fff;
+  color: $dark-theme-text-color-most-intense;
 }
 
 :host {

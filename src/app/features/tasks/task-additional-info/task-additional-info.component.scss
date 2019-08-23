@@ -93,7 +93,6 @@
 .attachment-list-tab-wrapper,
 .mat-tab-body {
   // needed to overstyle current task
-  @include standardThemeTextColor();
 }
 
 
@@ -104,16 +103,12 @@
   display: block;
   box-shadow: $whiteframe-shadow-3dp;
 
+  @include layerTextAndBgHighest();
+
   @include lightTheme {
-    color: $standard-note-fg-light;
     border: 1px solid #dddddd;
-    //background: $light-theme-bg-darker;
-    background-color: #fff;
   }
-  @include darkTheme {
-    background: $standard-note-bg-dark;
-    color: #fff;
-  }
+
 
   &.issue-content-wrapper {
   }
@@ -140,15 +135,11 @@
 
     .markdown-unparsed,
     .markdown-parsed {
-      @include standardThemeTextColor();
+      color: inherit;
+      background-color: inherit;
+
       @include lightTheme {
         background: $light-theme-bg-darker;
-        color: $standard-note-fg-light;
-      }
-
-      @include darkTheme {
-        background: $standard-note-bg-dark;
-        color: #fff;
       }
     }
   }
