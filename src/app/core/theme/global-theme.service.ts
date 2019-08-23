@@ -40,9 +40,9 @@ export class GlobalThemeService {
     this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
 
     if (!theme.isAutoContrast) {
-      this._materialCssVarsService.changeContrastColorThresholdPrimary(theme.huePrimary);
-      this._materialCssVarsService.changeContrastColorThresholdAccent(theme.hueAccent);
-      this._materialCssVarsService.changeContrastColorThresholdWarn(theme.hueWarn);
+      this._materialCssVarsService.setContrastColorThresholdPrimary(theme.huePrimary);
+      this._materialCssVarsService.setContrastColorThresholdAccent(theme.hueAccent);
+      this._materialCssVarsService.setContrastColorThresholdWarn(theme.hueWarn);
     }
 
     this._materialCssVarsService.setPrimaryColor(theme.primary);
