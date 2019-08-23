@@ -357,15 +357,13 @@ $z-time-btn-svg-wrapper: 5555;
     box-shadow: $shadow-edit-on-click;
     opacity: 0;
     z-index: -1;
-    border: 1px solid black;
     pointer-events: none;
+    border-radius: $card-border-radius;
     background: #fff;
 
     @include darkTheme() {
       background: $dark-theme-bg-lightest;
-      border: 1px solid #ffffff;
-      box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
-      //box-shadow: $whiteframe-shadow-13dp;
+      box-shadow: 0 0 4px 0 $dark-theme-bg-lightest, $whiteframe-shadow-13dp;
     }
   }
 
