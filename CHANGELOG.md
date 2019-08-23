@@ -1,3 +1,43 @@
+## [2.10.10](https://github.com/johannesjo/super-productivity/compare/v2.10.9...v2.10.10) (2019-08-23)
+
+
+### Bug Fixes
+
+* **bookmark:** bar colors ([5ebbc3a](https://github.com/johannesjo/super-productivity/commit/5ebbc3a))
+* **colors:** most color issues ([1357ff1](https://github.com/johannesjo/super-productivity/commit/1357ff1))
+* **colors:** reintroduce help icon color ([54c46ac](https://github.com/johannesjo/super-productivity/commit/54c46ac))
+* **i18n:** wrong translations ([3aa3bae](https://github.com/johannesjo/super-productivity/commit/3aa3bae))
+* issue link being accent color ([344859d](https://github.com/johannesjo/super-productivity/commit/344859d))
+* jira throwing error when assignment to current user is checked [#208](https://github.com/johannesjo/super-productivity/issues/208) ([22e72b2](https://github.com/johannesjo/super-productivity/commit/22e72b2))
+* linting errors ([86ab1ea](https://github.com/johannesjo/super-productivity/commit/86ab1ea))
+* update angular material css and make it work again ([3fc8be9](https://github.com/johannesjo/super-productivity/commit/3fc8be9))
+* **jira:** cfg error on project change when on settings page ([555948e](https://github.com/johannesjo/super-productivity/commit/555948e))
+* **project:** migration not working as expected ([12a31a0](https://github.com/johannesjo/super-productivity/commit/12a31a0))
+* **task:** accent color for .ico-btn ([1919608](https://github.com/johannesjo/super-productivity/commit/1919608))
+* **task:** current task colors for bright primary color ([3622a23](https://github.com/johannesjo/super-productivity/commit/3622a23))
+
+
+### Features
+
+* **color:** make most basic project creation work again ([a51baba](https://github.com/johannesjo/super-productivity/commit/a51baba))
+* **color:** make project overview color work for new model ([fbb29e7](https://github.com/johannesjo/super-productivity/commit/fbb29e7))
+* **colors:** add hue selects ([a29fa5b](https://github.com/johannesjo/super-productivity/commit/a29fa5b))
+* **colors:** improve inline edit elevation everywhere ([c9a83e7](https://github.com/johannesjo/super-productivity/commit/c9a83e7))
+* **colors:** improve project creation dialog ([b1d9b21](https://github.com/johannesjo/super-productivity/commit/b1d9b21))
+* **colors:** improve theme text colors ([528f3bf](https://github.com/johannesjo/super-productivity/commit/528f3bf))
+* **colors:** make basic css variable theming work ([e7e4819](https://github.com/johannesjo/super-productivity/commit/e7e4819))
+* add new ts lint config and fix error ([c941564](https://github.com/johannesjo/super-productivity/commit/c941564))
+* **colors:** make basic custom color selection work ([b543fa5](https://github.com/johannesjo/super-productivity/commit/b543fa5))
+* **colors:** make buttons and project colors work ([6ad983c](https://github.com/johannesjo/super-productivity/commit/6ad983c))
+* **colors:** make theme utility classes work ([552d977](https://github.com/johannesjo/super-productivity/commit/552d977))
+* **tasks:** improve task title edit ([3e13185](https://github.com/johannesjo/super-productivity/commit/3e13185))
+* improve elevation for for task title edit ([8c2166a](https://github.com/johannesjo/super-productivity/commit/8c2166a))
+* improve elevation system for light theme ([bdb1ed0](https://github.com/johannesjo/super-productivity/commit/bdb1ed0))
+* make additional task info look better for dark theme ([ed3a71f](https://github.com/johannesjo/super-productivity/commit/ed3a71f))
+* prepare new theme model ([70cb742](https://github.com/johannesjo/super-productivity/commit/70cb742))
+
+
+
 ## [2.10.9](https://github.com/johannesjo/super-productivity/compare/v2.10.8...v2.10.9) (2019-08-19)
 
 
