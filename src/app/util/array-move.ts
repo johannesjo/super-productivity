@@ -1,6 +1,6 @@
-export const arrayMove = (arr_, from, to, on = 1) => {
+export const arrayMove = (arrIN, from, to, on = 1) => {
 
-  const arr = arr_.splice(0);
+  const arr = arrIN.splice(0);
   arr.splice(to, 0, ...arr.splice(from, on));
   return arr;
 };

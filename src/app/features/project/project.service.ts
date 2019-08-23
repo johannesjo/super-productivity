@@ -127,9 +127,9 @@ export class ProjectService {
   }
 
   async load() {
-    const projectState_ = await this._persistenceService.project.load() || initialProjectState;
+    const projectStateIN = await this._persistenceService.project.load() || initialProjectState;
     // we need to do this to migrate to the latest model if new fields are added
-    const projectState = migrateProjectState(projectState_);
+    const projectState = migrateProjectState(projectStateIN);
 
     if (projectState) {
       if (!projectState.currentId) {

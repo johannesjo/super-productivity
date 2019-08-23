@@ -48,10 +48,14 @@ const _updateThemeModel = (project: Project): Project => {
         ...project,
         theme: {
           ...DEFAULT_PROJECT_THEME,
+          // tslint:disable-next-line
           primary: (project.themeColor)
+            // tslint:disable-next-line
             ? THEME_COLOR_MAP[project.themeColor]
             : DEFAULT_PROJECT_THEME.primary,
+          // tslint:disable-next-line
           isDarkTheme: project.isDarkTheme,
+          // tslint:disable-next-line
           isReducedTheme: project.isReducedTheme,
         }
       };

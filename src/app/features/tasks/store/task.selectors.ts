@@ -13,14 +13,14 @@ const mapIssueDataToTask = (tasksIN, issueEntityMap): TaskWithIssueData[] => {
   });
 };
 
-const mapSubTasksToTasks = (tasksIN_): TaskWithSubTasks[] => {
-  return tasksIN_.filter((task) => !task.parentId)
+const mapSubTasksToTasks = (tasksIN): TaskWithSubTasks[] => {
+  return tasksIN.filter((task) => !task.parentId)
     .map((task) => {
       if (task.subTaskIds && task.subTaskIds.length > 0) {
         return {
           ...task,
           subTasks: task.subTaskIds
-            .map((subTaskId) => tasksIN_.find((task_) => task_.id === subTaskId))
+            .map((subTaskId) => tasksIN.find((taskIN) => taskIN.id === subTaskId))
         };
       } else {
         return task;
@@ -175,8 +175,8 @@ export const selectTaskByIssueId = createSelector(
   selectTaskFeatureState,
   (state, props: { issueId: string, issueType: IssueProviderKey }): Task => {
     const ids = state.ids as string[];
-    const taskId = ids.find(id_ => state.entities[id_]
-      && state.entities[id_].issueType === props.issueType && state.entities[id_].issueId === props.issueId);
+    const taskId = ids.find(idIN => state.entities[idIN]
+      && state.entities[idIN].issueType === props.issueType && state.entities[idIN].issueId === props.issueId);
 
     return taskId
       ? state.entities[taskId]
@@ -212,8 +212,8 @@ export const selectTasksByRepeatConfigId = createSelector(
   selectTaskFeatureState,
   (state, props: { repeatCfgId: string }): Task[] => {
     const ids = state.ids as string[];
-    const taskIds = ids.filter(id_ => state.entities[id_]
-      && state.entities[id_].repeatCfgId === props.repeatCfgId);
+    const taskIds = ids.filter(idIN => state.entities[idIN]
+      && state.entities[idIN].repeatCfgId === props.repeatCfgId);
 
     return (taskIds && taskIds.length)
       ? taskIds.map(id => state.entities[id])
@@ -225,8 +225,8 @@ export const selectTaskIdsByRepeatConfigId = createSelector(
   selectTaskFeatureState,
   (state, props: { repeatCfgId: string }): string[] => {
     const ids = state.ids as string[];
-    return ids.filter(id_ => state.entities[id_]
-      && state.entities[id_].repeatCfgId === props.repeatCfgId);
+    return ids.filter(idIN => state.entities[idIN]
+      && state.entities[idIN].repeatCfgId === props.repeatCfgId);
   }
 );
 

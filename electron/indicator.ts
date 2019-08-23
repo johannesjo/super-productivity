@@ -11,7 +11,7 @@ let tray;
 let isIndicatorRunning = false;
 let isGnomeShellExtensionRunning = false;
 
-export const initIndicator = function (params) {
+export const initIndicator = (params) => {
   const IS_LINUX = params.IS_LINUX;
   const IS_GNOME = params.IS_GNOME;
   const showApp = params.showApp;
@@ -65,6 +65,7 @@ function isGnomeShellInstalled(IS_LINUX, IS_GNOME) {
   // check if shell extension is installed
   let isGnomeShellExtInstalled = false;
   if (IS_LINUX && IS_GNOME) {
+    // tslint:disable-next-line
     const LINUX_HOME_DIR = process.env['HOME'];
     const EXTENSION_PATH = LINUX_HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com';
 
@@ -175,7 +176,7 @@ function createContextMenu(showApp, quitApp) {
   ]);
 }
 
-export const isRunning = function () {
+export const isRunning = () => {
   return isIndicatorRunning || isGnomeShellExtensionRunning;
 };
 

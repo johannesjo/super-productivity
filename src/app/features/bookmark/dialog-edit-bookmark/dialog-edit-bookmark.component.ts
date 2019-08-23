@@ -44,7 +44,7 @@ export class DialogEditBookmarkComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.bookmarkCopy = {...this.data.bookmark};
+    this.bookmarkCopy = {...this.data.bookmark} as BookmarkCopy;
     if (!this.bookmarkCopy.type) {
       this.bookmarkCopy.type = 'LINK';
     }

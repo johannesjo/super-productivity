@@ -107,12 +107,12 @@ export class JiraIssueService {
 
   // TODO there is probably a better way to to do this
   // TODO refactor to actions
-  updateIssueFromApi(issueId, oldIssueData_?: IssueData, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
-    const oldIssueData = oldIssueData_ as JiraIssue;
+  updateIssueFromApi(issueId, oldIssueDataIN?: IssueData, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
+    const oldIssueData = oldIssueDataIN as JiraIssue;
 
     return this._jiraApiService.getIssueById$(issueId, true)
       .subscribe((updatedIssue) => {
-        const changelog = oldIssueData_
+        const changelog = oldIssueDataIN
           ? this._createChangelog(updatedIssue, oldIssueData)
           : [];
         const wasUpdated = (isNotifyOnUpdate && changelog.length > 0);

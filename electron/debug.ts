@@ -58,9 +58,9 @@ function inspectElements() {
 }
 
 const addExtensionIfInstalled = (name, getPath) => {
-  const isExtensionInstalled = name_ => {
+  const isExtensionInstalled = nameIN => {
     return BrowserWindow.getDevToolsExtensions &&
-      {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), name_);
+      {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), nameIN);
   };
 
   try {

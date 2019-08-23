@@ -297,7 +297,7 @@ export class TaskService {
   }
 
   pauseCurrent() {
-    this._store.dispatch(new UnsetCurrentTask);
+    this._store.dispatch(new UnsetCurrentTask());
   }
 
   // Tasks

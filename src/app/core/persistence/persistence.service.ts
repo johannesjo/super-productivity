@@ -439,7 +439,7 @@ export class PersistenceService {
             return ids
               .map(id => state.entities[id])
               // filter out broken entries
-              .filter((model_: M) => !!model_);
+              .filter((modelIN: M) => !!modelIN);
           }
           return null;
         },
@@ -516,6 +516,7 @@ export class PersistenceService {
     return Object.assign({}, ...forProjectsData);
   }
 
+  // tslint:disable-next-line
   private async _loadForProjectIds(pids, getDataFn: Function): Promise<any> {
     return await pids.reduce(async (acc, projectId) => {
       const prevAcc = await acc;
@@ -527,6 +528,7 @@ export class PersistenceService {
     }, Promise.resolve({}));
   }
 
+  // tslint:disable-next-line
   private async _saveForProjectIds(data: any, saveDataFn: Function, isForce = false) {
     const promises = [];
     Object.keys(data).forEach(projectId => {

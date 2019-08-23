@@ -1,9 +1,9 @@
-<div *ngIf="isHideDone_ || isHideAll_"
+<div *ngIf="isHideDoneIN || isHideAllIN"
      @expandFadeFast
      class="done-task-box">
   <button (click)="expandDoneTasks()"
           mat-button>
-    <em>+ {{isHideDone_ ? doneTasksLength + ' done ' : allTasksLength}} sub tasks</em>
+    <em>+ {{isHideDoneIN ? doneTasksLength + ' done ' : allTasksLength}} sub tasks</em>
     <mat-icon>expand_more</mat-icon>
   </button>
 </div>
@@ -20,5 +20,5 @@
   </task>
 </div>
 
-<div *ngIf="noTasksMsg && !tasks_?.length"
+<div *ngIf="noTasksMsg && !tasksIN?.length"
      class="no-tasks">{{noTasksMsg}}</div>

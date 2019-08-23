@@ -29,8 +29,8 @@ export class ConfigFormComponent {
   }
 
   // somehow needed for the form to work
-  @Input() set formCfg(val_: FormlyFieldConfig[]) {
-    this.fields = val_ && [...val_];
+  @Input() set formCfg(val: FormlyFieldConfig[]) {
+    this.fields = val && [...val];
   }
 
   submit() {

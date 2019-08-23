@@ -12,6 +12,7 @@ export interface SnackParams {
   svgIco?: string;
   actionStr?: string;
   actionId?: string;
+  // tslint:disable-next-line
   actionFn?: Function;
   actionPayload?: any;
   config?: MatSnackBarConfig;

@@ -3,7 +3,7 @@
   <bookmark-bar class="bgc-800"></bookmark-bar>
   <!--TODO move inside page container somehow -->
   <banner></banner>
-  <add-task-bar (blur)="layoutService.hideAddTaskBar()"
+  <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
                 *ngIf="layoutService.isShowAddTaskBar$|async"
                 [@blendInOut]
                 class="global"></add-task-bar>

@@ -77,7 +77,7 @@ export function taskReducer(
             ...state.entities,
             [affectedTaskId]: {
               ...affectedTask,
-              attachmentIds: affectedTask.attachmentIds ? affectedTask.attachmentIds.filter(id_ => id_ !== attachmentId) : [],
+              attachmentIds: affectedTask.attachmentIds ? affectedTask.attachmentIds.filter(idIN => idIN !== attachmentId) : [],
             }
           },
         focusTaskId: affectedTaskId

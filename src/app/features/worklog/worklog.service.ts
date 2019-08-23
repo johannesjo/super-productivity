@@ -95,19 +95,19 @@ export class WorklogService {
     const worklog: Worklog = this.worklog;
     let tasks: WorklogTask[] = [];
 
-    Object.keys(worklog).forEach((yearKey_) => {
-      const yearKey = +yearKey_;
+    Object.keys(worklog).forEach((yearKeyIN) => {
+      const yearKey = +yearKeyIN;
       const year = worklog[yearKey];
 
       if (year && year.ent) {
-        Object.keys(year.ent).forEach(monthKey_ => {
+        Object.keys(year.ent).forEach(monthKeyIN => {
           // needs de-normalization
-          const monthKey = +monthKey_;
+          const monthKey = +monthKeyIN;
           const month = year.ent[monthKey];
 
           if (month && month.ent) {
-            Object.keys(month.ent).forEach(dayKey_ => {
-              const dayKey = +dayKey_;
+            Object.keys(month.ent).forEach(dayKeyIN => {
+              const dayKey = +dayKeyIN;
               const day: WorklogDay = month.ent[dayKey];
               if (day) {
                 tasks = tasks.concat(this._createTasksForDay(day));

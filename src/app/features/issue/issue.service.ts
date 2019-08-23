@@ -88,10 +88,10 @@ export class IssueService {
     }
   }
 
-  public getMappedAttachments(issueType: IssueProviderKey, issueData_: IssueData): Attachment[] {
+  public getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
     switch (issueType) {
       case JIRA_TYPE: {
-        const issueData = issueData_ as JiraIssue;
+        const issueData = issueDataIN as JiraIssue;
         return this._jiraIssueService.getMappedAttachmentsFromIssue(issueData);
       }
     }

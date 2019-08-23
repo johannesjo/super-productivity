@@ -126,6 +126,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
     let tasksTxt = '';
 
     if (tasks) {
+      // tslint:disable-next-line
       for (let i = 0; i < tasks.length; i++) {
         const task = tasks[i];
         if (
@@ -137,6 +138,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
         }
 
         if (this.options.isListSubTasks && task.subTasks && task.subTasks.length > 0) {
+          // tslint:disable-next-line
           for (let j = 0; j < task.subTasks.length; j++) {
             const subTask = task.subTasks[j];
             if (

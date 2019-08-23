@@ -113,12 +113,12 @@ export class BookmarkService {
         bookmark: {...bookmark},
       },
     }).afterClosed()
-      .subscribe((bookmark_) => {
-        if (bookmark_) {
-          if (bookmark_.id) {
-            this.updateBookmark(bookmark_.id, bookmark_);
+      .subscribe((bookmarkIN) => {
+        if (bookmarkIN) {
+          if (bookmarkIN.id) {
+            this.updateBookmark(bookmarkIN.id, bookmarkIN);
           } else {
-            this.addBookmark(bookmark_);
+            this.addBookmark(bookmarkIN);
           }
         }
       });

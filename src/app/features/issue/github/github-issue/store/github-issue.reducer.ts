@@ -111,8 +111,8 @@ export function githubIssueReducer(
 
     case TaskActionTypes.RestoreTask: {
       const issueType = action.payload.task.issueType;
-      const issueType_ = issueType as string;
-      if (issueType === GITHUB_TYPE || issueType_ === LEGACY_GITHUB_TYPE) {
+      const issueTypeIN = issueType as string;
+      if (issueType === GITHUB_TYPE || issueTypeIN === LEGACY_GITHUB_TYPE) {
         const issue = action.payload.task.issueData as GithubIssue;
         return githubIssueAdapter.upsertOne(issue, state);
         // TODO sub task case if we need it in the future

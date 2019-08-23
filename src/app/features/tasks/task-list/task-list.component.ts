@@ -27,11 +27,11 @@ import {T} from '../../../t.const';
 })
 export class TaskListComponent implements OnDestroy, OnInit {
   T = T;
-  tasks_: TaskWithSubTasks[];
+  tasksIN: TaskWithSubTasks[];
   tasks$: BehaviorSubject<TaskWithSubTasks[]> = new BehaviorSubject([]);
-  isHideDone_: boolean;
+  isHideDoneIN: boolean;
   isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  isHideAll_: boolean;
+  isHideAllIN: boolean;
   isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   filteredTasks: TaskWithSubTasks[];
 
@@ -69,20 +69,20 @@ export class TaskListComponent implements OnDestroy, OnInit {
   }
 
   @Input() set tasks(tasks: TaskWithSubTasks[]) {
-    this.tasks_ = tasks;
+    this.tasksIN = tasks;
     this.tasks$.next(tasks);
-    this.doneTasksLength = this.tasks_.filter(task => task.isDone).length;
-    this.allTasksLength = this.tasks_.length;
-    this.undoneTasksLength = this.tasks_.length - this.doneTasksLength;
+    this.doneTasksLength = this.tasksIN.filter(task => task.isDone).length;
+    this.allTasksLength = this.tasksIN.length;
+    this.undoneTasksLength = this.tasksIN.length - this.doneTasksLength;
   }
 
   @Input() set isHideDone(val: boolean) {
-    this.isHideDone_ = val;
+    this.isHideDoneIN = val;
     this.isHideDone$.next(val);
   }
 
   @Input() set isHideAll(val: boolean) {
-    this.isHideAll_ = val;
+    this.isHideAllIN = val;
     this.isHideAll$.next(val);
   }
 

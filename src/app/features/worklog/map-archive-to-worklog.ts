@@ -92,18 +92,18 @@ export const mapArchiveToWorklog = (
     });
   });
 
-  Object.keys(worklog).forEach((year_: string) => {
-    const year: WorklogYear = worklog[year_];
+  Object.keys(worklog).forEach((yearIN: string) => {
+    const year: WorklogYear = worklog[yearIN];
     const monthKeys = Object.keys(year.ent);
     year.monthWorked = monthKeys.length;
 
-    monthKeys.forEach((month_: string) => {
-      const month: WorklogMonth = worklog[year_].ent[month_];
+    monthKeys.forEach((monthIN: string) => {
+      const month: WorklogMonth = worklog[yearIN].ent[monthIN];
       const days = Object.keys(month.ent);
       month.daysWorked = days.length;
       year.daysWorked += days.length;
 
-      const weeks = getWeeksInMonth((+month_ - 1), +year_);
+      const weeks = getWeeksInMonth((+monthIN - 1), +yearIN);
 
       month.weeks = weeks.map((week) => {
         const weekForMonth: WorklogWeek = {
@@ -111,15 +111,15 @@ export const mapArchiveToWorklog = (
           timeSpent: 0,
           daysWorked: 0,
           ent: {},
-          weekNr: getWeekNumber(new Date(+year_, +month_ - 1, week.start)),
+          weekNr: getWeekNumber(new Date(+yearIN, +monthIN - 1, week.start)),
         };
 
-        days.forEach((day_: string) => {
-          const day: WorklogDay = month.ent[day_];
-          if (+day_ >= week.start && +day_ <= week.end) {
-            weekForMonth.timeSpent += month.ent[day_].timeSpent;
+        days.forEach((dayIN: string) => {
+          const day: WorklogDay = month.ent[dayIN];
+          if (+dayIN >= week.start && +dayIN <= week.end) {
+            weekForMonth.timeSpent += month.ent[dayIN].timeSpent;
             weekForMonth.daysWorked += 1;
-            weekForMonth.ent[day_] = day;
+            weekForMonth.ent[dayIN] = day;
           }
         });
 

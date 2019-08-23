@@ -173,7 +173,7 @@ export class GithubApiService {
     }
   }
 
-  private _handleRequestError$(error: HttpErrorResponse, caught: Observable<Object>): ObservableInput<{}> {
+  private _handleRequestError$(error: HttpErrorResponse, caught: Observable<object>): ObservableInput<{}> {
     console.error(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.

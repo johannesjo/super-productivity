@@ -188,8 +188,8 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.DeleteTask,
       ),
-      tap((action_: DeleteTask) => {
-        const action = action_ as DeleteTask;
+      tap((actionIN: DeleteTask) => {
+        const action = actionIN as DeleteTask;
         this._snackService.open({
           translateParams: {
             title: truncate(action.payload.task.title)

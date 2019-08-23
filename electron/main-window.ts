@@ -14,15 +14,15 @@ const mainWinModule = {
   isAppReady: false
 };
 
-export const getWin = function () {
+export const getWin = () => {
   return mainWinModule.win;
 };
 
-export const getIsAppReady = function () {
+export const getIsAppReady = () => {
   return mainWinModule.isAppReady;
 };
 
-export const createWindow = function (params) {
+export const createWindow = (params) => {
   // make sure the main window isn't already created
   if (mainWin) {
     errorHandler('Main window already exists');
@@ -86,7 +86,7 @@ export const createWindow = function (params) {
 
 function initWinEventListeners(app: any) {
   // open new window links in browser
-  mainWin.webContents.on('new-window', function (event, url) {
+  mainWin.webContents.on('new-window', (event, url) => {
     event.preventDefault();
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
@@ -103,7 +103,7 @@ function initWinEventListeners(app: any) {
 
   // TODO refactor quiting mess
 
-  mainWin.on('close', function (event) {
+  mainWin.on('close', (event) => {
       if (isQuiting) {
         app.quit();
       } else {
@@ -162,9 +162,9 @@ function createMenu(quitApp) {
     ]
   }
   ];
-  const menuTpl_ = menuTpl as MenuItemConstructorOptions[];
+  const menuTplOUT = menuTpl as MenuItemConstructorOptions[];
 
   // we need to set a menu to get copy & paste working for mac os x
-  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTpl_));
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTplOUT));
 }
 

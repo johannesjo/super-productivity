@@ -29,7 +29,7 @@ export class DialogEditAttachmentComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.attachmentCopy = {...this.data.attachment};
+    this.attachmentCopy = {...this.data.attachment} as AttachmentCopy;
 
     if (!this.attachmentCopy.type) {
       this.attachmentCopy.type = 'LINK';

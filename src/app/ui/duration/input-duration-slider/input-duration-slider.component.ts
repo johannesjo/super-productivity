@@ -81,8 +81,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       // prevent touchmove
       ev.preventDefault();
 
-      function convertThetaToCssDegrees(theta_) {
-        return 90 - theta_;
+      function convertThetaToCssDegrees(thetaIN) {
+        return 90 - thetaIN;
       }
 
       const centerX = this.circleEl.nativeElement.offsetWidth / 2;

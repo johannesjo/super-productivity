@@ -13,9 +13,6 @@ export const MultiPartBuilder = function() {
 
 /**
  * Appends a part.
- *
- * @param {String} mimeType Content type of this part
- * @param {Blob|File|String} content Body of this part
  */
 MultiPartBuilder.prototype.append = function(mimeType, content) {
   if (this.body !== null) {
@@ -32,8 +29,6 @@ MultiPartBuilder.prototype.append = function(mimeType, content) {
  * Finalizes building of the multipart request and returns a Blob containing
  * the request. Once finalized, appending additional parts will result in an
  * error.
- *
- * @returns {Object} Object containing the mime type (mimeType) & assembled multipart body (body)
  */
 MultiPartBuilder.prototype.finish = function() {
   if (this.parts.length === 0) {

@@ -115,7 +115,7 @@ function openAuthWindow(url) {
 // });
 
 
-export const initGoogleAuth = function () {
+export const initGoogleAuth = () => {
   ipcMain.on(IPC.TRIGGER_GOOGLE_AUTH, (ev, refreshToken) => {
     console.log('refreshToken', (refreshToken && refreshToken.length));
     const mainWin = getWin();

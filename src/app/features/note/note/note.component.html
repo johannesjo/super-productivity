@@ -10,9 +10,9 @@
   <div *ngIf="!note.imgUrl"
        class="content">
     <inline-markdown #markdownEl
-                     (blur)="isFocus=false"
+                     (blurred)="isFocus=false"
                      (changed)="updateContent($event)"
-                     (focus)="isFocus=true"
+                     (focused)="isFocus=true"
                      [isLock]="note.isLock"
                      [model]="note.content"></inline-markdown>
   </div>

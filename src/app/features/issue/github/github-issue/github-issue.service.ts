@@ -117,8 +117,8 @@ export class GithubIssueService {
   }
 
 
-  updateIssueFromApi(issueId_: number | string) {
-    const issueNumber = issueId_ as number;
+  updateIssueFromApi(issueId: number | string) {
+    const issueNumber = issueId as number;
     this._githubApiService.getIssueWithCommentsByIssueNumber$(issueNumber).pipe(
       take(1)
     ).subscribe((issue) => {

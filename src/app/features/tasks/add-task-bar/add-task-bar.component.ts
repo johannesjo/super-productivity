@@ -30,7 +30,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog = false;
   @Input() isAddToBottom;
   @Input() isAutoFocus: boolean;
-  @Output() blur: EventEmitter<any> = new EventEmitter();
+  @Output() blurred: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('inputEl', {static: true}) inputEl;
@@ -72,7 +72,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       this.inputEl.nativeElement.focus();
       this.inputEl.nativeElement.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') {
-          this.blur.emit();
+          this.blurred.emit();
         } else if (ev.key === '1' && ev.ctrlKey === true) {
           this.isAddToBacklog = !this.isAddToBacklog;
           ev.preventDefault();
@@ -93,11 +93,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     } else if (ev.relatedTarget && ev.relatedTarget.className.includes('mat-option')) {
       this._blurTimeout = window.setTimeout(() => {
         if (!this._isAddInProgress) {
-          this.blur.emit(ev);
+          this.blurred.emit(ev);
         }
       }, 300);
     } else {
-      this.blur.emit(ev);
+      this.blurred.emit(ev);
     }
   }
 
@@ -123,7 +123,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           this.isAddToBottom
         );
       } else if (this.doubleEnterCount > 0) {
-        this.blur.emit();
+        this.blurred.emit();
         this.done.emit();
       } else {
         this.doubleEnterCount++;

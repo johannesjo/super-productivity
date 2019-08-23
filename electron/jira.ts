@@ -15,9 +15,9 @@ export const sendJiraRequest = (request) => {
   const {host, protocol, port} = parseHostAndPort(config);
 
   const jira = new JiraApi({
-    protocol: protocol,
-    host: host,
-    port: port,
+    protocol,
+    host,
+    port,
     username: config.userName,
     password: config.password,
     apiVersion: 'latest',
@@ -31,13 +31,13 @@ export const sendJiraRequest = (request) => {
       // console.log('JIRA_RESPONSE', error, res);
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         response: res,
-        requestId: requestId
+        requestId,
       });
     })
     .catch(err => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         error: err,
-        requestId: requestId
+        requestId,
       });
     });
 };
@@ -46,6 +46,7 @@ export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
   const {host, protocol, port} = parseHostAndPort(jiraCfg);
 
   const _b64EncodeUnicode = (str) => {
+    // tslint:disable-next-line
     return Buffer.from(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
       function toSolidBytes(match, p1) {
         return String.fromCharCode(+`0x${p1}`);

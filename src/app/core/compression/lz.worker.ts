@@ -8,9 +8,11 @@ function handleData(msgData) {
     case 'DECOMPRESS':
       return LZString.decompress(msgData.strToHandle);
     case 'COMPRESS_UTF16':
-      return LZString.compressToUTF16(msgData.strToHandle);
+      // tslint:disable-next-line
+      return LZString['compressToUTF16'](msgData.strToHandle);
     case 'DECOMPRESS_UTF16':
-      return LZString.decompressFromUTF16(msgData.strToHandle);
+      // tslint:disable-next-line
+      return LZString['decompressFromUTF16'](msgData.strToHandle);
   }
 }
 
@@ -19,13 +21,13 @@ addEventListener('message', ({data}) => {
     const strToHandle = handleData(data);
     postMessage({
       id: data.id,
-      strToHandle: strToHandle,
+      strToHandle,
     });
   } catch (err) {
     console.log(err);
     postMessage({
       id: data.id,
-      err: err,
+      err,
     });
   }
 });

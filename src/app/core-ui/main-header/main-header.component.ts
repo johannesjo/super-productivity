@@ -42,8 +42,8 @@ export class MainHeaderComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.taskService.currentTaskProgress$.subscribe((progress_) => {
-      let progress = progress_ || 1;
+    this.taskService.currentTaskProgress$.subscribe((progressIN) => {
+      let progress = progressIN || 1;
       if (progress > 1) {
         progress = 1;
       }

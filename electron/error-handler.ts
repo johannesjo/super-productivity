@@ -39,7 +39,7 @@ function _handleError(e, additionalLogInfo, errObj) {
   if (_isReadyForFrontEndError()) {
     mainWin.webContents.send(ERROR_EV, {
       error: e,
-      stack: stack,
+      stack,
     });
   } else {
     console.error('ERR', 'Electron Error: Frontend not loaded. Could not send error to renderer.');

@@ -28,8 +28,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() model: string;
   @Input() isLock = false;
   @Output() changed: EventEmitter<any> = new EventEmitter();
-  @Output() focus: EventEmitter<Event> = new EventEmitter();
-  @Output() blur: EventEmitter<Event> = new EventEmitter();
+  @Output() focused: EventEmitter<Event> = new EventEmitter();
+  @Output() blurred: EventEmitter<Event> = new EventEmitter();
   @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef;
   @ViewChild('textareaEl', {static: false}) textareaEl: ElementRef;
   @ViewChild('previewEl', {static: true}) previewEl: MarkdownComponent;
@@ -130,12 +130,12 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   setFocus(ev: Event) {
-    this.focus.emit(ev);
+    this.focused.emit(ev);
   }
 
 
   setBlur(ev: Event) {
-    this.blur.emit(ev);
+    this.blurred.emit(ev);
   }
 
   private _hideOverflow() {

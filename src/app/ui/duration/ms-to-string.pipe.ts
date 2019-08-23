@@ -26,6 +26,6 @@ export const msToString = (value: any, isShowSeconds?: boolean, isHideEmptyPlace
   name: 'msToString'
 })
 export class MsToStringPipe implements PipeTransform {
-  transform = msToString;
+  transform: (value: any, isShowSeconds?: boolean, isHideEmptyPlaceholder?: boolean) => string = msToString;
 }
 

@@ -122,9 +122,9 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectJiraIssueEntities)),
         this._store$.pipe(select(selectTaskEntities)),
       ),
-      filter(([act_, isEnabled]) => isEnabled),
-      tap(([act_, isEnabled, jiraCfg, jiraEntities, taskEntities]) => {
-        const act = act_ as UpdateTask;
+      filter(([actIN, isEnabled]) => isEnabled),
+      tap(([actIN, isEnabled, jiraCfg, jiraEntities, taskEntities]) => {
+        const act = actIN as UpdateTask;
         const taskId = act.payload.task.id;
         const isDone = act.payload.task.changes.isDone;
         const task = taskEntities[taskId];
@@ -303,8 +303,8 @@ export class JiraIssueEffects {
       this._store$.pipe(select(selectJiraIssueIds)),
       this._store$.pipe(select(selectJiraIssueEntities)),
     ),
-    tap(([x, issueIds_, entities]: [number, string[], Dictionary<JiraIssue>]) => {
-      const issueIds = issueIds_ as string[];
+    tap(([x, issueIdsIN, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+      const issueIds = issueIdsIN as string[];
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
           msg: T.F.JIRA.S.POLLING,

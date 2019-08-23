@@ -15,7 +15,7 @@ export class CollapsibleComponent {
   // TODO remove
   @Input() initiallyExpanded = false;
   @Input() btnIcon: string;
-  @Input() btnAction: Function;
+  @Input() btnAction: () => void;
 
   @HostBinding('class.isExpanded') @Input() isExpanded: boolean;
   @Output() isExpandedChange: EventEmitter<boolean> = new EventEmitter();

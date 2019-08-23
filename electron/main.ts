@@ -41,7 +41,7 @@ interface MyApp extends App {
   isQuiting?: boolean;
 }
 
-const app_: MyApp = app;
+const appIN: MyApp = app;
 
 initDebug({showDevTools: IS_DEV}, IS_DEV);
 
@@ -53,7 +53,7 @@ const nestedWinParams = {isDarwinForceQuit: false};
 // keep app active to keep time tracking running
 powerSaveBlocker.start('prevent-app-suspension');
 
-app_.on('second-instance', () => {
+appIN.on('second-instance', () => {
   if (mainWin) {
     showApp();
     if (mainWin.isMinimized()) {
@@ -64,12 +64,12 @@ app_.on('second-instance', () => {
 });
 
 // make it a single instance by closing other instances but allow for dev mode
-if (!app_.requestSingleInstanceLock() && !IS_DEV) {
+if (!appIN.requestSingleInstanceLock() && !IS_DEV) {
   quitAppNow();
 }
 
 // Allow invalid certificates for jira requests
-app_.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+appIN.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
   console.log(error);
   event.preventDefault();
   callback(true);
@@ -77,10 +77,10 @@ app_.on('certificate-error', (event, webContents, url, error, certificate, callb
 
 // APP EVENT LISTENERS
 // -------------------
-app_.on('ready', createMainWin);
-app_.on('ready', createIndicator);
+appIN.on('ready', createMainWin);
+appIN.on('ready', createIndicator);
 
-app_.on('activate', function () {
+appIN.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWin === null) {
@@ -92,7 +92,7 @@ app_.on('activate', function () {
 
 let isLocked = false;
 
-app_.on('ready', () => {
+appIN.on('ready', () => {
   let suspendStart;
   const sendIdleMsgIfOverMin = (idleTime) => {
     // sometimes when starting a second instance we get here although we don't want to
@@ -102,12 +102,12 @@ app_.on('ready', () => {
     }
 
     // don't update if the user is about to close
-    if (!app_.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
+    if (!appIN.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
       mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
     }
   };
 
-  const checkIdle = () => powerMonitor['querySystemIdleTime']((idleTimeSeconds) => {
+  const checkIdle = () => powerMonitor.querySystemIdleTime((idleTimeSeconds) => {
     sendIdleMsgIfOverMin(idleTimeSeconds * 1000);
   });
 
@@ -136,21 +136,21 @@ app_.on('ready', () => {
 });
 
 
-app_.on('before-quit', () => {
+appIN.on('before-quit', () => {
   // handle darwin
   if (IS_MAC) {
     nestedWinParams.isDarwinForceQuit = true;
   }
 });
 
-app_.on('will-quit', () => {
+appIN.on('will-quit', () => {
   // un-register all shortcuts.
   globalShortcut.unregisterAll();
 });
 
 // AUTO-UPDATER
 // ------------
-// app_.on('ready', () => {
+// appIN.on('ready', () => {
 //  // init auto-updates
 //  log.info('INIT AUTO UPDATES');
 //  // log.info(autoUpdater.getFeedURL());
@@ -316,8 +316,8 @@ function quitApp() {
 
 function quitAppNow() {
   // tslint:disable-next-line
-  app_.isQuiting = true;
-  app_.quit();
+  appIN.isQuiting = true;
+  appIN.quit();
 }
 
 function showOrFocus(passedWin) {
@@ -344,8 +344,8 @@ function showOrFocus(passedWin) {
 
 function exec(ev, command) {
   console.log('running command ' + command);
-  const exec_ = require('child_process').exec;
-  exec_(command, (error) => {
+  const execIN = require('child_process').exec;
+  execIN(command, (error) => {
     if (error) {
       errorHandler(error);
     }

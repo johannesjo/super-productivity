@@ -43,12 +43,12 @@ export class GoogleApiService {
     this._session$,
     this._onTokenExpire$,
   ).pipe(
-    map((session_: GoogleSession | number) => {
-      if (session_ === 0) {
+    map((sessionIN: GoogleSession | number) => {
+      if (sessionIN === 0) {
         console.log('GOOGLE API: SESSION EXPIRED, expiresAt', this._session.expiresAt);
         return false;
       }
-      const session = session_ as GoogleSession;
+      const session = sessionIN as GoogleSession;
       return session && !!session.accessToken;
     }),
     shareReplay(),
@@ -396,7 +396,7 @@ export class GoogleApiService {
     });
   }
 
-  private _mapHttp$(params_: HttpRequest<string> | any): Observable<any> {
+  private _mapHttp$(paramsIN: HttpRequest<string> | any): Observable<any> {
     const loginObs = this._session$.pipe(
       take(1),
       concatMap((session) => {
@@ -413,9 +413,9 @@ export class GoogleApiService {
       .pipe(
         concatMap(() => {
           const p: any = {
-            ...params_,
+            ...paramsIN,
             headers: {
-              ...(params_.headers || {}),
+              ...(paramsIN.headers || {}),
               Authorization: `Bearer ${this._session.accessToken}`,
             }
           };
@@ -426,7 +426,7 @@ export class GoogleApiService {
             params: new HttpParams({fromObject: p.params}),
             reportProgress: false,
             observe: 'response',
-            responseType: params_.responseType,
+            responseType: paramsIN.responseType,
           }];
           const req = new HttpRequest(p.method, p.url, ...allArgs);
           return this._http.request(req);

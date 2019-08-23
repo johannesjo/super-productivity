@@ -114,14 +114,14 @@ export class ReminderService {
   }
 
   removeReminderByRelatedIdIfSet(relatedId: string) {
-    const reminder = this._reminders.find(reminder_ => reminder_.relatedId === relatedId);
+    const reminder = this._reminders.find(reminderIN => reminderIN.relatedId === relatedId);
     if (reminder) {
       this.removeReminder(reminder.id);
     }
   }
 
   removeReminderByProjectId(projectId: string) {
-    const reminders = this._reminders.filter(reminder_ => reminder_.projectId === projectId);
+    const reminders = this._reminders.filter(reminderIN => reminderIN.projectId === projectId);
     if (reminders && reminders.length) {
       reminders.forEach(reminder => {
         this.removeReminder(reminder.id);

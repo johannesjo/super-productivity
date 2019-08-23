@@ -2,8 +2,8 @@ import {ipcMain} from 'electron';
 import {IPC} from './ipc-events.const';
 
 let cb;
-export const getSettings = (win, cb_) => {
-  cb = cb_;
+export const getSettings = (win, cbIN) => {
+  cb = cbIN;
   win.webContents.send(IPC.TRANSFER_SETTINGS_REQUESTED);
 };
 

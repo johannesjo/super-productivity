@@ -274,7 +274,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
       group.titlesWithSub = unique(group.tasks.map(t => t.title));
       group.titles = unique(group.tasks.map(t => (
-          t.parentId && tasks.find(pt_ => pt_.id === t.parentId).title
+          t.parentId && tasks.find(ptIN => ptIN.id === t.parentId).title
         ) || (!t.parentId && t.title)
       )).filter(title => !!title);
       group.dates = unique(group.dates).sort((a: string, b: string) => {

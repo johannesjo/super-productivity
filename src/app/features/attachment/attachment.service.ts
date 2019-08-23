@@ -106,12 +106,12 @@ export class AttachmentService {
         attachment: {...attachment, taskId},
       },
     }).afterClosed()
-      .subscribe((attachment_) => {
-        if (attachment_) {
-          if (attachment_.id) {
-            this.updateAttachment(attachment_.id, attachment_);
+      .subscribe((attachmentIN) => {
+        if (attachmentIN) {
+          if (attachmentIN.id) {
+            this.updateAttachment(attachmentIN.id, attachmentIN);
           } else {
-            this.addAttachment(attachment_);
+            this.addAttachment(attachmentIN);
           }
         }
       });
