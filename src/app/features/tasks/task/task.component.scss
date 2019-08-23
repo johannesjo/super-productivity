@@ -667,6 +667,8 @@ progress-bar {
   margin: auto $task-button-spacer;
   padding: 0;
   z-index: $z-btn;
+  color: inherit;
+
   @extend %standardTaskOpacityChange;
 
   &:hover {
