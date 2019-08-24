@@ -116,7 +116,7 @@ $z-time-btn-svg-wrapper: 5555;
     box-shadow: $task-active-shadow;
     border-color: transparent;
     border-radius: $card-border-radius;
-    background: mat-css-color-primary(600);
+    background: $c-primary-600;
   }
 
   :host:first-child > .inner-wrapper > & {
