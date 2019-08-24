@@ -104,7 +104,9 @@ $z-time-btn-svg-wrapper: 5555;
     border-radius: $card-border-radius;
 
     @include mq(xs) {
-      border: 1px solid $c-accent !important;
+      border: 1px solid $c-accent;
+      // NOTE: somehow ng build messes up, if we don't include it like that
+      border-color: $c-accent;
       box-shadow: $whiteframe-shadow-5dp;
       left: -3px;
       right: -3px;
