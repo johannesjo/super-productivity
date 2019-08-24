@@ -12,6 +12,13 @@
 .tab-wrapper {
   min-height: 100%;
   flex: 1;
+
+  @include darkTheme {
+    background: $dark-theme-bg-slightly-lighter;
+  }
+  @include lightTheme {
+    background: #fff;
+  }
 }
 
 :host ::ng-deep {
@@ -21,7 +28,7 @@
     height: 100%;
     top: 0;
     left: 0;
-    @include mat-css-bg(200);
+    @include mat-css-bg(300);
 
     > .mat-tab-header {
       position: relative;

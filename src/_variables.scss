@@ -6,10 +6,11 @@ $card-border-radius: 4px;
 
 // COLORS
 // ------
+$dark-theme-bg: rgb(48, 48, 48);
 $dark-theme-bg-darker: rgb(39, 39, 39);
+$dark-theme-bg-slightly-lighter: rgb(52, 52, 52);
 $dark-theme-bg-lighter: rgb(66, 66, 66);
 $dark-theme-bg-lightest: rgb(84, 84, 84);
-$dark-theme-bg: rgb(48, 48, 48);
 $dark-theme-card-bg: $dark-theme-bg-lighter;
 
 $light-theme-bg: #fafafa;

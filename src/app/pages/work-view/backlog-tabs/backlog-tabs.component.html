@@ -8,7 +8,7 @@
         ({{taskService.estimateRemainingBacklog$|async|msToString}})</span>
     </ng-template>
 
-    <div class="tab-wrapper bgc-400">
+    <div class="tab-wrapper">
       <div class="task-list-wrapper">
         <task-list [noTasksMsg]="T.BL.NO_TASKS|translate"
                    [tasks]="taskService.backlogTasks$|async"
@@ -28,7 +28,7 @@
         ({{(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length}})</span>
     </ng-template>
 
-    <div class="tab-wrapper bgc-400">
+    <div class="tab-wrapper">
       <div class="component-wrapper page-wrapper">
         <p *ngIf="!(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
            class="no-scheduled-tasks">

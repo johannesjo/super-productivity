@@ -17,12 +17,6 @@ mat-sidenav-container {
   height: 100%;
 }
 
-:host.isLightTheme {
-  .route-wrapper {
-    background: #eeeeee !important;
-  }
-}
-
 ::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
 }
