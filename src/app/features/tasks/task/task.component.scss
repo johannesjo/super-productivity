@@ -85,6 +85,10 @@ $z-time-btn-svg-wrapper: 5555;
   border: 1px solid $light-theme-extra-border-color;
   border-bottom-color: transparent;
 
+  :host.gu-mirror & {
+    box-shadow: $whiteframe-shadow-8dp !important;
+  }
+
   @include mq(xs) {
     box-shadow: $task-shadow;
   }

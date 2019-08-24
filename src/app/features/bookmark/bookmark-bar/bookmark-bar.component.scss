@@ -126,6 +126,11 @@ $bookmarkMinWidth: 56px;
   padding-right: $s;
 }
 
+.global-bookmark.gu-mirror > a {
+  box-shadow: $whiteframe-shadow-8dp !important;
+}
+
+
 .controls {
   position: absolute;
   top: 0;

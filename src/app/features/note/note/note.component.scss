@@ -6,6 +6,7 @@ $noteFontSize: 14px;
   display: block;
 }
 
+
 .note {
   @include noteStyle;
 
@@ -18,6 +19,10 @@ $noteFontSize: 14px;
 
   &.isImg {
     border: 0;
+  }
+
+  :host.gu-mirror & {
+    box-shadow: $whiteframe-shadow-8dp !important;
   }
 }
 
