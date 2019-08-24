@@ -77,34 +77,34 @@ $thisHeight: 80px;
 
 .controls {
   position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-top: $s*-2;
+  top: -0.5*$s;
+  left: -0.5*$s;
+  right: -0.5*$s;
   z-index: 5;
   visibility: hidden;
   display: flex;
   flex-direction: row;
-  // TODO fix that this causes an overflow
-  padding: 0 $s;
-  transform: translate(-50%, 0);
 
   button {
     transition: $transition-leave;
-    //border-radius: 0;
     margin: 0;
     padding: 0;
     min-height: 0;
+    flex-grow: 1;
+    min-width: 20px;
     opacity: 0;
+    //box-shadow: $whiteframe-shadow-5dp;
   }
 }
 
-$this-distance: $s*4;
 .edit-btn {
-  // TODO fix that this causes an overflow
-  transform: translate(-$this-distance, $this-distance);
+  @include mq(xs) {
+    transform: translate(-100%, -50%);
+  }
 }
 
 .trash-btn {
-  // TODO fix that this causes an overflow
-  transform: translate($this-distance, $this-distance);
+  @include mq(xs) {
+    transform: translate(100%, -50%);
+  }
 }

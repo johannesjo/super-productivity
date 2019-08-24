@@ -16,7 +16,11 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSe
 export const selectAllAttachments = createSelector(selectAttachmentFeatureState, selectAll);
 export const selectAttachmentByIds = createSelector(
   selectAttachmentFeatureState,
-  (state, props: { ids }) => props.ids ? props.ids.map(id => state.entities[id]) : []
+  (state, props: { ids }) => props.ids
+    ? props.ids.map(id => state.entities[id])
+      // don't display in case of data corruption
+      .filter(v => !!v)
+    : []
 );
 
 export const initialAttachmentState: AttachmentState = adapter.getInitialState({

@@ -1,5 +1,5 @@
 <ul [@standardList]="attachments?.length"
-    class="attachments color-contrast">
+    class="attachments">
   <li *ngFor="let attachment of attachments; let i = index; trackBy: trackByFn;"
       class="attachment"
       draggable="false">
@@ -7,7 +7,7 @@
        [href]="attachment?.path"
        [type]="isError[i] ? 'LINK': attachment?.type"
        attachmentLink
-       class="attachment-link mat-elevation-z3 bg-400"
+       class="attachment-link mat-elevation-z3 bgc-600"
        draggable="false"
        tabindex="1"
        target="_blank">
@@ -27,14 +27,14 @@
          class="controls">
       <button (click)="openEditDialog(attachment)"
               class="edit-btn"
-              color="primary"
-              mat-mini-fab="">
+              color="lighter"
+              mat-raised-button="">
         <mat-icon>edit</mat-icon>
       </button>
       <button (click)="remove(attachment?.id)"
               class="trash-btn"
               color="warn"
-              mat-mini-fab="">
+              mat-raised-button="">
         <mat-icon>delete_forever</mat-icon>
       </button>
     </div>
