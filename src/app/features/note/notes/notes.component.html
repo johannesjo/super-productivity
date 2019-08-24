@@ -1,7 +1,7 @@
-<div class="wrapper bg-600">
+<div class="wrapper">
   <div *ngIf="isDragOver"
        @fade
-       class="bg-accent drag-over-msg color-contrast">
+       class="bgc-accent drag-over-msg">
     <mat-icon>add</mat-icon>
     {{T.F.NOTE.NOTES_CMP.DROP_TO_ADD|translate}}
   </div>
@@ -10,7 +10,6 @@
     <button #buttonEl
             (click)="addNote()"
             autofocus="autofocus"
-            class="color-contrast"
             mat-button=""
             tabindex="1">
       <mat-icon>add</mat-icon>
