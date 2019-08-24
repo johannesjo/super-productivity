@@ -5,10 +5,8 @@ $this-handle-size: 20px;
 $this-extra-touch-space: $this-handle-size/2;
 $this-margin: $this-extra-touch-space;
 $this-handle-scale: 2;
-$this-handle-color: rgb(255, 64, 129);
-$this-handle-border-color: rgba(255, 64, 129, 0.5);
+$this-handle-color: $c-accent;
 $this-circle-width: 2px;
-$this-text-color: #222222;
 $this-dot-size: 14px;
 
 @mixin onCircle($item-count, $circle-size, $item-size, $start-rotation: -90) {
@@ -37,150 +35,14 @@ $this-dot-size: 14px;
   display: block;
   user-select: none;
   width: $this-size+$this-margin*2;
-
-  .circle {
-    margin: $this-margin;
-    width: $this-size;
-    height: $this-size;
-    border-radius: 100%;
-    position: relative;
-    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.26);
-    cursor: grab;
-
-    @include darkTheme() {
-      border-color: transparent;
-    }
-
-    // touch spacer
-    &:after {
-      content: '';
-      position: absolute;
-      top: -$this-extra-touch-space;
-      right: -$this-extra-touch-space;
-      left: -$this-extra-touch-space;
-      bottom: -$this-extra-touch-space;
-      border-radius: 100%;
-    }
-
-    // inner circle
-    .inner-circle {
-      position: absolute;
-      top: $this-circle-width;
-      right: $this-circle-width;
-      left: $this-circle-width;
-      bottom: $this-circle-width;
-      border-radius: 100%;
-      background: #ffffff;
-      @include darkTheme() {
-        background: $dark-theme-bg-darker;
-        border-color: transparent;
-      }
-    }
-
-    .dots {
-      position: absolute;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      width: $this-size;
-      height: $this-size;
-      z-index: 4;
-      pointer-events: none;
-    }
-
-    .dot {
-      //background: lighten($this-handle-color, 11);
-      //background: #eeeeee;
-      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
-      height: 8px;
-      width: 8px;
-      border-radius: 100%;
-      cursor: grabbing;
-      @include onCircle(12, $this-size - $this-circle-width, $this-dot-size);
-      //animation: $transition-duration-l ani-circle-reveal $ani-enter-timing;
-
-      @include darkTheme() {
-        //background: #cccccc;
-      }
-
-      &.ng-leave,
-      &.ng-leave-active {
-        // TODO make this work
-        //animation: $transition-duration-l ani-circle-remove $ani-leave-timing;
-      }
-    }
-  }
+  @include standardThemeTextColor();
 
   &.is-dragging .circle {
     cursor: grabbing;
   }
 
-  $this-handle-border-width: 4px;
-
-  .handle-wrapper {
-    cursor: grab;
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 2;
-    transition: $transition-duration-m $ani-standard-timing;
-
-    &:after {
-      content: '';
-      position: absolute;
-      top: -$this-extra-touch-space;
-      right: -$this-extra-touch-space;
-      left: -$this-extra-touch-space;
-      bottom: -$this-extra-touch-space;
-    }
-  }
-
   &.is-dragging .handle-wrapper {
     transition: none;
-  }
-
-  $this-stroke-width: 4px;
-
-  .handle {
-    top: 0;
-    background: $this-handle-color;
-    left: 50%;
-    width: 0;
-    height: $this-handle-size+5;
-    position: absolute;
-    transform-origin: 50% 100%;
-    cursor: grabbing;
-
-    // actual handle
-    &:after {
-      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-      content: '';
-      top: -$this-handle-size/2 +$this-circle-width/2;
-      background: $this-handle-color;
-      border: 4px solid $this-handle-border-color;
-      left: 50%;
-      margin-left: - #{$this-handle-size/2};
-      position: absolute;
-      transform-origin: 50% 100%;
-      height: $this-handle-size;
-      width: $this-handle-size;
-      border-radius: 100%;
-      cursor: grabbing;
-    }
-  }
-
-  .value-wrapper {
-    z-index: 3;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 70%;
-    text-align: center;
-    transform: translate3d(-50%, -50%, 0);
   }
 
   &.is-dragging {
@@ -189,67 +51,190 @@ $this-dot-size: 14px;
       pointer-events: none;
     }
   }
+}
 
-  .value {
-    width: 100%;
-    text-align: center;
-    font-size: 16px;
-    line-height: 16px;
-    padding: 0;
-    cursor: text;
-    transition: all $transition-duration-m $ani-leave-timing;
-    transition-property: opacity, transform;
-    display: block;
-    position: relative;
-    overflow: visible;
-    user-select: none;
-    caret-color: #000000;
-    backface-visibility: hidden;
-    transform: translateZ(0);
+.circle {
+  margin: $this-margin;
+  width: $this-size;
+  height: $this-size;
+  border-radius: 100%;
+  position: relative;
+  box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.26);
+  cursor: grab;
+
+  @include darkTheme() {
+    border-color: transparent;
+  }
+
+  // touch spacer
+  &:after {
+    content: '';
+    position: absolute;
+    top: -$this-extra-touch-space;
+    right: -$this-extra-touch-space;
+    left: -$this-extra-touch-space;
+    bottom: -$this-extra-touch-space;
+    border-radius: 100%;
+  }
+
+  // inner circle
+  .inner-circle {
+    position: absolute;
+    top: $this-circle-width;
+    right: $this-circle-width;
+    left: $this-circle-width;
+    bottom: $this-circle-width;
+    border-radius: 100%;
+    background: #ffffff;
+    @include darkTheme() {
+      background: $dark-theme-bg-darker;
+      border-color: transparent;
+    }
+  }
+
+  .dots {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: $this-size;
+    height: $this-size;
     z-index: 4;
-    background: transparent;
-    border: none;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    pointer-events: none;
+  }
 
-    color: $this-text-color;
+  .dot {
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+    height: 8px;
+    width: 8px;
+    border-radius: 100%;
+    cursor: grabbing;
+    background: $c-primary-300;
+    @include onCircle(12, $this-size - $this-circle-width, $this-dot-size);
+  }
+}
 
-    @include darkTheme() {
-      color: #ffffff;
-      caret-color: #ffffff;
+
+$this-handle-border-width: 4px;
+
+.handle-wrapper {
+  cursor: grab;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: $transition-duration-m $ani-standard-timing;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: -$this-extra-touch-space;
+    right: -$this-extra-touch-space;
+    left: -$this-extra-touch-space;
+    bottom: -$this-extra-touch-space;
+  }
+}
+
+
+$this-stroke-width: 4px;
+
+.handle {
+  top: 0;
+  background: $this-handle-color;
+  left: 50%;
+  width: 0;
+  height: $this-handle-size+5;
+  position: absolute;
+  transform-origin: 50% 100%;
+  cursor: grabbing;
+
+  // actual handle
+  &:after {
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    content: '';
+    top: -$this-handle-size/2 +$this-circle-width/2;
+    background: $this-handle-color;
+    left: 50%;
+    margin-left: - #{$this-handle-size/2};
+    position: absolute;
+    transform-origin: 50% 100%;
+    height: $this-handle-size;
+    width: $this-handle-size;
+    border-radius: 100%;
+    cursor: grabbing;
+  }
+}
+
+.value-wrapper {
+  z-index: 3;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70%;
+  text-align: center;
+  transform: translate3d(-50%, -50%, 0);
+}
+
+
+.value {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  line-height: 16px;
+  padding: 0;
+  cursor: text;
+  transition: all $transition-duration-m $ani-leave-timing;
+  transition-property: opacity, transform;
+  display: block;
+  position: relative;
+  overflow: visible;
+  user-select: none;
+  caret-color: #000000;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  z-index: 4;
+  border: none;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  background-color: transparent;
+  color: inherit;
+
+  @include darkTheme() {
+    caret-color: #ffffff;
+    color: $dark-theme-text-color-most-intense;
+  }
+
+  &:focus {
+    @include inlineEditElevation();
+    outline: none;
+    z-index: 5;
+    user-select: all;
+    transform: scale(1.2);
+
+    &:after {
+      opacity: 1;
     }
 
-    &:focus {
-      z-index: 5;
-      user-select: all;
-      transform: scale(1.2);
-
-      &:after {
-        opacity: 1;
-      }
-
-      @media(max-width: $layout-xs) {
-        transform: scale(1.05);
-      }
-    }
-
-    &:focus {
-      + label {
-      }
+    @media(max-width: $layout-xs) {
+      transform: scale(1.05);
     }
   }
 
-  label {
-    font-size: 13px;
-    margin-bottom: 3px;
-    display: inline-block;
-    cursor: pointer;
-    color: $this-text-color;
-    text-align: center;
-    backface-visibility: hidden;
-
-    @include darkTheme() {
-      color: #ffffff;
+  &:focus {
+    + label {
     }
   }
+}
+
+label {
+  font-size: 13px;
+  margin-bottom: 3px;
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  backface-visibility: hidden;
 }
