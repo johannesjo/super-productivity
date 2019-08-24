@@ -98,7 +98,6 @@
 
 .tab-wrapper {
   border-radius: $card-border-radius;
-  overflow: hidden;
   margin: $s $s;
   display: block;
   box-shadow: $whiteframe-shadow-3dp;
@@ -111,6 +110,8 @@
 
 
   &.issue-content-wrapper {
+    // required for inner paddings to be there
+    overflow: hidden;
   }
 
   &.attachment-list-tab-wrapper {
@@ -125,6 +126,8 @@
     margin: $s $s;
     display: block;
     box-shadow: $whiteframe-shadow-4dp;
+    // required for inner paddings to be there
+    overflow: hidden;
   }
 
   ::ng-deep {
