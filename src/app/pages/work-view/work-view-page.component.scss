@@ -31,19 +31,14 @@ h2 {
   left: 0;
 }
 
-.work-view-header,
-.backlog-header {
-  box-shadow: $whiteframe-shadow-3dp;
-  color: #ffffff;
+.work-view-header {
   padding: 0.5*$s;
+
+  @include mat-css-color-and-contrast(700);
 
   @include mq(xs) {
     padding: 0.5*$s;
   }
-}
-
-.backlog-header {
-  padding: $s 0;
 }
 
 .work-view-header {
