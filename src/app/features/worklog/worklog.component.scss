@@ -121,7 +121,7 @@ $this-table-width: 300px;
             box-shadow: $whiteframe-shadow-2dp;
 
             @include darkTheme {
-              background-color: $dark-theme-bg-darker;
+              background-color: $dark-theme-bg-lighter;
             }
           }
         }
