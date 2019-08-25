@@ -10,6 +10,6 @@
   }
 }
 
-::ng-deep .mat-form-field-infix {
+:host::ng-deep .mat-form-field-infix {
   width: auto !important;
 }

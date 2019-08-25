@@ -63,7 +63,7 @@
   }
 }
 
-::ng-deep > .mat-tab-group > .mat-tab-body-wrapper {
+mat-tab-group::ng-deep > .mat-tab-group > .mat-tab-body-wrapper {
   > .mat-tab-body {
     > .mat-tab-body-content {
       // DON'T PUT OTHER STYLES HERE

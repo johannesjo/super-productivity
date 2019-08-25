@@ -65,29 +65,11 @@ $summary-point-inner-margin: $s;
   font-weight: bold;
 }
 
-::ng-deep collapsible {
-  text-align: center;
-}
-
-::ng-deep .collapsible-title {
-  font-size: 18px;
-}
-
 .finish-day-opts {
   margin-top: 10px;
 
   mat-checkbox {
     display: block;
-  }
-}
-
-
-.daily-summary-collapsible {
-  margin-bottom: $s*2;
-  margin-top: $s*2;
-
-  .collapsible-title {
-    font-size: 17px;
   }
 }
 

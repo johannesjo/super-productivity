@@ -17,7 +17,7 @@ mat-sidenav-container {
   height: 100%;
 }
 
-::ng-deep .mat-drawer-inner-container {
+mat-drawer::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
 }
 

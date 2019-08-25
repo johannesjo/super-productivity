@@ -17,6 +17,6 @@ mat-chip-list {
 
 }
 
-::ng-deep .mat-chip-list-wrapper {
+:host::ng-deep .mat-chip-list-wrapper {
   justify-content: center;
 }

@@ -57,16 +57,12 @@
   }
 }
 
-::ng-deep .mat-tab-header {
-  //border-top: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-::ng-deep .mat-tab-labels {
+:host::ng-deep .mat-tab-labels {
   justify-content: stretch;
   user-select: none;
 }
 
-::ng-deep .mat-tab-labels .mat-tab-label {
+:host::ng-deep .mat-tab-labels .mat-tab-label {
   flex-grow: 1;
   height: 46px;
   //text-transform: uppercase;
@@ -82,7 +78,7 @@
   }
 }
 
-::ng-deep issue-header > * {
+:host::ng-deep issue-header > * {
   display: inline-flex;
   justify-content: center;
   align-items: center;

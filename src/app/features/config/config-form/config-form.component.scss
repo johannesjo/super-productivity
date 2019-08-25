@@ -1,12 +1,12 @@
 @import '../../../../variables';
 
-::ng-deep .tpl {
+:host::ng-deep .tpl {
   clear: both !important;
   width: auto !important;
   float: none !important;
 }
 
-::ng-deep .sub-section-heading {
+:host::ng-deep .sub-section-heading {
   margin-top: $s*3 !important;
   margin-bottom: $s;
 }
