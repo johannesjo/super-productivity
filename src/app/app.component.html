@@ -1,6 +1,6 @@
 <ng-container *ngIf="(isAllDataLoadedInitially$|async)">
   <main-header></main-header>
-  <bookmark-bar class="bgc-800"></bookmark-bar>
+  <bookmark-bar></bookmark-bar>
   <!--TODO move inside page container somehow -->
   <banner></banner>
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
