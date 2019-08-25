@@ -6,6 +6,10 @@ $navBp2Lines: 680px;
 $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 
+.wrapper{
+  @include mat-css-color-and-contrast(500);
+}
+
 :host-context(.isMac.isElectron) {
   .wrapper {
     -webkit-app-region: drag;
