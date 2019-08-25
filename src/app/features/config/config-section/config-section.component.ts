@@ -52,6 +52,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   private _subs = new Subscription();
   private _cfg: any;
   private _instance;
+  private _viewDestroyTimeout: number;
 
   constructor(
     private _cd: ChangeDetectorRef,
@@ -78,7 +79,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
       if (this.section && this.section.customSection) {
         this.customFormRef.clear();
         // dirty trick to make sure data is actually there
-        setTimeout(() => {
+        this._viewDestroyTimeout = setTimeout(() => {
           this._loadCustomSection(this.section.customSection);
           this._cd.detectChanges();
         });
@@ -88,6 +89,9 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+    if (this._viewDestroyTimeout) {
+      window.clearTimeout(this._viewDestroyTimeout);
+    }
   }
 
   onSave($event) {
