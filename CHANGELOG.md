@@ -1,3 +1,31 @@
+## [2.10.11](https://github.com/johannesjo/super-productivity/compare/v2.10.10...v2.10.11) (2019-08-25)
+
+
+### Bug Fixes
+
+* focus color for task not showing for build ([b5c0353](https://github.com/johannesjo/super-productivity/commit/b5c0353))
+* hammer conf not being injectable ([bd13c57](https://github.com/johannesjo/super-productivity/commit/bd13c57))
+* potential crash when changing project on config page ([ff69d3b](https://github.com/johannesjo/super-productivity/commit/ff69d3b))
+* problematic usage of ::ng-deep ([92ecac2](https://github.com/johannesjo/super-productivity/commit/92ecac2))
+* styling for input duration slider ([a2c43ca](https://github.com/johannesjo/super-productivity/commit/a2c43ca))
+
+
+### Features
+
+* add box shadow when dragging stuff ([c5d3e15](https://github.com/johannesjo/super-productivity/commit/c5d3e15))
+* adjust note panel style ([9af7d3c](https://github.com/johannesjo/super-productivity/commit/9af7d3c))
+* adjust styles for bookmark bar ([3082691](https://github.com/johannesjo/super-productivity/commit/3082691))
+* adjust styles for workview header ([2a6541e](https://github.com/johannesjo/super-productivity/commit/2a6541e))
+* adjust styling for backlog tabs ([1693563](https://github.com/johannesjo/super-productivity/commit/1693563))
+* adjust styling for worklog tables ([1bb338d](https://github.com/johannesjo/super-productivity/commit/1bb338d))
+* improve attachment edit buttons ([e75b07f](https://github.com/johannesjo/super-productivity/commit/e75b07f))
+* improve attachment list styling ([61fe6a5](https://github.com/johannesjo/super-productivity/commit/61fe6a5))
+* improve main header layout ([07eb030](https://github.com/johannesjo/super-productivity/commit/07eb030))
+* slightly adjust card color ([1675271](https://github.com/johannesjo/super-productivity/commit/1675271))
+* use default form input font size again ([cad2b85](https://github.com/johannesjo/super-productivity/commit/cad2b85))
+
+
+
 ## [2.10.10](https://github.com/johannesjo/super-productivity/compare/v2.10.9...v2.10.10) (2019-08-23)
 
 
