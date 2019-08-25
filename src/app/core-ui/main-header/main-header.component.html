@@ -1,11 +1,4 @@
-<div class="wrapper bg-primary color-contrast mat-elevation-z3">
-  <button class="app-icon hide-xs"
-          mat-icon-button
-          routerLink="work-view"
-          [title]="T.MH.GO_TO_TASK_LIST|translate">
-    <mat-icon svgIcon="sp">sp</mat-icon>
-  </button>
-
+<div class="wrapper bgc-primary mat-elevation-z3">
   <button [matMenuTriggerFor]="mainMenu"
           [style.pointer-events]="isMainMenuDisabled ? 'none' : 'all'"
           (menuOpened)="isMainMenuDisabled = true"
@@ -19,7 +12,7 @@
           [style.pointer-events]="isMainMenuDisabled ? 'none' : 'all'"
           (menuOpened)="isMainMenuDisabled = true"
           (menuClosed)="isMainMenuDisabled = false"
-          class="burger-trigger bg-200 show-xs-only"
+          class="burger-trigger show-xs-only"
           color="lighter"
           mat-mini-fab>
     <mat-icon>menu</mat-icon>
@@ -123,7 +116,6 @@
 
   <nav class="action-nav">
     <button (click)="showAddTaskBar()"
-            class="bg-200"
             color="lighter"
             mat-mini-fab
             [title]="T.MH.ADD_NEW_TASK|translate">
@@ -131,9 +123,10 @@
     </button>
 
     <button (click)="bookmarkService.toggleBookmarks()"
-            class="bg-200 show-xs-only"
+            class="bookmark-btn"
             color="lighter"
             mat-mini-fab
+            [class.isOpen]="bookmarkService.isShowBookmarks$|async"
             [title]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
       <mat-icon>bookmark</mat-icon>
     </button>
@@ -143,7 +136,7 @@
             mat-mini-fab
             [title]="T.MH.TOGGLE_SHOW_NOTES|translate">
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
-                class="note-ico">note
+                class="note-ico">comment
       </mat-icon>
     </button>
 
@@ -192,13 +185,4 @@
       </ng-container>
     </div>
   </nav>
-
-  <button (click)="bookmarkService.toggleBookmarks()"
-          [class.is-open]="bookmarkService.isShowBookmarks$|async"
-          class="show-bookmarks-btn hide-xs"
-          color="primary"
-          mat-mini-fab=""
-          [title]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
-    <mat-icon>bookmark</mat-icon>
-  </button>
 </div>

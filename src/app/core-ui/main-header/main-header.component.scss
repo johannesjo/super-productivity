@@ -22,10 +22,6 @@ $mobileHorizontalPadding: 8px;
     }
   }
 
-  .app-icon {
-    transform: translateY($s*0.5);
-  }
-
   .project-btn {
     margin-left: $s;
   }
@@ -139,6 +135,21 @@ button {
   }
 }
 
+.bookmark-btn {
+  mat-icon {
+    transition: $transition-standard !important;
+    transition-property: transform !important;
+  }
+
+  &.isOpen {
+    mat-icon {
+      transform: rotate(180deg);
+      transition-property: transform !important;
+      transition: $transition-standard !important;
+    }
+  }
+}
+
 .wrapper {
   display: flex;
   align-items: center;
@@ -181,41 +192,11 @@ button {
   }
 }
 
-.show-bookmarks-btn {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  top: 100%;
-  transition: $transition-standard !important;
-  transition-property: transform !important;
-  margin: 0 !important;
-  //@include mq(xs, max) {
-  height: 30px !important;
-  min-height: 30px !important;
-  padding: 0 !important;
-
-  ::ng-deep .mat-button-wrapper {
-    padding: 0;
-    position: relative;
-    top: -3px;
-  }
-
-  //}
-
-  &.is-open {
-    transition-property: transform !important;
-    transition: $transition-standard !important;
-    //transform: translate(-50%, -75%);
-  }
-}
-
-
 .note-ico {
   transition: $transition-standard;
 
   &.rotate {
-    transform: rotate(90deg);
+    transform: rotate(45deg);
   }
 }
 
