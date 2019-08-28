@@ -1,3 +1,20 @@
+## [2.10.12](https://github.com/johannesjo/super-productivity/compare/v2.10.11...v2.10.12) (2019-08-28)
+
+
+### Bug Fixes
+
+* **i18n:** remove string leftover ([0ae06a1](https://github.com/johannesjo/super-productivity/commit/0ae06a1))
+* **i18n:** untranslated string ([3bf2292](https://github.com/johannesjo/super-productivity/commit/3bf2292))
+
+
+### Features
+
+* add option to hide evaluation sheet on daily summary ([fa7908d](https://github.com/johannesjo/super-productivity/commit/fa7908d))
+* also show planning mode when there are only repeatable tasks ([ff18991](https://github.com/johannesjo/super-productivity/commit/ff18991))
+* make bookmark bar bg slightly darker ([0805315](https://github.com/johannesjo/super-productivity/commit/0805315))
+
+
+
 ## [2.10.11](https://github.com/johannesjo/super-productivity/compare/v2.10.10...v2.10.11) (2019-08-25)
 
 
