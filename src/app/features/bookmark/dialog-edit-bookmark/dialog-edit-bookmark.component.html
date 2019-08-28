@@ -18,7 +18,7 @@
       </mat-form-field>
       <mat-form-field>
         <input [(ngModel)]="bookmarkCopy.path"
-               [placeholder]="mapTypeToLabel(bookmarkCopy.type)"
+               [placeholder]="mapTypeToLabel(bookmarkCopy.type)|translate"
                matInput=""
                name="path"
                required
