@@ -156,8 +156,8 @@ export const selectHasTasksToWorkOn = createSelector(
   selectTodaysTasksWithSubTasks,
   (isTasksLoaded, tasks) => {
     const _tasksToWorkOn = tasks.filter((t) => {
-      return !t.isDone &&
-        ((!t.subTasks || t.subTasks.length === 0) || t.subTasks.filter(st => !st.isDone).length > 0);
+      return !t.isDone && !t.repeatCfgId &&
+        ((!t.subTasks || t.subTasks.length === 0) || t.subTasks.filter((st) => !st.isDone).length > 0);
     });
     return (_tasksToWorkOn && _tasksToWorkOn.length > 0);
   }
