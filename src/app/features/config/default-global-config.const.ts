@@ -11,6 +11,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isHideNav: false,
     isAutMarkParentAsDone: false,
     isDisableRemindWhenForgotToFinishDay: false,
+    isHideEvaluationSheet: false,
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,

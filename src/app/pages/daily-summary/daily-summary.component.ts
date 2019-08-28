@@ -104,7 +104,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakTime$(dayStr)));
   breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakNr$(dayStr)));
 
-  isBreakTrackingSupport$: Observable<boolean> = this._configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
+  isBreakTrackingSupport$: Observable<boolean> = this.configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 
   private _successAnimationTimeout;
   private _doneAndRepeatingTasks: TaskWithSubTasks[];
@@ -114,8 +114,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor(
+    public readonly configService: GlobalConfigService,
     private readonly _taskService: TaskService,
-    private readonly _configService: GlobalConfigService,
     private readonly _googleDriveSync: GoogleDriveSyncService,
     private readonly _router: Router,
     private readonly _noteService: NoteService,
@@ -235,9 +235,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
 
   private _finishDayForGood(cb?) {
-    if (this._configService.cfg
-      && this._configService.cfg.googleDriveSync.isEnabled
-      && this._configService.cfg.googleDriveSync.isAutoSyncToRemote) {
+    if (this.configService.cfg
+      && this.configService.cfg.googleDriveSync.isEnabled
+      && this.configService.cfg.googleDriveSync.isAutoSyncToRemote) {
       // login in again, will hopefully prevent google errors
       // this._googleApiService.login().then(() => {
       this._googleDriveSync.saveForSync();

@@ -13,7 +13,7 @@
   <h1 class="done-headline mat-headline">
     <span *ngIf="isForToday"
           [innerHTML]="T.PDS.CELEBRATE|translate"></span>
-    <span *ngIf="!isForToday">{{T.PDS.SUMMARY_FOR|translate:{dayStr:dayStr} }}</span>
+    <span *ngIf="!isForToday">{{T.PDS.SUMMARY_FOR|translate:{dayStr: dayStr} }}</span>
   </h1>
   <div class="daily-summary-summary">
     <div class="summary-point">
@@ -62,7 +62,8 @@
   <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
                  [selectedIndex]="selectedTabIndex"
                  dynamicHeight>
-    <mat-tab [label]="T.PDS.EVALUATION|translate">
+    <mat-tab [label]="T.PDS.EVALUATION|translate"
+             *ngIf="!(configService.misc$|async)?.isHideEvaluationSheet">
       <section class="tab-inner">
         <evaluation-sheet (save)="onEvaluationSave()"
                           [day]="(dayStr$|async)"></evaluation-sheet>

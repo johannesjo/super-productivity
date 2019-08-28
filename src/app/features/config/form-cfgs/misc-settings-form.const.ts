@@ -43,5 +43,12 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY,
       },
     },
+    {
+      key: 'isHideEvaluationSheet',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_HIDE_EVALUATION_SHEET,
+      },
+    },
   ]
 };

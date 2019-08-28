@@ -47,6 +47,7 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isDisableRemindWhenForgotToFinishDay: boolean;
+  isHideEvaluationSheet: boolean;
 }>;
 
 export type IdleConfig = Readonly<{
