@@ -17,20 +17,22 @@ Organize your daily tasks at one place while making time tracking a lot less ann
 * Sexy global bookmark bar to add quick links, project related files and even commands and applications
 * Sexy note functionality with custom reminders 
 * Pomodoro timer
-* Export your time sheets to Google Sheets  (optional of course)
 * 'Take a break' reminder
 * Full Keyboard interaction
 * Different Themes!
-* Sync data between multiple instances 
 * Mobile support
+* Repeatable tasks for daily chores
 * Configurable and automatable Jira integration for: 
   * searching and adding tasks from jira
   * creating (local/personal) sub tasks for your jira tickets
-  * Setting transitions aka setting tickets to in progress or done
-  * Automatic notifications once your (current) task has changed or been commented on jira => no messy email notifications required any more
+  * setting transitions aka setting tickets to in progress or done
+  * automatic notifications once an issue in your list has changed or been commented on jira => no messy email notifications required any more
 * Configurable and automatable Git integration for:
-  * searching and adding tasks from git 
-  
+  * searching and adding tasks from git
+  * automatic notifications once an issue in your list has changed or been commented 
+* Export your time sheets to Google Sheets (optional of course)
+* Sync data between multiple instances (optional of course)
+
 And much more!
 
 ## Web Version
