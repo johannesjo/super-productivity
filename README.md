@@ -17,13 +17,10 @@
   </a>
   
 
-
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetive tasks and to provide you with a place to collect all the information you need to do your job.
 
 
-<a href="https://www.youtube.com/watch?v=VoF2_RSdNXA"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
-
-## Features
+## :heavy_check_mark: Features
 * **Full control over your data**, no tracking, no user accounts, no cloud
 * Sub Tasks
 * Time Tracking 
@@ -48,12 +45,18 @@ Organize your daily tasks at one place while making time tracking a lot less ann
 
 And much more!
 
-## Web Version
+
+<a href="https://www.youtube.com/watch?v=VoF2_RSdNXA"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
+
+## :question: How to use
+I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app. There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
+
+## :globe_with_meridians: Web Version
 Check out the [web-version](http://super-productivity.com). It is a little bit more limited (time tracking only works if the app is open and idle time tracking is disabled).
 
 If you want the Jira Integration to work you have also to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
-## Downloads & Install
+## :computer: Downloads & Install
 ### All Platforms
 [Install from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
@@ -83,7 +86,7 @@ brew cask install superProductivity
 ## Setup WebDAV Syncing
 When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
 
-## Contributing
+## :hearts: Contributing
 There are several ways to help. Publishing a bug or a feature request is a good first step. Also making it more popular by posting it on social media etc. is great, because it means more users, which in turn leads to more people testing the app and also more people contributing code.
 
 **Please Share!**
@@ -136,7 +139,7 @@ npm start
 ### Packaging the app
 Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `yarn dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also use the [command line interface of electron builder](https://www.electron.build/cli).
 
-## Contributors ✨
+## :sparkling_heart: Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
