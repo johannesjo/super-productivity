@@ -175,6 +175,9 @@ export class RemoveTaskReminder implements Action {
 
 export class StartFirstStartable implements Action {
   readonly type = TaskActionTypes.StartFirstStartable;
+
+  constructor(public payload: { isStartIfHasCurrent: boolean }) {
+  }
 }
 
 export class RestoreTask implements Action {

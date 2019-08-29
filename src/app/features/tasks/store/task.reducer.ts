@@ -95,6 +95,10 @@ export function taskReducer(
     }
 
     case TaskActionTypes.StartFirstStartable: {
+      if (!action.payload.isStartIfHasCurrent && state.currentTaskId) {
+        return state;
+      }
+
       const startableTasks = filterStartableTasks(state);
       return {
         ...state,

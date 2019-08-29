@@ -280,8 +280,8 @@ export class TaskService {
     }
   }
 
-  startFirstStartable() {
-    this._store.dispatch(new StartFirstStartable());
+  startFirstStartable(isStartIfHasCurrent = false) {
+    this._store.dispatch(new StartFirstStartable({isStartIfHasCurrent}));
   }
 
   async loadStateForProject(projectId) {
