@@ -1,5 +1,7 @@
 <p align="center" style="text-align: center;">
-  <img align="center" alt="Logo" src="build/icons/128x128.png" width="128px"/>
+  <a href="https://super-productivity.com/">
+    <img align="center" alt="Logo" src="build/icons/128x128.png" width="128px"/>
+  </a>
   <h1 align="center">Super Productivity</h1>
 </p>
 
@@ -17,6 +19,7 @@
 
 
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetive tasks and to provide you with a place to collect all the information you need to do your job.
+
 
 <a href="https://www.youtube.com/watch?v=VoF2_RSdNXA"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
 
@@ -79,16 +82,6 @@ brew cask install superProductivity
 
 ## Setup WebDAV Syncing
 When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
-
-## More Screenshots
-<img alt="issue" src="screens/screen_issue.png" width="100%">
-<img alt="reduced" src="screens/screen_reduced.png" width="100%">
-<img alt="idle" src="screens/screen_idle.png" width="100%">
-<img alt="take" src="screens/screen_take-a-break.png" width="100%">
-<img alt="daily" src="screens/screen_daily-summary.png" width="100%">
-<img alt="backlog" src="screens/screen_backlog.png" width="100%">
-<img alt="worklog" src="screens/screen_worklog.png" width="100%">
-<img alt="mobile" src="screens/screen_mobile.png">
 
 ## Contributing
 There are several ways to help. Publishing a bug or a feature request is a good first step. Also making it more popular by posting it on social media etc. is great, because it means more users, which in turn leads to more people testing the app and also more people contributing code.
