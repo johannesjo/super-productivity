@@ -1,10 +1,20 @@
-# Super Productivity
-[![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
-<a href="https://snapcraft.io/superproductivity">
-  <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" height="36" />
-</a>
-<a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png' alt='English badge' height="36"/></a>
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
+<p align="center" style="text-align: center;">
+  <img align="center" alt="Logo" src="build/icons/128x128.png" width="128px"/>
+  <h1 align="center">Super Productivity</h1>
+</p>
+
+<p align="center" style="text-align: center;">
+  <a href="https://snapcraft.io/superproductivity">
+    <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" align="center" height="36">
+  </a>
+  <a href="//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone">
+    <img alt="English badge" src="https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png" align="center" height="36">
+  </a>
+  <a href="https://lbesson.mit-license.org">
+    <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-blue.svg" align="center">
+  </a>
+  
+
 
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetive tasks and to provide you with a place to collect all the information you need to do your job.
 
