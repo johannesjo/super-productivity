@@ -20,7 +20,10 @@ export class DialogJiraInitialSetupComponent {
     this.jiraCfg = this.data.jiraCfg;
   }
 
-  saveJiraCfg($event) {
-    this._matDialogRef.close($event);
+  saveJiraCfg(cfg: JiraCfg) {
+    this._matDialogRef.close({
+      ...cfg,
+      isEnabled: !!(cfg && cfg.host && cfg.userName && cfg.password),
+    });
   }
 }
