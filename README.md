@@ -15,7 +15,14 @@
   <a href="https://lbesson.mit-license.org">
     <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-blue.svg" align="center">
   </a>
+  <a href="https://www.reddit.com/r/selfhosted/comments/by7bcu/super_productivity_is_an_open_source_todo_list/?ref=readnext">
+    <img alt="On reddit" src="https://img.shields.io/badge/on-reddit-orange.svg" align="center">
+  </a>
+   <a href="https://www.producthunt.com/posts/super-productivity">
+    <img alt="On product hunt" src="https://img.shields.io/badge/on-product%20hunt-red.svg" align="center">
+  </a>
   
+
 
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetitive tasks and to provide you with a place to collect all the information you need to do your job.
 
