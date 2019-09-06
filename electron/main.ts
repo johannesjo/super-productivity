@@ -107,9 +107,7 @@ appIN.on('ready', () => {
     }
   };
 
-  const checkIdle = () => powerMonitor.querySystemIdleTime((idleTimeSeconds) => {
-    sendIdleMsgIfOverMin(idleTimeSeconds * 1000);
-  });
+  const checkIdle = () => sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
 
   // init time tracking interval
   setInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);

@@ -1,10 +1,11 @@
-import {BrowserWindow, ipcMain, Menu, shell} from 'electron';
+import {BrowserWindow, ipcMain, Menu, shell, dialog} from 'electron';
 import {errorHandler} from './error-handler';
 import {join, normalize} from 'path';
 import {format} from 'url';
 import {getSettings} from './get-settings';
 import {IPC} from './ipc-events.const';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
+import MessageBoxReturnValue = Electron.MessageBoxReturnValue;
 
 let mainWin;
 let indicatorMod;
@@ -111,22 +112,23 @@ function initWinEventListeners(app: any) {
 
         getSettings(mainWin, (appCfg) => {
           if (appCfg && appCfg.misc.isConfirmBeforeExit && !app.isQuiting) {
-            const choice = require('electron').dialog.showMessageBox(mainWin,
+            dialog.showMessageBox(mainWin,
               {
                 type: 'question',
                 buttons: ['Yes', 'No'],
                 title: 'Confirm',
                 message: 'Are you sure you want to quit?'
-              });
-            if (choice === 1) {
-              event.preventDefault();
-              return;
-            } else if (choice === 0) {
-              app.isQuiting = true;
-              isQuiting = true;
-              app.quit();
-              return;
-            }
+              }).then((choice: MessageBoxReturnValue) => {
+              if (choice.response === 1) {
+                event.preventDefault();
+                return;
+              } else if (choice.response === 0) {
+                app.isQuiting = true;
+                isQuiting = true;
+                app.quit();
+                return;
+              }
+            });
           } else {
             app.isQuiting = true;
             isQuiting = true;
