@@ -1,11 +1,9 @@
-import {BrowserWindow, ipcMain, Menu, shell, dialog} from 'electron';
+import {BrowserWindow, ipcMain, Menu, shell, dialog, MenuItemConstructorOptions, MessageBoxReturnValue} from 'electron';
 import {errorHandler} from './error-handler';
 import {join, normalize} from 'path';
 import {format} from 'url';
 import {getSettings} from './get-settings';
 import {IPC} from './ipc-events.const';
-import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
-import MessageBoxReturnValue = Electron.MessageBoxReturnValue;
 
 let mainWin;
 let indicatorMod;
@@ -35,7 +33,6 @@ export const createWindow = (params) => {
   const IS_MAC = params.IS_MAC;
   const quitApp = params.quitApp;
   const app = params.app;
-  const nestedWinParams = params.nestedWinParams;
   indicatorMod = params.indicatorMod;
 
   mainWin = new BrowserWindow({
