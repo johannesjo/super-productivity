@@ -48,7 +48,7 @@
         "ADD_BOOKMARK": "Añadir marcador",
         "EDIT_BOOKMARK": "Editar marcador",
         "LABELS": {
-          "COMMAND": "Mando",
+          "COMMAND": "Comando",
           "FILE": "Ruta de archivo",
           "IMG": "Imagen",
           "LINK": "Url"
@@ -74,10 +74,10 @@
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la acumulación",
-        "IS_AUTO_POLL": "Encuestar automáticamente los problemas de git importados para los cambios",
+        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la cola de tareas",
+        "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
-        "REPO": "\"username / repositoryName\" para el repositorio de git que desea rastrear"
+        "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de GithHub para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
@@ -261,7 +261,7 @@
         "ADV_CFG": "Configuración avanzada",
         "CREDENTIALS": "cartas credenciales",
         "HELP_ARR": {
-          "H1": "Configuracion basica",
+          "H1": "Configuracion básica",
           "H2": "Configuraciones de registro de trabajo",
           "H3": "Transiciones por defecto",
           "P1_1": "Proporcione un nombre de inicio de sesión (se puede encontrar en su página de perfil) y un <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">token de API</a> o contraseña si no puede generar uno por algún motivo. Tenga en cuenta que las versiones más recientes de jira a veces solo funcionan con el token.",
@@ -278,7 +278,7 @@
         "ASSIGNEE": "Cesionario",
         "AT": "a",
         "ATTACHMENTS": "Archivos adjuntos",
-        "CHANGED": "cambiado",
+        "CHANGED": "Cambiado",
         "COMMENTS": "Comentarios",
         "COMPONENTS": "componentes",
         "DESCRIPTION": "Descripción",
@@ -319,11 +319,11 @@
     },
     "METRIC": {
       "CMP": {
-        "AVG_BREAKS_PER_DAY": "Avg. descansos por día",
-        "AVG_TASKS_PER_DAY_WORKED": "Avg. tareas por dia trabajadas",
-        "AVG_TIME_SPENT_ON_BREAKS": "Avg. tiempo dedicado a los descansos",
-        "AVG_TIME_SPENT_PER_DAY": "Avg. tiempo empleado por día",
-        "AVG_TIME_SPENT_PER_TASK": "Avg. tiempo empleado por tarea",
+        "AVG_BREAKS_PER_DAY": "Promedio descansos por día",
+        "AVG_TASKS_PER_DAY_WORKED": "Promedio tareas por dia trabajadas",
+        "AVG_TIME_SPENT_ON_BREAKS": "Promedio tiempo dedicado a los descansos",
+        "AVG_TIME_SPENT_PER_DAY": "Promedio tiempo empleado por día",
+        "AVG_TIME_SPENT_PER_TASK": "Promedio tiempo empleado por tarea",
         "COUNTING_SUBTASKS": "(contando subtareas)",
         "DAYS_WORKED": "Dias trabajados",
         "IMPROVEMENT_SELECTION_COUNT": "Número de veces que se seleccionó un factor de mejora",
@@ -448,14 +448,14 @@
         "CREATE": "Crear proyecto",
         "EDIT": "Editar proyecto",
         "ISSUE_PROVIDER_CFGS": "Configuración del proveedor de problemas (opcional)",
-        "SETUP_GIT": "Configurar la integración de Github",
-        "SETUP_JIRA": "Configurar Jira Integration"
+        "SETUP_GIT": "Configurar la integración con Github",
+        "SETUP_JIRA": "Configurar la integración con Jira"
       },
       "FORM": {
         "D_IS_DARK_THEME": "No se utilizará si el sistema admite el modo oscuro global.",
         "HELP": "Configuraciones muy básicas para tu proyecto.",
         "L_IS_DARK_THEME": "Usa el tema oscuro",
-        "L_IS_REDUCED_THEME": "Usar IU reducida (sin cuadros alrededor de las tareas)",
+        "L_IS_REDUCED_THEME": "Usar interfaz de usuario reducida (sin cuadros alrededor de las tareas)",
         "L_THEME_COLOR": "Color del tema",
         "L_TITLE": "Título",
         "TITLE": "Configuración del proyecto y tema"
@@ -706,7 +706,7 @@
     "OK": "De acuerdo",
     "PREVIOUS": "Anterior",
     "REMOVE": "retirar",
-    "SAVE": "Salvar",
+    "SAVE": "Guardar",
     "TITLE": "Título",
     "UNDO": "Deshacer",
     "UPDATE": "Actualizar"
@@ -726,8 +726,8 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Habilitar el manejo del tiempo de inactividad",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Solo se activa el diálogo de tiempo de inactividad cuando se selecciona una tarea actual",
       "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "El tiempo de inactividad no rastreado se restablece, toma un temporizador de interrupción",
-      "MIN_IDLE_TIME": "Disparador inactivo después de X",
-      "TITLE": "Manejo de ralentí"
+      "MIN_IDLE_TIME": "Disparador inactividad después de",
+      "TITLE": "Manejo de inactividad"
     },
     "IMEX": {
       "HELP": "<p>Aquí puede exportar todos sus datos como <strong>JSON</strong> para copias de seguridad, pero también para usarlos en un contexto diferente (por ejemplo, es posible que desee exportar sus proyectos en el navegador e importarlos a la versión de escritorio) ). </p> <p>La importación espera que JSON válido se copie en el área de texto. <strong>NOTA: Una vez que presiona el botón de importación, se sobrescribirán todos sus ajustes y datos actuales.</strong></p>",
@@ -748,7 +748,7 @@
       "GO_TO_FOCUS_MODE": "Ir al modo de enfoque",
       "GO_TO_SETTINGS": "Ir a la configuración",
       "GO_TO_WORK_VIEW": "Ir a la vista de trabajo",
-      "HELP": "<p>Aquí puedes configurar todos los atajos de teclado.</p> <p>Haga clic en la entrada de texto e ingrese la combinación de teclas deseada. Pulsa enter para guardar y Escape para abortar.</p> <p>Hay tres tipos de accesos directos:</p> <ul> <li> <strong>Accesos directos globales:</strong> Cuando la aplicación se está ejecutando, se activará la acción desde cualquier otra aplicación. </li> <li> <strong>Atajos de nivel de aplicación:</strong> Se activará desde todas las pantallas de la aplicación, pero no si está editando un campo de texto. </li> <li> <strong>Accesos directos de nivel de tarea:</strong> Solo se activarán si ha seleccionado una tarea mediante el mouse o el teclado y, por lo general, activará una acción relacionada específicamente con esa tarea. </li> </ul>",
+      "HELP": "<p>Aquí puedes configurar todos los atajos de teclado.</p> <p>Haga clic en la entrada de texto e ingrese la combinación de teclas deseada. Pulsa Enter para guardar y Escape para abortar.</p> <p>Hay tres tipos de accesos directos:</p> <ul> <li> <strong>Accesos directos globales:</strong> Cuando la aplicación se está ejecutando, se activará la acción desde cualquier otra aplicación. </li> <li> <strong>Atajos de nivel de aplicación:</strong> Se activará desde todas las pantallas de la aplicación, pero no si está editando un campo de texto. </li> <li> <strong>Accesos directos de nivel de tarea:</strong> Solo se activarán si ha seleccionado una tarea mediante el mouse o el teclado y, por lo general, activará una acción relacionada específicamente con esa tarea. </li> </ul>",
       "MOVE_TASK_DOWN": "Mueve la tarea hacia abajo en la lista",
       "MOVE_TASK_UP": "Mover la tarea arriba en la lista",
       "MOVE_TO_BACKLOG": "Mover la tarea a la tarea",
@@ -775,27 +775,27 @@
       "ZOOM_OUT": "Alejar (solo en el escritorio)"
     },
     "LANG": {
-      "AR": "Arábica",
-      "DE": "alemán",
+      "AR": "Árabe",
+      "DE": "Alemán",
       "EN": "Inglés",
-      "ES": "español",
-      "FR": "francés",
-      "JA": "japonés",
-      "KO": "coreano",
+      "ES": "Español",
+      "FR": "Francés",
+      "JA": "Japonés",
+      "KO": "Coreano",
       "LABEL": "Por favor, seleccione un idioma",
-      "RU": "ruso",
-      "TITLE": "idioma",
-      "TR": "turco",
-      "ZH": "chino"
+      "RU": "Ruso",
+      "TITLE": "Idioma",
+      "TR": "Turco",
+      "ZH": "Chino"
     },
     "MISC": {
       "HELP": "<p><strong>¿No ve las notificaciones de escritorio?</strong> Para Windows, es posible que desee revisar Sistema> Notificaciones y acciones y verificar si se han habilitado las notificaciones requeridas.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque la tarea principal como hecha, cuando todas las sub tareas estén listas",
-      "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación.",
+      "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Deshabilitar el recordatorio sobre el día de finalización olvidado",
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace el encabezado principal (solo en el escritorio)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
-      "TITLE": "Configuraciones Misc"
+      "TITLE": "Configuraciones"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duración de las pausas breves",
@@ -813,9 +813,9 @@
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Le permite configurar un recordatorio recurrente cuando ha trabajado durante un período de tiempo específico sin tomar un descanso.</p> <p>Puede modificar el mensaje que se muestra. ${duration} será reemplazado con el tiempo dedicado sin interrupción.</p> </div>",
-      "IS_ENABLED": "Habilitar tomar un recordatorio de ruptura",
-      "IS_FOCUS_WINDOW": "Ventana de la aplicación Focus cuando el recordatorio está activo (solo en el escritorio)",
-      "IS_LOCK_SCREEN": "Bloquear la pantalla cuando se debe un corte (solo en el escritorio)",
+      "IS_ENABLED": "Habilitar recordatorio para tomar un descanso",
+      "IS_FOCUS_WINDOW": "Enfocar la ventana de la aplicación cuando el recordatorio está activo (solo en el escritorio)",
+      "IS_LOCK_SCREEN": "Bloquear la pantalla cuando se debe tomar un descanso (solo en el escritorio)",
       "MESSAGE": "Tomar un mensaje de descanso",
       "MIN_WORKING_TIME": "Desencadenar una notificación de interrupción después de que X funcione sin una",
       "TITLE": "Recordatorio de descanso"
