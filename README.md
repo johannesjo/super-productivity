@@ -30,34 +30,19 @@ Organize your daily tasks at one place while making time tracking a lot less ann
 
 
 ## :heavy_check_mark: Features
-* **Full control over your data**, no tracking, no user accounts, no cloud
-* Sub Tasks
-* Time Tracking 
-* Sexy global bookmark bar to add quick links, project related files and even commands and applications
-* Sexy note functionality with custom reminders 
-* Pomodoro timer
-* 'Take a break' reminder
-* Full Keyboard interaction
-* Different Themes!
-* Mobile support
-* Repeatable tasks for daily chores
-* Configurable and automatable Jira integration for: 
-  * searching and adding tasks from jira
-  * creating (local/personal) sub tasks for your jira tickets
-  * setting transitions aka setting tickets to in progress or done
-  * automatic notifications once an issue in your list has changed or been commented on jira => no messy email notifications required any more
-* Configurable and automatable Git integration for:
-  * searching and adding tasks from git
-  * automatic notifications once an issue in your list has changed or been commented 
-* Export your time sheets to Google Sheets (optional of course)
-* Sync data between multiple instances (optional of course)
+* **Plan, track & summarize**. Create time sheets and work summaries in a breeze to easily export them to your companies time tracking system.
+* Integrate with **Jira** and **Github**. Auto import tasks assigned to you, plan the details locally, automatically create worklogs and get notified right away, when something changes.
+* Organize your project's data. Create **notes**, attach **files** or create **bookmarks** for links, files and even commands and have it all out of the way, once you're ready for the weekend.
+* Helps you to **establish healthy habits**. A break timer reminds to you, when it's time to step away. You also can collect personal metrics for yourself to see, which of your work routines need adjustments.
+* Stuck and procrastinating? No problem! Super Productivity's **anti procrastination** feature helps you to reconsider your options and a **pomodoro timer** is also always at hand.
+* Super Productivity **does NOT collect any data** and there are no user accounts or registration. It's **free** and **open source** and always will be.
 
 And much more!
 
 
 <a href="https://www.youtube.com/watch?v=VoF2_RSdNXA"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
 
-## :question: How to use
+## :question: How to use it
 I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app. There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
 ## :globe_with_meridians: Web Version
