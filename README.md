@@ -28,6 +28,7 @@
 
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetitive tasks and to provide you with a place to collect all the information you need to do your job.
 
+ [:globe_with_meridians: Web App](http://super-productivity.com) or [:computer: Download](https://github.com/johannesjo/super-productivity/releases)
 
 ## :heavy_check_mark: Features
 * **Plan, track & summarize**. Create time sheets and work summaries in a breeze to easily export them to your companies time tracking system.
@@ -46,7 +47,7 @@ And much more!
 I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app. There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
 ## :globe_with_meridians: Web Version
-Check out the [web-version](http://super-productivity.com). It is a little bit more limited (time tracking only works if the app is open and idle time tracking is disabled).
+Check out the It is a little bit more limited (time tracking only works if the app is open and idle time tracking is disabled).
 
 If you want the Jira Integration to work you have also to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
