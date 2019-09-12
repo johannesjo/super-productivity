@@ -15,11 +15,17 @@
   <a href="https://lbesson.mit-license.org">
     <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" align="center">
   </a>
+  <a href="https://github.com/johannesjo/super-productivity/releases">
+    <img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/johannesjo/super-productivity/total" align="center">
+  </a>
   <a href="https://www.reddit.com/r/selfhosted/comments/by7bcu/super_productivity_is_an_open_source_todo_list/?ref=readnext">
     <img alt="On reddit" src="https://img.shields.io/badge/on-reddit-orange.svg?style=flat-square" align="center">
   </a>
-   <a href="https://www.producthunt.com/posts/super-productivity">
-    <img alt="On product hunt" src="https://img.shields.io/badge/on-product%20hunt-red.svg?style=flat-square" align="center">
+  <a href="https://www.producthunt.com/posts/super-productivity">
+    <img alt="On product hunt" src="https://img.shields.io/badge/on-product%20hunt-blue.svg?style=flat-square" align="center">
+  </a>
+  <a href="https://www.producthunt.com/posts/super-productivity">
+    <img alt="On Indie Hackers" src="https://img.shields.io/badge/on-indie%20hackers-blue?style=flat-square" align="center">
   </a>
   <a href="https://twitter.com/intent/tweet?text=Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com">
     <img alt="tweet" src="https://img.shields.io/twitter/url/https/github.com/ArmynC/ArminC-AutoExec.svg?style=flat-square&logo=twitter" target="_blank" align="center" />
