@@ -15,6 +15,7 @@ export class DialogConfirmDriveSyncLoadComponent {
     private _matDialogRef: MatDialogRef<DialogConfirmDriveSyncLoadComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
+    _matDialogRef.disableClose = true;
   }
 
   close() {
