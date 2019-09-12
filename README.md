@@ -24,7 +24,7 @@
   <a href="https://www.producthunt.com/posts/super-productivity">
     <img alt="On product hunt" src="https://img.shields.io/badge/on-product%20hunt-blue.svg?style=flat-square" align="center">
   </a>
-  <a href="https://www.producthunt.com/posts/super-productivity">
+  <a href="https://www.indiehackers.com/product/super-productivity">
     <img alt="On Indie Hackers" src="https://img.shields.io/badge/on-indie%20hackers-blue?style=flat-square" align="center">
   </a>
   <a href="https://twitter.com/intent/tweet?text=Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com">
