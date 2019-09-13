@@ -67,6 +67,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.isCurrent;
   }
 
+  // TODO do via observable
+  @HostBinding('class.isAdditionalInfoOpen')
+  private get _isAdditionalInfoOpen() {
+    return this.task._isAdditionalInfoOpen;
+  }
+
+  // TODO do via observable
+  @HostBinding('class.isDone')
+  private get _isDone() {
+    return this.task.isDone;
+  }
+
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout: number;

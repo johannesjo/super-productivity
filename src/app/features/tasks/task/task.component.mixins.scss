@@ -29,7 +29,7 @@
 }
 
 @mixin isDoneForFirstLine($direct-parent-only-sel: false) {
-  .inner-wrapper.isDone > .first-line & {
+  :host.isDone > .inner-wrapper > .first-line & {
     @content;
   }
 }

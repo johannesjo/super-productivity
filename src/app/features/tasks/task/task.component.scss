@@ -51,7 +51,6 @@ $z-time-btn-svg-wrapper: 5555;
 
   &.isCurrent {
     z-index: $z-is-current-host;
-    color: mat-css-contrast-color(600);
   }
 
   &:focus {
@@ -66,10 +65,10 @@ $z-time-btn-svg-wrapper: 5555;
   padding: $task-inner-padding-top-bottom 0;
   margin-bottom: 0;
 
-  //&.isCurrent,
-  &.isAdditionalInfoOpen {
+  :host.isAdditionalInfoOpen > & {
     margin-top: $s*2;
     margin-bottom: $s*2;
+    box-shadow: $whiteframe-shadow-1dp;
   }
 }
 
@@ -83,51 +82,47 @@ $z-time-btn-svg-wrapper: 5555;
   transition-property: transform;
   //border-radius: $card-border-radius;
   border: 1px solid $light-theme-extra-border-color;
-  border-bottom-color: transparent;
+  border-top-width: 0;
+
 
   :host.gu-mirror & {
     box-shadow: $whiteframe-shadow-8dp !important;
   }
 
-  @include mq(xs) {
-    box-shadow: $task-shadow;
-  }
-
-  :host-context(.sub-tasks) & {
-    @include mq(xs) {
-      box-shadow: $sub-task-shadow;
-    }
-  }
-
   @include darkTheme {
     border-color: $dark-theme-bg;
-    border-bottom-color: transparent;
   }
 
   @include isHostFocus('.inner-wrapper') {
     border-radius: $card-border-radius;
 
     @include mq(xs) {
-      border: 1px solid $c-accent;
       // NOTE: somehow ng build messes up, if we don't include it like that
-      border-color: $c-accent;
-      box-shadow: $whiteframe-shadow-5dp;
-      left: -3px;
-      right: -3px;
+      border-color: $c-primary;
+      border-top-width: 1px;
+      border-width: 2px;
     }
   }
 
   @include isCurrent {
     transform: scale($task-current-task-zoom);
     box-shadow: $task-active-shadow;
-    border-color: transparent;
+    border: 2px solid $c-accent !important;
+    border-bottom-color: $c-accent !important;
+    border-top-width: 2px !important;
     border-radius: $card-border-radius;
-    background: $c-primary-600;
+    border-radius: 12px !important;
   }
 
   :host:first-child > .inner-wrapper > & {
     border-top-left-radius: $card-border-radius;
     border-top-right-radius: $card-border-radius;
+  }
+
+  :host:first-child > .inner-wrapper > &,
+  :host + :host.isAdditionalInfoOpen > .inner-wrapper > &,
+  :host.isAdditionalInfoOpen + :host > .inner-wrapper > & {
+    border-top-width: 1px;
   }
 
   :host:last-child > .inner-wrapper > & {
@@ -143,27 +138,14 @@ $z-time-btn-svg-wrapper: 5555;
 
   :host-context(.isDarkTheme):last-child > .inner-wrapper > & {
     @include mq(xs, max) {
-      //border-bottom-color: $dark-theme-extra-border-color;
-      //border-bottom-color: $dark-theme-bg;
       border-bottom-color: rgb(55, 55, 55);
     }
   }
 
-  .inner-wrapper:not(.isCurrent) > .box {
-    box-shadow: none !important;
-    border-color: transparent;
-    background: transparent !important;
-  }
-
-  &.focus {
-    > .inner-wrapper:not(.isCurrent) > .box {
-      border-color: $c-accent !important;
-    }
-  }
-
-  :host-context(.isReducedTheme):focus > .inner-wrapper:not(.isCurrent) > & {
-    border-color: $c-accent !important;
-  }
+  //.inner-wrapper:not(.isCurrent) > .box {
+  //  border-color: transparent;
+  //  background: transparent !important;
+  //}
 
   :host-context(.isReducedTheme) > .inner-wrapper:not(.isCurrent) > & {
     box-shadow: none !important;
@@ -284,10 +266,6 @@ $z-time-btn-svg-wrapper: 5555;
     background-color: $light-theme-bg;
   }
 
-  .inner-wrapper.isCurrent > .first-line > .all-controls-wrapper > &:before {
-    border-left: 1px solid rgba(255, 255, 255, 0.9);
-  }
-
 
   // extra hitarea
   &:after {
@@ -347,9 +325,6 @@ $z-time-btn-svg-wrapper: 5555;
     // text-transform: uppercase;
   }
 
-  .isCurrent & {
-    //font-weight: bold;
-  }
 
   &:after {
     transition: $transition-leave;

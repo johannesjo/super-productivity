@@ -1,7 +1,4 @@
-<div [class.isAdditionalInfoOpen]="task._isAdditionalInfoOpen"
-     [class.isCurrent]="isCurrent"
-     [class.isDone]="task.isDone"
-     class="inner-wrapper">
+<div class="inner-wrapper">
 
   <div class="box bg-card"></div>
 
@@ -103,8 +100,7 @@
       </div>
 
       <div class="controls">
-        <div [class.bg-600i]="isCurrent"
-             class="hover-controls bg-card">
+        <div  class="hover-controls bg-card">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                   class="ico-btn start-task-btn"
@@ -348,7 +344,7 @@
   </div>
 
   <progress-bar *ngIf="isCurrent"
-                [cssClass]="'bg-100'"
+                [cssClass]="'bg-accent'"
                 [progress]="progress"></progress-bar>
 
   <task-additional-info (tabIndexChange)="onTabIndexChange($event)"
