@@ -1,20 +1,10 @@
-<div class="wrapper mat-elevation-z3">
-  <button [matMenuTriggerFor]="mainMenu"
-          [style.pointer-events]="isMainMenuDisabled ? 'none' : 'all'"
-          (menuOpened)="isMainMenuDisabled = true"
-          (menuClosed)="isMainMenuDisabled = false"
-          class="burger-trigger hide-xs"
-          mat-icon-button>
-    <mat-icon>menu</mat-icon>
-  </button>
-
+<div class="wrapper mat-elevation-z2">
   <button [matMenuTriggerFor]="mainMenu"
           [style.pointer-events]="isMainMenuDisabled ? 'none' : 'all'"
           (menuOpened)="isMainMenuDisabled = true"
           (menuClosed)="isMainMenuDisabled = false"
           class="burger-trigger show-xs-only"
-          color="lighter"
-          mat-mini-fab>
+          mat-icon-button>
     <mat-icon>menu</mat-icon>
   </button>
 
@@ -116,24 +106,21 @@
 
   <nav class="action-nav">
     <button (click)="showAddTaskBar()"
-            color="lighter"
-            mat-mini-fab
+            mat-icon-button
             [title]="T.MH.ADD_NEW_TASK|translate">
       <mat-icon>add</mat-icon>
     </button>
 
     <button (click)="bookmarkService.toggleBookmarks()"
             class="bookmark-btn"
-            color="lighter"
-            mat-mini-fab
+            mat-icon-button
             [class.isOpen]="bookmarkService.isShowBookmarks$|async"
             [title]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
       <mat-icon>bookmark</mat-icon>
     </button>
 
     <button (click)="toggleShowNotes()"
-            color="lighter"
-            mat-mini-fab
+            mat-icon-button
             [title]="T.MH.TOGGLE_SHOW_NOTES|translate">
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
                 class="note-ico">comment
@@ -144,24 +131,24 @@
       <button (click)="togglePlay()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
               class="play-btn"
-              mat-fab
+              mat-mini-fab
               [title]="T.MH.TOGGLE_TRACK_TIME|translate">
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
         <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
         <svg class="circle-svg"
              focusable="false"
-             height="52"
-             width="52">
+             height="40"
+             width="40">
           <circle #circleSvg
                   class=""
                   cx="50%"
                   cy="50%"
                   fill="none"
-                  r="13"
+                  r="10"
                   stroke="#000"
                   stroke-dasharray="81.6814089933"
                   stroke-dashoffset="-81.6814089933"
-                  stroke-width="26"></circle>
+                  stroke-width="20"></circle>
         </svg>
       </button>
 

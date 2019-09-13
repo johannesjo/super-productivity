@@ -43,7 +43,7 @@ h2 {
 
 .work-view-header {
   position: relative;
-  min-height: 56px;
+  min-height: $bar-height-small;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -74,7 +74,6 @@ h2 {
   justify-content: center;
   padding: 5px 0;
   user-select: none;
-  min-height: 4*$s;
 
   .item {
     margin: 0 1.5*$s;

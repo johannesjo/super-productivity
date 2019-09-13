@@ -31,6 +31,11 @@ $mobileHorizontalPadding: 8px;
   }
 }
 
+.mat-mini-fab  {
+  // should be the same as the the links
+  color: mat-css-contrast-color-primary();
+}
+
 a,
 button {
   cursor: pointer;
@@ -159,7 +164,7 @@ button {
   align-items: center;
   padding: 4px $mobileHorizontalPadding;
   flex-wrap: wrap;
-  min-height: 56px;
+  min-height: $bar-height;
 
   @include mq(xs) {
     padding: 4px 16px;
@@ -231,11 +236,6 @@ button {
     .mat-icon {
       position: relative;
       z-index: 2;
-    }
-
-    @include mq(xs, max) {
-      //width: 40px;
-      //height: 40px;
     }
   }
 

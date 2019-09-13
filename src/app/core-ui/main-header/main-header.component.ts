@@ -20,7 +20,7 @@ import {T} from '../../t.const';
 })
 export class MainHeaderComponent implements OnInit {
   T = T;
-  progressCircleRadius = 13;
+  progressCircleRadius = 10;
   circumference = this.progressCircleRadius * Math.PI * 2;
   isProjectMenuDisabled = false;
   isMainMenuDisabled = false;
