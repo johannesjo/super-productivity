@@ -24,12 +24,6 @@
   }
 }
 
-@mixin reducedTheme {
-  :host-context(.isReducedTheme) & {
-    @content;
-  }
-}
-
 @mixin standardThemeTextColor {
   @include darkTheme() {
     color: $dark-theme-text-color;

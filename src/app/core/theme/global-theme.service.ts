@@ -50,14 +50,6 @@ export class GlobalThemeService {
     this._materialCssVarsService.setWarnColor(theme.warn);
     this._materialCssVarsService.setDarkTheme(theme.isDarkTheme);
 
-    if (theme.isReducedTheme) {
-      this.document.body.classList.remove(BodyClass.isNoReducedTheme);
-      this.document.body.classList.add(BodyClass.isReducedTheme);
-    } else {
-      this.document.body.classList.remove(BodyClass.isReducedTheme);
-      this.document.body.classList.add(BodyClass.isNoReducedTheme);
-    }
-
     this._setChartTheme(isDarkTheme);
   }
 

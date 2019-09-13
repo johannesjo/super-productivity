@@ -55,8 +55,6 @@ const _updateThemeModel = (project: Project): Project => {
             : DEFAULT_PROJECT_THEME.primary,
           // tslint:disable-next-line
           isDarkTheme: project.isDarkTheme,
-          // tslint:disable-next-line
-          isReducedTheme: project.isReducedTheme,
         }
       };
 

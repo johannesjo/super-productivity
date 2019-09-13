@@ -680,11 +680,6 @@ progress-bar {
     opacity: 1;
   }
 
-  @include reducedTheme {
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
   mat-icon {
     transition: $transition-standard;
     margin-top: -8px;

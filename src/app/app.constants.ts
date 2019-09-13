@@ -60,8 +60,6 @@ export enum BodyClass {
   isNoTouchDevice = 'isNoTouchDevice',
   isLightTheme = 'isLightTheme',
   isDarkTheme = 'isDarkTheme',
-  isReducedTheme = 'isReducedTheme',
-  isNoReducedTheme = 'isNoReducedTheme',
 }
 
 export enum HelperClasses {
