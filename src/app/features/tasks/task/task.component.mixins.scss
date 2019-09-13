@@ -1,5 +1,5 @@
 @mixin isCurrent {
-  .inner-wrapper.isCurrent & {
+  :host.isCurrent & {
     @content;
   }
 }

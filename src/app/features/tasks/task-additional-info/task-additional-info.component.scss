@@ -8,10 +8,15 @@
 
 .wrapper {
   // 1px for the border
-  margin: 0 1px 0;
+  //margin: 0 1px 0;
   transition: $transition-standard;
 
-  border: 1px solid transparent;
+  @media (max-width: $layout-xs) {
+    margin: $s/2;
+    margin-bottom: $s;
+  }
+
+  border-top: 1px solid transparent;
 
   @include lightTheme {
     border-top-color: #ddd;
@@ -19,34 +24,6 @@
 
   @include darkTheme {
     border-top-color: rgba(255, 255, 255, 0.12);
-  }
-
-  @media (max-width: $layout-xs) {
-    margin: $s/2;
-    margin-bottom: $s;
-  }
-
-  :host-context(.isCurrent) & {
-    border-radius: $card-border-radius;
-    border: 1px solid #ddd;
-    box-shadow: $whiteframe-shadow-1dp;
-  }
-
-  // weird workaround for electron build
-  // @see https://github.com/angular/angular/issues/19199
-  .isDarkTheme .isCurrent :host-context &,
-  :host-context(.isDarkTheme .isCurrent) & {
-    border-color: #333333;
-  }
-
-  :host-context(.isReducedTheme) & {
-    border-radius: $card-border-radius;
-    border: 1px solid #ddd;
-    box-shadow: $whiteframe-shadow-1dp;
-  }
-
-  :host-context(.isReducedTheme.isDarkTheme) & {
-    border-color: #333333;
   }
 }
 
@@ -64,7 +41,7 @@
 
 :host::ng-deep .mat-tab-labels .mat-tab-label {
   flex-grow: 1;
-  height: 46px;
+  height: $bar-height-very-small;
   //text-transform: uppercase;
   //font-weight: normal;
 }
@@ -96,7 +73,7 @@
   border-radius: $card-border-radius;
   margin: $s $s;
   display: block;
-  box-shadow: $whiteframe-shadow-3dp;
+  box-shadow: $whiteframe-shadow-1dp;
 
   @include layerTextAndBgHighest();
 
@@ -121,7 +98,7 @@
   &.note-wrapper {
     margin: $s $s;
     display: block;
-    box-shadow: $whiteframe-shadow-4dp;
+    //box-shadow: $whiteframe-shadow-4dp;
     // required for inner paddings to be there
     overflow: hidden;
   }

@@ -10,19 +10,6 @@
   margin: 0;
   position: relative;
 
-  //.as-sortable-placeholder,
-  //.dndPlaceholder {
-  //  margin: 1px 2px 5px 1px;
-  //  display: block;
-  //  min-height: 22px;
-  //  background-color: #dddddd;
-  //  body.dark-theme & {
-  //    background-color: $dark-theme-bg-darker;
-  //  }
-  //}
-  &__backlog {
-  }
-
   ::ng-deep task-list & {
     margin: 2px 5px 0 5px;
 
@@ -31,72 +18,6 @@
     }
   }
 }
-
-// animations
-.is-animation-ready {
-  .first-line {
-    //.mat-icon-button,
-    mat-checkbox {
-      transition: 300ms;
-    }
-  }
-
-  .task {
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-
-    &.ng-enter {
-      //opacity: 0;
-      transform: scaleY(0);
-    }
-
-    &.ng-enter-active {
-      //opacity: 1;
-      transform: scale(1);
-    }
-
-    &.ng-leave {
-      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-      display: block;
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    &.ng-leave-active {
-      display: block;
-      opacity: 0;
-      transform: scale(0);
-    }
-  }
-
-  .additional-info {
-    // animation
-    &.ng-enter,
-    &.ng-leave {
-      transition: all 0.3s $ease-in-out-quint;
-    }
-
-    &.ng-enter {
-      opacity: 0;
-      max-height: 0;
-    }
-
-    &.ng-enter.ng-enter-active {
-      opacity: 1;
-      max-height: 400px;
-    }
-
-    &.ng-leave {
-      opacity: 1;
-      max-height: 200px;
-    }
-
-    &.ng-leave.ng-leave-active {
-      max-height: 0;
-      opacity: 1;
-    }
-  }
-}
-
 
 .done-task-box {
   text-align: center;
@@ -111,4 +32,10 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+
+// additional info has a margin so we need a border
+task.isAdditionalInfoOpen + task::ng-deep .box {
+  border-top-width: 1px;
 }

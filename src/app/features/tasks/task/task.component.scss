@@ -69,6 +69,7 @@ $z-time-btn-svg-wrapper: 5555;
     margin-top: $s*2;
     margin-bottom: $s*2;
     box-shadow: $whiteframe-shadow-1dp;
+    border-top-width: 1px;
   }
 }
 
@@ -82,6 +83,7 @@ $z-time-btn-svg-wrapper: 5555;
   transition-property: transform;
   //border-radius: $card-border-radius;
   border: 1px solid $light-theme-extra-border-color;
+  //border: 1px solid #cdcdcd;
   border-top-width: 0;
 
 
@@ -89,8 +91,12 @@ $z-time-btn-svg-wrapper: 5555;
     box-shadow: $whiteframe-shadow-8dp !important;
   }
 
+  @include lightTheme {
+    background: #fff;
+  }
+
   @include darkTheme {
-    border-color: $dark-theme-bg;
+    border-color: $dark-theme-bg-lightest;
   }
 
   @include isHostFocus('.inner-wrapper') {
@@ -108,10 +114,11 @@ $z-time-btn-svg-wrapper: 5555;
     transform: scale($task-current-task-zoom);
     box-shadow: $task-active-shadow;
     border: 2px solid $c-accent !important;
+    border-color: $c-accent !important;
     border-bottom-color: $c-accent !important;
-    border-top-width: 2px !important;
-    border-radius: $card-border-radius;
     border-radius: 12px !important;
+    bottom: -2px;
+    top: -2px;
   }
 
   :host:first-child > .inner-wrapper > & {
@@ -119,16 +126,23 @@ $z-time-btn-svg-wrapper: 5555;
     border-top-right-radius: $card-border-radius;
   }
 
-  :host:first-child > .inner-wrapper > &,
-  :host + :host.isAdditionalInfoOpen > .inner-wrapper > &,
-  :host.isAdditionalInfoOpen + :host > .inner-wrapper > & {
-    border-top-width: 1px;
-  }
-
   :host:last-child > .inner-wrapper > & {
     border-bottom-left-radius: $card-border-radius;
     border-bottom-right-radius: $card-border-radius;
   }
+
+  // NOTE: there are also styles in the task list component, because of host not being usable
+  // with the adjacent child selector
+  :host:first-child > .inner-wrapper > &,
+  :host.isAdditionalInfoOpen > .inner-wrapper > & {
+    border-top-width: 1px;
+  }
+
+  // because the shadow gets to intense otherwise
+  :host.isAdditionalInfoOpen > .inner-wrapper > & {
+    border-bottom-width: 0;
+  }
+
 
   :host-context(.isLightTheme):last-child > .inner-wrapper > & {
     @include mq(xs, max) {
@@ -146,12 +160,6 @@ $z-time-btn-svg-wrapper: 5555;
   //  border-color: transparent;
   //  background: transparent !important;
   //}
-
-  :host-context(.isReducedTheme) > .inner-wrapper:not(.isCurrent) > & {
-    box-shadow: none !important;
-    border-color: transparent;
-    background: transparent !important;
-  }
 }
 
 
@@ -257,15 +265,6 @@ $z-time-btn-svg-wrapper: 5555;
   .first-line:hover & {
     display: flex;
   }
-
-  :host-context(.isReducedTheme.isDarkTheme) & {
-    background-color: $dark-theme-bg;
-  }
-
-  :host-context(.isReducedTheme.isLightTheme) & {
-    background-color: $light-theme-bg;
-  }
-
 
   // extra hitarea
   &:after {

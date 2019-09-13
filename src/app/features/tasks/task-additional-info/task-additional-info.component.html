@@ -1,7 +1,7 @@
-<div class="wrapper bg-card">
+<div class="wrapper">
   <mat-tab-group (selectedIndexChange)="indexChange($event)"
                  [selectedIndex]="selectedIndex"
-                 color="accent"
+                 color="primary"
                  dynamicHeight>
     <mat-tab *ngIf="taskData.issueData">
       <ng-template mat-tab-label>
