@@ -80,12 +80,9 @@ $z-time-btn-svg-wrapper: 5555;
   bottom: 0;
   top: 0;
   transition: $transition-standard;
-  transition-property: transform;
-  //border-radius: $card-border-radius;
+  transition-property: transform, box-shadow;
   border: 1px solid $light-theme-extra-border-color;
-  //border: 1px solid #cdcdcd;
   border-top-width: 0;
-
 
   :host.gu-mirror & {
     box-shadow: $whiteframe-shadow-8dp !important;
@@ -105,8 +102,7 @@ $z-time-btn-svg-wrapper: 5555;
     @include mq(xs) {
       // NOTE: somehow ng build messes up, if we don't include it like that
       border-color: $c-primary;
-      border-top-width: 1px;
-      border-width: 2px;
+      border-width: 1px;
     }
   }
 
@@ -155,11 +151,6 @@ $z-time-btn-svg-wrapper: 5555;
       border-bottom-color: rgb(55, 55, 55);
     }
   }
-
-  //.inner-wrapper:not(.isCurrent) > .box {
-  //  border-color: transparent;
-  //  background: transparent !important;
-  //}
 }
 
 
