@@ -771,7 +771,7 @@ $min-badge-size: $s*2.25;
 
 
   :host:focus > .inner-wrapper > .first-line &,
-  :host:hover > .inner-wrapper > .first-line & {
+  .first-line:hover & {
     display: none;
   }
 }
