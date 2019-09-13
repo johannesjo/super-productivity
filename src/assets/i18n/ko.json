@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "닫기",
+      "COPY_TO_CLIPBOARD": "클립 보드에 복사",
       "DATE": "날짜",
       "ESTIMATE": "견적",
       "FIELDS_TO_DISPLAY": "표시 할 필드",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "파일에 저장",
       "SEPARATE_FIELDS_BY": "필드 구분",
       "SHOW_AS_TEXT": "텍스트로 표시",
+      "SNACK_TO_CLIPPBOARD": "클립 보드에 복사 됨",
       "TIME_AS_MILLISECONDS": "시간 (밀리 초)",
       "TIME_ESTIMATE": "예상 시간",
       "TIME_SPENT": "지출 된 시간",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> 작업을 현재 작업 목록으로 이동 하시겠습니까?",
       "D_EXPORT_TITLE": "작업 로그 내보내기 {{start}}-{{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "클립 보드에 복사",
         "DONT_ROUND": "돌지 마라.",
         "GROUP_BY": "그룹화 기준",
         "O": {

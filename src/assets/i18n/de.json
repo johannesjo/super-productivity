@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Schließen",
+      "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
       "DATE": "Datum",
       "ESTIMATE": "Schätzen",
       "FIELDS_TO_DISPLAY": "Felder, die angezeigt werden sollen",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "Speichern unter",
       "SEPARATE_FIELDS_BY": "Trennen Sie die Felder durch",
       "SHOW_AS_TEXT": "Als Text anzeigen",
+      "SNACK_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
       "TIME_AS_MILLISECONDS": "Zeit in Millisekunden",
       "TIME_ESTIMATE": "Zeitschätzung",
       "TIME_SPENT": "Zeitaufwand",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?",
       "D_EXPORT_TITLE": "Worklog-Export {{start}}-{{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
         "DONT_ROUND": "runde nicht",
         "GROUP_BY": "Gruppiere nach",
         "O": {

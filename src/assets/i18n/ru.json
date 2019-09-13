@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "близко",
+      "COPY_TO_CLIPBOARD": "Скопировать в буфер обмена",
       "DATE": "Дата",
       "ESTIMATE": "Оценить",
       "FIELDS_TO_DISPLAY": "Поля для отображения",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "Сохранить в файл",
       "SEPARATE_FIELDS_BY": "Разделяйте поля",
       "SHOW_AS_TEXT": "Показать как текст",
+      "SNACK_TO_CLIPPBOARD": "Скопировано в буфер обмена",
       "TIME_AS_MILLISECONDS": "Время в миллисекундах",
       "TIME_ESTIMATE": "Оценка времени",
       "TIME_SPENT": "Время потрачено",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": "Вы уверены, что хотите переместить задачу <strong>\"{{title}}\"</strong> в свой текущий список задач?",
       "D_EXPORT_TITLE": "Экспорт журнала работ {{start}}-{{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "Скопировать в буфер обмена",
         "DONT_ROUND": "не округлять",
         "GROUP_BY": "Группа по",
         "O": {

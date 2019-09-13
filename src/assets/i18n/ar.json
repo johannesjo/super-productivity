@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "قريب",
+      "COPY_TO_CLIPBOARD": "نسخ إلى الحافظة",
       "DATE": "تاريخ",
       "ESTIMATE": "تقدير",
       "FIELDS_TO_DISPLAY": "الحقول لعرضها",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "احفظ الملف",
       "SEPARATE_FIELDS_BY": "افصل بين الحقول",
       "SHOW_AS_TEXT": "تظهر كنص",
+      "SNACK_TO_CLIPPBOARD": "نسخ إلى الحافظة",
       "TIME_AS_MILLISECONDS": "الوقت كما ميلي ثانية",
       "TIME_ESTIMATE": "تقدير الوقت",
       "TIME_SPENT": "قضاء الوقت",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": "هل أنت متأكد من رغبتك في نقل المهمة <strong>\"{{title}}\"</strong> إلى قائمة مهام اليوم؟",
       "D_EXPORT_TITLE": "تصدير  {{start}}-{{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "نسخ إلى الحافظة",
         "DONT_ROUND": "لا تدور",
         "GROUP_BY": "مجموعة من",
         "O": {

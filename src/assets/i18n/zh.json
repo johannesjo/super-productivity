@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "关",
+      "COPY_TO_CLIPBOARD": "复制到剪贴板",
       "DATE": "日期",
       "ESTIMATE": "估计",
       "FIELDS_TO_DISPLAY": "要显示的字段",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "保存到文件",
       "SEPARATE_FIELDS_BY": "单独的字段",
       "SHOW_AS_TEXT": "显示为文字",
+      "SNACK_TO_CLIPPBOARD": "复制到剪贴板",
       "TIME_AS_MILLISECONDS": "时间为毫秒",
       "TIME_ESTIMATE": "时间估计",
       "TIME_SPENT": "所花费的时间",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？",
       "D_EXPORT_TITLE": "工作日志导出 {{start}} - {{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "复制到剪贴板",
         "DONT_ROUND": "不圆",
         "GROUP_BY": "通过...分组",
         "O": {

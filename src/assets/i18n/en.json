@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Close",
+      "COPY_TO_CLIPBOARD": "Copy to clipboard",
       "DATE": "Date",
       "ESTIMATE": "Estimate",
       "FIELDS_TO_DISPLAY": "Fields to display",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "Save to file",
       "SEPARATE_FIELDS_BY": "Separate fields by",
       "SHOW_AS_TEXT": "Show as text",
+      "SNACK_TO_CLIPPBOARD": "Copied to clipboard",
       "TIME_AS_MILLISECONDS": "Time as milliseconds",
       "TIME_ESTIMATE": "Time Estimate",
       "TIME_SPENT": "Time Spent",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
       "D_EXPORT_TITLE": "Worklog Export {{start}}–{{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "Copy to clipboard",
         "DONT_ROUND": "don't round",
         "GROUP_BY": "Group by",
         "O": {

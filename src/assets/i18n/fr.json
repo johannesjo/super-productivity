@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Fermer",
+      "COPY_TO_CLIPBOARD": "Copier dans le presse-papier",
       "DATE": "Rendez-vous amoureux",
       "ESTIMATE": "Estimation",
       "FIELDS_TO_DISPLAY": "Champs à afficher",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "Enregistrer dans le fichier",
       "SEPARATE_FIELDS_BY": "Séparer les champs par",
       "SHOW_AS_TEXT": "Afficher sous forme de texte",
+      "SNACK_TO_CLIPPBOARD": "Copié dans le presse-papier",
       "TIME_AS_MILLISECONDS": "Temps en millisecondes",
       "TIME_ESTIMATE": "Estimation du temps",
       "TIME_SPENT": "Temps passé",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": "Êtes-vous sûr de vouloir déplacer la tâche <strong>\"{{title}}\"</strong> dans votre liste de tâches actuelle?",
       "D_EXPORT_TITLE": "Exportation du journal de travail {{start}}-{{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "Copier dans le presse-papier",
         "DONT_ROUND": "ne pas arrondir",
         "GROUP_BY": "Par groupe",
         "O": {

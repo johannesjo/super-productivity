@@ -448,7 +448,7 @@
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "No se utilizará si el sistema admite el modo oscuro global.",
-        "HELP": "Configuración del tema para su proyecto.",
+        "HELP": "Configuraciones muy básicas para tu proyecto.",
         "L_COLOR_ACCENT": "Acentuar el color",
         "L_COLOR_PRIMARY": "Color primario",
         "L_COLOR_WARN": "Color de advertencia / error",
@@ -457,7 +457,7 @@
         "L_HUE_WARN": "Umbral para texto oscuro sobre fondo de color de advertencia",
         "L_IS_AUTO_CONTRAST": "Configuración automática de colores de texto para una mejor legibilidad",
         "L_IS_DARK_THEME": "Usa el tema oscuro",
-        "L_IS_REDUCED_THEME": "Usar IU reducida (sin cuadros alrededor de las tareas)",
+        "L_IS_REDUCED_THEME": "Usar interfaz de usuario reducida (sin cuadros alrededor de las tareas)",
         "L_THEME_COLOR": "Color del tema",
         "L_TITLE": "Título",
         "TITLE": "Tema"
@@ -478,6 +478,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Cerrar",
+      "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
       "DATE": "Fecha",
       "ESTIMATE": "ESTIMAR",
       "FIELDS_TO_DISPLAY": "Campos para mostrar",
@@ -495,6 +496,7 @@
       "SAVE_TO_FILE": "Guardar en archivo",
       "SEPARATE_FIELDS_BY": "Campos separados por",
       "SHOW_AS_TEXT": "Mostrar como texto",
+      "SNACK_TO_CLIPPBOARD": "Copiado al portapapeles",
       "TIME_AS_MILLISECONDS": "El tiempo como milisegundos.",
       "TIME_ESTIMATE": "Tiempo estimado",
       "TIME_SPENT": "Tiempo usado",
@@ -651,6 +653,7 @@
       "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?",
       "D_EXPORT_TITLE": "Exportar registro de trabajo {{start}}-{{end}}",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
         "DONT_ROUND": "no redondear",
         "GROUP_BY": "Agrupar por",
         "O": {
