@@ -10,6 +10,10 @@
        [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning"
        class="first-line">
 
+    <mat-icon *ngIf="isCurrent"
+              class="play-icon-indicator"
+              >play_arrow</mat-icon>
+
     <ng-container *ngIf="isTouch">
       <div #blockLeft
            class="block-left bg-400">
@@ -100,7 +104,7 @@
       </div>
 
       <div class="controls">
-        <div  class="hover-controls bg-card">
+        <div class="hover-controls bg-card">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                   class="ico-btn start-task-btn"

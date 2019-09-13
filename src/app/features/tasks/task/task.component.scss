@@ -758,3 +758,20 @@ $min-badge-size: $s*2.25;
   border-radius: 50%;
   text-align: center;
 }
+
+.play-icon-indicator {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $c-accent;
+
+  height: 20px;
+  width: 20px;
+
+
+  :host:focus > .inner-wrapper > .first-line &,
+  :host:hover > .inner-wrapper > .first-line & {
+    display: none;
+  }
+}
