@@ -1,3 +1,19 @@
+## [2.11.1](https://github.com/johannesjo/super-productivity/compare/v2.11.0...v2.11.1) (2019-09-13)
+
+
+### Bug Fixes
+
+* **worklog:** select crashing app ([8499297](https://github.com/johannesjo/super-productivity/commit/8499297))
+* **worklog:** styling for longer table headings ([9cbac27](https://github.com/johannesjo/super-productivity/commit/9cbac27))
+
+
+### Features
+
+* **worklog:** improve modal title ([f5d58cc](https://github.com/johannesjo/super-productivity/commit/f5d58cc))
+* **worklog:** improve worklog export table ([c88ae8b](https://github.com/johannesjo/super-productivity/commit/c88ae8b))
+
+
+
 # [2.11.0](https://github.com/johannesjo/super-productivity/compare/v2.10.12...v2.11.0) (2019-09-13)
 
 
