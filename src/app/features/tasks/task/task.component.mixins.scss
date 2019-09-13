@@ -39,7 +39,6 @@
   opacity: $task-icon-default-opacity;
   transition: transform $transition-fast;
 
-  :host:focus &,
   .isCurrent &,
   &:hover,
   &:focus {
