@@ -11,6 +11,7 @@ import {map, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
 import {T} from '../../t.const';
+import {ImprovementService} from '../../features/metric/improvement/improvement.service';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -49,6 +50,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     public taskService: TaskService,
     public takeABreakService: TakeABreakService,
     public planningModeService: PlanningModeService,
+    public improvementService: ImprovementService,
     private _layoutService: LayoutService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,

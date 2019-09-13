@@ -55,7 +55,7 @@
       </div>
     </header>
 
-    <improvement-banner></improvement-banner>
+    <improvement-banner *ngIf="(improvementService.hasLastTrackedImprovements$|async)"></improvement-banner>
 
     <div class="task-list-wrapper">
       <div *ngIf="!(planningModeService.isPlanningMode$|async) && !(taskService.isHasTasksToWorkOn$|async)"

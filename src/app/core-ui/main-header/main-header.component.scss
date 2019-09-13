@@ -6,8 +6,11 @@ $navBp2Lines: 680px;
 $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 
-.wrapper{
+.wrapper {
   @include mat-css-color-and-contrast(500);
+  //background: linear-gradient(50deg,#00288e 0,#0939a5 30%,#4385f4 90%,#aaceee 100%);
+  //background: linear-gradient(50deg, #00288e 0, #0939a5 30%, #4385f4 90%, #aaceee 100%);
+  //background: linear-gradient(50deg, $c-primary-700 0, $c-primary-400 30%, $c-primary-600 90%, $c-primary-700 100%);
 }
 
 :host-context(.isMac.isElectron) {
@@ -31,7 +34,7 @@ $mobileHorizontalPadding: 8px;
   }
 }
 
-.mat-mini-fab  {
+.mat-mini-fab {
   // should be the same as the the links
   color: mat-css-contrast-color-primary();
 }

@@ -15,6 +15,15 @@ mat-drawer-container,
 mat-sidenav-container {
   //height: calc(100% - #{$main-header-height});
   height: 100%;
+
+  @include lightTheme {
+    background: $light-theme-bg;
+    //background: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+    //background: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1));
+  }
+  //@include darkTheme {
+  //  background: radial-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+  //}
 }
 
 mat-drawer::ng-deep .mat-drawer-inner-container {

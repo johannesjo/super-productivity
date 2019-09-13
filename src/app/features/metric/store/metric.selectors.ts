@@ -35,6 +35,11 @@ export const selectLastTrackedImprovementsTomorrow = createSelector(
   }
 );
 
+export const selectHasLastTrackedImprovements = createSelector(
+  selectLastTrackedImprovementsTomorrow,
+  (improvements): boolean => !!improvements && improvements.length > 0
+);
+
 export const selectAllUsedImprovementIds = createSelector(
   selectAllMetrics,
   (metrics: Metric[]): string[] => {

@@ -14,7 +14,7 @@ import {Observable} from 'rxjs';
 import {Improvement, ImprovementState} from './improvement.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
+import {selectHasLastTrackedImprovements, selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +22,7 @@ import {selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
 export class ImprovementService {
   improvements$: Observable<Improvement[]> = this._store$.pipe(select(selectAllImprovements));
   lastTrackedImprovementsTomorrow$: Observable<Improvement[]> = this._store$.pipe(select(selectLastTrackedImprovementsTomorrow));
+  hasLastTrackedImprovements$: Observable<boolean> = this._store$.pipe(select(selectHasLastTrackedImprovements));
 
   constructor(
     private _store$: Store<ImprovementState>,

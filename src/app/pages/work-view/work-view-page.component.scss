@@ -34,6 +34,13 @@ h2 {
 .work-view-header {
   padding: 0.5*$s;
 
+  //@include lightTheme {
+  //  border-bottom: 1px solid $light-theme-extra-border-color;
+  //  background: $light-theme-bg-darker;
+  //}
+  //@include darkTheme {
+  //  border-bottom: 1px solid $dark-theme-extra-border-color;
+  //}
   @include mat-css-color-and-contrast(700);
 
   @include mq(xs) {
