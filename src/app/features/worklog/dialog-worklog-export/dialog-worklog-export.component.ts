@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 import {WorklogExportSettingsCopy} from '../worklog.model';
 import {T} from '../../../t.const';
-import {getWorklogStr} from '../../../util/get-work-log-str';
+import * as moment from 'moment';
 
 @Component({
   selector: 'dialog-worklog-export',
@@ -21,8 +21,10 @@ export class DialogWorklogExportComponent {
     private _matDialogRef: MatDialogRef<DialogWorklogExportComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
-    this.strStart = getWorklogStr(data.rangeStart);
-    this.strEnd = getWorklogStr(data.rangeEnd);
+    // this.strStart = getWorklogStr(data.rangeStart);
+    // this.strEnd = getWorklogStr(data.rangeEnd);
+    this.strStart = moment(data.rangeStart).format('l');
+    this.strEnd = moment(data.rangeEnd).format('l');
   }
 
   close() {
