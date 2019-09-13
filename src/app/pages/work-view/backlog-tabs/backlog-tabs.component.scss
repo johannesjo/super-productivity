@@ -46,6 +46,7 @@
 
         .mat-tab-label {
           flex-grow: 1;
+          height: $bar-height-very-small;
           @include mat-css-color-and-contrast(600);
 
 

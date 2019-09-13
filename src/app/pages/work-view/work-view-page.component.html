@@ -40,8 +40,8 @@
 
       <div *ngIf="(planningModeService.isPlanningMode$|async)"
            class="planning-mode-header">
-        <h2 *ngIf="!(taskService.undoneTasks$|async)?.length"
-            class="planning-mode-header mat-h2">{{T.WW.ADD_SOME_TASKS|translate}}</h2>
+        <h3 *ngIf="!(taskService.undoneTasks$|async)?.length"
+            class="planning-mode-header mat-h3">{{T.WW.ADD_SOME_TASKS|translate}}</h3>
         <div *ngIf="(taskService.undoneTasks$|async)?.length"
              class="status-bar">
           <div class="item">
