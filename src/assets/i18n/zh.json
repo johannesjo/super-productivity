@@ -232,10 +232,6 @@
         "TIME_SPENT": "所花费的时间",
         "TITLE": "Jira：提交Worklog"
       },
-      "DIALOG_WORKdLOG": {
-        "TITLE": ""
-      },
-      "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"{{url}}\"> 下载Chrome扩展程序</a> ，以便与Jira Api进行通信。请注意，这不适用于移动设备。",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Github添加到待办事项",
         "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
@@ -447,18 +443,24 @@
       "D_CREATE": {
         "CREATE": "创建项目",
         "EDIT": "编辑项目",
-        "ISSUE_PROVIDER_CFGS": "发行提供商配置（可选）",
         "SETUP_GIT": "设置Github集成",
         "SETUP_JIRA": "设置Jira集成"
       },
-      "FORM": {
+      "FORM_THEME": {
         "D_IS_DARK_THEME": "如果系统支持全局暗模式，则不会使用。",
-        "HELP": "您项目的非常基本的设置。",
+        "HELP": "项目的主题设置。",
+        "L_COLOR_ACCENT": "强调色",
+        "L_COLOR_PRIMARY": "原色",
+        "L_COLOR_WARN": "警告/错误颜色",
+        "L_HUE_ACCENT": "强调颜色背景上的暗文本的阈值",
+        "L_HUE_PRIMARY": "原色背景上的暗文本阈值",
+        "L_HUE_WARN": "警告颜色背景上的黑暗文本的阈值",
+        "L_IS_AUTO_CONTRAST": "自动设置文本颜色以获得最佳可读性",
         "L_IS_DARK_THEME": "使用黑暗主题",
         "L_IS_REDUCED_THEME": "使用缩减的UI（任务周围没有框）",
         "L_THEME_COLOR": "主题色",
         "L_TITLE": "标题",
-        "TITLE": "项目设置和主题"
+        "TITLE": "主题"
       },
       "S": {
         "ARCHIVED": "存档项目",
@@ -476,7 +478,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "关",
-      "COPY_TO_CLIPBOARD": "复制到剪贴板",
       "DATE": "日期",
       "ESTIMATE": "估计",
       "FIELDS_TO_DISPLAY": "要显示的字段",
@@ -494,7 +495,6 @@
       "SAVE_TO_FILE": "保存到文件",
       "SEPARATE_FIELDS_BY": "单独的字段",
       "SHOW_AS_TEXT": "显示为文字",
-      "SNACK_TO_CLIPPBOARD": "复制到剪贴板",
       "TIME_AS_MILLISECONDS": "时间为毫秒",
       "TIME_ESTIMATE": "时间估计",
       "TIME_SPENT": "所花费的时间",
@@ -591,7 +591,7 @@
       "SELECT_OR_CREATE": "选择或创建任务",
       "SUMMARY_TABLE": {
         "ESTIMATE": "估计",
-        "SPENT_TODAY": "",
+        "SPENT_TODAY": "花了今天",
         "SPENT_TOTAL": "花费总计",
         "TASK": "任务",
         "TOGGLE_DONE": "un- /标记为已完成"
@@ -651,7 +651,6 @@
       "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？",
       "D_EXPORT_TITLE": "工作日志导出 {{start}} - {{end}}",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "复制到剪贴板",
         "DONT_ROUND": "不圆",
         "GROUP_BY": "通过...分组",
         "O": {
@@ -793,6 +792,7 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "禁用有关遗忘完成日的提醒",
+      "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "超出时间估算时通知",
       "TITLE": "其他设置"

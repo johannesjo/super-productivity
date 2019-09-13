@@ -232,10 +232,6 @@
         "TIME_SPENT": "Temps passé",
         "TITLE": "Jira: Soumettre le journal de travail"
       },
-      "DIALOG_WORKdLOG": {
-        "TITLE": ""
-      },
-      "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"{{url}}\"> télécharger l'extension chromée</a> afin de permettre la communication avec Jira Api. Notez que cela ne fonctionne pas pour mobile.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les problèmes non résolus de Github à l'arriéré",
         "IS_AUTO_POLL": "Interroger automatiquement les problèmes git importés pour connaître les modifications",
@@ -447,18 +443,24 @@
       "D_CREATE": {
         "CREATE": "Créer un projet",
         "EDIT": "Editer le projet",
-        "ISSUE_PROVIDER_CFGS": "Problèmes de configuration du fournisseur (facultatif)",
         "SETUP_GIT": "Configuration de l'intégration de Github",
         "SETUP_JIRA": "Configuration de l'intégration Jira"
       },
-      "FORM": {
+      "FORM_THEME": {
         "D_IS_DARK_THEME": "Ne sera pas utilisé si le système prend en charge le mode sombre global.",
-        "HELP": "Paramètres très basiques pour votre projet.",
+        "HELP": "Paramètres de thème pour votre projet.",
+        "L_COLOR_ACCENT": "Couleur d'accent",
+        "L_COLOR_PRIMARY": "Couleur primaire",
+        "L_COLOR_WARN": "Couleur d'avertissement / erreur",
+        "L_HUE_ACCENT": "Seuil pour le texte sombre sur l'arrière-plan de couleur d'accent",
+        "L_HUE_PRIMARY": "Seuil pour texte sombre sur fond de couleur primaire",
+        "L_HUE_WARN": "Seuil du texte sombre sur l'arrière-plan de la couleur d'avertissement",
+        "L_IS_AUTO_CONTRAST": "Réglage automatique des couleurs du texte pour une meilleure lisibilité",
         "L_IS_DARK_THEME": "Utiliser le thème sombre",
         "L_IS_REDUCED_THEME": "Utiliser une interface utilisateur réduite (aucune case autour des tâches)",
         "L_THEME_COLOR": "Couleur du thème",
         "L_TITLE": "Titre",
-        "TITLE": "Paramètres du projet et thème"
+        "TITLE": "Thème"
       },
       "S": {
         "ARCHIVED": "Projet archivé",
@@ -476,7 +478,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Fermer",
-      "COPY_TO_CLIPBOARD": "Copier dans le presse-papier",
       "DATE": "Rendez-vous amoureux",
       "ESTIMATE": "Estimation",
       "FIELDS_TO_DISPLAY": "Champs à afficher",
@@ -494,7 +495,6 @@
       "SAVE_TO_FILE": "Enregistrer dans le fichier",
       "SEPARATE_FIELDS_BY": "Séparer les champs par",
       "SHOW_AS_TEXT": "Afficher sous forme de texte",
-      "SNACK_TO_CLIPPBOARD": "Copié dans le presse-papier",
       "TIME_AS_MILLISECONDS": "Temps en millisecondes",
       "TIME_ESTIMATE": "Estimation du temps",
       "TIME_SPENT": "Temps passé",
@@ -591,7 +591,7 @@
       "SELECT_OR_CREATE": "Sélectionner ou créer une tâche",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Estimation",
-        "SPENT_TODAY": "",
+        "SPENT_TODAY": "Dépensé aujourd'hui",
         "SPENT_TOTAL": "Total dépensé",
         "TASK": "Tâche",
         "TOGGLE_DONE": "un- / marquer comme fait"
@@ -651,7 +651,6 @@
       "D_CONFIRM_RESTORE": "Êtes-vous sûr de vouloir déplacer la tâche <strong>\"{{title}}\"</strong> dans votre liste de tâches actuelle?",
       "D_EXPORT_TITLE": "Exportation du journal de travail {{start}}-{{end}}",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "Copier dans le presse-papier",
         "DONT_ROUND": "ne pas arrondir",
         "GROUP_BY": "Par groupe",
         "O": {
@@ -793,6 +792,7 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marquer la tâche parent comme terminée lorsque toutes les sous-tâches sont terminées",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmez avant de quitter l'application",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Désactiver le rappel du jour d'arrivée oublié",
+      "IS_HIDE_EVALUATION_SHEET": "Masquer la fiche d'évaluation dans le résumé quotidien",
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé",
       "TITLE": "Réglages divers"

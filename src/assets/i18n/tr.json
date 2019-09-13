@@ -142,7 +142,7 @@
         "ALWAYS_ROUND_UP": "Daima çalışma süresi doluyor",
         "AUTO_LOGIN": "Otomatik oturum açma ve bir dahaki sefere veri yükleme",
         "HELP_ADDITIONAL": "Buna ek olarak, bu değerlerin hesaplamasını değiştirmek için kullanabileceğiniz çeşitli seçenekler vardır.",
-        "HELP_INFO": "",
+        "HELP_INFO": "<p>Bu görünüm, çalışma sürenizi bir google sayfasına aktarmanızı sağlar. Google Elektronik Tablolarınıza Süper Üretkenlik tarafından erişilmesine izin verebilirsiniz. Ayrıca, elektronik tablonun kimliğini bulmak için giriş alanında (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho) kimliğini belirtin, ilk satırda başlıkları olan bir elektronik tablo oluşturmanız mı gerekiyor?</a>).</p><p>Elektronik tablonuzu başarıyla yükledikten sonra tablo 4 satırla birlikte gösterilecektir. İlk satır, elektronik tablonun kendisinde belirttiğiniz başlığı gösterir.</p><p>İkinci satır bilgilendirme amaçlıdır ve elektronik tablodaki son satırı gösterir.</p><p>Dördüncü satır, elektronik tabloya kaydet'e doğrudan girebileceğiniz değerlerin listesidir.</p><p>Üçüncü satır, sonraki satır için bazı değerleri otomatik olarak tanımlamak için vardır. Hücrelere girebileceğiniz birkaç özel dize vardır:</p>",
         "HELP_POSSIBLE_PROPERTIES": "",
         "LOGIN": "Google’a giriş yapın",
         "LOGOUT": "Çıkış Yap",
@@ -232,10 +232,6 @@
         "TIME_SPENT": "Harcanan zaman",
         "TITLE": "Jira: Worklog Gönder"
       },
-      "DIALOG_WORKdLOG": {
-        "TITLE": ""
-      },
-      "EXTENSION_INFO": "Jira Api ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"{{url}}\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Github'dan backlog'a ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
@@ -269,7 +265,7 @@
           "P1_3": "Ayrıca, otomatik olarak (örneğin planlama görünümünü her ziyaret ettiğinizde), özel bir JQL sorgusu tarafından belirtilen tüm yeni görevleri biriktirmek için eklemek üzere yapılandırabilirsiniz.",
           "P1_4": "Diğer bir seçenek ise \"Geçerli biletin mevcut kullanıcıya atanmış olup olmadığını kontrol et\" dir. Etkinleştirilirse ve başlıyorsanız, şu anda Jira'daki o bilete atanıp atanmadığınızı, kendinize bileti atamayı seçebileceğiniz bir İletişim Kutusu görünmüyorsa bir kontrol yapılır.",
           "P2_1": "Bir çalışma günlüğünü ne zaman ve nasıl göndermek istediğinizi belirlemek için çeşitli seçenekler vardır. <em>'Görev tamamlandığında Jira'ya bir çalışma grubu eklemek için çalışma iletişim kutusunu aç' seçeneğinin etkinleştirilmesi '</em> , bir Jira Görevini her şekilde yaptığınızda bir çalışma grubu eklemek için bir iletişim kutusu açar. Bu nedenle, bugüne kadar izlenen her şeyin üstüne çalışma günlükleri ekleneceğini unutmayın. Bu nedenle, bir görevi ikinci kez yapılan şekilde işaretlerseniz, görev için çalışılan tam zamanı tekrar göndermek istemeyebilirsiniz.",
-          "P2_2": "",
+          "P2_2": "<em>'Alt görev indiğinde iş günlüğü iletişim kutusunu açın ve alt görevlerin kendileri olan görevler için değil'</em> bir Jira sorununun alt görevini olduğu gibi işaretlediğinizde her seferinde bir iş günlüğü iletişim kutusu açar. Alt görevler aracılığıyla zamanınızı zaten izlediğiniz için, Jira görevinin kendisini bitmiş olarak işaretledikten sonra hiçbir iletişim kutusu açılmaz.",
           "P2_3": "<em>'Güncellemeleri iletişim kutusuna otomatik olarak çalışma günlüğüne gönder'</em> ne diyorsa onu yapar. Birkaç kez yapılan bir görevi işaretlemek, tüm çalışma süresinin iki kez izlenmesine yol açtığından, bu önerilmez.",
           "P3_1": "Burada varsayılan geçişlerinizi yeniden yapılandırabilirsiniz. Jira, genellikle Jira çevik panonuzdaki farklı sütunlar olarak harekete geçen geniş bir geçiş konfigürasyonuna olanak tanır; görevlerinizi nerede ve ne zaman geçireceğinizi ve bunu manuel olarak ayarlamanız gerektiğine dair varsayımlarda bulunmayız."
         }
@@ -447,18 +443,24 @@
       "D_CREATE": {
         "CREATE": "Proje Yarat",
         "EDIT": "Projeyi Düzenle",
-        "ISSUE_PROVIDER_CFGS": "Sorun Sağlayıcı Yapılandırmaları (isteğe bağlı)",
         "SETUP_GIT": "Github Entegrasyonunu Ayarla",
         "SETUP_JIRA": "Jira Entegrasyonunu Kur"
       },
-      "FORM": {
+      "FORM_THEME": {
         "D_IS_DARK_THEME": "Sistem global karanlık modunu destekliyorsa kullanılmaz.",
-        "HELP": "Projeniz için çok temel ayarlar.",
+        "HELP": "Projeniz için tema ayarları.",
+        "L_COLOR_ACCENT": "Vurgu Rengi",
+        "L_COLOR_PRIMARY": "Ana renk",
+        "L_COLOR_WARN": "Uyar / Hata Rengi",
+        "L_HUE_ACCENT": "Vurgulu renk arka plan üzerinde koyu metin için eşik",
+        "L_HUE_PRIMARY": "Ana renk arka planında koyu metin eşiği",
+        "L_HUE_WARN": "Uyar renk arka plan üzerinde koyu metin için eşik",
+        "L_IS_AUTO_CONTRAST": "En iyi okunabilirlik için otomatik metin renkleri ayarlama",
         "L_IS_DARK_THEME": "Karanlık Temayı Kullan",
         "L_IS_REDUCED_THEME": "Azaltılmış kullanıcı arayüzü kullanın (görevlerin etrafında kutu yok)",
         "L_THEME_COLOR": "Tema Rengi",
         "L_TITLE": "Başlık",
-        "TITLE": "Proje Ayarları ve Tema"
+        "TITLE": "tema"
       },
       "S": {
         "ARCHIVED": "Arşivlenmiş Proje",
@@ -476,7 +478,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Kapat",
-      "COPY_TO_CLIPBOARD": "Panoya kopyala",
       "DATE": "tarih",
       "ESTIMATE": "Tahmin",
       "FIELDS_TO_DISPLAY": "Görüntülenecek alanlar",
@@ -494,7 +495,6 @@
       "SAVE_TO_FILE": "Dosyaya kaydet",
       "SEPARATE_FIELDS_BY": "Alanları ayrı ayır",
       "SHOW_AS_TEXT": "Metin olarak göster",
-      "SNACK_TO_CLIPPBOARD": "Panoya kopyalandı",
       "TIME_AS_MILLISECONDS": "Milisaniye olarak zaman",
       "TIME_ESTIMATE": "Zaman tahmini",
       "TIME_SPENT": "Harcanan zaman",
@@ -591,7 +591,7 @@
       "SELECT_OR_CREATE": "Görev seç veya oluştur",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Tahmin",
-        "SPENT_TODAY": "",
+        "SPENT_TODAY": "Bugün Harcandı",
         "SPENT_TOTAL": "Harcanan Toplam",
         "TASK": "görev",
         "TOGGLE_DONE": "yapılan / işaretini kaldır"
@@ -651,7 +651,6 @@
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?",
       "D_EXPORT_TITLE": " {{start}}-{{end}}Worklog Dışa Aktarma",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "Panoya kopyala",
         "DONT_ROUND": "yuvarlama",
         "GROUP_BY": "Grupla",
         "O": {
@@ -793,6 +792,7 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",
+      "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
       "TITLE": "Diğer ayarlar"

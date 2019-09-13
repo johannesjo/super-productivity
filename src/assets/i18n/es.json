@@ -232,10 +232,6 @@
         "TIME_SPENT": "Tiempo usado",
         "TITLE": "Jira: enviar registro de trabajo"
       },
-      "DIALOG_WORKdLOG": {
-        "TITLE": ""
-      },
-      "EXTENSION_INFO": "Por favor, <a target=\"_blank\" href=\"{{url}}\"> descargue la extensión de chrome</a> para permitir la comunicación con Jira Api. Tenga en cuenta que esto no funciona para móviles.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la acumulación",
         "IS_AUTO_POLL": "Encuestar automáticamente los problemas de git importados para los cambios",
@@ -447,18 +443,24 @@
       "D_CREATE": {
         "CREATE": "Crear proyecto",
         "EDIT": "Editar proyecto",
-        "ISSUE_PROVIDER_CFGS": "Configuración del proveedor de problemas (opcional)",
         "SETUP_GIT": "Configurar la integración con Github",
         "SETUP_JIRA": "Configurar la integración con Jira"
       },
-      "FORM": {
+      "FORM_THEME": {
         "D_IS_DARK_THEME": "No se utilizará si el sistema admite el modo oscuro global.",
-        "HELP": "Configuraciones muy básicas para tu proyecto.",
+        "HELP": "Configuración del tema para su proyecto.",
+        "L_COLOR_ACCENT": "Acentuar el color",
+        "L_COLOR_PRIMARY": "Color primario",
+        "L_COLOR_WARN": "Color de advertencia / error",
+        "L_HUE_ACCENT": "Umbral para texto oscuro sobre fondo de color de acento",
+        "L_HUE_PRIMARY": "Umbral para texto oscuro sobre fondo de color primario",
+        "L_HUE_WARN": "Umbral para texto oscuro sobre fondo de color de advertencia",
+        "L_IS_AUTO_CONTRAST": "Configuración automática de colores de texto para una mejor legibilidad",
         "L_IS_DARK_THEME": "Usa el tema oscuro",
-        "L_IS_REDUCED_THEME": "Usar interfaz de usuario reducida (sin cuadros alrededor de las tareas)",
+        "L_IS_REDUCED_THEME": "Usar IU reducida (sin cuadros alrededor de las tareas)",
         "L_THEME_COLOR": "Color del tema",
         "L_TITLE": "Título",
-        "TITLE": "Configuración del proyecto y tema"
+        "TITLE": "Tema"
       },
       "S": {
         "ARCHIVED": "Proyecto Archivado",
@@ -476,7 +478,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Cerrar",
-      "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
       "DATE": "Fecha",
       "ESTIMATE": "ESTIMAR",
       "FIELDS_TO_DISPLAY": "Campos para mostrar",
@@ -494,7 +495,6 @@
       "SAVE_TO_FILE": "Guardar en archivo",
       "SEPARATE_FIELDS_BY": "Campos separados por",
       "SHOW_AS_TEXT": "Mostrar como texto",
-      "SNACK_TO_CLIPPBOARD": "Copiado al portapapeles",
       "TIME_AS_MILLISECONDS": "El tiempo como milisegundos.",
       "TIME_ESTIMATE": "Tiempo estimado",
       "TIME_SPENT": "Tiempo usado",
@@ -591,7 +591,7 @@
       "SELECT_OR_CREATE": "Seleccionar o crear tarea",
       "SUMMARY_TABLE": {
         "ESTIMATE": "ESTIMAR",
-        "SPENT_TODAY": "",
+        "SPENT_TODAY": "Gastado hoy",
         "SPENT_TOTAL": "Gastado total",
         "TASK": "Tarea",
         "TOGGLE_DONE": "un- / mark como hecho"
@@ -651,7 +651,6 @@
       "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?",
       "D_EXPORT_TITLE": "Exportar registro de trabajo {{start}}-{{end}}",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
         "DONT_ROUND": "no redondear",
         "GROUP_BY": "Agrupar por",
         "O": {
@@ -793,6 +792,7 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque la tarea principal como hecha, cuando todas las sub tareas estén listas",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Deshabilitar el recordatorio sobre el día de finalización olvidado",
+      "IS_HIDE_EVALUATION_SHEET": "Ocultar hoja de evaluación en resumen diario",
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace el encabezado principal (solo en el escritorio)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
       "TITLE": "Configuraciones"

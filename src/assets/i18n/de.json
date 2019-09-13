@@ -232,10 +232,6 @@
         "TIME_SPENT": "Zeitaufwand",
         "TITLE": "Jira: Worklog einreichen"
       },
-      "DIALOG_WORKdLOG": {
-        "TITLE": ""
-      },
-      "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"{{url}}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
@@ -447,18 +443,24 @@
       "D_CREATE": {
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
-        "ISSUE_PROVIDER_CFGS": "Issue Provider (optional)",
         "SETUP_GIT": "Einrichten der Github-Integration",
         "SETUP_JIRA": "Jira-Integration einrichten"
       },
-      "FORM": {
+      "FORM_THEME": {
         "D_IS_DARK_THEME": "Wird nicht verwendet, wenn das System den globalen Dunkelmodus unterstützt.",
-        "HELP": "Sehr grundlegende Einstellungen für Ihr Projekt.",
+        "HELP": "Theme-Einstellungen für Ihr Projekt.",
+        "L_COLOR_ACCENT": "Akzentfarbe",
+        "L_COLOR_PRIMARY": "Primärfarbe",
+        "L_COLOR_WARN": "Warn- / Fehlerfarbe",
+        "L_HUE_ACCENT": "Schwellenwert für dunklen Text auf Akzentfarbenhintergrund",
+        "L_HUE_PRIMARY": "Schwellenwert für dunklen Text auf Grundfarbenhintergrund",
+        "L_HUE_WARN": "Schwellenwert für dunklen Text auf farbigem Hintergrund warnen",
+        "L_IS_AUTO_CONTRAST": "Automatisch eingestellte Textfarben für beste Lesbarkeit",
         "L_IS_DARK_THEME": "Verwenden Sie dunkles Design",
         "L_IS_REDUCED_THEME": "Reduzierte Benutzeroberfläche verwenden (keine Kästchen um Aufgaben)",
         "L_THEME_COLOR": "Farbe des Themas",
         "L_TITLE": "Titel",
-        "TITLE": "Projekteinstellungen & Thema"
+        "TITLE": "Thema"
       },
       "S": {
         "ARCHIVED": "Archiviertes Projekt",
@@ -476,7 +478,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Schließen",
-      "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
       "DATE": "Datum",
       "ESTIMATE": "Schätzen",
       "FIELDS_TO_DISPLAY": "Felder, die angezeigt werden sollen",
@@ -494,7 +495,6 @@
       "SAVE_TO_FILE": "Speichern unter",
       "SEPARATE_FIELDS_BY": "Trennen Sie die Felder durch",
       "SHOW_AS_TEXT": "Als Text anzeigen",
-      "SNACK_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
       "TIME_AS_MILLISECONDS": "Zeit in Millisekunden",
       "TIME_ESTIMATE": "Zeitschätzung",
       "TIME_SPENT": "Zeitaufwand",
@@ -591,7 +591,7 @@
       "SELECT_OR_CREATE": "Aufgabe auswählen oder erstellen",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Schätzen",
-        "SPENT_TODAY": "",
+        "SPENT_TODAY": "Heute verbracht",
         "SPENT_TOTAL": "Insgesamt ausgegeben",
         "TASK": "Aufgabe",
         "TOGGLE_DONE": "ab- / als erledigt markieren"
@@ -651,7 +651,6 @@
       "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?",
       "D_EXPORT_TITLE": "Worklog-Export {{start}}-{{end}}",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
         "DONT_ROUND": "runde nicht",
         "GROUP_BY": "Gruppiere nach",
         "O": {
@@ -793,6 +792,7 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
       "IS_CONFIRM_BEFORE_EXIT": "Bestätigen Sie, bevor Sie die App beenden",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Erinnerung an vergessenen Zieltag deaktivieren",
+      "IS_HIDE_EVALUATION_SHEET": "Bewertungsbogen in der Tageszusammenfassung ausblenden",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "TITLE": "Verschiedene Einstellungen"

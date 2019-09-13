@@ -80,7 +80,7 @@
         "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
       },
       "FORM_SECTION": {
-        "HELP": "",
+        "HELP": "<p>여기서는 일일 계획 보기의 작업 만들기 패널에서 특정 리포지토리에 대한 열린 GithHub 문제를 나열하도록 SuperProductivity를 구성할 수 있습니다. 제안으로 나열 되며 문제에 대 한 링크 뿐만 아니라 그것에 대 한 자세한 정보를 제공 합니다.</p> <p>또한 자동으로 추가하고 작업 백로그에 열려있는 모든 문제를 동기화 할 수 있습니다.</p>",
         "TITLE": "기둥"
       },
       "ISSUE_CONTENT": {
@@ -124,7 +124,7 @@
         "OVERWRITE_LOCAL": "로컬 데이터 덮어 쓰기",
         "OVERWRITE_REMOTE": "원격 데이터 덮어 쓰기",
         "REMOTE": "먼",
-        "TEXT": "",
+        "TEXT": "<p>구글 드라이브 백업에서 업데이트. <strong>로컬 데이터는 원격 데이터보다</strong> 최신 인 것 같습니다. 저장되지 않은 로컬 변경 내용을 덮어쓰시나요? <strong>모든 데이터는 영원히 손실됩니다</strong>.</p>",
         "TITLE": "GDrive Update로 로컬 데이터 덮어 쓰기?"
       },
       "D_CONFIRM_SAVE": {
@@ -232,10 +232,6 @@
         "TIME_SPENT": "지출 된 시간",
         "TITLE": "Jira : 작업 로그 제출"
       },
-      "DIALOG_WORKdLOG": {
-        "TITLE": ""
-      },
-      "EXTENSION_INFO": "Jira Api와의 통신을 허용하려면 <a target=\"_blank\" href=\"{{url}}\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
@@ -422,7 +418,7 @@
       },
       "H1": "자신을 자르십시오!",
       "P1": "우선 긴장을 풀어 라! 모두가 한 번씩 그렇게합니다. 그리고 네가해야 할 일을하지 않는다면, 적어도 그것을 즐겨라! 그런 다음 아래 섹션에서 유용한 정보를 확인하십시오.",
-      "P2": "",
+      "P2": "여기 뒤에 과학에 대 한 자세한 내용은 다음을 추천할 수 있습니다 <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">이 문서</a> 운동의 일부입니다.",
       "P3": "기억하십시오 : 지연은 시간 관리 문제가 아닌 감정 조절 문제입니다.",
       "REFRAME": {
         "INTRO": "그 임무에도 불구하고 무엇이 긍정적인지를 생각해보십시오.",
@@ -447,18 +443,24 @@
       "D_CREATE": {
         "CREATE": "프로젝트 만들기",
         "EDIT": "프로젝트 수정",
-        "ISSUE_PROVIDER_CFGS": "이슈 공급자 구성 (선택 사항)",
         "SETUP_GIT": "Github 통합 설치",
         "SETUP_JIRA": "Jira 통합 설정"
       },
-      "FORM": {
+      "FORM_THEME": {
         "D_IS_DARK_THEME": "시스템이 글로벌 암 모드를 지원하면 사용되지 않습니다.",
-        "HELP": "프로젝트의 매우 기본적인 설정.",
+        "HELP": "프로젝트의 테마 설정.",
+        "L_COLOR_ACCENT": "악센트 색상",
+        "L_COLOR_PRIMARY": "원색",
+        "L_COLOR_WARN": "경고 / 오류 색상",
+        "L_HUE_ACCENT": "악센트 색상 배경에 어두운 텍스트에 대한 임계 값",
+        "L_HUE_PRIMARY": "기본 색상 배경에서 어두운 텍스트에 대한 임계 값",
+        "L_HUE_WARN": "경고 색상 배경에 어두운 텍스트에 대한 임계 값",
+        "L_IS_AUTO_CONTRAST": "최고의 가독성을위한 자동 텍스트 색상 설정",
         "L_IS_DARK_THEME": "다크 테마 사용",
         "L_IS_REDUCED_THEME": "축소 된 UI 사용 (작업 주위의 상자 없음)",
         "L_THEME_COLOR": "테마 색",
         "L_TITLE": "표제",
-        "TITLE": "프로젝트 설정 및 테마"
+        "TITLE": "테마"
       },
       "S": {
         "ARCHIVED": "보관 된 프로젝트",
@@ -476,7 +478,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "닫기",
-      "COPY_TO_CLIPBOARD": "클립 보드에 복사",
       "DATE": "날짜",
       "ESTIMATE": "견적",
       "FIELDS_TO_DISPLAY": "표시 할 필드",
@@ -494,7 +495,6 @@
       "SAVE_TO_FILE": "파일에 저장",
       "SEPARATE_FIELDS_BY": "필드 구분",
       "SHOW_AS_TEXT": "텍스트로 표시",
-      "SNACK_TO_CLIPPBOARD": "클립 보드에 복사 됨",
       "TIME_AS_MILLISECONDS": "시간 (밀리 초)",
       "TIME_ESTIMATE": "예상 시간",
       "TIME_SPENT": "지출 된 시간",
@@ -591,7 +591,7 @@
       "SELECT_OR_CREATE": "작업 선택 또는 생성",
       "SUMMARY_TABLE": {
         "ESTIMATE": "견적",
-        "SPENT_TODAY": "",
+        "SPENT_TODAY": "오늘 보낸",
         "SPENT_TOTAL": "사용한 총액",
         "TASK": "태스크",
         "TOGGLE_DONE": "완료로 표시 취소 / 표시"
@@ -651,7 +651,6 @@
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> 작업을 현재 작업 목록으로 이동 하시겠습니까?",
       "D_EXPORT_TITLE": "작업 로그 내보내기 {{start}}-{{end}}",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "클립 보드에 복사",
         "DONT_ROUND": "돌지 마라.",
         "GROUP_BY": "그룹화 기준",
         "O": {
@@ -789,10 +788,11 @@
       "ZH": "중국말"
     },
     "MISC": {
-      "HELP": "",
+      "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "잊혀진 종료일에 대한 알림 사용 중지",
+      "IS_HIDE_EVALUATION_SHEET": "일일 요약에서 평가 시트 숨기기",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "TITLE": "기타 설정"

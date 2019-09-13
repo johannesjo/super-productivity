@@ -232,10 +232,6 @@
         "TIME_SPENT": "Time Spent",
         "TITLE": "Jira: Submit Worklog"
       },
-      "DIALOG_WORKdLOG": {
-        "TITLE": ""
-      },
-      "EXTENSION_INFO": "",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
@@ -453,15 +449,15 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
         "HELP": "Theme settings for your project.",
-        "L_COLOR_PRIMARY": "Primary Color",
         "L_COLOR_ACCENT": "Accent Color",
+        "L_COLOR_PRIMARY": "Primary Color",
         "L_COLOR_WARN": "Warn/Error Color",
+        "L_HUE_ACCENT": "Threshold for dark text on accent color background",
+        "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
+        "L_HUE_WARN": "Threshold for dark text on warn color background",
+        "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
         "L_IS_DARK_THEME": "Use Dark Theme",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
-        "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
-        "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
-        "L_HUE_ACCENT": "Threshold for dark text on accent color background",
-        "L_HUE_WARN": "Threshold for dark text on warn color background",
         "L_THEME_COLOR": "Theme Color",
         "L_TITLE": "Title",
         "TITLE": "Theme"
@@ -482,7 +478,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Close",
-      "COPY_TO_CLIPBOARD": "",
       "DATE": "Date",
       "ESTIMATE": "Estimate",
       "FIELDS_TO_DISPLAY": "Fields to display",
@@ -500,7 +495,6 @@
       "SAVE_TO_FILE": "Save to file",
       "SEPARATE_FIELDS_BY": "Separate fields by",
       "SHOW_AS_TEXT": "Show as text",
-      "SNACK_TO_CLIPPBOARD": "",
       "TIME_AS_MILLISECONDS": "Time as milliseconds",
       "TIME_ESTIMATE": "Time Estimate",
       "TIME_SPENT": "Time Spent",
@@ -597,7 +591,7 @@
       "SELECT_OR_CREATE": "Select or create task",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Estimate",
-        "SPENT_TODAY": "",
+        "SPENT_TODAY": "Spent Today",
         "SPENT_TOTAL": "Spent Total",
         "TASK": "Task",
         "TOGGLE_DONE": "un-/mark as done"
@@ -657,7 +651,6 @@
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
       "D_EXPORT_TITLE": "Worklog Export {{start}}–{{end}}",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "",
         "DONT_ROUND": "don't round",
         "GROUP_BY": "Group by",
         "O": {
@@ -799,9 +792,9 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
+      "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
-      "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "TITLE": "Misc Settings"
     },
     "POMODORO": {
