@@ -96,7 +96,7 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   @include darkTheme {
-    border-color: $dark-theme-bg-lightest;
+    border-color: $dark-theme-extra-border-color;
   }
 
   @include isHostFocus('.inner-wrapper') {

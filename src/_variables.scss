@@ -27,7 +27,7 @@ $light-theme-text-color-less-intense: transparentize($light-theme-text-color, 0.
 $light-theme-text-color-most-intense: rgb(0, 0, 0);
 
 $light-theme-extra-border-color: #dddddd;
-$dark-theme-extra-border-color: #333333;
+$dark-theme-extra-border-color: $dark-theme-bg-lightest;
 
 $c-accent: mat-css-color-accent();
 $c-warn: mat-css-color-warn();

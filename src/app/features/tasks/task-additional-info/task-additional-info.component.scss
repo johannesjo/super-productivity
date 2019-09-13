@@ -23,7 +23,7 @@
   }
 
   @include darkTheme {
-    border-top-color: rgba(255, 255, 255, 0.12);
+    border-top-color: $dark-theme-extra-border-color;
   }
 }
 
@@ -42,8 +42,6 @@
 :host::ng-deep .mat-tab-labels .mat-tab-label {
   flex-grow: 1;
   height: $bar-height-very-small;
-  //text-transform: uppercase;
-  //font-weight: normal;
 }
 
 .tab-label-text {
@@ -75,10 +73,15 @@
   display: block;
   box-shadow: $whiteframe-shadow-1dp;
 
-  @include layerTextAndBgHighest();
+  @include layerTextAndBgHigher();
+
+  @include darkTheme() {
+    border: 1px solid $dark-theme-extra-border-color;
+  }
 
   @include lightTheme {
-    border: 1px solid #dddddd;
+    border: 1px solid $light-theme-extra-border-color;
+    background: $light-theme-bg-darker;
   }
 
 
@@ -98,8 +101,6 @@
   &.note-wrapper {
     margin: $s $s;
     display: block;
-    //box-shadow: $whiteframe-shadow-4dp;
-    // required for inner paddings to be there
     overflow: hidden;
   }
 

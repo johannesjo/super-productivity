@@ -18,6 +18,13 @@ $thisHeight: 80px;
   border-radius: $card-border-radius;
   position: relative;
 
+  @include layerTextAndBgHighest;
+
+  @include lightTheme{
+    background: #fff;
+  }
+
+
   > a:focus + .controls,
   &.focus .controls,
   &:hover .controls {
