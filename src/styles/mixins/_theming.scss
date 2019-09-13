@@ -54,6 +54,15 @@
 }
 
 
+@mixin extraBorder {
+  @include darkTheme {
+    border: 1px solid $dark-theme-extra-border-color;
+  }
+  @include lightTheme {
+    border: 1px solid $light-theme-extra-border-color;
+  }
+}
+
 // e.g. cards and tasks
 @mixin layerTextAndBgHigher {
   @include darkTheme() {

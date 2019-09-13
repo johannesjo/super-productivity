@@ -41,6 +41,11 @@ div.material-table {
   white-space: nowrap;
   background-color: #FFF;
 
+  &._no-elevation {
+    box-shadow: none;
+    background-color: transparent;
+  }
+
   &,
   table {
     border-collapse: collapse;
@@ -50,7 +55,13 @@ div.material-table {
     background: $dark-theme-bg-lighter;
     // NOTE: because we're on a lighter background
     color: $dark-theme-text-color-more-intense;
+
   }
+
+  .isDarkTheme &._no-elevation  {
+    background-color: transparent;
+  }
+
 
   tr {
     min-height: $this-table-min-height;

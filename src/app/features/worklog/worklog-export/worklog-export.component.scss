@@ -42,17 +42,14 @@
 
 
 .table-wrapper {
-  margin-bottom: $s;
   overflow: auto;
   position: relative;
   z-index: 1;
+  margin: 0 -20px $s;
 
 
   ::ng-deep table {
     width: 100%;
-    @include darkTheme {
-      background: $dark-theme-bg-darker;
-    }
   }
 
   ::ng-deep td {
@@ -61,6 +58,14 @@
     &:last-child {
       white-space: normal;
     }
+  }
+
+  tr:first-of-type td {
+    @include extraBorder;
+  }
+
+  th {
+    //@include mat-css-color-and-contrast(500);
   }
 
   th,
