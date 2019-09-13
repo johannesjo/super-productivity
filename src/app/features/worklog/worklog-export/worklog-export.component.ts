@@ -15,7 +15,7 @@ import {roundDuration} from '../../../util/round-duration';
 import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
-import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
+import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 import {T} from '../../../t.const';
 
 const LINE_SEPARATOR = '\n';
@@ -108,7 +108,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       if (pr.advancedCfg.worklogExportSettings) {
         this.options = {
           ...WORKLOG_EXPORT_DEFAULTS,
-          ...pr.advancedCfg.worklogExportSettings
+          ...pr.advancedCfg.worklogExportSettings,
+          // NOTE: if we don't do this typescript(?) get's aggressive
+          cols: [...(
+            pr.advancedCfg.worklogExportSettings
+              ? pr.advancedCfg.worklogExportSettings.cols
+              : WORKLOG_EXPORT_DEFAULTS.cols
+          )]
         };
       } else {
         this.options = WORKLOG_EXPORT_DEFAULTS;
