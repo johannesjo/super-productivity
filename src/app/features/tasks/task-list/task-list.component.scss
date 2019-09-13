@@ -39,3 +39,11 @@
 task.isAdditionalInfoOpen + task::ng-deep .box {
   border-top-width: 1px;
 }
+
+.expand-tasks-btn {
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+  }
+}

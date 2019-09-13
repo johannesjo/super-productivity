@@ -2,7 +2,9 @@
      @expandFadeFast
      class="done-task-box">
   <button (click)="expandDoneTasks()"
+          class="expand-tasks-btn"
           mat-button>
+    <!--TODO translate -->
     <em>+ {{isHideDoneIN ? doneTasksLength + ' done ' : allTasksLength}} sub tasks</em>
     <mat-icon>expand_more</mat-icon>
   </button>
