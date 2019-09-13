@@ -1,3 +1,34 @@
+# [2.11.0](https://github.com/johannesjo/super-productivity/compare/v2.10.12...v2.11.0) (2019-09-13)
+
+
+### Bug Fixes
+
+* enable jira for new project when all settings are provided ([d8e4fa7](https://github.com/johannesjo/super-productivity/commit/d8e4fa7))
+* only start task for ready to work when there is not already one ([228a75b](https://github.com/johannesjo/super-productivity/commit/228a75b))
+* **i18n:** translation mess ([ec461d4](https://github.com/johannesjo/super-productivity/commit/ec461d4))
+
+
+### Features
+
+* **googleSync:** make dialogs unclosable ([f6416f8](https://github.com/johannesjo/super-productivity/commit/f6416f8))
+* **i18n:** add missing translations ([629ffdc](https://github.com/johannesjo/super-productivity/commit/629ffdc))
+* **reDesign:** add play status icon to current task ([8a7fed5](https://github.com/johannesjo/super-productivity/commit/8a7fed5))
+* **reDesign:** adjust header and status bar styling ([3ba6bb2](https://github.com/johannesjo/super-productivity/commit/3ba6bb2))
+* **reDesign:** adjust main header ([0e524bf](https://github.com/johannesjo/super-productivity/commit/0e524bf))
+* **reDesign:** adjust play indicator position ([e8a3f74](https://github.com/johannesjo/super-productivity/commit/e8a3f74))
+* **reDesign:** adjust task list styles ([4321da0](https://github.com/johannesjo/super-productivity/commit/4321da0))
+* **reDesign:** adjust work view ([20e3a71](https://github.com/johannesjo/super-productivity/commit/20e3a71))
+* **reDesign:** further adjust task list styles ([9a20c86](https://github.com/johannesjo/super-productivity/commit/9a20c86))
+* **reDesign:** improve additional task info and inline edit ([6605c8d](https://github.com/johannesjo/super-productivity/commit/6605c8d))
+* **reDesign:** improve current task transition ([1897da8](https://github.com/johannesjo/super-productivity/commit/1897da8))
+* **reDesign:** improve play hover ([73ad0b7](https://github.com/johannesjo/super-productivity/commit/73ad0b7))
+* **reDesign:** improve sub task list expand button ([3e77996](https://github.com/johannesjo/super-productivity/commit/3e77996))
+* **reDesign:** improve task focus styling ([ecf437c](https://github.com/johannesjo/super-productivity/commit/ecf437c))
+* **reDesign:** make bars smaller again ([8b14e85](https://github.com/johannesjo/super-productivity/commit/8b14e85))
+* **reDesign:** remove reduced theme ([e9802b5](https://github.com/johannesjo/super-productivity/commit/e9802b5))
+
+
+
 ## [2.10.12](https://github.com/johannesjo/super-productivity/compare/v2.10.11...v2.10.12) (2019-08-28)
 
 
