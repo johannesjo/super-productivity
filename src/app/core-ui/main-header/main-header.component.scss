@@ -5,6 +5,7 @@ $navBpReduceToBurger: 420px;
 $navBp2Lines: 680px;
 $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
+$navVerticalPadding: 4px;
 
 .wrapper {
   @include mat-css-color-and-contrast(500);
@@ -165,12 +166,12 @@ button {
 .wrapper {
   display: flex;
   align-items: center;
-  padding: 4px $mobileHorizontalPadding;
+  padding: $navVerticalPadding $mobileHorizontalPadding;
   flex-wrap: wrap;
   min-height: $bar-height;
 
   @include mq(xs) {
-    padding: 4px 16px;
+    padding: $navVerticalPadding 16px;
   }
 
   @media (max-width: $navBp2Lines) {
