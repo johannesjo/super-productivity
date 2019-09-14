@@ -98,10 +98,6 @@ export interface GoogleDriveSyncConfig {
 
 
 // SETTINGS (not configurable under config)
-export type UiHelperSettings = Readonly<{
-  _zoomFactor: number;
-}>;
-
 export type GoogleSession = Readonly<{
   accessToken: string,
   refreshToken: string,
@@ -127,7 +123,6 @@ export type GlobalConfigState = Readonly<{
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig,
   _googleSession: GoogleSession;
-  _uiHelper: UiHelperSettings;
 }>;
 
 
@@ -138,7 +133,6 @@ export type GlobalSectionConfig
   | PomodoroConfig
   | KeyboardConfig
   | GoogleSession
-  | UiHelperSettings
   ;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 

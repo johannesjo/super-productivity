@@ -11,6 +11,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {DialogAddNoteComponent} from '../../features/note/dialog-add-note/dialog-add-note.component';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
 import {IPC} from '../../../../electron/ipc-events.const';
+import {UiHelperService} from '../../features/ui-helper/ui-helper.service';
 
 
 @Injectable({
@@ -28,6 +29,7 @@ export class ShortcutService {
     private _noteService: NoteService,
     private _taskService: TaskService,
     private _activatedRoute: ActivatedRoute,
+    private _uiHelperService: UiHelperService,
     private _bookmarkService: BookmarkService,
     private _ngZone: NgZone,
   ) {
@@ -134,28 +136,12 @@ export class ShortcutService {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
         window.ipcRenderer.send('TOGGLE_DEV_TOOLS');
       } else if (checkKeyCombo(ev, keys.zoomIn)) {
-        this._zoom(0.05);
+        this._uiHelperService.zoom(0.05);
       } else if (checkKeyCombo(ev, keys.zoomOut)) {
-        this._zoom(-0.05);
+        this._uiHelperService.zoom(-0.05);
       } else if (checkKeyCombo(ev, keys.zoomDefault)) {
-        this._zoom(0);
+        this._uiHelperService.zoom(0);
       }
     }
-  }
-
-  private _zoom(zoomDelta: number) {
-    const webFrame = this._electronService.webFrame;
-    let zoomFactor = webFrame.getZoomFactor();
-    zoomFactor += zoomDelta;
-    zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
-
-    if (zoomDelta === 0) {
-      webFrame.setZoomFactor(1);
-    } else {
-      webFrame.setZoomFactor(zoomFactor);
-    }
-    this._configService.updateSection('_uiHelper', {
-      _zoomFactor: zoomFactor
-    });
   }
 }

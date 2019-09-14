@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, HostListener, Inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostListener, Inject} from '@angular/core';
 import {ProjectService} from './features/project/project.service';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
@@ -29,6 +29,7 @@ import {BannerId} from './core/banner/banner.model';
 import {T} from './t.const';
 import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
+import {UiHelperService} from './features/ui-helper/ui-helper.service';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -44,7 +45,7 @@ const SIDE_PANEL_BREAKPOINT = 900;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
     this._store.select(selectIsTaskDataLoaded),
@@ -71,6 +72,7 @@ export class AppComponent implements OnInit {
     private _translateService: TranslateService,
     private _globalThemeService: GlobalThemeService,
     private _breakPointObserver: BreakpointObserver,
+    private _uiHelperService: UiHelperService,
     private _store: Store<any>,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
@@ -89,7 +91,7 @@ export class AppComponent implements OnInit {
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC.APP_READY);
       this._initElectronErrorHandler();
-      this._initMousewheelZoomForElectron();
+      this._uiHelperService.initElectron();
 
 
       this._electronService.ipcRenderer.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
@@ -159,10 +161,6 @@ export class AppComponent implements OnInit {
   }
 
 
-  ngOnInit() {
-
-  }
-
   getPage(outlet) {
     return outlet.activatedRouteData.page || 'one';
   }
@@ -181,32 +179,4 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private _initMousewheelZoomForElectron() {
-    const ZOOM_DELTA = 0.05;
-    const webFrame = this._electronService.webFrame;
-
-    if (this._configService.cfg
-      && this._configService.cfg._uiHelper
-      && this._configService.cfg._uiHelper._zoomFactor > 0) {
-      webFrame.setZoomFactor(this._configService.cfg._uiHelper._zoomFactor);
-    }
-
-    this.document.addEventListener('mousewheel', (event: WheelEvent) => {
-      if (event && event.ctrlKey) {
-        let zoomFactor = webFrame.getZoomFactor();
-        if (event.deltaY > 0) {
-          zoomFactor -= ZOOM_DELTA;
-        } else if (event.deltaY < 0) {
-          zoomFactor += ZOOM_DELTA;
-        }
-
-        zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
-
-        webFrame.setZoomFactor(zoomFactor);
-        this._configService.updateSection('_uiHelper', {
-          _zoomFactor: zoomFactor
-        });
-      }
-    }, false);
-  }
 }

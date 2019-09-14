@@ -93,9 +93,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   localBackup: {
     isEnabled: true,
   },
-  _uiHelper: {
-    _zoomFactor: 1,
-  },
   _googleSession: {
     accessToken: null,
     refreshToken: null,

@@ -350,3 +350,9 @@ function exec(ev, command) {
   });
 }
 
+
+// required for graceful closing
+// @see: https://github.com/electron/electron/issues/5708
+process.on('exit', () => {
+  app.quit();
+});
