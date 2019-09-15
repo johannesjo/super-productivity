@@ -168,9 +168,10 @@ button {
   align-items: center;
   padding: $navVerticalPadding $mobileHorizontalPadding;
   flex-wrap: wrap;
-  min-height: $bar-height;
+  min-height: $bar-height-large;
 
   @include mq(xs) {
+    min-height: $bar-height;
     padding: $navVerticalPadding 16px;
   }
 

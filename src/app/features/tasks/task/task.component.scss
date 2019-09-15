@@ -107,7 +107,6 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   @include isCurrent {
-    transform: scale($task-current-task-zoom);
     box-shadow: $task-active-shadow;
     border: 2px solid $c-accent !important;
     border-color: $c-accent !important;
@@ -115,6 +114,9 @@ $z-time-btn-svg-wrapper: 5555;
     border-radius: 12px !important;
     bottom: -2px;
     top: -2px;
+    @include mq(xs) {
+      transform: scale($task-current-task-zoom);
+    }
   }
 
   :host:first-child > .inner-wrapper > & {
@@ -747,14 +749,21 @@ $min-badge-size: $s*2.25;
 
 .play-icon-indicator {
   position: absolute;
-  left: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: $c-accent;
-  margin-top: -1px;
 
   height: 20px;
+  margin-top: 1px;
   width: 20px;
+  font-size: 20px;
+  line-height: 20px;
+  left: 24px;
+
+  @include mq(xs) {
+    margin-top: 0;
+    left: 10px;
+  }
 
   .first-line:hover & {
     display: none;

@@ -204,6 +204,11 @@ h2 {
   align-items: center;
   justify-content: center;
   padding-bottom: 2*$s;
+  margin: $s;
+
+  @include mq('xs'){
+    margin: 0;
+  }
 
   add-task-bar {
     width: 100%;
