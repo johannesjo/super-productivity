@@ -49,7 +49,7 @@
               ],
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false,
+              "sourceMap": true,
               "evalSourceMap": false,
               "extractCss": true,
               "namedChunks": false,
