@@ -24,7 +24,7 @@ import {fadeAnimation} from './ui/animations/fade.ani';
 import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
 import {BannerService} from './core/banner/banner.service';
 import {loadFromLs, saveToLs} from './core/persistence/local-storage';
-import {LS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
+import {SS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
 import {BannerId} from './core/banner/banner.model';
 import {T} from './t.const';
 import {TranslateService} from '@ngx-translate/core';
@@ -135,7 +135,7 @@ export class AppComponent {
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(e: any) {
-    if (IS_ELECTRON || loadFromLs(LS_WEB_APP_INSTALL)) {
+    if (IS_ELECTRON || sessionStorage.getItem(SS_WEB_APP_INSTALL)) {
       return;
     }
 
@@ -154,7 +154,7 @@ export class AppComponent {
       action2: {
         label: T.APP.B_INSTALL.IGNORE,
         fn: () => {
-          saveToLs(LS_WEB_APP_INSTALL, true);
+          sessionStorage.setItem(SS_WEB_APP_INSTALL, 'true');
         }
       }
     });
