@@ -183,7 +183,7 @@ export const selectTaskByIssueId = createSelector(
       : null;
   }
 );
-export const selectTasksWorkedOnOrDoneFlat = createSelector(selectTodaysTasksFlat, (tasks, props: { day: string }) => {
+export const selectTasksWorkedOnOrDoneFlat = createSelector(selectAllTasks, (tasks, props: { day: string }) => {
   if (!props) {
     return null;
   }
