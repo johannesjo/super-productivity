@@ -14,7 +14,11 @@
           <mat-icon *ngIf="task.repeatCfgId"
                     class="repeat-task-icon">repeat
           </mat-icon>
-          <span *ngIf="task.parentId">–</span> {{task.title}}
+          <span *ngIf="task.parentId">–</span>
+          <inline-input style="display: inline-block"
+                        (changed)="updateTaskTitle(task, $event)"
+                        [value]="task.title">
+          </inline-input>
         </div>
       </td>
     </ng-container>

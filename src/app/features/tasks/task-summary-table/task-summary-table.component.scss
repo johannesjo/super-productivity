@@ -8,13 +8,6 @@
   }
 
   td {
-    .isDone {
-      text-decoration: line-through;
-    }
-
-    .isSubTask {
-      font-style: italic;
-    }
   }
 
   th {
@@ -91,4 +84,41 @@
   margin-right: 4px;
   transform: rotate(45deg);
   opacity: 0.7;
+}
+
+.task-title {
+  display: flex;
+  //border: 1px solid orange;
+  text-align: left;
+  align-items: center;
+
+  &.isDone ::ng-deep .value-wrapper {
+    text-decoration: line-through;
+  }
+
+  &.isSubTask {
+    font-style: italic;
+  }
+
+
+  > span {
+    text-decoration: none !important;
+    display: block;
+    padding-left: $s*1;
+  }
+
+  inline-input {
+    flex-grow: 1;
+    text-align: left;
+    display: block;
+  }
+
+  ::ng-deep .inline-input-wrapper {
+    padding: $s;
+
+    input {
+      width: 100%;
+      text-align: left;
+    }
+  }
 }

@@ -30,6 +30,12 @@ export class TaskSummaryTableComponent {
     });
   }
 
+  updateTaskTitle(task: Task, newVal: string) {
+    this._taskService.update(task.id, {
+      title: newVal
+    });
+  }
+
   toggleTaskDone(task: Task) {
     task.isDone
       ? this._taskService.setUnDone(task.id)
