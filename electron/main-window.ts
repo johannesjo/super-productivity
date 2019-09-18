@@ -38,7 +38,7 @@ export const createWindow = (params) => {
   mainWin = new BrowserWindow({
     width: 800,
     height: 800,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: 'default',
     show: false,
     webPreferences: {
       scrollBounce: true,

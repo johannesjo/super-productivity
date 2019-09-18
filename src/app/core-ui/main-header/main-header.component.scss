@@ -17,11 +17,11 @@ $navVerticalPadding: 4px;
 :host-context(.isMac.isElectron) {
   .wrapper {
     -webkit-app-region: drag;
-    cursor: grab;
+    //cursor: grab;
     user-select: none;
 
     &:active {
-      cursor: grabbing;
+      //cursor: grabbing;
     }
 
     button,
