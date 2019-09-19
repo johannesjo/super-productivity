@@ -6,6 +6,7 @@ $vertical-button-margin: $s;
   box-shadow: $shadow-card-shadow;
   position: relative;
   z-index: 2;
+  display: block;
 }
 
 :host-context(.isDarkTheme) {

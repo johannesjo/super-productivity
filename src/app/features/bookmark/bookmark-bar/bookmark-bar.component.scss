@@ -7,6 +7,7 @@ $listControlsWidth: 36px;
 $bookmarkMinWidth: 56px;
 
 :host {
+  display: block;
   @include mat-css-color-and-contrast(800);
 }
 

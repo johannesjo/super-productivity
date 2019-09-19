@@ -1,8 +1,11 @@
 <div class="wrapper ">
+<!--<div class="wrapper mat-elevation-z3">-->
   <button class="burger-trigger"
           mat-icon-button>
     <mat-icon>menu</mat-icon>
   </button>
+
+  <div class="current-project-title">{{(projectService.currentProject$|async).title}}</div>
 
   <!--  <mat-menu #mainMenu="matMenu">-->
 

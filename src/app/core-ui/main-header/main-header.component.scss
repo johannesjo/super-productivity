@@ -7,6 +7,10 @@ $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 $navVerticalPadding: 4px;
 
+:host {
+  display: block;
+}
+
 .wrapper {
   //@include mat-css-color-and-contrast(500);
   //background: linear-gradient(50deg,#00288e 0,#0939a5 30%,#4385f4 90%,#aaceee 100%);
@@ -14,7 +18,13 @@ $navVerticalPadding: 4px;
   //background: linear-gradient(50deg, $c-primary-700 0, $c-primary-400 30%, $c-primary-600 90%, $c-primary-700 100%);
   background: transparent;
   //background: $dark-theme-bg;
-  backdrop-filter: blur(10px);
+  //backdrop-filter: blur(33px);
+}
+
+.current-project-title {
+  //font-weight: bold;
+  font-size: 18px;
+  margin-left: $s*2;
 }
 
 :host-context(.isMac.isElectron) {
@@ -40,7 +50,7 @@ $navVerticalPadding: 4px;
 
 .mat-mini-fab {
   // should be the same as the the links
-  color: mat-css-contrast-color-primary();
+  //color: mat-css-contrast-color-primary();
 }
 
 a,

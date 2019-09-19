@@ -1,7 +1,6 @@
 <ng-container *ngIf="(isAllDataLoadedInitially$|async)">
 
   <!--TODO move inside page container somehow -->
-  <banner></banner>
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
                 *ngIf="layoutService.isShowAddTaskBar$|async"
                 [@blendInOut]
@@ -11,9 +10,11 @@
        class="backdrop"></div>
 
   <mat-drawer-container>
-    <main-header></main-header>
-    <bookmark-bar></bookmark-bar>
-
+    <header class="header-wrapper">
+      <main-header></main-header>
+      <bookmark-bar></bookmark-bar>
+      <banner></banner>
+    </header>
 
     <div [@warpRoute]="getPage(o)"
          class="route-wrapper">

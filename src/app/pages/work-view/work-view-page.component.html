@@ -105,12 +105,7 @@
                    listId="PARENT"
                    listModelId="DONE"></task-list>
         <div class="finish-day-button-wrapper">
-          <button class="hide-xs"
-                  color="primary"
-                  mat-button=""
-                  routerLink="/procrastination">
-            {{T.WW.HELP_PROCRASTINATION|translate}}
-          </button>
+
 
           <button color="primary"
                   mat-raised-button=""
@@ -123,24 +118,24 @@
     </div>
   </div>
 
-<!--  <div #splitBottomEl-->
-<!--       [style.user-focus]="(splitInputPos===100)? 'none':''"-->
-<!--       class="backlog">-->
-<!--    <split (mouseenter)="isPreloadBacklog=true"-->
-<!--           (mouseleave)="isPreloadBacklog=false"-->
-<!--           (posChanged)="splitInputPos=$event"-->
-<!--           [containerEl]="containerEl"-->
-<!--           [counter]="(taskService.backlogTasks$|async)?.length"-->
-<!--           [isAnimateBtn]="isTriggerBacklogIconAni$|async"-->
-<!--           [splitBottomEl]="splitBottomEl"-->
-<!--           [splitPos]="splitInputPos"-->
-<!--           [splitTopEl]="splitTopEl"></split>-->
-<!--    <div *ngIf="isPreloadBacklog || splitInputPos!==100"-->
-<!--         class="inner-wrapper"-->
-<!--         style="user-select: none;">-->
-<!--      <backlog-tabs (closeBacklog)="splitInputPos=100"></backlog-tabs>-->
-<!--    </div>-->
-<!--  </div>-->
+  <div #splitBottomEl
+       [style.user-focus]="(splitInputPos===100)? 'none':''"
+       class="backlog">
+    <split (mouseenter)="isPreloadBacklog=true"
+           (mouseleave)="isPreloadBacklog=false"
+           (posChanged)="splitInputPos=$event"
+           [containerEl]="containerEl"
+           [counter]="(taskService.backlogTasks$|async)?.length"
+           [isAnimateBtn]="isTriggerBacklogIconAni$|async"
+           [splitBottomEl]="splitBottomEl"
+           [splitPos]="splitInputPos"
+           [splitTopEl]="splitTopEl"></split>
+    <div *ngIf="isPreloadBacklog || splitInputPos!==100"
+         class="inner-wrapper"
+         style="user-select: none;">
+      <backlog-tabs (closeBacklog)="splitInputPos=100"></backlog-tabs>
+    </div>
+  </div>
 </div>
 
 
