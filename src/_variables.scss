@@ -10,9 +10,10 @@ $dark-theme-bg: rgb(48, 48, 48);
 $dark-theme-bg-darker: rgb(39, 39, 39);
 $dark-theme-bg-slightly-lighter: rgb(52, 52, 52);
 $dark-theme-bg-lighter: rgb(66, 66, 66);
+$dark-theme-bg-lighter: rgb(66, 66, 66);
 $dark-theme-bg-lightest: rgb(84, 84, 84);
 $dark-theme-card-bg: $dark-theme-bg-lighter;
-$dark-theme-card-bg: rgb(58, 58, 58);
+$dark-theme-card-bg: $dark-theme-bg;
 
 $light-theme-bg: rgb(250, 250, 250);
 $light-theme-bg-darker: rgb(244, 244, 244);
@@ -33,6 +34,7 @@ $c-accent: mat-css-color-accent();
 $c-warn: mat-css-color-warn();
 
 $c-primary: mat-css-color-primary();
+$c-primary-50: mat-css-color-primary(50);
 $c-primary-100: mat-css-color-primary(100);
 $c-primary-200: mat-css-color-primary(200);
 $c-primary-300: mat-css-color-primary(300);
@@ -40,6 +42,7 @@ $c-primary-400: mat-css-color-primary(400);
 $c-primary-600: mat-css-color-primary(600);
 $c-primary-700: mat-css-color-primary(700);
 $c-primary-800: mat-css-color-primary(800);
+$c-primary-900: mat-css-color-primary(900);
 
 $c-contrast: mat-css-contrast-color();
 $c-contrast-600: mat-css-contrast-color(600);

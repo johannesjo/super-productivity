@@ -41,20 +41,17 @@ h2 {
   //@include darkTheme {
   //  border-bottom: 1px solid $dark-theme-extra-border-color;
   //}
-  @include mat-css-color-and-contrast(700);
+  //@include mat-css-color-and-contrast(700);
 
-  @include mq(xs) {
-    padding: 0.5*$s;
-  }
-}
 
-.work-view-header {
   position: relative;
   min-height: $bar-height-small;
   display: flex;
   justify-content: center;
   align-items: center;
-
+  @include mq(xs) {
+    padding: 0.5*$s;
+  }
   @include mq(xs, max) {
     .label {
       display: none;
@@ -206,7 +203,7 @@ h2 {
   padding-bottom: 2*$s;
   margin: $s;
 
-  @include mq('xs'){
+  @include mq('xs') {
     margin: 0;
   }
 

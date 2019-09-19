@@ -1,0 +1,26 @@
+@import '../../../variables';
+
+:host {
+  flex-grow: 1;
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  margin-bottom: $s*2;
+}
+
+.projects {
+  margin-bottom: $s*2;
+}
+
+.app {
+  margin-top: auto;
+}

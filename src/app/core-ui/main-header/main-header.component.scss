@@ -8,10 +8,13 @@ $mobileHorizontalPadding: 8px;
 $navVerticalPadding: 4px;
 
 .wrapper {
-  @include mat-css-color-and-contrast(500);
+  //@include mat-css-color-and-contrast(500);
   //background: linear-gradient(50deg,#00288e 0,#0939a5 30%,#4385f4 90%,#aaceee 100%);
   //background: linear-gradient(50deg, #00288e 0, #0939a5 30%, #4385f4 90%, #aaceee 100%);
   //background: linear-gradient(50deg, $c-primary-700 0, $c-primary-400 30%, $c-primary-600 90%, $c-primary-700 100%);
+  background: transparent;
+  //background: $dark-theme-bg;
+  backdrop-filter: blur(10px);
 }
 
 :host-context(.isMac.isElectron) {
@@ -78,9 +81,6 @@ button {
 
 
 .burger-trigger {
-  @media (min-width: $navBpReduceToBurger +1) {
-    display: none;
-  }
 }
 
 .main-nav {

@@ -31,7 +31,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
 
-const SIDE_PANEL_BREAKPOINT = 900;
+const SIDE_PANEL_BREAKPOINT = 700;
 
 @Component({
   selector: 'app-root',

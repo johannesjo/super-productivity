@@ -1,6 +1,5 @@
 <ng-container *ngIf="(isAllDataLoadedInitially$|async)">
-  <main-header></main-header>
-  <bookmark-bar></bookmark-bar>
+
   <!--TODO move inside page container somehow -->
   <banner></banner>
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
@@ -12,10 +11,20 @@
        class="backdrop"></div>
 
   <mat-drawer-container>
+    <main-header></main-header>
+    <bookmark-bar></bookmark-bar>
+
+
     <div [@warpRoute]="getPage(o)"
          class="route-wrapper">
       <router-outlet #o="outlet"></router-outlet>
     </div>
+    <mat-drawer (closedStart)="noteService.hide()"
+                [mode]="(isSidePanelBp$|async) ? 'over' : 'side'"
+                [opened]="noteService.isShowNotes$|async"
+                position="start">
+      <project-list></project-list>
+    </mat-drawer>
     <mat-drawer (closedStart)="noteService.hide()"
                 [mode]="(isSidePanelBp$|async) ? 'over' : 'side'"
                 [opened]="noteService.isShowNotes$|async"

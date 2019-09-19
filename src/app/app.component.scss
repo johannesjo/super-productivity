@@ -15,15 +15,20 @@ mat-drawer-container,
 mat-sidenav-container {
   //height: calc(100% - #{$main-header-height});
   height: 100%;
+  background-attachment: fixed;
 
   @include lightTheme {
     background: $light-theme-bg;
     //background: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
     //background: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1));
+    //background: linear-gradient(180deg, $c-primary-400 0, $c-primary-100 30%, $c-primary-300 90%, $c-primary-400 100%);
+    background: linear-gradient(180deg, $c-primary-100 0, $c-primary-50 90%, #fff 100%);
+
   }
-  //@include darkTheme {
-  //  background: radial-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
-  //}
+  @include darkTheme {
+    //background: radial-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+    background: linear-gradient(180deg,$dark-theme-bg 0, $c-primary-900 20%, $c-primary-800 50%, $c-primary-700 100%);
+  }
 }
 
 mat-drawer::ng-deep .mat-drawer-inner-container {
@@ -46,7 +51,7 @@ mat-drawer {
   width: 100%;
   height: 100%;
   left: 0;
-  top: 0;
+  top: $bar-height;
   overflow: hidden;
 
   > ::ng-deep router-outlet + * {

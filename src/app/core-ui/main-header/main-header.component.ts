@@ -35,7 +35,6 @@ export class MainHeaderComponent implements OnInit {
     public readonly taskService: TaskService,
     public readonly configService: GlobalConfigService,
     public readonly pomodoroService: PomodoroService,
-    private readonly _matDialog: MatDialog,
     private readonly _layoutService: LayoutService,
     private readonly _renderer: Renderer2,
   ) {
@@ -52,19 +51,8 @@ export class MainHeaderComponent implements OnInit {
     });
   }
 
-  trackById(i: number, project: Project) {
-    return project.id;
-  }
 
-  switchProject(projectId) {
-    this.projectService.setCurrentId(projectId);
-  }
 
-  addProject() {
-    this._matDialog.open(DialogCreateProjectComponent, {
-      restoreFocus: true,
-    });
-  }
 
   showAddTaskBar() {
     this._layoutService.showAddTaskBar();
