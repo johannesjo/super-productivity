@@ -13,14 +13,82 @@ section {
   flex-direction: column;
 }
 
+
+button {
+  &.isCurrentProject,
+  &.isActiveRoute {
+    //position: sticky;
+    //top: 0;
+
+    @include darkTheme {
+      background: rgba(255, 255, 255, 0.04);
+    }
+  }
+
+  .project-color,
+  &.isActiveRoute:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: $s;
+    background-color: $c-primary;
+  }
+
+  .project-color {
+    opacity: 0;
+  }
+
+  &.isCurrentProject,
+  &:hover {
+    .project-color {
+      opacity: 1;
+    }
+  }
+
+}
+
+$spacer: $s;
+
 .main {
-  margin-bottom: $s*2;
+  margin-bottom: $spacer;
+  padding-bottom: $spacer;
+
+  &:after {
+    bottom: 0;
+  }
 }
 
 .projects {
-  margin-bottom: $s*2;
+  margin-bottom: $spacer;
 }
 
 .app {
   margin-top: auto;
+  padding-top: $spacer;
+
+  &:after {
+    top: 0;
+  }
+}
+
+.main,
+.app {
+  position: relative;
+
+  &:after {
+    content: '';
+    position: absolute;
+    left: $s*2;
+    right: $s*2;
+    height: 1px;
+
+    @include lightTheme {
+      background: rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
+    }
+    @include darkTheme {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
 }

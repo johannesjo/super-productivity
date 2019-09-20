@@ -4,6 +4,7 @@ import {T} from '../../t.const';
 import {DialogCreateProjectComponent} from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import {Project} from '../../features/project/project.model';
 import {MatDialog} from '@angular/material';
+import {THEME_COLOR_MAP} from '../../app.constants';
 
 @Component({
   selector: 'project-list',
@@ -35,5 +36,13 @@ export class ProjectListComponent implements OnInit {
 
   trackById(i: number, project: Project) {
     return project.id;
+  }
+
+  getThemeColor(color: string): { [key: string]: string } {
+    const standardColor = THEME_COLOR_MAP[color];
+    const colorToUse = (standardColor)
+      ? standardColor
+      : color;
+    return {background: colorToUse};
   }
 }
