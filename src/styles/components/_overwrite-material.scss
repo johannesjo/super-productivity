@@ -84,3 +84,8 @@ body .mat-form-field {
   text-transform: uppercase;
 }
 
+
+// CARD BG
+.isDarkTheme .mat-card {
+  background: $dark-theme-card-bg;
+}
