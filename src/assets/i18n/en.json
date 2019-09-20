@@ -456,7 +456,6 @@
         "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
         "L_HUE_WARN": "Threshold for dark text on warn color background",
         "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
-        "L_IS_DARK_THEME": "Use Dark Theme",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
         "L_THEME_COLOR": "Theme Color",
         "L_TITLE": "Title",
@@ -792,6 +791,7 @@
     },
     "MISC": {
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
+      "IS_DARK_MODE": "Dark Mode",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",

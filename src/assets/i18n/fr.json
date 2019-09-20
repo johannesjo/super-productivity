@@ -456,7 +456,6 @@
         "L_HUE_PRIMARY": "Seuil pour texte sombre sur fond de couleur primaire",
         "L_HUE_WARN": "Seuil du texte sombre sur l'arrière-plan de la couleur d'avertissement",
         "L_IS_AUTO_CONTRAST": "Réglage automatique des couleurs du texte pour une meilleure lisibilité",
-        "L_IS_DARK_THEME": "Utiliser le thème sombre",
         "L_IS_REDUCED_THEME": "Utiliser une interface utilisateur réduite (aucune case autour des tâches)",
         "L_THEME_COLOR": "Couleur du thème",
         "L_TITLE": "Titre",

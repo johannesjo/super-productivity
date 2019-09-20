@@ -12,17 +12,21 @@ import {MatIconRegistry} from '@angular/material';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ChromeExtensionInterfaceService} from '../chrome-extension-interface/chrome-extension-interface.service';
 import {ThemeService as NgChartThemeService} from 'ng2-charts';
+import {GlobalConfigService} from '../../features/config/global-config.service';
+import {MiscConfig} from '../../features/config/global-config.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GlobalThemeService {
+  private _isDarkTheme: boolean;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _materialCssVarsService: MaterialCssVarsService,
     private _electronService: ElectronService,
     private _projectService: ProjectService,
+    private _globalConfigService: GlobalConfigService,
     private _matIconRegistry: MatIconRegistry,
     private _domSanitizer: DomSanitizer,
     private _chartThemeService: NgChartThemeService,
@@ -36,7 +40,14 @@ export class GlobalThemeService {
     this._initThemeWatchers();
   }
 
-  private _setTheme(theme: ProjectThemeCfg, isDarkTheme: boolean) {
+  private _setDarkTheme(isDarkTheme: boolean) {
+    this._materialCssVarsService.setDarkTheme(isDarkTheme);
+    this._setChartTheme(isDarkTheme);
+    // this._materialCssVarsService.setDarkTheme(true);
+    // this._materialCssVarsService.setDarkTheme(false);
+  }
+
+  private _setColorTheme(theme: ProjectThemeCfg) {
     this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
 
     if (!theme.isAutoContrast) {
@@ -48,11 +59,6 @@ export class GlobalThemeService {
     this._materialCssVarsService.setPrimaryColor(theme.primary);
     this._materialCssVarsService.setAccentColor(theme.accent);
     this._materialCssVarsService.setWarnColor(theme.warn);
-    // this._materialCssVarsService.setDarkTheme(theme.isDarkTheme);
-    this._materialCssVarsService.setDarkTheme(true);
-    // this._materialCssVarsService.setDarkTheme(false);
-
-    this._setChartTheme(isDarkTheme);
   }
 
   private _initIcons() {
@@ -80,24 +86,27 @@ export class GlobalThemeService {
 
   private _initThemeWatchers() {
     // init theme watchers
-    this._projectService.currentTheme$.subscribe((theme: ProjectThemeCfg) => {
-      const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
-        ? this._electronService.remote.systemPreferences.isDarkMode()
-        : theme.isDarkTheme;
+    this._projectService.currentTheme$.subscribe((theme: ProjectThemeCfg) => this._setColorTheme(theme));
 
-      this._setTheme(theme, isDarkTheme);
-    });
 
     // TODO beautify code here
     if (IS_ELECTRON && this._electronService.isMacOS) {
       this._electronService.remote.systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
-        this._projectService.currentTheme$.pipe(take(1)).subscribe(theme => {
+        this._globalConfigService.misc$.pipe(take(1)).subscribe((misc: MiscConfig) => {
           const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
             ? this._electronService.remote.systemPreferences.isDarkMode()
-            : theme.isDarkTheme;
+            : misc.isDarkMode;
 
-          this._setTheme(theme, isDarkTheme);
+          this._setDarkTheme(isDarkTheme);
         });
+      });
+    } else {
+      this._globalConfigService.misc$.subscribe((misc: MiscConfig) => {
+        const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
+          ? this._electronService.remote.systemPreferences.isDarkMode()
+          : misc.isDarkMode;
+
+        this._setDarkTheme(isDarkTheme);
       });
     }
   }

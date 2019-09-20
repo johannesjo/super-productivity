@@ -45,7 +45,6 @@ export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {
 };
 
 export const DEFAULT_PROJECT_THEME: ProjectThemeCfg = {
-  isDarkTheme: false,
   isAutoContrast: true,
   primary: '#0b77d2',
   huePrimary: '500',
@@ -59,7 +58,6 @@ export const DEFAULT_PROJECT: Project = {
   id: null,
   title: '',
   themeColor: '',
-  isDarkTheme: false,
   isArchived: false,
   timeWorkedWithoutBreak: null,
   theme: DEFAULT_PROJECT_THEME,

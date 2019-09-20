@@ -456,7 +456,6 @@
         "L_HUE_PRIMARY": "Umbral para texto oscuro sobre fondo de color primario",
         "L_HUE_WARN": "Umbral para texto oscuro sobre fondo de color de advertencia",
         "L_IS_AUTO_CONTRAST": "Configuración automática de colores de texto para una mejor legibilidad",
-        "L_IS_DARK_THEME": "Usa el tema oscuro",
         "L_IS_REDUCED_THEME": "Usar interfaz de usuario reducida (sin cuadros alrededor de las tareas)",
         "L_THEME_COLOR": "Color del tema",
         "L_TITLE": "Título",

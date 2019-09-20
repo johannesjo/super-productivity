@@ -54,7 +54,6 @@ const _updateThemeModel = (project: Project): Project => {
             ? THEME_COLOR_MAP[project.themeColor]
             : DEFAULT_PROJECT_THEME.primary,
           // tslint:disable-next-line
-          isDarkTheme: project.isDarkTheme,
         }
       };
 

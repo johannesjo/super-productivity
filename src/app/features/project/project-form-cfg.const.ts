@@ -45,14 +45,6 @@ export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg
       },
     },
     {
-      key: 'isDarkTheme',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.F.PROJECT.FORM_THEME.L_IS_DARK_THEME,
-        description: T.F.PROJECT.FORM_THEME.D_IS_DARK_THEME,
-      },
-    },
-    {
       key: 'isAutoContrast',
       type: 'checkbox',
       templateOptions: {
@@ -122,14 +114,6 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
         type: 'color',
-      },
-    },
-    {
-      key: 'theme.isDarkTheme',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.F.PROJECT.FORM_THEME.L_IS_DARK_THEME,
-        description: T.F.PROJECT.FORM_THEME.D_IS_DARK_THEME,
       },
     },
   ]

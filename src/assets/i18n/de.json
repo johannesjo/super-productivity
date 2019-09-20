@@ -456,7 +456,6 @@
         "L_HUE_PRIMARY": "Schwellenwert für dunklen Text auf Grundfarbenhintergrund",
         "L_HUE_WARN": "Schwellenwert für dunklen Text auf farbigem Hintergrund warnen",
         "L_IS_AUTO_CONTRAST": "Automatisch eingestellte Textfarben für beste Lesbarkeit",
-        "L_IS_DARK_THEME": "Verwenden Sie dunkles Design",
         "L_IS_REDUCED_THEME": "Reduzierte Benutzeroberfläche verwenden (keine Kästchen um Aufgaben)",
         "L_THEME_COLOR": "Farbe des Themas",
         "L_TITLE": "Titel",

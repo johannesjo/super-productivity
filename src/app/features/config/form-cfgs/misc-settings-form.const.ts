@@ -9,6 +9,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
   help: T.GCF.MISC.HELP,
   items: [
     {
+      key: 'isDarkMode',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_DARK_MODE,
+      },
+    },
+    {
       key: 'isConfirmBeforeExit',
       type: 'checkbox',
       templateOptions: {
