@@ -69,6 +69,7 @@ export const createWindow = (params) => {
     createMenu(quitApp);
   } else {
     mainWin.setMenu(null);
+    mainWin.setMenuBarVisibility(false);
   }
 
   // update prop
