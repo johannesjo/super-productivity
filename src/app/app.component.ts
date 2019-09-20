@@ -31,7 +31,6 @@ import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
 
-const SIDE_PANEL_BREAKPOINT = 700;
 
 @Component({
   selector: 'app-root',
@@ -54,9 +53,7 @@ export class AppComponent {
     filter(isLoaded => isLoaded),
     take(1),
   );
-  isSidePanelBp$: Observable<boolean> = this._breakPointObserver.observe([
-    `(max-width: ${SIDE_PANEL_BREAKPOINT}px)`,
-  ]).pipe(map(result => result.matches));
+
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -71,7 +68,6 @@ export class AppComponent {
     private _swUpdate: SwUpdate,
     private _translateService: TranslateService,
     private _globalThemeService: GlobalThemeService,
-    private _breakPointObserver: BreakpointObserver,
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
     public readonly layoutService: LayoutService,

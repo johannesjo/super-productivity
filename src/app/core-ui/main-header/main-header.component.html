@@ -1,7 +1,8 @@
 <!--<div class="wrapper ">-->
 <div class="wrapper"
      [class.mat-elevation-z3]="(bannerService.activeBanner$|async)">
-  <button class="burger-trigger"
+  <button *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
+          class="burger-trigger"
           (click)="layoutService.toggleSidebar()"
           mat-icon-button>
     <mat-icon>menu</mat-icon>
@@ -120,7 +121,8 @@
       <mat-icon>bookmark</mat-icon>
     </button>
 
-    <button (click)="noteService.toggleShow()"
+    <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"
+            (click)="noteService.toggleShow()"
             mat-icon-button
             [title]="T.MH.TOGGLE_SHOW_NOTES|translate">
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"

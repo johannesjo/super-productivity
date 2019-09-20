@@ -20,14 +20,14 @@
          class="route-wrapper">
       <router-outlet #o="outlet"></router-outlet>
     </div>
-    <mat-drawer [mode]="(isSidePanelBp$|async) ? 'over' : 'side'"
-                [opened]="layoutService.isShowSideBar$|async"
+    <mat-drawer [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
+                [opened]="(layoutService.isShowNav$|async)"
                 position="start">
       <project-list></project-list>
     </mat-drawer>
     <mat-drawer (closedStart)="noteService.hide()"
-                [mode]="(isSidePanelBp$|async) ? 'over' : 'side'"
-                [opened]="noteService.isShowNotes$|async"
+                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"
+                [opened]="layoutService.isShowNotes$|async"
                 position="end">
       <notes></notes>
     </mat-drawer>
