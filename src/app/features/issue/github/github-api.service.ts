@@ -77,10 +77,15 @@ export class GithubApiService {
 
 
   searchIssueForRepo$(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
-    const filterFn = issue =>
-      issue.title.toLowerCase().match(searchText.toLowerCase())
-      || issue.body.toLowerCase().match(searchText.toLowerCase());
-
+    const filterFn = issue => {
+      try {
+        return issue.title.toLowerCase().match(searchText.toLowerCase())
+          || issue.body.toLowerCase().match(searchText.toLowerCase());
+      } catch (e) {
+        console.warn('RegEx Error', e);
+        return false;
+      }
+    };
     this._checkSettings();
 
     return this.getCompleteIssueDataForRepo$(repo)
