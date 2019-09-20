@@ -1,6 +1,5 @@
 <!--<div class="wrapper ">-->
-<div class="wrapper"
-     [class.mat-elevation-z3]="(bannerService.activeBanner$|async)">
+<div class="wrapper">
   <button *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
           class="burger-trigger"
           (click)="layoutService.toggleSidebar()"

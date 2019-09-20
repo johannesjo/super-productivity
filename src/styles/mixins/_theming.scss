@@ -1,6 +1,10 @@
 @mixin darkTheme {
   $sel: #{&};
-  @if ($sel and $sel !='') {
+  @if ($sel and $sel ==':host') {
+    @at-root  :host-context(.isDarkTheme) {
+      @content;
+    }
+  } @else if ($sel and $sel !='') {
     @at-root  :host-context(.isDarkTheme) & {
       @content;
     }
@@ -13,7 +17,11 @@
 
 @mixin lightTheme {
   $sel: #{&};
-  @if ($sel and $sel !='') {
+  @if ($sel and $sel ==':host') {
+    @at-root  :host-context(.isLightTheme) {
+      @content;
+    }
+  } @else if ($sel and $sel !='') {
     @at-root  :host-context(.isLightTheme) & {
       @content;
     }
@@ -84,5 +92,17 @@
   }
   @include lightTheme() {
     color: $light-theme-text-color-less-intense;
+  }
+}
+
+@mixin dividerBorderColor($border-width: 0 0 1px 0) {
+  border-style: solid;
+  border-width: $border-width;
+
+  @include lightTheme {
+    border-color: rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
+  }
+  @include darkTheme {
+    border-color: rgba(255, 255, 255, 0.12);
   }
 }

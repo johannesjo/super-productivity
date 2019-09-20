@@ -78,17 +78,11 @@ $spacer: $s;
   position: relative;
 
   &:after {
+    @include dividerBorderColor();
     content: '';
     position: absolute;
     left: $s*2;
     right: $s*2;
-    height: 1px;
-
-    @include lightTheme {
-      background: rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
-    }
-    @include darkTheme {
-      background: rgba(255, 255, 255, 0.12);
-    }
+    height: 0;
   }
 }
