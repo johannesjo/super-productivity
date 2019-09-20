@@ -2,7 +2,6 @@
 
 mat-drawer-container,
 mat-sidenav-container {
-  //height: calc(100% - #{$main-header-height});
   height: 100%;
   background-attachment: fixed;
 
@@ -23,8 +22,6 @@ mat-sidenav-container {
 }
 
 .header-wrapper {
-  //top: 0;
-  //position: sticky;
   position: relative;
   z-index: 10;
   display: block;
@@ -37,7 +34,7 @@ mat-drawer::ng-deep .mat-drawer-inner-container {
 
 mat-drawer {
   z-index: 3;
-  box-shadow: 0 8px 10px -5px rgba(0, 0, 0, 0.2), 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12);
+  //box-shadow: 0 8px 10px -5px rgba(0, 0, 0, 0.2), 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12);
   border-left: 0 !important;
 }
 
