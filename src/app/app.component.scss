@@ -47,12 +47,21 @@ mat-drawer {
   flex-direction: column;
 }
 
-:host::ng-deep .mat-drawer-content {
+:host ::ng-deep .mat-drawer-content {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
 
-  background: rgba(0, 0, 0, 0.05);
+// makes background a bit darker
+::ng-deep .mat-drawer-content {
+  @include lightTheme {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  @include darkTheme {
+    background: rgba(0, 0, 0, 0.15);
+  }
 }
 
 .route-wrapper {
