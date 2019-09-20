@@ -13,13 +13,13 @@
     <div class="list-controls">
       <button (click)="openEditDialog()"
               aria-label="add global bookmark"
-              color="lighter"
+              color=""
               mat-raised-button=""
               tabindex="1">
         <mat-icon>add</mat-icon>
       </button>
       <button (click)="isEditMode=!isEditMode"
-              [color]="isEditMode?'accent':'lighter'"
+              [color]="isEditMode?'accent':''"
               mat-raised-button=""
               tabindex="1">
         <mat-icon>edit</mat-icon>
@@ -45,7 +45,7 @@
            [title]="bookmark.path"
            aria-label="open global bookmark"
            bookmarkLink
-           color="darker"
+           color=""
            draggable="false"
            mat-raised-button=""
            tabindex="1"

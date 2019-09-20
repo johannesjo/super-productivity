@@ -11,6 +11,7 @@ import {GlobalConfigService} from '../../features/config/global-config.service';
 import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
 import {Project} from '../../features/project/project.model';
 import {T} from '../../t.const';
+import {BannerService} from '../../core/banner/banner.service';
 
 @Component({
   selector: 'main-header',
@@ -33,7 +34,7 @@ export class MainHeaderComponent implements OnInit {
     public readonly bookmarkService: BookmarkService,
     public readonly noteService: NoteService,
     public readonly taskService: TaskService,
-    public readonly configService: GlobalConfigService,
+    public readonly bannerService: BannerService,
     public readonly pomodoroService: PomodoroService,
     private readonly _layoutService: LayoutService,
     private readonly _renderer: Renderer2,

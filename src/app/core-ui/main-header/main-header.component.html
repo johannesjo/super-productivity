@@ -1,5 +1,6 @@
-<div class="wrapper ">
-<!--<div class="wrapper mat-elevation-z3">-->
+<!--<div class="wrapper ">-->
+<div class="wrapper"
+     [class.mat-elevation-z3]="(bannerService.activeBanner$|async)">
   <button class="burger-trigger"
           mat-icon-button>
     <mat-icon>menu</mat-icon>
@@ -124,6 +125,13 @@
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
                 class="note-ico">comment
       </mat-icon>
+    </button>
+
+    <button class="hide-xs"
+            [title]="T.WW.HELP_PROCRASTINATION|translate"
+            mat-icon-button=""
+            routerLink="/procrastination">
+      <mat-icon>flash_on</mat-icon>
     </button>
 
     <div class="play-btn-wrapper">
