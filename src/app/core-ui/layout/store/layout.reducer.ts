@@ -6,18 +6,20 @@ export const LAYOUT_FEATURE_NAME = 'layout';
 export interface LayoutState {
   isShowAddTaskBar: boolean;
   isShowBookmarkBar: boolean;
+  isShowSideBar: boolean;
 }
 
 export const initialState: LayoutState = {
   isShowAddTaskBar: false,
   isShowBookmarkBar: false,
+  isShowSideBar: false,
 };
 
 export const selectLayoutFeatureState = createFeatureSelector<LayoutState>(LAYOUT_FEATURE_NAME);
 
 export const selectIsShowAddTaskBar = createSelector(selectLayoutFeatureState, state => state.isShowAddTaskBar);
 
-export const selectIsShowBookmarkBar = createSelector(selectLayoutFeatureState, state => state.isShowBookmarkBar);
+export const selectIsShowSideBar = createSelector(selectLayoutFeatureState, state => state.isShowSideBar);
 
 
 export function reducer(state: LayoutState = initialState, action: LayoutActions): LayoutState {
@@ -33,14 +35,8 @@ export function reducer(state: LayoutState = initialState, action: LayoutActions
       return {...state, isShowAddTaskBar: !state.isShowAddTaskBar};
 
 
-    case LayoutActionTypes.ShowBookmarkBar:
-      return {...state, isShowBookmarkBar: true};
-
-    case LayoutActionTypes.HideBookmarkBar:
-      return {...state, isShowBookmarkBar: false};
-
-    case LayoutActionTypes.ToggleBookmarkBar:
-      return {...state, isShowBookmarkBar: !state.isShowBookmarkBar};
+    case LayoutActionTypes.ToggleSideBar:
+      return {...state, isShowSideBar: !state.isShowSideBar};
 
     default:
       return state;

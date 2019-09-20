@@ -4,9 +4,7 @@ export enum LayoutActionTypes {
   ShowAddTaskBar = '[Layout] Show AddTaskBar',
   HideAddTaskBar = '[Layout] Hide AddTaskBar',
   ToggleAddTaskBar = '[Layout] Toggle AddTaskBar',
-  ShowBookmarkBar = '[Layout] Show BookmarkBar',
-  HideBookmarkBar = '[Layout] Hide BookmarkBar',
-  ToggleBookmarkBar = '[Layout] Toggle BookmarkBar',
+  ToggleSideBar = '[Layout] Toggle SideBar',
 }
 
 export class ShowAddTaskBar implements Action {
@@ -21,19 +19,11 @@ export class ToggleAddTaskBar implements Action {
   readonly type = LayoutActionTypes.ToggleAddTaskBar;
 }
 
-export class ShowBookmarkBar implements Action {
-  readonly type = LayoutActionTypes.ShowBookmarkBar;
-}
-
-export class HideBookmarkBar implements Action {
-  readonly type = LayoutActionTypes.HideBookmarkBar;
-}
-
-export class ToggleBookmarkBar implements Action {
-  readonly type = LayoutActionTypes.ToggleBookmarkBar;
+export class ToggleSideBar implements Action {
+  readonly type = LayoutActionTypes.ToggleSideBar;
 }
 
 export type LayoutActions =
   ShowAddTaskBar | HideAddTaskBar | ToggleAddTaskBar
-  | ShowBookmarkBar | HideBookmarkBar | ToggleBookmarkBar
+  | ToggleSideBar
   ;

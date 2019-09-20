@@ -2,6 +2,7 @@
 <div class="wrapper"
      [class.mat-elevation-z3]="(bannerService.activeBanner$|async)">
   <button class="burger-trigger"
+          (click)="layoutService.toggleSidebar()"
           mat-icon-button>
     <mat-icon>menu</mat-icon>
   </button>
@@ -105,7 +106,7 @@
   <!--  </nav>-->
 
   <nav class="action-nav">
-    <button (click)="showAddTaskBar()"
+    <button (click)="layoutService.showAddTaskBar()"
             mat-icon-button
             [title]="T.MH.ADD_NEW_TASK|translate">
       <mat-icon>add</mat-icon>
@@ -119,7 +120,7 @@
       <mat-icon>bookmark</mat-icon>
     </button>
 
-    <button (click)="toggleShowNotes()"
+    <button (click)="noteService.toggleShow()"
             mat-icon-button
             [title]="T.MH.TOGGLE_SHOW_NOTES|translate">
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
@@ -135,7 +136,7 @@
     </button>
 
     <div class="play-btn-wrapper">
-      <button (click)="togglePlay()"
+      <button (click)="taskService.toggleStartTask()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
               class="play-btn"
               mat-mini-fab
@@ -163,13 +164,13 @@
         <div class="pomodoro-label">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
         </div>
         <div class="pomodoro-controls">
-          <button (click)="skipToNextPomodoroSession()"
+          <button (click)="pomodoroService.finishPomodoroSession()"
                   class="pomodoro-btn"
                   color=""
                   mat-mini-fab>
             <mat-icon>skip_next</mat-icon>
           </button>
-          <button (click)="stopPomodoro()"
+          <button (click)="pomodoroService.stop()"
                   class="pomodoro-btn"
                   color=""
                   mat-mini-fab>
