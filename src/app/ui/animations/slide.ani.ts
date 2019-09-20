@@ -4,12 +4,12 @@ import {ANI_ENTER_TIMING, ANI_LEAVE_TIMING} from './animation.const';
 export const slideAnimation = [
   trigger('slide', [
     transition(':enter', [
-      style({marginTop: '-{{elHeight}}px'}),
-      animate(ANI_ENTER_TIMING, style({marginTop: '*'}))
+      style({marginTop: '-{{elHeight}}px', opacity: 0}),
+      animate(ANI_ENTER_TIMING, style({marginTop: '*', opacity: 1}))
     ]), // void => *
     transition(':leave', [
-      style({marginTop: 0}),
-      animate(ANI_LEAVE_TIMING, style({marginTop: '-{{elHeight}}px'}))
+      style({marginTop: 0, opacity: 1}),
+      animate(ANI_LEAVE_TIMING, style({marginTop: '-{{elHeight}}px', opacity: 0}))
     ])
   ])
 ];

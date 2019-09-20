@@ -7,9 +7,9 @@ $listControlsWidth: 36px;
 $bookmarkMinWidth: 56px;
 
 :host {
-  @include mat-css-color-and-contrast(800);
-  // TODO glassTheme
-
+  display: block;
+  //@include mat-css-color-and-contrast(800);
+  // TODO glassTheme bzw. noGlassTheme
   a,
   button {
     background: transparent;

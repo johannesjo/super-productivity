@@ -49,8 +49,8 @@ export class GlobalThemeService {
     this._materialCssVarsService.setAccentColor(theme.accent);
     this._materialCssVarsService.setWarnColor(theme.warn);
     // this._materialCssVarsService.setDarkTheme(theme.isDarkTheme);
-    // this._materialCssVarsService.setDarkTheme(true);
-    this._materialCssVarsService.setDarkTheme(false);
+    this._materialCssVarsService.setDarkTheme(true);
+    // this._materialCssVarsService.setDarkTheme(false);
 
     this._setChartTheme(isDarkTheme);
   }
