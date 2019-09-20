@@ -12,6 +12,9 @@ $vertical-button-margin: $s;
 :host-context(.isDarkTheme) {
   background-color: $dark-theme-bg-darker;
 }
+:host-context(.isLightTheme) {
+  background-color: $dark-theme-text-color-most-intense;
+}
 
 .content-wrapper {
   max-width: $component-max-width;
