@@ -3,6 +3,10 @@
 .summary-table {
   width: 100%;
 
+  @include darkTheme {
+    background: $dark-theme-bg-lighter;
+  }
+
   tr {
     height: 36px !important;
   }

@@ -106,11 +106,12 @@ table.export-input-table {
 
   input {
     border-radius: 4px;
-    border: 1px solid #bbb;
+    //border: 1px solid #bbb;
+    border: none;
     padding: $s $s*0.5;
 
     @include darkTheme {
-      background-color: $dark-theme-bg-darker;
+      background-color: $dark-theme-bg-lightest;
       color: #fff;
     }
   }

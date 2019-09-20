@@ -30,6 +30,10 @@ mat-sidenav-container {
 // sidebars
 mat-drawer::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
+
+  @include darkTheme {
+    background: $dark-theme-sidebar-bg;
+  }
 }
 
 mat-drawer {

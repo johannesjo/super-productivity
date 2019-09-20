@@ -48,11 +48,6 @@ input {
 
   @include inlineEditElevation();
 
-  //@include darkTheme() {
-  //  background: $dark-theme-bg-lighter;
-  //  border: 1px solid #ffffff;
-  //  box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
-  //}
 
   &.duration-input {
     width: 100%;

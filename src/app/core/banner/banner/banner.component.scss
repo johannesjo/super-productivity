@@ -10,6 +10,7 @@ $vertical-button-margin: $s;
 
 :host-context(.isDarkTheme) {
   background-color: $dark-theme-bg-darker;
+  background-color: $dark-theme-bg-lightest;
 }
 
 :host-context(.isLightTheme) {

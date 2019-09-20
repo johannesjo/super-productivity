@@ -33,6 +33,10 @@ $project-color-width: $s*3;
   position: relative;
   overflow: hidden;
 
+  @include darkTheme{
+    background: $dark-theme-card-bg;
+  }
+
   > * {
     flex-basis: 33.333%;
   }
