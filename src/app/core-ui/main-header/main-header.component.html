@@ -2,7 +2,7 @@
 <div class="wrapper">
   <button *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
           class="burger-trigger"
-          (click)="layoutService.toggleSidebar()"
+          (click)="layoutService.toggleSideNav()"
           mat-icon-button>
     <mat-icon>menu</mat-icon>
   </button>

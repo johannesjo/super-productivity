@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ProjectListComponent} from './project-list.component';
+import {SideNavComponent} from './side-nav.component';
 import {UiModule} from '../../ui/ui.module';
 import {RouterModule} from '@angular/router';
 
@@ -12,11 +12,11 @@ import {RouterModule} from '@angular/router';
     RouterModule,
   ],
   declarations: [
-    ProjectListComponent,
+    SideNavComponent,
   ],
   exports: [
-    ProjectListComponent,
+    SideNavComponent,
   ]
 })
-export class ProjectListModule {
+export class SideNavModule {
 }

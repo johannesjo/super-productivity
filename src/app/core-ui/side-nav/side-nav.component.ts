@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {ProjectService} from '../../features/project/project.service';
 import {T} from '../../t.const';
 import {DialogCreateProjectComponent} from '../../features/project/dialogs/create-project/dialog-create-project.component';
@@ -7,21 +7,18 @@ import {MatDialog} from '@angular/material';
 import {THEME_COLOR_MAP} from '../../app.constants';
 
 @Component({
-  selector: 'project-list',
-  templateUrl: './project-list.component.html',
-  styleUrls: ['./project-list.component.scss'],
+  selector: 'side-nav',
+  templateUrl: './side-nav.component.html',
+  styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectListComponent implements OnInit {
+export class SideNavComponent {
   T = T;
 
   constructor(
     public readonly projectService: ProjectService,
     private readonly _matDialog: MatDialog,
   ) {
-  }
-
-  ngOnInit() {
   }
 
   switchProject(projectId) {

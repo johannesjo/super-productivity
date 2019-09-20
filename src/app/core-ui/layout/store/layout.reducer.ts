@@ -4,7 +4,7 @@ import {
   showAddTaskBar,
   toggleAddTaskBar,
   toggleShowNotes,
-  toggleSideBar
+  toggleSideNav
 } from './layout.actions';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 
@@ -14,13 +14,13 @@ export interface LayoutState {
   isShowAddTaskBar: boolean;
   isShowBookmarkBar: boolean;
   isShowNotes: boolean;
-  isShowSideBar: boolean;
+  isShowSideNav: boolean;
 }
 
 const _initialLayoutState: LayoutState = {
   isShowAddTaskBar: false,
   isShowBookmarkBar: false,
-  isShowSideBar: false,
+  isShowSideNav: false,
   isShowNotes: false,
 };
 
@@ -28,7 +28,7 @@ export const selectLayoutFeatureState = createFeatureSelector<LayoutState>(LAYOU
 
 export const selectIsShowAddTaskBar = createSelector(selectLayoutFeatureState, state => state.isShowAddTaskBar);
 
-export const selectIsShowSideBar = createSelector(selectLayoutFeatureState, state => state.isShowSideBar);
+export const selectIsShowSideNav = createSelector(selectLayoutFeatureState, state => state.isShowSideNav);
 
 export const selectIsShowNotes = createSelector(selectLayoutFeatureState, (state) => state.isShowNotes);
 
@@ -42,7 +42,7 @@ const _reducer = createReducer<LayoutState>(
 
   on(toggleAddTaskBar, (state) => ({...state, isShowAddTaskBar: !state.isShowAddTaskBar})),
 
-  on(toggleSideBar, (state) => ({...state, isShowSideBar: !state.isShowSideBar})),
+  on(toggleSideNav, (state) => ({...state, isShowSideBar: !state.isShowSideNav})),
 
   on(toggleShowNotes, (state) => ({...state, isShowNotes: !state.isShowNotes})),
 

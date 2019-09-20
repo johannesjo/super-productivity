@@ -13,7 +13,7 @@ export const toggleAddTaskBar = createAction(
   '[Layout] Toggle AddTaskBar',
 );
 
-export const toggleSideBar = createAction(
+export const toggleSideNav = createAction(
   '[Layout] Toggle SideBar',
 );
 

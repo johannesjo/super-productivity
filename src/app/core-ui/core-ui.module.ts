@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {LayoutModule} from './layout/layout.module';
 import {MainHeaderModule} from './main-header/main-header.module';
 import {ShortcutModule} from './shortcut/shortcut.module';
-import {ProjectListModule} from './project-list/project-list.module';
+import {SideNavModule} from './side-nav/side-nav.module';
 
 @NgModule({
   declarations: [],
@@ -12,13 +12,13 @@ import {ProjectListModule} from './project-list/project-list.module';
     LayoutModule,
     MainHeaderModule,
     ShortcutModule,
-    ProjectListModule,
+    SideNavModule,
   ],
   exports: [
     LayoutModule,
     MainHeaderModule,
     ShortcutModule,
-    ProjectListModule,
+    SideNavModule,
   ],
 })
 export class CoreUiModule {

@@ -21,9 +21,9 @@
       <router-outlet #o="outlet"></router-outlet>
     </div>
     <mat-drawer [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
-                [opened]="(layoutService.isShowNav$|async)"
+                [opened]="(layoutService.isShowSideNav$|async)"
                 position="start">
-      <project-list></project-list>
+      <side-nav></side-nav>
     </mat-drawer>
     <mat-drawer (closedStart)="layoutService.hideNotes()"
                 [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"

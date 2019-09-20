@@ -5,11 +5,11 @@ import {
   showAddTaskBar,
   toggleAddTaskBar,
   toggleShowNotes,
-  toggleSideBar
+  toggleSideNav
 } from './store/layout.actions';
 import {Observable, of} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideBar} from './store/layout.reducer';
+import {LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideNav} from './store/layout.reducer';
 import {map, switchMap} from 'rxjs/operators';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {NoteService} from '../../features/note/note.service';
@@ -24,7 +24,7 @@ const BOTH_OVER = 726;
 })
 export class LayoutService {
 
-  private _isShowSideBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowSideBar));
+  private _isShowSideNav$: Observable<boolean> = this._store$.pipe(select(selectIsShowSideNav));
   private _isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
 
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
@@ -42,7 +42,7 @@ export class LayoutService {
     `(min-width: ${BOTH_OVER}px)`,
   ]).pipe(map(result => result.matches));
 
-  isShowNav$: Observable<boolean> = this._isShowSideBar$.pipe(
+  isShowSideNav$: Observable<boolean> = this._isShowSideNav$.pipe(
     switchMap((isShow) => {
       return isShow
         ? of(isShow)
@@ -86,10 +86,9 @@ export class LayoutService {
     this._store$.dispatch(toggleAddTaskBar());
   }
 
-  toggleSidebar() {
-    this._store$.dispatch(toggleSideBar());
+  toggleSideNav() {
+    this._store$.dispatch(toggleSideNav());
   }
-
 
   public toggleNotes() {
     this._store$.dispatch(toggleShowNotes());
