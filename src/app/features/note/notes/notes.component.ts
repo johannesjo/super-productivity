@@ -67,17 +67,6 @@ export class NotesComponent implements OnInit, OnDestroy {
         return handle.className.indexOf && handle.className.indexOf('handle-drag') > -1;
       }
     });
-
-    let isFirst = true;
-    this._subs.add(this.noteService.isShowNotes$.subscribe((isShow) => {
-      if (isShow && !isFirst) {
-        // timeout needs to be longer than animation
-        setTimeout(() => {
-          this.buttonEl._elementRef.nativeElement.focus();
-        }, 200);
-      }
-      isFirst = false;
-    }));
   }
 
   ngOnDestroy() {

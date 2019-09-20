@@ -1,29 +1,28 @@
-import {Action} from '@ngrx/store';
+import {createAction} from '@ngrx/store';
 
-export enum LayoutActionTypes {
-  ShowAddTaskBar = '[Layout] Show AddTaskBar',
-  HideAddTaskBar = '[Layout] Hide AddTaskBar',
-  ToggleAddTaskBar = '[Layout] Toggle AddTaskBar',
-  ToggleSideBar = '[Layout] Toggle SideBar',
-}
 
-export class ShowAddTaskBar implements Action {
-  readonly type = LayoutActionTypes.ShowAddTaskBar;
-}
+export const showAddTaskBar = createAction(
+  '[Layout] Show AddTaskBar',
+);
 
-export class HideAddTaskBar implements Action {
-  readonly type = LayoutActionTypes.HideAddTaskBar;
-}
+export const hideAddTaskBar = createAction(
+  '[Layout] Hide AddTaskBar',
+);
 
-export class ToggleAddTaskBar implements Action {
-  readonly type = LayoutActionTypes.ToggleAddTaskBar;
-}
+export const toggleAddTaskBar = createAction(
+  '[Layout] Toggle AddTaskBar',
+);
 
-export class ToggleSideBar implements Action {
-  readonly type = LayoutActionTypes.ToggleSideBar;
-}
+export const toggleSideBar = createAction(
+  '[Layout] Toggle SideBar',
+);
 
-export type LayoutActions =
-  ShowAddTaskBar | HideAddTaskBar | ToggleAddTaskBar
-  | ToggleSideBar
-  ;
+
+export const toggleShowNotes = createAction(
+  '[Layout] ToggleShow Notes',
+);
+
+export const hideNotes = createAction(
+  '[Layout] Hide Notes',
+);
+

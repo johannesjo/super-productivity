@@ -123,7 +123,7 @@ export class ShortcutService {
       }
 
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
-      this._noteService.toggleShow();
+      this._layoutService.toggleNotes();
       ev.preventDefault();
 
     } else if (checkKeyCombo(ev, keys.toggleBookmarks)) {

@@ -6,9 +6,7 @@ import {
   clearNotes,
   deleteNote,
   deleteNotes,
-  hideNotes,
   loadNoteState,
-  toggleShowNotes,
   updateNote,
   updateNoteOrder,
   updateNotes,
@@ -39,7 +37,6 @@ export const NOTE_FEATURE_NAME = 'note';
 export const selectNoteFeatureState = createFeatureSelector<NoteState>(NOTE_FEATURE_NAME);
 
 export const selectAllNotes = createSelector(selectNoteFeatureState, selectAll);
-export const selectIsShowNotes = createSelector(selectNoteFeatureState, (state) => state.isShowNotes);
 export const selectNoteById = createSelector(
   selectNoteFeatureState,
   (state, props: { id: string }) => state.entities[props.id]
@@ -51,16 +48,6 @@ const _reducer = createReducer<NoteState>(
   on(loadNoteState, (state, payload) => ({
     ...state,
     ...payload.state,
-  })),
-
-  on(toggleShowNotes, (state) => ({
-    ...state,
-    isShowNotes: !state.isShowNotes
-  })),
-
-  on(hideNotes, (state) => ({
-    ...state,
-    isShowNotes: false
   })),
 
   on(updateNoteOrder, (state, payload) => ({

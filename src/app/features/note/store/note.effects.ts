@@ -8,9 +8,7 @@ import {
   addNote,
   addNoteReminder,
   deleteNote,
-  hideNotes,
   removeNoteReminder,
-  toggleShowNotes,
   updateNote,
   updateNoteOrder,
   updateNoteReminder
@@ -36,19 +34,6 @@ export class NoteEffects {
     tap(this._saveToLs.bind(this)),
     tap(this._updateLastActive.bind(this)),
   ), {dispatch: false});
-
-  updateNoteUi$: any = createEffect(() => this._actions$.pipe(
-    ofType(
-      toggleShowNotes,
-      hideNotes,
-    ),
-    withLatestFrom(
-      this._store$.pipe(select(selectCurrentProjectId)),
-      this._store$.pipe(select(selectNoteFeatureState)),
-    ),
-    tap(this._saveToLs.bind(this))
-  ), {dispatch: false});
-
 
   deleteNote$: any = createEffect(() => this._actions$.pipe(
     ofType(

@@ -7,13 +7,6 @@ export const loadNoteState = createAction(
   '[Note] Load Note State',
   props<{ state: NoteState }>(),
 );
-export const toggleShowNotes = createAction(
-  '[Note] ToggleShow Notes',
-);
-
-export const hideNotes = createAction(
-  '[Note] Hide Notes',
-);
 
 export const updateNoteOrder = createAction(
   '[Note] Update Note Order',

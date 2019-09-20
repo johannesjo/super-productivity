@@ -121,10 +121,10 @@
     </button>
 
     <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"
-            (click)="noteService.toggleShow()"
+            (click)="layoutService.toggleNotes()"
             mat-icon-button
             [title]="T.MH.TOGGLE_SHOW_NOTES|translate">
-      <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
+      <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)"
                 class="note-ico">comment
       </mat-icon>
     </button>

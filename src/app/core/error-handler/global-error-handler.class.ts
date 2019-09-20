@@ -5,9 +5,16 @@ import {HANDLED_ERROR, IS_ELECTRON} from '../../app.constants';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../banner/banner.service';
 
+let isWasErrorAlertCreated = false;
+
 const _createErrorAlert = (err: string) => {
+  if (isWasErrorAlertCreated) {
+    return;
+  }
+
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
+  errorAlert.style.color = 'black';
   errorAlert.innerHTML = `
     <h2>An error occurred<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">Please Report</a></p>
@@ -20,6 +27,7 @@ const _createErrorAlert = (err: string) => {
   });
   errorAlert.append(btnReload);
   document.body.append(errorAlert);
+  isWasErrorAlertCreated = true;
 };
 
 // chrome only??

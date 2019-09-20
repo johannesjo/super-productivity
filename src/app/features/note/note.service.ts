@@ -6,16 +6,14 @@ import {
   addNote,
   addNoteReminder,
   deleteNote,
-  hideNotes,
   loadNoteState,
   removeNoteReminder,
-  toggleShowNotes,
   updateNote,
   updateNoteOrder,
   updateNoteReminder
 } from './store/note.actions';
 import shortid from 'shortid';
-import {initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNoteById} from './store/note.reducer';
+import {initialNoteState, NoteState, selectAllNotes, selectNoteById} from './store/note.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {take} from 'rxjs/operators';
 import {createFromDrop, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
@@ -25,7 +23,6 @@ import {isImageUrl, isImageUrlSimple} from '../../util/is-image-url';
   providedIn: 'root',
 })
 export class NoteService {
-  public isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
   public notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
 
   constructor(
@@ -42,13 +39,6 @@ export class NoteService {
     return await this._persistenceService.note.ent.getById(projectId, id);
   }
 
-  public toggleShow() {
-    this._store$.dispatch(toggleShowNotes());
-  }
-
-  public hide() {
-    this._store$.dispatch(hideNotes());
-  }
 
   public async loadStateForProject(projectId) {
     const notes = await this._persistenceService.note.load(projectId) || initialNoteState;
