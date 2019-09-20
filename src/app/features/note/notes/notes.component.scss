@@ -9,6 +9,14 @@
   overflow: hidden;
   width: $s*36;
 
+  @include lightTheme {
+    background: $light-theme-bg-darker;
+    border-left: solid 1px rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
+  }
+  @include darkTheme {
+    border-left: solid 1px rgba(255, 255, 255, 0.12);
+  }
+
   @media (min-width: 900px) and (max-width: 950px) {
     width: $s*32;
     padding: 0 $s*1;
