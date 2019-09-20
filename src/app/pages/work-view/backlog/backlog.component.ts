@@ -5,13 +5,13 @@ import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {T} from '../../../t.const';
 
 @Component({
-  selector: 'backlog-tabs',
-  templateUrl: './backlog-tabs.component.html',
-  styleUrls: ['./backlog-tabs.component.scss'],
+  selector: 'backlog',
+  templateUrl: './backlog.component.html',
+  styleUrls: ['./backlog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation]
 })
-export class BacklogTabsComponent {
+export class BacklogComponent {
   T = T;
 
   @Output() closeBacklog = new EventEmitter<any>();

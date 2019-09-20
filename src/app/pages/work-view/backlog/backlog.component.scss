@@ -12,6 +12,7 @@
 .wrapper {
   min-height: 100%;
   flex: 1;
+  padding-top: $s*3;
 
   @include darkTheme {
     background: $dark-theme-bg-slightly-lighter;
