@@ -11,6 +11,8 @@ mat-sidenav-container {
     //background: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1));
     //background: linear-gradient(180deg, $c-primary-400 0, $c-primary-100 30%, $c-primary-300 90%, $c-primary-400 100%);
     background: linear-gradient(180deg, $c-primary-100 0, $c-primary-50 90%, $light-theme-bg 100%);
+    background: linear-gradient(180deg, $c-primary-200 0, $c-primary-100 90%, $c-primary-50 100%);
+    background: linear-gradient(180deg,  $c-primary-50 0, $c-primary-100 90%,  $c-primary-200 100%);
     //background: $c-primary-50;
 
   }
