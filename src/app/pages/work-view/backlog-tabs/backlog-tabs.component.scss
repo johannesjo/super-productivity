@@ -9,7 +9,7 @@
   left: 0;
 }
 
-.tab-wrapper {
+.wrapper {
   min-height: 100%;
   flex: 1;
 
@@ -17,129 +17,7 @@
     background: $dark-theme-bg-slightly-lighter;
   }
   @include lightTheme {
-    background: #fff;
+    background: $light-theme-bg-darker;
+    //background: linear-gradient(180deg, $c-primary-100 0, $c-primary-50 90%, $light-theme-bg 100%);
   }
-}
-
-:host ::ng-deep {
-  > .mat-tab-group {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    @include mat-css-bg(300);
-
-    > .mat-tab-header {
-      position: relative;
-      z-index: 4;
-      box-shadow: $whiteframe-shadow-3dp;
-      border-bottom: 0;
-
-      .mat-tab-label-active {
-        opacity: 1 !important;
-      }
-
-      .mat-tab-labels {
-        justify-content: stretch;
-        user-select: none;
-
-        .mat-tab-label {
-          flex-grow: 1;
-          height: $bar-height-small;
-          @include mat-css-color-and-contrast(600);
-
-
-          mat-icon {
-            margin-right: $s;
-          }
-        }
-      }
-    }
-
-    > .mat-tab-body-wrapper {
-      // grow to parent height (at least)
-      flex: 1;
-    }
-  }
-}
-
-mat-tab-group::ng-deep > .mat-tab-group > .mat-tab-body-wrapper {
-  > .mat-tab-body {
-    > .mat-tab-body-content {
-      // DON'T PUT OTHER STYLES HERE
-      // this is just required because we use host-context inside the mixin
-      @include scrollY;
-    }
-  }
-}
-
-.component-wrapper {
-  padding-top: $s*2;
-}
-
-.tab-label-text {
-  &,
-  ::ng-deep & {
-    @media (max-width: $layout-xs) {
-      display: none;
-    }
-  }
-}
-
-task-list ::ng-deep > .task-list-inner {
-  min-height: 50px;
-}
-
-
-.scheduled-task {
-  margin-bottom: $s;
-  padding: $s/2 $s*2;
-
-  .content {
-    .title-and-due-date {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-
-      @include mq(xs) {
-        flex-direction: row;
-      }
-    }
-
-    .title {
-      flex: 1;
-    }
-
-    .due-date {
-      font-style: italic;
-      @include mq(xs) {
-        margin: 0 $s*2;
-      }
-    }
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    .controls {
-      align-self: center;
-      display: flex;
-      justify-content: center;
-      flex-direction: row;
-
-      button {
-        margin-left: $s/2;
-        @include mq(xs) {
-          margin-left: $s;
-        }
-      }
-    }
-  }
-}
-
-.no-scheduled-tasks {
-  margin: $s;
-  margin-top: $s*2;
-  text-align: center;
 }
