@@ -1,7 +1,7 @@
 <div *ngIf="metricService.simpleMetrics$|async as sm"
      [@fade]
      class="wrapper">
-  <section style="max-width: 400px; margin: auto; text-align: center;">
+  <section class="basic-stats">
     <!--  <h2>Basic Metrics</h2>-->
     <p><i>{{sm.start}} – {{sm.end}}</i></p>
     <div class="material-table">

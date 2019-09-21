@@ -8,6 +8,13 @@ h3 {
   margin-top: $s*3;
 }
 
+.basic-stats {
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
 .chart-wrapper {
 }
 
@@ -19,4 +26,8 @@ h3 {
       width: 50%;
     }
   }
+}
+
+section {
+  margin-bottom: 2*$s;
 }
