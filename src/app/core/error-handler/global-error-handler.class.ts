@@ -7,7 +7,9 @@ import {BannerService} from '../banner/banner.service';
 
 let isWasErrorAlertCreated = false;
 
-const _createErrorAlert = (err: string) => {
+const _createErrorAlert = (err: string, stackTrace: string) => {
+  console.log(stackTrace);
+
   if (isWasErrorAlertCreated) {
     return;
   }
@@ -16,9 +18,10 @@ const _createErrorAlert = (err: string) => {
   errorAlert.classList.add('global-error-alert');
   errorAlert.style.color = 'black';
   errorAlert.innerHTML = `
-    <h2>An error occurred<h2>
-    <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">Please Report</a></p>
+    <h2>Snap! A critical error occurred...<h2>
+    <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please Report !</a></p>
     <pre style="line-height: 1.3;">${err}</pre>
+    <pre style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
     `;
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
@@ -28,13 +31,6 @@ const _createErrorAlert = (err: string) => {
   errorAlert.append(btnReload);
   document.body.append(errorAlert);
   isWasErrorAlertCreated = true;
-};
-
-// chrome only??
-const _getStackTrace = () => {
-  const obj: any = {};
-  Error.captureStackTrace(obj, _getStackTrace);
-  return obj.stack;
 };
 
 
@@ -54,6 +50,9 @@ export class GlobalErrorHandler implements ErrorHandler {
   // TODO Cleanup this mess
   handleError(err: any) {
     const errStr = (typeof err === 'string') ? err : err.toString();
+    // tslint:disable-next-line
+    const stack = err && err.stack;
+
 
     // if not our custom error handler we have a critical error on our hands
     if (!err || (!err.handledError && (errStr && !errStr.match(HANDLED_ERROR)))) {
@@ -61,9 +60,9 @@ export class GlobalErrorHandler implements ErrorHandler {
 
       // NOTE: dom exceptions will break all rendering that's why
       if (err.constructor && err.constructor === DOMException) {
-        _createErrorAlert('DOMException: ' + errorStr);
+        _createErrorAlert('DOMException: ' + errorStr, stack);
       } else {
-        _createErrorAlert(errorStr);
+        _createErrorAlert(errorStr, stack);
         // try {
         //   this._bannerService.open({
         //     id: BannerId.GlobalError,
@@ -92,13 +91,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
     console.error('GLOBAL_ERROR_HANDLER', err);
     if (IS_ELECTRON) {
-      let stackTrace;
-      try {
-        stackTrace = _getStackTrace();
-      } catch (e) {
-        stackTrace = '';
-      }
-      this._electronLogger.error('Frontend Error:', err, stackTrace);
+      this._electronLogger.error('Frontend Error:', err, stack);
     }
 
     // NOTE: rethrow the error otherwise it gets swallowed
