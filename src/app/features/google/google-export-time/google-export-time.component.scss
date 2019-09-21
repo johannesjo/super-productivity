@@ -6,7 +6,7 @@
   padding: $s*2;
   background: #fff;
   border-radius: $card-border-radius;
-  box-shadow: $shadow-card-shadow;
+  box-shadow: $whiteframe-shadow-1dp;
 }
 
 :host-context(.isDarkTheme) {

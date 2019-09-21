@@ -1,6 +1,10 @@
-@mixin darkTheme {
+@mixin darkTheme($is-global: false) {
   $sel: #{&};
-  @if ($sel and $sel ==':host') {
+  @if ($is-global) {
+    .isDarkTheme & {
+      @content;
+    }
+  } @else if ($sel and $sel ==':host') {
     @at-root  :host-context(.isDarkTheme) {
       @content;
     }
@@ -15,9 +19,13 @@
   }
 }
 
-@mixin lightTheme {
+@mixin lightTheme($is-global: false) {
   $sel: #{&};
-  @if ($sel and $sel ==':host') {
+  @if ($is-global) {
+    .isLightTheme & {
+      @content;
+    }
+  } @else if ($sel and $sel ==':host') {
     @at-root  :host-context(.isLightTheme) {
       @content;
     }
@@ -95,18 +103,18 @@
   }
 }
 
-@mixin dividerBorderColor($border-width: 0 0 1px 0) {
+@mixin dividerBorderColor($border-width: 0 0 1px 0, $is-global: false) {
   border-style: solid;
   border-width: $border-width;
 
-  @include lightTheme {
+  @include lightTheme($is-global) {
     border-color: rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
   }
-  @include darkTheme {
+  @include darkTheme($is-global) {
     border-color: rgba(255, 255, 255, 0.12);
   }
 }
 
-@mixin flatBox() {
-  @include dividerBorderColor(1px);
+@mixin flatBox($is-global: false) {
+  @include dividerBorderColor(1px, $is-global);
 }

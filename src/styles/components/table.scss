@@ -22,6 +22,7 @@ table {
 
 .table-wrapper {
   overflow: auto;
+  border-radius: $card-border-radius;
 }
 
 $this-table-min-height: $s*2;

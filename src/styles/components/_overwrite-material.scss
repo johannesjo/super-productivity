@@ -89,3 +89,10 @@ body .mat-form-field {
 .isDarkTheme .mat-card {
   background: $dark-theme-card-bg;
 }
+
+.mat-card {
+  box-shadow: none;
+
+  @include flatBox(true);
+
+}
