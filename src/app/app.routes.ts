@@ -3,9 +3,7 @@ import {WorkViewPageComponent} from './pages/work-view/work-view-page.component'
 import {ConfigPageComponent} from './pages/config-page/config-page.component';
 import {ProjectPageComponent} from './pages/project-page/project-page.component';
 import {DailySummaryComponent} from './pages/daily-summary/daily-summary.component';
-import {WorklogAndCalendarComponent} from './pages/worklog-and-calendar/worklog-and-calendar.component';
 import {WorklogComponent} from './features/worklog/worklog.component';
-import {CalendarComponent} from './pages/worklog-and-calendar/calendar/calendar.component';
 import {MetricPageComponent} from './pages/metric-page/metric-page.component';
 import {ProcrastinationComponent} from './features/procrastination/procrastination.component';
 import {SchedulePageComponent} from './pages/schedule-page/schedule-page.component';
@@ -19,25 +17,6 @@ export const APP_ROUTES: Routes = [
   {path: 'procrastination', component: ProcrastinationComponent, data: {page: 'procrastination'}},
   {path: 'daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
-  {
-    path: 'worklog-and-calendar',
-    component: WorklogAndCalendarComponent,
-    children: [
-      {path: '', redirectTo: 'worklog', pathMatch: 'full'},
-      {path: 'calendar', component: CalendarComponent},
-      {path: 'worklog', component: WorklogComponent},
-    ]
-  },
-  // {path: 'hero/:id', component: HeroDetailComponent},
-  // {
-  //   path: 'heroes',
-  //   component: HeroListComponent,
-  //   data: {title: 'Heroes List'}
-  // },
-  // {
-  //   path: '',
-  //   redirectTo: '/heroes',
-  //   pathMatch: 'full'
-  // },
+  {path: 'worklog', component: WorklogComponent, data: {page: 'worklog'}},
   {path: '**', component: WorkViewPageComponent}
 ];

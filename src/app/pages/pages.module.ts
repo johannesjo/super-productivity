@@ -4,9 +4,9 @@ import {ConfigPageModule} from './config-page/config-page.module';
 import {ProjectPageModule} from './project-page/project-page.module';
 import {WorkViewPageModule} from './work-view/work-view-page.module';
 import {DailySummaryModule} from './daily-summary/daily-summary.module';
-import {WorklogAndCalendarModule} from './worklog-and-calendar/worklog-and-calendar.module';
 import {MetricPageModule} from './metric-page/metric-page.module';
 import {SchedulePageModule} from './schedule-page/schedule-page.module';
+import {WorklogPageModule} from './worklog-page/worklog-page.module';
 
 @NgModule({
   imports: [
@@ -16,7 +16,7 @@ import {SchedulePageModule} from './schedule-page/schedule-page.module';
     WorkViewPageModule,
     DailySummaryModule,
     MetricPageModule,
-    WorklogAndCalendarModule,
+    WorklogPageModule,
     SchedulePageModule,
   ],
   declarations: []
