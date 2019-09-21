@@ -1516,10 +1516,10 @@ amdefine@>=0.0.4:
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
   integrity sha1-SlKCrBZHKek2Gbz9OtFR+BfOkfU=
 
-angular-material-css-vars@0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/angular-material-css-vars/-/angular-material-css-vars-0.1.4.tgz#0f334126c7c385297e4a551c45a3556f19da7a45"
-  integrity sha512-jmwNGMBAX/ginEZ0usm6iQxLzPr2BHR21J8gpuGrpDZ1tIcboOC8UDvQ/r7MYsInyUXAxAGrzL86KMQypgOJVQ==
+angular-material-css-vars@0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/angular-material-css-vars/-/angular-material-css-vars-0.1.5.tgz#96da11f55d9f00d885b1872333bf9c184cceaa77"
+  integrity sha512-+O5bHDaRKmw7sutFPrDutL1gGWsN7UUNeTGrqRFQxLUTuY/daMSdhgk0SFpFfQnA7KSNOrVvPbPj+F3yL3iB5g==
   dependencies:
     tinycolor2 "^1.4.1"
     tslib "^1.9.0"
