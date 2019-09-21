@@ -27,7 +27,8 @@
             <button (click)="exportData(month.value,year.key, month.key)"
                     aria-label="export data"
                     color="primary"
-                    mat-mini-fab="">
+                    mat-mini-fab
+                    class="mat-elevation-z1">
               <mat-icon>call_made</mat-icon>
             </button>
           </h2>
@@ -53,7 +54,8 @@
                   [matTooltip]="week.start+'.-'+week.end+'. Days: '+ week.daysWorked+', Time: '+(week.timeSpent|msToString)"
                   aria-label="export data"
                   color=""
-                  mat-mini-fab="">
+                  mat-mini-fab
+                  class="mat-elevation-z1">
                   <mat-icon>call_made</mat-icon>
                 </button>
               </div>

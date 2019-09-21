@@ -139,7 +139,7 @@
     <div class="play-btn-wrapper">
       <button (click)="taskService.toggleStartTask()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
-              class="play-btn"
+              class="play-btn mat-elevation-z3"
               mat-mini-fab
               [title]="T.MH.TOGGLE_TRACK_TIME|translate">
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>

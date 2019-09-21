@@ -106,3 +106,7 @@
     border-color: rgba(255, 255, 255, 0.12);
   }
 }
+
+@mixin flatBox() {
+  @include dividerBorderColor(1px);
+}

@@ -158,7 +158,7 @@
               *ngIf="isForToday"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
-              mat-raised-button="">
+              mat-flat-button="">
         <mat-icon>wb_sunny</mat-icon>
         {{T.PDS.SAVE_AND_GO_HOME|translate}}
       </button>
@@ -166,7 +166,7 @@
               *ngIf="!isForToday"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
-              mat-raised-button="">
+              mat-flat-button="">
         <mat-icon>wb_sunny</mat-icon>
         {{T.PDS.CLEAR_ALL_CONTINUE|translate}}
       </button>
