@@ -173,8 +173,8 @@ $summary-point-inner-margin: $s;
 
 
 $particles: 30;
-$width: 300;
-$height: 300;
+$width: 500;
+$height: 500;
 
 // Create the explosion...
 $box-shadow: ();
@@ -185,20 +185,26 @@ $box-shadow2: ();
   $box-shadow2: $box-shadow2, 0 0 #fff
 }
 
-.pyro > .before, .pyro > .after {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 100%;
-  box-shadow: $box-shadow2;
+.pyro {
   pointer-events: none;
-  animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards, 5s position linear infinite backwards;
+
+  > .before,
+  > .after {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    //border-radius: 50%;
+    box-shadow: $box-shadow2;
+    animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards, 5s position linear infinite backwards;
+    opacity: 0;
+  }
+
+  > .after {
+    animation-delay: 1.25s, 1.25s, 1.25s;
+    animation-duration: 1.25s, 1.25s, 6.25s;
+  }
 }
 
-.pyro > .after {
-  animation-delay: 1.25s, 1.25s, 1.25s;
-  animation-duration: 1.25s, 1.25s, 6.25s;
-}
 
 @keyframes bang {
   to {
@@ -207,7 +213,15 @@ $box-shadow2: ();
 }
 
 @keyframes gravity {
-  to {
+  0% {
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1
+  }
+
+  100% {
     transform: translateY(200px);
     opacity: 0;
   }
