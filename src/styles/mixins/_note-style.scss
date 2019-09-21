@@ -6,7 +6,7 @@
   border-radius: $card-border-radius;
   box-shadow: $shadow-card-shadow;
   transition: $transition-standard;
-  transition-property: transform;
+  transition-property: transform, box-shadow;
   //border: 1px solid #DADCE0;
 
   @include darkTheme {

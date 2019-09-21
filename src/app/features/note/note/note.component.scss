@@ -14,6 +14,7 @@ $noteFontSize: 14px;
     transform: scale(1.04);
     position: relative;
     z-index: 4;
+    box-shadow: $whiteframe-shadow-6dp;
     //outline: 2px dashed $c-accent;
   }
 
