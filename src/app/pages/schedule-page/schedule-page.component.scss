@@ -3,6 +3,8 @@
 .scheduled-task {
   margin-bottom: $s;
   padding: $s/2 $s*2;
+  @include dividerBorderColor(1px);
+  box-shadow: none;
 
   .content {
     .title-and-due-date {
