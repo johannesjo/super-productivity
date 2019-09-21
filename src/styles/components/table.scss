@@ -60,7 +60,7 @@ div.material-table {
 
   }
 
-  .isDarkTheme &._no-elevation  {
+  .isDarkTheme &._no-elevation {
     background-color: transparent;
   }
 
@@ -87,6 +87,22 @@ div.material-table {
 
     &:last-of-type {
       padding-right: $s*3;
+    }
+  }
+
+  tr {
+    &:first-of-type {
+      th,
+      td {
+        border-top: 0;
+      }
+    }
+
+    &:last-of-type {
+      th,
+      td {
+        border-bottom: 0;
+      }
     }
   }
 }
