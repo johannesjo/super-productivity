@@ -3,15 +3,13 @@
           routerLink="work-view"
           routerLinkActive="isActiveRoute">
     <mat-icon>wb_sunny</mat-icon>
-    Tasks
-    <!--    {{T.MH.MANAGE_PROJECTS|translate}}-->
+        {{T.MH.TASKS|translate}}
   </button>
   <button mat-menu-item
           routerLink="schedule"
           routerLinkActive="isActiveRoute">
     <mat-icon>access_alarms</mat-icon>
-    Scheduled
-    <!--    {{T.MH.MANAGE_PROJECTS|translate}}-->
+        {{T.MH.SCHEDULED|translate}}
   </button>
   <button mat-menu-item
           routerLink="worklog-and-calendar"
@@ -35,9 +33,6 @@
           mat-menu-item>
     <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
          class="project-color"></div>
-
-    <!--    <mat-icon *ngIf="project.id===(projectService.currentId$|async)">radio_button_checked</mat-icon>-->
-    <!--    <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>-->
     <mat-icon>list</mat-icon>
     {{project.title}}
   </button>
