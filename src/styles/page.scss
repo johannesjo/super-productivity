@@ -38,11 +38,11 @@ body {
   margin: auto;
 
   @include mq(xs) {
-    padding: $s 2*$s $s*9;
+    padding: 0 2*$s $s*9;
   }
 
   @include mq(component) {
-    padding: $s*2 3*$s $s*9;
+    padding: 0 3*$s $s*9;
   }
 
   improvement-banner + & {

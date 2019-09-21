@@ -138,7 +138,7 @@
 
     <div class="play-btn-wrapper">
       <button (click)="taskService.toggleStartTask()"
-              [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
+              [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
               class="play-btn"
               mat-mini-fab
               [title]="T.MH.TOGGLE_TRACK_TIME|translate">

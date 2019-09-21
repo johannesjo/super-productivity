@@ -50,7 +50,7 @@ h2 {
   justify-content: center;
   align-items: center;
   @include mq(xs) {
-    padding: 0.5*$s;
+    padding: 2*$s 0;
   }
   @include mq(xs, max) {
     .label {

@@ -14,13 +14,13 @@
       <button (click)="openEditDialog()"
               aria-label="add global bookmark"
               color=""
-              mat-raised-button=""
+              mat-stroked-button=""
               tabindex="1">
         <mat-icon>add</mat-icon>
       </button>
       <button (click)="isEditMode=!isEditMode"
               [color]="isEditMode?'accent':''"
-              mat-raised-button=""
+              mat-stroked-button=""
               tabindex="1">
         <mat-icon>edit</mat-icon>
       </button>
@@ -47,7 +47,7 @@
            bookmarkLink
            color=""
            draggable="false"
-           mat-raised-button=""
+           mat-stroked-button=""
            tabindex="1"
            target="_blank"
            type="{{bookmark.type}}">
