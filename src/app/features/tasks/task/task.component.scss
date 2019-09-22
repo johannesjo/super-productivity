@@ -2,7 +2,6 @@
 @import '~angular-material-css-vars/public-util';
 
 $task-shadow: $shadow-card-shadow;
-$sub-task-shadow: $whiteframe-shadow-1dp;
 $task-active-shadow: $whiteframe-shadow-6dp;
 $task-first-line-min-height: 40px;
 $task-icon-default-opacity: 0.7;
@@ -666,16 +665,8 @@ progress-bar {
   transform-origin: left top;
   transition-property: all;
 
-  @include mq(xs, max) {
-    //display: none;
-  }
-
   :host-context(.isNoTouchDevice) & {
     opacity: 0;
-  }
-
-  @include mq(xs, max) {
-    //display: none;
   }
 
   :host:hover & {
