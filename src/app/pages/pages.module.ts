@@ -7,6 +7,7 @@ import {DailySummaryModule} from './daily-summary/daily-summary.module';
 import {MetricPageModule} from './metric-page/metric-page.module';
 import {SchedulePageModule} from './schedule-page/schedule-page.module';
 import {WorklogPageModule} from './worklog-page/worklog-page.module';
+import {ProjectSettingsModule} from './project-settings/project-settings.module';
 
 @NgModule({
   imports: [
@@ -18,6 +19,7 @@ import {WorklogPageModule} from './worklog-page/worklog-page.module';
     MetricPageModule,
     WorklogPageModule,
     SchedulePageModule,
+    ProjectSettingsModule,
   ],
   declarations: []
 })

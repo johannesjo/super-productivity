@@ -7,15 +7,23 @@
     position: relative;
   }
 
+  .section-wrapper {
+    //display: grid;
+    //grid-template-columns: 50% 50%;
+    //grid-gap: 0 $s*2;
+  }
+
   .config-section {
+    @include dividerBorderColor(1px);
+    break-inside: avoid;
     margin-bottom: 10px;
     border-radius: $card-border-radius;
     background: #ffffff;
-    @include dividerBorderColor(1px);
 
     @include darkTheme {
       background-color: $dark-theme-bg-lighter;
     }
+
 
     .md-title {
       margin-top: 0;
@@ -43,23 +51,6 @@
     }
   }
 
-  @include mq(sm) {
-    .row {
-      display: flex;
-      flex-direction: row;
-    }
-    .settings-col {
-      width: 50%;
-
-      &:first-child {
-        margin-right: 10px;
-      }
-
-      &:last-child {
-        margin-left: 10px;
-      }
-    }
-  }
 
   @include mq(xs, max) {
     .keyboard-settings {

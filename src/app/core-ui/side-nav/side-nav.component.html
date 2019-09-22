@@ -36,7 +36,7 @@
        class="project">
     <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
          class="project-color"></div>
-    <button (click)="switchProject(project.id)"
+    <button (click)="switchProject(project.id, 'work-view')"
             mat-menu-item>
       <mat-icon>list</mat-icon>
       {{project.title}}
@@ -44,7 +44,9 @@
 
     <button
       class="project-settings-btn"
-      mat-icon-button>
+      mat-icon-button
+      routerLinkActive="isActiveRoute"
+      (click)="switchProject(project.id, 'project-settings')">
       <mat-icon>more_vert</mat-icon>
     </button>
   </div>
