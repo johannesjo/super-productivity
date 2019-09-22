@@ -6,7 +6,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     lng: null
   },
   misc: {
-    isDarkMode: true,
+    isDarkMode: false,
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
     isHideNav: false,
