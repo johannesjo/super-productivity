@@ -915,6 +915,7 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
+    "TOGGLE_DARK_MODE": "Toggle Dark Mode",
     "PROJECT_SETTINGS": "Project Specific Settings"
   },
   "S": {

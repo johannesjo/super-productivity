@@ -13,6 +13,7 @@ import {IssueIntegrationCfgs} from '../../features/issue/issue';
 import {IS_ELECTRON} from '../../app.constants';
 import {environment} from '../../../environments/environment';
 import {T} from '../../t.const';
+import {MatSlideToggleChange} from '@angular/material';
 
 @Component({
   selector: 'config-page',
@@ -61,5 +62,9 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     } else {
       this.configService.updateSection(sectionKey, config);
     }
+  }
+
+  toggleDarkMode(change: MatSlideToggleChange) {
+    this.configService.updateSection('misc', {isDarkMode: change.checked});
   }
 }
