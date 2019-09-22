@@ -37,7 +37,7 @@
           <tr *ngFor="let logEntry of day.value.logEntries; trackBy: trackByLogEntry;">
             <td [class.isSubTask]="logEntry.task.parentId"
                 class="title"
-                colspan="">
+                colspan>
               <span class="task-title">{{logEntry.task.title}}</span>
             </td>
             <td class="worked">

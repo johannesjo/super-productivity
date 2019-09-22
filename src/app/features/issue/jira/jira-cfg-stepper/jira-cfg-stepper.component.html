@@ -60,7 +60,7 @@
                      [model]="jiraCfg">
 
           <div class="center-wrapper">
-            <button mat-raised-button=""
+            <button mat-raised-button
                     matStepperPrevious>
               <mat-icon>arrow_backward</mat-icon>
               {{T.G.PREVIOUS|translate}}
@@ -82,14 +82,14 @@
       <ng-template matStepLabel>Done</ng-template>
       {{T.F.JIRA.STEPPER.DONE|translate}}
       <div class="center-wrapper">
-        <button mat-raised-button=""
+        <button mat-raised-button
                 matStepperPrevious>
           <mat-icon>arrow_backward</mat-icon>
           {{T.G.PREVIOUS|translate}}
         </button>
         <button (click)="saveConfig()"
                 color="primary"
-                mat-raised-button=""
+                mat-raised-button
                 type="button">
           <mat-icon>save</mat-icon>
           {{T.G.SAVE|translate}}

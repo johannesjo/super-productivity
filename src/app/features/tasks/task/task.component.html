@@ -31,7 +31,7 @@
     <button (click)="toggleTaskDone()"
             *ngIf="task.isDone"
             class="check-done"
-            mat-icon-button=""
+            mat-icon-button
             tabindex="2"
             [title]="T.F.TASK.CMP.TOGGLE_DONE|translate">
       <mat-icon @swirl
@@ -218,7 +218,7 @@
 
           <button (click)="toggleTaskDone()"
                   class="show-touch-only"
-                  mat-menu-item=""
+                  mat-menu-item
                   tabindex="2">
             <ng-container *ngIf="task.isDone">
               <mat-icon>undo
@@ -258,14 +258,14 @@
 
           <button (click)="addSubTask();"
                   *ngIf="!task.parentId&&!task.isDone"
-                  mat-menu-item=""
+                  mat-menu-item
                   tabindex="2">
             <mat-icon>playlist_add</mat-icon>
             {{T.F.TASK.CMP.ADD_SUB_TASK|translate}}
           </button>
 
           <button (click)="addAttachment();"
-                  mat-menu-item=""
+                  mat-menu-item
                   tabindex="2">
             <mat-icon>attachment</mat-icon>
             {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
@@ -273,7 +273,7 @@
 
           <button (click)="updateIssueData()"
                   *ngIf="task.issueId"
-                  mat-menu-item=""
+                  mat-menu-item
                   tabindex="2">
             <mat-icon>cloud_download</mat-icon>
             {{T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate}}
@@ -281,7 +281,7 @@
 
           <button (click)="moveToBacklog();"
                   *ngIf="!task.parentId && !isBacklog"
-                  mat-menu-item=""
+                  mat-menu-item
                   tabindex="2">
             <mat-icon>arrow_downward</mat-icon>
             {{T.F.TASK.CMP.MOVE_TO_BACKLOG|translate}}
@@ -289,7 +289,7 @@
 
           <button (click)="moveToToday();"
                   *ngIf="!task.parentId && isBacklog"
-                  mat-menu-item=""
+                  mat-menu-item
                   tabindex="2">
             <mat-icon>arrow_upward</mat-icon>
             {{T.F.TASK.CMP.MOVE_TO_TODAY|translate}}
@@ -297,7 +297,7 @@
 
           <button (click)="deleteTask()"
                   *ngIf="!task.repeatCfgId"
-                  mat-menu-item=""
+                  mat-menu-item
                   tabindex="2">
 
             <mat-icon style="color:#e15d63;">delete_forever
@@ -305,7 +305,7 @@
             {{T.F.TASK.CMP.DELETE|translate}}
           </button>
 
-          <button mat-menu-item=""
+          <button mat-menu-item
                   tabindex="2"
                   *ngIf="!task.parentId && !task.issueId"
                   [matMenuTriggerFor]="advMenu">
@@ -329,7 +329,7 @@
 
           <button (click)="editTaskRepeatCfg()"
                   *ngIf="!task.parentId && !task.issueId"
-                  mat-menu-item="">
+                  mat-menu-item>
             <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
             <span *ngIf="!task.repeatCfgId">{{T.F.TASK.CMP.REPEAT_TASK|translate}}</span>
             <span *ngIf="task.repeatCfgId">{{T.F.TASK.CMP.REPEAT_EDIT|translate}}</span>
@@ -365,7 +365,7 @@
             *ngIf="task.subTasks && task.subTasks.length"
             class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
             color=""
-            mat-mini-fab=""
+            mat-mini-fab
             tabindex="2"
             [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">
       <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)">add

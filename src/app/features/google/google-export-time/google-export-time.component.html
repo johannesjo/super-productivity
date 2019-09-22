@@ -21,7 +21,7 @@
     <mat-form-field>
       <label>Spreadsheet ID</label>
       <input [(ngModel)]="opts.spreadsheetId"
-             matInput=""
+             matInput
              name="spreadsheetId"
              type="text">
     </mat-form-field>
@@ -88,7 +88,7 @@
           *ngIf="!(googleApiService.isLoggedIn$|async)"
           [promiseBtn]="loginPromise"
           color=""
-          mat-stroked-button=""
+          mat-stroked-button
           type="button">
     <mat-icon>exit_to_app</mat-icon>
     {{T.F.GOOGLE.EXPORT_TIME.LOGIN|translate}}
@@ -96,7 +96,7 @@
   <button (click)="logout()"
           *ngIf="(googleApiService.isLoggedIn$|async)"
           color=""
-          mat-stroked-button=""
+          mat-stroked-button
           type="button">
     <mat-icon>clear</mat-icon>
     <!--<mat-icon>logout</mat-icon>-->
@@ -107,7 +107,7 @@
           [disabled]="!opts.spreadsheetId"
           [promiseBtn]="readPromise"
           color=""
-          mat-stroked-button=""
+          mat-stroked-button
           type="button">
     <mat-icon>chrome_reader_mode</mat-icon>
     {{T.F.GOOGLE.EXPORT_TIME.READ_SPREADSHEET|translate}}
@@ -115,7 +115,7 @@
   <a *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
      color=""
      href="https://docs.google.com/spreadsheets/d/{{opts.spreadsheetId}}"
-     mat-stroked-button=""
+     mat-stroked-button
      target="_blank">
     <mat-icon>link</mat-icon>
     {{T.F.GOOGLE.EXPORT_TIME.OPEN_SPREADSHEET|translate}}
@@ -124,13 +124,13 @@
           *ngIf="actualValues.length > 0 &&  (googleApiService.isLoggedIn$|async)"
           [promiseBtn]="savePromise"
           color="primary"
-          mat-stroked-button=""
+          mat-stroked-button
           type="button">
     <mat-icon>save</mat-icon>
     {{T.F.GOOGLE.EXPORT_TIME.SAVE_ROW|translate}}
   </button>
 
-  <!--<a mat-stroked-button=""-->
+  <!--<a mat-stroked-button-->
   <!--color="primary"-->
   <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
   <!--target="_blank"-->
@@ -148,7 +148,7 @@
         <mat-form-field>
           <label>Spreadsheet ID</label>
           <input [(ngModel)]="opts.spreadsheetId"
-                 matInput=""
+                 matInput
                  name="spreadsheetId"
                  type="text">
         </mat-form-field>

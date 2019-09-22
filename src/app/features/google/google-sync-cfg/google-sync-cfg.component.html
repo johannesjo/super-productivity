@@ -13,7 +13,7 @@
               *ngIf="!(googleApiService.isLoggedIn$|async)"
               [promiseBtn]="loginPromise"
               color="primary"
-              mat-stroked-button=""
+              mat-stroked-button
               type="button">
         <mat-icon>exit_to_app</mat-icon>
         {{T.G.LOGIN|translate}}
@@ -21,7 +21,7 @@
       <button (click)="logout()"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               color="primary"
-              mat-stroked-button=""
+              mat-stroked-button
               type="button">
         <mat-icon>clear</mat-icon>
         {{T.G.LOGOUT|translate}}
@@ -32,7 +32,7 @@
               [disabled]="googleDriveSyncService.isLoadInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isSaveInProgress$|async"
               color="primary"
-              mat-stroked-button=""
+              mat-stroked-button
               type="button">
         <mat-icon>arrow_upward</mat-icon>
         {{T.F.GOOGLE.SYNC_CFG.BACKUP_NOW|translate}}
@@ -42,7 +42,7 @@
               [disabled]="googleDriveSyncService.isSaveInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isLoadInProgress$|async"
               color="primary"
-              mat-stroked-button=""
+              mat-stroked-button
               type="button">
         <mat-icon>arrow_downward</mat-icon>
         {{T.F.GOOGLE.SYNC_CFG.LOAD_FROM|translate}}
@@ -53,7 +53,7 @@
              class="form-inputs">
       <mat-form-field>
         <input [(ngModel)]="tmpSyncFile"
-               matInput=""
+               matInput
                name="tmpSyncFile"
                [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_FILE_NAME|translate"
                type="text">
@@ -62,7 +62,7 @@
 
       <button (click)="changeSyncFileName(tmpSyncFile)"
               color="primary"
-              mat-stroked-button=""
+              mat-stroked-button
               type="button">
         <mat-icon>save</mat-icon>
         {{T.F.GOOGLE.SYNC_CFG.UPDATE_SYNC_FILE|translate}}
@@ -95,8 +95,8 @@
         <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
           <input [(ngModel)]="cfg.syncInterval"
                  [isAllowSeconds]="true"
-                 inputDuration=""
-                 matInput=""
+                 inputDuration
+                 matInput
                  name="syncInterval"
                  [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_INTERVAL|translate"
                  type="text">
@@ -104,7 +104,7 @@
         </mat-form-field>
       </section>
 
-      <a mat-button=""
+      <a mat-button
          color=primary
          class="md-stroked"
          external-link

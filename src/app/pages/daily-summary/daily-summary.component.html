@@ -7,7 +7,7 @@
   <div *ngIf="isForToday"
        style="text-align: center;">
     <a class="back-btn"
-       mat-button=""
+       mat-button
        routerLink="/work-view">
       <mat-icon>chevron_left</mat-icon>
       {{T.PDS.BACK|translate}}
@@ -89,14 +89,14 @@
                               [flatTasks]="(tasksWorkedOnOrDoneOrRepeatableFlat$|async)"></task-summary-table>
           <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
             <button [matMenuTriggerFor]="roundTimeActions"
-                    mat-button=""
+                    mat-button
                     [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate">
               <mat-icon>restore</mat-icon>
               {{T.PDS.ROUND_TIME_SPENT|translate}}
             </button>
             <button (click)="showExportModal()"
                     *ngIf="isForToday"
-                    mat-button="">
+                    mat-button>
               <mat-icon>call_made</mat-icon>
               {{T.PDS.EXPORT_TASK_LIST|translate}}
             </button>
@@ -158,7 +158,7 @@
               *ngIf="isForToday"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
-              mat-flat-button="">
+              mat-flat-button>
         <mat-icon>wb_sunny</mat-icon>
         {{T.PDS.SAVE_AND_GO_HOME|translate}}
       </button>
@@ -166,7 +166,7 @@
               *ngIf="!isForToday"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
-              mat-flat-button="">
+              mat-flat-button>
         <mat-icon>wb_sunny</mat-icon>
         {{T.PDS.CLEAR_ALL_CONTINUE|translate}}
       </button>

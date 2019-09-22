@@ -20,7 +20,7 @@
       <div class="item">
         <button (click)="openJiraCfg()"
                 color="primary"
-                mat-button=""
+                mat-button
                 type="button">
           <mat-icon *ngIf="!jiraCfg?.isEnabled"
                     svgIcon="jira"></mat-icon>
@@ -31,7 +31,7 @@
       <div class="item">
         <button (click)="openGithubCfg()"
                 color="primary"
-                mat-button=""
+                mat-button
                 type="button">
           <mat-icon *ngIf="!githubCfg?.repo"
                     svgIcon="github"></mat-icon>
@@ -40,7 +40,7 @@
         </button>
       </div>
       <!--<div class="item">-->
-      <!--<button mat-raised-button="" color=primary-->
+      <!--<button mat-raised-button color=primary-->
       <!--type="button">-->
       <!--<mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.GITHUB">card_giftcard</mat-icon>-->
       <!--<mat-icon *ngIf="projectData?.issueIntegrationCfgs?.GITHUB">checkmark</mat-icon>-->

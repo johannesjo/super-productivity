@@ -17,14 +17,14 @@
   <mat-dialog-actions align="end">
     <button (click)="close()"
             color="primary"
-            mat-button=""
+            mat-button
             type="button">
       {{T.G.CANCEL|translate}}
     </button>
 
     <button [disabled]="!formGroup.valid"
             color="primary"
-            mat-stroked-button=""
+            mat-stroked-button
             type="submit">
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}

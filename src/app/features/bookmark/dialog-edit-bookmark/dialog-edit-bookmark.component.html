@@ -10,7 +10,7 @@
       <mat-form-field>
         <input [(ngModel)]="bookmarkCopy.title"
                autofocus="autofocus"
-               matInput=""
+               matInput
                name="title"
                [placeholder]="(T.G.TITLE|translate)"
                tabindex="1"
@@ -19,7 +19,7 @@
       <mat-form-field>
         <input [(ngModel)]="bookmarkCopy.path"
                [placeholder]="mapTypeToLabel(bookmarkCopy.type)|translate"
-               matInput=""
+               matInput
                name="path"
                required
                tabindex="1"
@@ -64,14 +64,14 @@
   <mat-dialog-actions align="end">
     <button (click)="close()"
             color="primary"
-            mat-button=""
+            mat-button
             type="button">
       {{T.G.CANCEL|translate}}
     </button>
 
     <button [disabled]="!form.valid"
             color="primary"
-            mat-stroked-button=""
+            mat-stroked-button
             type="submit">
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}

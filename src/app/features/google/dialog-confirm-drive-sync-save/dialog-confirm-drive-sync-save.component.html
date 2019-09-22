@@ -25,18 +25,18 @@
 <mat-dialog-actions align="end">
   <button (click)="close()"
           color="primary"
-          mat-button="">
+          mat-button>
     {{T.G.CANCEL|translate}}
   </button>
   <button (click)="data.saveToRemote();close()"
           color="primary"
-          mat-stroked-button="">
+          mat-stroked-button>
     <mat-icon>file_upload</mat-icon>
     {{T.F.GOOGLE.D_CONFIRM_LOAD.OVERWRITE_REMOTE|translate}}
   </button>
   <button (click)="data.loadFromRemote();close()"
           color="primary"
-          mat-stroked-button="">
+          mat-stroked-button>
     <mat-icon>file_download</mat-icon>
     {{T.F.GOOGLE.D_CONFIRM_LOAD.OVERWRITE_LOCAL|translate}}
   </button>

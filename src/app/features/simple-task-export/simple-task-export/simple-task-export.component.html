@@ -1,5 +1,5 @@
 <div class="dialog-content"
-     mat-dialog-content="">
+     mat-dialog-content>
   <textarea [(ngModel)]="tasksTxt"
             [hidden]="!options.isShowAsText"
             class="simple-textarea mat-elevation-z2"
@@ -105,7 +105,7 @@
           </label>
           <input (change)="onOptionsChange()"
                  [(ngModel)]="options.separateFieldsBy"
-                 matInput=""
+                 matInput
                  name="separateFieldsBy"
                  type="text">
         </mat-form-field>
@@ -116,10 +116,10 @@
 
 
 <div align="end"
-     mat-dialog-actions="">
+     mat-dialog-actions>
   <button (click)="onCancelClick()"
           color="primary"
-          mat-button=""
+          mat-button
           type="button">
     {{T.F.SIMPLE_TASK_EXPORT.CLOSE|translate}}
   </button>
@@ -128,14 +128,14 @@
           data-clipboard-action="copy"
           data-clipboard-target="#task-textarea"
           id="clipboard-btn"
-          mat-stroked-button="">
+          mat-stroked-button>
     <mat-icon>content_paste</mat-icon>
     {{T.F.SIMPLE_TASK_EXPORT.COPY_TO_CLIPBOARD|translate}}
   </button>
   <a [simpleDownloadData]="tasksTxt"
      [simpleDownload]="fileName"
      color="primary"
-     mat-stroked-button="">
+     mat-stroked-button>
     <mat-icon>file_download</mat-icon>
     {{T.F.SIMPLE_TASK_EXPORT.SAVE_TO_FILE|translate}}
   </a>
