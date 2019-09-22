@@ -37,21 +37,13 @@ export class SchedulePageComponent {
   }
 
   startTask(task: TaskWithReminderData) {
-    if (task.parentId) {
-      this.taskService.moveToToday(task.parentId, true);
+    if (task.reminderData.projectId === this.projectService.currentId) {
+      this._startTaskFronCurrentProject(task);
     } else {
-      this.taskService.moveToToday(task.id, true);
+      this._startTaskFromOtherProject(task);
     }
-    this.taskService.removeReminder(task.id, task.reminderId);
-    this.taskService.setCurrentId(task.id);
-    this._router.navigate(['/work-view']);
   }
 
-  startTaskFromOtherProject(task: TaskWithReminderData) {
-    this.taskService.startTaskFromOtherProject$(task.id, task.reminderData.projectId).pipe(take(1)).subscribe(() => {
-      this._router.navigate(['/work-view']);
-    });
-  }
 
   removeReminder(task: TaskWithReminderData) {
     this.taskService.removeReminder(task.id, task.reminderId);
@@ -72,5 +64,22 @@ export class SchedulePageComponent {
       ? standardColor
       : color;
     return {background: colorToUse};
+  }
+
+  private _startTaskFronCurrentProject(task: TaskWithReminderData) {
+    if (task.parentId) {
+      this.taskService.moveToToday(task.parentId, true);
+    } else {
+      this.taskService.moveToToday(task.id, true);
+    }
+    this.taskService.removeReminder(task.id, task.reminderId);
+    this.taskService.setCurrentId(task.id);
+    this._router.navigate(['/work-view']);
+  }
+
+  private _startTaskFromOtherProject(task: TaskWithReminderData) {
+    this.taskService.startTaskFromOtherProject$(task.id, task.reminderData.projectId).pipe(take(1)).subscribe(() => {
+      this._router.navigate(['/work-view']);
+    });
   }
 }
