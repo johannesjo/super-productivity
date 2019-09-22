@@ -95,14 +95,14 @@ div.material-table {
     &:first-of-type {
       th,
       td {
-        border-top: 0;
+        border-top-width: 0;
       }
     }
 
     &:last-of-type {
       th,
       td {
-        border-bottom: 0;
+        border-bottom-width: 0;
       }
     }
   }

@@ -90,10 +90,12 @@ $this-table-outer-padding-left-right: $s*6;
           &:first-child {
             padding-left: $this-table-outer-padding-left-right;
             text-align: left;
+            border-top-left-radius: $card-border-radius;
           }
 
           &:last-child {
             padding-right: $this-table-outer-padding-left-right;
+            border-top-right-radius: $card-border-radius;
 
             mat-icon {
               // prevent table recalculation on icon change
@@ -163,10 +165,23 @@ $this-table-outer-padding-left-right: $s*6;
   position: relative;
   z-index: 3;
 
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+
   > table {
     width: 100%;
     text-align: left;
     border-collapse: collapse;
+
+    // Overwrite default styles in table.scss
+    tr {
+      &:first-of-type {
+        th,
+        td {
+          border-top-width: 1px;
+        }
+      }
+    }
   }
 
   caption {
