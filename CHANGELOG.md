@@ -1,3 +1,17 @@
+## [2.12.1](https://github.com/johannesjo/super-productivity/compare/v2.12.0...v2.12.1) (2019-09-22)
+
+
+### Bug Fixes
+
+* **scheduled:** starting task from other project ([31d58de](https://github.com/johannesjo/super-productivity/commit/31d58de))
+
+
+### Features
+
+* improve side nav dragging experience ([ffff324](https://github.com/johannesjo/super-productivity/commit/ffff324))
+
+
+
 # [2.12.0](https://github.com/johannesjo/super-productivity/compare/v2.11.1...v2.12.0) (2019-09-22)
 
 
