@@ -3,7 +3,6 @@ import {combineLatest, from, Observable} from 'rxjs';
 import {delay, map, shareReplay, switchMap} from 'rxjs/operators';
 import {TaskService} from './task.service';
 import {ReminderService} from '../reminder/reminder.service';
-import {ProjectService} from '../project/project.service';
 
 @Injectable({
   providedIn: 'root'
@@ -43,24 +42,10 @@ export class ScheduledTaskService {
     shareReplay(),
   );
 
-  scheduledTasksForOtherProjects$: Observable<any> = combineLatest([
-    this._projectService.currentId$,
-    this.allScheduledTasks$,
-  ]).pipe(
-    map(([currentProjectId, tasks]) => tasks.filter(task => task.reminderData.projectId !== currentProjectId))
-  );
-
-  scheduledTasksForCurrentProject$: Observable<any> = combineLatest([
-    this._projectService.currentId$,
-    this.allScheduledTasks$,
-  ]).pipe(
-    map(([currentProjectId, tasks]) => tasks.filter(task => task.reminderData.projectId === currentProjectId))
-  );
 
   constructor(
     private _taskService: TaskService,
     private _reminderService: ReminderService,
-    private _projectService: ProjectService,
   ) {
     // this.allScheduledTasks$.subscribe((v) => console.log('allScheduledTasks$', v));
     // this.scheduledTasksForCurrentProject$.subscribe((v) => console.log('scheduledTasksForCurrentProject$', v));

@@ -1,18 +1,27 @@
-<div class="component-wrapper page-wrapper">
-  <p *ngIf="!(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
+<div class="component-wrapper page-wrapper"
+     style="margin-top: 24px;">
+  <p *ngIf="!(scheduledTaskService.allScheduledTasks$|async)?.length"
      class="no-scheduled-tasks">
     {{T.BL.NO_SCHEDULED|translate}}
   </p>
 
-  <div [@standardList]="(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
+  <div [@standardList]="(scheduledTaskService.allScheduledTasks$|async)?.length"
        class="tasks">
     <mat-card
-      *ngFor="let task of (scheduledTaskService.scheduledTasksForCurrentProject$|async); trackBy: trackByFn;"
+      *ngFor="let task of (scheduledTaskService.allScheduledTasks$|async); trackBy: trackByFn;"
       class="scheduled-task">
       <mat-card-content>
         <div class="content">
-          <div class="title-and-due-date">
-            <div class="title">{{task.title}}</div>
+          <div class="task-info">
+            <div class="title">
+              <div class="task-title">{{task.title}}</div>
+              <div *ngIf="(projectService.getById$(task.reminderData.projectId)|async) as project"
+                   class="project">
+                <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
+                     class="project-color"></div>
+                <div class="project-title">{{project.title}}</div>
+              </div>
+            </div>
             <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
           </div>
           <div class="controls">
@@ -33,53 +42,9 @@
             </button>
           </div>
         </div>
+
       </mat-card-content>
     </mat-card>
   </div>
-
-
-  <ng-container *ngIf="(scheduledTaskService.scheduledTasksForOtherProjects$|async) as scheduledTasksForOtherProjects">
-    <section *ngIf="scheduledTasksForOtherProjects?.length">
-      <h2 class="mat-h2"
-          style="text-align: center; margin-top: 16px;">{{T.BL.FROM_OTHER_PROJECTS|translate}}</h2>
-      <div [@standardList]="scheduledTasksForOtherProjects?.length"
-           class="tasks">
-        <mat-card
-          *ngFor="let task of scheduledTasksForOtherProjects; trackBy: trackByFn;"
-          class="scheduled-task">
-
-          <!--            <div class="project-color bg-400-el"-->
-          <!--                 [ngClass]="project.themeColor">-->
-          <!--            </div>-->
-
-          <mat-card-content>
-            <div class="content">
-              <div class="title-and-due-date">
-                <div class="title">{{task.title}}</div>
-                <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
-              </div>
-              <div class="controls">
-                <button (click)="startTaskFromOtherProject(task)"
-                        color="primary"
-                        mat-icon-button>
-                  <mat-icon>play_arrow</mat-icon>
-                </button>
-                <button (click)="editReminder(task)"
-                        color=""
-                        mat-icon-button>
-                  <mat-icon>alarm</mat-icon>
-                </button>
-                <button (click)="removeReminder(task)"
-                        color="warn"
-                        mat-icon-button>
-                  <mat-icon>alarm_off</mat-icon>
-                </button>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </section>
-  </ng-container>
 
 </div>

@@ -9,6 +9,8 @@ import {DialogAddTaskReminderComponent} from '../../features/tasks/dialog-add-ta
 import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 import {Router} from '@angular/router';
 import {take} from 'rxjs/operators';
+import {ProjectService} from '../../features/project/project.service';
+import {THEME_COLOR_MAP} from '../../app.constants';
 
 @Component({
   selector: 'schedule-page',
@@ -22,6 +24,7 @@ export class SchedulePageComponent {
 
   constructor(
     public taskService: TaskService,
+    public projectService: ProjectService,
     public scheduledTaskService: ScheduledTaskService,
     private _reminderService: ReminderService,
     private _matDialog: MatDialog,
@@ -61,5 +64,13 @@ export class SchedulePageComponent {
         task,
       }
     });
+  }
+
+  getThemeColor(color: string): { [key: string]: string } {
+    const standardColor = THEME_COLOR_MAP[color];
+    const colorToUse = (standardColor)
+      ? standardColor
+      : color;
+    return {background: colorToUse};
   }
 }

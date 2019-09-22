@@ -7,10 +7,11 @@
   box-shadow: none;
 
   .content {
-    .title-and-due-date {
+    .task-info {
       flex: 1;
       display: flex;
       flex-direction: column;
+      align-items: center;
 
       @include mq(xs) {
         flex-direction: row;
@@ -45,6 +46,20 @@
         }
       }
     }
+  }
+
+  .project {
+    margin-top: $s/2;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+  }
+
+  .project-color {
+    border-radius: 50%;
+    height: $s;
+    width: $s;
+    margin-right: $s;
   }
 }
 
