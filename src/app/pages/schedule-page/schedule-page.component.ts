@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {T} from '../../t.const';
 import {TaskService} from '../../features/tasks/task.service';
 import {ScheduledTaskService} from '../../features/tasks/scheduled-task.service';
@@ -7,6 +7,8 @@ import {MatDialog} from '@angular/material';
 import {TaskWithReminderData} from '../../features/tasks/task.model';
 import {DialogAddTaskReminderComponent} from '../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {standardListAnimation} from '../../ui/animations/standard-list.ani';
+import {Router} from '@angular/router';
+import {take} from 'rxjs/operators';
 
 @Component({
   selector: 'schedule-page',
@@ -18,16 +20,14 @@ import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 export class SchedulePageComponent {
   T = T;
 
-  @Output() closeBacklog = new EventEmitter<any>();
-
   constructor(
     public taskService: TaskService,
     public scheduledTaskService: ScheduledTaskService,
     private _reminderService: ReminderService,
     private _matDialog: MatDialog,
+    private _router: Router,
   ) {
   }
-
 
   trackByFn(i: number, task: TaskWithReminderData) {
     return task.id;
@@ -41,11 +41,13 @@ export class SchedulePageComponent {
     }
     this.taskService.removeReminder(task.id, task.reminderId);
     this.taskService.setCurrentId(task.id);
+    this._router.navigate(['/work-view']);
   }
 
   startTaskFromOtherProject(task: TaskWithReminderData) {
-    this.taskService.startTaskFromOtherProject$(task.id, task.reminderData.projectId);
-    this.closeBacklog.emit();
+    this.taskService.startTaskFromOtherProject$(task.id, task.reminderData.projectId).pipe(take(1)).subscribe(() => {
+      this._router.navigate(['/work-view']);
+    });
   }
 
   removeReminder(task: TaskWithReminderData) {
