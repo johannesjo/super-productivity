@@ -30,13 +30,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
-      key: 'isHideNav',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.MISC.IS_HIDE_NAV,
-      },
-    },
-    {
       key: 'isAutMarkParentAsDone',
       type: 'checkbox',
       templateOptions: {

@@ -43,7 +43,6 @@ export type KeyboardConfig = Readonly<{
 
 export type MiscConfig = Readonly<{
   isDarkMode: boolean;
-  isHideNav: boolean;
   isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;

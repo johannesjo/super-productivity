@@ -9,7 +9,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isDarkMode: false,
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
-    isHideNav: false,
     isAutMarkParentAsDone: false,
     isDisableRemindWhenForgotToFinishDay: false,
     isHideEvaluationSheet: false,
