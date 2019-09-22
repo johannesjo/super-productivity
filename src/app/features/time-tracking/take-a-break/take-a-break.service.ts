@@ -27,9 +27,11 @@ import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.mo
 import {T} from '../../../t.const';
 import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../../electron/ipc-events.const';
+import {NotifyService} from '../../../core/notify/notify.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
+const DESKTOP_NOTIFICATION_THROTTLE = 5 * 60 * 1000;
 const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
 const LOCK_SCREEN_DELAY = 30 * 1000;
 
@@ -135,6 +137,28 @@ export class TakeABreakService {
     ),
   );
 
+  private _triggerBanner$: Observable<[number, GlobalConfigState, boolean, boolean]> = this.timeWorkingWithoutABreak$.pipe(
+    withLatestFrom(
+      this._configService.cfg$,
+      this._idleService.isIdle$,
+      this._snoozeActive$,
+    ),
+    filter(([timeWithoutBreak, cfg, isIdle, isSnoozeActive]:
+              [number, GlobalConfigState, boolean, boolean]): boolean =>
+      cfg && cfg.takeABreak && cfg.takeABreak.isTakeABreakEnabled
+      && !isSnoozeActive
+      && (timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime)
+      // we don't wanna show if idle to avoid conflicts with the idle modal
+      && (!isIdle || !cfg.idle.isEnableIdleTimeTracking)
+    ),
+    // throttleTime(5 * 1000),
+    throttleTime(PING_UPDATE_BANNER_INTERVAL),
+  );
+
+  private _triggerDesktopNotification$: Observable<[number, GlobalConfigState, boolean, boolean]> = this._triggerBanner$.pipe(
+    throttleTime(DESKTOP_NOTIFICATION_THROTTLE)
+  );
+
 
   constructor(
     private _taskService: TaskService,
@@ -143,6 +167,7 @@ export class TakeABreakService {
     private _configService: GlobalConfigService,
     private _projectService: ProjectService,
     private _electronService: ElectronService,
+    private _notifyService: NotifyService,
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
@@ -159,23 +184,14 @@ export class TakeABreakService {
       }
     });
 
-    this.timeWorkingWithoutABreak$.pipe(
-      withLatestFrom(
-        this._configService.cfg$,
-        this._idleService.isIdle$,
-        this._snoozeActive$,
-      ),
-      filter(([timeWithoutBreak, cfg, isIdle, isSnoozeActive]:
-                [number, GlobalConfigState, boolean, boolean]): boolean =>
-        cfg && cfg.takeABreak && cfg.takeABreak.isTakeABreakEnabled
-        && !isSnoozeActive
-        && (timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime)
-        // we don't wanna show if idle to avoid conflicts with the idle modal
-        && (!isIdle || !cfg.idle.isEnableIdleTimeTracking)
-      ),
-      // throttleTime(5 * 1000),
-      throttleTime(PING_UPDATE_BANNER_INTERVAL),
-    ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
+    this._triggerDesktopNotification$.subscribe(([timeWithoutBreak, cfg]) => {
+      const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
+      this._notifyService.notifyDesktop({
+        title: msg,
+      });
+    });
+
+    this._triggerBanner$.subscribe(([timeWithoutBreak, cfg]) => {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
       if (IS_ELECTRON && cfg.takeABreak.isLockScreen) {
         this._triggerLockScreenCounter$.next(true);
