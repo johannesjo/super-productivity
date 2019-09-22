@@ -154,6 +154,10 @@ h2 {
     transition: $transition-standard;
   }
 
+  task-list {
+    padding-top: 0;
+  }
+
   task-list ::ng-deep > .task-list-inner {
     min-height: 50px;
   }
@@ -182,14 +186,11 @@ h2 {
 
 // PLAN MODE
 .planning-mode-header {
-  position: absolute;
-  width: 100%;
-  top: 50%;
-  left: 0;
   text-align: center;
-  transform: translateY(-50%);
 
-  h1, h2 {
+  h1,
+  h2,
+  h3 {
     margin: 0;
     padding: 0;
   }

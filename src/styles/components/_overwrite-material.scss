@@ -96,3 +96,9 @@ body .mat-form-field {
   @include flatBox(true);
 
 }
+
+
+// HEADINGS
+body .mat-h1 {
+  margin-top: $s*1.5;
+}

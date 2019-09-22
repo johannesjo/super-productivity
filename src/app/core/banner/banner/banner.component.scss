@@ -8,32 +8,15 @@ $vertical-button-margin: $s;
   display: block;
 }
 
-:host-context(.isDarkTheme) {
-  background-color: $dark-theme-bg-darker;
-  background-color: $dark-theme-bg-lightest;
-}
-
-:host-context(.isLightTheme) {
-  background-color: #fff;
-}
-
 .content-wrapper {
-
   @include dividerBorderColor(1px 0);
 
-
-  //border: 1px solid #fff;
-  //border-radius: $card-border-radius;
-  //
-  //@include darkTheme {
-  //  //background-color: $dark-theme-bg-darker;
-  //  border-color: rgba(255, 255, 255, 0.5);
-  //}
-  //
-  //@include lightTheme {
-  //  //background-color: $dark-theme-text-color-most-intense;
-  //  border-color: rgba(0, 0, 0, 0.5);
-  //}
+  @include lightTheme() {
+    background-color: #fff;
+  }
+  @include darkTheme() {
+    background-color: $dark-theme-bg-lightest;
+  }
 }
 
 .inner-content-wrapper {

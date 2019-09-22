@@ -1,7 +1,6 @@
 <div class="page-wrapper">
   <div class="component-wrapper">
-    <h1 class="mat-h1"
-        style="text-align: center; margin-top: 12px;">{{T.PP.TITLE|translate}}</h1>
+    <h1 class="mat-h1">{{T.PP.TITLE|translate}}</h1>
 
     <div [@standardList]="(projectService.list$|async)?.length"
          [dragulaModel]="projectService.list$|async"
