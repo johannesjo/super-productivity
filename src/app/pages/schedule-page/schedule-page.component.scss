@@ -2,7 +2,7 @@
 
 .scheduled-task {
   margin-bottom: $s;
-  padding: $s/2 $s*2;
+  padding: $s $s*3;
   @include dividerBorderColor(1px);
   box-shadow: none;
 

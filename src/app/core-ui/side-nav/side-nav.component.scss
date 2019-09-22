@@ -15,9 +15,19 @@ section {
 
 .drag-handle {
   cursor: grab;
+  position: relative;
 
   &:active {
     cursor: grabbing;
+  }
+
+  &:after{
+    content: '';
+    position: absolute;
+    top: -$s;
+    left: -$s;
+    right: -$s;
+    bottom: -$s;
   }
 }
 

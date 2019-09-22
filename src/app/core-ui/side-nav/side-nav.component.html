@@ -32,7 +32,7 @@
 
 <section class="projects">
   <div [dragulaModel]="projectService.list$|async"
-       dragula="PROJECTS">
+       [dragula]="PROJECTS_SIDE_NAV">
     <div *ngFor="let project of (projectService.list$|async); trackBy: trackById;"
          [class.isCurrentProject]="project.id===(projectService.currentId$|async)"
          class="project">

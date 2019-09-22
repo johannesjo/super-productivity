@@ -17,6 +17,8 @@ import {Subscription} from 'rxjs';
 })
 export class SideNavComponent implements OnDestroy {
   T = T;
+  PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
+
   private _subs = new Subscription();
 
   constructor(
@@ -25,7 +27,13 @@ export class SideNavComponent implements OnDestroy {
     private readonly _router: Router,
     private readonly _dragulaService: DragulaService,
   ) {
-    this._subs.add(this._dragulaService.dropModel('PROJECTS')
+    this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
+      direction: 'vertical',
+      moves: (el, container, handle) => {
+        return handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
+      }
+    });
+    this._subs.add(this._dragulaService.dropModel(this.PROJECTS_SIDE_NAV)
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
         const targetNewIds = targetModel.map((project) => project.id);
