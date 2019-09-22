@@ -9,101 +9,36 @@
 
   <div class="current-project-title">{{(projectService.currentProject$|async).title}}</div>
 
-  <!--  <mat-menu #mainMenu="matMenu">-->
+<!--    <button [matMenuTriggerFor]="projectMenu"-->
+<!--            [style.pointer-events]="isProjectMenuDisabled ? 'none' : 'all'"-->
+<!--            (menuOpened)="isProjectMenuDisabled = true"-->
+<!--            (menuClosed)="isProjectMenuDisabled = false"-->
+<!--            class="project-btn"-->
+<!--            mat-button-->
+<!--            [title]="T.MH.PROJECT_MENU|translate">-->
+<!--      <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>-->
+<!--      <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>-->
+<!--    </button>-->
+<!--    <mat-menu #projectMenu="matMenu">-->
+<!--      <button (click)="switchProject(project.id)"-->
+<!--              *ngFor="let project of (projectService.list$|async); trackBy:trackById;"-->
+<!--              mat-menu-item>-->
+<!--        <mat-icon *ngIf="project.id===(projectService.currentId$|async)">radio_button_checked</mat-icon>-->
+<!--        <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>-->
+<!--        {{project.title}}-->
+<!--      </button>-->
+<!--      <button mat-menu-item-->
+<!--              routerLink="projects">-->
+<!--        <mat-icon>list</mat-icon>-->
+<!--        {{T.MH.MANAGE_PROJECTS|translate}}-->
+<!--      </button>-->
+<!--      <button (click)="addProject()"-->
+<!--              mat-menu-item>-->
+<!--        <mat-icon>add</mat-icon>-->
+<!--        {{T.MH.CREATE_PROJECT|translate}}-->
+<!--      </button>-->
+<!--    </mat-menu>-->
 
-  <!--    <button mat-menu-item-->
-  <!--            routerLink="work-view">-->
-  <!--      <mat-icon>playlist_play</mat-icon>-->
-  <!--      {{T.MH.TASK_LIST|translate}} ({{(taskService.undoneTasks$|async)?.length || 0}})-->
-  <!--    </button>-->
-  <!--    <button mat-menu-item-->
-  <!--            routerLink="worklog-and-calendar">-->
-  <!--      <mat-icon>today</mat-icon>-->
-  <!--      {{T.MH.WORKLOG|translate}}-->
-  <!--    </button>-->
-
-  <!--    <button mat-menu-item-->
-  <!--            routerLink="metrics">-->
-  <!--      <mat-icon>insert_chart</mat-icon>-->
-  <!--      {{T.MH.METRICS|translate}}-->
-  <!--    </button>-->
-
-  <!--    <button mat-menu-item-->
-  <!--            routerLink="projects">-->
-  <!--      <mat-icon>list</mat-icon>-->
-  <!--      {{T.MH.PROJECTS|translate}}-->
-  <!--    </button>-->
-
-  <!--    <button mat-menu-item-->
-  <!--            routerLink="config"-->
-  <!--            routerLinkActive>-->
-  <!--      <mat-icon>settings</mat-icon>-->
-  <!--      {{T.MH.SETTINGS|translate}}-->
-  <!--    </button>-->
-  <!--    <button mat-menu-item-->
-  <!--            routerLink="procrastination"-->
-  <!--            routerLinkActive>-->
-  <!--      <mat-icon>verified_user</mat-icon>-->
-  <!--      {{T.MH.PROCRASTINATE|translate}}-->
-  <!--    </button>-->
-
-  <!--  </mat-menu>-->
-
-  <!--  <button [matMenuTriggerFor]="projectMenu"-->
-  <!--          [style.pointer-events]="isProjectMenuDisabled ? 'none' : 'all'"-->
-  <!--          (menuOpened)="isProjectMenuDisabled = true"-->
-  <!--          (menuClosed)="isProjectMenuDisabled = false"-->
-  <!--          class="project-btn"-->
-  <!--          mat-button-->
-  <!--          [title]="T.MH.PROJECT_MENU|translate">-->
-  <!--    <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>-->
-  <!--    <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>-->
-  <!--  </button>-->
-  <!--  <mat-menu #projectMenu="matMenu">-->
-  <!--    <button (click)="switchProject(project.id)"-->
-  <!--            *ngFor="let project of (projectService.list$|async); trackBy:trackById;"-->
-  <!--            mat-menu-item>-->
-  <!--      <mat-icon *ngIf="project.id===(projectService.currentId$|async)">radio_button_checked</mat-icon>-->
-  <!--      <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>-->
-  <!--      {{project.title}}-->
-  <!--    </button>-->
-  <!--    <button mat-menu-item-->
-  <!--            routerLink="projects">-->
-  <!--      <mat-icon>list</mat-icon>-->
-  <!--      {{T.MH.MANAGE_PROJECTS|translate}}-->
-  <!--    </button>-->
-  <!--    <button (click)="addProject()"-->
-  <!--            mat-menu-item>-->
-  <!--      <mat-icon>add</mat-icon>-->
-  <!--      {{T.MH.CREATE_PROJECT|translate}}-->
-  <!--    </button>-->
-  <!--  </mat-menu>-->
-
-  <!--  <nav [class.isHideNav]="(configService.cfg$|async)?.misc.isHideNav"-->
-  <!--       class="main-nav">-->
-  <!--    <button mat-button-->
-  <!--            routerLink="work-view"-->
-  <!--            routerLinkActive="isActive">-->
-  <!--      <span class="text">{{T.MH.TASKS|translate}} ({{(taskService.undoneTasks$|async)?.length || 0}})</span>-->
-  <!--    </button>-->
-  <!--    <button mat-button-->
-  <!--            routerLink="worklog-and-calendar"-->
-  <!--            routerLinkActive="isActive">-->
-  <!--      <span class="text">{{T.MH.WORKLOG|translate}}</span>-->
-  <!--    </button>-->
-
-  <!--    <button mat-button-->
-  <!--            routerLink="metrics"-->
-  <!--            routerLinkActive="isActive">-->
-  <!--      <span class="text">{{T.MH.METRICS|translate}}</span>-->
-  <!--    </button>-->
-
-  <!--    <button mat-button-->
-  <!--            routerLink="config"-->
-  <!--            routerLinkActive="isActive">-->
-  <!--      <span class="text">{{T.MH.SETTINGS|translate}}</span>-->
-  <!--    </button>-->
-  <!--  </nav>-->
 
   <nav class="action-nav">
     <button (click)="layoutService.showAddTaskBar()"

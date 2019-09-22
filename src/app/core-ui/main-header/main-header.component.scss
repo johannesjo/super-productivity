@@ -1,147 +1,45 @@
 @import '../../../variables';
 
-$navBpUltraSmall: 360px;
-$navBpReduceToBurger: 420px;
-$navBp2Lines: 680px;
-$navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 $navVerticalPadding: 4px;
 
 :host {
   display: block;
+  position: relative;
+  z-index: 3;
 }
 
 .wrapper {
-  //@include mat-css-color-and-contrast(500);
-  //background: linear-gradient(50deg,#00288e 0,#0939a5 30%,#4385f4 90%,#aaceee 100%);
-  //background: linear-gradient(50deg, #00288e 0, #0939a5 30%, #4385f4 90%, #aaceee 100%);
-  //background: linear-gradient(50deg, $c-primary-700 0, $c-primary-400 30%, $c-primary-600 90%, $c-primary-700 100%);
   background: transparent;
-  //background: $dark-theme-bg;
-  //backdrop-filter: blur(5px);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding: $navVerticalPadding $mobileHorizontalPadding;
+  //flex-wrap: wrap;
+  min-height: $bar-height-large;
+
+  @include mq(xs) {
+    min-height: $bar-height;
+    padding: $navVerticalPadding 16px;
+  }
 }
 
 .current-project-title {
   //font-weight: bold;
   font-size: 18px;
-  margin-left: $s*2;
-}
-
-:host-context(.isMac.isElectron) {
-  .wrapper {
-    -webkit-app-region: drag;
-    //cursor: grab;
-    user-select: none;
-
-    &:active {
-      //cursor: grabbing;
-    }
-
-    button,
-    a {
-      -webkit-app-region: no-drag;
-    }
-  }
-
-  .project-btn {
-    margin-left: $s;
-  }
-}
-
-.mat-mini-fab {
-  // should be the same as the the links
-  //color: mat-css-contrast-color-primary();
+  margin-left: $s;
+  margin-right: 2*$s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+  white-space: nowrap;
+  max-width: 220px;
 }
 
 a,
 button {
   cursor: pointer;
-}
-
-.project-btn,
-.main-nav button {
-  height: 36px;
-}
-
-.project-btn {
-  min-width: 0;
-  overflow: hidden;
-  max-width: 200px;
-
-  @media (max-width: $navBpShrinking) {
-    flex: 1;
-  }
-
-  ::ng-deep .mat-button-wrapper {
-    display: flex;
-    align-items: center;
-  }
-
-
-  .current-project-title {
-    text-transform: uppercase;
-    font-weight: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-    max-width: 220px;
-  }
-}
-
-
-.burger-trigger {
-}
-
-.main-nav {
-  display: flex;
-  flex: 1;
-
-
-  .mat-button {
-    text-transform: none;
-  }
-
-  button.isActive {
-    font-weight: bold;
-  }
-
-  mat-icon {
-    display: none;
-  }
-
-  .text {
-    text-align: center;
-  }
-
-  &.isHideNav {
-    @media(min-width: $navBp2Lines +1) {
-      transition: $transition-standard;
-      opacity: 0;
-      .wrapper:hover & {
-        opacity: 1;
-      }
-    }
-  }
-
-  @media (max-width: $navBpReduceToBurger) {
-    display: none;
-  }
-
-  @media (max-width: $navBp2Lines) {
-    flex-basis: 100%;
-    order: 3;
-    justify-content: stretch;
-
-    button {
-      flex: 1;
-      text-align: center;
-    }
-    ::ng-deep .mat-button-wrapper {
-      display: flex;
-      justify-content: center;
-    }
-  }
 }
 
 .action-nav {
@@ -170,49 +68,6 @@ button {
       transition-property: transform !important;
       transition: $transition-standard !important;
     }
-  }
-}
-
-.wrapper {
-  display: flex;
-  align-items: center;
-  padding: $navVerticalPadding $mobileHorizontalPadding;
-  flex-wrap: wrap;
-  min-height: $bar-height-large;
-
-  @include mq(xs) {
-    min-height: $bar-height;
-    padding: $navVerticalPadding 16px;
-  }
-
-  @media (max-width: $navBp2Lines) {
-    padding-bottom: 0;
-  }
-}
-
-
-.spacer {
-  display: none;
-  flex: 1 1 auto;
-
-  @media(max-width: $navBpShrinking) and (min-width: $navBp2Lines +1) {
-    display: none;
-  }
-}
-
-
-:host {
-  position: relative;
-  z-index: 3;
-  display: block;
-}
-
-.mat-fab {
-  height: 48px;
-  width: 48px;
-
-  ::ng-deep .mat-button-wrapper {
-    padding: 0 !important;
   }
 }
 
