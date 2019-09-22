@@ -13,6 +13,13 @@ section {
   flex-direction: column;
 }
 
+.drag-handle {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
 
 .project {
   display: flex;

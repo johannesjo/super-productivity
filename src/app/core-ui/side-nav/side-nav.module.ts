@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {SideNavComponent} from './side-nav.component';
 import {UiModule} from '../../ui/ui.module';
 import {RouterModule} from '@angular/router';
+import {DragulaModule} from 'ng2-dragula';
 
 @NgModule({
 
@@ -10,6 +11,7 @@ import {RouterModule} from '@angular/router';
     UiModule,
     CommonModule,
     RouterModule,
+    DragulaModule,
   ],
   declarations: [
     SideNavComponent,

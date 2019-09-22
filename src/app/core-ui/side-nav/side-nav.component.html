@@ -31,24 +31,29 @@
 </section>
 
 <section class="projects">
-  <div *ngFor="let project of (projectService.list$|async); trackBy: trackById;"
-       [class.isCurrentProject]="project.id===(projectService.currentId$|async)"
-       class="project">
-    <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
-         class="project-color"></div>
-    <button (click)="switchProject(project.id, 'work-view')"
-            mat-menu-item>
-      <mat-icon>list</mat-icon>
-      {{project.title}}
-    </button>
+  <div [dragulaModel]="projectService.list$|async"
+       dragula="PROJECTS">
+    <div *ngFor="let project of (projectService.list$|async); trackBy: trackById;"
+         [class.isCurrentProject]="project.id===(projectService.currentId$|async)"
+         class="project">
+      <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
+           class="project-color"></div>
+      <button (click)="switchProject(project.id, 'work-view')"
+              mat-menu-item>
+        <mat-icon drag-handle
+                  class="drag-handle">list
+        </mat-icon>
+        {{project.title}}
+      </button>
 
-    <button
-      class="project-settings-btn"
-      mat-icon-button
-      routerLinkActive="isActiveRoute"
-      (click)="switchProject(project.id, 'project-settings')">
-      <mat-icon>more_vert</mat-icon>
-    </button>
+      <button
+        class="project-settings-btn"
+        mat-icon-button
+        routerLinkActive="isActiveRoute"
+        (click)="switchProject(project.id, 'project-settings')">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </div>
   </div>
   <button (click)="addProject()"
           mat-menu-item>
