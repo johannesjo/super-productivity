@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -64,6 +64,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _issueService: IssueService,
     private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
+    private _cd: ChangeDetectorRef,
   ) {
   }
 
@@ -75,6 +76,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           this.blurred.emit();
         } else if (ev.key === '1' && ev.ctrlKey === true) {
           this.isAddToBacklog = !this.isAddToBacklog;
+          this._cd.detectChanges();
           ev.preventDefault();
         }
       });
