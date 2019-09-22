@@ -1,24 +1,28 @@
 <section class="main">
-  <button mat-menu-item
+  <button class="route-link"
+          mat-menu-item
           routerLink="work-view"
           routerLinkActive="isActiveRoute">
     <mat-icon>wb_sunny</mat-icon>
     {{T.MH.TASKS|translate}}
   </button>
-  <button mat-menu-item
+  <button class="route-link"
+          mat-menu-item
           routerLink="schedule"
           routerLinkActive="isActiveRoute">
     <mat-icon>access_alarms</mat-icon>
     {{T.MH.SCHEDULED|translate}}
   </button>
-  <button mat-menu-item
+  <button class="route-link"
+          mat-menu-item
           routerLink="worklog"
           routerLinkActive="isActiveRoute">
     <mat-icon>date_range</mat-icon>
     <span class="text">{{T.MH.WORKLOG|translate}}</span>
   </button>
 
-  <button mat-menu-item
+  <button class="route-link"
+          mat-menu-item
           routerLink="metrics"
           routerLinkActive="isActiveRoute">
     <mat-icon>donut_large</mat-icon>
@@ -27,16 +31,23 @@
 </section>
 
 <section class="projects">
-  <button (click)="switchProject(project.id)"
-          [class.isCurrentProject]="project.id===(projectService.currentId$|async)"
-          *ngFor="let project of (projectService.list$|async); trackBy: trackById;"
-          mat-menu-item>
+  <div *ngFor="let project of (projectService.list$|async); trackBy: trackById;"
+       [class.isCurrentProject]="project.id===(projectService.currentId$|async)"
+       class="project">
     <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
          class="project-color"></div>
-    <mat-icon>list</mat-icon>
-    {{project.title}}
-  </button>
+    <button (click)="switchProject(project.id)"
+            mat-menu-item>
+      <mat-icon>list</mat-icon>
+      {{project.title}}
+    </button>
 
+    <button
+      class="project-settings-btn"
+      mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </div>
   <button (click)="addProject()"
           mat-menu-item>
     <mat-icon>add</mat-icon>
@@ -46,7 +57,8 @@
 
 
 <section class="app">
-  <button mat-menu-item
+  <button class="route-link"
+          mat-menu-item
           routerLink="projects"
           routerLinkActive="isActiveRoute">
     <mat-icon>list</mat-icon>
@@ -54,7 +66,8 @@
   </button>
 
 
-  <button mat-menu-item
+  <button class="route-link"
+          mat-menu-item
           routerLink="config"
           routerLinkActive="isActiveRoute">
     <mat-icon>settings_applications</mat-icon>

@@ -14,17 +14,56 @@ section {
 }
 
 
-button {
-  &.isCurrentProject,
-  &.isActiveRoute {
-    //position: sticky;
-    //top: 0;
-    font-weight: bold;
-    @include darkTheme {
-      background: rgba(255, 255, 255, 0.04);
+.project {
+  display: flex;
+  position: relative;
+  align-items: stretch;
+  justify-content: stretch;
+
+  button:first-of-type {
+    flex-grow: 1;
+  }
+
+  button:last-of-type {
+    border-radius: 0;
+    align-self: stretch;
+    display: block;
+    height: auto;
+    min-width: 48px;
+
+    @include mq(xs) {
+      opacity: 0;
+      display: none;
     }
   }
 
+  &:hover {
+    button:last-of-type {
+      opacity: 1;
+      display: block;
+    }
+  }
+}
+
+.project-settings-btn:hover,
+.project.isCurrentProject,
+.project button:first-of-type:hover,
+.route-link.isActiveRoute,
+.route-link:hover {
+  //position: sticky;
+  //top: 0;
+  font-weight: bold;
+  @include lightTheme {
+    background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+  }
+  @include darkTheme {
+    background: rgba(255, 255, 255, 0.04);
+
+  }
+}
+
+.project,
+.route-link {
   .project-color,
   &.isActiveRoute:before {
     content: '';
