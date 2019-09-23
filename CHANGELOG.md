@@ -1,3 +1,12 @@
+## [2.12.3](https://github.com/johannesjo/super-productivity/compare/v2.12.2...v2.12.3) (2019-09-23)
+
+
+### Bug Fixes
+
+* side nav styling for dark theme ([4559dfe](https://github.com/johannesjo/super-productivity/commit/4559dfe))
+
+
+
 ## [2.12.2](https://github.com/johannesjo/super-productivity/compare/v2.12.1...v2.12.2) (2019-09-23)
 
 
