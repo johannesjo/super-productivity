@@ -5,10 +5,9 @@ import {MODEL_VERSION_KEY} from '../../app.constants';
 const MODEL_VERSION = 1;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
-  if (globalConfigState && globalConfigState[MODEL_VERSION_KEY] === MODEL_VERSION) {
+  if (!globalConfigState || (globalConfigState && globalConfigState[MODEL_VERSION_KEY] === MODEL_VERSION)) {
     return globalConfigState;
   } else {
-    globalConfigState[MODEL_VERSION_KEY] = MODEL_VERSION;
   }
 
   // NOTE: needs to run before default stuff
@@ -16,6 +15,8 @@ export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): 
 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
   globalConfigState = _extendConfigDefaults(globalConfigState);
+
+  globalConfigState[MODEL_VERSION_KEY] = MODEL_VERSION;
   return globalConfigState;
 };
 

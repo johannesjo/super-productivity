@@ -52,7 +52,7 @@ import {metricReducer} from '../../features/metric/store/metric.reducer';
 import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
 import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
-import {migrateTaskState} from '../../features/tasks/migrate-task-state.util';
+import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
 
 
@@ -89,8 +89,7 @@ export class PersistenceService {
     // NOTE: this might be problematic, as we don't really have reducer logic for the archive
     // TODO add a working reducer for task archive
     taskReducer,
-    // TODO needs migration
-    // migrateTaskState,
+    migrateTaskArchiveState,
   );
   taskAttachment = this._cmProject<AttachmentState, Attachment>(
     LS_TASK_ATTACHMENT_STATE,

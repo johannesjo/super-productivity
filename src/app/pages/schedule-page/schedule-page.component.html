@@ -14,7 +14,7 @@
         <div class="content">
           <div class="task-info">
             <div class="title">
-              <div class="task-title">{{task.title}}</div>
+              <div class="task-title">{{task.projectId}} {{task.title}}</div>
               <div *ngIf="(projectService.getById$(task.reminderData.projectId)|async) as project"
                    class="project">
                 <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"

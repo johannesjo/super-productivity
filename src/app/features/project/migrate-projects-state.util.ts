@@ -10,10 +10,8 @@ import {MODEL_VERSION_KEY, THEME_COLOR_MAP} from '../../app.constants';
 const MODEL_VERSION = 1;
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
-  if (projectState && projectState[MODEL_VERSION_KEY] === MODEL_VERSION) {
+  if (!projectState || (projectState && projectState[MODEL_VERSION_KEY] === MODEL_VERSION)) {
     return projectState;
-  } else {
-    projectState[MODEL_VERSION_KEY] = MODEL_VERSION;
   }
 
   const projectEntities: Dictionary<Project> = {...projectState.entities};
@@ -25,6 +23,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
   });
 
+  projectState[MODEL_VERSION_KEY] = MODEL_VERSION;
   return {
     ...projectState,
     entities: projectEntities,
