@@ -2,7 +2,7 @@
      style="margin-top: 24px;">
   <p *ngIf="!(scheduledTaskService.allScheduledTasks$|async)?.length"
      class="no-scheduled-tasks">
-    {{T.BL.NO_SCHEDULED|translate}}
+    {{T.SCHEDULE.NO_SCHEDULED|translate}}
   </p>
 
   <div [@standardList]="(scheduledTaskService.allScheduledTasks$|async)?.length"
@@ -12,9 +12,17 @@
       class="scheduled-task">
       <mat-card-content>
         <div class="content">
+          <button (click)="startTask(task)"
+                  color=""
+                  class="mat-elevation-z0 start-task-btn"
+                  [title]="T.SCHEDULE.START_TASK|translate"
+                  mat-mini-fab>
+            <mat-icon>play_arrow</mat-icon>
+          </button>
+
           <div class="task-info">
             <div class="title">
-              <div class="task-title">{{task.projectId}} {{task.title}}</div>
+              <div class="task-title">{{task.title}}</div>
               <div *ngIf="(projectService.getById$(task.reminderData.projectId)|async) as project"
                    class="project">
                 <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
@@ -23,24 +31,14 @@
               </div>
             </div>
             <div class="due-date"
-                 [title]="task.reminderData.remindAt|date:'short'">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
-          </div>
-          <div class="controls">
-            <button (click)="startTask(task)"
-                    color="primary"
-                    mat-icon-button>
-              <mat-icon>play_arrow</mat-icon>
-            </button>
-            <button (click)="editReminder(task)"
-                    color=""
-                    mat-icon-button>
+                 mat-ripple
+                 (click)="editReminder(task)"
+                 [title]="task.reminderData.remindAt|date:'short'">
+              <div class="date">
+                {{task.reminderData.remindAt|humanizeTimestamp}}
+              </div>
               <mat-icon>alarm</mat-icon>
-            </button>
-            <button (click)="removeReminder(task)"
-                    color="warn"
-                    mat-icon-button>
-              <mat-icon>alarm_off</mat-icon>
-            </button>
+            </div>
           </div>
         </div>
 

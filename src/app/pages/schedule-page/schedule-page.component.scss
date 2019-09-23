@@ -2,65 +2,79 @@
 
 .scheduled-task {
   margin-bottom: $s;
-  padding: $s $s*3;
+  padding: $s/2 $s*2;
   @include dividerBorderColor(1px);
   box-shadow: none;
+}
 
-  .content {
-    .task-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      @include mq(xs) {
-        flex-direction: row;
-      }
+.start-task-btn {
+  margin-right: $s*2;
+  transition: $transition-duration-m;
+  @include mq(xs) {
+    opacity: 0;
+    .scheduled-task:hover & {
+      opacity: 1;
     }
+  }
 
-    .title {
-      flex: 1;
-    }
+  &:hover {
+    box-shadow: $whiteframe-shadow-3dp;
+  }
+}
 
-    .due-date {
-      font-style: italic;
-      @include mq(xs) {
-        margin: 0 $s*2;
-      }
-    }
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
+  .task-info {
+    flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
 
-    .controls {
-      align-self: center;
-      display: flex;
-      justify-content: center;
+    @include mq(xs) {
       flex-direction: row;
-
-      button {
-        margin-left: $s/2;
-        @include mq(xs) {
-          margin-left: $s;
-        }
-      }
     }
   }
 
-  .project {
-    margin-top: $s/2;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
+  .title {
+    flex: 1;
   }
 
-  .project-color {
-    border-radius: 50%;
-    height: $s;
-    width: $s;
-    margin-right: $s;
+  .due-date {
+    display: flex;
+    font-style: italic;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    min-height: 48px;
+
+    .date {
+      @include mq(xs) {
+        margin-right: $s;
+      }
+    }
+
+    @include mq(xs) {
+      margin: 0 $s*2;
+      flex-direction: row;
+    }
   }
+}
+
+.project {
+  margin-top: $s/2;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+}
+
+.project-color {
+  border-radius: 50%;
+  height: $s;
+  width: $s;
+  margin-right: $s;
 }
 
 .no-scheduled-tasks {

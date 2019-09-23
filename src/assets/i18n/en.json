@@ -9,10 +9,13 @@
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "From other Projects",
-    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
     "NO_TASKS": "There are currently no tasks in your backlog",
     "SCHEDULED": "Scheduled",
     "TITLE": "Backlog"
+  },
+  "SCHEDULE": {
+    "START_TASK": "Start task now and remove reminder",
+    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task."
   },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",
