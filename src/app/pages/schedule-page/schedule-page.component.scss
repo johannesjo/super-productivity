@@ -1,4 +1,5 @@
 @import './../../../_variables';
+@import './../../features/tasks/task/task.component.mixins';
 
 .scheduled-task {
   margin-bottom: $s;
@@ -93,4 +94,10 @@
   margin: $s;
   margin-top: $s*2;
   text-align: center;
+}
+
+
+.task-title {
+  margin-left: -4px;
+  @include taskTitle;
 }

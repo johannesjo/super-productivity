@@ -337,6 +337,21 @@ export class TaskService {
     }));
   }
 
+  // NOTE: side effects are not executed!!!
+  updateForProject(id: string, projectId: string, changedFields: Partial<Task>) {
+    if (projectId === this._projectService.currentId) {
+      this._store.dispatch(new UpdateTask({
+        task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+      }));
+    } else {
+      this._persistenceService.task.update(projectId, (state) => {
+        const task = state.entities[id];
+        state.entities[id] = {...task, ...changedFields};
+        return state;
+      });
+    }
+  }
+
 
   updateUi(id: string, changes: Partial<Task>) {
     this._store.dispatch(new UpdateTaskUi({
