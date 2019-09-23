@@ -21,7 +21,7 @@ section {
     cursor: grabbing;
   }
 
-  &:after{
+  &:after {
     content: '';
     position: absolute;
     top: -$s;
@@ -63,9 +63,7 @@ section {
 }
 
 .project-settings-btn:hover,
-.project.isCurrentProject,
 .project button:first-of-type:hover,
-.route-link.isActiveRoute,
 .route-link:hover {
   //position: sticky;
   //top: 0;
@@ -74,10 +72,28 @@ section {
     background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
   }
   @include darkTheme {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.1);
 
   }
 }
+
+.route-link.isActiveRoute,
+.project.isCurrentProject {
+  background-color: mat-css-color-primary(500, 0.04);
+}
+
+.route-link.isActiveRoute,
+.project.isCurrentProject button {
+  font-weight: bold;
+}
+
+.route-link.isActiveRoute,
+.route-link.isActiveRoute mat-icon,
+.project.isCurrentProject mat-icon,
+.project.isCurrentProject button {
+  color: $c-primary-800;
+}
+
 
 .project,
 .route-link {
