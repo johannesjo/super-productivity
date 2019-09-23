@@ -1,6 +1,6 @@
 <!--<pre><code>{{(worklogService.currentWeek$|async|json)}}</code></pre>-->
 
-<div *ngIf="(worklogService.currentWeek$|async) as currentWeek">
+<div *ngIf="(worklogService.currentWeek$|async) as currentWeek else noData">
   <div class="days">
     <div *ngFor="let day of currentWeek?.ent|keyvalue:sortDays trackBy: trackByDay; let i = index;"
          class="day">
@@ -57,7 +57,7 @@
 
 
   <div style="text-align: center; margin-top: 12px;">
-    <button (click)="exportData(currentWeek)"
+    <button (click)="exportData()"
             color=""
             mat-button>
       <mat-icon>call_made</mat-icon>
@@ -65,3 +65,7 @@
     </button>
   </div>
 </div>
+
+<ng-template #noData>
+  <div class="no-data">{{T.F.WORKLOG.WEEK.NO_DATA|translate}}</div>
+</ng-template>

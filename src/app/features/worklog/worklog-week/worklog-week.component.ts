@@ -21,6 +21,7 @@ import {T} from '../../../t.const';
 export class WorklogWeekComponent {
   visibility: boolean[] = [];
   T = T;
+  keys = Object.keys;
 
   constructor(
     public readonly worklogService: WorklogService,

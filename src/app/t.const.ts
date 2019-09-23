@@ -684,7 +684,8 @@ export const T = {
       },
       'WEEK': {
         'EXPORT': 'F.WORKLOG.WEEK.EXPORT',
-        'TITLE': 'F.WORKLOG.WEEK.TITLE'
+        'TITLE': 'F.WORKLOG.WEEK.TITLE',
+        'NO_DATA': 'F.WORKLOG.WEEK.NO_DATA'
       }
     }
   },
