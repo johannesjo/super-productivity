@@ -22,7 +22,8 @@
                 <div class="project-title">{{project.title}}</div>
               </div>
             </div>
-            <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
+            <div class="due-date"
+                 [title]="task.reminderData.remindAt|date:'short'">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
           </div>
           <div class="controls">
             <button (click)="startTask(task)"
