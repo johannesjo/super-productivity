@@ -18,7 +18,6 @@ import {
   SHORT_SYNTAX_REG_EX,
   ShowSubTasksMode,
   Task,
-  TaskState,
   TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
@@ -94,7 +93,7 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
-import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../issue/issue.const';
+import {migrateTaskState} from './migrate-task-state.util';
 
 
 @Injectable({
@@ -287,9 +286,10 @@ export class TaskService {
   async loadStateForProject(projectId) {
     const lsTaskState = await this._persistenceService.task.load(projectId);
     if (lsTaskState) {
-      this._replaceLegacyGitType(lsTaskState);
+      this.loadState(migrateTaskState(lsTaskState, projectId));
+    } else {
+      this.loadState(initialTaskState);
     }
-    this.loadState(lsTaskState || initialTaskState);
   }
 
   loadState(state) {
@@ -656,6 +656,7 @@ export class TaskService {
       created: Date.now(),
       title,
       id: shortid(),
+      projectId: this._projectService.currentId,
       ...additional,
     }) as Task;
   }
@@ -691,17 +692,5 @@ export class TaskService {
     } else {
       return task;
     }
-  }
-
-  // hacky but it should work
-  private _replaceLegacyGitType(state: TaskState) {
-    const ids = state.ids as string[];
-    ids.forEach(id => {
-      const task = state.entities[id] as any;
-      const issueType = task.issueType as string;
-      if (issueType === LEGACY_GITHUB_TYPE) {
-        task.issueType = GITHUB_TYPE;
-      }
-    });
   }
 }

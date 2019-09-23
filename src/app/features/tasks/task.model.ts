@@ -20,6 +20,7 @@ export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 
 export interface TaskCopy {
   id: string;
+  projectId: string;
   title: string;
 
   subTaskIds: string[];
@@ -62,6 +63,7 @@ export interface TaskWithSubTasks extends TaskWithIssueData {
 
 export const DEFAULT_TASK: Task = {
   id: null,
+  projectId: null,
   subTaskIds: [],
   attachmentIds: [],
   timeSpentOnDay: {},

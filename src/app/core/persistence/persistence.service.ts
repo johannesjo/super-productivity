@@ -142,12 +142,16 @@ export class PersistenceService {
           ...acc,
           [task.id]: {
             ...task,
+            projectId,
             subTasks: null,
           },
         };
         if (task.subTasks) {
           task.subTasks.forEach((subTask) => {
-            newAcc[subTask.id] = subTask;
+            newAcc[subTask.id] = {
+              ...subTask,
+              projectId,
+            };
           });
         }
 
