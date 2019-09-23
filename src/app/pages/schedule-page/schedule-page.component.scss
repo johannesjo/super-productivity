@@ -2,15 +2,20 @@
 
 .scheduled-task {
   margin-bottom: $s;
-  padding: $s/2 $s*2;
+  padding: $s $s*2;
   @include dividerBorderColor(1px);
   box-shadow: none;
 }
 
 .start-task-btn {
-  margin-right: $s*2;
-  transition: $transition-duration-m;
+  display: none;
+
   @include mq(xs) {
+    background-color: inherit;
+    display: block;
+    margin-left: -$s;
+    margin-right: $s;
+    transition: $transition-duration-m;
     opacity: 0;
     .scheduled-task:hover & {
       opacity: 1;
@@ -18,7 +23,7 @@
   }
 
   &:hover {
-    box-shadow: $whiteframe-shadow-3dp;
+    box-shadow: $whiteframe-shadow-2dp;
   }
 }
 
@@ -30,7 +35,7 @@
   .task-info {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    //flex-direction: column;
     align-items: center;
 
     @include mq(xs) {
@@ -40,15 +45,22 @@
 
   .title {
     flex: 1;
+    @include mq(xs) {
+      .scheduled-task:hover & {
+      }
+    }
   }
 
   .due-date {
+    border-radius: $card-border-radius;
     display: flex;
     font-style: italic;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    min-height: 48px;
+    padding-left: $s;
+    padding-right: $s;
+    min-height: $mat-mini-fab-size;
 
     .date {
       @include mq(xs) {
