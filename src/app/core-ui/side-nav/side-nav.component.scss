@@ -91,7 +91,10 @@ section {
 .route-link.isActiveRoute mat-icon,
 .project.isCurrentProject mat-icon,
 .project.isCurrentProject button {
-  color: $c-primary-800;
+  // does not look good for dark theme...
+  @include lightTheme {
+    color: $c-primary-800;
+  }
 }
 
 
