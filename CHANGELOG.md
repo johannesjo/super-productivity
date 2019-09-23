@@ -1,3 +1,22 @@
+## [2.12.2](https://github.com/johannesjo/super-productivity/compare/v2.12.1...v2.12.2) (2019-09-23)
+
+
+### Features
+
+* add migration for task archive ([424f5c6](https://github.com/johannesjo/super-productivity/commit/424f5c6))
+* add no data message to worklog week ([22924be](https://github.com/johannesjo/super-productivity/commit/22924be))
+* add projectId to task model ([e99dad8](https://github.com/johannesjo/super-productivity/commit/e99dad8))
+* improve side nav styles ([a38930b](https://github.com/johannesjo/super-productivity/commit/a38930b))
+* move migrations to persistence service and make them smarter ([cc15a71](https://github.com/johannesjo/super-productivity/commit/cc15a71))
+* re-color i forgot something ([1383ed7](https://github.com/johannesjo/super-productivity/commit/1383ed7))
+* **reDesign:** make evaluation sheet a little smaller per default ([e648345](https://github.com/johannesjo/super-productivity/commit/e648345))
+* **scheduled:** add tooltip with exact time and date ([e509c13](https://github.com/johannesjo/super-productivity/commit/e509c13))
+* **scheduled:** beautify ([36b46d2](https://github.com/johannesjo/super-productivity/commit/36b46d2))
+* **scheduled:** beautify 2 ([ef6b212](https://github.com/johannesjo/super-productivity/commit/ef6b212))
+* **scheduled:** make task title editable ([ccd4c1b](https://github.com/johannesjo/super-productivity/commit/ccd4c1b))
+
+
+
 ## [2.12.1](https://github.com/johannesjo/super-productivity/compare/v2.12.0...v2.12.1) (2019-09-22)
 
 
