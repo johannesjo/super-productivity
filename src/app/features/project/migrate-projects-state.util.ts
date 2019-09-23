@@ -5,9 +5,17 @@ import {DEFAULT_PROJECT, DEFAULT_PROJECT_THEME} from './project.const';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {getYesterdaysDate} from '../../util/get-yesterdays-date';
-import {THEME_COLOR_MAP} from '../../app.constants';
+import {MODEL_VERSION_KEY, THEME_COLOR_MAP} from '../../app.constants';
+
+const MODEL_VERSION = 1;
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
+  if (projectState && projectState[MODEL_VERSION_KEY] === MODEL_VERSION) {
+    return projectState;
+  } else {
+    projectState[MODEL_VERSION_KEY] = MODEL_VERSION;
+  }
+
   const projectEntities: Dictionary<Project> = {...projectState.entities};
   Object.keys(projectEntities).forEach((key) => {
     projectEntities[key] = _updateThemeModel(projectEntities[key]);
@@ -16,7 +24,11 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
   });
-  return {...projectState, entities: projectEntities};
+
+  return {
+    ...projectState,
+    entities: projectEntities,
+  };
 };
 
 

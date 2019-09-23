@@ -51,6 +51,9 @@ import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-re
 import {metricReducer} from '../../features/metric/store/metric.reducer';
 import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
 import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
+import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
+import {migrateTaskState} from '../../features/tasks/migrate-task-state.util';
+import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
 
 
 @Injectable({
@@ -64,14 +67,15 @@ export class PersistenceService {
   private _projectModels = [];
 
   // TODO auto generate ls keys from appDataKey where possible
-  project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project');
-  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig');
+  project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
+  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
   task = this._cmProject<TaskState, Task>(
     LS_TASK_STATE,
     'task',
     taskReducer,
+    migrateTaskState,
   );
   taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
@@ -85,6 +89,8 @@ export class PersistenceService {
     // NOTE: this might be problematic, as we don't really have reducer logic for the archive
     // TODO add a working reducer for task archive
     taskReducer,
+    // TODO needs migration
+    // migrateTaskState,
   );
   taskAttachment = this._cmProject<AttachmentState, Attachment>(
     LS_TASK_ATTACHMENT_STATE,
@@ -401,10 +407,14 @@ export class PersistenceService {
 
 
   // ------------------
-  private _cmBase<T>(lsKey: string, appDataKey: keyof AppBaseData): PersistenceBaseModel<T> {
+  private _cmBase<T>(
+    lsKey: string,
+    appDataKey: keyof AppBaseData,
+    migrateFn: (state: T) => T = (v) => v,
+  ): PersistenceBaseModel<T> {
     const model = {
       appDataKey,
-      load: () => this._loadFromDb(lsKey),
+      load: () => this._loadFromDb(lsKey).then(migrateFn),
       save: (data, isForce) => this._saveToDb(lsKey, data, isForce),
     };
 
@@ -417,11 +427,12 @@ export class PersistenceService {
   private _cmProject<S, M>(
     lsKey: string,
     appDataKey: keyof AppDataForProjects,
-    reducerFn: (state: S, action: Action) => S
+    reducerFn: (state: S, action: Action) => S,
+    migrateFn: (state: S, projectId: string) => S = (v) => v,
   ): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
-      load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
+      load: (projectId): Promise<S> => this._loadFromDb(this._makeProjectKey(projectId, lsKey)).then(v => migrateFn(v, projectId)),
       save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
       remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
 
@@ -434,11 +445,11 @@ export class PersistenceService {
       },
       ent: {
         getById: async (projectId: string, id: string): Promise<M> => {
-          const state = await model.load(projectId);
+          const state = await model.load(projectId) as any;
           return state && state.entities && state.entities[id] || null;
         },
         getByIds: async (projectId: string, ids: string[]): Promise<M[]> => {
-          const state = await model.load(projectId);
+          const state = await model.load(projectId) as any;
           if (state && state.entities) {
             return ids
               .map(id => state.entities[id])
@@ -457,7 +468,7 @@ export class PersistenceService {
         },
         // NOTE: side effects are not executed!!!
         bulkUpdate: async (projectId: string, adjustFn: (model: M) => M): Promise<S> => {
-          const state = await model.load(projectId);
+          const state = await model.load(projectId) as any;
           const ids = state.ids as string[];
           const newState = {
             ...state,

@@ -21,7 +21,6 @@ import {
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {Actions, ofType} from '@ngrx/effects';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
-import {migrateGlobalConfigState} from './migrate-global-config.util';
 
 @Injectable({
   providedIn: 'root',
@@ -90,7 +89,7 @@ export class GlobalConfigService {
       type: GlobalConfigActionTypes.LoadGlobalConfig,
       // always extend default config
       payload: {
-        cfg: migrateGlobalConfigState(state),
+        cfg: state,
         isOmitTokens
       },
     });

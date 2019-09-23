@@ -1,7 +1,16 @@
 import {GlobalConfigState, IdleConfig, TakeABreakConfig} from './global-config.model';
 import {DEFAULT_GLOBAL_CONFIG} from './default-global-config.const';
+import {MODEL_VERSION_KEY} from '../../app.constants';
+
+const MODEL_VERSION = 1;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
+  if (globalConfigState && globalConfigState[MODEL_VERSION_KEY] === MODEL_VERSION) {
+    return globalConfigState;
+  } else {
+    globalConfigState[MODEL_VERSION_KEY] = MODEL_VERSION;
+  }
+
   // NOTE: needs to run before default stuff
   globalConfigState = _migrateMiscToSeparateKeys(globalConfigState);
 

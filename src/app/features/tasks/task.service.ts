@@ -93,7 +93,6 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
-import {migrateTaskState} from './migrate-task-state.util';
 
 
 @Injectable({
@@ -285,11 +284,7 @@ export class TaskService {
 
   async loadStateForProject(projectId) {
     const lsTaskState = await this._persistenceService.task.load(projectId);
-    if (lsTaskState) {
-      this.loadState(migrateTaskState(lsTaskState, projectId));
-    } else {
-      this.loadState(initialTaskState);
-    }
+    this.loadState(lsTaskState || initialTaskState);
   }
 
   loadState(state) {
