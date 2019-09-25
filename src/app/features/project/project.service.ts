@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable, ReplaySubject} from 'rxjs';
 import {
   BreakNr,
   BreakTime,
@@ -47,7 +47,7 @@ import {JiraCfg} from '../issue/jira/jira';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/github/github';
 import {Actions, ofType} from '@ngrx/effects';
-import {distinctUntilChanged, shareReplay, take} from 'rxjs/operators';
+import {concatMap, distinctUntilChanged, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
@@ -116,6 +116,14 @@ export class ProjectService {
   lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
 
   lastCompletedDay$: Observable<string> = this._store$.pipe(select(selectProjectLastCompletedDay));
+
+  private _isProjectChanging$ = new ReplaySubject<boolean>(1);
+  isProjectChanging$: Observable<any> = this._isProjectChanging$.pipe(
+    switchMap(() => this.onProjectRelatedDataLoaded$.pipe(
+      mapTo(false),
+      startWith(true),
+    ))
+  );
 
 
   constructor(
@@ -302,6 +310,7 @@ export class ProjectService {
       return;
     }
 
+    this._isProjectChanging$.next(true);
     this._store$.dispatch({
       type: ProjectActionTypes.SetCurrentProject,
       payload: projectId,
