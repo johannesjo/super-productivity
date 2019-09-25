@@ -12,6 +12,7 @@ import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
 import {T} from '../../t.const';
 import {ImprovementService} from '../../features/metric/improvement/improvement.service';
+import {ProjectService} from '../../features/project/project.service';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -48,6 +49,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
   constructor(
     public taskService: TaskService,
+    public projectService: ProjectService,
     public takeABreakService: TakeABreakService,
     public planningModeService: PlanningModeService,
     public improvementService: ImprovementService,

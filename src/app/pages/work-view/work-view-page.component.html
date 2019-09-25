@@ -1,4 +1,6 @@
 <div #containerEl
+     *ngIf="!(projectService.isProjectChanging$|async)"
+     @fade
      class="wrapper">
   <div #splitTopEl
        class="today">

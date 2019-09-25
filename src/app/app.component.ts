@@ -70,7 +70,7 @@ export class AppComponent {
     private _store: Store<any>,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
-    public readonly noteService: NoteService,
+    public projectService: ProjectService,
   ) {
     // try to avoid data-loss
     if (navigator.storage && navigator.storage.persist) {
