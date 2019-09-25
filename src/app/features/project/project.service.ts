@@ -8,7 +8,8 @@ import {
   Project,
   ProjectAdvancedCfg,
   ProjectAdvancedCfgKey,
-  ProjectBasicCfg, ProjectThemeCfg,
+  ProjectBasicCfg,
+  ProjectThemeCfg,
   SimpleSummarySettings,
 } from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
@@ -34,7 +35,8 @@ import {
   selectProjectJiraCfg,
   selectProjectJiraIsEnabled,
   selectProjectLastCompletedDay,
-  selectProjectLastWorkEnd, selectProjectThemeCfg,
+  selectProjectLastWorkEnd,
+  selectProjectThemeCfg,
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
   selectUnarchivedProjects,
@@ -296,6 +298,10 @@ export class ProjectService {
   }
 
   setCurrentId(projectId: string) {
+    if (this.currentId === projectId) {
+      return;
+    }
+
     this._store$.dispatch({
       type: ProjectActionTypes.SetCurrentProject,
       payload: projectId,
