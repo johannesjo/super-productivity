@@ -7,12 +7,14 @@ import {
   toggleShowNotes,
   toggleSideNav
 } from './store/layout.actions';
-import {Observable, of} from 'rxjs';
+import {merge, Observable, of} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideNav} from './store/layout.reducer';
-import {map, switchMap} from 'rxjs/operators';
+import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {NoteService} from '../../features/note/note.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ProjectService} from '../../features/project/project.service';
 
 const BOTH__ALWAYS_VISIBLE = 1400;
 const NAV_ALWAYS_VISIBLE = 1050;
@@ -67,11 +69,28 @@ export class LayoutService {
   constructor(
     private _store$: Store<LayoutState>,
     private _noteService: NoteService,
+    private _router: Router,
+    private _activatedRoute: ActivatedRoute,
+    private _projectService: ProjectService,
     private _breakPointObserver: BreakpointObserver,
   ) {
-    this.isShowNotes$.subscribe((v) => console.log('isShowNotes$', v));
-    this._isShowNotes$.subscribe((v) => console.log('_isShowNotes$', v));
-
+    // this.isNavOver$.pipe(
+    //   filter(v => v),
+    //   switchMap(() => merge(
+    //     // this._router.events.pipe(filter((ev)=> ev.)),
+    //     this._activatedRoute.params,
+    //     this._projectService.onProjectChange$
+    //   ).pipe(
+    //     withLatestFrom(
+    //       this._isShowSideNav$,
+    //     ),
+    //     tap((v) => console.log(v)),
+    //     filter(([url, isShowSideNav]) => isShowSideNav),
+    //   ))
+    // ).subscribe(([url]) => {
+    //   console.log(url);
+    //   this.toggleSideNav();
+    // });
   }
 
   showAddTaskBar() {
