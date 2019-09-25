@@ -65,3 +65,12 @@
   font-style: italic;
   padding: $s*3;
 }
+
+
+.dark-mode-toggle {
+  margin: 20px 0;
+
+  :host-context(.isMac.isElectron) & {
+    display: none;
+  }
+}
