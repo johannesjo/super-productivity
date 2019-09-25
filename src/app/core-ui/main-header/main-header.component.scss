@@ -9,11 +9,10 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
   position: relative;
   z-index: 3;
   user-select: none;
-
-  padding-top: $macExtraPadding;
 }
 
 :host-context(.isMac.isElectron) {
+  padding-top: $macExtraPadding;
   -webkit-app-region: drag;
   cursor: grab;
 
