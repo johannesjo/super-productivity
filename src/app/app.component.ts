@@ -14,7 +14,6 @@ import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
 import {NoteService} from './features/note/note.service';
-import {BreakpointObserver} from '@angular/cdk/layout';
 import {DOCUMENT} from '@angular/common';
 import {filter, map, take} from 'rxjs/operators';
 import {MigrateService} from './imex/migrate/migrate.service';
@@ -23,7 +22,6 @@ import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
 import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
 import {BannerService} from './core/banner/banner.service';
-import {loadFromLs, saveToLs} from './core/persistence/local-storage';
 import {SS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
 import {BannerId} from './core/banner/banner.model';
 import {T} from './t.const';
@@ -74,6 +72,17 @@ export class AppComponent {
     public readonly bookmarkService: BookmarkService,
     public readonly noteService: NoteService,
   ) {
+    // try to avoid data-loss
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(granted => {
+        if (granted) {
+          console.log('Persistent store granted');
+        } else {
+          this._snackService.open({msg: T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED});
+        }
+      });
+    }
+
     // TODO we are better than this
     // LOAD GLOBAL MODELS
     this._projectService.load();
