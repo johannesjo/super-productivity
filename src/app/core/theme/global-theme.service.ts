@@ -91,6 +91,7 @@ export class GlobalThemeService {
 
     // TODO beautify code here
     if (IS_ELECTRON && this._electronService.isMacOS) {
+      this._setDarkTheme(this._electronService.remote.systemPreferences.isDarkMode());
       this._electronService.remote.systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
         this._globalConfigService.misc$.pipe(take(1)).subscribe((misc: MiscConfig) => {
           const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
