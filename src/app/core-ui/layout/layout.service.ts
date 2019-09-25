@@ -8,7 +8,7 @@ import {
   toggleShowNotes,
   toggleSideNav
 } from './store/layout.actions';
-import {merge, Observable, of} from 'rxjs';
+import {EMPTY, merge, Observable, of} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideNav} from './store/layout.reducer';
 import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
@@ -76,16 +76,18 @@ export class LayoutService {
     private _breakPointObserver: BreakpointObserver,
   ) {
     this.isNavOver$.pipe(
-      filter(v => v),
-      switchMap(() => merge(
-        this._router.events.pipe(
-          filter((ev) => ev instanceof NavigationStart)
-        ),
-        this._projectService.onProjectChange$
-      ).pipe(
-        withLatestFrom(this._isShowSideNav$),
-        filter(([, isShowSideNav]) => isShowSideNav),
-      ))
+      switchMap((isNavOver) => isNavOver
+        ? merge(
+          this._router.events.pipe(
+            filter((ev) => ev instanceof NavigationStart)
+          ),
+          this._projectService.onProjectChange$
+        ).pipe(
+          withLatestFrom(this._isShowSideNav$),
+          filter(([, isShowSideNav]) => isShowSideNav),
+        )
+        : EMPTY
+      )
     ).subscribe(() => {
       this.hideSideNav();
     });
