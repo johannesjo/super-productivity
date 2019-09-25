@@ -21,7 +21,7 @@ import {T} from '../../t.const';
 })
 export class ReminderService {
   onReminderActive$ = new Subject<Reminder>();
-  private _reminders$ = new ReplaySubject<Reminder[]>();
+  private _reminders$ = new ReplaySubject<Reminder[]>(1);
   reminders$ = this._reminders$.asObservable();
   private _onReloadModel$ = new Subject<Reminder[]>();
   onReloadModel$ = this._onReloadModel$.asObservable();

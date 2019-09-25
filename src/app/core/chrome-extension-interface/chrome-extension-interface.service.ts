@@ -9,7 +9,7 @@ const interfaceEl = window;
   providedIn: 'root',
 })
 export class ChromeExtensionInterfaceService {
-  private _onReady$: ReplaySubject<boolean> = new ReplaySubject();
+  private _onReady$: ReplaySubject<boolean> = new ReplaySubject(1);
   // we only every one to catch a single event
   public onReady$ = this._onReady$.pipe(first());
   public isReady$ = this.onReady$.pipe(startWith(false));
