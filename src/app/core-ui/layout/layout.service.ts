@@ -109,6 +109,10 @@ export class LayoutService {
     this._store$.dispatch(toggleSideNav());
   }
 
+  hideSideNav() {
+    this._store$.dispatch(toggleSideNav());
+  }
+
   public toggleNotes() {
     this._store$.dispatch(toggleShowNotes());
   }

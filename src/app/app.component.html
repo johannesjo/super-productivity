@@ -20,7 +20,8 @@
          class="route-wrapper">
       <router-outlet #o="outlet"></router-outlet>
     </div>
-    <mat-drawer [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
+    <mat-drawer (closedStart)="layoutService.hideSideNav()"
+                [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
                 [opened]="(layoutService.isShowSideNav$|async)"
                 position="start">
       <side-nav></side-nav>
