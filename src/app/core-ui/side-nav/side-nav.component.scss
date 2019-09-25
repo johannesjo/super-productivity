@@ -130,6 +130,10 @@ $spacer: $s;
   margin-bottom: $spacer;
   padding-bottom: $spacer;
 
+  :host-context(.isMac.isElectron) & {
+    padding-top: $mac-title-bar-padding;
+  }
+
   &:after {
     bottom: 0;
   }

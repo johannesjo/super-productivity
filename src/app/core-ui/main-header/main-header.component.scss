@@ -2,12 +2,35 @@
 
 $mobileHorizontalPadding: 8px;
 $navVerticalPadding: 4px;
+$macExtraPadding: (-8px+$mac-title-bar-padding);
 
 :host {
   display: block;
   position: relative;
   z-index: 3;
+  user-select: none;
+
+  padding-top: $macExtraPadding;
 }
+
+:host-context(.isMac.isElectron) {
+  -webkit-app-region: drag;
+  cursor: grab;
+
+  .wrapper {
+    -webkit-app-region: drag;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  button,
+  a {
+    -webkit-app-region: no-drag;
+  }
+}
+
 
 .wrapper {
   background: transparent;

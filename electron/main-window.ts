@@ -1,4 +1,4 @@
-import {BrowserWindow, ipcMain, Menu, shell, dialog, MenuItemConstructorOptions, MessageBoxReturnValue} from 'electron';
+import {BrowserWindow, dialog, ipcMain, Menu, MenuItemConstructorOptions, MessageBoxReturnValue, shell} from 'electron';
 import {errorHandler} from './error-handler';
 import {join, normalize} from 'path';
 import {format} from 'url';
@@ -38,7 +38,7 @@ export const createWindow = (params) => {
   mainWin = new BrowserWindow({
     width: 800,
     height: 800,
-    titleBarStyle: 'default',
+    titleBarStyle: IS_MAC ? 'hidden' : 'default',
     show: false,
     webPreferences: {
       scrollBounce: true,
