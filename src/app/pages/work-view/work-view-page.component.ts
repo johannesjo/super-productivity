@@ -92,6 +92,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
         }
       });
     }
+    // preload
+    this._subs.add(this.taskService.backlogTasks$.subscribe());
 
     this._subs.add(this._activatedRoute.queryParams
       .subscribe((params) => {

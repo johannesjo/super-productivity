@@ -3,8 +3,7 @@ import {TaskService} from '../../../features/tasks/task.service';
 import {TaskWithReminderData, TaskWithSubTasks} from '../../../features/tasks/task.model';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {T} from '../../../t.const';
-import {Observable, of} from 'rxjs';
-import {delay, startWith, switchMap} from 'rxjs/operators';
+import {Observable} from 'rxjs';
 import {ProjectService} from '../../../features/project/project.service';
 
 @Component({
@@ -20,11 +19,12 @@ export class BacklogComponent {
   @Output() closeBacklog = new EventEmitter<any>();
 
   // we do it here to have the tasks in memory all the time
-  backlogTasks$: Observable<TaskWithSubTasks[]> = this._projectService.isProjectChanging$.pipe(
-    delay(50),
-    switchMap((isChanging) => isChanging ? of([]) : this.taskService.backlogTasks$),
-    startWith([])
-  );
+  // backlogTasks$: Observable<TaskWithSubTasks[]> = this._projectService.isProjectChanging$.pipe(
+  //   delay(50),
+  //   switchMap((isChanging) => isChanging ? of([]) : this.taskService.backlogTasks$),
+  //   startWith([])
+  // );
+  backlogTasks$: Observable<TaskWithSubTasks[]> = this.taskService.backlogTasks$;
 
   constructor(
     public taskService: TaskService,
