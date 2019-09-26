@@ -29,31 +29,31 @@ export class GlobalConfigService {
   cfg$: Observable<GlobalConfigState> = this._store.pipe(
     select(selectConfigFeatureState),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   googleDriveSyncCfg$: Observable<GoogleDriveSyncConfig> = this._store.pipe(
     select(selectGoogleDriveSyncConfig),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   idle$: Observable<IdleConfig> = this._store.pipe(
     select(selectIdleConfig),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   takeABreak$: Observable<TakeABreakConfig> = this._store.pipe(
     select(selectTakeABreakConfig),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   googleSession$: Observable<GoogleSession> = this._store.pipe(

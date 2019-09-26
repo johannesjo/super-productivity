@@ -39,7 +39,7 @@ export class ScheduledTaskService {
     ),
     map(tasks => tasks
       .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)),
-    shareReplay(),
+    shareReplay(1),
   );
 
 

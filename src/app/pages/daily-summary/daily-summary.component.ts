@@ -68,7 +68,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         return getWorklogStr();
       }
     }),
-    shareReplay()
+    shareReplay(1)
   );
 
   tasksWorkedOnOrDoneOrRepeatableFlat$ = this.dayStr$.pipe(
@@ -82,7 +82,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         (task => !task.repeatCfgId || task.repeatCfgId === null)
       ),
     ]),
-    shareReplay(),
+    shareReplay(1),
   );
 
   hasTasksForToday$: Observable<boolean> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(map(tasks => tasks && !!tasks.length));

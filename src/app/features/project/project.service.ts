@@ -69,14 +69,14 @@ export class ProjectService {
     select(selectCurrentProject),
     // filter(v => !!v),
     // TODO investigate share replay issues
-    shareReplay(),
+    shareReplay(1),
   );
   currentTheme$: Observable<ProjectThemeCfg> = this._store$.pipe(
     select(selectProjectThemeCfg),
   );
   currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
     select(selectProjectJiraCfg),
-    // shareReplay(),
+    // shareReplay(1),
   );
   isJiraEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectJiraIsEnabled),
@@ -84,7 +84,7 @@ export class ProjectService {
 
   currentGithubCfg$: Observable<GithubCfg> = this._store$.pipe(
     select(selectProjectGithubCfg),
-    // shareReplay(),
+    // shareReplay(1),
   );
   isGithubEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectGithubIsEnabled),
@@ -92,7 +92,7 @@ export class ProjectService {
 
   advancedCfg$: Observable<ProjectAdvancedCfg> = this._store$.pipe(
     select(selectAdvancedProjectCfg),
-    // shareReplay(),
+    // shareReplay(1),
   );
 
   basicCfg$: Observable<ProjectBasicCfg> = this._store$.pipe(

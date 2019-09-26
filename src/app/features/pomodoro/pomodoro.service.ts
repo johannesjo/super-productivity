@@ -78,7 +78,7 @@ export class PomodoroService {
         return cfg.longerBreakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration;
       }
     }),
-    shareReplay(),
+    shareReplay(1),
   );
 
   currentSessionTime$: Observable<number> = merge(
@@ -90,7 +90,7 @@ export class PomodoroService {
         ? acc + value
         : value;
     }),
-    shareReplay(),
+    shareReplay(1),
   );
 
   // 0 to 1

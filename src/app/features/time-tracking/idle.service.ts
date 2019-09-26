@@ -22,7 +22,7 @@ const IDLE_POLL_INTERVAL = 1000;
 export class IdleService {
   isIdle = false;
   private _isIdle$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(distinctUntilChanged(), shareReplay());
+  isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(distinctUntilChanged(), shareReplay(1));
 
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
   idleTime$: Observable<number> = this._idleTime$.asObservable();

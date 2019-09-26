@@ -51,7 +51,7 @@ export class GoogleApiService {
       const session = sessionIN as GoogleSession;
       return session && !!session.accessToken;
     }),
-    shareReplay(),
+    shareReplay(1),
   );
 
   private _isScriptLoaded = false;

@@ -52,7 +52,7 @@ export class TakeABreakService {
         ? from([0])
         : this._timeTrackingService.tick$.pipe(scan(reduceBreak, 0));
     }),
-    shareReplay(),
+    shareReplay(1),
   );
 
   private _isIdleResetEnabled$ = this._configService.idle$.pipe(
@@ -121,7 +121,7 @@ export class TakeABreakService {
         ? acc + value
         : value;
     }),
-    shareReplay(),
+    shareReplay(1),
   );
 
   private _triggerLockScreenCounter$ = new Subject<boolean>();

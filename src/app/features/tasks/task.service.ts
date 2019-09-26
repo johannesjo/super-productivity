@@ -140,7 +140,7 @@ export class TaskService {
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysTasksWithSubTasks),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   isTasksForToday$: Observable<boolean> = this._store.pipe(
@@ -150,18 +150,18 @@ export class TaskService {
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectBacklogTasksWithSubTasks),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysUnDoneTasksWithSubTasks),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysDoneTasksWithSubTasks),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
@@ -230,7 +230,7 @@ export class TaskService {
     debounceTime(1000),
     select(selectTasksWithMissingIssueData),
     distinctUntilChanged(),
-    shareReplay(),
+    shareReplay(1),
   );
 
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
