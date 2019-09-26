@@ -50,14 +50,42 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
 .current-project-title {
   //font-weight: bold;
   font-size: 18px;
-  margin-left: $s;
-  margin-right: 2*$s;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-grow: 1;
+  //flex-grow: 1;
   white-space: nowrap;
   max-width: 220px;
+  cursor: pointer;
+  border-radius: $card-border-radius;
+  padding: $s 2*$s $s $s;
+
+  @include mq(xs) {
+    padding-right: $s;
+  }
+
+  &:focus {
+    outline: none
+  }
 }
+
+.project-settings-btn {
+  display: none;
+  @include mq(xs) {
+    display: block;
+    transition: $transition-standard;
+    opacity: 0;
+    margin-right: 2*$s;
+    margin-left: -$s;
+    position: relative;
+    z-index: 1;
+  }
+
+  &:hover,
+  .current-project-title:hover + & {
+    opacity: 1;
+  }
+}
+
 
 a,
 button {
