@@ -7,7 +7,7 @@ import {BannerService} from '../banner/banner.service';
 
 let isWasErrorAlertCreated = false;
 
-const _createErrorAlert = (err: string, stackTrace: string) => {
+const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: string) => {
   console.log(stackTrace);
 
   if (isWasErrorAlertCreated) {
@@ -26,7 +26,11 @@ const _createErrorAlert = (err: string, stackTrace: string) => {
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
   btnReload.addEventListener('click', () => {
-    window.location.reload();
+    if (IS_ELECTRON) {
+      eSvc.remote.getCurrentWindow().webContents.reload();
+    } else {
+      window.location.reload();
+    }
   });
   errorAlert.append(btnReload);
   document.body.append(errorAlert);
@@ -60,38 +64,16 @@ export class GlobalErrorHandler implements ErrorHandler {
 
       // NOTE: dom exceptions will break all rendering that's why
       if (err.constructor && err.constructor === DOMException) {
-        _createErrorAlert('DOMException: ' + errorStr, stack);
+        _createErrorAlert(this._electronService, 'DOMException: ' + errorStr, stack);
       } else {
-        _createErrorAlert(errorStr, stack);
-        // try {
-        //   this._bannerService.open({
-        //     id: BannerId.GlobalError,
-        //     type: 'ERROR',
-        //     ico: 'error',
-        //     msg: 'ERROR: ' + errorStr.substring(0, 300),
-        //     action: {
-        //       label: 'Report',
-        //       fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
-        //     },
-        //     action2: {
-        //       label: 'Reload App',
-        //       fn: () => window.location.reload()
-        //     },
-        //     action3: {
-        //       label: 'Dismiss',
-        //       fn: () => {
-        //       }
-        //     }
-        //   });
-        // } catch (e) {
-        //   _createErrorAlert(errorStr);
-        // }
+        _createErrorAlert(this._electronService, errorStr, stack);
       }
     }
 
     console.error('GLOBAL_ERROR_HANDLER', err);
     if (IS_ELECTRON) {
       this._electronLogger.error('Frontend Error:', err, stack);
+      this._electronService.remote.getCurrentWindow().webContents.openDevTools();
     }
 
     // NOTE: rethrow the error otherwise it gets swallowed
