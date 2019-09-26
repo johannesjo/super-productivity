@@ -1,6 +1,6 @@
 <div #containerEl
-     *ngIf="!(projectService.isProjectChanging$|async)"
-     @fade
+     *ngIf="!(projectService.isProjectChangingWithDelay$|async)"
+     @fadeListAfter
      class="wrapper">
   <div #splitTopEl
        class="today">

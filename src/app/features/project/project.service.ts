@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
+import {interval, Observable, of, Subject} from 'rxjs';
 import {
   BreakNr,
   BreakTime,
@@ -47,7 +47,7 @@ import {JiraCfg} from '../issue/jira/jira';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/github/github';
 import {Actions, ofType} from '@ngrx/effects';
-import {distinctUntilChanged, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
+import {delayWhen, distinctUntilChanged, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
@@ -125,6 +125,12 @@ export class ProjectService {
     )),
     startWith(false),
     shareReplay(1),
+  );
+  isProjectChangingWithDelay$: Observable<boolean> = this.isProjectChanging$.pipe(
+    delayWhen(val => val
+      ? of(undefined)
+      : interval(60)
+    )
   );
 
 

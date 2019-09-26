@@ -7,7 +7,7 @@ import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-
 import {ActivatedRoute} from '@angular/router';
 import {from, Observable, of, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
-import {delay, map, startWith, switchMap} from 'rxjs/operators';
+import {concatMap, delay, delayWhen, map, startWith, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
 import {T} from '../../t.const';
@@ -17,7 +17,7 @@ import {fadeListAfterAnimation} from '../../ui/animations/fade-animate-list';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
-const TASK_LIST_INITIAL_DELAY = 10;
+const TASK_LIST_INITIAL_DELAY = 2210;
 
 @Component({
   selector: 'work-view',
@@ -32,17 +32,23 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   isPreloadBacklog = false;
   T = T;
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.projectService.isProjectChanging$.pipe(
-    delay(TASK_LIST_INITIAL_DELAY),
-    switchMap((isChanging) => isChanging ? of([]) : this.taskService.undoneTasks$),
-    startWith([])
-  );
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.undoneTasks$;
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.doneTasks$;
 
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.projectService.isProjectChanging$.pipe(
-    delay(TASK_LIST_INITIAL_DELAY),
-    switchMap((isChanging) => isChanging ? of([]) : this.taskService.doneTasks$),
-    startWith([])
-  );
+  // undoneTasks$: Observable<TaskWithSubTasks[]> = this.projectService.isProjectChanging$.pipe(
+  //   // delay(TASK_LIST_INITIAL_DELAY),
+  //   switchMap((isChanging) => isChanging
+  //     ? of([])
+  //     : this.taskService.undoneTasks$),
+  //   startWith([])
+  // );
+  // doneTasks$: Observable<TaskWithSubTasks[]> = this.projectService.isProjectChanging$.pipe(
+  //   // delay(TASK_LIST_INITIAL_DELAY),
+  //   switchMap((isChanging) => isChanging
+  //     ? of([])
+  //     : this.taskService.doneTasks$),
+  //   startWith([])
+  // );
 
 
   // NOTE: not perfect but good enough for now

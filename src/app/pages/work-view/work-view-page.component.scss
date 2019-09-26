@@ -29,6 +29,12 @@ h2 {
   position: absolute;
   top: 0;
   left: 0;
+
+  transition: $transition-enter;
+  &.isFadeOut {
+    transition: $transition-ultra-fast;
+    opacity: 0;
+  }
 }
 
 .work-view-header {
