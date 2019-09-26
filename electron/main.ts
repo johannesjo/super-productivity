@@ -265,6 +265,8 @@ function registerShowAppShortCuts(cfg: KeyboardConfig) {
           case 'globalShowHide':
             actionFn = () => {
               if (mainWin.isFocused()) {
+                // we need to blur the window for windows
+                mainWin.blur();
                 mainWin.hide();
               } else {
                 showOrFocus(mainWin);
