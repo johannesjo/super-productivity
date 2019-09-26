@@ -1,7 +1,7 @@
 <div class="wrapper">
   <div class="task-list-wrapper">
     <task-list [noTasksMsg]="T.BL.NO_TASKS|translate"
-               [tasks]="taskService.backlogTasks$|async"
+               [tasks]="backlogTasks$|async"
                [isBacklog]="true"
                class="isHidePlayBtn"
                listId="PARENT"

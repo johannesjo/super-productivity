@@ -1,0 +1,16 @@
+import {animate, animateChild, query, style, transition, trigger} from '@angular/animations';
+import {ANI_ENTER_FAST_TIMING, ANI_ENTER_TIMING, ANI_LEAVE_FAST_TIMING, ANI_LEAVE_TIMING} from './animation.const';
+
+export const fadeListAfterAnimation = [
+  trigger('fadeListAfter', [
+    transition(':enter', [
+      style({opacity: 0}),
+      animate(ANI_ENTER_FAST_TIMING, style({opacity: '*'})),
+      // query('@standardList', animateChild()),
+    ]), // void => *
+    transition(':leave', [
+      style({opacity: '*'}),
+      animate(ANI_LEAVE_FAST_TIMING, style({opacity: 0}))
+    ])
+  ])
+];

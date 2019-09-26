@@ -123,6 +123,7 @@ export class ProjectService {
       mapTo(false),
       startWith(true),
     )),
+    startWith(false),
     shareReplay(1),
   );
 

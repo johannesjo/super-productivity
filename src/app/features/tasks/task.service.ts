@@ -60,7 +60,7 @@ import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectAllTasksWithIssueData,
+  selectAllTasksWithIssueData, selectBacklogTaskCount,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -123,12 +123,10 @@ export class TaskService {
 
   startableTaskIds$: Observable<string[]> = this._store.pipe(
     select(selectStartableTaskIds),
-    distinctUntilChanged(),
   );
 
   startableTasks$: Observable<Task[]> = this._store.pipe(
     select(selectStartableTasks),
-    distinctUntilChanged(),
   );
 
   // todays list flat + tasks worked on today
@@ -139,7 +137,6 @@ export class TaskService {
   // only todays list
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysTasksWithSubTasks),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
@@ -149,18 +146,19 @@ export class TaskService {
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectBacklogTasksWithSubTasks),
-    distinctUntilChanged(),
     shareReplay(1),
   );
+  backlogTasksCount$: Observable<number> = this._store.pipe(
+    select(selectBacklogTaskCount),
+  );
+
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysUnDoneTasksWithSubTasks),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysDoneTasksWithSubTasks),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
@@ -180,7 +178,6 @@ export class TaskService {
 
   scheduledTasksWOData$ = this._store.pipe(
     select(selectScheduledTasks),
-    distinctUntilChanged(),
   );
 
 

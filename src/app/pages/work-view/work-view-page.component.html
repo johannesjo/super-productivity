@@ -95,7 +95,7 @@
           {{T.WW.READY_TO_WORK|translate}}
         </button>
       </div>
-      <task-list [tasks]="taskService.undoneTasks$|async"
+      <task-list [tasks]="undoneTasks$|async"
                  listId="PARENT"
                  listModelId="UNDONE"></task-list>
 
@@ -103,7 +103,7 @@
            @expand>
         <h2 class="mat-h2 completed-tasks-heading">{{T.WW.COMPLETED_TASKS|translate}}</h2>
         <task-list [noTasksMsg]="T.WW.NO_COMPLETED_TASKS|translate"
-                   [tasks]="taskService.doneTasks$|async"
+                   [tasks]="doneTasks$|async"
                    listId="PARENT"
                    listModelId="DONE"></task-list>
         <div class="finish-day-button-wrapper">
@@ -126,7 +126,7 @@
            (mouseleave)="isPreloadBacklog=false"
            (posChanged)="splitInputPos=$event"
            [containerEl]="containerEl"
-           [counter]="(taskService.backlogTasks$|async)?.length"
+           [counter]="(taskService.backlogTasksCount$|async)"
            [isAnimateBtn]="isTriggerBacklogIconAni$|async"
            [splitBottomEl]="splitBottomEl"
            [splitPos]="splitInputPos"

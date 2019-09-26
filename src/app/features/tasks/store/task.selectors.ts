@@ -69,6 +69,7 @@ export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEAT
 export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
 export const selectIsTasksLoaded = createSelector(selectTaskFeatureState, state => state.isDataLoaded);
 export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
+export const selectBacklogTaskCount = createSelector(selectBacklogTaskIds, state => state && state.length);
 export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
 export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);
 export const selectIsTaskDataLoaded = createSelector(selectTaskFeatureState, state => state.isDataLoaded);
