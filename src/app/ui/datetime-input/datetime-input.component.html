@@ -21,10 +21,12 @@
   <owl-date-time #dt1></owl-date-time>
 
   <mat-chip-list>
-    <mat-chip (click)="setCommonVal('15M')">{{T.DATETIME_INPUT.IN|translate:{time:'15m'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('1H')">{{T.DATETIME_INPUT.IN|translate:{time:'1h'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('2H')">{{T.DATETIME_INPUT.IN|translate:{time:'2h'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('5H')">{{T.DATETIME_INPUT.IN|translate:{time:'5h'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('TOMORROW_11')">{{T.DATETIME_INPUT.TOMORROW|translate:{time:'11:00'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('15M')">{{T.DATETIME_INPUT.IN|translate:{time: '15m'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('1H')">{{T.DATETIME_INPUT.IN|translate:{time: '1h'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('2H')">{{T.DATETIME_INPUT.IN|translate:{time: '2h'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('5H')">{{T.DATETIME_INPUT.IN|translate:{time: '5h'} }}</mat-chip>
+    <mat-chip (click)="setCommonVal('TOMORROW_11')">{{T.DATETIME_INPUT.TOMORROW|translate:{time: '11:00'} }}</mat-chip>
+    <mat-chip *ngIf="lastVal"
+              (click)="setLastVal()">{{lastVal|date:'short'}}</mat-chip>
   </mat-chip-list>
 </div>

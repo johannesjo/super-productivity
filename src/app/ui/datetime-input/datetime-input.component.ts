@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {T} from '../../t.const';
+import {LS_LAST_REMINDER_DATE} from '../../core/persistence/ls-keys.const';
 
 @Component({
   selector: 'datetime-input',
@@ -15,8 +16,14 @@ export class DatetimeInputComponent {
   nrValue: number;
   strValue: string;
   T = T;
+  lastVal: number;
 
   constructor() {
+    const lastVal = localStorage.getItem(LS_LAST_REMINDER_DATE);
+    console.log(lastVal, Date.now());
+    if (lastVal && +lastVal > Date.now()) {
+      this.lastVal = +lastVal;
+    }
   }
 
   @Input()
@@ -55,7 +62,11 @@ export class DatetimeInputComponent {
         break;
     }
 
-    this._updateValues(date.getTime());
+    this._updateValues(date.getTime(), false);
+  }
+
+  setLastVal() {
+    this._updateValues(this.lastVal, false);
   }
 
   private _updateValues(v: number | Date, isFromInput = false) {
@@ -68,7 +79,10 @@ export class DatetimeInputComponent {
     this.nrValue = v;
     this.modelChange.emit(v);
 
-    if (!isFromInput) {
+    if (isFromInput) {
+      localStorage.setItem(LS_LAST_REMINDER_DATE, v.toString());
+    } else {
+      // required to update view value
       this.strValue = this._convertToIsoString(v);
     }
   }
