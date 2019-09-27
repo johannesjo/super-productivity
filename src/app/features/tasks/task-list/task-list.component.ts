@@ -42,7 +42,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() isBacklog: boolean;
 
   @ViewChild('listEl', {static: true}) listEl;
-  isBlockAni = true;
+  isBlockAni = false;
   doneTasksLength = 0;
   undoneTasksLength = 0;
   allTasksLength = 0;
@@ -87,9 +87,6 @@ export class TaskListComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
-    // block initial animation (method could be also used to set an initial animation)
-    this._blockAnimation();
-
     this._subs.add(this._filteredTasks$.subscribe((tasks) => {
       this.filteredTasks = tasks;
     }));
