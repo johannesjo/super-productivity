@@ -5,15 +5,15 @@ import {LayoutService} from '../../core-ui/layout/layout.service';
 import {DragulaService} from 'ng2-dragula';
 import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-a-break.service';
 import {ActivatedRoute} from '@angular/router';
-import {from, Observable, of, Subscription, timer, zip} from 'rxjs';
+import {from, Observable, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
-import {concatMap, delay, delayWhen, map, startWith, switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
 import {T} from '../../t.const';
 import {ImprovementService} from '../../features/metric/improvement/improvement.service';
 import {ProjectService} from '../../features/project/project.service';
-import {fadeListAfterAnimation} from '../../ui/animations/fade-animate-list';
+import {workViewProjectChangeAnimation} from '../../ui/animations/work-view-project-change.ani';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -23,7 +23,7 @@ const TASK_LIST_INITIAL_DELAY = 2210;
   selector: 'work-view',
   templateUrl: './work-view-page.component.html',
   styleUrls: ['./work-view-page.component.scss'],
-  animations: [expandFadeAnimation, expandAnimation, fadeAnimation, fadeListAfterAnimation],
+  animations: [expandFadeAnimation, expandAnimation, fadeAnimation, workViewProjectChangeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkViewPageComponent implements OnInit, OnDestroy {
