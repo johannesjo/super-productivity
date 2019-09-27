@@ -38,6 +38,7 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
+import {Router} from '@angular/router';
 
 // TODO send message to electron when current task changes here
 
@@ -157,6 +158,22 @@ export class TaskEffects {
         },
         msg: T.F.TASK.S.REMINDER_UPDATED,
         ico: 'schedule',
+      })),
+    );
+
+  @Effect({dispatch: false}) taskCreatedSnack$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.AddTask,
+      ),
+      filter(() => this._router.url !== '/work-view'),
+      tap((a: UpdateTaskReminder) => this._snackService.open({
+        type: 'SUCCESS',
+        translateParams: {
+          title: truncate(a.payload.title)
+        },
+        msg: T.F.TASK.S.TASK_CREATED,
+        ico: 'add',
       })),
     );
 
@@ -420,6 +437,7 @@ export class TaskEffects {
               private _configService: GlobalConfigService,
               private _bannerService: BannerService,
               private _reminderService: ReminderService,
+              private _router: Router,
               private _snackService: SnackService,
               private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {
