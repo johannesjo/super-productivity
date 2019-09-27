@@ -35,6 +35,10 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
   errorAlert.append(btnReload);
   document.body.append(errorAlert);
   isWasErrorAlertCreated = true;
+
+  if (IS_ELECTRON) {
+    eSvc.remote.getCurrentWindow().webContents.openDevTools();
+  }
 };
 
 
@@ -73,7 +77,6 @@ export class GlobalErrorHandler implements ErrorHandler {
     console.error('GLOBAL_ERROR_HANDLER', err);
     if (IS_ELECTRON) {
       this._electronLogger.error('Frontend Error:', err, stack);
-      this._electronService.remote.getCurrentWindow().webContents.openDevTools();
     }
 
     // NOTE: rethrow the error otherwise it gets swallowed
