@@ -10,10 +10,10 @@ import {
 import {Task, TaskWithSubTasks} from '../task.model';
 import {TaskService} from '../task.service';
 import {DragulaService} from 'ng2-dragula';
-import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, ReplaySubject, Subscription} from 'rxjs';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {expandFadeFastAnimation} from '../../../ui/animations/expand.ani';
-import {map, share} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {filterDoneTasks} from '../filter-done-tasks.pipe';
 import {T} from '../../../t.const';
 
@@ -28,7 +28,7 @@ import {T} from '../../../t.const';
 export class TaskListComponent implements OnDestroy, OnInit {
   T = T;
   tasksIN: TaskWithSubTasks[];
-  tasks$: BehaviorSubject<TaskWithSubTasks[]> = new BehaviorSubject([]);
+  tasks$: ReplaySubject<TaskWithSubTasks[]> = new ReplaySubject(1);
   isHideDoneIN: boolean;
   isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isHideAllIN: boolean;
