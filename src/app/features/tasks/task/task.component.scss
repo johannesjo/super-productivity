@@ -208,14 +208,13 @@
   top: 0;
   bottom: 0;
   z-index: $z-hover-controls;
+  display: none;
 
 
   @include mq(xs, max) {
-    display: none !important;
-  }
-
-  @include mq(xs) {
-    display: none;
+    :host-context(.isTouchDevice) & {
+      display: none !important;
+    }
   }
 
   button {
@@ -255,7 +254,7 @@
 
 // TASK TITLE
 .task-title {
- @include taskTitle;
+  @include taskTitle;
 }
 
 

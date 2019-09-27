@@ -136,7 +136,7 @@
           </button>
           <button (click)="estimateTime()"
                   *ngIf="!task.subTasks?.length"
-                  class="ico-btn time-btn hide-xs"
+                  class="ico-btn time-btn"
                   color=""
                   mat-icon-button
                   tabindex="2"
@@ -146,7 +146,7 @@
           <button (click)="toggleShowAdditionalInfoOpen()"
                   *ngIf="!task.notes&&!task.issueData"
                   [class.isActive]="task._isAdditionalInfoOpen"
-                  class="ico-btn show-additional-info-btn hide-xs"
+                  class="ico-btn show-additional-info-btn"
                   color=""
                   mat-icon-button
                   tabindex="2"
@@ -167,7 +167,7 @@
         <button (click)="toggleShowAdditionalInfoOpen()"
                 *ngIf="task.notes||task.issueData"
                 [class.isActive]="task._isAdditionalInfoOpen"
-                class="ico-btn show-additional-info-btn hide-xs"
+                class="ico-btn show-additional-info-btn"
                 color=""
                 mat-icon-button
                 tabindex="2"
@@ -178,7 +178,7 @@
         <button (click)="toggleShowAttachments()"
                 *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
                 [class.isActive]="task._isAdditionalInfoOpen"
-                class="ico-btn attachment-btn hide-xs"
+                class="ico-btn attachment-btn"
                 color=""
                 mat-icon-button
                 tabindex="2"
