@@ -44,18 +44,18 @@
 </a>
 
 <br>
+<br>
 
 <a href="https://snapcraft.io/superproductivity">
   <img alt="Get it from the Snap Store"
        src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg"
        align="center"
-       height="36">
+       height="50">
 </a>
-<a href="//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone">
-  <img alt="English badge"
-       src="https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png"
-       align="center"
-       height="36">
+<a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'>
+  <img src='https://assets.windowsphone.com/85864462-9c82-451e-9355-a3d5f874397a/English_get-it-from-MS_InvariantCulture_Default.png'
+       alt='English badge'
+       height="50" />
 </a>
 
 
