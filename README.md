@@ -9,9 +9,6 @@
   <a href="https://snapcraft.io/superproductivity">
     <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" align="center" height="36">
   </a>
-  <a href="//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone">
-    <img alt="English badge" src="https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png" align="center" height="36">
-  </a>
   <a href="https://lbesson.mit-license.org">
     <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" align="center">
   </a>
@@ -22,7 +19,11 @@
     <img alt="Join the community on Spectrum" align="center" src="https://withspectrum.github.io/badge/badge.svg" />
 </a>
   <br>
-  <a href="https://www.reddit.com/r/selfhosted/comments/by7bcu/super_productivity_is_an_open_source_todo_list/?ref=readnext">
+  <a href="//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone">
+    <img alt="English badge" src="https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png" align="center" height="36">
+  </a>
+
+<a href="https://www.reddit.com/r/selfhosted/comments/by7bcu/super_productivity_is_an_open_source_todo_list/?ref=readnext">
     <img alt="On reddit" src="https://img.shields.io/badge/on-reddit-orange.svg?style=flat-square" align="center">
   </a>
   <a href="https://www.producthunt.com/posts/super-productivity">
