@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {
+  AddTask,
   AddTaskReminder,
   AddTimeSpent,
   DeleteTask,
@@ -167,10 +168,10 @@ export class TaskEffects {
         TaskActionTypes.AddTask,
       ),
       filter(() => this._router.url !== '/work-view'),
-      tap((a: UpdateTaskReminder) => this._snackService.open({
+      tap((a: AddTask) => this._snackService.open({
         type: 'SUCCESS',
         translateParams: {
-          title: truncate(a.payload.title)
+          title: truncate(a.payload.task.title)
         },
         msg: T.F.TASK.S.TASK_CREATED,
         ico: 'add',
