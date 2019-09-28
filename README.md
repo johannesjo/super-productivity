@@ -44,7 +44,6 @@
 </a>
 
 <br>
-<br>
 
 <a href="https://snapcraft.io/superproductivity">
   <img alt="Get it from the Snap Store"
@@ -54,6 +53,7 @@
 </a>
 <a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'>
   <img src='https://assets.windowsphone.com/85864462-9c82-451e-9355-a3d5f874397a/English_get-it-from-MS_InvariantCulture_Default.png'
+       align="center"
        alt='English badge'
        height="50" />
 </a>
