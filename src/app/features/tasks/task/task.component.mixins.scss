@@ -137,22 +137,17 @@ $z-time-btn-svg-wrapper: 5555;
     // NOTE: needed to overwrite color for current task
     color: $light-theme-text-color;
 
-    @include darkTheme() {
-      color: #fff;
+    @include mq(xs, max) {
+      transform: scale(1);
     }
 
-    .is-hide-controls & {
-      transform-origin: center center;
-      transform: scale(1.142857143) translateX(20px);
+    @include darkTheme() {
+      color: #fff;
     }
 
     &:after {
       opacity: 1;
       transition: $transition-standard;
-    }
-
-    @include mq(xs, max) {
-      transform: scale(1);
     }
   }
 }
