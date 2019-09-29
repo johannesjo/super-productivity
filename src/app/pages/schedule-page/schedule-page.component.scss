@@ -3,7 +3,7 @@
 
 .scheduled-task {
   margin-bottom: $s;
-  padding: $s $s*2;
+  padding: $s/2 $s*2;
   @include dividerBorderColor(1px);
   box-shadow: none;
 }
@@ -46,6 +46,8 @@
 
   .title {
     flex: 1;
+    // to account for the task titles inner padding
+    margin-top: -8px;
     @include mq(xs) {
       .scheduled-task:hover & {
       }
@@ -78,9 +80,15 @@
 
 .project {
   margin-top: $s/2;
+  // to align with task title
+  margin-left: $s;
   font-size: 11px;
   display: flex;
   align-items: center;
+}
+
+.project-title {
+  line-height: 1;
 }
 
 .project-color {
