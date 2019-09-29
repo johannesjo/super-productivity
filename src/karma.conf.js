@@ -25,7 +25,32 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false
+    browsers: ['ChromeHeadless'],
+    singleRun: false,
+    customLaunchers: {
+      'ChromeHeadless': {
+        base: 'Chrome',
+        flags: [
+          // We must disable the Chrome sandbox when running Chrome inside Docker
+          // (Chrome's sandbox needs more permissions than Docker allows by default)
+          '--headless',
+          '--no-sandbox',
+          '--disable-gpu',
+          '--no-default-browser-check',
+          '--no-first-run',
+          '--disable-default-apps',
+          '--disable-popup-blocking',
+          '--disable-translate',
+          '--disable-background-timer-throttling',
+          '--disable-renderer-backgrounding',
+          '--disable-device-discovery-notifications',
+          // Without a remote debugging port, Google Chrome exits immediately.
+          '--remote-debugging-port=9222',
+          '--disable-web-security',
+        ],
+        debug: true
+      }
+    },
+    browserNoActivityTimeout: 120000,
   });
 };
