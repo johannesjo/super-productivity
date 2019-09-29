@@ -1,4 +1,4 @@
-import {Directive, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 
 
 // HELPER
@@ -8,12 +8,13 @@ import {Directive, ElementRef, EventEmitter, Input, OnInit, Output} from '@angul
 @Directive({
   selector: '[editOnClick]',
 })
-export class EditOnClickDirective implements OnInit {
+export class EditOnClickDirective implements OnInit, OnDestroy {
   @Input() isResetAfterEdit = false;
   @Output() editFinished: EventEmitter<any> = new EventEmitter();
   private _lastDomValue: string;
   private _lastOutsideVal: string;
   private readonly _el: HTMLElement;
+  private _redrawTimeout: number;
 
   constructor(el: ElementRef) {
     this._el = el.nativeElement;
@@ -40,9 +41,14 @@ export class EditOnClickDirective implements OnInit {
       // setTimeout(() => {
       //   document.execCommand('selectAll', false, null);
       // });
+
+      window.clearTimeout(this._redrawTimeout);
+      // this fixes the bug where the text is not visible for some time
+      // by triggering a redraw via el.offsetHeight
+      this._redrawTimeout = window.setTimeout(() => this._el.offsetHeight, 30);
     });
 
-    el.addEventListener('input', () => {
+    el.addEventListener('input', (ev) => {
       this._setValueFromElement();
     });
 
@@ -54,7 +60,6 @@ export class EditOnClickDirective implements OnInit {
     // prevent keyboard shortcuts from firing when here
     el.addEventListener('keydown', (ev: KeyboardEvent) => {
       ev.stopPropagation();
-
       // blur on escape
       if (ev.key === 'Enter' || ev.key === 'Escape') {
         ev.preventDefault();
@@ -85,6 +90,9 @@ export class EditOnClickDirective implements OnInit {
     };
   }
 
+  ngOnDestroy(): void {
+    window.clearTimeout(this._redrawTimeout);
+  }
 
   private _refreshView() {
     this._el.innerText = this._value;
