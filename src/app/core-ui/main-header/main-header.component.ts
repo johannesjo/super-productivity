@@ -3,17 +3,20 @@ import {ProjectService} from '../../features/project/project.service';
 import {MatDrawer} from '@angular/material/sidenav';
 import {LayoutService} from '../layout/layout.service';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
-import {NoteService} from '../../features/note/note.service';
 import {TaskService} from '../../features/tasks/task.service';
 import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
 import {T} from '../../t.const';
-import {BannerService} from '../../core/banner/banner.service';
+import {fadeAnimation} from '../../ui/animations/fade.ani';
+import {NavigationStart, Router} from '@angular/router';
+import {filter, map} from 'rxjs/operators';
+import {combineLatest, Observable} from 'rxjs';
 
 @Component({
   selector: 'main-header',
   templateUrl: './main-header.component.html',
   styleUrls: ['./main-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeAnimation]
 })
 export class MainHeaderComponent implements OnInit {
   T = T;
@@ -23,14 +26,24 @@ export class MainHeaderComponent implements OnInit {
   @Input() drawer: MatDrawer;
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
+  isShowTaskTitle$: Observable<boolean> = combineLatest(
+    this._router.events.pipe(
+      filter(event => event instanceof NavigationStart),
+    ),
+    this.taskService.currentTaskId$,
+  ).pipe(
+    map(([routerEv, currentTaskId]: [NavigationStart, string]): boolean => {
+      return routerEv.url !== '/work-view' && !!currentTaskId;
+    })
+  );
+
   constructor(
     public readonly projectService: ProjectService,
     public readonly bookmarkService: BookmarkService,
-    public readonly noteService: NoteService,
     public readonly taskService: TaskService,
-    public readonly bannerService: BannerService,
     public readonly pomodoroService: PomodoroService,
     public readonly layoutService: LayoutService,
+    private readonly _router: Router,
     private readonly _renderer: Renderer2,
   ) {
   }

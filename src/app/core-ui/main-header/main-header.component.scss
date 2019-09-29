@@ -226,3 +226,36 @@ button {
     }
   }
 }
+
+.current-task-title {
+  position: absolute;
+  right: 100%;
+  width: auto;
+  border: 2px solid $c-accent;
+  border-radius: 12px;
+  min-width: 50px;
+  white-space: nowrap;
+  padding: $s/2 2*$s;
+  padding-right: $s*3;
+  margin-right: -$s*2;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  pointer-events: none;
+  transition: $transition-standard;
+  max-width: 250px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+
+  @include mq(xs, max) {
+    display: none;
+  }
+
+  @include darkTheme(){
+    background: $dark-theme-bg-lighter;
+  }
+
+  :host:hover & {
+    opacity: 0;
+  }
+}
