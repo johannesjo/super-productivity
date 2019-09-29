@@ -26,7 +26,7 @@ export class SchedulePageComponent {
     public taskService: TaskService,
     public projectService: ProjectService,
     public scheduledTaskService: ScheduledTaskService,
-    private _reminderService: ReminderService,
+    public reminderService: ReminderService,
     private _matDialog: MatDialog,
     private _router: Router,
   ) {

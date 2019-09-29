@@ -1,4 +1,9 @@
-<div class="component-wrapper page-wrapper"
+<ng-template #spinner>
+  <full-page-spinner></full-page-spinner>
+</ng-template>
+
+<div *ngIf="(reminderService.isRemindersLoaded$|async); else spinner"
+     class="component-wrapper page-wrapper"
      style="margin-top: 24px;">
   <p *ngIf="!(scheduledTaskService.allScheduledTasks$|async)?.length"
      class="no-scheduled-tasks">

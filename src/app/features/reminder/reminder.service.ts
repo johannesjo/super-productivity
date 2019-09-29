@@ -5,7 +5,7 @@ import {RecurringConfig, Reminder, ReminderCopy, ReminderType} from './reminder.
 import {SnackService} from '../../core/snack/snack.service';
 import shortid from 'shortid';
 import {NotifyService} from '../../core/notify/notify.service';
-import {ReplaySubject, Subject} from 'rxjs';
+import {BehaviorSubject, Observable, ReplaySubject, Subject} from 'rxjs';
 import {throttle} from 'throttle-debounce';
 import {promiseTimeout} from '../../util/promise-timeout';
 import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
@@ -21,10 +21,15 @@ import {T} from '../../t.const';
 })
 export class ReminderService {
   onReminderActive$ = new Subject<Reminder>();
+
   private _reminders$ = new ReplaySubject<Reminder[]>(1);
   reminders$ = this._reminders$.asObservable();
+
   private _onReloadModel$ = new Subject<Reminder[]>();
   onReloadModel$ = this._onReloadModel$.asObservable();
+
+  private _isRemindersLoaded$ = new BehaviorSubject<boolean>(false);
+  isRemindersLoaded$: Observable<boolean> = this._isRemindersLoaded$.asObservable();
 
   private _w: Worker;
   private _reminders: Reminder[];
@@ -55,8 +60,8 @@ export class ReminderService {
       this._w.addEventListener('error', this._handleError.bind(this));
       console.log('WORKER INITIALIZED FOR REMINDERS');
 
-
       await this.reloadFromLs();
+      this._isRemindersLoaded$.next(true);
     } else {
       console.error('No service workers supported :(');
     }
