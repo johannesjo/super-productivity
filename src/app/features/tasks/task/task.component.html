@@ -1,4 +1,11 @@
-<div class="inner-wrapper">
+<div class="inner-wrapper"
+     (contextmenu)="openContextMenu($event)">
+
+  <div style="visibility: hidden; position: fixed"
+       [style.left]="contextMenuPosition.x"
+       [style.top]="contextMenuPosition.y"
+       [matMenuTriggerFor]="menu">
+  </div>
 
   <div class="box bg-card"></div>
 
@@ -12,7 +19,8 @@
 
     <mat-icon *ngIf="isCurrent"
               class="play-icon-indicator"
-              >play_arrow</mat-icon>
+    >play_arrow
+    </mat-icon>
 
     <ng-container *ngIf="isTouch">
       <div #blockLeft
@@ -390,3 +398,11 @@
     {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
   </div>
 </div>
+
+<ng-template #userMenu
+             let-user>
+  <section class="user-menu">
+    <div (click)="delete(user)">Delete {{user.name}}</div>
+    <div>Send to</div>
+  </section>
+</ng-template>

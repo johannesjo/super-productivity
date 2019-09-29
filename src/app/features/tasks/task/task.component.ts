@@ -32,6 +32,7 @@ import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edi
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
 import {T} from '../../../t.const';
+import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
   selector: 'task',
@@ -55,10 +56,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isActionTriggered = false;
   isContextMenuDisabled = false;
   ShowSubTasksMode = ShowSubTasksMode;
+  contextMenuPosition = {x: '0px', y: '0px'};
 
   @ViewChild('editOnClickEl', {static: true}) editOnClickEl: ElementRef;
   @ViewChild('blockLeft', {static: false}) blockLeftEl: ElementRef;
   @ViewChild('blockRight', {static: false}) blockRightEl: ElementRef;
+  @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
+
   @HostBinding('tabindex') tabIndex = 1;
 
   // TODO do via observable
@@ -373,6 +377,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.editOnClickEl.nativeElement.focus();
   }
 
+  openContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    this.editOnClickEl.nativeElement.blur();
+    this.contextMenuPosition.x = event.clientX + 'px';
+    this.contextMenuPosition.y = event.clientY + 'px';
+    this.contextMenu.openMenu();
+  }
 
   onTaskNotesChanged(newVal) {
     this._taskService.update(this.task.id, {notes: newVal});
