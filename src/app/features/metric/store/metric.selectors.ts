@@ -1,6 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {LineChartData, Metric, MetricState, PieChartData} from '../metric.model';
-import {sortStringDates} from '../../../util/sortStringDates';
+import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {METRIC_FEATURE_NAME, metricAdapter} from './metric.reducer';
 import {selectAllImprovementIds, selectImprovementFeatureState} from '../improvement/store/improvement.reducer';
 import {ImprovementState} from '../improvement/improvement.model';
@@ -13,7 +13,7 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = metricAdapter
 export const selectAllMetrics = createSelector(selectMetricFeatureState, selectAll);
 export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, (state: MetricState) => {
   const ids = state.ids as string[];
-  const sorted = sortStringDates(ids);
+  const sorted = sortWorklogDates(ids);
   const id = sorted[sorted.length - 1];
   return state.entities[id];
 });
@@ -160,7 +160,7 @@ export const selectProductivityHappinessLineChartDataComplete = createSelector(
   selectMetricFeatureState,
   (state: MetricState): LineChartData => {
     const ids = state.ids as string[];
-    const sorted = sortStringDates(ids);
+    const sorted = sortWorklogDates(ids);
 
     const v = {
       labels: [],

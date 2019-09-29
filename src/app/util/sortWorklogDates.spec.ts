@@ -1,4 +1,4 @@
-import {sortStringDates} from './sortStringDates';
+import {sortWorklogDates} from './sortWorklogDates';
 
 describe('sortStringDates', () => {
   it('should sort a list of unsorted dates', () => {
@@ -10,7 +10,7 @@ describe('sortStringDates', () => {
       '13-02-2015',
       '15-01-2015',
     ];
-    const result = sortStringDates(dates);
+    const result = sortWorklogDates(dates);
 
     expect(result.length).toBe(dates.length);
     expect(result).toEqual([
@@ -22,5 +22,4 @@ describe('sortStringDates', () => {
       '12-02-2017',
     ]);
   });
-
 });

@@ -3,7 +3,7 @@ import {BreakNr, BreakNrCopy, Project, ProjectBasicCfg, WorkStartEnd} from '../p
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
-import {sortStringDates} from '../../../util/sortStringDates';
+import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/jira/jira';
 import {GithubCfg} from '../../issue/github/github';
 
@@ -78,7 +78,7 @@ export const selectProjectLastWorkEnd = createSelector(
       return;
     }
     const allDates = Object.keys(workEnd);
-    const lastDate = sortStringDates(allDates)[allDates.length - 1];
+    const lastDate = sortWorklogDates(allDates)[allDates.length - 1];
     return workEnd[lastDate];
   }
 );
