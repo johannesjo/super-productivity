@@ -34,6 +34,7 @@ import {BannerId} from '../../../core/banner/banner.model';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {T} from '../../../t.const';
+import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
 
 @Injectable()
 export class ProjectEffects {
@@ -107,23 +108,10 @@ export class ProjectEffects {
         this._projectService.lastCompletedDay$,
         this._globalConfigService.misc$,
       ),
-      filter(([a, lastWorkEndStr, lastCompletedDayStr, miscCfg]) =>
+      filter(([a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg]) =>
         miscCfg && !miscCfg.isDisableRemindWhenForgotToFinishDay),
-      filter(([a, lastWorkEndStr, lastCompletedDayStr, miscCfg]) => {
-        const today = new Date();
-        const lastWorkEnd = new Date(lastWorkEndStr);
-        const lastCompletedDay = new Date(lastCompletedDayStr);
-
-        today.setHours(0, 0, 0, 0);
-        lastWorkEnd.setHours(0, 0, 0, 0);
-        lastCompletedDay.setHours(0, 0, 0, 0);
-
-        // console.log('lastCompletedDay', lastCompletedDay[getWorklogStr(lastWorkEnd)],
-        //   lastCompletedDay, 'lastWorkEnd', lastWorkEnd, 'today', today);
-        // NOTE: ignore projects without any completed day
-        return !!(lastCompletedDay)
-          && (lastWorkEnd < today)
-          && (lastWorkEnd > lastCompletedDay);
+      filter(([a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg]) => {
+        return isShowFinishDayNotification(lastWorkEndTimestamp, lastCompletedDayStr);
       }),
       tap(([a, workEnd, dayCompleted]) => {
         const dayStr = getWorklogStr(workEnd);
@@ -154,8 +142,6 @@ export class ProjectEffects {
         this._bannerService.dismissIfExisting(BannerId.JiraUnblock);
       }),
     );
-
-
 
 
   @Effect() updateWorkEnd$: any = this._actions$
