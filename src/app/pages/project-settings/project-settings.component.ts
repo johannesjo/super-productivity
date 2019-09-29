@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {T} from '../../t.const';
 import {
   ConfigFormConfig,
@@ -24,7 +24,7 @@ import {DEFAULT_GITHUB_CFG} from '../../features/issue/github/github.const';
   styleUrls: ['./project-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectSettingsComponent implements OnInit {
+export class ProjectSettingsComponent implements OnInit, OnDestroy {
   T = T;
   projectThemeSettingsFormCfg: ConfigFormSection<ProjectThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;
