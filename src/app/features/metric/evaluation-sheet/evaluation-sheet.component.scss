@@ -19,6 +19,7 @@ mat-form-field {
   @include mq(xs) {
     display: flex;
     justify-content: space-between;
+    padding-bottom: $s;
 
     > * {
       width: 48%;
