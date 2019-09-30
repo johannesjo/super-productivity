@@ -8,11 +8,88 @@ $weird-task-list-f: 5px;
   margin-bottom: 30px;
 }
 
-mat-chip-list {
-  display: block;
+.improvements {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: -4px;
+  white-space: nowrap;
+  justify-content: center;
 
 }
 
-:host::ng-deep .mat-chip-list-wrapper {
-  justify-content: center;
+.improvement {
+  align-items: center;
+  border-radius: 16px;
+  user-select: none;
+  display: flex;
+  font-weight: 500;
+  font-size: 14px;
+  height: 32px;
+  line-height: 20px;
+  margin: 4px;
+  min-height: 32px;
+  position: relative;
+  padding: 7px 0;
+  overflow: hidden;
+  transition: $transition-fast;
+
+  @include lightTheme() {
+    background-color: rgba(var(--palette-background-unselected-chip), 1);
+    color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
+  }
+
+  @include darkTheme() {
+    color: #fff;
+    background: $dark-theme-bg-super-light;
+  }
+
+  &:active {
+    box-shadow: $whiteframe-shadow-2dp;
+  }
+
+  button {
+    transition: inherit;
+    opacity: 0;
+    transform: translate(0, 0);
+    position: relative;
+
+    @include lightTheme() {
+      color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
+    }
+    @include darkTheme() {
+      color: white;
+    }
+
+
+    &.dismiss {
+      transform: translateX(-50%);
+      margin-right: -4px;
+    }
+
+    &.check {
+      transform: translateX(50%);
+      margin-left: -4px;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      max-height: 32px;
+    }
+  }
+
+
+  &:hover {
+    button {
+      opacity: 0.4;
+      transform: translate(0, 0);
+    }
+  }
+
+  .hover {
+    display: none;
+    position: absolute;
+    right: 100%;
+  }
 }

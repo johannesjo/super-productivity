@@ -1,8 +1,17 @@
-<mat-chip-list>
-  <mat-chip (removed)="remove(improvement)"
-            *ngFor="let improvement of (improvementService.lastTrackedImprovementsTomorrow$|async); "
-            [removable]="true">
-    {{improvement?.title}}
-    <mat-icon matChipRemove>check</mat-icon>
-  </mat-chip>
-</mat-chip-list>
+<div class="improvements">
+  <div class="improvement"
+       mat-ripple
+       *ngFor="let improvement of (improvementService.lastTrackedImprovementsTomorrow$|async);">
+    <button mat-icon-button
+            disableRipple
+            class="dismiss">
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="title">{{improvement?.title}}</div>
+    <button mat-icon-button
+            disableRipple
+            class="check">
+      <mat-icon>check</mat-icon>
+    </button>
+  </div>
+</div>
