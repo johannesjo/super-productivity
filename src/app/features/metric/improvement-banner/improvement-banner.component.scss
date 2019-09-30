@@ -27,13 +27,13 @@ $weird-task-list-f: 5px;
   font-weight: 500;
   font-size: 14px;
   height: 32px;
-  line-height: 20px;
   margin: 4px;
   min-height: 32px;
   position: relative;
   padding: 7px 0;
   overflow: hidden;
   transition: $transition-fast;
+
 
   @include lightTheme() {
     background-color: rgba(var(--palette-background-unselected-chip), 1);
@@ -47,6 +47,14 @@ $weird-task-list-f: 5px;
 
   &:active {
     box-shadow: $whiteframe-shadow-2dp;
+  }
+
+  .title {
+    max-width: 300px;
+    height: 32px;
+    line-height: 32px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   button {

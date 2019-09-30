@@ -9,12 +9,42 @@
             (click)="dismiss(improvement)">
       <mat-icon>close</mat-icon>
     </button>
+
+    <!--    <div class="title"-->
+    <!--         [matMenuTriggerFor]="advMenu"-->
+    <!--    >{{improvement?.title}}</div>-->
     <div class="title">{{improvement?.title}}</div>
+
     <button mat-icon-button
             disableRipple
             class="check"
             (click)="check(improvement)">
       <mat-icon>check</mat-icon>
     </button>
+
+    <mat-menu #advMenu="matMenu">
+      <button mat-menu-item
+              (click)="check(improvement)">
+        <mat-icon>check</mat-icon>
+        Mark as checked for today
+      </button>
+      <button mat-menu-item
+              (click)="dismiss(improvement)">
+        <mat-icon>close</mat-icon>
+        Dismiss
+      </button>
+      <button mat-menu-item
+              *ngIf="!improvement.isShowEveryDay"
+              (click)="updateShowEveryDay(improvement.id,true)">
+        <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
+        Show this every day
+      </button>
+      <button mat-menu-item
+              *ngIf="improvement.isShowEveryDay"
+              (click)="updateShowEveryDay(improvement.id,false)">
+        <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
+        Don't show every day
+      </button>
+    </mat-menu>
   </div>
 </div>

@@ -47,6 +47,7 @@ export class ImprovementService {
       improvement: {
         title,
         id,
+        isShowEveryDay: false,
         checkedDays: []
       }
     }));
