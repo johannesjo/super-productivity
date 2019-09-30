@@ -8,49 +8,45 @@
   </help-section>
 
   <form #f="ngForm"
-        (submit)="submit()"
         name="form"
         novalidate>
-    <mat-form-field>
-      <input #mood="ngModel"
-             [(ngModel)]="metricForDay.mood"
-             matInput
-             max="10"
-             maxLength="2"
-             min="1"
-             name="mood"
-             [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
-             required
-             type="number">
-      <mat-hint>{{T.F.METRIC.EVAL_FORM.MOOD_HINT|translate}}</mat-hint>
-      <mat-error *ngIf="mood.invalid && (mood.dirty || mood.touched)">
-        {{T.V.E_1TO10|translate}}
-      </mat-error>
-    </mat-form-field>
+    <div class="row">
+      <mat-form-field>
+        <input #mood="ngModel"
+               [ngModel]="metricForDay.mood"
+               (ngModelChange)="updateMood($event)"
+               matInput
+               max="10"
+               maxLength="2"
+               min="1"
+               name="mood"
+               [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
+               required
+               type="number">
+        <mat-hint>{{T.F.METRIC.EVAL_FORM.MOOD_HINT|translate}}</mat-hint>
+        <mat-error *ngIf="mood.invalid && (mood.dirty || mood.touched)">
+          {{T.V.E_1TO10|translate}}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field>
-      <input #productivity="ngModel"
-             [(ngModel)]="metricForDay.productivity"
-             matInput
-             max="10"
-             maxLength="2"
-             min="1"
-             name="productivity"
-             [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
-             required
-             type="number">
-      <mat-hint>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT|translate}}</mat-hint>
-      <mat-error *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)">
-        {{T.V.E_1TO10|translate}}
-      </mat-error>
-    </mat-form-field>
-
-    <chip-list-input (addItem)="addObstruction($event)"
-                     (addNewItem)="addNewObstruction($event)"
-                     (removeItem)="removeObstruction($event)"
-                     [model]="metricForDay.obstructions"
-                     [suggestions]="(obstructionService.obstructions$|async)"
-                     [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"></chip-list-input>
+      <mat-form-field>
+        <input #productivity="ngModel"
+               [ngModel]="metricForDay.productivity"
+               (ngModelChange)="updateProductivity($event)"
+               matInput
+               max="10"
+               maxLength="2"
+               min="1"
+               name="productivity"
+               [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
+               required
+               type="number">
+        <mat-hint>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT|translate}}</mat-hint>
+        <mat-error *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)">
+          {{T.V.E_1TO10|translate}}
+        </mat-error>
+      </mat-form-field>
+    </div>
 
     <chip-list-input (addItem)="addImprovement($event)"
                      (addNewItem)="addNewImprovement($event)"
@@ -59,6 +55,12 @@
                      [suggestions]="(improvementService.improvements$|async)"
                      [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"></chip-list-input>
 
+    <chip-list-input (addItem)="addObstruction($event)"
+                     (addNewItem)="addNewObstruction($event)"
+                     (removeItem)="removeObstruction($event)"
+                     [model]="metricForDay.obstructions"
+                     [suggestions]="(obstructionService.obstructions$|async)"
+                     [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"></chip-list-input>
 
     <chip-list-input (addItem)="addImprovementTomorrow($event)"
                      (addNewItem)="addNewImprovementTomorrow($event)"
@@ -66,21 +68,13 @@
                      [model]="metricForDay.improvementsTomorrow"
                      [suggestions]="(improvementService.improvements$|async)"
                      [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW|translate"></chip-list-input>
-    <mat-form-field>
-      <textarea [(ngModel)]="tomorrowsNote"
-                matInput
-                name="notes"
-                [placeholder]="T.F.METRIC.EVAL_FORM.NOTES|translate"></textarea>
-    </mat-form-field>
-
-    <div style="text-align: right;">
-      <button [disabled]="!f.valid"
-              color="primary"
-              mat-stroked-button
-              type="submit">
-        <mat-icon>save</mat-icon>
-        {{T.G.SAVE|translate}}
-      </button>
-    </div>
   </form>
+</div>
+<div style="text-align: center; margin-top: 8px;margin-bottom: 16px;">
+  <button mat-button
+          (click)="addNote()">
+    <mat-icon>add</mat-icon>
+    Add Note for tomorrow
+    <!--    {{T.G.SAVE|translate}}-->
+  </button>
 </div>

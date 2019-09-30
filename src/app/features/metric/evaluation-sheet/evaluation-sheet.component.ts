@@ -19,6 +19,8 @@ import {getWorklogStr} from '../../../util/get-work-log-str';
 import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ProjectService} from '../../project/project.service';
 import {T} from '../../../t.const';
+import {DialogAddNoteComponent} from '../../note/dialog-add-note/dialog-add-note.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -44,7 +46,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this.day$,
     this._projectService.isRelatedDataLoadedForCurrentProject$,
   ]).pipe(
-    filter(([day, isLoaded]) => isLoaded),
+    filter(([day, isLoaded]) => !!isLoaded),
     switchMap(([day]) => this._metricService.getMetricForDay$(day)),
     withLatestFrom(this.day$),
     map(([metric, day]) => {
@@ -62,6 +64,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     public improvementService: ImprovementService,
     private _metricService: MetricService,
     private _projectService: ProjectService,
+    private _matDialog: MatDialog,
     private _noteService: NoteService,
     private _cd: ChangeDetectorRef,
   ) {
@@ -74,64 +77,68 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     }));
   }
 
-
   ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 
+  updateMood(mood: number) {
+    this._update({mood});
+  }
+
+  updateProductivity(productivity: number) {
+    this._update({productivity});
+  }
+
   addObstruction(v: string) {
-    this.metricForDay.obstructions = [...this.metricForDay.obstructions, v];
+    this._update({obstructions: [...this.metricForDay.obstructions, v]});
   }
 
   addNewObstruction(v: string) {
     const id = this.obstructionService.addObstruction(v);
-    this.metricForDay.obstructions = [...this.metricForDay.obstructions, id];
+    this._update({obstructions: [...this.metricForDay.obstructions, id]});
   }
 
   removeObstruction(idToRemove: string) {
-    this.metricForDay.obstructions = this.metricForDay.obstructions.filter(id => id !== idToRemove);
+    this._update({obstructions: this.metricForDay.obstructions.filter(id => id !== idToRemove)});
   }
 
-
   addImprovement(v: string) {
-    this.metricForDay.improvements = [...this.metricForDay.improvements, v];
+    this._update({improvements: [...this.metricForDay.improvements, v]});
   }
 
   addNewImprovement(v: string) {
     const id = this.improvementService.addImprovement(v);
-    this.metricForDay.improvements = [...this.metricForDay.improvements, id];
+    this._update({improvements: [...this.metricForDay.improvements, id]});
   }
 
   removeImprovement(idToRemove: string) {
-    this.metricForDay.improvements = this.metricForDay.improvements.filter(id => id !== idToRemove);
+    this._update({improvements: this.metricForDay.improvements.filter(id => id !== idToRemove)});
   }
 
-
   addImprovementTomorrow(v: string) {
-    this.metricForDay.improvementsTomorrow = [...this.metricForDay.improvementsTomorrow, v];
+    this._update({improvementsTomorrow: [...this.metricForDay.improvementsTomorrow, v]});
   }
 
   addNewImprovementTomorrow(v: string) {
     const id = this.improvementService.addImprovement(v);
-    this.metricForDay.improvementsTomorrow = [...this.metricForDay.improvementsTomorrow, id];
+    this._update({improvementsTomorrow: [...this.metricForDay.improvementsTomorrow, id]});
   }
 
   removeImprovementTomorrow(idToRemove: string) {
-    this.metricForDay.improvementsTomorrow = this.metricForDay.improvementsTomorrow.filter(id => id !== idToRemove);
+    this._update({
+      improvementsTomorrow: this.metricForDay.improvementsTomorrow.filter(id => id !== idToRemove),
+    });
   }
 
-  submit() {
-    if (this.tomorrowsNote && this.tomorrowsNote.trim().length > 0) {
-      const date = new Date();
-      // tomorrow at 10 o'clock
-      date.setHours(10, 0, 0, 0);
-      date.setDate(date.getDate() + 1);
-      this._noteService.add({
-        content: this.tomorrowsNote,
-      }, date.getTime());
-    }
+  addNote() {
+    this._matDialog.open(DialogAddNoteComponent);
+  }
 
+  private _update(updateData: Partial<MetricCopy>) {
+    this.metricForDay = {
+      ...this.metricForDay,
+      ...updateData,
+    } as MetricCopy;
     this._metricService.upsertMetric(this.metricForDay);
-    this.save.emit();
   }
 }

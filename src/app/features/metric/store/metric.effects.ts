@@ -6,7 +6,6 @@ import {MetricActionTypes} from './metric.actions';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectMetricFeatureState} from './metric.selectors';
-import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
 
 @Injectable()
@@ -27,18 +26,18 @@ export class MetricEffects {
       tap(this._saveToLs.bind(this))
     );
 
-  @Effect({dispatch: false}) saveMetrics$: any = this._actions$
-    .pipe(
-      ofType(
-        MetricActionTypes.AddMetric,
-        MetricActionTypes.UpsertMetric,
-        MetricActionTypes.UpdateMetric,
-      ),
-      tap(() => this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.METRIC.S.SAVE_METRIC
-      })),
-    );
+  // @Effect({dispatch: false}) saveMetrics$: any = this._actions$
+  //   .pipe(
+  //     ofType(
+  //       MetricActionTypes.AddMetric,
+  //       MetricActionTypes.UpsertMetric,
+  //       MetricActionTypes.UpdateMetric,
+  //     ),
+  //     tap(() => this._snackService.open({
+  //       type: 'SUCCESS',
+  //       msg: T.F.METRIC.S.SAVE_METRIC
+  //     })),
+  //   );
 
   constructor(
     private _actions$: Actions,

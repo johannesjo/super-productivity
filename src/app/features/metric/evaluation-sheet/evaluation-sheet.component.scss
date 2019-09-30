@@ -14,3 +14,14 @@
 mat-form-field {
   margin-bottom: $s;
 }
+
+.row {
+  @include mq(xs) {
+    display: flex;
+    justify-content: space-between;
+
+    > * {
+      width: 48%;
+    }
+  }
+}
