@@ -1,7 +1,8 @@
-<div class="improvements">
+<div class="improvements"
+     [@improvementBanner]="improvements.length">
   <div class="improvement"
        mat-ripple
-       *ngFor="let improvement of (improvementService.lastTrackedImprovementsTomorrow$|async);">
+       *ngFor="let improvement of improvements;">
     <button mat-icon-button
             disableRipple
             class="dismiss"
