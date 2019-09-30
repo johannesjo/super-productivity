@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {InputDurationDirective} from './duration/input-duration.directive';
 import {DurationFromStringPipe} from './duration/duration-from-string.pipe';
 import {DurationToStringPipe} from './duration/duration-to-string.pipe';
-import {EditOnClickDirective} from './edit-on-click/edit-on-click.directive';
+import {ContentEditableOnClickDirective} from './edit-on-click/content-editable-on-click.directive';
 import {InlineMarkdownComponent} from './inline-markdown/inline-markdown.component';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatBadgeModule} from '@angular/material/badge';
@@ -138,7 +138,7 @@ import {FormlyValidationService} from './formly-translate-extension/formly-valid
     InputDurationDirective,
     InputDurationFormlyComponent,
     InputDurationSliderComponent,
-    EditOnClickDirective,
+    ContentEditableOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
     MsToClockStringPipe,
@@ -173,7 +173,7 @@ import {FormlyValidationService} from './formly-translate-extension/formly-valid
     InputDurationDirective,
     InputDurationFormlyComponent,
     InputDurationSliderComponent,
-    EditOnClickDirective,
+    ContentEditableOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
     ProgressBarComponent,

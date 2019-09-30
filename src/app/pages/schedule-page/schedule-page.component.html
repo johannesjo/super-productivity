@@ -31,7 +31,7 @@
               <div class="task-title"
                    (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal, task)"
                    contenteditable="true"
-                   editOnClick>{{task.title}}</div>
+                   contentEditableOnClick>{{task.title}}</div>
               <div *ngIf="(projectService.getById$(task.reminderData.projectId)|async) as project"
                    class="project">
                 <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"

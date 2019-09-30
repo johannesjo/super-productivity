@@ -6,9 +6,9 @@ import {Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output} f
 
 
 @Directive({
-  selector: '[editOnClick]',
+  selector: '[contentEditableOnClick]',
 })
-export class EditOnClickDirective implements OnInit, OnDestroy {
+export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   @Input() isResetAfterEdit = false;
   @Output() editFinished: EventEmitter<any> = new EventEmitter();
   private _lastDomValue: string;

@@ -58,7 +58,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition = {x: '0px', y: '0px'};
 
-  @ViewChild('editOnClickEl', {static: true}) editOnClickEl: ElementRef;
+  @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
   @ViewChild('blockLeft', {static: false}) blockLeftEl: ElementRef;
   @ViewChild('blockRight', {static: false}) blockRightEl: ElementRef;
   @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
@@ -374,14 +374,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusTitleForEdit() {
-    this.editOnClickEl.nativeElement.focus();
+    this.contentEditableOnClickEl.nativeElement.focus();
   }
 
   openContextMenu(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-    this.editOnClickEl.nativeElement.blur();
+    this.contentEditableOnClickEl.nativeElement.blur();
     this.contextMenuPosition.x = event.clientX + 'px';
     this.contextMenuPosition.y = event.clientY + 'px';
     this.contextMenu.openMenu();
@@ -405,7 +405,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (
       (ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1)
       || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)
-      || document.activeElement === this.editOnClickEl.nativeElement
+      || document.activeElement === this.contentEditableOnClickEl.nativeElement
       || ev.isFinal
     ) {
       return;
@@ -487,7 +487,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     const targetRef = this.isLockPanRight ? this.blockLeftEl : this.blockRightEl;
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    // this.editOnClickEl.nativeElement.blur();
+    // this.contentEditableOnClickEl.nativeElement.blur();
     if (targetRef) {
       let scale = ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;

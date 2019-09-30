@@ -87,13 +87,13 @@
         <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
       </button>
 
-      <div #editOnClickEl
+      <div #contentEditableOnClickEl
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
            [value]="task.title"
            [isResetAfterEdit]="true"
            class="task-title"
            contenteditable="true"
-           editOnClick
+           contentEditableOnClick
            tabindex="2"></div>
     </div>
 
