@@ -45,11 +45,16 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       window.clearTimeout(this._redrawTimeout);
       // this fixes the bug where the text is not visible for some time
       // by triggering a redraw via el.offsetHeight
-      this._redrawTimeout = window.setTimeout(() => this._el.offsetHeight, 30);
+      // this._redrawTimeout = window.setTimeout(() => this._el.offsetHeight, 30);
     });
 
     el.addEventListener('input', (ev) => {
       this._setValueFromElement();
+
+      // this fixes the bug where the text is not visible for some time
+      // by triggering a redraw via el.offsetHeight
+      // tslint:disable-next-line
+      this._el.offsetHeight;
     });
 
     el.addEventListener('blur', (ev) => {
