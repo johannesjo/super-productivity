@@ -4,11 +4,11 @@ $weird-task-list-f: 5px;
 
 :host {
   display: block;
-  margin-top: 4px;
-  margin-bottom: 30px;
 }
 
 .improvements {
+  padding-top: 4px;
+  padding-bottom: 30px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
