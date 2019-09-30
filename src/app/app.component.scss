@@ -70,7 +70,7 @@ mat-drawer {
 .route-wrapper {
   flex-grow: 1;
   position: relative;
-  @include scrollYImportant();
+  @include scrollY();
 
   > ::ng-deep router-outlet + * {
     position: absolute;
