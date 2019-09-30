@@ -3,13 +3,9 @@
 $weird-task-list-f: 5px;
 
 :host {
-  margin: ($s + $weird-task-list-f) $s*2 $s;
   display: block;
-
-  @include mq(component) {
-    margin-top: 2*$s + $weird-task-list-f;
-    margin-bottom: 2*$s;
-  }
+  margin-top: 4px;
+  margin-bottom: 30px;
 }
 
 mat-chip-list {
