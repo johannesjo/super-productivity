@@ -16,7 +16,7 @@ import {
   selectProductivityHappinessLineChartData,
   selectProductivityHappinessLineChartDataComplete
 } from './store/metric.selectors';
-import {filter, map, switchMap, take} from 'rxjs/operators';
+import {filter, map, skipUntil, switchMap, take, tap} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {WorklogService} from '../worklog/worklog.service';
 import {ProjectService} from '../project/project.service';
@@ -80,18 +80,17 @@ export class MetricService {
   }
 
   getMetricForDayOrDefaultWithCheckedImprovements$(day = getWorklogStr()): Observable<Metric> {
-    return this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
+    return this._store$.pipe(select(selectMetricById, {id: day})).pipe(
       // required because otherwise there might be trouble
-      filter((isLoaded): boolean => isLoaded),
-      switchMap(() => this.getMetricForDay$(day)),
+      skipUntil(this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
+        filter((isLoaded): boolean => isLoaded))
+      ),
       switchMap((metric) => {
         return metric
           ? of(metric)
           : this._store$.pipe(
             select(selectCheckedImprovementIdsForDay, {day}),
             map((checkedImprovementIds) => {
-              console.log(checkedImprovementIds);
-
               return {
                 id: day,
                 ...DEFAULT_METRIC_FOR_DAY,
