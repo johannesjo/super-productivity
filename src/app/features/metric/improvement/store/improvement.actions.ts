@@ -10,6 +10,7 @@ export enum ImprovementActionTypes {
   DeleteImprovements = '[Improvement] Delete multiple Improvements',
   HideImprovement = '[Improvement] Hide Improvement',
   ClearHiddenImprovements = '[Improvement] Clear Hidden Improvements',
+  AddImprovementCheckedDay = '[Improvement] Add checked day',
 }
 
 export class LoadImprovementState implements Action {
@@ -54,6 +55,13 @@ export class HideImprovement implements Action {
   }
 }
 
+export class AddImprovementCheckedDay implements Action {
+  readonly type = ImprovementActionTypes.AddImprovementCheckedDay;
+
+  constructor(public payload: { id: string; checkedDay: string }) {
+  }
+}
+
 export class ClearHiddenImprovements implements Action {
   readonly type = ImprovementActionTypes.ClearHiddenImprovements;
 }
@@ -66,5 +74,6 @@ export type ImprovementActions =
   | DeleteImprovement
   | DeleteImprovements
   | HideImprovement
+  | AddImprovementCheckedDay
   | ClearHiddenImprovements
   ;

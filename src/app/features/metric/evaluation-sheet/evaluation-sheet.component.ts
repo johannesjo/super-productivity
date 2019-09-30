@@ -13,10 +13,10 @@ import {MetricCopy} from '../metric.model';
 import {MetricService} from '../metric.service';
 import {ObstructionService} from '../obstruction/obstruction.service';
 import {ImprovementService} from '../improvement/improvement.service';
-import {BehaviorSubject, combineLatest, Subscription} from 'rxjs';
+import {BehaviorSubject, Subscription} from 'rxjs';
 import {NoteService} from '../../note/note.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ProjectService} from '../../project/project.service';
 import {T} from '../../../t.const';
 import {DialogAddNoteComponent} from '../../note/dialog-add-note/dialog-add-note.component';
@@ -42,19 +42,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   day$ = new BehaviorSubject<string>(getWorklogStr());
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
 
-  private _metricForDay$ = combineLatest([
-    this.day$,
-    this._projectService.isRelatedDataLoadedForCurrentProject$,
-  ]).pipe(
-    filter(([day, isLoaded]) => !!isLoaded),
-    switchMap(([day]) => this._metricService.getMetricForDay$(day)),
-    withLatestFrom(this.day$),
-    map(([metric, day]) => {
-      return metric || {
-        id: day,
-        ...DEFAULT_METRIC_FOR_DAY,
-      };
-    })
+  private _metricForDay$ = this.day$.pipe(
+    switchMap((day) => this._metricService.getMetricForTodayOrDefault$(day)),
   );
   private _subs = new Subscription();
 

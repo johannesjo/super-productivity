@@ -4,13 +4,15 @@
        *ngFor="let improvement of (improvementService.lastTrackedImprovementsTomorrow$|async);">
     <button mat-icon-button
             disableRipple
-            class="dismiss">
+            class="dismiss"
+            (click)="dismiss(improvement)">
       <mat-icon>close</mat-icon>
     </button>
     <div class="title">{{improvement?.title}}</div>
     <button mat-icon-button
             disableRipple
-            class="check">
+            class="check"
+            (click)="check(improvement)">
       <mat-icon>check</mat-icon>
     </button>
   </div>

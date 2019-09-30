@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {Improvement} from '../improvement/improvement.model';
 import {ImprovementService} from '../improvement/improvement.service';
+import {getWorklogStr} from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'improvement-banner',
@@ -14,9 +15,12 @@ export class ImprovementBannerComponent {
   ) {
   }
 
-  remove(improvement: Improvement) {
-    // TODO simplify save hidden indexes to session storage
+  dismiss(improvement: Improvement) {
     this.improvementService.hideImprovement(improvement.id);
   }
 
+  check(improvement: Improvement) {
+    this.improvementService.addCheckedDay(improvement.id, getWorklogStr());
+    this.improvementService.hideImprovement(improvement.id);
+  }
 }

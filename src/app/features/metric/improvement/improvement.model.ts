@@ -3,6 +3,7 @@ import {EntityState} from '@ngrx/entity';
 export interface ImprovementCopy {
   id: string;
   title: string;
+  checkedDays: string[];
 }
 
 export type Improvement = Readonly<ImprovementCopy>;

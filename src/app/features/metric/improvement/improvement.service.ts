@@ -3,6 +3,7 @@ import {select, Store} from '@ngrx/store';
 import {initialImprovementState, selectAllImprovements} from './store/improvement.reducer';
 import {
   AddImprovement,
+  AddImprovementCheckedDay,
   ClearHiddenImprovements,
   DeleteImprovement,
   DeleteImprovements,
@@ -15,6 +16,7 @@ import {Improvement, ImprovementState} from './improvement.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectHasLastTrackedImprovements, selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
+import {getWorklogStr} from '../../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -45,9 +47,17 @@ export class ImprovementService {
       improvement: {
         title,
         id,
+        checkedDays: []
       }
     }));
     return id;
+  }
+
+  addCheckedDay(id: string, checkedDay = getWorklogStr()) {
+    this._store$.dispatch(new AddImprovementCheckedDay({
+      id,
+      checkedDay,
+    }));
   }
 
   deleteImprovement(id: string) {

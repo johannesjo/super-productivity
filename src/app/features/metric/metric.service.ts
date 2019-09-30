@@ -16,11 +16,12 @@ import {
   selectProductivityHappinessLineChartData,
   selectProductivityHappinessLineChartDataComplete
 } from './store/metric.selectors';
-import {map, switchMap, take} from 'rxjs/operators';
+import {filter, map, switchMap, take} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {WorklogService} from '../worklog/worklog.service';
 import {ProjectService} from '../project/project.service';
 import {mapSimpleMetrics} from './metric.util';
+import {DEFAULT_METRIC_FOR_DAY} from './metric.const';
 
 @Injectable({
   providedIn: 'root',
@@ -74,8 +75,21 @@ export class MetricService {
     if (!id) {
       throw new Error('No valid id provided');
     }
-
     return this._store$.pipe(select(selectMetricById, {id}), take(1));
+  }
+
+  getMetricForTodayOrDefault$(day = getWorklogStr()): Observable<Metric> {
+    return this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
+      // required because otherwise there might be trouble
+      filter((isLoaded): boolean => isLoaded),
+      switchMap(() => this.getMetricForDay$(day)),
+      map((metric) => {
+        return metric || {
+          id: day,
+          ...DEFAULT_METRIC_FOR_DAY,
+        };
+      })
+    );
   }
 
 
@@ -97,6 +111,16 @@ export class MetricService {
   }
 
   upsertMetric(metric: Metric) {
+    this._store$.dispatch(new UpsertMetric({metric}));
+  }
+
+  upsertTodayMetric(metricIn: Partial<Metric>) {
+    const day = getWorklogStr();
+    const metric = {
+      id: day,
+      ...DEFAULT_METRIC_FOR_DAY,
+      ...metricIn,
+    } as Metric;
     this._store$.dispatch(new UpsertMetric({metric}));
   }
 

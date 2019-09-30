@@ -55,6 +55,22 @@ export function improvementReducer(
         hiddenImprovementBannerItems: []
       };
 
+    case ImprovementActionTypes.AddImprovementCheckedDay: {
+      const {id, checkedDay} = action.payload;
+      const allCheckedDays = state.entities[id].checkedDays || [];
+
+      return (allCheckedDays.includes(checkedDay) && checkedDay)
+        ? state
+        : adapter.updateOne({
+          id,
+          changes: {
+            checkedDays: [...allCheckedDays, checkedDay]
+          }
+        }, state);
+
+    }
+
+
     default: {
       return state;
     }
