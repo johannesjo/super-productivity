@@ -1,3 +1,50 @@
+## [2.12.4](https://github.com/johannesjo/super-productivity/compare/v2.12.3...v2.12.4) (2019-09-30)
+
+
+### Bug Fixes
+
+* avoid weird task animation state ([f0231da](https://github.com/johannesjo/super-productivity/commit/f0231da))
+* cannot read property user of undefined ([eb8f4fb](https://github.com/johannesjo/super-productivity/commit/eb8f4fb))
+* date sorting messing up end day notification [#216](https://github.com/johannesjo/super-productivity/issues/216) ([40e86af](https://github.com/johannesjo/super-productivity/commit/40e86af))
+* extra mac padding shown for web and others ([1e133e3](https://github.com/johannesjo/super-productivity/commit/1e133e3))
+* make global show/hide work for windows ([a6668e6](https://github.com/johannesjo/super-productivity/commit/a6668e6))
+* make mac os dark mode work initially ([3ae3e5b](https://github.com/johannesjo/super-productivity/commit/3ae3e5b))
+* missing OnDestroy for project settings ([d555bf7](https://github.com/johannesjo/super-productivity/commit/d555bf7))
+* nav closing for other state as over ([9734f55](https://github.com/johannesjo/super-productivity/commit/9734f55))
+* only open dev tools on unhandled errors ([d6184c7](https://github.com/johannesjo/super-productivity/commit/d6184c7))
+* project list being gone on project change sometimes ([e1d47b4](https://github.com/johannesjo/super-productivity/commit/e1d47b4))
+* reload inside electron and open dev tools when there is an error ([857b27f](https://github.com/johannesjo/super-productivity/commit/857b27f))
+* side nav requiring two clicks to open if closed via backdrop ([d3de075](https://github.com/johannesjo/super-productivity/commit/d3de075))
+* task title edit text sometimes not being visible ([8edc839](https://github.com/johannesjo/super-productivity/commit/8edc839))
+* task title not showing for add task snack ([7b7090d](https://github.com/johannesjo/super-productivity/commit/7b7090d))
+
+
+### Features
+
+* add last val for datetime input ([2cd47ba](https://github.com/johannesjo/super-productivity/commit/2cd47ba))
+* add notification when task is created and not being on task list ([105f222](https://github.com/johannesjo/super-productivity/commit/105f222))
+* add right click task context menu ([d85785f](https://github.com/johannesjo/super-productivity/commit/d85785f))
+* add tooltip instead of title for scheduled play ([027429c](https://github.com/johannesjo/super-productivity/commit/027429c))
+* hide dark mode switch for mac ([0a5a627](https://github.com/johannesjo/super-productivity/commit/0a5a627))
+* hide side nav when opening route or changing project ([e65bc2e](https://github.com/johannesjo/super-productivity/commit/e65bc2e))
+* improve note handle styling ([91ad4a4](https://github.com/johannesjo/super-productivity/commit/91ad4a4))
+* improve project change transition ([9ebf07d](https://github.com/johannesjo/super-productivity/commit/9ebf07d))
+* improve project change transition ([16f5eeb](https://github.com/johannesjo/super-productivity/commit/16f5eeb))
+* improve project transition further ([6bcb176](https://github.com/johannesjo/super-productivity/commit/6bcb176))
+* link task list and project settings from main menu bar at the top ([d65fbf6](https://github.com/johannesjo/super-productivity/commit/d65fbf6))
+* make frameless window work for mac ([f95397d](https://github.com/johannesjo/super-productivity/commit/f95397d))
+* make hover controls work for non touch very small sizes ([71f6b6a](https://github.com/johannesjo/super-productivity/commit/71f6b6a))
+* make progress bar more visible ([c7214b2](https://github.com/johannesjo/super-productivity/commit/c7214b2))
+* make project transition slightly smoother ([f27ebd7](https://github.com/johannesjo/super-productivity/commit/f27ebd7))
+* only update project id if different then before ([f77091e](https://github.com/johannesjo/super-productivity/commit/f77091e))
+* remove animation for backlog tasks ([58f613e](https://github.com/johannesjo/super-productivity/commit/58f613e))
+* show current task title in header when not on work view ([ae423d1](https://github.com/johannesjo/super-productivity/commit/ae423d1))
+* **scheduled:** add loading spinner when reminders are not yet loaded ([7f2d75f](https://github.com/johannesjo/super-productivity/commit/7f2d75f))
+* **scheduled:** improve styling ([4c03dff](https://github.com/johannesjo/super-productivity/commit/4c03dff))
+* warn about non persistent storage [#217](https://github.com/johannesjo/super-productivity/issues/217) ([1199d35](https://github.com/johannesjo/super-productivity/commit/1199d35))
+
+
+
 ## [2.12.3](https://github.com/johannesjo/super-productivity/compare/v2.12.2...v2.12.3) (2019-09-23)
 
 
