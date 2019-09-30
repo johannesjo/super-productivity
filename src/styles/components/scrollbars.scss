@@ -1,44 +1,54 @@
-@include mq(xs) {
-  .isNoMac {
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
+@mixin _scrollBarStyles() {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
 
-    /* Track */
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 16px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  &.isDarkTheme {
     ::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: #222;
       border-radius: 4px;
     }
 
     /* Handle */
     ::-webkit-scrollbar-thumb {
-      background: #888;
+      background: #333;
       border-radius: 16px;
     }
 
     /* Handle on hover */
     ::-webkit-scrollbar-thumb:hover {
-      background: #555;
+      background: #444;
     }
 
-    &.isDarkTheme {
-      ::-webkit-scrollbar-track {
-        background: #222;
-        border-radius: 4px;
-      }
+  }
+}
 
-      /* Handle */
-      ::-webkit-scrollbar-thumb {
-        background: #333;
-        border-radius: 16px;
-      }
+@include mq(xs) {
+  .isNoMac {
+    @include _scrollBarStyles;
+  }
+}
 
-      /* Handle on hover */
-      ::-webkit-scrollbar-thumb:hover {
-        background: #444;
-      }
-
-    }
+@include mq(xs, max) {
+  .isNoTouchDevice {
+    @include _scrollBarStyles;
   }
 }
