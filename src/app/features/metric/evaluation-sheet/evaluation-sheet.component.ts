@@ -8,7 +8,6 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
 import {MetricCopy} from '../metric.model';
 import {MetricService} from '../metric.service';
 import {ObstructionService} from '../obstruction/obstruction.service';
@@ -16,11 +15,12 @@ import {ImprovementService} from '../improvement/improvement.service';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {NoteService} from '../../note/note.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import {map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {switchMap} from 'rxjs/operators';
 import {ProjectService} from '../../project/project.service';
 import {T} from '../../../t.const';
 import {DialogAddNoteComponent} from '../../note/dialog-add-note/dialog-add-note.component';
 import {MatDialog} from '@angular/material/dialog';
+
 
 @Component({
   selector: 'evaluation-sheet',
@@ -36,14 +36,13 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   @Output() save = new EventEmitter<any>();
 
   T = T;
-  tomorrowsNote: string;
   metricForDay: MetricCopy;
 
   day$ = new BehaviorSubject<string>(getWorklogStr());
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
 
   private _metricForDay$ = this.day$.pipe(
-    switchMap((day) => this._metricService.getMetricForTodayOrDefault$(day)),
+    switchMap((day) => this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(day)),
   );
   private _subs = new Subscription();
 

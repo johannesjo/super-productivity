@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {initialMetricState} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
-import {combineLatest, from, Observable} from 'rxjs';
+import {combineLatest, from, Observable, of} from 'rxjs';
 import {LineChartData, Metric, MetricState, PieChartData, SimpleMetrics} from './metric.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -22,6 +22,7 @@ import {WorklogService} from '../worklog/worklog.service';
 import {ProjectService} from '../project/project.service';
 import {mapSimpleMetrics} from './metric.util';
 import {DEFAULT_METRIC_FOR_DAY} from './metric.const';
+import {selectCheckedImprovementIdsForDay} from './improvement/store/improvement.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -78,17 +79,27 @@ export class MetricService {
     return this._store$.pipe(select(selectMetricById, {id}), take(1));
   }
 
-  getMetricForTodayOrDefault$(day = getWorklogStr()): Observable<Metric> {
+  getMetricForDayOrDefaultWithCheckedImprovements$(day = getWorklogStr()): Observable<Metric> {
     return this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
       // required because otherwise there might be trouble
       filter((isLoaded): boolean => isLoaded),
       switchMap(() => this.getMetricForDay$(day)),
-      map((metric) => {
-        return metric || {
-          id: day,
-          ...DEFAULT_METRIC_FOR_DAY,
-        };
-      })
+      switchMap((metric) => {
+        return metric
+          ? of(metric)
+          : this._store$.pipe(
+            select(selectCheckedImprovementIdsForDay, {day}),
+            map((checkedImprovementIds) => {
+              console.log(checkedImprovementIds);
+
+              return {
+                id: day,
+                ...DEFAULT_METRIC_FOR_DAY,
+                improvements: checkedImprovementIds,
+              };
+            })
+          );
+      }),
     );
   }
 

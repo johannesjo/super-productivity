@@ -11,6 +11,12 @@ export const selectImprovementFeatureState = createFeatureSelector<ImprovementSt
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAllImprovements = createSelector(selectImprovementFeatureState, selectAll);
 export const selectAllImprovementIds = createSelector(selectImprovementFeatureState, selectIds);
+export const selectCheckedImprovementIdsForDay = createSelector(
+  selectAllImprovements,
+  (improvements: Improvement[], props: { day: string }): string[] => {
+    return improvements.filter(improvement => improvement.checkedDays && improvement.checkedDays.includes(props.day))
+      .map(improvement => improvement.id);
+  });
 
 
 export const initialImprovementState: ImprovementState = adapter.getInitialState({

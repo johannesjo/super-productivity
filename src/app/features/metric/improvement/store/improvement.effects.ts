@@ -18,6 +18,7 @@ export class ImprovementEffects {
         ImprovementActionTypes.AddImprovement,
         ImprovementActionTypes.UpdateImprovement,
         ImprovementActionTypes.DeleteImprovement,
+        ImprovementActionTypes.AddImprovementCheckedDay,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
