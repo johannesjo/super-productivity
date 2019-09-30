@@ -50,6 +50,7 @@ $weird-task-list-f: 5px;
   }
 
   .title {
+    transition: inherit;
     max-width: 300px;
     height: 32px;
     line-height: 32px;
@@ -60,8 +61,10 @@ $weird-task-list-f: 5px;
   button {
     transition: inherit;
     opacity: 0;
-    transform: translate(0, 0);
+    transform: scale(0.1);
     position: relative;
+    z-index: 1;
+    transform-origin: center center;
 
     @include lightTheme() {
       color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
@@ -72,17 +75,17 @@ $weird-task-list-f: 5px;
 
 
     &.dismiss {
-      transform: translateX(-50%);
-      margin-right: -4px;
+      transform: translateX(-11px);
+      margin-right: -12px;
     }
 
     &.check {
-      transform: translateX(50%);
-      margin-left: -4px;
+      transform: translateX(11px);
+      margin-left: -12px;
     }
 
     mat-icon {
-      font-size: 18px;
+      font-size: 22px;
       max-height: 32px;
     }
   }
@@ -91,7 +94,14 @@ $weird-task-list-f: 5px;
   &:hover {
     button {
       opacity: 0.4;
-      transform: translate(0, 0);
+      transform: scale(1);
+      &:hover {
+        opacity: 1;
+      }
+    }
+    .title {
+      transform-origin: center center;
+      transform: scale(0.857142857142857);
     }
   }
 
