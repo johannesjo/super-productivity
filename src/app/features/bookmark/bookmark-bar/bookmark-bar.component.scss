@@ -9,9 +9,8 @@ $bookmarkMinWidth: 56px;
 :host {
   display: block;
   //@include mat-css-color-and-contrast(800);
-  // TODO glassTheme bzw. noGlassTheme
-  a,
-  button {
+  .list-controls > button,
+  .global-bookmark a {
     background: transparent;
   }
 }
