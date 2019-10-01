@@ -26,12 +26,12 @@ export class MainHeaderComponent implements OnInit {
   @Input() drawer: MatDrawer;
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
-  isShowTaskTitle$: Observable<boolean> = combineLatest(
+  isShowTaskTitle$: Observable<boolean> = combineLatest([
     this._router.events.pipe(
       filter(event => event instanceof NavigationStart),
     ),
     this.taskService.currentTaskId$,
-  ).pipe(
+  ]).pipe(
     map(([routerEv, currentTaskId]: [NavigationStart, string]): boolean => {
       return routerEv.url !== '/work-view' && !!currentTaskId;
     })
