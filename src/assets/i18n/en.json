@@ -348,6 +348,9 @@
         "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient",
         "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow"
       },
+      "BANNER": {
+        "CHECK": "I did it!"
+      },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"
       }

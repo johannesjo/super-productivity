@@ -4,6 +4,7 @@ import {ImprovementService} from '../improvement/improvement.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {improvementBannerAnimation} from './improvement-banner.ani';
 import {Subscription} from 'rxjs';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'improvement-banner',
@@ -13,6 +14,7 @@ import {Subscription} from 'rxjs';
   animations: [improvementBannerAnimation]
 })
 export class ImprovementBannerComponent implements OnDestroy {
+  T = T;
   improvements: Improvement[];
 
   private _subs = new Subscription();

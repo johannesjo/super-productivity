@@ -348,6 +348,9 @@ export const T = {
         'PRODUCTIVITY_HINT': 'F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT',
         'ADD_NOTE_FOR_TOMORROW': 'F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW'
       },
+      'BANNER': {
+        'CHECK': 'F.METRIC.BANNER.CHECK'
+      },
       'S': {
         'SAVE_METRIC': 'F.METRIC.S.SAVE_METRIC'
       }
