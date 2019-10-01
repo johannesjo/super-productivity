@@ -171,7 +171,7 @@ $bookmarkMinWidth: 56px;
   button {
     border-radius: 0;
     flex-grow: 1;
-    transition: $transition-leave;
+    transition: $transition-duration-s;
     //border-radius: 0;
     margin: 0;
     padding: 0;
