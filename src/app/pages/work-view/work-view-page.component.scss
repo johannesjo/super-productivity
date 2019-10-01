@@ -31,6 +31,7 @@ h2 {
   left: 0;
 
   transition: $transition-enter;
+
   &.isFadeOut {
     transition: $transition-ultra-fast;
     opacity: 0;
@@ -240,5 +241,13 @@ h2 {
         margin-left: 0;
       }
     }
+  }
+}
+
+.read-to-work-btn {
+  margin-top: $s*2;
+
+  @include mq(xs) {
+    margin-top: $s*3;
   }
 }
