@@ -11,4 +11,5 @@ export type Improvement = Readonly<ImprovementCopy>;
 
 export interface ImprovementState extends EntityState<Improvement> {
   hiddenImprovementBannerItems: string[];
+  hideDay: string;
 }

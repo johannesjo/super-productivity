@@ -1,13 +1,14 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {map, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {ClearHiddenImprovements, DeleteImprovements, ImprovementActionTypes} from './improvement.actions';
-import {selectImprovementFeatureState} from './improvement.reducer';
+import {selectImprovementFeatureState, selectImprovementHideDay} from './improvement.reducer';
 import {PersistenceService} from '../../../../core/persistence/persistence.service';
-import {MetricActionTypes} from '../../store/metric.actions';
 import {selectCurrentProjectId} from '../../../project/store/project.reducer';
 import {selectUnusedImprovementIds} from '../../store/metric.selectors';
+import {ProjectActionTypes} from '../../../project/store/project.actions';
+import {getWorklogStr} from '../../../../util/get-work-log-str';
 
 @Injectable()
 export class ImprovementEffects {
@@ -17,6 +18,7 @@ export class ImprovementEffects {
       ofType(
         ImprovementActionTypes.AddImprovement,
         ImprovementActionTypes.UpdateImprovement,
+        ImprovementActionTypes.HideImprovement,
         ImprovementActionTypes.DeleteImprovement,
         ImprovementActionTypes.AddImprovementCheckedDay,
       ),
@@ -30,19 +32,17 @@ export class ImprovementEffects {
   @Effect() clearImprovements$: any = this._actions$
     .pipe(
       ofType(
-        MetricActionTypes.AddMetric,
-        MetricActionTypes.UpsertMetric,
-        MetricActionTypes.UpdateMetric,
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
       ),
+      withLatestFrom(this._store$.pipe(select(selectImprovementHideDay))),
+      filter(([, hideDay]) => hideDay !== getWorklogStr()),
       map(() => new ClearHiddenImprovements()),
     );
 
   @Effect() clearUnusedImprovements$: any = this._actions$
     .pipe(
       ofType(
-        MetricActionTypes.AddMetric,
-        MetricActionTypes.UpsertMetric,
-        MetricActionTypes.UpdateMetric,
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectUnusedImprovementIds)),

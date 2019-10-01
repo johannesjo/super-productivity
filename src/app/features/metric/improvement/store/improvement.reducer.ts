@@ -2,6 +2,7 @@ import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import {ImprovementActions, ImprovementActionTypes} from './improvement.actions';
 import {Improvement, ImprovementState} from '../improvement.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {getWorklogStr} from '../../../../util/get-work-log-str';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 
@@ -11,6 +12,7 @@ export const selectImprovementFeatureState = createFeatureSelector<ImprovementSt
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAllImprovements = createSelector(selectImprovementFeatureState, selectAll);
 export const selectAllImprovementIds = createSelector(selectImprovementFeatureState, selectIds);
+export const selectImprovementHideDay = createSelector(selectImprovementFeatureState, (s) => s.hideDay);
 export const selectCheckedImprovementIdsForDay = createSelector(
   selectAllImprovements,
   (improvements: Improvement[], props: { day: string }): string[] => {
@@ -21,6 +23,7 @@ export const selectCheckedImprovementIdsForDay = createSelector(
 
 export const initialImprovementState: ImprovementState = adapter.getInitialState({
   // additional entity state properties
+  hideDay: null,
   hiddenImprovementBannerItems: [],
 });
 
@@ -52,6 +55,7 @@ export function improvementReducer(
       const items = state.hiddenImprovementBannerItems || [];
       return {
         ...state,
+        hideDay: getWorklogStr(),
         hiddenImprovementBannerItems: [...items, action.payload.id]
       };
 
