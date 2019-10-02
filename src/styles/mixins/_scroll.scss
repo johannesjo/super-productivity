@@ -58,6 +58,7 @@
 
 @mixin scrollYImportant() {
   -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
   overflow-y: scroll !important;
 
   :host-context(.isNoMac) & {

@@ -172,6 +172,7 @@ h2 {
 
 .today,
 .backlog .inner-wrapper {
+  overflow-x: hidden;
   @include scrollYImportant();
 }
 

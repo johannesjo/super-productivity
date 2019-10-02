@@ -70,6 +70,7 @@ mat-drawer {
 .route-wrapper {
   flex-grow: 1;
   position: relative;
+  overflow-x: hidden;
   @include scrollY();
 
   > ::ng-deep router-outlet + * {
@@ -78,6 +79,7 @@ mat-drawer {
     height: 100%;
     left: 0;
     top: 0;
+    overflow-x: hidden;
     @include scrollY();
   }
 }
