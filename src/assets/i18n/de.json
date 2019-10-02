@@ -9,7 +9,6 @@
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "Aus anderen Projekten",
-    "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
     "NO_TASKS": "Derzeit befinden sich keine Aufgaben in Ihrem Backlog",
     "SCHEDULED": "Geplant",
     "TITLE": "Backlog"
@@ -314,6 +313,9 @@
       }
     },
     "METRIC": {
+      "BANNER": {
+        "CHECK": "Ich hab es gemacht!"
+      },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Durchschn. Pausen pro Tag",
         "AVG_TASKS_PER_DAY_WORKED": "Durchschn. Aufgaben pro Tag gearbeitet",
@@ -331,6 +333,7 @@
         "TIME_SPENT": "Zeitaufwand"
       },
       "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "Notiz für morgen hinzufügen",
         "HELP_H1": "Warum sollte es mich kümmern?",
         "HELP_LINK_TXT": "Gehen Sie zum Abschnitt \"Kennzahlen\"",
         "HELP_P1": "Zeit für eine kleine Selbsteinschätzung! Ihre Antworten hier werden gespeichert und liefern Ihnen ein bisschen Statistik darüber, wie Sie im Abschnitt \"Metriken\" arbeiten. Darüber hinaus erscheinen die Vorschläge für morgen am nächsten Tag über Ihrer Aufgabenliste.",
@@ -587,7 +590,8 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
         "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
         "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
-        "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert"
+        "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert",
+        "TASK_CREATED": "Erstellte Aufgabe \"{{title}}\""
       },
       "SELECT_OR_CREATE": "Aufgabe auswählen oder erstellen",
       "SUMMARY_TABLE": {
@@ -684,6 +688,7 @@
       },
       "WEEK": {
         "EXPORT": "Wochendaten exportieren",
+        "NO_DATA": "Noch keine Aufgaben in dieser Woche.",
         "TITLE": "Titel"
       }
     }
@@ -831,6 +836,7 @@
     "ERR_DB_DELETE": "Fehler beim Löschen der Daten",
     "ERR_DB_LOAD": "Fehler beim Laden der Daten",
     "ERR_DB_SAVE": "Fehler beim Speichern der Daten",
+    "PERSISTENCE_DISALLOWED": "Daten werden nicht dauerhaft gespeichert. Beachten Sie, dass dies zu Datenverlust führen kann !!",
     "RUNNING_X": "Wird gestartet: \"{{str}}\"."
   },
   "MH": {
@@ -915,7 +921,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale Einstellungen",
-    "PROJECT_SETTINGS": "Projektspezifische Einstellungen"
+    "PROJECT_SETTINGS": "Projektspezifische Einstellungen",
+    "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"
   },
   "S": {
     "SYNC": {
@@ -924,6 +931,10 @@
       "IMPORTING": "Daten importieren",
       "SUCCESS": "Daten importiert"
     }
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
+    "START_TASK": "Aufgabe jetzt starten und Erinnerung entfernen"
   },
   "THEMES": {
     "SELECT_THEME": "Farbschema wählen",

@@ -9,7 +9,6 @@
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "À partir d'autres projets",
-    "NO_SCHEDULED": "Il n'y a actuellement aucune tâche planifiée. Vous pouvez planifier une tâche en choisissant \"Planifier une tâche\" dans le menu contextuel de la tâche. Pour l'ouvrir, cliquez sur les 3 petits points à droite d'une tâche.",
     "NO_TASKS": "Il n'y a actuellement aucune tâche dans votre carnet de commandes",
     "SCHEDULED": "Prévu",
     "TITLE": "Arriéré"
@@ -314,6 +313,9 @@
       }
     },
     "METRIC": {
+      "BANNER": {
+        "CHECK": "Je l'ai fait!"
+      },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Moy. pauses par jour",
         "AVG_TASKS_PER_DAY_WORKED": "Moy. tâches par jour travaillées",
@@ -331,6 +333,7 @@
         "TIME_SPENT": "Temps passé"
       },
       "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "Ajouter une note pour demain",
         "HELP_H1": "Pourquoi devrais-je m'en soucier?",
         "HELP_LINK_TXT": "Aller à la section des métriques",
         "HELP_P1": "Temps pour une petite auto-évaluation! Vos réponses ici sont sauvegardées et vous fournissent un peu de statistiques sur la façon dont vous travaillez dans la section des métriques. De plus, les suggestions pour demain apparaîtront au-dessus de votre liste de tâches le lendemain.",
@@ -587,7 +590,8 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "Tâche restaurée <strong>{{title}}</strong> liée à une sortie d'archive",
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
-        "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\""
+        "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
+        "TASK_CREATED": "Tâche créée \"{{title}}\""
       },
       "SELECT_OR_CREATE": "Sélectionner ou créer une tâche",
       "SUMMARY_TABLE": {
@@ -684,6 +688,7 @@
       },
       "WEEK": {
         "EXPORT": "Données de la semaine d'exportation",
+        "NO_DATA": "Aucune tâche cette semaine encore.",
         "TITLE": "Titre"
       }
     }
@@ -831,6 +836,7 @@
     "ERR_DB_DELETE": "Erreur lors de la suppression des données",
     "ERR_DB_LOAD": "Erreur lors du chargement des données",
     "ERR_DB_SAVE": "Erreur lors de la sauvegarde des données",
+    "PERSISTENCE_DISALLOWED": "Les données ne seront pas conservées de manière permanente. Sachez que cela peut entraîner une perte de données!",
     "RUNNING_X": "Lancer \"{{str}}\"."
   },
   "MH": {
@@ -915,7 +921,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Paramètres globaux",
-    "PROJECT_SETTINGS": "Paramètres spécifiques au projet"
+    "PROJECT_SETTINGS": "Paramètres spécifiques au projet",
+    "TOGGLE_DARK_MODE": "Basculer en mode sombre"
   },
   "S": {
     "SYNC": {
@@ -924,6 +931,10 @@
       "IMPORTING": "Importer des données",
       "SUCCESS": "Données importées"
     }
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "Il n'y a actuellement aucune tâche planifiée. Vous pouvez planifier une tâche en choisissant \"Planifier une tâche\" dans le menu contextuel de la tâche. Pour l'ouvrir, cliquez sur les 3 petits points à droite d'une tâche.",
+    "START_TASK": "Démarrer la tâche maintenant et supprimer le rappel"
   },
   "THEMES": {
     "SELECT_THEME": "Sélectionne un thème",

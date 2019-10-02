@@ -9,7 +9,6 @@
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "Diğer Projelerden",
-    "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
     "NO_TASKS": "İş günlüğünüzde şu anda görev yok",
     "SCHEDULED": "tarifeli",
     "TITLE": "birikim"
@@ -314,6 +313,9 @@
       }
     },
     "METRIC": {
+      "BANNER": {
+        "CHECK": "Yaptım!"
+      },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Ort. günde molalar",
         "AVG_TASKS_PER_DAY_WORKED": "Ort. günde görevler çalıştı",
@@ -331,6 +333,7 @@
         "TIME_SPENT": "Harcanan zaman"
       },
       "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "Yarın için not ekle",
         "HELP_H1": "Neden umursayayım?",
         "HELP_LINK_TXT": "Metrikler bölümüne git",
         "HELP_P1": "Küçük bir öz değerlendirme zamanı! Buradaki cevaplarınız kaydedilir ve ölçümler bölümünde nasıl çalıştığınızla ilgili size biraz istatistik sunar. Ayrıca, yarın için öneriler ertesi gün görev listenizin üstünde görünecektir.",
@@ -587,7 +590,8 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "Geri yüklenen görev <strong>{{title}}</strong> arşivden konu ile ilgili",
         "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
         "REMINDER_DELETED": "Görev için silinen hatırlatıcı",
-        "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı"
+        "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı",
+        "TASK_CREATED": "\"{{title}}\" görevi oluşturuldu"
       },
       "SELECT_OR_CREATE": "Görev seç veya oluştur",
       "SUMMARY_TABLE": {
@@ -684,6 +688,7 @@
       },
       "WEEK": {
         "EXPORT": "İhracat Haftası Verileri",
+        "NO_DATA": "Henüz bu hafta görev yok.",
         "TITLE": "Başlık"
       }
     }
@@ -831,6 +836,7 @@
     "ERR_DB_DELETE": "Veri silinirken hata oluştu",
     "ERR_DB_LOAD": "Veri yüklenirken hata oluştu",
     "ERR_DB_SAVE": "Veri kaydederken hata",
+    "PERSISTENCE_DISALLOWED": "Veri kalıcı olarak sürdürülmeyecek. Bunun veri kaybına neden olabileceğini unutmayın!",
     "RUNNING_X": "\"{{str}}\" çalıştırılıyor."
   },
   "MH": {
@@ -915,7 +921,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Genel Ayarlar",
-    "PROJECT_SETTINGS": "Projeye Özel Ayarlar"
+    "PROJECT_SETTINGS": "Projeye Özel Ayarlar",
+    "TOGGLE_DARK_MODE": "Koyu Modu Değiştir"
   },
   "S": {
     "SYNC": {
@@ -924,6 +931,10 @@
       "IMPORTING": "Veri alınıyor",
       "SUCCESS": "Alınan veri"
     }
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
+    "START_TASK": "Görevi şimdi başlat ve anımsatıcıyı kaldır"
   },
   "THEMES": {
     "SELECT_THEME": "Tema seçin",

@@ -13,10 +13,6 @@
     "SCHEDULED": "Scheduled",
     "TITLE": "Backlog"
   },
-  "SCHEDULE": {
-    "START_TASK": "Start task now and remove reminder",
-    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task."
-  },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",
     "TOMORROW": "tomorrow {{time}}"
@@ -317,6 +313,9 @@
       }
     },
     "METRIC": {
+      "BANNER": {
+        "CHECK": "I did it!"
+      },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Avg. breaks per day",
         "AVG_TASKS_PER_DAY_WORKED": "Avg. tasks per day worked",
@@ -334,6 +333,7 @@
         "TIME_SPENT": "Time Spent"
       },
       "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
         "HELP_H1": "Why should I care?",
         "HELP_LINK_TXT": "Go to metrics section",
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
@@ -345,11 +345,7 @@
         "NOTES": "Notes for tomorrow",
         "OBSTRUCTIONS": "What hindered your productivity?",
         "PRODUCTIVITY": "How efficient did you work?",
-        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient",
-        "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow"
-      },
-      "BANNER": {
-        "CHECK": "I did it!"
+        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"
@@ -692,8 +688,8 @@
       },
       "WEEK": {
         "EXPORT": "Export Week Data",
-        "TITLE": "Title",
-        "NO_DATA": "No tasks this week yet."
+        "NO_DATA": "No tasks this week yet.",
+        "TITLE": "Title"
       }
     }
   },
@@ -925,8 +921,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
-    "TOGGLE_DARK_MODE": "Toggle Dark Mode",
-    "PROJECT_SETTINGS": "Project Specific Settings"
+    "PROJECT_SETTINGS": "Project Specific Settings",
+    "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },
   "S": {
     "SYNC": {
@@ -935,6 +931,10 @@
       "IMPORTING": "Importing data",
       "SUCCESS": "Data imported"
     }
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
+    "START_TASK": "Start task now and remove reminder"
   },
   "THEMES": {
     "SELECT_THEME": "Select Theme",

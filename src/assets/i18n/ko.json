@@ -9,7 +9,6 @@
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "다른 프로젝트에서",
-    "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",
     "NO_TASKS": "현재 백 로그에 작업이 없습니다.",
     "SCHEDULED": "예정",
     "TITLE": "백 로그"
@@ -314,6 +313,9 @@
       }
     },
     "METRIC": {
+      "BANNER": {
+        "CHECK": "내가 해냈어!"
+      },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "평균 하루에 휴식",
         "AVG_TASKS_PER_DAY_WORKED": "평균 일일 작업 수",
@@ -331,6 +333,7 @@
         "TIME_SPENT": "지출 된 시간"
       },
       "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "내일 메모 추가",
         "HELP_H1": "왜 내가 신경 써야하니?",
         "HELP_LINK_TXT": "통계 섹션으로 이동",
         "HELP_P1": "조금 자기 평가 시간! 여기에 귀하의 답변이 저장되어 메트릭 섹션에서 어떻게 작업하는지에 대한 통계를 제공합니다. 또한 내일을위한 제안은 다음날 작업 목록 위에 나타납니다.",
@@ -587,7 +590,8 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "아카이브의 문제와 관련된 복원 된 작업 <strong>{{title}}</strong> ",
         "REMINDER_ADDED": "예약 된 작업 \"{{title}}\"",
         "REMINDER_DELETED": "할 일 목록 삭제",
-        "REMINDER_UPDATED": "\"{{title}}\"작업에 대한 알림이 업데이트되었습니다."
+        "REMINDER_UPDATED": "\"{{title}}\"작업에 대한 알림이 업데이트되었습니다.",
+        "TASK_CREATED": "\"{{title}}\"작업 생성"
       },
       "SELECT_OR_CREATE": "작업 선택 또는 생성",
       "SUMMARY_TABLE": {
@@ -684,6 +688,7 @@
       },
       "WEEK": {
         "EXPORT": "주 데이터 내보내기",
+        "NO_DATA": "이번 주에는 아직 할 일이 없습니다.",
         "TITLE": "표제"
       }
     }
@@ -831,6 +836,7 @@
     "ERR_DB_DELETE": "데이터를 삭제하는 중 오류가 발생했습니다.",
     "ERR_DB_LOAD": "데이터를로드하는 중 오류가 발생했습니다.",
     "ERR_DB_SAVE": "데이터를 저장하는 중 오류가 발생했습니다.",
+    "PERSISTENCE_DISALLOWED": "데이터는 영구적으로 유지되지 않습니다. 이로 인해 데이터가 손실 될 수 있습니다 !!",
     "RUNNING_X": "\"{{str}}\"실행 중."
   },
   "MH": {
@@ -915,7 +921,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "전체 설정",
-    "PROJECT_SETTINGS": "프로젝트 별 설정"
+    "PROJECT_SETTINGS": "프로젝트 별 설정",
+    "TOGGLE_DARK_MODE": "어두운 모드 전환"
   },
   "S": {
     "SYNC": {
@@ -924,6 +931,10 @@
       "IMPORTING": "데이터 가져 오기",
       "SUCCESS": "가져온 데이터"
     }
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",
+    "START_TASK": "지금 작업을 시작하고 알림 제거"
   },
   "THEMES": {
     "SELECT_THEME": "주제 선택",

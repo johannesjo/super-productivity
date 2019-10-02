@@ -9,7 +9,6 @@
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "De otros proyectos",
-    "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
     "NO_TASKS": "Actualmente no hay tareas en tu backlog",
     "SCHEDULED": "Programado",
     "TITLE": "RESERVA"
@@ -314,6 +313,9 @@
       }
     },
     "METRIC": {
+      "BANNER": {
+        "CHECK": "¡Lo hice!"
+      },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Promedio descansos por día",
         "AVG_TASKS_PER_DAY_WORKED": "Promedio tareas por dia trabajadas",
@@ -331,6 +333,7 @@
         "TIME_SPENT": "Tiempo usado"
       },
       "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "Añadir nota para mañana",
         "HELP_H1": "¿Por qué debería importarme?",
         "HELP_LINK_TXT": "Ir a la sección de métricas.",
         "HELP_P1": "¡Hora de una pequeña autoevaluación! Sus respuestas aquí se guardan y le proporcionan un poco de estadísticas sobre cómo trabaja en la sección de métricas. Además, las sugerencias para mañana aparecerán sobre su lista de tareas al día siguiente.",
@@ -587,7 +590,8 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarea restaurada <strong>{{title}}</strong> relacionada con el problema desde el archivo",
         "REMINDER_ADDED": "Tarea programada \"{{title}}\"",
         "REMINDER_DELETED": "Recordatorio eliminado para la tarea",
-        "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\""
+        "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\"",
+        "TASK_CREATED": "Tarea creada \"{{title}}\""
       },
       "SELECT_OR_CREATE": "Seleccionar o crear tarea",
       "SUMMARY_TABLE": {
@@ -684,6 +688,7 @@
       },
       "WEEK": {
         "EXPORT": "Exportar datos de la semana",
+        "NO_DATA": "No hay tareas esta semana todavía.",
         "TITLE": "Título"
       }
     }
@@ -831,6 +836,7 @@
     "ERR_DB_DELETE": "Error al eliminar datos",
     "ERR_DB_LOAD": "Error al cargar datos",
     "ERR_DB_SAVE": "Error al guardar datos",
+    "PERSISTENCE_DISALLOWED": "Los datos no se conservarán de forma permanente. ¡Tenga en cuenta que esto puede conducir a la pérdida de datos!",
     "RUNNING_X": "Ejecutando \"{{str}}\"."
   },
   "MH": {
@@ -915,7 +921,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Ajustes globales",
-    "PROJECT_SETTINGS": "Configuraciones Específicas del Proyecto"
+    "PROJECT_SETTINGS": "Configuraciones Específicas del Proyecto",
+    "TOGGLE_DARK_MODE": "Cambiar modo oscuro"
   },
   "S": {
     "SYNC": {
@@ -924,6 +931,10 @@
       "IMPORTING": "Importando datos",
       "SUCCESS": "Datos importados"
     }
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
+    "START_TASK": "Inicie la tarea ahora y elimine el recordatorio"
   },
   "THEMES": {
     "SELECT_THEME": "Seleccione el tema",

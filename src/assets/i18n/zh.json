@@ -9,7 +9,6 @@
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "来自其他项目",
-    "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",
     "NO_TASKS": "您的待办事项中目前没有任务",
     "SCHEDULED": "计划",
     "TITLE": "积压"
@@ -314,6 +313,9 @@
       }
     },
     "METRIC": {
+      "BANNER": {
+        "CHECK": "x"
+      },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "平均。每天休息",
         "AVG_TASKS_PER_DAY_WORKED": "平均。每天工作的任务",
@@ -331,6 +333,7 @@
         "TIME_SPENT": "所花费的时间"
       },
       "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "明天添加注释",
         "HELP_H1": "我为什么要在乎？",
         "HELP_LINK_TXT": "转到指标部分",
         "HELP_P1": "时间进行一点自我评估！此处的答案已保存，并为您提供有关如何在指标部分工作的一些统计信息。此外，明天的建议将在第二天出现在您的任务列表上方。",
@@ -587,7 +590,8 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "已恢复的任务 <strong>{{title}}</strong> 与存档问题相关",
         "REMINDER_ADDED": "计划任务“{{title}}”",
         "REMINDER_DELETED": "已删除任务提醒",
-        "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒"
+        "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒",
+        "TASK_CREATED": "已创建任务“{{title}}”"
       },
       "SELECT_OR_CREATE": "选择或创建任务",
       "SUMMARY_TABLE": {
@@ -684,6 +688,7 @@
       },
       "WEEK": {
         "EXPORT": "出口周数据",
+        "NO_DATA": "本周还没有任务。",
         "TITLE": "标题"
       }
     }
@@ -831,6 +836,7 @@
     "ERR_DB_DELETE": "删除数据时出错",
     "ERR_DB_LOAD": "加载数据时出错",
     "ERR_DB_SAVE": "保存数据时出错",
+    "PERSISTENCE_DISALLOWED": "数据将不会永久保存。请注意，这可能会导致数据丢失！！",
     "RUNNING_X": "运行“{{str}}”。"
   },
   "MH": {
@@ -915,7 +921,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "全局设置",
-    "PROJECT_SETTINGS": "项目特定设置"
+    "PROJECT_SETTINGS": "项目特定设置",
+    "TOGGLE_DARK_MODE": "切换暗模式"
   },
   "S": {
     "SYNC": {
@@ -924,6 +931,10 @@
       "IMPORTING": "导入数据",
       "SUCCESS": "数据已导入"
     }
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",
+    "START_TASK": "立即开始任务并删除提醒"
   },
   "THEMES": {
     "SELECT_THEME": "选择主题",
