@@ -1,3 +1,38 @@
+## [2.12.5](https://github.com/johannesjo/super-productivity/compare/v2.12.4...v2.12.5) (2019-10-02)
+
+
+### Bug Fixes
+
+* improvement reappearing after project change ([3f5dc22](https://github.com/johannesjo/super-productivity/commit/3f5dc22))
+* metrics not updating ([635ab9a](https://github.com/johannesjo/super-productivity/commit/635ab9a))
+* note styles with new last reminder time ([e54af92](https://github.com/johannesjo/super-productivity/commit/e54af92))
+* redrawing problem on every key stroke ([e07ae77](https://github.com/johannesjo/super-productivity/commit/e07ae77))
+* remove scrollbar if not needed ([1a08b3a](https://github.com/johannesjo/super-productivity/commit/1a08b3a))
+* **bookmarks:** for light theme ([c6cc8fd](https://github.com/johannesjo/super-productivity/commit/c6cc8fd))
+* scrollbar appearing unwantedly ([92d6a10](https://github.com/johannesjo/super-productivity/commit/92d6a10))
+
+
+### Features
+
+* add checking of improvements ([e50e9c5](https://github.com/johannesjo/super-productivity/commit/e50e9c5))
+* add little animation to banner ([ebfc4ac](https://github.com/johannesjo/super-productivity/commit/ebfc4ac))
+* add some space to ready to work button [#219](https://github.com/johannesjo/super-productivity/issues/219) ([744a559](https://github.com/johannesjo/super-productivity/commit/744a559))
+* add tooltips for improvement banner ([f17e882](https://github.com/johannesjo/super-productivity/commit/f17e882))
+* auto add checked improvements to list ([1cd1498](https://github.com/johannesjo/super-productivity/commit/1cd1498))
+* improve banner out ani ([0994bd8](https://github.com/johannesjo/super-productivity/commit/0994bd8))
+* improve improvement banner hover animation ([1735cf7](https://github.com/johannesjo/super-productivity/commit/1735cf7))
+* improve improvements suggestion position ([4ced2a5](https://github.com/johannesjo/super-productivity/commit/4ced2a5))
+* improve ui for evaluation sheet ([bc25f37](https://github.com/johannesjo/super-productivity/commit/bc25f37))
+* improve ui for improvement banner ([9057c4f](https://github.com/johannesjo/super-productivity/commit/9057c4f))
+* make progress bar a little smaller again ([4f7c2c6](https://github.com/johannesjo/super-productivity/commit/4f7c2c6))
+* prepare improvement repeat ui ([2363ef5](https://github.com/johannesjo/super-productivity/commit/2363ef5))
+* restyle improvement banner ([5e1203f](https://github.com/johannesjo/super-productivity/commit/5e1203f))
+* **bookmarks:** make transition quicker ([de350c1](https://github.com/johannesjo/super-productivity/commit/de350c1))
+* **i18n:** add missing translation string ([8a42a54](https://github.com/johannesjo/super-productivity/commit/8a42a54))
+* **i18n:** add missing translations ([35ad7eb](https://github.com/johannesjo/super-productivity/commit/35ad7eb))
+
+
+
 ## [2.12.4](https://github.com/johannesjo/super-productivity/compare/v2.12.3...v2.12.4) (2019-09-30)
 
 
