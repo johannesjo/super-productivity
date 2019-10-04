@@ -20,6 +20,7 @@ import {getWorklogStr} from '../../util/get-work-log-str';
 import * as moment from 'moment';
 import {RoundTimeOption} from '../../features/project/project.model';
 import {T} from '../../t.const';
+import {WorklogService} from '../../features/worklog/worklog.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -124,6 +125,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _projectService: ProjectService,
     private readonly _googleApiService: GoogleApiService,
     private readonly _electronService: ElectronService,
+    private readonly _worklogService: WorklogService,
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
   ) {
@@ -233,6 +235,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this.selectedTabIndex = i;
   }
 
+  onTaskSummaryEdit() {
+    this._worklogService.refreshWorklog();
+  }
 
   private _finishDayForGood(cb?) {
     if (this.configService.cfg

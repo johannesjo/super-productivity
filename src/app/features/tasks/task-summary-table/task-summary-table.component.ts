@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {Task, TaskWithIssueData} from '../task.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {TaskService} from '../task.service';
@@ -13,6 +13,7 @@ import {T} from '../../../t.const';
 export class TaskSummaryTableComponent {
   @Input() flatTasks: TaskWithIssueData[];
   @Input() day: string = getWorklogStr();
+  @Output() updated = new EventEmitter<void>();
 
   T = T;
 
@@ -28,17 +29,20 @@ export class TaskSummaryTableComponent {
         [this.day]: +newVal,
       }
     });
+    this.updated.emit();
   }
 
   updateTaskTitle(task: Task, newVal: string) {
     this._taskService.update(task.id, {
       title: newVal
     });
+    this.updated.emit();
   }
 
   toggleTaskDone(task: Task) {
     task.isDone
       ? this._taskService.setUnDone(task.id)
       : this._taskService.setDone(task.id);
+    this.updated.emit();
   }
 }
