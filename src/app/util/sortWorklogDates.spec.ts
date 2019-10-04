@@ -1,25 +1,45 @@
 import {sortWorklogDates} from './sortWorklogDates';
 
-describe('sortStringDates', () => {
+describe('sortWorklogDates', () => {
   it('should sort a list of unsorted dates', () => {
     const dates = [
-      '12-02-2015',
-      '09-03-2015',
-      '12-02-2017',
-      '11-02-2015',
-      '13-02-2015',
-      '15-01-2015',
+      '2015-02-12',
+      '2015-03-09',
+      '2017-02-12',
+      '2015-02-11',
+      '2015-02-13',
+      '2015-01-15',
     ];
     const result = sortWorklogDates(dates);
 
     expect(result.length).toBe(dates.length);
     expect(result).toEqual([
-      '15-01-2015',
-      '11-02-2015',
-      '12-02-2015',
-      '13-02-2015',
-      '09-03-2015',
-      '12-02-2017',
+      '2015-01-15',
+      '2015-02-11',
+      '2015-02-12',
+      '2015-02-13',
+      '2015-03-09',
+      '2017-02-12',
+    ]);
+  });
+
+  it('should sort a list of unsorted dates with zeros', () => {
+    const dates = [
+      '2019-10-04',
+      '2019-09-29',
+      '2019-10-02',
+      '2019-09-30',
+      '2019-10-01'
+    ];
+    const result = sortWorklogDates(dates);
+
+    expect(result.length).toBe(dates.length);
+    expect(result).toEqual([
+      '2019-09-29',
+      '2019-09-30',
+      '2019-10-01',
+      '2019-10-02',
+      '2019-10-04'
     ]);
   });
 });
