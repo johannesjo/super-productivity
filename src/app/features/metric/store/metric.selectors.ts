@@ -2,8 +2,12 @@ import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {LineChartData, Metric, MetricState, PieChartData} from '../metric.model';
 import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {METRIC_FEATURE_NAME, metricAdapter} from './metric.reducer';
-import {selectAllImprovementIds, selectImprovementFeatureState} from '../improvement/store/improvement.reducer';
-import {ImprovementState} from '../improvement/improvement.model';
+import {
+  selectAllImprovementIds,
+  selectImprovementFeatureState,
+  selectRepeatedImprovementIds
+} from '../improvement/store/improvement.reducer';
+import {Improvement, ImprovementState} from '../improvement/improvement.model';
 import {selectAllObstructionIds, selectObstructionFeatureState} from '../obstruction/store/obstruction.reducer';
 import {ObstructionState} from '../obstruction/obstruction.model';
 import {unique} from '../../../util/unique';
@@ -20,23 +24,24 @@ export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, 
 
 export const selectMetricHasData = createSelector(selectMetricFeatureState, (state) => state && !!state.ids.length);
 
-export const selectLastTrackedImprovementsTomorrow = createSelector(
+export const selectImprovementBannerImprovements = createSelector(
   selectLastTrackedMetric,
   selectImprovementFeatureState,
-  (metric: Metric, improvementState: ImprovementState) => {
-    if (!metric || !improvementState.ids.length) {
+  selectRepeatedImprovementIds,
+  (metric: Metric, improvementState: ImprovementState, repeatedImprovementIds: string[]): Improvement[] => {
+    if (!improvementState.ids.length) {
       return null;
     }
     const hiddenIds = improvementState.hiddenImprovementBannerItems || [];
 
-    return metric && metric.improvementsTomorrow
-      .filter(id => !hiddenIds.includes(id))
-      .map(id => improvementState.entities[id]);
-  }
-);
+    const selectedTomorrowIds = metric && metric.improvementsTomorrow || [];
+    const all = unique(repeatedImprovementIds.concat(selectedTomorrowIds))
+      .filter(id => !hiddenIds.includes(id));
+    return all.map(id => improvementState.entities[id]);
+  });
 
 export const selectHasLastTrackedImprovements = createSelector(
-  selectLastTrackedImprovementsTomorrow,
+  selectImprovementBannerImprovements,
   (improvements): boolean => !!improvements && improvements.length > 0
 );
 

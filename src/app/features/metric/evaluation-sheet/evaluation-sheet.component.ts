@@ -116,6 +116,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({
       improvementsTomorrow: this.metricForDay.improvementsTomorrow.filter(id => id !== idToRemove),
     });
+    // this.improvementService.disableImprovementRepeat(idToRemove);
   }
 
   toggleImprovementRepeat(improvementId: string) {

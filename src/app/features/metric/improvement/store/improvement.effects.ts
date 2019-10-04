@@ -19,6 +19,7 @@ export class ImprovementEffects {
         ImprovementActionTypes.AddImprovement,
         ImprovementActionTypes.UpdateImprovement,
         ImprovementActionTypes.ToggleImprovementRepeat,
+        ImprovementActionTypes.DisableImprovementRepeat,
         ImprovementActionTypes.HideImprovement,
         ImprovementActionTypes.DeleteImprovement,
         ImprovementActionTypes.AddImprovementCheckedDay,

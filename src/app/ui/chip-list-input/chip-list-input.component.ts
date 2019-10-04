@@ -102,10 +102,6 @@ export class ChipListInputComponent {
   }
 
   isToggled(id: string) {
-    console.log(id);
-
-    console.log(this.toggledItems);
-
     return this.toggledItems && this.toggledItems.includes(id);
   }
 

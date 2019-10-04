@@ -16,13 +16,13 @@ import {
   selectProductivityHappinessLineChartData,
   selectProductivityHappinessLineChartDataComplete
 } from './store/metric.selectors';
-import {filter, map, skipUntil, switchMap, take, tap} from 'rxjs/operators';
+import {filter, map, skipUntil, switchMap, take} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {WorklogService} from '../worklog/worklog.service';
 import {ProjectService} from '../project/project.service';
 import {mapSimpleMetrics} from './metric.util';
 import {DEFAULT_METRIC_FOR_DAY} from './metric.const';
-import {selectCheckedImprovementIdsForDay} from './improvement/store/improvement.reducer';
+import {selectCheckedImprovementIdsForDay, selectRepeatedImprovementIds} from './improvement/store/improvement.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -88,13 +88,16 @@ export class MetricService {
       switchMap((metric) => {
         return metric
           ? of(metric)
-          : this._store$.pipe(
-            select(selectCheckedImprovementIdsForDay, {day}),
-            map((checkedImprovementIds) => {
+          : combineLatest(
+            this._store$.pipe(select(selectCheckedImprovementIdsForDay, {day})),
+            this._store$.pipe(select(selectRepeatedImprovementIds)),
+          ).pipe(
+            map(([checkedImprovementIds, repeatedImprovementIds]) => {
               return {
                 id: day,
                 ...DEFAULT_METRIC_FOR_DAY,
-                improvements: checkedImprovementIds,
+                improvements: checkedImprovementIds || [],
+                improvementsTomorrow: repeatedImprovementIds || [],
               };
             })
           );

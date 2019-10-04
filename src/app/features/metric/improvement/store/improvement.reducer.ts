@@ -53,9 +53,9 @@ export function improvementReducer(
       return adapter.removeOne(action.payload.id, state);
     }
 
-    case ImprovementActionTypes.DeleteImprovements: {
-      return adapter.removeMany(action.payload.ids, state);
-    }
+    // case ImprovementActionTypes.DeleteImprovements: {
+    //   return adapter.removeMany(action.payload.ids, state);
+    // }
 
     case ImprovementActionTypes.LoadImprovementState:
       return {...action.payload.state};
@@ -69,11 +69,19 @@ export function improvementReducer(
       };
 
     case ImprovementActionTypes.ToggleImprovementRepeat:
-      const item = state.entities[action.payload.id];
+      const itemI = state.entities[action.payload.id];
       return adapter.updateOne({
         id: action.payload.id,
         changes: {
-          isRepeat: !item.isRepeat
+          isRepeat: !itemI.isRepeat
+        },
+      }, state);
+
+    case ImprovementActionTypes.DisableImprovementRepeat:
+      return adapter.updateOne({
+        id: action.payload.id,
+        changes: {
+          isRepeat: false
         },
       }, state);
 

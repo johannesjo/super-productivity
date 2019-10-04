@@ -11,15 +11,17 @@ import {
   ClearHiddenImprovements,
   DeleteImprovement,
   DeleteImprovements,
+  DisableImprovementRepeat,
   HideImprovement,
-  LoadImprovementState, ToggleImprovementRepeat,
+  LoadImprovementState,
+  ToggleImprovementRepeat,
   UpdateImprovement
 } from './store/improvement.actions';
 import {Observable} from 'rxjs';
 import {Improvement, ImprovementState} from './improvement.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectHasLastTrackedImprovements, selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
+import {selectHasLastTrackedImprovements, selectImprovementBannerImprovements} from '../store/metric.selectors';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 
 @Injectable({
@@ -28,7 +30,7 @@ import {getWorklogStr} from '../../../util/get-work-log-str';
 export class ImprovementService {
   improvements$: Observable<Improvement[]> = this._store$.pipe(select(selectAllImprovements));
   repeatedImprovementIds$: Observable<string[]> = this._store$.pipe(select(selectRepeatedImprovementIds));
-  lastTrackedImprovementsTomorrow$: Observable<Improvement[]> = this._store$.pipe(select(selectLastTrackedImprovementsTomorrow));
+  improvementBannerImprovements$: Observable<Improvement[]> = this._store$.pipe(select(selectImprovementBannerImprovements));
   hasLastTrackedImprovements$: Observable<boolean> = this._store$.pipe(select(selectHasLastTrackedImprovements));
 
   constructor(
@@ -84,6 +86,10 @@ export class ImprovementService {
 
   toggleImprovementRepeat(id: string) {
     this._store$.dispatch(new ToggleImprovementRepeat({id}));
+  }
+
+  disableImprovementRepeat(id: string) {
+    this._store$.dispatch(new DisableImprovementRepeat({id}));
   }
 
   clearHiddenImprovements() {

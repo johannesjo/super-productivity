@@ -22,7 +22,7 @@ export class ImprovementBannerComponent implements OnDestroy {
   constructor(
     public improvementService: ImprovementService,
   ) {
-    this._subs.add(this.improvementService.lastTrackedImprovementsTomorrow$.subscribe(val => this.improvements = val));
+    this._subs.add(this.improvementService.improvementBannerImprovements$.subscribe(val => this.improvements = val));
   }
 
   ngOnDestroy(): void {
