@@ -42,7 +42,8 @@
             <div class="due-date"
                  mat-ripple
                  (click)="editReminder(task)"
-                 [title]="task.reminderData.remindAt|date:'short'">
+                 matTooltipPosition="left"
+                 [matTooltip]="task.reminderData.remindAt|date:'short'">
               <div class="date">
                 {{task.reminderData.remindAt|humanizeTimestamp}}
               </div>

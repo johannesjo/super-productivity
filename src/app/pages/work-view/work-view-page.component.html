@@ -30,9 +30,9 @@
           <span class="no-wrap">
         <strong class="time-val">{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
       </span>
-          <div class="take-a-break-reset-btn">
+          <div [matTooltip]="T.WW.RESET_BREAK_TIMER|translate"
+               class="take-a-break-reset-btn">
             <button (click)="resetBreakTimer()"
-                    [matTooltip]="T.WW.RESET_BREAK_TIMER|translate"
                     color="lighter"
                     mat-mini-fab>
               <mat-icon>timer_off</mat-icon>
