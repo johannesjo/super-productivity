@@ -10,10 +10,12 @@
 
   <div class="current-project-title"
        mat-ripple
+       [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
        routerLink="work-view">{{(projectService.currentProject$|async).title}}</div>
 
   <button mat-icon-button
           class="project-settings-btn"
+          [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
           routerLink="project-settings">
     <mat-icon>more_vert</mat-icon>
   </button>
@@ -24,7 +26,7 @@
   <!--            (menuClosed)="isProjectMenuDisabled = false"-->
   <!--            class="project-btn"-->
   <!--            mat-button-->
-  <!--            [title]="T.MH.PROJECT_MENU|translate">-->
+  <!--            [matTooltip]="T.MH.PROJECT_MENU|translate">-->
   <!--      <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>-->
   <!--      <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>-->
   <!--    </button>-->
@@ -52,7 +54,7 @@
   <nav class="action-nav">
     <button (click)="layoutService.showAddTaskBar()"
             mat-icon-button
-            [title]="T.MH.ADD_NEW_TASK|translate">
+            [matTooltip]="T.MH.ADD_NEW_TASK|translate">
       <mat-icon>add</mat-icon>
     </button>
 
@@ -60,21 +62,21 @@
             class="bookmark-btn"
             mat-icon-button
             [class.isOpen]="bookmarkService.isShowBookmarks$|async"
-            [title]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
+            [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
       <mat-icon>bookmark</mat-icon>
     </button>
 
     <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"
             (click)="layoutService.toggleNotes()"
             mat-icon-button
-            [title]="T.MH.TOGGLE_SHOW_NOTES|translate">
+            [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate">
       <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)"
                 class="note-ico">comment
       </mat-icon>
     </button>
 
     <button class="hide-xs"
-            [title]="T.WW.HELP_PROCRASTINATION|translate"
+            [matTooltip]="T.WW.HELP_PROCRASTINATION|translate"
             mat-icon-button
             routerLink="/procrastination">
       <mat-icon>flash_on</mat-icon>
@@ -89,7 +91,7 @@
               [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
               class="play-btn mat-elevation-z3"
               mat-mini-fab
-              [title]="T.MH.TOGGLE_TRACK_TIME|translate">
+              [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate">
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
         <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
         <svg class="circle-svg"

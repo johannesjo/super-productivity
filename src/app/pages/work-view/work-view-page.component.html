@@ -32,6 +32,7 @@
       </span>
           <div class="take-a-break-reset-btn">
             <button (click)="resetBreakTimer()"
+                    [matTooltip]="T.WW.RESET_BREAK_TIMER|translate"
                     color="lighter"
                     mat-mini-fab>
               <mat-icon>timer_off</mat-icon>

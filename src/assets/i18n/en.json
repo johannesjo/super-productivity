@@ -857,7 +857,8 @@
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "WORKLOG": "Worklog"
+    "WORKLOG": "Worklog",
+    "PROJECT_SETTINGS": "Project Settings"
   },
   "PDS": {
     "BACK": "Wait I forgot something!",
@@ -978,6 +979,7 @@
     "READY_TO_WORK": "Ready to work!",
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
-    "WORKING_TODAY": "Working today:"
+    "WORKING_TODAY": "Working today:",
+    "RESET_BREAK_TIMER": "Reset without break timer"
   }
 }
