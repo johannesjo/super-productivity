@@ -13,6 +13,15 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSe
 export const selectAllImprovements = createSelector(selectImprovementFeatureState, selectAll);
 export const selectAllImprovementIds = createSelector(selectImprovementFeatureState, selectIds);
 export const selectImprovementHideDay = createSelector(selectImprovementFeatureState, (s) => s.hideDay);
+
+export const selectRepeatedImprovementIds = createSelector(
+  selectAllImprovements,
+  (improvements: Improvement[]): string[] => {
+    return improvements && improvements.filter(i => i.isRepeat).map(i => i.id);
+  }
+);
+
+
 export const selectCheckedImprovementIdsForDay = createSelector(
   selectAllImprovements,
   (improvements: Improvement[], props: { day: string }): string[] => {
@@ -58,6 +67,15 @@ export function improvementReducer(
         hideDay: getWorklogStr(),
         hiddenImprovementBannerItems: [...items, action.payload.id]
       };
+
+    case ImprovementActionTypes.ToggleImprovementRepeat:
+      const item = state.entities[action.payload.id];
+      return adapter.updateOne({
+        id: action.payload.id,
+        changes: {
+          isRepeat: !item.isRepeat
+        },
+      }, state);
 
     case ImprovementActionTypes.ClearHiddenImprovements:
       return {

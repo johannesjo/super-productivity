@@ -4,8 +4,22 @@
       (removed)="remove(modelItem.id)"
       *ngFor="let modelItem of modelItems; trackBy:trackById"
       [removable]="true">
+
       {{ modelItem.title}}
-      <mat-icon matChipRemove>cancel</mat-icon>
+
+      <mat-icon matChipRemove
+                [matTooltip]="T.G.REMOVE|translate">cancel
+      </mat-icon>
+
+      <button mat-icon-button
+              *ngIf="additionalActionIcon"
+              class="additional"
+              [class.isToggled]="isToggled(modelItem.id)"
+              (click)="additionalAction.emit(modelItem.id)"
+              [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle: additionalActionTooltip">
+        <mat-icon style="transform: rotate(45deg)">{{additionalActionIcon}}
+        </mat-icon>
+      </button>
     </mat-chip>
 
     <input

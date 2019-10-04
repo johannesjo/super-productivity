@@ -4,7 +4,7 @@ export interface ImprovementCopy {
   id: string;
   title: string;
   checkedDays: string[];
-  isShowEveryDay: boolean;
+  isRepeat: boolean;
 }
 
 export type Improvement = Readonly<ImprovementCopy>;

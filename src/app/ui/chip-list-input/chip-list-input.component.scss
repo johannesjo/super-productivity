@@ -1,0 +1,44 @@
+@import '../../../variables';
+
+.additional {
+  transition: $transition-fast;
+  opacity: 0;
+  transform: scale(0.1);
+  width: 0;
+  position: relative;
+  z-index: 1;
+  transform-origin: center center;
+  margin-top: -2px;
+  height: 40px;
+
+  @include lightTheme() {
+    color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
+  }
+  @include darkTheme() {
+    color: white;
+  }
+
+  mat-icon {
+    font-size: 22px;
+    max-height: 32px;
+  }
+}
+
+mat-chip {
+  user-select: none;
+}
+
+
+//mat-chip {
+.additional {
+  mat-chip:hover &,
+  &.isToggled {
+    opacity: 0.4;
+    transform: scale(1);
+    width: 32px;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

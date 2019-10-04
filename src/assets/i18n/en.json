@@ -345,7 +345,9 @@
         "NOTES": "Notes for tomorrow",
         "OBSTRUCTIONS": "What hindered your productivity?",
         "PRODUCTIVITY": "How efficient did you work?",
-        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
+        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient",
+        "ENABLE_REPEAT_EVERY_DAY": "Repeat every day",
+        "DISABLE_REPEAT_EVERY_DAY": "Disable repeat every day"
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"

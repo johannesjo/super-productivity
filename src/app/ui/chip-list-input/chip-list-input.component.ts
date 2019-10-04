@@ -5,6 +5,7 @@ import {MatAutocomplete, MatAutocompleteSelectedEvent} from '@angular/material/a
 import {MatChipInputEvent} from '@angular/material/chips';
 import {map, startWith} from 'rxjs/operators';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import {T} from '../../t.const';
 
 
 interface Suggestion {
@@ -22,7 +23,13 @@ interface Suggestion {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChipListInputComponent {
+  T = T;
+
   @Input() label: string;
+  @Input() additionalActionIcon: string;
+  @Input() additionalActionTooltip: string;
+  @Input() additionalActionTooltipUnToggle: string;
+  @Input() toggledItems: string[];
 
   @Input() set suggestions(val) {
     this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
@@ -39,6 +46,7 @@ export class ChipListInputComponent {
   @Output() addItem = new EventEmitter<string>();
   @Output() addNewItem = new EventEmitter<string>();
   @Output() removeItem = new EventEmitter<string>();
+  @Output() additionalAction = new EventEmitter<string>();
 
   modelItems: Suggestion[];
 
@@ -52,7 +60,7 @@ export class ChipListInputComponent {
       : this.suggestionsIn.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
   );
 
-  @ViewChild('inputElRef', {static: true}) fruitInput: ElementRef<HTMLInputElement>;
+  @ViewChild('inputElRef', {static: true}) inputEl: ElementRef<HTMLInputElement>;
   @ViewChild('autoElRef', {static: true}) matAutocomplete: MatAutocomplete;
 
   private _modelIds: string[] = [];
@@ -85,12 +93,20 @@ export class ChipListInputComponent {
 
   selected(event: MatAutocompleteSelectedEvent): void {
     this._add(event.option.value);
-    this.fruitInput.nativeElement.value = '';
+    this.inputEl.nativeElement.value = '';
     this.inputCtrl.setValue(null);
   }
 
   trackById(i: number, item: Suggestion) {
     return item.id;
+  }
+
+  isToggled(id: string) {
+    console.log(id);
+
+    console.log(this.toggledItems);
+
+    return this.toggledItems && this.toggledItems.includes(id);
   }
 
   private _updateModelItems(modelIds) {

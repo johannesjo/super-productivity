@@ -65,6 +65,11 @@
     <chip-list-input (addItem)="addImprovementTomorrow($event)"
                      (addNewItem)="addNewImprovementTomorrow($event)"
                      (removeItem)="removeImprovementTomorrow($event)"
+                     (additionalAction)="toggleImprovementRepeat($event)"
+                     additionalActionIcon="repeat"
+                     [toggledItems]="improvementService.repeatedImprovementIds$|async"
+                     [additionalActionTooltip]="T.F.METRIC.EVAL_FORM.ENABLE_REPEAT_EVERY_DAY|translate"
+                     [additionalActionTooltipUnToggle]="T.F.METRIC.EVAL_FORM.DISABLE_REPEAT_EVERY_DAY|translate"
                      [model]="metricForDay.improvementsTomorrow"
                      [suggestions]="(improvementService.improvements$|async)"
                      [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW|translate"></chip-list-input>

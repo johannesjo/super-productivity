@@ -118,6 +118,10 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     });
   }
 
+  toggleImprovementRepeat(improvementId: string) {
+    this.improvementService.toggleImprovementRepeat(improvementId);
+  }
+
   addNote() {
     this._matDialog.open(DialogAddNoteComponent);
   }
