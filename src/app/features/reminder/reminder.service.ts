@@ -7,7 +7,6 @@ import shortid from 'shortid';
 import {NotifyService} from '../../core/notify/notify.service';
 import {BehaviorSubject, Observable, ReplaySubject, Subject} from 'rxjs';
 import {throttle} from 'throttle-debounce';
-import {promiseTimeout} from '../../util/promise-timeout';
 import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
 import {ImexMetaService} from '../../imex/imex-meta/imex-meta.service';
 import {TaskService} from '../tasks/task.service';
@@ -15,6 +14,7 @@ import {Note} from '../note/note.model';
 import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
+import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 
 @Injectable({
   providedIn: 'root',
@@ -37,6 +37,7 @@ export class ReminderService {
 
   constructor(
     private readonly _projectService: ProjectService,
+    private readonly _globalSyncService: GlobalSyncService,
     private readonly _persistenceService: PersistenceService,
     private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
@@ -46,7 +47,7 @@ export class ReminderService {
   ) {
   }
 
-  async init() {
+  init() {
     if (typeof Worker !== 'undefined') {
       this._w = new Worker('./reminder.worker', {
         name: 'reminder',
@@ -55,13 +56,13 @@ export class ReminderService {
 
       // TODO we need a better solution for this
       // we do this to wait for syncing and the like
-      await promiseTimeout(1000 * 3);
-      this._w.addEventListener('message', this._onReminderActivated.bind(this));
-      this._w.addEventListener('error', this._handleError.bind(this));
-      console.log('WORKER INITIALIZED FOR REMINDERS');
+      this._globalSyncService.afterInitialSyncDone$.subscribe(async () => {
+        this._w.addEventListener('message', this._onReminderActivated.bind(this));
+        this._w.addEventListener('error', this._handleError.bind(this));
+        await this.reloadFromLs();
+        this._isRemindersLoaded$.next(true);
+      });
 
-      await this.reloadFromLs();
-      this._isRemindersLoaded$.next(true);
     } else {
       console.error('No service workers supported :(');
     }

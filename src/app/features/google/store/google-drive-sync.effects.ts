@@ -47,6 +47,8 @@ import {selectIsGoogleDriveSaveInProgress} from './google-drive-sync.reducer';
 import {CompressionService} from '../../../core/compression/compression.service';
 import {TranslateService} from '@ngx-translate/core';
 import {T} from '../../../t.const';
+import {GlobalSyncService} from '../../../core/global-sync/global-sync.service';
+import {SyncProvider} from '../../../core/global-sync/sync-provider';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -54,6 +56,7 @@ export class GoogleDriveSyncEffects {
   isEnabled$ = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
   isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
   syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
+  isInitialSyncDone = false;
 
   @Effect() triggerSync$: any = this._actions$.pipe(
     ofType(
@@ -107,6 +110,7 @@ export class GoogleDriveSyncEffects {
         return of(new LoadFromGoogleDriveFlow());
       } else {
         this._snackService.open(T.F.GOOGLE.S.NO_UPDATE_REQUIRED);
+        this._setInitialSyncDone();
         return EMPTY;
       }
     }),
@@ -353,8 +357,10 @@ export class GoogleDriveSyncEffects {
     map((action: LoadFromGoogleDriveSuccess) => action.payload.modifiedDate),
     // NOTE: last active needs to be set to exactly the value we get back
     tap((modifiedDate) => this._syncService.saveLastActive(modifiedDate)),
+    tap(() => this._setInitialSyncDone()),
     map((modifiedDate) => this._updateConfig({_lastSync: modifiedDate}, true)),
   );
+
   private _config: GoogleDriveSyncConfig;
 
   constructor(
@@ -363,6 +369,7 @@ export class GoogleDriveSyncEffects {
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _googleApiService: GoogleApiService,
     private _configService: GlobalConfigService,
+    private _globalSyncService: GlobalSyncService,
     private _snackService: SnackService,
     private _translateService: TranslateService,
     private _compressionService: CompressionService,
@@ -383,6 +390,7 @@ export class GoogleDriveSyncEffects {
       translateParams: {errTxt}
 
     });
+    this._setInitialSyncDone();
     return of(new LoadFromGoogleDriveCancel());
   }
 
@@ -423,10 +431,17 @@ export class GoogleDriveSyncEffects {
         restoreFocus: true,
         data: {
           loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
-          saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
+          saveToRemote: () => {
+            this._setInitialSyncDone();
+            this._store$.dispatch(new SaveToGoogleDrive())
+          },
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),
           lastSync: this._formatDate(this._config._lastSync),
+        }
+      }).afterClosed().subscribe((isCanceled) => {
+        if (isCanceled) {
+          this._setInitialSyncDone();
         }
       });
     }
@@ -521,5 +536,12 @@ export class GoogleDriveSyncEffects {
 
   private _formatDate(date: Date | string) {
     return moment(date).format('DD-MM-YYYY --- hh:mm:ss');
+  }
+
+  private _setInitialSyncDone() {
+    if (!this.isInitialSyncDone) {
+      this._globalSyncService.setInitialSyncDone(true, SyncProvider.GoogleDrive);
+      this.isInitialSyncDone = true;
+    }
   }
 }
