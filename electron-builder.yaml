@@ -33,16 +33,17 @@ snap:
     - default
     -
 mac:
+  appId: com.super-productivity.app
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
   icon: build/icon.icns
   publish:
     - github
   target:
-    - pkg
     - dmg
     - zip
     - mas
+    - pkg
 
 mas:
   type: distribution
