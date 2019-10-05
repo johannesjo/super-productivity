@@ -78,7 +78,9 @@ export class AppComponent {
         if (granted) {
           console.log('Persistent store granted');
         } else {
-          this._snackService.open({msg: T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED});
+          const msg = this._translateService.instant(T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED);
+          console.warn('Persistence not allowed');
+          this._snackService.open({msg});
         }
       });
     }
