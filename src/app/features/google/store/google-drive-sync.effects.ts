@@ -433,7 +433,7 @@ export class GoogleDriveSyncEffects {
           loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
           saveToRemote: () => {
             this._setInitialSyncDone();
-            this._store$.dispatch(new SaveToGoogleDrive())
+            this._store$.dispatch(new SaveToGoogleDrive());
           },
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),

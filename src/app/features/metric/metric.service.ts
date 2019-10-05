@@ -88,10 +88,10 @@ export class MetricService {
       switchMap((metric) => {
         return metric
           ? of(metric)
-          : combineLatest(
+          : combineLatest([
             this._store$.pipe(select(selectCheckedImprovementIdsForDay, {day})),
             this._store$.pipe(select(selectRepeatedImprovementIds)),
-          ).pipe(
+          ]).pipe(
             map(([checkedImprovementIds, repeatedImprovementIds]) => {
               return {
                 id: day,
