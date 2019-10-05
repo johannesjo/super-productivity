@@ -65,57 +65,6 @@
       "owner": "johannesjo"
     }
   ],
-  "build": {
-    "appId": "superProductivity",
-    "files": [
-      "electron/**/*",
-      "!electron/**/*.ts",
-      "!electron/**/*.js.map",
-      "dist/**/*"
-    ],
-    "directories": {
-      "output": "./app-builds"
-    },
-    "mac": {
-      "category": "productivity",
-      "publish": [
-        "github"
-      ]
-    },
-    "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
-      "publish": [
-        "github"
-      ]
-    },
-    "appx": {
-      "applicationId": "SuperProductivity",
-      "displayName": "Super Productivity",
-      "publisherDisplayName": "johannesjo",
-      "publisher": "CN=___-___",
-      "identityName": "___johannesjo.SuperProductivity"
-    },
-    "linux": {
-      "category": "Utility",
-      "target": [
-        "AppImage",
-        "snap",
-        "deb"
-      ],
-      "publish": [
-        "github"
-      ]
-    },
-    "snap": {
-      "grade": "stable",
-      "stagePackages": [
-        "default"
-      ]
-    }
-  },
   "dependencies": {
     "electron-dl": "^1.13.0",
     "electron-localshortcut": "^3.1.0",

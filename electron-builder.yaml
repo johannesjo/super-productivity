@@ -1,0 +1,51 @@
+appId: superProductivity
+files:
+  - electron/**/*
+  - "!electron/**/*.ts"
+  - "!electron/**/*.js.map"
+  - dist/**/*
+directories:
+  output: "./app-builds"
+
+win:
+  target:
+    - nsis
+    - portable
+  publish:
+    - github
+appx:
+  applicationId: SuperProductivity
+  displayName: Super Productivity
+  publisherDisplayName: johannesjo
+  publisher: CN=___-___
+  identityName: ___johannesjo.SuperProductivity
+linux:
+  category: Utility
+  target:
+    - AppImage
+    - snap
+    - deb
+  publish:
+    - github
+snap:
+  grade: stable
+  stagePackages:
+    - default
+    -
+mac:
+  category: public.app-category.productivity
+  entitlements: build/entitlements.mac.plist
+  icon: build/icon.icns
+  publish:
+    - github
+  target:
+    - pkg
+    - dmg
+    - zip
+    - mas
+
+mas:
+  type: distribution
+  category: public.app-category.productivity
+  entitlements: build/entitlements.mas.plist
+  icon: build/icon.icns
