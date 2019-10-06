@@ -2,7 +2,8 @@
 
 <form #formRef="ngForm"
       (submit)="submit()">
-  <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
+  <mat-slide-toggle [ngModel]="cfg.isEnabled"
+                    (ngModelChange)="toggleEnabled($event)"
                     name="isEnabled">
     {{T.F.GOOGLE.SYNC_CFG.ENABLE|translate}}
   </mat-slide-toggle>

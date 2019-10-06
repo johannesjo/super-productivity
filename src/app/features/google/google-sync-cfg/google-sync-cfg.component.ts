@@ -91,4 +91,10 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   changeSyncFileName(newSyncFile) {
     this.googleDriveSyncService.changeSyncFileName(newSyncFile);
   }
+
+  toggleEnabled(isEnabled: boolean) {
+    this._configService.updateSection('googleDriveSync', {
+      isEnabled,
+    });
+  }
 }
