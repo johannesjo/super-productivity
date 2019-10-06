@@ -120,6 +120,7 @@
     "cross-env": "^5.2.0",
     "electron": "6.0.7",
     "electron-builder": "^21.2.0",
+    "electron-notarize": "^0.1.1",
     "electron-reload": "^1.2.5",
     "file-saver": "^2.0.2",
     "hammerjs": "^2.0.8",

@@ -8,22 +8,25 @@ exports.default = async function notarizing(context) {
     return;
   }
 
-  let appPath = `${appOutDir}/${appName}.app`;
+  const appName = context.packager.appInfo.productFilename;
+  const appBundleId = context.packager.appInfo.macBundleIdentifier;
+  const appPath = `${appOutDir}/${appName}.app`;
   if (!fs.existsSync(appPath)) {
     throw new Error(`Cannot find application at: ${appPath}`);
   }
 
-  const appName = context.packager.appInfo.productFilename;
-  console.log(`Notarizing ${appName}`);
+  console.log(`Notarizing ${appName}: ${appBundleId} `);
+
   try {
     await notarize({
-      appBundleId: 'com.super-productvity.app',
+      appBundleId,
       appPath,
       appleId: process.env.APPLEID,
       appleIdPassword: process.env.APPLEIDPASS,
     });
   } catch (e) {
     console.error(e);
+    throw (e);
   }
   console.log(`Notarizing DONE`);
 };
