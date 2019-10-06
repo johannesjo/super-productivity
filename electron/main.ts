@@ -1,5 +1,7 @@
 'use strict';
 import {App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker} from 'electron';
+import * as electronDl from 'electron-dl';
+
 import {info} from 'electron-log';
 import {CONFIG} from './CONFIG';
 
@@ -46,7 +48,7 @@ const appIN: MyApp = app;
 initDebug({showDevTools: IS_DEV}, IS_DEV);
 
 // TODO maybe reimplement when fixed
-// electronDl({openFolderWhenDone: true});
+electronDl({openFolderWhenDone: true});
 
 let mainWin: BrowserWindow;
 const nestedWinParams = {isDarwinForceQuit: false};

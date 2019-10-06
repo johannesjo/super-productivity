@@ -121,6 +121,7 @@
     "electron": "6.0.7",
     "electron-builder": "^21.2.0",
     "electron-reload": "^1.2.5",
+    "file-saver": "^2.0.2",
     "hammerjs": "^2.0.8",
     "husky": "^2.3.0",
     "jasmine-core": "^3.4.0",
