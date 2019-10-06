@@ -49,4 +49,3 @@ electron/**/*.js.map
 
 # mac os deployment
 embedded.provisionprofile
-build/all-certs.p12
