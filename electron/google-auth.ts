@@ -41,6 +41,17 @@ async function authenticate(refreshToken) {
       scope: scopes.join(' ')
     });
 
+    const freshAuth = () => {
+      // open the browser window to the authorize url to start the workflow
+      openAuthWindow(authorizeUrl)
+        .then((code: any) => {
+          oauth2Client.getToken(code)
+            .then((res) => resolve(res.tokens))
+            .catch(reject);
+        })
+        .catch(reject);
+    };
+
     // grab the url that will be used for authorization
     if (refreshToken) {
       // console.log('SETTING REFRESH TOKEN', refreshToken);
@@ -52,16 +63,12 @@ async function authenticate(refreshToken) {
           // console.log('TOKEN REFRESH ', res.res.data);
           resolve(res.res.data);
         })
-        .catch(reject);
+        .catch((err) => {
+          console.log(err);
+          freshAuth();
+        });
     } else {
-      // open the browser window to the authorize url to start the workflow
-      openAuthWindow(authorizeUrl)
-        .then((code: any) => {
-          oauth2Client.getToken(code)
-            .then((res) => resolve(res.tokens))
-            .catch(reject);
-        })
-        .catch(reject);
+      freshAuth();
     }
   });
 }
