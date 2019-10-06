@@ -2,7 +2,8 @@
   <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>
 </div>
 
-<mat-slide-toggle [(ngModel)]="cfg.isEnabled"
+<mat-slide-toggle [ngModel]="cfg.isEnabled"
+                  (ngModelChange)="toggleEnabled($event)"
                   [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
                   name="isEnabled"
                   style="margin-bottom: 8px;">

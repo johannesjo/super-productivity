@@ -299,7 +299,7 @@ export class ProjectService {
   updateIssueProviderConfig(
     projectId: string,
     issueProviderKey: IssueProviderKey,
-    providerCfg: IssueIntegrationCfg,
+    providerCfg: Partial<IssueIntegrationCfg>,
     isOverwrite = false
   ) {
     this._store$.dispatch({

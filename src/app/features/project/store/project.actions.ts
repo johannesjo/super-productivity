@@ -122,7 +122,7 @@ export class UpdateProjectIssueProviderCfg implements Action {
   constructor(public payload: {
     projectId: string;
     issueProviderKey: IssueProviderKey;
-    providerCfg: IssueIntegrationCfg,
+    providerCfg: Partial<IssueIntegrationCfg>,
     isOverwrite: boolean
   }) {
   }

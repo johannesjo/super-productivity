@@ -14,6 +14,7 @@ import {JiraIssue} from '../jira-issue/jira-issue.model';
 import {SnackService} from '../../../../core/snack/snack.service';
 import {T} from '../../../../t.const';
 import {HelperClasses} from '../../../../app.constants';
+import {ProjectService} from '../../../project/project.service';
 
 @Component({
   selector: 'jira-cfg',
@@ -96,6 +97,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   constructor(
     private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
+    private _projectService: ProjectService,
   ) {
   }
 
@@ -105,6 +107,12 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+  }
+
+  toggleEnabled(isEnabled) {
+    this._projectService.updateIssueProviderConfig(this._projectService.currentId, 'JIRA', {
+      isEnabled,
+    });
   }
 
   submit() {
