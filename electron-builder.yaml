@@ -1,4 +1,5 @@
 appId: superProductivity
+#afterSign: build/scripts/notarize.js
 files:
   - electron/**/*
   - "!electron/**/*.ts"
@@ -34,6 +35,7 @@ snap:
     -
 mac:
   appId: com.super-productivity.app
+  type: development
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
@@ -42,6 +44,7 @@ mac:
     - github
   hardenedRuntime: true
   gatekeeperAssess: false
+#  provisioningProfile: embedded.provisionprofile
   darkModeSupport: true
   target:
     - dmg
@@ -55,3 +58,6 @@ mas:
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.plist
   icon: build/icon.icns
+
+dmg:
+  sign: false
