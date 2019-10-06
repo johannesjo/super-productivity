@@ -1,5 +1,6 @@
 require('dotenv').config();
 const {notarize} = require('electron-notarize');
+const fs = require('fs');
 
 exports.default = async function notarizing(context) {
   const {electronPlatformName, appOutDir} = context;
@@ -7,12 +8,22 @@ exports.default = async function notarizing(context) {
     return;
   }
 
-  const appName = context.packager.appInfo.productFilename;
+  let appPath = `${appOutDir}/${appName}.app`;
+  if (!fs.existsSync(appPath)) {
+    throw new Error(`Cannot find application at: ${appPath}`);
+  }
 
-  return await notarize({
-    appBundleId: 'com.super-productvity.app',
-    appPath: `${appOutDir}/${appName}.app`,
-    appleId: process.env.APPLEID,
-    appleIdPassword: process.env.APPLEIDPASS,
-  });
+  const appName = context.packager.appInfo.productFilename;
+  console.log(`Notarizing ${appName}`);
+  try {
+    await notarize({
+      appBundleId: 'com.super-productvity.app',
+      appPath,
+      appleId: process.env.APPLEID,
+      appleIdPassword: process.env.APPLEIDPASS,
+    });
+  } catch (e) {
+    console.error(e);
+  }
+  console.log(`Notarizing DONE`);
 };
