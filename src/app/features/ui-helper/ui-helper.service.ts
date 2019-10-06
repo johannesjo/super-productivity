@@ -23,6 +23,11 @@ export class UiHelperService {
   }
 
   zoom(zoomFactor: number) {
+    if (Number.isNaN(zoomFactor) || typeof zoomFactor !== 'number') {
+      console.error('Invalid zoom factor', zoomFactor);
+      return;
+    }
+
     this._webFrame.setZoomFactor(zoomFactor);
     this._updateLocalUiHelperSettings({zoomFactor});
   }
