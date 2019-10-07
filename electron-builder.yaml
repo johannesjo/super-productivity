@@ -58,9 +58,12 @@ mas:
   provisioningProfile: prod.provisionprofile
   icon: build/icon.icns
   hardenedRuntime: true
-  publish: false
+  publish: never
 
 dmg:
   sign: false
   publish:
     - github
+
+pkg:
+  publish: never
