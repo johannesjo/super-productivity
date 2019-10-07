@@ -1,3 +1,29 @@
+## [2.12.6](https://github.com/johannesjo/super-productivity/compare/v2.12.5...v2.12.6) (2019-10-07)
+
+
+### Bug Fixes
+
+* check for invalid zoom factors ([47b83ca](https://github.com/johannesjo/super-productivity/commit/47b83ca))
+* downloads not working for electron ([67777ad](https://github.com/johannesjo/super-productivity/commit/67777ad))
+* global persistence disallowed error message ([9da97d7](https://github.com/johannesjo/super-productivity/commit/9da97d7))
+* improvement banner items showing up ([9c3c718](https://github.com/johannesjo/super-productivity/commit/9c3c718))
+* linting issues ([6c3e84e](https://github.com/johannesjo/super-productivity/commit/6c3e84e))
+
+
+### Features
+
+* add some tooltips for a better first experience ([727c5de](https://github.com/johannesjo/super-productivity/commit/727c5de))
+* always show repeated improvements for banner ([047b489](https://github.com/johannesjo/super-productivity/commit/047b489))
+* handle failed refresh token login for electron google auth ([7749f68](https://github.com/johannesjo/super-productivity/commit/7749f68))
+* immediately update google drive sync enabled ([cefb957](https://github.com/johannesjo/super-productivity/commit/cefb957))
+* immediately update jira enabled ([26d4e2b](https://github.com/johannesjo/super-productivity/commit/26d4e2b))
+* wait for initial sync before showing any reminders ([8e98304](https://github.com/johannesjo/super-productivity/commit/8e98304))
+* **scheduled:** add exact date as tooltip ([93101b7](https://github.com/johannesjo/super-productivity/commit/93101b7))
+* make improvements repeatable ([8f448d3](https://github.com/johannesjo/super-productivity/commit/8f448d3))
+* update work week when task summary table changes values ([790dfba](https://github.com/johannesjo/super-productivity/commit/790dfba))
+
+
+
 ## [2.12.5](https://github.com/johannesjo/super-productivity/compare/v2.12.4...v2.12.5) (2019-10-02)
 
 
