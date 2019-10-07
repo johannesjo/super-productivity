@@ -45,11 +45,13 @@ mac:
   gatekeeperAssess: false
   provisioningProfile: embedded.provisionprofile
 #  darkModeSupport: true
+  publish:
+    - github
   target:
     - dmg
+    - pkg
     - zip
 #    - mas
-#    - pkg
 
 mas:
   type: distribution
@@ -59,6 +61,7 @@ mas:
   provisioningProfile: prod.provisionprofile
   icon: build/icon.icns
   hardenedRuntime: true
+  publish: false
 
 dmg:
   sign: false
