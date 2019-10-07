@@ -16,8 +16,6 @@ matrix:
         - brew update
         - brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
         - brew install yarn
-      after_script:
-        - xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
       addons:
         chrome: stable
     - os: linux
@@ -66,7 +64,7 @@ script:
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         electronuserland/builder:wine-chrome \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && snap install snapcraft --classic; sudo snap install snapcraft --classic; yarn --link-duplicates --pure-lockfile && yarn run dist:linuxAndWin -p ${PUB} && ls -l ./dist"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn --link-duplicates --pure-lockfile && yarn run dist:linuxAndWin -p ${PUB} && ls -l ./dist"
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
@@ -98,6 +96,15 @@ deploy:
       branch: master
       condition: $TRAVIS_OS_NAME = linux
       tags: true
+  - provider: script
+    script: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
+    skip_cleanup: true
+    on:
+      branch: master
+      condition: $TRAVIS_OS_NAME = osx
+      tags: true
+
+
 # NOTE: this would only work, if we could auto publish the github draft
 #  - provider: script
 #    script: brew update && brew install vitorgalvao/tiny-scripts/cask-repair && openssl aes-256-cbc -K $encrypted_c04542ca1075_key -iv $encrypted_c04542ca1075_iv -in build/hub.enc -out ~/.config/hub -d && cask-repair -b -v $TRAVIS_TAG superproductivity
