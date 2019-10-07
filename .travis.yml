@@ -69,7 +69,9 @@ script:
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
       yarn dist:mac:dl -p $PUB
-      yarn dist:mac:mas
+      if [ -n "$TRAVIS_TAG" ]; then
+        yarn dist:mac:mas
+      fi
     fi
 
 deploy:
