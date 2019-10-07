@@ -47,7 +47,6 @@ mac:
     - github
   target:
     - dmg
-    - pkg
     - zip
 #    - mas
 
