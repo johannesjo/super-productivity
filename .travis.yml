@@ -16,6 +16,8 @@ matrix:
         - brew update
         - brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
         - brew install yarn
+      after_script:
+        - xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
       addons:
         chrome: stable
     - os: linux
