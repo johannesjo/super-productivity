@@ -55,7 +55,7 @@ export class TakeABreakService {
     shareReplay(1),
   );
 
-  private _isIdleResetEnabled$ = this._configService.idle$.pipe(
+  private _isIdleResetEnabled$: Observable<boolean> = this._configService.idle$.pipe(
     switchMap((idleCfg) => {
         const isConfigured = (idleCfg.isEnableIdleTimeTracking && idleCfg.isUnTrackedIdleResetsBreakTimer);
         if (IS_ELECTRON) {

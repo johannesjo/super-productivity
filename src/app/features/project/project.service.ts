@@ -53,6 +53,7 @@ import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {T} from '../../t.const';
+import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 
 @Injectable({
   providedIn: 'root',
@@ -97,7 +98,7 @@ export class ProjectService {
 
   basicCfg$: Observable<ProjectBasicCfg> = this._store$.pipe(
     select(selectProjectBasicCfg),
-    distinctUntilChanged((a, b) => !a || !b || (JSON.stringify(a) === JSON.stringify(b))),
+    distinctUntilChanged(distinctUntilChangedObject),
   );
 
   currentId$: Observable<string> = this._store$.pipe(

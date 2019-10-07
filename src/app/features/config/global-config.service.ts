@@ -21,6 +21,7 @@ import {
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {Actions, ofType} from '@ngrx/effects';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
+import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 
 @Injectable({
   providedIn: 'root',
@@ -28,37 +29,32 @@ import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
 export class GlobalConfigService {
   cfg$: Observable<GlobalConfigState> = this._store.pipe(
     select(selectConfigFeatureState),
-    distinctUntilChanged(),
+    distinctUntilChanged(distinctUntilChangedObject),
     shareReplay(1),
   );
 
   googleDriveSyncCfg$: Observable<GoogleDriveSyncConfig> = this._store.pipe(
     select(selectGoogleDriveSyncConfig),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
   idle$: Observable<IdleConfig> = this._store.pipe(
     select(selectIdleConfig),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
   takeABreak$: Observable<TakeABreakConfig> = this._store.pipe(
     select(selectTakeABreakConfig),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
   googleSession$: Observable<GoogleSession> = this._store.pipe(
     select(selectGoogleSession),
-    distinctUntilChanged(),
   );
 
   cfg: GlobalConfigState;

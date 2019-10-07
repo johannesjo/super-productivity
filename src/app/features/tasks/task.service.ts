@@ -192,7 +192,7 @@ export class TaskService {
     distinctUntilChanged(),
   );
 
-  totalTimeWorkedOnTodaysTasks$: Observable<any> = this._store.pipe(
+  totalTimeWorkedOnTodaysTasks$: Observable<number> = this._store.pipe(
     select(selectTotalTimeWorkedOnTodaysTasks),
     distinctUntilChanged(),
   );
@@ -226,7 +226,6 @@ export class TaskService {
     // wait for issue model to be loaded
     debounceTime(1000),
     select(selectTasksWithMissingIssueData),
-    distinctUntilChanged(),
     shareReplay(1),
   );
 
