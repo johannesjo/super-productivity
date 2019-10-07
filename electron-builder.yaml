@@ -5,6 +5,7 @@ files:
   - "!electron/**/*.ts"
   - "!electron/**/*.js.map"
   - dist/**/*
+  - 'embedded.provisionprofile'
 directories:
   output: "./app-builds"
 
@@ -35,30 +36,31 @@ snap:
     -
 mac:
   appId: com.super-productivity.app
-#  type: development
+  type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   icon: build/icon.icns
-  publish:
-    - github
   hardenedRuntime: true
   gatekeeperAssess: false
-#  provisioningProfile: embedded.provisionprofile
+  provisioningProfile: embedded.provisionprofile
 #  darkModeSupport: true
   target:
     - dmg
-    - zip
-    - mas
-    - pkg
+#    - mas
+#    - pkg
+#    - zip
 
 mas:
   type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
+#  provisioningProfile: embedded.provisionprofile
   icon: build/icon.icns
   hardenedRuntime: true
 
 dmg:
   sign: false
+  publish:
+    - github

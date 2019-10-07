@@ -48,4 +48,5 @@ electron/**/*.js
 electron/**/*.js.map
 
 # mac os deployment
-embedded.provisionprofile
+*.provisionprofile
+*.Xprovisionprofile
