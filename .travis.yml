@@ -25,8 +25,8 @@ matrix:
       language: generic
       services:
         - docker
-      before_install:
-        - sudo snap install snapcraft --classic
+#      before_install:
+#        - sudo snap install snapcraft --classic
 #        - export CHROME_BIN=chromium-browser
 #        - export DISPLAY=:99.0
 #        - sh -e /etc/init.d/xvfb start
@@ -66,7 +66,7 @@ script:
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         electronuserland/builder:wine-chrome \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run dist:linuxAndWin -p ${PUB} && ls -l ./dist"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && snap install snapcraft --classic; sudo snap install snapcraft --classic; yarn --link-duplicates --pure-lockfile && yarn run dist:linuxAndWin -p ${PUB} && ls -l ./dist"
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
