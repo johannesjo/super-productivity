@@ -46,10 +46,10 @@ mac:
   provisioningProfile: embedded.provisionprofile
 #  darkModeSupport: true
   target:
-#    - dmg
-    - mas
+    - dmg
+    - zip
+#    - mas
 #    - pkg
-#    - zip
 
 mas:
   type: distribution

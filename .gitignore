@@ -50,3 +50,5 @@ electron/**/*.js.map
 # mac os deployment
 *.provisionprofile
 *.Xprovisionprofile
+all-certs.p12
+mac-cert.tar

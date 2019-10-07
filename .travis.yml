@@ -9,6 +9,9 @@ matrix:
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+      before_install:
+        - openssl aes-256-cbc -K $encrypted_527645209bb0_key -iv $encrypted_527645209bb0_iv -in build/mac-cert.tar.enc -out mac-cert.tar -d
+        - tar xvf mac-cert.tar
       install:
         - brew update
         - brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
@@ -63,7 +66,9 @@ script:
         /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWin -p ${PUB} && ls -l ./dist"
     else
       yarn install && yarn add 7zip-bin-mac
-      yarn run dist -p $PUB
+      yarn run buildAllElectron
+      yarn dist:mac:dl -p $PUB
+      yarn dist:mac:mas
     fi
 
 deploy:
