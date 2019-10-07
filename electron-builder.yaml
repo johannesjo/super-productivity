@@ -31,9 +31,7 @@ linux:
     - github
 snap:
   grade: stable
-  stagePackages:
-    - default
-    -
+
 mac:
   appId: com.super-productivity.app
   type: distribution
