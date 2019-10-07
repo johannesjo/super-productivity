@@ -9,31 +9,6 @@ files:
 directories:
   output: "./app-builds"
 
-win:
-  target:
-    - nsis
-    - portable
-  publish:
-    - github
-appx:
-  applicationId: SuperProductivity
-  displayName: Super Productivity
-  publisherDisplayName: johannesjo
-  publisher: CN=___-___
-  identityName: ___johannesjo.SuperProductivity
-linux:
-  category: Utility
-  target:
-    - AppImage
-    - snap
-    - deb
-  publish:
-    - github
-snap:
-  grade: stable
-  stagePackages:
-    - default
-    -
 mac:
   appId: com.super-productivity.app
   type: distribution
@@ -46,21 +21,13 @@ mac:
   provisioningProfile: embedded.provisionprofile
 #  darkModeSupport: true
   target:
-#    - dmg
     - mas
-#    - pkg
-#    - zip
 
 mas:
   type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
-  provisioningProfile: prod.provisionprofile
+  provisioningProfile: embedded.provisionprofile
   icon: build/icon.icns
   hardenedRuntime: true
-
-dmg:
-  sign: false
-  publish:
-    - github
