@@ -68,7 +68,7 @@ script:
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
-      travis_wait yarn dist:mac:dl -p $PUB
+      yarn dist:mac:dl -p $PUB
       if [ -n "$TRAVIS_TAG" ]; then
         yarn dist:mac:mas
       fi
