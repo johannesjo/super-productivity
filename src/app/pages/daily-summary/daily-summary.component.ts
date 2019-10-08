@@ -21,6 +21,7 @@ import * as moment from 'moment';
 import {RoundTimeOption} from '../../features/project/project.model';
 import {T} from '../../t.const';
 import {WorklogService} from '../../features/worklog/worklog.service';
+import {DialogWorklogExportComponent} from '../../features/worklog/dialog-worklog-export/dialog-worklog-export.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -171,11 +172,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   showExportModal() {
-    this._matDialog.open(DialogSimpleTaskExportComponent, {
+    this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
       panelClass: 'big',
       data: {
-        tasks: this._todaysTasks,
+        rangeStart: new Date().setHours(0, 0, 0, 0),
+        rangeEnd: new Date().setHours(23, 59, 59),
       }
     });
   }
