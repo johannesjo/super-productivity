@@ -11,7 +11,7 @@ directories:
 
 mac:
   appId: com.super-productivity.app
-  type: distribution
+  type: development
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
   icon: build/icon.icns
@@ -23,7 +23,7 @@ mac:
     - mas
 
 mas:
-  type: distribution
+  type: development
   category: public.app-category.productivity
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist

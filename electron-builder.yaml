@@ -48,17 +48,6 @@ mac:
   target:
     - dmg
     - zip
-#    - mas
-
-mas:
-  type: distribution
-  category: public.app-category.productivity
-  entitlements: build/entitlements.mas.plist
-  entitlementsInherit: build/entitlements.mas.inherit.plist
-  provisioningProfile: prod.provisionprofile
-  icon: build/icon.icns
-  hardenedRuntime: true
-  publish: never
 
 dmg:
   sign: false
@@ -67,3 +56,15 @@ dmg:
 
 pkg:
   publish: never
+
+
+# HERE: electron-builder.mas.yaml
+#mas:
+#  type: distribution
+#  category: public.app-category.productivity
+#  entitlements: build/entitlements.mas.plist
+#  entitlementsInherit: build/entitlements.mas.inherit.plist
+#  provisioningProfile: prod.provisionprofile
+#  icon: build/icon.icns
+#  hardenedRuntime: true
+#  publish: never
