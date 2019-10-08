@@ -60,72 +60,74 @@
                 </button>
               </div>
 
-              <table class="week-table">
-                <tr>
-                  <th></th>
-                  <td>{{T.F.WORKLOG.CMP.TASKS|translate}}</td>
-                  <td>{{T.F.WORKLOG.CMP.WORKED|translate}}</td>
-                  <th></th>
-                </tr>
-                <ng-container
-                  *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse; trackBy: trackByKey;"
-                  class="day">
-                  <tr (click)="expanded[worklogForDay.value.dateStr]=!expanded[worklogForDay.value.dateStr];"
-                      [class.isExpanded]="expanded[worklogForDay.value.dateStr]"
-                      class="week-row">
-                    <td mat-ripple>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
-                    <td mat-ripple>{{worklogForDay.value.logEntries.length}}</td>
-                    <td mat-ripple>{{worklogForDay.value.timeSpent|msToClockString}}</td>
-                    <td mat-ripple>
-                      <mat-icon *ngIf="!expanded[worklogForDay.value.dateStr]">list</mat-icon>
-                      <mat-icon *ngIf="expanded[worklogForDay.value.dateStr]">close</mat-icon>
-                    </td>
-                  </tr>
-
-
+              <div class="week-table-wrapper">
+                <table class="week-table">
                   <tr>
-                    <td colspan="4">
-                      <div *ngIf="expanded[worklogForDay.value.dateStr]"
-                           [@expandFade]
-                           class="summary-table-wrapper material-table">
-                        <table class="task-summary-table">
-                          <tr *ngFor="let logEntry of worklogForDay.value.logEntries; trackBy: trackByForLogEntry;">
-                            <td [class.isSubTask]="logEntry.task.parentId"
-                                class="title">
-                              <mat-icon *ngIf="logEntry.task.repeatCfgId"
-                                        class="repeat-task-icon"
-                                        [title]="T.F.WORKLOG.CMP.REPEATING_TASK|translate">repeat
-                              </mat-icon>
-                              <span class="task-title">{{logEntry.task.title}}</span>
-                            </td>
-                            <td class="worked">
+                    <th></th>
+                    <td>{{T.F.WORKLOG.CMP.TASKS|translate}}</td>
+                    <td>{{T.F.WORKLOG.CMP.WORKED|translate}}</td>
+                    <th></th>
+                  </tr>
+                  <ng-container
+                    *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse; trackBy: trackByKey;"
+                    class="day">
+                    <tr (click)="expanded[worklogForDay.value.dateStr]=!expanded[worklogForDay.value.dateStr];"
+                        [class.isExpanded]="expanded[worklogForDay.value.dateStr]"
+                        class="week-row">
+                      <td mat-ripple>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
+                      <td mat-ripple>{{worklogForDay.value.logEntries.length}}</td>
+                      <td mat-ripple>{{worklogForDay.value.timeSpent|msToClockString}}</td>
+                      <td mat-ripple>
+                        <mat-icon *ngIf="!expanded[worklogForDay.value.dateStr]">list</mat-icon>
+                        <mat-icon *ngIf="expanded[worklogForDay.value.dateStr]">close</mat-icon>
+                      </td>
+                    </tr>
+
+
+                    <tr>
+                      <td colspan="4">
+                        <div *ngIf="expanded[worklogForDay.value.dateStr]"
+                             [@expandFade]
+                             class="summary-table-wrapper material-table">
+                          <table class="task-summary-table">
+                            <tr *ngFor="let logEntry of worklogForDay.value.logEntries; trackBy: trackByForLogEntry;">
+                              <td [class.isSubTask]="logEntry.task.parentId"
+                                  class="title">
+                                <mat-icon *ngIf="logEntry.task.repeatCfgId"
+                                          class="repeat-task-icon"
+                                          [title]="T.F.WORKLOG.CMP.REPEATING_TASK|translate">repeat
+                                </mat-icon>
+                                <span class="task-title">{{logEntry.task.title}}</span>
+                              </td>
+                              <td class="worked">
                               <span
                                 *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑ {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</span>
-                              <inline-input (changed)="updateTimeSpentTodayForTask(logEntry.task,worklogForDay.value.dateStr, $event)"
-                                            *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
-                                            [displayValue]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString"
-                                            [type]="'duration'"
-                                            [value]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]">
-                              </inline-input>
+                                <inline-input (changed)="updateTimeSpentTodayForTask(logEntry.task,worklogForDay.value.dateStr, $event)"
+                                              *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
+                                              [displayValue]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString"
+                                              [type]="'duration'"
+                                              [value]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]">
+                                </inline-input>
 
-                            </td>
-                            <td class="actions">
-                              <button (click)="restoreTask(logEntry.task);"
-                                      *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
-                                      aria-label="restore"
-                                      color=""
-                                      mat-icon-button
-                                      [title]="T.F.WORKLOG.CMP.RESTORE_TASK_FROM_ARCHIVE|translate">
-                                <mat-icon>settings_backup_restore</mat-icon>
-                              </button>
-                            </td>
-                          </tr>
-                        </table>
-                      </div>
-                    </td>
-                  </tr>
-                </ng-container>
-              </table>
+                              </td>
+                              <td class="actions">
+                                <button (click)="restoreTask(logEntry.task);"
+                                        *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
+                                        aria-label="restore"
+                                        color=""
+                                        mat-icon-button
+                                        [title]="T.F.WORKLOG.CMP.RESTORE_TASK_FROM_ARCHIVE|translate">
+                                  <mat-icon>settings_backup_restore</mat-icon>
+                                </button>
+                              </td>
+                            </tr>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </table>
+              </div>
             </div>
           </div>
         </div>
