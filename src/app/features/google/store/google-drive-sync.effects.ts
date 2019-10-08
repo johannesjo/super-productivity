@@ -313,7 +313,7 @@ export class GoogleDriveSyncEffects {
 
                   // update but ask if remote data is not newer than the last local update
                   const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
-                  console.log(isSkipConfirm, lastActiveRemote, lastActiveLocal);
+                  console.log(isSkipConfirm, lastActiveRemote, lastActiveLocal, appData);
 
                   if (isSkipConfirm) {
                     return of(new LoadFromGoogleDrive({

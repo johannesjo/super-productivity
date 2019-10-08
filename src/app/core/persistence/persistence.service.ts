@@ -320,7 +320,6 @@ export class PersistenceService {
 
   getLastActive(): string {
     // TODO refactor to timestamp
-    console.log(loadFromLs(LS_LAST_ACTIVE), localStorage.getItem(LS_LAST_ACTIVE));
     return localStorage.getItem(LS_LAST_ACTIVE);
   }
 
