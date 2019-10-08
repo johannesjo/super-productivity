@@ -42,7 +42,7 @@ mac:
   hardenedRuntime: true
   gatekeeperAssess: false
   provisioningProfile: embedded.provisionprofile
-#  darkModeSupport: true
+  darkModeSupport: true
   publish:
     - github
   target:
