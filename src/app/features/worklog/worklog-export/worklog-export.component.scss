@@ -45,6 +45,9 @@
         @include darkTheme() {
           background: rgba(255, 255, 255, 0.1);
         }
+        @include lightTheme() {
+          background: rgba(0, 0, 0, 0.1);
+        }
       }
     }
   }
@@ -140,6 +143,24 @@
 
 .options {
   text-align: left;
+  position: relative;
+
+  &:after {
+    position: absolute;
+    content: '';
+    left: -20px;
+    right: -20px;
+    top: 0;
+    border: 1px solid;
+
+    @include darkTheme() {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    @include lightTheme() {
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+  }
 }
 
 collapsible::ng-deep .collapsible-title {
