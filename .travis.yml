@@ -69,9 +69,10 @@ script:
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
       yarn dist:mac:dl -p $PUB
-      if [ -n "$TRAVIS_TAG" ]; then
-        yarn dist:mac:mas
-      fi
+# NOTE: disabled until next release of electron builder
+#      if [ -n "$TRAVIS_TAG" ]; then
+#        yarn dist:mac:mas
+#      fi
     fi
 
 deploy:
@@ -98,13 +99,14 @@ deploy:
       branch: master
       condition: $TRAVIS_OS_NAME = linux
       tags: true
-  - provider: script
-    script: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
-    skip_cleanup: true
-    on:
-      branch: master
-      condition: $TRAVIS_OS_NAME = osx
-      tags: true
+# NOTE: disabled until next release of electron builder
+#  - provider: script
+#    script: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
+#    skip_cleanup: true
+#    on:
+#      branch: master
+#      condition: $TRAVIS_OS_NAME = osx
+#      tags: true
 
 
 # NOTE: this would only work, if we could auto publish the github draft
