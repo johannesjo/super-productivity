@@ -1,5 +1,5 @@
 appId: superProductivity
-#afterSign: build/scripts/notarize.js
+afterSign: build/scripts/notarize.js
 files:
   - electron/**/*
   - "!electron/**/*.ts"
@@ -23,10 +23,8 @@ mac:
     - mas-dev
 
 mas:
-  type: development
   category: public.app-category.productivity
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
-  provisioningProfile: embedded.provisionprofile
   icon: build/icon.icns
   hardenedRuntime: true
