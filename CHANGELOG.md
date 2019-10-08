@@ -1,3 +1,27 @@
+# [2.13.0](https://github.com/johannesjo/super-productivity/compare/v2.12.11...v2.13.0) (2019-10-08)
+
+
+### Bug Fixes
+
+* edge case when reminder is never loaded ([9fd14c1](https://github.com/johannesjo/super-productivity/commit/9fd14c1))
+* worklog options extend error ([f0e9ef3](https://github.com/johannesjo/super-productivity/commit/f0e9ef3))
+* worklog table styling ([f32e1d5](https://github.com/johannesjo/super-productivity/commit/f32e1d5))
+
+
+### Features
+
+* make project title editable on project settings ([a578dde](https://github.com/johannesjo/super-productivity/commit/a578dde))
+* remove google sheet export completely ([dbd9a79](https://github.com/johannesjo/super-productivity/commit/dbd9a79))
+* remove migrate service completely ([9cf7957](https://github.com/johannesjo/super-productivity/commit/9cf7957))
+* replace simple task export with worklog export ([2adb9e6](https://github.com/johannesjo/super-productivity/commit/2adb9e6))
+* **i18n:** add all missing translations ([5ca5147](https://github.com/johannesjo/super-productivity/commit/5ca5147))
+* **worklog:** add tooltips ([ca873f9](https://github.com/johannesjo/super-productivity/commit/ca873f9))
+* **worklog:** display only single day if there is only one ([d465a16](https://github.com/johannesjo/super-productivity/commit/d465a16))
+* **worklog:** improve options and light theme styling ([17b8293](https://github.com/johannesjo/super-productivity/commit/17b8293))
+* **worklog:** improve styling for control columns ([23bbfa7](https://github.com/johannesjo/super-productivity/commit/23bbfa7))
+
+
+
 ## [2.12.11](https://github.com/johannesjo/super-productivity/compare/v2.12.10...v2.12.11) (2019-10-08)
 
 
