@@ -301,10 +301,15 @@ export class GoogleDriveSyncEffects {
           concatMap((isUpdated: boolean): Observable<any> => {
             if (isUpdated) {
               return this._loadFile().pipe(
-                concatMap((loadResponse: any): any => {
-                  const backup: AppDataComplete = loadResponse.backup;
+                concatMap((loadRes) => {
+                  return combineLatest([
+                    of(loadRes),
+                    this._decodeAppDataIfNeeded(loadRes.backup)
+                  ]);
+                }),
+                concatMap(([loadResponse, appData]): any => {
                   const lastActiveLocal = this._syncService.getLastActive();
-                  const lastActiveRemote = backup.lastActiveTime;
+                  const lastActiveRemote = appData.lastActiveTime;
 
                   // update but ask if remote data is not newer than the last local update
                   const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
@@ -487,15 +492,23 @@ export class GoogleDriveSyncEffects {
   }
 
   private async _import(loadRes): Promise<string> {
+    const backupData: AppDataComplete = await this._decodeAppDataIfNeeded(loadRes.backup);
+
+    return from(this._syncService.loadCompleteSyncData(backupData))
+      .pipe(mapTo(loadRes.meta.modifiedDate))
+      .toPromise();
+  }
+
+  private async _decodeAppDataIfNeeded(backupStr: string | AppDataComplete): Promise<AppDataComplete> {
     let backupData: AppDataComplete;
 
     // we attempt this regardless of the option, because data might be compressed anyway
-    if (typeof loadRes.backup === 'string') {
+    if (typeof backupStr === 'string') {
       try {
-        backupData = JSON.parse(loadRes.backup) as AppDataComplete;
+        backupData = JSON.parse(backupStr) as AppDataComplete;
       } catch (e) {
         try {
-          const decompressedData = await this._compressionService.decompressUTF16(loadRes.backup);
+          const decompressedData = await this._compressionService.decompressUTF16(backupStr);
           backupData = JSON.parse(decompressedData) as AppDataComplete;
         } catch (e) {
           console.error('Drive Sync, invalid data');
@@ -503,10 +516,7 @@ export class GoogleDriveSyncEffects {
         }
       }
     }
-
-    return from(this._syncService.loadCompleteSyncData(backupData))
-      .pipe(mapTo(loadRes.meta.modifiedDate))
-      .toPromise();
+    return backupData || (backupStr as AppDataComplete);
   }
 
   private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false): UpdateGlobalConfigSection {
@@ -526,6 +536,12 @@ export class GoogleDriveSyncEffects {
     const d1 = new Date(strDate1);
     const d2 = new Date(strDate2);
     return (d1.getTime() > d2.getTime());
+  }
+
+  private _isNewerThanOrEqual(strDate1, strDate2) {
+    const d1 = new Date(strDate1);
+    const d2 = new Date(strDate2);
+    return (d1.getTime() >= d2.getTime());
   }
 
   private _isEqual(strDate1, strDate2) {

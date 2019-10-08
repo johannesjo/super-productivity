@@ -315,12 +315,13 @@ export class PersistenceService {
   saveLastActive(date: string = new Date().toString()) {
     // TODO refactor to timestamp
     // console.log('Save LastAct', date);
-    saveToLs(LS_LAST_ACTIVE, date);
+    localStorage.setItem(LS_LAST_ACTIVE, date);
   }
 
   getLastActive(): string {
     // TODO refactor to timestamp
-    return loadFromLs(LS_LAST_ACTIVE);
+    console.log(loadFromLs(LS_LAST_ACTIVE), localStorage.getItem(LS_LAST_ACTIVE));
+    return localStorage.getItem(LS_LAST_ACTIVE);
   }
 
   async loadBackup(): Promise<AppDataComplete> {
