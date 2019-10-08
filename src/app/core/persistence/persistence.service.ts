@@ -312,15 +312,17 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  saveLastActive(date: string = new Date().toString()) {
+  saveLastActive(date: number = Date.now()) {
     // TODO refactor to timestamp
     // console.log('Save LastAct', date);
-    localStorage.setItem(LS_LAST_ACTIVE, date);
+    localStorage.setItem(LS_LAST_ACTIVE, date.toString());
   }
 
-  getLastActive(): string {
+  getLastActive(): number {
     // TODO refactor to timestamp
-    return localStorage.getItem(LS_LAST_ACTIVE);
+    const la = localStorage.getItem(LS_LAST_ACTIVE);
+    // NOTE: to account for legacy string dates
+    return new Date(la).getTime();
   }
 
   async loadBackup(): Promise<AppDataComplete> {

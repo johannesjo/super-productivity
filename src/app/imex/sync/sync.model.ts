@@ -55,6 +55,6 @@ export interface AppDataForProjects {
 }
 
 export interface AppDataComplete extends AppBaseData, AppDataForProjects {
-  lastActiveTime: string;
+  lastActiveTime: number;
 }
 

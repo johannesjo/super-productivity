@@ -25,8 +25,12 @@ export class SyncService {
   ) {
   }
 
-  saveLastActive(date: string) {
-    this._persistenceService.saveLastActive(date);
+  /** @deprecated use persistenceService directly. */
+  saveLastActive(date: number | string | Date) {
+    const d = (typeof date === 'number')
+      ? date
+      : new Date(date).getTime();
+    this._persistenceService.saveLastActive(d);
   }
 
   getLastActive(): Date {

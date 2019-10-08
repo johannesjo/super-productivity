@@ -366,7 +366,7 @@ export class GoogleDriveSyncEffects {
     ),
     map((action: LoadFromGoogleDriveSuccess) => action.payload.modifiedDate),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((modifiedDate) => this._syncService.saveLastActive(modifiedDate)),
+    tap((modifiedDate) => this._syncService.saveLastActive(new Date(modifiedDate).getTime())),
     tap(() => this._setInitialSyncDone()),
     map((modifiedDate) => this._updateConfig({_lastSync: modifiedDate}, true)),
   );
