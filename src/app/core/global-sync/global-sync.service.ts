@@ -11,7 +11,7 @@ import {SyncProvider} from './sync-provider';
 export class GlobalSyncService {
   private _isSyncActive$: Observable<boolean> = this._globalConfigService.onCfgLoaded$.pipe(
     switchMap(() => this._globalConfigService.googleDriveSyncCfg$.pipe(
-      map(cfg => cfg.isLoadRemoteDataOnStartup && cfg.isAutoLogin),
+      map(cfg => cfg && cfg.isEnabled && cfg.isLoadRemoteDataOnStartup && cfg.isAutoLogin),
       distinctUntilChanged(),
     )),
   );
