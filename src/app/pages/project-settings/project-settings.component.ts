@@ -11,7 +11,10 @@ import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../..
 import {Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {ProjectService} from '../../features/project/project.service';
-import {PROJECT_THEME_CONFIG_FORM_CONFIG} from '../../features/project/project-form-cfg.const';
+import {
+  BASIC_PROJECT_CONFIG_FORM_CONFIG,
+  PROJECT_THEME_CONFIG_FORM_CONFIG
+} from '../../features/project/project-form-cfg.const';
 import {ISSUE_PROVIDER_FORM_CFGS} from '../../features/issue/issue.const';
 import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
 import {IS_ELECTRON} from '../../app.constants';
@@ -29,6 +32,7 @@ export class ProjectSettingsComponent implements OnInit, OnDestroy {
   projectThemeSettingsFormCfg: ConfigFormSection<ProjectThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;
   globalConfigFormCfg: ConfigFormConfig;
+  basicFormCfg: ConfigFormSection<Project>;
 
   currentProject: Project;
   currentProjectTheme: ProjectThemeCfg;
@@ -46,6 +50,7 @@ export class ProjectSettingsComponent implements OnInit, OnDestroy {
     // somehow they are only unproblematic if assigned here
     this.projectThemeSettingsFormCfg = PROJECT_THEME_CONFIG_FORM_CONFIG;
     this.issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
+    this.basicFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
   }
 
@@ -87,6 +92,16 @@ export class ProjectSettingsComponent implements OnInit, OnDestroy {
         theme: {
           ...$event.config,
         }
+      });
+    }
+  }
+
+  saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: Project }) {
+    if (!$event.config) {
+      throw new Error('Not enough data');
+    } else {
+      this.projectService.update(this.currentProject.id, {
+        title: $event.config.title,
       });
     }
   }

@@ -451,6 +451,10 @@
         "SETUP_GIT": "Setup Github Integration",
         "SETUP_JIRA": "Setup Jira Integration"
       },
+      "FORM_BASIC": {
+        "TITLE": "Basic Settings",
+        "L_TITLE": "Project Name"
+      },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
         "HELP": "Theme settings for your project.",

@@ -1,6 +1,6 @@
 import {ConfigFormSection, GenericConfigFormSection} from '../config/global-config.model';
 import {T} from '../../t.const';
-import {ProjectThemeCfg} from './project.model';
+import {Project, ProjectThemeCfg} from './project.model';
 
 const HUES = [
   {value: '50', label: '50'},
@@ -93,7 +93,23 @@ export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg
   ]
 };
 
-export const BASIC_PROJECT_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
+
+export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
+  title: T.F.PROJECT.FORM_BASIC.TITLE,
+  key: 'basic',
+  items: [
+    {
+      key: 'title',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: T.F.PROJECT.FORM_BASIC.L_TITLE,
+      },
+    },
+  ]
+};
+
+export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
   title: 'Project Settings & Theme',
   key: 'basic',
   /* tslint:disable */

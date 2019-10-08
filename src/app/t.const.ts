@@ -451,6 +451,10 @@ export const T = {
         'SETUP_GIT': 'F.PROJECT.D_CREATE.SETUP_GIT',
         'SETUP_JIRA': 'F.PROJECT.D_CREATE.SETUP_JIRA'
       },
+      'FORM_BASIC': {
+        'TITLE': 'F.PROJECT.FORM_BASIC.TITLE',
+        'L_TITLE': 'F.PROJECT.FORM_BASIC.L_TITLE'
+      },
       'FORM_THEME': {
         'D_IS_DARK_THEME': 'F.PROJECT.FORM_THEME.D_IS_DARK_THEME',
         'HELP': 'F.PROJECT.FORM_THEME.HELP',

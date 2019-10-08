@@ -6,7 +6,7 @@ import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {ProjectService} from '../../project.service';
 import {DEFAULT_PROJECT} from '../../project.const';
 import {JiraCfg} from '../../../issue/jira/jira';
-import {BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_THEME_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
+import {CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG, PROJECT_THEME_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
 import {IssueIntegrationCfgs} from '../../../issue/issue';
 import {DialogJiraInitialSetupComponent} from '../../../issue/jira/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import {SS_PROJECT_TMP} from '../../../../core/persistence/ls-keys.const';
@@ -56,7 +56,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here,
-    this.basicSettingsFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
+    this.basicSettingsFormCfg = CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG.items;
     this.themeFormCfg = PROJECT_THEME_CONFIG_FORM_CONFIG.items;
   }
 
