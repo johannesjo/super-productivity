@@ -99,7 +99,7 @@ deploy:
       condition: $TRAVIS_OS_NAME = linux
       tags: true
   - provider: script
-    script: travis_wait xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
+    script: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
     skip_cleanup: true
     on:
       branch: master
