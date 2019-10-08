@@ -15,6 +15,8 @@
     <button (click)="addCol()"
             class="add-col"
             color=""
+            [matTooltip]="T.F.WORKLOG.EXPORT.ADD_COL|translate"
+            matTooltipPosition="left"
             mat-mini-fab>
       <mat-icon>add</mat-icon>
     </button>
@@ -23,7 +25,9 @@
         <tr>
           <td *ngFor="let col of options.cols;let i = index;">
             <mat-select (selectionChange)="onOptionsChange()"
-                        [(ngModel)]="options.cols[i]">
+                        [(ngModel)]="options.cols[i]"
+                        [matTooltip]="T.F.WORKLOG.EXPORT.EDIT_COL|translate"
+                        matTooltipPosition="above">
               <mat-option><em>remove</em></mat-option>
               <mat-option *ngFor="let colOpt of colOpts"
                           [value]="colOpt.id">
