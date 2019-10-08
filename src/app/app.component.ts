@@ -16,7 +16,6 @@ import {warpRouteAnimation} from './ui/animations/warp-route';
 import {NoteService} from './features/note/note.service';
 import {DOCUMENT} from '@angular/common';
 import {filter, map, take} from 'rxjs/operators';
-import {MigrateService} from './imex/migrate/migrate.service';
 import {combineLatest, Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
@@ -62,7 +61,6 @@ export class AppComponent {
     private _electronService: ElectronService,
     private _snackService: SnackService,
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
-    private _migrateService: MigrateService,
     private _swUpdate: SwUpdate,
     private _translateService: TranslateService,
     private _globalThemeService: GlobalThemeService,
@@ -92,8 +90,6 @@ export class AppComponent {
 
     // init theme and body class handlers
     this._globalThemeService.init();
-
-    this._migrateService.checkForUpdate();
 
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC.APP_READY);

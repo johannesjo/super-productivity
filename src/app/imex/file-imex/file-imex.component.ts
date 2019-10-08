@@ -2,8 +2,6 @@ import {ChangeDetectionStrategy, Component, ElementRef, ViewChild} from '@angula
 import {SyncService} from '../sync/sync.service';
 import {SnackService} from '../../core/snack/snack.service';
 import {AppDataComplete} from '../sync/sync.model';
-import {OldDataExport} from '../migrate/migrate.model';
-import {MigrateService} from '../migrate/migrate.service';
 import {download} from '../../util/download';
 import {T} from '../../t.const';
 
@@ -19,7 +17,6 @@ export class FileImexComponent {
 
   constructor(
     private _syncService: SyncService,
-    private _migrateService: MigrateService,
     private _snackService: SnackService,
   ) {
   }
@@ -32,7 +29,7 @@ export class FileImexComponent {
       const textData = reader.result;
       console.log(textData);
       let data: AppDataComplete;
-      let oldData: OldDataExport;
+      let oldData;
       try {
         data = oldData = JSON.parse(textData.toString());
       } catch (e) {
@@ -40,7 +37,7 @@ export class FileImexComponent {
       }
 
       if (oldData.config && Array.isArray(oldData.tasks)) {
-        await this._migrateService.migrateData(oldData);
+        alert('V1 Data. Migration not imported any more.');
       } else {
         await this._syncService.loadCompleteSyncData(data);
       }

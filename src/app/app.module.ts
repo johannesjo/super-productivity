@@ -24,7 +24,6 @@ import {BookmarkModule} from './features/bookmark/bookmark.module';
 import {NoteModule} from './features/note/note.module';
 import {ReminderModule} from './features/reminder/reminder.module';
 import {CoreUiModule} from './core-ui/core-ui.module';
-import {MigrateModule} from './imex/migrate/migrate.module';
 import {GlobalErrorHandler} from './core/error-handler/global-error-handler.class';
 import {MyHammerConfig} from '../hammer-config.class';
 import {ProcrastinationModule} from './features/procrastination/procrastination.module';
@@ -61,7 +60,6 @@ export function createTranslateLoader(http: HttpClient) {
     ProcrastinationModule,
     TimeTrackingModule,
     ReminderModule,
-    MigrateModule,
     CoreUiModule,
     NoteModule,
     BookmarkModule,
