@@ -54,7 +54,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   isShowAsText = false;
   headlineCols: string[] = [];
   formattedRows: (string | number)[][];
-  options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
+  options: WorklogExportSettingsCopy = {...WORKLOG_EXPORT_DEFAULTS};
   txt: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
@@ -117,7 +117,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           )]
         };
       } else {
-        this.options = WORKLOG_EXPORT_DEFAULTS;
+        this.options = {...WORKLOG_EXPORT_DEFAULTS};
       }
 
       const tasks: WorklogTask[] = this._worklogService.getTaskListForRange(this.rangeStart, this.rangeEnd, true);
