@@ -15,7 +15,7 @@ import {
   tap,
   withLatestFrom
 } from 'rxjs/operators';
-import {combineLatest, EMPTY, from, interval, Observable, of, throwError} from 'rxjs';
+import {combineLatest, EMPTY, from, interval, Observable, of, throwError, zip} from 'rxjs';
 import {GoogleDriveSyncService} from '../google-drive-sync.service';
 import {GoogleApiService} from '../google-api.service';
 import {GlobalConfigService} from '../../config/global-config.service';
@@ -302,10 +302,10 @@ export class GoogleDriveSyncEffects {
             if (isUpdated) {
               return this._loadFile().pipe(
                 concatMap((loadRes) => {
-                  return combineLatest([
+                  return zip(
                     of(loadRes),
                     this._decodeAppDataIfNeeded(loadRes.backup)
-                  ]);
+                  );
                 }),
                 concatMap(([loadResponse, appData]): any => {
                   const lastActiveLocal = this._syncService.getLastActive();
@@ -313,9 +313,14 @@ export class GoogleDriveSyncEffects {
 
                   // update but ask if remote data is not newer than the last local update
                   const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
+                  console.log(isSkipConfirm, lastActiveRemote, lastActiveLocal);
 
                   if (isSkipConfirm) {
-                    return of(new LoadFromGoogleDrive({loadResponse}));
+                    return of(new LoadFromGoogleDrive({
+                      // NOTE: to prevent having to decode again
+                      ...loadResponse,
+                      backup: appData,
+                    }));
                   } else {
                     this._openConfirmLoadDialog(lastActiveRemote);
                     return of(new LoadFromGoogleDriveCancel());
