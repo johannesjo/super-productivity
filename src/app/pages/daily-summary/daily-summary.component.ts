@@ -4,7 +4,6 @@ import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
-import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../electron/ipc-events.const';
