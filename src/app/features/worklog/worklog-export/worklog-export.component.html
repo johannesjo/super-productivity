@@ -22,7 +22,7 @@
     </button>
     <div class="table-wrapper material-table _no-elevation">
       <table>
-        <tr>
+        <tr class="control-row">
           <td *ngFor="let col of options.cols;let i = index;">
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.cols[i]"
