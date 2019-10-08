@@ -69,11 +69,13 @@ script:
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
       yarn dist:mac:dl -p $PUB
+    fi
+
 # NOTE: disabled until next release of electron builder
 #      if [ -n "$TRAVIS_TAG" ]; then
 #        yarn dist:mac:mas
 #      fi
-    fi
+
 
 deploy:
   - provider: snap
