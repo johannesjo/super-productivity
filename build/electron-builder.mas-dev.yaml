@@ -1,5 +1,5 @@
 appId: superProductivity
-afterSign: build/scripts/notarize.js
+#afterSign: build/scripts/notarize.js
 files:
   - electron/**/*
   - "!electron/**/*.ts"
@@ -20,7 +20,7 @@ mac:
   provisioningProfile: embedded.provisionprofile
 #  darkModeSupport: true
   target:
-    - mas
+    - mas-dev
 
 mas:
   type: development
