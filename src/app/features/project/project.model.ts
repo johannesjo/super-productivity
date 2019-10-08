@@ -33,6 +33,7 @@ export type WorkStartEnd = Readonly<WorkStartEndCopy>;
 
 export type DayCompletedCopy = string[];
 
+/** @deprecated use new theme model instead. */
 export interface GoogleTimeSheetExportCopy {
   spreadsheetId: string;
   isAutoLogin: boolean;
@@ -44,7 +45,7 @@ export interface GoogleTimeSheetExportCopy {
   defaultValues: string[];
   lastExported: string;
 }
-
+/** @deprecated use new theme model instead. */
 export type GoogleTimeSheetExport = Readonly<GoogleTimeSheetExportCopy>;
 
 export interface SimpleSummarySettingsCopy {
@@ -66,6 +67,7 @@ export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
 
 
 export type ProjectAdvancedCfg = Readonly<{
+  /** @deprecated use new theme model instead. */
   googleTimeSheetExport: GoogleTimeSheetExport;
   simpleSummarySettings: SimpleSummarySettings;
   worklogExportSettings: WorklogExportSettings;
