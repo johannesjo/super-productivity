@@ -1,3 +1,7 @@
+## [2.12.9](https://github.com/johannesjo/super-productivity/compare/v2.12.8...v2.12.9) (2019-10-08)
+
+
+
 ## [2.12.8](https://github.com/johannesjo/super-productivity/compare/v2.12.7...v2.12.8) (2019-10-07)
 
 
