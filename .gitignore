@@ -52,3 +52,4 @@ electron/**/*.js.map
 *.Xprovisionprofile
 all-certs.p12
 mac-cert.tar
+build/electron-builder.appx.yaml
