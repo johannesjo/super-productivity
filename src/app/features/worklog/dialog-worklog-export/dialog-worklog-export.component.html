@@ -1,7 +1,9 @@
-<h1 mat-dialog-title>{{T.F.WORKLOG.D_EXPORT_TITLE|translate:{
-  start:  strStart,
-  end: strEnd
-} }}</h1>
+<h1 mat-dialog-title>{{
+  (isSingleDay ? T.F.WORKLOG.D_EXPORT_TITLE_SINGLE : T.F.WORKLOG.D_EXPORT_TITLE)|translate:{
+    day: strStart,
+    start: strStart,
+    end: strEnd
+  } }}</h1>
 
 <worklog-export (cancel)="close()"
                 [isShowClose]="true"

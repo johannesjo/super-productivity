@@ -16,6 +16,7 @@ export class DialogWorklogExportComponent {
   options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
   strStart: string;
   strEnd: string;
+  isSingleDay = false;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogWorklogExportComponent>,
@@ -25,6 +26,8 @@ export class DialogWorklogExportComponent {
     // this.strEnd = getWorklogStr(data.rangeEnd);
     this.strStart = moment(data.rangeStart).format('l');
     this.strEnd = moment(data.rangeEnd).format('l');
+
+    this.isSingleDay = (this.strStart === this.strEnd);
   }
 
   close() {

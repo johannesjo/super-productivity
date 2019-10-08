@@ -661,6 +661,7 @@
       },
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
       "D_EXPORT_TITLE": "Worklog Export {{start}}–{{end}}",
+      "D_EXPORT_TITLE_SINGLE": "Worklog Export {{day}}",
       "EXPORT": {
         "ADD_COL": "Add column",
         "EDIT_COL": "Edit column",
