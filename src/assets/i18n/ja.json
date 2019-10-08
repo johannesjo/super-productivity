@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "リマインダーインターフェースのエラー"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "閉じる",
-      "COPY_TO_CLIPBOARD": "クリップボードにコピー",
-      "DATE": "日付",
-      "ESTIMATE": "見積もり",
-      "FIELDS_TO_DISPLAY": "表示するフィールド",
-      "LIST_DONE_TASKS_ONLY": "完了タスクのみをリストする",
-      "LIST_SUB_TASKS": "サブタスクの一覧表示",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "リストは今日の仕事だけに取り組んだ",
-      "M_TITLE": "タスクリストのエクスポート",
-      "NO_DATA": "- データなし -",
-      "OPTIONS": "オプション",
-      "R": {
-        "HALF": "半時間",
-        "HOUR": "全時間",
-        "QUARTER": "全四半期"
-      },
-      "SAVE_TO_FILE": "ファイルに保存",
-      "SEPARATE_FIELDS_BY": "でフィールドを区切る",
-      "SHOW_AS_TEXT": "テキストとして表示",
-      "SNACK_TO_CLIPPBOARD": "クリップボードにコピー",
-      "TIME_AS_MILLISECONDS": "ミリ秒単位の時間",
-      "TIME_ESTIMATE": "時間見積もり",
-      "TIME_SPENT": "使った時間",
-      "TITLE": "タイトル"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "添付ファイル {{nr}}",

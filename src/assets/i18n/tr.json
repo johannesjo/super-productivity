@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "Kapat",
-      "COPY_TO_CLIPBOARD": "Panoya kopyala",
-      "DATE": "tarih",
-      "ESTIMATE": "Tahmin",
-      "FIELDS_TO_DISPLAY": "Görüntülenecek alanlar",
-      "LIST_DONE_TASKS_ONLY": "Yalnızca yapılan görevleri listele",
-      "LIST_SUB_TASKS": "Alt görevleri listele",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "Liste yalnızca bugünkü görevlerde çalıştı",
-      "M_TITLE": "Görev Listesi Verme",
-      "NO_DATA": "- Veri yok -",
-      "OPTIONS": "Seçenekler",
-      "R": {
-        "HALF": "tam yarım saat",
-        "HOUR": "tam saatler",
-        "QUARTER": "tam çeyrek"
-      },
-      "SAVE_TO_FILE": "Dosyaya kaydet",
-      "SEPARATE_FIELDS_BY": "Alanları ayrı ayır",
-      "SHOW_AS_TEXT": "Metin olarak göster",
-      "SNACK_TO_CLIPPBOARD": "Panoya kopyalandı",
-      "TIME_AS_MILLISECONDS": "Milisaniye olarak zaman",
-      "TIME_ESTIMATE": "Zaman tahmini",
-      "TIME_SPENT": "Harcanan zaman",
-      "TITLE": "Başlık"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "Ekler {{nr}}",

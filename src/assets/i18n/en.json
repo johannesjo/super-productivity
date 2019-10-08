@@ -484,32 +484,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Error for reminder interface"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "Close",
-      "COPY_TO_CLIPBOARD": "Copy to clipboard",
-      "DATE": "Date",
-      "ESTIMATE": "Estimate",
-      "FIELDS_TO_DISPLAY": "Fields to display",
-      "LIST_DONE_TASKS_ONLY": "List done tasks only",
-      "LIST_SUB_TASKS": "List sub tasks",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "List worked on today tasks only",
-      "M_TITLE": "Task List Export",
-      "NO_DATA": "- No Data -",
-      "OPTIONS": "Options",
-      "R": {
-        "HALF": "full half hours",
-        "HOUR": "full hours",
-        "QUARTER": "full quarters"
-      },
-      "SAVE_TO_FILE": "Save to file",
-      "SEPARATE_FIELDS_BY": "Separate fields by",
-      "SHOW_AS_TEXT": "Show as text",
-      "SNACK_TO_CLIPPBOARD": "Copied to clipboard",
-      "TIME_AS_MILLISECONDS": "Time as milliseconds",
-      "TIME_ESTIMATE": "Time Estimate",
-      "TIME_SPENT": "Time Spent",
-      "TITLE": "Title"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "Attachments {{nr}}",

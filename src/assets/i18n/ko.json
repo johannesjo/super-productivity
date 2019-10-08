@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "알림 인터페이스 오류"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "닫기",
-      "COPY_TO_CLIPBOARD": "클립 보드에 복사",
-      "DATE": "날짜",
-      "ESTIMATE": "견적",
-      "FIELDS_TO_DISPLAY": "표시 할 필드",
-      "LIST_DONE_TASKS_ONLY": "완료된 작업 만 표시",
-      "LIST_SUB_TASKS": "하위 작업 나열",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "목록은 오늘 작업에만 적용되었습니다.",
-      "M_TITLE": "작업 목록 내보내기",
-      "NO_DATA": "- 데이터 없음 -",
-      "OPTIONS": "옵션",
-      "R": {
-        "HALF": "반 시간 반",
-        "HOUR": "1 시간 내내",
-        "QUARTER": "전체 분기"
-      },
-      "SAVE_TO_FILE": "파일에 저장",
-      "SEPARATE_FIELDS_BY": "필드 구분",
-      "SHOW_AS_TEXT": "텍스트로 표시",
-      "SNACK_TO_CLIPPBOARD": "클립 보드에 복사 됨",
-      "TIME_AS_MILLISECONDS": "시간 (밀리 초)",
-      "TIME_ESTIMATE": "예상 시간",
-      "TIME_SPENT": "지출 된 시간",
-      "TITLE": "표제"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "첨부 파일 {{nr}}",

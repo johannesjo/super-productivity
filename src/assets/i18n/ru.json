@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Ошибка интерфейса напоминания"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "близко",
-      "COPY_TO_CLIPBOARD": "Скопировать в буфер обмена",
-      "DATE": "Дата",
-      "ESTIMATE": "Оценить",
-      "FIELDS_TO_DISPLAY": "Поля для отображения",
-      "LIST_DONE_TASKS_ONLY": "Список только выполненных задач",
-      "LIST_SUB_TASKS": "Список подзадач",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "Список работал только на сегодняшние задачи",
-      "M_TITLE": "Экспорт списка задач",
-      "NO_DATA": "- Нет данных -",
-      "OPTIONS": "опции",
-      "R": {
-        "HALF": "полчаса",
-        "HOUR": "полные часы",
-        "QUARTER": "полные кварталы"
-      },
-      "SAVE_TO_FILE": "Сохранить в файл",
-      "SEPARATE_FIELDS_BY": "Разделяйте поля",
-      "SHOW_AS_TEXT": "Показать как текст",
-      "SNACK_TO_CLIPPBOARD": "Скопировано в буфер обмена",
-      "TIME_AS_MILLISECONDS": "Время в миллисекундах",
-      "TIME_ESTIMATE": "Оценка времени",
-      "TIME_SPENT": "Время потрачено",
-      "TITLE": "заглавие"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "Вложения {{nr}}",

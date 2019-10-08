@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "Schließen",
-      "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
-      "DATE": "Datum",
-      "ESTIMATE": "Schätzen",
-      "FIELDS_TO_DISPLAY": "Felder, die angezeigt werden sollen",
-      "LIST_DONE_TASKS_ONLY": "Nur erledigte Aufgaben auflisten",
-      "LIST_SUB_TASKS": "Auflisten von Unteraufgaben",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "Liste hat nur an heutigen Aufgaben gearbeitet",
-      "M_TITLE": "Aufgabenlistenexport",
-      "NO_DATA": "- Keine Daten -",
-      "OPTIONS": "Optionen",
-      "R": {
-        "HALF": "volle halbe stunden",
-        "HOUR": "volle Stunden",
-        "QUARTER": "volle viertel"
-      },
-      "SAVE_TO_FILE": "Speichern unter",
-      "SEPARATE_FIELDS_BY": "Trennen Sie die Felder durch",
-      "SHOW_AS_TEXT": "Als Text anzeigen",
-      "SNACK_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
-      "TIME_AS_MILLISECONDS": "Zeit in Millisekunden",
-      "TIME_ESTIMATE": "Zeitschätzung",
-      "TIME_SPENT": "Zeitaufwand",
-      "TITLE": "Titel"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "Anhänge {{nr}}",

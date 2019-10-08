@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Erreur pour l'interface de rappel"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "Fermer",
-      "COPY_TO_CLIPBOARD": "Copier dans le presse-papier",
-      "DATE": "Rendez-vous amoureux",
-      "ESTIMATE": "Estimation",
-      "FIELDS_TO_DISPLAY": "Champs à afficher",
-      "LIST_DONE_TASKS_ONLY": "Liste des tâches effectuées uniquement",
-      "LIST_SUB_TASKS": "Liste des sous tâches",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "Liste travaillée sur les tâches du jour uniquement",
-      "M_TITLE": "Exportation de la liste des tâches",
-      "NO_DATA": "- Pas de données -",
-      "OPTIONS": "Les options",
-      "R": {
-        "HALF": "plein demi heures",
-        "HOUR": "heures pleines",
-        "QUARTER": "quarts complets"
-      },
-      "SAVE_TO_FILE": "Enregistrer dans le fichier",
-      "SEPARATE_FIELDS_BY": "Séparer les champs par",
-      "SHOW_AS_TEXT": "Afficher sous forme de texte",
-      "SNACK_TO_CLIPPBOARD": "Copié dans le presse-papier",
-      "TIME_AS_MILLISECONDS": "Temps en millisecondes",
-      "TIME_ESTIMATE": "Estimation du temps",
-      "TIME_SPENT": "Temps passé",
-      "TITLE": "Titre"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "Pièces jointes {{nr}}",

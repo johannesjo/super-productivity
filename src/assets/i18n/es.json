@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Error para la interfaz de recordatorio"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "Cerrar",
-      "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
-      "DATE": "Fecha",
-      "ESTIMATE": "ESTIMAR",
-      "FIELDS_TO_DISPLAY": "Campos para mostrar",
-      "LIST_DONE_TASKS_ONLY": "Listar solo las tareas realizadas",
-      "LIST_SUB_TASKS": "Listar sub tareas",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "Lista trabajada en tareas de hoy solamente",
-      "M_TITLE": "Exportar lista de tareas",
-      "NO_DATA": "- Sin datos -",
-      "OPTIONS": "Opciones",
-      "R": {
-        "HALF": "media horas completas",
-        "HOUR": "horas completas",
-        "QUARTER": "cuartos completos"
-      },
-      "SAVE_TO_FILE": "Guardar en archivo",
-      "SEPARATE_FIELDS_BY": "Campos separados por",
-      "SHOW_AS_TEXT": "Mostrar como texto",
-      "SNACK_TO_CLIPPBOARD": "Copiado al portapapeles",
-      "TIME_AS_MILLISECONDS": "El tiempo como milisegundos.",
-      "TIME_ESTIMATE": "Tiempo estimado",
-      "TIME_SPENT": "Tiempo usado",
-      "TITLE": "Título"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "Adjuntos {{nr}}",

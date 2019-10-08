@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "提醒界面出错"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "关",
-      "COPY_TO_CLIPBOARD": "复制到剪贴板",
-      "DATE": "日期",
-      "ESTIMATE": "估计",
-      "FIELDS_TO_DISPLAY": "要显示的字段",
-      "LIST_DONE_TASKS_ONLY": "仅列出已完成的任务",
-      "LIST_SUB_TASKS": "列出子任务",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "列表仅适用于今天的任务",
-      "M_TITLE": "任务列表导出",
-      "NO_DATA": "- 没有数据 -",
-      "OPTIONS": "选项",
-      "R": {
-        "HALF": "整整半个小时",
-        "HOUR": "整整一个小时",
-        "QUARTER": "整个季度"
-      },
-      "SAVE_TO_FILE": "保存到文件",
-      "SEPARATE_FIELDS_BY": "单独的字段",
-      "SHOW_AS_TEXT": "显示为文字",
-      "SNACK_TO_CLIPPBOARD": "复制到剪贴板",
-      "TIME_AS_MILLISECONDS": "时间为毫秒",
-      "TIME_ESTIMATE": "时间估计",
-      "TIME_SPENT": "所花费的时间",
-      "TITLE": "标题"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "附件 {{nr}}",

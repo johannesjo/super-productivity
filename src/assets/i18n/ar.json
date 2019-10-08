@@ -478,32 +478,6 @@
     "REMINDER": {
       "S_REMINDER_ERR": "خطأ في واجهة التذكير"
     },
-    "SIMPLE_TASK_EXPORT": {
-      "CLOSE": "قريب",
-      "COPY_TO_CLIPBOARD": "نسخ إلى الحافظة",
-      "DATE": "تاريخ",
-      "ESTIMATE": "تقدير",
-      "FIELDS_TO_DISPLAY": "الحقول لعرضها",
-      "LIST_DONE_TASKS_ONLY": "قائمة المهام المنجزة فقط",
-      "LIST_SUB_TASKS": "قائمة المهام الفرعية",
-      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "قائمة عملت على مهام اليوم فقط",
-      "M_TITLE": "تصدير قائمة المهام",
-      "NO_DATA": "- لايوجد بيانات -",
-      "OPTIONS": "خيارات",
-      "R": {
-        "HALF": "نصف ساعة كاملة",
-        "HOUR": "ساعات كاملة",
-        "QUARTER": "أرباع كاملة"
-      },
-      "SAVE_TO_FILE": "احفظ الملف",
-      "SEPARATE_FIELDS_BY": "افصل بين الحقول",
-      "SHOW_AS_TEXT": "تظهر كنص",
-      "SNACK_TO_CLIPPBOARD": "نسخ إلى الحافظة",
-      "TIME_AS_MILLISECONDS": "الوقت كما ميلي ثانية",
-      "TIME_ESTIMATE": "تقدير الوقت",
-      "TIME_SPENT": "قضاء الوقت",
-      "TITLE": "عنوان"
-    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ATTACHMENTS": "المرفقات {{nr}}",
