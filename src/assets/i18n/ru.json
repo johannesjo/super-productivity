@@ -137,27 +137,6 @@
         "TEXT": "  <p>Кажется, что в Google Диске есть некоторые изменения, которых у вас нет локально. Вы все равно хотите их перезаписать?</p>",
         "TITLE": "Перезаписать несохраненные данные на Google Диске?"
       },
-      "EXPORT_TIME": {
-        "ALWAYS_ROUND_UP": "Всегда вокруг рабочего времени",
-        "AUTO_LOGIN": "Автоматический вход и загрузка данных в следующий раз",
-        "HELP_ADDITIONAL": "В дополнение к этому есть несколько опций, которые вы можете использовать для изменения расчета этих значений.",
-        "HELP_INFO": "<p>Этот вид позволяет вам экспортировать ваше рабочее время в лист Google. Вы должны разрешить Super Productivity доступ к вашим таблицам Google. Вам также необходимо создать электронную таблицу с заголовками в первой строке и указать ее идентификатор в поле ввода (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Как найти идентификатор электронной таблицы?</a>).</p><p>После успешной загрузки таблицы появится таблица с 4 строками. В первой строке показан заголовок, указанный вами в самой электронной таблице.</p><p>Вторая строка предназначена для информационных целей и показывает последнюю строку из электронной таблицы.</p><p>Четвертая строка представляет собой список значений, которые вы можете непосредственно ввести, сохраняя в электронную таблицу.</p><p>Третья строка предназначена для автоматического определения некоторых значений для четвертой строки. В ячейки можно ввести несколько специальных строк:</p>",
-        "HELP_POSSIBLE_PROPERTIES": "<dt>{startTime}</dt><dd>The time when you first used this app today. It's possible to round this via the options.</dd><dt>{currentTime}</dt><dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via  the options.</dd><dt>{endTime}</dt><dd>The last time time was tracked to a task in current project.</dd><dt>{date}</dt><dd>Todays date in standard format (mm/dd/yyyy)</dd><dt>{date:DD/MM/YYYY} (example)</dt><dd>Date with a custom date format string.</dd><dt>{taskTitles}</dt><dd>Comma separated (parent) task titles</dd><dt>{subTaskTitles}</dt><dd>Comma separated sub task titles</dd><dt>{totalTime}</dt><dd>The total time you spend working on your todays tasks.</dd>",
-        "LOGIN": "Войти в Google",
-        "LOGOUT": "Выйти",
-        "OPEN_SPREADSHEET": "Открыть электронную таблицу",
-        "OPTIONS": "опции",
-        "READ_SPREADSHEET": "Читать электронную таблицу",
-        "ROUND_END_TIME_TO": "Время окончания раунда до",
-        "ROUND_HALF": "полчаса",
-        "ROUND_HOUR": "полные часы",
-        "ROUND_QUARTER": "полные кварталы",
-        "ROUND_START_TIME_TO": "Время начала раунда до",
-        "ROUND_TIME_WORKED_TO": "Время раунда работало на",
-        "SAVE_ROW": "Сохранить строку",
-        "S_EQUAL_VALUES": "Текущие значения и последняя сохраненная строка имеют одинаковые значения, это, вероятно, не то, что вы хотите.",
-        "S_ROW_APPENDED": "Строка успешно добавлена"
-      },
       "S": {
         "DOWNLOADING_UPDATE": "Google Drive: есть удаленное обновление! Загрузка ...",
         "ERROR": "Google Диск - Ошибка:",
@@ -334,6 +313,8 @@
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Добавить записку на завтра",
+        "DISABLE_REPEAT_EVERY_DAY": "Отключить повторять каждый день",
+        "ENABLE_REPEAT_EVERY_DAY": "Повторять каждый день",
         "HELP_H1": "Почему я должен волноваться?",
         "HELP_LINK_TXT": "Перейти в раздел метрик",
         "HELP_P1": "Время для небольшой самооценки! Ваши ответы здесь сохранены и предоставят вам немного статистики о том, как вы работаете в разделе метрик. Кроме того, предложения на завтра появятся над списком задач на следующий день.",
@@ -448,6 +429,10 @@
         "EDIT": "Редактировать проект",
         "SETUP_GIT": "Настройка Github Интеграция",
         "SETUP_JIRA": "Настройка интеграции Jira"
+      },
+      "FORM_BASIC": {
+        "L_TITLE": "Название проекта",
+        "TITLE": "Базовые настройки"
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Не будет использоваться, если система поддерживает глобальный темный режим.",
@@ -629,9 +614,12 @@
       },
       "D_CONFIRM_RESTORE": "Вы уверены, что хотите переместить задачу <strong>\"{{title}}\"</strong> в свой текущий список задач?",
       "D_EXPORT_TITLE": "Экспорт журнала работ {{start}}-{{end}}",
+      "D_EXPORT_TITLE_SINGLE": "Экспорт журнала работ {{day}}",
       "EXPORT": {
+        "ADD_COL": "Добавить столбец",
         "COPY_TO_CLIPBOARD": "Скопировать в буфер обмена",
         "DONT_ROUND": "не округлять",
+        "EDIT_COL": "Редактировать столбец",
         "GROUP_BY": "Группа по",
         "O": {
           "DATE": "Дата",
@@ -822,6 +810,7 @@
     "PROCRASTINATE": "мешкать",
     "PROJECTS": "проектов",
     "PROJECT_MENU": "Меню проекта",
+    "PROJECT_SETTINGS": "Настройки проекта",
     "SCHEDULED": "по расписанию",
     "SETTINGS": "настройки",
     "TASKS": "задачи",
@@ -843,7 +832,6 @@
     },
     "EVALUATION": "оценка",
     "EXPORT_TASK_LIST": "Экспорт списка задач",
-    "GOOGLE_SHEET": "Google Sheet",
     "NO_TASKS": "На этот день нет заданий",
     "ROUND_15M": "Округлить все задания до 15 минут",
     "ROUND_30M": "Округлить все задания до 30 минут",
@@ -948,6 +936,7 @@
     "NO_COMPLETED_TASKS": "В настоящее время нет выполненных задач",
     "NO_PLANNED_TASKS": "Нет запланированных задач",
     "READY_TO_WORK": "Готов к работе!",
+    "RESET_BREAK_TIMER": "Сброс без перерыва таймера",
     "TIME_ESTIMATED": "Расчетное время:",
     "WITHOUT_BREAK": "Без перерыва:",
     "WORKING_TODAY": "Работаю сегодня:"

@@ -137,27 +137,6 @@
         "TEXT": "  <p>Parece que hay algunos cambios en Google Drive, que no tiene localmente. ¿Quieres sobrescribirlos de todos modos?</p>",
         "TITLE": "¿Sobrescribir los datos no guardados en Google Drive?"
       },
-      "EXPORT_TIME": {
-        "ALWAYS_ROUND_UP": "Siempre redondeando el tiempo de trabajo.",
-        "AUTO_LOGIN": "Iniciar sesión automáticamente y cargar datos la próxima vez",
-        "HELP_ADDITIONAL": "Además de esto, hay varias opciones que puede utilizar para modificar el cálculo de esos valores.",
-        "HELP_INFO": "<p>Esta vista le permite exportar su tiempo trabajado a una hoja de Google. Debe permitir que Super Productivity acceda a sus Hojas de cálculo de Google. También debe crear una hoja de cálculo con encabezados en la primera fila y especificar su ID en el campo de entrada (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho para encontrar el ID de una hoja de cálculo?</a>).</p><p>Después de cargar con éxito su hoja de cálculo, aparecerá una tabla con 4 filas. La primera fila muestra el encabezado que especificó en la hoja de cálculo.</p><p>La segunda fila es para fines informativos y muestra la última fila de la hoja de cálculo.</p><p>La cuarta fila es una lista de valores que puede ingresar directamente y guardar en la hoja de cálculo.</p><p>La tercera fila está ahí para definir automáticamente algunos valores para la cuarta fila. Hay varias cadenas especiales que puedes ingresar en las celdas:</p>",
-        "HELP_POSSIBLE_PROPERTIES": "<dt>{startTime}</dt><dd>The time when you first used this app today. It's possible to round this via the options.</dd><dt>{currentTime}</dt><dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via  the options.</dd><dt>{endTime}</dt><dd>The last time time was tracked to a task in current project.</dd><dt>{date}</dt><dd>Todays date in standard format (mm/dd/yyyy)</dd><dt>{date:DD/MM/YYYY} (example)</dt><dd>Date with a custom date format string.</dd><dt>{taskTitles}</dt><dd>Comma separated (parent) task titles</dd><dt>{subTaskTitles}</dt><dd>Comma separated sub task titles</dd><dt>{totalTime}</dt><dd>The total time you spend working on your todays tasks.</dd>",
-        "LOGIN": "Inicia sesión en Google",
-        "LOGOUT": "Cerrar sesión",
-        "OPEN_SPREADSHEET": "Abrir hoja de cálculo",
-        "OPTIONS": "Opciones",
-        "READ_SPREADSHEET": "Leer hoja de calculo",
-        "ROUND_END_TIME_TO": "Tiempo de finalización de ronda a",
-        "ROUND_HALF": "media horas completas",
-        "ROUND_HOUR": "horas completas",
-        "ROUND_QUARTER": "cuartos completos",
-        "ROUND_START_TIME_TO": "Hora de inicio de ronda para",
-        "ROUND_TIME_WORKED_TO": "Tiempo de ronda trabajado para",
-        "SAVE_ROW": "Guardar fila",
-        "S_EQUAL_VALUES": "Los valores actuales y la última fila guardada tienen valores iguales, probablemente no es lo que desea.",
-        "S_ROW_APPENDED": "Fila anexada correctamente"
-      },
       "S": {
         "DOWNLOADING_UPDATE": "Google Drive: ¡Hay una actualización remota! Descargando ...",
         "ERROR": "Google Drive - Error:",
@@ -334,6 +313,8 @@
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Añadir nota para mañana",
+        "DISABLE_REPEAT_EVERY_DAY": "Desactivar repetir todos los días",
+        "ENABLE_REPEAT_EVERY_DAY": "Repite todos los dias",
         "HELP_H1": "¿Por qué debería importarme?",
         "HELP_LINK_TXT": "Ir a la sección de métricas.",
         "HELP_P1": "¡Hora de una pequeña autoevaluación! Sus respuestas aquí se guardan y le proporcionan un poco de estadísticas sobre cómo trabaja en la sección de métricas. Además, las sugerencias para mañana aparecerán sobre su lista de tareas al día siguiente.",
@@ -448,6 +429,10 @@
         "EDIT": "Editar proyecto",
         "SETUP_GIT": "Configurar la integración con Github",
         "SETUP_JIRA": "Configurar la integración con Jira"
+      },
+      "FORM_BASIC": {
+        "L_TITLE": "Nombre del proyecto",
+        "TITLE": "Ajustes básicos"
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "No se utilizará si el sistema admite el modo oscuro global.",
@@ -629,9 +614,12 @@
       },
       "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?",
       "D_EXPORT_TITLE": "Exportar registro de trabajo {{start}}-{{end}}",
+      "D_EXPORT_TITLE_SINGLE": "Exportar registro de trabajo {{day}}",
       "EXPORT": {
+        "ADD_COL": "Añadir columna",
         "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
         "DONT_ROUND": "no redondear",
+        "EDIT_COL": "Editar columna",
         "GROUP_BY": "Agrupar por",
         "O": {
           "DATE": "Fecha",
@@ -822,6 +810,7 @@
     "PROCRASTINATE": "Aplazar",
     "PROJECTS": "Proyectos",
     "PROJECT_MENU": "Menú de proyecto",
+    "PROJECT_SETTINGS": "Configuraciones del proyecto",
     "SCHEDULED": "Programado",
     "SETTINGS": "Ajustes",
     "TASKS": "Tareas",
@@ -843,7 +832,6 @@
     },
     "EVALUATION": "Evaluación",
     "EXPORT_TASK_LIST": "Lista de tareas de exportación",
-    "GOOGLE_SHEET": "Hoja de Google",
     "NO_TASKS": "No hay tareas para este día.",
     "ROUND_15M": "Redondear todas las tareas a 15 minutos.",
     "ROUND_30M": "Redondear todas las tareas a 30 minutos.",
@@ -948,6 +936,7 @@
     "NO_COMPLETED_TASKS": "Actualmente no hay tareas completadas.",
     "NO_PLANNED_TASKS": "No hay tareas planificadas",
     "READY_TO_WORK": "¡Listo para trabajar!",
+    "RESET_BREAK_TIMER": "Restablecer sin temporizador de pausa",
     "TIME_ESTIMATED": "Tiempo estimado:",
     "WITHOUT_BREAK": "Sin descanso:",
     "WORKING_TODAY": "Trabajando hoy:"

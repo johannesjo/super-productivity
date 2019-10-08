@@ -137,27 +137,6 @@
         "TEXT": "  <p>Google 드라이브에 로컬로 설치하지 않은 일부 변경 사항이있는 것 같습니다. 어쨌든 덮어 쓰시겠습니까?</p>",
         "TITLE": "저장되지 않은 데이터를 Google 드라이브에 덮어 쓰시겠습니까?"
       },
-      "EXPORT_TIME": {
-        "ALWAYS_ROUND_UP": "항상 작업 시간을 반올림합니다.",
-        "AUTO_LOGIN": "다음 번에 자동 로그인 및 데이터로드",
-        "HELP_ADDITIONAL": "이 외에도 이러한 값의 계산을 수정하는 데 사용할 수있는 몇 가지 옵션이 있습니다.",
-        "HELP_INFO": "<p>이보기를 사용하면 근무 시간을 Google 시트로 내보낼 수 있습니다. Super Productivity에서 Google 스프레드 시트에 액세스 할 수 있도록 허용해야합니다. 또한 첫 번째 행에 표제가있는 스프레드 시트를 작성해야합니다. 입력 필드에 ID를 지정하지 마십시오 (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho로 스프레드 시트의 ID를 찾으십니까?</a>).</p><p>스프레드 시트를 성공적으로로드하면 테이블에 4 개의 행이 표시됩니다. 첫 번째 행에는 스프레드 시트에서 지정한 제목이 표시됩니다.</p><p>두 번째 행은 정보 용이며 스프레드 시트의 마지막 행을 표시합니다.</p><p>네 번째 행은 스프레드 시트에 직접 저장할 수있는 값의 목록입니다.</p><p>세 번째 행은 네 번째 행에 대한 일부 값을 자동으로 정의합니다. 셀에 입력 할 수있는 몇 가지 특수 문자열이 있습니다 :</p>",
-        "HELP_POSSIBLE_PROPERTIES": "<dt>{startTime}</dt><dd>The time when you first used this app today. It's possible to round this via the options.</dd><dt>{currentTime}</dt><dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via  the options.</dd><dt>{endTime}</dt><dd>The last time time was tracked to a task in current project.</dd><dt>{date}</dt><dd>Todays date in standard format (mm/dd/yyyy)</dd><dt>{date:DD/MM/YYYY} (example)</dt><dd>Date with a custom date format string.</dd><dt>{taskTitles}</dt><dd>Comma separated (parent) task titles</dd><dt>{subTaskTitles}</dt><dd>Comma separated sub task titles</dd><dt>{totalTime}</dt><dd>The total time you spend working on your todays tasks.</dd>",
-        "LOGIN": "Google에 로그인",
-        "LOGOUT": "로그 아웃",
-        "OPEN_SPREADSHEET": "열린 스프레드 시트",
-        "OPTIONS": "옵션",
-        "READ_SPREADSHEET": "스프레드 시트 읽기",
-        "ROUND_END_TIME_TO": "라운드 종료 시간 :",
-        "ROUND_HALF": "반 시간 반",
-        "ROUND_HOUR": "1 시간 내내",
-        "ROUND_QUARTER": "전체 분기",
-        "ROUND_START_TIME_TO": "라운드 시작 시간 :",
-        "ROUND_TIME_WORKED_TO": "왕복 근무 시간",
-        "SAVE_ROW": "행 저장",
-        "S_EQUAL_VALUES": "현재 값과 마지막으로 저장 한 행의 값은 같기 때문에 원하는 값과 다를 수 있습니다.",
-        "S_ROW_APPENDED": "성공적으로 추가 된 행"
-      },
       "S": {
         "DOWNLOADING_UPDATE": "Google 드라이브 : 원격 업데이트가 있습니다! 다운로드 중 ...",
         "ERROR": "Google 드라이브 - 오류 : {{errTxt}}",
@@ -334,6 +313,8 @@
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "내일 메모 추가",
+        "DISABLE_REPEAT_EVERY_DAY": "매일 반복 사용 안함",
+        "ENABLE_REPEAT_EVERY_DAY": "매일 반복",
         "HELP_H1": "왜 내가 신경 써야하니?",
         "HELP_LINK_TXT": "통계 섹션으로 이동",
         "HELP_P1": "조금 자기 평가 시간! 여기에 귀하의 답변이 저장되어 메트릭 섹션에서 어떻게 작업하는지에 대한 통계를 제공합니다. 또한 내일을위한 제안은 다음날 작업 목록 위에 나타납니다.",
@@ -448,6 +429,10 @@
         "EDIT": "프로젝트 수정",
         "SETUP_GIT": "Github 통합 설치",
         "SETUP_JIRA": "Jira 통합 설정"
+      },
+      "FORM_BASIC": {
+        "L_TITLE": "프로젝트 이름",
+        "TITLE": "기본 설정"
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "시스템이 글로벌 암 모드를 지원하면 사용되지 않습니다.",
@@ -629,9 +614,12 @@
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> 작업을 현재 작업 목록으로 이동 하시겠습니까?",
       "D_EXPORT_TITLE": "작업 로그 내보내기 {{start}}-{{end}}",
+      "D_EXPORT_TITLE_SINGLE": "작업 로그 내보내기 {{day}}",
       "EXPORT": {
+        "ADD_COL": "열 추가",
         "COPY_TO_CLIPBOARD": "클립 보드에 복사",
         "DONT_ROUND": "돌지 마라.",
+        "EDIT_COL": "열 편집",
         "GROUP_BY": "그룹화 기준",
         "O": {
           "DATE": "날짜",
@@ -822,6 +810,7 @@
     "PROCRASTINATE": "미루다",
     "PROJECTS": "프로젝트",
     "PROJECT_MENU": "프로젝트 메뉴",
+    "PROJECT_SETTINGS": "프로젝트 설정",
     "SCHEDULED": "예정",
     "SETTINGS": "설정",
     "TASKS": "할 일 목록",
@@ -843,7 +832,6 @@
     },
     "EVALUATION": "평가",
     "EXPORT_TASK_LIST": "작업 목록 내보내기",
-    "GOOGLE_SHEET": "Google 시트",
     "NO_TASKS": "오늘은 아무 작업도 없습니다.",
     "ROUND_15M": "모든 작업을 15 분으로 반올림",
     "ROUND_30M": "모든 작업을 30 분으로 반올림",
@@ -948,6 +936,7 @@
     "NO_COMPLETED_TASKS": "현재 완료된 작업이 없습니다.",
     "NO_PLANNED_TASKS": "계획된 작업 없음",
     "READY_TO_WORK": "준비 완료!",
+    "RESET_BREAK_TIMER": "중단 타이머없이 재설정",
     "TIME_ESTIMATED": "예상 시간 :",
     "WITHOUT_BREAK": "휴식없이 :",
     "WORKING_TODAY": "오늘은 일한다:"

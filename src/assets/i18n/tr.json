@@ -137,27 +137,6 @@
         "TEXT": "  <p>Google Drive’da yerel olarak sahip olmadığınız bazı değişiklikler var. Yine de üzerine yazmak ister misiniz?</p>",
         "TITLE": "Google Drive'da kaydedilmemiş verilerin üzerine yazılsın mı?"
       },
-      "EXPORT_TIME": {
-        "ALWAYS_ROUND_UP": "Daima çalışma süresi doluyor",
-        "AUTO_LOGIN": "Otomatik oturum açma ve bir dahaki sefere veri yükleme",
-        "HELP_ADDITIONAL": "Buna ek olarak, bu değerlerin hesaplamasını değiştirmek için kullanabileceğiniz çeşitli seçenekler vardır.",
-        "HELP_INFO": "<p>Bu görünüm, çalışma sürenizi bir google sayfasına aktarmanızı sağlar. Google Elektronik Tablolarınıza Süper Üretkenlik tarafından erişilmesine izin verebilirsiniz. Ayrıca, elektronik tablonun kimliğini bulmak için giriş alanında (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho) kimliğini belirtin, ilk satırda başlıkları olan bir elektronik tablo oluşturmanız mı gerekiyor?</a>).</p><p>Elektronik tablonuzu başarıyla yükledikten sonra tablo 4 satırla birlikte gösterilecektir. İlk satır, elektronik tablonun kendisinde belirttiğiniz başlığı gösterir.</p><p>İkinci satır bilgilendirme amaçlıdır ve elektronik tablodaki son satırı gösterir.</p><p>Dördüncü satır, elektronik tabloya kaydet'e doğrudan girebileceğiniz değerlerin listesidir.</p><p>Üçüncü satır, sonraki satır için bazı değerleri otomatik olarak tanımlamak için vardır. Hücrelere girebileceğiniz birkaç özel dize vardır:</p>",
-        "HELP_POSSIBLE_PROPERTIES": "<dt>{startTime}</dt><dd>The time when you first used this app today. It's possible to round this via the options.</dd><dt>{currentTime}</dt><dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via  the options.</dd><dt>{endTime}</dt><dd>The last time time was tracked to a task in current project.</dd><dt>{date}</dt><dd>Todays date in standard format (mm/dd/yyyy)</dd><dt>{date:DD/MM/YYYY} (example)</dt><dd>Date with a custom date format string.</dd><dt>{taskTitles}</dt><dd>Comma separated (parent) task titles</dd><dt>{subTaskTitles}</dt><dd>Comma separated sub task titles</dd><dt>{totalTime}</dt><dd>The total time you spend working on your todays tasks.</dd>",
-        "LOGIN": "Google’a giriş yapın",
-        "LOGOUT": "Çıkış Yap",
-        "OPEN_SPREADSHEET": "Elektronik tabloyu aç",
-        "OPTIONS": "Seçenekler",
-        "READ_SPREADSHEET": "Elektronik tabloyu oku",
-        "ROUND_END_TIME_TO": "Gidiş zamanı",
-        "ROUND_HALF": "tam yarım saat",
-        "ROUND_HOUR": "tam saatler",
-        "ROUND_QUARTER": "tam çeyrek",
-        "ROUND_START_TIME_TO": "Yuvarlak başlangıç zamanı",
-        "ROUND_TIME_WORKED_TO": "Yuvarlak zaman çalıştı",
-        "SAVE_ROW": "Satırı kaydet",
-        "S_EQUAL_VALUES": "Geçerli değerler ve son kaydedilen satır eşit değerlere sahip, muhtemelen istediğiniz şey bu değil.",
-        "S_ROW_APPENDED": "Satır başarıyla eklendi"
-      },
       "S": {
         "DOWNLOADING_UPDATE": "Google Drive: Uzaktan güncelleme var! İndiriliyor ...",
         "ERROR": "Google Drive - Hata:",
@@ -334,6 +313,8 @@
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Yarın için not ekle",
+        "DISABLE_REPEAT_EVERY_DAY": "Her gün tekrarı devre dışı bırak",
+        "ENABLE_REPEAT_EVERY_DAY": "Her gün tekrarla",
         "HELP_H1": "Neden umursayayım?",
         "HELP_LINK_TXT": "Metrikler bölümüne git",
         "HELP_P1": "Küçük bir öz değerlendirme zamanı! Buradaki cevaplarınız kaydedilir ve ölçümler bölümünde nasıl çalıştığınızla ilgili size biraz istatistik sunar. Ayrıca, yarın için öneriler ertesi gün görev listenizin üstünde görünecektir.",
@@ -448,6 +429,10 @@
         "EDIT": "Projeyi Düzenle",
         "SETUP_GIT": "Github Entegrasyonunu Ayarla",
         "SETUP_JIRA": "Jira Entegrasyonunu Kur"
+      },
+      "FORM_BASIC": {
+        "L_TITLE": "proje Adı",
+        "TITLE": "Temel ayarlar"
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Sistem global karanlık modunu destekliyorsa kullanılmaz.",
@@ -629,9 +614,12 @@
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?",
       "D_EXPORT_TITLE": " {{start}}-{{end}}Worklog Dışa Aktarma",
+      "D_EXPORT_TITLE_SINGLE": "Worklog Dışa Aktarma {{day}}",
       "EXPORT": {
+        "ADD_COL": "Sütun ekle",
         "COPY_TO_CLIPBOARD": "Panoya kopyala",
         "DONT_ROUND": "yuvarlama",
+        "EDIT_COL": "Sütunu düzenle",
         "GROUP_BY": "Grupla",
         "O": {
           "DATE": "tarih",
@@ -822,6 +810,7 @@
     "PROCRASTINATE": "ertelemek",
     "PROJECTS": "Projeler",
     "PROJECT_MENU": "Proje Menüsü",
+    "PROJECT_SETTINGS": "Proje ayarları",
     "SCHEDULED": "tarifeli",
     "SETTINGS": "ayarlar",
     "TASKS": "Görevler",
@@ -843,7 +832,6 @@
     },
     "EVALUATION": "Değerlendirme",
     "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
-    "GOOGLE_SHEET": "Google Sayfası",
     "NO_TASKS": "Bu gün için görev yok",
     "ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
     "ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
@@ -948,6 +936,7 @@
     "NO_COMPLETED_TASKS": "Şu anda tamamlanmış bir görev yok.",
     "NO_PLANNED_TASKS": "Planlanmış görev yok",
     "READY_TO_WORK": "Çalışmaya hazır!",
+    "RESET_BREAK_TIMER": "Ara zamanlayıcı olmadan sıfırla",
     "TIME_ESTIMATED": "Tahmini Süre:",
     "WITHOUT_BREAK": "Ara vermeden:",
     "WORKING_TODAY": "Bugün çalışıyorum:"

@@ -137,27 +137,6 @@
         "TEXT": "  <p>Google云端硬盘似乎有一些变化，您没有本地更改。你想要覆盖它们吗？</p>",
         "TITLE": "覆盖Google云端硬盘上未保存的数据？"
       },
-      "EXPORT_TIME": {
-        "ALWAYS_ROUND_UP": "始终围绕工作时间",
-        "AUTO_LOGIN": "下次自动登录并加载数据",
-        "HELP_ADDITIONAL": "除此之外，您还可以使用几个选项来修改这些值的计算。",
-        "HELP_INFO": "<p>此视图允许您将工作时间导出到Google工作表。您需要允许Super Productivity访问您的Google Spreadsheets。您还需要在第一行创建一个标题的电子表格，并在输入字段中指定它的ID（<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">何以查找电子表格的ID？</a>）。</p><p>成功加载电子表格后，表格将显示4行。第一行显示您在电子表格中指定的标题。</p><p>第二行用于提供信息，显示电子表格的最后一行。</p><p>第四行是您可以直接输入保存到电子表格的值列表。</p><p>第三行是为第四行自动定义一些值。您可以在单元格中输入几个特殊字符串：</p>",
-        "HELP_POSSIBLE_PROPERTIES": "<dt>{startTime}</dt><dd>您今天第一次使用此应用的时间。可以通过选项对此进行舍入。</dd><dt>{currentTime}</dt><dd>当前时间。可用于今天工作日的结束时间可以通过选项对此进行舍入。</dd><dt>{endTime}</dt><dd>上次跟踪当前项目中的任务时间。</dd><dt>{date}</dt><dd>今天日期的标准格式（mm / dd / yyyy）</dd><dt>{date:DD/MM/YYYY} （示例）</dt><dd>日期与自定义日期格式字符串。</dd><dt>{taskTitles}</dt><dd>逗号分隔（父）任务标题</dd><dt>{subTaskTitles}</dt><dd>以逗号分隔的子任务标题</dd><dt>{totalTime}}</dt><dd>你花在完成今天任务上的总时间。</dd>",
-        "LOGIN": "登录Google",
-        "LOGOUT": "登出",
-        "OPEN_SPREADSHEET": "打开电子表格",
-        "OPTIONS": "选项",
-        "READ_SPREADSHEET": "阅读电子表格",
-        "ROUND_END_TIME_TO": "结束时间到",
-        "ROUND_HALF": "整整半个小时",
-        "ROUND_HOUR": "整整一个小时",
-        "ROUND_QUARTER": "整个季度",
-        "ROUND_START_TIME_TO": "回合开始时间",
-        "ROUND_TIME_WORKED_TO": "回合时间适用于",
-        "SAVE_ROW": "保存行",
-        "S_EQUAL_VALUES": "当前值和上次保存的行具有相同的值，这可能不是您想要的。",
-        "S_ROW_APPENDED": "行已成功附加"
-      },
       "S": {
         "DOWNLOADING_UPDATE": "Google云端硬盘：有远程更新！下载...",
         "ERROR": "Google云端硬盘 - 错误：",
@@ -334,6 +313,8 @@
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "明天添加注释",
+        "DISABLE_REPEAT_EVERY_DAY": "每天禁用重复",
+        "ENABLE_REPEAT_EVERY_DAY": "每天重复",
         "HELP_H1": "我为什么要在乎？",
         "HELP_LINK_TXT": "转到指标部分",
         "HELP_P1": "时间进行一点自我评估！此处的答案已保存，并为您提供有关如何在指标部分工作的一些统计信息。此外，明天的建议将在第二天出现在您的任务列表上方。",
@@ -448,6 +429,10 @@
         "EDIT": "编辑项目",
         "SETUP_GIT": "设置Github集成",
         "SETUP_JIRA": "设置Jira集成"
+      },
+      "FORM_BASIC": {
+        "L_TITLE": "项目名",
+        "TITLE": "基本设置"
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "如果系统支持全局暗模式，则不会使用。",
@@ -629,9 +614,12 @@
       },
       "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？",
       "D_EXPORT_TITLE": "工作日志导出 {{start}} - {{end}}",
+      "D_EXPORT_TITLE_SINGLE": "工作日志导出 {{day}}",
       "EXPORT": {
+        "ADD_COL": "添加栏",
         "COPY_TO_CLIPBOARD": "复制到剪贴板",
         "DONT_ROUND": "不圆",
+        "EDIT_COL": "编辑栏",
         "GROUP_BY": "通过...分组",
         "O": {
           "DATE": "日期",
@@ -822,6 +810,7 @@
     "PROCRASTINATE": "拖延",
     "PROJECTS": "项目",
     "PROJECT_MENU": "项目菜单",
+    "PROJECT_SETTINGS": "项目设置",
     "SCHEDULED": "计划",
     "SETTINGS": "设置",
     "TASKS": "任务",
@@ -843,7 +832,6 @@
     },
     "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
-    "GOOGLE_SHEET": "Google表格",
     "NO_TASKS": "今天没有任务",
     "ROUND_15M": "将所有任务舍入到15分钟",
     "ROUND_30M": "将所有任务舍入到30分钟",
@@ -948,6 +936,7 @@
     "NO_COMPLETED_TASKS": "目前还没有完成的任务",
     "NO_PLANNED_TASKS": "没有计划的任务",
     "READY_TO_WORK": "准备好工作了！",
+    "RESET_BREAK_TIMER": "无需中断计时器即可重置",
     "TIME_ESTIMATED": "估计时间：",
     "WITHOUT_BREAK": "没有休息：",
     "WORKING_TODAY": "今天工作："

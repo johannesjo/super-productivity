@@ -313,6 +313,8 @@
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
+        "DISABLE_REPEAT_EVERY_DAY": "Disable repeat every day",
+        "ENABLE_REPEAT_EVERY_DAY": "Repeat every day",
         "HELP_H1": "Why should I care?",
         "HELP_LINK_TXT": "Go to metrics section",
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
@@ -324,9 +326,7 @@
         "NOTES": "Notes for tomorrow",
         "OBSTRUCTIONS": "What hindered your productivity?",
         "PRODUCTIVITY": "How efficient did you work?",
-        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient",
-        "ENABLE_REPEAT_EVERY_DAY": "Repeat every day",
-        "DISABLE_REPEAT_EVERY_DAY": "Disable repeat every day"
+        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"
@@ -431,8 +431,8 @@
         "SETUP_JIRA": "Setup Jira Integration"
       },
       "FORM_BASIC": {
-        "TITLE": "Basic Settings",
-        "L_TITLE": "Project Name"
+        "L_TITLE": "Project Name",
+        "TITLE": "Basic Settings"
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
@@ -617,9 +617,9 @@
       "D_EXPORT_TITLE_SINGLE": "Worklog Export {{day}}",
       "EXPORT": {
         "ADD_COL": "Add column",
-        "EDIT_COL": "Edit column",
         "COPY_TO_CLIPBOARD": "Copy to clipboard",
         "DONT_ROUND": "don't round",
+        "EDIT_COL": "Edit column",
         "GROUP_BY": "Group by",
         "O": {
           "DATE": "Date",
@@ -810,6 +810,7 @@
     "PROCRASTINATE": "Procrastinate",
     "PROJECTS": "Projects",
     "PROJECT_MENU": "Project Menu",
+    "PROJECT_SETTINGS": "Project Settings",
     "SCHEDULED": "Scheduled",
     "SETTINGS": "Settings",
     "TASKS": "Tasks",
@@ -817,8 +818,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "WORKLOG": "Worklog",
-    "PROJECT_SETTINGS": "Project Settings"
+    "WORKLOG": "Worklog"
   },
   "PDS": {
     "BACK": "Wait I forgot something!",
@@ -936,9 +936,9 @@
     "NO_COMPLETED_TASKS": "There are currently no completed tasks",
     "NO_PLANNED_TASKS": "No planned tasks",
     "READY_TO_WORK": "Ready to work!",
+    "RESET_BREAK_TIMER": "Reset without break timer",
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
-    "WORKING_TODAY": "Working today:",
-    "RESET_BREAK_TIMER": "Reset without break timer"
+    "WORKING_TODAY": "Working today:"
   }
 }
