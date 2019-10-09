@@ -431,7 +431,7 @@ export class GoogleDriveSyncEffects {
     }
   }
 
-  private _openConfirmLoadDialog(remoteModified: string | Date): void {
+  private _openConfirmLoadDialog(remoteModified: string | number| Date): void {
     // Don't open multiple at the same time
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
