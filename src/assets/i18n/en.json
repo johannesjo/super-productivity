@@ -131,8 +131,8 @@
         "LAST_SYNC": "last sync",
         "LOCAL": "local",
         "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local data",
-        "OVERWRITE_REMOTE": "Overwrite remote data",
+        "OVERWRITE_LOCAL": "Overwrite local",
+        "OVERWRITE_REMOTE": "Overwrite remote",
         "REMOTE": "remote",
         "TEXT": "  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>",
         "TITLE": "Overwrite unsaved data on Google Drive?"
