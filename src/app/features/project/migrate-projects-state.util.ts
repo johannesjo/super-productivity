@@ -21,6 +21,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
+    projectEntities[key] = _removeOutdatedData(projectEntities[key]);
   });
 
   projectState[MODEL_VERSION_KEY] = MODEL_VERSION;
@@ -41,6 +42,16 @@ const _extendProjectDefaults = (project: Project): Project => {
       ...project.issueIntegrationCfgs,
     }
   };
+};
+
+const _removeOutdatedData = (project: Project): Project => {
+  return project;
+
+  // TODO use this after a some period to give people time to complain about the missing feature
+  // const copy: any = dirtyDeepCopy(project);
+  // delete copy.advancedCfg.googleTimeSheetExport;
+  // delete copy.advancedCfg.simpleSummarySettings;
+  // return copy;
 };
 
 const _addFirstEntryForDayCompleted = (project: Project): Project => {

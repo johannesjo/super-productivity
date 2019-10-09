@@ -4,13 +4,11 @@ import {
   BreakNr,
   BreakTime,
   ExportedProject,
-  GoogleTimeSheetExport,
   Project,
   ProjectAdvancedCfg,
   ProjectAdvancedCfgKey,
   ProjectBasicCfg,
   ProjectThemeCfg,
-  SimpleSummarySettings,
 } from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
@@ -349,21 +347,6 @@ export class ProjectService {
     } else {
       this._snackService.open({type: 'ERROR', msg: T.F.PROJECT.S.E_INVALID_FILE});
     }
-  }
-
-  // HELPER
-  updateTimeSheetExportSettings(projectId: string, data: GoogleTimeSheetExport, isExport = false) {
-    this.updateAdvancedCfg(projectId, 'googleTimeSheetExport', {
-      ...data,
-      ...(isExport ? {lastExported: getWorklogStr()} : {})
-    });
-  }
-
-  // HELPER
-  updateSimpleSummarySettings(projectId: string, data: SimpleSummarySettings) {
-    this.updateAdvancedCfg(projectId, 'simpleSummarySettings', {
-      ...data,
-    });
   }
 
   updateWorklogExportSettings(projectId: string, data: WorklogExportSettings) {

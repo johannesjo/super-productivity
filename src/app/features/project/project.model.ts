@@ -31,45 +31,7 @@ export interface WorkStartEndCopy {
 
 export type WorkStartEnd = Readonly<WorkStartEndCopy>;
 
-export type DayCompletedCopy = string[];
-
-/** @deprecated was removed. */
-export interface GoogleTimeSheetExportCopy {
-  spreadsheetId: string;
-  isAutoLogin: boolean;
-  isAutoFocusEmpty: boolean;
-  isRoundWorkTimeUp: boolean;
-  roundStartTimeTo: RoundTimeOption;
-  roundEndTimeTo: RoundTimeOption;
-  roundWorkTimeTo: RoundTimeOption;
-  defaultValues: string[];
-  lastExported: string;
-}
-/** @deprecated was removed. */
-export type GoogleTimeSheetExport = Readonly<GoogleTimeSheetExportCopy>;
-
-export interface SimpleSummarySettingsCopy {
-  roundWorkTimeTo: RoundTimeOption;
-  separateTasksBy: string;
-  separateFieldsBy: string;
-  isShowAsText: boolean;
-  isListSubTasks: boolean;
-  isListDoneOnly: boolean;
-  isWorkedOnTodayOnly: boolean;
-  isShowTitle: boolean;
-  isShowTimeSpent: boolean;
-  isShowTimeEstimate: boolean;
-  isTimesAsMilliseconds: boolean;
-  isShowDate: boolean;
-}
-
-export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
-
-
 export type ProjectAdvancedCfg = Readonly<{
-  /** @deprecated was removed. */
-  googleTimeSheetExport: GoogleTimeSheetExport;
-  simpleSummarySettings: SimpleSummarySettings;
   worklogExportSettings: WorklogExportSettings;
 }>;
 

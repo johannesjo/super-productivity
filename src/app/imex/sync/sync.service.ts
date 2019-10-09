@@ -25,7 +25,6 @@ export class SyncService {
   ) {
   }
 
-  /** @deprecated use persistenceService directly. */
   saveLastActive(date: number | string | Date) {
     const d = (typeof date === 'number')
       ? date
