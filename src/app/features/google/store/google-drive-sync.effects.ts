@@ -431,7 +431,7 @@ export class GoogleDriveSyncEffects {
     }
   }
 
-  private _openConfirmLoadDialog(remoteModified: string | Date): void {
+  private _openConfirmLoadDialog(remoteModified: number | Date): void {
     // Don't open multiple at the same time
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
@@ -555,7 +555,7 @@ export class GoogleDriveSyncEffects {
     return (d1.getTime() === d2.getTime());
   }
 
-  private _formatDate(date: Date | string) {
+  private _formatDate(date: Date | number | string) {
     return moment(date).format('DD-MM-YYYY --- hh:mm:ss');
   }
 
