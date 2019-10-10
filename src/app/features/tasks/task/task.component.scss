@@ -268,6 +268,12 @@
   margin-right: $s;
   z-index: $z-time-wrapper;
 
+  @include noTouchDevice {
+    &.hasNoTimeSpentOrEstimate {
+      display: none;
+    }
+  }
+
   &.isEditable {
     cursor: pointer;
 

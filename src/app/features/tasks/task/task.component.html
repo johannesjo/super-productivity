@@ -100,6 +100,7 @@
     <div class="all-controls-wrapper">
       <div (click)="estimateTime()"
            [class.isEditable]="!task.subTasks?.length"
+           [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
            class="time-wrapper">
         <div class="time">
           <div class="time-val">
