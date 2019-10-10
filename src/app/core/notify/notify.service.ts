@@ -49,6 +49,7 @@ export class NotifyService {
         const instance = new Notification(title, {
           icon: 'assets/icons/icon-128x128.png',
           vibrate: [100, 50, 100],
+          silent: false,
           data: {
             dateOfArrival: Date.now(),
             primaryKey: 1

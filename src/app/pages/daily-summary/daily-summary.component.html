@@ -147,6 +147,14 @@
         <worklog-week></worklog-week>
       </section>
     </mat-tab>
+
+    <mat-tab *ngIf="isForToday"
+             [label]="T.PDS.PLAN|translate">
+      <section class="tab-inner">
+        <plan-tasks-tomorrow></plan-tasks-tomorrow>
+      </section>
+    </mat-tab>
+
   </mat-tab-group>
 
 

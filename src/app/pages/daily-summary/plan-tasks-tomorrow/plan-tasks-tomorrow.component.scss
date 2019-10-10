@@ -1,0 +1,10 @@
+@import '../../../../variables';
+
+.add-task-bar-wrapper {
+  margin: $s*1.5 auto $s*1.5;
+  max-width: 628px;
+}
+
+:host::ng-deep .start-task-btn {
+  display: none !important;
+}

@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -29,7 +30,8 @@ import {T} from '../../../t.const';
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog = false;
   @Input() isAddToBottom;
-  @Input() isAutoFocus: boolean;
+  @Input() isElevated: boolean;
+  @Input() isDisableAutoFocus: boolean;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
@@ -58,6 +60,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   private _isAddInProgress: boolean;
   private _blurTimeout: number;
+  private _autofocusTimeout: number;
+  private _attachKeyDownHandlerTimeout: number;
 
   constructor(
     private _taskService: TaskService,
@@ -69,8 +73,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.inputEl.nativeElement.focus();
+    this._autofocusTimeout = setTimeout(() => {
+      if (!this.isDisableAutoFocus) {
+        this.inputEl.nativeElement.focus();
+      }
+    });
+
+    this._attachKeyDownHandlerTimeout = setTimeout(() => {
       this.inputEl.nativeElement.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') {
           this.blurred.emit();
@@ -86,6 +95,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     if (this._blurTimeout) {
       window.clearTimeout(this._blurTimeout);
+    }
+    if (this.autofocusTimeoutDuration) {
+      window.clearTimeout(this.autofocusTimeoutDuration);
+    }
+    if (this._attachKeyDownHandlerTimeout) {
+      window.clearTimeout(this._attachKeyDownHandlerTimeout);
     }
   }
 

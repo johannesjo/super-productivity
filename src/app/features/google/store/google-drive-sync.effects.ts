@@ -366,9 +366,11 @@ export class GoogleDriveSyncEffects {
     ),
     map((action: LoadFromGoogleDriveSuccess) => action.payload.modifiedDate),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((modifiedDate) => this._syncService.saveLastActive(new Date(modifiedDate).getTime())),
+    tap((modifiedDate) => this._syncService.saveLastActive(modifiedDate as any)),
     tap(() => this._setInitialSyncDone()),
-    map((modifiedDate) => this._updateConfig({_lastSync: modifiedDate}, true)),
+    map((modifiedDate) => this._updateConfig({
+      _lastSync: new Date(modifiedDate as string).getTime()
+    }, true)),
   );
 
   private _config: GoogleDriveSyncConfig;
@@ -431,7 +433,7 @@ export class GoogleDriveSyncEffects {
     }
   }
 
-  private _openConfirmLoadDialog(remoteModified: number | Date): void {
+  private _openConfirmLoadDialog(remoteModified: string | number| Date): void {
     // Don't open multiple at the same time
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
@@ -555,7 +557,7 @@ export class GoogleDriveSyncEffects {
     return (d1.getTime() === d2.getTime());
   }
 
-  private _formatDate(date: Date | number | string) {
+  private _formatDate(date: Date | string | number) {
     return moment(date).format('DD-MM-YYYY --- hh:mm:ss');
   }
 

@@ -1,5 +1,6 @@
 <form (submit)="addTask()"
-      class="add-task-form mat-elevation-z3">
+      [class.mat-elevation-z3]="isElevated"
+      class="add-task-form">
   <div *ngIf="(isLoading$|async)"
        class="spinner">
     <mat-spinner diameter="50"></mat-spinner>
@@ -18,7 +19,6 @@
          [placeholder]="(doubleEnterCount > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)
          :(T.F.TASK.SELECT_OR_CREATE|translate)"
-         autofocus="autofocus"
          class="border-color-primary"
          matInput>
 
