@@ -850,7 +850,8 @@
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
     "TODAY": "Today",
-    "WEEK": "Week"
+    "WEEK": "Week",
+    "PLAN": "Plan"
   },
   "PM": {
     "TITLE": "Project Metrics"

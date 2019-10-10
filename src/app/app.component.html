@@ -4,6 +4,7 @@
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
                 *ngIf="layoutService.isShowAddTaskBar$|async"
                 [@blendInOut]
+                [isElevated]="true"
                 class="global"></add-task-bar>
   <div *ngIf="(layoutService.isShowAddTaskBar$|async)"
        @fade
