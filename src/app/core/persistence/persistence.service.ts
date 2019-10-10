@@ -31,7 +31,6 @@ import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from './database.service';
-import {loadFromLs, saveToLs} from './local-storage';
 import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
@@ -313,16 +312,18 @@ export class PersistenceService {
   // BACKUP AND SYNC RELATED
   // -----------------------
   saveLastActive(date: number = Date.now()) {
-    // TODO refactor to timestamp
     // console.log('Save LastAct', date);
     localStorage.setItem(LS_LAST_ACTIVE, date.toString());
   }
 
   getLastActive(): number {
-    // TODO refactor to timestamp
     const la = localStorage.getItem(LS_LAST_ACTIVE);
+    // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
+    const laParsed = Number.isNaN(Number(la))
+      ? la
+      : +la;
     // NOTE: to account for legacy string dates
-    return new Date(la).getTime();
+    return new Date(laParsed).getTime();
   }
 
   async loadBackup(): Promise<AppDataComplete> {
