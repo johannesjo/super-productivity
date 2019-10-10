@@ -6,11 +6,12 @@ import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {getYesterdaysDate} from '../../util/get-yesterdays-date';
 import {MODEL_VERSION_KEY, THEME_COLOR_MAP} from '../../app.constants';
+import {isMigrateModel} from '../../util/model-version';
 
 const MODEL_VERSION = 1;
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
-  if (!projectState || (projectState && projectState[MODEL_VERSION_KEY] === MODEL_VERSION)) {
+  if (!isMigrateModel(projectState, MODEL_VERSION)) {
     return projectState;
   }
 
@@ -23,6 +24,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
   });
 
+  // Update model version after all migrations ran successfully
   projectState[MODEL_VERSION_KEY] = MODEL_VERSION;
   return {
     ...projectState,
