@@ -96,9 +96,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     if (this._blurTimeout) {
       window.clearTimeout(this._blurTimeout);
     }
-    if (this.autofocusTimeoutDuration) {
-      window.clearTimeout(this.autofocusTimeoutDuration);
-    }
     if (this._attachKeyDownHandlerTimeout) {
       window.clearTimeout(this._attachKeyDownHandlerTimeout);
     }
