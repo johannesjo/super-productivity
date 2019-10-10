@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {TaskService} from '../../../features/tasks/task.service';
 
 @Component({
@@ -7,13 +7,10 @@ import {TaskService} from '../../../features/tasks/task.service';
   styleUrls: ['./plan-tasks-tomorrow.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PlanTasksTomorrowComponent implements OnInit {
+export class PlanTasksTomorrowComponent {
 
   constructor(
     public taskService: TaskService,
-  ) { }
-
-  ngOnInit() {
+  ) {
   }
-
 }
