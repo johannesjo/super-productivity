@@ -115,6 +115,7 @@ export class GoogleDriveSyncEffects {
       }
     }),
     catchError(() => {
+      this._setInitialSyncDone();
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.GOOGLE.S.ERROR_INITIAL_IMPORT,
