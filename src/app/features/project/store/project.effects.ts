@@ -108,13 +108,15 @@ export class ProjectEffects {
         this._projectService.lastCompletedDay$,
         this._globalConfigService.misc$,
       ),
-      filter(([a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg]) =>
+      map(([a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg]) =>
+        ({a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg})),
+      filter(({miscCfg}) =>
         miscCfg && !miscCfg.isDisableRemindWhenForgotToFinishDay),
-      filter(([a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg]) => {
+      filter(({lastWorkEndTimestamp, lastCompletedDayStr}) => {
         return isShowFinishDayNotification(lastWorkEndTimestamp, lastCompletedDayStr);
       }),
-      tap(([a, workEnd, dayCompleted]) => {
-        const dayStr = getWorklogStr(workEnd);
+      tap(({lastWorkEndTimestamp}) => {
+        const dayStr = getWorklogStr(lastWorkEndTimestamp);
         this._bannerService.open({
           id: BannerId.ForgotToFinishDay,
           ico: 'info',
