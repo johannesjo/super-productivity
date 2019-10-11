@@ -30,6 +30,7 @@ import {T} from '../../../t.const';
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog = false;
   @Input() isAddToBottom;
+  @Input() isDoubleEnterMode = false;
   @Input() isElevated: boolean;
   @Input() isDisableAutoFocus: boolean;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
@@ -139,7 +140,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       } else if (this.doubleEnterCount > 0) {
         this.blurred.emit();
         this.done.emit();
-      } else {
+      } else if (this.isDoubleEnterMode) {
         this.doubleEnterCount++;
       }
     } else {

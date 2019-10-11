@@ -17,7 +17,6 @@ import {workViewProjectChangeAnimation} from '../../ui/animations/work-view-proj
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
-const TASK_LIST_INITIAL_DELAY = 2210;
 
 @Component({
   selector: 'work-view',
