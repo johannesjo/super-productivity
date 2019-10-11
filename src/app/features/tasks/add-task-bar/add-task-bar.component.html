@@ -19,7 +19,9 @@
          [matAutocomplete]="autoEl"
          [placeholder]="(doubleEnterCount > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)
-         :(T.F.TASK.SELECT_OR_CREATE|translate)"
+         : isAddToBacklog
+           ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BACKLOG|translate)
+           : (T.F.TASK.ADD_TASK_BAR.ADD_TASK|translate)"
          matInput>
 
   <mat-autocomplete #autoEl="matAutocomplete"

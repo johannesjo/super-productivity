@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert",
         "TASK_CREATED": "Erstellte Aufgabe \"{{title}}\""
       },
-      "SELECT_OR_CREATE": "Aufgabe auswählen oder erstellen",
+      "ADD_TASK": "Aufgabe auswählen oder erstellen",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Schätzen",
         "SPENT_TODAY": "Heute verbracht",

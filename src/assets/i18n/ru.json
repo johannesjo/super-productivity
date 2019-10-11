@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "Обновленное напоминание для задачи \"{{title}}\"",
         "TASK_CREATED": "Создано задание \"{{title}}\""
       },
-      "SELECT_OR_CREATE": "Выберите или создайте задачу",
+      "ADD_TASK": "Выберите или создайте задачу",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Оценить",
         "SPENT_TODAY": "Потратил сегодня",

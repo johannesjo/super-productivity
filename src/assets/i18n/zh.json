@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒",
         "TASK_CREATED": "已创建任务“{{title}}”"
       },
-      "SELECT_OR_CREATE": "选择或创建任务",
+      "ADD_TASK": "选择或创建任务",
       "SUMMARY_TABLE": {
         "ESTIMATE": "估计",
         "SPENT_TODAY": "花了今天",

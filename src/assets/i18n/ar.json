@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "تذكير محدث للمهمة \"{{title}}\"",
         "TASK_CREATED": "المهمة التي تم تكوينها \"{{title}}\""
       },
-      "SELECT_OR_CREATE": "حدد أو أنشئ المهمة",
+      "ADD_TASK": "حدد أو أنشئ المهمة",
       "SUMMARY_TABLE": {
         "ESTIMATE": "تقدير",
         "SPENT_TODAY": "قضى اليوم",

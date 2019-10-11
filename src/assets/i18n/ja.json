@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "タスク \"{{title}}\"の通知を更新しました",
         "TASK_CREATED": "タスク「{{title}}」を作成しました"
       },
-      "SELECT_OR_CREATE": "タスクを選択または作成する",
+      "ADD_TASK": "タスクを選択または作成する",
       "SUMMARY_TABLE": {
         "ESTIMATE": "見積もり",
         "SPENT_TODAY": "今日を過ごした",

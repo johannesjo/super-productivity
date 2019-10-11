@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\"",
         "TASK_CREATED": "Tarea creada \"{{title}}\""
       },
-      "SELECT_OR_CREATE": "Seleccionar o crear tarea",
+      "ADD_TASK": "Seleccionar o crear tarea",
       "SUMMARY_TABLE": {
         "ESTIMATE": "ESTIMAR",
         "SPENT_TODAY": "Gastado hoy",

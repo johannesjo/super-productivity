@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "\"{{title}}\"작업에 대한 알림이 업데이트되었습니다.",
         "TASK_CREATED": "\"{{title}}\"작업 생성"
       },
-      "SELECT_OR_CREATE": "작업 선택 또는 생성",
+      "ADD_TASK": "작업 선택 또는 생성",
       "SUMMARY_TABLE": {
         "ESTIMATE": "견적",
         "SPENT_TODAY": "오늘 보낸",

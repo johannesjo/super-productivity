@@ -552,7 +552,7 @@
         "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı",
         "TASK_CREATED": "\"{{title}}\" görevi oluşturuldu"
       },
-      "SELECT_OR_CREATE": "Görev seç veya oluştur",
+      "ADD_TASK": "Görev seç veya oluştur",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Tahmin",
         "SPENT_TODAY": "Bugün Harcandı",

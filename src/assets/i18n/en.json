@@ -471,6 +471,8 @@
         "NOTES": "Notes"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "Add task",
+        "ADD_TASK_TO_BACKLOG": "Add task to backlog",
         "START": "Press enter one more time to start"
       },
       "B": {
