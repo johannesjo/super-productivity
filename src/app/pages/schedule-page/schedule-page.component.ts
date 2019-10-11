@@ -11,6 +11,7 @@ import {Router} from '@angular/router';
 import {take} from 'rxjs/operators';
 import {ProjectService} from '../../features/project/project.service';
 import {THEME_COLOR_MAP} from '../../app.constants';
+import {AddTaskReminderInterface} from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
 
 @Component({
   selector: 'schedule-page',
@@ -48,8 +49,10 @@ export class SchedulePageComponent {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {
-        task,
-      }
+        reminderId: task.reminderId,
+        taskId: task.id,
+        title: task.title,
+      } as AddTaskReminderInterface
     });
   }
 

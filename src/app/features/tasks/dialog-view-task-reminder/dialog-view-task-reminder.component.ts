@@ -12,6 +12,7 @@ import {ScheduledTaskService} from '../scheduled-task.service';
 import {Router} from '@angular/router';
 import {T} from '../../../t.const';
 import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
+import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -44,8 +45,6 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this._close();
     }));
-    this._projectService.currentProject$.subscribe((val) => console.log('_projectService.currentProject$', val));
-    console.log(this.reminder.projectId, this._projectService.currentId);
   }
 
   ngOnDestroy(): void {
@@ -96,18 +95,14 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
 
   editReminder() {
     this.isDisableControls = true;
-    const task: TaskWithReminderData = {
-      title: this.reminder.title,
-      id: this.reminder.relatedId,
-      ...this.task,
-      reminderId: this.reminder.id,
-      reminderData: this.reminder,
-    };
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {
-        task,
-      }
+        title: this.task ? this.task.title : this.reminder.title,
+        taskId: this.reminder.relatedId,
+        reminderId: this.reminder.id,
+        isMoveToBacklogPossible: false,
+      } as AddTaskReminderInterface
     });
     this._close();
   }

@@ -6,6 +6,7 @@ import {ReminderCopy} from '../../reminder/reminder.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {T} from '../../../t.const';
+import {AddTaskReminderInterface} from './add-task-reminder-interface';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -15,12 +16,11 @@ import {T} from '../../../t.const';
 })
 export class DialogAddTaskReminderComponent {
   T = T;
-  task: Task = this.data.task;
-  title: string = this.task.title;
-  reminder: ReminderCopy = this.task.reminderId && this._reminderService.getById(this.data.task.reminderId);
+  title: string = this.data.title;
+  reminder: ReminderCopy = this.data.reminderId && this._reminderService.getById(this.data.reminderId);
   isEdit: boolean = !!(this.reminder && this.reminder.id);
   dateTime: number = this.reminder && this.reminder.remindAt;
-  isMoveToBacklogPossible: boolean = (!this.isEdit && !this.task.parentId);
+  isMoveToBacklogPossible: boolean = (!this.isEdit && this.data.isMoveToBacklogPossible);
   isMoveToBacklog: boolean = (this.isMoveToBacklogPossible);
 
   constructor(
@@ -28,7 +28,7 @@ export class DialogAddTaskReminderComponent {
     private _snackService: SnackService,
     private _reminderService: ReminderService,
     private _matDialogRef: MatDialogRef<DialogAddTaskReminderComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task },
+    @Inject(MAT_DIALOG_DATA) public data: AddTaskReminderInterface,
   ) {
   }
 
@@ -41,7 +41,7 @@ export class DialogAddTaskReminderComponent {
 
     if (this.isEdit) {
       this._taskService.updateReminder(
-        this.task.id,
+        this.data.taskId,
         this.reminder.id,
         timestamp,
         this.title,
@@ -49,7 +49,7 @@ export class DialogAddTaskReminderComponent {
       this.close();
     } else {
       this._taskService.addReminder(
-        this.task.id,
+        this.data.taskId,
         timestamp,
         this.title,
         this.isMoveToBacklog,
@@ -59,7 +59,7 @@ export class DialogAddTaskReminderComponent {
   }
 
   remove() {
-    this._taskService.removeReminder(this.task.id, this.reminder.id);
+    this._taskService.removeReminder(this.data.taskId, this.reminder.id);
     this.close();
   }
 

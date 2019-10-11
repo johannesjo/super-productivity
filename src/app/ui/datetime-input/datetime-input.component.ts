@@ -20,7 +20,7 @@ export class DatetimeInputComponent {
 
   constructor() {
     const lastVal = localStorage.getItem(LS_LAST_REMINDER_DATE);
-    console.log(lastVal, Date.now());
+    console.log(lastVal, Date.now(), +lastVal > Date.now());
     if (lastVal && +lastVal > Date.now()) {
       this.lastVal = +lastVal;
     }

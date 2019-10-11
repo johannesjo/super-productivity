@@ -33,6 +33,7 @@ import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
 import {T} from '../../../t.const';
 import {MatMenuTrigger} from '@angular/material/menu';
+import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
 
 @Component({
   selector: 'task',
@@ -197,8 +198,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {
-        task: this.task,
-      }
+        title: this.task.title,
+        taskId: this.task.id,
+        reminderId: this.task.reminderId,
+        isMoveToBacklogPossible: !this.task.parentId,
+      } as AddTaskReminderInterface
     });
   }
 
