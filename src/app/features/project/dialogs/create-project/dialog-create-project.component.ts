@@ -14,8 +14,10 @@ import {Subscription} from 'rxjs';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
 import {GithubCfg} from '../../../issue/github/github';
 import {DialogGithubInitialSetupComponent} from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import {GITHUB_TYPE} from '../../../issue/issue.const';
+import {DEFAULT_ISSUE_PROVIDER_CFGS, GITHUB_TYPE, JIRA_TYPE} from '../../../issue/issue.const';
 import {T} from '../../../../t.const';
+import {DEFAULT_JIRA_CFG} from '../../../issue/jira/jira.const';
+import {DEFAULT_GITHUB_CFG} from '../../../issue/github/github.const';
 
 @Component({
   selector: 'dialog-create-project',
@@ -108,8 +110,8 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   submit() {
     const issueIntegrationCfgs: IssueIntegrationCfgs = {
       ...this.projectData.issueIntegrationCfgs,
-      JIRA: this.jiraCfg,
-      GITHUB: this.githubCfg,
+      JIRA: this.jiraCfg || DEFAULT_JIRA_CFG,
+      GITHUB: this.githubCfg || DEFAULT_GITHUB_CFG,
     };
 
     const projectDataToSave: Project | Partial<Project> = {
