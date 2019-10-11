@@ -665,6 +665,7 @@ export const T = {
     'CLICK_TO_EDIT': 'G.CLICK_TO_EDIT',
     'CLOSE': 'G.CLOSE',
     'DELETE': 'G.DELETE',
+    'EDIT': 'G.EDIT',
     'DISMISS': 'G.DISMISS',
     'DO_IT': 'G.DO_IT',
     'EXTENSION_INFO': 'G.EXTENSION_INFO',
@@ -677,7 +678,8 @@ export const T = {
     'SAVE': 'G.SAVE',
     'TITLE': 'G.TITLE',
     'UNDO': 'G.UNDO',
-    'UPDATE': 'G.UPDATE'
+    'UPDATE': 'G.UPDATE',
+    'MINUTES': 'G.MINUTES'
   },
   'GCF': {
     'AUTO_BACKUPS': {

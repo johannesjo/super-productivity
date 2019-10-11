@@ -37,13 +37,14 @@
     </button>
 
     <ng-container *ngIf="!isError">
-      <button (click)="snooze()"
+      <button [matMenuTriggerFor]="snoozeMenu"
+              (dblclick)="snooze(10)"
               [disabled]="isDisableControls"
               color="primary"
               mat-button
               type="button">
         <mat-icon>snooze</mat-icon>
-        {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate:{time: '10m'} }}
+        {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate }}
       </button>
 
       <button (click)="dismiss()"
@@ -63,9 +64,28 @@
               type="button">
         <mat-icon>play_arrow</mat-icon>
         {{!isForCurrentProject
-        ? (T.F.TASK.D_REMINDER_VIEW.SWITCH_PROJECT_START|translate)
-        : (T.F.TASK.D_REMINDER_VIEW.START|translate)}}
+          ? (T.F.TASK.D_REMINDER_VIEW.SWITCH_PROJECT_START|translate)
+          : (T.F.TASK.D_REMINDER_VIEW.START|translate)}}
       </button>
     </ng-container>
   </div>
 </mat-dialog-actions>
+
+<mat-menu #snoozeMenu="matMenu">
+  <button mat-menu-item
+          (click)="snooze(10)">
+    <mat-icon>snooze</mat-icon>{{T.G.MINUTES|translate:{m: 10} }}
+  </button>
+  <button mat-menu-item
+          (click)="snooze(30)">
+    <mat-icon>snooze</mat-icon>{{T.G.MINUTES|translate:{m: 30} }}
+  </button>
+  <button mat-menu-item
+          (click)="snooze(60)">
+    <mat-icon>snooze</mat-icon>{{T.G.MINUTES|translate:{m: 60} }}
+  </button>
+  <button mat-menu-item
+          (click)="editReminder()">
+    <mat-icon>edit</mat-icon>{{T.G.EDIT|translate}}
+  </button>
+</mat-menu>

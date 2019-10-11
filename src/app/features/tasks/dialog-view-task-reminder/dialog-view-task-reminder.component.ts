@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Reminder} from '../../reminder/reminder.model';
-import {Task} from '../task.model';
+import {Task, TaskWithReminderData} from '../task.model';
 import {TaskService} from '../task.service';
 import {Observable, Subscription} from 'rxjs';
 import {ReminderService} from '../../reminder/reminder.service';
@@ -11,6 +11,7 @@ import {Project} from '../../project/project.model';
 import {ScheduledTaskService} from '../scheduled-task.service';
 import {Router} from '@angular/router';
 import {T} from '../../../t.const';
+import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -34,6 +35,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     private _scheduledTaskService: ScheduledTaskService,
     private _projectService: ProjectService,
     private _router: Router,
+    private _matDialog: MatDialog,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
@@ -42,6 +44,8 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this._close();
     }));
+    this._projectService.currentProject$.subscribe((val) => console.log('_projectService.currentProject$', val));
+    console.log(this.reminder.projectId, this._projectService.currentId);
   }
 
   ngOnDestroy(): void {
@@ -82,10 +86,28 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     this._close();
   }
 
-  snooze() {
+  snooze(snoozeInMinutes) {
     this.isDisableControls = true;
     this._reminderService.updateReminder(this.reminder.id, {
-      remindAt: Date.now() + (10 * 60 * 1000)
+      remindAt: Date.now() + (snoozeInMinutes * 60 * 1000)
+    });
+    this._close();
+  }
+
+  editReminder() {
+    this.isDisableControls = true;
+    const task: TaskWithReminderData = {
+      title: this.reminder.title,
+      id: this.reminder.relatedId,
+      ...this.task,
+      reminderId: this.reminder.id,
+      reminderData: this.reminder,
+    };
+    this._matDialog.open(DialogAddTaskReminderComponent, {
+      restoreFocus: true,
+      data: {
+        task,
+      }
     });
     this._close();
   }
