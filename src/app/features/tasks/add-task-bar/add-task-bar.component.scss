@@ -35,9 +35,10 @@
     font-size: 16px;
     box-sizing: border-box;
     border-style: solid;
-    border-width: 3px;
+    border-width: 0;
     border-radius: $card-border-radius;
     outline: 0;
+    border-color: $c-primary;
 
     padding-left: 40px !important;
     line-height: 42px;
@@ -46,7 +47,7 @@
     background: #ffffff;
 
     @include darkTheme {
-      background-color: $dark-theme-bg;
+      background-color: $dark-theme-bg-lightest;
       color: #eeeeee;
     }
   }

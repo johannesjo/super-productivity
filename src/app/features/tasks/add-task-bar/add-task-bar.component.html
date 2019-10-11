@@ -1,5 +1,6 @@
 <form (submit)="addTask()"
-      [class.mat-elevation-z3]="isElevated"
+      [class.mat-elevation-z2]="isElevated"
+      [class.mat-elevation-z1]="!isElevated"
       class="add-task-form">
   <div *ngIf="(isLoading$|async)"
        class="spinner">
@@ -19,7 +20,6 @@
          [placeholder]="(doubleEnterCount > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)
          :(T.F.TASK.SELECT_OR_CREATE|translate)"
-         class="border-color-primary"
          matInput>
 
   <mat-autocomplete #autoEl="matAutocomplete"
