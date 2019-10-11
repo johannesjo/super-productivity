@@ -50,7 +50,7 @@ cache:
 
 
 script:
-  - 'travis_wait 30 sleep 1800 &'
+  - 'travis_wait 40 sleep 2400 &'
   - |
     if [ -n "$TRAVIS_TAG" ]; then
       PUB=always
