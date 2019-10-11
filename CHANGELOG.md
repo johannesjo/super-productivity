@@ -1,3 +1,37 @@
+## [2.13.1](https://github.com/johannesjo/super-productivity/compare/v2.13.0...v2.13.1) (2019-10-11)
+
+
+### Bug Fixes
+
+* crash on changing project [#238](https://github.com/johannesjo/super-productivity/issues/238) ([6871fec](https://github.com/johannesjo/super-productivity/commit/6871fec))
+* **scheduled:** styling for long task titles ([888f6f3](https://github.com/johannesjo/super-productivity/commit/888f6f3))
+* case when initial import fails and reminders are never loaded ([d880b98](https://github.com/johannesjo/super-productivity/commit/d880b98))
+* cleanout error ([163be6a](https://github.com/johannesjo/super-productivity/commit/163be6a))
+* google drive initial import if update is encoded ([37c8880](https://github.com/johannesjo/super-productivity/commit/37c8880))
+* last active loaded value being wrong for timestamp ([db292e9](https://github.com/johannesjo/super-productivity/commit/db292e9))
+* local storage error ([9c719b6](https://github.com/johannesjo/super-productivity/commit/9c719b6))
+* make notifications non silent ([a24d5d7](https://github.com/johannesjo/super-productivity/commit/a24d5d7))
+* typing error ([9adecd6](https://github.com/johannesjo/super-productivity/commit/9adecd6))
+* typing issue ([057e131](https://github.com/johannesjo/super-productivity/commit/057e131))
+* typing issue ([a179cd3](https://github.com/johannesjo/super-productivity/commit/a179cd3))
+* wrong syntax ([b9ecfd5](https://github.com/johannesjo/super-productivity/commit/b9ecfd5))
+
+
+### Features
+
+* add check for when local model version is smaller than the one imported ([a98bd81](https://github.com/johannesjo/super-productivity/commit/a98bd81))
+* add new productivity tip ([79dfa15](https://github.com/johannesjo/super-productivity/commit/79dfa15))
+* add planning mode at the end of the day ([70fefbc](https://github.com/johannesjo/super-productivity/commit/70fefbc))
+* adjust web app icons ([cc0b74f](https://github.com/johannesjo/super-productivity/commit/cc0b74f))
+* hide play button for daily summary plan ([42209d7](https://github.com/johannesjo/super-productivity/commit/42209d7))
+* hide time estimates/spent when there is no data ([cff29fb](https://github.com/johannesjo/super-productivity/commit/cff29fb))
+* improve snoozing experience for tasks ([7e66643](https://github.com/johannesjo/super-productivity/commit/7e66643))
+* reduce add task reminder interface to what is needed ([7eb215a](https://github.com/johannesjo/super-productivity/commit/7eb215a))
+* **i18n:** make button text shorter ([0e17873](https://github.com/johannesjo/super-productivity/commit/0e17873))
+* remove outdated models for simpleTaskSummary and googleTimeSheetExport ([404ff8a](https://github.com/johannesjo/super-productivity/commit/404ff8a))
+
+
+
 # [2.13.0](https://github.com/johannesjo/super-productivity/compare/v2.12.11...v2.13.0) (2019-10-08)
 
 
