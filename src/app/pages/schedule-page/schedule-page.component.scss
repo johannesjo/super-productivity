@@ -46,12 +46,8 @@
 
   .title {
     flex: 1;
-    // to account for the task titles inner padding
-    margin-top: -8px;
-    @include mq(xs) {
-      .scheduled-task:hover & {
-      }
-    }
+    padding-top: $s;
+    padding-bottom: $s;
   }
 
   .due-date {
@@ -108,4 +104,6 @@
 .task-title {
   margin-left: -4px;
   @include taskTitle;
+  // to account for the task titles inner padding
+  margin-top: -8px;
 }
