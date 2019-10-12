@@ -11,15 +11,16 @@ import {
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {TaskService} from '../task.service';
-import {debounceTime, switchMap, tap} from 'rxjs/operators';
+import {debounceTime, map, switchMap, tap} from 'rxjs/operators';
 import {JiraIssue} from '../../issue/jira/jira-issue/jira-issue.model';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {BehaviorSubject, Observable, zip} from 'rxjs';
 import {IssueService} from '../../issue/issue.service';
-import {SearchResultItem} from '../../issue/issue';
 import {SnackService} from '../../../core/snack/snack.service';
 import {JiraApiService} from '../../issue/jira/jira-api.service';
 import {JIRA_TYPE} from '../../issue/issue.const';
 import {T} from '../../../t.const';
+import {Task} from '../task.model';
+import {AddTaskSuggestion} from './add-task-suggestions.model';
 
 @Component({
   selector: 'add-task-bar',
@@ -43,17 +44,43 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   doubleEnterCount = 0;
 
   taskSuggestionsCtrl: FormControl = new FormControl();
-  filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.taskSuggestionsCtrl.valueChanges.pipe(
+
+  filteredIssueSuggestions$: Observable<(AddTaskSuggestion)[]> = this.taskSuggestionsCtrl.valueChanges.pipe(
     debounceTime(300),
     tap(() => this.isLoading$.next(true)),
     switchMap((searchTerm) => {
       if (searchTerm && searchTerm.length > 0) {
-        return this._issueService.searchIssues$(searchTerm);
+        const backlog$ = this._taskService.backlogTasks$.pipe(
+          map(tasks => tasks
+            .filter(task => this._filterBacklog(searchTerm, task))
+            .map((task): AddTaskSuggestion => ({
+              title: task.title,
+              taskId: task.id,
+              taskIssueId: task.issueId,
+              issueType: task.issueType,
+            }))
+          )
+        );
+        const issues$ = this._issueService.searchIssues$(searchTerm);
+        return zip(backlog$, issues$, (...allResults) => [].concat(...allResults));
       } else {
         // Note: the outer array signifies the observable stream the other is the value
         return [[]];
       }
     }),
+    // don't show issues twice
+    // NOTE: this only works because backlog items come first
+    map((items: AddTaskSuggestion[]) => items.reduce(
+      (unique: AddTaskSuggestion[], item: AddTaskSuggestion) => {
+        return (item.issueData && unique.find(
+          // NOTE: we check defined because we don't want to run into
+          // false == false or similar
+          u => u.taskIssueId && u.taskIssueId === item.issueData.id
+        ))
+          ? unique
+          : [...unique, item];
+      }, [])
+    ),
     tap(() => {
       this.isLoading$.next(false);
     }),
@@ -120,19 +147,22 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     return issue && issue.summary;
   }
 
-  trackByFn(i: number, searchResultItem: SearchResultItem) {
-    return searchResultItem.issueData.id;
+  trackByFn(i: number, item: AddTaskSuggestion) {
+    return item.taskId || item.issueData.id;
   }
 
   async addTask() {
     this._isAddInProgress = true;
-    const issueOrTitle = this.taskSuggestionsCtrl.value || '' as (string | SearchResultItem);
+    const item: AddTaskSuggestion = this.taskSuggestionsCtrl.value;
 
-    if (typeof issueOrTitle === 'string') {
-      if (issueOrTitle.length > 0) {
+    if (!item) {
+      return;
+    } else if (typeof item === 'string') {
+      const newTaskStr = item as string;
+      if (newTaskStr.length > 0) {
         this.doubleEnterCount = 0;
         this._taskService.add(
-          issueOrTitle,
+          newTaskStr,
           this.isAddToBacklog,
           {},
           this.isAddToBottom
@@ -143,16 +173,25 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       } else if (this.isDoubleEnterMode) {
         this.doubleEnterCount++;
       }
+      // NOTE: it's important that this comes before the issue check
+      // so that backlog issues are found first
+    } else if (item.taskId) {
+      this._taskService.moveToToday(item.taskId);
+      this._snackService.open({
+        ico: 'arrow_upward',
+        msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+        translateParams: {title: item.title},
+      });
     } else {
-      const issueData = (issueOrTitle.issueType === JIRA_TYPE)
-        ? await this._jiraApiService.getIssueById$(issueOrTitle.issueData.id).toPromise()
-        : issueOrTitle.issueData;
+      const issueData = (item.issueType === JIRA_TYPE)
+        ? await this._jiraApiService.getIssueById$(item.issueData.id).toPromise()
+        : item.issueData;
 
       const res = await this._taskService.checkForTaskWithIssue(issueData);
       if (!res) {
         this._taskService.addWithIssue(
-          issueOrTitle.title,
-          issueOrTitle.issueType,
+          item.title,
+          item.issueType,
           issueData,
           this.isAddToBacklog,
         );
@@ -166,7 +205,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       } else {
         this._taskService.moveToToday(res.task.id);
         this._snackService.open({
-          ico: 'info',
+          ico: 'arrow_upward',
           msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
           translateParams: {title: res.task.title},
         });
@@ -175,5 +214,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
     this.taskSuggestionsCtrl.setValue('');
     this._isAddInProgress = false;
+  }
+
+  private _filterBacklog(searchText: string, task: Task) {
+    try {
+      return task.title.toLowerCase().match(searchText.toLowerCase());
+    } catch (e) {
+      console.warn('RegEx Error', e);
+      return false;
+    }
   }
 }
