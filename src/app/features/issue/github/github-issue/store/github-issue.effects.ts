@@ -146,6 +146,9 @@ export class GithubIssueEffects {
         this._snackService.open({
           msg: T.F.GITHUB.S.MISSING_ISSUE_DATA,
           svgIco: 'github',
+          config: {
+            duration: 9000,
+          }
         });
         tasks.forEach((task) => this._githubIssueService.loadMissingIssueData(task.issueId));
       })
