@@ -8,7 +8,7 @@ $weird-task-list-f: 5px;
 
 .improvements {
   padding-top: 4px;
-  padding-bottom: 30px;
+  padding-bottom: 16px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -17,6 +17,9 @@ $weird-task-list-f: 5px;
   white-space: nowrap;
   justify-content: center;
 
+  @include mq(xs) {
+    padding-bottom: 30px;
+  }
 }
 
 .improvement {
@@ -95,10 +98,12 @@ $weird-task-list-f: 5px;
     button {
       opacity: 0.4;
       transform: scale(1);
+
       &:hover {
         opacity: 1;
       }
     }
+
     .title {
       transform-origin: center center;
       transform: scaleX(0.857142857142857);
