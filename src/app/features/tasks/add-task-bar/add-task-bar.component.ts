@@ -62,7 +62,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           )
         );
         const issues$ = this._issueService.searchIssues$(searchTerm);
-        return zip(backlog$, issues$, (...allResults) => [].concat(...allResults));
+        return zip(backlog$, issues$).pipe(
+          map(([backlog, issues]) => ([...backlog, ...issues])),
+        );
       } else {
         // Note: the outer array signifies the observable stream the other is the value
         return [[]];
