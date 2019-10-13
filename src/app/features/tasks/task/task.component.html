@@ -1,5 +1,4 @@
-<div class="inner-wrapper"
-     (contextmenu)="openContextMenu($event)">
+<div class="inner-wrapper">
 
   <div style="visibility: hidden; position: fixed"
        [style.left]="contextMenuPosition.x"
@@ -15,7 +14,8 @@
        (panright)="onPanRight($event)"
        (panstart)="onPanStart($event)"
        [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning"
-       class="first-line">
+       class="first-line"
+       (contextmenu)="openContextMenu($event)">
 
     <mat-icon *ngIf="isCurrent"
               class="play-icon-indicator"
