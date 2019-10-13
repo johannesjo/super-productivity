@@ -120,8 +120,8 @@
         "LAST_SYNC": "last sync",
         "LOCAL": "local",
         "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local data",
-        "OVERWRITE_REMOTE": "Overwrite remote data",
+        "OVERWRITE_LOCAL": "Overwrite local",
+        "OVERWRITE_REMOTE": "Overwrite remote",
         "REMOTE": "remote",
         "TEXT": "<p>Update from Google Drive Backup. <strong>Local data seems to be newer</strong> than the remote data. Overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>",
         "TITLE": "Overwrite local data with GDrive Update?"
