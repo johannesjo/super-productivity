@@ -205,8 +205,8 @@ export class GoogleDriveSyncEffects {
           catchError(err => this._handleError(err)),
           concatMap((res: any): Observable<any> => {
 
-            const lastActiveLocal = this._syncService.getLastActive();
-            const lastModifiedRemote = res.modifiedDate;
+            const lastActiveLocal: number = this._syncService.getLastActive();
+            const lastModifiedRemote: string = res.modifiedDate;
 
             if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
               if (!action.payload || !action.payload.isSkipSnack) {
@@ -415,7 +415,7 @@ export class GoogleDriveSyncEffects {
       );
   }
 
-  private _openConfirmSaveDialog(remoteModified: string | Date): void {
+  private _openConfirmSaveDialog(remoteModified: string): void {
     // Don't open multiple at the same time
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncSaveComponent.name;
@@ -434,12 +434,12 @@ export class GoogleDriveSyncEffects {
     }
   }
 
-  private _openConfirmLoadDialog(remoteModified: string | number| Date): void {
+  private _openConfirmLoadDialog(remoteModified: string | number | Date): void {
     // Don't open multiple at the same time
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
     })) {
-      const lastActiveLocal = this._syncService.getLastActive();
+      const lastActiveLocal: number = this._syncService.getLastActive();
       this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
         restoreFocus: true,
         data: {
@@ -540,16 +540,10 @@ export class GoogleDriveSyncEffects {
   }
 
   // SIMPLE HELPER
-  private _isNewerThan(strDate1, strDate2) {
+  private _isNewerThan(strDate1: string|number, strDate2: string|number) {
     const d1 = new Date(strDate1);
     const d2 = new Date(strDate2);
     return (d1.getTime() > d2.getTime());
-  }
-
-  private _isNewerThanOrEqual(strDate1, strDate2) {
-    const d1 = new Date(strDate1);
-    const d2 = new Date(strDate2);
-    return (d1.getTime() >= d2.getTime());
   }
 
   private _isEqual(strDate1, strDate2) {

@@ -32,8 +32,8 @@ export class SyncService {
     this._persistenceService.saveLastActive(d);
   }
 
-  getLastActive(): Date {
-    return new Date(this._persistenceService.getLastActive());
+  getLastActive(): number {
+    return this._persistenceService.getLastActive();
   }
 
   async getCompleteSyncData(): Promise<AppDataComplete> {
