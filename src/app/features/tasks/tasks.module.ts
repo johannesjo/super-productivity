@@ -25,6 +25,8 @@ import {TaskRelatedModelEffects} from './store/task-related-model.effects';
 import {TaskReminderEffects} from './store/task-reminder.effects';
 import {TaskUiEffects} from './store/task-ui.effects';
 import {TaskElectronEffects} from './store/task-electron.effects';
+import {SubTaskTotalTimeSpentPipe} from './pipes/sub-task-total-time-spent.pipe';
+import {SubTaskTotalTimeEstimatePipe} from './pipes/sub-task-total-time-estimate.pipe';
 
 @NgModule({
   imports: [
@@ -57,6 +59,8 @@ import {TaskElectronEffects} from './store/task-electron.effects';
     SelectTaskComponent,
     FilterDoneTasksPipe,
     TaskSummaryTableComponent,
+    SubTaskTotalTimeSpentPipe,
+    SubTaskTotalTimeEstimatePipe,
   ],
   exports: [
     TaskComponent,

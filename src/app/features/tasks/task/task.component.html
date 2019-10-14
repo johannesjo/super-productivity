@@ -102,12 +102,22 @@
            [class.isEditable]="!task.subTasks?.length"
            [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
            class="time-wrapper">
-        <div class="time">
+        <div *ngIf="!task.subTasks?.length"
+             class="time">
           <div class="time-val">
-            <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
             <span [innerHTML]="task.timeSpent|msToString"></span></div>
           <div class="separator">/</div>
           <div [innerHTML]="task.timeEstimate|msToString"
+               class="time-val"></div>
+        </div>
+
+        <div *ngIf="task.subTasks?.length"
+             class="time">
+          <div class="time-val">
+            <span>∑</span>
+            <span [innerHTML]="task.subTasks|subTaskTotalTimeSpent|msToString"></span></div>
+          <div class="separator">/</div>
+          <div [innerHTML]="task.subTasks|subTaskTotalTimeEstimate|msToString"
                class="time-val"></div>
         </div>
       </div>
