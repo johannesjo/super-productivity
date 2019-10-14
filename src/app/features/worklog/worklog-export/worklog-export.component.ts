@@ -15,7 +15,7 @@ import {roundDuration} from '../../../util/round-duration';
 import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
-import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
+import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 import {T} from '../../../t.const';
 
 const LINE_SEPARATOR = '\n';
@@ -54,7 +54,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   isShowAsText = false;
   headlineCols: string[] = [];
   formattedRows: (string | number)[][];
-  options: WorklogExportSettingsCopy = {...WORKLOG_EXPORT_DEFAULTS};
+  options: WorklogExportSettingsCopy = {
+    ...WORKLOG_EXPORT_DEFAULTS,
+    cols: [...WORKLOG_EXPORT_DEFAULTS.cols],
+  };
   txt: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
@@ -112,12 +115,15 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           // NOTE: if we don't do this typescript(?) get's aggressive
           cols: [...(
             pr.advancedCfg.worklogExportSettings
-              ? pr.advancedCfg.worklogExportSettings.cols
-              : WORKLOG_EXPORT_DEFAULTS.cols
+              ? [...pr.advancedCfg.worklogExportSettings.cols]
+              : [...WORKLOG_EXPORT_DEFAULTS.cols]
           )]
         };
       } else {
-        this.options = {...WORKLOG_EXPORT_DEFAULTS};
+        this.options = {
+          ...WORKLOG_EXPORT_DEFAULTS,
+          cols: [...WORKLOG_EXPORT_DEFAULTS.cols],
+        };
       }
 
       const tasks: WorklogTask[] = this._worklogService.getTaskListForRange(this.rangeStart, this.rangeEnd, true);
