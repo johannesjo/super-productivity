@@ -6,20 +6,11 @@ matrix:
   include:
     - os: osx
       osx_image: xcode10
-      env:
-        - ELECTRON_CACHE=$HOME/.cache/electron
-        - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
       addons:
         chrome: stable
       before_install:
         - openssl aes-256-cbc -K $encrypted_527645209bb0_key -iv $encrypted_527645209bb0_iv -in build/mac-cert.tar.enc -out mac-cert.tar -d
         - tar xvf mac-cert.tar
-      install:
-        - brew update
-        - brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
-        - brew install yarn
-      before_cache:
-        - brew cleanup
 
     - os: linux
       dist: xenial
@@ -51,11 +42,10 @@ cache:
     - node_modules
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
-    - $HOME/Library/Caches/Homebrew
     - $HOME/.npm/_prebuilds
 
 script:
-  - 'travis_wait 40 sleep 2400 &'
+  - 'travis_wait 30 sleep 1800 &'
   - |
     if [ -n "$TRAVIS_TAG" ]; then
       PUB=always
