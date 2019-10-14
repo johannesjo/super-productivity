@@ -1,3 +1,27 @@
+## [2.13.3](https://github.com/johannesjo/super-productivity/compare/v2.13.2...v2.13.3) (2019-10-14)
+
+
+### Bug Fixes
+
+* app icons ([648136d](https://github.com/johannesjo/super-productivity/commit/648136d790620c0801e75f61ccf8d0f8768cc818))
+* error for reminders when there is no initial config ([2abcd8a](https://github.com/johannesjo/super-productivity/commit/2abcd8a5923531abb41b0c93decc5a299f0ebcf9))
+* mobile styling for improvement banner ([d8e6960](https://github.com/johannesjo/super-productivity/commit/d8e6960533f9ce44a1e078665d69c8a307fe05e8))
+* worklog export error ([359212e](https://github.com/johannesjo/super-productivity/commit/359212e2472d741ef6b23905f02aa66b6f580a87))
+
+
+### Features
+
+* allow to add task from backlog via add task bar ([0b7a3c9](https://github.com/johannesjo/super-productivity/commit/0b7a3c99c66bf7a66c207552bfad5fd33a4b3da5))
+* also hide mark as done button for daily summary planner ([261fe88](https://github.com/johannesjo/super-productivity/commit/261fe88880a48e254fea5f4de849d68277fade63))
+* enable double enter mode only on daily planner ([68d972a](https://github.com/johannesjo/super-productivity/commit/68d972ae7396a97a8e253939dd986421c271ea39))
+* improve add task bar label ([52e1623](https://github.com/johannesjo/super-productivity/commit/52e1623a838c07a68e5f5c37dab66bc36e9e33c2))
+* limit task context menu to first line ([e9b4850](https://github.com/johannesjo/super-productivity/commit/e9b4850d0232561dd099f9498ddb8c1608b46055))
+* show git deleted issue msg longer ([a287eba](https://github.com/johannesjo/super-productivity/commit/a287ebafdfc76366ee116e50df37e94a5231612e))
+* **i18n:** shorten button text ([bfb53fe](https://github.com/johannesjo/super-productivity/commit/bfb53feb6cbac5c9967acd566f8a240d29b15b46))
+* restyle add task bar ([4d9552e](https://github.com/johannesjo/super-productivity/commit/4d9552e99ea92e8e0a53a86e85a6c5c3b2dff59b))
+
+
+
 ## [2.13.2](https://github.com/johannesjo/super-productivity/compare/v2.13.1...v2.13.2) (2019-10-11)
 
 
