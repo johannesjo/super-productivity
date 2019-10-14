@@ -7,7 +7,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {AddTaskBarComponent} from './add-task-bar/add-task-bar.component';
 import {DialogTimeEstimateComponent} from './dialog-time-estimate/dialog-time-estimate.component';
 import {StoreModule} from '@ngrx/store';
-import {TaskEffects} from './store/task.effects';
 import {EffectsModule} from '@ngrx/effects';
 import {TASK_FEATURE_NAME, taskReducer} from './store/task.reducer';
 import {TaskAdditionalInfoComponent} from './task-additional-info/task-additional-info.component';
@@ -20,6 +19,12 @@ import {DialogAddTaskReminderComponent} from './dialog-add-task-reminder/dialog-
 import {TaskSummaryTableComponent} from './task-summary-table/task-summary-table.component';
 import {DialogAddTimeEstimateForOtherDayComponent} from './dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
 import {TaskRepeatCfgModule} from '../task-repeat-cfg/task-repeat-cfg.module';
+import {TaskDbEffects} from './store/task-db.effects';
+import {TaskInternalEffects} from './store/task-internal.effects';
+import {TaskRelatedModelEffects} from './store/task-related-model.effects';
+import {TaskReminderEffects} from './store/task-reminder.effects';
+import {TaskUiEffects} from './store/task-ui.effects';
+import {TaskElectronEffects} from './store/task-electron.effects';
 
 @NgModule({
   imports: [
@@ -31,7 +36,14 @@ import {TaskRepeatCfgModule} from '../task-repeat-cfg/task-repeat-cfg.module';
     ReactiveFormsModule,
     TaskRepeatCfgModule,
     StoreModule.forFeature(TASK_FEATURE_NAME, taskReducer),
-    EffectsModule.forFeature([TaskEffects]),
+    EffectsModule.forFeature([
+      TaskDbEffects,
+      TaskInternalEffects,
+      TaskRelatedModelEffects,
+      TaskReminderEffects,
+      TaskUiEffects,
+      TaskElectronEffects,
+    ]),
   ],
   declarations: [
     TaskComponent,

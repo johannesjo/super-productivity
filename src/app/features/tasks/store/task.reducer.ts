@@ -34,7 +34,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   lastActiveFocusTaskId: null,
   stateBefore: null,
   isDataLoaded: false,
-});
+}) as TaskState;
 
 
 // TODO unit test the shit out of this once the model is settled
