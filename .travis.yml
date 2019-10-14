@@ -40,6 +40,11 @@ addons:
     packages:
       - sshpass
 
+env:
+  global:
+    - ELECTRON_CACHE=$HOME/.cache/electron
+    - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+
 cache:
   yarn: true
   directories:
@@ -47,7 +52,7 @@ cache:
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
     - $HOME/Library/Caches/Homebrew
-
+    - $HOME/.npm/_prebuilds
 
 script:
   - 'travis_wait 40 sleep 2400 &'
