@@ -1,18 +1,20 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {GlobalConfigActionTypes} from './store/global-config.actions';
-import {Observable} from 'rxjs';
+import {merge, Observable, Subject} from 'rxjs';
 import {
   GlobalConfigSectionKey,
   GlobalConfigState,
-  GlobalSectionConfig, GoogleDriveSyncConfig,
+  GlobalSectionConfig,
+  GoogleDriveSyncConfig,
   GoogleSession,
   IdleConfig,
   MiscConfig,
   TakeABreakConfig
 } from './global-config.model';
 import {
-  selectConfigFeatureState, selectGoogleDriveSyncConfig,
+  selectConfigFeatureState,
+  selectGoogleDriveSyncConfig,
   selectGoogleSession,
   selectIdleConfig,
   selectMiscConfig,
@@ -59,7 +61,13 @@ export class GlobalConfigService {
 
   cfg: GlobalConfigState;
 
-  onCfgLoaded$: Observable<any> = this._actions$.pipe(ofType(GlobalConfigActionTypes.LoadGlobalConfig));
+  private _onNoCfgLoaded$ = new Subject();
+
+  onCfgLoaded$: Observable<any> = merge(
+    this._actions$.pipe(ofType(GlobalConfigActionTypes.LoadGlobalConfig)),
+    this._onNoCfgLoaded$,
+  );
+
 
   constructor(
     private readonly _store: Store<any>,
@@ -77,6 +85,7 @@ export class GlobalConfigService {
     } else {
       // NOTE: this happens if there never have been any changes to the default cfg
       console.warn('ConfigService No config found in ls');
+      this._onNoCfgLoaded$.next();
     }
   }
 
