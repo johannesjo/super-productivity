@@ -45,7 +45,6 @@ cache:
     - $HOME/.npm/_prebuilds
 
 script:
-  - 'travis_wait 30 sleep 1800 &'
   - |
     if [ -n "$TRAVIS_TAG" ]; then
       PUB=always
@@ -68,7 +67,7 @@ script:
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
-      yarn dist:mac:dl -p $PUB
+      travis_wait 30 yarn dist:mac:dl -p $PUB
     fi
 
 # NOTE: disabled until next release of electron builder
