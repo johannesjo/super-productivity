@@ -471,6 +471,8 @@
         "NOTES": "笔记"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "添加任务",
+        "ADD_TASK_TO_BACKLOG": "将任务添加到积压中",
         "START": "再次按回车键开始"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒",
         "TASK_CREATED": "已创建任务“{{title}}”"
       },
-      "ADD_TASK": "选择或创建任务",
+      "SELECT_OR_CREATE": "选择或创建任务",
       "SUMMARY_TABLE": {
         "ESTIMATE": "估计",
         "SPENT_TODAY": "花了今天",
@@ -667,9 +669,11 @@
     "DELETE": "删除",
     "DISMISS": "解雇",
     "DO_IT": "做吧！",
+    "EDIT": "编辑",
     "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
     "LOGIN": "登录",
     "LOGOUT": "登出",
+    "MINUTES": "{{m}} 分钟",
     "NEXT": "下一个",
     "OK": "好",
     "PREVIOUS": "以前",
@@ -833,6 +837,7 @@
     "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
     "NO_TASKS": "今天没有任务",
+    "PLAN": "计划",
     "ROUND_15M": "将所有任务舍入到15分钟",
     "ROUND_30M": "将所有任务舍入到30分钟",
     "ROUND_5M": "将所有任务舍入到5分钟",

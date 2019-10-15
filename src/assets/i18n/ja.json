@@ -471,6 +471,8 @@
         "NOTES": "ノート"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "タスクを追加",
+        "ADD_TASK_TO_BACKLOG": "バックログにタスクを追加",
         "START": "もう一度Enterキーを押して開始します"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "タスク \"{{title}}\"の通知を更新しました",
         "TASK_CREATED": "タスク「{{title}}」を作成しました"
       },
-      "ADD_TASK": "タスクを選択または作成する",
+      "SELECT_OR_CREATE": "タスクを選択または作成する",
       "SUMMARY_TABLE": {
         "ESTIMATE": "見積もり",
         "SPENT_TODAY": "今日を過ごした",
@@ -667,9 +669,11 @@
     "DELETE": "削除",
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
+    "EDIT": "編集",
     "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、クロム拡張</a> をダウンロード <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> してください。これはモバイルでは機能しないことに注意してください。",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
+    "MINUTES": "{{m}} 分",
     "NEXT": "次",
     "OK": "OK",
     "PREVIOUS": "前",
@@ -833,6 +837,7 @@
     "EVALUATION": "評価",
     "EXPORT_TASK_LIST": "タスクリストのエクスポート",
     "NO_TASKS": "この日は何もしていません",
+    "PLAN": "計画",
     "ROUND_15M": "すべてのタスクを15分に丸める",
     "ROUND_30M": "すべてのタスクを30分に丸める",
     "ROUND_5M": "すべてのタスクを5分に丸める",

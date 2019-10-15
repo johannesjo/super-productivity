@@ -471,6 +471,8 @@
         "NOTES": "Remarques"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "Ajouter une tâche",
+        "ADD_TASK_TO_BACKLOG": "Ajouter une tâche à l'arriéré",
         "START": "Appuyez sur Entrée une fois de plus pour commencer"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
         "TASK_CREATED": "Tâche créée \"{{title}}\""
       },
-      "ADD_TASK": "Sélectionner ou créer une tâche",
+      "SELECT_OR_CREATE": "Sélectionner ou créer une tâche",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Estimation",
         "SPENT_TODAY": "Dépensé aujourd'hui",
@@ -667,9 +669,11 @@
     "DELETE": "Effacer",
     "DISMISS": "Rejeter",
     "DO_IT": "Fais le!",
+    "EDIT": "modifier",
     "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> télécharger l'extension chromée</a> afin de permettre la communication avec Jira Api et la gestion du temps d'inactivité. Notez que cela ne fonctionne pas pour mobile.",
     "LOGIN": "S'identifier",
     "LOGOUT": "Connectez - Out",
+    "MINUTES": "{{m}} minutes",
     "NEXT": "Suivant",
     "OK": "D'accord",
     "PREVIOUS": "précédent",
@@ -833,6 +837,7 @@
     "EVALUATION": "évaluation",
     "EXPORT_TASK_LIST": "Liste des tâches d'exportation",
     "NO_TASKS": "Il n'y a pas de tâches pour ce jour",
+    "PLAN": "Plan",
     "ROUND_15M": "Arrondissez toutes les tâches à 15 minutes",
     "ROUND_30M": "Arrondissez toutes les tâches à 30 minutes",
     "ROUND_5M": "Arrondissez toutes les tâches à 5 minutes",

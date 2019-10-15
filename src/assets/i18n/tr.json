@@ -471,6 +471,8 @@
         "NOTES": "Notlar"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "Görev ekle",
+        "ADD_TASK_TO_BACKLOG": "İş gününe görev ekle",
         "START": "Başlamak için bir kez daha enter tuşuna basın"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı",
         "TASK_CREATED": "\"{{title}}\" görevi oluşturuldu"
       },
-      "ADD_TASK": "Görev seç veya oluştur",
+      "SELECT_OR_CREATE": "Görev seç veya oluştur",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Tahmin",
         "SPENT_TODAY": "Bugün Harcandı",
@@ -667,9 +669,11 @@
     "DELETE": "silmek",
     "DISMISS": "Reddet",
     "DO_IT": "Yap!",
+    "EDIT": "Düzenle",
     "EXTENSION_INFO": "Jira Api ve Idle Time Handling ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
+    "MINUTES": "{{m}} dakika",
     "NEXT": "Sonraki",
     "OK": "tamam",
     "PREVIOUS": "Önceki",
@@ -833,6 +837,7 @@
     "EVALUATION": "Değerlendirme",
     "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
     "NO_TASKS": "Bu gün için görev yok",
+    "PLAN": "Plan",
     "ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
     "ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
     "ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
