@@ -471,6 +471,8 @@
         "NOTES": "Anmerkungen"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "Aufgabe hinzufügen",
+        "ADD_TASK_TO_BACKLOG": "Aufgabe zum Rückstand hinzufügen",
         "START": "Drücken Sie die Eingabetaste noch einmal, um zu beginnen"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert",
         "TASK_CREATED": "Erstellte Aufgabe \"{{title}}\""
       },
-      "ADD_TASK": "Aufgabe auswählen oder erstellen",
+      "SELECT_OR_CREATE": "Aufgabe auswählen oder erstellen",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Schätzen",
         "SPENT_TODAY": "Heute verbracht",
@@ -667,9 +669,11 @@
     "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
     "DO_IT": "TU es!",
+    "EDIT": "Bearbeiten",
     "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Idle Time Handling zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "LOGIN": "Anmeldung",
     "LOGOUT": "Ausloggen",
+    "MINUTES": "{{m}} Minuten",
     "NEXT": "Nächster",
     "OK": "OK",
     "PREVIOUS": "Bisherige",
@@ -833,6 +837,7 @@
     "EVALUATION": "Auswertung",
     "EXPORT_TASK_LIST": "Aufgabenliste exportieren",
     "NO_TASKS": "Für diesen Tag gibt es keine Aufgaben",
+    "PLAN": "Planen",
     "ROUND_15M": "Runden auf 15 Minuten",
     "ROUND_30M": "Runden auf 30 Minuten",
     "ROUND_5M": "Runden auf 5 Minuten",

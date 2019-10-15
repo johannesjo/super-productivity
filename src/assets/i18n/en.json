@@ -667,12 +667,13 @@
     "CLICK_TO_EDIT": "click to edit",
     "CLOSE": "Close",
     "DELETE": "Delete",
-    "EDIT": "Edit",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
+    "EDIT": "Edit",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
+    "MINUTES": "{{m}} minutes",
     "NEXT": "Next",
     "OK": "Ok",
     "PREVIOUS": "Previous",
@@ -680,8 +681,7 @@
     "SAVE": "Save",
     "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "Update",
-    "MINUTES": "{{m}} minutes"
+    "UPDATE": "Update"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -837,6 +837,7 @@
     "EVALUATION": "Evaluation",
     "EXPORT_TASK_LIST": "Export Task List",
     "NO_TASKS": "There are no tasks for this day",
+    "PLAN": "Plan",
     "ROUND_15M": "Round all tasks to 15 minutes",
     "ROUND_30M": "Round all tasks to 30 minutes",
     "ROUND_5M": "Round all tasks to 5 minutes",
@@ -854,8 +855,7 @@
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
     "TODAY": "Today",
-    "WEEK": "Week",
-    "PLAN": "Plan"
+    "WEEK": "Week"
   },
   "PM": {
     "TITLE": "Project Metrics"

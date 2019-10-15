@@ -471,6 +471,8 @@
         "NOTES": "노트"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "작업 추가",
+        "ADD_TASK_TO_BACKLOG": "백 로그에 작업 추가",
         "START": "시작하려면 한 번 더 입력하십시오."
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "\"{{title}}\"작업에 대한 알림이 업데이트되었습니다.",
         "TASK_CREATED": "\"{{title}}\"작업 생성"
       },
-      "ADD_TASK": "작업 선택 또는 생성",
+      "SELECT_OR_CREATE": "작업 선택 또는 생성",
       "SUMMARY_TABLE": {
         "ESTIMATE": "견적",
         "SPENT_TODAY": "오늘 보낸",
@@ -667,9 +669,11 @@
     "DELETE": "지우다",
     "DISMISS": "버리다",
     "DO_IT": "해!",
+    "EDIT": "편집하다",
     "EXTENSION_INFO": "Jira Api 및 Idle Time Handling과의 통신을 허용하려면 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
     "LOGIN": "로그인",
     "LOGOUT": "로그 아웃",
+    "MINUTES": "{{m}} 분",
     "NEXT": "다음 것",
     "OK": "승인",
     "PREVIOUS": "너무 이른",
@@ -833,6 +837,7 @@
     "EVALUATION": "평가",
     "EXPORT_TASK_LIST": "작업 목록 내보내기",
     "NO_TASKS": "오늘은 아무 작업도 없습니다.",
+    "PLAN": "계획",
     "ROUND_15M": "모든 작업을 15 분으로 반올림",
     "ROUND_30M": "모든 작업을 30 분으로 반올림",
     "ROUND_5M": "모든 작업을 5 분으로 반올림",

@@ -471,6 +471,8 @@
         "NOTES": "Заметки"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "Добавить задачу",
+        "ADD_TASK_TO_BACKLOG": "Добавить задачу в отставание",
         "START": "Нажмите ввод еще раз, чтобы начать"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "Обновленное напоминание для задачи \"{{title}}\"",
         "TASK_CREATED": "Создано задание \"{{title}}\""
       },
-      "ADD_TASK": "Выберите или создайте задачу",
+      "SELECT_OR_CREATE": "Выберите или создайте задачу",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Оценить",
         "SPENT_TODAY": "Потратил сегодня",
@@ -667,9 +669,11 @@
     "DELETE": "удалять",
     "DISMISS": "отклонять",
     "DO_IT": "Сделай это!",
+    "EDIT": "редактировать",
     "EXTENSION_INFO": "Пожалуйста, <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> загрузите расширение Chrome</a> , чтобы обеспечить связь с Jira Api и Idle Time Handling. Обратите внимание, что это не работает для мобильных устройств.",
     "LOGIN": "Авторизоваться",
     "LOGOUT": "Выйти",
+    "MINUTES": "{{m}} минут",
     "NEXT": "следующий",
     "OK": "Хорошо",
     "PREVIOUS": "предыдущий",
@@ -833,6 +837,7 @@
     "EVALUATION": "оценка",
     "EXPORT_TASK_LIST": "Экспорт списка задач",
     "NO_TASKS": "На этот день нет заданий",
+    "PLAN": "план",
     "ROUND_15M": "Округлить все задания до 15 минут",
     "ROUND_30M": "Округлить все задания до 30 минут",
     "ROUND_5M": "Округлить все задания до 5 минут",

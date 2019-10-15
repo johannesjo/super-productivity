@@ -471,6 +471,8 @@
         "NOTES": "Notas"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "Agregar tarea",
+        "ADD_TASK_TO_BACKLOG": "Agregar tarea a la acumulación",
         "START": "Presiona entrar una vez más para comenzar"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\"",
         "TASK_CREATED": "Tarea creada \"{{title}}\""
       },
-      "ADD_TASK": "Seleccionar o crear tarea",
+      "SELECT_OR_CREATE": "Seleccionar o crear tarea",
       "SUMMARY_TABLE": {
         "ESTIMATE": "ESTIMAR",
         "SPENT_TODAY": "Gastado hoy",
@@ -667,9 +669,11 @@
     "DELETE": "Borrar",
     "DISMISS": "Despedir",
     "DO_IT": "¡Hazlo!",
+    "EDIT": "Editar",
     "EXTENSION_INFO": "Descargue <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> la extensión de Chrome</a> para permitir la comunicación con Jira Api y Idle Time Handling. Tenga en cuenta que esto no funciona para móviles.",
     "LOGIN": "Iniciar sesión",
     "LOGOUT": "Cerrar sesión",
+    "MINUTES": "{{m}} minutos",
     "NEXT": "Siguiente",
     "OK": "De acuerdo",
     "PREVIOUS": "Anterior",
@@ -833,6 +837,7 @@
     "EVALUATION": "Evaluación",
     "EXPORT_TASK_LIST": "Lista de tareas de exportación",
     "NO_TASKS": "No hay tareas para este día.",
+    "PLAN": "plan",
     "ROUND_15M": "Redondear todas las tareas a 15 minutos.",
     "ROUND_30M": "Redondear todas las tareas a 30 minutos.",
     "ROUND_5M": "Redondear todas las tareas a 5 minutos.",

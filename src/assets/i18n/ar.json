@@ -471,6 +471,8 @@
         "NOTES": "ملاحظات"
       },
       "ADD_TASK_BAR": {
+        "ADD_TASK": "إضافة مهمة",
+        "ADD_TASK_TO_BACKLOG": "إضافة مهمة إلى تراكم",
         "START": "اضغط على إدخال مرة أخرى للبدء"
       },
       "B": {
@@ -552,7 +554,7 @@
         "REMINDER_UPDATED": "تذكير محدث للمهمة \"{{title}}\"",
         "TASK_CREATED": "المهمة التي تم تكوينها \"{{title}}\""
       },
-      "ADD_TASK": "حدد أو أنشئ المهمة",
+      "SELECT_OR_CREATE": "حدد أو أنشئ المهمة",
       "SUMMARY_TABLE": {
         "ESTIMATE": "تقدير",
         "SPENT_TODAY": "قضى اليوم",
@@ -667,9 +669,11 @@
     "DELETE": "حذف",
     "DISMISS": "رفض",
     "DO_IT": "افعلها!",
+    "EDIT": "تصحيح",
     "EXTENSION_INFO": "يرجى <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> تنزيل ملحق chrome</a> للسماح بالتواصل مع Jira Api و Idle Time Handling. لاحظ أن هذا لا يعمل للجوال.",
     "LOGIN": "تسجيل الدخول",
     "LOGOUT": "الخروج",
+    "MINUTES": "{{m}} دقيقة",
     "NEXT": "التالى",
     "OK": "حسنا",
     "PREVIOUS": "سابق",
@@ -833,6 +837,7 @@
     "EVALUATION": "تقييم",
     "EXPORT_TASK_LIST": "تصدير قائمة المهام",
     "NO_TASKS": "لا توجد مهام لهذا اليوم",
+    "PLAN": "خطة",
     "ROUND_15M": "تقريب جميع المهام إلى 15 دقيقة",
     "ROUND_30M": "تقريب جميع المهام إلى 30 دقيقة",
     "ROUND_5M": "تقريب جميع المهام إلى 5 دقائق",
