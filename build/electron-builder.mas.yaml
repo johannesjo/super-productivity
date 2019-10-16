@@ -11,11 +11,10 @@ directories:
 
 mac:
   appId: com.super-productivity.app
-  type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
   icon: build/icon.icns
-  hardenedRuntime: false
+  hardenedRuntime: true
   gatekeeperAssess: false
   provisioningProfile: embedded.provisionprofile
   darkModeSupport: true
@@ -27,9 +26,7 @@ mac:
     CFBundleDevelopmentRegion: en
 
 mas:
-  type: distribution
-  category: public.app-category.productivity
+  hardenedRuntime: false
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
   provisioningProfile: embedded.provisionprofile
-  hardenedRuntime: false
