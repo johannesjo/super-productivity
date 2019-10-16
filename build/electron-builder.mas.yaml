@@ -15,12 +15,16 @@ mac:
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
   icon: build/icon.icns
-  hardenedRuntime: true
+  hardenedRuntime: false
   gatekeeperAssess: false
   provisioningProfile: embedded.provisionprofile
-#  darkModeSupport: true
+  darkModeSupport: true
   target:
     - mas
+  extendInfo:
+    ITSAppUsesNonExemptEncryption: false,
+    CFBundleLocalizations: ['en','cs','da','de','es','et','fi','fr','hr','hu','id','it','ja','nb','nl','pl','pt-BR','pt-PT','ro','ru','sk','sv','tr','uk','vi','zh-Hans','zh-Hant']
+    CFBundleDevelopmentRegion: en
 
 mas:
   type: distribution
@@ -28,5 +32,4 @@ mas:
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
   provisioningProfile: embedded.provisionprofile
-  icon: build/icon.icns
-  hardenedRuntime: true
+  hardenedRuntime: false
