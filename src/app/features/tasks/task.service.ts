@@ -11,7 +11,7 @@ import {
   withLatestFrom
 } from 'rxjs/operators';
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -93,6 +93,7 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
+import {DexieService} from '../../core/dexie/dexie.service';
 
 
 @Injectable({
@@ -152,10 +153,8 @@ export class TaskService {
     select(selectBacklogTaskCount),
   );
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysUnDoneTasksWithSubTasks),
-    shareReplay(1),
-  );
+  d = this._dexieService.table('todos');
+  undoneTasks$: Observable<any[]> = of(this.d.toArray());
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysDoneTasksWithSubTasks),
@@ -251,6 +250,7 @@ export class TaskService {
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
+    private readonly _dexieService: DexieService,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 
