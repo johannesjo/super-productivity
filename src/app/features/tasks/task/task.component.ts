@@ -75,7 +75,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // TODO do via observable
   @HostBinding('class.isAdditionalInfoOpen')
   private get _isAdditionalInfoOpen() {
-    return this.task._isAdditionalInfoOpen;
+    return this.task.ui_isAdditionalInfoOpen;
   }
 
   // TODO do via observable
@@ -293,14 +293,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   showAdditionalInfos() {
-    if (!this.task._isAdditionalInfoOpen) {
+    if (!this.task.ui_isAdditionalInfoOpen) {
       this._taskService.showAdditionalInfoOpen(this.task.id);
       this.focusSelf();
     }
   }
 
   hideAdditionalInfos() {
-    if (this.task._isAdditionalInfoOpen) {
+    if (this.task.ui_isAdditionalInfoOpen) {
       this._taskService.hideAdditionalInfoOpen(this.task.id);
       this.focusSelf();
     }
@@ -308,7 +308,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   toggleShowAdditionalInfoOpen() {
-    this.task._isAdditionalInfoOpen
+    this.task.ui_isAdditionalInfoOpen
       ? this._taskService.hideAdditionalInfoOpen(this.task.id)
       : this._taskService.showAdditionalInfoOpen(this.task.id);
     this.focusSelf();
@@ -316,11 +316,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleShowAttachments() {
     const attachmentTabIndex = this.task.issueData ? 2 : 1;
-    (this.task._isAdditionalInfoOpen && this.task._currentTab === attachmentTabIndex)
+    (this.task.ui_isAdditionalInfoOpen && this.task.ui_currentTab === attachmentTabIndex)
       ? this._taskService.hideAdditionalInfoOpen(this.task.id)
       : this._taskService.updateUi(this.task.id, {
-        _isAdditionalInfoOpen: true,
-        _currentTab: attachmentTabIndex,
+        ui_isAdditionalInfoOpen: true,
+        ui_currentTab: attachmentTabIndex,
       });
     this.focusSelf();
   }
@@ -397,7 +397,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTabIndexChange(newVal) {
-    this._taskService.updateUi(this.task.id, {_currentTab: newVal || 0});
+    this._taskService.updateUi(this.task.id, {ui_currentTab: newVal || 0});
   }
 
   onPanStart(ev) {
@@ -590,9 +590,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // collapse sub tasks
     if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
       const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
-      if (this.task._isAdditionalInfoOpen) {
+      if (this.task.ui_isAdditionalInfoOpen) {
         this.hideAdditionalInfos();
-      } else if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.HideAll) {
+      } else if (hasSubTasks && this.task.ui_showSubTasksMode !== ShowSubTasksMode.HideAll) {
         this._taskService.toggleSubTaskMode(this.task.id, true, false);
         // TODO find a solution
         // } else if (this.task.parentId) {
@@ -605,9 +605,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
       const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
-      if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.Show) {
+      if (hasSubTasks && this.task.ui_showSubTasksMode !== ShowSubTasksMode.Show) {
         this._taskService.toggleSubTaskMode(this.task.id, false, false);
-      } else if (!this.task._isAdditionalInfoOpen) {
+      } else if (!this.task.ui_isAdditionalInfoOpen) {
         this.showAdditionalInfos();
       } else {
         this.focusNext();

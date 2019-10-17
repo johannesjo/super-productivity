@@ -10,7 +10,7 @@ import {NgxRxdbService} from './ngx-rxdb.service';
 @Injectable()
 export class NgxRxdbCollectionService<T> implements OnDestroy {
   private _config: NgxRxdbCollectionConfig;
-  private _inited: ReplaySubject<boolean>;
+  private _isInitialized: ReplaySubject<boolean>;
   private _collection: RxCollection<T>;
   public get collection() {
     if (RxDB.isRxCollection(this._collection)) {
@@ -35,30 +35,28 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
   }
 
   collectionLoaded$(): Observable<boolean> {
-    if (this._inited) {
-      return this._inited.asObservable();
+    if (this._isInitialized) {
+      return this._isInitialized.asObservable();
     }
 
-    this._inited = new ReplaySubject();
+    this._isInitialized = new ReplaySubject();
     this.dbService.createCollection(this._config).then(collection => {
       this._collection = collection;
-      this._inited.next(true);
-      this._inited.complete();
+      this._isInitialized.next(true);
+      this._isInitialized.complete();
     });
 
-    return this._inited.asObservable();
+    return this._isInitialized.asObservable();
   }
 
   docs(rules?: any, sortBy?: string, limit?: number): Observable<RxDocument<T>[]> {
     return this.collectionLoaded$().pipe(
-      filter(inited => !!inited),
+      filter(isInitialized => !!isInitialized),
       switchMap(() => this.collection
-        ? this.collection
-          .find(rules)
-          .sort(sortBy || 'primary')
-          .limit(limit)
-          .$
-        : []
+        .find(rules)
+        .sort(sortBy)
+        .limit(limit)
+        .$
       )
     );
   }

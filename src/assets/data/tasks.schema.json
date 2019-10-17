@@ -5,29 +5,79 @@
   "title": "Todo",
   "description": "Todo Schema",
   "required": [
-    "guid",
-    "name"
+    "id",
+    "title"
   ],
   "version": 0,
   "properties": {
-    "guid": {
+    "id": {
       "type": "string",
-      "title": "Id",
       "primary": true,
       "pattern": "^(.*)$"
     },
-    "name": {
+    "projectId": {
       "type": "string",
-      "title": "Todo"
-    },
-    "done": {
-      "type": "boolean",
-      "title": "Done"
-    },
-    "dateCreated": {
-      "type": "number",
-      "title": "Date Created",
       "index": true
+    },
+    "parentId": {
+      "type": "string"
+    },
+    "reminderId": {
+      "type": "string"
+    },
+    "repeatCfgId": {
+      "type": "string"
+    },
+    "created": {
+      "type": "number",
+      "index": true
+    },
+    "title": {
+      "type": "string"
+    },
+    "subTaskIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "timeSpent": {
+      "type": "number"
+    },
+    "timeSpentOnDay": {
+      "type": "object"
+    },
+    "timeEstimate": {
+      "type": "number"
+    },
+    "isDone": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "issueId": {
+      "type": "string"
+    },
+    "issueType": {
+      "type": "string"
+    },
+    "attachmentIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "ui_isAdditionalInfoOpen": {
+      "type": "boolean"
+    },
+    "ui_showSubTasksMode": {
+      "type": "number"
+    },
+    "ui_currentTab": {
+      "type": "number"
     }
   }
 }

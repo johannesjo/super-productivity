@@ -84,7 +84,6 @@ import {
   selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
-  selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
@@ -154,15 +153,13 @@ export class TaskService {
     select(selectBacklogTaskCount),
   );
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysUnDoneTasksWithSubTasks),
-    shareReplay(1),
-  );
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this.selectTodos({
+    // $and: [{isDone: {$eq: false}}],
+  });
 
-  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysDoneTasksWithSubTasks),
-    shareReplay(1),
-  );
+  doneTasks$: Observable<TaskWithSubTasks[]> =  this.selectTodos({
+    // $and: [{isDone: {$eq: true}}],
+  });
 
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectAllRepeatableTaskWithSubTasks),
@@ -256,9 +253,7 @@ export class TaskService {
     private _ngxRxdbCollectionService: NgxRxdbCollectionService<Task>
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
-    setTimeout(() => {
-      this.selectTodos().subscribe((val) => console.log('selectTodos()', val));
-    }, 3000);
+
     // time tracking
     this._timeTrackingService.tick$
       .pipe(withLatestFrom(this.currentTaskId$))
@@ -269,11 +264,8 @@ export class TaskService {
       });
   }
 
-  selectTodos(): Observable<any[]> {
-    const rulesObject: any = {
-      $and: [{dateCreated: {$gt: null}}],
-    };
-    return this._ngxRxdbCollectionService.docs(rulesObject, '-dateCreated');
+  selectTodos(rulesObject = {}): Observable<any[]> {
+    return this._ngxRxdbCollectionService.docs(rulesObject, '-created');
   }
 
 
@@ -311,11 +303,25 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-    this._store.dispatch(new AddTask({
-      task: this.createNewTaskWithDefaults(title, additionalFields),
-      isAddToBacklog,
-      isAddToBottom
-    }));
+    function clean(obj): any {
+      for (const propName in obj) {
+        if (obj[propName] === null || obj[propName] === undefined) {
+          delete obj[propName];
+        }
+      }
+    }
+
+    const task = this.createNewTaskWithDefaults(title, additionalFields);
+    clean(task);
+    console.log(task);
+    this._ngxRxdbCollectionService.insert(task).subscribe((v) => {
+      console.log('SAVE SUCCESS', v);
+    });
+    // this._store.dispatch(new AddTask({
+    //   task: this.createNewTaskWithDefaults(title, additionalFields),
+    //   isAddToBacklog,
+    //   isAddToBottom
+    // }));
   }
 
   addWithIssue(title: string,
@@ -560,15 +566,15 @@ export class TaskService {
   }
 
   showAdditionalInfoOpen(id: string) {
-    this.updateUi(id, {_isAdditionalInfoOpen: true, _currentTab: 0});
+    this.updateUi(id, {ui_isAdditionalInfoOpen: true, ui_currentTab: 0});
   }
 
   hideAdditionalInfoOpen(id: string) {
-    this.updateUi(id, {_isAdditionalInfoOpen: false});
+    this.updateUi(id, {ui_isAdditionalInfoOpen: false});
   }
 
   showSubTasks(id: string) {
-    this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.Show});
+    this.updateUi(id, {ui_showSubTasksMode: ShowSubTasksMode.Show});
   }
 
   toggleSubTaskMode(taskId: string, isShowLess = true, isEndless = false) {
@@ -576,7 +582,7 @@ export class TaskService {
   }
 
   hideSubTasks(id: string) {
-    this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.HideAll});
+    this.updateUi(id, {ui_showSubTasksMode: ShowSubTasksMode.HideAll});
   }
 
   // GLOBAL TASK MODEL STUFF
@@ -674,7 +680,7 @@ export class TaskService {
       ...DEFAULT_TASK,
       created: Date.now(),
       title,
-      id: shortid(),
+      id: 'T_' + shortid(),
       projectId: this._projectService.currentId,
       ...additional,
     }) as Task;

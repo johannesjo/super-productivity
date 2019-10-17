@@ -191,7 +191,7 @@ export function taskReducer(
       const subTasks = task.subTaskIds.map(id => state.entities[id]);
       const doneTasksLength = subTasks.filter(t => t.isDone).length;
       const isDoneTaskCaseNeeded = doneTasksLength && (doneTasksLength < subTasks.length);
-      const oldVal = +task._showSubTasksMode;
+      const oldVal = +task.ui_showSubTasksMode;
       let newVal;
 
       if (isDoneTaskCaseNeeded) {
@@ -232,7 +232,7 @@ export function taskReducer(
       return taskAdapter.updateOne({
         id: taskId,
         changes: {
-          _showSubTasksMode: newVal
+          ui_showSubTasksMode: newVal
         }
       }, state);
     }

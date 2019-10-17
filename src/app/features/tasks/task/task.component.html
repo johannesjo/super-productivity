@@ -164,7 +164,7 @@
           </button>
           <button (click)="toggleShowAdditionalInfoOpen()"
                   *ngIf="!task.notes&&!task.issueData"
-                  [class.isActive]="task._isAdditionalInfoOpen"
+                  [class.isActive]="task.ui_isAdditionalInfoOpen"
                   class="ico-btn show-additional-info-btn"
                   color=""
                   mat-icon-button
@@ -185,7 +185,7 @@
         </button>
         <button (click)="toggleShowAdditionalInfoOpen()"
                 *ngIf="task.notes||task.issueData"
-                [class.isActive]="task._isAdditionalInfoOpen"
+                [class.isActive]="task.ui_isAdditionalInfoOpen"
                 class="ico-btn show-additional-info-btn"
                 color=""
                 mat-icon-button
@@ -196,7 +196,7 @@
 
         <button (click)="toggleShowAttachments()"
                 *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
-                [class.isActive]="task._isAdditionalInfoOpen"
+                [class.isActive]="task.ui_isAdditionalInfoOpen"
                 class="ico-btn attachment-btn"
                 color=""
                 mat-icon-button
@@ -267,7 +267,7 @@
 
           <button (click)="toggleShowAdditionalInfoOpen()"
                   class="show-touch-only"
-                  [class.isActive]="task._isAdditionalInfoOpen"
+                  [class.isActive]="task.ui_isAdditionalInfoOpen"
                   mat-menu-item
                   tabindex="2">
             <mat-icon *ngIf="task.notes||task.issueData">chat</mat-icon>
@@ -372,9 +372,9 @@
 
   <task-additional-info (tabIndexChange)="onTabIndexChange($event)"
                         (taskNotesChanged)="onTaskNotesChanged($event)"
-                        *ngIf="task._isAdditionalInfoOpen"
+                        *ngIf="task.ui_isAdditionalInfoOpen"
                         [@expand]
-                        [selectedIndex]="task._currentTab"
+                        [selectedIndex]="task.ui_currentTab"
                         [task]="task"
                         class="additional-info"></task-additional-info>
 
@@ -387,16 +387,16 @@
             mat-mini-fab
             tabindex="2"
             [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">
-      <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)">add
+      <mat-icon *ngIf="(task.ui_showSubTasksMode===ShowSubTasksMode.HideAll)">add
       </mat-icon>
-      <mat-icon *ngIf="(task._showSubTasksMode!==ShowSubTasksMode.HideAll)"
-                [class.isHideDoneTasks]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)">remove
+      <mat-icon *ngIf="(task.ui_showSubTasksMode!==ShowSubTasksMode.HideAll)"
+                [class.isHideDoneTasks]="(task.ui_showSubTasksMode===ShowSubTasksMode.HideDone)">remove
       </mat-icon>
     </button>
     <task-list *ngIf="task.subTasks?.length"
                [@expand]
-               [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"
-               [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"
+               [isHideAll]="(task.ui_showSubTasksMode!==ShowSubTasksMode.Show)"
+               [isHideDone]="(task.ui_showSubTasksMode===ShowSubTasksMode.HideDone)"
                [listModelId]="task.id"
                [parentId]="task.id"
                [tasks]="task.subTasks"

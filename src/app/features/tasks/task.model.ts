@@ -40,10 +40,10 @@ export interface TaskCopy {
   repeatCfgId: string;
 
   // ui model
-  _isAdditionalInfoOpen: boolean;
+  ui_isAdditionalInfoOpen: boolean;
   // 0: show, 1: hide-done tasks, 2: hide all sub tasks
-  _showSubTasksMode: ShowSubTasksMode;
-  _currentTab: number;
+  ui_showSubTasksMode: ShowSubTasksMode;
+  ui_currentTab: number;
 }
 
 export type Task = Readonly<TaskCopy>;
@@ -78,9 +78,9 @@ export const DEFAULT_TASK: Task = {
   reminderId: null,
   created: Date.now(),
   repeatCfgId: null,
-  _isAdditionalInfoOpen: false,
-  _showSubTasksMode: ShowSubTasksMode.Show,
-  _currentTab: 0,
+  ui_isAdditionalInfoOpen: false,
+  ui_showSubTasksMode: ShowSubTasksMode.Show,
+  ui_currentTab: 0,
 };
 
 export const SHORT_SYNTAX_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;

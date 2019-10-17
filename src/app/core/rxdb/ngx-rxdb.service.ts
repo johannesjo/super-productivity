@@ -10,6 +10,7 @@ import RxDBValidateModule from 'rxdb/plugins/validate';
 import {Observable, of} from 'rxjs';
 import {NgxRxdbCollectionConfig, NgxRxdbConfig, NgxRxdbDump} from './ngx-rxdb.interface';
 import {NgxRxdbCollectionCreator} from './ngx-rxdb-collection.class';
+import {promiseTimeout} from '../../util/promise-timeout';
 
 RxDB.plugin(RxDBErrorMessagesModule);
 RxDB.plugin(dumpPlugin);
@@ -119,6 +120,9 @@ export class NgxRxdbService implements OnDestroy {
   }
 
   async createCollection(schemaConfig: NgxRxdbCollectionConfig) {
+    // TODO this needs to be fixed to be available initially
+    await promiseTimeout(2500);
+
     if (!schemaConfig || !schemaConfig.schema) {
       throw new Error('RxdbService: missing schema object');
     }
