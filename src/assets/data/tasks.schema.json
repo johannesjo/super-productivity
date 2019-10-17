@@ -1,0 +1,33 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Todo",
+  "description": "Todo Schema",
+  "required": [
+    "guid",
+    "name"
+  ],
+  "version": 0,
+  "properties": {
+    "guid": {
+      "type": "string",
+      "title": "Id",
+      "primary": true,
+      "pattern": "^(.*)$"
+    },
+    "name": {
+      "type": "string",
+      "title": "Todo"
+    },
+    "done": {
+      "type": "boolean",
+      "title": "Done"
+    },
+    "dateCreated": {
+      "type": "number",
+      "title": "Date Created",
+      "index": true
+    }
+  }
+}

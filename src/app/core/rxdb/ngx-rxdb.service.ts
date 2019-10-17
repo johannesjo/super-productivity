@@ -1,16 +1,15 @@
 // tslint:disable:array-type member-access no-console no-string-literal interface-over-type-literal
-import { isDevMode, Injectable, OnDestroy } from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import * as PouchdbAdapterIdb from 'pouchdb-adapter-idb';
-import { RxCollection, RxDatabase, RxDocument, RxJsonSchema } from 'rxdb';
+import {RxCollection, RxDatabase, RxDocument} from 'rxdb';
 import RxDB from 'rxdb/plugins/core';
 import UpdatePlugin from 'rxdb/plugins/update';
 import RxDBErrorMessagesModule from 'rxdb/plugins/error-messages';
 import * as dumpPlugin from 'rxdb/plugins/json-dump';
 import RxDBValidateModule from 'rxdb/plugins/validate';
-import { Observable, of } from 'rxjs';
-import { isEmpty } from 'micro-dash';
-import { NgxRxdbCollectionConfig, NgxRxdbDump, NgxRxdbConfig } from './ngx-rxdb.interface';
-import { NgxRxdbCollectionCreator } from './ngx-rxdb-collection.class';
+import {Observable, of} from 'rxjs';
+import {NgxRxdbCollectionConfig, NgxRxdbConfig, NgxRxdbDump} from './ngx-rxdb.interface';
+import {NgxRxdbCollectionCreator} from './ngx-rxdb-collection.class';
 
 RxDB.plugin(RxDBErrorMessagesModule);
 RxDB.plugin(dumpPlugin);
@@ -20,30 +19,29 @@ RxDB.plugin(PouchdbAdapterIdb);
 
 const DEFAULT_ADAPTER = 'idb';
 const DEFAULT_CONFIG = {
-  name: 'ngx',
+  name: 'default_name_please_change',
   adapter: DEFAULT_ADAPTER,
-  multiInstance: false,
+  multiInstance: true,
   queryChangeDetection: false,
   ignoreDuplicate: true,
 };
 
-export type RxDbCollections = { [key: string]: RxCollection };
-
 @Injectable()
 export class NgxRxdbService implements OnDestroy {
-  private dbInstance: RxDatabase;
+  private _dbInstance: RxDatabase;
 
   get db(): RxDatabase {
-    return this.dbInstance;
+    return this._dbInstance;
   }
 
   set db(dbInstanceObj: RxDatabase) {
-    this.dbInstance = dbInstanceObj;
+    this._dbInstance = dbInstanceObj;
   }
 
   get _imported() {
     return window.localStorage['_pouch_imported'];
   }
+
   set _imported(v) {
     window.localStorage['_pouch_imported'] = v;
   }
@@ -54,7 +52,7 @@ export class NgxRxdbService implements OnDestroy {
 
   async ngOnDestroy() {
     // tslint:disable-next-line:no-unused-expression
-    this.dbInstance && await this.dbInstance.destroy();
+    this._dbInstance && await this._dbInstance.destroy();
   }
 
   /**
@@ -67,14 +65,15 @@ export class NgxRxdbService implements OnDestroy {
         ...DEFAULT_CONFIG,
         ...config
       });
-      this.dbInstance = db;
+      this._dbInstance = db;
+      console.log(this.db);
       console.log('RxdbService: created database');
       // also can create collections from root config
-      if (!isEmpty(config.options) && config.options.schemas) {
+      if (config && config.options && config.options.schemas) {
         await this.initCollections(config.options.schemas);
         console.log('RxdbService: created collections bulk');
       }
-      if (!isEmpty(config.options) && config.options.dumpPath) {
+      if (config && config.options && config.options.dumpPath) {
         // fetch dump json
         const dump = await (await fetch(config.options.dumpPath)).json();
         // import only new dump
@@ -106,7 +105,7 @@ export class NgxRxdbService implements OnDestroy {
    */
   async importDbDump(dumpObj: NgxRxdbDump) {
     try {
-      const dump = this.prepareDump(dumpObj);
+      const dump = this._prepareDump(dumpObj);
       await this.db.importDump(dump);
       this._imported = dump.timestamp;
     } catch (error) {
@@ -120,7 +119,7 @@ export class NgxRxdbService implements OnDestroy {
   }
 
   async createCollection(schemaConfig: NgxRxdbCollectionConfig) {
-    if (isEmpty(schemaConfig) || isEmpty(schemaConfig.schema)) {
+    if (!schemaConfig || !schemaConfig.schema) {
       throw new Error('RxdbService: missing schema object');
     }
     let collection: RxCollection = this.db[name];
@@ -165,10 +164,10 @@ export class NgxRxdbService implements OnDestroy {
   /**
    * change schemaHashes from dump to existing schema hashes
    */
-  private prepareDump(dumpObj: NgxRxdbDump): NgxRxdbDump {
-    const dumpWithHashes = { ...dumpObj };
-    const collections = this.db.collections;
-    if (isEmpty(collections)) {
+  private _prepareDump(dumpObj: NgxRxdbDump): NgxRxdbDump {
+    const dumpWithHashes = {...dumpObj};
+    const collections = this.db.collections as any;
+    if (!collections) {
       throw new Error('collections must be initialized before importing dump');
     }
     for (const key of collections) {

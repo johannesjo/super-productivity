@@ -1,11 +1,11 @@
 // tslint:disable:variable-name
-import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { RxCollection, RxDocument, RxLocalDocument } from 'rxdb';
+import {Inject, Injectable, OnDestroy} from '@angular/core';
+import {RxCollection, RxDocument, RxLocalDocument} from 'rxdb';
 import RxDB from 'rxdb/plugins/core';
-import { defer, from, Observable, ReplaySubject } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
-import { NgxRxdbCollectionConfig } from './ngx-rxdb.interface';
-import { NgxRxdbService } from './ngx-rxdb.service';
+import {defer, from, Observable, ReplaySubject} from 'rxjs';
+import {filter, switchMap} from 'rxjs/operators';
+import {NgxRxdbCollectionConfig} from './ngx-rxdb.interface';
+import {NgxRxdbService} from './ngx-rxdb.service';
 
 @Injectable()
 export class NgxRxdbCollectionService<T> implements OnDestroy {
@@ -20,6 +20,7 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
       return null;
     }
   }
+
   public get db() {
     return this.dbService.db;
   }
@@ -39,7 +40,6 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
     }
 
     this._inited = new ReplaySubject();
-
     this.dbService.createCollection(this._config).then(collection => {
       this._collection = collection;
       this._inited.next(true);
@@ -53,10 +53,13 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
     return this.collectionLoaded$().pipe(
       filter(inited => !!inited),
       switchMap(() => this.collection
-      .find(rules)
-      .sort(sortBy || 'primary')
-      .limit(limit)
-      .$)
+        ? this.collection
+          .find(rules)
+          .sort(sortBy || 'primary')
+          .limit(limit)
+          .$
+        : []
+      )
     );
   }
 
@@ -95,7 +98,7 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
   update(id, data: Partial<T>): Observable<RxDocument<T>> {
     return defer(async () => {
       const doc = await this.collection.findOne(id).exec();
-      return doc.update({$set: { ...data }});
+      return doc.update({$set: {...data}});
     });
   }
 
@@ -124,7 +127,7 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
         const docs = await this.collection.find(rulesObj).exec();
         if (docs && docs.length) {
           // tslint:disable-next-line:no-string-literal
-          const deletedDocs = docs.map(doc => ({ _id: doc.primary, _rev: doc['_rev'], _deleted: true}));
+          const deletedDocs = docs.map(doc => ({_id: doc.primary, _rev: doc['_rev'], _deleted: true}));
           return this.collection.pouch.bulkDocs(deletedDocs);
         }
       } catch (error) {

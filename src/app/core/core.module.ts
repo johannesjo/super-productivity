@@ -8,6 +8,7 @@ import {NotifyModule} from './notify/notify.module';
 import {LocalBackupModule} from '../imex/local-backup/local-backup.module';
 import {BannerModule} from './banner/banner.module';
 import {CompressionModule} from './compression/compression.module';
+import {NgxRxdbModule} from './rxdb/ngx-rxdb.module';
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import {CompressionModule} from './compression/compression.module';
     NotifyModule,
     LocalBackupModule,
     CompressionModule,
+    NgxRxdbModule.forRoot({ name: 'sup3'}),
   ],
   exports: [
     PersistenceModule,

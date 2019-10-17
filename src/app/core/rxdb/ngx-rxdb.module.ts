@@ -53,7 +53,7 @@ export class NgxRxdbModule {
 export class NgxRxdbFeatureModule {
   constructor(private collectionService: NgxRxdbCollectionService<any>) {
     // init collection via loader
-    this.collectionService.collectionLoaded$().subscribe(() => {
-    });
+    // this.collectionService.collectionLoaded$().subscribe(() => {
+    // });
   }
 }

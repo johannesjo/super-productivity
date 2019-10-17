@@ -60,7 +60,8 @@ import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectAllTasksWithIssueData, selectBacklogTaskCount,
+  selectAllTasksWithIssueData,
+  selectBacklogTaskCount,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -93,6 +94,7 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
+import {NgxRxdbCollectionService} from '../../core/rxdb/ngx-rxdb-collection.service';
 
 
 @Injectable({
@@ -251,9 +253,12 @@ export class TaskService {
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
+    private _ngxRxdbCollectionService: NgxRxdbCollectionService<Task>
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
-
+    setTimeout(() => {
+      this.selectTodos().subscribe((val) => console.log('selectTodos()', val));
+    }, 3000);
     // time tracking
     this._timeTrackingService.tick$
       .pipe(withLatestFrom(this.currentTaskId$))
@@ -263,6 +268,14 @@ export class TaskService {
         }
       });
   }
+
+  selectTodos(): Observable<any[]> {
+    const rulesObject: any = {
+      $and: [{dateCreated: {$gt: null}}],
+    };
+    return this._ngxRxdbCollectionService.docs(rulesObject, '-dateCreated');
+  }
+
 
   // META
   // ----

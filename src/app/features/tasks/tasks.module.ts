@@ -27,6 +27,8 @@ import {TaskUiEffects} from './store/task-ui.effects';
 import {TaskElectronEffects} from './store/task-electron.effects';
 import {SubTaskTotalTimeSpentPipe} from './pipes/sub-task-total-time-spent.pipe';
 import {SubTaskTotalTimeEstimatePipe} from './pipes/sub-task-total-time-estimate.pipe';
+import {NgxRxdbModule} from '../../core/rxdb/ngx-rxdb.module';
+import {TASKS_SCHEMA} from './model/tasks.schema';
 
 @NgModule({
   imports: [
@@ -46,6 +48,7 @@ import {SubTaskTotalTimeEstimatePipe} from './pipes/sub-task-total-time-estimate
       TaskUiEffects,
       TaskElectronEffects,
     ]),
+    NgxRxdbModule.forFeature(TASKS_SCHEMA),
   ],
   declarations: [
     TaskComponent,

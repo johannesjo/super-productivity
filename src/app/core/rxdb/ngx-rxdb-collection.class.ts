@@ -1,6 +1,6 @@
 // tslint:disable:ban-types
-import { RxJsonSchema } from 'rxdb';
-import { NgxRxdbCollectionConfig } from './ngx-rxdb.interface';
+import {RxJsonSchema} from 'rxdb';
+import {NgxRxdbCollectionConfig} from './ngx-rxdb.interface';
 
 function idLengthFn() {
   return this.primary.length;
@@ -30,8 +30,8 @@ export class NgxRxdbCollectionCreator implements NgxRxdbCollectionConfig {
   constructor(config: NgxRxdbCollectionConfig) {
     Object.assign(this, {
       ...config,
-      methods: { ...DEFAULT_INSTANCE_METHODS, ...config.methods },
-      statics: { ...DEFAULT_COLLECTION_METHODS, ...config.statics },
+      methods: {...DEFAULT_INSTANCE_METHODS, ...config.methods},
+      statics: {...DEFAULT_COLLECTION_METHODS, ...config.statics},
     });
   }
 }
