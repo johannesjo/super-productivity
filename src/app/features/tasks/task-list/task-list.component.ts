@@ -69,8 +69,9 @@ export class TaskListComponent implements OnDestroy, OnInit {
   }
 
   @Input() set tasks(tasks: TaskWithSubTasks[]) {
+    console.log(tasks);
+
     if (!tasks) {
-      console.log(tasks);
       return;
     }
     this.tasksIN = tasks;

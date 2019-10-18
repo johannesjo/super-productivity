@@ -25,7 +25,10 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
     return this.dbService.db;
   }
 
-  constructor(private dbService: NgxRxdbService, @Inject('RXDB_FEATURE_CONFIG') private config: NgxRxdbCollectionConfig) {
+  constructor(
+    private dbService: NgxRxdbService,
+    @Inject('RXDB_FEATURE_CONFIG') private config: NgxRxdbCollectionConfig,
+  ) {
     this._config = config;
   }
 
@@ -47,6 +50,18 @@ export class NgxRxdbCollectionService<T> implements OnDestroy {
     });
 
     return this._isInitialized.asObservable();
+  }
+
+  docsCustom(rules?: any, sortBy?: string, limit?: number): Observable<RxDocument<T>[]> {
+    return this.collectionLoaded$().pipe(
+      filter(isInitialized => !!isInitialized),
+      switchMap(() => this.collection
+        .find(rules)
+        .sort(sortBy)
+        .limit(50)
+        .$
+      )
+    );
   }
 
   docs(rules?: any, sortBy?: string, limit?: number): Observable<RxDocument<T>[]> {

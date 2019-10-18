@@ -61,6 +61,7 @@ export class NgxRxdbService implements OnDestroy {
    * to ensure the database exists before the angular-app starts up
    */
   async initDb(config: NgxRxdbConfig) {
+    console.log('INIT DB');
     try {
       const db: RxDatabase = await RxDB.create<any>({
         ...DEFAULT_CONFIG,
@@ -74,6 +75,8 @@ export class NgxRxdbService implements OnDestroy {
         await this.initCollections(config.options.schemas);
         console.log('RxdbService: created collections bulk');
       }
+      console.log(config);
+
       if (config && config.options && config.options.dumpPath) {
         // fetch dump json
         const dump = await (await fetch(config.options.dumpPath)).json();
@@ -120,6 +123,8 @@ export class NgxRxdbService implements OnDestroy {
   }
 
   async createCollection(schemaConfig: NgxRxdbCollectionConfig) {
+    console.log('CREATE COLLECTION');
+
     // TODO this needs to be fixed to be available initially
     await promiseTimeout(2500);
 

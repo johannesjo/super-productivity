@@ -1,33 +1,14 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  shareReplay,
-  switchMap,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {
-  DEFAULT_TASK,
-  DropListModelSource,
-  SHORT_SYNTAX_REG_EX,
-  ShowSubTasksMode,
-  Task,
-  TaskWithIssueData,
-  TaskWithSubTasks
-} from './task.model';
+import {DEFAULT_TASK, DropListModelSource, SHORT_SYNTAX_REG_EX, ShowSubTasksMode, Task, TaskWithIssueData, TaskWithSubTasks} from './task.model';
 import {select, Store} from '@ngrx/store';
 import {
   AddSubTask,
   AddTask,
   AddTaskReminder,
   AddTimeSpent,
-  DeleteTask,
   FocusLastActiveTask,
   FocusTask,
   LoadTaskState,
@@ -82,7 +63,6 @@ import {
   selectTasksWithMissingIssueData,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId,
-  selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
@@ -157,7 +137,7 @@ export class TaskService {
     // $and: [{isDone: {$eq: false}}],
   });
 
-  doneTasks$: Observable<TaskWithSubTasks[]> =  this.selectTodos({
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.selectTodos({
     // $and: [{isDone: {$eq: true}}],
   });
 
@@ -265,7 +245,12 @@ export class TaskService {
   }
 
   selectTodos(rulesObject = {}): Observable<any[]> {
-    return this._ngxRxdbCollectionService.docs(rulesObject, '-created');
+    console.time('CHANGE COLLECTION');
+    return this._ngxRxdbCollectionService.docsCustom(rulesObject, '-created').pipe(
+      tap(() => {
+        console.timeEnd('CHANGE COLLECTION');
+      })
+    );
   }
 
 
@@ -314,8 +299,11 @@ export class TaskService {
     const task = this.createNewTaskWithDefaults(title, additionalFields);
     clean(task);
     console.log(task);
+    console.time('SAVE');
+    console.time('CHANGE COLLECTION');
     this._ngxRxdbCollectionService.insert(task).subscribe((v) => {
       console.log('SAVE SUCCESS', v);
+      console.timeEnd('SAVE');
     });
     // this._store.dispatch(new AddTask({
     //   task: this.createNewTaskWithDefaults(title, additionalFields),
@@ -342,7 +330,12 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks) {
-    this._store.dispatch(new DeleteTask({task}));
+    console.time('DELETE');
+    console.time('CHANGE COLLECTION');
+    this._ngxRxdbCollectionService.remove(task.id).subscribe(() => {
+      console.timeEnd('DELETE');
+    });
+    // this._store.dispatch(new DeleteTask({task}));
   }
 
 
