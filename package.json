@@ -78,6 +78,8 @@
     "moment": "^2.24.0"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^8.2.0",
+    "@angular-builders/dev-server": "^7.3.1",
     "@angular-devkit/build-angular": "0.803.4",
     "@angular/animations": "^8.2.6",
     "@angular/cdk": "^8.2.0",
@@ -107,6 +109,8 @@
     "@ngx-formly/material": "^5.2.0",
     "@ngx-translate/core": "^11.0.1",
     "@ngx-translate/http-loader": "^4.0.0",
+    "@nozbe/watermelondb": "^0.14.1",
+    "@nozbe/with-observables": "^1.0.5",
     "@schematics/angular": "^8.0.1",
     "@types/jasmine": "^3.3.12",
     "@types/jasminewd2": "~2.0.3",
@@ -158,6 +162,7 @@
     "ts-node": "~8.2.0",
     "tslint": "^5.16.0",
     "typescript": "~3.5.3",
+    "worker-loader": "^2.0.0",
     "zone.js": "^0.9.1"
   }
 }

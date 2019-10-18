@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Task, TaskWithSubTasks} from '../task.model';
 import {TaskService} from '../task.service';
 import {DragulaService} from 'ng2-dragula';
@@ -69,6 +61,9 @@ export class TaskListComponent implements OnDestroy, OnInit {
   }
 
   @Input() set tasks(tasks: TaskWithSubTasks[]) {
+    if (!tasks) {
+      return;
+    }
     this.tasksIN = tasks;
     this.tasks$.next(tasks);
     this.doneTasksLength = this.tasksIN.filter(task => task.isDone).length;

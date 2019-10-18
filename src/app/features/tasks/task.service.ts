@@ -1,26 +1,8 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  shareReplay,
-  switchMap,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {
-  DEFAULT_TASK,
-  DropListModelSource,
-  SHORT_SYNTAX_REG_EX,
-  ShowSubTasksMode,
-  Task,
-  TaskWithIssueData,
-  TaskWithSubTasks
-} from './task.model';
+import {DEFAULT_TASK, DropListModelSource, SHORT_SYNTAX_REG_EX, ShowSubTasksMode, Task, TaskWithIssueData, TaskWithSubTasks} from './task.model';
 import {select, Store} from '@ngrx/store';
 import {
   AddSubTask,
@@ -60,7 +42,8 @@ import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectAllTasksWithIssueData, selectBacklogTaskCount,
+  selectAllTasksWithIssueData,
+  selectBacklogTaskCount,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -83,7 +66,6 @@ import {
   selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
-  selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
@@ -93,6 +75,7 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
+import {WatermelonService} from '../../core/watermelon/watermelon.service';
 
 
 @Injectable({
@@ -152,10 +135,25 @@ export class TaskService {
     select(selectBacklogTaskCount),
   );
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysUnDoneTasksWithSubTasks),
-    shareReplay(1),
+
+  undoneTasks$: Observable<any[]> = this._watermelonService.db.collections.get('tasks').changes.pipe(
+    switchMap(() => this._watermelonService.db.collections.get('tasks').query().fetch()),
+    shareReplay(1)
   );
+  //  undoneTasks$: Observable<any[]> = new Observable((obs) => {
+  //   const collection = this._watermelonService.db.collections.get('tasks');
+  //   console.log(collection);
+  //
+  //   collection.query().fetch().then(allTasks => {
+  //     console.log(allTasks);
+  //     obs.next(allTasks);
+  //   });
+  // });
+  // //
+  // undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+  //   select(selectTodaysUnDoneTasksWithSubTasks),
+  //   shareReplay(1),
+  // );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysDoneTasksWithSubTasks),
@@ -250,6 +248,7 @@ export class TaskService {
     private readonly _issueService: IssueService,
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
+    private readonly _watermelonService: WatermelonService,
     private readonly _actions$: Actions,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
@@ -298,11 +297,23 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-    this._store.dispatch(new AddTask({
-      task: this.createNewTaskWithDefaults(title, additionalFields),
-      isAddToBacklog,
-      isAddToBottom
-    }));
+
+    this._watermelonService.db.action(async () => {
+      const collection = this._watermelonService.db.collections.get('tasks');
+      const newPost = await collection.create(task => {
+        console.log(task);
+        const realTask = this.createNewTaskWithDefaults(title, additionalFields);
+
+        task.title = realTask.title;
+
+        return realTask;
+      });
+    });
+    // this._store.dispatch(new AddTask({
+    //   task: this.createNewTaskWithDefaults(title, additionalFields),
+    //   isAddToBacklog,
+    //   isAddToBottom
+    // }));
   }
 
   addWithIssue(title: string,
