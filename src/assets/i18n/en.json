@@ -123,7 +123,7 @@
         "OVERWRITE_LOCAL": "Overwrite local",
         "OVERWRITE_REMOTE": "Overwrite remote",
         "REMOTE": "remote",
-        "TEXT": "<p>Update from Google Drive Backup. <strong>Local data seems to be newer</strong> than the remote data. Overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>",
+        "TEXT": "<p>Update from Google Drive Backup. Both local and remote data seem to be modified. Do you want to overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>",
         "TITLE": "Overwrite local data with GDrive Update?"
       },
       "D_CONFIRM_SAVE": {

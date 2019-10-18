@@ -123,7 +123,7 @@
         "OVERWRITE_LOCAL": "Yerel verilerin üzerine yaz",
         "OVERWRITE_REMOTE": "Uzak verilerin üzerine yaz",
         "REMOTE": "uzak",
-        "TEXT": " Google Drive Yedekleme'den<p>Güncelleme. <strong>Yerel veri, uzak veriden</strong> daha yeni görünüyor. Kaydedilmemiş yerel değişikliklerin üzerine yazılsın mı? <strong>Bütün veriler sonsuza dek kaybedilecek</strong>.</p>",
+        "TEXT": " Google Drive Yedekleme'den<p>Güncelleme. Hem yerel hem de uzak veriler değiştirilmiş görünüyor. Kaydedilmemiş yerel değişikliklerin üzerine yazmak ister misiniz? <strong>Tüm veriler sonsuza dek kaybedilecek</strong>.</p>",
         "TITLE": "GDrive Update ile yerel verilerin üzerine yazılsın mı?"
       },
       "D_CONFIRM_SAVE": {

@@ -123,7 +123,7 @@
         "OVERWRITE_LOCAL": "覆盖本地数据",
         "OVERWRITE_REMOTE": "覆盖远程数据",
         "REMOTE": "远程",
-        "TEXT": "<p>从Google云端硬盘备份更新。 <strong>本地数据似乎比远程数据更新</strong> 。覆盖未保存的本地更改？ <strong>所有数据将永久丢失</strong>。</p>",
+        "TEXT": "<p>从Google Drive备份进行更新。本地和远程数据似乎都被修改。您要覆盖未保存的本地更改吗？ <strong>所有数据将永远丢失</strong>。</p>",
         "TITLE": "使用GDrive Update覆盖本地数据？"
       },
       "D_CONFIRM_SAVE": {

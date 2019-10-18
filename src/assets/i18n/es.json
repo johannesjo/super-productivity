@@ -123,7 +123,7 @@
         "OVERWRITE_LOCAL": "Sobrescribir datos locales",
         "OVERWRITE_REMOTE": "Sobrescribir datos remotos",
         "REMOTE": "remoto",
-        "TEXT": "<p>Actualizar desde Google Drive Backup. <strong>Los datos locales parecen ser más nuevos</strong> que los datos remotos. ¿Sobrescribir cambios locales no guardados? <strong>Todos los datos se perderán para siempre</strong>.</p>",
+        "TEXT": "<p>Actualización de la copia de seguridad de Google Drive. Los datos locales y remotos parecen estar modificados. ¿Desea sobrescribir los cambios locales no guardados? <strong>Todos los datos se perderán para siempre</strong>.</p>",
         "TITLE": "¿Sobrescribir los datos locales con la actualización de GDrive?"
       },
       "D_CONFIRM_SAVE": {

@@ -123,7 +123,7 @@
         "OVERWRITE_LOCAL": "Ecraser les données locales",
         "OVERWRITE_REMOTE": "Écraser les données distantes",
         "REMOTE": "éloigné",
-        "TEXT": "<p>Mise à jour à partir de Google Drive Backup. <strong>Les données locales semblent être plus récentes</strong> que les données distantes. Remplacer les modifications locales non enregistrées? <strong>Toutes les données seront définitivement perdues</strong>.</p>",
+        "TEXT": "<p>Mise à jour à partir de Google Drive Backup. Les données locales et distantes semblent être modifiées. Voulez-vous écraser les modifications locales non enregistrées? <strong>Toutes les données seront définitivement perdues</strong>.</p>",
         "TITLE": "Écraser les données locales avec GDrive Update?"
       },
       "D_CONFIRM_SAVE": {
