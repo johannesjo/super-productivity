@@ -36,7 +36,7 @@
             <mat-icon>edit</mat-icon>
           </button>
           <button (click)="archive(project.id)"
-                  *ngIf="project.id !== (projectService.currentId$|async)"
+                  [disabled]="project.id === (projectService.currentId$|async)"
                   color=""
                   mat-icon-button
                   [title]="T.PP.ARCHIVE_PROJECT|translate">
@@ -50,7 +50,7 @@
             <mat-icon>flight</mat-icon>
           </button>
           <button (click)="remove(project.id)"
-                  *ngIf="project.id !== (projectService.currentId$|async)"
+                  [disabled]="project.id === (projectService.currentId$|async)"
                   color="warn"
                   mat-icon-button
                   [title]="T.PP.DELETE_PROJECT|translate">
