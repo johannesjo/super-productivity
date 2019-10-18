@@ -4,7 +4,8 @@ import LokiJSAdapter from '@nozbe/watermelondb/adapters/lokijs';
 
 import schema from './schema';
 import TaskMelon from './task';
-// import Post from './model/Post' // ⬅️ You'll import your Models here
+import {switchMap} from 'rxjs/operators';
+import {from, merge, Observable} from 'rxjs';
 
 // First, create the adapter to the underlying database:
 // const adapter = new SQLiteAdapter({
@@ -14,23 +15,52 @@ const adapter = new LokiJSAdapter({
   schema,
 });
 
+const modelClasses = [
+  TaskMelon as any,
+];
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class WatermelonService {
-  db;
+  db = new Database({
+    adapter,
+    modelClasses,
+    actionsEnabled: true,
+  });
+
+  task = this._createCollection(TaskMelon.table);
 
   constructor() {
+  }
 
-// Then, make a Watermelon database from it!
-    this.db = new Database({
-      adapter,
-      modelClasses: [
-        TaskMelon as any,
-        // Post, // ⬅️ You'll add Models to Watermelon here
-      ],
-      actionsEnabled: true,
-    });
+
+  private _createCollection(tableName: string) {
+    const col = this.db.collections.get(tableName);
+    console.log(col);
+    return {
+      query: () => col.query().fetch(),
+      query$: (): Observable<any> => merge(
+        from(col.query().fetch()),
+        col.changes.pipe(
+          switchMap(() => col.query().fetch())
+        )
+      ),
+      add: (item) => {
+        this.db.action(async () => {
+          await col.create(itemInner => {
+            Object.keys(item).forEach((key) => {
+              if (key !== 'id') {
+                // NOTE: don't know who designed this, but this is how it works
+                itemInner[key] = item[key];
+              }
+            });
+          });
+        });
+      }
+    };
+
+
   }
 }

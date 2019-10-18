@@ -135,11 +135,14 @@ export class TaskService {
     select(selectBacklogTaskCount),
   );
 
-
-  undoneTasks$: Observable<any[]> = this._watermelonService.db.collections.get('tasks').changes.pipe(
-    switchMap(() => this._watermelonService.db.collections.get('tasks').query().fetch()),
+  undoneTasks$: Observable<any[]> = this._watermelonService.task.query$().pipe(
     shareReplay(1)
   );
+
+  // undoneTasks$: Observable<any[]> = this._watermelonService.db.collections.get('tasks').changes.pipe(
+  //   switchMap(() => this._watermelonService.db.collections.get('tasks').query().fetch()),
+  //   shareReplay(1)
+  // );
   //  undoneTasks$: Observable<any[]> = new Observable((obs) => {
   //   const collection = this._watermelonService.db.collections.get('tasks');
   //   console.log(collection);
@@ -297,18 +300,7 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-
-    this._watermelonService.db.action(async () => {
-      const collection = this._watermelonService.db.collections.get('tasks');
-      const newPost = await collection.create(task => {
-        console.log(task);
-        const realTask = this.createNewTaskWithDefaults(title, additionalFields);
-
-        task.title = realTask.title;
-
-        return realTask;
-      });
-    });
+    this._watermelonService.task.add(this.createNewTaskWithDefaults(title, additionalFields));
     // this._store.dispatch(new AddTask({
     //   task: this.createNewTaskWithDefaults(title, additionalFields),
     //   isAddToBacklog,
