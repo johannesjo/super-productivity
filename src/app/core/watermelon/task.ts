@@ -1,5 +1,5 @@
 import {Model} from '@nozbe/watermelondb';
-import {field} from '@nozbe/watermelondb/decorators';
+import {date, field} from '@nozbe/watermelondb/decorators';
 
 export default class TaskMelon extends Model {
   static table = 'tasks';
@@ -16,8 +16,8 @@ export default class TaskMelon extends Model {
   // }
 
   // tslint:disable-next-line
-  @field('title') title;
-  // @date('created') created;
+  @field('title') title: string;
+  @date('created') created;
 
   // @action async createSpam() {
   //   await this.update(post => {

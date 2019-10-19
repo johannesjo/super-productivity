@@ -76,6 +76,7 @@ import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
 import {WatermelonService} from '../../core/watermelon/watermelon.service';
+import {calcTotalTimeSpent} from './util/calc-total-time-spent';
 
 
 @Injectable({
@@ -255,6 +256,7 @@ export class TaskService {
     private readonly _actions$: Actions,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
+    this.undoneTasks$.subscribe((v) => console.log('undoneTasks$', v));
 
     // time tracking
     this._timeTrackingService.tick$
@@ -300,7 +302,11 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-    this._watermelonService.task.add(this.createNewTaskWithDefaults(title, additionalFields));
+    const task = this.createNewTaskWithDefaults(title, additionalFields);
+    this._watermelonService.task.add({
+      ...task,
+      timeSpent: calcTotalTimeSpent(task.timeSpentOnDay)
+    });
     // this._store.dispatch(new AddTask({
     //   task: this.createNewTaskWithDefaults(title, additionalFields),
     //   isAddToBacklog,
@@ -326,14 +332,16 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks) {
-    this._store.dispatch(new DeleteTask({task}));
+    this._watermelonService.task.remove(task.id);
+    // this._store.dispatch(new DeleteTask({task}));
   }
 
 
   update(id: string, changedFields: Partial<Task>) {
-    this._store.dispatch(new UpdateTask({
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    }));
+    this._watermelonService.task.update(id, changedFields);
+      // this._store.dispatch(new UpdateTask({
+    //   task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    // }));
   }
 
   // NOTE: side effects are not executed!!!
