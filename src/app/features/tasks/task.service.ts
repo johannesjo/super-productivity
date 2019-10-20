@@ -11,7 +11,7 @@ import {
   withLatestFrom
 } from 'rxjs/operators';
 import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
+import {from, Observable, of} from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -153,8 +153,8 @@ export class TaskService {
     select(selectBacklogTaskCount),
   );
 
-  d = this._dexieService.table('todos');
-  undoneTasks$: Observable<any[]> = of(this.d.toArray());
+  d = this._dexieService.table('tasks');
+  undoneTasks$: Observable<any[]> = from(this.d.toArray());
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysDoneTasksWithSubTasks),
@@ -298,11 +298,13 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-    this._store.dispatch(new AddTask({
-      task: this.createNewTaskWithDefaults(title, additionalFields),
-      isAddToBacklog,
-      isAddToBottom
-    }));
+    const task = this.createNewTaskWithDefaults(title, additionalFields);
+    this._dexieService.tasks.put(task);
+    // this._store.dispatch(new AddTask({
+    //   task: this.createNewTaskWithDefaults(title, additionalFields),
+    //   isAddToBacklog,
+    //   isAddToBottom
+    // }));
   }
 
   addWithIssue(title: string,

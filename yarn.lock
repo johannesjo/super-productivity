@@ -3631,6 +3631,11 @@ detect-node@^2.0.4:
   resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.0.4.tgz#014ee8f8f669c5c58023da64b8179c083a28c46c"
   integrity sha512-ZIzRpLJrOj7jjP2miAtgqIfmzbxa4ZOr5jJc601zklsfEx9oTzmmj2nVpIPRpNlRTIh8lc1kyViIY7BWSGNmKw==
 
+dexie-observable@^1.0.0-beta.5:
+  version "1.0.0-beta.5"
+  resolved "https://registry.yarnpkg.com/dexie-observable/-/dexie-observable-1.0.0-beta.5.tgz#a62fa51e38b3724c631301e72b0dc51635703ff4"
+  integrity sha512-n/q5hArT6+2sPZ+BunpwkXtcjt3/41gheQfmBt4pW73ot6bFGSW4lC5t6p9O7VdA/xyapt/Bukzkzjs4dEAd0Q==
+
 dexie@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/dexie/-/dexie-2.0.4.tgz#6027a5e05879424e8f9979d8c14e7420f27e3a11"
