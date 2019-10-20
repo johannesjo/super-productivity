@@ -3,11 +3,18 @@ import 'dexie-observable';
 import {Injectable} from '@angular/core';
 import {Task} from '../../features/tasks/task.model';
 import {from, merge, Observable, Subject} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {filter, switchMap} from 'rxjs/operators';
+import {IDatabaseChange} from 'dexie-observable/api';
+
+enum Tables {
+  'tasks' = 'tasks'
+}
 
 const storeCfg = [{
   name: 'tasks',
-  fields: '++id, projectId, title, *subTaskIds, timeSpentOnDay, timeSpent, timeEstimate, created, isDone, notes, &issueId, issueType, parentId, attachmentIds, &reminderId, &repeatCfgId, _showSubTasksMode, _currentTab'
+  // tslint:disable-next-line
+  // fields: '++id, projectId, title, *subTaskIds, timeSpentOnDay, timeSpent, timeEstimate, created, isDone, notes, &issueId, issueType, parentId, attachmentIds, &reminderId, &repeatCfgId, _showSubTasksMode, _currentTab'
+  fields: '++id, projectId, title, created, parentId'
 }];
 
 export type TaskTable = Dexie.Table<Task, string>;
@@ -17,7 +24,8 @@ export type TaskTable = Dexie.Table<Task, string>;
 })
 export class DexieService extends Dexie {
   tasks: TaskTable;
-  private _taskRefresh$ = new Subject();
+
+  private _refresh$ = new Subject<IDatabaseChange[]>();
 
   constructor() {
     super('SUP_DEXIE');
@@ -33,11 +41,10 @@ export class DexieService extends Dexie {
       this[val.name] = this.table(val.name);
     });
 
-    this.on('changes', (changes: any) => {
+    this.on('changes', (changes: IDatabaseChange[]) => {
       console.log(changes);
-      if (changes.find(change => change.table === 'tasks')) {
-        this._taskRefresh$.next();
-      }
+      this._refresh$.next(changes);
+
     });
 
     this.getTasks$().subscribe((v) => console.log('getTasks$()', v));
@@ -49,9 +56,14 @@ export class DexieService extends Dexie {
 
     return merge(
       from(query(this.tasks)),
-      this._taskRefresh$.pipe(
+      this._refresh$.pipe(
+        filter(changes => this._isRefreshForTable(Tables.tasks, changes)),
         switchMap(() => query(this.tasks))
       )
     );
+  }
+
+  private _isRefreshForTable(tableName: Tables, changes: IDatabaseChange[]) {
+    return !!changes.find(change => change.table === tableName);
   }
 }
