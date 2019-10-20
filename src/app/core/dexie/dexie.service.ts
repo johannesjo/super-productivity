@@ -5,6 +5,7 @@ import {Task} from '../../features/tasks/task.model';
 import {from, merge, Observable, Subject} from 'rxjs';
 import {filter, switchMap} from 'rxjs/operators';
 import {IDatabaseChange} from 'dexie-observable/api';
+import {TaskClass} from './task.class';
 
 enum Tables {
   'tasks' = 'tasks'
@@ -14,7 +15,8 @@ const storeCfg = [{
   name: 'tasks',
   // tslint:disable-next-line
   // fields: '++id, projectId, title, *subTaskIds, timeSpentOnDay, timeSpent, timeEstimate, created, isDone, notes, &issueId, issueType, parentId, attachmentIds, &reminderId, &repeatCfgId, _showSubTasksMode, _currentTab'
-  fields: '++id, projectId, title, created, parentId'
+  fields: '++id, projectId, title, created, parentId, *subTaskIds',
+  c: TaskClass,
 }];
 
 export type TaskTable = Dexie.Table<Task, string>;
@@ -23,7 +25,7 @@ export type TaskTable = Dexie.Table<Task, string>;
   providedIn: 'root',
 })
 export class DexieService extends Dexie {
-  tasks: TaskTable;
+  tasks: Ta;
 
   private _refresh$ = new Subject<IDatabaseChange[]>();
 
@@ -39,7 +41,9 @@ export class DexieService extends Dexie {
 
     storeCfg.forEach((val) => {
       this[val.name] = this.table(val.name);
+      this[val.name].mapToClass(val.c);
     });
+
 
     this.on('changes', (changes: IDatabaseChange[]) => {
       console.log(changes);
