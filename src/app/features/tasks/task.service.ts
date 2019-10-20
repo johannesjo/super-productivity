@@ -1,26 +1,8 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  shareReplay,
-  switchMap,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
-import {from, Observable, of} from 'rxjs';
-import {
-  DEFAULT_TASK,
-  DropListModelSource,
-  SHORT_SYNTAX_REG_EX,
-  ShowSubTasksMode,
-  Task,
-  TaskWithIssueData,
-  TaskWithSubTasks
-} from './task.model';
+import {Observable} from 'rxjs';
+import {DEFAULT_TASK, DropListModelSource, SHORT_SYNTAX_REG_EX, ShowSubTasksMode, Task, TaskWithIssueData, TaskWithSubTasks} from './task.model';
 import {select, Store} from '@ngrx/store';
 import {
   AddSubTask,
@@ -60,7 +42,8 @@ import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectAllTasksWithIssueData, selectBacklogTaskCount,
+  selectAllTasksWithIssueData,
+  selectBacklogTaskCount,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -83,7 +66,6 @@ import {
   selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
-  selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
@@ -93,7 +75,7 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
-import {DexieService} from '../../core/dexie/dexie.service';
+import {DexieService, TaskTable} from '../../core/dexie/dexie.service';
 
 
 @Injectable({
@@ -153,8 +135,9 @@ export class TaskService {
     select(selectBacklogTaskCount),
   );
 
-  d = this._dexieService.table('tasks');
-  undoneTasks$: Observable<any[]> = from(this.d.toArray());
+  undoneTasks$: Observable<Task[]> = this._dexieService.getTasks$(
+    (taskTable: TaskTable) => taskTable.filter(task => !task.isDone).reverse().sortBy('created')
+  );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysDoneTasksWithSubTasks),

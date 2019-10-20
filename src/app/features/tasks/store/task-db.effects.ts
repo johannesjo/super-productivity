@@ -85,7 +85,7 @@ export class TaskDbEffects {
 
   private _saveToLs([action, currentProjectId, taskState]) {
     if (currentProjectId && taskState.isDataLoaded) {
-      this._persistenceService.task.save(currentProjectId, taskState);
+      // this._persistenceService.task.save(currentProjectId, taskState);
     } else {
       throw new Error('No current project id or data not loaded yet');
     }
