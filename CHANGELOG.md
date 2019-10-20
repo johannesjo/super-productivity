@@ -1,3 +1,18 @@
+## [2.13.4](https://github.com/johannesjo/super-productivity/compare/v2.13.3...v2.13.4) (2019-10-20)
+
+
+### Bug Fixes
+
+* correct confirm load text [#226](https://github.com/johannesjo/super-productivity/issues/226) ([e8ba652](https://github.com/johannesjo/super-productivity/commit/e8ba652d1a803d4fe3cb0770df2f630786a653b0))
+
+
+### Features
+
+* disable project delete and archive buttons rather than just hiding them ([9cc5d48](https://github.com/johannesjo/super-productivity/commit/9cc5d48b1b8f09cf15ced34f2e17cf727d96fdd3))
+* **i18n:** add missing translations ([999e32e](https://github.com/johannesjo/super-productivity/commit/999e32e09372af86305c9f02c04568078e534a52))
+
+
+
 ## [2.13.3](https://github.com/johannesjo/super-productivity/compare/v2.13.2...v2.13.3) (2019-10-14)
 
 
