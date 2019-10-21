@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import * as Gun from 'gun';
 import 'gun/lib/rindexed.js';
 import 'gun/lib/open.js';
-import {BehaviorSubject, Observable, ReplaySubject} from 'rxjs';
+import {BehaviorSubject} from 'rxjs';
 
 // console.log(Gun);
 // console.log(window['RindexedDB']);
@@ -12,6 +12,10 @@ interface State {
   yourapp: {
     [Username: string]: { age: number }
   };
+}
+
+enum GunCollection {
+  tasks = 'tasks'
 }
 
 const gun = new Gun({
@@ -27,7 +31,7 @@ export class GunService {
   public tasks$: BehaviorSubject<any[]> = new BehaviorSubject([]);
 
   get t() {
-    return gun.get('tasks');
+    return gun.get(GunCollection.tasks);
   }
 
   constructor() {
