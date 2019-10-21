@@ -153,10 +153,12 @@ export class TaskService {
     select(selectBacklogTaskCount),
   );
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysUnDoneTasksWithSubTasks),
-    shareReplay(1),
-  );
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this._gunService.tasks$;
+  //
+  // undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+  //   select(selectTodaysUnDoneTasksWithSubTasks),
+  //   shareReplay(1),
+  // );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysDoneTasksWithSubTasks),

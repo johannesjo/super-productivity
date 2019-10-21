@@ -1,17 +1,19 @@
 import {Injectable} from '@angular/core';
-import 'gun/lib/rindexed.js';
 // import 'gun/lib/store.js';
 import * as Gun from 'gun';
-import {ReplaySubject} from 'rxjs';
+import 'gun/lib/rindexed.js';
+import 'gun/lib/open.js';
+import {BehaviorSubject, Observable, ReplaySubject} from 'rxjs';
 
-console.log(Gun);
+// console.log(Gun);
+// console.log(window['RindexedDB']);
 
 interface State {
   yourapp: {
     [Username: string]: { age: number }
   };
 }
-console.log(window['RindexedDB']);
+
 const gun = new Gun({
   // tslint:disable-next-line
   store: window['RindexedDB']
@@ -22,7 +24,7 @@ const gun = new Gun({
 })
 export class GunService {
   private _t = {};
-  public tasks$ = new ReplaySubject(1);
+  public tasks$: BehaviorSubject<any[]> = new BehaviorSubject([]);
 
   get t() {
     return gun.get('tasks');
@@ -31,30 +33,16 @@ export class GunService {
   constructor() {
     console.log('XXX');
 
-// super({
-    //   store: RindexedDB({})
-    // });
-    // const user = gun.user();
-    // user.auth('')
-
-    // gun.get('mark').put({
-    //   name: 'Mark',
-    //   email: 'mark@gunDB.io',
-    // });
-    // gun.get('mark').on(function (data, key) {
-    //   console.log("update mark:", data);
-    // });
-
-    this.t.on((data) => {
+    this.t.open((data) => {
       console.log(data);
-      // this.t.once((dataIn) => {
-      //   console.log(dataIn);
-      // });
-      // this.tasks$.next();
+      console.log(Object.keys(data));
+      const array = Object.keys(data).map(key => data[key]);
+      console.log(array);
+      this.tasks$.next(array.reverse());
     });
-    // this.t.map().on((task, id) => {
-    //   console.log(task, id);
-    // });
+    this.t.map().on((task, id) => {
+      console.log(task, id);
+    });
     this.t.once(v => console.log(v));
 
   }
@@ -67,9 +55,9 @@ export class GunService {
       ...acc,
       [key]: data[key]
     }), {});
-    this.t.get(data.id).put(d);
+    const task = this.t.set(data.id).put(d);
     // arrayKeys.forEach(key => {
-    //   this.t.get(data.id).get(key).set(data[key]);
+    //   task.get(key).set(data[key]);
     // });
   }
 
