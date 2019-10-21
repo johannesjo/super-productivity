@@ -93,6 +93,7 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
+import {GunService} from '../../core/gun/gun.service';
 
 
 @Injectable({
@@ -251,6 +252,7 @@ export class TaskService {
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
+    private readonly _gunService: GunService,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 
@@ -298,11 +300,13 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-    this._store.dispatch(new AddTask({
-      task: this.createNewTaskWithDefaults(title, additionalFields),
-      isAddToBacklog,
-      isAddToBottom
-    }));
+    const task = this.createNewTaskWithDefaults(title, additionalFields);
+    this._gunService.addTask(task);
+    //   this._store.dispatch(new AddTask({
+    //   task: this.createNewTaskWithDefaults(title, additionalFields),
+    //   isAddToBacklog,
+    //   isAddToBottom
+    // }));
   }
 
   addWithIssue(title: string,
