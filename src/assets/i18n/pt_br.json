@@ -420,171 +420,171 @@
     "PROJECT": {
       "BANNER": {
         "FINISH_DAY": {
-          "FINISH_DAY": "Finish Day",
-          "MSG": "You forgot to finish your day on {{dayStr}}"
+          "FINISH_DAY": "Encerrar o dia",
+          "MSG": "Você esqueceu de terminar o seu dia em {{dayStr}}"
         }
       },
       "D_CREATE": {
-        "CREATE": "Create Project",
-        "EDIT": "Edit Project",
-        "SETUP_GIT": "Setup Github Integration",
-        "SETUP_JIRA": "Setup Jira Integration"
+        "CREATE": "Criar Projeto",
+        "EDIT": "Editar Projeto",
+        "SETUP_GIT": "Configurar integração com Github ",
+        "SETUP_JIRA": "Configurar integração com Jira "
       },
       "FORM_BASIC": {
-        "L_TITLE": "Project Name",
-        "TITLE": "Basic Settings"
+        "L_TITLE": "Nome do Projeto",
+        "TITLE": "Configurações básicas"
       },
       "FORM_THEME": {
-        "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
-        "HELP": "Theme settings for your project.",
-        "L_COLOR_ACCENT": "Accent Color",
-        "L_COLOR_PRIMARY": "Primary Color",
-        "L_COLOR_WARN": "Warn/Error Color",
-        "L_HUE_ACCENT": "Threshold for dark text on accent color background",
-        "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
-        "L_HUE_WARN": "Threshold for dark text on warn color background",
-        "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
-        "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
-        "L_THEME_COLOR": "Theme Color",
-        "L_TITLE": "Title",
-        "TITLE": "Theme"
+        "D_IS_DARK_THEME": "Não será usado se o sistema suportar o modo escuro global.",
+        "HELP": "Configurações do tema para o seu projeto.",
+        "L_COLOR_ACCENT": "Cor de destaque",
+        "L_COLOR_PRIMARY": "Cor principal",
+        "L_COLOR_WARN": "Cor de aviso / erro",
+        "L_HUE_ACCENT": "Limite para texto escuro em fundo de cor de destaque",
+        "L_HUE_PRIMARY": "Limite para texto escuro em fundo de cor primária",
+        "L_HUE_WARN": "Limite para texto escuro em aviso de cor de fundo",
+        "L_IS_AUTO_CONTRAST": "Definir cores de texto automaticamente para melhor legibilidade",
+        "L_IS_REDUCED_THEME": "Usar UI reduzida (sem caixas nas tarefas)",
+        "L_THEME_COLOR": "Cor do tema",
+        "L_TITLE": "Título",
+        "TITLE": "Tema"
       },
       "S": {
-        "ARCHIVED": "Archived Project",
-        "CREATED": "Created project <strong>{{title}}</strong>. You can select it from the menu on the top left.",
-        "DELETED": "Deleted Project",
-        "E_EXISTS": "Project \"{{title}}\" already exists",
-        "E_INVALID_FILE": "Invalid data for project file",
-        "ISSUE_PROVIDER_UPDATED": "Updated project settings for <strong>{{issueProviderKey}}</strong>",
-        "UNARCHIVED": "Unarchived project",
-        "UPDATED": "Updated project settings"
+        "ARCHIVED": "Projeto Arquivado",
+        "CREATED": "Projeto criado <strong> {{title}} </strong>. Você pode selecioná-lo no menu no canto superior esquerdo.",
+        "DELETED": "Projeto excluído",
+        "E_EXISTS": "Projeto \"{{title}}\" já existe",
+        "E_INVALID_FILE": "Dados inválidos para o arquivo de projeto",
+        "ISSUE_PROVIDER_UPDATED": "Configurações atualizadas do projeto para <strong> {{issueProviderKey}} </strong>",
+        "UNARCHIVED": "Projeto não arquivado",
+        "UPDATED": "Configurações atualizadas do projeto"
       }
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Error for reminder interface"
+      "S_REMINDER_ERR": "Erro na interface do lembrete"
     },
     "TASK": {
       "ADDITIONAL_INFO": {
-        "ATTACHMENTS": "Attachments {{nr}}",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
-        "LOCAL_ATTACHMENTS": "Local Attachments",
-        "NOTES": "Notes"
+        "ATTACHMENTS": "Anexos {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Anexos",
+        "LOCAL_ATTACHMENTS": "Anexos locais",
+        "NOTES": "Notas"
       },
       "ADD_TASK_BAR": {
-        "ADD_TASK": "Add task",
-        "ADD_TASK_TO_BACKLOG": "Add task to backlog",
-        "START": "Press enter one more time to start"
+        "ADD_TASK": "Adicionar tarefa",
+        "ADD_TASK_TO_BACKLOG": "Adicionar tarefa ao backlog",
+        "START": "Pressione enter mais uma vez para iniciar"
       },
       "B": {
-        "ADD_HALF_HOUR": "Add 1/2 hou",
-        "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\""
+        "ADD_HALF_HOUR": "Adicione meia hora",
+        "ESTIMATE_EXCEEDED": "Estimativa de tempo excedida para \"{{title}}\""
       },
       "CMP": {
-        "ADD_SUB_TASK": "Add sub task",
-        "ADVANCED": "Advanced",
-        "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
-        "DELETE": "Delete Task",
-        "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_REMINDER": "Edit reminder",
-        "MARK_DONE": "Mark as done",
-        "MARK_UNDONE": "Mark as undone",
-        "MOVE_TO_BACKLOG": "Move to backlog",
-        "MOVE_TO_OTHER_PROJECT": "Move to other Project",
-        "MOVE_TO_TODAY": "Move to today's list",
-        "OPEN_ATTACH": "Attach file or link",
-        "OPEN_ISSUE": "Open issue in a new browser tab",
-        "OPEN_TASK_MENU": "Open task menu",
-        "OPEN_TIME": "Estimate time/Add time spent",
-        "REPEAT_EDIT": "Edit repeat task config",
-        "REPEAT_TASK": "Repeat task",
-        "SCHEDULE": "Schedule task",
-        "SHOW_UPDATES": "Show updates",
-        "TOGGLE_ADDITIONAL": "Show/Hide additional info",
-        "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
-        "TOGGLE_DONE": "Mark as done/undone",
-        "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
-        "TRACK_TIME": "Start tracking time",
-        "TRACK_TIME_STOP": "Pause tracking time",
-        "UPDATE_ISSUE_DATA": "Update issue data"
+        "ADD_SUB_TASK": "Adicionar subtarefa",
+        "ADVANCED": "Avançado",
+        "CONVERT_TO_PARENT_TASK": "Converter em tarefa pai",
+        "DELETE": "Excluir tarefa",
+        "DROP_ATTACHMENT": "Solte aqui para anexar a \"{{title}}\"",
+        "EDIT_REMINDER": "Editar lembrete",
+        "MARK_DONE": "Marcar como concluído",
+        "MARK_UNDONE": "Marcar como desfeita",
+        "MOVE_TO_BACKLOG": "Mover para backlog",
+        "MOVE_TO_OTHER_PROJECT": "Mover para outro projeto",
+        "MOVE_TO_TODAY": "Mover para a lista de hoje",
+        "OPEN_ATTACH": "Anexar arquivo ou link",
+        "OPEN_ISSUE": "Abrir issue em uma nova guia do navegador",
+        "OPEN_TASK_MENU": "Abrir menu de tarefas",
+        "OPEN_TIME": "Tempo estimado / adicionar tempo gasto",
+        "REPEAT_EDIT": "Editar configuração da tarefa de repetição",
+        "REPEAT_TASK": "Repetir tarefa",
+        "PROGRAMAÇÃO": "Agendar tarefa",
+        "SHOW_UPDATES": "Mostrar atualizações",
+        "TOGGLE_ADDITIONAL": "Mostrar/ocultar informações adicionais",
+        "TOGGLE_ATTACHMENTS": "Mostrar/ocultar anexos",
+        "TOGGLE_DONE": "Marcar como concluído/desfeito",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Alternar visibilidade da subtarefa",
+        "TRACK_TIME": "Comece a rastrear o tempo",
+        "TRACK_TIME_STOP": "Pausar o tempo de rastreamento",
+        "UPDATE_ISSUE_DATA": "Atualizar dados da issue"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Schedule Task",
-        "DATETIME_FOR": "Datetime for reminder",
-        "EDIT": "Edit Reminder",
-        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
-        "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
+        "ADD": "Agendar tarefa",
+        "DATETIME_FOR": "Data e hora para lembrete",
+        "EDIT": "Editar lembrete",
+        "MOVE_TO_BACKLOG": "Mova a tarefa para backlog até que seja agendada",
+        "SCHEDULE": "Agendar",
+        "UNSCHEDULE": "Cancelar agendamento"
       },
       "D_REMINDER_VIEW": {
-        "DISMISS": "Dismiss Reminder",
-        "ERR_LOST": "There was a reminder scheduled for the task {{title}}, but it seems to be lost.",
-        "FOR_CURRENT": "Task is due. Do you want to start working on it?",
-        "FOR_OTHER": "Task is due. Do you want to start working on it?",
-        "FROM_PROJECT": "From Project",
-        "SNOOZE": "Snooze",
-        "START": "Start Task",
-        "SWITCH_PROJECT_START": "Switch Project & Start Task",
-        "TITLE": "Scheduled Task"
+        "DISMISS": "Dispensar lembrete",
+        "ERR_LOST": "Havia um lembrete agendado para a tarefa {{title}}, mas parece estar perdido.",
+        "FOR_CURRENT": "A tarefa está vencida. Deseja começar a trabalhar nela?",
+        "FOR_OTHER": "A tarefa está vencida. Deseja começar a trabalhar nela?",
+        "FROM_PROJECT": "Do projeto",
+        "SNOOZE": "Soneca",
+        "START": "Iniciar tarefa",
+        "SWITCH_PROJECT_START": "Alternar projeto e iniciar tarefa",
+        "TITLE": "Tarefa agendada"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "Add time spent for other day",
-        "DELETE_FOR": "Delete entry for day",
-        "ESTIMATE": "Estimate",
-        "TIME_SPENT": "Time Spent",
-        "TIME_SPENT_ON": "Time Spent {{date}}",
-        "TITLE": "Time spent / Estimates"
+        "ADD_FOR_OTHER_DAY": "Adicione tempo gasto para outro dia",
+        "DELETE_FOR": "Excluir entrada do dia",
+        "ESTIMATE": "Estimativa",
+        "TIME_SPENT": "Tempo gasto",
+        "TIME_SPENT_ON": "Tempo gasto {{date}}",
+        "TITLE": "Tempo gasto / estimativas"
       },
       "D_TIME_FOR_DAY": {
-        "ADD_ENTRY_FOR": "Add new entry for {{date}}",
-        "DATE": "Date for new entry",
-        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
-        "TINE_SPENT": "Time Spent",
-        "TITLE": "Add for Day"
+        "ADD_ENTRY_FOR": "Adicione uma nova entrada para {{date}}",
+        "DATE": "Data para nova entrada",
+        "HELP": "Exemplos:<br> 30m => 30 minutos<br> 2h => 2 horas<br> 2h 30m => 2 horas e 30 minutos",
+        "TINE_SPENT": "Tempo gasto",
+        "TITLE": "Adicionar para o dia"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "Time estimate exceeded!",
-        "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
+        "ESTIMATE_EXCEEDED": "Estimativa de tempo excedida!",
+        "ESTIMATE_EXCEEDED_BODY": "Você excedeu o tempo estimado para \"{{title}}\"."
       },
       "S": {
-        "DELETED": "Deleted task \"{{title}}\"",
-        "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
-        "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
-        "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
-        "REMINDER_DELETED": "Deleted reminder for task",
-        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
-        "TASK_CREATED": "Created task \"{{title}}\""
+        "DELETED": "Tarefa excluída \"{{title}}\"",
+        "FOUND_MOVE_FROM_BACKLOG": "Tarefa <strong>{{title}}</strong> movida do backlog para a lista de tarefas de hoje",
+        "FOUND_RESTORE_FROM_ARCHIVE": "Tarefa <strong>{{title}}</strong> relacionada ao problema restaurada do arquivo",
+        "REMINDER_ADDED": "Tarefa agendada \"{{title}}\"",
+        "REMINDER_DELETED": "Lembrete excluído da tarefa",
+        "REMINDER_UPDATED": "Lembrete atualizado para a tarefa \"{{title}}\"",
+        "TASK_CREATED": "Tarefa criada \"{{title}}\""
       },
-      "SELECT_OR_CREATE": "Select or create task",
+      "SELECT_OR_CREATE": "Selecione ou crie tarefa",
       "SUMMARY_TABLE": {
-        "ESTIMATE": "Estimate",
-        "SPENT_TODAY": "Spent Today",
-        "SPENT_TOTAL": "Spent Total",
-        "TASK": "Task",
-        "TOGGLE_DONE": "un-/mark as done"
+        "ESTIMATE": "Estimativa",
+        "SPENT_TODAY": "Gasto hoje",
+        "SPENT_TOTAL": "Total gasto",
+        "TASK": "Tarefa",
+        "TOGGLE_DONE": "Desmarcar/Marcar como concluído"
       }
     },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
-        "OK": "Remove completely"
+        "MSG": "A remoção da configuração de repetição converterá todas as instâncias anteriores desta tarefa em apenas tarefas regulares. Tem certeza de que deseja continuar?",
+        "OK": "Remover completamente"
       },
       "D_EDIT": {
-        "ADD": "Add Repeat Task Config",
-        "EDIT": "Edit Repeat Task Config",
-        "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
-        "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
-        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
+        "ADD": "Adicionar configuração de repetição de tarefas",
+        "EDIT": "Editr configuração de repetição de tarefas",
+        "HELP1": "Tarefas repetidas são destinadas a tarefas diárias, por exemplo: \"Organização\", \"Reunião Diária\", \"Revisão de Código\", \"Verificando e-mails\" ou tarefas semelhantes que provavelmente ocorrerão novamente e de novo.",
+        "HELP2": "Uma vez configurada, uma tarefa repetida será recriada todos os dias selecionados abaixo assim que você abrir o seu projeto e será automaticamente marcada como concluída no final do dia. Elas serão tratadas como instâncias diferentes. Assim, você pode adicione livremente subtarefas etc.",
+        "HELP3": "As tarefas importadas do Jira ou Issues do Git não podem ser repetidas. Todos os lembretes também serão excluídos em uma tarefa repetida."
       },
       "F": {
-        "DEFAULT_ESTIMATE": "Default Estimate",
-        "FRIDAY": "Friday",
-        "MONDAY": "Monday",
-        "SATURDAY": "Saturday",
-        "SUNDAY": "Sunday",
-        "THURSDAY": "Thursday",
-        "TITLE": "Title for task",
-        "TUESDAY": "Tuesday",
-        "WEDNESDAY": "Wednesday"
+        "DEFAULT_ESTIMATE": "Estimativa padrão",
+        "FRIDAY": "Sexta-feira",
+        "MONDAY": "Segunda-feira",
+        "SATURDAY": "Sábado",
+        "SUNDAY": "Domingo",
+        "THURSDAY": "Quinta-feira",
+        "TITLE": "Título da tarefa",
+        "TUESDAY": "Terça-feira",
+        "WEDNESDAY": "Quarta-feira"
       }
     },
     "TIME_TRACKING": {
