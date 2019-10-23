@@ -109,63 +109,63 @@
     },
     "GOOGLE": {
       "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
+        "AUTH_FAIL": "GoogleApi: Falha ao autenticar. Tente fazer login novamente!"
       },
       "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
+        "CREATE_SYNC_FILE": "Google Drive: Nenhum arquivo com o nome <strong>\"{{ fileName }}\"<strong> foi encontrado. <strong>Criar</strong> como arquivo de sincronização no Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>arquivo</strong> existente <strong>\"{{fileName}}\"</strong> como arquivo de sincronização? Caso contrário, altere o nome do arquivo de sincronização."
       },
       "D_CONFIRM_LOAD": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
+        "LAST_MOD": "última modificação:",
+        "LAST_SYNC": "última sincronização",
         "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "<p>Update from Google Drive Backup. Both local and remote data seem to be modified. Do you want to overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>",
-        "TITLE": "Overwrite local data with GDrive Update?"
+        "LOCAL_REMOTE": "local <=> remoto",
+        "OVERWRITE_LOCAL": "Substituir local",
+        "OVERWRITE_REMOTE": "Substituir remoto",
+        "REMOTE": "romoto",
+        "TEXT": "<p>Atualização do Google Drive Backup. Os dados locais e remotos parecem ter sido modificados. Deseja sobrescrever alterações locais não salvas? <strong>Todos os dados serão perdidos para sempre</strong>.</p>",
+        "TITLE": "Sobrescrever dados locais com a Atualização GDrive?"
       },
       "D_CONFIRM_SAVE": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
+        "LAST_MOD": "última modificações:",
+        "LAST_SYNC": "última sync",
         "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>",
-        "TITLE": "Overwrite unsaved data on Google Drive?"
+        "LOCAL_REMOTE": "local <=> remoto",
+        "OVERWRITE_LOCAL": "Substituir local",
+        "OVERWRITE_REMOTE": "Substituir remoto",
+        "REMOTE": "remoto",
+        "TEXT": "  <p>Parece haver algumas alterações no Google Drive que você não possui localmente. Deseja substituí-los de qualquer maneira?</p>",
+        "TITLE": "Substituir dados não salvos no Google Drive?"
       },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
-        "ERROR": "Google Drive – Error: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
-        "LOCAL_UP_TO_DATE": "Google Drive: Local data already up to date",
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "NO_UPDATE_REQUIRED": "Google Drive: No updated required",
-        "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
-        "SUCCESS": "Google Drive: Successfully saved backup",
-        "SYNCING": "Google Drive: Syncing"
+        "DOWNLOADING_UPDATE": "Google Drive: há uma atualização remota! Baixando...",
+        "ERROR": "Google Drive - Erro: {{errTxt}}",
+        "ERROR_INITIAL_IMPORT": "Google Drive: Erro ao tentar importar dados inicialmente",
+        "LOCAL_UP_TO_DATE": "Google Drive: Dados locais já atualizados",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Vários arquivos com o nome \"{{newFileName}}\" foram encontrados. Exclua todos, exceto um, ou escolha um nome diferente.",
+        "NO_UPDATE_REQUIRED": "Google Drive: Nenhuma atualização necessária",
+        "REMOTE_UP_TO_DATE": "Google Drive: Dados remotos já atualizados",
+        "SUCCESS": "Google Drive: Backup salvo com sucesso",
+        "SYNCING": "Google Drive: Sincronizando"
       },
       "SYNC_CFG": {
-        "AUTO_LOGIN": "Auto login at when starting app",
-        "AUTO_SYNC": "Auto sync data to remote",
-        "BACKUP_NOW": "Backup now",
-        "COMPRESS": "Compress Data",
-        "ENABLE": "Enable syncing via Google Drive",
-        "LOAD_FROM": "Load From GDrive",
-        "LOAD_ON_STARTUP": "Load remote data on startup",
-        "NOTIFY": "Notify when syncing",
-        "SYNC_FILE_NAME": "Sync file name",
-        "SYNC_INTERVAL": "Sync interval",
-        "UPDATE_SYNC_FILE": "Update sync file"
+        "AUTO_LOGIN": "Login automático ao iniciar o aplicativo",
+        "AUTO_SYNC": "Sincronizar dados automaticamente ao remoto",
+        "BACKUP_NOW": "Fazer backup agora",
+        "COMPRESS": "Compactar dados",
+        "ENABLE": "Ativar sincronização via Google Drive",
+        "LOAD_FROM": "Carregar do GDrive",
+        "LOAD_ON_STARTUP": "Carregar dados remotos na inicialização",
+        "NOTIFY": "Notificar ao sincronizar",
+        "SYNC_FILE_NAME": "Sincronizar nome do arquivo",
+        "SYNC_INTERVAL": "Intervalo de sincronização",
+        "UPDATE_SYNC_FILE": "Atualizar arquivo de sincronização"
       },
       "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
-        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
-        "SUCCESS_LOGIN": "GoogleApi: Login successful"
+        "ERR": "Erro do GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: Nenhum ID de arquivo especificado",
+        "ERR_NO_FILE_NAME": "GoogleApi: Nenhum nome de arquivo especificado",
+        "SUCCESS_LOGIN": "GoogleApi: login bem-sucedido"
       }
     },
     "JIRA": {
