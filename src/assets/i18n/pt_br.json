@@ -79,32 +79,32 @@
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar os problemas abertos do GithHub para um repositório específico no painel de criação de tarefas na visualização de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre ele. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no seu log de tarefas.</p>",
         "TITLE": "Github"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
         "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "DESCRIPTION": "Descrição",
+        "LABELS": "Etiquetas",
+        "MARK_AS_CHECKED": "Marcar atualizações como checadas",
         "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Indíce",
+        "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
-        "ERR_NETWORK": "Github: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "Github: Is not properly configured",
-        "ERR_REQUEST": "Github: API returned {{statusCode}}. {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
-        "POLLING": "Github: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "ERR_NETWORK": "Github: A solicitação falhou devido a um erro de rede do lado do cliente.",
+        "ERR_NOT_CONFIGURED": "Github: Não está configurado corretamente",
+        "ERR_REQUEST": "Github: A API retornou {{statusCode}}. {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Github: Importado {{issuesLength}} novas issues do git para o backlog",
+        "IMPORTED_SINGLE_ISSUE": "Github: Importado issue \"{{issueText}}\" do git para o backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
+        "ISSUE_UPDATE": "Github: Dados atualizados para \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Dados atualizados para \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Github:  Encontrado tarefa sem dados da issue. Recarregando.",
+        "NEW_COMMENT": "Github: Novo comentário para \"{{issueText}}\"",
+        "POLLING": "Github: Mudanças de sondagem para problemas",
+        "SHOW_ISSUE_BTN": "Mostre-me"
       }
     },
     "GOOGLE": {
