@@ -293,43 +293,43 @@
     },
     "METRIC": {
       "BANNER": {
-        "CHECK": "I did it!"
+        "CHECK": "Consegui!"
       },
       "CMP": {
-        "AVG_BREAKS_PER_DAY": "Avg. breaks per day",
-        "AVG_TASKS_PER_DAY_WORKED": "Avg. tasks per day worked",
-        "AVG_TIME_SPENT_ON_BREAKS": "Avg. time spent on breaks",
-        "AVG_TIME_SPENT_PER_DAY": "Avg. time spent per day",
-        "AVG_TIME_SPENT_PER_TASK": "Avg. time spent per task",
-        "COUNTING_SUBTASKS": "(counting subtasks)",
-        "DAYS_WORKED": "Days worked",
-        "IMPROVEMENT_SELECTION_COUNT": "Number of times an improvement factor was selected",
-        "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
-        "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
-        "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
-        "TASKS_DONE_CREATED": "Tasks (done/created)",
-        "TIME_ESTIMATED": "Time Estimated",
-        "TIME_SPENT": "Time Spent"
+        "AVG_BREAKS_PER_DAY": "Intervalos médios por dia",
+        "AVG_TASKS_PER_DAY_WORKED": "Média de tarefas por dia trabalhadas",
+        "AVG_TIME_SPENT_ON_BREAKS": "Tempo médio gasto em pausas",
+        "AVG_TIME_SPENT_PER_DAY": "Tempo médio gasto por dia",
+        "AVG_TIME_SPENT_PER_TASK": "Tempo médio gasto por tarefa",
+        "COUNTING_SUBTASKS": "(contagem de subtarefas)",
+        "DAYS_WORKED": "Dias trabalhados",
+        "IMPROVEMENT_SELECTION_COUNT": "Número de vezes que um fator de melhoria foi selecionado",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Humor e produtividade ao longo do tempo",
+        "NO_ADDITIONAL_DATA_YET": "Ainda não foram coletados dados adicionais. Use o formulário no painel Resumo diário \"Avaliação\" para fazer isso.",
+        "OBSTRUCTION_SELECTION_COUNT": "Número de vezes que um fator obstrutivo foi selecionado",
+        "TASKS_DONE_CREATED": "Tarefas (concluídas / criadas)",
+        "TIME_ESTIMATED": "Tempo estimado",
+        "TIME_SPENT": "Tempo gasto"
       },
       "EVAL_FORM": {
-        "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
-        "DISABLE_REPEAT_EVERY_DAY": "Disable repeat every day",
-        "ENABLE_REPEAT_EVERY_DAY": "Repeat every day",
-        "HELP_H1": "Why should I care?",
-        "HELP_LINK_TXT": "Go to metrics section",
-        "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
-        "HELP_P2": "This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully helps to get a better grip on these and to improve what you can.",
-        "IMPROVEMENTS": "What improved your productivity?",
-        "IMPROVEMENTS_TOMORROW": "What could you do to improve tomorrow?",
-        "MOOD": "How do you feel?",
-        "MOOD_HINT": "1: Awful – 10: Splendid",
-        "NOTES": "Notes for tomorrow",
-        "OBSTRUCTIONS": "What hindered your productivity?",
-        "PRODUCTIVITY": "How efficient did you work?",
-        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
+        "ADD_NOTE_FOR_TOMORROW": "Adicionar nota para amanhã",
+        "DISABLE_REPEAT_EVERY_DAY": "Desativar repetição todos os dias",
+        "ENABLE_REPEAT_EVERY_DAY": "Repita todos os dias",
+        "HELP_H1": "Por que devo me importar?",
+        "HELP_LINK_TXT": "Vá para a seção de métricas",
+        "HELP_P1": "Tempo para uma pequena auto-avaliação! Suas respostas aqui são salvas e fornecem um pouco de estatísticas sobre como você trabalha na seção de métricas. Além disso, as sugestões para amanhã aparecerão acima da sua lista de tarefas no dia seguinte.",
+        "HELP_P2": "O objetivo é ser menos sobre calcular as métricas exatas ou tornar-se eficiente como uma máquina em tudo o que você faz, isso é sobre melhorar a maneira como você se sente em relação ao seu trabalho. Pode ser útil avaliar pontos de dificuldades em sua rotina diária, assim como encontrar fatores que o ajudem. Ser um pouco sistemático sobre o assunto ajuda a entender melhor essas questões e melhorar o que você pode.",
+        "MELHORIAS": "O que melhorou sua produtividade?",
+        "IMPROVEMENTS_TOMORROW": "O que você poderia fazer para melhorar amanhã?",
+        "MOOD": "Como você se sente?",
+        "MOOD_HINT": "1: Horrível - 10: Esplêndido",
+        "NOTAS": "Notas para amanhã",
+        "OBSTRUÇÕES": "O que prejudicou sua produtividade?",
+        "PRODUTIVIDADE": "Quão eficiente você trabalhou?",
+        "PRODUCTIVITY_HINT": "1: nem começou - 10: enorme eficiência"
       },
       "S": {
-        "SAVE_METRIC": "Metric successfully saved"
+        "SAVE_METRIC": "Métrica salva com sucesso"
       }
     },
     "NOTE": {
