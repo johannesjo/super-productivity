@@ -170,125 +170,125 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",
-        "BLOCK_ACCESS_UNBLOCK": "Unblock"
+        "BLOCK_ACCESS_MSG": "Jira: A fim de impedir o desligamento da API, o acesso foi bloqueado pela Super Produtividade. Você provavelmente deve verificar suas configurações do jira!",
+        "BLOCK_ACCESS_UNBLOCK": "Desbloquear"
       },
       "CFG_CMP": {
-        "ALWAYS_ASK": "Always open dialog",
-        "DONE": "Status for completing task",
-        "DO_NOT": "Don't transition",
-        "ENABLE": "Enable Jira integration",
-        "ENABLE_TRANSITIONS": "Enable Transition Handling",
-        "IN_PROGRESS": "Status for starting task",
-        "LOAD_SUGGESTIONS": "Load Suggestions",
-        "MAP_CUSTOM_FIELDS": "Map Custom Fields",
-        "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it.",
-        "OPEN": "Status for pausing task",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
+        "ALWAYS_ASK": "Sempre abrir dialogo",
+        "DONE": "Status para conclusão da tarefa",
+        "DO_NOT": "Não faça a transição",
+        "ENABLE": "Ativar integração com Jira",
+        "ENABLE_TRANSITIONS": "Ativar tratamento de transição",
+        "IN_PROGRESS": "Status para iniciar a tarefa",
+        "LOAD_SUGGESTIONS": "Carregar sugestões",
+        "MAP_CUSTOM_FIELDS": "Mapear campos personalizados",
+        "MAP_CUSTOM_FIELDS_INFO": "Infelizmente, alguns dados do Jira são salvos em campos personalizados que são diferentes para cada instalação. Se você deseja incluir esses dados, precisa selecionar o campo personalizado apropriado para eles.",
+        "OPEN": "Status para Pausar Tarefa",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Selecione uma issue para carregar as transições disponíveis",
         "STORY_POINTS": "Story Points"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary}}</strong> is currently assigned to <strong>{{assignee}}</strong>. Do you want to assign it to yourself?",
-        "OK": "Do it!"
+        "MSG": "<strong>{{summary}}</strong> está atualmente atribuído a <strong>{{assignee}}</strong>. Deseja atribuir a si mesmo?",
+        "OK": "Fazer isso!"
       },
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Jira for Project"
+        "TITLE": "Configurar Jira para o Projeto"
       },
       "DIALOG_TRANSITION": {
-        "CHOOSE_STATUS": "Choose status to assign",
-        "CURRENT_ASSIGNEE": "Current Assignee:",
-        "CURRENT_STATUS": "Current Status:",
-        "TITLE": "Jira: Update Status",
-        "UPDATE_STATUS": "Update Status"
+        "CHOOSE_STATUS": "Escolha o status para atribuir",
+        "CURRENT_ASSIGNEE": "Responsável atual:",
+        "CURRENT_STATUS": "Status atual:",
+        "TITLE": "Jira: Atualizar status",
+        "UPDATE_STATUS": "Atualizar status"
       },
       "DIALOG_WORKLOG": {
-        "CURRENTLY_LOGGED": "Currently logged time: ",
-        "INVALID_DATE": "The entered value is not a date!",
-        "SAVE_WORKLOG": "Save Worklog",
-        "STARTED": "Started",
-        "SUBMIT_WORKLOG_FOR": "Submit a worklog to Jira for",
-        "TIME_SPENT": "Time Spent",
-        "TITLE": "Jira: Submit Worklog"
+        "CURRENTLY_LOGGED": "Hora atualmente registrada:",
+        "INVALID_DATE": "O valor digitado não é uma data!",
+        "SAVE_WORKLOG": "Salvar log de trabalho",
+        "STARTED": "Iniciado",
+        "SUBMIT_WORKLOG_FOR": "Envie um log de trabalho para Jira para",
+        "TIME_SPENT": "Tempo gasto",
+        "TITLE": "Jira: Enviar log de trabalho"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track"
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automáticamente problemas não resolvidos do Github para o backlog",
+        "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do Github como sugestões qando adicionar novas tarefas",
+        "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
       },
       "FORM_ADV": {
-        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
-        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add issues to Jira backlog",
-        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
-        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
-        "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
-        "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks",
-        "USER_ASSIGNEE_NAME": "Assignee name to check for"
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para adicionar tarefas automaticamente ao backlog",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir caixa de diálogo para enviar o log de trabalho a jira quando a subtarefa for concluída",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas ao backlog do Jira",
+        "IS_AUTO_POLL_TICKETS": "Verifique os problemas importados para alterações automaticamente e notificar",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Verifique se o problema atualmente trabalhado está atribuído ao usuário atual",
+        "IS_WORKLOG_ENABLED": "Abrir caixa de diálogo para enviar o log de trabalho a Jira quando a tarefa estiver concluída",
+        "SEARCH_JQL_QUERY": "Consulta JQL para limitar as tarefas do pesquisador",
+        "USER_ASSIGNEE_NAME": "Nome do responsável a ser verificado"
       },
       "FORM_CRED": {
         "HOST": "Host (e.g.: http://my-host.de:1234)",
-        "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username"
+        "PASSWORD": "Token / Senha",
+        "USER_NAME": "Email / Usuário"
       },
       "FORM_SECTION": {
-        "ADV_CFG": "Advanced Config",
-        "CREDENTIALS": "Credentials",
+        "ADV_CFG": "Configurações avançadas",
+        "CREDENTIALS": "Credenciais",
         "HELP_ARR": {
-          "H1": "Basic configuration",
-          "H2": "Worklog settings",
-          "H3": "Default transitions",
-          "P1_1": "Please provide a login name (can be found on your profile page) and an <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> or password if you can't generate one for some reason. Please not that newer versions of jira sometimes only work with the token. ",
-          "P1_2": "You also need to specify a JQL query which is used for the suggestions to add tasks from Jira. If you need help check out this link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
-          "P1_3": "You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.",
-          "P1_4": "Another option is \"Check if current ticket is assigned to current user\". If enabled and you're starting, a check will be made if you're currently assigned to that ticket on Jira, if not an Dialog appears in which you can chose to assign the ticket to yourself.",
-          "P2_1": "There are several options to determine when and how you want to submit a worklog. Enabling <em>'Open worklog dialog for adding a worklog to Jira when task is done'</em> opens a dialog to add an worklog every time you mark a Jira Task as done. So keep in mind that worklogs will be added on top of everything tracked so far. So if you mark a task as done for a second time, you might not want to submit the complete worked time for the task again.",
-          "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
-          "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
-          "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
+          "H1": "Configurações Básicas",
+          "H2": "Configurações do log de trabalho",
+          "H3": "Transições padrão",
+          "P1_1": "Forneça um nome de login (pode ser encontrado na sua página de perfil) e um <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> ou senha, se você não puder gerar uma por algum motivo. Às vezes, as versões mais recentes do Jira funcionam apenas com o token. ",
+          "P1_2": "Você também precisa especificar uma consulta JQL que é usada para as sugestões para adicionar tarefas do Jira. Se precisar de ajuda, confira este link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
+          "P1_3": "Você também pode configurar, se desejar automaticamente (por exemplo, sempre que visitar a exibição de planejamento), adicionar todas as novas tarefas especificadas por uma consulta JQL customizada ao backlog.",
+          "P1_4": "Outra opção é \"Verifique se o ticket atual está atribuído ao usuário atual\". Se ativado e você estiver começando, será feita uma verificação se você estiver atualmente atribuído a esse ticket no Jira, se não aparecer uma caixa de diálogo na qual você pode optar por atribuir o ticket a si mesmo.",
+          "P2_1": "Existem várias opções para determinar quando e como você deseja enviar um log de trabalho. Ativar <em>'Abrir caixa de diálogo do log de trabalho para adicionar um log de trabalho ao Jira quando a tarefa estiver concluída'</em> abre uma caixa de diálogo para adicionar um log de trabalho toda vez que você marcar uma tarefa do Jira como concluída. Portanto, lembre-se de que os logs de trabalho serão adicionados além de tudo rastreado até o momento. Portanto, se você marcar uma tarefa como concluída pela segunda vez, talvez não queira enviar o tempo de trabalho completo para a tarefa novamente.",
+          "P2_2": "<em>'Abre a caixa de diálogo do log de trabalho quando a subtarefa é concluída e não para tarefas com as próprias subtarefas'</em> abre uma caixa de diálogo do log de trabalho toda vez que você marca uma subtarefa de um problema do Jira como concluída. Você já acompanha seu tempo através das subtarefas, nenhuma caixa de diálogo é aberta depois que você marca a tarefa Jira como concluída.",
+          "P2_3": "<em>'Enviar atualizações para o log de trabalho automaticamente sem caixa de diálogo'</em> faz o que diz. Como marcar uma tarefa como executada várias vezes faz com que todo o tempo de trabalho seja rastreado duas vezes, isso não é recomendado.",
+          "P3_1": "Aqui você pode reconfigurar suas transições padrão. O Jira permite uma ampla configuração de transições que geralmente entram em ação como colunas diferentes no seu painel ágil Jira. Não podemos fazer suposições sobre onde e quando fazer a transição de suas tarefas e você precisa defina-o manualmente"
         }
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
+        "ASSIGNEE": "Resposável",
         "AT": "at",
-        "ATTACHMENTS": "Attachments",
-        "CHANGED": "changed",
-        "COMMENTS": "Comments",
-        "COMPONENTS": "Components",
-        "DESCRIPTION": "Description",
-        "LIST_OF_CHANGES": "List of changes",
-        "MARK_AS_CHECKED": "Mark updates as checked",
+        "ATTACHMENTS": "Anexos",
+        "CHANGED": "Alterado",
+        "COMMENTS": "Comentarios",
+        "COMPONENTS": "Componentes",
+        "DESCRIPTION": "Descrição",
+        "LIST_OF_CHANGES": "Lista de mudanças",
+        "MARK_AS_CHECKED": "Marcar atualizações como checadas",
         "ON": "on",
         "STATUS": "Status",
         "STORY_POINTS": "Story Points",
-        "SUMMARY": "Summary",
-        "WORKLOG": "Worklog",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "Indíce",
+        "WORKLOG": "Log de Trabalho",
+        "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
-        "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
-        "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
-        "INSUFFICIENT_SETTINGS": "Insufficient Settings provided for Jira",
-        "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" already up to date",
-        "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
-        "NO_VALID_TRANSITION": "Jira: No valid transition configured",
-        "POLLING": "Jira: Polling Changes for issues",
-        "TIMED_OUT": "Jira: Request timed out",
-        "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
-        "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
+        "ADDED_WORKLOG_FOR": "Jira: log de trabalho adicionado para {{issueKey}}",
+        "EXTENSION_NOT_LOADED": "Extensão de superprodutividade não carregada. Atualizar a página pode ajudar",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: importou {{issuesLength}} novos issues do Jira para o backlog",
+        "IMPORTED_SINGLE_ISSUE": "Jira: issue importado \"{{issueText}}\" do Jira para o backlog",
+        "INSUFFICIENT_SETTINGS": "Configurações insuficientes fornecidas para Jira",
+        "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" já está atualizado",
+        "ISSUE_UPDATE": "Jira: dados atualizados para \"{{issueText}}\" ",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: dados atualizados para \"{{issueText}}\" ",
+        "MISSING_ISSUE_DATA": "Jira: Foram encontradas tarefas com dados de problemas ausentes. Recarregando.",
+        "NO_VALID_TRANSITION": "Jira: nenhuma transição válida configurada",
+        "POLLING": "Jira: Mudanças na pesquisa de problemas",
+        "TIMED_OUT": "Jira: solicitação expirada",
+        "TRANSITION": "Jira: defina o problema \"{{issueKey}}\" como \"{{name}}\" ",
+        "TRANSITIONS_LOADED": "Jira: Transições carregadas. Use as opções abaixo para atribuí-las",
+        "TRANSITION_SUCCESS": "Jira: defina o problema {{issueKey}} como <strong> {{selectedTransition}} </strong>",
+        "UNABLE_TO_REASSIGN": "Jira: Não foi possível reatribuir o ticket a si mesmo, porque você não especificou um nome de usuário. Visite as configurações."
       },
       "STEPPER": {
-        "CREDENTIALS": "Credentials",
-        "DONE": "You are now done.",
-        "LOGIN_SUCCESS": "Login successful!",
-        "TEST_CREDENTIALS": "Test Credentials",
-        "WELCOME_USER": "Welcome {{user}}!"
+        "CREDENTIALS": "Credenciais",
+        "DONE": "Agora você terminou.",
+        "LOGIN_SUCCESS": "Login efetuado com sucesso!",
+        "TEST_CREDENTIALS": "Testar credenciais",
+        "WELCOME_USER": "Bem-vindo {{user}}!"
       }
     },
     "METRIC": {
