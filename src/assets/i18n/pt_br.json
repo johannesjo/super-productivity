@@ -333,88 +333,88 @@
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Add reminder",
+      "ADD_REMINDER": "Adicionar lembrete",
       "D_ADD": {
-        "DATETIME_LABEL": "Datetime for reminder (optional)",
-        "NOTE_LABEL": "Enter some text to save as note..."
+        "DATETIME_LABEL": "Data e hora para lembrete (opcional)",
+        "NOTE_LABEL": "Digite algum texto para salvar como nota ..."
       },
       "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "You need to enter a title",
-        "L_DATETIME": "Datetime for reminder",
-        "L_TITLE": "Title for notification",
-        "TITLE_ADD": "Add reminder for note",
-        "TITLE_EDIT": "Edit reminder for note"
+        "E_ENTER_TITLE": "Você precisa inserir um título",
+        "L_DATETIME": "Data e hora para lembrete",
+        "L_TITLE": "Título para notificação",
+        "TITLE_ADD": "Adicionar lembrete à nota",
+        "TITLE_EDIT": "Editar lembrete para a nota"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": "Snooze",
-        "TITLE": "Note"
+        "SNOOZE": "Soneca",
+        "TITLE": "Observação"
       },
-      "EDIT_REMINDER": "Edit reminder",
+      "EDIT_REMINDER": "Editar lembrete",
       "NOTES_CMP": {
-        "ADD_BTN": "Add new Note",
-        "DROP_TO_ADD": "Drop here to add new note"
+        "ADD_BTN": "Adicionar nova nota",
+        "DROP_TO_ADD": "Solte aqui para adicionar nova nota"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Disable markdown parsing",
-        "ENABLE_PARSE": "Enable markdown parse"
+        "DISABLE_PARSE": "Desativar análise de remarcação",
+        "ENABLE_PARSE": "Ativar análise de remarcação"
       },
-      "REMOVE_REMINDER": "Remove reminder",
+      "REMOVE_REMINDER": "Remover lembrete",
       "S": {
-        "ADDED_REMINDER": "Added reminder for note",
-        "DELETED_REMINDER": "Deleted reminder for note",
-        "UPDATED_REMINDER": "Updated reminder for note"
+        "ADDED_REMINDER": "Lembrete adicionado para a nota",
+        "DELETED_REMINDER": "Lembrete excluído da nota",
+        "UPDATED_REMINDER": "Lembrete atualizado para a nota"
       },
-      "UPDATE_REMINDER": "Update reminder"
+      "UPDATE_REMINDER": "Atualizar lembrete"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Back to work!",
-      "BREAK_IS_DONE": "Your break is done!",
-      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
-      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
+      "BACK_TO_WORK": "Voltar ao trabalho!",
+      "BREAK_IS_DONE": "Seu intervalo acabou!",
+      "ENJOY_YOURSELF": "Divirta-se, mexa-se, volte em:",
+      "FINISH_SESSION_X": "Você terminou a sessão com sucesso <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+        "BREAK_X_START": "Pomodoro: Pausa {{nr}} iniciado!",
+        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
       },
-      "SKIP_BREAK": "Skip break"
+      "SKIP_BREAK": "Pular pausa"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "Back to work!",
+      "BACK_TO_WORK": "Voltar ao trabalho!",
       "COMP": {
-        "INTRO": "Showing yourself some compassion is always a great idea. It improves your feeling of self-worth, fosters positive emotions and can help you overcome procrastination, of course. Try a little exercise:",
-        "L1": "Sit down for bit and stretch yourself, if you like, calm down a little bit",
-        "L2": "Try to listen to the thoughts and feelings that arise",
-        "L3": "Are you responding to yourself in a way that you would respond to a friend?",
-        "L4": "If the answer is no, imagine your friend in your situation. What you would say to them? What you would do for them?",
-        "OUTRO": "More exercises <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">can be found here</a> or on <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
-        "TITLE": "Self Compassion"
+        "INTRO": "Mostrar compaixão a si mesmo é sempre uma ótima idéia. Melhora o sentimento de valor próprio, promove emoções positivas e pode ajudá-lo a superar a procrastinação, é claro. Tente fazer um pequeno exercício:",
+        "L1": "Sente-se um pouco e estique-se, se quiser, acalme-se um pouco",
+        "L2": "Tente ouvir os pensamentos e sentimentos que surgem",
+        "L3": "Você está respondendo a si mesmo de uma maneira que responderia a um amigo?",
+        "L4": "Se a resposta for não, imagine seu amigo na sua situação. O que você diria a eles? O que você faria por eles?",
+        "OUTRO": "Mais exercícios <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">can be found here</a> or on <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
+        "TITLE": "Auto-compaixão"
       },
       "CUR": {
-        "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. Enjoy and explore!",
-        "L1": "What feelings are eliciting your temptation to procrastinate?",
-        "L2": "Where do you feel them in your body?",
-        "L3": "What do they remind you of?",
-        "L4": "What happens to the thought of procrastinating as you observe it? Does it intensify? Dissipate? Cause other emotions to arise?",
-        "L5": "How are the sensations in your body shifting as you continue to rest your awareness on them?",
-        "TITLE": "Curiosity"
+        "INTRO": "A procrastinação é interessante, não é? Não faz sentido fazê-lo. Não é do seu interesse a longo prazo. Mas ainda todo mundo faz. Aprecie e explore!",
+        "L1": "Que sentimentos estão provocando sua tentação de procrastinar?",
+        "L2": "Onde você os sente em seu corpo?",
+        "L3": "O que eles lembram?",
+        "L4": "O que acontece com o pensamento de procrastinar enquanto você o observa? Ele se intensifica? Dissipa? Faz com que surjam outras emoções?",
+        "L5": "Como as sensações em seu corpo estão mudando à medida que você repousa sua consciência nelas?",
+        "TITLE": "Curiosidade"
       },
-      "H1": "Cut yourself some slack!",
-      "P1": "First of all relax! Everybody does it once in a while. And if you're not doing what you should, you should at least enjoy it! Then check out the sections below for something helpful.",
-      "P2": "If you want to know more about the science behind all here I can recommend <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">this article</a> from which are some of the exercises.",
-      "P3": "Remember: Procrastination is an emotion regulation problem, not a time management problem.",
+      "H1": "Dê uma folga!",
+      "P1": "Antes de tudo, relaxe! Todo mundo faz isso de vez em quando. E se você não estiver fazendo o que deveria, pelo menos aproveite! Em seguida, verifique as seções abaixo para obter algo útil.",
+      "P2": "Se você quiser saber mais sobre a ciência por trás de tudo aqui, posso recomendar <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">Este Artigo</a> a partir do qual são alguns dos exercícios.",
+      "P3": "Lembre-se: a procrastinação é um problema de regulação emocional, não um problema de gerenciamento de tempo.",
       "REFRAME": {
-        "INTRO": "Think about what might be positive about the task despite its.",
-        "TITLE": "Reframing",
-        "TL1": "What might be interesting about it?",
-        "TL2": "What is to gain if you complete it?",
-        "TL3": "How will you feel about it if you complete it?"
+        "INTRO": "Pense no que pode ser positivo sobre a tarefa.",
+        "TITLE": "Reenquadrando",
+        "TL1": "O que pode ser interessante sobre isso?",
+        "TL2": "O que você ganha se você completá-lo?",
+        "TL3": "Como você se sentirá sobre isso se concluir o processo?"
       },
       "SPLIT_UP": {
-        "INTRO": "Split up the task into as many small chunks as you can.",
-        "OUTRO": "Done? Then think about it. What would be – strictly theoretical – the first thing you would do <i>if</i> you were to start working on the task? Just think about it...",
-        "TITLE": "Split it up!"
+        "INTRO": "Divida a tarefa em tantos pequenos pedaços quanto possível.",
+        "OUTRO": "Concluído? Então pense sobre isso. Qual seria -estritamente teórica- a primeira coisa que você faria se você começasse a trabalhar na tarefa? Pense nisso ...",
+        "TITLE": "Divida!"
       }
     },
     "PROJECT": {
