@@ -383,223 +383,223 @@
         "PROCRASTINATION": {
             "BACK_TO_WORK": "Torna al lavoro!",
             "COMP": {
-                "INTRO": "Showing yourself some compassion is always a great idea. It improves your feeling of self-worth, fosters positive emotions and can help you overcome procrastination, of course. Try a little exercise:",
-                "L1": "Sit down for bit and stretch yourself, if you like, calm down a little bit",
-                "L2": "Try to listen to the thoughts and feelings that arise",
-                "L3": "Are you responding to yourself in a way that you would respond to a friend?",
-                "L4": "If the answer is no, imagine your friend in your situation. What you would say to them? What you would do for them?",
-                "OUTRO": "More exercises <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">can be found here</a> or on <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
-                "TITLE": "Self Compassion"
+                "INTRO": "Prenderti cura di te stesso è sempre una buona idea. Migliora la tua autostima, i sentimenti positivi e può aiutarti ad evitare la procastinazione. Prova a fare un po' di esercizio:",
+                "L1": "Siediti e fai un po' di stretching, se ne hai voglia, rilassati un po'",
+                "L2": "Prova ad ascoltare i tuoi pensieri e le emozioni che ne scaturiscono",
+                "L3": "Rispondi a te stesso nello stesso modo in cui risponderesti ad un amico?",
+                "L4": "Se la risposta è no, immagina un tuo amico nella tua situazione. Cosa gli diresti? Cosa faresti per loro?",
+                "OUTRO": "Altro esercizi <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">li trovi qui</a> oppure su <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
+                "TITLE": "Auto compassione"
             },
             "CUR": {
-                "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. Enjoy and explore!",
-                "L1": "What feelings are eliciting your temptation to procrastinate?",
-                "L2": "Where do you feel them in your body?",
-                "L3": "What do they remind you of?",
-                "L4": "What happens to the thought of procrastinating as you observe it? Does it intensify? Dissipate? Cause other emotions to arise?",
-                "L5": "How are the sensations in your body shifting as you continue to rest your awareness on them?",
-                "TITLE": "Curiosity"
+                "INTRO": "La procastinazione è interessante, non credi? Non ha senso procastinare. Non nel tuo interesse a lungo termine. Ma tutti continuano a farlo. Divertiti ed esplora!",
+                "L1": "Che sensazioni ti suscita la tentazione di procastinare?",
+                "L2": "In che punto del tuo corpo le senti?",
+                "L3": "Cosa ti fanno venire in mente?",
+                "L4": "Cosa succede al pensiero di procastinare se lo osservi? Si intensifica? Svanisce? Suscita altre emozioni?",
+                "L5": "Come mutano le emozioni nel tuo corpo mentre continui a posare la tua consapevolezza su di esse?",
+                "TITLE": "Curiosità"
             },
-            "H1": "Cut yourself some slack!",
-            "P1": "First of all relax! Everybody does it once in a while. And if you're not doing what you should, you should at least enjoy it! Then check out the sections below for something helpful.",
-            "P2": "If you want to know more about the science behind all here I can recommend <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">this article</a> from which are some of the exercises.",
-            "P3": "Remember: Procrastination is an emotion regulation problem, not a time management problem.",
+            "H1": "Ritagliati una pausa!",
+            "P1": "Prima di tutto rilassati! Tutti ne hanno bisogno ogni tanto. E se non stai facendo quello che dovresti fare, dovresti almeno godertelo! Nelle sezioni sottostanti troverai risorse utili.",
+            "P2": "Se vuoi sapere di più sulla scienza che sta dietro tutto questo, ti consiglio <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">questo articolo</a> dal quale sono presi alcuni degli esercizi.",
+            "P3": "Ricorda: La procastinazione è un problema di regolazione delle emozioni, non un problema di gestione del tempo.",
             "REFRAME": {
-                "INTRO": "Think about what might be positive about the task despite its.",
-                "TITLE": "Reframing",
-                "TL1": "What might be interesting about it?",
-                "TL2": "What is to gain if you complete it?",
-                "TL3": "How will you feel about it if you complete it?"
+                "INTRO": "Pensa a ciò che potrebbe essere positivo riguardo al task, nonostante tutto.",
+                "TITLE": "Ricontestualizzazione",
+                "TL1": "Cosa di esso potrebbe essere interessante?",
+                "TL2": "Cosa ci guadagni a completarlo?",
+                "TL3": "Come ti sentirai se lo completi?"
             },
             "SPLIT_UP": {
-                "INTRO": "Split up the task into as many small chunks as you can.",
-                "OUTRO": "Done? Then think about it. What would be – strictly theoretical – the first thing you would do <i>if</i> you were to start working on the task? Just think about it...",
-                "TITLE": "Split it up!"
+                "INTRO": "Dividi il task in quanti più piccoli pezzi riesci.",
+                "OUTRO": "Fatto? Poi pensa. Quale potrebbe essere – teoricamente parlando – la prima cosa che faresti <i>if</i> se dovessi iniziare a lavorare sul task? Pensaci solo...",
+                "TITLE": "Dividilo in pezzi!"
             }
         },
         "PROJECT": {
             "BANNER": {
                 "FINISH_DAY": {
-                    "FINISH_DAY": "Finish Day",
-                    "MSG": "You forgot to finish your day on {{dayStr}}"
+                    "FINISH_DAY": "Termina la giornata",
+                    "MSG": "Ti sei dimenticato di terminare la giornata del {{dayStr}}"
                 }
             },
             "D_CREATE": {
-                "CREATE": "Create Project",
-                "EDIT": "Edit Project",
-                "SETUP_GIT": "Setup Github Integration",
-                "SETUP_JIRA": "Setup Jira Integration"
+                "CREATE": "Crea progetto",
+                "EDIT": "Modifica progetto",
+                "SETUP_GIT": "Configura integrazione Githun",
+                "SETUP_JIRA": "Configura integrazione Jira"
             },
             "FORM_BASIC": {
-                "L_TITLE": "Project Name",
-                "TITLE": "Basic Settings"
+                "L_TITLE": "Nome progetto",
+                "TITLE": "Impostazioni base"
             },
             "FORM_THEME": {
-                "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
-                "HELP": "Theme settings for your project.",
-                "L_COLOR_ACCENT": "Accent Color",
-                "L_COLOR_PRIMARY": "Primary Color",
-                "L_COLOR_WARN": "Warn/Error Color",
-                "L_HUE_ACCENT": "Threshold for dark text on accent color background",
-                "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
-                "L_HUE_WARN": "Threshold for dark text on warn color background",
-                "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
-                "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
-                "L_THEME_COLOR": "Theme Color",
-                "L_TITLE": "Title",
-                "TITLE": "Theme"
+                "D_IS_DARK_THEME": "Non verrà usato se il sistema supporta la dark mode globalmente.",
+                "HELP": "Impostazioni sul tema del tuo progetto.",
+                "L_COLOR_ACCENT": "Colore di accento",
+                "L_COLOR_PRIMARY": "Colore primario",
+                "L_COLOR_WARN": "Colore errori/warning",
+                "L_HUE_ACCENT": "Soglia per il testo scuro su sfondo del colore di accento",
+                "L_HUE_PRIMARY": "Soglia per il testo scuro su sfondo del colore primario",
+                "L_HUE_WARN": "Soglia per il testo scuro su sfondo del colore di warning",
+                "L_IS_AUTO_CONTRAST": "Imposta automaticamente il colore del testo per ottimizzare la leggibilità",
+                "L_IS_REDUCED_THEME": "Usa UI ridotta (nessuna box intorno ai task)",
+                "L_THEME_COLOR": "Colore del tema",
+                "L_TITLE": "Titolo",
+                "TITLE": "Tema"
             },
             "S": {
-                "ARCHIVED": "Archived Project",
-                "CREATED": "Created project <strong>{{title}}</strong>. You can select it from the menu on the top left.",
-                "DELETED": "Deleted Project",
-                "E_EXISTS": "Project \"{{title}}\" already exists",
-                "E_INVALID_FILE": "Invalid data for project file",
-                "ISSUE_PROVIDER_UPDATED": "Updated project settings for <strong>{{issueProviderKey}}</strong>",
-                "UNARCHIVED": "Unarchived project",
-                "UPDATED": "Updated project settings"
+                "ARCHIVED": "Progetto archiviato",
+                "CREATED": "Creato progetto <strong>{{title}}</strong>. Puoi selezionarlo dal menu in alto a sinistra.",
+                "DELETED": "Progetto eliminato",
+                "E_EXISTS": "Il progetto \"{{title}}\" esiste già",
+                "E_INVALID_FILE": "Dati non validi per il file di progetto",
+                "ISSUE_PROVIDER_UPDATED": "Aggiornare le impostazioni di progetto per <strong>{{issueProviderKey}}</strong>",
+                "UNARCHIVED": "Progetto non archiviato",
+                "UPDATED": "Aggiornate impostazioni di progetto"
             }
         },
         "REMINDER": {
-            "S_REMINDER_ERR": "Error for reminder interface"
+            "S_REMINDER_ERR": "Errore per interfaccia promemoria"
         },
         "TASK": {
             "ADDITIONAL_INFO": {
-                "ATTACHMENTS": "Attachments {{nr}}",
-                "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
-                "LOCAL_ATTACHMENTS": "Local Attachments",
-                "NOTES": "Notes"
+                "ATTACHMENTS": "Allegati {{nr}}",
+                "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} allegati",
+                "LOCAL_ATTACHMENTS": "Allegati locali",
+                "NOTES": "Note"
             },
             "ADD_TASK_BAR": {
-                "ADD_TASK": "Add task",
-                "ADD_TASK_TO_BACKLOG": "Add task to backlog",
-                "START": "Press enter one more time to start"
+                "ADD_TASK": "Aggiungi task",
+                "ADD_TASK_TO_BACKLOG": "Aggiungi task al backlog",
+                "START": "Premi ancora invio per iniziare"
             },
             "B": {
-                "ADD_HALF_HOUR": "Add 1/2 hou",
-                "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\""
+                "ADD_HALF_HOUR": "Aggiungi mezz'ora",
+                "ESTIMATE_EXCEEDED": "Tempo stimato superato per \"{{title}}\""
             },
             "CMP": {
-                "ADD_SUB_TASK": "Add sub task",
-                "ADVANCED": "Advanced",
-                "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
-                "DELETE": "Delete Task",
-                "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-                "EDIT_REMINDER": "Edit reminder",
-                "MARK_DONE": "Mark as done",
-                "MARK_UNDONE": "Mark as undone",
-                "MOVE_TO_BACKLOG": "Move to backlog",
-                "MOVE_TO_OTHER_PROJECT": "Move to other Project",
-                "MOVE_TO_TODAY": "Move to today's list",
-                "OPEN_ATTACH": "Attach file or link",
-                "OPEN_ISSUE": "Open issue in a new browser tab",
-                "OPEN_TASK_MENU": "Open task menu",
-                "OPEN_TIME": "Estimate time/Add time spent",
-                "REPEAT_EDIT": "Edit repeat task config",
-                "REPEAT_TASK": "Repeat task",
-                "SCHEDULE": "Schedule task",
-                "SHOW_UPDATES": "Show updates",
-                "TOGGLE_ADDITIONAL": "Show/Hide additional info",
-                "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
-                "TOGGLE_DONE": "Mark as done/undone",
-                "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
-                "TRACK_TIME": "Start tracking time",
-                "TRACK_TIME_STOP": "Pause tracking time",
-                "UPDATE_ISSUE_DATA": "Update issue data"
+                "ADD_SUB_TASK": "Aggiungi sotto-task",
+                "ADVANCED": "Avanzate",
+                "CONVERT_TO_PARENT_TASK": "Converti a task padre",
+                "DELETE": "Cancella task",
+                "DROP_ATTACHMENT": "Trascina qui per allegare a \"{{title}}\"",
+                "EDIT_REMINDER": "Modifica promemoria",
+                "MARK_DONE": "Segna come completato",
+                "MARK_UNDONE": "Segna come non completato",
+                "MOVE_TO_BACKLOG": "Sposta nel backlog",
+                "MOVE_TO_OTHER_PROJECT": "Sposta in un altro progetto",
+                "MOVE_TO_TODAY": "Sposta nella lista di oggi",
+                "OPEN_ATTACH": "Allega file o link",
+                "OPEN_ISSUE": "Apri issue in una nuova scheda del browser",
+                "OPEN_TASK_MENU": "Apri il menu dei task",
+                "OPEN_TIME": "Stima il tempo/Aggiungi il tempo impiegato",
+                "REPEAT_EDIT": "Modifica ripetizione configurazione task",
+                "REPEAT_TASK": "Ripeti task",
+                "SCHEDULE": "Pianifica task",
+                "SHOW_UPDATES": "Mostra aggiornamenti",
+                "TOGGLE_ADDITIONAL": "Mostra/nascondi informazioni aggiuntive",
+                "TOGGLE_ATTACHMENTS": "Mostra/nascondi allegati",
+                "TOGGLE_DONE": "Segna come completato/non completato",
+                "TOGGLE_SUB_TASK_VISIBILITY": "Cambia visibilità sotto-task",
+                "TRACK_TIME": "Inizia a tracciare il tempo",
+                "TRACK_TIME_STOP": "Pausa tracciamento del tempo",
+                "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
             },
             "D_REMINDER_ADD": {
-                "ADD": "Schedule Task",
-                "DATETIME_FOR": "Datetime for reminder",
-                "EDIT": "Edit Reminder",
-                "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
-                "SCHEDULE": "Schedule",
-                "UNSCHEDULE": "Unschedule"
+                "ADD": "Pianifica Task",
+                "DATETIME_FOR": "Data e ora per promemoria",
+                "EDIT": "Modifica promemoria",
+                "MOVE_TO_BACKLOG": "Sposta il task nel backlog fino alla pianificazione",
+                "SCHEDULE": "Pianifica",
+                "UNSCHEDULE": "Rimuovi pianificazione"
             },
             "D_REMINDER_VIEW": {
-                "DISMISS": "Dismiss Reminder",
-                "ERR_LOST": "There was a reminder scheduled for the task {{title}}, but it seems to be lost.",
-                "FOR_CURRENT": "Task is due. Do you want to start working on it?",
-                "FOR_OTHER": "Task is due. Do you want to start working on it?",
-                "FROM_PROJECT": "From Project",
-                "SNOOZE": "Snooze",
-                "START": "Start Task",
-                "SWITCH_PROJECT_START": "Switch Project & Start Task",
-                "TITLE": "Scheduled Task"
+                "DISMISS": "Rimuovi promemoria",
+                "ERR_LOST": "Un promemoria era pianificato per il task {{title}}, ma sembra essersi perso.",
+                "FOR_CURRENT": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
+                "FOR_OTHER": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
+                "FROM_PROJECT": "Da progetto",
+                "SNOOZE": "Silenzia",
+                "START": "Inizia task",
+                "SWITCH_PROJECT_START": "Cambia progetto & inizia task",
+                "TITLE": "Task pianificato"
             },
             "D_TIME": {
-                "ADD_FOR_OTHER_DAY": "Add time spent for other day",
-                "DELETE_FOR": "Delete entry for day",
-                "ESTIMATE": "Estimate",
-                "TIME_SPENT": "Time Spent",
-                "TIME_SPENT_ON": "Time Spent {{date}}",
-                "TITLE": "Time spent / Estimates"
+                "ADD_FOR_OTHER_DAY": "Aggiungi il tempo impiegato per un'altro giorno",
+                "DELETE_FOR": "Cancella la voce dalla giornata",
+                "ESTIMATE": "Stima",
+                "TIME_SPENT": "Tempo impiegato",
+                "TIME_SPENT_ON": "Tempo impiegato {{date}}",
+                "TITLE": "Tempo impiegato / Stime"
             },
             "D_TIME_FOR_DAY": {
-                "ADD_ENTRY_FOR": "Add new entry for {{date}}",
-                "DATE": "Date for new entry",
-                "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
-                "TINE_SPENT": "Time Spent",
-                "TITLE": "Add for Day"
+                "ADD_ENTRY_FOR": "Aggiungi nuova voce per il giorno {{date}}",
+                "DATE": "Data per la nuova voce",
+                "HELP": "Esempi:<br> 30m => 30 minuti<br> 2h => 2 ore<br> 2h 30m => 2 ore e 30 minuti",
+                "TINE_SPENT": "Tempo speso",
+                "TITLE": "Aggiungi per giorno"
             },
             "N": {
-                "ESTIMATE_EXCEEDED": "Time estimate exceeded!",
-                "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
+                "ESTIMATE_EXCEEDED": "Tempo stimato superato!",
+                "ESTIMATE_EXCEEDED_BODY": "Hai superato il tuo tempo stimato per \"{{title}}\"."
             },
             "S": {
-                "DELETED": "Deleted task \"{{title}}\"",
-                "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
-                "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
-                "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
-                "REMINDER_DELETED": "Deleted reminder for task",
-                "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
-                "TASK_CREATED": "Created task \"{{title}}\""
+                "DELETED": "Cancellato task \"{{title}}\"",
+                "FOUND_MOVE_FROM_BACKLOG": "Spostato task <strong>{{title}}</strong> dal backlog alla lista dei task di oggi",
+                "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinato task <strong>{{title}}</strong> relativo ad issue dall'archivio",
+                "REMINDER_ADDED": "Pianificato task \"{{title}}\"",
+                "REMINDER_DELETED": "Cancellato promemoria per task",
+                "REMINDER_UPDATED": "Aggiornato promemoria per task \"{{title}}\"",
+                "TASK_CREATED": "Creato task \"{{title}}\""
             },
-            "SELECT_OR_CREATE": "Select or create task",
+            "SELECT_OR_CREATE": "Seleziona o crea task",
             "SUMMARY_TABLE": {
-                "ESTIMATE": "Estimate",
-                "SPENT_TODAY": "Spent Today",
-                "SPENT_TOTAL": "Spent Total",
+                "ESTIMATE": "Stima",
+                "SPENT_TODAY": "Tempo impiegato oggi",
+                "SPENT_TOTAL": "Tempo impiegato totale",
                 "TASK": "Task",
-                "TOGGLE_DONE": "un-/mark as done"
+                "TOGGLE_DONE": "Segna come non completato/completato"
             }
         },
         "TASK_REPEAT": {
             "D_CONFIRM_REMOVE": {
-                "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
-                "OK": "Remove completely"
+                "MSG": "Rimuovere la configurazione ripeti convertirà tutte le istanze precedenti di questo task a normali task. Sei sicuro di voler procedere?",
+                "OK": "Rimuovi completamente"
             },
             "D_EDIT": {
-                "ADD": "Add Repeat Task Config",
-                "EDIT": "Edit Repeat Task Config",
-                "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
-                "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
-                "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
+                "ADD": "Aggiungi configurazione ripeti task",
+                "EDIT": "Modifica configurazione ripeti task",
+                "HELP1": "I task ripetuti servono ai doveri quotidiani, es: \"Organizzazione\", \"Meeting giornalieri\", \"Code Review\", \"Controllare email\" o task simili, che è probabile accadano più e più volte.",
+                "HELP2": "Una volta configurato, un task ripetuto sarà ricreato per ognuno dei giorni selezionati sotto non appena aprirai il progetto, e sarà automaticamente segnato come completato alla fine della giornata. Saranno gestiti come istanze separate, quindi puoi liberamente aggiungere sotto-task etc.",
+                "HELP3": "I tasks importati da Jira o gli issue di Git non possono essere ripetuti. Su un task ripetuto, saranno anche eliminati tutti i promemoria."
             },
             "F": {
-                "DEFAULT_ESTIMATE": "Default Estimate",
-                "FRIDAY": "Friday",
-                "MONDAY": "Monday",
-                "SATURDAY": "Saturday",
-                "SUNDAY": "Sunday",
-                "THURSDAY": "Thursday",
-                "TITLE": "Title for task",
-                "TUESDAY": "Tuesday",
-                "WEDNESDAY": "Wednesday"
+                "DEFAULT_ESTIMATE": "Stima di default",
+                "FRIDAY": "Venerdì",
+                "MONDAY": "Lunedì",
+                "SATURDAY": "Sabato",
+                "SUNDAY": "Domenica",
+                "THURSDAY": "Giovedì",
+                "TITLE": "Titolo del task",
+                "TUESDAY": "Martedì",
+                "WEDNESDAY": "Mercoledì"
             }
         },
         "TIME_TRACKING": {
             "B": {
-                "ALREADY_DID": "I already did",
-                "SNOOZE": "Snooze {{time}}"
+                "ALREADY_DID": "Ho già fatto",
+                "SNOOZE": "Silenzia {{time}}"
             },
             "D_IDLE": {
-                "BREAK": "Break",
-                "CREATE_AND_TRACK": "<em>Create</em> and track to:",
-                "IDLE_FOR": "You have been idle for:",
-                "SKIP": "Skip",
+                "BREAK": "Pausa",
+                "CREATE_AND_TRACK": "<em>Crea</em> e traccia su:",
+                "IDLE_FOR": "Sei stato fermo per:",
+                "SKIP": "Salta",
                 "TASK": "Task",
-                "TASK_BREAK": "Task+Break",
-                "TRACK_TO": "Track to:"
+                "TASK_BREAK": "Task+Pausa",
+                "TRACK_TO": "Traccia su:"
             }
         },
         "WORKLOG": {
