@@ -1,3 +1,12 @@
+## [2.13.7](https://github.com/johannesjo/super-productivity/compare/v2.13.6...v2.13.7) (2019-10-26)
+
+
+### Bug Fixes
+
+* by reducing entitlements ([f7408ae](https://github.com/johannesjo/super-productivity/commit/f7408aece1055568f6244a4e0d23f3d791513dd5))
+
+
+
 ## [2.13.6](https://github.com/johannesjo/super-productivity/compare/v2.13.5...v2.13.6) (2019-10-26)
 
 
