@@ -1,3 +1,13 @@
+## [2.13.6](https://github.com/johannesjo/super-productivity/compare/v2.13.5...v2.13.6) (2019-10-26)
+
+
+### Features
+
+* **i18n:** add italian and portuguese ([68dbb8c](https://github.com/johannesjo/super-productivity/commit/68dbb8cf2025ad50be3f1f7185861393c0d4289a))
+* Fixies and Portuguese Brazilian translations ([5c5faf0](https://github.com/johannesjo/super-productivity/commit/5c5faf0cc28f1dc062bcdc787273fce18f305be6))
+
+
+
 ## [2.13.5](https://github.com/johannesjo/super-productivity/compare/v2.13.4...v2.13.5) (2019-10-20)
 
 
