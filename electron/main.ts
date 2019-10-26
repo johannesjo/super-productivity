@@ -66,7 +66,7 @@ appIN.on('second-instance', () => {
 });
 
 // make it a single instance by closing other instances but allow for dev mode
-if (!appIN.requestSingleInstanceLock() && !IS_DEV) {
+if (!IS_MAC && !appIN.requestSingleInstanceLock() && !IS_DEV) {
   quitAppNow();
 }
 
