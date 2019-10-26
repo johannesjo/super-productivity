@@ -667,12 +667,13 @@ export const T = {
     'CLICK_TO_EDIT': 'G.CLICK_TO_EDIT',
     'CLOSE': 'G.CLOSE',
     'DELETE': 'G.DELETE',
-    'EDIT': 'G.EDIT',
     'DISMISS': 'G.DISMISS',
     'DO_IT': 'G.DO_IT',
+    'EDIT': 'G.EDIT',
     'EXTENSION_INFO': 'G.EXTENSION_INFO',
     'LOGIN': 'G.LOGIN',
     'LOGOUT': 'G.LOGOUT',
+    'MINUTES': 'G.MINUTES',
     'NEXT': 'G.NEXT',
     'OK': 'G.OK',
     'PREVIOUS': 'G.PREVIOUS',
@@ -680,8 +681,7 @@ export const T = {
     'SAVE': 'G.SAVE',
     'TITLE': 'G.TITLE',
     'UNDO': 'G.UNDO',
-    'UPDATE': 'G.UPDATE',
-    'MINUTES': 'G.MINUTES'
+    'UPDATE': 'G.UPDATE'
   },
   'GCF': {
     'AUTO_BACKUPS': {
@@ -758,7 +758,9 @@ export const T = {
       'RU': 'GCF.LANG.RU',
       'TITLE': 'GCF.LANG.TITLE',
       'TR': 'GCF.LANG.TR',
-      'ZH': 'GCF.LANG.ZH'
+      'ZH': 'GCF.LANG.ZH',
+      'IT': 'GCF.LANG.IT',
+      'PT': 'GCF.LANG.PT'
     },
     'MISC': {
       'HELP': 'GCF.MISC.HELP',
@@ -837,6 +839,7 @@ export const T = {
     'EVALUATION': 'PDS.EVALUATION',
     'EXPORT_TASK_LIST': 'PDS.EXPORT_TASK_LIST',
     'NO_TASKS': 'PDS.NO_TASKS',
+    'PLAN': 'PDS.PLAN',
     'ROUND_15M': 'PDS.ROUND_15M',
     'ROUND_30M': 'PDS.ROUND_30M',
     'ROUND_5M': 'PDS.ROUND_5M',
@@ -854,8 +857,7 @@ export const T = {
     'TIME_SPENT_AND_ESTIMATE_LABEL': 'PDS.TIME_SPENT_AND_ESTIMATE_LABEL',
     'TIME_SPENT_ESTIMATE_TITLE': 'PDS.TIME_SPENT_ESTIMATE_TITLE',
     'TODAY': 'PDS.TODAY',
-    'WEEK': 'PDS.WEEK',
-    'PLAN': 'PDS.PLAN'
+    'WEEK': 'PDS.WEEK'
   },
   'PM': {
     'TITLE': 'PM.TITLE'

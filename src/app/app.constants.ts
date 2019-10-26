@@ -35,6 +35,8 @@ export enum LanguageCode {
   ru = 'ru',
   tr = 'tr',
   zh = 'zh',
+  it = 'it',
+  pt = 'pt',
 }
 
 export enum LanguageCodeMomentMap {
@@ -47,6 +49,8 @@ export enum LanguageCodeMomentMap {
   ko = 'ko',
   ru = 'ru',
   tr = 'tr',
+  it = 'it',
+  pt = 'pt',
   zh = 'zh-cn',
 }
 
