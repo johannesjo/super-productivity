@@ -3,7 +3,7 @@ import 'dexie-observable';
 import {Injectable} from '@angular/core';
 import {Task} from '../../features/tasks/task.model';
 import {from, merge, Observable, Subject} from 'rxjs';
-import {filter, switchMap} from 'rxjs/operators';
+import {debounceTime, filter, switchMap} from 'rxjs/operators';
 import {IDatabaseChange} from 'dexie-observable/api';
 import {TaskClass} from './task.class';
 
@@ -15,7 +15,7 @@ const storeCfg = [{
   name: 'tasks',
   // tslint:disable-next-line
   // fields: '++id, projectId, title, *subTaskIds, timeSpentOnDay, timeSpent, timeEstimate, created, isDone, notes, &issueId, issueType, parentId, attachmentIds, &reminderId, &repeatCfgId, _showSubTasksMode, _currentTab'
-  fields: '++id, projectId, title, created, parentId, *subTaskIds',
+  fields: '++id, order, projectId, title, created, parentId, *subTaskIds',
   c: TaskClass,
 }];
 
@@ -25,9 +25,12 @@ export type TaskTable = Dexie.Table<Task, string>;
   providedIn: 'root',
 })
 export class DexieService extends Dexie {
-  tasks: Ta;
+  tasks: any;
 
   private _refresh$ = new Subject<IDatabaseChange[]>();
+  private _refreshDebounced$ = this._refresh$.pipe(
+    // debounceTime(10),
+  );
 
   constructor() {
     super('SUP_DEXIE');
@@ -60,7 +63,7 @@ export class DexieService extends Dexie {
 
     return merge(
       from(query(this.tasks)),
-      this._refresh$.pipe(
+      this._refreshDebounced$.pipe(
         filter(changes => this._isRefreshForTable(Tables.tasks, changes)),
         switchMap(() => query(this.tasks))
       )

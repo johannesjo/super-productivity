@@ -9,7 +9,6 @@ import {
   AddTask,
   AddTaskReminder,
   AddTimeSpent,
-  DeleteTask,
   FocusLastActiveTask,
   FocusTask,
   LoadTaskState,
@@ -64,7 +63,6 @@ import {
   selectTasksWithMissingIssueData,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId,
-  selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
@@ -136,12 +134,11 @@ export class TaskService {
   );
 
   undoneTasks$: Observable<Task[]> = this._dexieService.getTasks$(
-    (taskTable: TaskTable) => taskTable.filter(task => !task.isDone).reverse().sortBy('created')
+    (taskTable: TaskTable) => taskTable.filter(task => !task.isDone && !task.parentId).reverse().sortBy('order')
   );
 
-  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysDoneTasksWithSubTasks),
-    shareReplay(1),
+  doneTasks$: Observable<TaskWithSubTasks[]> = this._dexieService.getTasks$(
+    (taskTable: TaskTable) => taskTable.filter(task => task.isDone && !task.parentId).reverse().sortBy('order')
   );
 
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
@@ -282,7 +279,7 @@ export class TaskService {
       isAddToBottom = false,
   ) {
     const task = this.createNewTaskWithDefaults(title, additionalFields);
-    this._dexieService.tasks.put(task);
+    this._dexieService.tasks.add(task);
     // this._store.dispatch(new AddTask({
     //   task: this.createNewTaskWithDefaults(title, additionalFields),
     //   isAddToBacklog,
@@ -308,14 +305,25 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks) {
-    this._store.dispatch(new DeleteTask({task}));
+    // this._store.dispatch(new DeleteTask({task}));
+    if (task.subTasks) {
+      this._dexieService.tasks.bulkDelete([task.id, ...task.subTaskIds]);
+    } else {
+      // this._dexieService.tasks.delete(task.id);
+      this._dexieService.tasks.bulkDelete([task.id]);
+    }
   }
 
 
-  update(id: string, changedFields: Partial<Task>) {
-    this._store.dispatch(new UpdateTask({
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    }));
+  async update(id: string, changedFields: Partial<Task>) {
+    this._dexieService.tasks.put({
+      id,
+      ...(await this._dexieService.tasks.get(id)),
+      ...changedFields,
+    });
+    // this._store.dispatch(new UpdateTask({
+    //   task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    // }));
   }
 
   // NOTE: side effects are not executed!!!
