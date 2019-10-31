@@ -50,5 +50,12 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_HIDE_EVALUATION_SHEET,
       },
     },
+    {
+      key: 'isTurnOffMarkdown',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_TURN_OFF_MARKDOWN,
+      },
+    },
   ]
 };

@@ -6,8 +6,9 @@
             (focus)="setFocus($event)"
             (input)="resizeTextareaToFit()"
             (keypress)="keypressHandler($event)"
-            *ngIf="isShowEdit"
+            *ngIf="isShowEdit || (isTurnOffMarkdownParsing$|async)"
             [@fade]
+            [ngModel]="modelCopy"
             class="mat-body-1 markdown-unparsed"
             rows="1"
             tabindex="1"></textarea>
@@ -17,6 +18,7 @@
        (focus)="toggleShowEdit($event)"
        [data]="model"
        [hidden]="isShowEdit"
+       *ngIf="!(isTurnOffMarkdownParsing$|async)"
        class="mat-body-1 markdown-parsed"
        markdown
        tabindex="1"></div>

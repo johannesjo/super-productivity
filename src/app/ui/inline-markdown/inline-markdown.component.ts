@@ -14,6 +14,9 @@ import {fadeAnimation} from '../animations/fade.ani';
 import {MarkdownComponent} from 'ngx-markdown';
 import {IS_ELECTRON} from '../../app.constants';
 import {ElectronService} from 'ngx-electron';
+import {Observable} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import {GlobalConfigService} from '../../features/config/global-config.service';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -25,8 +28,8 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   animations: [fadeAnimation]
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
-  @Input() model: string;
   @Input() isLock = false;
+
   @Output() changed: EventEmitter<any> = new EventEmitter();
   @Output() focused: EventEmitter<Event> = new EventEmitter();
   @Output() blurred: EventEmitter<Event> = new EventEmitter();
@@ -37,11 +40,29 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   isHideOverflow = false;
   isShowEdit = false;
   modelCopy: string;
+
+  isTurnOffMarkdownParsing$: Observable<boolean> = this._globalConfigService.misc$.pipe(
+    map(cfg => cfg && cfg.isTurnOffMarkdown),
+    startWith(false),
+  );
+
   private _hideOverFlowTimeout: number;
+
+  private _model: string;
+  @Input() set model(v: string) {
+    this._model = v;
+    this.modelCopy = v;
+  }
+
+  get model() {
+    return this._model;
+  }
+
 
   constructor(
     private _electronService: ElectronService,
     private _cd: ChangeDetectorRef,
+    private _globalConfigService: GlobalConfigService,
   ) {
     this.resizeParsedToFit();
   }
@@ -122,6 +143,13 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this._hideOverflow();
 
     setTimeout(() => {
+      if (!this.previewEl) {
+        if (this.textareaEl) {
+          this.resizeTextareaToFit();
+        }
+        return;
+      }
+
       this.previewEl.element.nativeElement.style.height = 'auto';
       // NOTE: somehow this pixel seem to help
       this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 'px';
