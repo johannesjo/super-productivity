@@ -65,35 +65,34 @@ export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
   });
 };
 
+const MATCH_PROTOCOL_REG_EX = /(^[^:]+):\/\//;
+const MATCH_PORT_REG_EX = /:\d{2,4}/;
+
 const parseHostAndPort = (config: JiraCfg) => {
-  let host;
+  let host = config.host;
   let protocol;
   let port;
-  const matchPortRegEx = /:\d{2,4}/;
 
   // parse port from host and remove it
-  if (config.host.match(matchPortRegEx)) {
-    const match = matchPortRegEx.exec(config.host);
-    host = config.host.replace(matchPortRegEx, '');
+  if (host.match(MATCH_PORT_REG_EX)) {
+    const match = MATCH_PORT_REG_EX.exec(host);
+    host = host.replace(MATCH_PORT_REG_EX, '');
     port = parseInt(match[0].replace(':', ''), 10);
   }
 
-  const matchProtocolRegEx = /(^[^:]+):\/\//;
-
   // parse protocol from host and remove it
-  if (config.host.match(matchProtocolRegEx)) {
-    const match = matchProtocolRegEx.exec(config.host);
-    host = config.host
-      .replace(matchProtocolRegEx, '')
+  if (host.match(MATCH_PROTOCOL_REG_EX)) {
+    const match = MATCH_PROTOCOL_REG_EX.exec(host);
+    host = host
+      .replace(MATCH_PROTOCOL_REG_EX, '')
       // remove trailing slash just in case
       .replace(/\/$/, '');
 
     protocol = match[1];
   } else {
     protocol = 'https';
-    host = host || config.host;
   }
 
-  // console.log({host, protocol, port});
+  console.log({host, protocol, port});
   return {host, protocol, port};
 };
