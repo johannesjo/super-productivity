@@ -1,3 +1,19 @@
+## [2.13.8](https://github.com/johannesjo/super-productivity/compare/v2.13.7...v2.13.8) (2019-11-01)
+
+
+### Bug Fixes
+
+* **jira:** crashing if api doesn't respond with avatar url [#252](https://github.com/johannesjo/super-productivity/issues/252) ([ff96f9d](https://github.com/johannesjo/super-productivity/commit/ff96f9d3a8484276be01e7caeac80fa2d94d6b82))
+* **jira:** not handling ports correctly [#253](https://github.com/johannesjo/super-productivity/issues/253) ([393682e](https://github.com/johannesjo/super-productivity/commit/393682ef21778140738ec4d69bb58bc36b9f011f))
+* **jira:** sometimes crashing app for wrong config [#253](https://github.com/johannesjo/super-productivity/issues/253) ([d23d98f](https://github.com/johannesjo/super-productivity/commit/d23d98f611a0db67df9037ed781e1022899a7602))
+
+
+### Features
+
+* allow turning off markdown ([d452d22](https://github.com/johannesjo/super-productivity/commit/d452d226ff6a65a9ca5db9bd2ac17226052292e1))
+
+
+
 ## [2.13.7](https://github.com/johannesjo/super-productivity/compare/v2.13.6...v2.13.7) (2019-10-26)
 
 
