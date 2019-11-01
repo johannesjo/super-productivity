@@ -21,7 +21,7 @@ import {JiraCfg} from './jira';
 import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {SnackService} from '../../../core/snack/snack.service';
-import {IS_ELECTRON} from '../../../app.constants';
+import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
 import {combineLatest, Observable, throwError} from 'rxjs';
 import {SearchResultItem} from '../issue';
@@ -88,7 +88,7 @@ export class JiraApiService {
           .pipe(catchError((err) => {
             this._blockAccess();
             checkConnectionSub.unsubscribe();
-            return throwError({handledError: err});
+            return throwError({[HANDLED_ERROR_PROP_STR]: err});
           }))
           .subscribe(() => {
             this.unblockAccess();
@@ -144,7 +144,7 @@ export class JiraApiService {
     const searchQuery = this._cfg.autoAddBacklogJqlQuery;
 
     if (!searchQuery) {
-      return throwError({handledError: 'JiraApi: No search query for auto import'});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'JiraApi: No search query for auto import'});
     }
 
     return this._sendRequest$({
@@ -243,7 +243,7 @@ export class JiraApiService {
           ? T.F.JIRA.S.EXTENSION_NOT_LOADED
           : T.F.JIRA.S.INSUFFICIENT_SETTINGS,
       });
-      return throwError({handledError: 'Insufficient Settings for Jira'});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'Insufficient Settings for Jira'});
     }
 
     if (this._isBlockAccess && !isForce) {
@@ -257,7 +257,7 @@ export class JiraApiService {
           fn: () => this.unblockAccess()
         }
       });
-      return throwError({handledError: 'Blocked access to prevent being shut out'});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'Blocked access to prevent being shut out'});
     }
 
     // assign uuid to request to know which responsive belongs to which promise
@@ -316,7 +316,7 @@ export class JiraApiService {
         catchError((err) => {
           const errTxt = getJiraResponseErrorTxt(err);
           this._snackService.open({type: 'ERROR', msg: `Jira: ${errTxt}`});
-          return throwError({handledError: errTxt});
+          return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
         }),
         first(),
       );

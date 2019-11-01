@@ -17,7 +17,7 @@ import {expandAnimation} from '../../../../ui/animations/expand.ani';
 import {catchError} from 'rxjs/operators';
 import {Subscription, throwError} from 'rxjs';
 import {T} from '../../../../t.const';
-import {HelperClasses} from '../../../../app.constants';
+import {HANDLED_ERROR_PROP_STR, HelperClasses} from '../../../../app.constants';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -76,7 +76,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
           this.isTestCredentialsSuccess = false;
           this.user = null;
           this._changeDetectorRef.detectChanges();
-          return throwError({handledError: err});
+          return throwError({[HANDLED_ERROR_PROP_STR]: err});
         }))
         .subscribe((user: JiraOriginalUser) => {
           this.user = user;

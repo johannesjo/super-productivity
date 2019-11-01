@@ -1,15 +1,13 @@
 import {ErrorHandler, Injectable} from '@angular/core';
 import {isObject} from '../../util/is-object';
 import {getJiraResponseErrorTxt} from '../../util/get-jira-response-error-text';
-import {HANDLED_ERROR, IS_ELECTRON} from '../../app.constants';
+import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../banner/banner.service';
 
 let isWasErrorAlertCreated = false;
 
 const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: string) => {
-  console.log(stackTrace);
-
   if (isWasErrorAlertCreated) {
     return;
   }
@@ -42,6 +40,10 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
 };
 
 
+const isHandledError = (err): boolean => {
+  return (err && err.hasOwnProperty(HANDLED_ERROR_PROP_STR));
+};
+
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   private _electronLogger: any;
@@ -61,9 +63,8 @@ export class GlobalErrorHandler implements ErrorHandler {
     // tslint:disable-next-line
     const stack = err && err.stack;
 
-
     // if not our custom error handler we have a critical error on our hands
-    if (!err || (!err.handledError && (errStr && !errStr.match(HANDLED_ERROR)))) {
+    if (!isHandledError(err)) {
       const errorStr = this._getErrorStr(err) || errStr;
 
       // NOTE: dom exceptions will break all rendering that's why

@@ -22,7 +22,6 @@ export const ALL_THEMES = [
   'deep-orange',
 ];
 
-export const HANDLED_ERROR = '--HANDLED_ERROR--';
 
 export enum LanguageCode {
   en = 'en',
@@ -104,3 +103,5 @@ export enum THEME_COLOR_MAP {
   'grey' = '#9e9e9e',
   'blue-grey' = '#607d8b',
 }
+
+export const HANDLED_ERROR_PROP_STR = 'HANDLED_ERROR_PROP';

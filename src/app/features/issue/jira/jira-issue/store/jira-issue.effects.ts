@@ -34,6 +34,7 @@ import {isEmail} from '../../../../../util/is-email';
 import {T} from '../../../../../t.const';
 import {truncate} from '../../../../../util/truncate';
 import {ProjectService} from '../../../../project/project.service';
+import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -180,7 +181,7 @@ export class JiraIssueEffects {
           });
           return EMPTY;
         } else if (!issue) {
-          return throwError({handledError: 'Jira: Issue Data not found'});
+          return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: Issue Data not found'});
         } else if (!issue.assignee || issue.assignee.name !== currentUserName) {
           return this._matDialog.open(DialogConfirmComponent, {
             restoreFocus: true,
@@ -353,7 +354,7 @@ export class JiraIssueEffects {
             type: 'ERROR',
           });
           // NOTE: we would kill the whole effect chain if we do this
-          // return throwError({handledError: 'Jira: No valid transition configured'});
+          // return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: No valid transition configured'});
           return timer(2000).pipe(concatMap(() => this._openTransitionDialog(issue, localState)));
         }
 

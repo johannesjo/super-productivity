@@ -2,19 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
-import {
-  catchError,
-  concatMap,
-  distinctUntilChanged,
-  exhaustMap,
-  filter,
-  map,
-  mapTo,
-  switchMap,
-  take,
-  tap,
-  withLatestFrom
-} from 'rxjs/operators';
+import {catchError, concatMap, distinctUntilChanged, exhaustMap, filter, map, mapTo, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {combineLatest, EMPTY, from, interval, Observable, of, throwError, zip} from 'rxjs';
 import {GoogleDriveSyncService} from '../google-drive-sync.service';
 import {GoogleApiService} from '../google-api.service';
@@ -49,6 +37,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {T} from '../../../t.const';
 import {GlobalSyncService} from '../../../core/global-sync/global-sync.service';
 import {SyncProvider} from '../../../core/global-sync/sync-provider';
+import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -494,7 +483,7 @@ export class GoogleDriveSyncEffects {
   // DATE HELPER
   private _loadFile(): Observable<any> {
     if (!this._config.syncFileName) {
-      return throwError({handledError: 'No file name specified'});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'No file name specified'});
     }
     return this._googleApiService.loadFile$(this._config._backupDocId);
   }
@@ -540,7 +529,7 @@ export class GoogleDriveSyncEffects {
   }
 
   // SIMPLE HELPER
-  private _isNewerThan(strDate1: string|number, strDate2: string|number) {
+  private _isNewerThan(strDate1: string | number, strDate2: string | number) {
     const d1 = new Date(strDate1);
     const d2 = new Date(strDate2);
     return (d1.getTime() > d2.getTime());

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {GOOGLE_DEFAULT_FIELDS_FOR_DRIVE, GOOGLE_DISCOVERY_DOCS, GOOGLE_SCOPES, GOOGLE_SETTINGS} from './google.const';
 import * as moment from 'moment';
-import {IS_ELECTRON} from '../../app.constants';
+import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
 import {MultiPartBuilder} from './util/multi-part-builder';
 import {HttpClient, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {SnackService} from '../../core/snack/snack.service';
@@ -192,7 +192,7 @@ export class GoogleApiService {
           };
         } else {
           this._handleError('No data found');
-          return throwError({handledError: 'No data found'});
+          return throwError({[HANDLED_ERROR_PROP_STR]: 'No data found'});
         }
       }));
   }
@@ -200,7 +200,7 @@ export class GoogleApiService {
   getFileInfo$(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
-      throwError({handledError: 'No file id given'});
+      throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
     }
 
     return this._mapHttp$({
@@ -217,7 +217,7 @@ export class GoogleApiService {
   findFile$(fileName): Observable<any> {
     if (!fileName) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_NAME);
-      return throwError({handledError: 'No file name given'});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'No file name given'});
     }
 
     return this._mapHttp$({
@@ -235,7 +235,7 @@ export class GoogleApiService {
   loadFile$(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
-      throwError({handledError: 'No file id given'});
+      throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
     }
 
     const loadFile = this._mapHttp$({
@@ -447,7 +447,7 @@ export class GoogleApiService {
           } else if (res && (res.status >= 0)) {
             this._handleError('Could not connect to google. Check your internet connection.');
           }
-          return throwError({handledError: res});
+          return throwError({[HANDLED_ERROR_PROP_STR]: res});
         }),
       );
   }

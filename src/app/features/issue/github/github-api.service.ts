@@ -12,7 +12,7 @@ import {GithubComment, GithubIssue} from './github-issue/github-issue.model';
 import {SearchResultItem} from '../issue';
 import {loadFromLs, saveToLs} from '../../../core/persistence/local-storage';
 import {LS_GITHUB_ISSUE_CACHE_PREFIX} from '../../../core/persistence/ls-keys.const';
-import {HANDLED_ERROR} from '../../../app.constants';
+import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 import {T} from '../../../t.const';
 
 const BASE = GITHUB_API_BASE_URL;
@@ -174,7 +174,9 @@ export class GithubApiService {
         type: 'ERROR',
         msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED
       });
-      throw new Error(`${HANDLED_ERROR} Not enough settings`);
+      const e = new Error(`Not enough settings`);
+      e[HANDLED_ERROR_PROP_STR] = 'Not enough settings';
+      throw e;
     }
   }
 
@@ -198,10 +200,10 @@ export class GithubApiService {
       });
     }
     if (error && error.message) {
-      return throwError({handledError: 'Github: ' + error.message});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'Github: ' + error.message});
     }
 
-    return throwError({handledError: 'Github: Api request failed.'});
+    return throwError({[HANDLED_ERROR_PROP_STR]: 'Github: Api request failed.'});
   }
 
   private _mergeIssuesAndComments(issues: GithubIssue[], comments: GithubComment[]): GithubIssue[] {
