@@ -93,6 +93,6 @@ const parseHostAndPort = (config: JiraCfg) => {
     protocol = 'https';
   }
 
-  console.log({host, protocol, port});
+  // console.log({host, protocol, port});
   return {host, protocol, port};
 };

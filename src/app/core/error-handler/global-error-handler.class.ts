@@ -41,7 +41,10 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
 
 
 const isHandledError = (err): boolean => {
-  return (err && err.hasOwnProperty(HANDLED_ERROR_PROP_STR));
+  const errStr = (typeof err === 'string') ? err : err.toString();
+  // NOTE: for some unknown reason sometimes err is undefined while err.toString is not...
+  // this is why we also check the string value
+  return (err && err.hasOwnProperty(HANDLED_ERROR_PROP_STR)) || (errStr.match(HANDLED_ERROR_PROP_STR));
 };
 
 @Injectable()
@@ -62,6 +65,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     const errStr = (typeof err === 'string') ? err : err.toString();
     // tslint:disable-next-line
     const stack = err && err.stack;
+    console.log(isHandledError(err), err[HANDLED_ERROR_PROP_STR], errStr);
 
     // if not our custom error handler we have a critical error on our hands
     if (!isHandledError(err)) {

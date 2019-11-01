@@ -9,13 +9,7 @@ import {
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
 import {ProjectService} from '../../project/project.service';
-import {
-  mapIssueResponse,
-  mapIssuesResponse,
-  mapResponse,
-  mapToSearchResults,
-  mapTransitionResponse
-} from './jira-issue/jira-issue-map.util';
+import {mapIssueResponse, mapIssuesResponse, mapResponse, mapToSearchResults, mapTransitionResponse} from './jira-issue/jira-issue-map.util';
 import {JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser} from './jira-api-responses';
 import {JiraCfg} from './jira';
 import {ElectronService} from 'ngx-electron';
@@ -314,8 +308,8 @@ export class JiraApiService {
     return fromPromise(promise)
       .pipe(
         catchError((err) => {
-          const errTxt = getJiraResponseErrorTxt(err);
-          this._snackService.open({type: 'ERROR', msg: `Jira: ${errTxt}`});
+          const errTxt = `Jira: ${getJiraResponseErrorTxt(err)}`;
+          this._snackService.open({type: 'ERROR', msg: errTxt});
           return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
         }),
         first(),
