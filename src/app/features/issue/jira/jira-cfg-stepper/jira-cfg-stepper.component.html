@@ -18,7 +18,7 @@
           <div *ngIf="user"
                [@expand]
                class="welcome">
-            <img [src]="user.avatarUrls['48x48']"
+            <img [src]="user.avatarUrls && user.avatarUrls['48x48']"
                  alt="User Avatar"
                  class="user-avatar">
             <div class="welcome-txt">
