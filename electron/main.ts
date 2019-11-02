@@ -47,9 +47,10 @@ const appIN: MyApp = app;
 
 initDebug({showDevTools: IS_DEV}, IS_DEV);
 
-// TODO maybe reimplement when fixed
-electronDl({openFolderWhenDone: true});
-
+// NOTE: opening the folder crashes the mas build
+if (!IS_MAC) {
+  electronDl({openFolderWhenDone: true});
+}
 let mainWin: BrowserWindow;
 const nestedWinParams = {isDarwinForceQuit: false};
 // keep app active to keep time tracking running
