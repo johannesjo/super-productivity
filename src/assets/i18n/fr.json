@@ -3,14 +3,14 @@
     "B_INSTALL": {
       "IGNORE": "Ignorer",
       "INSTALL": "Installer",
-      "MSG": "Voulez-vous installer Super Productivity en tant que PWA?"
+      "MSG": "Voulez-vous installer Super Productivity en tant que PWA ?"
     },
-    "UPDATE_WEB_APP": "Nouvelle version disponible. Charger la nouvelle version?"
+    "UPDATE_WEB_APP": "Une nouvelle version est disponible. Charger la nouvelle version ?"
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "À partir d'autres projets",
     "NO_TASKS": "Il n'y a actuellement aucune tâche dans votre backlog",
-    "SCHEDULED": "Prévu",
+    "SCHEDULED": "Planifié",
     "TITLE": "Backlog"
   },
   "DATETIME_INPUT": {
@@ -40,12 +40,12 @@
     },
     "BOOKMARK": {
       "BAR": {
-        "DROP": "Déposer ici pour ajouter un favoris",
-        "NO_BOOKMARKS": "Vous n'avez aucun favoris de projet. Ajoutez-en un par glisser-déposer ou en cliquant sur le bouton 'plus'."
+        "DROP": "Déposer ici pour ajouter aux favoris",
+        "NO_BOOKMARKS": "Vous n'avez aucun projet favoris. Ajoutez-en un via glisser-déposer ou en cliquant sur le bouton 'plus'."
       },
       "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Ajouter un favoris",
-        "EDIT_BOOKMARK": "Modifier le favoris",
+        "ADD_BOOKMARK": "Ajouter aux favoris",
+        "EDIT_BOOKMARK": "Modifier le favori",
         "LABELS": {
           "COMMAND": "Commande",
           "FILE": "Chemin du fichier",
@@ -72,14 +72,14 @@
         "TITLE": "Configurer Github pour le projet"
       },
       "FORM": {
-        "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos popres modifications)",
+        "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de Github au backlog",
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues GithHub ouvertes pour un repository spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues GitHub ouvertes pour un repository spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
         "TITLE": "Github"
       },
       "ISSUE_CONTENT": {
@@ -93,30 +93,30 @@
         "WRITE_A_COMMENT": "Écrire un commentaire"
       },
       "S": {
-        "ERR_NETWORK": "Github: la requête a échoué à cause d'une erreur réseau côté client",
-        "ERR_NOT_CONFIGURED": "Github: n'est pas configuré correctement",
-        "ERR_REQUEST": "Github: l'API a renvoyé {{statusCode}}. {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} nouvelles issues de git dans le backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: Issue \"{{issueText}}\" importée de git dans le backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
-        "ISSUE_UPDATE": "Github: données mises à jour pour \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: données mises à jour pour \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Tâches avec données d'issue manquantes trouvées. Rechargement.",
-        "NEW_COMMENT": "Github: Nouveau commentaire pour \"{{issueText}}\"",
-        "POLLING": "Github: Recherche de changement sur les issues",
+        "ERR_NETWORK": "Github : la requête a échouée à cause d'une erreur réseau côté client",
+        "ERR_NOT_CONFIGURED": "Github : n'est pas configuré correctement",
+        "ERR_REQUEST": "Github : l'API a renvoyé {{statusCode}}. {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Github : {{issuesLength}} nouvelles issues de git dans le backlog",
+        "IMPORTED_SINGLE_ISSUE": "Github : Issue \"{{issueText}}\" importée de git dans le backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Github : l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
+        "ISSUE_UPDATE": "Github : données mises à jour pour \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github : données mises à jour pour \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Github : Tâches avec données d'issue manquantes trouvées. Rechargement.",
+        "NEW_COMMENT": "Github : Nouveau commentaire pour \"{{issueText}}\"",
+        "POLLING": "Github : Recherche de modification sur les issues",
         "SHOW_ISSUE_BTN": "Montre moi"
       }
     },
     "GOOGLE": {
       "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Échec de l'authentification, essayez de vous reconnecter!"
+        "AUTH_FAIL": "GoogleApi : Échec de l'authentification, essayez de vous reconnecter!"
       },
       "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: Aucun fichier nommé <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation? Sinon, veuillez changer le nom du fichier de synchronisation."
+        "CREATE_SYNC_FILE": "Google Drive : Aucun fichier nommé <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive : utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation? Sinon, veuillez changer le nom du fichier de synchronisation."
       },
       "D_CONFIRM_LOAD": {
-        "LAST_MOD": "Dernière modification:",
+        "LAST_MOD": "Dernière modification :",
         "LAST_SYNC": "dernière synchronisation",
         "LOCAL": "Local",
         "LOCAL_REMOTE": "local <=> distant",
@@ -138,7 +138,7 @@
         "TITLE": "Remplacer les données non enregistrées sur Google Drive?"
       },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: Il y a une mise à jour à distance! Téléchargement...",
+        "DOWNLOADING_UPDATE": "Google Drive: Il y a une mise à jour à distance ! Téléchargement...",
         "ERROR": "Google Drive - Erreur: {{errTxt}}",
         "ERROR_INITIAL_IMPORT": "Google Drive: erreur lors de la tentative d'importation des données initiales",
         "LOCAL_UP_TO_DATE": "Google Drive: les données locales sont déjà à jour",
@@ -170,7 +170,7 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: Pour éviter le blocage de l'API, l'accès a été bloqué par Super Productivity. Vous devriez probablement vérifier vos paramètres de jira!",
+        "BLOCK_ACCESS_MSG": "Jira : Pour éviter le blocage de l'API, l'accès a été bloqué par Super Productivity. Vous devriez probablement vérifier vos paramètres Jira !",
         "BLOCK_ACCESS_UNBLOCK": "Débloquer"
       },
       "CFG_CMP": {
@@ -293,7 +293,7 @@
     },
     "METRIC": {
       "BANNER": {
-        "CHECK": "Je l'ai fait!"
+        "CHECK": "Je l'ai fait !"
       },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Moy. pauses par jour",
@@ -315,18 +315,18 @@
         "ADD_NOTE_FOR_TOMORROW": "Ajouter une note pour demain",
         "DISABLE_REPEAT_EVERY_DAY": "Désactiver la répétition tous les jours",
         "ENABLE_REPEAT_EVERY_DAY": "Répéter tous les jours",
-        "HELP_H1": "Pourquoi devrais-je m'en soucier?",
+        "HELP_H1": "Pourquoi devrais-je m'en soucier ?",
         "HELP_LINK_TXT": "Aller à la section des métriques",
-        "HELP_P1": "Il est temps de faire une petite auto-évaluation! Vos réponses ici sont sauvegardées et vous fournissent un peu de statistiques sur la façon dont vous travaillez dans la section des métriques. De plus, les suggestions pour demain apparaîtront au-dessus de votre liste de tâches le lendemain.",
+        "HELP_P1": "Il est temps de faire une petite auto-évaluation ! Vos réponses ici sont sauvegardées et vous fournissent un peu de statistiques sur la façon dont vous travaillez dans la section des métriques. De plus, les suggestions pour demain apparaîtront au-dessus de votre liste de tâches le lendemain.",
         "HELP_P2": "Ceci est n'est pas destiné à calculer des métriques exactes ou à devenir efficace comme une machine dans tous vos travaux mais plutôt à améliorer votre perception de votre travail. Il peut être utile d’évaluer les points négatifs dans votre routine quotidienne et de rechercher des facteurs qui vous aident. En étant un peu systématiques à ce sujet, nous espérons pouvoir mieux les maîtriser et améliorer ce que vous pouvez.",
-        "IMPROVEMENTS": "Qu'est-ce qui a amélioré votre productivité?",
-        "IMPROVEMENTS_TOMORROW": "Que pourriez-vous faire pour améliorer demain?",
+        "IMPROVEMENTS": "Qu'est-ce qui a amélioré votre productivité ?",
+        "IMPROVEMENTS_TOMORROW": "Que pourriez-vous faire pour améliorer demain ?",
         "MOOD": "Comment vous sentez-vous?",
         "MOOD_HINT": "1: Horrible - 10: Magnifique",
         "NOTES": "Notes pour demain",
-        "OBSTRUCTIONS": "Qu'est-ce qui a nui à votre productivité?",
-        "PRODUCTIVITY": "Avez-vous travaillé efficacement?",
-        "PRODUCTIVITY_HINT": "1: N'a même pas commencé - 10: Énormément efficace"
+        "OBSTRUCTIONS": "Qu'est-ce qui a nui à votre productivité ?",
+        "PRODUCTIVITY": "Avez-vous travaillé efficacement ?",
+        "PRODUCTIVITY_HINT": "1: N'a même pas commencé - 10: Extrêmement efficace"
       },
       "S": {
         "SAVE_METRIC": "Métrique enregistrée avec succès"
@@ -346,7 +346,7 @@
         "TITLE_EDIT": "Modifier le rappel pour la note"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": "Snooze pour {{time}}",
+        "SNOOZE": "Sommeil pour {{time}}",
         "TITLE": "Note"
       },
       "EDIT_REMINDER": "Modifier le rappel",
@@ -355,8 +355,8 @@
         "DROP_TO_ADD": "Déposer ici pour ajouter une nouvelle note"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Désactiver le parsage markdown",
-        "ENABLE_PARSE": "Activer le parsage markdown"
+        "DISABLE_PARSE": "Désactiver le markdown",
+        "ENABLE_PARSE": "Activer le markdown"
       },
       "REMOVE_REMINDER": "Supprimer le rappel",
       "S": {
@@ -367,27 +367,27 @@
       "UPDATE_REMINDER": "Mettre à jour le rappel"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Au travail!",
-      "BREAK_IS_DONE": "Votre pause est terminée!",
-      "ENJOY_YOURSELF": "Amusez-vous, bougez, revenez dans:",
-      "FINISH_SESSION_X": "Vous avez terminé avec succès la session <strong>{{nr}}</strong>!",
+      "BACK_TO_WORK": "Au travail !",
+      "BREAK_IS_DONE": "Votre pause est terminée !",
+      "ENJOY_YOURSELF": "Amusez-vous, bougez, revenez dans :",
+      "FINISH_SESSION_X": "Vous avez terminé avec succès la session <strong>{{nr}}</strong> !",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: La pause {{nr}} a commencé!",
-        "SESSION_X_START": "Pomodoro: La session {{nr}} a commencé!"
+        "BREAK_X_START": "Pomodoro : La pause {{nr}} a commencée !",
+        "SESSION_X_START": "Pomodoro : La session {{nr}} a commencée !"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: La session {{nr}} a commencé!"
+        "SESSION_X_START": "Pomodoro : La session {{nr}} a commencée !"
       },
       "SKIP_BREAK": "Passer la pause"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "Au travail!",
+      "BACK_TO_WORK": "Au travail !",
       "COMP": {
         "INTRO": "Faire preuve d'indulgence est toujours une bonne idée. Ça améliore l'estime de soi, favorise les émotions positives et peut vous aider à surmonter la procrastination, bien sûr. Essayez un petit exercice:",
         "L1": "Asseyez-vous quelques instants et étirez-vous, en d'autres termes, détendez-vous",
         "L2": "Essayez d'écouter les pensées et les sentiments qui émergent",
-        "L3": "Agissez-vous avec vous-même de la même manière que vous agiriez avec un ami?",
-        "L4": "Si la réponse est non, imaginez votre ami dans votre situation. Que lui diriez-vous? Que feriez-vous pour eux?",
+        "L3": "Agissez-vous avec vous-même de la même manière que vous agiriez avec un ami ?",
+        "L4": "Si la réponse est non, imaginez votre ami dans votre situation. Que lui diriez-vous? Que feriez-vous pour eux ?",
         "OUTRO": "Vous trouverez plus d'exercices <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">ici</a> ou sur <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
         "TITLE": "Indulgence avec soi-même"
       },
@@ -420,15 +420,15 @@
     "PROJECT": {
       "BANNER": {
         "FINISH_DAY": {
-          "FINISH_DAY": "Fin de journée",
-          "MSG": "Vous avez oublié de terminer votre journée le {{dayStr}}"
+          "FINISH_DAY": "Clôturer la journée",
+          "MSG": "Vous avez oublié de clôturer votre journée le {{dayStr}}"
         }
       },
       "D_CREATE": {
         "CREATE": "Créer un projet",
         "EDIT": "Modifier le projet",
-        "SETUP_GIT": "Configurer l'intégration à Github",
-        "SETUP_JIRA": "Configurer l'intégration à Jira"
+        "SETUP_GIT": "Configurer l'intégration de Github",
+        "SETUP_JIRA": "Configurer l'intégration de Jira"
       },
       "FORM_BASIC": {
         "L_TITLE": "Nom du projet",
@@ -518,8 +518,8 @@
       "D_REMINDER_VIEW": {
         "DISMISS": "Fermer le rappel",
         "ERR_LOST": "Un rappel était prévu pour la tâche {{title}}, mais il semble avoir été perdu.",
-        "FOR_CURRENT": "La tâche est due. Voulez-vous commencer à travailler dessus?",
-        "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus?",
+        "FOR_CURRENT": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
+        "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FROM_PROJECT": "Depuis le projet",
         "SNOOZE": "Snooze {{time}}",
         "START": "Démarrer la tâche",
@@ -542,7 +542,7 @@
         "TITLE": "Ajouter pour le jour"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "Estimation du temps dépassée!",
+        "ESTIMATE_EXCEEDED": "Estimation du temps dépassée !",
         "ESTIMATE_EXCEEDED_BODY": "Vous avez dépassé votre temps estimé pour \"{{title}}\"."
       },
       "S": {
@@ -589,27 +589,27 @@
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "je l'ai déjà fait",
+        "ALREADY_DID": "Je l'ai déjà fait",
         "SNOOZE": "Snooze {{time}}"
       },
       "D_IDLE": {
         "BREAK": "Pause",
-        "CREATE_AND_TRACK": "<em>Créer</em> et suivre pour:",
-        "IDLE_FOR": "Vous avez été inactif pendant:",
+        "CREATE_AND_TRACK": "<em>Créer</em> et ajouter sur :",
+        "IDLE_FOR": "Vous avez été inactif pendant : ",
         "SKIP": "Passer",
         "TASK": "Tâche",
         "TASK_BREAK": "Pause de travail",
-        "TRACK_TO": "Suivre sur:"
+        "TRACK_TO": "Ajouter à :"
       }
     },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "Jours travaillés:",
-        "MONTH_WORKED": "Mois travaillé:",
-        "REPEATING_TASK": "Tâche répétée",
-        "RESTORE_TASK_FROM_ARCHIVE": "Restaurer la tâche à partir d'une archive",
+        "DAYS_WORKED": "Jours travaillés : ",
+        "MONTH_WORKED": "Mois travaillé : ",
+        "REPEATING_TASK": "Tâche récurrente",
+        "RESTORE_TASK_FROM_ARCHIVE": "Restaurer la tâche à partir de l'archive",
         "TASKS": "Tâches",
-        "TOTAL_TIME": "Temps total passé:",
+        "TOTAL_TIME": "Temps total passé :",
         "TOTAL_TIME_PROJECT": "Temps total consacré au projet",
         "WEEK_NR": "Semaine {{nr}}",
         "WORKED": "Travaillé"
@@ -626,7 +626,7 @@
         "O": {
           "DATE": "Date",
           "ENDED_WORKING": "Terminé le travail",
-          "ESTIMATE_AS_CLOCK": "Estimation format horloge (par exemple 5:23)",
+          "ESTIMATE_AS_CLOCK": "Estimation format horaire (par exemple 5:23)",
           "ESTIMATE_AS_MILLISECONDS": "Estimation en millisecondes",
           "ESTIMATE_AS_STRING": "Estimation littérale (par exemple 5h 23m)",
           "FULL_HALF_HOURS": "demi heures pleines",
@@ -636,7 +636,7 @@
           "PARENT_TASK_TITLES_ONLY": "Titres de tâches parentes uniquement",
           "STARTED_WORKING": "Commencé à travailler",
           "TASK_SUBTASK": "Tâche / Sous-tâche",
-          "TIME_AS_CLOCK": "Heure format horloge (par exemple 5:23)",
+          "TIME_AS_CLOCK": "Heure format horaire (par exemple 5:23)",
           "TIME_AS_MILLISECONDS": "Temps en millisecondes",
           "TIME_AS_STRING": "Temps au format littéral (par exemple 5h 23m)",
           "TITLES_AND_SUB_TASK_TITLES": "Titres et sous-titres de tâches",
@@ -668,7 +668,7 @@
     "CLOSE": "Fermer",
     "DELETE": "Effacer",
     "DISMISS": "Rejeter",
-    "DO_IT": "Fais le!",
+    "DO_IT": "Fais le !",
     "EDIT": "modifier",
     "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> télécharger l'extension chrome</a> afin de permettre la communication avec l'Api Jira et la gestion du temps d'inactivité. Notez que cela ne fonctionne pas sur mobile.",
     "LOGIN": "S'identifier",
@@ -761,7 +761,7 @@
       "ZH": "chinois"
     },
     "MISC": {
-      "HELP": "<p><strong>Vous ne voyez pas les notifications de bureau?</strong> Pour Windows, vous pouvez vérifier Système> Notifications et actions et vérifier si les notifications requises ont été activées.</p>",
+      "HELP": "<p><strong>Vous ne voyez pas les notifications de bureau ?</strong> Pour Windows, vous pouvez vérifier Système> Notifications et actions et vérifier si les notifications requises ont été activées.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marquer la tâche parent comme terminée lorsque toutes les sous-tâches sont terminées",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmez avant de quitter l'application",
       "IS_DARK_MODE": "Mode sombre",
@@ -830,9 +830,9 @@
     "CELEBRATE": "Prenez un moment pour célébrer <i>!</i>",
     "CLEAR_ALL_CONTINUE": "Effacer tout et continuer",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Non, juste effacer les tâches",
-      "MSG": "Votre travail est terminé. Il est temps de rentrer à la maison!",
-      "OK": "Aye Aye! Fermer!"
+      "CANCEL": "Non, effacer seulement les tâches",
+      "MSG": "Votre journée de travail est terminée. Il est temps de rentrer à la maison!",
+      "OK": "Aye Aye ! Fermer !"
     },
     "EVALUATION": "évaluation",
     "EXPORT_TASK_LIST": "Exporter la liste des tâches",
@@ -866,7 +866,7 @@
     "CREATE_NEW": "Créer un nouveau",
     "DELETE_PROJECT": "Supprimer le projet",
     "D_CONFIRM_ARCHIVE": {
-      "MSG": "Êtes-vous sûr de vouloir archiver ce projet? Les projets archivés ne seront plus affichés dans le menu et vous ne pourrez accéder à aucune de leurs données sans les restaurer. Il est recommandé de sauvegarder vos données avant de procéder.",
+      "MSG": "Êtes-vous sûr de vouloir archiver ce projet ? Les projets archivés ne seront plus affichés dans le menu et vous ne pourrez accéder à aucune de leurs données sans les restaurer. Il est recommandé de sauvegarder vos données avant de procéder.",
       "OK": "Archiver"
     },
     "D_CONFIRM_DELETE": {
@@ -923,7 +923,7 @@
   },
   "V": {
     "E_1TO10": "Veuillez entrer une valeur entre 1 et 10",
-    "E_DATETIME": "La valeur entrée n'est pas un datetime!",
+    "E_DATETIME": "La valeur entrée n'est pas un datetime !",
     "E_MAX": "Ne devrait pas être plus grand que {{val}}",
     "E_MAX_LENGTH": "Doit comporter au maximum {{val}} caractères",
     "E_MIN": "Devrait être plus petit que {{val}}",
@@ -935,15 +935,15 @@
     "ADD_MORE": "Ajouter plus",
     "ADD_SOME_TASKS": "Ajoutez quelques tâches pour planifier votre journée!",
     "COMPLETED_TASKS": "Tâches terminées",
-    "ESTIMATE_REMAINING": "Est. restant:",
+    "ESTIMATE_REMAINING": "Tps. restant:",
     "FINISH_DAY": "Fin de journée",
-    "HELP_PROCRASTINATION": "A l'aide je procrastine!",
+    "HELP_PROCRASTINATION": "A l'aide je procrastine !",
     "NO_COMPLETED_TASKS": "Il n'y a actuellement aucune tâche terminée",
     "NO_PLANNED_TASKS": "Aucune tâche planifiée",
-    "READY_TO_WORK": "Prêt à travailler!",
+    "READY_TO_WORK": "Prêt à travailler !",
     "RESET_BREAK_TIMER": "Réinitialiser le timer 'sans prendre de pause'",
-    "TIME_ESTIMATED": "Temps estimé:",
-    "WITHOUT_BREAK": "Sans pause:",
-    "WORKING_TODAY": "Travaillé aujourd'hui:"
+    "TIME_ESTIMATED": "Temps estimé :",
+    "WITHOUT_BREAK": "Sans pause :",
+    "WORKING_TODAY": "Travaillé aujourd'hui :"
   }
 }
