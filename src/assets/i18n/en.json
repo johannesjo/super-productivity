@@ -752,15 +752,15 @@
       "EN": "English",
       "ES": "Spanish",
       "FR": "French",
+      "IT": "Italian",
       "JA": "Japanese",
       "KO": "Korean",
       "LABEL": "Please select a language",
+      "PT": "Portuguese",
       "RU": "Russian",
       "TITLE": "Language",
       "TR": "Turkish",
-      "ZH": "Chinese",
-      "IT": "Italian",
-      "PT": "Portuguese"
+      "ZH": "Chinese"
     },
     "MISC": {
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",

@@ -752,9 +752,11 @@
       "EN": "영어",
       "ES": "스페인 사람",
       "FR": "프랑스 국민",
+      "IT": "이탈리아 사람",
       "JA": "일본어",
       "KO": "한국어",
       "LABEL": "언어를 선택하십시오.",
+      "PT": "포르투갈 인",
       "RU": "러시아인",
       "TITLE": "언어",
       "TR": "터키어",
@@ -769,6 +771,7 @@
       "IS_HIDE_EVALUATION_SHEET": "일일 요약에서 평가 시트 숨기기",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
+      "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
       "TITLE": "기타 설정"
     },
     "POMODORO": {

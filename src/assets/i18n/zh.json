@@ -752,9 +752,11 @@
       "EN": "英语",
       "ES": "西班牙语",
       "FR": "法国",
+      "IT": "意大利",
       "JA": "日本",
       "KO": "朝鲜的",
       "LABEL": "请选择一种语言",
+      "PT": "葡萄牙语",
       "RU": "俄语",
       "TITLE": "语言",
       "TR": "土耳其",
@@ -769,6 +771,7 @@
       "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "超出时间估算时通知",
+      "IS_TURN_OFF_MARKDOWN": "关闭标记的降价解析",
       "TITLE": "其他设置"
     },
     "POMODORO": {
