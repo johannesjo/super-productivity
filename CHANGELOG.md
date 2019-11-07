@@ -1,3 +1,17 @@
+## [2.13.9](https://github.com/johannesjo/super-productivity/compare/v2.13.8...v2.13.9) (2019-11-07)
+
+
+### Bug Fixes
+
+* mac os mas build not working with electron dl ([e0bb802](https://github.com/johannesjo/super-productivity/commit/e0bb802f974a52fef5efcf7dc8f941eabfb40a0d))
+
+
+### Features
+
+* **i18n:** add missing translations ([b847d0e](https://github.com/johannesjo/super-productivity/commit/b847d0e8af0891eeef13b3a8b82da3b18a3f5e55))
+
+
+
 ## [2.13.8](https://github.com/johannesjo/super-productivity/compare/v2.13.7...v2.13.8) (2019-11-01)
 
 
