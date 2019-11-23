@@ -38,7 +38,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Output() blurred: EventEmitter<Event> = new EventEmitter();
   @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef;
   @ViewChild('textareaEl', {static: false}) textareaEl: ElementRef;
-  @ViewChild('previewEl', {static: true}) previewEl: MarkdownComponent;
+  @ViewChild('previewEl', {static: false}) previewEl: MarkdownComponent;
 
   isHideOverflow = false;
   isShowEdit = false;
@@ -55,6 +55,12 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() set model(v: string) {
     this._model = v;
     this.modelCopy = v;
+
+    if (!this.isShowEdit) {
+      window.setTimeout(() => {
+        this.resizeParsedToFit();
+      });
+    }
   }
 
   get model() {
