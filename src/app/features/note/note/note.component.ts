@@ -4,6 +4,7 @@ import {NoteService} from '../note.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogAddNoteReminderComponent} from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
 import {T} from '../../../t.const';
+import {DialogFullscreenMarkdownComponent} from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 
 @Component({
   selector: 'note',
@@ -48,5 +49,19 @@ export class NoteComponent {
 
   removeReminder() {
     this._noteService.removeReminder(this.note.id, this.note.reminderId);
+  }
+
+  editFullscreen() {
+    this._matDialog.open(DialogFullscreenMarkdownComponent, {
+      minWidth: '100vw',
+      height: '100vh',
+      data: {
+        content: this.note.content,
+      }
+    }).afterClosed().subscribe((content) => {
+      if (typeof content === 'string') {
+        this._noteService.update(this.note.id, {content});
+      }
+    });
   }
 }

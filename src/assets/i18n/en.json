@@ -359,6 +359,7 @@
         "ENABLE_PARSE": "Enable markdown parse"
       },
       "REMOVE_REMINDER": "Remove reminder",
+      "EDIT_FULLSCREEN": "Edit in fullscreen",
       "S": {
         "ADDED_REMINDER": "Added reminder for note",
         "DELETED_REMINDER": "Deleted reminder for note",

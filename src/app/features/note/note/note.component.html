@@ -41,14 +41,21 @@
           <mat-icon>alarm</mat-icon>
           {{T.F.NOTE.EDIT_REMINDER|translate}}
         </ng-container>
-
       </button>
+
+      <button (click)="editFullscreen()"
+              mat-menu-item>
+        <mat-icon>fullscreen</mat-icon>
+        {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
+      </button>
+
       <button (click)="removeReminder()"
               *ngIf="note.reminderId"
               mat-menu-item>
         <mat-icon style="color:#e15d63;">alarm_off</mat-icon>
         {{T.F.NOTE.REMOVE_REMINDER|translate}}
       </button>
+
       <button (click)="toggleLock()"
               *ngIf="!note.imgUrl"
               mat-menu-item>
@@ -57,6 +64,7 @@
 
         {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) : (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
       </button>
+
       <button (click)="removeNote()"
               mat-menu-item>
         <mat-icon style="color:#e15d63;">delete_forever</mat-icon>

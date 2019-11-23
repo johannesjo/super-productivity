@@ -359,6 +359,7 @@ export const T = {
         'ENABLE_PARSE': 'F.NOTE.NOTE_CMP.ENABLE_PARSE'
       },
       'REMOVE_REMINDER': 'F.NOTE.REMOVE_REMINDER',
+      'EDIT_FULLSCREEN': 'F.NOTE.EDIT_FULLSCREEN',
       'S': {
         'ADDED_REMINDER': 'F.NOTE.S.ADDED_REMINDER',
         'DELETED_REMINDER': 'F.NOTE.S.DELETED_REMINDER',
@@ -752,15 +753,15 @@ export const T = {
       'EN': 'GCF.LANG.EN',
       'ES': 'GCF.LANG.ES',
       'FR': 'GCF.LANG.FR',
+      'IT': 'GCF.LANG.IT',
       'JA': 'GCF.LANG.JA',
       'KO': 'GCF.LANG.KO',
       'LABEL': 'GCF.LANG.LABEL',
+      'PT': 'GCF.LANG.PT',
       'RU': 'GCF.LANG.RU',
       'TITLE': 'GCF.LANG.TITLE',
       'TR': 'GCF.LANG.TR',
-      'ZH': 'GCF.LANG.ZH',
-      'IT': 'GCF.LANG.IT',
-      'PT': 'GCF.LANG.PT'
+      'ZH': 'GCF.LANG.ZH'
     },
     'MISC': {
       'HELP': 'GCF.MISC.HELP',
