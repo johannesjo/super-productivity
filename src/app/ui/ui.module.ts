@@ -69,6 +69,7 @@ import {registerTranslateExtension} from './formly-translate-extension/formly-tr
 import {FormlyTranslatedTemplateComponent} from './formly-translated-template/formly-translated-template.component';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {FormlyValidationService} from './formly-translate-extension/formly-validation.service';
+import { DialogFullscreenMarkdownComponent } from './dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 
 
 @NgModule({
@@ -162,9 +163,11 @@ import {FormlyValidationService} from './formly-translate-extension/formly-valid
     ChipListInputComponent,
     FullPageSpinnerComponent,
     FormlyTranslatedTemplateComponent,
+    DialogFullscreenMarkdownComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
+    DialogFullscreenMarkdownComponent,
   ],
   exports: [
     SplitModule,

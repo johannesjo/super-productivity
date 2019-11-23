@@ -107,7 +107,10 @@
   ::ng-deep {
     .markdown-wrapper {
       min-height: 60px;
-      max-height: 600px;
+
+      @include mq(xs) {
+        max-height: 40vh;
+      }
     }
 
     .markdown-unparsed,

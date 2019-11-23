@@ -19,7 +19,8 @@
 
       <div class="tab-wrapper note-wrapper">
         <inline-markdown (changed)="changeTaskNotes($event)"
-                         [model]="taskData.notes"></inline-markdown>
+                         [model]="taskData.notes"
+                         [isShowControls]="true"></inline-markdown>
       </div>
     </mat-tab>
 

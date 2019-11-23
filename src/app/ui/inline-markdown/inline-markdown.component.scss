@@ -2,6 +2,7 @@
 
 :host {
   display: block;
+  position: relative;
 
   [hidden] {
     display: none !important;
@@ -16,6 +17,7 @@
   position: relative;
   transition: height $transition-fast;
   transform-origin: top;
+  @include scrollY;
 
   .resize-to-fit {
     position: absolute;
@@ -82,4 +84,16 @@
 
 textarea {
   outline: none;
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  opacity: 0;
+  transition: $transition-standard;
+
+  :host:hover & {
+    opacity: 1;
+  }
 }

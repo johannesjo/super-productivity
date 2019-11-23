@@ -17,6 +17,8 @@ import {ElectronService} from 'ngx-electron';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
+import {MatDialog} from '@angular/material';
+import {DialogFullscreenMarkdownComponent} from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -29,8 +31,9 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() isLock = false;
+  @Input() isShowControls = false;
 
-  @Output() changed: EventEmitter<any> = new EventEmitter();
+  @Output() changed: EventEmitter<string> = new EventEmitter();
   @Output() focused: EventEmitter<Event> = new EventEmitter();
   @Output() blurred: EventEmitter<Event> = new EventEmitter();
   @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef;
@@ -63,6 +66,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     private _electronService: ElectronService,
     private _cd: ChangeDetectorRef,
     private _globalConfigService: GlobalConfigService,
+    private _matDialog: MatDialog,
   ) {
     this.resizeParsedToFit();
   }
@@ -136,6 +140,21 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this.textareaEl.nativeElement.style.height = 'auto';
     this.textareaEl.nativeElement.style.height = this.textareaEl.nativeElement.scrollHeight + 'px';
     this.wrapperEl.nativeElement.style.height = this.textareaEl.nativeElement.offsetHeight + 'px';
+  }
+
+  openFullScreen() {
+    this._matDialog.open(DialogFullscreenMarkdownComponent, {
+      minWidth: '100vw',
+      height: '100vh',
+      data: {
+        content: this.modelCopy
+      }
+    }).afterClosed().subscribe((res) => {
+      if (typeof res === 'string') {
+        this.modelCopy = res;
+        this.changed.emit(res);
+      }
+    });
   }
 
 

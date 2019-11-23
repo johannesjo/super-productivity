@@ -1,0 +1,25 @@
+<div class="content">
+    <textarea #textareaEl
+              [(ngModel)]="data.content"
+              class="mat-body-1 markdown-unparsed"
+              rows="1"
+              tabindex="1"></textarea>
+</div>
+
+<div class="controls">
+  <button (click)="close(false)"
+          class="btn btn-primary submit-button"
+          mat-button
+          type="button">
+    <mat-icon>close</mat-icon>
+    {{(T.G.CANCEL)|translate}}
+  </button>
+
+  <button (click)="close(true)"
+          class="btn btn-primary submit-button"
+          color="primary"
+          mat-stroked-button>
+    <mat-icon>check</mat-icon>
+    {{(T.G.SAVE)|translate}}
+  </button>
+</div>

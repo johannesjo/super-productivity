@@ -23,3 +23,11 @@
        markdown
        tabindex="1"></div>
 </div>
+
+<div class="controls"
+     *ngIf="isShowControls">
+  <button mat-icon-button
+          (click)="openFullScreen()">
+    <mat-icon>fullscreen</mat-icon>
+  </button>
+</div>
