@@ -40,7 +40,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "Lesezeichen hinzufügen",
         "DROP": "Fügen Sie hier ein Lesezeichen hinzu",
+        "EDIT": "Lesezeichen bearbeiten",
         "NO_BOOKMARKS": "Sie haben keine Projektlesezeichen. Fügen Sie eine per Drag & Drop oder durch Klicken auf das den plus button hinzu."
       },
       "DIALOG_EDIT": {
@@ -349,6 +351,7 @@
         "SNOOZE": "Snooze für {{time}}",
         "TITLE": "Hinweis"
       },
+      "EDIT_FULLSCREEN": "Im Vollbildmodus bearbeiten",
       "EDIT_REMINDER": "Erinnerung bearbeiten",
       "NOTES_CMP": {
         "ADD_BTN": "Neue Notiz hinzufügen",

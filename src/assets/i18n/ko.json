@@ -40,7 +40,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "북마크에 추가하다",
         "DROP": "책갈피를 추가하려면 여기로 끌어다 놓으십시오.",
+        "EDIT": "북마크 편집",
         "NO_BOOKMARKS": "프로젝트 북마크가 없습니다. 끌어서 놓기 또는 '더하기'버튼을 클릭하여 추가하십시오."
       },
       "DIALOG_EDIT": {
@@ -349,6 +351,7 @@
         "SNOOZE": " {{time}}에 대한 일시 중지",
         "TITLE": "노트"
       },
+      "EDIT_FULLSCREEN": "전체 화면으로 편집",
       "EDIT_REMINDER": "알림 수정",
       "NOTES_CMP": {
         "ADD_BTN": "새 메모 추가",

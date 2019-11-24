@@ -40,7 +40,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "Añadir marcador",
         "DROP": "Suelta aquí para agregar un marcador",
+        "EDIT": "Editar marcadores",
         "NO_BOOKMARKS": "No tienes marcadores de proyectos. Agregue una a través de arrastrar y soltar o haciendo clic en el ícono ''."
       },
       "DIALOG_EDIT": {
@@ -349,6 +351,7 @@
         "SNOOZE": "Posponer para {{time}}",
         "TITLE": "Nota"
       },
+      "EDIT_FULLSCREEN": "Editar en pantalla completa",
       "EDIT_REMINDER": "Editar recordatorio",
       "NOTES_CMP": {
         "ADD_BTN": "Añadir nueva nota",

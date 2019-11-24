@@ -40,7 +40,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "添加书签",
         "DROP": "点击此处添加书签",
+        "EDIT": "编辑书签",
         "NO_BOOKMARKS": "您没有项目书签。通过拖放或单击“图标”添加一个。"
       },
       "DIALOG_EDIT": {
@@ -349,6 +351,7 @@
         "SNOOZE": "暂停 {{time}}",
         "TITLE": "注意"
       },
+      "EDIT_FULLSCREEN": "全屏编辑",
       "EDIT_REMINDER": "编辑提醒",
       "NOTES_CMP": {
         "ADD_BTN": "添加新笔记",

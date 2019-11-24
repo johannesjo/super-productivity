@@ -40,7 +40,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "Ajouter un marque-page",
         "DROP": "Déposer ici pour ajouter aux favoris",
+        "EDIT": "Modifier les favoris",
         "NO_BOOKMARKS": "Vous n'avez aucun projet favoris. Ajoutez-en un via glisser-déposer ou en cliquant sur le bouton 'plus'."
       },
       "DIALOG_EDIT": {
@@ -349,6 +351,7 @@
         "SNOOZE": "Sommeil pour {{time}}",
         "TITLE": "Note"
       },
+      "EDIT_FULLSCREEN": "Modifier en plein écran",
       "EDIT_REMINDER": "Modifier le rappel",
       "NOTES_CMP": {
         "ADD_BTN": "Ajouter une nouvelle note",

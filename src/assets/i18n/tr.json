@@ -40,7 +40,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "İmi eklemek",
         "DROP": "Yer imi eklemek için buraya bırakın",
+        "EDIT": "Yer İşaretlerini Düzenle",
         "NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '' simgesini tıklatarak ekleyin."
       },
       "DIALOG_EDIT": {
@@ -349,6 +351,7 @@
         "SNOOZE": " {{time}}için erteleme",
         "TITLE": "not"
       },
+      "EDIT_FULLSCREEN": "Tam ekranda düzenle",
       "EDIT_REMINDER": "Hatırlatıcıyı düzenle",
       "NOTES_CMP": {
         "ADD_BTN": "Yeni not ekle",
