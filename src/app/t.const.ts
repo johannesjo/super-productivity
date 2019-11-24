@@ -41,7 +41,9 @@ export const T = {
     'BOOKMARK': {
       'BAR': {
         'DROP': 'F.BOOKMARK.BAR.DROP',
-        'NO_BOOKMARKS': 'F.BOOKMARK.BAR.NO_BOOKMARKS'
+        'NO_BOOKMARKS': 'F.BOOKMARK.BAR.NO_BOOKMARKS',
+        'ADD': 'F.BOOKMARK.BAR.ADD',
+        'EDIT': 'F.BOOKMARK.BAR.EDIT'
       },
       'DIALOG_EDIT': {
         'ADD_BOOKMARK': 'F.BOOKMARK.DIALOG_EDIT.ADD_BOOKMARK',

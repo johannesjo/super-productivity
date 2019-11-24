@@ -11,19 +11,42 @@
 
   <div class="controls-and-list-wrapper">
     <div class="list-controls">
-      <button (click)="openEditDialog()"
-              aria-label="add global bookmark"
-              color=""
+      <button *ngIf="!isEditMode"
+              [matMenuTriggerFor]="menu"
+              [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
+              (menuOpened)="isContextMenuDisabled = true"
+              (menuClosed)="isContextMenuDisabled = false"
               mat-stroked-button
+              [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
               tabindex="1">
-        <mat-icon>add</mat-icon>
+        <mat-icon>more_vert</mat-icon>
       </button>
-      <button (click)="isEditMode=!isEditMode"
-              [color]="isEditMode?'accent':''"
+      <button *ngIf="isEditMode"
+              (click)="isEditMode=false"
+              color="accent"
               mat-stroked-button
+              [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
               tabindex="1">
-        <mat-icon>edit</mat-icon>
+        <mat-icon>close</mat-icon>
       </button>
+
+      <mat-menu #menu="matMenu">
+
+        <button (click)="openEditDialog()"
+                color=""
+                mat-menu-item
+                tabindex="1">
+          <mat-icon>add</mat-icon>
+          {{T.F.BOOKMARK.BAR.ADD|translate}}
+        </button>
+        <button (click)="isEditMode=!isEditMode"
+                color=""
+                mat-menu-item
+                tabindex="1">
+          <mat-icon>edit</mat-icon>
+          {{T.F.BOOKMARK.BAR.EDIT|translate}}
+        </button>
+      </mat-menu>
     </div>
 
     <div [class.isEditMode]="isEditMode"

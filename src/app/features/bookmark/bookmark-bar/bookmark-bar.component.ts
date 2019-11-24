@@ -25,7 +25,7 @@ export class BookmarkBarComponent implements OnDestroy {
   dragEnterTarget: HTMLElement;
   LIST_ID = 'BOOKMARKS';
   T = T;
-
+  isContextMenuDisabled = false;
   bookmarkBarHeight = 50;
 
   @ViewChild('bookmarkBar', {read: ElementRef, static: false}) set bookmarkBarEl(content: ElementRef) {
