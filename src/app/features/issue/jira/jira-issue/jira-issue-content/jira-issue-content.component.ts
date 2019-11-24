@@ -6,6 +6,7 @@ import {JiraIssue} from '../jira-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 import {Attachment} from '../../../../attachment/attachment.model';
 import {T} from '../../../../../t.const';
+import * as j2m from 'jira2md';
 
 @Component({
   selector: 'jira-issue-content',
@@ -17,6 +18,7 @@ import {T} from '../../../../../t.const';
 export class JiraIssueContentComponent implements OnInit {
   taskData: TaskWithSubTasks;
   issueData: JiraIssue;
+  description: string;
   attachments: Attachment[];
   isFocusDescription = false;
   T = T;
@@ -30,6 +32,7 @@ export class JiraIssueContentComponent implements OnInit {
   @Input() set task(task: TaskWithSubTasks) {
     this.taskData = task;
     this.issueData = task.issueData as JiraIssue;
+    this.description = this.issueData && j2m.to_markdown(this.issueData.description);
     this.attachments = this._jiraIssueService.getMappedAttachmentsFromIssue(this.issueData);
   }
 

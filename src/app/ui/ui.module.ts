@@ -70,6 +70,7 @@ import {FormlyTranslatedTemplateComponent} from './formly-translated-template/fo
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {FormlyValidationService} from './formly-translate-extension/formly-validation.service';
 import { DialogFullscreenMarkdownComponent } from './dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import {JiraToMarkdownPipe} from './pipes/jira-to-markdown.pipe';
 
 
 @NgModule({
@@ -134,6 +135,7 @@ import { DialogFullscreenMarkdownComponent } from './dialog-fullscreen-markdown/
     TranslateModule,
   ],
   declarations: [
+    JiraToMarkdownPipe,
     DurationFromStringPipe,
     DurationToStringPipe,
     InputDurationDirective,
@@ -171,6 +173,7 @@ import { DialogFullscreenMarkdownComponent } from './dialog-fullscreen-markdown/
   ],
   exports: [
     SplitModule,
+    JiraToMarkdownPipe,
     DurationFromStringPipe,
     DurationToStringPipe,
     InputDurationDirective,

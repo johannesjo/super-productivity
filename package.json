@@ -131,6 +131,7 @@
     "jasmine-core": "^3.4.0",
     "jasmine-marbles": "^0.5.0",
     "jasmine-spec-reporter": "^4.2.1",
+    "jira2md": "git+https://github.com/johannesjo/J2M.git",
     "jo": "file:./tools/schematics",
     "karma": "^4.1.0",
     "karma-chrome-launcher": "^2.2.0",
