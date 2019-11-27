@@ -28,9 +28,14 @@ Please search the issues before creating one. -->
 <!--- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
 
 ### Error Log (Desktop only)
-<!--- For the desktop versions there is also an error log file. 
+<!--- For the desktop versions there is also an error log file in case there is no console output. 
 Usually you can find it here:
-on Linux: ~/.config/superProductivity/log.log
+on Linux: 
+~/.config/superProductivity/log.log
+--or--
+~/snap/superproductivity/current/.config/superProductivity/log.log
+
 on macOS: ~/Library/Logs/superProductivity/log.log
+
 on Windows: %USERPROFILE%\AppData\Roaming\superProductivity\log.log
 . -->
