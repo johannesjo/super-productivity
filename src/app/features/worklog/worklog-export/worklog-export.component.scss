@@ -74,6 +74,11 @@
 
 .wrapper-wrapper {
   position: relative;
+  min-height: 60px;
+
+  &.isNoCols {
+    text-align: center;
+  }
 }
 
 .add-col {
@@ -81,6 +86,14 @@
   position: absolute;
   top: 0;
   right: -20px;
+  transition: $transition-slow;
+
+  .isNoCols & {
+    position: absolute;
+    top: 10px;
+    right: 50%;
+    opacity: 1;
+  }
 
   @include mq(xs) {
     opacity: 0;

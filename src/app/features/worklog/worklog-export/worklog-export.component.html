@@ -11,7 +11,9 @@
 
 
   <div *ngIf="!isShowAsText"
-       class="wrapper-wrapper">
+       class="wrapper-wrapper"
+       [class.isNoCols]="!options.cols?.length"
+  >
     <button (click)="addCol()"
             class="add-col"
             color=""
