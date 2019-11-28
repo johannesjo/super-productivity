@@ -17,6 +17,8 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
 import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 import {T} from '../../../t.const';
+import {distinctUntilChanged} from 'rxjs/operators';
+import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -107,15 +109,17 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       ;
     }
 
-    this._subs.add(this._projectService.currentProject$.subscribe((pr) => {
-      if (pr.advancedCfg.worklogExportSettings) {
+    this._subs.add(this._projectService.advancedCfg$.pipe(
+      distinctUntilChanged(distinctUntilChangedObject)
+    ).subscribe(advancedCfg => {
+      if (advancedCfg.worklogExportSettings) {
         this.options = {
           ...WORKLOG_EXPORT_DEFAULTS,
-          ...pr.advancedCfg.worklogExportSettings,
+          ...advancedCfg.worklogExportSettings,
           // NOTE: if we don't do this typescript(?) get's aggressive
           cols: [...(
-            pr.advancedCfg.worklogExportSettings
-              ? [...pr.advancedCfg.worklogExportSettings.cols]
+            advancedCfg.worklogExportSettings
+              ? [...advancedCfg.worklogExportSettings.cols]
               : [...WORKLOG_EXPORT_DEFAULTS.cols]
           )]
         };
@@ -126,6 +130,9 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         };
       }
 
+    }));
+
+    this._subs.add(this._projectService.currentProject$.subscribe((pr) => {
       const tasks: WorklogTask[] = this._worklogService.getTaskListForRange(this.rangeStart, this.rangeEnd, true);
 
       if (tasks) {
