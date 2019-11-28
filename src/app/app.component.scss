@@ -39,6 +39,7 @@ mat-sidenav-container {
     }
     @include darkTheme() {
       background: rgba(0, 0, 0, 0.05);
+      box-shadow: $whiteframe-shadow-2dp;
     }
   }
 }
