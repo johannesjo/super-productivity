@@ -15,7 +15,7 @@ import {roundDuration} from '../../../util/round-duration';
 import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
-import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
+import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 import {T} from '../../../t.const';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
@@ -191,8 +191,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this._projectService.updateWorklogExportSettings(this._projectService.currentId, this.options);
   }
 
-  addCol() {
-    this.options.cols.push('EMPTY');
+  addCol(colOpt: WorklogColTypes) {
+    this.options.cols.push(colOpt);
   }
 
   private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: WorklogGrouping): RowItem[] {

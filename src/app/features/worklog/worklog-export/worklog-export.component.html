@@ -14,7 +14,7 @@
        class="wrapper-wrapper"
        [class.isNoCols]="!options.cols?.length"
   >
-    <button (click)="addCol()"
+    <button [matMenuTriggerFor]="addColMenu"
             class="add-col"
             color=""
             [matTooltip]="T.F.WORKLOG.EXPORT.ADD_COL|translate"
@@ -22,6 +22,15 @@
             mat-mini-fab>
       <mat-icon>add</mat-icon>
     </button>
+    <mat-menu #addColMenu="matMenu">
+      <button mat-menu-item
+              *ngFor="let colOpt of colOpts"
+              (click)="addCol(colOpt.id)">
+        {{colOpt.title|translate}}
+      </button>
+    </mat-menu>
+
+
     <div class="table-wrapper material-table _no-elevation">
       <table>
         <tr class="control-row">
