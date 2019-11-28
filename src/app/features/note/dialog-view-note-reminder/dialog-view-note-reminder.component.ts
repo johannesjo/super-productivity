@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Reminder} from '../../reminder/reminder.model';
 import {Note} from '../note.model';
 import {NoteService} from '../note.service';
@@ -28,6 +28,7 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
     private _matDialogRef: MatDialogRef<DialogViewNoteReminderComponent>,
     private _noteService: NoteService,
     private _projectService: ProjectService,
+    private _matDialog: MatDialog,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
@@ -60,8 +61,10 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
     }
   }
 
-  snooze() {
-    this._reminderService.snooze(this.reminder.id, 10 * 60 * 1000);
+  snooze(snoozeInMinutes) {
+    this._reminderService.updateReminder(this.reminder.id, {
+      remindAt: Date.now() + (snoozeInMinutes * 60 * 1000)
+    });
     this.close();
   }
 

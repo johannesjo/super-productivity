@@ -20,9 +20,10 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button (click)="snooze()"
+    <button [matMenuTriggerFor]="snoozeMenu"
+            (dblclick)="snooze(10)"
             color="primary"
-            mat-stroked-button
+            mat-button
             type="button">
       <mat-icon>snooze</mat-icon>
       {{T.F.NOTE.D_VIEW_REMINDER.SNOOZE|translate:{time: '10m'} }}
@@ -37,3 +38,26 @@
     </button>
   </div>
 </mat-dialog-actions>
+
+
+<mat-menu #snoozeMenu="matMenu">
+  <button mat-menu-item
+          (click)="snooze(10)">
+    <mat-icon>snooze</mat-icon>
+    {{T.G.MINUTES|translate:{m: 10} }}
+  </button>
+  <button mat-menu-item
+          (click)="snooze(30)">
+    <mat-icon>snooze</mat-icon>
+    {{T.G.MINUTES|translate:{m: 30} }}
+  </button>
+  <button mat-menu-item
+          (click)="snooze(60)">
+    <mat-icon>snooze</mat-icon>
+    {{T.G.MINUTES|translate:{m: 60} }}
+  </button>
+  <!--  <button mat-menu-item-->
+  <!--          (click)="editReminder()">-->
+  <!--    <mat-icon>edit</mat-icon>{{T.G.EDIT|translate}}-->
+  <!--  </button>-->
+</mat-menu>
