@@ -14,8 +14,11 @@
 .content {
   flex-grow: 1;
   position: relative;
+  @include layerTextAndBgHighest;
 
   textarea {
+    background: inherit;
+    color: inherit;
     position: absolute;
     top: 0;
     right: 0;
@@ -41,6 +44,8 @@
   flex-direction: row;
   display: flex;
   justify-content: flex-end;
+  box-shadow: $whiteframe-shadow-2dp;
+  padding: 0 $s*2;
 
   > button {
     margin: $s;
