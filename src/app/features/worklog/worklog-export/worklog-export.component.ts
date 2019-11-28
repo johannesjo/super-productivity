@@ -182,7 +182,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  onCancelClick() {
+  onCloseClick() {
     this.cancel.emit();
   }
 

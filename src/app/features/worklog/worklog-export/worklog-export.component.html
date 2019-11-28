@@ -144,20 +144,12 @@
 
 <div align="end"
      mat-dialog-actions>
-  <button (click)="onCancelClick()"
-          *ngIf="isShowClose"
-          color="primary"
-          mat-button
-          type="button">
-    {{T.G.CANCEL|translate}}
-  </button>
-
   <button *ngIf="isShowAsText"
           color="primary"
           data-clipboard-action="copy"
           data-clipboard-target="#task-textarea"
           id="clipboard-btn"
-          mat-stroked-button>
+          mat-button>
     <mat-icon>content_paste</mat-icon>
     {{T.F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD|translate}}
   </button>
@@ -165,8 +157,16 @@
   <a [simpleDownloadData]="txt"
      [simpleDownload]="fileName"
      color="primary"
-     mat-stroked-button>
+     mat-button>
     <mat-icon>file_download</mat-icon>
     {{T.F.WORKLOG.EXPORT.SAVE_TO_FILE|translate}}
   </a>
+
+  <button (click)="onCloseClick()"
+          *ngIf="isShowClose"
+          color="primary"
+          mat-stroked-button
+          type="button">
+    {{T.G.CLOSE|translate}}
+  </button>
 </div>
