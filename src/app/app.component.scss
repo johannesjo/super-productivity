@@ -28,6 +28,19 @@ mat-sidenav-container {
   position: relative;
   z-index: 10;
   display: block;
+  transition: $transition-sharp;
+
+  &.isScrolled {
+    transition: $transition-enter;
+    box-shadow: $whiteframe-shadow-1dp;
+
+    @include lightTheme() {
+      background: rgba(255, 255, 255, 0.6);
+    }
+    @include darkTheme() {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
 }
 
 // sidebars

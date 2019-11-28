@@ -11,7 +11,8 @@
        class="backdrop"></div>
 
   <mat-drawer-container>
-    <header class="header-wrapper  mat-elevation-z2">
+    <header class="header-wrapper"
+            [class.isScrolled]="layoutService.isScrolled$|async">
       <main-header></main-header>
       <bookmark-bar></bookmark-bar>
       <banner></banner>

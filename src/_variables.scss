@@ -112,6 +112,7 @@ $transition-duration--leave: 195ms;
 $transition-enter: $transition-duration--enter $ani-enter-timing;
 $transition-leave: $transition-duration--leave $ani-leave-timing;
 $transition-standard: $transition-duration-m $ani-standard-timing;
+$transition-sharp: $transition-duration-m $ani-sharp-timing;
 $transition-slow: $transition-duration-l $ani-standard-timing;
 $transition-fast: $transition-duration-s $ani-standard-timing;
 $transition-ultra-fast: $transition-duration-xs $ani-standard-timing;

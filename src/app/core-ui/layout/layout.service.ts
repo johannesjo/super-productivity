@@ -8,7 +8,7 @@ import {
   toggleShowNotes,
   toggleSideNav
 } from './store/layout.actions';
-import {EMPTY, merge, Observable, of} from 'rxjs';
+import {BehaviorSubject, EMPTY, merge, Observable, of} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideNav} from './store/layout.reducer';
 import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
@@ -65,7 +65,7 @@ export class LayoutService {
   );
 
   isNotesOver$: Observable<boolean> = this.isNavNextNotesOver$.pipe(map(v => !v));
-
+  isScrolled$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     private _store$: Store<LayoutState>,
