@@ -255,6 +255,7 @@ export class TaskService {
     private readonly _actions$: Actions,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
+    this.todaysTasks$.subscribe((v) => console.log('todaysTasks$', v));
 
     // time tracking
     this._timeTrackingService.tick$
@@ -647,10 +648,9 @@ export class TaskService {
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
         const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issue.id);
-        const subTasks: TaskWithIssueData[] = archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState.entities[id]);
         return archiveTaskWithSameIssue && {
           task: archiveTaskWithSameIssue,
-          subTasks,
+          subTasks: archiveTaskWithSameIssue.subTaskIds && archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState.entities[id]),
           isFromArchive: true
         };
       }
