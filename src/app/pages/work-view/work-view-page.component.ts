@@ -80,19 +80,19 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this._subs.add(
-      this.projectService.isProjectChangingWithDelay$.pipe(
-        filter(isChanging => !isChanging),
-        delay(200),
-        // NOTE: hacky, but it's not worth it to crash
-        filter(() => !!this.splitTopElRef),
-        switchMap(() => fromEvent(this.splitTopElRef.nativeElement, 'scroll')),
-      ).subscribe(() => {
-        (this.splitTopElRef.nativeElement.scrollTop !== 0)
-          ? this._layoutService.isScrolled$.next(true)
-          : this._layoutService.isScrolled$.next(false);
-      })
-    );
+    // this._subs.add(
+    //   this.projectService.isProjectChangingWithDelay$.pipe(
+    //     filter(isChanging => !isChanging),
+    //     delay(200),
+    //     // NOTE: hacky, but it's not worth it to crash
+    //     filter(() => !!this.splitTopElRef),
+    //     switchMap(() => fromEvent(this.splitTopElRef.nativeElement, 'scroll')),
+    //   ).subscribe(() => {
+    //     (this.splitTopElRef.nativeElement.scrollTop !== 0)
+    //       ? this._layoutService.isScrolled$.next(true)
+    //       : this._layoutService.isScrolled$.next(false);
+    //   })
+    // );
 
     const sub = this._dragulaService.find(SUB);
     const par = this._dragulaService.find(PARENT);
