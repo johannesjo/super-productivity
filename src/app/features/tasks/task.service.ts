@@ -18,6 +18,7 @@ import {
   SHORT_SYNTAX_REG_EX,
   ShowSubTasksMode,
   Task,
+  TaskArchive,
   TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
@@ -60,7 +61,8 @@ import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectAllTasksWithIssueData, selectBacklogTaskCount,
+  selectAllTasksWithIssueData,
+  selectBacklogTaskCount,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -641,13 +643,14 @@ export class TaskService {
         subTasks: null,
       };
     } else {
-      const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
+      const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.load(this._projectService.currentId);
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
         const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issue.id);
+        const subTasks: TaskWithIssueData[] = archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState.entities[id]);
         return archiveTaskWithSameIssue && {
           task: archiveTaskWithSameIssue,
-          subTasks: archiveTaskWithSameIssue.subTaskIds && archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState[id]),
+          subTasks,
           isFromArchive: true
         };
       }
