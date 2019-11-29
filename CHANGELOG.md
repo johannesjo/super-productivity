@@ -1,3 +1,35 @@
+## [2.13.10](https://github.com/johannesjo/super-productivity/compare/v2.13.9...v2.13.10) (2019-11-29)
+
+
+### Bug Fixes
+
+* **jira:** restoring jira task with sub tasks corrupting task data [#260](https://github.com/johannesjo/super-productivity/issues/260) ([264dc06](https://github.com/johannesjo/super-productivity/commit/264dc06e3a8bdcbc914770fec668c2d13c8ee22f))
+* dark theme styling for dialog fullscreen markdown ([ef7bcd5](https://github.com/johannesjo/super-productivity/commit/ef7bcd58cc5a38e38b6b379badf27715609f3323))
+* lockscreen not working for plasma desktops [#259](https://github.com/johannesjo/super-productivity/issues/259) ([fe89390](https://github.com/johannesjo/super-productivity/commit/fe89390d257fd1ea352092bde4401a378e9a07a8))
+* **worklog:** add col button style when all cols where deleted ([cd91202](https://github.com/johannesjo/super-productivity/commit/cd912022b86e4b8c38bc57f2044f45e85a49b7c3))
+* **worklog:** unable to add columns while tracking time ([31c5e03](https://github.com/johannesjo/super-productivity/commit/31c5e03baaf21b3f087e20a51adb0f2a3b3fcff6))
+* inline markdown textarea resize ([adf3121](https://github.com/johannesjo/super-productivity/commit/adf3121dc0ec85c27f412b24ce637133c8d276e7))
+* remove redundant scrollbar ([9183b97](https://github.com/johannesjo/super-productivity/commit/9183b97f884c401a60184b373cefc827fa51eb0a))
+
+
+### Features
+
+* make header border only appear when scrolled ([e74c551](https://github.com/johannesjo/super-productivity/commit/e74c5510f51fe3dafb0a064c8a9f235795668a1b))
+* make header shadow bigger for dark theme ([9c196af](https://github.com/johannesjo/super-productivity/commit/9c196afa314f8f86d03eda5759d24656c334e17f))
+* re add new header elevation ([b31a488](https://github.com/johannesjo/super-productivity/commit/b31a4887753ddc4e977b09a07556fb88e8e7a2f5))
+* revert shadow thingy for now ([72ff89c](https://github.com/johannesjo/super-productivity/commit/72ff89cc5668b6e1e89a1da4ec040558c71a4ee9))
+* **bookmark:** use single button for add and edit ([5a80377](https://github.com/johannesjo/super-productivity/commit/5a80377afb94167c804732da117b2a826cdaa216))
+* **i18n:** add translations ([d43db11](https://github.com/johannesjo/super-productivity/commit/d43db11a47e6aed9ec1965cf54c558ceb59ec5e4))
+* **jira:** improve jira markup parsing ([c36c286](https://github.com/johannesjo/super-productivity/commit/c36c286b3e3abf342a7da0c5b1c5d161438b24a1))
+* **note:** improve snoozing ([706007d](https://github.com/johannesjo/super-productivity/commit/706007defbe75414c1cd4911d8b90f12eab6b0d0))
+* **worklog:** add menu to directly add new col with type ([0723539](https://github.com/johannesjo/super-productivity/commit/0723539b15a055f7c917c3e0c4d8a4f8eedef53f))
+* **worklog:** make close the primary action ([b966dd4](https://github.com/johannesjo/super-productivity/commit/b966dd4cc3ddc5203678ebceafc2bc45d3df176a))
+* add full screen edit for notes ([ad660bd](https://github.com/johannesjo/super-productivity/commit/ad660bdf2ad9cd15510afa7cf45924590c2b022e))
+* add full screen edit for task notes ([7db4227](https://github.com/johannesjo/super-productivity/commit/7db42279d265b5e87ca01fa2ff04ff09355a7c14))
+* add shadow to header ([a2460b7](https://github.com/johannesjo/super-productivity/commit/a2460b784ba7addc9377fd0906b69773caf51cc4))
+
+
+
 ## [2.13.9](https://github.com/johannesjo/super-productivity/compare/v2.13.8...v2.13.9) (2019-11-07)
 
 
