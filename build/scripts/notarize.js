@@ -16,15 +16,15 @@ exports.default = async function notarizing(context) {
   }
 
   try {
-    // let envBefore = process.env.DEBUG;
-    // process.env.DEBUG = 'electron-notarize';
+    let envBefore = process.env.DEBUG;
+    process.env.DEBUG = 'electron-notarize';
     await notarize({
       appBundleId,
       appPath,
       appleId: process.env.APPLEID,
       appleIdPassword: process.env.APPLEIDPASS,
     });
-    // process.env.DEBUG = envBefore;
+    process.env.DEBUG = envBefore;
   } catch (e) {
     console.error(e);
     throw new Error(e);
