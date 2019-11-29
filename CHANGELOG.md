@@ -1,3 +1,12 @@
+## [2.13.11](https://github.com/johannesjo/super-productivity/compare/v2.13.10...v2.13.11) (2019-11-29)
+
+
+### Bug Fixes
+
+* stupid mistake ([7cb5360](https://github.com/johannesjo/super-productivity/commit/7cb5360ff831f0457581f6938a5eee09236fcdc1))
+
+
+
 ## [2.13.10](https://github.com/johannesjo/super-productivity/compare/v2.13.9...v2.13.10) (2019-11-29)
 
 
