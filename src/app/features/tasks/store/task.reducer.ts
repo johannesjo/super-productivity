@@ -121,6 +121,7 @@ export function taskReducer(
             changes: {isDone: false}
           }, state)),
           currentTaskId: taskToStartId,
+          selectedTaskId: state.selectedTaskId && taskToStartId,
         };
       } else {
         return {
