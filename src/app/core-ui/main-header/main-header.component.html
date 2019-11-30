@@ -66,14 +66,14 @@
       <mat-icon>bookmark</mat-icon>
     </button>
 
-    <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"
-            (click)="layoutService.toggleNotes()"
-            mat-icon-button
-            [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate">
-      <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)"
-                class="note-ico">comment
-      </mat-icon>
-    </button>
+<!--    <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"-->
+<!--            (click)="layoutService.toggleNotes()"-->
+<!--            mat-icon-button-->
+<!--            [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate">-->
+<!--      <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)"-->
+<!--                class="note-ico">comment-->
+<!--      </mat-icon>-->
+<!--    </button>-->
 
     <button class="hide-xs"
             [matTooltip]="T.WW.HELP_PROCRASTINATION|translate"

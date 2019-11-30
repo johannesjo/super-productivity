@@ -1,6 +1,7 @@
 @import '../../../../variables';
 
 $noteFontSize: 14px;
+$noteFontSize: 12px;
 
 :host {
   display: block;
@@ -12,6 +13,7 @@ $noteFontSize: 14px;
 
   &.isFocused {
     transform: scale(1.04);
+    transform-origin: left center;
     position: relative;
     z-index: 4;
     box-shadow: $whiteframe-shadow-6dp;

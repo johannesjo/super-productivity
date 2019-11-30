@@ -47,11 +47,19 @@ mat-sidenav-container {
 // sidebars
 mat-drawer::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
+  //scroll-snap-type: y proximity;
+
 
   @include darkTheme {
     background: $dark-theme-sidebar-bg;
     background: $dark-theme-bg-lighter;
   }
+  //
+  //side-nav,
+  //notes,
+  //> * {
+  //  scroll-snap-align: start;
+  //}
 }
 
 mat-drawer {
