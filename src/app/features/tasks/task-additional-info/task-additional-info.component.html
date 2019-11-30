@@ -34,10 +34,30 @@
   <!--      </mat-panel-description>-->
   <!--    </mat-expansion-panel-header>-->
   <div class="tab-wrapper">
-    <task-list [listModelId]="taskData.id"
-               [parentId]="taskData.id"
-               [tasks]="taskData.subTasks"
-               listId="SUB"></task-list>
+    <div *ngIf="taskData.subTasks && taskData.subTasks.length"
+         class="sub-tasks">
+<!--      <button (click)="toggleSubTaskMode()"-->
+<!--              *ngIf="taskData.subTasks && taskData.subTasks.length"-->
+<!--              class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"-->
+<!--              color=""-->
+<!--              mat-mini-fab-->
+<!--              tabindex="2"-->
+<!--              [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">-->
+<!--        <mat-icon *ngIf="(taskData._showSubTasksMode===ShowSubTasksMode.HideAll)">add-->
+<!--        </mat-icon>-->
+<!--        <mat-icon *ngIf="(taskData._showSubTasksMode!==ShowSubTasksMode.HideAll)"-->
+<!--                  [class.isHideDoneTasks]="(taskData._showSubTasksMode===ShowSubTasksMode.HideDone)">remove-->
+<!--        </mat-icon>-->
+<!--      </button>-->
+      <task-list *ngIf="taskData.subTasks?.length"
+                 [@expand]
+                 [isHideAll]="(taskData._showSubTasksMode!==ShowSubTasksMode.Show)"
+                 [isHideDone]="(taskData._showSubTasksMode===ShowSubTasksMode.HideDone)"
+                 [listModelId]="taskData.id"
+                 [parentId]="taskData.id"
+                 [tasks]="taskData.subTasks"
+                 listId="SUB"></task-list>
+    </div>
   </div>
   <!--  </mat-expansion-panel>-->
 
