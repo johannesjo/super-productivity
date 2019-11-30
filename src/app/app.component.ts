@@ -26,6 +26,7 @@ import {T} from './t.const';
 import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
+import {TaskService} from './features/tasks/task.service';
 
 
 @Component({
@@ -67,6 +68,7 @@ export class AppComponent {
     private _store: Store<any>,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
+    public readonly taskService: TaskService,
     public projectService: ProjectService,
   ) {
     // try to avoid data-loss

@@ -68,6 +68,7 @@ import {SubTaskTotalTimeEstimatePipe} from './pipes/sub-task-total-time-estimate
     AddTaskBarComponent,
     SelectTaskComponent,
     TaskSummaryTableComponent,
+    TaskAdditionalInfoComponent,
   ],
   entryComponents: [
     DialogTimeEstimateComponent,

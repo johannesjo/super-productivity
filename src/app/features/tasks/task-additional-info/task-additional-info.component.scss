@@ -4,6 +4,31 @@
   //margin-bottom: -2px;
   position: relative;
   z-index: 1;
+  display: contents;
+
+  .mat-expansion-panel {
+    background: $dark-theme-bg-lighter;
+    box-shadow: none;
+  }
+
+
+  task-list {
+    padding: 0;
+  }
+}
+
+.task-title-wrapper {
+  min-height: $bar-height;
+  display: flex;
+  align-items: center;
+}
+
+.task-title {
+  padding: 0 10px;
+  font-size: 16px;
+  margin: 0;
+  flex-grow: 1;
+  line-height: 1.4;
 }
 
 .wrapper {
@@ -34,6 +59,10 @@
   }
 }
 
+:host::ng-deep .mat-expansion-panel-body {
+  padding: $s/2;
+}
+
 :host::ng-deep .mat-tab-labels {
   justify-content: stretch;
   user-select: none;
@@ -42,12 +71,24 @@
 :host::ng-deep .mat-tab-labels .mat-tab-label {
   flex-grow: 1;
   height: $bar-height-small;
+  width: 40px;
+  min-width: 40px;
 }
+
+:host ::ng-deep .mat-expansion-panel-header-title {
+  flex-grow: 0;
+  width: 30px;
+}
+
+:host .mat-expansion-panel-header {
+  position: sticky;
+}
+
 
 .tab-label-text {
   &,
   ::ng-deep & {
-    @media (max-width: $layout-xs) {
+    @media (max-width: $layout-sm) {
       display: none;
     }
   }
@@ -109,7 +150,7 @@
       min-height: 60px;
 
       @include mq(xs) {
-        max-height: 40vh;
+        //max-height: 40vh;
       }
     }
 
