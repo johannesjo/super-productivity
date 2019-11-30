@@ -1,5 +1,5 @@
 import {google} from 'googleapis';
-import {BrowserWindow, ipcMain} from 'electron';
+import {BrowserWindow, ipcMain, BrowserWindowConstructorOptions} from 'electron';
 import {getWin} from './main-window';
 import {IPC} from './ipc-events.const';
 
@@ -13,21 +13,32 @@ const A = {
     ' https://www.googleapis.com/auth/drive'
 };
 
-const clientId = A.EL_CLIENT_ID;
-const clientSecret = A.EL_API_KEY;
-const scopes = [
+const CLIENT_ID = A.EL_CLIENT_ID;
+const CLIENT_SECRET = A.EL_API_KEY;
+const SCOPES = [
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/drive.install',
   'https://www.googleapis.com/auth/spreadsheets.readonly'
 ];
+
+const POPUP_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36';
+const BROWSER_WINDOW_PARAMS: BrowserWindowConstructorOptions = {
+  center: true,
+  show: true,
+  resizable: false,
+  webPreferences: {
+    nodeIntegration: false,
+  },
+};
+
 
 
 /**
  * Create a new OAuth2 client with the configured keys.
  */
 const oauth2Client = new google.auth.OAuth2(
-  clientId,
-  clientSecret,
+  CLIENT_ID,
+  CLIENT_SECRET,
   'urn:ietf:wg:oauth:2.0:oob'
 );
 
@@ -38,7 +49,7 @@ async function authenticate(refreshToken) {
   return new Promise((resolve, reject) => {
     const authorizeUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: scopes.join(' ')
+      scope: SCOPES.join(' ')
     });
 
     const freshAuth = () => {
@@ -74,20 +85,11 @@ async function authenticate(refreshToken) {
 }
 
 function openAuthWindow(url) {
-  const browserWindowParams = {
-    center: true,
-    show: true,
-    resizable: false,
-    webPreferences: {
-      nodeIntegration: false
-    }
-  };
-
   return new Promise((resolve, reject) => {
     /* tslint:disable-next-line */
-    const win = new BrowserWindow(browserWindowParams || {useContentSize: true});
+    const win = new BrowserWindow(BROWSER_WINDOW_PARAMS);
 
-    win.loadURL(url);
+    win.loadURL(url, {userAgent: POPUP_USER_AGENT});
 
     win.on('closed', () => {
       reject(new Error('User closed the window'));
