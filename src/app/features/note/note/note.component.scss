@@ -5,22 +5,27 @@ $noteFontSize: 12px;
 
 :host {
   display: block;
+  margin-right: $s;
 }
 
 
 .note {
   @include noteStyle;
 
+  &:hover,
   &.isFocused {
     transform: scale(1.04);
-    transform-origin: left center;
+    transform-origin: center center;
     position: relative;
     z-index: 4;
-    box-shadow: $whiteframe-shadow-6dp;
+    box-shadow: $whiteframe-shadow-3dp;
     //outline: 2px dashed $c-accent;
   }
+  &.isFocused {
+    z-index: 5;
+  }
 
-  &.isImg {
+    &.isImg {
     border: 0;
   }
 
