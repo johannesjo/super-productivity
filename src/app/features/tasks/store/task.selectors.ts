@@ -96,6 +96,23 @@ export const selectCurrentTaskOrParentWithData = createSelector(
     };
   });
 
+export const selectSelectedTask = createSelector(
+  selectTaskFeatureState,
+  selectIssueEntityMap,
+  (s, issueEntityMap): TaskWithSubTasks => {
+    const t = s.selectedTaskId
+      && s.entities[s.selectedTaskId] && s.entities[s.selectedTaskId].parentId
+      && s.entities[s.entities[s.selectedTaskId].parentId] || s.entities[s.selectedTaskId];
+    if (!t) {
+      return;
+    }
+    const twi: TaskWithIssueData = mapIssueDataToTask([t], issueEntityMap)[0];
+    return {
+      ...twi,
+      subTasks: twi.subTaskIds.map(id => s.entities[id]),
+    };
+  });
+
 export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeatureState, (s): Task =>
   s.currentTaskId
   && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId

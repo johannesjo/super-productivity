@@ -28,17 +28,18 @@
                 position="start">
       <side-nav></side-nav>
     </mat-drawer>
-<!--    <mat-drawer (closedStart)="layoutService.hideNotes()"-->
-<!--                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"-->
-<!--                [opened]="layoutService.isShowNotes$|async"-->
-<!--                position="end">-->
-<!--    </mat-drawer>-->
-    <mat-drawer [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"
-                [opened]="taskService.currentTaskOrCurrentParent$|async"
+    <!--    <mat-drawer (closedStart)="layoutService.hideNotes()"-->
+    <!--                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"-->
+    <!--                [opened]="layoutService.isShowNotes$|async"-->
+    <!--                position="end">-->
+    <!--    </mat-drawer>-->
+    <mat-drawer (closedStart)="taskService.setSelectedId(null)"
+                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"
+                [opened]="taskService.selectSelectedTask$|async"
                 position="end">
       <div style="width: 400px; min-width: 340px; max-width: 700px;">
-        <task-additional-info *ngIf="taskService.currentTaskOrCurrentParent$|async"
-                              [task]="taskService.currentTaskOrCurrentParent$|async"></task-additional-info>
+        <task-additional-info *ngIf="taskService.selectSelectedTask$|async"
+                              [task]="taskService.selectSelectedTask$|async"></task-additional-info>
       </div>
     </mat-drawer>
 

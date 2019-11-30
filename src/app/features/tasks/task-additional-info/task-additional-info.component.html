@@ -14,6 +14,10 @@
 
 
   <div class="task-title-wrapper">
+    <button mat-icon-button
+            (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
     <h2 class="task-title">{{taskData.title}}</h2>
     <button mat-icon-button>
       <mat-icon>more_vert</mat-icon>

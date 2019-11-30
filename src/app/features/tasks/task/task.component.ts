@@ -308,10 +308,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   toggleShowAdditionalInfoOpen() {
-    this.task._isAdditionalInfoOpen
-      ? this._taskService.hideAdditionalInfoOpen(this.task.id)
-      : this._taskService.showAdditionalInfoOpen(this.task.id);
-    this.focusSelf();
+    // this.task._isAdditionalInfoOpen
+    //   ? this._taskService.hideAdditionalInfoOpen(this.task.id)
+    //   : this._taskService.showAdditionalInfoOpen(this.task.id);
+    // this.focusSelf();
+    this._taskService.setSelectedId(this.task.id);
   }
 
   toggleShowAttachments() {

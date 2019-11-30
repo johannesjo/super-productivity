@@ -7,6 +7,7 @@ import {RoundTimeOption} from '../../project/project.model';
 export enum TaskActionTypes {
   LoadTaskState = '[Task] Load Task State',
   SetCurrentTask = '[Task] SetCurrentTask',
+  SetSelectedTask = '[Task] SetSelectedTask',
   UnsetCurrentTask = '[Task] UnsetCurrentTask',
 
   // Task Actions
@@ -53,6 +54,13 @@ export class LoadTaskState implements Action {
 
 export class SetCurrentTask implements Action {
   readonly type = TaskActionTypes.SetCurrentTask;
+
+  constructor(public payload: string) {
+  }
+}
+
+export class SetSelectedTask implements Action {
+  readonly type = TaskActionTypes.SetSelectedTask;
 
   constructor(public payload: string) {
   }
@@ -247,6 +255,7 @@ export class RoundTimeSpentForDay implements Action {
 export type TaskActions
   = LoadTaskState
   | SetCurrentTask
+  | SetSelectedTask
   | UnsetCurrentTask
   | AddTask
   | UpdateTaskUi

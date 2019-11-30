@@ -6,6 +6,7 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {Attachment} from '../../attachment/attachment.model';
 import {switchMap} from 'rxjs/operators';
 import {T} from '../../../t.const';
+import {TaskService} from '../task.service';
 
 @Component({
   selector: 'task-additional-info',
@@ -29,6 +30,7 @@ export class TaskAdditionalInfoComponent {
   constructor(
     private _resolver: ComponentFactoryResolver,
     private _issueService: IssueService,
+    private _taskService: TaskService,
     public attachmentService: AttachmentService,
   ) {
   }
@@ -45,5 +47,9 @@ export class TaskAdditionalInfoComponent {
 
   indexChange($event: number) {
     this.tabIndexChange.emit($event);
+  }
+
+  close() {
+    this._taskService.setSelectedId(null);
   }
 }

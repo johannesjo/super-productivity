@@ -44,6 +44,7 @@ import {
   RestoreTask,
   RoundTimeSpentForDay,
   SetCurrentTask,
+  SetSelectedTask,
   StartFirstStartable,
   TaskActionTypes,
   ToggleStart,
@@ -74,6 +75,7 @@ import {
   selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
   selectScheduledTasks,
+  selectSelectedTask,
   selectStartableTaskIds,
   selectStartableTasks,
   selectTaskById,
@@ -114,6 +116,11 @@ export class TaskService {
 
   currentTask$: Observable<Task> = this._store.pipe(
     select(selectCurrentTask),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
+
+  selectSelectedTask$: Observable<TaskWithSubTasks> = this._store.pipe(
+    select(selectSelectedTask),
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
@@ -275,6 +282,10 @@ export class TaskService {
     } else {
       this._store.dispatch(new UnsetCurrentTask());
     }
+  }
+
+  setSelectedId(id: string) {
+    this._store.dispatch(new SetSelectedTask(id));
   }
 
   startFirstStartable(isStartIfHasCurrent = false) {

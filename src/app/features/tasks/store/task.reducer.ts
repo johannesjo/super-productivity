@@ -27,6 +27,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   ids: [],
 
   currentTaskId: null,
+  selectedTaskId: null,
   lastCurrentTaskId: null,
   todaysTaskIds: [],
   backlogTaskIds: [],
@@ -131,6 +132,10 @@ export function taskReducer(
 
     case TaskActionTypes.UnsetCurrentTask: {
       return {...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId};
+    }
+
+    case TaskActionTypes.SetSelectedTask: {
+      return {...state, selectedTaskId: action.payload};
     }
 
     // Task Actions
