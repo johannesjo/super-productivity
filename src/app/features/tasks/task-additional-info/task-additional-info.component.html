@@ -20,22 +20,22 @@
     </button>
   </div>
 
-  <mat-expansion-panel *ngIf="taskData.subTasks?.length">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon>list</mat-icon>
-      </mat-panel-title>
-      <mat-panel-description>
-        Sub Tasks ({{taskData.subTasks?.length}})
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-    <div class="tab-wrapper">
-      <task-list [listModelId]="taskData.id"
-                 [parentId]="taskData.id"
-                 [tasks]="taskData.subTasks"
-                 listId="SUB"></task-list>
-    </div>
-  </mat-expansion-panel>
+  <!--  <mat-expansion-panel *ngIf="taskData.subTasks?.length">-->
+  <!--    <mat-expansion-panel-header>-->
+  <!--      <mat-panel-title>-->
+  <!--        <mat-icon>list</mat-icon>-->
+  <!--      </mat-panel-title>-->
+  <!--      <mat-panel-description>-->
+  <!--        Sub Tasks ({{taskData.subTasks?.length}})-->
+  <!--      </mat-panel-description>-->
+  <!--    </mat-expansion-panel-header>-->
+  <div class="tab-wrapper">
+    <task-list [listModelId]="taskData.id"
+               [parentId]="taskData.id"
+               [tasks]="taskData.subTasks"
+               listId="SUB"></task-list>
+  </div>
+  <!--  </mat-expansion-panel>-->
 
   <mat-expansion-panel *ngIf="taskData.issueData">
     <mat-expansion-panel-header>

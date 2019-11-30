@@ -50,6 +50,7 @@ mat-drawer::ng-deep .mat-drawer-inner-container {
 
   @include darkTheme {
     background: $dark-theme-sidebar-bg;
+    background: $dark-theme-bg-lighter;
   }
 }
 

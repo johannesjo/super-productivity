@@ -6,14 +6,16 @@
   z-index: 1;
   display: contents;
 
-  .mat-expansion-panel {
-    background: $dark-theme-bg-lighter;
-    box-shadow: none;
-  }
-
-
   task-list {
     padding: 0;
+  }
+}
+
+.mat-expansion-panel {
+  box-shadow: none;
+
+  @include darkTheme {
+    background: $dark-theme-bg-lighter;
   }
 }
 
@@ -21,11 +23,24 @@
   min-height: $bar-height;
   display: flex;
   align-items: center;
+  position: sticky;
+  background: inherit;
+  top: 0;
+  margin-top: -1px;
+  z-index: 44;
+
+  @include lightTheme() {
+    background: #fff;
+    box-shadow: $whiteframe-shadow-1dp;
+  }
+  @include darkTheme() {
+    background: $dark-theme-bg-lighter;
+  }
 }
 
 .task-title {
   padding: 0 10px;
-  font-size: 16px;
+  font-size: 15px;
   margin: 0;
   flex-grow: 1;
   line-height: 1.4;
@@ -82,6 +97,7 @@
 
 :host .mat-expansion-panel-header {
   position: sticky;
+  top: 0;
 }
 
 
@@ -109,20 +125,20 @@
 
 
 .tab-wrapper {
-  border-radius: $card-border-radius;
+  //border-radius: $card-border-radius;
   margin: $s $s;
   display: block;
-  box-shadow: $whiteframe-shadow-1dp;
+  //box-shadow: $whiteframe-shadow-1dp;
 
   @include layerTextAndBgHigher();
 
   @include darkTheme() {
-    border: 1px solid $dark-theme-extra-border-color;
+    //border: 1px solid $dark-theme-extra-border-color;
   }
 
   @include lightTheme {
-    border: 1px solid $light-theme-extra-border-color;
-    background: $light-theme-bg-darker;
+    //border: 1px solid $light-theme-extra-border-color;
+    //background: $light-theme-bg-darker;
   }
 
 
