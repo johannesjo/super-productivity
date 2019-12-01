@@ -15,6 +15,7 @@ import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -78,6 +79,12 @@ export class ReminderService {
   getById(reminderId: string): ReminderCopy {
     const _foundReminder = this._reminders && this._reminders.find(reminder => reminder.id === reminderId);
     return _foundReminder && dirtyDeepCopy(_foundReminder);
+  }
+
+  getById$(reminderId: string): Observable<ReminderCopy> {
+    return this.reminders$.pipe(
+      map(reminders => reminders.find(reminder => reminder.id === reminderId)),
+    );
   }
 
   addReminder(type: ReminderType, relatedId: string, title: string, remindAt: number, recurringConfig?: RecurringConfig): string {

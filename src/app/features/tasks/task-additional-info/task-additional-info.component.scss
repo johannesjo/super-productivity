@@ -71,6 +71,7 @@ progress-bar {
 }
 
 
+.input-item,
 .mat-expansion-panel {
   box-shadow: none;
   //overflow: inherit !important;
@@ -79,7 +80,7 @@ progress-bar {
   border-style: solid;
   border-radius: 0;
 
-  &:last-of-type {
+  &:last-child {
     border-bottom-width: 1px;
   }
 
@@ -191,6 +192,11 @@ progress-bar {
   align-items: center;
   height: 48px;
   cursor: pointer;
+  font-size: 15px;
+
+  &:hover {
+    background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+  }
 }
 
 .input-item__title {
@@ -204,7 +210,6 @@ progress-bar {
   color: rgba(var(--palette-foreground-secondary-text), var(--palette-foreground-secondary-text-alpha, 1));
   display: flex;
   flex-grow: 1;
-  font-size: 15px;
 
   > * {
     flex-grow: 1;

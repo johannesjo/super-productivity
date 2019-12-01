@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, ComponentFactoryResolver, EventEmitt
 import {ShowSubTasksMode, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 import {Attachment} from '../../attachment/attachment.model';
 import {switchMap} from 'rxjs/operators';
 import {T} from '../../../t.const';
@@ -13,6 +13,10 @@ import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
 import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
 import {MatDialog} from '@angular/material/dialog';
 import {isTouch} from '../../../util/is-touch';
+import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
+import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
+import {ReminderCopy} from '../../reminder/reminder.model';
+import {ReminderService} from '../../reminder/reminder.service';
 
 @Component({
   selector: 'task-additional-info',
@@ -26,6 +30,13 @@ export class TaskAdditionalInfoComponent {
   issueAttachments: Attachment[];
   taskData: TaskWithSubTasks;
   ShowSubTasksMode = ShowSubTasksMode;
+  reminderId$ = new BehaviorSubject(null);
+  reminderData$: Observable<ReminderCopy> = this.reminderId$.pipe(
+    switchMap(id => id
+      ? this._reminderService.getById$(id)
+      : of(null)
+    ),
+  );
 
   @Input() selectedIndex = 0;
   @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
@@ -40,6 +51,7 @@ export class TaskAdditionalInfoComponent {
     private _resolver: ComponentFactoryResolver,
     private _issueService: IssueService,
     private _taskService: TaskService,
+    private _reminderService: ReminderService,
     private readonly _matDialog: MatDialog,
     public attachmentService: AttachmentService,
   ) {
@@ -49,6 +61,11 @@ export class TaskAdditionalInfoComponent {
     this.taskData = val;
     this._attachmentIds$.next(this.taskData.attachmentIds);
     this.issueAttachments = this._issueService.getMappedAttachments(this.taskData.issueType, this.taskData.issueData);
+    this.reminderId$.next(val.reminderId);
+  }
+
+  get task() {
+    return this.taskData;
   }
 
   get progress() {
@@ -73,8 +90,24 @@ export class TaskAdditionalInfoComponent {
   estimateTime() {
     this._matDialog
       .open(DialogTimeEstimateComponent, {
-        data: {task: this.taskData},
+        data: {task: this.task},
         autoFocus: !isTouch(),
       });
+  }
+
+  editReminder() {
+    if (this.task.repeatCfgId) {
+      return;
+    }
+
+    this._matDialog.open(DialogAddTaskReminderComponent, {
+      restoreFocus: true,
+      data: {
+        title: this.task.title,
+        taskId: this.task.id,
+        reminderId: this.task.reminderId,
+        isMoveToBacklogPossible: !this.task.parentId,
+      } as AddTaskReminderInterface
+    });
   }
 }

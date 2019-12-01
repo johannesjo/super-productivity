@@ -7,11 +7,11 @@
     </button>
     <h2 class="task-title"
         (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
-        [value]="taskData.title"
+        [value]="task.title"
         [isResetAfterEdit]="true"
         contenteditable="true"
         contentEditableOnClick
-        tabindex="2">{{taskData.title}}</h2>
+        tabindex="2">{{task.title}}</h2>
     <button mat-icon-button>
       <mat-icon>more_vert</mat-icon>
     </button>
@@ -20,36 +20,36 @@
   </header>
 
 
-  <mat-expansion-panel *ngIf="taskData.subTasks?.length">
+  <mat-expansion-panel *ngIf="task.subTasks?.length">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon class="panel-header-icon">list</mat-icon>
-        <span>Sub Tasks ({{taskData.subTasks?.length}})</span>
+        <span>Sub Tasks ({{task.subTasks?.length}})</span>
       </mat-panel-title>
     </mat-expansion-panel-header>
     <div class="panel-content-wrapper">
-      <div *ngIf="taskData.subTasks && taskData.subTasks.length"
+      <div *ngIf="task.subTasks && task.subTasks.length"
            class="sub-tasks">
         <!--      <button (click)="toggleSubTaskMode()"-->
-        <!--              *ngIf="taskData.subTasks && taskData.subTasks.length"-->
+        <!--              *ngIf="task.subTasks && task.subTasks.length"-->
         <!--              class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"-->
         <!--              color=""-->
         <!--              mat-mini-fab-->
         <!--              tabindex="2"-->
         <!--              [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">-->
-        <!--        <mat-icon *ngIf="(taskData._showSubTasksMode===ShowSubTasksMode.HideAll)">add-->
+        <!--        <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)">add-->
         <!--        </mat-icon>-->
-        <!--        <mat-icon *ngIf="(taskData._showSubTasksMode!==ShowSubTasksMode.HideAll)"-->
-        <!--                  [class.isHideDoneTasks]="(taskData._showSubTasksMode===ShowSubTasksMode.HideDone)">remove-->
+        <!--        <mat-icon *ngIf="(task._showSubTasksMode!==ShowSubTasksMode.HideAll)"-->
+        <!--                  [class.isHideDoneTasks]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)">remove-->
         <!--        </mat-icon>-->
         <!--      </button>-->
-        <task-list *ngIf="taskData.subTasks?.length"
+        <task-list *ngIf="task.subTasks?.length"
                    [@expand]
-                   [isHideAll]="(taskData._showSubTasksMode!==ShowSubTasksMode.Show)"
-                   [isHideDone]="(taskData._showSubTasksMode===ShowSubTasksMode.HideDone)"
-                   [listModelId]="taskData.id"
-                   [parentId]="taskData.id"
-                   [tasks]="taskData.subTasks"
+                   [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"
+                   [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"
+                   [listModelId]="task.id"
+                   [parentId]="task.id"
+                   [tasks]="task.subTasks"
                    listId="SUB"></task-list>
       </div>
     </div>
@@ -74,15 +74,15 @@
            (click)="estimateTime()">
     <div class="input-item__title">
       <mat-icon class="panel-header-icon">timer</mat-icon>
-      <span>Time</span>
+      <span>Time Spent/Est.</span>
     </div>
     <div class="input-item__value">
       <div class="time">
           <span class="time-val">
-            <span [innerHTML]="taskData.timeSpent|msToString"></span>
+            <span [innerHTML]="task.timeSpent|msToString"></span>
           </span>
         <span class="separator">/</span>
-        <span [innerHTML]="taskData.timeEstimate|msToString"
+        <span [innerHTML]="task.timeEstimate|msToString"
               class="time-val"></span>
       </div>
     </div>
@@ -93,22 +93,31 @@
     </button>
   </section>
 
-  <mat-expansion-panel *ngIf="!taskData.repeatCfgId">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon class="panel-header-icon">alarm</mat-icon>
-        <span>Reminder</span>
-      </mat-panel-title>
-      <mat-panel-description>
-        {{taskData.repeatCfgId}}
-      </mat-panel-description>
-    </mat-expansion-panel-header>
+  <section class="input-item"
+           (click)="editReminder()">
+    <div class="input-item__title">
+      <mat-icon class="panel-header-icon">alarm</mat-icon>
+      <span *ngIf="task.reminderId">Reminder</span>
+      <span *ngIf="!task.reminderId">Add Reminder</span>
+    </div>
+    <div class="input-item__value">
+      <div class="reminder-value"
+           matTooltipPosition="left"
+           *ngIf="reminderData$|async as reminderData"
+           [matTooltip]="reminderData.remindAt|date:'short'">
+        {{reminderData.remindAt|humanizeTimestamp}}
+      </div>
+    </div>
+    <button mat-icon-button
+            color="accent"
+            class="input-item__edit-btn">
+      <mat-icon *ngIf="!task.reminderId">add</mat-icon>
+      <mat-icon *ngIf="task.reminderId">edit</mat-icon>
+    </button>
+  </section>
 
-    <p>This is the primary content of the panel.</p>
-  </mat-expansion-panel>
 
-
-  <mat-expansion-panel *ngIf="!taskData.parentId && !taskData.issueId">
+  <mat-expansion-panel *ngIf="!task.parentId && !task.issueId">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon class="panel-header-icon"
@@ -117,7 +126,7 @@
         <span>Repeat</span>
       </mat-panel-title>
       <mat-panel-description>
-        {{taskData.repeatCfgId}}
+        {{task.repeatCfgId}}
       </mat-panel-description>
     </mat-expansion-panel-header>
 
@@ -125,16 +134,16 @@
   </mat-expansion-panel>
 
 
-  <mat-expansion-panel *ngIf="taskData.issueData">
+  <mat-expansion-panel *ngIf="task.issueData">
     <mat-expansion-panel-header>
       <mat-panel-title>
-        <issue-header [task]="taskData"></issue-header>
+        <issue-header [task]="task"></issue-header>
       </mat-panel-title>
       <mat-panel-description>
       </mat-panel-description>
     </mat-expansion-panel-header>
 
-    <issue-content [task]="taskData"
+    <issue-content [task]="task"
                    class="panel-content-wrapper issue-content-wrapper"></issue-content>
   </mat-expansion-panel>
 
@@ -142,10 +151,10 @@
   <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
-        <mat-icon *ngIf="taskData.notes||taskData.issueData"
+        <mat-icon *ngIf="task.notes||task.issueData"
                   class="panel-header-icon">chat
         </mat-icon>
-        <mat-icon *ngIf="!taskData.notes&&!taskData.issueData"
+        <mat-icon *ngIf="!task.notes&&!task.issueData"
                   class="panel-header-icon">chat_bubble_outline
         </mat-icon>
         <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
@@ -155,7 +164,7 @@
     </mat-expansion-panel-header>
     <div class="panel-content-wrapper note-wrapper">
       <inline-markdown (changed)="changeTaskNotes($event)"
-                       [model]="taskData.notes"
+                       [model]="task.notes"
                        [isShowControls]="true"></inline-markdown>
     </div>
   </mat-expansion-panel>
@@ -171,9 +180,9 @@
     </mat-expansion-panel-header>
 
     <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
-      <ng-container *ngIf="taskData.issueType">
+      <ng-container *ngIf="task.issueType">
         <h3 class="mat-h3"
-            style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: taskData.issueType} }}</h3>
+            style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: task.issueType} }}</h3>
         <attachment-list [attachments]="issueAttachments"
                          [isDisableControls]="true"></attachment-list>
       </ng-container>
