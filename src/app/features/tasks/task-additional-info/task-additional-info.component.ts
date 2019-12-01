@@ -21,6 +21,7 @@ import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edi
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {TaskRepeatCfg} from '../../task-repeat-cfg/task-repeat-cfg.model';
 import * as moment from 'moment';
+import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
 
 @Component({
   selector: 'task-additional-info',
@@ -145,5 +146,21 @@ export class TaskAdditionalInfoComponent {
         task: this.task,
       }
     });
+  }
+
+  addAttachment() {
+    this._matDialog
+      .open(DialogEditAttachmentComponent, {
+        data: {},
+      })
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          this.attachmentService.addAttachment({
+            ...result,
+            taskId: this.task.id,
+          });
+        }
+      });
   }
 }

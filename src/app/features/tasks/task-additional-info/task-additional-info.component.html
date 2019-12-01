@@ -88,7 +88,8 @@
   </mat-expansion-panel>
 
 
-  <mat-expansion-panel>
+  <mat-expansion-panel
+    *ngIf="issueAttachments?.length || (localAttachments$|async)?.length">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon class="panel-header-icon">attachment</mat-icon>
@@ -108,6 +109,23 @@
       <attachment-list [attachments]="localAttachments$|async"></attachment-list>
     </div>
   </mat-expansion-panel>
+
+  <section class="input-item"
+           *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
+           (click)="addAttachment()">
+    <div class="input-item__title">
+      <mat-icon class="panel-header-icon">attachment</mat-icon>
+      <span>Add attachment</span>
+    </div>
+    <div class="input-item__value">
+    </div>
+    <button mat-icon-button
+            color="accent"
+            class="input-item__edit-btn">
+      <mat-icon>add</mat-icon>
+    </button>
+  </section>
+
 
 
   <section class="input-item"
