@@ -20,25 +20,11 @@
   </header>
 
 
-  <!--  <mat-expansion-panel>-->
-  <!--    <mat-expansion-panel-header>-->
-  <!--      <mat-panel-title>-->
-  <!--        This is the expansion title-->
-  <!--      </mat-panel-title>-->
-  <!--      <mat-panel-description>-->
-  <!--        This is a summary of the content-->
-  <!--      </mat-panel-description>-->
-  <!--    </mat-expansion-panel-header>-->
-
-  <!--    <p>This is the primary content of the panel.</p>-->
-  <!--  </mat-expansion-panel>-->
-
-
   <mat-expansion-panel *ngIf="taskData.subTasks?.length">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon class="panel-header-icon">list</mat-icon>
-        Sub Tasks ({{taskData.subTasks?.length}})
+        <span>Sub Tasks ({{taskData.subTasks?.length}})</span>
       </mat-panel-title>
     </mat-expansion-panel-header>
     <div class="panel-content-wrapper">
@@ -69,6 +55,75 @@
     </div>
   </mat-expansion-panel>
 
+
+  <!--  <mat-expansion-panel>-->
+  <!--    <mat-expansion-panel-header>-->
+  <!--      <mat-panel-title>-->
+  <!--        This is the expansion title-->
+  <!--      </mat-panel-title>-->
+  <!--      <mat-panel-description>-->
+  <!--        This is a summary of the content-->
+  <!--      </mat-panel-description>-->
+  <!--    </mat-expansion-panel-header>-->
+
+  <!--    <p>This is the primary content of the panel.</p>-->
+  <!--  </mat-expansion-panel>-->
+
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon class="panel-header-icon">timer</mat-icon>
+        <span>Time</span>
+      </mat-panel-title>
+      <mat-panel-description>
+        <div class="time">
+          <span class="time-val">
+            <span [innerHTML]="taskData.timeSpent|msToString"></span>
+          </span>
+          <span class="separator">/</span>
+          <span [innerHTML]="taskData.timeEstimate|msToString"
+                class="time-val"></span>
+        </div>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <p>This is the primary content of the panel.</p>
+  </mat-expansion-panel>
+
+
+  <mat-expansion-panel *ngIf="!taskData.repeatCfgId">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon class="panel-header-icon">alarm</mat-icon>
+        <span>Reminder</span>
+      </mat-panel-title>
+      <mat-panel-description>
+        {{taskData.repeatCfgId}}
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <p>This is the primary content of the panel.</p>
+  </mat-expansion-panel>
+
+
+  <mat-expansion-panel *ngIf="!taskData.parentId && !taskData.issueId">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon class="panel-header-icon"
+                  style="transform: rotate(45deg);">repeat
+        </mat-icon>
+        <span>Repeat</span>
+      </mat-panel-title>
+      <mat-panel-description>
+        {{taskData.repeatCfgId}}
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <p>This is the primary content of the panel.</p>
+  </mat-expansion-panel>
+
+
   <mat-expansion-panel *ngIf="taskData.issueData">
     <mat-expansion-panel-header>
       <mat-panel-title>
@@ -86,8 +141,11 @@
   <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
-        <mat-icon class="panel-header-icon">notes</mat-icon>
-        {{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}
+        <mat-icon *ngIf="taskData.notes||taskData.issueData"
+                  class="panel-header-icon">chat</mat-icon>
+        <mat-icon *ngIf="!taskData.notes&&!taskData.issueData"
+                  class="panel-header-icon">chat_bubble_outline</mat-icon>
+        <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
       </mat-panel-title>
       <mat-panel-description>
       </mat-panel-description>
@@ -104,7 +162,7 @@
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon class="panel-header-icon">attachment</mat-icon>
-        {{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}
+        <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
       </mat-panel-title>
       <mat-panel-description></mat-panel-description>
     </mat-expansion-panel-header>
