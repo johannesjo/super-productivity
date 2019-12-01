@@ -51,14 +51,12 @@ mat-drawer::ng-deep .mat-drawer-inner-container {
 
 
   @include lightTheme() {
-    //background: $light-theme-bg-darker;
+    background: $light-theme-bg-darker;
   }
 
   @include darkTheme {
-    //background: $dark-theme-sidebar-bg;
-    //background: $dark-theme-bg-lighter;
+    background: $dark-theme-sidebar-bg;
   }
-
   //
   //side-nav,
   //notes,

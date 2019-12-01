@@ -13,7 +13,8 @@
   }
 
   @include darkTheme() {
-    background: $dark-theme-bg-slightly-lighter;
+    background: $dark-theme-sidebar-bg;
+    background: $dark-theme-bg;
   }
 
   task-list {
@@ -24,7 +25,6 @@
 
 ::ng-deep task .box {
   @include darkTheme() {
-    background: transparent;
   }
 }
 
@@ -44,7 +44,8 @@
     box-shadow: $whiteframe-shadow-1dp;
   }
   @include darkTheme() {
-    background: $dark-theme-bg-lighter;
+    background: $dark-theme-bg-slightly-lighter;
+    border: 1px solid $dark-theme-extra-border-color;
   }
 }
 
@@ -54,6 +55,7 @@
   padding-top: $s;
   padding-bottom: $s;
   font-size: 15px;
+  font-weight: normal;
   margin: 0;
   flex-grow: 1;
   line-height: 1.4;
@@ -95,8 +97,13 @@ progress-bar {
   border-radius: 0;
   margin: 8px;
 
+  &,
+  ::ng-deep & .mat-expansion-panel-header {
+    font-size: 14px;
+  }
+
   @include darkTheme() {
-    background: $dark-theme-bg-lighter;
+    background: $dark-theme-bg-slightly-lighter;
     border-color: $dark-theme-extra-border-color;
   }
   @include lightTheme {
@@ -107,7 +114,7 @@ progress-bar {
 
 :host::ng-deep {
   .mat-expansion-panel-body {
-    padding: $s/2;
+    padding: 0;
   }
 
   .mat-expansion-panel-header {
@@ -169,7 +176,6 @@ progress-bar {
   }
 
   &.note-wrapper {
-    margin: 0;
     display: block;
     overflow: hidden;
     box-shadow: $whiteframe-shadow-1dp;
@@ -197,7 +203,7 @@ progress-bar {
         background: $light-theme-bg-darker;
       }
       @include darkTheme() {
-        background: $dark-theme-bg-lightest;
+        background: $dark-theme-bg-lighter;
       }
     }
   }
@@ -211,7 +217,6 @@ progress-bar {
   align-items: center;
   height: 48px;
   cursor: pointer;
-  font-size: 15px;
 
   &:hover {
     @include lightTheme() {
