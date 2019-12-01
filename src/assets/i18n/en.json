@@ -468,7 +468,7 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
-        "ATTACHMENTS": "Attachments {{nr}}",
+        "ATTACHMENTS": "Attachments ({{nr}})",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Notes"

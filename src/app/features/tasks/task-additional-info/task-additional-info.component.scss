@@ -44,6 +44,11 @@
   line-height: 1.4;
 }
 
+progress-bar {
+  position: absolute !important;
+  bottom: 0;
+}
+
 .wrapper {
   // 1px for the border
   //margin: 0 1px 0;
@@ -62,13 +67,6 @@
 
   @include darkTheme {
     border-top-color: $dark-theme-extra-border-color;
-  }
-}
-
-.tab-header-icon {
-  &,
-  ::ng-deep & {
-    margin-right: $s;
   }
 }
 
@@ -92,8 +90,6 @@
   @include lightTheme {
     border-color: $light-theme-extra-border-color;
   }
-
-
 }
 
 :host::ng-deep {
@@ -109,6 +105,10 @@
   .mat-expansion-panel-header-title {
     flex-grow: 0;
     //min-width: 130px;
+  }
+
+  .panel-header-icon {
+    margin-right: $s;
   }
 }
 
@@ -147,6 +147,7 @@
     //margin: $s $s;
     display: block;
     overflow: hidden;
+    box-shadow: $whiteframe-shadow-1dp;
   }
 
   ::ng-deep {

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, ComponentFactoryResolver, EventEmitter, Input, Output} from '@angular/core';
-import {TaskWithSubTasks, ShowSubTasksMode} from '../task.model';
+import {ShowSubTasksMode, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
 import {BehaviorSubject, Observable} from 'rxjs';
@@ -45,6 +45,10 @@ export class TaskAdditionalInfoComponent {
     this.taskData = val;
     this._attachmentIds$.next(this.taskData.attachmentIds);
     this.issueAttachments = this._issueService.getMappedAttachments(this.taskData.issueType, this.taskData.issueData);
+  }
+
+  get progress() {
+    return this.taskData && this.taskData.timeEstimate && (this.taskData.timeSpent / this.taskData.timeEstimate) * 100;
   }
 
   changeTaskNotes($event: string) {

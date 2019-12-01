@@ -50,10 +50,15 @@ mat-drawer::ng-deep .mat-drawer-inner-container {
   //scroll-snap-type: y proximity;
 
 
-  @include darkTheme {
-    background: $dark-theme-sidebar-bg;
-    background: $dark-theme-bg-lighter;
+  @include lightTheme() {
+    //background: $light-theme-bg-darker;
   }
+
+  @include darkTheme {
+    //background: $dark-theme-sidebar-bg;
+    //background: $dark-theme-bg-lighter;
+  }
+
   //
   //side-nav,
   //notes,
