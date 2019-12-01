@@ -169,8 +169,14 @@ export class TaskRepeatCfgEffects {
 
   private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string, projectId: string) {
     this._persistenceService.taskArchive.load(projectId).then((taskArchive: TaskArchive) => {
+      // if not yet initialized for project
+      if (!taskArchive) {
+        return;
+      }
+
       const newState = {...taskArchive};
       const ids = newState.ids as string[];
+
       const tasksWithRepeatCfgId = ids.map(id => newState.entities[id])
         .filter((task: TaskWithSubTasks) => task.repeatCfgId === repeatConfigId);
 

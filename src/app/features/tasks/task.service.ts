@@ -262,7 +262,6 @@ export class TaskService {
     private readonly _actions$: Actions,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
-    this.todaysTasks$.subscribe((v) => console.log('todaysTasks$', v));
 
     // time tracking
     this._timeTrackingService.tick$
