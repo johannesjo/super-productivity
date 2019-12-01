@@ -40,7 +40,7 @@
                 [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"
                 [opened]="taskService.selectSelectedTask$|async"
                 position="end">
-      <div style="width: 35vw; min-width: 340px; max-width: 700px; min-height: 100vh">
+      <div style="width: 45vw; min-width: 340px; max-width: 700px; min-height: 100vh">
         <task-additional-info *ngIf="taskService.selectSelectedTask$|async"
                               [task]="taskService.selectSelectedTask$|async"></task-additional-info>
       </div>
