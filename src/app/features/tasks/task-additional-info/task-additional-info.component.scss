@@ -2,14 +2,29 @@
 @import '../task/task.component.mixins';
 
 :host {
-  //margin-bottom: -2px;
   position: relative;
   z-index: 1;
   display: contents;
+  display: block;
+  min-height: 100vh;
+
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
+  }
+
+  @include darkTheme() {
+    background: $dark-theme-bg-slightly-lighter;
+  }
 
   task-list {
     padding: 0;
-    margin-bottom: $s;
+    margin-bottom: 0;
+  }
+}
+
+::ng-deep task .box {
+  @include darkTheme() {
+    background: transparent;
   }
 }
 
@@ -29,7 +44,7 @@
     box-shadow: $whiteframe-shadow-1dp;
   }
   @include darkTheme() {
-    background: $dark-theme-bg-lightest;
+    background: $dark-theme-bg-lighter;
   }
 }
 
@@ -75,20 +90,17 @@ progress-bar {
 .mat-expansion-panel {
   box-shadow: none;
   //overflow: inherit !important;
-  border-width: 0;
-  border-top-width: 1px;
+  border-width: 1px;
   border-style: solid;
   border-radius: 0;
-
-  &:last-child {
-    border-bottom-width: 1px;
-  }
+  margin: 8px;
 
   @include darkTheme() {
     background: $dark-theme-bg-lighter;
     border-color: $dark-theme-extra-border-color;
   }
   @include lightTheme {
+    background: #fff;
     border-color: $light-theme-extra-border-color;
   }
 }
@@ -157,10 +169,14 @@ progress-bar {
   }
 
   &.note-wrapper {
-    //margin: $s $s;
+    margin: 0;
     display: block;
     overflow: hidden;
     box-shadow: $whiteframe-shadow-1dp;
+  }
+
+  &.sub-tasks {
+    margin: 0;
   }
 
   ::ng-deep {
@@ -180,6 +196,9 @@ progress-bar {
       @include lightTheme {
         background: $light-theme-bg-darker;
       }
+      @include darkTheme() {
+        background: $dark-theme-bg-lightest;
+      }
     }
   }
 }
@@ -195,7 +214,12 @@ progress-bar {
   font-size: 15px;
 
   &:hover {
-    background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+    @include lightTheme() {
+      background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+    }
+    @include darkTheme() {
+      background-color: $dark-theme-bg-lightest;
+    }
   }
 }
 
@@ -207,9 +231,16 @@ progress-bar {
 
 .input-item__value {
   text-align: right;
-  color: rgba(var(--palette-foreground-secondary-text), var(--palette-foreground-secondary-text-alpha, 1));
   display: flex;
   flex-grow: 1;
+
+  @include lightTheme() {
+    color: rgba(var(--palette-foreground-secondary-text), var(--palette-foreground-secondary-text-alpha, 1));
+  }
+
+  @include darkTheme() {
+    color: rgba(255, 255, 255, 0.7);
+  }
 
   > * {
     flex-grow: 1;

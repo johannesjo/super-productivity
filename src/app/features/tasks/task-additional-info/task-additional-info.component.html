@@ -27,7 +27,7 @@
         <span>Sub Tasks ({{task.subTasks?.length}})</span>
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <div class="panel-content-wrapper">
+    <div class="panel-content-wrapper sub-tasks">
       <div *ngIf="task.subTasks && task.subTasks.length"
            class="sub-tasks">
         <!--      <button (click)="toggleSubTaskMode()"-->
@@ -71,6 +71,7 @@
 
 
   <section class="input-item"
+           *ngIf="!task.subTasks?.length"
            (click)="estimateTime()">
     <div class="input-item__title">
       <mat-icon class="panel-header-icon">timer</mat-icon>
@@ -147,8 +148,6 @@
       <mat-panel-title>
         <issue-header [task]="task"></issue-header>
       </mat-panel-title>
-      <mat-panel-description>
-      </mat-panel-description>
     </mat-expansion-panel-header>
 
     <issue-content [task]="task"
@@ -167,8 +166,6 @@
         </mat-icon>
         <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
       </mat-panel-title>
-      <mat-panel-description>
-      </mat-panel-description>
     </mat-expansion-panel-header>
     <div class="panel-content-wrapper note-wrapper">
       <inline-markdown (changed)="changeTaskNotes($event)"
@@ -184,7 +181,6 @@
         <mat-icon class="panel-header-icon">attachment</mat-icon>
         <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
       </mat-panel-title>
-      <mat-panel-description></mat-panel-description>
     </mat-expansion-panel-header>
 
     <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
