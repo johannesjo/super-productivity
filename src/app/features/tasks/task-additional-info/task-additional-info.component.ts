@@ -4,7 +4,7 @@ import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
 import {BehaviorSubject, Observable, of} from 'rxjs';
 import {Attachment} from '../../attachment/attachment.model';
-import {switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
@@ -17,6 +17,10 @@ import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
 import {ReminderCopy} from '../../reminder/reminder.model';
 import {ReminderService} from '../../reminder/reminder.service';
+import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
+import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
+import {TaskRepeatCfg} from '../../task-repeat-cfg/task-repeat-cfg.model';
+import * as moment from 'moment';
 
 @Component({
   selector: 'task-additional-info',
@@ -26,6 +30,10 @@ import {ReminderService} from '../../reminder/reminder.service';
   animations: [expandAnimation, fadeAnimation, swirlAnimation]
 })
 export class TaskAdditionalInfoComponent {
+  @Input() selectedIndex = 0;
+  @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
+  @Output() tabIndexChange: EventEmitter<number> = new EventEmitter();
+
   T = T;
   issueAttachments: Attachment[];
   taskData: TaskWithSubTasks;
@@ -38,9 +46,26 @@ export class TaskAdditionalInfoComponent {
     ),
   );
 
-  @Input() selectedIndex = 0;
-  @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
-  @Output() tabIndexChange: EventEmitter<number> = new EventEmitter();
+  repeatCfgId$ = new BehaviorSubject(null);
+  repeatCfgDays$: Observable<string> = this.repeatCfgId$.pipe(
+    switchMap(id => (id)
+      ? this._taskRepeatCfgService.getTaskRepeatCfgById$(id).pipe(
+        map(repeatCfg => {
+          if (!repeatCfg) {
+            return null;
+          }
+          const days: (keyof TaskRepeatCfg)[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+          const localWeekDays = moment.weekdaysMin();
+          return days.filter(day => repeatCfg[day])
+            .map((day, index) => localWeekDays[days.indexOf(day)])
+            .join(', ');
+        }),
+      )
+
+      : of(null)
+    ),
+  );
+
 
   private _attachmentIds$ = new BehaviorSubject([]);
   localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
@@ -52,7 +77,8 @@ export class TaskAdditionalInfoComponent {
     private _issueService: IssueService,
     private _taskService: TaskService,
     private _reminderService: ReminderService,
-    private readonly _matDialog: MatDialog,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
+    private  _matDialog: MatDialog,
     public attachmentService: AttachmentService,
   ) {
   }
@@ -62,9 +88,10 @@ export class TaskAdditionalInfoComponent {
     this._attachmentIds$.next(this.taskData.attachmentIds);
     this.issueAttachments = this._issueService.getMappedAttachments(this.taskData.issueType, this.taskData.issueData);
     this.reminderId$.next(val.reminderId);
+    this.repeatCfgId$.next(val.repeatCfgId);
   }
 
-  get task() {
+  get task(): TaskWithSubTasks {
     return this.taskData;
   }
 
@@ -108,6 +135,15 @@ export class TaskAdditionalInfoComponent {
         reminderId: this.task.reminderId,
         isMoveToBacklogPossible: !this.task.parentId,
       } as AddTaskReminderInterface
+    });
+  }
+
+  editTaskRepeatCfg() {
+    this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
+      restoreFocus: false,
+      data: {
+        task: this.task,
+      }
     });
   }
 }

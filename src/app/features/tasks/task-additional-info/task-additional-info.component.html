@@ -94,6 +94,7 @@
   </section>
 
   <section class="input-item"
+           *ngIf="!task.repeatCfgId"
            (click)="editReminder()">
     <div class="input-item__title">
       <mat-icon class="panel-header-icon">alarm</mat-icon>
@@ -117,22 +118,29 @@
   </section>
 
 
-  <mat-expansion-panel *ngIf="!task.parentId && !task.issueId">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon class="panel-header-icon"
-                  style="transform: rotate(45deg);">repeat
-        </mat-icon>
-        <span>Repeat</span>
-      </mat-panel-title>
-      <mat-panel-description>
-        {{task.repeatCfgId}}
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <p>This is the primary content of the panel.</p>
-  </mat-expansion-panel>
-
+  <section class="input-item"
+           *ngIf="!task.parentId && !task.issueId"
+           (click)="editTaskRepeatCfg()">
+    <div class="input-item__title">
+      <mat-icon class="panel-header-icon"
+                style="transform: rotate(45deg);">repeat
+      </mat-icon>
+      <span>Repeat</span>
+    </div>
+    <div class="input-item__value">
+      <div class="reminder-value"
+           matTooltipPosition="left"
+           *ngIf="repeatCfgDays$|async as repeatCfgDays">
+        {{repeatCfgDays}}
+      </div>
+    </div>
+    <button mat-icon-button
+            color="accent"
+            class="input-item__edit-btn">
+      <mat-icon *ngIf="!task.repeatCfgId">add</mat-icon>
+      <mat-icon *ngIf="task.repeatCfgId">edit</mat-icon>
+    </button>
+  </section>
 
   <mat-expansion-panel *ngIf="task.issueData">
     <mat-expansion-panel-header>
