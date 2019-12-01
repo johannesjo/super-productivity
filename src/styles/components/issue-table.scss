@@ -3,6 +3,7 @@
 .issue-table {
   width: 100%;
   display: block;
+  text-align: left;
 
   pre {
     overflow: auto;
@@ -13,6 +14,7 @@
   tr {
     display: flex;
     flex-wrap: wrap;
+    margin-bottom: $s*1.5;
   }
 
   td,
@@ -28,7 +30,9 @@
   }
 
   th {
-    min-width: 90px;
+    min-width: 80px;
+    text-align: left;
+    font-style: italic;
   }
 
   // to shrink the th col to a min
