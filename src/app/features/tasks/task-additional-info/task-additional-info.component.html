@@ -39,7 +39,7 @@
   <!--        Sub Tasks ({{taskData.subTasks?.length}})-->
   <!--      </mat-panel-description>-->
   <!--    </mat-expansion-panel-header>-->
-  <div class="tab-wrapper">
+  <div class="panel-content-wrapper">
     <div *ngIf="taskData.subTasks && taskData.subTasks.length"
          class="sub-tasks">
       <!--      <button (click)="toggleSubTaskMode()"-->
@@ -73,12 +73,11 @@
         <issue-header [task]="taskData"></issue-header>
       </mat-panel-title>
       <mat-panel-description>
-        Github
       </mat-panel-description>
     </mat-expansion-panel-header>
 
     <issue-content [task]="taskData"
-                   class="tab-wrapper issue-content-wrapper"></issue-content>
+                   class="panel-content-wrapper issue-content-wrapper"></issue-content>
   </mat-expansion-panel>
 
 
@@ -86,12 +85,12 @@
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon class="tab-header-icon">notes</mat-icon>
+        {{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}
       </mat-panel-title>
       <mat-panel-description>
-        {{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}
       </mat-panel-description>
     </mat-expansion-panel-header>
-    <div class="tab-wrapper note-wrapper">
+    <div class="panel-content-wrapper note-wrapper">
       <inline-markdown (changed)="changeTaskNotes($event)"
                        [model]="taskData.notes"
                        [isShowControls]="true"></inline-markdown>
@@ -103,11 +102,12 @@
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon class="tab-header-icon">attachment</mat-icon>
+        {{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}
       </mat-panel-title>
-      <mat-panel-description>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</mat-panel-description>
+      <mat-panel-description></mat-panel-description>
     </mat-expansion-panel-header>
 
-    <div class="tab-wrapper attachment-list-tab-wrapper">
+    <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
       <ng-container *ngIf="taskData.issueType">
         <h3 class="mat-h3"
             style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: taskData.issueType} }}</h3>

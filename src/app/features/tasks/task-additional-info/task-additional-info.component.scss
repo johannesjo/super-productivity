@@ -9,16 +9,10 @@
 
   task-list {
     padding: 0;
+    margin-bottom: $s;
   }
 }
 
-.mat-expansion-panel {
-  box-shadow: none;
-
-  @include darkTheme {
-    background: $dark-theme-bg-lighter;
-  }
-}
 
 .task-title-wrapper {
   min-height: $bar-height;
@@ -78,41 +72,46 @@
   }
 }
 
-:host::ng-deep .mat-expansion-panel-body {
-  padding: $s/2;
+
+.mat-expansion-panel {
+  box-shadow: none;
+  //overflow: inherit !important;
+  border-width: 0;
+  border-top-width: 1px;
+  border-style: solid;
+  border-radius: 0;
+
+  &:last-of-type {
+    border-bottom-width: 1px;
+  }
+
+  @include darkTheme() {
+    background: $dark-theme-bg-lighter;
+    border-color: $dark-theme-extra-border-color;
+  }
+  @include lightTheme {
+    border-color: $light-theme-extra-border-color;
+  }
+
+
 }
 
-:host::ng-deep .mat-tab-labels {
-  justify-content: stretch;
-  user-select: none;
-}
+:host::ng-deep {
+  .mat-expansion-panel-body {
+    padding: $s/2;
+  }
 
-:host::ng-deep .mat-tab-labels .mat-tab-label {
-  flex-grow: 1;
-  height: $bar-height-small;
-  width: 40px;
-  min-width: 40px;
-}
+  .mat-expansion-panel-header {
+    position: sticky;
+    top: 0;
+  }
 
-:host ::ng-deep .mat-expansion-panel-header-title {
-  flex-grow: 0;
-  width: 30px;
-}
-
-:host .mat-expansion-panel-header {
-  position: sticky;
-  top: 0;
-}
-
-
-.tab-label-text {
-  &,
-  ::ng-deep & {
-    @media (max-width: $layout-sm) {
-      display: none;
-    }
+  .mat-expansion-panel-header-title {
+    flex-grow: 0;
+    //min-width: 130px;
   }
 }
+
 
 :host::ng-deep issue-header > * {
   display: inline-flex;
@@ -122,32 +121,17 @@
 }
 
 
-.attachment-list-tab-wrapper,
-.mat-tab-body {
-  // needed to overstyle current task
-}
-
-
-.tab-wrapper {
-  //border-radius: $card-border-radius;
+.panel-content-wrapper {
   margin: $s $s;
   display: block;
-  //box-shadow: $whiteframe-shadow-1dp;
 
-  @include layerTextAndBgHigher();
-
-  @include darkTheme() {
-    //border: 1px solid $dark-theme-extra-border-color;
-  }
-
-  @include lightTheme {
-    //border: 1px solid $light-theme-extra-border-color;
-    //background: $light-theme-bg-darker;
-  }
+  //@include layerTextAndBgHigher();
+  @include standardThemeTextColorLessIntense();
 
 
   &.issue-content-wrapper {
     // required for inner paddings to be there
+    margin: 0;
     overflow: hidden;
   }
 
@@ -160,7 +144,7 @@
   }
 
   &.note-wrapper {
-    margin: $s $s;
+    //margin: $s $s;
     display: block;
     overflow: hidden;
   }
