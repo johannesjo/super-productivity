@@ -108,6 +108,7 @@ progress-bar {
     align-items: center;
     //min-width: 130px;
   }
+
   .mat-expansion-panel-header-description {
     text-align: right;
 
@@ -183,6 +184,48 @@ progress-bar {
 }
 
 
+// Input-Item
+// Similar styles to panel
+.input-item {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  cursor: pointer;
+}
+
+.input-item__title {
+  display: flex;
+  align-items: center;
+  padding: 0 $s*3;
+}
+
+.input-item__value {
+  text-align: right;
+  color: rgba(var(--palette-foreground-secondary-text), var(--palette-foreground-secondary-text-alpha, 1));
+  display: flex;
+  flex-grow: 1;
+  font-size: 15px;
+
+  > * {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    text-align: right;
+    justify-content: flex-end;
+  }
+}
+
+.input-item__edit-btn {
+  margin-right: $s;
+  opacity: 0;
+
+  .input-item:hover & {
+    opacity: 1;
+  }
+}
+
+
+// OTHER
 .toggle-sub-tasks-btn.toggle-sub-tasks-btn {
   position: absolute !important;
   transform: translateY(-50%);

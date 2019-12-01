@@ -70,27 +70,28 @@
   <!--  </mat-expansion-panel>-->
 
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon class="panel-header-icon">timer</mat-icon>
-        <span>Time</span>
-      </mat-panel-title>
-      <mat-panel-description>
-        <div class="time">
+  <section class="input-item"
+           (click)="estimateTime()">
+    <div class="input-item__title">
+      <mat-icon class="panel-header-icon">timer</mat-icon>
+      <span>Time</span>
+    </div>
+    <div class="input-item__value">
+      <div class="time">
           <span class="time-val">
             <span [innerHTML]="taskData.timeSpent|msToString"></span>
           </span>
-          <span class="separator">/</span>
-          <span [innerHTML]="taskData.timeEstimate|msToString"
-                class="time-val"></span>
-        </div>
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <p>This is the primary content of the panel.</p>
-  </mat-expansion-panel>
-
+        <span class="separator">/</span>
+        <span [innerHTML]="taskData.timeEstimate|msToString"
+              class="time-val"></span>
+      </div>
+    </div>
+    <button mat-icon-button
+            color="accent"
+            class="input-item__edit-btn">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </section>
 
   <mat-expansion-panel *ngIf="!taskData.repeatCfgId">
     <mat-expansion-panel-header>
@@ -142,9 +143,11 @@
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon *ngIf="taskData.notes||taskData.issueData"
-                  class="panel-header-icon">chat</mat-icon>
+                  class="panel-header-icon">chat
+        </mat-icon>
         <mat-icon *ngIf="!taskData.notes&&!taskData.issueData"
-                  class="panel-header-icon">chat_bubble_outline</mat-icon>
+                  class="panel-header-icon">chat_bubble_outline
+        </mat-icon>
         <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
       </mat-panel-title>
       <mat-panel-description>

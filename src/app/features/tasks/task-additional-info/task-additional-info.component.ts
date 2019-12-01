@@ -10,6 +10,9 @@ import {TaskService} from '../task.service';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
+import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
+import {MatDialog} from '@angular/material/dialog';
+import {isTouch} from '../../../util/is-touch';
 
 @Component({
   selector: 'task-additional-info',
@@ -37,6 +40,7 @@ export class TaskAdditionalInfoComponent {
     private _resolver: ComponentFactoryResolver,
     private _issueService: IssueService,
     private _taskService: TaskService,
+    private readonly _matDialog: MatDialog,
     public attachmentService: AttachmentService,
   ) {
   }
@@ -55,9 +59,6 @@ export class TaskAdditionalInfoComponent {
     this.taskNotesChanged.emit($event);
   }
 
-  indexChange($event: number) {
-    this.tabIndexChange.emit($event);
-  }
 
   close() {
     this._taskService.setSelectedId(null);
@@ -69,7 +70,11 @@ export class TaskAdditionalInfoComponent {
     }
   }
 
-  toggleSubTaskMode() {
-    this._taskService.toggleSubTaskMode(this.taskData.id, true, true);
+  estimateTime() {
+    this._matDialog
+      .open(DialogTimeEstimateComponent, {
+        data: {task: this.taskData},
+        autoFocus: !isTouch(),
+      });
   }
 }
