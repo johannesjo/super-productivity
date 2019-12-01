@@ -59,8 +59,13 @@ export class TaskAdditionalInfoComponent {
     this._taskService.setSelectedId(null);
   }
 
+  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
+    if (isChanged) {
+      this._taskService.update(this.taskData.id, {title: newTitle});
+    }
+  }
 
   toggleSubTaskMode() {
-    this._taskService.toggleSubTaskMode(this.task.id, true, true);
+    this._taskService.toggleSubTaskMode(this.taskData.id, true, true);
   }
 }

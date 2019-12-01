@@ -18,7 +18,13 @@
             (click)="close()">
       <mat-icon>close</mat-icon>
     </button>
-    <h2 class="task-title">{{taskData.title}}</h2>
+    <h2 class="task-title"
+        (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
+        [value]="taskData.title"
+        [isResetAfterEdit]="true"
+        contenteditable="true"
+        contentEditableOnClick
+        tabindex="2">{{taskData.title}}</h2>
     <button mat-icon-button>
       <mat-icon>more_vert</mat-icon>
     </button>
@@ -36,19 +42,19 @@
   <div class="tab-wrapper">
     <div *ngIf="taskData.subTasks && taskData.subTasks.length"
          class="sub-tasks">
-<!--      <button (click)="toggleSubTaskMode()"-->
-<!--              *ngIf="taskData.subTasks && taskData.subTasks.length"-->
-<!--              class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"-->
-<!--              color=""-->
-<!--              mat-mini-fab-->
-<!--              tabindex="2"-->
-<!--              [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">-->
-<!--        <mat-icon *ngIf="(taskData._showSubTasksMode===ShowSubTasksMode.HideAll)">add-->
-<!--        </mat-icon>-->
-<!--        <mat-icon *ngIf="(taskData._showSubTasksMode!==ShowSubTasksMode.HideAll)"-->
-<!--                  [class.isHideDoneTasks]="(taskData._showSubTasksMode===ShowSubTasksMode.HideDone)">remove-->
-<!--        </mat-icon>-->
-<!--      </button>-->
+      <!--      <button (click)="toggleSubTaskMode()"-->
+      <!--              *ngIf="taskData.subTasks && taskData.subTasks.length"-->
+      <!--              class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"-->
+      <!--              color=""-->
+      <!--              mat-mini-fab-->
+      <!--              tabindex="2"-->
+      <!--              [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">-->
+      <!--        <mat-icon *ngIf="(taskData._showSubTasksMode===ShowSubTasksMode.HideAll)">add-->
+      <!--        </mat-icon>-->
+      <!--        <mat-icon *ngIf="(taskData._showSubTasksMode!==ShowSubTasksMode.HideAll)"-->
+      <!--                  [class.isHideDoneTasks]="(taskData._showSubTasksMode===ShowSubTasksMode.HideDone)">remove-->
+      <!--        </mat-icon>-->
+      <!--      </button>-->
       <task-list *ngIf="taskData.subTasks?.length"
                  [@expand]
                  [isHideAll]="(taskData._showSubTasksMode!==ShowSubTasksMode.Show)"
