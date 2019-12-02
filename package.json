@@ -75,7 +75,8 @@
     "electron-log": "^3.0.1",
     "googleapis": "^40.0.0",
     "jira-client-fork": "^4.2.1",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "stacktrace-js": "^2.0.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.803.4",

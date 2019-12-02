@@ -4,10 +4,11 @@ import {getJiraResponseErrorTxt} from '../../util/get-jira-response-error-text';
 import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../banner/banner.service';
+import * as StackTrace from 'stacktrace-js';
 
 let isWasErrorAlertCreated = false;
 
-const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: string) => {
+const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: string, origErr: any) => {
   if (isWasErrorAlertCreated) {
     return;
   }
@@ -19,7 +20,8 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
     <h2>Snap! A critical error occurred...<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please Report !</a></p>
     <pre style="line-height: 1.3;">${err}</pre>
-    <pre style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
+    <pre id="stack-trace"
+         style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
     `;
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
@@ -33,12 +35,26 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
   errorAlert.append(btnReload);
   document.body.append(errorAlert);
   isWasErrorAlertCreated = true;
+  getStacktrace(origErr).then(stack => {
+    console.log(stack);
+    document.getElementById('stack-trace').innerText = stack;
+  });
 
   if (IS_ELECTRON) {
     eSvc.remote.getCurrentWindow().webContents.openDevTools();
   }
 };
 
+async function getStacktrace(err): Promise<string> {
+  return StackTrace.fromError(err)
+    .then((stackframes) => {
+      return stackframes
+        .splice(0, 20)
+        .map((sf) => {
+          return sf.toString();
+        }).join('\n');
+    });
+}
 
 const isHandledError = (err): boolean => {
   const errStr = (typeof err === 'string') ? err : err.toString();
@@ -64,7 +80,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   handleError(err: any) {
     const errStr = (typeof err === 'string') ? err : err.toString();
     // tslint:disable-next-line
-    const stack = err && err.stack;
+    const simpleStack = err && err.stack;
     console.log(isHandledError(err), err[HANDLED_ERROR_PROP_STR], errStr);
 
     // if not our custom error handler we have a critical error on our hands
@@ -73,15 +89,18 @@ export class GlobalErrorHandler implements ErrorHandler {
 
       // NOTE: dom exceptions will break all rendering that's why
       if (err.constructor && err.constructor === DOMException) {
-        _createErrorAlert(this._electronService, 'DOMException: ' + errorStr, stack);
+        _createErrorAlert(this._electronService, 'DOMException: ' + errorStr, simpleStack, err);
       } else {
-        _createErrorAlert(this._electronService, errorStr, stack);
+        _createErrorAlert(this._electronService, errorStr, simpleStack, err);
       }
     }
 
     console.error('GLOBAL_ERROR_HANDLER', err);
     if (IS_ELECTRON) {
-      this._electronLogger.error('Frontend Error:', err, stack);
+      this._electronLogger.error('Frontend Error:', err, simpleStack);
+      getStacktrace(err).then(stack => {
+        this._electronLogger.error('Frontend Error Stack:', err, stack);
+      });
     }
 
     // NOTE: rethrow the error otherwise it gets swallowed
