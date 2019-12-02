@@ -22,7 +22,8 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
     <pre style="line-height: 1.3;">${err}</pre>
     <pre id="stack-trace"
          style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
-    `;
+    <pre style="line-height: 1.3; font-size: 12px;">${getSimpleMeta()}</pre>
+  `;
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
   btnReload.addEventListener('click', () => {
@@ -55,6 +56,11 @@ async function getStacktrace(err): Promise<string> {
         }).join('\n');
     });
 }
+
+const getSimpleMeta = (): string => {
+  const n = window.navigator;
+  return `META: ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${n.language} – ${n.platform} – ${n.userAgent}`;
+};
 
 const isHandledError = (err): boolean => {
   const errStr = (typeof err === 'string') ? err : err.toString();
@@ -96,6 +102,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
 
     console.error('GLOBAL_ERROR_HANDLER', err);
+    console.log(getSimpleMeta());
     if (IS_ELECTRON) {
       this._electronLogger.error('Frontend Error:', err, simpleStack);
       getStacktrace(err).then(stack => {
