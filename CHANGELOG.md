@@ -1,3 +1,18 @@
+## [2.13.13](https://github.com/johannesjo/super-productivity/compare/v2.13.12...v2.13.13) (2019-12-02)
+
+
+### Bug Fixes
+
+* **google:** login not working for some users [#258](https://github.com/johannesjo/super-productivity/issues/258) ([8348ec1](https://github.com/johannesjo/super-productivity/commit/8348ec12c928ee87aaf5602f730af504862fd8ef))
+
+
+### Features
+
+* also add meta info for errors, so users don't have to think about it ([2ec52b5](https://github.com/johannesjo/super-productivity/commit/2ec52b5e60f2cdaa814368ec4d5f80f8751b6a2c))
+* improve error handling via stacktrace js ([92d4cab](https://github.com/johannesjo/super-productivity/commit/92d4cab12730f1814971ad84eab92dfe49b2fede))
+
+
+
 ## [2.13.12](https://github.com/johannesjo/super-productivity/compare/v2.13.11...v2.13.12) (2019-11-29)
 
 
