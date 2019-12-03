@@ -10,6 +10,7 @@
 
   @include lightTheme() {
     background: $light-theme-bg-darker;
+    //background: $c-primary-100;
   }
 
   @include darkTheme() {

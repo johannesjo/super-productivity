@@ -17,33 +17,29 @@ import {NoteService} from '../../features/note/note.service';
 import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
 import {ProjectService} from '../../features/project/project.service';
 
-const BOTH__ALWAYS_VISIBLE = 1400;
 const NAV_ALWAYS_VISIBLE = 1050;
-const NAV_NEXT_NOTES_OVER = 900;
-const BOTH_OVER = 726;
+const NAV_OVER_NOTES_NEXT = 900;
+const BOTH_OVER = 780;
 
 @Injectable({
   providedIn: 'root',
 })
 export class LayoutService {
+  isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
 
   private _isShowSideNav$: Observable<boolean> = this._store$.pipe(select(selectIsShowSideNav));
   private _isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
 
-  isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
 
-  isBothAlwaysVisible$: Observable<boolean> = this._breakPointObserver.observe([
-    `(min-width: ${BOTH__ALWAYS_VISIBLE}px)`,
-  ]).pipe(map(result => result.matches));
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver.observe([
     `(min-width: ${NAV_ALWAYS_VISIBLE}px)`,
   ]).pipe(map(result => result.matches));
-  isNavNextNotesOver$: Observable<boolean> = this._breakPointObserver.observe([
-    `(min-width: ${NAV_NEXT_NOTES_OVER}px)`,
+  isNotesNextNavOver$: Observable<boolean> = this._breakPointObserver.observe([
+    `(min-width: ${NAV_OVER_NOTES_NEXT}px)`,
   ]).pipe(map(result => result.matches));
-  isBothOver$: Observable<boolean> = this._breakPointObserver.observe([
+  isNotesOver$: Observable<boolean> = this._breakPointObserver.observe([
     `(min-width: ${BOTH_OVER}px)`,
-  ]).pipe(map(result => result.matches));
+  ]).pipe(map(result => !result.matches));
 
   isShowSideNav$: Observable<boolean> = this._isShowSideNav$.pipe(
     switchMap((isShow) => {
@@ -53,18 +49,17 @@ export class LayoutService {
     }),
   );
 
-  isNavOver$: Observable<boolean> = this.isBothOver$.pipe(map(v => !v));
+  isNavOver$: Observable<boolean> = this.isNotesNextNavOver$.pipe(map(v => !v));
 
 
-  isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe(
-    switchMap((isShow) => {
-      return isShow
-        ? of(isShow)
-        : this.isBothAlwaysVisible$;
-    }),
-  );
+  // isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe(
+  //   switchMap((isShow) => {
+  //     return isShow
+  //       ? of(isShow)
+  //       : this.isBothAlwaysVisible$;
+  //   }),
+  // );
 
-  isNotesOver$: Observable<boolean> = this.isNavNextNotesOver$.pipe(map(v => !v));
   isScrolled$ = new BehaviorSubject<boolean>(false);
 
   constructor(
