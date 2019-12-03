@@ -33,9 +33,13 @@ body {
 }
 
 .task-list-wrapper {
-  padding: 0 0 $s*9;
-  max-width: $component-max-width;
-  margin: auto;
+  &,
+  .isSmallMainContainer & {
+    padding: 0 0 $s*9;
+    max-width: $component-max-width;
+    margin: auto;
+  }
+
 
   @include mq(xs) {
     padding: 0 2*$s $s*9;

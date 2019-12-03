@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, HostListener, Inject} from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  ViewChild
+} from '@angular/core';
 import {ProjectService} from './features/project/project.service';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
@@ -27,6 +35,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {TaskService} from './features/tasks/task.service';
+import {observeWidth} from './util/resize-observer-obs';
 
 
 @Component({
@@ -41,7 +50,7 @@ import {TaskService} from './features/tasks/task.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
+export class AppComponent implements AfterContentInit {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
     this._store.select(selectIsTaskDataLoaded),
@@ -50,7 +59,8 @@ export class AppComponent {
     filter(isLoaded => isLoaded),
     take(1),
   );
-
+  isSmallMainContainer$: Observable<boolean>;
+  @ViewChild('routeWrapper', {static: false, read: ElementRef}) routeWrapperElRef: ElementRef;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -119,6 +129,15 @@ export class AppComponent {
         }
       });
     }
+  }
+
+  ngAfterContentInit(): void {
+    // TODO wait for is all data loaded
+    setTimeout(() => {
+      this.isSmallMainContainer$ = observeWidth(this.routeWrapperElRef.nativeElement).pipe(map(v => v < 550));
+      // bla.subscribe((v) => console.log('bla', v));
+
+    }, 2000);
   }
 
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {

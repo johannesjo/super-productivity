@@ -125,8 +125,11 @@
 
 
 .sub-tasks {
-  margin: $s 0 $s $s*3;
-  position: relative;
+  &,
+  :host-context(.isSmallMainContainer) & {
+    margin: $s 0 $s $s*3;
+    position: relative;
+  }
 
   @include mq(xs) {
     //margin: $s $s*2 $s $s*3;
@@ -149,6 +152,11 @@
     flex-wrap: wrap;
     justify-content: flex-end;
   }
+
+  //:host-context(.isSmallMainContainer) & {
+  //  flex-wrap: wrap;
+  //  justify-content: flex-end;
+  //}
 }
 
 
@@ -198,6 +206,12 @@
     white-space: normal;
     margin-left: 5px;
   }
+
+  :host-context(.isSmallMainContainer) & {
+    white-space: normal;
+    margin-left: 5px;
+  }
+
 }
 
 
@@ -286,6 +300,18 @@
   }
 
 
+  :host-context(.isSmallMainContainer) & {
+    &:after {
+      content: '';
+      border-top: 1px solid;
+      opacity: 0.1;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+    }
+  }
+
   @include mq(xs, max) {
     @include isDoneForFirstLine {
       opacity: $task-is-done-dim-opacity +0.1;
@@ -319,6 +345,12 @@
       font-size: 13px;
     }
 
+    :host-context(.isSmallMainContainer) & {
+      font-size: 13px;
+      flex-direction: column;
+    }
+
+
     .time-val,
     .separator {
       display: block;
@@ -328,6 +360,10 @@
     .separator {
       padding: 0 $s/2;
       @include mq(xs, max) {
+        display: none;
+      }
+
+      :host-context(.isSmallMainContainer) & {
         display: none;
       }
     }

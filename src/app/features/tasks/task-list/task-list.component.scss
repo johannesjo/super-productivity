@@ -19,6 +19,13 @@
   }
 }
 
+:host-context(.isSmallMainContainer) {
+  ::ng-deep task-list task-list {
+    margin: 1px 0 0 10px;
+  }
+}
+
+
 .done-task-box {
   text-align: center;
   display: flex;

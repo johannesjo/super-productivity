@@ -19,6 +19,8 @@
     </header>
 
     <div [@warpRoute]="getPage(o)"
+         #routeWrapper
+         [class.isSmallMainContainer]="isSmallMainContainer$|async"
          class="route-wrapper">
       <router-outlet #o="outlet"></router-outlet>
     </div>
