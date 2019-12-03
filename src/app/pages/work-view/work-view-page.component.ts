@@ -1,11 +1,19 @@
-import {ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {TaskService} from '../../features/tasks/task.service';
 import {expandAnimation, expandFadeAnimation} from '../../ui/animations/expand.ani';
 import {LayoutService} from '../../core-ui/layout/layout.service';
 import {DragulaService} from 'ng2-dragula';
 import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-a-break.service';
 import {ActivatedRoute} from '@angular/router';
-import {from, fromEvent, Observable, Subscription, timer, zip} from 'rxjs';
+import {from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {delay, filter, map, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
@@ -25,7 +33,7 @@ const PARENT = 'PARENT';
   animations: [expandFadeAnimation, expandAnimation, fadeAnimation, workViewProjectChangeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkViewPageComponent implements OnInit, OnDestroy {
+export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
   isShowTimeWorkedWithoutBreak = true;
   splitInputPos = 100;
   isPreloadBacklog = false;
@@ -61,7 +69,13 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     map(v => v[0]),
   );
 
-  @ViewChild('splitTopEl', {static: false, read: ElementRef}) splitTopElRef: ElementRef;
+  @ViewChild('splitTopEl', {static: false, read: ElementRef}) set splitTopElRef(ref: ElementRef) {
+    if (ref) {
+      this.splitTopEl$.next(ref.nativeElement);
+    }
+  }
+
+  public splitTopEl$ = new ReplaySubject<HTMLElement>(1);
 
   private _subs = new Subscription();
   private _switchListAnimationTimeout: number;
@@ -80,20 +94,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this._subs.add(
-      this.projectService.isProjectChangingWithDelay$.pipe(
-        filter(isChanging => !isChanging),
-        delay(200),
-        // NOTE: hacky, but it's not worth it to crash
-        filter(() => !!this.splitTopElRef),
-        switchMap(() => fromEvent(this.splitTopElRef.nativeElement, 'scroll')),
-      ).subscribe(() => {
-        (this.splitTopElRef.nativeElement.scrollTop !== 0)
-          ? this._layoutService.isScrolled$.next(true)
-          : this._layoutService.isScrolled$.next(false);
-      })
-    );
-
     const sub = this._dragulaService.find(SUB);
     const par = this._dragulaService.find(PARENT);
 
@@ -122,6 +122,21 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
           this.splitInputPos = params.backlogPos;
         }
       }));
+  }
+
+  ngAfterViewInit(): void {
+    this._subs.add(
+      this.projectService.isProjectChanging$.pipe(
+        filter(isChanging => !isChanging),
+        delay(50),
+        switchMap(() => this.splitTopEl$),
+        switchMap((el) => fromEvent(el, 'scroll')),
+      ).subscribe(({target}) => {
+        ((target as HTMLElement).scrollTop !== 0)
+          ? this._layoutService.isScrolled$.next(true)
+          : this._layoutService.isScrolled$.next(false);
+      })
+    );
   }
 
 
