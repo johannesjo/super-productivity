@@ -1,6 +1,9 @@
 .markdown {
   @include scrollY;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 
   *:first-child {
     margin-top: 0;

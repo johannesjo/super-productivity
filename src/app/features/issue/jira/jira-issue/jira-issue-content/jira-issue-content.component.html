@@ -93,6 +93,7 @@
                 {{comment.created|date:'short'}}</span>
             </div>
             <div *ngIf="comment.body"
+                 class="markdown"
                  [innerHTML]="comment.body|jiraToMarkdown|markdown"></div>
           </div>
         </div>
