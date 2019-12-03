@@ -1,3 +1,14 @@
+## [2.13.14](https://github.com/johannesjo/super-productivity/compare/v2.13.13...v2.13.14) (2019-12-03)
+
+
+### Bug Fixes
+
+* markdown not always breaking words as expected ([f4fc838](https://github.com/johannesjo/super-productivity/commit/f4fc8381c43487099f86aa32c1d359f4addc8ae1))
+* **jira:** markdown error when trying to parse null issue description [#261](https://github.com/johannesjo/super-productivity/issues/261) ([f4cf908](https://github.com/johannesjo/super-productivity/commit/f4cf90884cd80384e58934a304d710dfb25040ab))
+* dynamic header shadow sometimes not working as intended ([7a053f6](https://github.com/johannesjo/super-productivity/commit/7a053f676b0ac3d0e35ce9322e75dd81a2870342))
+
+
+
 ## [2.13.13](https://github.com/johannesjo/super-productivity/compare/v2.13.12...v2.13.13) (2019-12-02)
 
 
