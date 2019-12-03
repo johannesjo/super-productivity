@@ -32,7 +32,7 @@ export class JiraIssueContentComponent implements OnInit {
   @Input() set task(task: TaskWithSubTasks) {
     this.taskData = task;
     this.issueData = task.issueData as JiraIssue;
-    this.description = this.issueData && j2m.to_markdown(this.issueData.description);
+    this.description = this.issueData && this.issueData.description && j2m.to_markdown(this.issueData.description);
     this.attachments = this._jiraIssueService.getMappedAttachmentsFromIssue(this.issueData);
   }
 
