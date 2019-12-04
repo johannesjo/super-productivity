@@ -123,10 +123,11 @@
   }
 }
 
-
 .sub-tasks {
-  &,
-  :host-context(.isSmallMainContainer) & {
+  margin: $s 0 $s $s*3;
+  position: relative;
+
+  @include smallMainContainer {
     margin: $s 0 $s $s*3;
     position: relative;
   }
@@ -153,7 +154,7 @@
     justify-content: flex-end;
   }
 
-  //:host-context(.isSmallMainContainer) & {
+  //@include smallMainContainer{
   //  flex-wrap: wrap;
   //  justify-content: flex-end;
   //}
@@ -208,7 +209,7 @@
     margin-left: 5px;
   }
 
-  :host-context(.isSmallMainContainer) & {
+  @include smallMainContainer {
     white-space: normal;
     margin-left: 5px;
   }
@@ -346,7 +347,7 @@
     padding: 0 $s/2;
   }
 
-  :host-context(.isSmallMainContainer) & {
+  @include smallMainContainer {
     @include timeWrapperMinimalStyles;
   }
 

@@ -59,6 +59,16 @@ h2 {
   @include mq(xs) {
     padding: 2*$s 0;
   }
+
+  @include smallMainContainer() {
+    .label {
+      display: none;
+    }
+    p {
+      margin: 0;
+    }
+  }
+
   @include mq(xs, max) {
     .label {
       display: none;

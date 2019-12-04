@@ -34,12 +34,10 @@ body {
 
 .task-list-wrapper {
   padding: 0 0 $s*9;
-  max-width: $component-max-width;
+  // for a little bit of extra space for 800 width
+  max-width: #{$component-max-width - 40};
   margin: auto;
 
-  @include mq(xs) {
-    padding: 0 $s $s*9;
-  }
 
   @include mq(xs) {
     padding: 0 $s $s*9;
@@ -47,6 +45,7 @@ body {
 
   @include mq(sm) {
     padding: 0 3*$s $s*9;
+    max-width: $component-max-width;
   }
 
   improvement-banner + & {

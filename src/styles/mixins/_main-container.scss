@@ -1,0 +1,42 @@
+@mixin smallMainContainer($is-global: false) {
+  $sel: #{&};
+  @if ($is-global) {
+    .isSmallMainContainer & {
+      @content;
+    }
+  } @else if ($sel and $sel ==':host') {
+    @at-root  :host-context(.isSmallMainContainer) {
+      @content;
+    }
+  } @else if ($sel and $sel !='') {
+    @at-root  :host-context(.isSmallMainContainer) & {
+      @content;
+    }
+  } @else {
+    :host-context(.isSmallMainContainer) {
+      @content;
+    }
+  }
+}
+
+@mixin verySmallMainContainer($is-global: false) {
+  $sel: #{&};
+  @if ($is-global) {
+    .isVerySmallMainContainer & {
+      @content;
+    }
+  } @else if ($sel and $sel ==':host') {
+    @at-root  :host-context(.isVerySmallMainContainer) {
+      @content;
+    }
+  } @else if ($sel and $sel !='') {
+    @at-root  :host-context(.isVerySmallMainContainer) & {
+      @content;
+    }
+  } @else {
+    :host-context(.isVerySmallMainContainer) {
+      @content;
+    }
+  }
+}
+

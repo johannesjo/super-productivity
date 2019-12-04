@@ -17,7 +17,7 @@ import {NoteService} from '../../features/note/note.service';
 import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
 import {ProjectService} from '../../features/project/project.service';
 
-const NAV_ALWAYS_VISIBLE = 1050;
+const NAV_ALWAYS_VISIBLE = 1250;
 const NAV_OVER_NOTES_NEXT = 900;
 const BOTH_OVER = 780;
 

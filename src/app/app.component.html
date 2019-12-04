@@ -20,7 +20,6 @@
 
     <div [@warpRoute]="getPage(o)"
          #routeWrapper
-         [class.isSmallMainContainer]="isSmallMainContainer$|async"
          class="route-wrapper">
       <router-outlet #o="outlet"></router-outlet>
     </div>
@@ -42,7 +41,7 @@
                 [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"
                 [opened]="taskService.selectSelectedTask$|async"
                 position="end">
-      <div style="min-width: 300px; width: 33vw; max-width:700px; min-height: 100vh">
+      <div class="additional-info-panel">
         <task-additional-info *ngIf="taskService.selectSelectedTask$|async"
                               [task]="taskService.selectSelectedTask$|async"></task-additional-info>
       </div>

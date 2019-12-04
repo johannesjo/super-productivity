@@ -16,13 +16,13 @@ import {LayoutService} from './core-ui/layout/layout.service';
 import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../electron/ipc-events.const';
 import {SnackService} from './core/snack/snack.service';
-import {IS_ELECTRON} from './app.constants';
+import {BodyClass, IS_ELECTRON} from './app.constants';
 import {SwUpdate} from '@angular/service-worker';
 import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
 import {DOCUMENT} from '@angular/common';
-import {filter, map, take} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, share, take} from 'rxjs/operators';
 import {combineLatest, Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
@@ -60,6 +60,7 @@ export class AppComponent implements AfterContentInit {
     take(1),
   );
   isSmallMainContainer$: Observable<boolean>;
+  isVerySmallMainContainer$: Observable<boolean>;
   @ViewChild('routeWrapper', {static: false, read: ElementRef}) routeWrapperElRef: ElementRef;
 
   constructor(
@@ -134,8 +135,23 @@ export class AppComponent implements AfterContentInit {
   ngAfterContentInit(): void {
     // TODO wait for is all data loaded
     setTimeout(() => {
-      this.isSmallMainContainer$ = observeWidth(this.routeWrapperElRef.nativeElement).pipe(map(v => v < 600));
+      const obs = observeWidth(this.routeWrapperElRef.nativeElement).pipe(share());
+      this.isSmallMainContainer$ = obs.pipe(map(v => v < 600), distinctUntilChanged());
+      this.isVerySmallMainContainer$ = obs.pipe(map(v => v < 450), distinctUntilChanged());
       // bla.subscribe((v) => console.log('bla', v));
+
+      this.isSmallMainContainer$.subscribe(v => {
+        v
+          ? this.document.body.classList.add(BodyClass.isSmallMainContainer)
+          : this.document.body.classList.remove(BodyClass.isSmallMainContainer);
+      });
+      this.isVerySmallMainContainer$.subscribe(v => {
+        console.log(v);
+
+        v
+          ? this.document.body.classList.add(BodyClass.isVerySmallMainContainer)
+          : this.document.body.classList.remove(BodyClass.isVerySmallMainContainer);
+      });
 
     }, 2000);
   }

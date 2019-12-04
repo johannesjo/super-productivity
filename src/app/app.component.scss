@@ -133,3 +133,19 @@ bookmark-bar {
   position: relative;
   z-index: 3;
 }
+
+
+.additional-info-panel {
+  min-width: 300px;
+  width: 40vw;
+  max-width: 700px;
+  min-height: 100vh;
+
+  .mat-drawer-over & {
+    width: 80vw;
+
+    @include mq(xs, max) {
+      width: 90vw;
+    }
+  }
+}
