@@ -21,7 +21,6 @@
   th {
     vertical-align: top;
     padding-bottom: $s;
-    padding-left: $s;
     display: block;
 
     &:first-child {
@@ -31,6 +30,7 @@
 
   th {
     min-width: 80px;
+    padding-left: 12px;
     text-align: left;
     font-style: italic;
   }
@@ -41,7 +41,7 @@
     word-wrap: break-word;
     word-break: break-word;
     hyphens: auto;
-    padding-left: 12px;
+    padding-left: 0;
 
     ::ng-deep img,
     img {
