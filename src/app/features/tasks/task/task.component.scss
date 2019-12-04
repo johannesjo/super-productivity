@@ -273,6 +273,27 @@
 }
 
 
+@mixin timeWrapperMinimalStyles() {
+  &:after {
+    content: '';
+    border-top: 1px solid;
+    opacity: 0.1;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+  }
+
+  .time {
+    font-size: 13px !important;
+    flex-direction: column !important;
+  }
+
+  .separator {
+    display: none !important;
+  }
+}
+
 // TIME
 .time-wrapper {
   position: relative;
@@ -282,12 +303,6 @@
   justify-content: stretch;
   margin-right: $s;
   z-index: $z-time-wrapper;
-
-  @include noTouchDevice {
-    &.hasNoTimeSpentOrEstimate {
-      display: none;
-    }
-  }
 
   &.isEditable {
     cursor: pointer;
@@ -300,31 +315,9 @@
     }
   }
 
-
-  :host-context(.isSmallMainContainer) & {
-    &:after {
-      content: '';
-      border-top: 1px solid;
-      opacity: 0.1;
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-    }
-  }
-
-  @include mq(xs, max) {
-    @include isDoneForFirstLine {
-      opacity: $task-is-done-dim-opacity +0.1;
-    }
-    &:after {
-      content: '';
-      border-top: 1px solid;
-      opacity: 0.1;
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
+  @include noTouchDevice {
+    &.hasNoTimeSpentOrEstimate {
+      display: none;
     }
   }
 
@@ -341,31 +334,28 @@
       opacity: 0.5;
       flex-direction: row;
     }
+  }
 
-    @include mq(xs, max) {
-      font-size: 13px;
-    }
+  .time-val,
+  .separator {
+    display: block;
+    white-space: nowrap;
+  }
 
-    :host-context(.isSmallMainContainer) & {
-      font-size: 13px;
-      flex-direction: column;
-    }
+  .separator {
+    padding: 0 $s/2;
+  }
 
+  :host-context(.isSmallMainContainer) & {
+    @include timeWrapperMinimalStyles;
+  }
 
-    .time-val,
-    .separator {
-      display: block;
-      white-space: nowrap;
-    }
+  @include mq(component, max) {
+    @at-root  .time-wrapper {
+      @include timeWrapperMinimalStyles;
 
-    .separator {
-      padding: 0 $s/2;
-      @include mq(xs, max) {
-        display: none;
-      }
-
-      :host-context(.isSmallMainContainer) & {
-        display: none;
+      @include isDoneForFirstLine {
+        opacity: $task-is-done-dim-opacity +0.1;
       }
     }
   }
