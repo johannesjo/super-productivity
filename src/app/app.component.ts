@@ -134,7 +134,7 @@ export class AppComponent implements AfterContentInit {
   ngAfterContentInit(): void {
     // TODO wait for is all data loaded
     setTimeout(() => {
-      this.isSmallMainContainer$ = observeWidth(this.routeWrapperElRef.nativeElement).pipe(map(v => v < 550));
+      this.isSmallMainContainer$ = observeWidth(this.routeWrapperElRef.nativeElement).pipe(map(v => v < 600));
       // bla.subscribe((v) => console.log('bla', v));
 
     }, 2000);
