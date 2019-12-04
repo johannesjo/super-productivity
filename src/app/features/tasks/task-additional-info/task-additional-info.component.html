@@ -20,114 +20,40 @@
   </header>
 
 
-<!--  <mat-expansion-panel *ngIf="task.subTasks?.length">-->
-<!--    <mat-expansion-panel-header>-->
-<!--      <mat-panel-title>-->
-<!--        <mat-icon class="panel-header-icon">list</mat-icon>-->
-<!--        <span>Sub Tasks ({{task.subTasks?.length}})</span>-->
-<!--      </mat-panel-title>-->
-<!--    </mat-expansion-panel-header>-->
-<!--    <div class="panel-content-wrapper sub-tasks">-->
-<!--      <div *ngIf="task.subTasks && task.subTasks.length"-->
-<!--           class="sub-tasks">-->
-<!--        &lt;!&ndash;      <button (click)="toggleSubTaskMode()"&ndash;&gt;-->
-<!--        &lt;!&ndash;              *ngIf="task.subTasks && task.subTasks.length"&ndash;&gt;-->
-<!--        &lt;!&ndash;              class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"&ndash;&gt;-->
-<!--        &lt;!&ndash;              color=""&ndash;&gt;-->
-<!--        &lt;!&ndash;              mat-mini-fab&ndash;&gt;-->
-<!--        &lt;!&ndash;              tabindex="2"&ndash;&gt;-->
-<!--        &lt;!&ndash;              [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">&ndash;&gt;-->
-<!--        &lt;!&ndash;        <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)">add&ndash;&gt;-->
-<!--        &lt;!&ndash;        </mat-icon>&ndash;&gt;-->
-<!--        &lt;!&ndash;        <mat-icon *ngIf="(task._showSubTasksMode!==ShowSubTasksMode.HideAll)"&ndash;&gt;-->
-<!--        &lt;!&ndash;                  [class.isHideDoneTasks]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)">remove&ndash;&gt;-->
-<!--        &lt;!&ndash;        </mat-icon>&ndash;&gt;-->
-<!--        &lt;!&ndash;      </button>&ndash;&gt;-->
-<!--        <task-list *ngIf="task.subTasks?.length"-->
-<!--                   [@expand]-->
-<!--                   [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"-->
-<!--                   [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"-->
-<!--                   [listModelId]="task.id"-->
-<!--                   [parentId]="task.id"-->
-<!--                   [tasks]="task.subTasks"-->
-<!--                   listId="SUB"></task-list>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </mat-expansion-panel>-->
-
-
-  <mat-expansion-panel *ngIf="task.issueData"
-                       [expanded]="true">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <issue-header [task]="task"></issue-header>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-
-    <issue-content [task]="task"
-                   class="panel-content-wrapper issue-content-wrapper"></issue-content>
-  </mat-expansion-panel>
-
-
-  <mat-expansion-panel [expanded]="!(task.issueId) ||task.notes">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon *ngIf="task.notes"
-                  class="panel-header-icon">chat
-        </mat-icon>
-        <mat-icon *ngIf="!task.notes"
-                  class="panel-header-icon">chat_bubble_outline
-        </mat-icon>
-        <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <div class="panel-content-wrapper note-wrapper">
-      <inline-markdown (changed)="changeTaskNotes($event)"
-                       [model]="task.notes"
-                       [isShowControls]="true"></inline-markdown>
-    </div>
-  </mat-expansion-panel>
-
-
-  <mat-expansion-panel
-    *ngIf="issueAttachments?.length || (localAttachments$|async)?.length">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon class="panel-header-icon">attachment</mat-icon>
-        <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-
-    <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
-      <ng-container *ngIf="task.issueType">
-        <h3 class="mat-h3"
-            style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: task.issueType} }}</h3>
-        <attachment-list [attachments]="issueAttachments"
-                         [isDisableControls]="true"></attachment-list>
-      </ng-container>
-      <h3 class="mat-h3"
-          style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
-      <attachment-list [attachments]="localAttachments$|async"></attachment-list>
-    </div>
-  </mat-expansion-panel>
-
-  <section class="input-item"
-           *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
-           (click)="addAttachment()">
-    <div class="input-item__title">
-      <mat-icon class="panel-header-icon">attachment</mat-icon>
-      <span>Add attachment</span>
-    </div>
-    <div class="input-item__value">
-    </div>
-    <button mat-icon-button
-            color="accent"
-            class="input-item__edit-btn">
-      <mat-icon>add</mat-icon>
-    </button>
-  </section>
-
-
+  <!--  <mat-expansion-panel *ngIf="task.subTasks?.length">-->
+  <!--    <mat-expansion-panel-header>-->
+  <!--      <mat-panel-title>-->
+  <!--        <mat-icon class="panel-header-icon">list</mat-icon>-->
+  <!--        <span>Sub Tasks ({{task.subTasks?.length}})</span>-->
+  <!--      </mat-panel-title>-->
+  <!--    </mat-expansion-panel-header>-->
+  <!--    <div class="panel-content-wrapper sub-tasks">-->
+  <!--      <div *ngIf="task.subTasks && task.subTasks.length"-->
+  <!--           class="sub-tasks">-->
+  <!--        &lt;!&ndash;      <button (click)="toggleSubTaskMode()"&ndash;&gt;-->
+  <!--        &lt;!&ndash;              *ngIf="task.subTasks && task.subTasks.length"&ndash;&gt;-->
+  <!--        &lt;!&ndash;              class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"&ndash;&gt;-->
+  <!--        &lt;!&ndash;              color=""&ndash;&gt;-->
+  <!--        &lt;!&ndash;              mat-mini-fab&ndash;&gt;-->
+  <!--        &lt;!&ndash;              tabindex="2"&ndash;&gt;-->
+  <!--        &lt;!&ndash;              [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate">&ndash;&gt;-->
+  <!--        &lt;!&ndash;        <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)">add&ndash;&gt;-->
+  <!--        &lt;!&ndash;        </mat-icon>&ndash;&gt;-->
+  <!--        &lt;!&ndash;        <mat-icon *ngIf="(task._showSubTasksMode!==ShowSubTasksMode.HideAll)"&ndash;&gt;-->
+  <!--        &lt;!&ndash;                  [class.isHideDoneTasks]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)">remove&ndash;&gt;-->
+  <!--        &lt;!&ndash;        </mat-icon>&ndash;&gt;-->
+  <!--        &lt;!&ndash;      </button>&ndash;&gt;-->
+  <!--        <task-list *ngIf="task.subTasks?.length"-->
+  <!--                   [@expand]-->
+  <!--                   [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"-->
+  <!--                   [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"-->
+  <!--                   [listModelId]="task.id"-->
+  <!--                   [parentId]="task.id"-->
+  <!--                   [tasks]="task.subTasks"-->
+  <!--                   listId="SUB"></task-list>-->
+  <!--      </div>-->
+  <!--    </div>-->
+  <!--  </mat-expansion-panel>-->
 
   <section class="input-item"
            *ngIf="!task.subTasks?.length"
@@ -174,6 +100,78 @@
             class="input-item__edit-btn">
       <mat-icon *ngIf="!task.reminderId">add</mat-icon>
       <mat-icon *ngIf="task.reminderId">edit</mat-icon>
+    </button>
+  </section>
+
+  <mat-expansion-panel *ngIf="task.issueData"
+                       [expanded]="true">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <issue-header [task]="task"></issue-header>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <issue-content [task]="task"
+                   class="panel-content-wrapper issue-content-wrapper"></issue-content>
+  </mat-expansion-panel>
+
+
+  <mat-expansion-panel [expanded]="!(task.issueId) ||task.notes">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon *ngIf="task.notes"
+                  class="panel-header-icon">chat
+        </mat-icon>
+        <mat-icon *ngIf="!task.notes"
+                  class="panel-header-icon">chat_bubble_outline
+        </mat-icon>
+        <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="panel-content-wrapper note-wrapper">
+      <inline-markdown (changed)="changeTaskNotes($event)"
+                       [model]="task.notes"
+                       [isShowControls]="true"></inline-markdown>
+    </div>
+  </mat-expansion-panel>
+
+
+  <mat-expansion-panel
+    [expanded]="true"
+    *ngIf="issueAttachments?.length || (localAttachments$|async)?.length">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon class="panel-header-icon">attachment</mat-icon>
+        <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
+      <ng-container *ngIf="task.issueType">
+        <h3 class="mat-h3"
+            style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: task.issueType} }}</h3>
+        <attachment-list [attachments]="issueAttachments"
+                         [isDisableControls]="true"></attachment-list>
+      </ng-container>
+      <h3 class="mat-h3"
+          style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
+      <attachment-list [attachments]="localAttachments$|async"></attachment-list>
+    </div>
+  </mat-expansion-panel>
+
+  <section class="input-item"
+           *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
+           (click)="addAttachment()">
+    <div class="input-item__title">
+      <mat-icon class="panel-header-icon">attachment</mat-icon>
+      <span>Add attachment</span>
+    </div>
+    <div class="input-item__value">
+    </div>
+    <button mat-icon-button
+            color="accent"
+            class="input-item__edit-btn">
+      <mat-icon>add</mat-icon>
     </button>
   </section>
 
