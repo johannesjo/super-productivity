@@ -1,26 +1,20 @@
 @mixin mq($size, $type: min) {
-  @if $size == 'xxs' {
-    @media screen and ($type + -width: $layout-xxs) {
-      @content;
-    }
-  } @else if $size == 'xs' {
-    @media screen and ($type + -width: $layout-xs) {
-      @content;
-    }
-  } @else if $size == 'sm' {
-    @media screen and ($type + -width: $layout-sm) {
-      @content;
-    }
-  } @else if $size == 'md' {
-    @media screen and ($type + -width: $layout-md) {
-      @content;
-    }
-  } @else if $size == 'lg' {
-    @media screen and ($type + -width: $layout-lg) {
-      @content;
-    }
-  } @else if $size == 'component' {
-    @media screen and ($type + -width: $component-max-width) {
+  $f: 0;
+  @if ($type == max) {
+    $f: -1;
+  }
+
+  $width: map-get((
+    'xxs' : $layout-xxs,
+    'xs' : $layout-xs,
+    'sm' : $layout-sm,
+    'md' : $layout-md,
+    'lg' : $layout-lg,
+    'component' : $component-max-width,
+  ), $size);
+
+  @if ($width) {
+    @media screen and ($type + -width: $width  + $f) {
       @content;
     }
   } @else {
