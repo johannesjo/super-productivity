@@ -189,6 +189,12 @@
   margin-left: $s;
   margin-right: $s;
   align-items: stretch;
+
+  @include verySmallMainContainer {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    justify-content: center;
+  }
 }
 
 .controls {
@@ -214,6 +220,9 @@
     margin-left: 5px;
   }
 
+  @include verySmallMainContainer {
+    min-height: 40px;
+  }
 }
 
 
@@ -286,14 +295,15 @@
   }
 
   .time {
-    font-size: 13px !important;
-    flex-direction: column !important;
+    font-size: 13px;
+    flex-direction: column;
   }
 
   .separator {
-    display: none !important;
+    display: none;
   }
 }
+
 
 // TIME
 .time-wrapper {
@@ -358,6 +368,19 @@
       @include isDoneForFirstLine {
         opacity: $task-is-done-dim-opacity +0.1;
       }
+    }
+  }
+
+  @include verySmallMainContainer {
+    flex-direction: row;
+    &:after {
+      display: none;
+    }
+    .time {
+      flex-direction: row;
+    }
+    .separator {
+      display: block;
     }
   }
 }
