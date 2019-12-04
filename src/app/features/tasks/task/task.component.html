@@ -67,6 +67,16 @@
         <mat-icon class="update update-icon">update</mat-icon>
       </button>
 
+<!--      <button (click)="handleUpdateBtnClick()"-->
+<!--              *ngIf="task.issueData"-->
+<!--              class="ico-btn"-->
+<!--              color="accent"-->
+<!--              mat-icon-button-->
+<!--              tabindex="2"-->
+<!--              [title]="T.F.TASK.CMP.SHOW_UPDATES|translate">-->
+<!--        <mat-icon class="update update-icon">update</mat-icon>-->
+<!--      </button>-->
+
       <a *ngIf="task.issueData?.url"
          [href]="task.issueData?.url"
          class="ico-btn"
@@ -153,15 +163,15 @@
             <mat-icon *ngIf="task.isDone">undo</mat-icon>
             <mat-icon *ngIf="!task.isDone">check</mat-icon>
           </button>
-          <button (click)="estimateTime()"
-                  *ngIf="!task.subTasks?.length"
-                  class="ico-btn time-btn"
-                  color=""
-                  mat-icon-button
-                  tabindex="2"
-                  [title]="T.F.TASK.CMP.OPEN_TIME|translate">
-            <mat-icon>timer</mat-icon>
-          </button>
+<!--          <button (click)="estimateTime()"-->
+<!--                  *ngIf="!task.subTasks?.length"-->
+<!--                  class="ico-btn time-btn"-->
+<!--                  color=""-->
+<!--                  mat-icon-button-->
+<!--                  tabindex="2"-->
+<!--                  [title]="T.F.TASK.CMP.OPEN_TIME|translate">-->
+<!--            <mat-icon>timer</mat-icon>-->
+<!--          </button>-->
           <button (click)="toggleShowAdditionalInfoOpen()"
                   *ngIf="!task.notes&&!task.issueData"
                   [class.isActive]="task._isAdditionalInfoOpen"
@@ -209,7 +219,7 @@
                 [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
                 (menuOpened)="isContextMenuDisabled = true"
                 (menuClosed)="isContextMenuDisabled = false"
-                class="ico-btn menu-trigger"
+                class="ico-btn menu-trigger show-touch-only"
                 color=""
                 mat-icon-button
                 [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate">
