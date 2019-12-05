@@ -79,8 +79,9 @@
     }
   }
 
-  &.isSelected.isSelected.isSelected {
+  &.isSelected.isSelected {
     border-top-width: 1px;
+    transition-property: all;
 
     @include lightTheme() {
       background: $light-theme-bg-darker;
@@ -98,7 +99,7 @@
     }
   }
 
-  :host.isCurrent & {
+  :host.isCurrent.isCurrent.isCurrent & {
     border-color: $task-c-current !important;
     border: 2px solid $task-c-current !important;
     border-bottom-color: $task-c-current !important;
