@@ -87,7 +87,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     const errStr = (typeof err === 'string') ? err : err.toString();
     // tslint:disable-next-line
     const simpleStack = err && err.stack;
-    console.log(isHandledError(err), err[HANDLED_ERROR_PROP_STR], errStr);
+    console.error('GLOBAL_ERROR_HANDLER', err);
 
     // if not our custom error handler we have a critical error on our hands
     if (!isHandledError(err)) {
@@ -99,19 +99,20 @@ export class GlobalErrorHandler implements ErrorHandler {
       } else {
         _createErrorAlert(this._electronService, errorStr, simpleStack, err);
       }
+      console.log(getSimpleMeta());
     }
 
-    console.error('GLOBAL_ERROR_HANDLER', err);
-    console.log(getSimpleMeta());
     if (IS_ELECTRON) {
       this._electronLogger.error('Frontend Error:', err, simpleStack);
       getStacktrace(err).then(stack => {
         this._electronLogger.error('Frontend Error Stack:', err, stack);
-      });
+      })
+        // NOTE: there is an issue with this sometimes
+        .catch(console.error);
     }
 
     // NOTE: rethrow the error otherwise it gets swallowed
-    throw err;
+    throw new Error(err);
   }
 
   private _getErrorStr(err: any): string {
