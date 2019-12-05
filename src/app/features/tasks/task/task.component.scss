@@ -18,11 +18,15 @@
   color: $light-theme-text-color;
 
   &.isSelected {
-    z-index: $z-is-selected-host;
+    //z-index: $z-is-selected-host;
+    //position: sticky;
+    //top: 16px;
   }
 
   &.isCurrent {
     z-index: $z-is-current-host;
+    position: sticky;
+    top: $s;
   }
 
   &:focus {
