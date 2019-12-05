@@ -1,27 +1,12 @@
 @import '../_variables.scss';
 
+mat-drawer-container {
+  background: transparent !important;
+}
+
 mat-drawer-container,
 mat-sidenav-container {
   height: 100%;
-  background-attachment: fixed;
-
-  @include lightTheme {
-    background: $light-theme-bg;
-    //background: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
-    //background: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1));
-    //background: linear-gradient(180deg, $c-primary-400 0, $c-primary-100 30%, $c-primary-300 90%, $c-primary-400 100%);
-    background: linear-gradient(180deg, $c-primary-100 0, $c-primary-50 90%, $light-theme-bg 100%);
-    background: linear-gradient(180deg, $c-primary-200 0, $c-primary-100 90%, $c-primary-50 100%);
-    background: linear-gradient(180deg, $c-primary-50 0, $c-primary-100 85%, $c-primary-200 100%);
-    //background: linear-gradient(180deg,  $c-primary-50 0, $c-primary-100 50%, $c-primary-200 100%);
-    //background: $c-primary-50;
-
-  }
-  @include darkTheme {
-    //background: radial-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
-    background: linear-gradient(180deg, $dark-theme-bg 0, $c-primary-900 20%, $c-primary-800 50%, $c-primary-700 100%);
-    //background: $c-primary-900;
-  }
 }
 
 .header-wrapper {
@@ -80,17 +65,6 @@ mat-drawer {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-// makes background a bit darker
-::ng-deep .mat-drawer-content {
-  @include lightTheme {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0, rgba(0, 0, 0, 0) 50%, rgba(255, 255, 255, 0.15) 100%);
-  }
-
-  @include darkTheme {
-    background: rgba(0, 0, 0, 0.15);
-  }
 }
 
 .route-wrapper {
