@@ -103,10 +103,13 @@
     }
   }
 
-  :host.isCurrent.isCurrent.isCurrent & {
-    border-color: $task-c-current !important;
-    border: 2px solid $task-c-current !important;
-    border-bottom-color: $task-c-current !important;
+  :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
+    border-color: $task-c-current;
+    border: 2px solid $task-c-current;
+    border-bottom-color: $task-c-current;
+    border-top-color: $task-c-current;
+    border-left-color: $task-c-current;
+    border-right-color: $task-c-current;
   }
 
   @include isCurrent {
