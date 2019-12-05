@@ -174,7 +174,7 @@
           <!--            <mat-icon>timer</mat-icon>-->
           <!--          </button>-->
           <button (click)="toggleShowAdditionalInfoOpen()"
-                  *ngIf="!task.notes&&!task.issueData"
+                  *ngIf="!task.notes&&!task.issueData&&!isSelected"
                   [class.isActive]="task._isAdditionalInfoOpen"
                   class="ico-btn show-additional-info-btn"
                   color=""
@@ -195,14 +195,15 @@
           <mat-icon>alarm</mat-icon>
         </button>
         <button (click)="toggleShowAdditionalInfoOpen()"
-                *ngIf="task.notes||task.issueData"
+                *ngIf="task.notes||task.issueData||isSelected"
                 [class.isActive]="task._isAdditionalInfoOpen"
                 class="ico-btn show-additional-info-btn"
                 color=""
                 mat-icon-button
                 tabindex="2"
                 [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate">
-          <mat-icon>chat</mat-icon>
+          <mat-icon *ngIf="!isSelected">chat</mat-icon>
+          <mat-icon *ngIf="isSelected">close</mat-icon>
         </button>
 
         <button (click)="toggleShowAttachments()"

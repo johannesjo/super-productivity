@@ -328,14 +328,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleShowAttachments() {
-    const attachmentTabIndex = this.task.issueData ? 2 : 1;
-    (this.task._isAdditionalInfoOpen && this.task._currentTab === attachmentTabIndex)
-      ? this._taskService.hideAdditionalInfoOpen(this.task.id)
-      : this._taskService.updateUi(this.task.id, {
-        _isAdditionalInfoOpen: true,
-        _currentTab: attachmentTabIndex,
-      });
-    this.focusSelf();
+    // const attachmentTabIndex = this.task.issueData ? 2 : 1;
+    // (this.task._isAdditionalInfoOpen && this.task._currentTab === attachmentTabIndex)
+    //   ? this._taskService.hideAdditionalInfoOpen(this.task.id)
+    //   : this._taskService.updateUi(this.task.id, {
+    //     _isAdditionalInfoOpen: true,
+    //     _currentTab: attachmentTabIndex,
+    //   });
+    // this.focusSelf();
+    this._taskService.setSelectedId(this.task.id);
   }
 
   toggleSubTaskMode() {
