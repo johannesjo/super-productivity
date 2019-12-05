@@ -313,6 +313,10 @@
 // TASK TITLE
 .task-title {
   @include taskTitle;
+
+  :host.isSelected & {
+    font-weight: bold;
+  }
 }
 
 
