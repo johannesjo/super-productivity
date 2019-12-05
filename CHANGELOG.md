@@ -1,3 +1,12 @@
+## [2.13.15](https://github.com/johannesjo/super-productivity/compare/v2.13.14...v2.13.15) (2019-12-05)
+
+
+### Bug Fixes
+
+* error handling possibly crashing app ([7225832](https://github.com/johannesjo/super-productivity/commit/72258323997b2d2f47314b4fade1f052c2635797))
+
+
+
 ## [2.13.14](https://github.com/johannesjo/super-productivity/compare/v2.13.13...v2.13.14) (2019-12-03)
 
 
