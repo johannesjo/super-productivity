@@ -136,7 +136,7 @@ export function taskReducer(
     }
 
     case TaskActionTypes.SetSelectedTask: {
-      return {...state, selectedTaskId: action.payload};
+      return {...state, selectedTaskId: (action.payload === state.selectedTaskId) ? null : action.payload};
     }
 
     // Task Actions
