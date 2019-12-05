@@ -36,16 +36,24 @@ $weird-task-list-f: 5px;
   padding: 7px 0;
   overflow: hidden;
   transition: $transition-fast;
+  background: transparent;
 
 
   @include lightTheme() {
-    background-color: rgba(var(--palette-background-unselected-chip), 1);
+    border: 1px solid #333;
+    //background-color: rgba(var(--palette-background-unselected-chip), 1);
     color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
+    // this would be the bookmark button border
+    //border-color: rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.33);
   }
 
   @include darkTheme() {
+    border: 1px solid;
     color: #fff;
-    background: $dark-theme-bg-super-light;
+    // this would be the bookmark button border
+    //border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.33);
   }
 
   &:active {
