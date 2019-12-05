@@ -1,6 +1,5 @@
 export const arrayMove = (arrIN, from, to, on = 1) => {
-
-  const arr = arrIN.splice(0);
+  const arr = arrIN.slice(0);
   arr.splice(to, 0, ...arr.splice(from, on));
   return arr;
 };
