@@ -14,12 +14,17 @@ mat-sidenav-container {
   z-index: 10;
   display: block;
   transition: $transition-enter;
-  border-bottom: 1px solid rgba(0, 0, 0, .22);
+  border-bottom: 1px solid transparent;
+
   @include lightTheme() {
-    border-bottom: 1px solid rgba(0, 0, 0, .22);
+    border-color: rgba(0, 0, 0, .15);
   }
   @include darkTheme() {
-    border-bottom: 1px solid rgba(255, 255, 255, .15);
+    border-color: rgba(255, 255, 255, .15);
+  }
+
+  &.isNotScrolled {
+    border-color: transparent !important;
   }
 }
 
