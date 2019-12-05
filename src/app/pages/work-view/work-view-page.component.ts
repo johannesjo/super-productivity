@@ -1,8 +1,9 @@
 import {
+  AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
+  ElementRef, Inject,
   OnDestroy,
   OnInit,
   ViewChild
@@ -15,13 +16,16 @@ import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-
 import {ActivatedRoute} from '@angular/router';
 import {from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
-import {delay, filter, map, switchMap} from 'rxjs/operators';
+import {delay, distinctUntilChanged, filter, map, share, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
 import {T} from '../../t.const';
 import {ImprovementService} from '../../features/metric/improvement/improvement.service';
 import {ProjectService} from '../../features/project/project.service';
 import {workViewProjectChangeAnimation} from '../../ui/animations/work-view-project-change.ani';
+import {observeWidth} from '../../util/resize-observer-obs';
+import {BodyClass} from '../../app.constants';
+import {DOCUMENT} from '@angular/common';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -33,7 +37,7 @@ const PARENT = 'PARENT';
   animations: [expandFadeAnimation, expandAnimation, fadeAnimation, workViewProjectChangeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
+export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit, AfterContentInit {
   isShowTimeWorkedWithoutBreak = true;
   splitInputPos = 100;
   isPreloadBacklog = false;
@@ -42,20 +46,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.undoneTasks$;
   doneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.doneTasks$;
 
-  // undoneTasks$: Observable<TaskWithSubTasks[]> = this.projectService.isProjectChanging$.pipe(
-  //   // delay(TASK_LIST_INITIAL_DELAY),
-  //   switchMap((isChanging) => isChanging
-  //     ? of([])
-  //     : this.taskService.undoneTasks$),
-  //   startWith([])
-  // );
-  // doneTasks$: Observable<TaskWithSubTasks[]> = this.projectService.isProjectChanging$.pipe(
-  //   // delay(TASK_LIST_INITIAL_DELAY),
-  //   switchMap((isChanging) => isChanging
-  //     ? of([])
-  //     : this.taskService.doneTasks$),
-  //   startWith([])
-  // );
+  isSmallMainContainer$: Observable<boolean>;
+  isVerySmallMainContainer$: Observable<boolean>;
 
 
   // NOTE: not perfect but good enough for now
@@ -75,12 +67,16 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  @ViewChild('containerEl', {static: false, read: ElementRef}) containerElRef: ElementRef;
+
+
   public splitTopEl$ = new ReplaySubject<HTMLElement>(1);
 
   private _subs = new Subscription();
   private _switchListAnimationTimeout: number;
 
   constructor(
+    @Inject(DOCUMENT) private document: Document,
     public taskService: TaskService,
     public projectService: ProjectService,
     public takeABreakService: TakeABreakService,
@@ -139,6 +135,29 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  ngAfterContentInit(): void {
+    // TODO wait for is all data loaded
+    setTimeout(() => {
+      const obs = observeWidth(this.containerElRef.nativeElement).pipe(share());
+      this.isSmallMainContainer$ = obs.pipe(map(v => v < 600), distinctUntilChanged());
+      this.isVerySmallMainContainer$ = obs.pipe(map(v => v < 450), distinctUntilChanged());
+      // bla.subscribe((v) => console.log('bla', v));
+
+      this.isSmallMainContainer$.subscribe(v => {
+        v
+          ? this.document.body.classList.add(BodyClass.isSmallMainContainer)
+          : this.document.body.classList.remove(BodyClass.isSmallMainContainer);
+      });
+      this.isVerySmallMainContainer$.subscribe(v => {
+        console.log(v);
+
+        v
+          ? this.document.body.classList.add(BodyClass.isVerySmallMainContainer)
+          : this.document.body.classList.remove(BodyClass.isVerySmallMainContainer);
+      });
+
+    }, 2000);
+  }
 
   ngOnDestroy() {
     if (this._switchListAnimationTimeout) {

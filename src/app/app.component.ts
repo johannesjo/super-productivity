@@ -50,7 +50,7 @@ import {observeWidth} from './util/resize-observer-obs';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements AfterContentInit {
+export class AppComponent  {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
     this._store.select(selectIsTaskDataLoaded),
@@ -59,12 +59,9 @@ export class AppComponent implements AfterContentInit {
     filter(isLoaded => isLoaded),
     take(1),
   );
-  isSmallMainContainer$: Observable<boolean>;
-  isVerySmallMainContainer$: Observable<boolean>;
-  @ViewChild('routeWrapper', {static: false, read: ElementRef}) routeWrapperElRef: ElementRef;
+
 
   constructor(
-    @Inject(DOCUMENT) private document: Document,
     private _configService: GlobalConfigService,
     private _shortcutService: ShortcutService,
     private _bannerService: BannerService,
@@ -130,30 +127,6 @@ export class AppComponent implements AfterContentInit {
         }
       });
     }
-  }
-
-  ngAfterContentInit(): void {
-    // TODO wait for is all data loaded
-    setTimeout(() => {
-      const obs = observeWidth(this.routeWrapperElRef.nativeElement).pipe(share());
-      this.isSmallMainContainer$ = obs.pipe(map(v => v < 600), distinctUntilChanged());
-      this.isVerySmallMainContainer$ = obs.pipe(map(v => v < 450), distinctUntilChanged());
-      // bla.subscribe((v) => console.log('bla', v));
-
-      this.isSmallMainContainer$.subscribe(v => {
-        v
-          ? this.document.body.classList.add(BodyClass.isSmallMainContainer)
-          : this.document.body.classList.remove(BodyClass.isSmallMainContainer);
-      });
-      this.isVerySmallMainContainer$.subscribe(v => {
-        console.log(v);
-
-        v
-          ? this.document.body.classList.add(BodyClass.isVerySmallMainContainer)
-          : this.document.body.classList.remove(BodyClass.isVerySmallMainContainer);
-      });
-
-    }, 2000);
   }
 
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
