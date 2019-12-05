@@ -19,19 +19,20 @@ $z-check-done: 11;
 $z-first-line-controls-hover: 12;
 $z-swipe-block: 13;
 
-$z-is-current-host: 20;
-$z-focus-host: 20;
+$z-is-selected-host: 20;
+$z-is-current-host: 21;
+$z-focus-host: 21;
 
-$z-toggle-sub-task-btn: 21;
-$z-drag-over-msg: 22;
-$z-task-title-focus: 23;
+$z-toggle-sub-task-btn: 22;
+$z-drag-over-msg: 23;
+$z-task-title-focus: 24;
 
 $z-time-btn-svg-wrapper: 5555;
 
 // colors
 $task-c-current: $c-accent;
-$task-c-selected: $c-primary;
-$task-c-focus: $c-primary-200;
+$task-c-selected: $c-primary-700;
+$task-c-focus: $c-primary-400;
 
 @mixin isCurrent {
   :host.isCurrent & {

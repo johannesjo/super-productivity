@@ -17,7 +17,10 @@
 
   color: $light-theme-text-color;
 
-  &.isSelected,
+  &.isSelected {
+    z-index: $z-is-selected-host;
+  }
+
   &.isCurrent {
     z-index: $z-is-current-host;
   }
@@ -76,12 +79,12 @@
     }
   }
 
-  &.isSelected {
-    border-top-width: 1px !important;
+  &.isSelected.isSelected.isSelected {
+    border-top-width: 1px;
 
     @include lightTheme() {
       background: $light-theme-bg-darker;
-      border-color: $light-theme-extra-border-color !important;
+      border-color: $light-theme-extra-border-color;
     }
     @include darkTheme() {
       background: #222222;
@@ -91,14 +94,14 @@
 
     @include mq(xs) {
       transform-origin: left;
-      right: -24px;
+      right: -34px;
     }
   }
 
   :host.isCurrent & {
     border-color: $task-c-current !important;
-    border: 2px solid $task-c-current;
-    border-bottom-color: $task-c-current;
+    border: 2px solid $task-c-current !important;
+    border-bottom-color: $task-c-current !important;
   }
 
   @include isCurrent {
