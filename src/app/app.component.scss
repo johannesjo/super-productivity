@@ -14,25 +14,17 @@ mat-sidenav-container {
   z-index: 10;
   display: block;
   transition: $transition-enter;
-
-  //@include lightTheme() {
-  //  background: rgba(255, 255, 255, 0.6);
-  //  box-shadow: $whiteframe-shadow-1dp;
-  //}
-  //@include darkTheme() {
-  //  background: rgba(0, 0, 0, 0.05);
-  //  box-shadow: $whiteframe-shadow-2dp;
-  //}
-
-  &.isNotScrolled {
-    transition: $transition-sharp;
-    background: none !important;
-    box-shadow: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, .22);
+  @include lightTheme() {
+    border-bottom: 1px solid rgba(0, 0, 0, .22);
+  }
+  @include darkTheme() {
+    border-bottom: 1px solid rgba(255, 255, 255, .15);
   }
 }
 
 // sidebars
- mat-drawer ::ng-deep .mat-drawer-inner-container {
+mat-drawer ::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
 
   @include lightTheme() {
