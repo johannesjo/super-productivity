@@ -116,7 +116,7 @@
   </mat-expansion-panel>
 
 
-  <mat-expansion-panel [expanded]="!(task.issueId) ||task.notes">
+  <mat-expansion-panel [expanded]="task.notes || (!(task.issueId) && !task.attachmentIds?.length)">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <mat-icon *ngIf="task.notes"
