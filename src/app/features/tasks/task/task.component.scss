@@ -17,6 +17,7 @@
 
   color: $light-theme-text-color;
 
+  &.isSelected,
   &.isCurrent {
     z-index: $z-is-current-host;
   }
@@ -69,16 +70,39 @@
 
     @include mq(xs) {
       // NOTE: somehow ng build messes up, if we don't include it like that
-      border-color: $c-primary;
+      border-color: $task-c-focus;
       border-width: 1px;
+      border-style: dashed !important;
     }
+  }
+
+  &.isSelected {
+    border-top-width: 1px !important;
+
+    @include lightTheme() {
+      background: $light-theme-bg-darker;
+      border-color: $light-theme-extra-border-color !important;
+    }
+    @include darkTheme() {
+      background: #222222;
+      border-color: #222222 !important;
+    }
+
+
+    @include mq(xs) {
+      transform-origin: left;
+      right: -24px;
+    }
+  }
+
+  :host.isCurrent & {
+    border-color: $task-c-current !important;
+    border: 2px solid $task-c-current;
+    border-bottom-color: $task-c-current;
   }
 
   @include isCurrent {
     box-shadow: $task-active-shadow;
-    border: 2px solid $c-accent !important;
-    border-color: $c-accent !important;
-    border-bottom-color: $c-accent !important;
     border-radius: 12px !important;
     bottom: -2px;
     top: -2px;
@@ -86,6 +110,7 @@
       transform: scale($task-current-task-zoom);
     }
   }
+
 
   :host:first-child > .inner-wrapper > & {
     border-top-left-radius: $card-border-radius;

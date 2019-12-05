@@ -39,11 +39,11 @@
     <!--    </mat-drawer>-->
     <mat-drawer (closedStart)="taskService.setSelectedId(null)"
                 [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"
-                [opened]="taskService.selectSelectedTask$|async"
+                [opened]="taskService.selectedTask$|async"
                 position="end">
       <div class="additional-info-panel">
-        <task-additional-info *ngIf="taskService.selectSelectedTask$|async"
-                              [task]="taskService.selectSelectedTask$|async"></task-additional-info>
+        <task-additional-info *ngIf="taskService.selectedTask$|async"
+                              [task]="taskService.selectedTask$|async"></task-additional-info>
       </div>
     </mat-drawer>
 

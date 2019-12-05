@@ -75,7 +75,7 @@ import {
   selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
   selectScheduledTasks,
-  selectSelectedTask,
+  selectSelectedTask, selectSelectedTaskId,
   selectStartableTaskIds,
   selectStartableTasks,
   selectTaskById,
@@ -119,7 +119,12 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  selectSelectedTask$: Observable<TaskWithSubTasks> = this._store.pipe(
+  selectedTaskId$: Observable<string> = this._store.pipe(
+    select(selectSelectedTaskId),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
+
+  selectedTask$: Observable<TaskWithSubTasks> = this._store.pipe(
     select(selectSelectedTask),
     // NOTE: we can't use share here, as we need the last emitted value
   );

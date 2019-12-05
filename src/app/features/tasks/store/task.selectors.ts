@@ -96,6 +96,7 @@ export const selectCurrentTaskOrParentWithData = createSelector(
     };
   });
 
+export const selectSelectedTaskId = createSelector(selectTaskFeatureState, (state) => state.selectedTaskId);
 export const selectSelectedTask = createSelector(
   selectTaskFeatureState,
   selectIssueEntityMap,

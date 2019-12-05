@@ -49,6 +49,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   T = T;
   isDragOver: boolean;
   isCurrent: boolean;
+  isSelected: boolean;
   isTouch: boolean = IS_TOUCH;
 
   isLockPanLeft = false;
@@ -70,6 +71,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('class.isCurrent')
   private get _isCurrent() {
     return this.isCurrent;
+  }
+
+  @HostBinding('class.isSelected')
+  private get _isSelected() {
+    return this.isSelected;
   }
 
   // TODO do via observable
@@ -155,7 +161,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
         this.isCurrent = (this.task && id === this.task.id);
-        this._cd.detectChanges();
+        this._cd.markForCheck();
+      });
+    this._taskService.selectedTaskId$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((id) => {
+        this.isSelected = (this.task && id === this.task.id);
+        this._cd.markForCheck();
       });
   }
 

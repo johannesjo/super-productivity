@@ -28,6 +28,10 @@ $z-task-title-focus: 23;
 
 $z-time-btn-svg-wrapper: 5555;
 
+// colors
+$task-c-current: $c-accent;
+$task-c-selected: $c-primary;
+$task-c-focus: $c-primary-200;
 
 @mixin isCurrent {
   :host.isCurrent & {
