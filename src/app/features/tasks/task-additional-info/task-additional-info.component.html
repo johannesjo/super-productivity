@@ -15,8 +15,6 @@
     <button mat-icon-button>
       <mat-icon>more_vert</mat-icon>
     </button>
-    <progress-bar [cssClass]="'bg-accent'"
-                  [progress]="progress"></progress-bar>
   </header>
 
 
@@ -55,7 +53,7 @@
   <!--    </div>-->
   <!--  </mat-expansion-panel>-->
 
-  <section class="input-item"
+  <section class="input-item --estimate"
            *ngIf="!task.subTasks?.length"
            (click)="estimateTime()">
     <div class="input-item__title">
@@ -77,6 +75,8 @@
             class="input-item__edit-btn">
       <mat-icon>edit</mat-icon>
     </button>
+    <progress-bar [cssClass]="false &&'bg-accent'"
+                  [progress]="progress"></progress-bar>
   </section>
 
   <section class="input-item"

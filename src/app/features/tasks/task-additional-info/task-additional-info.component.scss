@@ -214,6 +214,7 @@ progress-bar {
 // Input-Item
 // Similar styles to panel
 .input-item {
+  position: relative;
   display: flex;
   align-items: center;
   height: 48px;
@@ -225,6 +226,21 @@ progress-bar {
     }
     @include darkTheme() {
       background-color: $dark-theme-bg-lightest;
+    }
+  }
+
+  &.--estimate {
+    progress-bar {
+      @include lightTheme() {
+        background: $light-theme-extra-border-color;
+      }
+      @include darkTheme() {
+        background: $dark-theme-extra-border-color;
+      }
+    }
+
+    &:hover progress-bar {
+      background: $c-accent !important;
     }
   }
 }
