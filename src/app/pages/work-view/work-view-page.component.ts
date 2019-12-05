@@ -86,7 +86,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
     public takeABreakService: TakeABreakService,
     public planningModeService: PlanningModeService,
     public improvementService: ImprovementService,
-    private _layoutService: LayoutService,
+    public layoutService: LayoutService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
   ) {
@@ -133,8 +133,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
         switchMap((el) => fromEvent(el, 'scroll')),
       ).subscribe(({target}) => {
         ((target as HTMLElement).scrollTop !== 0)
-          ? this._layoutService.isScrolled$.next(true)
-          : this._layoutService.isScrolled$.next(false);
+          ? this.layoutService.isScrolled$.next(true)
+          : this.layoutService.isScrolled$.next(false);
       })
     );
   }
@@ -144,7 +144,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this._switchListAnimationTimeout) {
       window.clearTimeout(this._switchListAnimationTimeout);
     }
-    this._layoutService.isScrolled$.next(false);
+    this.layoutService.isScrolled$.next(false);
   }
 
 

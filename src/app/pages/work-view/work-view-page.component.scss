@@ -4,6 +4,53 @@
   overflow: hidden !important;
 }
 
+mat-drawer-container {
+  background: transparent !important;
+
+}
+
+mat-drawer-container,
+mat-sidenav-container {
+  height: 100%;
+}
+
+mat-drawer {
+  width: 40%;
+  min-width: 300px;
+  max-width: 700px;
+  background: transparent;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.12);
+
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
+    //background: $c-primary-100;
+  }
+
+  @include darkTheme() {
+    background: $dark-theme-sidebar-bg;
+    background: $dark-theme-bg;
+  }
+}
+
+mat-drawer ::ng-deep .mat-drawer-inner-container {
+  @include scrollYImportant();
+}
+
+.additional-info-panel {
+
+
+  .mat-drawer-over & {
+    width: 80vw;
+
+    @include mq(xs, max) {
+      width: 90vw;
+    }
+  }
+}
+
+
 add-task-bar {
   margin: 0 auto $s*2;
   max-width: 628px;

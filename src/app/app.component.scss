@@ -13,27 +13,27 @@ mat-sidenav-container {
   position: relative;
   z-index: 10;
   display: block;
-  transition: $transition-sharp;
+  transition: $transition-enter;
 
-  &.isScrolled {
-    transition: $transition-enter;
-    box-shadow: $whiteframe-shadow-1dp;
+  //@include lightTheme() {
+  //  background: rgba(255, 255, 255, 0.6);
+  //  box-shadow: $whiteframe-shadow-1dp;
+  //}
+  //@include darkTheme() {
+  //  background: rgba(0, 0, 0, 0.05);
+  //  box-shadow: $whiteframe-shadow-2dp;
+  //}
 
-    @include lightTheme() {
-      background: rgba(255, 255, 255, 0.6);
-    }
-    @include darkTheme() {
-      background: rgba(0, 0, 0, 0.05);
-      box-shadow: $whiteframe-shadow-2dp;
-    }
+  &.isNotScrolled {
+    transition: $transition-sharp;
+    background: none !important;
+    box-shadow: none !important;
   }
 }
 
 // sidebars
-mat-drawer::ng-deep .mat-drawer-inner-container {
+ mat-drawer ::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
-  //scroll-snap-type: y proximity;
-
 
   @include lightTheme() {
     background: $light-theme-bg-darker;
@@ -42,12 +42,6 @@ mat-drawer::ng-deep .mat-drawer-inner-container {
   @include darkTheme {
     background: $dark-theme-sidebar-bg;
   }
-  //
-  //side-nav,
-  //notes,
-  //> * {
-  //  scroll-snap-align: start;
-  //}
 }
 
 mat-drawer {

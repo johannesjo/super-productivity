@@ -12,7 +12,7 @@
 
   <mat-drawer-container>
     <header class="header-wrapper"
-            [class.isScrolled]="layoutService.isScrolled$|async">
+            [class.isNotScrolled]="!(layoutService.isScrolled$|async)">
       <main-header></main-header>
       <bookmark-bar></bookmark-bar>
       <banner></banner>
@@ -37,15 +37,15 @@
     <!--                [opened]="layoutService.isShowNotes$|async"-->
     <!--                position="end">-->
     <!--    </mat-drawer>-->
-    <mat-drawer (closedStart)="taskService.setSelectedId(null)"
-                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"
-                [opened]="taskService.selectedTask$|async"
-                position="end">
-      <div class="additional-info-panel">
-        <task-additional-info *ngIf="taskService.selectedTask$|async"
-                              [task]="taskService.selectedTask$|async"></task-additional-info>
-      </div>
-    </mat-drawer>
+<!--    <mat-drawer (closedStart)="taskService.setSelectedId(null)"-->
+<!--                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"-->
+<!--                [opened]="taskService.selectedTask$|async"-->
+<!--                position="end">-->
+<!--      <div class="additional-info-panel">-->
+<!--        <task-additional-info *ngIf="taskService.selectedTask$|async"-->
+<!--                              [task]="taskService.selectedTask$|async"></task-additional-info>-->
+<!--      </div>-->
+<!--    </mat-drawer>-->
 
   </mat-drawer-container>
 </ng-container>

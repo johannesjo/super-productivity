@@ -4,19 +4,8 @@
 :host {
   position: relative;
   z-index: 1;
-  display: contents;
   display: block;
-  min-height: 100vh;
-
-  @include lightTheme() {
-    background: $light-theme-bg-darker;
-    //background: $c-primary-100;
-  }
-
-  @include darkTheme() {
-    background: $dark-theme-sidebar-bg;
-    background: $dark-theme-bg;
-  }
+  padding-bottom: $s;
 
   task-list {
     padding: 0;
@@ -77,15 +66,15 @@ progress-bar {
     margin-bottom: $s;
   }
 
-  border-top: 1px solid transparent;
-
-  @include lightTheme {
-    border-top-color: #ddd;
-  }
-
-  @include darkTheme {
-    border-top-color: $dark-theme-extra-border-color;
-  }
+  //border-top: 1px solid transparent;
+  //
+  //@include lightTheme {
+  //  border-top-color: #ddd;
+  //}
+  //
+  //@include darkTheme {
+  //  //border-top-color: $dark-theme-extra-border-color;
+  //}
 }
 
 

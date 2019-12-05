@@ -9,6 +9,7 @@ import {SplitModule} from './split/split.module';
 import {TimeTrackingModule} from '../../features/time-tracking/time-tracking.module';
 import {BacklogComponent} from './backlog/backlog.component';
 import {MetricModule} from '../../features/metric/metric.module';
+import {MatSidenavModule} from '@angular/material/sidenav';
 
 @NgModule({
   imports: [
@@ -21,6 +22,7 @@ import {MetricModule} from '../../features/metric/metric.module';
     SplitModule,
     TimeTrackingModule,
     MetricModule,
+    MatSidenavModule,
   ],
   declarations: [WorkViewPageComponent, BacklogComponent],
 })

@@ -18,7 +18,7 @@ import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
 import {ProjectService} from '../../features/project/project.service';
 
 const NAV_ALWAYS_VISIBLE = 1250;
-const NAV_OVER_NOTES_NEXT = 900;
+const NAV_OVER_NOTES_NEXT = 850;
 const BOTH_OVER = 780;
 
 @Injectable({
