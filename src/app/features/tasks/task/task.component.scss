@@ -84,7 +84,7 @@
   }
 
   &.isSelected.isSelected {
-    border-top-width: 1px;
+    //border-top-width: 1px;
     transition-property: all;
 
     @include lightTheme() {
@@ -100,6 +100,9 @@
     @include mq(xs) {
       transform-origin: left;
       right: -34px;
+      left: -8px;
+      border-top-left-radius: $card-border-radius;
+      border-bottom-left-radius: $card-border-radius;
     }
   }
 
