@@ -288,6 +288,20 @@
 
   .first-line:hover & {
     display: flex;
+    background: #fff;
+
+    @include darkTheme() {
+      background: $dark-theme-card-bg;
+    }
+
+    :host-context(.isLightTheme).isSelected & {
+      background: $light-theme-bg-darker;
+    }
+
+    :host-context(.isDarkTheme).isSelected & {
+      background: #222;
+    }
+
   }
 
   // extra hitarea
