@@ -10,6 +10,7 @@ import {TimeTrackingModule} from '../../features/time-tracking/time-tracking.mod
 import {BacklogComponent} from './backlog/backlog.component';
 import {MetricModule} from '../../features/metric/metric.module';
 import {MatSidenavModule} from '@angular/material/sidenav';
+import {BetterDrawerModule} from '../../ui/better-drawer/better-drawer.module';
 
 @NgModule({
   imports: [
@@ -23,6 +24,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
     TimeTrackingModule,
     MetricModule,
     MatSidenavModule,
+    BetterDrawerModule,
   ],
   declarations: [WorkViewPageComponent, BacklogComponent],
 })

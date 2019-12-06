@@ -71,6 +71,7 @@ import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {FormlyValidationService} from './formly-translate-extension/formly-validation.service';
 import {DialogFullscreenMarkdownComponent} from './dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import {JiraToMarkdownPipe} from './pipes/jira-to-markdown.pipe';
+import {BetterDrawerModule} from './better-drawer/better-drawer.module';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -79,7 +80,6 @@ const DIALOG_COMPONENTS = [
 
 const COMPONENT_AND_PIPES = [
   ...DIALOG_COMPONENTS,
-
   ChipListInputComponent,
   CollapsibleComponent,
   ContentEditableOnClickDirective,
@@ -176,7 +176,9 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     }),
     DragulaModule.forRoot(),
 
+    // my modules
     ValidationModule,
+    BetterDrawerModule,
   ],
   declarations: [
     ...COMPONENT_AND_PIPES,

@@ -1,0 +1,15 @@
+<div class="content">
+  <ng-content select="[better-drawer-content]"></ng-content>
+</div>
+
+<div class="backdrop"
+     (click)="onBackdropClicked()"
+     *ngIf="isOpenGet && isOverGet"
+     @fade></div>
+
+
+<div class="side"
+     [style]="sideStyle">
+  <ng-content select="[better-drawer-side]"></ng-content>
+</div>
+
