@@ -56,7 +56,7 @@ export class SnackService {
         ...params,
         msg: (isSkipTranslate)
           ? msg
-          : this._translateService.instant(msg, translateParams),
+          : msg && this._translateService.instant(msg, translateParams),
       },
     };
 
