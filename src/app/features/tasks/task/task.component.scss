@@ -18,7 +18,7 @@
   color: $light-theme-text-color;
 
   &.isSelected {
-    //z-index: $z-is-selected-host;
+    z-index: $z-is-selected-host;
     //position: sticky;
     //top: 16px;
   }
@@ -83,7 +83,7 @@
     }
   }
 
-  &.isSelected.isSelected {
+  .inner-wrapper.isSelected.isSelected & {
     //border-top-width: 1px;
     transition-property: all;
 
@@ -334,7 +334,7 @@
 .task-title {
   @include taskTitle;
 
-  :host.isSelected & {
+  .inner-wrapper.isSelected > .first-line & {
     font-weight: bold;
   }
 }

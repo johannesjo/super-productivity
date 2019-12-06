@@ -1,4 +1,5 @@
-<div class="inner-wrapper">
+<div class="inner-wrapper"
+     [class.isSelected]="isSelected">
 
   <div style="visibility: hidden; position: fixed"
        [style.left]="contextMenuPosition.x"
@@ -6,8 +7,7 @@
        [matMenuTriggerFor]="menu">
   </div>
 
-  <div class="box bg-card"
-       [class.isSelected]="isSelected"></div>
+  <div class="box bg-card"></div>
 
   <!-- TODO only bind pan etc when touch is available-->
   <div (panend)="onPanEnd()"
