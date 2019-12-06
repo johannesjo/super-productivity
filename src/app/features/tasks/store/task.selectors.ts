@@ -101,9 +101,7 @@ export const selectSelectedTask = createSelector(
   selectTaskFeatureState,
   selectIssueEntityMap,
   (s, issueEntityMap): TaskWithSubTasks => {
-    const t = s.selectedTaskId
-      && s.entities[s.selectedTaskId] && s.entities[s.selectedTaskId].parentId
-      && s.entities[s.entities[s.selectedTaskId].parentId] || s.entities[s.selectedTaskId];
+    const t = s.selectedTaskId && s.entities[s.selectedTaskId];
     if (!t) {
       return;
     }

@@ -2,6 +2,7 @@
      *ngIf="task.id"
      [@taskAdditionalInfoTaskChange]="task.id">
 
+
   <!--  <header class="task-title-wrapper">-->
   <!--    <button mat-icon-button-->
   <!--            (click)="close()">-->
@@ -54,6 +55,24 @@
   <!--      </div>-->
   <!--    </div>-->
   <!--  </mat-expansion-panel>-->
+
+  <section class="input-item --estimate"
+           *ngIf="task.parentId"
+           (click)="taskService.setSelectedId(task.parentId)">
+    <div class="input-item__title">
+      <mat-icon class="panel-header-icon">subdirectory_arrow_right</mat-icon>
+      <span style="white-space: nowrap">Parent</span>
+    </div>
+    <div class="input-item__value"
+         style="white-space: nowrap; overflow: hidden; display: inline-block; width: 200px;text-overflow: ellipsis">
+      {{(taskService.getById$(task.parentId)|async)?.title}}
+    </div>
+    <button mat-icon-button
+            color="accent"
+            class="input-item__edit-btn">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </section>
 
   <section class="input-item --estimate"
            *ngIf="!task.subTasks?.length"

@@ -89,7 +89,7 @@ export class TaskAdditionalInfoComponent {
   constructor(
     private _resolver: ComponentFactoryResolver,
     private _issueService: IssueService,
-    private _taskService: TaskService,
+    public taskService: TaskService,
     private _reminderService: ReminderService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private  _matDialog: MatDialog,
@@ -119,12 +119,12 @@ export class TaskAdditionalInfoComponent {
 
 
   close() {
-    this._taskService.setSelectedId(null);
+    this.taskService.setSelectedId(null);
   }
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
     if (isChanged) {
-      this._taskService.update(this._taskData.id, {title: newTitle});
+      this.taskService.update(this._taskData.id, {title: newTitle});
     }
   }
 
