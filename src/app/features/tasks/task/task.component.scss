@@ -102,7 +102,7 @@
     @include mq(xs) {
       transform-origin: left;
       right: -34px;
-      left: -8px;
+      left: -1 * $card-border-radius;
       border-top-left-radius: $card-border-radius;
       border-bottom-left-radius: $card-border-radius;
     }
@@ -298,11 +298,11 @@
       background: $dark-theme-card-bg;
     }
 
-    :host-context(.isLightTheme).isSelected & {
+    :host-context(.isLightTheme).isSelected > .inner-wrapper > & {
       background: $light-theme-bg-darker;
     }
 
-    :host-context(.isDarkTheme).isSelected & {
+    :host-context(.isDarkTheme).isSelected > .inner-wrapper > & {
       background: #222;
     }
 
