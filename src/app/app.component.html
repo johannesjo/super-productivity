@@ -10,42 +10,29 @@
        @fade
        class="backdrop"></div>
 
-  <mat-drawer-container>
-    <header class="header-wrapper"
-            [class.isNotScrolled]="!(layoutService.isScrolled$|async)">
-      <main-header></main-header>
-      <bookmark-bar></bookmark-bar>
-      <banner></banner>
-    </header>
-
-    <div [@warpRoute]="getPage(o)"
-         #routeWrapper
-         class="route-wrapper">
-      <router-outlet #o="outlet"></router-outlet>
-    </div>
-    <mat-drawer (closedStart)="layoutService.hideSideNav()"
-                [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
-                [opened]="(layoutService.isShowSideNav$|async)"
-                position="start">
+  <mat-sidenav-container>
+    <mat-sidenav (closedStart)="layoutService.hideSideNav()"
+                 [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
+                 [opened]="(layoutService.isShowSideNav$|async)"
+                 position="start">
       <side-nav></side-nav>
       <hr>
       <notes></notes>
+    </mat-sidenav>
 
-    </mat-drawer>
-    <!--    <mat-drawer (closedStart)="layoutService.hideNotes()"-->
-    <!--                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"-->
-    <!--                [opened]="layoutService.isShowNotes$|async"-->
-    <!--                position="end">-->
-    <!--    </mat-drawer>-->
-<!--    <mat-drawer (closedStart)="taskService.setSelectedId(null)"-->
-<!--                [mode]="(layoutService.isNotesOver$|async) ? 'over' : 'side'"-->
-<!--                [opened]="taskService.selectedTask$|async"-->
-<!--                position="end">-->
-<!--      <div class="additional-info-panel">-->
-<!--        <task-additional-info *ngIf="taskService.selectedTask$|async"-->
-<!--                              [task]="taskService.selectedTask$|async"></task-additional-info>-->
-<!--      </div>-->
-<!--    </mat-drawer>-->
+    <mat-sidenav-content>
+      <header class="header-wrapper"
+              [class.isNotScrolled]="!(layoutService.isScrolled$|async)">
+        <main-header></main-header>
+        <bookmark-bar></bookmark-bar>
+        <banner></banner>
+      </header>
 
-  </mat-drawer-container>
+      <div [@warpRoute]="getPage(o)"
+           #routeWrapper
+           class="route-wrapper">
+        <router-outlet #o="outlet"></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </ng-container>

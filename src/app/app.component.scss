@@ -1,12 +1,8 @@
 @import '../_variables.scss';
 
-mat-drawer-container {
-  background: transparent !important;
-}
-
-mat-drawer-container,
-mat-sidenav-container {
-  height: 100%;
+:host {
+  display: flex;
+  flex-direction: column;
 }
 
 .header-wrapper {
@@ -26,36 +22,6 @@ mat-sidenav-container {
   &.isNotScrolled {
     border-color: transparent !important;
   }
-}
-
-// sidebars
-mat-drawer ::ng-deep .mat-drawer-inner-container {
-  @include scrollYImportant();
-
-  @include lightTheme() {
-    background: $light-theme-bg-darker;
-  }
-
-  @include darkTheme {
-    background: $dark-theme-sidebar-bg;
-  }
-}
-
-mat-drawer {
-  z-index: 3;
-  //box-shadow: 0 8px 10px -5px rgba(0, 0, 0, 0.2), 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12);
-  //border-left: 0 !important;
-}
-
-:host {
-  display: flex;
-  flex-direction: column;
-}
-
-:host ::ng-deep .mat-drawer-content {
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .route-wrapper {
@@ -114,3 +80,40 @@ bookmark-bar {
     }
   }
 }
+
+
+// SIDENAV
+// -------
+:host ::ng-deep .mat-drawer-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+mat-sidenav-container {
+  background: transparent !important;
+}
+
+mat-sidenav,
+mat-sidenav-container {
+  height: 100%;
+}
+
+
+// sidebars
+mat-sidenav ::ng-deep .mat-drawer-inner-container {
+  @include scrollYImportant();
+
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
+  }
+
+  @include darkTheme {
+    background: $dark-theme-sidebar-bg;
+  }
+}
+
+mat-sidenav {
+  z-index: 3;
+}
+
