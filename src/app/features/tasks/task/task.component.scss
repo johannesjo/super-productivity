@@ -249,6 +249,7 @@
   button {
     margin-top: auto;
     margin-bottom: auto;
+    //height: 100%;
   }
 
   @include mq(xs, max) {
@@ -286,6 +287,7 @@
   button {
     margin-top: auto;
     margin-bottom: auto;
+    //height: 100%;
   }
 
   .first-line:hover & {
@@ -337,7 +339,7 @@
   @include taskTitle;
 
   .inner-wrapper.isSelected > .first-line & {
-    font-weight: bold;
+    //font-weight: bold;
   }
 }
 
