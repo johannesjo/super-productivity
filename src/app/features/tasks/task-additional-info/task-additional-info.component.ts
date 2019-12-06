@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, ComponentFactoryResolver, EventEmitter, Input, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ComponentFactoryResolver,
+  EventEmitter,
+  HostBinding,
+  Input,
+  Output
+} from '@angular/core';
 import {ShowSubTasksMode, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
@@ -22,22 +30,26 @@ import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.servic
 import {TaskRepeatCfg} from '../../task-repeat-cfg/task-repeat-cfg.model';
 import * as moment from 'moment';
 import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani';
+import {noopAnimation} from '../../../ui/animations/noop.ani';
 
 @Component({
   selector: 'task-additional-info',
   templateUrl: './task-additional-info.component.html',
   styleUrls: ['./task-additional-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation, swirlAnimation]
+  animations: [expandAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
 })
 export class TaskAdditionalInfoComponent {
   @Input() selectedIndex = 0;
   @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
   @Output() tabIndexChange: EventEmitter<number> = new EventEmitter();
 
+
+  @HostBinding('@noop') alwaysTrue = true;
+
   T = T;
   issueAttachments: Attachment[];
-  taskData: TaskWithSubTasks;
   ShowSubTasksMode = ShowSubTasksMode;
   reminderId$ = new BehaviorSubject(null);
   reminderData$: Observable<ReminderCopy> = this.reminderId$.pipe(
@@ -72,6 +84,7 @@ export class TaskAdditionalInfoComponent {
   localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
     switchMap((ids) => this.attachmentService.getByIds$(ids))
   );
+  private _taskData: TaskWithSubTasks;
 
   constructor(
     private _resolver: ComponentFactoryResolver,
@@ -85,19 +98,19 @@ export class TaskAdditionalInfoComponent {
   }
 
   @Input() set task(val: TaskWithSubTasks) {
-    this.taskData = val;
-    this._attachmentIds$.next(this.taskData.attachmentIds);
-    this.issueAttachments = this._issueService.getMappedAttachments(this.taskData.issueType, this.taskData.issueData);
+    this._taskData = val;
+    this._attachmentIds$.next(this._taskData.attachmentIds);
+    this.issueAttachments = this._issueService.getMappedAttachments(this._taskData.issueType, this._taskData.issueData);
     this.reminderId$.next(val.reminderId);
     this.repeatCfgId$.next(val.repeatCfgId);
   }
 
   get task(): TaskWithSubTasks {
-    return this.taskData;
+    return this._taskData;
   }
 
   get progress() {
-    return this.taskData && this.taskData.timeEstimate && (this.taskData.timeSpent / this.taskData.timeEstimate) * 100;
+    return this._taskData && this._taskData.timeEstimate && (this._taskData.timeSpent / this._taskData.timeEstimate) * 100;
   }
 
   changeTaskNotes($event: string) {
@@ -111,7 +124,7 @@ export class TaskAdditionalInfoComponent {
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
     if (isChanged) {
-      this._taskService.update(this.taskData.id, {title: newTitle});
+      this._taskService.update(this._taskData.id, {title: newTitle});
     }
   }
 
