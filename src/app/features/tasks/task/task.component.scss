@@ -83,13 +83,15 @@
     }
   }
 
-  .inner-wrapper.isSelected.isSelected > & {
+  .inner-wrapper.isSelected > & {
     //border-top-width: 1px;
-    transition-property: all;
+    transition: $transition-enter;
+    transition-property: left, right, box-shadow;
+    box-shadow: $whiteframe-shadow-1dp;
 
     @include lightTheme() {
       background: $light-theme-bg-darker;
-      border-color: $light-theme-extra-border-color;
+      //border-color: $light-theme-extra-border-color;
     }
     @include darkTheme() {
       background: #222222;
