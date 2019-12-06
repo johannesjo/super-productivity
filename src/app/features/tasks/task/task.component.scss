@@ -83,7 +83,7 @@
     }
   }
 
-  .inner-wrapper.isSelected.isSelected & {
+  .inner-wrapper.isSelected.isSelected > & {
     //border-top-width: 1px;
     transition-property: all;
 
