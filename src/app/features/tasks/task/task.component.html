@@ -164,15 +164,7 @@
             <mat-icon *ngIf="task.isDone">undo</mat-icon>
             <mat-icon *ngIf="!task.isDone">check</mat-icon>
           </button>
-          <!--          <button (click)="estimateTime()"-->
-          <!--                  *ngIf="!task.subTasks?.length"-->
-          <!--                  class="ico-btn time-btn"-->
-          <!--                  color=""-->
-          <!--                  mat-icon-button-->
-          <!--                  tabindex="2"-->
-          <!--                  [title]="T.F.TASK.CMP.OPEN_TIME|translate">-->
-          <!--            <mat-icon>timer</mat-icon>-->
-          <!--          </button>-->
+
           <button (click)="toggleShowAdditionalInfoOpen()"
                   *ngIf="!task.notes&&!task.issueData&&!isSelected"
                   [class.isActive]="task._isAdditionalInfoOpen"
@@ -263,7 +255,13 @@
             </ng-container>
           </button>
 
-          <!-- Reminders -->
+          <button (click)="estimateTime()"
+                  *ngIf="!task.subTasks?.length"
+                  mat-menu-item>
+            <mat-icon>timer</mat-icon>
+            {{T.F.TASK.CMP.OPEN_TIME|translate}}
+          </button>
+
           <button (click)="editReminder()"
                   *ngIf="!task.repeatCfgId"
                   mat-menu-item>
