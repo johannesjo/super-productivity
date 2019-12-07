@@ -7,6 +7,12 @@
   margin-bottom: $s;
 }
 
+
+.issue-description {
+  flex-grow: 1;
+  width: 100%;
+}
+
 .comment {
   display: flex;
   margin-bottom: $s*1;

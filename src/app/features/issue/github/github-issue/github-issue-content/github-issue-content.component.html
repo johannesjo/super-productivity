@@ -36,7 +36,7 @@
     </tr>
     <tr *ngIf="issueData.body">
       <th>{{T.F.GITHUB.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
-      <td>
+      <td class="issue-description">
         <div [data]="issueData?.body"
              class="description markdown"
              markdown></div>
