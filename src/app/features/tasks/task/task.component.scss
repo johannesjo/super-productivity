@@ -57,7 +57,7 @@
   top: 0;
   transition: $transition-standard;
   transition-property: transform, box-shadow;
-  border: 1px solid $light-theme-extra-border-color;
+  border: 1px solid $task-c-border-light;
   border-top-width: 0;
 
   :host.gu-mirror & {
@@ -65,11 +65,13 @@
   }
 
   @include lightTheme {
-    background: #fff;
+    background: $task-c-bg-light;
+    border-color: $task-c-border-dark;
   }
 
   @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
+    background: $task-c-bg-dark;
+    border-color: $task-c-border-dark;
   }
 
   .inner-wrapper.isSelected > & {
@@ -79,25 +81,25 @@
     box-shadow: $whiteframe-shadow-1dp;
 
     @include lightTheme() {
-      background: $light-theme-bg-darker;
-      //border-color: $light-theme-extra-border-color;
+      background: $task-c-selected-border-light;
+      //border-color: $task-c-border-light;
     }
     @include darkTheme() {
-      background: #222222;
-      border-color: #222222;
+      background: $task-c-selected-bg-dark;
+      border-color: $task-c-selected-border-dark;
     }
 
     @include mq(xs) {
       transform-origin: left;
       right: -34px;
-      left: -1 * $card-border-radius;
-      border-top-left-radius: $card-border-radius;
-      border-bottom-left-radius: $card-border-radius;
+      left: -1 * $task-border-radius;
+      border-top-left-radius: $task-border-radius;
+      border-bottom-left-radius: $task-border-radius;
     }
   }
 
   @include isHostFocus('.inner-wrapper') {
-    border-radius: $card-border-radius;
+    border-radius: $task-border-radius;
 
     @include mq(xs) {
       // NOTE: somehow ng build messes up, if we don't include it like that
@@ -128,13 +130,13 @@
 
 
   :host:first-child > .inner-wrapper > & {
-    border-top-left-radius: $card-border-radius;
-    border-top-right-radius: $card-border-radius;
+    border-top-left-radius: $task-border-radius;
+    border-top-right-radius: $task-border-radius;
   }
 
   :host:last-child > .inner-wrapper > & {
-    border-bottom-left-radius: $card-border-radius;
-    border-bottom-right-radius: $card-border-radius;
+    border-bottom-left-radius: $task-border-radius;
+    border-bottom-right-radius: $task-border-radius;
   }
 
   // NOTE: there are also styles in the task list component, because of host not being usable
@@ -152,13 +154,13 @@
 
   :host-context(.isLightTheme):last-child > .inner-wrapper > & {
     @include mq(xs, max) {
-      border-bottom-color: $light-theme-extra-border-color;
+      border-bottom-color: $task-c-border-light;
     }
   }
 
   :host-context(.isDarkTheme):last-child > .inner-wrapper > & {
     @include mq(xs, max) {
-      border-bottom-color: rgb(55, 55, 55);
+      border-bottom-color: $task-c-border-dark;
     }
   }
 }
@@ -291,18 +293,18 @@
 
   .first-line:hover & {
     display: flex;
-    background: #fff;
+    background: $task-c-bg-light;
 
     @include darkTheme() {
-      background: $dark-theme-card-bg;
+      background:  $task-c-bg-dark;
     }
 
     :host-context(.isLightTheme).isSelected > .inner-wrapper > & {
-      background: $light-theme-bg-darker;
+      background: $task-c-selected-bg-light;
     }
 
     :host-context(.isDarkTheme).isSelected > .inner-wrapper > & {
-      background: #222;
+      background: $task-c-selected-bg-dark;
     }
 
   }
