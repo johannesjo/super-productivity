@@ -1,9 +1,9 @@
 import {
   AfterContentInit,
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ElementRef, Inject,
+  ElementRef,
+  Inject,
   OnDestroy,
   OnInit,
   ViewChild
@@ -29,6 +29,8 @@ import {DOCUMENT} from '@angular/common';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
+const SMALL_CONTAINER_WIDTH = 600;
+const VERY_SMALL_CONTAINER_WIDTH = 450;
 
 @Component({
   selector: 'work-view',
@@ -37,7 +39,7 @@ const PARENT = 'PARENT';
   animations: [expandFadeAnimation, expandAnimation, fadeAnimation, workViewProjectChangeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit, AfterContentInit {
+export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentInit {
   isShowTimeWorkedWithoutBreak = true;
   splitInputPos = 100;
   isPreloadBacklog = false;
@@ -45,10 +47,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit, 
 
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.undoneTasks$;
   doneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.doneTasks$;
-
-  isSmallMainContainer$: Observable<boolean>;
-  isVerySmallMainContainer$: Observable<boolean>;
-
 
   // NOTE: not perfect but good enough for now
   isTriggerBacklogIconAni$ = this.taskService.onMoveToBacklog$.pipe(
@@ -61,16 +59,45 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit, 
     map(v => v[0]),
   );
 
+  containerWidth$: Observable<number> = this.projectService.isProjectChanging$.pipe(
+    filter(isChanging => !isChanging),
+    delay(50),
+    switchMap(() => this.containerEl$),
+    switchMap((containerEl) => observeWidth(containerEl)),
+    share(),
+  );
+
+  containerScroll$ = this.projectService.isProjectChanging$.pipe(
+    filter(isChanging => !isChanging),
+    delay(50),
+    switchMap(() => this.splitTopEl$),
+    switchMap((el) => fromEvent(el, 'scroll')),
+  );
+
+  isSmallMainContainer$: Observable<boolean> = this.containerWidth$.pipe(
+    map(v => v < SMALL_CONTAINER_WIDTH),
+    distinctUntilChanged(),
+  );
+  isVerySmallMainContainer$: Observable<boolean> = this.containerWidth$.pipe(
+    map(v => v < VERY_SMALL_CONTAINER_WIDTH),
+    distinctUntilChanged(),
+  );
+
+
   @ViewChild('splitTopEl', {static: false, read: ElementRef}) set splitTopElRef(ref: ElementRef) {
     if (ref) {
       this.splitTopEl$.next(ref.nativeElement);
     }
   }
 
-  @ViewChild('containerEl', {static: false, read: ElementRef}) containerElRef: ElementRef;
+  @ViewChild('containerEl', {static: false, read: ElementRef}) set setContainerElRef(ref: ElementRef) {
+    if (ref) {
+      this.containerEl$.next(ref.nativeElement);
+    }
+  }
 
-
-  public splitTopEl$ = new ReplaySubject<HTMLElement>(1);
+  splitTopEl$ = new ReplaySubject<HTMLElement>(1);
+  containerEl$ = new ReplaySubject<HTMLElement>(1);
 
   private _subs = new Subscription();
   private _switchListAnimationTimeout: number;
@@ -120,43 +147,25 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterViewInit, 
       }));
   }
 
-  ngAfterViewInit(): void {
+  ngAfterContentInit(): void {
     this._subs.add(
-      this.projectService.isProjectChanging$.pipe(
-        filter(isChanging => !isChanging),
-        delay(50),
-        switchMap(() => this.splitTopEl$),
-        switchMap((el) => fromEvent(el, 'scroll')),
-      ).subscribe(({target}) => {
+      this.containerScroll$.subscribe(({target}) => {
         ((target as HTMLElement).scrollTop !== 0)
           ? this.layoutService.isScrolled$.next(true)
           : this.layoutService.isScrolled$.next(false);
       })
     );
-  }
 
-  ngAfterContentInit(): void {
-    // TODO wait for is all data loaded
-    setTimeout(() => {
-      const obs = observeWidth(this.containerElRef.nativeElement).pipe(share());
-      this.isSmallMainContainer$ = obs.pipe(map(v => v < 600), distinctUntilChanged());
-      this.isVerySmallMainContainer$ = obs.pipe(map(v => v < 450), distinctUntilChanged());
-      // bla.subscribe((v) => console.log('bla', v));
-
-      this.isSmallMainContainer$.subscribe(v => {
-        v
-          ? this.document.body.classList.add(BodyClass.isSmallMainContainer)
-          : this.document.body.classList.remove(BodyClass.isSmallMainContainer);
-      });
-      this.isVerySmallMainContainer$.subscribe(v => {
-        console.log(v);
-
-        v
-          ? this.document.body.classList.add(BodyClass.isVerySmallMainContainer)
-          : this.document.body.classList.remove(BodyClass.isVerySmallMainContainer);
-      });
-
-    }, 2000);
+    this._subs.add(this.isSmallMainContainer$.subscribe(v => {
+      v
+        ? this.document.body.classList.add(BodyClass.isSmallMainContainer)
+        : this.document.body.classList.remove(BodyClass.isSmallMainContainer);
+    }));
+    this._subs.add(this.isVerySmallMainContainer$.subscribe(v => {
+      v
+        ? this.document.body.classList.add(BodyClass.isVerySmallMainContainer)
+        : this.document.body.classList.remove(BodyClass.isVerySmallMainContainer);
+    }));
   }
 
   ngOnDestroy() {
