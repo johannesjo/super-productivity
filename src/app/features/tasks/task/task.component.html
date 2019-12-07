@@ -61,30 +61,32 @@
           svgIcon="drag_handle">
         </mat-icon>
 
-        <mat-icon class="task-type-ico"
-                  *ngIf="task.repeatCfgId"
-                  (click)="editTaskRepeatCfg()"
-                  style="transform: rotate(45deg);">repeat
-        </mat-icon>
+        <div class="type-ico-wrapper">
+          <mat-icon class="task-type-ico"
+                    *ngIf="task.repeatCfgId"
+                    (click)="editTaskRepeatCfg()"
+                    style="transform: rotate(45deg);">repeat
+          </mat-icon>
 
-        <mat-icon class="task-type-ico"
-                  (click)="handleUpdateBtnClick()"
-                  *ngIf="task.issueData?.wasUpdated"
-                  color="accent">update
-        </mat-icon>
+          <mat-icon class="task-type-ico"
+                    (click)="handleUpdateBtnClick()"
+                    *ngIf="task.issueData?.wasUpdated"
+                    color="accent">update
+          </mat-icon>
 
-        <a class="task-type-ico ico-btn"
-           *ngIf="!task.issueData?.wasUpdated && task.issueData"
-           [href]="task.issueData?.url"
-           mat-icon-button
-           tabindex="2"
-           color=""
-           target="_blank"
-           [title]="T.F.TASK.CMP.OPEN_ISSUE|translate">
-          <div *ngIf="task.issueData?.storyPoints"
-               class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
-          <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-        </a>
+          <a class="task-type-ico ico-btn"
+             *ngIf="!task.issueData?.wasUpdated && task.issueData"
+             [href]="task.issueData?.url"
+             mat-icon-button
+             tabindex="2"
+             color=""
+             target="_blank"
+             [title]="T.F.TASK.CMP.OPEN_ISSUE|translate">
+            <div *ngIf="task.issueData?.storyPoints"
+                 class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
+            <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+          </a>
+        </div>
       </div>
 
       <div #contentEditableOnClickEl

@@ -78,6 +78,7 @@
   :host-context(.isLightTheme).isSelected & {
     background: $task-c-selected-bg-light;
   }
+
   :host-context(.isDarkTheme).isSelected & {
     background: $task-c-selected-bg-dark;
   }
@@ -304,7 +305,7 @@
     background: $task-c-bg-light;
 
     @include darkTheme() {
-      background:  $task-c-bg-dark;
+      background: $task-c-bg-dark;
     }
 
     //:host-context(.isLightTheme).isSelected > .inner-wrapper > & {
@@ -318,6 +319,7 @@
     :host-context(.isLightTheme).isSelected & {
       background: $task-c-selected-bg-light;
     }
+
     :host-context(.isDarkTheme).isSelected & {
       background: $task-c-selected-bg-dark;
     }
@@ -612,44 +614,54 @@ progress-bar {
 
 
 .drag-handle {
-  min-width: 32px;
-  margin: 0 4px 0 9px;
-  position: relative;
+  margin-left: $s;
+  margin-right: 0;
+  width: 40px;
+  height: 40px;
   z-index: $z-drag-handle;
   cursor: grab;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 
   @extend %standardTaskOpacityChange;
 
   // fixes drag and drop on mobile
   touch-action: none;
 
-  .task-type-ico {
-    display: block;
-    margin-left: $s/2;
+  > * {
+    width: 40px;
+  }
+
+  .type-ico-wrapper {
     opacity: 1;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     .first-line:hover & {
+      display: none;
+    }
+
+    @include mq(xs, max) {
       display: none;
     }
   }
 
   .drag-handle-ico {
-    display: none;
-
-    .first-line:hover & {
-      display: block;
+    @include mq(xs) {
+      opacity: 0;
+      .first-line:hover & {
+        opacity: 1;
+      }
     }
   }
 
-  //@include mq(xs) {
-  //  opacity: 0;
-  //  .first-line:hover & {
-  //    opacity: 1;
-  //  }
-  //}
 
   &:active {
     cursor: grabbing;
@@ -665,9 +677,9 @@ progress-bar {
     right: -$s*0.25;
 
     @include mq(xs) {
-      top: -$s*2;
-      bottom: -$s*2;
-      left: -$s*2;
+      top: -$s*1;
+      bottom: -$s*1;
+      left: -$s*1;
       right: -$s*0.5;
     }
   }
