@@ -52,51 +52,40 @@
     </button>
 
     <div class="title-and-left-btns-wrapper">
-      <mat-icon [class.handle-par]="!task.parentId"
-                [class.handle-sub]="task.parentId"
-                class="drag-handle"
-                svgIcon="drag_handle">
-      </mat-icon>
 
-      <button (click)="handleUpdateBtnClick()"
-              *ngIf="task.issueData?.wasUpdated"
-              class="ico-btn"
-              color="accent"
-              mat-icon-button
-              tabindex="2"
-              [title]="T.F.TASK.CMP.SHOW_UPDATES|translate">
-        <mat-icon class="update update-icon">update</mat-icon>
-      </button>
+      <div class="drag-handle"
+           [class.handle-par]="!task.parentId"
+           [class.handle-sub]="task.parentId">
+        <mat-icon
+          class="drag-handle-ico"
+          svgIcon="drag_handle">
+        </mat-icon>
 
-      <!--      <button (click)="handleUpdateBtnClick()"-->
-      <!--              *ngIf="task.issueData"-->
-      <!--              class="ico-btn"-->
-      <!--              color="accent"-->
-      <!--              mat-icon-button-->
-      <!--              tabindex="2"-->
-      <!--              [title]="T.F.TASK.CMP.SHOW_UPDATES|translate">-->
-      <!--        <mat-icon class="update update-icon">update</mat-icon>-->
-      <!--      </button>-->
+        <mat-icon class="task-type-ico"
+                  *ngIf="task.repeatCfgId"
+                  (click)="editTaskRepeatCfg()"
+                  style="transform: rotate(45deg);">repeat
+        </mat-icon>
 
-      <a *ngIf="task.issueData?.url"
-         [href]="task.issueData?.url"
-         class="ico-btn"
-         color=""
-         mat-icon-button
-         tabindex="2"
-         target="_blank"
-         [title]="T.F.TASK.CMP.OPEN_ISSUE|translate">
-        <div *ngIf="task.issueData?.storyPoints"
-             class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
-        <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-      </a>
+        <mat-icon class="task-type-ico"
+                  (click)="handleUpdateBtnClick()"
+                  *ngIf="task.issueData?.wasUpdated"
+                  color="accent">update
+        </mat-icon>
 
-      <button (click)="editTaskRepeatCfg()"
-              *ngIf="task.repeatCfgId"
-              class="ico-btn"
-              mat-icon-button>
-        <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
-      </button>
+        <a class="task-type-ico ico-btn"
+           *ngIf="!task.issueData?.wasUpdated && task.issueData"
+           [href]="task.issueData?.url"
+           mat-icon-button
+           tabindex="2"
+           color=""
+           target="_blank"
+           [title]="T.F.TASK.CMP.OPEN_ISSUE|translate">
+          <div *ngIf="task.issueData?.storyPoints"
+               class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
+          <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+        </a>
+      </div>
 
       <div #contentEditableOnClickEl
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"

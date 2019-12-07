@@ -596,22 +596,44 @@ progress-bar {
 
 
 .drag-handle {
-  min-width: 24px;
+  min-width: 32px;
   margin: 0 4px 0 9px;
   position: relative;
   z-index: $z-drag-handle;
   cursor: grab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   @extend %standardTaskOpacityChange;
 
   // fixes drag and drop on mobile
   touch-action: none;
 
-  @include mq(xs) {
-    opacity: 0;
+  .task-type-ico {
+    display: block;
+    margin-left: $s/2;
+    opacity: 1;
+
     .first-line:hover & {
-      opacity: 1;
+      display: none;
     }
   }
+
+  .drag-handle-ico {
+    display: none;
+
+    .first-line:hover & {
+      display: block;
+    }
+  }
+
+  //@include mq(xs) {
+  //  opacity: 0;
+  //  .first-line:hover & {
+  //    opacity: 1;
+  //  }
+  //}
 
   &:active {
     cursor: grabbing;
