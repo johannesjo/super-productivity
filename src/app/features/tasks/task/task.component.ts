@@ -79,12 +79,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // TODO do via observable
-  @HostBinding('class.isAdditionalInfoOpen')
-  private get _isAdditionalInfoOpen() {
-    return this.task._isAdditionalInfoOpen;
-  }
-
-  // TODO do via observable
   @HostBinding('class.isDone')
   private get _isDone() {
     return this.task.isDone;
@@ -232,7 +226,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   handleUpdateBtnClick() {
-    this._taskService.showAdditionalInfoOpen(this.task.id);
+    this._taskService.setSelectedId(this.task.id);
   }
 
   deleteTask() {
@@ -305,38 +299,26 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   showAdditionalInfos() {
-    if (!this.task._isAdditionalInfoOpen) {
-      this._taskService.showAdditionalInfoOpen(this.task.id);
-      this.focusSelf();
-    }
+    this._taskService.setSelectedId(this.task.id);
+    this.focusSelf();
   }
 
   hideAdditionalInfos() {
-    if (this.task._isAdditionalInfoOpen) {
-      this._taskService.hideAdditionalInfoOpen(this.task.id);
-      this.focusSelf();
-    }
+    this._taskService.setSelectedId(this.task.id);
+    this.focusSelf();
   }
 
 
   toggleShowAdditionalInfoOpen() {
-    // this.task._isAdditionalInfoOpen
-    //   ? this._taskService.hideAdditionalInfoOpen(this.task.id)
-    //   : this._taskService.showAdditionalInfoOpen(this.task.id);
-    // this.focusSelf();
-    this._taskService.setSelectedId(this.task.id);
+    this.isSelected
+      ? this._taskService.setSelectedId(null)
+      : this._taskService.setSelectedId(this.task.id);
+    this.focusSelf();
   }
 
   toggleShowAttachments() {
-    // const attachmentTabIndex = this.task.issueData ? 2 : 1;
-    // (this.task._isAdditionalInfoOpen && this.task._currentTab === attachmentTabIndex)
-    //   ? this._taskService.hideAdditionalInfoOpen(this.task.id)
-    //   : this._taskService.updateUi(this.task.id, {
-    //     _isAdditionalInfoOpen: true,
-    //     _currentTab: attachmentTabIndex,
-    //   });
-    // this.focusSelf();
     this._taskService.setSelectedId(this.task.id);
+    this.focusSelf();
   }
 
   toggleSubTaskMode() {
@@ -405,14 +387,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.contextMenu.openMenu();
   }
 
-  onTaskNotesChanged(newVal) {
-    this._taskService.update(this.task.id, {notes: newVal});
-    this.focusSelf();
-  }
-
-  onTabIndexChange(newVal) {
-    this._taskService.updateUi(this.task.id, {_currentTab: newVal || 0});
-  }
 
   onPanStart(ev) {
     if (!IS_TOUCH) {
@@ -604,7 +578,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // collapse sub tasks
     if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
       const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
-      if (this.task._isAdditionalInfoOpen) {
+      if (this.isSelected) {
         this.hideAdditionalInfos();
       } else if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.HideAll) {
         this._taskService.toggleSubTaskMode(this.task.id, true, false);
@@ -621,7 +595,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
       if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.Show) {
         this._taskService.toggleSubTaskMode(this.task.id, false, false);
-      } else if (!this.task._isAdditionalInfoOpen) {
+      } else if (!this.isSelected) {
         this.showAdditionalInfos();
       } else {
         this.focusNext();

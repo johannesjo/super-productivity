@@ -564,14 +564,6 @@ export class TaskService {
     this.update(id, {isDone: false});
   }
 
-  showAdditionalInfoOpen(id: string) {
-    this.updateUi(id, {_isAdditionalInfoOpen: true, _currentTab: 0});
-  }
-
-  hideAdditionalInfoOpen(id: string) {
-    this.updateUi(id, {_isAdditionalInfoOpen: false});
-  }
-
   showSubTasks(id: string) {
     this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.Show});
   }

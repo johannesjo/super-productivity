@@ -156,7 +156,6 @@
 
           <button (click)="toggleShowAdditionalInfoOpen()"
                   *ngIf="!task.notes&&!task.issueData&&!isSelected"
-                  [class.isActive]="task._isAdditionalInfoOpen"
                   class="ico-btn show-additional-info-btn"
                   color=""
                   mat-icon-button
@@ -177,7 +176,6 @@
         </button>
         <button (click)="toggleShowAdditionalInfoOpen()"
                 *ngIf="task.notes||task.issueData||isSelected"
-                [class.isActive]="task._isAdditionalInfoOpen"
                 class="ico-btn show-additional-info-btn"
                 color=""
                 mat-icon-button
@@ -189,7 +187,6 @@
 
         <button (click)="toggleShowAttachments()"
                 *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
-                [class.isActive]="task._isAdditionalInfoOpen"
                 class="ico-btn attachment-btn"
                 color=""
                 mat-icon-button
@@ -266,7 +263,6 @@
 
           <button (click)="toggleShowAdditionalInfoOpen()"
                   class="show-touch-only"
-                  [class.isActive]="task._isAdditionalInfoOpen"
                   mat-menu-item
                   tabindex="2">
             <mat-icon *ngIf="task.notes||task.issueData">chat</mat-icon>
