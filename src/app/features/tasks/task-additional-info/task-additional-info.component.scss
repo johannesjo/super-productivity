@@ -80,12 +80,12 @@ progress-bar {
 
 .input-item,
 .mat-expansion-panel {
+  box-shadow: none;
   //overflow: inherit !important;
   border-width: 1px;
   border-style: solid;
   border-radius: 0;
   margin: 8px;
-  box-shadow: $whiteframe-shadow-1dp;
 
   &,
   ::ng-deep & .mat-expansion-panel-header {
@@ -93,8 +93,9 @@ progress-bar {
   }
 
   @include darkTheme() {
-    background: $dark-theme-card-bg;
+    background: $dark6;
     border-color: $dark-theme-extra-border-color;
+    box-shadow: $whiteframe-shadow-1dp;
   }
   @include lightTheme {
     background: #fff;

@@ -55,9 +55,9 @@ div.material-table {
   }
 
   .isDarkTheme & {
-    background: $dark-theme-bg-lighter;
+    background: $dark-theme-card-bg;
     // NOTE: because we're on a lighter background
-    color: $dark-theme-text-color-more-intense;
+    color: $dark-theme-text-color;
 
   }
 
@@ -75,11 +75,19 @@ div.material-table {
     vertical-align: middle;
     min-height: $this-table-min-height;
     position: relative;
-    border-top: 1px solid rgba(0, 0, 0, .12);
-    border-bottom: 1px solid rgba(0, 0, 0, .12);
+    border-top: 1px solid;
+    border-bottom: 1px solid;
     padding: $s $s*2.25;
     box-sizing: border-box;
     text-align: left;
+
+    .isLightTheme & {
+      border-color: $light-theme-extra-border-color;
+    }
+
+    .isDarkTheme & {
+      border-color: $dark-theme-extra-border-color;
+    }
 
     &:first-of-type {
       padding-left: $s*3;

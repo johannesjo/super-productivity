@@ -40,15 +40,16 @@ $task-text-c-dark: $dark-theme-text-color;
 // NOTE: light is just standard color
 
 $task-c-bg-light: #fff;
-$task-c-bg-dark: $dark2;
+$task-c-bg-dark: $dark-theme-card-bg;
 
 $task-c-border-light: $light-theme-extra-border-color;
-$task-c-border-dark: rgba(255, 255, 255, 0.12);
+$task-c-selected-border-light: $task-c-border-light;
+$task-c-border-dark: $dark-theme-extra-border-color;
+$task-c-selected-border-dark: $task-c-border-dark;
+
 
 $task-c-selected-bg-light: $light-theme-bg-darker;
-$task-c-selected-border-light: $light-theme-bg-darker;
 $task-c-selected-bg-dark: $dark-theme-bg-slightly-lighter;
-$task-c-selected-border-dark: $task-c-border-dark;
 
 
 @mixin isCurrent {
