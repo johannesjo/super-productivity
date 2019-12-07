@@ -422,7 +422,7 @@
     @include timeWrapperMinimalStyles;
   }
 
-  @include mq(component, max) {
+  @include mq(xs, max) {
     @at-root  .time-wrapper {
       @include timeWrapperMinimalStyles;
 
