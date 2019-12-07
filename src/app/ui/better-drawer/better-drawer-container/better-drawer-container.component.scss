@@ -34,8 +34,7 @@
   }
 
   @include darkTheme() {
-    background: $dark-theme-sidebar-bg;
-    background: $dark-theme-bg;
+    background: $dark-theme-bg-slightly-lighter;
     border-color:  $dark-theme-extra-border-color;
   }
 

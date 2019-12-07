@@ -36,18 +36,19 @@ $task-c-selected: $c-primary-700;
 $task-c-focus: $c-primary-400;
 
 $task-text-c-dark: $dark-theme-text-color-most-intense;
+$task-text-c-dark: $dark-theme-text-color;
 // NOTE: light is just standard color
 
 $task-c-bg-light: #fff;
-$task-c-bg-dark: $dark-theme-card-bg;
+$task-c-bg-dark: $dark2;
 
 $task-c-border-light: $light-theme-extra-border-color;
-$task-c-border-dark: $dark-theme-extra-border-color; //rgb(55, 55, 55);
+$task-c-border-dark: rgba(255, 255, 255, 0.12);
 
 $task-c-selected-bg-light: $light-theme-bg-darker;
 $task-c-selected-border-light: $light-theme-bg-darker;
-$task-c-selected-bg-dark: #222222;
-$task-c-selected-border-dark: #222222;
+$task-c-selected-bg-dark: $dark-theme-bg-slightly-lighter;
+$task-c-selected-border-dark: $task-c-border-dark;
 
 
 @mixin isCurrent {

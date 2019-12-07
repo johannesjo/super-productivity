@@ -66,12 +66,20 @@
 
   @include lightTheme {
     background: $task-c-bg-light;
-    border-color: $task-c-border-dark;
+    border-color: $task-c-border-light;
   }
 
   @include darkTheme {
     background: $task-c-bg-dark;
     border-color: $task-c-border-dark;
+  }
+
+  // NOTE: also applies to child tasks
+  :host-context(.isLightTheme).isSelected & {
+    background: $task-c-selected-bg-light;
+  }
+  :host-context(.isDarkTheme).isSelected & {
+    background: $task-c-selected-bg-dark;
   }
 
   .inner-wrapper.isSelected > & {
@@ -81,8 +89,8 @@
     box-shadow: $whiteframe-shadow-1dp;
 
     @include lightTheme() {
-      background: $task-c-selected-border-light;
-      //border-color: $task-c-border-light;
+      background: $light-theme-bg-darker;
+      border-color: $task-c-selected-border-light;
     }
     @include darkTheme() {
       background: $task-c-selected-bg-dark;
@@ -299,11 +307,18 @@
       background:  $task-c-bg-dark;
     }
 
-    :host-context(.isLightTheme).isSelected > .inner-wrapper > & {
+    //:host-context(.isLightTheme).isSelected > .inner-wrapper > & {
+    //  background: $task-c-selected-bg-light;
+    //}
+    //
+    //:host-context(.isDarkTheme).isSelected > .inner-wrapper > & {
+    //  background: $task-c-selected-bg-dark;
+    //}
+    // NOTE: also applies to child tasks
+    :host-context(.isLightTheme).isSelected & {
       background: $task-c-selected-bg-light;
     }
-
-    :host-context(.isDarkTheme).isSelected > .inner-wrapper > & {
+    :host-context(.isDarkTheme).isSelected & {
       background: $task-c-selected-bg-dark;
     }
 
