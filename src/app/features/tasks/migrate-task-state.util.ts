@@ -14,6 +14,7 @@ export const migrateTaskState = (taskState: TaskState, projectId: string): TaskS
   Object.keys(taskEntities).forEach((key) => {
     taskEntities[key] = _addProjectId(taskEntities[key], projectId);
     taskEntities[key] = _replaceLegacyGitType(taskEntities[key]);
+    // taskEntities[key] = _deleteUnusedFields(taskEntities[key]);
   });
 
   taskState[MODEL_VERSION_KEY] = MODEL_VERSION;
@@ -39,4 +40,14 @@ const _replaceLegacyGitType = (task: Task) => {
   return (issueType === LEGACY_GITHUB_TYPE)
     ? {...task, issueType: GITHUB_TYPE}
     : task;
+};
+
+const _deleteUnusedFields = (task: Task) => {
+  const {
+    // legacy
+    _isAdditionalInfoOpen,
+    // the rest
+    ...cleanTask
+  } = task;
+  return cleanTask;
 };

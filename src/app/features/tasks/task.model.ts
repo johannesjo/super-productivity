@@ -40,8 +40,8 @@ export interface TaskCopy {
   repeatCfgId: string;
 
   // ui model
-  // @deprecated
-  _isAdditionalInfoOpen: boolean;
+  /** @deprecated handled by selectedTaskId now */
+  _isAdditionalInfoOpen?: boolean;
   // 0: show, 1: hide-done tasks, 2: hide all sub tasks
   _showSubTasksMode: ShowSubTasksMode;
   _currentTab: number;
