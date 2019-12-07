@@ -72,17 +72,6 @@
     border-color: $dark-theme-extra-border-color;
   }
 
-  @include isHostFocus('.inner-wrapper') {
-    border-radius: $card-border-radius;
-
-    @include mq(xs) {
-      // NOTE: somehow ng build messes up, if we don't include it like that
-      border-color: $task-c-focus;
-      border-width: 1px;
-      border-style: dashed !important;
-    }
-  }
-
   .inner-wrapper.isSelected > & {
     //border-top-width: 1px;
     transition: $transition-enter;
@@ -95,9 +84,8 @@
     }
     @include darkTheme() {
       background: #222222;
-      border-color: #222222 !important;
+      border-color: #222222;
     }
-
 
     @include mq(xs) {
       transform-origin: left;
@@ -105,6 +93,17 @@
       left: -1 * $card-border-radius;
       border-top-left-radius: $card-border-radius;
       border-bottom-left-radius: $card-border-radius;
+    }
+  }
+
+  @include isHostFocus('.inner-wrapper') {
+    border-radius: $card-border-radius;
+
+    @include mq(xs) {
+      // NOTE: somehow ng build messes up, if we don't include it like that
+      border-color: $task-c-focus;
+      border-width: 1px;
+      border-style: dashed !important;
     }
   }
 
