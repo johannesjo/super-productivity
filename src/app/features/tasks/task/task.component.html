@@ -176,16 +176,6 @@
                 [title]="T.F.TASK.CMP.EDIT_REMINDER|translate">
           <mat-icon>alarm</mat-icon>
         </button>
-        <button (click)="toggleShowAdditionalInfoOpen()"
-                *ngIf="task.notes||task.issueData||isSelected"
-                class="ico-btn show-additional-info-btn"
-                color=""
-                mat-icon-button
-                tabindex="2"
-                [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate">
-          <mat-icon *ngIf="!isSelected">chat</mat-icon>
-          <mat-icon *ngIf="isSelected">close</mat-icon>
-        </button>
 
         <button (click)="toggleShowAttachments()"
                 *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
@@ -195,6 +185,17 @@
                 tabindex="2"
                 [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate">
           <mat-icon>attach_file</mat-icon>
+        </button>
+
+        <button (click)="toggleShowAdditionalInfoOpen()"
+                *ngIf="task.notes||task.issueData||isSelected"
+                class="ico-btn show-additional-info-btn"
+                color=""
+                mat-icon-button
+                tabindex="2"
+                [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate">
+          <mat-icon *ngIf="!isSelected">chat</mat-icon>
+          <mat-icon *ngIf="isSelected">close</mat-icon>
         </button>
 
         <button [matMenuTriggerFor]="menu"
