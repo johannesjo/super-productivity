@@ -29,11 +29,11 @@
       margin-top: 0;
     }
 
-    ::ng-deep .collapsible-title {
+    ::ng-deep .collapsible-header {
       border-bottom: 1px solid transparent;
     }
 
-    ::ng-deep .isExpanded .collapsible-title {
+    ::ng-deep .isExpanded .collapsible-header {
       font-weight: bold;
       border-color: $light-theme-extra-border-color;
 

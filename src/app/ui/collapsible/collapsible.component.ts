@@ -11,13 +11,12 @@ import {expandAnimation} from '../animations/expand.ani';
 export class CollapsibleComponent {
   @Input() title: string;
   @Input() icon: string;
-  @Input() counter = null;
-  // TODO remove
-  @Input() initiallyExpanded = false;
-  @Input() btnIcon: string;
-  @Input() btnAction: () => void;
+
+  @Input() isIconBefore: boolean;
 
   @HostBinding('class.isExpanded') @Input() isExpanded: boolean;
+  @HostBinding('class.isInline') @Input() isInline: boolean;
+
   @Output() isExpandedChange: EventEmitter<boolean> = new EventEmitter();
 
   constructor() {
@@ -26,11 +25,5 @@ export class CollapsibleComponent {
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
     this.isExpandedChange.emit(this.isExpanded);
-  }
-
-  execAction(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    this.btnAction();
   }
 }
