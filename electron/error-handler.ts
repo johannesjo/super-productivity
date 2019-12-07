@@ -3,7 +3,6 @@ import {IPC} from './ipc-events.const';
 import {error} from 'electron-log';
 
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
-const ERROR_EV = IPC.ERROR;
 
 export const errorHandler = (e = 'UNDEFINED ERROR', additionalLogInfo?) => {
   const errObj = new Error(e);
@@ -37,8 +36,9 @@ function _handleError(e, additionalLogInfo, errObj) {
   }
 
   if (_isReadyForFrontEndError()) {
-    mainWin.webContents.send(ERROR_EV, {
+    mainWin.webContents.send(IPC.ERROR, {
       error: e,
+      errorStr: e && e.toString(),
       stack,
     });
   } else {

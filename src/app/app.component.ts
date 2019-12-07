@@ -13,7 +13,6 @@ import {SwUpdate} from '@angular/service-worker';
 import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
-import {NoteService} from './features/note/note.service';
 import {DOCUMENT} from '@angular/common';
 import {filter, map, take} from 'rxjs/operators';
 import {combineLatest, Observable} from 'rxjs';
@@ -171,11 +170,16 @@ export class AppComponent {
 
   private _initElectronErrorHandler() {
     this._electronService.ipcRenderer.on(IPC.ERROR, (ev, data: {
-      error: string,
+      error: any,
       stack: any,
+      errorStr: string,
     }) => {
+      const errMsg = (typeof data.errorStr === 'string')
+        ? data.errorStr
+        : ' INVALID ERROR MSG :( ';
+
       this._snackService.open({
-        msg: data.error,
+        msg: errMsg,
         type: 'ERROR'
       });
       console.error(data);

@@ -48,7 +48,20 @@ export class SnackService {
       _destroy$.next(true);
       _destroy$.unsubscribe();
     };
-    const {msg, actionStr, actionId, actionPayload, config, type, isSkipTranslate, translateParams, showWhile$, promise, isSpinner} = params;
+    const {
+      msg,
+      actionStr,
+      actionId,
+      actionPayload,
+      config,
+      type,
+      isSkipTranslate,
+      translateParams = {},
+      showWhile$,
+      promise,
+      isSpinner
+    } = params;
+
     const cfg = {
       ...DEFAULT_SNACK_CFG,
       ...config,
@@ -56,7 +69,7 @@ export class SnackService {
         ...params,
         msg: (isSkipTranslate)
           ? msg
-          : msg && this._translateService.instant(msg, translateParams),
+          : (typeof msg === 'string') && this._translateService.instant(msg, translateParams),
       },
     };
 
