@@ -13,7 +13,8 @@
   <table class="issue-table">
     <tr>
       <th>{{T.F.GITHUB.ISSUE_CONTENT.SUMMARY|translate}}</th>
-      <td><strong>{{issueData?.title}} #{{issueData?.number}}</strong></td>
+      <td><a [href]="issueData.url"
+             target="_blank"><strong>{{issueData?.title}} #{{issueData?.number}}</strong></a></td>
     </tr>
     <tr>
       <th>{{T.F.GITHUB.ISSUE_CONTENT.STATUS|translate}}</th>
