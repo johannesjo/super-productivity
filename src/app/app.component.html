@@ -15,9 +15,11 @@
                  [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
                  [opened]="(layoutService.isShowSideNav$|async)"
                  position="start">
-      <side-nav></side-nav>
+      <side-nav #sideNavElRef
+                (scrollToNotes)="scrollToNotes()"></side-nav>
       <hr>
-      <notes></notes>
+      <notes #notesElRef
+             (scrollToSidenav)="scrollToSidenav()"></notes>
     </mat-sidenav>
 
     <mat-sidenav-content>

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, Output} from '@angular/core';
 import {ProjectService} from '../../features/project/project.service';
 import {T} from '../../t.const';
 import {DialogCreateProjectComponent} from '../../features/project/dialogs/create-project/dialog-create-project.component';
@@ -16,6 +16,9 @@ import {Subscription} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SideNavComponent implements OnDestroy {
+
+  @Output() scrollToNotes = new EventEmitter<void>();
+
   T = T;
   PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
 
@@ -70,5 +73,9 @@ export class SideNavComponent implements OnDestroy {
       ? standardColor
       : color;
     return {background: colorToUse};
+  }
+
+  onScrollToNotesClick() {
+    this.scrollToNotes.emit();
   }
 }

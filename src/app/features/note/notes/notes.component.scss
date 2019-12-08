@@ -1,5 +1,11 @@
 @import '../../../../variables';
 
+:host,
+.wrapper {
+  position: sticky;
+  top: 0;
+}
+
 .wrapper {
   display: block;
   text-align: center;
@@ -24,7 +30,9 @@
   }
 
   header {
-    display: block;
+    display: flex;
+    position: sticky;
+    top: 0;
   }
 }
 

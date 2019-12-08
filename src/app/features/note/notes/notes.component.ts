@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {NoteService} from '../note.service';
 import {DragulaService} from 'ng2-dragula';
 import {Subscription} from 'rxjs';
@@ -19,6 +28,8 @@ import {T} from '../../../t.const';
 
 })
 export class NotesComponent implements OnInit, OnDestroy {
+  @Output() scrollToSidenav = new EventEmitter<void>();
+
   T = T;
   isElementWasAdded = false;
   isDragOver = false;
@@ -79,5 +90,9 @@ export class NotesComponent implements OnInit, OnDestroy {
 
   addNote() {
     this._matDialog.open(DialogAddNoteComponent);
+  }
+
+  onScrollToSidenavClick() {
+    this.scrollToSidenav.emit();
   }
 }

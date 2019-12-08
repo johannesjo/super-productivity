@@ -97,6 +97,17 @@ section {
   }
 }
 
+.scroll-down-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  ::ng-deep mat-icon:last-of-type {
+    margin-left: auto;
+    margin-right: 0;
+  }
+}
+
 
 .project,
 .route-link {

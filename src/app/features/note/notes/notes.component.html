@@ -6,13 +6,17 @@
     {{T.F.NOTE.NOTES_CMP.DROP_TO_ADD|translate}}
   </div>
 
-  <header style="position: sticky; top: 0;">
+  <header>
     <button #buttonEl
             (click)="addNote()"
             mat-button
             tabindex="1">
       <mat-icon>add</mat-icon>
       {{T.F.NOTE.NOTES_CMP.ADD_BTN|translate}}
+    </button>
+    <button mat-icon-button
+            (click)="onScrollToSidenavClick()">
+      <mat-icon>arrow_upwards</mat-icon>
     </button>
     <!--<button mat-icon-button>-->
     <!--<mat-icon>search</mat-icon>-->

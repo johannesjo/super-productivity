@@ -1,12 +1,4 @@
-import {
-  AfterContentInit,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  HostListener,
-  Inject,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostListener, ViewChild, ViewContainerRef} from '@angular/core';
 import {ProjectService} from './features/project/project.service';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
@@ -16,13 +8,12 @@ import {LayoutService} from './core-ui/layout/layout.service';
 import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../electron/ipc-events.const';
 import {SnackService} from './core/snack/snack.service';
-import {BodyClass, IS_ELECTRON} from './app.constants';
+import {IS_ELECTRON} from './app.constants';
 import {SwUpdate} from '@angular/service-worker';
 import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
-import {DOCUMENT} from '@angular/common';
-import {distinctUntilChanged, filter, map, share, take} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {combineLatest, Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
@@ -35,7 +26,6 @@ import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {TaskService} from './features/tasks/task.service';
-import {observeWidth} from './util/resize-observer-obs';
 
 
 @Component({
@@ -50,7 +40,7 @@ import {observeWidth} from './util/resize-observer-obs';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent  {
+export class AppComponent {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
     this._store.select(selectIsTaskDataLoaded),
@@ -59,6 +49,9 @@ export class AppComponent  {
     filter(isLoaded => isLoaded),
     take(1),
   );
+
+  @ViewChild('notesElRef', {read: ViewContainerRef, static: false}) notesElRef: ViewContainerRef;
+  @ViewChild('sideNavElRef', {read: ViewContainerRef, static: false}) sideNavElRef: ViewContainerRef;
 
 
   constructor(
@@ -175,6 +168,14 @@ export class AppComponent  {
 
   getPage(outlet) {
     return outlet.activatedRouteData.page || 'one';
+  }
+
+  scrollToNotes() {
+    this.notesElRef.element.nativeElement.scrollIntoView({behavior: 'smooth'});
+  }
+
+  scrollToSidenav() {
+    this.sideNavElRef.element.nativeElement.scrollIntoView({behavior: 'smooth'});
   }
 
 
