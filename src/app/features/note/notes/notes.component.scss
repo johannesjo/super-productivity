@@ -1,39 +1,29 @@
 @import '../../../../variables';
 
-:host,
-.wrapper {
-  position: sticky;
-  top: 0;
-}
-
-.wrapper {
+:host {
+  background-color: inherit;
   display: block;
   text-align: center;
   min-height: 100%;
-  padding: 0 $s;
   box-sizing: border-box;
-  overflow: hidden;
   //width: $s*36;
   width: 200px;
+  position: relative;
+}
 
-  @include lightTheme {
-    background: $light-theme-bg-darker;
-    border-left: solid 1px rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
-  }
-  @include darkTheme {
-    border-left: solid 1px rgba(255, 255, 255, 0.12);
-  }
+header {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 55;
+  background-color: inherit;
+  @include extraBorder('-bottom');
+  margin-bottom: $s;
+  padding-right: 8px;
+}
 
-  @media (min-width: 900px) and (max-width: 950px) {
-    //width: $s*32;
-    //padding: 0 $s*1;
-  }
-
-  header {
-    display: flex;
-    position: sticky;
-    top: 0;
-  }
+.notes {
+  padding: 0 $s;
 }
 
 note {

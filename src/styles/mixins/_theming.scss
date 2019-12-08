@@ -70,12 +70,12 @@
 }
 
 
-@mixin extraBorder {
+@mixin extraBorder($sideSuffix:'') {
   @include darkTheme {
-    border: 1px solid $dark-theme-extra-border-color;
+    #{'border'+$sideSuffix}: 1px solid $dark-theme-extra-border-color;
   }
   @include lightTheme {
-    border: 1px solid $light-theme-extra-border-color;
+    #{'border'+$sideSuffix}: 1px solid $light-theme-extra-border-color;
   }
 }
 
