@@ -54,6 +54,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
 
   selectedItemIndex = 0;
+  isFocusNotes = false;
   T = T;
   issueAttachments: Attachment[];
   reminderId$ = new BehaviorSubject(null);

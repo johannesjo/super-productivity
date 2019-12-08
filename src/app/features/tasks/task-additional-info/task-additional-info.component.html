@@ -147,6 +147,7 @@
     [expanded]="task.notes || (!(task.issueId) && !task.attachmentIds?.length)"
     (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
+    (editActionTriggered)="isFocusNotes=true"
   >
     <ng-container panel-header>
       <mat-icon *ngIf="task.notes"
@@ -159,7 +160,10 @@
     </ng-container>
 
     <ng-container panel-content>
-      <inline-markdown (changed)="changeTaskNotes($event)"
+      <inline-markdown (changed)="changeTaskNotes($event); isFocusNotes=false"
+                       (blur)="isFocusNotes=false"
+                       (blurred)="isFocusNotes=false"
+                       [isFocus]="isFocusNotes"
                        [model]="task.notes"
                        [isShowControls]="true"></inline-markdown>
     </ng-container>

@@ -6,7 +6,6 @@ import {
   HostBinding,
   HostListener,
   Input,
-  OnInit,
   Output
 } from '@angular/core';
 
@@ -16,13 +15,12 @@ import {
   styleUrls: ['./task-additional-info-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TaskAdditionalInfoItemComponent implements OnInit {
+export class TaskAdditionalInfoItemComponent {
   @Input() type: 'input' | 'panel' = 'input';
   @Input() expanded: boolean;
   @Input() inputIcon: string;
 
   @Output() collapseParent = new EventEmitter<void>();
-  @Output() enterPress = new EventEmitter<void>();
   @Output() keyPress = new EventEmitter<KeyboardEvent>();
   @Output() editActionTriggered = new EventEmitter<void>();
 
@@ -30,10 +28,19 @@ export class TaskAdditionalInfoItemComponent implements OnInit {
 
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
+    if ((ev.target as HTMLElement).tagName === 'input' || (ev.target as HTMLElement).tagName === 'textarea') {
+      return;
+    }
+
     this.keyPress.emit(ev);
-    if (ev.key === 'ArrowRight') {
+
+    if (ev.key === 'ArrowRight' || ev.key === 'Enter') {
       if (this.type === 'panel') {
-        this.expanded = true;
+        if (this.expanded) {
+          this.editActionTriggered.emit();
+        } else {
+          this.expanded = true;
+        }
       } else {
         this.editActionTriggered.emit();
       }
@@ -43,22 +50,12 @@ export class TaskAdditionalInfoItemComponent implements OnInit {
       } else {
         this.collapseParent.emit();
       }
-    } else if (ev.key === 'Enter') {
-      this.enterPress.emit();
-      this.editActionTriggered.emit();
-
-      if (!this.expanded) {
-        this.expanded = true;
-      }
     }
   }
 
   constructor(
     public elementRef: ElementRef
   ) {
-  }
-
-  ngOnInit() {
   }
 
   focusEl() {
