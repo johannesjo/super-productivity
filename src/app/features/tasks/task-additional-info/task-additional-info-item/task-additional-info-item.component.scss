@@ -1,5 +1,13 @@
 @import '../../../../../variables';
 
+:host {
+  display: block;
+
+  &:focus {
+    outline: none;
+  }
+}
+
 .input-item,
 .mat-expansion-panel {
   box-shadow: none;
@@ -8,6 +16,11 @@
   border-style: solid;
   border-radius: 0;
   margin: 8px;
+
+  :host:focus & {
+    border: 1px dashed $c-focus-border;
+    border-color: $c-focus-border !important;
+  }
 
   &,
   ::ng-deep & .mat-expansion-panel-header {
@@ -210,6 +223,3 @@
 }
 
 
-*:focus {
-  outline: 2px solid $c-focus-border;
-}
