@@ -24,16 +24,19 @@ export class TaskAdditionalInfoItemComponent implements OnInit {
   @Output() collapseParent = new EventEmitter<void>();
   @Output() enterPress = new EventEmitter<void>();
   @Output() keyPress = new EventEmitter<KeyboardEvent>();
+  @Output() editActionTriggered = new EventEmitter<void>();
 
   @HostBinding('tabindex') tabindex = 3;
 
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     this.keyPress.emit(ev);
-    // tslint:disable-next-line
-    if (ev.key === 'ArrowRight' && !this.expanded) {
-      this.expanded = true;
-      // tslint:disable-next-line
+    if (ev.key === 'ArrowRight') {
+      if (this.type === 'panel') {
+        this.expanded = true;
+      } else {
+        this.editActionTriggered.emit();
+      }
     } else if (ev.key === 'ArrowLeft') {
       if (this.expanded) {
         this.expanded = false;
@@ -42,6 +45,8 @@ export class TaskAdditionalInfoItemComponent implements OnInit {
       }
     } else if (ev.key === 'Enter') {
       this.enterPress.emit();
+      this.editActionTriggered.emit();
+
       if (!this.expanded) {
         this.expanded = true;
       }
@@ -58,5 +63,10 @@ export class TaskAdditionalInfoItemComponent implements OnInit {
 
   focusEl() {
     this.elementRef.nativeElement.focus();
+  }
+
+  onInputItemClick() {
+    this.editActionTriggered.emit();
+    this.focusEl();
   }
 }

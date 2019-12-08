@@ -197,7 +197,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   onItemKeyPress(ev: KeyboardEvent) {
-    console.log(this.selectedItemIndex, ev.key);
     if (ev.key === 'ArrowUp' && this.selectedItemIndex > 0) {
       this.selectedItemIndex--;
       this.itemEls.toArray()[this.selectedItemIndex].focusEl();

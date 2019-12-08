@@ -59,8 +59,7 @@
     class="input-item --estimate"
     *ngIf="task.parentId"
     [inputIcon]="'arrow_forward'"
-    (enterPress)="taskService.setSelectedId(task.parentId)"
-    (click)="taskService.setSelectedId(task.parentId)"
+    (editActionTriggered)="taskService.setSelectedId(task.parentId)"
     (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
@@ -79,8 +78,7 @@
     class="input-item --estimate"
     *ngIf="!task.subTasks?.length"
     [inputIcon]="'edit'"
-    (enterPress)="estimateTime()"
-    (click)="estimateTime()"
+    (editActionTriggered)="estimateTime()"
     (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
@@ -107,8 +105,7 @@
     class="input-item"
     *ngIf="!task.repeatCfgId"
     [inputIcon]="task.reminderId ? 'edit': 'add'"
-    (click)="editReminder()"
-    (enterPress)="editReminder()"
+    (editActionTriggered)="editReminder()"
     (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
@@ -200,8 +197,7 @@
     class="input-item"
     *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
     [inputIcon]="'add'"
-    (click)="addAttachment()"
-    (enterPress)="addAttachment()"
+    (editActionTriggered)="addAttachment()"
     (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
@@ -218,8 +214,7 @@
     class="input-item"
     *ngIf="!task.parentId && !task.issueId"
     [inputIcon]="task.repeatCfgId ? 'edit': 'add'"
-    (click)="editTaskRepeatCfg()"
-    (enterPress)="editTaskRepeatCfg()"
+    (editActionTriggered)="editTaskRepeatCfg()"
     (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
