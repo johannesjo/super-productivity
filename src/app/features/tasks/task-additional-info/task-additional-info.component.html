@@ -61,6 +61,7 @@
     [inputIcon]="'arrow_forward'"
     (enterPress)="taskService.setSelectedId(task.parentId)"
     (click)="taskService.setSelectedId(task.parentId)"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container input-title>
@@ -80,6 +81,7 @@
     [inputIcon]="'edit'"
     (enterPress)="estimateTime()"
     (click)="estimateTime()"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container input-title>
@@ -107,6 +109,7 @@
     [inputIcon]="task.reminderId ? 'edit': 'add'"
     (click)="editReminder()"
     (enterPress)="editReminder()"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container input-title>
@@ -128,6 +131,7 @@
     [type]="'panel'"
     *ngIf="task.issueData"
     [expanded]="true"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container panel-header>
@@ -144,6 +148,7 @@
   <task-additional-info-item
     [type]="'panel'"
     [expanded]="task.notes || (!(task.issueId) && !task.attachmentIds?.length)"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container panel-header>
@@ -168,6 +173,7 @@
     [type]="'panel'"
     [expanded]="true"
     *ngIf="issueAttachments?.length || (localAttachments$|async)?.length"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container panel-header>
@@ -193,8 +199,10 @@
   <task-additional-info-item
     class="input-item"
     *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
+    [inputIcon]="'add'"
     (click)="addAttachment()"
     (enterPress)="addAttachment()"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container input-title>
@@ -203,19 +211,16 @@
     </ng-container>
     <ng-container input-value>
     </ng-container>
-    <button mat-icon-button
-            color="accent"
-            class="input-item__edit-btn">
-      <mat-icon>add</mat-icon>
-    </button>
   </task-additional-info-item>
 
 
   <task-additional-info-item
     class="input-item"
     *ngIf="!task.parentId && !task.issueId"
+    [inputIcon]="task.repeatCfgId ? 'edit': 'add'"
     (click)="editTaskRepeatCfg()"
     (enterPress)="editTaskRepeatCfg()"
+    (keyPress)="onItemKeyPress($event)"
     (collapseParent)="collapseParent()"
   >
     <ng-container input-title>
@@ -231,12 +236,6 @@
         {{repeatCfgDays}}
       </div>
     </ng-container>
-    <button mat-icon-button
-            color="accent"
-            class="input-item__edit-btn">
-      <mat-icon *ngIf="!task.repeatCfgId">add</mat-icon>
-      <mat-icon *ngIf="task.repeatCfgId">edit</mat-icon>
-    </button>
   </task-additional-info-item>
 
 </div>

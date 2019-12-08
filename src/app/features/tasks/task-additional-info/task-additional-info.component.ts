@@ -11,7 +11,7 @@ import {
   QueryList,
   ViewChildren
 } from '@angular/core';
-import {ShowSubTasksMode, TaskWithSubTasks} from '../task.model';
+import {TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
 import {BehaviorSubject, Observable, of} from 'rxjs';
@@ -46,7 +46,6 @@ import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-
   animations: [expandAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
-  @Input() selectedIndex = 0;
   @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
   @Output() tabIndexChange: EventEmitter<number> = new EventEmitter();
 
@@ -54,6 +53,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
 
+  selectedItemIndex = 0;
   T = T;
   issueAttachments: Attachment[];
   reminderId$ = new BehaviorSubject(null);
@@ -121,7 +121,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-   this.focusFirst();
+    this.focusFirst();
   }
 
   ngOnDestroy(): void {
@@ -196,10 +196,22 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this.taskService.setSelectedId(null);
   }
 
+  onItemKeyPress(ev: KeyboardEvent) {
+    console.log(this.selectedItemIndex, ev.key);
+    if (ev.key === 'ArrowUp' && this.selectedItemIndex > 0) {
+      this.selectedItemIndex--;
+      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
+    } else if (ev.key === 'ArrowDown' && this.itemEls.toArray().length > (this.selectedItemIndex + 1)) {
+      this.selectedItemIndex++;
+      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
+    }
+  }
+
   private focusFirst() {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
-      this.itemEls.first.elementRef.nativeElement.focus();
+      this.itemEls.first.focusEl();
+      this.selectedItemIndex = 0;
     }, 150);
   }
 }

@@ -23,17 +23,18 @@ export class TaskAdditionalInfoItemComponent implements OnInit {
 
   @Output() collapseParent = new EventEmitter<void>();
   @Output() enterPress = new EventEmitter<void>();
+  @Output() keyPress = new EventEmitter<KeyboardEvent>();
 
   @HostBinding('tabindex') tabindex = 3;
 
 
-
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
+    this.keyPress.emit(ev);
     // tslint:disable-next-line
-    if (ev['keyCode'] === 39 && !this.expanded) {
+    if (ev.key === 'ArrowRight' && !this.expanded) {
       this.expanded = true;
       // tslint:disable-next-line
-    } else if (ev['keyCode'] === 37) {
+    } else if (ev.key === 'ArrowLeft') {
       if (this.expanded) {
         this.expanded = false;
       } else {
