@@ -1,0 +1,35 @@
+<ng-container *ngIf="type==='input'">
+  <section class="input-item"
+           (click)="focusEl()">
+    <div class="input-item__title">
+      <ng-content select="[input-title]"></ng-content>
+    </div>
+    <div class="input-item__value">
+      <ng-content select="[input-value]"></ng-content>
+    </div>
+
+    <button mat-icon-button
+            color="accent"
+            class="input-item__edit-btn">
+      <mat-icon>{{inputIcon}}</mat-icon>
+    </button>
+
+    <ng-content select="[input-additional]"></ng-content>
+  </section>
+</ng-container>
+
+<ng-container *ngIf="type==='panel'">
+  <mat-expansion-panel
+    [expanded]="expanded">
+    <mat-expansion-panel-header
+      (click)="focusEl()">
+      <mat-panel-title>
+        <ng-content select="[panel-header]"></ng-content>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div class="panel-content-wrapper">
+      <ng-content select="[panel-content]"></ng-content>
+    </div>
+  </mat-expansion-panel>
+</ng-container>

@@ -1,11 +1,15 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ComponentFactoryResolver,
   EventEmitter,
   HostBinding,
   Input,
-  Output
+  OnDestroy,
+  Output,
+  QueryList,
+  ViewChildren
 } from '@angular/core';
 import {ShowSubTasksMode, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
@@ -32,6 +36,7 @@ import * as moment from 'moment';
 import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
 import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani';
 import {noopAnimation} from '../../../ui/animations/noop.ani';
+import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-additional-info-item.component';
 
 @Component({
   selector: 'task-additional-info',
@@ -40,17 +45,17 @@ import {noopAnimation} from '../../../ui/animations/noop.ani';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
 })
-export class TaskAdditionalInfoComponent {
+export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @Input() selectedIndex = 0;
   @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
   @Output() tabIndexChange: EventEmitter<number> = new EventEmitter();
 
-
   @HostBinding('@noop') alwaysTrue = true;
+
+  @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
 
   T = T;
   issueAttachments: Attachment[];
-  ShowSubTasksMode = ShowSubTasksMode;
   reminderId$ = new BehaviorSubject(null);
   reminderData$: Observable<ReminderCopy> = this.reminderId$.pipe(
     switchMap(id => id
@@ -85,6 +90,7 @@ export class TaskAdditionalInfoComponent {
     switchMap((ids) => this.attachmentService.getByIds$(ids))
   );
   private _taskData: TaskWithSubTasks;
+  private _focusTimeout: number;
 
   constructor(
     private _resolver: ComponentFactoryResolver,
@@ -103,6 +109,7 @@ export class TaskAdditionalInfoComponent {
     this.issueAttachments = this._issueService.getMappedAttachments(this._taskData.issueType, this._taskData.issueData);
     this.reminderId$.next(val.reminderId);
     this.repeatCfgId$.next(val.repeatCfgId);
+    this.focusFirst();
   }
 
   get task(): TaskWithSubTasks {
@@ -111,6 +118,14 @@ export class TaskAdditionalInfoComponent {
 
   get progress() {
     return this._taskData && this._taskData.timeEstimate && (this._taskData.timeSpent / this._taskData.timeEstimate) * 100;
+  }
+
+  ngAfterViewInit(): void {
+   this.focusFirst();
+  }
+
+  ngOnDestroy(): void {
+    window.clearTimeout(this._focusTimeout);
   }
 
   changeTaskNotes($event: string) {
@@ -175,5 +190,16 @@ export class TaskAdditionalInfoComponent {
           });
         }
       });
+  }
+
+  collapseParent() {
+    this.taskService.setSelectedId(null);
+  }
+
+  private focusFirst() {
+    window.clearTimeout(this._focusTimeout);
+    this._focusTimeout = window.setTimeout(() => {
+      this.itemEls.first.elementRef.nativeElement.focus();
+    }, 150);
   }
 }

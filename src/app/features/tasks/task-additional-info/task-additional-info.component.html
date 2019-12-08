@@ -2,7 +2,6 @@
      *ngIf="task.id"
      [@taskAdditionalInfoTaskChange]="task.id">
 
-
   <!--  <header class="task-title-wrapper">-->
   <!--    <button mat-icon-button-->
   <!--            (click)="close()">-->
@@ -56,169 +55,188 @@
   <!--    </div>-->
   <!--  </mat-expansion-panel>-->
 
-  <section class="input-item --estimate"
-           *ngIf="task.parentId"
-           (click)="taskService.setSelectedId(task.parentId)">
-    <div class="input-item__title">
-      <mat-icon class="panel-header-icon">subdirectory_arrow_right</mat-icon>
+  <task-additional-info-item
+    class="input-item --estimate"
+    *ngIf="task.parentId"
+    [inputIcon]="'arrow_forward'"
+    (enterPress)="taskService.setSelectedId(task.parentId)"
+    (click)="taskService.setSelectedId(task.parentId)"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container input-title>
+      <mat-icon>subdirectory_arrow_right</mat-icon>
       <span style="white-space: nowrap">Parent</span>
-    </div>
-    <div class="input-item__value"
-         style="white-space: nowrap; overflow: hidden; display: inline-block; width: 200px;text-overflow: ellipsis">
+    </ng-container>
+    <ng-container input-value
+                  style="white-space: nowrap; overflow: hidden; display: inline-block; width: 200px;text-overflow: ellipsis">
       {{(taskService.getById$(task.parentId)|async)?.title}}
-    </div>
-    <button mat-icon-button
-            color="accent"
-            class="input-item__edit-btn">
-      <mat-icon>arrow_forward</mat-icon>
-    </button>
-  </section>
+    </ng-container>
 
-  <section class="input-item --estimate"
-           *ngIf="!task.subTasks?.length"
-           (click)="estimateTime()">
-    <div class="input-item__title">
-      <mat-icon class="panel-header-icon">timer</mat-icon>
+  </task-additional-info-item>
+
+  <task-additional-info-item
+    class="input-item --estimate"
+    *ngIf="!task.subTasks?.length"
+    [inputIcon]="'edit'"
+    (enterPress)="estimateTime()"
+    (click)="estimateTime()"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container input-title>
+      <mat-icon>timer</mat-icon>
       <span>Time</span>
-    </div>
-    <div class="input-item__value">
-      <div class="time">
+    </ng-container>
+    <ng-container input-value>
           <span class="time-val">
             <span [innerHTML]="task.timeSpent|msToString"></span>
           </span>
-        <span class="separator">/</span>
-        <span [innerHTML]="task.timeEstimate|msToString"
-              class="time-val"></span>
-      </div>
-    </div>
-    <button mat-icon-button
-            color="accent"
-            class="input-item__edit-btn">
-      <mat-icon>edit</mat-icon>
-    </button>
-    <progress-bar [cssClass]="false &&'bg-accent'"
-                  [progress]="progress"></progress-bar>
-  </section>
+      <span class="separator">/</span>
+      <span [innerHTML]="task.timeEstimate|msToString"
+            class="time-val"></span>
 
-  <section class="input-item"
-           *ngIf="!task.repeatCfgId"
-           (click)="editReminder()">
-    <div class="input-item__title">
-      <mat-icon class="panel-header-icon">alarm</mat-icon>
+      <ng-container input-additional>
+        <progress-bar [cssClass]="false &&'bg-accent'"
+                      [progress]="progress"></progress-bar>
+      </ng-container>
+    </ng-container>
+  </task-additional-info-item>
+
+  <task-additional-info-item
+    class="input-item"
+    *ngIf="!task.repeatCfgId"
+    [inputIcon]="task.reminderId ? 'edit': 'add'"
+    (click)="editReminder()"
+    (enterPress)="editReminder()"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container input-title>
+      <mat-icon>alarm</mat-icon>
       <span *ngIf="task.reminderId">Reminder</span>
       <span *ngIf="!task.reminderId">Schedule Task</span>
-    </div>
-    <div class="input-item__value">
+    </ng-container>
+    <ng-container input-value>
       <div class="reminder-value"
            matTooltipPosition="left"
            *ngIf="reminderData$|async as reminderData"
            [matTooltip]="reminderData.remindAt|date:'short'">
         {{reminderData.remindAt|humanizeTimestamp}}
       </div>
-    </div>
-    <button mat-icon-button
-            color="accent"
-            class="input-item__edit-btn">
-      <mat-icon *ngIf="!task.reminderId">add</mat-icon>
-      <mat-icon *ngIf="task.reminderId">edit</mat-icon>
-    </button>
-  </section>
+    </ng-container>
+  </task-additional-info-item>
 
-  <mat-expansion-panel *ngIf="task.issueData"
-                       [expanded]="true">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <issue-header [task]="task"></issue-header>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
+  <task-additional-info-item
+    [type]="'panel'"
+    *ngIf="task.issueData"
+    [expanded]="true"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container panel-header>
+      <issue-header [task]="task"></issue-header>
+    </ng-container>
 
-    <issue-content [task]="task"
-                   class="panel-content-wrapper issue-content-wrapper"></issue-content>
-  </mat-expansion-panel>
+    <ng-container panel-content>
+      <issue-content [task]="task"
+                     class="panel-content-wrapper issue-content-wrapper"></issue-content>
+    </ng-container>
+  </task-additional-info-item>
 
 
-  <mat-expansion-panel [expanded]="task.notes || (!(task.issueId) && !task.attachmentIds?.length)">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon *ngIf="task.notes"
-                  class="panel-header-icon">chat
-        </mat-icon>
-        <mat-icon *ngIf="!task.notes"
-                  class="panel-header-icon">chat_bubble_outline
-        </mat-icon>
-        <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <div class="panel-content-wrapper note-wrapper">
+  <task-additional-info-item
+    [type]="'panel'"
+    [expanded]="task.notes || (!(task.issueId) && !task.attachmentIds?.length)"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container panel-header>
+      <mat-icon *ngIf="task.notes"
+      >chat
+      </mat-icon>
+      <mat-icon *ngIf="!task.notes"
+      >chat_bubble_outline
+      </mat-icon>
+      <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
+    </ng-container>
+
+    <ng-container panel-content>
       <inline-markdown (changed)="changeTaskNotes($event)"
                        [model]="task.notes"
                        [isShowControls]="true"></inline-markdown>
-    </div>
-  </mat-expansion-panel>
+    </ng-container>
+  </task-additional-info-item>
 
 
-  <mat-expansion-panel
+  <task-additional-info-item
+    [type]="'panel'"
     [expanded]="true"
-    *ngIf="issueAttachments?.length || (localAttachments$|async)?.length">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon class="panel-header-icon">attachment</mat-icon>
-        <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
+    *ngIf="issueAttachments?.length || (localAttachments$|async)?.length"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container panel-header>
+      <mat-icon>attachment</mat-icon>
+      <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
+    </ng-container>
 
-    <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
-      <ng-container *ngIf="task.issueType">
+    <ng-container panel-content>
+      <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
+        <ng-container *ngIf="task.issueType">
+          <h3 class="mat-h3"
+              style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: task.issueType} }}</h3>
+          <attachment-list [attachments]="issueAttachments"
+                           [isDisableControls]="true"></attachment-list>
+        </ng-container>
         <h3 class="mat-h3"
-            style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: task.issueType} }}</h3>
-        <attachment-list [attachments]="issueAttachments"
-                         [isDisableControls]="true"></attachment-list>
-      </ng-container>
-      <h3 class="mat-h3"
-          style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
-      <attachment-list [attachments]="localAttachments$|async"></attachment-list>
-    </div>
-  </mat-expansion-panel>
+            style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
+        <attachment-list [attachments]="localAttachments$|async"></attachment-list>
+      </div>
+    </ng-container>
+  </task-additional-info-item>
 
-  <section class="input-item"
-           *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
-           (click)="addAttachment()">
-    <div class="input-item__title">
-      <mat-icon class="panel-header-icon">attachment</mat-icon>
+  <task-additional-info-item
+    class="input-item"
+    *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
+    (click)="addAttachment()"
+    (enterPress)="addAttachment()"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container input-title>
+      <mat-icon>attachment</mat-icon>
       <span>Add attachment</span>
-    </div>
-    <div class="input-item__value">
-    </div>
+    </ng-container>
+    <ng-container input-value>
+    </ng-container>
     <button mat-icon-button
             color="accent"
             class="input-item__edit-btn">
       <mat-icon>add</mat-icon>
     </button>
-  </section>
+  </task-additional-info-item>
 
 
-  <section class="input-item"
-           *ngIf="!task.parentId && !task.issueId"
-           (click)="editTaskRepeatCfg()">
-    <div class="input-item__title">
-      <mat-icon class="panel-header-icon"
-                style="transform: rotate(45deg);">repeat
+  <task-additional-info-item
+    class="input-item"
+    *ngIf="!task.parentId && !task.issueId"
+    (click)="editTaskRepeatCfg()"
+    (enterPress)="editTaskRepeatCfg()"
+    (collapseParent)="collapseParent()"
+  >
+    <ng-container input-title>
+      <mat-icon
+        style="transform: rotate(45deg);">repeat
       </mat-icon>
       <span>Repeat</span>
-    </div>
-    <div class="input-item__value">
+    </ng-container>
+    <ng-container input-value>
       <div class="reminder-value"
            matTooltipPosition="left"
            *ngIf="repeatCfgDays$|async as repeatCfgDays">
         {{repeatCfgDays}}
       </div>
-    </div>
+    </ng-container>
     <button mat-icon-button
             color="accent"
             class="input-item__edit-btn">
       <mat-icon *ngIf="!task.repeatCfgId">add</mat-icon>
       <mat-icon *ngIf="task.repeatCfgId">edit</mat-icon>
     </button>
-  </section>
+  </task-additional-info-item>
 
 </div>
