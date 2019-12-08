@@ -413,7 +413,8 @@ export class TaskService {
   }
 
   focusTask(id: string) {
-    this._store.dispatch(new FocusTask({id}));
+    document.getElementById('t-' + id).focus();
+    // this._store.dispatch(new FocusTask({id}));
   }
 
   focusLastActiveTask() {

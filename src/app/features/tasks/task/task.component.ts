@@ -84,6 +84,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.task.isDone;
   }
 
+  @HostBinding('id')
+  private get _taskId() {
+    return 't-' + this.task.id;
+  }
+
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout: number;
@@ -169,14 +174,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // this._taskService.focusTaskId$
     //   .pipe(
     //     takeUntil(this._destroy$),
-    //     distinctUntilChanged()
     //   )
     //   .subscribe((id) => {
-    //     this._currentFocusId = id;
     //     if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
     //       this.focusSelfElement();
     //     }
-    //     this._cd.markForCheck();
     //   });
 
     // hacky but relatively performant
