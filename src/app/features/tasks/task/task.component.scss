@@ -655,12 +655,12 @@ progress-bar {
     }
 
     :host.isCurrent & {
-      opacity: 0.2;
     }
 
     :host.isCurrent &::ng-deep mat-icon {
       transform: scale(1.4) !important;
       transform-origin: center center;
+      opacity: 0.18;
     }
 
     @include mq(xs, max) {
@@ -704,6 +704,8 @@ progress-bar {
   }
 }
 
+$this-play-size: 22px;
+
 .play-icon-indicator {
   position: absolute;
   top: 50%;
@@ -711,12 +713,13 @@ progress-bar {
   transform: translate(-50%, -50%);
   color: $c-accent;
 
-  height: 22px;
+  height: $this-play-size;
   margin-top: 1px;
-  width: 22px;
-  font-size: 22px;
-  line-height: 22px;
+  width: $this-play-size;
+  font-size: $this-play-size;
+  line-height: $this-play-size;
   opacity: 1 !important;
+  z-index: 3;
 
   @include mq(xs) {
     margin-top: 0;
