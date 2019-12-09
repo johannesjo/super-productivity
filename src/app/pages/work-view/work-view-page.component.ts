@@ -29,7 +29,7 @@ import {DOCUMENT} from '@angular/common';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
-const SMALL_CONTAINER_WIDTH = 600;
+const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;
 
 @Component({
