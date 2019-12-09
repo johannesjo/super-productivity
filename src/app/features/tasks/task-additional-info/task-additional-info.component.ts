@@ -104,13 +104,16 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ) {
   }
 
-  @Input() set task(val: TaskWithSubTasks) {
-    this._taskData = val;
+  @Input() set task(newVal: TaskWithSubTasks) {
+    const prev = this._taskData;
+    this._taskData = newVal;
     this._attachmentIds$.next(this._taskData.attachmentIds);
     this.issueAttachments = this._issueService.getMappedAttachments(this._taskData.issueType, this._taskData.issueData);
-    this.reminderId$.next(val.reminderId);
-    this.repeatCfgId$.next(val.repeatCfgId);
-    this.focusFirst();
+    this.reminderId$.next(newVal.reminderId);
+    this.repeatCfgId$.next(newVal.repeatCfgId);
+    if (!prev || !newVal || (prev.id !== newVal.id)) {
+      this.focusFirst();
+    }
   }
 
   get task(): TaskWithSubTasks {
