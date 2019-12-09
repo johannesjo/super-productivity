@@ -134,6 +134,9 @@
       transform: scale($task-current-task-zoom);
     }
   }
+  :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
+      background: $dark-theme-bg-slightly-lighter;
+  }
 
   :host:first-child > .inner-wrapper > & {
     border-top-left-radius: $task-border-radius;
@@ -317,6 +320,7 @@
       background: $task-c-selected-bg-light;
     }
 
+    :host-context(.isDarkTheme).isCurrent &,
     :host-context(.isDarkTheme).isSelected & {
       background: $task-c-selected-bg-dark;
     }
