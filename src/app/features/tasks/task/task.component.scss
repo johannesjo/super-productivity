@@ -134,8 +134,9 @@
       transform: scale($task-current-task-zoom);
     }
   }
+
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
-      background: $dark-theme-bg-slightly-lighter;
+    background: $dark-theme-bg-slightly-lighter;
   }
 
   :host:first-child > .inner-wrapper > & {
@@ -619,28 +620,32 @@ progress-bar {
   margin-right: 0;
   width: 40px;
   height: 40px;
+  min-width: 40px;
   z-index: $z-drag-handle;
   cursor: grab;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  //display: flex;
+  //justify-content: center;
+  //align-items: center;
   position: relative;
 
-  @extend %standardTaskOpacityChange;
 
   // fixes drag and drop on mobile
   touch-action: none;
 
   > * {
-    width: 40px;
-  }
-
-  .type-ico-wrapper {
-    opacity: 1;
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+  }
+
+
+  .type-ico-wrapper {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    opacity: $task-icon-default-opacity;
+    position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -649,8 +654,21 @@ progress-bar {
       display: none;
     }
 
+    :host.isCurrent & {
+      opacity: 0.2;
+    }
+
+    :host.isCurrent &::ng-deep mat-icon {
+      transform: scale(1.4) !important;
+      transform-origin: center center;
+    }
+
     @include mq(xs, max) {
       display: none;
+    }
+
+    a {
+      opacity: 1;
     }
   }
 
@@ -685,6 +703,31 @@ progress-bar {
     }
   }
 }
+
+.play-icon-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: $c-accent;
+
+  height: 22px;
+  margin-top: 1px;
+  width: 22px;
+  font-size: 22px;
+  line-height: 22px;
+  opacity: 1 !important;
+
+  @include mq(xs) {
+    margin-top: 0;
+    //left: 10px;
+  }
+
+  .first-line:hover & {
+    display: none;
+  }
+}
+
 
 .ico-btn {
   color: inherit;
@@ -799,25 +842,3 @@ $min-badge-size: $s*2.25;
   text-align: center;
 }
 
-.play-icon-indicator {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: $c-accent;
-
-  height: 20px;
-  margin-top: 1px;
-  width: 20px;
-  font-size: 20px;
-  line-height: 20px;
-  left: 24px;
-
-  @include mq(xs) {
-    margin-top: 0;
-    left: 10px;
-  }
-
-  .first-line:hover & {
-    display: none;
-  }
-}

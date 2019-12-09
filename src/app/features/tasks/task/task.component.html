@@ -18,10 +18,6 @@
        class="first-line"
        (contextmenu)="openContextMenu($event)">
 
-    <mat-icon *ngIf="isCurrent"
-              class="play-icon-indicator"
-    >play_arrow
-    </mat-icon>
 
     <ng-container *ngIf="isTouch">
       <div #blockLeft
@@ -60,12 +56,16 @@
           class="drag-handle-ico"
           svgIcon="drag_handle">
         </mat-icon>
+        <mat-icon *ngIf="isCurrent"
+                  class="play-icon-indicator">play_arrow
+        </mat-icon>
+
 
         <div class="type-ico-wrapper">
           <mat-icon class="task-type-ico"
                     *ngIf="task.repeatCfgId"
                     (click)="editTaskRepeatCfg()"
-                    style="transform: rotate(45deg);">repeat
+                    [style.transform]="isCurrent ? 'scale(1.4) rotate(45deg)': 'rotate(45deg)'">repeat
           </mat-icon>
 
           <mat-icon class="task-type-ico"
@@ -74,18 +74,12 @@
                     color="accent">update
           </mat-icon>
 
-          <a class="task-type-ico ico-btn"
-             *ngIf="!task.issueData?.wasUpdated && task.issueData"
-             [href]="task.issueData?.url"
-             mat-icon-button
-             tabindex="2"
-             color=""
-             target="_blank"
-             [title]="T.F.TASK.CMP.OPEN_ISSUE|translate">
+          <div class="task-type-ico"
+             *ngIf="!task.issueData?.wasUpdated && task.issueData">
             <div *ngIf="task.issueData?.storyPoints"
                  class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
             <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-          </a>
+          </div>
         </div>
       </div>
 
