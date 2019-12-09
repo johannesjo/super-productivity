@@ -125,9 +125,7 @@
     border-top-color: $task-c-current !important;
     border-left-color: $task-c-current !important;
     border-right-color: $task-c-current !important;
-  }
 
-  @include isCurrent {
     box-shadow: $task-active-shadow;
     border-radius: 12px !important;
     bottom: -2px;
@@ -136,7 +134,6 @@
       transform: scale($task-current-task-zoom);
     }
   }
-
 
   :host:first-child > .inner-wrapper > & {
     border-top-left-radius: $task-border-radius;
