@@ -14,7 +14,7 @@ import {LayoutService} from '../../core-ui/layout/layout.service';
 import {DragulaService} from 'ng2-dragula';
 import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-a-break.service';
 import {ActivatedRoute} from '@angular/router';
-import {from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip} from 'rxjs';
+import {from, fromEvent, Observable, of, ReplaySubject, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {delay, distinctUntilChanged, filter, map, share, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
@@ -81,6 +81,14 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
   isVerySmallMainContainer$: Observable<boolean> = this.containerWidth$.pipe(
     map(v => v < VERY_SMALL_CONTAINER_WIDTH),
     distinctUntilChanged(),
+  );
+
+  // to still display its data when panel is closing
+  selectedTaskWithDelayForNone$ = this.taskService.selectedTask$.pipe(
+    switchMap((task) => task
+      ? of(task)
+      : of(null).pipe(delay(200))
+    )
   );
 
 
