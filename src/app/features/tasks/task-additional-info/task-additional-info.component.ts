@@ -127,7 +127,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this._subs.add(this.taskService.taskAdditionalInfoTargetPanel$.pipe(
       // hacky but we need a minimal delay to make sure selectedTaskId is ready
-      delay(10),
+      delay(50),
       withLatestFrom(this.taskService.selectedTaskId$),
       filter(([, id]) => !!id),
     ).subscribe(([v]) => {
@@ -231,8 +231,13 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   private _focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration = 150) {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
-      this.selectedItemIndex = this.itemEls.toArray().findIndex(el => el === cmpInstance);
-      cmpInstance.elementRef.nativeElement.focus();
+      const i = this.itemEls.toArray().findIndex(el => el === cmpInstance);
+      if (i === -1) {
+        this._focusItem(cmpInstance);
+      } else {
+        this.selectedItemIndex = i;
+        cmpInstance.elementRef.nativeElement.focus();
+      }
     }, timeoutDuration);
   }
 }
