@@ -8,6 +8,11 @@ export enum ShowSubTasksMode {
   Show = 2,
 }
 
+export enum TaskAdditionalInfoTargetPanel {
+  Default = 'Default',
+  Attachments = 'Attachments',
+}
+
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
 export interface TimeSpentOnDayCopy {
@@ -93,6 +98,7 @@ export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
   selectedTaskId: string | null;
+  taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel;
   lastCurrentTaskId: string | null;
   focusTaskId: string | null;
   lastActiveFocusTaskId: string | null;

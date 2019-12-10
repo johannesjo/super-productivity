@@ -1,5 +1,5 @@
 import {TaskActions, TaskActionTypes} from './task.actions';
-import {ShowSubTasksMode, TaskState, TaskWithSubTasks} from '../task.model';
+import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskState, TaskWithSubTasks} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../../attachment/store/attachment.actions';
@@ -28,6 +28,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 
   currentTaskId: null,
   selectedTaskId: null,
+  taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
   lastCurrentTaskId: null,
   todaysTaskIds: [],
   backlogTaskIds: [],
@@ -136,7 +137,12 @@ export function taskReducer(
     }
 
     case TaskActionTypes.SetSelectedTask: {
-      return {...state, selectedTaskId: (action.payload === state.selectedTaskId) ? null : action.payload};
+      const {id, taskAdditionalInfoTargetPanel} = action.payload;
+      return {
+        ...state,
+        taskAdditionalInfoTargetPanel: (id === state.selectedTaskId) ? null : taskAdditionalInfoTargetPanel,
+        selectedTaskId: (id === state.selectedTaskId) ? null : id,
+      };
     }
 
     // Task Actions

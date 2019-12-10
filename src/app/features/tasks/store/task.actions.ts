@@ -1,6 +1,13 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {DropListModelSource, Task, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
+import {
+  DropListModelSource,
+  Task,
+  TaskAdditionalInfoTargetPanel,
+  TaskState,
+  TaskWithIssueData,
+  TaskWithSubTasks
+} from '../task.model';
 import {IssueData} from '../../issue/issue';
 import {RoundTimeOption} from '../../project/project.model';
 
@@ -62,7 +69,7 @@ export class SetCurrentTask implements Action {
 export class SetSelectedTask implements Action {
   readonly type = TaskActionTypes.SetSelectedTask;
 
-  constructor(public payload: string) {
+  constructor(public payload: { id: string; taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel }) {
   }
 }
 

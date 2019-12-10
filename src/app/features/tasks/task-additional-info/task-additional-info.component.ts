@@ -7,14 +7,15 @@ import {
   Input,
   OnDestroy,
   QueryList,
+  ViewChild,
   ViewChildren
 } from '@angular/core';
-import {TaskWithSubTasks} from '../task.model';
+import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, Observable, of} from 'rxjs';
+import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
 import {Attachment} from '../../attachment/attachment.model';
-import {map, switchMap} from 'rxjs/operators';
+import {delay, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
@@ -47,6 +48,9 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @HostBinding('@noop') alwaysTrue = true;
 
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
+  @ViewChild('attachmentPanelElRef', {
+    static: false,
+  }) attachmentPanelElRef: TaskAdditionalInfoItemComponent;
 
   selectedItemIndex = 0;
   isFocusNotes = false;
@@ -87,6 +91,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   );
   private _taskData: TaskWithSubTasks;
   private _focusTimeout: number;
+  private _subs = new Subscription();
 
   constructor(
     private _resolver: ComponentFactoryResolver,
@@ -120,7 +125,18 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this._focusFirst();
+    this._subs.add(this.taskService.taskAdditionalInfoTargetPanel$.pipe(
+      // hacky but we need a minimal delay to make sure selectedTaskId is ready
+      delay(10),
+      withLatestFrom(this.taskService.selectedTaskId$),
+      filter(([, id]) => !!id),
+    ).subscribe(([v]) => {
+      if (v === TaskAdditionalInfoTargetPanel.Attachments) {
+        this._focusItem(this.attachmentPanelElRef);
+      } else {
+        this._focusFirst();
+      }
+    }));
   }
 
   ngOnDestroy(): void {
@@ -207,10 +223,16 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   private _focusFirst() {
+    this._focusTimeout = window.setTimeout(() => {
+      this._focusItem(this.itemEls.first, 0);
+    }, 150);
+  }
+
+  private _focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration = 150) {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
-      this.itemEls.first.focusEl();
-      this.selectedItemIndex = 0;
-    }, 150);
+      this.selectedItemIndex = this.itemEls.toArray().findIndex(el => el === cmpInstance);
+      cmpInstance.elementRef.nativeElement.focus();
+    }, timeoutDuration);
   }
 }

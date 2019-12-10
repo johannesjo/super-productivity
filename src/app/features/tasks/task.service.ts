@@ -18,6 +18,7 @@ import {
   SHORT_SYNTAX_REG_EX,
   ShowSubTasksMode,
   Task,
+  TaskAdditionalInfoTargetPanel,
   TaskArchive,
   TaskWithIssueData,
   TaskWithSubTasks
@@ -30,7 +31,6 @@ import {
   AddTimeSpent,
   DeleteTask,
   FocusLastActiveTask,
-  FocusTask,
   LoadTaskState,
   Move,
   MoveDown,
@@ -75,9 +75,11 @@ import {
   selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
   selectScheduledTasks,
-  selectSelectedTask, selectSelectedTaskId,
+  selectSelectedTask,
+  selectSelectedTaskId,
   selectStartableTaskIds,
   selectStartableTasks,
+  selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIssueId,
   selectTaskEntities,
@@ -126,6 +128,11 @@ export class TaskService {
 
   selectedTask$: Observable<TaskWithSubTasks> = this._store.pipe(
     select(selectSelectedTask),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
+
+  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel> = this._store.pipe(
+    select(selectTaskAdditionalInfoTargetPanel),
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
@@ -288,8 +295,8 @@ export class TaskService {
     }
   }
 
-  setSelectedId(id: string) {
-    this._store.dispatch(new SetSelectedTask(id));
+  setSelectedId(id: string, taskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default) {
+    this._store.dispatch(new SetSelectedTask({id, taskAdditionalInfoTargetPanel}));
   }
 
   startFirstStartable(isStartIfHasCurrent = false) {

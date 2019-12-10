@@ -171,6 +171,7 @@
 
 
   <task-additional-info-item
+    #attachmentPanelElRef
     [type]="'panel'"
     [expanded]="true"
     *ngIf="issueAttachments?.length || (localAttachments$|async)?.length"

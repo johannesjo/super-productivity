@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {TaskService} from '../task.service';
 import {Subject} from 'rxjs';
-import {ShowSubTasksMode, TaskWithSubTasks} from '../task.model';
+import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
@@ -319,7 +319,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleShowAttachments() {
-    this._taskService.setSelectedId(this.task.id);
+    this._taskService.setSelectedId(this.task.id, TaskAdditionalInfoTargetPanel.Attachments);
     this.focusSelf();
   }
 
