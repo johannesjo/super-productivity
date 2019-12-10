@@ -3,11 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   ComponentFactoryResolver,
-  EventEmitter,
   HostBinding,
   Input,
   OnDestroy,
-  Output,
   QueryList,
   ViewChildren
 } from '@angular/core';
@@ -46,9 +44,6 @@ import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-
   animations: [expandAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
-  @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
-  @Output() tabIndexChange: EventEmitter<number> = new EventEmitter();
-
   @HostBinding('@noop') alwaysTrue = true;
 
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
@@ -112,7 +107,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this.reminderId$.next(newVal.reminderId);
     this.repeatCfgId$.next(newVal.repeatCfgId);
     if (!prev || !newVal || (prev.id !== newVal.id)) {
-      this.focusFirst();
+      this._focusFirst();
     }
   }
 
@@ -125,7 +120,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.focusFirst();
+    this._focusFirst();
   }
 
   ngOnDestroy(): void {
@@ -133,7 +128,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   changeTaskNotes($event: string) {
-    this.taskNotesChanged.emit($event);
+    this.taskService.update(this.task.id, {notes: $event});
   }
 
 
@@ -211,7 +206,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private focusFirst() {
+  private _focusFirst() {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
       this.itemEls.first.focusEl();
