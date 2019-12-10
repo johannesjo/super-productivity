@@ -1,5 +1,7 @@
 $task-shadow: $shadow-card-shadow;
-$task-active-shadow: $whiteframe-shadow-6dp;
+$task-active-shadow-dark: $whiteframe-shadow-6dp;
+$task-active-shadow-light: $whiteframe-shadow-3dp;
+
 $task-first-line-min-height: 40px;
 $task-icon-default-opacity: 0.7;
 $task-current-task-zoom: 1.0178571428, 1;

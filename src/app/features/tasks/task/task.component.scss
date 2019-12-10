@@ -77,10 +77,12 @@
   // NOTE: also applies to child tasks
   :host-context(.isLightTheme).isSelected & {
     background: $task-c-selected-bg-light;
+    border-color: $task-c-selected-border-light;
   }
 
   :host-context(.isDarkTheme).isSelected & {
     background: $task-c-selected-bg-dark;
+    border-color: $task-c-selected-border-dark;
   }
 
   .inner-wrapper.isSelected > & {
@@ -88,15 +90,9 @@
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
     box-shadow: $whiteframe-shadow-1dp;
-
-    @include lightTheme() {
-      background: $light-theme-bg-darker;
-      border-color: $task-c-selected-border-light;
-    }
-    @include darkTheme() {
-      background: $task-c-selected-bg-dark;
-      border-color: $task-c-selected-border-dark;
-    }
+    //@include darkTheme {
+    //  box-shadow: $whiteframe-shadow-1dp;
+    //}
 
     @include mq(xs) {
       transform-origin: left;
@@ -126,7 +122,6 @@
     border-left-color: $task-c-current !important;
     border-right-color: $task-c-current !important;
 
-    box-shadow: $task-active-shadow;
     border-radius: 12px !important;
     bottom: -2px;
     top: -2px;
@@ -135,9 +130,14 @@
     }
   }
 
+  :host-context(.isLightTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
+    box-shadow: $task-active-shadow-light;
+  }
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
     background: $dark-theme-bg-slightly-lighter;
+    box-shadow: $task-active-shadow-dark;
   }
+
 
   :host:first-child > .inner-wrapper > & {
     border-top-left-radius: $task-border-radius;
