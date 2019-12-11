@@ -8,6 +8,8 @@
   }
 }
 
+// SHARED
+// ------
 .input-item,
 .mat-expansion-panel {
   box-shadow: none;
@@ -44,6 +46,8 @@
   }
 }
 
+// PANEL
+// -----
 :host::ng-deep {
   .mat-expansion-panel-body {
     padding: 0;
@@ -76,6 +80,44 @@
 }
 
 
+.panel-content-wrapper {
+  margin: $s $s;
+  display: block;
+  @include standardThemeTextColorLessIntense();
+
+
+  ::ng-deep inline-markdown {
+    &.isFocused .markdown-wrapper {
+      box-shadow: $whiteframe-shadow-5dp;
+      border-color: transparent;
+    }
+
+    .markdown-wrapper {
+      min-height: 60px;
+      box-shadow: $whiteframe-shadow-1dp;
+      border-radius: $card-border-radius* 3;
+      overflow: hidden !important;
+
+      @include lightTheme {
+        background: $light-theme-bg-darker;
+        border: 1px solid $light-theme-extra-border-color;
+      }
+      @include darkTheme() {
+        border-radius: $card-border-radius;
+        background: $dark-theme-bg-lighter;
+        box-shadow: $whiteframe-shadow-1dp;
+        border: 1px solid $dark-theme-extra-border-color;
+      }
+    }
+
+    .markdown-unparsed,
+    .markdown-parsed {
+      color: inherit;
+      background-color: inherit;
+    }
+  }
+}
+
 :host::ng-deep issue-header > * {
   display: inline-flex;
   justify-content: center;
@@ -84,65 +126,8 @@
 }
 
 
-.panel-content-wrapper {
-  margin: $s $s;
-  display: block;
-
-  //@include layerTextAndBgHigher();
-  @include standardThemeTextColorLessIntense();
-
-
-  &.issue-content-wrapper {
-    // required for inner paddings to be there
-    margin: 0;
-    overflow: hidden;
-  }
-
-  &.attachment-list-tab-wrapper {
-    padding: $s $s*2;
-
-    h3 {
-      margin-bottom: $s;
-    }
-  }
-
-  &.note-wrapper {
-    display: block;
-    overflow: hidden;
-    box-shadow: $whiteframe-shadow-1dp;
-  }
-
-  &.sub-tasks {
-    margin: 0;
-  }
-
-  ::ng-deep {
-    .markdown-wrapper {
-      min-height: 60px;
-
-      @include mq(xs) {
-        //max-height: 40vh;
-      }
-    }
-
-    .markdown-unparsed,
-    .markdown-parsed {
-      color: inherit;
-      background-color: inherit;
-
-      @include lightTheme {
-        background: $light-theme-bg-darker;
-      }
-      @include darkTheme() {
-        background: $dark-theme-bg-lighter;
-      }
-    }
-  }
-}
-
-
 // Input-Item
-// Similar styles to panel
+// ----------
 .input-item {
   position: relative;
   display: flex;

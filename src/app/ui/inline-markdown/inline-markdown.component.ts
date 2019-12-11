@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostBinding,
   Input,
   OnDestroy,
   OnInit,
@@ -48,6 +49,10 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     map(cfg => cfg && cfg.isTurnOffMarkdown),
     startWith(false),
   );
+
+  @HostBinding('class.isFocused') get isFocused() {
+    return this.isShowEdit;
+  }
 
   private _hideOverFlowTimeout: number;
 
