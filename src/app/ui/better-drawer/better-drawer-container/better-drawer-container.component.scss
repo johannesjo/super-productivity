@@ -1,5 +1,8 @@
 @import '../../../../variables';
 
+$z-side: 44;
+$z-content: 45;
+
 :host {
   display: flex;
   flex-direction: row;
@@ -11,11 +14,12 @@
 .content {
   flex-grow: 1;
   position: relative;
+  z-index: $z-content;
 }
 
 .side {
   position: relative;
-  z-index: 44;
+  z-index: $z-side;
   transition: $transition-leave;
   transition-property: opacity, margin-right;
   height: 100%;
@@ -55,7 +59,7 @@
   }
 
   :host.isOpen & {
-    box-shadow: $whiteframe-shadow-1dp !important;
+    box-shadow: $whiteframe-shadow-2dp !important;
     opacity: 1;
     transition: $transition-enter;
   }
