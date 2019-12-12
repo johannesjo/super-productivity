@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添付ファイルを追加する",
         "ATTACHMENTS": "添付ファイル {{nr}}",
+        "FROM_PARENT": "（親から）",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 件の添付ファイル",
         "LOCAL_ATTACHMENTS": "ローカル添付",
         "NOTES": "ノート",
         "PARENT": "親",
         "REMINDER": "リマインダー",
         "REPEAT": "繰り返す",
+        "SCHEDULE_TASK": "スケジュールタスク",
         "TIME": "時間"
       },
       "ADD_TASK_BAR": {

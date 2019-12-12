@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Eklenti ekle",
         "ATTACHMENTS": "Ekler {{nr}}",
+        "FROM_PARENT": "(Ebeveynden)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Ekler",
         "LOCAL_ATTACHMENTS": "Yerel Ekler",
         "NOTES": "Notlar",
         "PARENT": "ebeveyn",
         "REMINDER": "Hatırlatma",
         "REPEAT": "Tekrar et",
+        "SCHEDULE_TASK": "Görev Takvimi",
         "TIME": "zaman"
       },
       "ADD_TASK_BAR": {

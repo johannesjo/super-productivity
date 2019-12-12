@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "첨부 파일 추가",
         "ATTACHMENTS": "첨부 파일 {{nr}}",
+        "FROM_PARENT": "(부모님)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 첨부 파일",
         "LOCAL_ATTACHMENTS": "로컬 첨부 파일",
         "NOTES": "노트",
         "PARENT": "부모의",
         "REMINDER": "조언",
         "REPEAT": "반복",
+        "SCHEDULE_TASK": "작업 예약",
         "TIME": "시각"
       },
       "ADD_TASK_BAR": {

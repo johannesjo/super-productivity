@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Añadir un adjunto",
         "ATTACHMENTS": "Adjuntos {{nr}}",
+        "FROM_PARENT": "(del padre)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Adjuntos",
         "LOCAL_ATTACHMENTS": "Adjuntos locales",
         "NOTES": "Notas",
         "PARENT": "Padre",
         "REMINDER": "Recordatorio",
         "REPEAT": "Repetir",
+        "SCHEDULE_TASK": "Tarea programada",
         "TIME": "hora"
       },
       "ADD_TASK_BAR": {

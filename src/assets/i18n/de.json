@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Anhang hinzufügen",
         "ATTACHMENTS": "Anhänge {{nr}}",
+        "FROM_PARENT": "(von Eltern)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Anhänge",
         "LOCAL_ATTACHMENTS": "Lokale Anhänge",
         "NOTES": "Anmerkungen",
         "PARENT": "Elternteil",
         "REMINDER": "Erinnerung",
         "REPEAT": "Wiederholen",
+        "SCHEDULE_TASK": "Task planen",
         "TIME": "Zeit"
       },
       "ADD_TASK_BAR": {

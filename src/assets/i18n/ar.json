@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "إضافة مرفق",
         "ATTACHMENTS": "المرفقات {{nr}}",
+        "FROM_PARENT": "(من الوالد)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} المرفقات",
         "LOCAL_ATTACHMENTS": "المرفقات المحلية",
         "NOTES": "ملاحظات",
         "PARENT": "الأبوين",
         "REMINDER": "تذكير",
         "REPEAT": "كرر",
+        "SCHEDULE_TASK": "جدولة مهمة",
         "TIME": "زمن"
       },
       "ADD_TASK_BAR": {

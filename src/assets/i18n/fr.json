@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Ajouter une pièce jointe",
         "ATTACHMENTS": "Pièces jointes {{nr}}",
+        "FROM_PARENT": "(du parent)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Pièces jointes",
         "LOCAL_ATTACHMENTS": "Pièces jointes locales",
         "NOTES": "Notes",
         "PARENT": "Parent",
         "REMINDER": "Rappel",
         "REPEAT": "Répéter",
+        "SCHEDULE_TASK": "Planifier une tâche",
         "TIME": "Temps"
       },
       "ADD_TASK_BAR": {

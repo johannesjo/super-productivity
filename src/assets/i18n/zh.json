@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添加附件",
         "ATTACHMENTS": "附件 {{nr}}",
+        "FROM_PARENT": "（来自家长）",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 附件",
         "LOCAL_ATTACHMENTS": "本地附件",
         "NOTES": "笔记",
         "PARENT": "亲",
         "REMINDER": "提醒",
         "REPEAT": "重复",
+        "SCHEDULE_TASK": "安排任务",
         "TIME": "时间"
       },
       "ADD_TASK_BAR": {

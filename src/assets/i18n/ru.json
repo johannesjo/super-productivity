@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Добавить приложение",
         "ATTACHMENTS": "Вложения {{nr}}",
+        "FROM_PARENT": "(от родителя)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} вложения",
         "LOCAL_ATTACHMENTS": "Локальные вложения",
         "NOTES": "Заметки",
         "PARENT": "родитель",
         "REMINDER": "Напоминание",
         "REPEAT": "Повторение",
+        "SCHEDULE_TASK": "Расписание задачи",
         "TIME": "время"
       },
       "ADD_TASK_BAR": {
