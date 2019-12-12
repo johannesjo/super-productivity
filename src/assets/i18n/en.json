@@ -470,12 +470,14 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Add attachment",
         "ATTACHMENTS": "Attachments ({{nr}})",
+        "FROM_PARENT": "(from Parent)",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Notes",
         "PARENT": "Parent",
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
+        "SCHEDULE_TASK": "Schedule Task",
         "TIME": "Time"
       },
       "ADD_TASK_BAR": {

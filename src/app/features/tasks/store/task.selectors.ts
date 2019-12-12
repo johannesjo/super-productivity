@@ -1,7 +1,7 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {TASK_FEATURE_NAME} from './task.reducer';
 import {selectIssueEntityMap} from '../../issue/issue.selector';
-import {Task, TaskAdditionalInfoTargetPanel, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
+import {Task, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueProviderKey} from '../../issue/issue';
 import {filterStartableTasks} from './task.reducer.util';
 import {taskAdapter} from './task.adapter';
@@ -186,6 +186,12 @@ export const selectHasTasksToWorkOn = createSelector(
 export const selectTaskById = createSelector(
   selectTaskFeatureState,
   (state, props: { id: string }): Task => state.entities[props.id]
+);
+
+export const selectTaskByIdWithIssueData = createSelector(
+  selectTaskFeatureState,
+  selectIssueEntityMap,
+  (state, issueEntityMap, props: { id: string }): TaskWithIssueData => mapIssueDataToTask([state.entities[props.id]], issueEntityMap)[0]
 );
 
 

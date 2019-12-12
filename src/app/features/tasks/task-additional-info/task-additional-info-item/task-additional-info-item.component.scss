@@ -181,11 +181,23 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 
 .input-item__value {
   text-align: right;
-  display: block;
   flex-grow: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+
+  &,
+  ::ng-deep span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  ::ng-deep mat-icon {
+    margin-right: $s;
+    font-size: 32px;
+    height: 32px;
+    width: 32px;
+  }
 
   @include lightTheme() {
     color: rgba(var(--palette-foreground-secondary-text), var(--palette-foreground-secondary-text-alpha, 1));

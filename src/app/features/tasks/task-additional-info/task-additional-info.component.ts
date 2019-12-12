@@ -10,7 +10,7 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
+import {TaskAdditionalInfoTargetPanel, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
 import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
@@ -84,11 +84,16 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     ),
   );
 
-
   private _attachmentIds$ = new BehaviorSubject([]);
   localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
     switchMap((ids) => this.attachmentService.getByIds$(ids))
   );
+
+  parentId$ = new BehaviorSubject<string>(null);
+  parentTaskData$: Observable<TaskWithIssueData> = this.parentId$.pipe(
+    switchMap((id) => id ? this.taskService.getByIdWithIssueData$(id) : of(null))
+  );
+
   private _taskData: TaskWithSubTasks;
   private _focusTimeout: number;
   private _subs = new Subscription();
@@ -111,6 +116,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this.issueAttachments = this._issueService.getMappedAttachments(this._taskData.issueType, this._taskData.issueData);
     this.reminderId$.next(newVal.reminderId);
     this.repeatCfgId$.next(newVal.repeatCfgId);
+    this.parentId$.next(newVal.parentId);
+
     if (!prev || !newVal || (prev.id !== newVal.id)) {
       this._focusFirst();
     }
@@ -150,12 +157,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   close() {
     this.taskService.setSelectedId(null);
-  }
-
-  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
-    if (isChanged) {
-      this.taskService.update(this._taskData.id, {title: newTitle});
-    }
   }
 
   estimateTime() {

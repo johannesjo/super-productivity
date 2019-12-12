@@ -14,7 +14,8 @@
       <span>{{T.F.TASK.ADDITIONAL_INFO.PARENT|translate}}</span>
     </ng-container>
     <ng-container input-value>
-      {{(taskService.getById$(task.parentId)|async)?.title}}
+      <mat-icon *ngIf="(parentTaskData$|async)?.issueType as issueType"[svgIcon]="issueType|issueIcon"></mat-icon>
+      <span>{{(taskService.getById$(task.parentId)|async)?.title}}</span>
     </ng-container>
 
   </task-additional-info-item>
@@ -54,7 +55,7 @@
     <ng-container input-title>
       <mat-icon>alarm</mat-icon>
       <span *ngIf="task.reminderId">{{T.F.TASK.ADDITIONAL_INFO.REMINDER|translate}}</span>
-      <span *ngIf="!task.reminderId">Schedule Task</span>
+      <span *ngIf="!task.reminderId">{{T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK|translate}}</span>
     </ng-container>
     <ng-container input-value>
       <div class="reminder-value"

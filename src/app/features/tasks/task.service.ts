@@ -80,7 +80,7 @@ import {
   selectStartableTaskIds,
   selectStartableTasks,
   selectTaskAdditionalInfoTargetPanel,
-  selectTaskById,
+  selectTaskById, selectTaskByIdWithIssueData,
   selectTaskByIssueId,
   selectTaskEntities,
   selectTasksByRepeatConfigId,
@@ -507,6 +507,10 @@ export class TaskService {
   // ------
   getById$(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
+  }
+
+  getByIdWithIssueData$(id: string): Observable<TaskWithIssueData> {
+    return this._store.pipe(select(selectTaskByIdWithIssueData, {id}), take(1));
   }
 
   getTasksByRepeatCfgId$(repeatCfgId: string): Observable<Task[]> {
