@@ -22,7 +22,6 @@ $z-content: 45;
   z-index: $z-side;
   transition: $transition-leave;
   transition-property: opacity, margin-right;
-  height: 100%;
   // NOTE: if this value is to big it might mess, with the push out logic, as
   // the width is not really 40% any more
   min-width: 200px;
@@ -33,7 +32,6 @@ $z-content: 45;
   border-bottom: 0;
   opacity: 0;
   //box-shadow: 0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px rgba(0, 0, 0, 0.12) !important;
-  @include scrollYImportant();
 
   @include lightTheme() {
     background: $light-theme-bg-darker;
@@ -54,7 +52,7 @@ $z-content: 45;
     right: -100%;
 
     @include mq(xs, max) {
-      width: 90vw !important;
+      width: 88vw !important;
     }
   }
 
@@ -63,6 +61,13 @@ $z-content: 45;
     opacity: 1;
     transition: $transition-enter;
   }
+}
+
+.side-inner {
+  @include scrollYImportant();
+  height: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 
@@ -81,5 +86,49 @@ $z-content: 45;
   }
   @include darkTheme() {
     background-color: rgba(189, 189, 189, 0.6);
+  }
+}
+
+
+.close-btn {
+  display: none;
+  font-size: 32px;
+  height: 48px;
+  width: 48px;
+  text-align: center;
+  line-height: 46px;
+  position: absolute;
+  right: 100%;
+  top: $s*2;
+  background: inherit;
+  border: 1px solid;
+  z-index: 2;
+  box-shadow: $whiteframe-shadow-1dp;
+  cursor: pointer;
+
+  &,
+  &:focus,
+  &:active {
+    outline: none
+  }
+
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  @include darkTheme() {
+    background: $dark-theme-bg-slightly-lighter;
+    border-color: $dark-theme-extra-border-color;
+  }
+
+
+  :host.isOver & {
+    display: block;
+
+  }
+
+  @include mq(xs) {
+    display: none;
   }
 }

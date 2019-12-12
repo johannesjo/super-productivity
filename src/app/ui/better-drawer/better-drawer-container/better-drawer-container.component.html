@@ -3,13 +3,19 @@
 </div>
 
 <div class="backdrop"
-     (click)="onBackdropClicked()"
+     (click)="close()"
      *ngIf="isOpenGet && isOverGet"
      @fade></div>
 
 
 <div class="side"
      [style]="sideStyle">
-  <ng-content select="[better-drawer-side]"></ng-content>
+  <button class="close-btn"
+       (click)="close()">
+    &times;
+  </button>
+  <div class="side-inner">
+    <ng-content select="[better-drawer-side]"></ng-content>
+  </div>
 </div>
 

@@ -45,7 +45,7 @@ export class BetterDrawerContainerComponent implements OnInit {
     this._updateStyle();
   }
 
-  onBackdropClicked() {
+  close() {
     this.wasClosed.emit();
   }
 
