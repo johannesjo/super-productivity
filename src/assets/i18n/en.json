@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Add attachment",
         "ATTACHMENTS": "Attachments ({{nr}})",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
         "LOCAL_ATTACHMENTS": "Local Attachments",
-        "NOTES": "Notes"
+        "NOTES": "Notes",
+        "PARENT": "Parent",
+        "REMINDER": "Reminder",
+        "REPEAT": "Repeat",
+        "TIME": "Time"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "Add task",
