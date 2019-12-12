@@ -46,6 +46,20 @@
   }
 }
 
+mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
+.input-item {
+  &:hover,
+  &:focus {
+    @include lightTheme() {
+      background: #eee;
+    }
+    @include darkTheme() {
+      background: $dark-theme-bg-lightest;
+    }
+  }
+}
+
+
 // PANEL
 // -----
 :host::ng-deep {
@@ -134,15 +148,6 @@
   align-items: center;
   height: 48px;
   cursor: pointer;
-
-  &:hover {
-    @include lightTheme() {
-      background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
-    }
-    @include darkTheme() {
-      background-color: $dark-theme-bg-lightest;
-    }
-  }
 
   &.--estimate {
     progress-bar {
