@@ -12,10 +12,9 @@
   >
     <ng-container input-title>
       <mat-icon>subdirectory_arrow_right</mat-icon>
-      <span style="white-space: nowrap">Parent</span>
+      <span>Parent</span>
     </ng-container>
-    <ng-container input-value
-                  style="white-space: nowrap; overflow: hidden; display: inline-block; width: 200px;text-overflow: ellipsis">
+    <ng-container input-value>
       {{(taskService.getById$(task.parentId)|async)?.title}}
     </ng-container>
 
