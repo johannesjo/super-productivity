@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "添付ファイルを追加する",
         "ATTACHMENTS": "添付ファイル {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 件の添付ファイル",
         "LOCAL_ATTACHMENTS": "ローカル添付",
-        "NOTES": "ノート"
+        "NOTES": "ノート",
+        "PARENT": "親",
+        "REMINDER": "リマインダー",
+        "REPEAT": "繰り返す",
+        "TIME": "時間"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "タスクを追加",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "タスクリストへ",
     "MANAGE_PROJECTS": "プロジェクトを管理する",
     "METRICS": "メトリック",
+    "NOTES": "ノート",
     "PROCRASTINATE": "先延ばし",
     "PROJECTS": "プロジェクト",
     "PROJECT_MENU": "プロジェクトメニュー",

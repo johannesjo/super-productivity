@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Ajouter une pièce jointe",
         "ATTACHMENTS": "Pièces jointes {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Pièces jointes",
         "LOCAL_ATTACHMENTS": "Pièces jointes locales",
-        "NOTES": "Notes"
+        "NOTES": "Notes",
+        "PARENT": "Parent",
+        "REMINDER": "Rappel",
+        "REPEAT": "Répéter",
+        "TIME": "Temps"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "Ajouter une tâche",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "Aller à la liste des tâches",
     "MANAGE_PROJECTS": "Gérer les projets",
     "METRICS": "Métriques",
+    "NOTES": "Remarques",
     "PROCRASTINATE": "Procrastiner",
     "PROJECTS": "Projets",
     "PROJECT_MENU": "Menu du projet",

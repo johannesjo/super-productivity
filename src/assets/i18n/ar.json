@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "إضافة مرفق",
         "ATTACHMENTS": "المرفقات {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} المرفقات",
         "LOCAL_ATTACHMENTS": "المرفقات المحلية",
-        "NOTES": "ملاحظات"
+        "NOTES": "ملاحظات",
+        "PARENT": "الأبوين",
+        "REMINDER": "تذكير",
+        "REPEAT": "كرر",
+        "TIME": "زمن"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "إضافة مهمة",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "انتقل إلى قائمة المهام",
     "MANAGE_PROJECTS": "إدارة المشاريع",
     "METRICS": "المقاييس",
+    "NOTES": "ملاحظات",
     "PROCRASTINATE": "ماطل",
     "PROJECTS": "مشاريع",
     "PROJECT_MENU": "قائمة المشروع",

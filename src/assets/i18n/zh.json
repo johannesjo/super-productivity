@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "添加附件",
         "ATTACHMENTS": "附件 {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 附件",
         "LOCAL_ATTACHMENTS": "本地附件",
-        "NOTES": "笔记"
+        "NOTES": "笔记",
+        "PARENT": "亲",
+        "REMINDER": "提醒",
+        "REPEAT": "重复",
+        "TIME": "时间"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "添加任务",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "转到任务列表",
     "MANAGE_PROJECTS": "管理项目",
     "METRICS": "度量",
+    "NOTES": "笔记",
     "PROCRASTINATE": "拖延",
     "PROJECTS": "项目",
     "PROJECT_MENU": "项目菜单",

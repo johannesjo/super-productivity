@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "첨부 파일 추가",
         "ATTACHMENTS": "첨부 파일 {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 첨부 파일",
         "LOCAL_ATTACHMENTS": "로컬 첨부 파일",
-        "NOTES": "노트"
+        "NOTES": "노트",
+        "PARENT": "부모의",
+        "REMINDER": "조언",
+        "REPEAT": "반복",
+        "TIME": "시각"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "작업 추가",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "작업 목록으로 이동",
     "MANAGE_PROJECTS": "프로젝트 관리",
     "METRICS": "측정 항목",
+    "NOTES": "노트",
     "PROCRASTINATE": "미루다",
     "PROJECTS": "프로젝트",
     "PROJECT_MENU": "프로젝트 메뉴",

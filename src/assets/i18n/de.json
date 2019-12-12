@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Anhang hinzufügen",
         "ATTACHMENTS": "Anhänge {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Anhänge",
         "LOCAL_ATTACHMENTS": "Lokale Anhänge",
-        "NOTES": "Anmerkungen"
+        "NOTES": "Anmerkungen",
+        "PARENT": "Elternteil",
+        "REMINDER": "Erinnerung",
+        "REPEAT": "Wiederholen",
+        "TIME": "Zeit"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "Aufgabe hinzufügen",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "Gehe zur Aufgabenliste",
     "MANAGE_PROJECTS": "Projekte verwalten",
     "METRICS": "Metriken",
+    "NOTES": "Anmerkungen",
     "PROCRASTINATE": "Prokrastination",
     "PROJECTS": "Projekte",
     "PROJECT_MENU": "Projektmenü",

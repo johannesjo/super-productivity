@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Добавить приложение",
         "ATTACHMENTS": "Вложения {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} вложения",
         "LOCAL_ATTACHMENTS": "Локальные вложения",
-        "NOTES": "Заметки"
+        "NOTES": "Заметки",
+        "PARENT": "родитель",
+        "REMINDER": "Напоминание",
+        "REPEAT": "Повторение",
+        "TIME": "время"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "Добавить задачу",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "Перейти к списку задач",
     "MANAGE_PROJECTS": "Управление проектами",
     "METRICS": "Метрика",
+    "NOTES": "Заметки",
     "PROCRASTINATE": "Лениться",
     "PROJECTS": "Проектов",
     "PROJECT_MENU": "Меню проекта",

@@ -468,10 +468,15 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Eklenti ekle",
         "ATTACHMENTS": "Ekler {{nr}}",
         "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Ekler",
         "LOCAL_ATTACHMENTS": "Yerel Ekler",
-        "NOTES": "Notlar"
+        "NOTES": "Notlar",
+        "PARENT": "ebeveyn",
+        "REMINDER": "Hatırlatma",
+        "REPEAT": "Tekrar et",
+        "TIME": "zaman"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "Görev ekle",
@@ -817,6 +822,7 @@
     "GO_TO_TASK_LIST": "Görev listesine git",
     "MANAGE_PROJECTS": "Projeleri Yönet",
     "METRICS": "Metrik",
+    "NOTES": "Notlar",
     "PROCRASTINATE": "ertelemek",
     "PROJECTS": "Projeler",
     "PROJECT_MENU": "Proje Menüsü",
