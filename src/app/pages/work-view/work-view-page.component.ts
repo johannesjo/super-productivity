@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  Inject,
   OnDestroy,
   OnInit,
   ViewChild
@@ -14,7 +13,7 @@ import {LayoutService} from '../../core-ui/layout/layout.service';
 import {DragulaService} from 'ng2-dragula';
 import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-a-break.service';
 import {ActivatedRoute} from '@angular/router';
-import {from, fromEvent, Observable, of, ReplaySubject, Subscription, timer, zip} from 'rxjs';
+import {from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {delay, filter, map, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
@@ -23,7 +22,6 @@ import {T} from '../../t.const';
 import {ImprovementService} from '../../features/metric/improvement/improvement.service';
 import {ProjectService} from '../../features/project/project.service';
 import {workViewProjectChangeAnimation} from '../../ui/animations/work-view-project-change.ani';
-import {DOCUMENT} from '@angular/common';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -62,9 +60,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
     switchMap(() => this.splitTopEl$),
     switchMap((el) => fromEvent(el, 'scroll')),
   );
-
-
-
 
 
   @ViewChild('splitTopEl', {static: false, read: ElementRef}) set splitTopElRef(ref: ElementRef) {
