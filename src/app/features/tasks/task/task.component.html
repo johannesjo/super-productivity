@@ -75,7 +75,7 @@
           </mat-icon>
 
           <div class="task-type-ico"
-             *ngIf="!task.issueData?.wasUpdated && task.issueData">
+               *ngIf="!task.issueData?.wasUpdated && task.issueData">
             <div *ngIf="task.issueData?.storyPoints"
                  class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
             <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
@@ -281,6 +281,15 @@
             <mat-icon>attachment</mat-icon>
             {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
           </button>
+
+          <a *ngIf="task.issueData?.url"
+             [href]="task.issueData.url"
+             mat-menu-item
+             target="_blank"
+             tabindex="2">
+            <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+            {{T.F.TASK.CMP.OPEN_ISSUE|translate}}
+          </a>
 
           <button (click)="updateIssueData()"
                   *ngIf="task.issueId"

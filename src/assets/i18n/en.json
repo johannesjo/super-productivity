@@ -502,7 +502,7 @@
         "MOVE_TO_OTHER_PROJECT": "Move to other Project",
         "MOVE_TO_TODAY": "Move to today's list",
         "OPEN_ATTACH": "Attach file or link",
-        "OPEN_ISSUE": "Open issue in a new browser tab",
+        "OPEN_ISSUE": "Open in browser",
         "OPEN_TASK_MENU": "Open task menu",
         "OPEN_TIME": "Time Tracking",
         "REPEAT_EDIT": "Edit repeat task config",
