@@ -66,18 +66,10 @@
       </div>
     </div>
 
+
     <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
                    [selectedIndex]="selectedTabIndex"
                    dynamicHeight>
-      <mat-tab [label]="T.PDS.EVALUATION|translate"
-               *ngIf="!(configService.misc$|async)?.isHideEvaluationSheet">
-        <section class="tab-inner"
-                 style="max-width: 600px">
-          <evaluation-sheet (save)="onEvaluationSave()"
-                            [day]="(dayStr$|async)"></evaluation-sheet>
-        </section>
-      </mat-tab>
-
       <mat-tab [label]="(isForToday)
       ? (T.PDS.TODAY|translate)
       : (T.PDS.TASK_LIST|translate)">
@@ -136,18 +128,20 @@
                 </button>
               </mat-menu>
             </div>
-
           </ng-container>
-
-
         </section>
       </mat-tab>
-      <mat-tab *ngIf="isForToday"
-               [label]="T.PDS.WEEK|translate">
-        <section class="tab-inner full-width">
-          <worklog-week></worklog-week>
+
+
+      <mat-tab [label]="T.PDS.EVALUATION|translate"
+               *ngIf="!(configService.misc$|async)?.isHideEvaluationSheet">
+        <section class="tab-inner"
+                 style="max-width: 600px">
+          <evaluation-sheet (save)="onEvaluationSave()"
+                            [day]="(dayStr$|async)"></evaluation-sheet>
         </section>
       </mat-tab>
+
 
       <mat-tab *ngIf="isForToday"
                [label]="T.PDS.PLAN|translate">
@@ -155,6 +149,15 @@
           <plan-tasks-tomorrow></plan-tasks-tomorrow>
         </section>
       </mat-tab>
+
+
+      <mat-tab *ngIf="isForToday"
+               [label]="T.PDS.WEEK|translate">
+        <section class="tab-inner full-width">
+          <worklog-week></worklog-week>
+        </section>
+      </mat-tab>
+
 
     </mat-tab-group>
 
