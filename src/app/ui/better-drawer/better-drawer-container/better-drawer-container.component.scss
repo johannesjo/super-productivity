@@ -21,7 +21,7 @@ $z-content: 45;
   position: relative;
   z-index: $z-side;
   transition: $transition-leave;
-  transition-property: opacity, margin-right;
+  transition-property: opacity, margin-right, right;
   // NOTE: if this value is to big it might mess, with the push out logic, as
   // the width is not really 40% any more
   min-width: 200px;
@@ -73,7 +73,7 @@ $z-content: 45;
 
 .backdrop {
   display: block;
-  opacity: 0.6;
+  opacity: 1;
   top: 0;
   left: 0;
   right: 0;
@@ -85,7 +85,7 @@ $z-content: 45;
     background-color: rgba(var(--palette-background-card), 0.6);
   }
   @include darkTheme() {
-    background-color: rgba(189, 189, 189, 0.6);
+    background-color: rgba(189, 189, 189, 0.4);
   }
 }
 
@@ -118,6 +118,7 @@ $z-content: 45;
   }
 
   @include darkTheme() {
+    color: $dark-theme-text-color;
     background: $dark-theme-bg-slightly-lighter;
     border-color: $dark-theme-extra-border-color;
   }
