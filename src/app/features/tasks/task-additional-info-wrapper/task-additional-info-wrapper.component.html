@@ -1,4 +1,4 @@
-<better-drawer-container [isOver]="(layoutService.isNotesOver$|async)"
+<better-drawer-container [isOver]="isAlwaysOver || (layoutService.isNotesOver$|async)"
                          [isOpen]="taskService.selectedTask$|async"
                          (wasClosed)="taskService.setSelectedId(null)"
                          [sideWidth]="40">

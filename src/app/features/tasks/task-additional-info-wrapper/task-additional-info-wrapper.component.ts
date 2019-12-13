@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskService} from '../task.service';
 import {ProjectService} from '../../project/project.service';
 import {LayoutService} from '../../../core-ui/layout/layout.service';
@@ -12,6 +12,8 @@ import {of} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskAdditionalInfoWrapperComponent {
+  @Input() isAlwaysOver = false;
+
   // to still display its data when panel is closing
   selectedTaskWithDelayForNone$ = this.taskService.selectedTask$.pipe(
     switchMap((task) => task
