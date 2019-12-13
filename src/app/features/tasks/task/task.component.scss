@@ -38,7 +38,8 @@
 
 .inner-wrapper {
   position: relative;
-  padding: $task-inner-padding-top-bottom 0;
+  // NOTE: -1 px because we move the box slightly up
+  padding: #{$task-inner-padding-top-bottom - 1} 0 $task-inner-padding-top-bottom;
   margin-bottom: 0;
 }
 
@@ -47,11 +48,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  top: 0;
+  top: -1px;
   transition: $transition-standard;
   transition-property: transform, box-shadow;
   border: 1px solid $task-c-border-light;
-  border-top-width: 0;
 
   :host.gu-mirror & {
     box-shadow: $whiteframe-shadow-8dp !important;
@@ -110,10 +110,6 @@
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
     border-color: $task-c-current !important;
     border-width: 2px !important;
-    border-bottom-color: $task-c-current !important;
-    border-top-color: $task-c-current !important;
-    border-left-color: $task-c-current !important;
-    border-right-color: $task-c-current !important;
 
     border-radius: 12px !important;
     bottom: -2px;
@@ -126,6 +122,7 @@
   :host-context(.isLightTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
     box-shadow: $task-active-shadow-light;
   }
+
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
     background: $dark-theme-bg-slightly-lighter;
     box-shadow: $task-active-shadow-dark;
@@ -140,24 +137,6 @@
   :host:last-child > .inner-wrapper > & {
     border-bottom-left-radius: $task-border-radius;
     border-bottom-right-radius: $task-border-radius;
-  }
-
-  // NOTE: there are also styles in the task list component, because of host not being usable
-  // with the adjacent child selector
-  :host:first-child > .inner-wrapper > & {
-    border-top-width: 1px;
-  }
-
-  :host-context(.isLightTheme):last-child > .inner-wrapper > & {
-    @include mq(xs, max) {
-      border-bottom-color: $task-c-border-light;
-    }
-  }
-
-  :host-context(.isDarkTheme):last-child > .inner-wrapper > & {
-    @include mq(xs, max) {
-      border-bottom-color: $task-c-border-dark;
-    }
   }
 }
 
