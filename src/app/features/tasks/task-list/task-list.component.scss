@@ -41,12 +41,6 @@
   transform: translate(-50%, -50%);
 }
 
-
-// additional info has a margin so we need a border
-task.isAdditionalInfoOpen + task::ng-deep .box {
-  border-top-width: 1px;
-}
-
 .expand-tasks-btn {
   opacity: 0.8;
 

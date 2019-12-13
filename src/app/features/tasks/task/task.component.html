@@ -362,14 +362,6 @@
                 [cssClass]="'bg-accent'"
                 [progress]="progress"></progress-bar>
 
-  <!--  <task-additional-info (tabIndexChange)="onTabIndexChange($event)"-->
-  <!--                        (taskNotesChanged)="onTaskNotesChanged($event)"-->
-  <!--                        *ngIf="task._isAdditionalInfoOpen"-->
-  <!--                        [@expand]-->
-  <!--                        [selectedIndex]="task._currentTab"-->
-  <!--                        [task]="task"-->
-  <!--                        class="additional-info"></task-additional-info>-->
-
   <div *ngIf="task.subTasks && task.subTasks.length"
        class="sub-tasks">
     <button (click)="toggleSubTaskMode()"

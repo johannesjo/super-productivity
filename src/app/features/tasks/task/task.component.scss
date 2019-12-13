@@ -40,13 +40,6 @@
   position: relative;
   padding: $task-inner-padding-top-bottom 0;
   margin-bottom: 0;
-
-  :host.isAdditionalInfoOpen > & {
-    margin-top: $s*2;
-    margin-bottom: $s*2;
-    box-shadow: $whiteframe-shadow-1dp;
-    border-top-width: 1px;
-  }
 }
 
 .box {
@@ -151,16 +144,9 @@
 
   // NOTE: there are also styles in the task list component, because of host not being usable
   // with the adjacent child selector
-  :host:first-child > .inner-wrapper > &,
-  :host.isAdditionalInfoOpen > .inner-wrapper > & {
+  :host:first-child > .inner-wrapper > & {
     border-top-width: 1px;
   }
-
-  // because the shadow gets to intense otherwise
-  :host.isAdditionalInfoOpen > .inner-wrapper > & {
-    border-bottom-width: 0;
-  }
-
 
   :host-context(.isLightTheme):last-child > .inner-wrapper > & {
     @include mq(xs, max) {
