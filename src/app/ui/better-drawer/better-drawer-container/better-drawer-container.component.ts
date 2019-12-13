@@ -1,6 +1,26 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, OnInit, Output} from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostBinding,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {fadeAnimation} from '../../animations/fade.ani';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
+import {Observable, ReplaySubject, Subscription} from 'rxjs';
+import {distinctUntilChanged, filter, map, share, switchMap, tap} from 'rxjs/operators';
+import {observeWidth} from '../../../util/resize-observer-obs';
+import {MainContainerClass} from '../../../app.constants';
+
+
+const SMALL_CONTAINER_WIDTH = 620;
+const VERY_SMALL_CONTAINER_WIDTH = 450;
 
 @Component({
   selector: 'better-drawer-container',
@@ -9,7 +29,7 @@ import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation]
 })
-export class BetterDrawerContainerComponent implements OnInit {
+export class BetterDrawerContainerComponent implements OnInit, AfterContentInit, OnDestroy {
   @Input() sideWidth: number;
 
   @Input() set isOpen(v: boolean) {
@@ -32,17 +52,62 @@ export class BetterDrawerContainerComponent implements OnInit {
 
   @Output() wasClosed = new EventEmitter<void>();
 
-  public sideStyle: SafeStyle;
+  @ViewChild('contentElRef', {static: false, read: ElementRef}) set setContentElRef(ref: ElementRef) {
+    if (ref) {
+      this.contentEl$.next(ref.nativeElement);
+    }
+  }
+
+  contentEl$ = new ReplaySubject<HTMLElement>(1);
+
+  containerWidth$: Observable<number> = this.contentEl$.pipe(
+    filter(el => !!el),
+    switchMap((el) => observeWidth(el)),
+    distinctUntilChanged(),
+    share(),
+  );
+  isSmallMainContainer$: Observable<boolean> = this.containerWidth$.pipe(
+    map(v => v < SMALL_CONTAINER_WIDTH),
+    distinctUntilChanged(),
+  );
+  isVerySmallMainContainer$: Observable<boolean> = this.containerWidth$.pipe(
+    map(v => v < VERY_SMALL_CONTAINER_WIDTH),
+    distinctUntilChanged(),
+  );
+
+  sideStyle: SafeStyle;
 
   private _isOpen: boolean;
   private _isOver: boolean;
+  private _subs = new Subscription();
 
 
-  constructor(private _domSanitizer: DomSanitizer) {
+  constructor(
+    private _elementRef: ElementRef,
+    private _domSanitizer: DomSanitizer,
+  ) {
   }
 
   ngOnInit(): void {
     this._updateStyle();
+  }
+
+  ngAfterContentInit(): void {
+    const containerEl = this._elementRef.nativeElement;
+    this._subs.add(this.isSmallMainContainer$.subscribe(v => {
+      v
+        ? containerEl.classList.add(MainContainerClass.isSmallMainContainer)
+        : containerEl.classList.remove(MainContainerClass.isSmallMainContainer);
+    }));
+    this._subs.add(this.isVerySmallMainContainer$.subscribe(v => {
+      v
+        ? containerEl.classList.add(MainContainerClass.isVerySmallMainContainer)
+        : containerEl.classList.remove(MainContainerClass.isVerySmallMainContainer);
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   close() {
@@ -60,6 +125,5 @@ export class BetterDrawerContainerComponent implements OnInit {
     ;
     const widthStyle = ` width: ${this.sideWidth}%;`;
     this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(style + widthStyle);
-
   }
 }

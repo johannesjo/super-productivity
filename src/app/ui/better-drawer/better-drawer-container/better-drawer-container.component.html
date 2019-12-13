@@ -1,4 +1,5 @@
-<div class="content">
+<div class="content"
+     #contentElRef>
   <ng-content select="[better-drawer-content]"></ng-content>
 </div>
 
@@ -11,7 +12,7 @@
 <div class="side"
      [style]="sideStyle">
   <button class="close-btn"
-       (click)="close()">
+          (click)="close()">
     &times;
   </button>
   <div class="side-inner">

@@ -5,11 +5,13 @@
       @content;
     }
   } @else if ($sel and $sel ==':host') {
-    @at-root  :host-context(.isSmallMainContainer) {
+    @at-root :host-context(.isSmallMainContainer) {
       @content;
     }
   } @else if ($sel and $sel !='') {
-    @at-root  :host-context(.isSmallMainContainer) & {
+    @at-root
+    .isSmallMainContainer &,
+    :host-context(.isSmallMainContainer) & {
       @content;
     }
   } @else {
@@ -26,11 +28,13 @@
       @content;
     }
   } @else if ($sel and $sel ==':host') {
-    @at-root  :host-context(.isVerySmallMainContainer) {
+    @at-root :host-context(.isVerySmallMainContainer) {
       @content;
     }
   } @else if ($sel and $sel !='') {
-    @at-root  :host-context(.isVerySmallMainContainer) & {
+    @at-root
+    .isVerySmallMainContainer &,
+    :host-context(.isVerySmallMainContainer) & {
       @content;
     }
   } @else {

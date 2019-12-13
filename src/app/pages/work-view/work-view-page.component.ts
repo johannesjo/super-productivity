@@ -16,21 +16,18 @@ import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-
 import {ActivatedRoute} from '@angular/router';
 import {from, fromEvent, Observable, of, ReplaySubject, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
-import {delay, distinctUntilChanged, filter, map, share, switchMap} from 'rxjs/operators';
+import {delay, filter, map, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
 import {T} from '../../t.const';
 import {ImprovementService} from '../../features/metric/improvement/improvement.service';
 import {ProjectService} from '../../features/project/project.service';
 import {workViewProjectChangeAnimation} from '../../ui/animations/work-view-project-change.ani';
-import {observeWidth} from '../../util/resize-observer-obs';
-import {BodyClass} from '../../app.constants';
 import {DOCUMENT} from '@angular/common';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
-const SMALL_CONTAINER_WIDTH = 620;
-const VERY_SMALL_CONTAINER_WIDTH = 450;
+
 
 @Component({
   selector: 'work-view',
@@ -59,29 +56,13 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
     map(v => v[0]),
   );
 
-  containerWidth$: Observable<number> = this.projectService.isProjectChanging$.pipe(
-    filter(isChanging => !isChanging),
-    delay(50),
-    switchMap(() => this.containerEl$),
-    switchMap((containerEl) => observeWidth(containerEl)),
-    share(),
-  );
-
-  containerScroll$ = this.projectService.isProjectChanging$.pipe(
+  upperContainerScroll$ = this.projectService.isProjectChanging$.pipe(
     filter(isChanging => !isChanging),
     delay(50),
     switchMap(() => this.splitTopEl$),
     switchMap((el) => fromEvent(el, 'scroll')),
   );
 
-  isSmallMainContainer$: Observable<boolean> = this.containerWidth$.pipe(
-    map(v => v < SMALL_CONTAINER_WIDTH),
-    distinctUntilChanged(),
-  );
-  isVerySmallMainContainer$: Observable<boolean> = this.containerWidth$.pipe(
-    map(v => v < VERY_SMALL_CONTAINER_WIDTH),
-    distinctUntilChanged(),
-  );
 
   // to still display its data when panel is closing
   selectedTaskWithDelayForNone$ = this.taskService.selectedTask$.pipe(
@@ -98,14 +79,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
     }
   }
 
-  @ViewChild('containerEl', {static: false, read: ElementRef}) set setContainerElRef(ref: ElementRef) {
-    if (ref) {
-      this.containerEl$.next(ref.nativeElement);
-    }
-  }
-
   splitTopEl$ = new ReplaySubject<HTMLElement>(1);
-  containerEl$ = new ReplaySubject<HTMLElement>(1);
 
   private _subs = new Subscription();
   private _switchListAnimationTimeout: number;
@@ -118,6 +92,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
     public planningModeService: PlanningModeService,
     public improvementService: ImprovementService,
     public layoutService: LayoutService,
+    private _elementRef: ElementRef,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
   ) {
@@ -157,23 +132,12 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
 
   ngAfterContentInit(): void {
     this._subs.add(
-      this.containerScroll$.subscribe(({target}) => {
+      this.upperContainerScroll$.subscribe(({target}) => {
         ((target as HTMLElement).scrollTop !== 0)
           ? this.layoutService.isScrolled$.next(true)
           : this.layoutService.isScrolled$.next(false);
       })
     );
-
-    this._subs.add(this.isSmallMainContainer$.subscribe(v => {
-      v
-        ? this.document.body.classList.add(BodyClass.isSmallMainContainer)
-        : this.document.body.classList.remove(BodyClass.isSmallMainContainer);
-    }));
-    this._subs.add(this.isVerySmallMainContainer$.subscribe(v => {
-      v
-        ? this.document.body.classList.add(BodyClass.isVerySmallMainContainer)
-        : this.document.body.classList.remove(BodyClass.isVerySmallMainContainer);
-    }));
   }
 
   ngOnDestroy() {
