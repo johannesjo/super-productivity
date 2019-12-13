@@ -129,6 +129,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
   ) {
+    this._taskService.setSelectedId(null);
   }
 
   ngOnInit() {
