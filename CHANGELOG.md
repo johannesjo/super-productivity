@@ -1,3 +1,26 @@
+## [3.0.1](https://github.com/johannesjo/super-productivity/compare/v3.0.0...v3.0.1) (2019-12-13)
+
+
+### Bug Fixes
+
+* **taskSidebar:** project change animation ([9b1eca1](https://github.com/johannesjo/super-productivity/commit/9b1eca1af35a04d4a5a075cf7bc48ae6d9d20c62))
+* settings collapsable header for electron ([e71f774](https://github.com/johannesjo/super-productivity/commit/e71f774cd27b0b401ea3eb68d0ac5b2d01b355ae))
+* **taskSidebar:** add import for daily summary ([a5b2162](https://github.com/johannesjo/super-productivity/commit/a5b2162d2f6f79bd76f64733fe2a02dd7be2bf55))
+* **taskSidebar:** daily planner plan view ([eba8e0a](https://github.com/johannesjo/super-productivity/commit/eba8e0a387ec8fd792af98b07a2fab48060fd397))
+* **taskSidebar:** remove failing spec ([7057680](https://github.com/johannesjo/super-productivity/commit/7057680b067882ea536fcb526021cbe5383ca13d))
+
+
+### Features
+
+* **tasks:** add a quick way to open original issue in browser ([33f7d04](https://github.com/johannesjo/super-productivity/commit/33f7d042ec715ec4aae2e403a020645010a52383))
+* **taskSidebar:** add close ani for over ([c6e3f55](https://github.com/johannesjo/super-productivity/commit/c6e3f55db99c649dd1be2eb67ce0b7260565b5f8))
+* **taskSidebar:** move small container class handling to better drawer container component ([5d930ea](https://github.com/johannesjo/super-productivity/commit/5d930eac0588b016add366b3b3a7f1daf75eb9be))
+* **taskSidebar:** move task additional stuff to new wrapper component ([04689c3](https://github.com/johannesjo/super-productivity/commit/04689c326ddf8050b304958fb380ce15c19964f5))
+* **taskSidebar:** unset task when navigating to daily summary ([712b055](https://github.com/johannesjo/super-productivity/commit/712b055dfd5b316595cf8ebc1b55eadd085dd587))
+* rearrange entries for daily summary ([74ff91f](https://github.com/johannesjo/super-productivity/commit/74ff91f7b1146745cc2c92f88d26220491041aa0))
+
+
+
 # [3.0.0](https://github.com/johannesjo/super-productivity/compare/v2.13.15...v3.0.0) (2019-12-12)
 
 
