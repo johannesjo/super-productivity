@@ -64,13 +64,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
   );
 
 
-  // to still display its data when panel is closing
-  selectedTaskWithDelayForNone$ = this.taskService.selectedTask$.pipe(
-    switchMap((task) => task
-      ? of(task)
-      : of(null).pipe(delay(200))
-    )
-  );
+
 
 
   @ViewChild('splitTopEl', {static: false, read: ElementRef}) set splitTopElRef(ref: ElementRef) {
@@ -85,7 +79,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
   private _switchListAnimationTimeout: number;
 
   constructor(
-    @Inject(DOCUMENT) private document: Document,
     public taskService: TaskService,
     public projectService: ProjectService,
     public takeABreakService: TakeABreakService,
