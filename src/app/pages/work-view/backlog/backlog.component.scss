@@ -13,12 +13,31 @@
   min-height: 100%;
   flex: 1;
   padding-top: $s*5;
+  position: relative;
+  box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.19), inset 0 6px 6px rgba(0, 0, 0, 0.23);
+
+  &:before {
+    position: absolute;
+    content: '';
+    background: rgba(0, 0, 0, .5);
+    width: 100%;
+    top: 0;
+    left: 0;
+    height: 100%;
+    pointer-events: none;
+  }
 
   @include darkTheme {
     background: $dark-theme-bg-slightly-lighter;
+    background: $c-primary-900;
+
   }
   @include lightTheme {
     background: $light-theme-bg-darker;
-    //background: linear-gradient(180deg, $c-primary-100 0, $c-primary-50 90%, $light-theme-bg 100%);
+    background: $c-primary-200;
+
+    &:before {
+      background: rgba(0, 0, 0, .2);
+    }
   }
 }
