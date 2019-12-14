@@ -82,7 +82,7 @@
     <tr *ngIf="issueData.comments">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMMENTS|translate}}</th>
       <td>
-        <div *ngFor="let comment of issueData.comments"
+        <div *ngFor="let comment of (issueData.comments|sort:'created')"
              class="comment">
 
           <img [src]="comment.author.avatarUrl"

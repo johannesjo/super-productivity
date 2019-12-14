@@ -72,6 +72,7 @@ import {FormlyValidationService} from './formly-translate-extension/formly-valid
 import {DialogFullscreenMarkdownComponent} from './dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import {JiraToMarkdownPipe} from './pipes/jira-to-markdown.pipe';
 import {BetterDrawerModule} from './better-drawer/better-drawer.module';
+import {SortPipe} from './pipes/sort.pipe';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -109,6 +110,7 @@ const COMPONENT_AND_PIPES = [
   StringToMsPipe,
   ThemeSelectComponent,
   ToArrayPipe,
+  SortPipe,
 ];
 
 const MAT_MODULES = [

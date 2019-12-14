@@ -46,7 +46,7 @@
   </table>
 
   <div *ngIf="issueData?.comments">
-    <div *ngFor="let comment of issueData?.comments"
+    <div *ngFor="let comment of (issueData?.comments|sort:'created_at')"
          class="comment">
       <!--<img [src]="comment.author.avatarUrl"-->
       <!--class="author-avatar">-->
