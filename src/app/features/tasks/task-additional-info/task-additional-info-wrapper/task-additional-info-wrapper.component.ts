@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {TaskService} from '../task.service';
-import {ProjectService} from '../../project/project.service';
-import {LayoutService} from '../../../core-ui/layout/layout.service';
+import {TaskService} from '../../task.service';
+import {ProjectService} from '../../../project/project.service';
+import {LayoutService} from '../../../../core-ui/layout/layout.service';
 import {delay, switchMap} from 'rxjs/operators';
 import {of} from 'rxjs';
 
