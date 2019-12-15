@@ -3,6 +3,7 @@
 @mixin scroll() {
   -webkit-overflow-scrolling: touch;
   overflow: auto;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 
   :host-context(.isNoMac) & {
     @supports (overflow:overlay) {
@@ -24,6 +25,7 @@
 
 @mixin scrollY() {
   -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
   overflow-y: scroll;
 
   .isNoMac &,
@@ -58,6 +60,7 @@
 
 @mixin scrollYImportant() {
   -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
   overflow-x: hidden;
   overflow-y: scroll !important;
 
@@ -84,6 +87,7 @@
 
 @mixin scrollX() {
   -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
   overflow-x: scroll;
 
   :host-context(.isNoMac) & {
