@@ -315,7 +315,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isSelected
       ? this._taskService.setSelectedId(null)
       : this._taskService.setSelectedId(this.task.id);
-    this.focusSelf();
+    // this.focusSelf();
   }
 
   toggleShowAttachments() {
