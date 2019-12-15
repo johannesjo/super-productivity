@@ -1,11 +1,16 @@
 @import '../../../../variables';
 
 $thisHeight: 80px;
+$thisMargin: $s;
+
+:host {
+  display: block;
+}
 
 .attachments {
   list-style-type: none;
   display: flex;
-  margin: 0;
+  margin: -1*$thisMargin;
   padding: 0;
   flex-flow: row;
   justify-content: left;
@@ -13,7 +18,7 @@ $thisHeight: 80px;
 }
 
 .attachment {
-  margin: $s;
+  margin: $thisMargin;
   padding: 0;
   border-radius: $card-border-radius;
   position: relative;

@@ -96,7 +96,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 
 
 .panel-content-wrapper {
-  margin: $s $s;
+  margin: 0 $s $s;
   display: block;
   @include standardThemeTextColorLessIntense();
 
@@ -109,7 +109,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     .markdown-wrapper {
       min-height: 60px;
       border-radius: $card-border-radius* 1;
-      overflow: hidden !important;
+      overflow: visible !important;
       box-shadow: $whiteframe-shadow-2dp;
 
       @include lightTheme {
