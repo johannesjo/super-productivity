@@ -23,9 +23,9 @@ $thisMargin: $s;
   border-radius: $card-border-radius;
   position: relative;
 
-  @include layerTextAndBgHighest;
+  @include layerTextAndBgHigher;
 
-  @include lightTheme{
+  @include lightTheme {
     background: #fff;
   }
 
@@ -90,9 +90,9 @@ $thisMargin: $s;
 .controls {
   position: absolute;
   bottom: 0;
-  left: -0.5*$s;
-  right: -0.5*$s;
-  transform: translateY(50%);
+  left: 0;
+  right: 0;
+  //transform: translateY(25%);
   z-index: 5;
   visibility: hidden;
   display: flex;
@@ -108,6 +108,15 @@ $thisMargin: $s;
     height: 4*$s;
     min-width: 20px;
     opacity: 0;
+    border-color: inherit;
+
+    @include lightTheme() {
+      background: #fff;
+    }
+
+    @include darkTheme() {
+      background: $dark-theme-bg-lightest;
+    }
   }
 }
 

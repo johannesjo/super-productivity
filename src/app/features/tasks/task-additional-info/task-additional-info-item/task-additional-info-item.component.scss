@@ -19,6 +19,7 @@
   border-radius: 0;
   margin: 8px;
   border-radius: $card-border-radius* 1;
+  //overflow: visible;
 
   :host:focus & {
     border: 1px dashed $c-focus-border;
