@@ -27,8 +27,7 @@
 .route-wrapper {
   flex-grow: 1;
   position: relative;
-  overflow-x: hidden;
-  @include scrollY();
+  overflow: hidden;
 
   > ::ng-deep router-outlet + * {
     position: absolute;
