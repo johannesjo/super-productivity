@@ -122,12 +122,11 @@
     <ng-container panel-content>
       <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
         <ng-container *ngIf="task.issueType">
-          <h3 class="mat-h3"
-              style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.ISSUE_TYPE_ATTACHMENTS|translate:{issueType: task.issueType} }}</h3>
           <attachment-list [attachments]="issueAttachments"
                            [isDisableControls]="true"></attachment-list>
         </ng-container>
         <h3 class="mat-h3"
+            *ngIf="issueAttachments?.length"
             style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
         <attachment-list [attachments]="localAttachments$|async"></attachment-list>
       </div>

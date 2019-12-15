@@ -471,7 +471,6 @@
         "ADD_ATTACHMENT": "Add attachment",
         "ATTACHMENTS": "Attachments ({{nr}})",
         "FROM_PARENT": "(from Parent)",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Notes",
         "PARENT": "Parent",
