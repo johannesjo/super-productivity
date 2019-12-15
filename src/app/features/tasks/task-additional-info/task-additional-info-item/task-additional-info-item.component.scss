@@ -18,6 +18,7 @@
   border-style: solid;
   border-radius: 0;
   margin: 8px;
+  border-radius: $card-border-radius* 1;
 
   :host:focus & {
     border: 1px dashed $c-focus-border;
@@ -100,28 +101,31 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   @include standardThemeTextColorLessIntense();
 
 
-  ::ng-deep inline-markdown {
-    &.isFocused .markdown-wrapper {
-      box-shadow: $whiteframe-shadow-5dp;
+  &::ng-deep inline-markdown {
+    &.isFocused {
       border-color: transparent;
     }
 
     .markdown-wrapper {
       min-height: 60px;
-      box-shadow: $whiteframe-shadow-1dp;
-      border-radius: $card-border-radius* 3;
+      border-radius: $card-border-radius* 1;
       overflow: hidden !important;
+      box-shadow: $whiteframe-shadow-2dp;
 
       @include lightTheme {
-        background: $light-theme-bg-darker;
-        border: 1px solid $light-theme-extra-border-color;
+        background: $light-theme-bg;
+        //border: 1px solid $light-theme-extra-border-color;
       }
       @include darkTheme() {
         border-radius: $card-border-radius;
         background: $dark-theme-bg-lighter;
-        box-shadow: $whiteframe-shadow-1dp;
         border: 1px solid $dark-theme-extra-border-color;
       }
+    }
+
+    &.isFocused .markdown-wrapper {
+      box-shadow: $whiteframe-shadow-5dp !important;
+      border-color: transparent;
     }
 
     .markdown-unparsed,
