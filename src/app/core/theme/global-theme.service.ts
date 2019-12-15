@@ -19,8 +19,6 @@ import {MiscConfig} from '../../features/config/global-config.model';
   providedIn: 'root'
 })
 export class GlobalThemeService {
-  private _isDarkTheme: boolean;
-
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _materialCssVarsService: MaterialCssVarsService,

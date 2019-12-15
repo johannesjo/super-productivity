@@ -19,7 +19,6 @@ $dark12: rgb(50, 50, 50);
 $dark24: rgb(60, 60, 60);
 
 
-
 $dark-theme-bg: $dark2;
 $dark-theme-bg-darker: $dark0;
 $dark-theme-bg-slightly-lighter: $dark4;
@@ -42,6 +41,8 @@ $light-theme-text-color: rgb(44, 44, 44);
 $light-theme-text-color-less-intense: transparentize($light-theme-text-color, 0.1);
 $light-theme-text-color-most-intense: rgb(0, 0, 0);
 
+$light-theme-selected-task-bg-color: mat-css-color-primary(100);
+$light-theme-selected-task-bg-color: #fff;
 $light-theme-extra-border-color: #dddddd;
 $dark-theme-extra-border-color: rgba(255, 255, 255, 0.12);
 

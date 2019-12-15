@@ -79,10 +79,10 @@
   }
 
   .inner-wrapper.isSelected > & {
-    //border-top-width: 1px;
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
-    box-shadow: $whiteframe-shadow-1dp;
+    box-shadow: $whiteframe-shadow-2dp;
+    border-width: 0;
     //@include darkTheme {
     //  box-shadow: $whiteframe-shadow-1dp;
     //}
@@ -109,7 +109,7 @@
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
     border-color: $task-c-current !important;
-    border-width: 2px !important;
+    border-width: 1px !important;
 
     border-radius: 12px !important;
     bottom: -2px;

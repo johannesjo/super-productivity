@@ -35,7 +35,7 @@ $z-content: 45;
 
 
   @include lightTheme() {
-    background: $light-theme-bg-darker;
+    background: $light-theme-selected-task-bg-color;
     border-color: rgba(0, 0, 0, 0.12);
   }
 
