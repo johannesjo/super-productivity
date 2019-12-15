@@ -1,3 +1,25 @@
+## [3.0.2](https://github.com/johannesjo/super-productivity/compare/v3.0.1...v3.0.2) (2019-12-15)
+
+
+### Bug Fixes
+
+* excess scrollbars ([4060f55](https://github.com/johannesjo/super-productivity/commit/4060f55f2a55ac5c051bb6698c879ccaf9729971))
+* scrollbar styles for edge and firefox ([46fd1cf](https://github.com/johannesjo/super-productivity/commit/46fd1cfea28d0efb9ccccd238c9eda6a332a7b57))
+
+
+### Features
+
+* **attachments:** beautify edit btn styling ([58c9e83](https://github.com/johannesjo/super-productivity/commit/58c9e83fa8c18ac9ade7f55274d52cfa24a0c4e9))
+* **attachments:** beautify styling ([1b9dd09](https://github.com/johannesjo/super-productivity/commit/1b9dd0994553fc4bb6e018804c6b5f3b42fcab3a))
+* **attachments:** improve headings ([54f2ed6](https://github.com/johannesjo/super-productivity/commit/54f2ed6aff81b409397c366e2ab2e53b4c7a68db))
+* **tasks:** improve selected task focus behaviour ([2003b6e](https://github.com/johannesjo/super-productivity/commit/2003b6ec6919d16960da9b21245febbbf8deb71c))
+* **tasks:** improve selected task styling ([cc90df0](https://github.com/johannesjo/super-productivity/commit/cc90df0174425479e6546611a53641bd63aea9f3))
+* **taskSideBar:** improve task notes styling ([2d7b470](https://github.com/johannesjo/super-productivity/commit/2d7b4703ab3acc8d365bbad8dafb446453185d30))
+* make backlog look a little better ([bcbb666](https://github.com/johannesjo/super-productivity/commit/bcbb666a38bbe701b5fb9c68e63113165abf9829))
+* sort issue comments by creation date ([ae92092](https://github.com/johannesjo/super-productivity/commit/ae9209207a96f2efb0aade6ee3a1f6411d107e29))
+
+
+
 ## [3.0.1](https://github.com/johannesjo/super-productivity/compare/v3.0.0...v3.0.1) (2019-12-13)
 
 

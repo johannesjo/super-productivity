@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
   "author": "johannesjo <contact@super-productivity.com> (http://super-productivity.com)",
@@ -42,7 +42,7 @@
     "dist:only": "electron-builder",
     "dist:linuxAndWin": "yarn buildAllElectron && electron-builder --linux --win",
     "dist:win": "yarn buildAllElectron && electron-builder --win",
-    "dist:win:only": "electron-builder --win", 
+    "dist:win:only": "electron-builder --win",
     "dist:win:appx": "yarn buildAllElectron && electron-builder --win --config=build/electron-builder.appx.yaml",
     "dist:win:store": "git stash && git pull && yarn && git stash pop && yarn dist:win",
     "dist:mac:dl": "cp dl.provisionprofile embedded.provisionprofile && electron-builder --mac",
