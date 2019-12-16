@@ -18,6 +18,8 @@ $z-content: 45;
 }
 
 .side {
+  // prevent double border when header got a bottom one
+  margin-top: -1px;
   position: relative;
   z-index: $z-side;
   transition: $transition-leave;
