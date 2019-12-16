@@ -24,10 +24,15 @@
     </a>
 
     <div *ngIf="!isDisableControls"
-         class="controls">
+         class="controls border-color-primary">
+      <button (click)="openEditDialog(attachment)"
+              class="view-btn"
+              mat-stroked-button>
+        <mat-icon>search</mat-icon>
+      </button>
+
       <button (click)="openEditDialog(attachment)"
               class="edit-btn"
-              color="primary"
               mat-stroked-button>
         <mat-icon>edit</mat-icon>
       </button>

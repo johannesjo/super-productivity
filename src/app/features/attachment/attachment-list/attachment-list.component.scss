@@ -30,6 +30,7 @@ $thisMargin: $s;
   }
 
 
+  //.controls,
   > a:focus + .controls,
   &.focus .controls,
   &:hover .controls {
@@ -40,10 +41,8 @@ $thisMargin: $s;
       transition: $transition-enter;
     }
 
-    .edit-btn {
-      transform: translate(0, 0);
-    }
-
+    .view-btn,
+    .edit-btn,
     .trash-btn {
       transform: translate(0, 0);
     }
@@ -92,37 +91,59 @@ $thisMargin: $s;
   bottom: 0;
   left: 0;
   right: 0;
+  top: 0;
   //transform: translateY(25%);
   z-index: 5;
   visibility: hidden;
   display: flex;
   flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
+  flex-wrap: wrap;
+  pointer-events: none;
 
   button {
+    display: block;
     transition: $transition-leave;
     margin: 0;
     padding: 0;
     min-height: 0;
     flex-grow: 1;
-    line-height: 4 *$s;
-    height: 4*$s;
     min-width: 20px;
     opacity: 0;
-    border-color: inherit;
+    border-color: transparent;
 
     @include lightTheme() {
-      background: #fff;
+      background: rgba(255, 255, 255, 0.4);
     }
 
     @include darkTheme() {
-      background: $dark-theme-bg-lightest;
+      background: rgba(0, 0, 0, 0.4);
     }
   }
 }
 
+.view-btn {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  flex: 1;
+  flex-basis: 100%;
+  width: 100%;
+  min-width: 100%;
+  border-bottom: 0;
+  height: 50px;
+
+  @include mq(xs) {
+    transform: translate(0, -50%);
+  }
+}
+
 .edit-btn {
+  pointer-events: all;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  flex-basis: 50%;
+  width: 50%;
 
   @include mq(xs) {
     transform: translate(-100%, 50%);
@@ -130,8 +151,11 @@ $thisMargin: $s;
 }
 
 .trash-btn {
+  pointer-events: all;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  flex-basis: 50%;
+  width: 50%;
 
   @include mq(xs) {
     transform: translate(100%, 50%);
