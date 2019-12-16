@@ -33,9 +33,6 @@
                     "IMG": "Immagine (mostrata nella miniatura)",
                     "LINK": "Link (aperto nel browser)"
                 }
-            },
-            "LIST": {
-                "NO_ATTACHMENTS": "Non ci sono allegati"
             }
         },
         "BOOKMARK": {

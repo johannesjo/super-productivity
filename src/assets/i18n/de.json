@@ -33,9 +33,6 @@
           "IMG": "Bild (als Thumbnail angezeigt)",
           "LINK": "Link (öffnet im Browser)"
         }
-      },
-      "LIST": {
-        "NO_ATTACHMENTS": "Derzeit sind keine Anhänge vorhanden"
       }
     },
     "BOOKMARK": {

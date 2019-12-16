@@ -33,9 +33,6 @@
           "IMG": "Image (shown as thumbnail)",
           "LINK": "Link (opens in browser)"
         }
-      },
-      "LIST": {
-        "NO_ATTACHMENTS": "There are currently no attachments"
       }
     },
     "BOOKMARK": {
