@@ -3,6 +3,9 @@
 $thisHeight: 80px;
 $thisMargin: $s;
 
+$thisUpperHeight: 52px;
+$thisLowerHeight: $thisHeight - $thisUpperHeight;
+
 :host {
   display: block;
 }
@@ -30,7 +33,6 @@ $thisMargin: $s;
   }
 
 
-  //.controls,
   > a:focus + .controls,
   &.focus .controls,
   &:hover .controls {
@@ -61,6 +63,10 @@ $thisMargin: $s;
   border-radius: $card-border-radius;
   cursor: pointer;
   box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+  }
 
   mat-icon {
     font-size: $s*5;
@@ -111,14 +117,16 @@ $thisMargin: $s;
     flex-grow: 1;
     min-width: 20px;
     opacity: 0;
-    border-color: transparent;
+    border-width: 0;
 
     @include lightTheme() {
       background: rgba(255, 255, 255, 0.4);
+      border-color: rgba(255, 255, 255, 0.5);
     }
 
     @include darkTheme() {
       background: rgba(0, 0, 0, 0.4);
+      border-color: rgba(0, 0, 0, 0.5);
     }
   }
 }
@@ -130,17 +138,25 @@ $thisMargin: $s;
   flex-basis: 100%;
   width: 100%;
   min-width: 100%;
-  border-bottom: 0;
-  height: 50px;
+  line-height: $thisUpperHeight;
+  height: $thisUpperHeight;
 
   @include mq(xs) {
     transform: translate(0, -50%);
   }
 }
 
+.edit-btn,
+.trash-btn {
+  margin-top: 2px;
+  line-height: $thisLowerHeight;
+  height: $thisLowerHeight;
+}
+
 .edit-btn {
   pointer-events: all;
   border-top-right-radius: 0;
+  border-top-left-radius: 0;
   border-bottom-right-radius: 0;
   flex-basis: 50%;
   width: 50%;
@@ -153,7 +169,9 @@ $thisMargin: $s;
 .trash-btn {
   pointer-events: all;
   border-top-left-radius: 0;
+  border-top-right-radius: 0;
   border-bottom-left-radius: 0;
+  margin-left: 1px;
   flex-basis: 50%;
   width: 50%;
 

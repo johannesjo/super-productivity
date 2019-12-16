@@ -27,20 +27,19 @@
          class="controls border-color-primary">
       <button (click)="openEditDialog(attachment)"
               class="view-btn"
-              mat-stroked-button>
+              mat-flat-button>
         <mat-icon>search</mat-icon>
       </button>
 
       <button (click)="openEditDialog(attachment)"
               class="edit-btn"
-              mat-stroked-button>
+              mat-flat-button>
         <mat-icon>edit</mat-icon>
       </button>
       <button (click)="remove(attachment?.id)"
               class="trash-btn"
-              color="warn"
-              mat-stroked-button>
-        <mat-icon>delete_forever</mat-icon>
+              mat-flat-button>
+        <mat-icon color="warn">delete_forever</mat-icon>
       </button>
     </div>
   </li>
