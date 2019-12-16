@@ -35,6 +35,11 @@ export const createWindow = (params) => {
   const app = params.app;
   indicatorMod = params.indicatorMod;
 
+  // workaround for https://github.com/electron/electron/issues/16521
+  if (!IS_MAC) {
+    Menu.setApplicationMenu(null);
+  }
+
   mainWin = new BrowserWindow({
     width: 800,
     height: 800,
