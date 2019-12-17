@@ -7,7 +7,7 @@
 
 .header-wrapper {
   position: relative;
-  z-index: 10;
+  z-index: $z-main-header-wrapper;
   display: block;
   transition: $transition-enter;
   border-bottom: 1px solid transparent;
@@ -27,7 +27,7 @@
 .route-wrapper {
   flex-grow: 1;
   position: relative;
-  overflow: hidden;
+  overflow: hidden;A
 
   > ::ng-deep router-outlet + * {
     position: absolute;
@@ -47,21 +47,21 @@
   height: 100%;
   top: 0;
   left: 0;
-  z-index: 220;
+  z-index: $z-backdrop;
 }
 
 add-task-bar {
-  z-index: 10000;
+  z-index: $z-add-task-bar;
 }
 
 main-header {
   position: relative;
-  z-index: 4;
+  z-index: $z-main-header;
 }
 
 bookmark-bar {
   position: relative;
-  z-index: 3;
+  z-index: $z-bookmarks;
 }
 
 
@@ -113,6 +113,6 @@ mat-sidenav ::ng-deep .mat-drawer-inner-container {
 }
 
 mat-sidenav {
-  z-index: 3;
+  z-index: $z-side-nav;
 }
 

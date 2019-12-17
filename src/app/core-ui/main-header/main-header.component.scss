@@ -7,7 +7,6 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
 :host {
   display: block;
   position: relative;
-  z-index: 3;
   user-select: none;
 }
 

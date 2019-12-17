@@ -1,7 +1,6 @@
 @import '../../../../variables';
 
-$z-side: 44;
-$z-content: 45;
+$z-content: $z-task-side-bar +1;
 
 :host {
   display: flex;
@@ -21,7 +20,7 @@ $z-content: 45;
   // prevent double border when header got a bottom one
   margin-top: -1px;
   position: relative;
-  z-index: $z-side;
+  z-index: $z-task-side-bar;
   transition: $transition-leave;
   transition-property: opacity, margin-right, right;
   // NOTE: if this value is to big it might mess, with the push out logic, as
