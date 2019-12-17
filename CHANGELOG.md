@@ -1,3 +1,22 @@
+## [3.0.4](https://github.com/johannesjo/super-productivity/compare/v3.0.3...v3.0.4) (2019-12-17)
+
+
+### Bug Fixes
+
+* pomodoro play controls not being visible [#264](https://github.com/johannesjo/super-productivity/issues/264) ([e8fe8ef](https://github.com/johannesjo/super-productivity/commit/e8fe8efbdd4b96f18b3fe27a61bda5efeaf067fc))
+* **electron:** main nav bar being added for non mac builds ([45753a8](https://github.com/johannesjo/super-productivity/commit/45753a83319b05331d95baa86c50c5c7ac7c1f90))
+
+
+### Features
+
+* improve backlog styling ([3da2431](https://github.com/johannesjo/super-productivity/commit/3da243124ba55369c97e93ea93a022f09130a928))
+* **attachments:** improve attachment buttons styling ([66c7140](https://github.com/johannesjo/super-productivity/commit/66c7140c7b32d1220a1a632eae279fff996c14b3))
+* **attachments:** remove no attachments msg as it is not needed any more ([f19d453](https://github.com/johannesjo/super-productivity/commit/f19d453fdb7cac805a9dde98b28afc5316cf7d0d))
+* **attachments:** restyle attachment buttons ([6eb0f32](https://github.com/johannesjo/super-productivity/commit/6eb0f32f1b174fe5cb671386dfe2814d02370f51))
+* improve container border style ([e9767d2](https://github.com/johannesjo/super-productivity/commit/e9767d270f437b770068b250927c144331c1933c))
+
+
+
 ## [3.0.3](https://github.com/johannesjo/super-productivity/compare/v3.0.2...v3.0.3) (2019-12-15)
 
 
