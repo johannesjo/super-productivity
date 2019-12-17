@@ -172,13 +172,9 @@ h2 {
   }
 }
 
-.today,
-.backlog .inner-wrapper {
+.today {
   overflow-x: hidden;
   @include scrollYImportant();
-}
-
-.today {
   top: 0;
 }
 

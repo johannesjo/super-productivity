@@ -7,14 +7,6 @@
   height: 100%;
   top: 0;
   left: 0;
-}
-
-.wrapper {
-  min-height: 100%;
-  flex: 1;
-  padding-top: $s*5;
-  position: relative;
-  box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.19), inset 0 6px 6px rgba(0, 0, 0, 0.23);
 
   &:before {
     position: absolute;
@@ -25,6 +17,18 @@
     left: 0;
     height: 100%;
     pointer-events: none;
+  }
+
+  &:after {
+    pointer-events: none;
+    position: absolute;
+    content: '';
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 44;
+    box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.19), inset 0 6px 6px rgba(0, 0, 0, 0.23);
   }
 
   @include darkTheme {
@@ -40,4 +44,15 @@
       background: rgba(0, 0, 0, .2);
     }
   }
+}
+
+.wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  padding-top: $s*5;
+  overflow-x: hidden;
+  @include scrollYImportant();
 }
