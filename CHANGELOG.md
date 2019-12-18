@@ -1,3 +1,12 @@
+## [3.0.5](https://github.com/johannesjo/super-productivity/compare/v3.0.4...v3.0.5) (2019-12-18)
+
+
+### Bug Fixes
+
+* pages not being scrollable ([b8cbe28](https://github.com/johannesjo/super-productivity/commit/b8cbe2820cca4a1ca2d45ca724a0979bc86c846e))
+
+
+
 ## [3.0.4](https://github.com/johannesjo/super-productivity/compare/v3.0.3...v3.0.4) (2019-12-17)
 
 
