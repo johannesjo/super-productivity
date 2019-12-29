@@ -1,3 +1,18 @@
+## [3.0.6](https://github.com/johannesjo/super-productivity/compare/v3.0.5...v3.0.6) (2019-12-29)
+
+
+### Bug Fixes
+
+* resize observer throwing error when not available [#269](https://github.com/johannesjo/super-productivity/issues/269) ([633fe5f](https://github.com/johannesjo/super-productivity/commit/633fe5f48fdb202d98de7fc48e4155df199555c0))
+
+
+### Features
+
+* improve attachments ([d44c654](https://github.com/johannesjo/super-productivity/commit/d44c654ef3a59e7be98eb852214b260b8ab6cf74))
+* improve enlarge image styling and general unify backdrop styling ([1768406](https://github.com/johannesjo/super-productivity/commit/17684066e20decf40857d10326f731411f99433a))
+
+
+
 ## [3.0.5](https://github.com/johannesjo/super-productivity/compare/v3.0.4...v3.0.5) (2019-12-18)
 
 
