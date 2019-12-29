@@ -17,7 +17,7 @@ Please search the issues before creating one. -->
 <!--- If suggesting a change/improvement, explain the difference from current behavior -->
 
 ### Steps to Reproduce (for bugs)
-<!--- Provide a link to a live example, or an unambiguous set of steps to -->
+<!--- Provide a link to a live example or an unambiguous set of steps to -->
 <!--- reproduce this bug. Include code to reproduce, if relevant -->
 1.
 2.
@@ -28,8 +28,8 @@ Please search the issues before creating one. -->
 <!--- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
 
 ### Error Log (Desktop only)
-<!--- For the desktop versions there is also an error log file in case there is no console output. 
-Usually you can find it here:
+<!--- For the desktop versions, there is also an error log file in case there is no console output. 
+Usually, you can find it here:
 on Linux: 
 ~/.config/superProductivity/log.log
 --or--
