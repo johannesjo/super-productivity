@@ -102,3 +102,13 @@ body .mat-form-field {
 body .mat-h1 {
   margin-top: $s*1.5;
 }
+
+// BACKDROP FIX
+.mat-drawer-backdrop{
+  @include lightTheme(true) {
+    background-color: $c-backdrop-light-theme;
+  }
+  @include darkTheme(true) {
+    background-color: $c-backdrop-dark-theme;
+  }
+}

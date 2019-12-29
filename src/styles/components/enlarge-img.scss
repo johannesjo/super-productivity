@@ -8,7 +8,6 @@
   top: 0;
   bottom: 0;
   right: 0;
-  z-index: 12;
   width: 100%;
   height: 100%;
   cursor: zoom-out;
@@ -16,8 +15,9 @@
   flex-direction: column; /* make main axis vertical */
   justify-content: center; /* center items vertically, in this case */
   align-items: center; /* center items horizontally, in this case */
-  background: rgba(0, 0, 0, 0.2);
+  //background: rgba(0, 0, 0, 0.2);
   animation: $transition-standard fadeIn;
+  z-index: $z-backdrop;
 
   &.ani-enter {
     background: transparent;
@@ -25,13 +25,19 @@
 
   &:after {
     content: '';
-    background: rgba(0, 0, 0, 0.2);
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
     opacity: 0;
+
+    @include lightTheme(true) {
+      background-color: $c-backdrop-light-theme;
+    }
+    @include darkTheme(true) {
+      background-color: $c-backdrop-dark-theme;
+    }
   }
 
   &.ani-enter,
@@ -66,6 +72,7 @@
   -khtml-user-drag: none;
   -moz-user-drag: none;
   -o-user-drag: none;
+  box-shadow: $whiteframe-shadow-5dp;
 
   &:hover {
     cursor: zoom-in;

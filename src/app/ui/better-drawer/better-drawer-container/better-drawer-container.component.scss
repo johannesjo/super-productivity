@@ -1,6 +1,7 @@
 @import '../../../../variables';
 
-$z-content: $z-task-side-bar +1;
+$z-this-content: $z-task-side-bar +1;
+$z-this-backdrop: -1 + $z-task-side-bar-over;
 
 :host {
   display: flex;
@@ -13,7 +14,7 @@ $z-content: $z-task-side-bar +1;
 .content {
   flex-grow: 1;
   position: relative;
-  z-index: $z-content;
+  z-index: $z-this-content;
 }
 
 .side {
@@ -50,7 +51,7 @@ $z-content: $z-task-side-bar +1;
     width: 80vw !important;
     top: 0;
     bottom: 0;
-    z-index: 100;
+    z-index: $z-task-side-bar-over;
     right: -100%;
 
     @include mq(sm, max) {
@@ -76,25 +77,10 @@ $z-content: $z-task-side-bar +1;
   z-index: 2;
 }
 
-
 .backdrop {
-  display: block;
-  opacity: 1;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  position: fixed;
-  z-index: 60;
-
-  @include lightTheme() {
-    background-color: rgba(var(--palette-background-card), 0.6);
-  }
-  @include darkTheme() {
-    background-color: rgba(189, 189, 189, 0.4);
-  }
+  // global styles in backdrop.scss
+  z-index: $z-this-backdrop;
 }
-
 
 .close-btn {
   display: none;

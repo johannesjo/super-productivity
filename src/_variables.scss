@@ -64,6 +64,9 @@ $c-contrast: mat-css-contrast-color();
 $c-contrast-600: mat-css-contrast-color(600);
 
 $c-focus-border: $c-primary-400;
+$c-backdrop-light-theme: rgba(0, 0, 0, 0.6);
+$c-backdrop-dark-theme: rgba(189, 189, 189, 0.4);
+
 $success-green: #4fa758;
 $yellow: #fff400; // for sun
 
@@ -88,6 +91,7 @@ $mac-title-bar-padding: 20px;
 // INDEXES
 // -------
 $z-task-side-bar: 44;
+$z-task-side-bar-over: 100;
 $z-main-header-wrapper: 50;
 $z-side-nav: 60;
 $z-main-header: 10;
