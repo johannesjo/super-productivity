@@ -1,4 +1,4 @@
-<ng-container *ngIf="(isAllDataLoadedInitially$|async)">
+<ng-container *ngIf="(isAllDataLoadedInitially$|async)" [dir]="isRTL ? 'rtl' : 'ltr'">
 
   <!--TODO move inside page container somehow -->
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
