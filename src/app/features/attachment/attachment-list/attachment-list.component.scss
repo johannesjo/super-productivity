@@ -25,6 +25,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   padding: 0;
   border-radius: $card-border-radius;
   position: relative;
+  overflow: hidden;
 
   @include layerTextAndBgHigher;
 
@@ -32,7 +33,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     background: #fff;
   }
 
-
+  //.controls,
   > a:focus + .controls,
   &.focus .controls,
   &:hover .controls {
@@ -40,7 +41,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 
     button {
       opacity: 1;
-      transition: $transition-enter;
+      transition: $transition-fast;
     }
 
     .view-btn,
@@ -110,7 +111,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 
   button {
     display: block;
-    transition: $transition-leave;
+    transition: $transition-fast;
     margin: 0;
     padding: 0;
     min-height: 0;
@@ -122,11 +123,19 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     @include lightTheme() {
       background: rgba(255, 255, 255, 0.4);
       border-color: rgba(255, 255, 255, 0.5);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.9);
+      }
     }
 
     @include darkTheme() {
       background: rgba(0, 0, 0, 0.4);
       border-color: rgba(0, 0, 0, 0.5);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.9);
+      }
     }
   }
 }
@@ -174,6 +183,14 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   margin-left: 1px;
   flex-basis: 50%;
   width: 50%;
+
+  &:hover {
+    background: $c-warn !important;
+
+    mat-icon {
+      color: #fff !important;
+    }
+  }
 
   @include mq(xs) {
     transform: translate(100%, 50%);
