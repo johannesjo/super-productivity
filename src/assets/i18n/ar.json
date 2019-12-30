@@ -422,8 +422,8 @@
     "PROJECT": {
       "BANNER": {
         "FINISH_DAY": {
-          "FINISH_DAY": "يوم النهاية",
-          "MSG": "لقد نسيت أن تنتهي يومك في {{dayStr}}"
+          "FINISH_DAY": "أنهى اليوم",
+          "MSG": "لقد نسيت أن تنهي يومك في {{dayStr}}"
         }
       },
       "D_CREATE": {
