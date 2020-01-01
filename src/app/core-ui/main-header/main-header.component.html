@@ -1,5 +1,5 @@
 <!--<div class="wrapper ">-->
-<div class="wrapper" [dir]="isRTL ? 'rtl' : 'ltr'">
+<div class="wrapper">
   <button *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
           class="burger-trigger"
           (click)="layoutService.toggleSideNav()"

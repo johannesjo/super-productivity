@@ -97,7 +97,7 @@ button {
   display: flex;
   align-items: center;
 
-  [dir=rtl] & {
+  :host-context([dir=rtl]) & {
     margin-left: 0px;
     margin-right: auto;
   }
