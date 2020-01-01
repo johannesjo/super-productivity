@@ -46,7 +46,7 @@ $vertical-button-margin: $s;
     margin-right: $s*1.5;
     min-width: 20px;
 
-    [dir=rtl] & {
+    :host-context([dir=rtl]) & {
       margin-right: 0px;
       margin-left: $s*1.5;
     }
@@ -61,7 +61,7 @@ $vertical-button-margin: $s;
   display: flex;
   align-items: center;
 
-  [dir=rtl] & {
+  :host-context([dir=rtl]) & {
     button {
       font-weight: bolder;
     }

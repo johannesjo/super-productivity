@@ -1,5 +1,4 @@
 <div #wrapperEl
-     [dir]="isRTL ? 'rtl' : 'ltr'"
      *ngIf="(activeBanner$|async) as banner"
      [@slide]="{value:'*',params:{elHeight:height}}"
      [class.isError]="banner.type==='ERROR'"
