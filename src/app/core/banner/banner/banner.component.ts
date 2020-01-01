@@ -1,10 +1,11 @@
-import {ChangeDetectionStrategy, Component, ElementRef, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, ViewChild, OnDestroy} from '@angular/core';
 import {BannerService} from '../banner.service';
 import {Banner, BannerAction} from '../banner.model';
 import {concatMap, mapTo} from 'rxjs/operators';
-import {merge, Observable, of, timer} from 'rxjs';
+import {merge, Observable, of, timer, Subscription} from 'rxjs';
 import {slideAnimation} from '../../../ui/animations/slide.ani';
 import {T} from '../../../t.const';
+import { LanguageService } from '../../language/language.service';
 
 @Component({
   selector: 'banner',
@@ -13,7 +14,7 @@ import {T} from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [slideAnimation]
 })
-export class BannerComponent {
+export class BannerComponent implements OnDestroy {
   T = T;
 
   // TODO maybe improve if initial delay is annoying
@@ -39,6 +40,8 @@ export class BannerComponent {
   height = 120;
 
   private _dirtyReference: string;
+  private _subs = new Subscription();
+  isRTL: boolean;
 
   @ViewChild('wrapperEl', {static: false}) set wrapperEl(content: ElementRef) {
     if (content && content.nativeElement) {
@@ -48,7 +51,11 @@ export class BannerComponent {
 
   constructor(
     public bannerService: BannerService,
+    private _languageService : LanguageService,
   ) {
+    this._subs.add(this._languageService.isLangRTL.subscribe((val) => {
+      this.isRTL = val;
+    }));
   }
 
   dismiss(bannerId) {
@@ -58,5 +65,9 @@ export class BannerComponent {
   action(bannerId: string, bannerAction: BannerAction) {
     this.dismiss(bannerId);
     bannerAction.fn();
+  }
+
+  ngOnDestroy() {
+    this._subs.unsubscribe();
   }
 }
