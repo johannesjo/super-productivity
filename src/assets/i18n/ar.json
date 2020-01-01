@@ -901,7 +901,7 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "الاعدادات العامة",
-    "PROJECT_SETTINGS": "إعدادات المشروع المحددة",
+    "PROJECT_SETTINGS": "إعدادات المشروع",
     "TOGGLE_DARK_MODE": "تبديل الوضع الداكن"
   },
   "S": {
@@ -949,8 +949,8 @@
     "ADD_SOME_TASKS": "أضف بعض المهام للتخطيط ليومك!",
     "COMPLETED_TASKS": "المهام المنجزة",
     "ESTIMATE_REMAINING": "تقدير المتبقي:",
-    "FINISH_DAY": "يوم النهاية",
-    "HELP_PROCRASTINATION": "مساعدة أنا المماطلة!",
+    "FINISH_DAY": "انهاء اليوم",
+    "HELP_PROCRASTINATION": "مساعدة أنا اماطل!",
     "NO_COMPLETED_TASKS": "لا توجد مهام مكتملة حاليًا",
     "NO_PLANNED_TASKS": "لا توجد مهام مخطط لها",
     "READY_TO_WORK": "على استعداد للعمل!",
