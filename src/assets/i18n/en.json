@@ -841,7 +841,7 @@
     "CLEAR_ALL_CONTINUE": "Clear all done and continue",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "No, just clear the tasks",
-      "MSG": "You work is done. Time to go home!",
+      "MSG": "Your work is done. Time to go home!",
       "OK": "Aye aye! Shutdown!"
     },
     "EVALUATION": "Evaluation",
