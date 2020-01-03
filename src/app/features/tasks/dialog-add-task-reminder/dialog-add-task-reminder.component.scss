@@ -3,6 +3,10 @@
   flex-direction: column;
   justify-content: stretch;
   align-items: stretch;
+
+  :host-context([dir=rtl]) {
+    direction: rtl;
+  }
 }
 
 .form-wrapper {
