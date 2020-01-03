@@ -1,5 +1,8 @@
 @import '../../../../variables';
 
+:host-context([dir=rtl]) {
+  direction: rtl;
+}
 textarea {
   display: block;
   width: 100%;
