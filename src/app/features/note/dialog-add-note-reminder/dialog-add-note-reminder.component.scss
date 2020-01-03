@@ -1,3 +1,7 @@
+:host-context([dir=rtl]) {
+  direction: rtl;
+}
+
 .form-wrapper {
   display: flex;
   flex-direction: column;
