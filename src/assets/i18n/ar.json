@@ -876,7 +876,7 @@
   "PP": {
     "ARCHIVED_PROJECTS": "المشاريع المؤرشفة",
     "ARCHIVE_PROJECT": "مشروع الأرشيف",
-    "CREATE_NEW": "خلق جديد إبداع جديد",
+    "CREATE_NEW": "مشروع جديد",
     "DELETE_PROJECT": "حذف المشروع",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "هل تريد بالتأكيد أرشفة هذا المشروع؟ لن تظهر المشاريع المؤرشفة في القائمة بعد الآن ولا يمكنك الوصول إلى أي من بياناتهم دون استعادتها. يوصى بعمل نسخة احتياطية لبياناتك قبل القيام بذلك.",
@@ -891,7 +891,7 @@
       "OK": "إلغاء الأرشفة"
     },
     "EDIT_PROJECT": "تحرير المشروع",
-    "EXPORT_PROJECT": "مشروع التصدير",
+    "EXPORT_PROJECT": "تصدير المشروع",
     "GITHUB_CONFIGURED": "جيثب التكامل تكوين",
     "IMPORT_FROM_FILE": "استيراد من الملف",
     "JIRA_CONFIGURED": "جيرا تكامل التكوين",
@@ -948,7 +948,7 @@
     "ADD_MORE": "أضف المزيد",
     "ADD_SOME_TASKS": "أضف بعض المهام للتخطيط ليومك!",
     "COMPLETED_TASKS": "المهام المنجزة",
-    "ESTIMATE_REMAINING": "تقدير المتبقي:",
+    "ESTIMATE_REMAINING": "الباقى من الوقت المتوقع:",
     "FINISH_DAY": "انهاء اليوم",
     "HELP_PROCRASTINATION": "مساعدة أنا اماطل!",
     "NO_COMPLETED_TASKS": "لا توجد مهام مكتملة حاليًا",
@@ -957,6 +957,6 @@
     "RESET_BREAK_TIMER": "إعادة تعيين دون كسر الوقت",
     "TIME_ESTIMATED": "الوقت المقدر:",
     "WITHOUT_BREAK": "بدون انقطاع:",
-    "WORKING_TODAY": "اعمل اليوم:"
+    "WORKING_TODAY": "عمل اليوم:"
   }
 }
