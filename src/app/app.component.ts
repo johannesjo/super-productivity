@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, HostListener, ViewChild, ViewContainerRef, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostListener, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
 import {ProjectService} from './features/project/project.service';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
@@ -26,7 +26,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {TaskService} from './features/tasks/task.service';
-import { LanguageService } from './core/language/language.service';
+import {LanguageService} from './core/language/language.service';
 
 
 @Component({
@@ -41,7 +41,7 @@ import { LanguageService } from './core/language/language.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnDestroy{
+export class AppComponent implements OnDestroy {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
     this._store.select(selectIsTaskDataLoaded),
@@ -53,9 +53,8 @@ export class AppComponent implements OnDestroy{
 
   @ViewChild('notesElRef', {read: ViewContainerRef, static: false}) notesElRef: ViewContainerRef;
   @ViewChild('sideNavElRef', {read: ViewContainerRef, static: false}) sideNavElRef: ViewContainerRef;
-
-  private _subs : Subscription = new Subscription();
-  isRTL : boolean;
+  isRTL: boolean;
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _configService: GlobalConfigService,
@@ -70,13 +69,13 @@ export class AppComponent implements OnDestroy{
     private _globalThemeService: GlobalThemeService,
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
-    private _languageService : LanguageService,
+    private _languageService: LanguageService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly taskService: TaskService,
     public projectService: ProjectService,
   ) {
-    this._subs = this._languageService.isLangRTL.subscribe( (val) => {
+    this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });
@@ -187,6 +186,9 @@ export class AppComponent implements OnDestroy{
     this.sideNavElRef.element.nativeElement.scrollIntoView({behavior: 'smooth'});
   }
 
+  ngOnDestroy() {
+    this._subs.unsubscribe();
+  }
 
   private _initElectronErrorHandler() {
     this._electronService.ipcRenderer.on(IPC.ERROR, (ev, data: {
@@ -204,9 +206,5 @@ export class AppComponent implements OnDestroy{
       });
       console.error(data);
     });
-  }
-
-  ngOnDestroy() {
-    this._subs.unsubscribe();
   }
 }

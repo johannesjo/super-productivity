@@ -5,15 +5,15 @@
       <textarea (keydown)="keydownHandler($event)"
                 (ngModelChange)="saveTmp()"
                 [(ngModel)]="noteContent"
+                [placeholder]="T.F.NOTE.D_ADD.NOTE_LABEL|translate"
                 matTextareaAutosize
                 name="noteContent"
-                [placeholder]="T.F.NOTE.D_ADD.NOTE_LABEL|translate"
                 rows="6"></textarea>
     </div>
     <datetime-input (modelChange)="reminderDate=$event"
                     [model]="reminderDate"
-                    name="reminderData"
                     [placeholder]="T.F.NOTE.D_ADD.DATETIME_LABEL|translate"
+                    name="reminderData"
                     style="width: 100%;"></datetime-input>
   </div>
 

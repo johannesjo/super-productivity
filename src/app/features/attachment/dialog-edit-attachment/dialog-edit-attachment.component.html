@@ -18,18 +18,18 @@
       </mat-form-field>
       <mat-form-field>
         <input [(ngModel)]="attachmentCopy.title"
+               [placeholder]="(T.G.TITLE|translate)"
                autofocus="autofocus"
                matInput
                name="title"
-               [placeholder]="(T.G.TITLE|translate)"
                tabindex="1"
                type="text">
       </mat-form-field>
 
       <mat-form-field>
         <mat-select [(ngModel)]="attachmentCopy.type"
-                    name="type"
                     [placeholder]="(T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE|translate)"
+                    name="type"
                     required="true"
                     tabindex="1">
           <mat-option *ngFor="let type of types"

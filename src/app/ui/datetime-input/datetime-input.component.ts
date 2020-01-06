@@ -26,13 +26,13 @@ export class DatetimeInputComponent {
     }
   }
 
+  get model() {
+    return this.nrValue;
+  }
+
   @Input()
   set model(v: number) {
     this._updateValues(v);
-  }
-
-  get model() {
-    return this.nrValue;
   }
 
   updateFromInput(v: number) {

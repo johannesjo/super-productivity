@@ -14,7 +14,7 @@ import {Subscription} from 'rxjs';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
 import {GithubCfg} from '../../../issue/github/github';
 import {DialogGithubInitialSetupComponent} from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import {DEFAULT_ISSUE_PROVIDER_CFGS, GITHUB_TYPE, JIRA_TYPE} from '../../../issue/issue.const';
+import {GITHUB_TYPE} from '../../../issue/issue.const';
 import {T} from '../../../../t.const';
 import {DEFAULT_JIRA_CFG} from '../../../issue/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../../issue/github/github.const';

@@ -1,7 +1,6 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BetterDrawerContainerComponent } from './better-drawer-container/better-drawer-container.component';
-
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {BetterDrawerContainerComponent} from './better-drawer-container/better-drawer-container.component';
 
 
 @NgModule({
@@ -15,4 +14,5 @@ import { BetterDrawerContainerComponent } from './better-drawer-container/better
     CommonModule
   ],
 })
-export class BetterDrawerModule { }
+export class BetterDrawerModule {
+}

@@ -6,8 +6,8 @@
             [formGroup]="credentialsFormGroup">
         <ng-template matStepLabel>{{T.F.JIRA.STEPPER.CREDENTIALS|translate}}</ng-template>
 
-        <p [ngClass]="HelperClasses.isHideForAdvancedFeatures"
-           [innerHTML]="T.G.EXTENSION_INFO|translate">
+        <p [innerHTML]="T.G.EXTENSION_INFO|translate"
+           [ngClass]="HelperClasses.isHideForAdvancedFeatures">
         </p>
 
         <formly-form (modelChange)="jiraCfg=$event"

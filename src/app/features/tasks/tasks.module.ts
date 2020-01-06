@@ -27,8 +27,8 @@ import {TaskUiEffects} from './store/task-ui.effects';
 import {TaskElectronEffects} from './store/task-electron.effects';
 import {SubTaskTotalTimeSpentPipe} from './pipes/sub-task-total-time-spent.pipe';
 import {SubTaskTotalTimeEstimatePipe} from './pipes/sub-task-total-time-estimate.pipe';
-import { TaskAdditionalInfoItemComponent } from './task-additional-info/task-additional-info-item/task-additional-info-item.component';
-import { TaskAdditionalInfoWrapperComponent } from './task-additional-info/task-additional-info-wrapper/task-additional-info-wrapper.component';
+import {TaskAdditionalInfoItemComponent} from './task-additional-info/task-additional-info-item/task-additional-info-item.component';
+import {TaskAdditionalInfoWrapperComponent} from './task-additional-info/task-additional-info-wrapper/task-additional-info-wrapper.component';
 import {BetterDrawerModule} from '../../ui/better-drawer/better-drawer.module';
 
 @NgModule({

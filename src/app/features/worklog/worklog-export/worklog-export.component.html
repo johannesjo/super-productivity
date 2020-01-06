@@ -11,21 +11,21 @@
 
 
   <div *ngIf="!isShowAsText"
-       class="wrapper-wrapper"
        [class.isNoCols]="!options.cols?.length"
+       class="wrapper-wrapper"
   >
     <button [matMenuTriggerFor]="addColMenu"
+            [matTooltip]="T.F.WORKLOG.EXPORT.ADD_COL|translate"
             class="add-col"
             color=""
-            [matTooltip]="T.F.WORKLOG.EXPORT.ADD_COL|translate"
-            matTooltipPosition="left"
-            mat-mini-fab>
+            mat-mini-fab
+            matTooltipPosition="left">
       <mat-icon>add</mat-icon>
     </button>
     <mat-menu #addColMenu="matMenu">
-      <button mat-menu-item
+      <button (click)="addCol(colOpt.id)"
               *ngFor="let colOpt of colOpts"
-              (click)="addCol(colOpt.id)">
+              mat-menu-item>
         {{colOpt.title|translate}}
       </button>
     </mat-menu>
@@ -61,9 +61,9 @@
   </div>
 
 
-  <collapsible class="options-collapsible"
-               [isInline]="true"
-               [title]="T.F.WORKLOG.EXPORT.OPTIONS|translate">
+  <collapsible [isInline]="true"
+               [title]="T.F.WORKLOG.EXPORT.OPTIONS|translate"
+               class="options-collapsible">
     <section class="options">
       <div class="row">
         <div class="col">

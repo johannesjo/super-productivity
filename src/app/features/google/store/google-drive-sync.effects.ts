@@ -2,7 +2,19 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
-import {catchError, concatMap, distinctUntilChanged, exhaustMap, filter, map, mapTo, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {
+  catchError,
+  concatMap,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  map,
+  mapTo,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom
+} from 'rxjs/operators';
 import {combineLatest, EMPTY, from, interval, Observable, of, throwError, zip} from 'rxjs';
 import {GoogleDriveSyncService} from '../google-drive-sync.service';
 import {GoogleApiService} from '../google-api.service';

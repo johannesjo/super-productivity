@@ -21,6 +21,8 @@ export class GithubIssueService {
   // githubIssues$: Observable<GithubIssue[]> = this._store.pipe(select(selectAllGithubIssues));
   // githubIssuesEntities$: Observable<Dictionary<GithubIssue>> = this._store.pipe(select(selectGithubIssueEntities));
 
+  private _fineWithDeletionIssueIds = [];
+
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
@@ -29,9 +31,8 @@ export class GithubIssueService {
   ) {
   }
 
-  private _fineWithDeletionIssueIds = [];
-
   // META
+
   // ----
   async loadStateForProject(projectId: string) {
     const lsGithubIssueState = await this._persistenceService.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState;

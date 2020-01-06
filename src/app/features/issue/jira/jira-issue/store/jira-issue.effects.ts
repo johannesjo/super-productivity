@@ -39,25 +39,6 @@ import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 @Injectable()
 export class JiraIssueEffects {
 
-  @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
-    .pipe(
-      ofType(
-        // while load state should be enough this just might fix the error of polling for inactive projects?
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-        ProjectActionTypes.UpdateProjectIssueProviderCfg,
-        JiraIssueActionTypes.LoadState,
-      ),
-      withLatestFrom(
-        this._projectService.isJiraEnabled$,
-        this._projectService.currentJiraCfg$,
-      ),
-      switchMap(([a, isEnabled, jiraCfg]) => {
-        return (isEnabled && jiraCfg.isAutoPollTickets)
-          ? this._pollChangesForIssues$
-          : EMPTY;
-      })
-    );
-
   @Effect() pollNewIssuesToBacklog$: any = this._actions$
     .pipe(
       ofType(
@@ -78,7 +59,6 @@ export class JiraIssueEffects {
           : EMPTY;
       }),
     );
-
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(
       ofType(
@@ -99,7 +79,6 @@ export class JiraIssueEffects {
       ),
       tap(this._saveToLs.bind(this))
     );
-
   @Effect({dispatch: false}) addOpenIssuesToBacklog$: any = this._actions$
     .pipe(
       ofType(
@@ -110,8 +89,6 @@ export class JiraIssueEffects {
       ),
       tap(this._importNewIssuesToBacklog.bind(this))
     );
-
-
   @Effect({dispatch: false}) addWorklog$: any = this._actions$
     .pipe(
       ofType(
@@ -148,7 +125,6 @@ export class JiraIssueEffects {
         }
       })
     );
-
   @Effect({dispatch: false}) checkForReassignment: any = this._actions$
     .pipe(
       ofType(
@@ -209,7 +185,6 @@ export class JiraIssueEffects {
         }
       })
     );
-
   @Effect({dispatch: false}) checkForStartTransition$: Observable<any> = this._actions$
     .pipe(
       ofType(
@@ -229,7 +204,6 @@ export class JiraIssueEffects {
         return this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
       }),
     );
-
   @Effect({dispatch: false})
   checkForDoneTransition$: Observable<any> = this._actions$
     .pipe(
@@ -253,7 +227,6 @@ export class JiraIssueEffects {
         return this._handleTransitionForIssue('DONE', jiraCfg, issueData);
       })
     );
-
   @Effect({dispatch: false}) loadMissingIssues$: any = this._taskService.tasksWithMissingIssueData$
     .pipe(
       withLatestFrom(
@@ -272,7 +245,6 @@ export class JiraIssueEffects {
         tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
       })
     );
-
   @Effect() updateTaskTitleIfChanged$: any = this._actions$
     .pipe(
       ofType(
@@ -298,7 +270,6 @@ export class JiraIssueEffects {
         })
       ),
     );
-
   private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
     withLatestFrom(
       this._store$.pipe(select(selectJiraIssueIds)),
@@ -316,6 +287,24 @@ export class JiraIssueEffects {
       }
     }),
   );
+  @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
+    .pipe(
+      ofType(
+        // while load state should be enough this just might fix the error of polling for inactive projects?
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
+        JiraIssueActionTypes.LoadState,
+      ),
+      withLatestFrom(
+        this._projectService.isJiraEnabled$,
+        this._projectService.currentJiraCfg$,
+      ),
+      switchMap(([a, isEnabled, jiraCfg]) => {
+        return (isEnabled && jiraCfg.isAutoPollTickets)
+          ? this._pollChangesForIssues$
+          : EMPTY;
+      })
+    );
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,

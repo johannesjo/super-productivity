@@ -1,23 +1,23 @@
-<div class="improvements"
-     [@improvementBanner]="improvements.length">
-  <div class="improvement"
-       mat-ripple
-       *ngFor="let improvement of improvements;">
-    <button mat-icon-button
-            disableRipple
-            class="dismiss"
+<div [@improvementBanner]="improvements.length"
+     class="improvements">
+  <div *ngFor="let improvement of improvements;"
+       class="improvement"
+       mat-ripple>
+    <button (click)="dismiss(improvement)"
             [matTooltip]="T.G.DISMISS|translate"
-            (click)="dismiss(improvement)">
+            class="dismiss"
+            disableRipple
+            mat-icon-button>
       <mat-icon>close</mat-icon>
     </button>
 
     <div class="title">{{improvement?.title}}</div>
 
-    <button mat-icon-button
-            disableRipple
-            class="check"
+    <button (click)="check(improvement)"
             [matTooltip]="T.F.METRIC.BANNER.CHECK|translate"
-            (click)="check(improvement)">
+            class="check"
+            disableRipple
+            mat-icon-button>
       <mat-icon>check</mat-icon>
     </button>
   </div>

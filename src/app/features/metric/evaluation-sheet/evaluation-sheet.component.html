@@ -13,14 +13,14 @@
     <div class="row">
       <mat-form-field>
         <input #mood="ngModel"
-               [ngModel]="metricForDay.mood"
                (ngModelChange)="updateMood($event)"
+               [ngModel]="metricForDay.mood"
+               [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
                matInput
                max="10"
                maxLength="2"
                min="1"
                name="mood"
-               [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
                required
                type="number">
         <mat-hint>{{T.F.METRIC.EVAL_FORM.MOOD_HINT|translate}}</mat-hint>
@@ -31,14 +31,14 @@
 
       <mat-form-field>
         <input #productivity="ngModel"
-               [ngModel]="metricForDay.productivity"
                (ngModelChange)="updateProductivity($event)"
+               [ngModel]="metricForDay.productivity"
+               [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
                matInput
                max="10"
                maxLength="2"
                min="1"
                name="productivity"
-               [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
                required
                type="number">
         <mat-hint>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT|translate}}</mat-hint>
@@ -51,34 +51,34 @@
     <chip-list-input (addItem)="addImprovement($event)"
                      (addNewItem)="addNewImprovement($event)"
                      (removeItem)="removeImprovement($event)"
+                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"
                      [model]="metricForDay.improvements"
-                     [suggestions]="(improvementService.improvements$|async)"
-                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"></chip-list-input>
+                     [suggestions]="(improvementService.improvements$|async)"></chip-list-input>
 
     <chip-list-input (addItem)="addObstruction($event)"
                      (addNewItem)="addNewObstruction($event)"
                      (removeItem)="removeObstruction($event)"
+                     [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"
                      [model]="metricForDay.obstructions"
-                     [suggestions]="(obstructionService.obstructions$|async)"
-                     [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"></chip-list-input>
+                     [suggestions]="(obstructionService.obstructions$|async)"></chip-list-input>
 
     <chip-list-input (addItem)="addImprovementTomorrow($event)"
                      (addNewItem)="addNewImprovementTomorrow($event)"
-                     (removeItem)="removeImprovementTomorrow($event)"
                      (additionalAction)="toggleImprovementRepeat($event)"
-                     additionalActionIcon="repeat"
-                     [toggledItems]="improvementService.repeatedImprovementIds$|async"
-                     [additionalActionTooltip]="T.F.METRIC.EVAL_FORM.ENABLE_REPEAT_EVERY_DAY|translate"
+                     (removeItem)="removeImprovementTomorrow($event)"
                      [additionalActionTooltipUnToggle]="T.F.METRIC.EVAL_FORM.DISABLE_REPEAT_EVERY_DAY|translate"
+                     [additionalActionTooltip]="T.F.METRIC.EVAL_FORM.ENABLE_REPEAT_EVERY_DAY|translate"
+                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW|translate"
                      [model]="metricForDay.improvementsTomorrow"
                      [suggestions]="(improvementService.improvements$|async)"
-                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW|translate"></chip-list-input>
+                     [toggledItems]="improvementService.repeatedImprovementIds$|async"
+                     additionalActionIcon="repeat"></chip-list-input>
   </form>
 </div>
 <div style="text-align: center; margin-top: 8px;margin-bottom: 16px;">
-  <button mat-button
-          (click)="addNote()">
+  <button (click)="addNote()"
+          mat-button>
     <mat-icon>add</mat-icon>
-        {{T.F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW|translate}}
+    {{T.F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW|translate}}
   </button>
 </div>

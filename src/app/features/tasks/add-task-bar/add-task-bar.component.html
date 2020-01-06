@@ -1,6 +1,6 @@
 <form (submit)="addTask()"
-      [class.mat-elevation-z2]="isElevated"
       [class.mat-elevation-z1]="!isElevated"
+      [class.mat-elevation-z2]="isElevated"
       class="add-task-form">
   <div *ngIf="(isLoading$|async)"
        class="spinner">

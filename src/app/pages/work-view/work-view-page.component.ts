@@ -53,23 +53,13 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
     ),
     map(v => v[0]),
   );
-
+  splitTopEl$ = new ReplaySubject<HTMLElement>(1);
   upperContainerScroll$ = this.projectService.isProjectChanging$.pipe(
     filter(isChanging => !isChanging),
     delay(50),
     switchMap(() => this.splitTopEl$),
     switchMap((el) => fromEvent(el, 'scroll')),
   );
-
-
-  @ViewChild('splitTopEl', {static: false, read: ElementRef}) set splitTopElRef(ref: ElementRef) {
-    if (ref) {
-      this.splitTopEl$.next(ref.nativeElement);
-    }
-  }
-
-  splitTopEl$ = new ReplaySubject<HTMLElement>(1);
-
   private _subs = new Subscription();
   private _switchListAnimationTimeout: number;
 
@@ -86,6 +76,11 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
   ) {
   }
 
+  @ViewChild('splitTopEl', {static: false, read: ElementRef}) set splitTopElRef(ref: ElementRef) {
+    if (ref) {
+      this.splitTopEl$.next(ref.nativeElement);
+    }
+  }
 
   ngOnInit() {
     const sub = this._dragulaService.find(SUB);

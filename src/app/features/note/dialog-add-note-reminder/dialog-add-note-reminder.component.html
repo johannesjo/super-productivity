@@ -9,9 +9,9 @@
         <!--[matDatepicker]="myDatepicker"-->
         <input
           [(ngModel)]="title"
+          [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_TITLE|translate"
           matInput
           name="title"
-          [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_TITLE|translate"
           required
           type="text">
         <mat-error>{{T.F.NOTE.D_ADD_REMINDER.E_ENTER_TITLE|translate}}</mat-error>
@@ -19,9 +19,9 @@
 
       <datetime-input (modelChange)="dateTime=$event"
                       [model]="dateTime"
+                      [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_DATETIME|translate"
                       [required]="true"
-                      name="reminderDate"
-                      [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_DATETIME|translate"></datetime-input>
+                      name="reminderDate"></datetime-input>
     </div>
   </mat-dialog-content>
 

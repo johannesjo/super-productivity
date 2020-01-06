@@ -6,8 +6,8 @@
 
     <mat-dialog-content>
       <help-section>
-        <div class="side-info"
-             [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate">
+        <div [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate"
+             class="side-info">
         </div>
       </help-section>
 
@@ -16,9 +16,9 @@
       <mat-form-field>
         <input [(ngModel)]="newEntry.date"
                [matDatepicker]="myDatepicker"
+               [placeholder]="T.F.TASK.D_TIME_FOR_DAY.DATE|translate"
                matInput
                name="date"
-               [placeholder]="T.F.TASK.D_TIME_FOR_DAY.DATE|translate"
                required
                type="text">
         <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
@@ -39,14 +39,14 @@
     <mat-dialog-actions align="end">
       <button [mat-dialog-close]="true"
               color="primary"
-              type="button"
-              mat-button>
+              mat-button
+              type="button">
         {{T.G.CANCEL|translate}}
       </button>
 
-      <button type="submit"
-              color="primary"
-              mat-stroked-button>
+      <button color="primary"
+              mat-stroked-button
+              type="submit">
         <mat-icon>save</mat-icon>
         {{T.G.SAVE|translate}}
       </button>

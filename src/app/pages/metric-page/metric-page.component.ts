@@ -9,6 +9,7 @@ import {T} from '../../t.const';
 })
 export class MetricPageComponent {
   T = T;
+
   constructor() {
   }
 }

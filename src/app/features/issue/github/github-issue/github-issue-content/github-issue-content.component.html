@@ -54,9 +54,9 @@
         <div><span class="author-name">{{comment.user?.login}}</span>
           <span class="when">{{T.F.GITHUB.ISSUE_CONTENT.AT|translate}} {{comment.created_at|date:'short'}}</span>
         </div>
-        <div class="markdown"
-             *ngIf="comment.body"
-             [innerHTML]="comment?.body|markdown"></div>
+        <div *ngIf="comment.body"
+             [innerHTML]="comment?.body|markdown"
+             class="markdown"></div>
       </div>
     </div>
   </div>

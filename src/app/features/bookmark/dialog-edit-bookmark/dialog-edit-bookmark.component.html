@@ -9,10 +9,10 @@
     <div class="form-wrapper">
       <mat-form-field>
         <input [(ngModel)]="bookmarkCopy.title"
+               [placeholder]="(T.G.TITLE|translate)"
                autofocus="autofocus"
                matInput
                name="title"
-               [placeholder]="(T.G.TITLE|translate)"
                tabindex="1"
                type="text">
       </mat-form-field>
@@ -28,8 +28,8 @@
 
       <mat-form-field>
         <mat-select [(ngModel)]="bookmarkCopy.type"
-                    name="type"
                     [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
+                    name="type"
                     required="true"
                     tabindex="1">
           <mat-option *ngFor="let type of types"
@@ -44,8 +44,8 @@
           <input [(ngModel)]="bookmarkCopy.icon"
                  [formControl]="iconControl"
                  [matAutocomplete]="auto"
-                 matInput
                  [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_ICON|translate)"
+                 matInput
                  type="text">
           <mat-icon matPrefix="">{{bookmarkCopy.icon}}</mat-icon>
           <mat-autocomplete #auto="matAutocomplete"

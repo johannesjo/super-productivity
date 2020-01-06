@@ -7,16 +7,16 @@
 
       {{ modelItem.title}}
 
-      <mat-icon matChipRemove
-                [matTooltip]="T.G.REMOVE|translate">cancel
+      <mat-icon [matTooltip]="T.G.REMOVE|translate"
+                matChipRemove>cancel
       </mat-icon>
 
-      <button mat-icon-button
+      <button (click)="additionalAction.emit(modelItem.id)"
               *ngIf="additionalActionIcon"
-              class="additional"
               [class.isToggled]="isToggled(modelItem.id)"
-              (click)="additionalAction.emit(modelItem.id)"
-              [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle: additionalActionTooltip">
+              [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle: additionalActionTooltip"
+              class="additional"
+              mat-icon-button>
         <mat-icon style="transform: rotate(45deg)">{{additionalActionIcon}}
         </mat-icon>
       </button>

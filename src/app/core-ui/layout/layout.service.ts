@@ -26,11 +26,6 @@ const BOTH_OVER = 780;
 })
 export class LayoutService {
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
-
-  private _isShowSideNav$: Observable<boolean> = this._store$.pipe(select(selectIsShowSideNav));
-  private _isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
-
-
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver.observe([
     `(min-width: ${NAV_ALWAYS_VISIBLE}px)`,
   ]).pipe(map(result => result.matches));
@@ -40,7 +35,9 @@ export class LayoutService {
   isNotesOver$: Observable<boolean> = this._breakPointObserver.observe([
     `(min-width: ${BOTH_OVER}px)`,
   ]).pipe(map(result => !result.matches));
-
+  isNavOver$: Observable<boolean> = this.isNotesNextNavOver$.pipe(map(v => !v));
+  isScrolled$ = new BehaviorSubject<boolean>(false);
+  private _isShowSideNav$: Observable<boolean> = this._store$.pipe(select(selectIsShowSideNav));
   isShowSideNav$: Observable<boolean> = this._isShowSideNav$.pipe(
     switchMap((isShow) => {
       return isShow
@@ -48,8 +45,6 @@ export class LayoutService {
         : this.isNavAlwaysVisible$;
     }),
   );
-
-  isNavOver$: Observable<boolean> = this.isNotesNextNavOver$.pipe(map(v => !v));
 
 
   // isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe(
@@ -59,8 +54,7 @@ export class LayoutService {
   //       : this.isBothAlwaysVisible$;
   //   }),
   // );
-
-  isScrolled$ = new BehaviorSubject<boolean>(false);
+  private _isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
 
   constructor(
     private _store$: Store<LayoutState>,

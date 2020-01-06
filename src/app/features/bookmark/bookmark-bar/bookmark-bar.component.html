@@ -11,21 +11,21 @@
 
   <div class="controls-and-list-wrapper">
     <div class="list-controls">
-      <button *ngIf="!isEditMode"
+      <button (menuClosed)="isContextMenuDisabled = false"
+              (menuOpened)="isContextMenuDisabled = true"
+              *ngIf="!isEditMode"
               [matMenuTriggerFor]="menu"
               [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
-              (menuOpened)="isContextMenuDisabled = true"
-              (menuClosed)="isContextMenuDisabled = false"
-              mat-stroked-button
               [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
+              mat-stroked-button
               tabindex="1">
         <mat-icon>more_vert</mat-icon>
       </button>
-      <button *ngIf="isEditMode"
-              (click)="isEditMode=false"
+      <button (click)="isEditMode=false"
+              *ngIf="isEditMode"
+              [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
               color="accent"
               mat-stroked-button
-              [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
               tabindex="1">
         <mat-icon>close</mat-icon>
       </button>

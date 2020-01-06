@@ -30,29 +30,17 @@ export class ChipListInputComponent {
   @Input() additionalActionTooltip: string;
   @Input() additionalActionTooltipUnToggle: string;
   @Input() toggledItems: string[];
-
-  @Input() set suggestions(val) {
-    this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
-    this._updateModelItems(this._modelIds);
-  }
-
   suggestionsIn: Suggestion[];
-
-  @Input() set model(v: string[]) {
-    this._modelIds = v;
-    this._updateModelItems(v);
-  }
-
   @Output() addItem = new EventEmitter<string>();
   @Output() addNewItem = new EventEmitter<string>();
   @Output() removeItem = new EventEmitter<string>();
   @Output() additionalAction = new EventEmitter<string>();
-
   modelItems: Suggestion[];
-
   inputCtrl = new FormControl();
   separatorKeysCodes: number[] = [ENTER, COMMA];
-
+  @ViewChild('inputElRef', {static: true}) inputEl: ElementRef<HTMLInputElement>;
+  @ViewChild('autoElRef', {static: true}) matAutocomplete: MatAutocomplete;
+  private _modelIds: string[] = [];
   filteredSuggestions: Observable<Suggestion[]> = this.inputCtrl.valueChanges.pipe(
     startWith(''),
     map((val: string | null) => val
@@ -60,12 +48,17 @@ export class ChipListInputComponent {
       : this.suggestionsIn.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
   );
 
-  @ViewChild('inputElRef', {static: true}) inputEl: ElementRef<HTMLInputElement>;
-  @ViewChild('autoElRef', {static: true}) matAutocomplete: MatAutocomplete;
-
-  private _modelIds: string[] = [];
-
   constructor() {
+  }
+
+  @Input() set suggestions(val) {
+    this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
+    this._updateModelItems(this._modelIds);
+  }
+
+  @Input() set model(v: string[]) {
+    this._modelIds = v;
+    this._updateModelItems(v);
   }
 
   add(event: MatChipInputEvent): void {

@@ -26,7 +26,7 @@
     <mat-chip (click)="setCommonVal('2H')">{{T.DATETIME_INPUT.IN|translate:{time: '2h'} }}</mat-chip>
     <mat-chip (click)="setCommonVal('5H')">{{T.DATETIME_INPUT.IN|translate:{time: '5h'} }}</mat-chip>
     <mat-chip (click)="setCommonVal('TOMORROW_11')">{{T.DATETIME_INPUT.TOMORROW|translate:{time: '11:00'} }}</mat-chip>
-    <mat-chip *ngIf="lastVal"
-              (click)="setLastVal()">{{lastVal|date:'short'}}</mat-chip>
+    <mat-chip (click)="setLastVal()"
+              *ngIf="lastVal">{{lastVal|date:'short'}}</mat-chip>
   </mat-chip-list>
 </div>

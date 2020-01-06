@@ -18,20 +18,20 @@
       <mat-card-content>
         <div class="content">
           <button (click)="startTask(task)"
-                  color=""
-                  class="mat-elevation-z1 start-task-btn"
-                  matTooltipPosition="right"
                   [matTooltip]="T.SCHEDULE.START_TASK|translate"
-                  mat-mini-fab>
+                  class="mat-elevation-z1 start-task-btn"
+                  color=""
+                  mat-mini-fab
+                  matTooltipPosition="right">
             <mat-icon>play_arrow</mat-icon>
           </button>
 
           <div class="task-info">
             <div class="title">
-              <div class="task-title"
-                   (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal, task)"
-                   contenteditable="true"
-                   contentEditableOnClick>{{task.title}}</div>
+              <div (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal, task)"
+                   class="task-title"
+                   contentEditableOnClick
+                   contenteditable="true">{{task.title}}</div>
               <div *ngIf="(projectService.getById$(task.reminderData.projectId)|async) as project"
                    class="project">
                 <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
@@ -39,11 +39,11 @@
                 <div class="project-title">{{project.title}}</div>
               </div>
             </div>
-            <div class="due-date"
+            <div (click)="editReminder(task)"
+                 [matTooltip]="task.reminderData.remindAt|date:'short'"
+                 class="due-date"
                  mat-ripple
-                 (click)="editReminder(task)"
-                 matTooltipPosition="left"
-                 [matTooltip]="task.reminderData.remindAt|date:'short'">
+                 matTooltipPosition="left">
               <div class="date">
                 {{task.reminderData.remindAt|humanizeTimestamp}}
               </div>

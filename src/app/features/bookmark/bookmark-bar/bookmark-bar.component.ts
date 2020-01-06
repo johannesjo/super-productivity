@@ -27,13 +27,6 @@ export class BookmarkBarComponent implements OnDestroy {
   T = T;
   isContextMenuDisabled = false;
   bookmarkBarHeight = 50;
-
-  @ViewChild('bookmarkBar', {read: ElementRef, static: false}) set bookmarkBarEl(content: ElementRef) {
-    if (content && content.nativeElement) {
-      this.bookmarkBarHeight = content.nativeElement.offsetHeight;
-    }
-  }
-
   private _subs = new Subscription();
 
   constructor(
@@ -55,6 +48,12 @@ export class BookmarkBarComponent implements OnDestroy {
         this.bookmarkService.reorderBookmarks(newIds);
       })
     );
+  }
+
+  @ViewChild('bookmarkBar', {read: ElementRef, static: false}) set bookmarkBarEl(content: ElementRef) {
+    if (content && content.nativeElement) {
+      this.bookmarkBarHeight = content.nativeElement.offsetHeight;
+    }
   }
 
   ngOnDestroy() {

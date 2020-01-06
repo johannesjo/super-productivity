@@ -16,9 +16,9 @@
     <input (ngModelChange)="onInputChange($event)"
            [id]="uid"
            [ngModel]="_model"
+           [placeholder]="T.G.CLICK_TO_EDIT|translate"
            class="value"
            inputDuration="optional"
-           [placeholder]="T.G.CLICK_TO_EDIT|translate"
            spellcheck="false"
            type="text">
   </div>

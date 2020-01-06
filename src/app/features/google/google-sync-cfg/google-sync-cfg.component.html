@@ -2,8 +2,8 @@
 
 <form #formRef="ngForm"
       (submit)="submit()">
-  <mat-slide-toggle [ngModel]="cfg.isEnabled"
-                    (ngModelChange)="toggleEnabled($event)"
+  <mat-slide-toggle (ngModelChange)="toggleEnabled($event)"
+                    [ngModel]="cfg.isEnabled"
                     name="isEnabled">
     {{T.F.GOOGLE.SYNC_CFG.ENABLE|translate}}
   </mat-slide-toggle>
@@ -54,9 +54,9 @@
              class="form-inputs">
       <mat-form-field>
         <input [(ngModel)]="tmpSyncFile"
+               [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_FILE_NAME|translate"
                matInput
                name="tmpSyncFile"
-               [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_FILE_NAME|translate"
                type="text">
         <mat-icon matSuffix="">file_upload</mat-icon>
       </mat-form-field>
@@ -96,21 +96,21 @@
         <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
           <input [(ngModel)]="cfg.syncInterval"
                  [isAllowSeconds]="true"
+                 [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_INTERVAL|translate"
                  inputDuration
                  matInput
                  name="syncInterval"
-                 [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_INTERVAL|translate"
                  type="text">
           <mat-icon matSuffix="">timer</mat-icon>
         </mat-form-field>
       </section>
 
-      <a mat-button
+      <a class="md-stroked"
          color=primary
-         class="md-stroked"
          external-link
-         target="_blank"
-         href="https://myaccount.google.com/permissions">
+         href="https://myaccount.google.com/permissions"
+         mat-button
+         target="_blank">
         <mat-icon>remove_circle</mat-icon>
         Revoke permissions
       </a>

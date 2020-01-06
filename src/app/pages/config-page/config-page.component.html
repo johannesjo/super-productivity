@@ -7,14 +7,14 @@
 
       <div class="dark-mode-toggle">
         <mat-slide-toggle
-          [checked]="(configService.misc$|async)?.isDarkMode"
-          (change)="toggleDarkMode($event)">
+          (change)="toggleDarkMode($event)"
+          [checked]="(configService.misc$|async)?.isDarkMode">
           {{T.PS.TOGGLE_DARK_MODE|translate}}
         </mat-slide-toggle>
       </div>
 
-      <section class="config-section "
-               *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;">
+      <section *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;"
+               class="config-section ">
         <config-section (save)="saveGlobalCfg($event)"
                         [cfg]="globalCfg[section.key]"
                         [section]="section"></config-section>

@@ -50,14 +50,27 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     map(cfg => cfg && cfg.isTurnOffMarkdown),
     startWith(false),
   );
+  private _hideOverFlowTimeout: number;
+
+  constructor(
+    private _electronService: ElectronService,
+    private _cd: ChangeDetectorRef,
+    private _globalConfigService: GlobalConfigService,
+    private _matDialog: MatDialog,
+  ) {
+    this.resizeParsedToFit();
+  }
 
   @HostBinding('class.isFocused') get isFocused() {
     return this.isShowEdit;
   }
 
-  private _hideOverFlowTimeout: number;
-
   private _model: string;
+
+  get model() {
+    return this._model;
+  }
+
   @Input() set model(v: string) {
     this._model = v;
     this.modelCopy = v;
@@ -67,20 +80,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         this.resizeParsedToFit();
       });
     }
-  }
-
-  get model() {
-    return this._model;
-  }
-
-
-  constructor(
-    private _electronService: ElectronService,
-    private _cd: ChangeDetectorRef,
-    private _globalConfigService: GlobalConfigService,
-    private _matDialog: MatDialog,
-  ) {
-    this.resizeParsedToFit();
   }
 
   @Input() set isFocus(val: boolean) {

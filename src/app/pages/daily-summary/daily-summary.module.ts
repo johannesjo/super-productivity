@@ -8,7 +8,7 @@ import {RouterModule} from '@angular/router';
 import {WorklogModule} from '../../features/worklog/worklog.module';
 import {MetricModule} from '../../features/metric/metric.module';
 import {TasksModule} from '../../features/tasks/tasks.module';
-import { PlanTasksTomorrowComponent } from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
+import {PlanTasksTomorrowComponent} from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
 import {BetterDrawerModule} from '../../ui/better-drawer/better-drawer.module';
 
 @NgModule({

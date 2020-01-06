@@ -83,17 +83,14 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       : of(null)
     ),
   );
-
-  private _attachmentIds$ = new BehaviorSubject([]);
-  localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
-    switchMap((ids) => this.attachmentService.getByIds$(ids))
-  );
-
   parentId$ = new BehaviorSubject<string>(null);
   parentTaskData$: Observable<TaskWithIssueData> = this.parentId$.pipe(
     switchMap((id) => id ? this.taskService.getByIdWithIssueData$(id) : of(null))
   );
-
+  private _attachmentIds$ = new BehaviorSubject([]);
+  localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
+    switchMap((ids) => this.attachmentService.getByIds$(ids))
+  );
   private _taskData: TaskWithSubTasks;
   private _focusTimeout: number;
   private _subs = new Subscription();
@@ -109,6 +106,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ) {
   }
 
+  get task(): TaskWithSubTasks {
+    return this._taskData;
+  }
+
   @Input() set task(newVal: TaskWithSubTasks) {
     const prev = this._taskData;
     this._taskData = newVal;
@@ -121,10 +122,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     if (!prev || !newVal || (prev.id !== newVal.id)) {
       this._focusFirst();
     }
-  }
-
-  get task(): TaskWithSubTasks {
-    return this._taskData;
   }
 
   get progress() {

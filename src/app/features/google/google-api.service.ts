@@ -22,8 +22,8 @@ const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
   providedIn: 'root',
 })
 export class GoogleApiService {
+  public isLoggedIn: boolean;
   private _session$: Observable<GoogleSession> = this._configService.googleSession$;
-
   private _onTokenExpire$: Observable<number> = this._session$.pipe(
     switchMap((session) => {
       if (!session.accessToken) {
@@ -37,8 +37,6 @@ export class GoogleApiService {
         : EMPTY;
     })
   );
-
-  public isLoggedIn: boolean;
   public isLoggedIn$: Observable<boolean> = merge(
     this._session$,
     this._onTokenExpire$,

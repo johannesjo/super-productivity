@@ -13,9 +13,10 @@ import {T} from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [slideAnimation]
 })
-export class BannerComponent{
+export class BannerComponent {
   T = T;
-
+  height = 120;
+  private _dirtyReference: string;
   // TODO maybe improve if initial delay is annoying
   activeBanner$: Observable<Banner> = this.bannerService.activeBanner$.pipe(
     concatMap((activeBanner) => {
@@ -36,19 +37,16 @@ export class BannerComponent{
       }
     })
   );
-  height = 120;
 
-  private _dirtyReference: string;
+  constructor(
+    public bannerService: BannerService,
+  ) {
+  }
 
   @ViewChild('wrapperEl', {static: false}) set wrapperEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.height = content.nativeElement.offsetHeight;
     }
-  }
-
-  constructor(
-    public bannerService: BannerService,
-  ) {
   }
 
   dismiss(bannerId) {

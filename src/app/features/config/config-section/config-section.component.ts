@@ -31,26 +31,10 @@ import {TranslateService} from '@ngx-translate/core';
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<{ [key: string]: any }>;
-
-  @Input() set cfg(v: any) {
-    this._cfg = v;
-    if (v && this._instance) {
-      this._instance.cfg = {...v};
-    }
-  }
-
-  get cfg() {
-    return this._cfg;
-  }
-
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
-
   @ViewChild('customForm', {read: ViewContainerRef, static: true}) customFormRef: ViewContainerRef;
-
   isExpanded = false;
-
   private _subs = new Subscription();
-  private _cfg: any;
   private _instance;
   private _viewDestroyTimeout: number;
 
@@ -60,6 +44,19 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     private _projectService: ProjectService,
     private _translateService: TranslateService,
   ) {
+  }
+
+  private _cfg: any;
+
+  get cfg() {
+    return this._cfg;
+  }
+
+  @Input() set cfg(v: any) {
+    this._cfg = v;
+    if (v && this._instance) {
+      this._instance.cfg = {...v};
+    }
   }
 
   ngOnInit(): void {

@@ -26,6 +26,10 @@ export class TaskAdditionalInfoItemComponent {
 
   @HostBinding('tabindex') tabindex = 3;
 
+  constructor(
+    public elementRef: ElementRef
+  ) {
+  }
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     const tagName = (ev.target as HTMLElement).tagName.toLowerCase();
@@ -53,11 +57,6 @@ export class TaskAdditionalInfoItemComponent {
         this.collapseParent.emit();
       }
     }
-  }
-
-  constructor(
-    public elementRef: ElementRef
-  ) {
   }
 
   focusEl() {

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Reminder} from '../../reminder/reminder.model';
-import {Task, TaskWithReminderData} from '../task.model';
+import {Task} from '../task.model';
 import {TaskService} from '../task.service';
 import {Observable, Subscription} from 'rxjs';
 import {ReminderService} from '../../reminder/reminder.service';
@@ -47,13 +47,13 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     }));
   }
 
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
-  }
-
   get isError() {
     // just for this dialog we make an exception about using getters
     return !this.task && this.isForCurrentProject;
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   play() {

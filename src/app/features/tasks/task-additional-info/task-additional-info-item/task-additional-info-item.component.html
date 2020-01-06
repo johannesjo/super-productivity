@@ -1,6 +1,6 @@
 <ng-container *ngIf="type==='input'">
-  <section class="input-item"
-           (click)="onInputItemClick()">
+  <section (click)="onInputItemClick()"
+           class="input-item">
     <div class="input-item__title">
       <ng-content select="[input-title]"></ng-content>
     </div>
@@ -8,9 +8,9 @@
       <ng-content select="[input-value]"></ng-content>
     </div>
 
-    <button mat-icon-button
+    <button class="input-item__edit-btn"
             color="accent"
-            class="input-item__edit-btn">
+            mat-icon-button>
       <mat-icon>{{inputIcon}}</mat-icon>
     </button>
 

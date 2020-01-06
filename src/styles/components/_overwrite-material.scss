@@ -104,7 +104,7 @@ body .mat-h1 {
 }
 
 // BACKDROP FIX
-.mat-drawer-backdrop{
+.mat-drawer-backdrop {
   @include lightTheme(true) {
     background-color: $c-backdrop-light-theme;
   }

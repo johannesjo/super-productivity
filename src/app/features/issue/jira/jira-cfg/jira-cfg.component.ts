@@ -25,6 +25,52 @@ import {ProjectService} from '../../../project/project.service';
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<JiraCfg>;
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  T = T;
+  HelperClasses = HelperClasses;
+  issueSuggestionsCtrl: FormControl = new FormControl();
+  customFieldSuggestionsCtrl: FormControl = new FormControl();
+  customFields: any [] = [];
+  customFieldsPromise: Promise<any>;
+  isLoading$ = new BehaviorSubject(false);
+  fields: FormlyFieldConfig[];
+  form = new FormGroup({});
+  options: FormlyFormOptions = {};
+  filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.issueSuggestionsCtrl.valueChanges.pipe(
+    debounceTime(300),
+    tap(() => this.isLoading$.next(true)),
+    switchMap((searchTerm) => {
+      return (searchTerm && searchTerm.length > 1)
+        ? this._jiraApiService.issuePicker$(searchTerm)
+          .pipe(
+            catchError(() => {
+              return [];
+            })
+          )
+        // Note: the outer array signifies the observable stream the other is the value
+        : [[]];
+    }),
+    tap((suggestions) => {
+      this.isLoading$.next(false);
+    }),
+  );
+  filteredCustomFieldSuggestions$: Observable<any[]> = this.customFieldSuggestionsCtrl.valueChanges.pipe(
+    map(value => this._filterCustomFieldSuggestions(value)),
+  );
+  private _subs = new Subscription();
+
+  constructor(
+    private _jiraApiService: JiraApiService,
+    private _snackService: SnackService,
+    private _projectService: ProjectService,
+  ) {
+  }
+
+  private _cfg: JiraCfg;
+
+  get cfg() {
+    return this._cfg;
+  }
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: JiraCfg) {
@@ -46,59 +92,6 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     if (!Array.isArray(this._cfg.availableTransitions)) {
       this._cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
     }
-  }
-
-  get cfg() {
-    return this._cfg;
-  }
-
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
-
-  T = T;
-  HelperClasses = HelperClasses;
-
-  issueSuggestionsCtrl: FormControl = new FormControl();
-  customFieldSuggestionsCtrl: FormControl = new FormControl();
-  customFields: any [] = [];
-  customFieldsPromise: Promise<any>;
-
-  isLoading$ = new BehaviorSubject(false);
-
-  fields: FormlyFieldConfig[];
-  form = new FormGroup({});
-  options: FormlyFormOptions = {};
-
-  filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.issueSuggestionsCtrl.valueChanges.pipe(
-    debounceTime(300),
-    tap(() => this.isLoading$.next(true)),
-    switchMap((searchTerm) => {
-      return (searchTerm && searchTerm.length > 1)
-        ? this._jiraApiService.issuePicker$(searchTerm)
-          .pipe(
-            catchError(() => {
-              return [];
-            })
-          )
-        // Note: the outer array signifies the observable stream the other is the value
-        : [[]];
-    }),
-    tap((suggestions) => {
-      this.isLoading$.next(false);
-    }),
-  );
-
-  filteredCustomFieldSuggestions$: Observable<any[]> = this.customFieldSuggestionsCtrl.valueChanges.pipe(
-    map(value => this._filterCustomFieldSuggestions(value)),
-  );
-
-  private _subs = new Subscription();
-  private _cfg: JiraCfg;
-
-  constructor(
-    private _jiraApiService: JiraApiService,
-    private _snackService: SnackService,
-    private _projectService: ProjectService,
-  ) {
   }
 
   ngOnInit(): void {

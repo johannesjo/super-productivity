@@ -29,23 +29,15 @@ import {MatDialog} from '@angular/material/dialog';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
-  @Input() set day(val: string) {
-    this.day$.next(val);
-  }
-
   @Output() save = new EventEmitter<any>();
-
   T = T;
   metricForDay: MetricCopy;
-
   day$ = new BehaviorSubject<string>(getWorklogStr());
-  // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
-
   private _metricForDay$ = this.day$.pipe(
     switchMap((day) => this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(day)),
   );
+  // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
   private _subs = new Subscription();
-
 
   constructor(
     public obstructionService: ObstructionService,
@@ -56,6 +48,10 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     private _noteService: NoteService,
     private _cd: ChangeDetectorRef,
   ) {
+  }
+
+  @Input() set day(val: string) {
+    this.day$.next(val);
   }
 
   ngOnInit(): void {

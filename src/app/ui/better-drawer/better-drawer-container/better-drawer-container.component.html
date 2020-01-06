@@ -1,18 +1,18 @@
-<div class="content"
-     #contentElRef>
+<div #contentElRef
+     class="content">
   <ng-content select="[better-drawer-content]"></ng-content>
 </div>
 
-<div class="backdrop"
-     (click)="close()"
+<div (click)="close()"
      *ngIf="isOpenGet && isOverGet"
-     @fade></div>
+     @fade
+     class="backdrop"></div>
 
 
-<div class="side"
-     [style]="sideStyle">
-  <button class="close-btn"
-          (click)="close()">
+<div [style]="sideStyle"
+     class="side">
+  <button (click)="close()"
+          class="close-btn">
     &times;
   </button>
   <div class="side-inner">

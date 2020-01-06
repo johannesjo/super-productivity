@@ -5,9 +5,9 @@ import {BehaviorSubject, Observable} from 'rxjs';
   providedIn: 'root'
 })
 export class ImexMetaService {
+  isDataImportInProgress = false;
   private _isDataImportInProgress$ = new BehaviorSubject<boolean>(false);
   isDataImportInProgress$: Observable<boolean> = this._isDataImportInProgress$.asObservable();
-  isDataImportInProgress = false;
 
   constructor() {
     this.isDataImportInProgress$.subscribe((val) => this.isDataImportInProgress = val);

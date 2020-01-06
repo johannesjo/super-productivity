@@ -40,17 +40,17 @@
            class="project-color"></div>
       <button (click)="switchProject(project.id, 'work-view')"
               mat-menu-item>
-        <mat-icon drag-handle
-                  class="drag-handle">list
+        <mat-icon class="drag-handle"
+                  drag-handle>list
         </mat-icon>
         {{project.title}}
       </button>
 
       <button
+        (click)="switchProject(project.id, 'project-settings')"
         class="project-settings-btn"
         mat-icon-button
-        routerLinkActive="isActiveRoute"
-        (click)="switchProject(project.id, 'project-settings')">
+        routerLinkActive="isActiveRoute">
         <mat-icon>more_vert</mat-icon>
       </button>
     </div>
@@ -81,9 +81,9 @@
     <span class="text">{{T.MH.SETTINGS|translate}}</span>
   </button>
 
-  <button class="route-link scroll-down-btn"
-          mat-menu-item
-          (click)="onScrollToNotesClick()">
+  <button (click)="onScrollToNotesClick()"
+          class="route-link scroll-down-btn"
+          mat-menu-item>
     <mat-icon>notes</mat-icon>
     <span class="text">{{T.MH.NOTES|translate}}</span>
     <mat-icon>arrow_downwards</mat-icon>

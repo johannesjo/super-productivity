@@ -66,16 +66,16 @@
           flaws.</p>
 
         <mat-form-field>
-          <textarea matInput
-                    [placeholder]="T.F.PROCRASTINATION.REFRAME.TL1|translate"></textarea>
+          <textarea [placeholder]="T.F.PROCRASTINATION.REFRAME.TL1|translate"
+                    matInput></textarea>
         </mat-form-field>
         <mat-form-field>
-          <textarea matInput
-                    [placeholder]="T.F.PROCRASTINATION.REFRAME.TL2|translate"></textarea>
+          <textarea [placeholder]="T.F.PROCRASTINATION.REFRAME.TL2|translate"
+                    matInput></textarea>
         </mat-form-field>
         <mat-form-field>
-          <textarea matInput
-                    [placeholder]="T.F.PROCRASTINATION.REFRAME.TL3|translate"></textarea>
+          <textarea [placeholder]="T.F.PROCRASTINATION.REFRAME.TL3|translate"
+                    matInput></textarea>
         </mat-form-field>
       </section>
     </mat-tab>
@@ -88,7 +88,8 @@
 
         <task [task]="currentTask"></task>
 
-        <p style="margin-top: 16px;" [innerHTML]="T.F.PROCRASTINATION.SPLIT_UP.OUTRO|translate"></p>
+        <p [innerHTML]="T.F.PROCRASTINATION.SPLIT_UP.OUTRO|translate"
+           style="margin-top: 16px;"></p>
       </section>
     </mat-tab>
   </mat-tab-group>

@@ -15,9 +15,9 @@
                     class="repeat-task-icon">repeat
           </mat-icon>
           <span *ngIf="task.parentId">–</span>
-          <inline-input style="display: inline-block"
-                        (changed)="updateTaskTitle(task, $event)"
-                        [value]="task.title">
+          <inline-input (changed)="updateTaskTitle(task, $event)"
+                        [value]="task.title"
+                        style="display: inline-block">
           </inline-input>
         </div>
       </td>
@@ -67,10 +67,10 @@
           mat-cell>
         <button (click)="toggleTaskDone(task)"
                 [class.isDone]="task.isDone"
+                [title]="T.F.TASK.SUMMARY_TABLE.TOGGLE_DONE|translate"
                 class="check-done"
                 mat-icon-button
-                tabindex="2"
-                [title]="T.F.TASK.SUMMARY_TABLE.TOGGLE_DONE|translate">
+                tabindex="2">
           <mat-icon aria-label="Mark as undone"
                     class="undo">undo
           </mat-icon>

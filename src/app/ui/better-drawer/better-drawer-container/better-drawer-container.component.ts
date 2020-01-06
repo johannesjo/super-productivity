@@ -14,7 +14,7 @@ import {
 import {fadeAnimation} from '../../animations/fade.ani';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {Observable, ReplaySubject, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter, map, share, switchMap, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, share, switchMap} from 'rxjs/operators';
 import {observeWidth} from '../../../util/resize-observer-obs';
 import {MainContainerClass} from '../../../app.constants';
 
@@ -31,35 +31,8 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
 })
 export class BetterDrawerContainerComponent implements OnInit, AfterContentInit, OnDestroy {
   @Input() sideWidth: number;
-
-  @Input() set isOpen(v: boolean) {
-    this._isOpen = v;
-    this._updateStyle();
-  }
-
-  @HostBinding('class.isOpen') get isOpenGet() {
-    return this._isOpen;
-  }
-
-  @Input() set isOver(v: boolean) {
-    this._isOver = v;
-    this._updateStyle();
-  }
-
-  @HostBinding('class.isOver') get isOverGet() {
-    return this._isOver;
-  }
-
   @Output() wasClosed = new EventEmitter<void>();
-
-  @ViewChild('contentElRef', {static: false, read: ElementRef}) set setContentElRef(ref: ElementRef) {
-    if (ref) {
-      this.contentEl$.next(ref.nativeElement);
-    }
-  }
-
   contentEl$ = new ReplaySubject<HTMLElement>(1);
-
   containerWidth$: Observable<number> = this.contentEl$.pipe(
     filter(el => !!el),
     switchMap((el) => observeWidth(el)),
@@ -74,18 +47,41 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
     map(v => v < VERY_SMALL_CONTAINER_WIDTH),
     distinctUntilChanged(),
   );
-
   sideStyle: SafeStyle;
-
-  private _isOpen: boolean;
-  private _isOver: boolean;
   private _subs = new Subscription();
-
 
   constructor(
     private _elementRef: ElementRef,
     private _domSanitizer: DomSanitizer,
   ) {
+  }
+
+  @HostBinding('class.isOpen') get isOpenGet() {
+    return this._isOpen;
+  }
+
+  @HostBinding('class.isOver') get isOverGet() {
+    return this._isOver;
+  }
+
+  @ViewChild('contentElRef', {static: false, read: ElementRef}) set setContentElRef(ref: ElementRef) {
+    if (ref) {
+      this.contentEl$.next(ref.nativeElement);
+    }
+  }
+
+  private _isOpen: boolean;
+
+  @Input() set isOpen(v: boolean) {
+    this._isOpen = v;
+    this._updateStyle();
+  }
+
+  private _isOver: boolean;
+
+  @Input() set isOver(v: boolean) {
+    this._isOver = v;
+    this._updateStyle();
   }
 
   ngOnInit(): void {

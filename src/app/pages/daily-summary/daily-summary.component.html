@@ -8,8 +8,8 @@
     <div *ngIf="isForToday"
          style="text-align: center;">
       <a class="back-btn"
-         mat-button
          color="primary"
+         mat-button
          routerLink="/work-view">
         <mat-icon>chevron_left</mat-icon>
         {{T.PDS.BACK|translate}}
@@ -48,8 +48,8 @@
           </div>
         </div>
       </div>
-      <div class="summary-point"
-           [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE|translate">
+      <div [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE|translate"
+           class="summary-point">
         <mat-icon>timer</mat-icon>
         <div class="summary-text">{{T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL|translate}}
           <div class="summary-val">{{timeWorked$|async|msToClockString}}
@@ -80,13 +80,13 @@
           </ng-template>
 
           <ng-container *ngIf="(hasTasksForToday$|async); else noTasks">
-            <task-summary-table [day]="(dayStr$|async)"
-                                [flatTasks]="(tasksWorkedOnOrDoneOrRepeatableFlat$|async)"
-                                (updated)="onTaskSummaryEdit()"></task-summary-table>
+            <task-summary-table (updated)="onTaskSummaryEdit()"
+                                [day]="(dayStr$|async)"
+                                [flatTasks]="(tasksWorkedOnOrDoneOrRepeatableFlat$|async)"></task-summary-table>
             <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
               <button [matMenuTriggerFor]="roundTimeActions"
-                      mat-button
-                      [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate">
+                      [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate"
+                      mat-button>
                 <mat-icon>restore</mat-icon>
                 {{T.PDS.ROUND_TIME_SPENT|translate}}
               </button>
@@ -133,8 +133,8 @@
       </mat-tab>
 
 
-      <mat-tab [label]="T.PDS.EVALUATION|translate"
-               *ngIf="!(configService.misc$|async)?.isHideEvaluationSheet">
+      <mat-tab *ngIf="!(configService.misc$|async)?.isHideEvaluationSheet"
+               [label]="T.PDS.EVALUATION|translate">
         <section class="tab-inner"
                  style="max-width: 600px">
           <evaluation-sheet (save)="onEvaluationSave()"

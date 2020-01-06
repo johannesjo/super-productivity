@@ -26,9 +26,9 @@
 
             <button (click)="exportData(month.value,year.key, month.key)"
                     aria-label="export data"
+                    class="mat-elevation-z1"
                     color="primary"
-                    mat-mini-fab
-                    class="mat-elevation-z1">
+                    mat-mini-fab>
               <mat-icon>call_made</mat-icon>
             </button>
           </h2>
@@ -53,9 +53,9 @@
                   (click)="exportData(month.value,year.key, month.key, week.weekNr)"
                   [matTooltip]="week.start+'.-'+week.end+'. Days: '+ week.daysWorked+', Time: '+(week.timeSpent|msToString)"
                   aria-label="export data"
+                  class="mat-elevation-z1"
                   color=""
-                  mat-mini-fab
-                  class="mat-elevation-z1">
+                  mat-mini-fab>
                   <mat-icon>call_made</mat-icon>
                 </button>
               </div>
@@ -94,8 +94,8 @@
                               <td [class.isSubTask]="logEntry.task.parentId"
                                   class="title">
                                 <mat-icon *ngIf="logEntry.task.repeatCfgId"
-                                          class="repeat-task-icon"
-                                          [title]="T.F.WORKLOG.CMP.REPEATING_TASK|translate">repeat
+                                          [title]="T.F.WORKLOG.CMP.REPEATING_TASK|translate"
+                                          class="repeat-task-icon">repeat
                                 </mat-icon>
                                 <span class="task-title">{{logEntry.task.title}}</span>
                               </td>
@@ -113,10 +113,10 @@
                               <td class="actions">
                                 <button (click)="restoreTask(logEntry.task);"
                                         *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
+                                        [title]="T.F.WORKLOG.CMP.RESTORE_TASK_FROM_ARCHIVE|translate"
                                         aria-label="restore"
                                         color=""
-                                        mat-icon-button
-                                        [title]="T.F.WORKLOG.CMP.RESTORE_TASK_FROM_ARCHIVE|translate">
+                                        mat-icon-button>
                                   <mat-icon>settings_backup_restore</mat-icon>
                                 </button>
                               </td>

@@ -256,7 +256,7 @@ button {
     display: none;
   }
 
-  @include darkTheme(){
+  @include darkTheme() {
     background: $dark-theme-bg-lighter;
   }
 

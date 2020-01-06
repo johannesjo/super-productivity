@@ -6,6 +6,7 @@ $noteFontSize: 12px;
 :host {
   display: block;
   margin-right: $s;
+
   :host-context([dir=rtl]) {
     margin-left: $s;
     margin-right: unset;
@@ -25,11 +26,12 @@ $noteFontSize: 12px;
     box-shadow: $whiteframe-shadow-3dp;
     //outline: 2px dashed $c-accent;
   }
+
   &.isFocused {
     z-index: 5;
   }
 
-    &.isImg {
+  &.isImg {
     border: 0;
   }
 
@@ -48,6 +50,7 @@ $noteFontSize: 12px;
     right: unset;
     left: -$s*0.75;
   }
+
   // fixes drag and drop on mobile
   touch-action: none;
 

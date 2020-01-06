@@ -2,9 +2,9 @@
   <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>
 </div>
 
-<mat-slide-toggle [ngModel]="cfg.isEnabled"
-                  (ngModelChange)="toggleEnabled($event)"
+<mat-slide-toggle (ngModelChange)="toggleEnabled($event)"
                   [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
+                  [ngModel]="cfg.isEnabled"
                   name="isEnabled"
                   style="margin-bottom: 8px;">
   {{T.F.JIRA.CFG_CMP.ENABLE|translate}}
@@ -36,9 +36,9 @@
       <mat-form-field>
         <input [formControl]="issueSuggestionsCtrl"
                [matAutocomplete]="autoEl"
+               [placeholder]="T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate"
                class="border-color-primary"
-               matInput
-               [placeholder]="T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate">
+               matInput>
 
         <mat-autocomplete #autoEl="matAutocomplete"
                           (optionSelected)="updateTransitionOptions()"
@@ -92,9 +92,9 @@
         <input [(ngModel)]="cfg.storyPointFieldId"
                [formControl]="customFieldSuggestionsCtrl"
                [matAutocomplete]="storyPointAutoEl"
+               [placeholder]="T.F.JIRA.CFG_CMP.STORY_POINTS|translate"
                class="border-color-primary"
-               matInput
-               [placeholder]="T.F.JIRA.CFG_CMP.STORY_POINTS|translate">
+               matInput>
 
         <mat-autocomplete #storyPointAutoEl="matAutocomplete"
                           [autoActiveFirstOption]="true">

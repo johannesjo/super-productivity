@@ -59,17 +59,10 @@ import {migrateGlobalConfigState} from '../../features/config/migrate-global-con
   providedIn: 'root',
 })
 export class PersistenceService {
-  private _isBlockSaving = false;
-
-  // needs to be assigned before the creations
-  private _baseModels = [];
-  private _projectModels = [];
-
   // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
-
   task = this._cmProject<TaskState, Task>(
     LS_TASK_STATE,
     'task',
@@ -81,7 +74,6 @@ export class PersistenceService {
     'taskRepeatCfg',
     taskRepeatCfgReducer,
   );
-
   taskArchive = this._cmProject<TaskArchive, TaskWithIssueData>(
     LS_TASK_ARCHIVE,
     'taskArchive',
@@ -120,7 +112,10 @@ export class PersistenceService {
     'obstruction',
     obstructionReducer,
   );
-
+  private _isBlockSaving = false;
+  // needs to be assigned before the creations
+  private _baseModels = [];
+  private _projectModels = [];
 
   constructor(
     private _snackService: SnackService,
@@ -407,6 +402,18 @@ export class PersistenceService {
     }
   }
 
+  async _loadAppBaseData(): Promise<AppBaseData> {
+    const promises = this._baseModels.map(async (modelCfg) => {
+      const modelState = await modelCfg.load();
+      return {
+        [modelCfg.appDataKey]: modelState,
+      };
+    });
+    const baseDataArray: Partial<AppBaseData>[] = await Promise.all(promises);
+    return Object.assign({}, ...baseDataArray);
+  }
+
+  // TODO maybe refactor to class?
 
   // ------------------
   private _cmBase<T>(
@@ -424,7 +431,6 @@ export class PersistenceService {
     return model;
   }
 
-  // TODO maybe refactor to class?
   // TODO maybe find a way to exec effects here as well
   private _cmProject<S, M>(
     lsKey: string,
@@ -510,17 +516,6 @@ export class PersistenceService {
       JIRA: await this.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState,
       GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
     };
-  }
-
-  async _loadAppBaseData(): Promise<AppBaseData> {
-    const promises = this._baseModels.map(async (modelCfg) => {
-      const modelState = await modelCfg.load();
-      return {
-        [modelCfg.appDataKey]: modelState,
-      };
-    });
-    const baseDataArray: Partial<AppBaseData>[] = await Promise.all(promises);
-    return Object.assign({}, ...baseDataArray);
   }
 
   private async _loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {

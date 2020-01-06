@@ -9,7 +9,13 @@ import {
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
 import {ProjectService} from '../../project/project.service';
-import {mapIssueResponse, mapIssuesResponse, mapResponse, mapToSearchResults, mapTransitionResponse} from './jira-issue/jira-issue-map.util';
+import {
+  mapIssueResponse,
+  mapIssuesResponse,
+  mapResponse,
+  mapToSearchResults,
+  mapTransitionResponse
+} from './jira-issue/jira-issue-map.util';
 import {JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser} from './jira-api-responses';
 import {JiraCfg} from './jira';
 import {ElectronService} from 'ngx-electron';

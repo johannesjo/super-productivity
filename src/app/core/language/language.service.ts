@@ -4,7 +4,7 @@ import {DateTimeAdapter} from 'ng-pick-datetime';
 import {DateAdapter} from '@angular/material';
 import * as moment from 'moment';
 import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap} from '../../app.constants';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +12,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class LanguageService {
 
   // Temporary solution for knowing the rtl languages
+  rtlLanguages: LanguageCode[] = [LanguageCode.ar];
   // I think a better approach is to add a field in every [lang].json file to specify the direction of the language
-  private isRTL : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  isLangRTL : Observable<boolean> = this.isRTL.asObservable();
-  rtlLanguages : LanguageCode[] = [LanguageCode.ar];
+  private isRTL: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  isLangRTL: Observable<boolean> = this.isRTL.asObservable();
 
   constructor(
     private _translateService: TranslateService,
@@ -52,7 +52,7 @@ export class LanguageService {
     this._dateTimeAdapter.setLocale(momLng);
   }
 
-  private _isRTL (lng : LanguageCode) {
+  private _isRTL(lng: LanguageCode) {
     return this.rtlLanguages.indexOf(lng) !== -1;
   }
 }

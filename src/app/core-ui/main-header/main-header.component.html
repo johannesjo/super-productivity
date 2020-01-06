@@ -1,21 +1,21 @@
 <!--<div class="wrapper ">-->
 <div class="wrapper">
-  <button *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
+  <button (click)="layoutService.toggleSideNav()"
+          *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
           class="burger-trigger"
-          (click)="layoutService.toggleSideNav()"
           mat-icon-button>
     <mat-icon>menu</mat-icon>
   </button>
 
 
-  <div class="current-project-title"
+  <div [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
+       class="current-project-title"
        mat-ripple
-       [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
        routerLink="work-view">{{(projectService.currentProject$|async).title}}</div>
 
-  <button mat-icon-button
+  <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
           class="project-settings-btn"
-          [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
+          mat-icon-button
           routerLink="project-settings">
     <mat-icon>more_vert</mat-icon>
   </button>
@@ -53,45 +53,45 @@
 
   <nav class="action-nav">
     <button (click)="layoutService.showAddTaskBar()"
-            mat-icon-button
-            [matTooltip]="T.MH.ADD_NEW_TASK|translate">
+            [matTooltip]="T.MH.ADD_NEW_TASK|translate"
+            mat-icon-button>
       <mat-icon>add</mat-icon>
     </button>
 
     <button (click)="bookmarkService.toggleBookmarks()"
-            class="bookmark-btn"
-            mat-icon-button
             [class.isOpen]="bookmarkService.isShowBookmarks$|async"
-            [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate">
+            [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate"
+            class="bookmark-btn"
+            mat-icon-button>
       <mat-icon>bookmark</mat-icon>
     </button>
 
-<!--    <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"-->
-<!--            (click)="layoutService.toggleNotes()"-->
-<!--            mat-icon-button-->
-<!--            [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate">-->
-<!--      <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)"-->
-<!--                class="note-ico">comment-->
-<!--      </mat-icon>-->
-<!--    </button>-->
+    <!--    <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"-->
+    <!--            (click)="layoutService.toggleNotes()"-->
+    <!--            mat-icon-button-->
+    <!--            [matTooltip]="T.MH.TOGGLE_SHOW_NOTES|translate">-->
+    <!--      <mat-icon [class.rotate]="(layoutService.isShowNotes$|async)"-->
+    <!--                class="note-ico">comment-->
+    <!--      </mat-icon>-->
+    <!--    </button>-->
 
-    <button class="hide-xs"
-            [matTooltip]="T.WW.HELP_PROCRASTINATION|translate"
+    <button [matTooltip]="T.WW.HELP_PROCRASTINATION|translate"
+            class="hide-xs"
             mat-icon-button
             routerLink="/procrastination">
       <mat-icon>flash_on</mat-icon>
     </button>
 
     <div class="play-btn-wrapper">
-      <div class="current-task-title"
+      <div *ngIf="(isShowTaskTitle$|async)"
            @fade
-           *ngIf="(isShowTaskTitle$|async)">{{(taskService.currentTask$|async)?.title}}
+           class="current-task-title">{{(taskService.currentTask$|async)?.title}}
       </div>
       <button (click)="taskService.toggleStartTask()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
+              [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
               class="play-btn mat-elevation-z3"
-              mat-mini-fab
-              [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate">
+              mat-mini-fab>
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
         <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
         <svg class="circle-svg"

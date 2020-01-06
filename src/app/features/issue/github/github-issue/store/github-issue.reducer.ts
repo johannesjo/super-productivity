@@ -89,7 +89,7 @@ export function githubIssueReducer(
 
       if (tasksWithGithubIssue && tasksWithGithubIssue.length > 0) {
         const issueIds = tasksWithGithubIssue.map(task => task.issueId)
-        // only remove if data is there in the first place
+          // only remove if data is there in the first place
           .filter((issueId) => {
             const ids = state.ids as number[];
             const isInState = ids.includes(+issueId);

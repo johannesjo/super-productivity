@@ -10,15 +10,16 @@
 
   <mat-dialog-content>
     <p>{{T.F.JIRA.DIALOG_WORKLOG.SUBMIT_WORKLOG_FOR|translate}} <strong>{{issue.key}} {{issue.summary}}</strong>.</p>
-    <p>{{T.F.JIRA.DIALOG_WORKLOG.CURRENTLY_LOGGED|translate}} <strong>{{(issue.timespent * 1000)|msToString}}</strong></p>
+    <p>{{T.F.JIRA.DIALOG_WORKLOG.CURRENTLY_LOGGED|translate}} <strong>{{(issue.timespent * 1000)|msToString}}</strong>
+    </p>
 
     <div class="form-wrapper">
       <mat-form-field>
         <input [(ngModel)]="timeSpent"
+               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate"
                inputDuration="optional"
                matInput
                name="timeSpent"
-               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate"
                required
                type="text">
 
@@ -27,9 +28,9 @@
 
       <mat-form-field>
         <input [(ngModel)]="started"
+               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.STARTED|translate "
                matInput
                name="date"
-               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.STARTED|translate "
                required
                type="datetime-local">
         <mat-error>{{T.F.JIRA.DIALOG_WORKLOG.INVALID_DATE|translate}}</mat-error>

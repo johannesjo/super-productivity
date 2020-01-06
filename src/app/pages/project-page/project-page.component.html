@@ -21,39 +21,39 @@
 
         <div class="issue-providers">
           <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
-                    svgIcon="jira"
-                    [title]="T.PP.JIRA_CONFIGURED|translate"></mat-icon>
+                    [title]="T.PP.JIRA_CONFIGURED|translate"
+                    svgIcon="jira"></mat-icon>
           <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
-                    svgIcon="github"
-                    [title]="T.PP.GITHUB_CONFIGURED|translate"></mat-icon>
+                    [title]="T.PP.GITHUB_CONFIGURED|translate"
+                    svgIcon="github"></mat-icon>
         </div>
 
         <div class="controls">
           <button (click)="edit(project)"
+                  [title]="T.PP.EDIT_PROJECT|translate"
                   color=""
-                  mat-icon-button
-                  [title]="T.PP.EDIT_PROJECT|translate">
+                  mat-icon-button>
             <mat-icon>edit</mat-icon>
           </button>
           <button (click)="archive(project.id)"
                   [disabled]="project.id === (projectService.currentId$|async)"
+                  [title]="T.PP.ARCHIVE_PROJECT|translate"
                   color=""
-                  mat-icon-button
-                  [title]="T.PP.ARCHIVE_PROJECT|translate">
+                  mat-icon-button>
             <mat-icon>archive</mat-icon>
           </button>
           <button (click)="export(project.id, project.title)"
+                  [title]="T.PP.EXPORT_PROJECT|translate"
                   class="hide-xs"
                   color=""
-                  mat-icon-button
-                  [title]="T.PP.EXPORT_PROJECT|translate">
+                  mat-icon-button>
             <mat-icon>flight</mat-icon>
           </button>
           <button (click)="remove(project.id)"
                   [disabled]="project.id === (projectService.currentId$|async)"
+                  [title]="T.PP.DELETE_PROJECT|translate"
                   color="warn"
-                  mat-icon-button
-                  [title]="T.PP.DELETE_PROJECT|translate">
+                  mat-icon-button>
             <mat-icon>delete</mat-icon>
           </button>
         </div>
@@ -97,25 +97,25 @@
 
       <div class="issue-providers">
         <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
-                  svgIcon="jira"
-                  [title]="T.PP.JIRA_CONFIGURED|translate"></mat-icon>
+                  [title]="T.PP.JIRA_CONFIGURED|translate"
+                  svgIcon="jira"></mat-icon>
         <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
-                  svgIcon="github"
-                  [title]="T.PP.GITHUB_CONFIGURED|translate"></mat-icon>
+                  [title]="T.PP.GITHUB_CONFIGURED|translate"
+                  svgIcon="github"></mat-icon>
       </div>
 
       <div class="controls">
         <button (click)="unarchive(project.id)"
+                [title]="T.PP.UN_ARCHIVE_PROJECT|translate"
                 color=""
-                mat-icon-button
-                [title]="T.PP.UN_ARCHIVE_PROJECT|translate">
+                mat-icon-button>
           <mat-icon>unarchive</mat-icon>
         </button>
         <button (click)="remove(project.id)"
                 *ngIf="project.id !== (projectService.currentId$|async)"
+                [title]="T.PP.DELETE_PROJECT|translate"
                 color="warn"
-                mat-icon-button
-                [title]="T.PP.DELETE_PROJECT|translate">
+                mat-icon-button>
           <mat-icon>delete</mat-icon>
         </button>
       </div>

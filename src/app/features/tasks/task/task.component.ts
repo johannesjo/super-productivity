@@ -66,6 +66,26 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
 
   @HostBinding('tabindex') tabIndex = 1;
+  private _dragEnterTarget: HTMLElement;
+  private _destroy$: Subject<boolean> = new Subject<boolean>();
+  private _currentPanTimeout: number;
+
+  constructor(
+    private readonly _taskService: TaskService,
+    private readonly _matDialog: MatDialog,
+    private readonly _configService: GlobalConfigService,
+    private readonly _issueService: IssueService,
+    private readonly _attachmentService: AttachmentService,
+    private readonly _elementRef: ElementRef,
+    private readonly _renderer: Renderer2,
+    private readonly _cd: ChangeDetectorRef,
+    public readonly projectService: ProjectService,
+  ) {
+  }
+
+  public get progress() {
+    return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
+  }
 
   // TODO do via observable
   @HostBinding('class.isCurrent')
@@ -87,27 +107,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('id')
   private get _taskId() {
     return 't-' + this.task.id;
-  }
-
-  private _dragEnterTarget: HTMLElement;
-  private _destroy$: Subject<boolean> = new Subject<boolean>();
-  private _currentPanTimeout: number;
-
-  constructor(
-    private readonly _taskService: TaskService,
-    private readonly _matDialog: MatDialog,
-    private readonly _configService: GlobalConfigService,
-    private readonly _issueService: IssueService,
-    private readonly _attachmentService: AttachmentService,
-    private readonly _elementRef: ElementRef,
-    private readonly _renderer: Renderer2,
-    private readonly _cd: ChangeDetectorRef,
-    public readonly projectService: ProjectService,
-  ) {
-  }
-
-  public get progress() {
-    return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
   }
 
   // methods come last
