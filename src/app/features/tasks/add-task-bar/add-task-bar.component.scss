@@ -3,7 +3,7 @@
 :host {
   display: block;
   //overflow: hidden;
-  text-align: left;
+  text-align: start;
 
   &.global {
     position: fixed;
@@ -39,6 +39,7 @@
     outline: 0;
     border-color: $c-primary;
 
+    padding-right: 40px !important;
     padding-left: 40px !important;
     line-height: 42px;
 

@@ -17,7 +17,7 @@ import {combineLatest, Observable} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation]
 })
-export class MainHeaderComponent implements OnInit {
+export class MainHeaderComponent implements OnInit{
   T = T;
   progressCircleRadius = 10;
   circumference = this.progressCircleRadius * Math.PI * 2;
@@ -34,6 +34,7 @@ export class MainHeaderComponent implements OnInit {
       return routerEv.url !== '/work-view' && !!currentTaskId;
     })
   );
+
 
   constructor(
     public readonly projectService: ProjectService,

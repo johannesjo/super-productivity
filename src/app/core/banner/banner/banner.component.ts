@@ -13,7 +13,7 @@ import {T} from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [slideAnimation]
 })
-export class BannerComponent {
+export class BannerComponent{
   T = T;
 
   // TODO maybe improve if initial delay is annoying

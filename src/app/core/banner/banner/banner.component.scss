@@ -46,6 +46,11 @@ $vertical-button-margin: $s;
     margin-right: $s*1.5;
     min-width: 20px;
 
+    :host-context([dir=rtl]) & {
+      margin-right: 0px;
+      margin-left: $s*1.5;
+    }
+
     .isError & {
       color: $c-warn;
     }
@@ -53,7 +58,12 @@ $vertical-button-margin: $s;
 }
 
 .buttons {
-  margin-left: auto;
   display: flex;
   align-items: center;
+
+  :host-context([dir=rtl]) & {
+    button {
+      font-weight: bolder;
+    }
+  }
 }

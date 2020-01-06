@@ -10,6 +10,12 @@
   }
 }
 
+h1, mat-dialog-actions {
+  :host-context([dir=rtl]) & {
+    direction: rtl;
+  }
+}
+
 :host::ng-deep .mat-form-field-infix {
   width: auto !important;
 }

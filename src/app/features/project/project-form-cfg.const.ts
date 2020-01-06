@@ -121,7 +121,7 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection =
       type: 'input',
       templateOptions: {
         required: true,
-        label: 'Title',
+        label: T.F.PROJECT.FORM_BASIC.L_TITLE,
       },
     },
     {

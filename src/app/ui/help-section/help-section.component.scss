@@ -19,6 +19,14 @@
     z-index: 1;
   }
 
+  :host-context([dir=rtl]) {
+    .help-btn {
+      position: absolute;
+      right: unset;
+      left: -8px;
+    }
+  }
+
   .help-icon-wrapper {
     margin-top: 8px;
     margin-bottom: 8px;

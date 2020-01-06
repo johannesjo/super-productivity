@@ -8,6 +8,10 @@
   left: 0;
   display: flex;
   flex-direction: column;
+
+  :host-context([dir=rtl]) {
+    direction: rtl;
+  }
 }
 
 

@@ -25,7 +25,7 @@
   }
 
   td:first-child {
-    text-align: left;
+    text-align: start;
     min-width: 220px;
   }
 
@@ -93,7 +93,7 @@
 .task-title {
   display: flex;
   //border: 1px solid orange;
-  text-align: left;
+  text-align: start;
   align-items: center;
 
   &.isDone ::ng-deep .value-wrapper {
@@ -113,7 +113,7 @@
 
   inline-input {
     flex-grow: 1;
-    text-align: left;
+    text-align: start;
     display: block;
   }
 
@@ -122,7 +122,7 @@
 
     input {
       width: 100%;
-      text-align: left;
+      text-align: start;
     }
   }
 }

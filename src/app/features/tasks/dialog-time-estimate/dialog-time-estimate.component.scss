@@ -1,5 +1,11 @@
 @import '../../../../variables';
 
+.dialog-help-wrapper {
+  :host-context([dir=rtl]) & {
+    direction: rtl;
+  }
+}
+
 .wrap-time {
   display: flex;
   justify-content: space-around;

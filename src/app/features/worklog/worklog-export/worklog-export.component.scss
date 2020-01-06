@@ -1,5 +1,9 @@
 @import '../../../../variables';
 
+:host-context([dir=rtl]) {
+  direction: rtl;
+}
+
 .dialog-content {
 }
 
@@ -137,7 +141,7 @@
 
     &.TITLES_INCLUDING_SUB,
     &.TITLES {
-      text-align: left;
+      text-align: start;
       min-width: 250px;
     }
 

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, HostListener, ViewChild, ViewContainerRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostListener, ViewChild, ViewContainerRef, OnDestroy} from '@angular/core';
 import {ProjectService} from './features/project/project.service';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
@@ -14,7 +14,7 @@ import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
 import {filter, map, take} from 'rxjs/operators';
-import {combineLatest, Observable} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
 import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
@@ -26,6 +26,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {TaskService} from './features/tasks/task.service';
+import { LanguageService } from './core/language/language.service';
 
 
 @Component({
@@ -40,7 +41,7 @@ import {TaskService} from './features/tasks/task.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy{
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
     this._store.select(selectIsTaskDataLoaded),
@@ -53,6 +54,8 @@ export class AppComponent {
   @ViewChild('notesElRef', {read: ViewContainerRef, static: false}) notesElRef: ViewContainerRef;
   @ViewChild('sideNavElRef', {read: ViewContainerRef, static: false}) sideNavElRef: ViewContainerRef;
 
+  private _subs : Subscription = new Subscription();
+  isRTL : boolean;
 
   constructor(
     private _configService: GlobalConfigService,
@@ -67,11 +70,17 @@ export class AppComponent {
     private _globalThemeService: GlobalThemeService,
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
+    private _languageService : LanguageService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly taskService: TaskService,
     public projectService: ProjectService,
   ) {
+    this._subs = this._languageService.isLangRTL.subscribe( (val) => {
+      this.isRTL = val;
+      document.dir = this.isRTL ? 'rtl' : 'ltr';
+    });
+
     // try to avoid data-loss
     if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().then(granted => {
@@ -197,4 +206,7 @@ export class AppComponent {
     });
   }
 
+  ngOnDestroy() {
+    this._subs.unsubscribe();
+  }
 }

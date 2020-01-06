@@ -6,6 +6,10 @@ $noteFontSize: 12px;
 :host {
   display: block;
   margin-right: $s;
+  :host-context([dir=rtl]) {
+    margin-left: $s;
+    margin-right: unset;
+  }
 }
 
 
@@ -39,6 +43,11 @@ $noteFontSize: 12px;
   top: -$s*0.75;
   right: -$s*0.75;
 
+  :host-context([dir=rtl]) & {
+    position: absolute;
+    right: unset;
+    left: -$s*0.75;
+  }
   // fixes drag and drop on mobile
   touch-action: none;
 
@@ -63,7 +72,7 @@ $noteFontSize: 12px;
 }
 
 .content {
-  text-align: left;
+  text-align: start;
   font-size: $noteFontSize;
 
   inline-markdown ::ng-deep {

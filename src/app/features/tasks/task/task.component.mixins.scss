@@ -98,7 +98,7 @@ $task-c-selected-bg-dark: $dark-theme-bg-slightly-lighter;
 
 @mixin taskTitle() {
   flex-grow: 1;
-  text-align: left;
+  text-align: start;
   outline: none;
   margin-left: 2px;
   padding: 4px 0 4px 6px;

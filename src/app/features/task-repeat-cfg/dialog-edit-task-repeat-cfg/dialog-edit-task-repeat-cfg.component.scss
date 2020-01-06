@@ -1,3 +1,8 @@
+h1, mat-dialog-actions, help-section {
+  :host-context([dir=rtl]) & {
+    direction: rtl;
+  }
+}
 .form-wrapper {
   min-width: 280px;
 }

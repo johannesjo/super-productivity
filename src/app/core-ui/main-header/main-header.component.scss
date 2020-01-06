@@ -92,9 +92,15 @@ button {
 }
 
 .action-nav {
+  margin-right: 0px;
   margin-left: auto;
   display: flex;
   align-items: center;
+
+  :host-context([dir=rtl]) & {
+    margin-left: 0px;
+    margin-right: auto;
+  }
 
   button {
     margin-left: $s*0.5;
