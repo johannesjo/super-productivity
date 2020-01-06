@@ -14,7 +14,8 @@
       <span>{{T.F.TASK.ADDITIONAL_INFO.PARENT|translate}}</span>
     </ng-container>
     <ng-container input-value>
-      <mat-icon *ngIf="(parentTaskData$|async)?.issueType as issueType"[svgIcon]="issueType|issueIcon"></mat-icon>
+      <mat-icon *ngIf="(parentTaskData$|async)?.issueType as issueType"
+                [svgIcon]="issueType|issueIcon"></mat-icon>
       <span>{{(taskService.getById$(task.parentId)|async)?.title}}</span>
     </ng-container>
 
@@ -85,6 +86,7 @@
 
 
   <task-additional-info-item
+    #noteWrapperElRef
     [type]="'panel'"
     [expanded]="task.notes || (!(task.issueId) && !task.attachmentIds?.length)"
     (keyPress)="onItemKeyPress($event)"
@@ -100,6 +102,7 @@
       <inline-markdown (changed)="changeTaskNotes($event); isFocusNotes=false"
                        (blur)="isFocusNotes=false"
                        (blurred)="isFocusNotes=false"
+                       (keyboardUnToggle)="focusItem(noteWrapperElRef)"
                        [isFocus]="isFocusNotes"
                        [model]="task.notes"
                        [isShowControls]="true"></inline-markdown>

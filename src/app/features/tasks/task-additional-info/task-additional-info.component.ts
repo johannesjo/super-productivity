@@ -139,7 +139,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       filter(([, id]) => !!id),
     ).subscribe(([v]) => {
       if (v === TaskAdditionalInfoTargetPanel.Attachments) {
-        this._focusItem(this.attachmentPanelElRef);
+        this.focusItem(this.attachmentPanelElRef);
       } else {
         this._focusFirst();
       }
@@ -223,22 +223,24 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private _focusFirst() {
-    this._focusTimeout = window.setTimeout(() => {
-      this._focusItem(this.itemEls.first, 0);
-    }, 150);
-  }
-
-  private _focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration = 150) {
+  focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration = 150) {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
       const i = this.itemEls.toArray().findIndex(el => el === cmpInstance);
       if (i === -1) {
-        this._focusItem(cmpInstance);
+        this.focusItem(cmpInstance);
       } else {
         this.selectedItemIndex = i;
         cmpInstance.elementRef.nativeElement.focus();
       }
     }, timeoutDuration);
   }
+
+  private _focusFirst() {
+    this._focusTimeout = window.setTimeout(() => {
+      this.focusItem(this.itemEls.first, 0);
+    }, 150);
+  }
+
+
 }

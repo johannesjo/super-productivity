@@ -6,6 +6,7 @@
             (focus)="setFocus($event)"
             (input)="resizeTextareaToFit()"
             (keypress)="keypressHandler($event)"
+            (keydown)="keypressHandler($event)"
             *ngIf="isShowEdit || (isTurnOffMarkdownParsing$|async)"
             [@fade]
             [ngModel]="modelCopy"

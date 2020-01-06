@@ -37,6 +37,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Output() changed: EventEmitter<string> = new EventEmitter();
   @Output() focused: EventEmitter<Event> = new EventEmitter();
   @Output() blurred: EventEmitter<Event> = new EventEmitter();
+  @Output() keyboardUnToggle: EventEmitter<Event> = new EventEmitter();
   @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef;
   @ViewChild('textareaEl', {static: false}) textareaEl: ElementRef;
   @ViewChild('previewEl', {static: false}) previewEl: MarkdownComponent;
@@ -107,14 +108,10 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   keypressHandler(ev: KeyboardEvent) {
     this.resizeTextareaToFit();
-    // TODO check if needed
-    // tslint:disable-next-line
-    if (ev['keyCode'] === 10 && ev.ctrlKey) {
-      this.untoggleShowEdit();
-    }
 
-    if (ev.key === 'Enter' && ev.ctrlKey) {
+    if (ev.key === 'Enter' && ev.ctrlKey || ev.code === 'Escape') {
       this.untoggleShowEdit();
+      this.keyboardUnToggle.emit(ev);
     }
   }
 
