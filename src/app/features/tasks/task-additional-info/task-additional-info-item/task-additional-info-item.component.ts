@@ -28,7 +28,9 @@ export class TaskAdditionalInfoItemComponent {
 
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
-    if ((ev.target as HTMLElement).tagName === 'input' || (ev.target as HTMLElement).tagName === 'textarea') {
+    const tagName = (ev.target as HTMLElement).tagName.toLowerCase();
+
+    if (tagName === 'input' || tagName === 'textarea') {
       return;
     }
 
