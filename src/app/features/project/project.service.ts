@@ -116,7 +116,8 @@ export class ProjectService {
 
   lastCompletedDay$: Observable<string> = this._store$.pipe(select(selectProjectLastCompletedDay));
 
-  private _isProjectChanging$ = new Subject<boolean>();
+  // treated as private but needs to be assigned first
+  _isProjectChanging$ = new Subject<boolean>();
   isProjectChanging$: Observable<any> = this._isProjectChanging$.pipe(
     switchMap(() => this.onProjectRelatedDataLoaded$.pipe(
       mapTo(false),

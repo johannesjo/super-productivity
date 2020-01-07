@@ -59,6 +59,11 @@ import {migrateGlobalConfigState} from '../../features/config/migrate-global-con
   providedIn: 'root',
 })
 export class PersistenceService {
+
+  // handled as private but needs to be assigned before the creations
+  _baseModels = [];
+  _projectModels = [];
+
   // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
@@ -113,9 +118,6 @@ export class PersistenceService {
     obstructionReducer,
   );
   private _isBlockSaving = false;
-  // needs to be assigned before the creations
-  private _baseModels = [];
-  private _projectModels = [];
 
   constructor(
     private _snackService: SnackService,

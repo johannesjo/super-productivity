@@ -9,10 +9,11 @@ const interfaceEl = window;
   providedIn: 'root',
 })
 export class ChromeExtensionInterfaceService {
-  private _onReady$: ReplaySubject<boolean> = new ReplaySubject(1);
+  // handled as private but needs to assigned first
+  _onReady$: ReplaySubject<boolean> = new ReplaySubject(1);
+  onReady$ = this._onReady$.pipe(first());
+  isReady$ = this.onReady$.pipe(startWith(false));
   // we only every one to catch a single event
-  public onReady$ = this._onReady$.pipe(first());
-  public isReady$ = this.onReady$.pipe(startWith(false));
   private _isInterfaceReady = false;
 
   init() {

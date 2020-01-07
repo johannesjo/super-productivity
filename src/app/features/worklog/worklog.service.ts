@@ -20,7 +20,8 @@ const EMPTY_ENTITY = {
   providedIn: 'root'
 })
 export class WorklogService {
-  private _archiveUpdateTrigger$ = new BehaviorSubject(true);
+  // treated as private but needs to be assigned first
+  _archiveUpdateTrigger$ = new BehaviorSubject(true);
 
   // NOTE: task updates are not reflected
   worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest([
