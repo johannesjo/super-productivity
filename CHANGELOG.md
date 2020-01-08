@@ -1,3 +1,44 @@
+# [3.1.0](https://github.com/johannesjo/super-productivity/compare/v3.0.7...v3.1.0) (2020-01-08)
+
+
+### Bug Fixes
+
+* build code order issues after reformatting ([1df6651](https://github.com/johannesjo/super-productivity/commit/1df66512f29e12c902e5404a8e06c947b5b821da))
+* fix title field label in create project not being translated ([cdf1c02](https://github.com/johannesjo/super-productivity/commit/cdf1c0208b36901b9fba7e01830bc499b5cbc218))
+* text mistakes [#271](https://github.com/johannesjo/super-productivity/issues/271) ([2a3cd10](https://github.com/johannesjo/super-productivity/commit/2a3cd10f0dd22c26882159f92e3481663e275698))
+* text mistakes [#271](https://github.com/johannesjo/super-productivity/issues/271) ([d1083fe](https://github.com/johannesjo/super-productivity/commit/d1083fe3eb10341363550e4379bc556bb6952993))
+* text mistakes [#271](https://github.com/johannesjo/super-productivity/issues/271) ([c56d9cb](https://github.com/johannesjo/super-productivity/commit/c56d9cb86b95a5ed0563461ed827ed91ee6ca216))
+* up/down not working inside textarea ([d790be9](https://github.com/johannesjo/super-productivity/commit/d790be9d335092210b393243420017a238b28da8))
+
+
+### Features
+
+* add rtl support ([9e5771c](https://github.com/johannesjo/super-productivity/commit/9e5771c1db36a3eeb0fe7094acf3eb366a7f1eda))
+* allow language service to support rtl ([008a6b2](https://github.com/johannesjo/super-productivity/commit/008a6b20f2e13056143844143f685eb1d89d13ca))
+* fix add note dialog rtl design ([604e130](https://github.com/johannesjo/super-productivity/commit/604e130fc31ab0b1def342b6617e02c40250f0fa))
+* fix add note remainder rtl style ([b0f9749](https://github.com/johannesjo/super-productivity/commit/b0f97498ca672a3cce74b3ae8457b8c6b9fd502e))
+* fix add task reminder dialog rtl ([ca525e7](https://github.com/johannesjo/super-productivity/commit/ca525e7fa306f4fb65646bae00c81755219987b9))
+* fix bookmark dialog rtl design ([85b1f7a](https://github.com/johannesjo/super-productivity/commit/85b1f7a1da662ae69edf321da0eff2f5964bb5f1))
+* fix config page rtl style ([b740adc](https://github.com/johannesjo/super-productivity/commit/b740adc026bb0f2e97614d6829e745778b83f8c7))
+* fix create project rtl design ([72a4aec](https://github.com/johannesjo/super-productivity/commit/72a4aec4bd81381a0addef3d5260c9d82bc382fb))
+* fix edit attachment rtl ([4cd2667](https://github.com/johannesjo/super-productivity/commit/4cd26675e6c8f5992444b884e3e5d6e581bc58cf))
+* fix help section button for rtl design ([7f8c4ad](https://github.com/johannesjo/super-productivity/commit/7f8c4ad51fa4238f65155f056834a4dea3fb66d8))
+* fix metric basic stats table rtl style ([8c8dbc4](https://github.com/johannesjo/super-productivity/commit/8c8dbc438443bc0841bd50bd899a1bc8557fd581))
+* fix note rtl design ([fb5e159](https://github.com/johannesjo/super-productivity/commit/fb5e15965e1eb703a0f78f029b00a62ce086350e))
+* fix rdit tast repeat rtl style ([a1e1368](https://github.com/johannesjo/super-productivity/commit/a1e136865d5d1c6741fe1491c7c6350c00216615))
+* fix rtl design for config form ([dddab66](https://github.com/johannesjo/super-productivity/commit/dddab6689150b7c6e069dd6c946069374138d46f))
+* fix rtl for dialog full screen ([00720ba](https://github.com/johannesjo/super-productivity/commit/00720baee682a3b40ca96c8fcb15214fb4cef14c))
+* fix task summary tabl rtl design ([ada888b](https://github.com/johannesjo/super-productivity/commit/ada888ba03dbb3ea84d5fc1f1d9847783bce62b0))
+* fix time estimate dialog rtl design ([5131217](https://github.com/johannesjo/super-productivity/commit/513121722f382f1efa083a2e588ea4ca1a1577da))
+* fix work log rtl design ([e6c3a13](https://github.com/johannesjo/super-productivity/commit/e6c3a134056c8db9d6896c01cf17367afe9526a8))
+* fixed task rtl design ([cf6c7e2](https://github.com/johannesjo/super-productivity/commit/cf6c7e2cd3d5616da9833c1eed41034f5327f2a9))
+* improve focus behaviour for notes in sidebar ([31aa8cf](https://github.com/johannesjo/super-productivity/commit/31aa8cff91c926df7d5467202cee5de74ef372e9))
+* initial fix for add task bar rtl style ([ec54fcf](https://github.com/johannesjo/super-productivity/commit/ec54fcf6c6360ef7bf0a35997d63cfbcafff8add))
+* refactoring banner rtl style for better solution ([b2ef2dc](https://github.com/johannesjo/super-productivity/commit/b2ef2dc2629deae8c01347838f00caced55eb277))
+* refactoring main header rtl style ([c3193a5](https://github.com/johannesjo/super-productivity/commit/c3193a5d871b2617aeaad3a1213bf3eb97bcd6b9))
+
+
+
 ## [3.0.7](https://github.com/johannesjo/super-productivity/compare/v3.0.6...v3.0.7) (2019-12-29)
 
 
