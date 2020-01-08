@@ -1,3 +1,12 @@
+## [3.1.1](https://github.com/johannesjo/super-productivity/compare/v3.1.0...v3.1.1) (2020-01-08)
+
+
+### Bug Fixes
+
+* cannot read property 'send' of undefined [#273](https://github.com/johannesjo/super-productivity/issues/273) ([d1b9efc](https://github.com/johannesjo/super-productivity/commit/d1b9efc7c22ea19911148dd33e9e86fd5fe36257))
+
+
+
 # [3.1.0](https://github.com/johannesjo/super-productivity/compare/v3.0.7...v3.1.0) (2020-01-08)
 
 
