@@ -134,7 +134,7 @@ export class ShortcutService {
     // special hidden dev tools combo to use them for production
     if (IS_ELECTRON) {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
-        window.ipcRenderer.send('TOGGLE_DEV_TOOLS');
+        this._electronService.ipcRenderer.send('TOGGLE_DEV_TOOLS');
       } else if (checkKeyCombo(ev, keys.zoomIn)) {
         this._uiHelperService.zoom(0.05);
       } else if (checkKeyCombo(ev, keys.zoomOut)) {
