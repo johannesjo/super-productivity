@@ -122,8 +122,10 @@ export class GlobalErrorHandler implements ErrorHandler {
         .catch(console.error);
     }
 
-    // NOTE: rethrow the error otherwise it gets swallowed
-    throw new Error(err);
+    if (!isHandledError(err)) {
+      // NOTE: rethrow the error otherwise it gets swallowed
+      throw new Error(err);
+    }
   }
 
   private _getErrorStr(err: any): string {
