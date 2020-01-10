@@ -49,14 +49,23 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
 };
 
 async function getStacktrace(err): Promise<string> {
-  return StackTrace.fromError(err)
-    .then((stackframes) => {
-      return stackframes
-        .splice(0, 20)
-        .map((sf) => {
-          return sf.toString();
-        }).join('\n');
-    });
+  const isHttpError = err && (err.url || err.headers);
+  const isErrorWithStack = err && err.stack;
+
+  // Don't try to send stacktraces of HTTP errors as they are already logged on the server
+  if (!isHttpError && isErrorWithStack) {
+    return StackTrace.fromError(err)
+      .then((stackframes) => {
+        return stackframes
+          .splice(0, 20)
+          .map((sf) => {
+            return sf.toString();
+          }).join('\n');
+      });
+  } else {
+    console.warn('Error without stack', err);
+    return Promise.resolve('');
+  }
 }
 
 const getSimpleMeta = (): string => {
