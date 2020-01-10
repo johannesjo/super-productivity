@@ -32,6 +32,8 @@ export class DialogTimeEstimateComponent {
     this._taskService = _taskService;
     this.taskCopy = createTaskCopy(this.task);
     this.timeSpentOnDayCopy = this.taskCopy.timeSpentOnDay || {};
+    console.log(this.timeSpentOnDayCopy);
+
   }
 
 
