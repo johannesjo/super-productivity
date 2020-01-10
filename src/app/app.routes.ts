@@ -20,5 +20,5 @@ export const APP_ROUTES: Routes = [
   {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'worklog', component: WorklogComponent, data: {page: 'worklog'}},
   {path: 'project-settings', component: ProjectSettingsComponent, data: {page: 'project-settings'}},
-  {path: '**', component: WorkViewPageComponent}
+  {path: '**', redirectTo: 'work-view'}
 ];
