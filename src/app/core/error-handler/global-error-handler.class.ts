@@ -39,7 +39,9 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
   getStacktrace(origErr).then(stack => {
     console.log(stack);
     document.getElementById('stack-trace').innerText = stack;
-  });
+  })
+    // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
+    .catch(console.error);
 
   if (IS_ELECTRON) {
     eSvc.remote.getCurrentWindow().webContents.openDevTools();
@@ -107,7 +109,7 @@ export class GlobalErrorHandler implements ErrorHandler {
       getStacktrace(err).then(stack => {
         this._electronLogger.error('Frontend Error Stack:', err, stack);
       })
-        // NOTE: there is an issue with this sometimes
+        // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
         .catch(console.error);
     }
 
