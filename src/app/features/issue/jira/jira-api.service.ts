@@ -217,7 +217,7 @@ export class JiraApiService {
       arguments: [
         issueId,
         {
-          started: moment(started).format(JIRA_DATETIME_FORMAT),
+          started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
           timeSpentSeconds: Math.floor(timeSpent / 1000),
           comment,
         }
