@@ -49,7 +49,11 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
     ? {
       ...task,
       timeSpentOnDay: Object.keys(task.timeSpentOnDay).reduce((acc, dateKey) => {
-        const westernArabicKey = moment(dateKey).locale('en').format(WORKLOG_DATE_STR_FORMAT);
+        const date = moment(dateKey);
+        if (!date.isValid()) {
+          throw new Error('Cannot migrate invalid non western arabic date string ' + dateKey);
+        }
+        const westernArabicKey = date.locale('en').format(WORKLOG_DATE_STR_FORMAT);
         return {
           ...acc,
           [westernArabicKey]: task.timeSpentOnDay[dateKey]

@@ -5,10 +5,11 @@ import {DEFAULT_PROJECT, DEFAULT_PROJECT_THEME} from './project.const';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {getYesterdaysDate} from '../../util/get-yesterdays-date';
-import {MODEL_VERSION_KEY, THEME_COLOR_MAP} from '../../app.constants';
+import {MODEL_VERSION_KEY, THEME_COLOR_MAP, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import {isMigrateModel} from '../../util/model-version';
+import * as moment from 'moment';
 
-const MODEL_VERSION = 1;
+const MODEL_VERSION = 2;
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   if (!isMigrateModel(projectState, MODEL_VERSION)) {
@@ -19,6 +20,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
   Object.keys(projectEntities).forEach((key) => {
     projectEntities[key] = _updateThemeModel(projectEntities[key]);
     projectEntities[key] = _addFirstEntryForDayCompleted(projectEntities[key]);
+    projectEntities[key] = _convertToWesternArabicDateKeys(projectEntities[key]);
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
@@ -64,6 +66,37 @@ const _addFirstEntryForDayCompleted = (project: Project): Project => {
       lastCompletedDay: getWorklogStr(getYesterdaysDate())
     };
 };
+
+const ___convertToWesternArabicDateKeys = (workStartEnd: {
+  [key: string]: any;
+}): {
+  [key: string]: any;
+} => {
+  return (workStartEnd)
+    ? Object.keys(workStartEnd).reduce((acc, dateKey) => {
+      const date = moment(dateKey);
+      if (!date.isValid()) {
+        throw new Error('Cannot migrate invalid non western arabic date string ' + dateKey);
+      }
+      const westernArabicKey = date.locale('en').format(WORKLOG_DATE_STR_FORMAT);
+      return {
+        ...acc,
+        [westernArabicKey]: workStartEnd[dateKey]
+      };
+    }, {})
+    : workStartEnd;
+};
+
+const _convertToWesternArabicDateKeys = (project: Project) => {
+  return {
+    ...project,
+    workStart: ___convertToWesternArabicDateKeys(project.workStart),
+    workEnd: ___convertToWesternArabicDateKeys(project.workEnd),
+    breakNr: ___convertToWesternArabicDateKeys(project.breakNr),
+    breakTime: ___convertToWesternArabicDateKeys(project.breakTime),
+  };
+};
+
 
 const _updateThemeModel = (project: Project): Project => {
     return (project.hasOwnProperty('theme') && project.theme.primary)
