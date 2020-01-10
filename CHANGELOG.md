@@ -1,3 +1,17 @@
+## [3.1.2](https://github.com/johannesjo/super-productivity/compare/v3.1.1...v3.1.2) (2020-01-10)
+
+
+### Bug Fixes
+
+* add migration script to convert to western arabic numbers for model [#276](https://github.com/johannesjo/super-productivity/issues/276) ([ac620a5](https://github.com/johannesjo/super-productivity/commit/ac620a576558f3f3115ad1977b8de5c464520e28))
+* add migration script to convert to western arabic numbers for project model [#276](https://github.com/johannesjo/super-productivity/issues/276) ([74ca6f4](https://github.com/johannesjo/super-productivity/commit/74ca6f43c46540cdef7db6c0b7e60474a5d74c28))
+* catch if getstrace fails for some reason ([47bdebf](https://github.com/johannesjo/super-productivity/commit/47bdebf8e5596dee4b3b2ca9049f629947019475))
+* only rethrow unhandled errors ([01a3a51](https://github.com/johannesjo/super-productivity/commit/01a3a514a3a2dde016769c02d5ba1f96e01dc661))
+* stacktrace silently breaking stuff ([67e0411](https://github.com/johannesjo/super-productivity/commit/67e041149619b059a81170ebfdd85217e575d197))
+* use western arabic numbers for model [#276](https://github.com/johannesjo/super-productivity/issues/276) ([a036470](https://github.com/johannesjo/super-productivity/commit/a03647081132516e8d0d6a24dda9212f95afc66d))
+
+
+
 ## [3.1.1](https://github.com/johannesjo/super-productivity/compare/v3.1.0...v3.1.1) (2020-01-08)
 
 
