@@ -3,6 +3,7 @@ import {Task, TaskArchive, TaskState} from './task.model';
 import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../issue/issue.const';
 import {MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import * as moment from 'moment';
+import { convertToWesternArabic } from '../../util/numeric-converter';
 
 const MODEL_VERSION = 2;
 
@@ -49,7 +50,7 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
     ? {
       ...task,
       timeSpentOnDay: Object.keys(task.timeSpentOnDay).reduce((acc, dateKey) => {
-        const date = moment(dateKey);
+        const date = moment(convertToWesternArabic(dateKey));
         if (!date.isValid()) {
           throw new Error('Cannot migrate invalid non western arabic date string ' + dateKey);
         }

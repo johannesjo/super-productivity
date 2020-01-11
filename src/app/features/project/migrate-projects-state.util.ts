@@ -8,6 +8,7 @@ import {getYesterdaysDate} from '../../util/get-yesterdays-date';
 import {MODEL_VERSION_KEY, THEME_COLOR_MAP, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import {isMigrateModel} from '../../util/model-version';
 import * as moment from 'moment';
+import { convertToWesternArabic } from '../../util/numeric-converter';
 
 const MODEL_VERSION = 2;
 
@@ -74,7 +75,7 @@ const ___convertToWesternArabicDateKeys = (workStartEnd: {
 } => {
   return (workStartEnd)
     ? Object.keys(workStartEnd).reduce((acc, dateKey) => {
-      const date = moment(dateKey);
+      const date = moment(convertToWesternArabic(dateKey));
       if (!date.isValid()) {
         throw new Error('Cannot migrate invalid non western arabic date string ' + dateKey);
       }
