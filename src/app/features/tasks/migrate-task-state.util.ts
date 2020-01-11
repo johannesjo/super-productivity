@@ -55,9 +55,16 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
           throw new Error('Cannot migrate invalid non western arabic date string ' + dateKey);
         }
         const westernArabicKey = date.locale('en').format(WORKLOG_DATE_STR_FORMAT);
+
+        const totalTimeSpentOnDay = Object.keys(task.timeSpentOnDay).filter( (key) => {
+          return key === westernArabicKey && westernArabicKey !== dateKey;
+        }).reduce( (tot, val) => {
+          return tot + task.timeSpentOnDay[val];
+        } , task.timeSpentOnDay[dateKey]);
+
         return {
           ...acc,
-          [westernArabicKey]: task.timeSpentOnDay[dateKey]
+          [westernArabicKey]: totalTimeSpentOnDay
         };
       }, {})
     }
