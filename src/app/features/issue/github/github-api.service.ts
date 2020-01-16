@@ -37,17 +37,17 @@ export class GithubApiService {
     });
   }
 
-  public setHeader(accessToken : string) {
-    if(accessToken) {
+  public setHeader(accessToken: string) {
+    if (accessToken) {
       this._header = new HttpHeaders({
-        'Authorization': 'token '+ accessToken
+        Authorization: 'token ' + accessToken
       });
     } else {
       this._header = null;
     }
   }
 
-  public getHeader() : HttpHeaders {
+  public getHeader(): HttpHeaders {
     return this._header;
   }
 
