@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ProjectService} from '../../project/project.service';
 import {GithubCfg} from './github';
 import {SnackService} from '../../../core/snack/snack.service';
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {GITHUB_API_BASE_URL, GITHUB_MAX_CACHE_AGE} from './github.const';
 import {combineLatest, from, Observable, ObservableInput, Subject, throwError} from 'rxjs';
 import {GithubOriginalComment, GithubOriginalIssue} from './github-api-responses';
@@ -24,6 +24,7 @@ export class GithubApiService {
   public onCacheRefresh$ = new Subject<boolean>();
 
   private _cfg: GithubCfg;
+  private _header: HttpHeaders;
 
   constructor(
     private _projectService: ProjectService,
@@ -32,7 +33,22 @@ export class GithubApiService {
   ) {
     this._projectService.currentGithubCfg$.subscribe((cfg: GithubCfg) => {
       this._cfg = cfg;
+      this.setHeader(cfg.token);
     });
+  }
+
+  public setHeader(accessToken : string) {
+    if(accessToken) {
+      this._header = new HttpHeaders({
+        'Authorization': 'token '+ accessToken
+      });
+    } else {
+      this._header = null;
+    }
+  }
+
+  public getHeader() : HttpHeaders {
+    return this._header;
   }
 
   getById$(id: number): Observable<GithubIssue> {
@@ -107,8 +123,10 @@ export class GithubApiService {
   getIssueWithCommentsByIssueNumber$(issueNumber: number): Observable<GithubIssue> {
     this._checkSettings();
     return combineLatest([
-      this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`),
-      this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`),
+      this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`,
+        {headers: this._header ? this._header : {}}),
+      this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`,
+      {headers: this._header ? this._header : {}}),
     ]).pipe(
       catchError(this._handleRequestError$.bind(this)),
       map(([issue, comments]: [GithubOriginalIssue, GithubOriginalComment[]]) => {
@@ -132,7 +150,8 @@ export class GithubApiService {
     if (!isSkipCheck) {
       this._checkSettings();
     }
-    return this._http.get(`${BASE}repos/${repo}/issues?per_page=100`)
+    return this._http.get(`${BASE}repos/${repo}/issues?per_page=100`,
+    {headers: this._header ? this._header : {}})
       .pipe(
         catchError(this._handleRequestError$.bind(this)),
         map((issues: GithubOriginalIssue[]) => issues ? issues.map(mapGithubIssue) : []),
@@ -161,7 +180,8 @@ export class GithubApiService {
     if (!isSkipCheck) {
       this._checkSettings();
     }
-    return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`)
+    return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`,
+    {headers: this._header ? this._header : {}})
       .pipe(
         catchError(this._handleRequestError$.bind(this)),
         map(res => res as GithubComment[])
