@@ -4,4 +4,5 @@ export interface GithubCfg {
   isAutoPoll: boolean;
   filterUsername: string;
   repo: string;
+  token: string;
 }

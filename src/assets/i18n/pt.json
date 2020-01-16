@@ -73,7 +73,8 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automáticamente problemas não resolvidos do Github para o backlog",
         "IS_AUTO_POLL": "Obter automáticamente issues do Github para alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do Github como sugestões qando adicionar novas tarefas",
-        "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
+        "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear",
+        "TOKEN": "Token de acesso"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar os problemas abertos do GithHub para um repositório específico no painel de criação de tarefas na visualização de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre ele. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no seu log de tarefas.</p>",

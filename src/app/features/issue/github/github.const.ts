@@ -5,6 +5,7 @@ import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../config/global-c
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   repo: null,
+  token: null,
   isSearchIssuesFromGithub: false,
   isAutoPoll: false,
   isAutoAddToBacklog: false,
@@ -27,6 +28,13 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
       label: T.F.GITHUB.FORM.REPO,
       type: 'text',
       pattern: /^.+\/.+?$/i,
+    },
+  },
+  {
+    key: 'token',
+    type: 'input',
+    templateOptions: {
+      label: T.F.GITHUB.FORM.TOKEN,
     },
   },
   {
