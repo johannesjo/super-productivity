@@ -75,7 +75,8 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Github'dan backlog'a ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
-        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\""
+        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
+        "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
         "HELP": "<p>Burada Süper Verimliliği, günlük planlama görünümünde görev oluşturma panelinde belirli bir depo için açık GithHub sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili daha fazla bilgi sunacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz.</p>",
