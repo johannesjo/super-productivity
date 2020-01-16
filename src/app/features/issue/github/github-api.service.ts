@@ -126,7 +126,7 @@ export class GithubApiService {
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`,
         {headers: this._header ? this._header : {}}),
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`,
-      {headers: this._header ? this._header : {}}),
+        {headers: this._header ? this._header : {}}),
     ]).pipe(
       catchError(this._handleRequestError$.bind(this)),
       map(([issue, comments]: [GithubOriginalIssue, GithubOriginalComment[]]) => {
@@ -150,12 +150,13 @@ export class GithubApiService {
     if (!isSkipCheck) {
       this._checkSettings();
     }
-    return this._http.get(`${BASE}repos/${repo}/issues?per_page=100`,
-    {headers: this._header ? this._header : {}})
-      .pipe(
-        catchError(this._handleRequestError$.bind(this)),
-        map((issues: GithubOriginalIssue[]) => issues ? issues.map(mapGithubIssue) : []),
-      );
+    return this._http.get(
+      `${BASE}repos/${repo}/issues?per_page=100`,
+      {headers: this._header ? this._header : {}}
+    ).pipe(
+      catchError(this._handleRequestError$.bind(this)),
+      map((issues: GithubOriginalIssue[]) => issues ? issues.map(mapGithubIssue) : []),
+    );
   }
 
   private _getAllCommentsForRepo$(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubComment[]> {
@@ -180,12 +181,13 @@ export class GithubApiService {
     if (!isSkipCheck) {
       this._checkSettings();
     }
-    return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`,
-    {headers: this._header ? this._header : {}})
-      .pipe(
-        catchError(this._handleRequestError$.bind(this)),
-        map(res => res as GithubComment[])
-      );
+    return this._http.get(
+      `${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`,
+      {headers: this._header ? this._header : {}}
+    ).pipe(
+      catchError(this._handleRequestError$.bind(this)),
+      map(res => res as GithubComment[])
+    );
   }
 
   private _checkSettings() {
