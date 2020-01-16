@@ -1,3 +1,18 @@
+## [3.1.3](https://github.com/johannesjo/super-productivity/compare/v3.1.2...v3.1.3) (2020-01-16)
+
+
+### Bug Fixes
+
+* calculate total timeSpent on day for a task in migration ([821e531](https://github.com/johannesjo/super-productivity/commit/821e531e1022cd01d33410591c24d9ee3eb66d81))
+* fix date migration error ([b19c9aa](https://github.com/johannesjo/super-productivity/commit/b19c9aae41c0459b3e7599e67337cc2a2e1265cf))
+
+
+### Features
+
+* Add access token for github to access private repos ([0460cd0](https://github.com/johannesjo/super-productivity/commit/0460cd002f748a2a85f4389ca425a3d75dd7c9cf))
+
+
+
 ## [3.1.2](https://github.com/johannesjo/super-productivity/compare/v3.1.1...v3.1.2) (2020-01-10)
 
 
