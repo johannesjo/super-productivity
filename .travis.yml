@@ -77,7 +77,9 @@ script:
 
 
 deploy:
-  - provider: snap
+  # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
+  - edge: true
+    provider: snap
     snap: ./app-builds/*.snap
     channel: edge
     skip_cleanup: true
