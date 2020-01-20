@@ -1,3 +1,7 @@
+## [3.1.4](https://github.com/johannesjo/super-productivity/compare/v3.1.3...v3.1.4) (2020-01-20)
+
+
+
 ## [3.1.3](https://github.com/johannesjo/super-productivity/compare/v3.1.2...v3.1.3) (2020-01-16)
 
 
