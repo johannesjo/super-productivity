@@ -24,7 +24,8 @@
   <button class="route-link"
           mat-menu-item
           routerLink="metrics"
-          routerLinkActive="isActiveRoute">
+          routerLinkActive="isActiveRoute"
+          *ngIf="!(globalConfigService.evaluation$|async)?.isHideMetricFromMenu">
     <mat-icon>donut_large</mat-icon>
     <span class="text">{{T.MH.METRICS|translate}}</span>
   </button>

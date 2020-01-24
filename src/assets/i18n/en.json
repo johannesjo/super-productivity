@@ -696,6 +696,11 @@
       "LABEL_IS_ENABLED": "Enable automatic backups",
       "TITLE": "Automatic Backups"
     },
+    "EVALUATION": {
+      "TITLE": "Evaluation & Metrics",
+      "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
+      "IS_HIDE_METRIC_FROM_MENU": "Hide metrics from menu"
+    },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
       "TITLE": "Sync via Google Drive"
@@ -775,7 +780,6 @@
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
-      "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",

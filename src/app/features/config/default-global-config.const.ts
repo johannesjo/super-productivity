@@ -11,8 +11,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isNotifyWhenTimeEstimateExceeded: false,
     isAutMarkParentAsDone: false,
     isDisableRemindWhenForgotToFinishDay: false,
-    isHideEvaluationSheet: false,
     isTurnOffMarkdown: false,
+  },
+  evaluation: {
+    isHideEvaluationSheet: false,
+    isHideMetricFromMenu: false,
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,

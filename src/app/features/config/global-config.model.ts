@@ -47,8 +47,12 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isDisableRemindWhenForgotToFinishDay: boolean;
-  isHideEvaluationSheet: boolean;
   isTurnOffMarkdown: boolean;
+}>;
+
+export type EvaluationConfig = Readonly<{
+  isHideEvaluationSheet: boolean;
+  isHideMetricFromMenu: boolean;
 }>;
 
 export type IdleConfig = Readonly<{
@@ -117,6 +121,7 @@ export type LanguageConfig = Readonly<{
 export type GlobalConfigState = Readonly<{
   lang: LanguageConfig;
   misc: MiscConfig;
+  evaluation: EvaluationConfig;
   idle: IdleConfig;
   takeABreak: TakeABreakConfig;
   pomodoro: PomodoroConfig;

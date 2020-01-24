@@ -1,6 +1,7 @@
 import {GlobalConfigActions, GlobalConfigActionTypes} from './global-config.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {
+  EvaluationConfig,
   GlobalConfigState,
   GoogleDriveSyncConfig,
   IdleConfig,
@@ -12,6 +13,7 @@ import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
 export const selectMiscConfig = createSelector(selectConfigFeatureState, (cfg): MiscConfig => cfg.misc);
+export const selectEvaluationConfig = createSelector(selectConfigFeatureState, (cfg): EvaluationConfig => cfg.evaluation);
 export const selectGoogleDriveSyncConfig = createSelector(selectConfigFeatureState, (cfg): GoogleDriveSyncConfig => cfg.googleDriveSync);
 export const selectIdleConfig = createSelector(selectConfigFeatureState, (cfg): IdleConfig => cfg.idle);
 export const selectTakeABreakConfig = createSelector(selectConfigFeatureState, (cfg): TakeABreakConfig => cfg.takeABreak);

@@ -3,6 +3,7 @@ import {select, Store} from '@ngrx/store';
 import {GlobalConfigActionTypes} from './store/global-config.actions';
 import {merge, Observable, Subject} from 'rxjs';
 import {
+  EvaluationConfig,
   GlobalConfigSectionKey,
   GlobalConfigState,
   GlobalSectionConfig,
@@ -14,6 +15,7 @@ import {
 } from './global-config.model';
 import {
   selectConfigFeatureState,
+  selectEvaluationConfig,
   selectGoogleDriveSyncConfig,
   selectGoogleSession,
   selectIdleConfig,
@@ -43,6 +45,10 @@ export class GlobalConfigService {
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
     shareReplay(1),
+  );
+
+  evaluation$: Observable<EvaluationConfig> = this._store.pipe(
+    select(selectEvaluationConfig),
   );
 
   idle$: Observable<IdleConfig> = this._store.pipe(

@@ -8,6 +8,7 @@ import {THEME_COLOR_MAP} from '../../app.constants';
 import {Router} from '@angular/router';
 import {DragulaService} from 'ng2-dragula';
 import {Subscription} from 'rxjs';
+import {GlobalConfigService} from '../../features/config/global-config.service';
 
 @Component({
   selector: 'side-nav',
@@ -26,6 +27,7 @@ export class SideNavComponent implements OnDestroy {
 
   constructor(
     public readonly projectService: ProjectService,
+    public readonly globalConfigService: GlobalConfigService,
     private readonly _matDialog: MatDialog,
     private readonly _router: Router,
     private readonly _dragulaService: DragulaService,
