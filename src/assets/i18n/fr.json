@@ -33,8 +33,6 @@
           "IMG": "Image (affichée en miniature)",
           "LINK": "Lien (ouvert dans le navigateur)"
         }
-      },
-      "LIST": {
       }
     },
     "BOOKMARK": {
@@ -471,7 +469,6 @@
         "ADD_ATTACHMENT": "Ajouter une pièce jointe",
         "ATTACHMENTS": "Pièces jointes {{nr}}",
         "FROM_PARENT": "(du parent)",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Pièces jointes",
         "LOCAL_ATTACHMENTS": "Pièces jointes locales",
         "NOTES": "Notes",
         "PARENT": "Parent",
@@ -699,6 +696,11 @@
       "LABEL_IS_ENABLED": "Activer les sauvegardes automatiques",
       "TITLE": "Sauvegardes automatiques"
     },
+    "EVALUATION": {
+      "IS_HIDE_EVALUATION_SHEET": "Masquer la fiche d'évaluation dans le résumé quotidien",
+      "IS_HIDE_METRIC_FROM_MENU": "Masquer les métriques du menu",
+      "TITLE": "Évaluation et mesures"
+    },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Ici, vous pouvez configurer votre application pour qu'elle se synchronise automatiquement vers et depuis un unique fichier sur Google Drive. Toutes les données seront enregistrées non cryptées, alors assurez-vous de ne pas partager accidentellement ce fichier avec quelqu'un.",
       "TITLE": "Synchroniser via Google Drive"
@@ -778,7 +780,6 @@
       "IS_CONFIRM_BEFORE_EXIT": "Confirmez avant de quitter l'application",
       "IS_DARK_MODE": "Mode sombre",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Désactiver le rappel de fin de journée oubliée",
-      "IS_HIDE_EVALUATION_SHEET": "Masquer la fiche d'évaluation dans le résumé quotidien",
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé",
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
@@ -902,6 +903,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Paramètres globaux",
+    "PRIVATE_POLICY": "Politique privée",
+    "PRODUCTIVITY_HELPER": "Aide à la productivité",
     "PROJECT_SETTINGS": "Paramètres spécifiques au projet",
     "TOGGLE_DARK_MODE": "Basculer en mode sombre"
   },

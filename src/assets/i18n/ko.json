@@ -469,7 +469,6 @@
         "ADD_ATTACHMENT": "첨부 파일 추가",
         "ATTACHMENTS": "첨부 파일 {{nr}}",
         "FROM_PARENT": "(부모님)",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 첨부 파일",
         "LOCAL_ATTACHMENTS": "로컬 첨부 파일",
         "NOTES": "노트",
         "PARENT": "부모의",
@@ -697,6 +696,11 @@
       "LABEL_IS_ENABLED": "자동 백업 사용",
       "TITLE": "자동 백업"
     },
+    "EVALUATION": {
+      "IS_HIDE_EVALUATION_SHEET": "일일 요약에서 평가 시트 숨기기",
+      "IS_HIDE_METRIC_FROM_MENU": "메뉴에서 메트릭 숨기기",
+      "TITLE": "평가 및 측정 항목"
+    },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "여기에서 하나의 Google 드라이브 파일간에 자동 동기화되도록 앱을 구성 할 수 있습니다. 모든 데이터는 암호화되지 않은 상태로 저장되므로 실수로이 파일을 누군가와 공유하지 않도록하십시오.",
       "TITLE": "Google 드라이브를 통해 동기화"
@@ -776,7 +780,6 @@
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "잊혀진 종료일에 대한 알림 사용 중지",
-      "IS_HIDE_EVALUATION_SHEET": "일일 요약에서 평가 시트 숨기기",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
@@ -900,6 +903,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "전체 설정",
+    "PRIVATE_POLICY": "개인 정책",
+    "PRODUCTIVITY_HELPER": "생산성 도우미",
     "PROJECT_SETTINGS": "프로젝트 별 설정",
     "TOGGLE_DARK_MODE": "어두운 모드 전환"
   },

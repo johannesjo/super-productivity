@@ -469,7 +469,6 @@
         "ADD_ATTACHMENT": "Eklenti ekle",
         "ATTACHMENTS": "Ekler {{nr}}",
         "FROM_PARENT": "(Ebeveynden)",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Ekler",
         "LOCAL_ATTACHMENTS": "Yerel Ekler",
         "NOTES": "Notlar",
         "PARENT": "ebeveyn",
@@ -697,6 +696,11 @@
       "LABEL_IS_ENABLED": "Otomatik yedeklemeyi etkinleştir",
       "TITLE": "Otomatik Yedeklemeler"
     },
+    "EVALUATION": {
+      "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
+      "IS_HIDE_METRIC_FROM_MENU": "Metrikleri menüden gizle",
+      "TITLE": "Değerlendirme ve Metrikler"
+    },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Burada, uygulamanızı tek bir google sürücü dosyasına otomatik olarak senkronize edecek şekilde yapılandırabilirsiniz. Tüm veriler şifrelenmemiş olarak kaydedilir, bu nedenle bu dosyayı yanlışlıkla birisiyle paylaşmadığınızdan emin olun.",
       "TITLE": "Google Drive ile senkronize et"
@@ -776,7 +780,6 @@
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
       "IS_DARK_MODE": "Karanlık modu",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",
-      "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
@@ -900,6 +903,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Genel Ayarlar",
+    "PRIVATE_POLICY": "Özel politika",
+    "PRODUCTIVITY_HELPER": "Verimlilik Yardımcısı",
     "PROJECT_SETTINGS": "Projeye Özel Ayarlar",
     "TOGGLE_DARK_MODE": "Koyu Modu Değiştir"
   },

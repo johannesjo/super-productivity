@@ -697,9 +697,9 @@
       "TITLE": "Automatic Backups"
     },
     "EVALUATION": {
-      "TITLE": "Evaluation & Metrics",
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
-      "IS_HIDE_METRIC_FROM_MENU": "Hide metrics from menu"
+      "IS_HIDE_METRIC_FROM_MENU": "Hide metrics from menu",
+      "TITLE": "Evaluation & Metrics"
     },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",

@@ -469,7 +469,6 @@
         "ADD_ATTACHMENT": "添加附件",
         "ATTACHMENTS": "附件 {{nr}}",
         "FROM_PARENT": "（来自家长）",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 附件",
         "LOCAL_ATTACHMENTS": "本地附件",
         "NOTES": "笔记",
         "PARENT": "亲",
@@ -697,6 +696,11 @@
       "LABEL_IS_ENABLED": "启用自动备份",
       "TITLE": "自动备份"
     },
+    "EVALUATION": {
+      "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
+      "IS_HIDE_METRIC_FROM_MENU": "从菜单隐藏指标",
+      "TITLE": "评估与指标"
+    },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "在这里，您可以将应用配置为自动与单个Google驱动器文件同步。所有数据都将以未加密的方式保存，因此请确保您不会意外地与他人共享此文件。",
       "TITLE": "通过Google云端硬盘同步"
@@ -776,7 +780,6 @@
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_DARK_MODE": "暗模式",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "禁用有关遗忘完成日的提醒",
-      "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "超出时间估算时通知",
       "IS_TURN_OFF_MARKDOWN": "关闭标记的降价解析",
@@ -900,6 +903,8 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "全局设置",
+    "PRIVATE_POLICY": "私人政策",
+    "PRODUCTIVITY_HELPER": "生产力助手",
     "PROJECT_SETTINGS": "项目特定设置",
     "TOGGLE_DARK_MODE": "切换暗模式"
   },
