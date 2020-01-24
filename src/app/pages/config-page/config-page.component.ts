@@ -1,6 +1,9 @@
 import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
 import {GlobalConfigService} from '../../features/config/global-config.service';
-import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
+import {
+  GLOBAL_CONFIG_FORM_CONFIG,
+  GLOBAL_PRODUCTIVITY_FORM_CONFIG
+} from '../../features/config/global-config-form-config.const';
 import {
   ConfigFormConfig,
   ConfigFormSection,
@@ -24,8 +27,8 @@ import {MatSlideToggleChange} from '@angular/material';
 export class ConfigPageComponent implements OnInit, OnDestroy {
   T = T;
   globalConfigFormCfg: ConfigFormConfig;
+  globalProductivityConfigFormCfg: ConfigFormConfig;
 
-  issueIntegrationCfgs: IssueIntegrationCfgs;
   globalCfg: GlobalConfigState;
 
   appVersion: string = environment.version;
@@ -37,6 +40,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   ) {
     // somehow they are only unproblematic if assigned here
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
+    this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
   }
 
   ngOnInit() {

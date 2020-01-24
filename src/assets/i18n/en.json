@@ -900,6 +900,7 @@
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
     "PRIVATE_POLICY": "Private Policy",
+    "PRODUCTIVITY_HELPER": "Productivity Helper",
     "PROJECT_SETTINGS": "Project Specific Settings",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },
