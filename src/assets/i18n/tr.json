@@ -797,7 +797,7 @@
       "IS_PLAY_TICK": "Her saniye kene sesini çal",
       "IS_STOP_TRACKING_ON_BREAK": "Arada görev için zaman izlemeyi durdur",
       "LONGER_BREAK_DURATION": "Uzun molaların süresi",
-      "TITLE": "Pomodoro Ayarları"
+      "TITLE": "Pomodoro Zamanlayıcı"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Mola vermeden belirli bir süre çalıştığınızda tekrar eden bir hatırlatıcı yapılandırmanıza izin verir.</p> <p>Görüntülenen mesajı değiştirebilirsiniz. ${duration} , ara vermeden harcadığınız zamanla değiştirilecektir.</p> </div>",
