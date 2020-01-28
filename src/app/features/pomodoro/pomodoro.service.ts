@@ -15,6 +15,7 @@ import {
 import {selectCurrentCycle, selectIsBreak, selectIsManualPause} from './store/pomodoro.reducer';
 import {DEFAULT_GLOBAL_CONFIG} from '../config/default-global-config.const';
 import {Actions, ofType} from '@ngrx/effects';
+import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 
 // Tick Duration
 const TD = -1000;
@@ -57,7 +58,7 @@ export class PomodoroService {
   // isManualPause$
   nextSession$: Observable<number> = merge(
     this.isBreak$,
-    this.cfg$.pipe(distinctUntilChanged()),
+    this.cfg$.pipe(distinctUntilChanged(distinctUntilChangedObject)),
     this.onStop$,
   ).pipe(
     withLatestFrom(
@@ -67,8 +68,9 @@ export class PomodoroService {
       this.cfg$,
     ),
     map(([trigger, isLong, isShort, isBreak, cfg]) => {
-      // cfg.duration = 3000;
-      // cfg.breakDuration = 3000;
+      // cfg = {...cfg};
+      // cfg.duration = 5000;
+      // cfg.breakDuration = 15000;
       // cfg.longerBreakDuration = 20000;
       if (!isBreak) {
         return cfg.duration || DEFAULT_GLOBAL_CONFIG.pomodoro.duration;

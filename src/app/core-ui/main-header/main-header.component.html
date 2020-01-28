@@ -92,8 +92,19 @@
               [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
               class="play-btn mat-elevation-z3"
               mat-mini-fab>
-        <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
-        <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
+        <ng-container *ngIf="(pomodoroService.isEnabled$|async)">
+          <mat-icon *ngIf="(pomodoroService.isBreak$|async)">free_breakfast</mat-icon>
+          <ng-container *ngIf="!(pomodoroService.isBreak$|async)">
+            <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
+            <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="!(pomodoroService.isEnabled$|async)">
+          <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
+          <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
+        </ng-container>
+
         <svg class="circle-svg"
              focusable="false"
              height="40"
