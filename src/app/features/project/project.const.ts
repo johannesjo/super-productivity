@@ -15,6 +15,7 @@ export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
 
 export const DEFAULT_PROJECT_THEME: ProjectThemeCfg = {
   isAutoContrast: true,
+  isDisableBackgroundGradient: false,
   primary: '#0b77d2',
   huePrimary: '500',
   accent: '#ff4081',

@@ -47,6 +47,7 @@ export class GlobalThemeService {
 
   private _setColorTheme(theme: ProjectThemeCfg) {
     this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
+    this._setBackgroundGradient(theme.isDisableBackgroundGradient);
 
     if (!theme.isAutoContrast) {
       this._materialCssVarsService.setContrastColorThresholdPrimary(theme.huePrimary);
@@ -57,6 +58,14 @@ export class GlobalThemeService {
     this._materialCssVarsService.setPrimaryColor(theme.primary);
     this._materialCssVarsService.setAccentColor(theme.accent);
     this._materialCssVarsService.setWarnColor(theme.warn);
+  }
+
+  private _setBackgroundGradient(isOn: boolean) {
+    if (isOn) {
+      this.document.body.classList.add(BodyClass.isDisableBackgroundGradient);
+    } else {
+      this.document.body.classList.remove(BodyClass.isDisableBackgroundGradient);
+    }
   }
 
   private _initIcons() {

@@ -7,7 +7,7 @@ $card-border-radius: 4px;
 // COLORS
 // ------
 $dark0: rgb(18, 18, 18);
-//$dark1: rgb(30, 30, 30);
+$dark1: rgb(30, 30, 30);
 $dark2: rgb(34, 34, 34);
 //$dark3: rgb(36, 36, 36);
 $dark4: rgb(39, 39, 39);
@@ -19,7 +19,7 @@ $dark12: rgb(50, 50, 50);
 $dark24: rgb(60, 60, 60);
 
 
-$dark-theme-bg: $dark2;
+$dark-theme-bg: $dark1;
 $dark-theme-bg-darker: $dark0;
 $dark-theme-bg-slightly-lighter: $dark4;
 $dark-theme-bg-lighter: $dark12;

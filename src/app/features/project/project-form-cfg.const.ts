@@ -90,6 +90,13 @@ export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg
         placeholder: T.F.PROJECT.FORM_THEME.L_HUE_WARN
       },
     },
+    {
+      key: 'isDisableBackgroundGradient',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.F.PROJECT.FORM_THEME.L_IS_AUTO_CONTRAST,
+      },
+    },
   ]
 };
 

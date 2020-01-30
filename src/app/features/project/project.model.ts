@@ -37,6 +37,7 @@ export type ProjectAdvancedCfg = Readonly<{
 
 export type ProjectThemeCfg = Readonly<{
   isAutoContrast: boolean;
+  isDisableBackgroundGradient: boolean;
   primary: string;
   huePrimary: HueValue;
   accent: string;

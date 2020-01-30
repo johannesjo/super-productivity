@@ -65,6 +65,7 @@ export enum BodyClass {
   isNoTouchDevice = 'isNoTouchDevice',
   isLightTheme = 'isLightTheme',
   isDarkTheme = 'isDarkTheme',
+  isDisableBackgroundGradient = 'isDisableBackgroundGradient',
 }
 
 export enum MainContainerClass {

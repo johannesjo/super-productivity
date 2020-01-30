@@ -27,6 +27,10 @@ body {
     background: linear-gradient(180deg, $c-primary-50 0, $c-primary-100 85%, $c-primary-200 100%);
     //background: linear-gradient(180deg,  $c-primary-50 0, $c-primary-100 50%, $c-primary-200 100%);
     //background: $c-primary-50;
+
+    &.isDisableBackgroundGradient {
+      background: $light-theme-bg;
+    }
   }
 
   &.isDarkTheme {
@@ -34,6 +38,10 @@ body {
     //background: radial-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
     background: linear-gradient(180deg, $dark-theme-bg 0, $c-primary-900 20%, $c-primary-800 50%, $c-primary-700 100%);
     //background: $c-primary-900;
+
+    &.isDisableBackgroundGradient {
+      background: $dark-theme-bg;
+    }
   }
 }
 
