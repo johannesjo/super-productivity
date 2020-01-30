@@ -445,6 +445,7 @@
         "L_HUE_PRIMARY": "Ana renk arka planında koyu metin eşiği",
         "L_HUE_WARN": "Uyar renk arka plan üzerinde koyu metin için eşik",
         "L_IS_AUTO_CONTRAST": "En iyi okunabilirlik için otomatik metin renkleri ayarlama",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Renkli arka plan gradyanını devre dışı bırak",
         "L_IS_REDUCED_THEME": "Azaltılmış kullanıcı arayüzü kullanın (görevlerin etrafında kutu yok)",
         "L_THEME_COLOR": "Tema Rengi",
         "L_TITLE": "Başlık",

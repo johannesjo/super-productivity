@@ -94,7 +94,7 @@ export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg
       key: 'isDisableBackgroundGradient',
       type: 'checkbox',
       templateOptions: {
-        label: T.F.PROJECT.FORM_THEME.L_IS_AUTO_CONTRAST,
+        label: T.F.PROJECT.FORM_THEME.L_IS_DISABLE_BACKGROUND_GRADIENT,
       },
     },
   ]

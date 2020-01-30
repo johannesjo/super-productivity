@@ -445,6 +445,7 @@
         "L_HUE_PRIMARY": "原色背景上的暗文本阈值",
         "L_HUE_WARN": "警告颜色背景上的黑暗文本的阈值",
         "L_IS_AUTO_CONTRAST": "自动设置文本颜色以获得最佳可读性",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "禁用彩色背景渐变",
         "L_IS_REDUCED_THEME": "使用缩减的UI（任务周围没有框）",
         "L_THEME_COLOR": "主题色",
         "L_TITLE": "标题",

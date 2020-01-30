@@ -445,6 +445,7 @@
         "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
         "L_HUE_WARN": "Threshold for dark text on warn color background",
         "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Disable colored background gradient",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
         "L_THEME_COLOR": "Theme Color",
         "L_TITLE": "Title",

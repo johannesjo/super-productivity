@@ -445,6 +445,7 @@
         "L_HUE_PRIMARY": "기본 색상 배경에서 어두운 텍스트에 대한 임계 값",
         "L_HUE_WARN": "경고 색상 배경에 어두운 텍스트에 대한 임계 값",
         "L_IS_AUTO_CONTRAST": "최고의 가독성을위한 자동 텍스트 색상 설정",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "컬러 배경 그라디언트 비활성화",
         "L_IS_REDUCED_THEME": "축소 된 UI 사용 (작업 주위의 상자 없음)",
         "L_THEME_COLOR": "테마 색",
         "L_TITLE": "표제",
