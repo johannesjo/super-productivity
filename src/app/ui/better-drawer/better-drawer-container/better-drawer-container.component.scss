@@ -18,8 +18,9 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 }
 
 .side {
-  // prevent double border when header got a bottom one
-  margin-top: -1px;
+  // NOTE: we can't use margin-top: -1px; to prevent double border when header got a bottom one
+  // because then there would be none
+
   position: relative;
   z-index: $z-task-side-bar;
   transition: $transition-leave;
