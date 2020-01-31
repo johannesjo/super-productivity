@@ -1,3 +1,26 @@
+## [3.1.5](https://github.com/johannesjo/super-productivity/compare/v3.1.4...v3.1.5) (2020-01-31)
+
+
+### Bug Fixes
+
+* missing border ([5b993fa](https://github.com/johannesjo/super-productivity/commit/5b993fa4b5d7e571617f9ea7e981c19d12f3b383))
+* **pomodoro:** dialog close btn behaviour [#283](https://github.com/johannesjo/super-productivity/issues/283) ([f498b9a](https://github.com/johannesjo/super-productivity/commit/f498b9ab48400de6fe3699be1b8a92a0306cf36c))
+
+
+### Features
+
+* improve selected task styling ([9107214](https://github.com/johannesjo/super-productivity/commit/9107214c8d31b694206b38ee08ebb3d99690aa5f))
+* **i18n:** update translation ([d3b5069](https://github.com/johannesjo/super-productivity/commit/d3b50698bfab88738dbf5adbd527e0bca623d925))
+* **i18n:** update translations ([11f7ae1](https://github.com/johannesjo/super-productivity/commit/11f7ae138c0a744c4c01f611f74abbe6e7b32f68))
+* **pomodoro:** improve header icon [#283](https://github.com/johannesjo/super-productivity/issues/283) ([bccdc21](https://github.com/johannesjo/super-productivity/commit/bccdc21c28b9803add09384fbd5249a431b38db1))
+* **theme:** add label for disable background gradient [#267](https://github.com/johannesjo/super-productivity/issues/267) ([2b6ed77](https://github.com/johannesjo/super-productivity/commit/2b6ed77ffaf42a0543c89eec1b58cb503c568b16))
+* **theme:** allow disabling background gradient [#267](https://github.com/johannesjo/super-productivity/issues/267) ([e41b662](https://github.com/johannesjo/super-productivity/commit/e41b662b9df3dfd3648a406b2b28cb33edf8ec67))
+* add link to private policy ([56baf91](https://github.com/johannesjo/super-productivity/commit/56baf9171ed1e1639240b33e524c9359683bfab6))
+* move evaluation settings to productivity helper settings ([a39de4f](https://github.com/johannesjo/super-productivity/commit/a39de4f95043a37259411c1aeb10f9a16a3e166f))
+* move productivity helper settings to their own section ([0c22301](https://github.com/johannesjo/super-productivity/commit/0c2230164917e72d406194042fcb1c1d082102ad))
+
+
+
 ## [3.1.4](https://github.com/johannesjo/super-productivity/compare/v3.1.3...v3.1.4) (2020-01-20)
 
 
