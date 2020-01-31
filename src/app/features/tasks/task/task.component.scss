@@ -71,6 +71,7 @@
   :host-context(.isLightTheme).isSelected & {
     background: $task-c-selected-bg-light;
     border-color: $task-c-selected-border-light;
+    border-width: 0;
   }
 
   :host-context(.isDarkTheme).isSelected & {
@@ -82,7 +83,6 @@
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
     box-shadow: $whiteframe-shadow-2dp;
-    border-width: 0;
     //@include darkTheme {
     //  box-shadow: $whiteframe-shadow-1dp;
     //}
