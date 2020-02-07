@@ -1,3 +1,13 @@
+# [3.2.0](https://github.com/johannesjo/super-productivity/compare/v3.1.5...v3.2.0) (2020-02-07)
+
+
+### Bug Fixes
+
+* app breaking migration bugs ([8ece7ba](https://github.com/johannesjo/super-productivity/commit/8ece7bac9b406574495e6dcaf501fc3091b3ad14))
+* tmp fix for style not being applied ([efe76d5](https://github.com/johannesjo/super-productivity/commit/efe76d59494f018f648fc7d587d3119e84d0aaf3))
+
+
+
 ## [3.1.5](https://github.com/johannesjo/super-productivity/compare/v3.1.4...v3.1.5) (2020-01-31)
 
 
