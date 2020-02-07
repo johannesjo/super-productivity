@@ -6,7 +6,7 @@ import {takeUntil} from 'rxjs/operators';
 import {DEFAULT_SNACK_CFG} from './snack.const';
 import {SnackCustomComponent} from './snack-custom/snack-custom.component';
 import {TranslateService} from '@ngx-translate/core';
-import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material';
+import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
 import {Actions, ofType} from '@ngrx/effects';
 import {ProjectActionTypes} from '../../features/project/store/project.actions';
 

@@ -18,7 +18,7 @@ import {TaskRepeatCfg, TaskRepeatCfgState} from './task-repeat-cfg.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
-import {MatDialog} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
 import {T} from '../../t.const';
 
 @Injectable({

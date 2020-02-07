@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit} from '@an
 import {Task} from '../../tasks/task.model';
 import {TaskService} from '../../tasks/task.service';
 import {SnackService} from '../../../core/snack/snack.service';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
 import {DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy} from '../task-repeat-cfg.model';
 import {Subscription} from 'rxjs';

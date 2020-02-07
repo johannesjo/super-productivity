@@ -77,13 +77,13 @@
     "googleapis": "^40.0.0",
     "jira-client-fork": "^4.2.1",
     "moment": "^2.24.0",
-    "stacktrace-js": "^2.0.1"
-  ,    "tslib": "^1.10.0"
-},
+    "stacktrace-js": "^2.0.1",
+    "tslib": "^1.10.0"
+  },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.900.1",
     "@angular/animations": "^9.0.0",
-    "@angular/cdk": "^8.2.0",
+    "@angular/cdk": "^9.0.0",
     "@angular/cli": "^9.0.1",
     "@angular/common": "^9.0.0",
     "@angular/compiler": "^9.0.0",
@@ -91,8 +91,8 @@
     "@angular/core": "^9.0.0",
     "@angular/forms": "^9.0.0",
     "@angular/language-service": "^9.0.0",
-    "@angular/material": "^8.2.0",
-    "@angular/material-moment-adapter": "^8.2.0",
+    "@angular/material": "^9.0.0",
+    "@angular/material-moment-adapter": "^9.0.0",
     "@angular/platform-browser": "^9.0.0",
     "@angular/platform-browser-dynamic": "^9.0.0",
     "@angular/platform-server": "^9.0.0",

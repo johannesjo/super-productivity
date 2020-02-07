@@ -8,7 +8,7 @@ import {MaterialCssVarsService} from 'angular-material-css-vars';
 import {DOCUMENT} from '@angular/common';
 import {ElectronService} from 'ngx-electron';
 import {ProjectService} from '../../features/project/project.service';
-import {MatIconRegistry} from '@angular/material';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ChromeExtensionInterfaceService} from '../chrome-extension-interface/chrome-extension-interface.service';
 import {ThemeService as NgChartThemeService} from 'ng2-charts';

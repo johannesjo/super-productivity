@@ -3,7 +3,7 @@ import {ProjectService} from '../../features/project/project.service';
 import {T} from '../../t.const';
 import {DialogCreateProjectComponent} from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import {Project} from '../../features/project/project.model';
-import {MatDialog} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
 import {THEME_COLOR_MAP} from '../../app.constants';
 import {Router} from '@angular/router';
 import {DragulaService} from 'ng2-dragula';
