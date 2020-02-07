@@ -27,7 +27,7 @@ export class SplitComponent {
   }
 
   @Input() set splitPos(pos: number) {
-    if (pos !== this.pos) {
+    if (pos !== this.pos && this.splitTopEl && this.splitBottomEl) {
       this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
       this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
       this._updatePos(pos, true);

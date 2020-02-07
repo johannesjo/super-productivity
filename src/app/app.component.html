@@ -1,6 +1,4 @@
-<!-- TODO better readable solution ? -->
-<ng-container *ngIf="(isAllDataLoadedInitially$|async)"
-              [dir]="isRTL ? 'rtl' : 'ltr'">
+<ng-container *ngIf="(isAllDataLoadedInitially$|async)">
 
   <!--TODO move inside page container somehow -->
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
@@ -12,7 +10,8 @@
        @fade
        class="backdrop"></div>
 
-  <mat-sidenav-container>
+  <mat-sidenav-container
+    [dir]="isRTL ? 'rtl' : 'ltr'">
     <mat-sidenav (closedStart)="layoutService.hideSideNav()"
                  [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
                  [opened]="(layoutService.isShowSideNav$|async)"

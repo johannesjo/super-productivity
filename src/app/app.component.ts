@@ -51,9 +51,11 @@ export class AppComponent implements OnDestroy {
     take(1),
   );
 
-  @ViewChild('notesElRef', { read: ViewContainerRef }) notesElRef: ViewContainerRef;
-  @ViewChild('sideNavElRef', { read: ViewContainerRef }) sideNavElRef: ViewContainerRef;
+  @ViewChild('notesElRef', {read: ViewContainerRef}) notesElRef: ViewContainerRef;
+  @ViewChild('sideNavElRef', {read: ViewContainerRef}) sideNavElRef: ViewContainerRef;
+
   isRTL: boolean;
+
   private _subs: Subscription = new Subscription();
 
   constructor(
