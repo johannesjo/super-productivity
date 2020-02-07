@@ -48,9 +48,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @HostBinding('@noop') alwaysTrue = true;
 
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
-  @ViewChild('attachmentPanelElRef', {
-    static: false,
-  }) attachmentPanelElRef: TaskAdditionalInfoItemComponent;
+  @ViewChild('attachmentPanelElRef') attachmentPanelElRef: TaskAdditionalInfoItemComponent;
 
   selectedItemIndex = 0;
   isFocusNotes = false;

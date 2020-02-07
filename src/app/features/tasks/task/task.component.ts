@@ -61,8 +61,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   contextMenuPosition = {x: '0px', y: '0px'};
 
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
-  @ViewChild('blockLeft', {static: false}) blockLeftEl: ElementRef;
-  @ViewChild('blockRight', {static: false}) blockRightEl: ElementRef;
+  @ViewChild('blockLeft') blockLeftEl: ElementRef;
+  @ViewChild('blockRight') blockRightEl: ElementRef;
   @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
 
   @HostBinding('tabindex') tabIndex = 1;

@@ -16,7 +16,7 @@ export class NoteComponent {
   @Input() note: Note;
   @Input() isFocus: boolean;
 
-  @ViewChild('markdownEl', {static: false}) markdownEl: HTMLElement;
+  @ViewChild('markdownEl') markdownEl: HTMLElement;
 
   T = T;
 

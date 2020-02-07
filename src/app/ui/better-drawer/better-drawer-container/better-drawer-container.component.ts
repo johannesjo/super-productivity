@@ -64,7 +64,7 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
     return this._isOver;
   }
 
-  @ViewChild('contentElRef', {static: false, read: ElementRef}) set setContentElRef(ref: ElementRef) {
+  @ViewChild('contentElRef', { read: ElementRef }) set setContentElRef(ref: ElementRef) {
     if (ref) {
       this.contentEl$.next(ref.nativeElement);
     }

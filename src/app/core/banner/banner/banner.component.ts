@@ -43,7 +43,7 @@ export class BannerComponent {
   ) {
   }
 
-  @ViewChild('wrapperEl', {static: false}) set wrapperEl(content: ElementRef) {
+  @ViewChild('wrapperEl') set wrapperEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.height = content.nativeElement.offsetHeight;
     }

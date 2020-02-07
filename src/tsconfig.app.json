@@ -4,9 +4,8 @@
     "outDir": "../out-tsc/app",
     "types": []
   },
-  "exclude": [
-    "test.ts",
-    "**/*.spec.ts",
-    "**/*.worker.ts"
+  "files": [
+    "main.ts",
+    "polyfills.ts"
   ]
 }

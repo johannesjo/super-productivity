@@ -76,7 +76,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
   ) {
   }
 
-  @ViewChild('splitTopEl', {static: false, read: ElementRef}) set splitTopElRef(ref: ElementRef) {
+  @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
     if (ref) {
       this.splitTopEl$.next(ref.nativeElement);
     }

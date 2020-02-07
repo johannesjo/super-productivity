@@ -22,8 +22,8 @@ export class InlineInputComponent {
   @Input() newValue: string | number;
 
   @Output() changed = new EventEmitter<string | number>();
-  @ViewChild('inputEl', {static: false}) inputEl: ElementRef;
-  @ViewChild('inputElDuration', {static: false}) inputElDuration: ElementRef;
+  @ViewChild('inputEl') inputEl: ElementRef;
+  @ViewChild('inputElDuration') inputElDuration: ElementRef;
 
   @HostBinding('class.isFocused') isFocused = false;
 

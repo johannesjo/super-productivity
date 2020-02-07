@@ -50,7 +50,7 @@ export class BookmarkBarComponent implements OnDestroy {
     );
   }
 
-  @ViewChild('bookmarkBar', {read: ElementRef, static: false}) set bookmarkBarEl(content: ElementRef) {
+  @ViewChild('bookmarkBar', { read: ElementRef }) set bookmarkBarEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.bookmarkBarHeight = content.nativeElement.offsetHeight;
     }
