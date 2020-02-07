@@ -1,6 +1,7 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -64,7 +65,7 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
     return this._isOver;
   }
 
-  @ViewChild('contentElRef', { read: ElementRef }) set setContentElRef(ref: ElementRef) {
+  @ViewChild('contentElRef', {read: ElementRef}) set setContentElRef(ref: ElementRef) {
     if (ref) {
       this.contentEl$.next(ref.nativeElement);
     }
@@ -121,5 +122,7 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
     ;
     const widthStyle = ` width: ${this.sideWidth}%;`;
     this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(style + widthStyle);
+    // TODO tmp fix, because the line above doesn't seem to work any more
+    this.sideStyle = style + widthStyle;
   }
 }
