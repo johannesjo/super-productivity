@@ -14,8 +14,8 @@
     "TITLE": "بک لاگ"
   },
   "DATETIME_INPUT": {
-    "IN": "in {{time}}",
-    "TOMORROW": "tomorrow {{time}}"
+    "IN": "در {{time}}",
+    "TOMORROW": "فردا {{time}}"
   },
   "F": {
     "ATTACHMENT": {
@@ -71,16 +71,16 @@
         "TITLE": "راه اندازی گیت هاب برای پروژه"
       },
       "FORM": {
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
+        "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
+        "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track",
-        "TOKEN": "Access Token"
+        "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
-        "TITLE": "Github"
+        "TITLE": "گیت هاب"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "مسئول",
@@ -90,33 +90,33 @@
         "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
-        "WRITE_A_COMMENT": "یک نظر بنویسید"
+        "WRITE_A_COMMENT": "دیدگاهتان را بنویسید"
       },
       "S": {
-        "ERR_NETWORK": "Github: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "Github: Is not properly configured",
+        "ERR_NETWORK": "گیت هاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
+        "ERR_NOT_CONFIGURED": "گیت هاب: به درستی پیکربندی نشده است",
         "ERR_REQUEST": "Github: API returned {{statusCode}}. {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
+        "ISSUE_UPDATE": "گیت هاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
+        "NEW_COMMENT": "گیت هاب: دیدگاه جدید برای \"{{issueText}}\"",
         "POLLING": "Github: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "SHOW_ISSUE_BTN": "به من نشان بده"
       }
     },
     "GOOGLE": {
       "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
+        "AUTH_FAIL": "GoogleApi: تأیید هویت انجام نشد ، لطفاً دوباره وارد سیستم شوید!"
       },
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
       },
       "D_CONFIRM_LOAD": {
-        "LAST_MOD": "last modification:",
+        "LAST_MOD": "آخرین تغییرات:",
         "LAST_SYNC": "آخرین همگام سازی",
         "LOCAL": "local",
         "LOCAL_REMOTE": "local <=> remote",
@@ -127,8 +127,8 @@
         "TITLE": "Overwrite local data with GDrive Update?"
       },
       "D_CONFIRM_SAVE": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
+        "LAST_MOD": "آخرین تغییرات:",
+        "LAST_SYNC": "آخرین همگام سازی",
         "LOCAL": "local",
         "LOCAL_REMOTE": "local <=> remote",
         "OVERWRITE_LOCAL": "Overwrite local",
@@ -138,28 +138,28 @@
         "TITLE": "Overwrite unsaved data on Google Drive?"
       },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
-        "ERROR": "Google Drive – Error: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
-        "LOCAL_UP_TO_DATE": "Google Drive: Local data already up to date",
+        "DOWNLOADING_UPDATE": "درایو گوگل: یک بروزرسانی از ریموت وجود دارد،در حال دانلود...",
+        "ERROR": "درایو گوگل – خطا: {{errTxt}}",
+        "ERROR_INITIAL_IMPORT": "درایو گوگل: هنگام تلاش برای وارد کردن اطلاعات ابتدای خطایی رخ داد",
+        "LOCAL_UP_TO_DATE": "درایو گوگل: اطلاعات محلی قبلا بروزرسانی شده است",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "NO_UPDATE_REQUIRED": "Google Drive: No updated required",
-        "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
-        "SUCCESS": "Google Drive: Successfully saved backup",
-        "SYNCING": "Google Drive: Syncing"
+        "NO_UPDATE_REQUIRED": "درایو گوگل: نیازی به بروزرسانی نیست",
+        "REMOTE_UP_TO_DATE": "درایو گوگل: اطلاعات ریموت قبلا بروزرسانی شده است",
+        "SUCCESS": "درایو گوگل: پشتیبان گیری با موفقیت ذخیره شد",
+        "SYNCING": "درایو گوگل: همگام سازی"
       },
       "SYNC_CFG": {
-        "AUTO_LOGIN": "Auto login at when starting app",
-        "AUTO_SYNC": "Auto sync data to remote",
-        "BACKUP_NOW": "Backup now",
+        "AUTO_LOGIN": "ورود خودکار هنگام شروع برنامه",
+        "AUTO_SYNC": "همگام سازی خودکار اطلاعات به ریموت",
+        "BACKUP_NOW": "همین حالا نسخه  پشتیبان تهیه کن",
         "COMPRESS": "فشرده سازی اطلاعات",
-        "ENABLE": "Enable syncing via Google Drive",
-        "LOAD_FROM": "Load From GDrive",
-        "LOAD_ON_STARTUP": "Load remote data on startup",
-        "NOTIFY": "Notify when syncing",
-        "SYNC_FILE_NAME": "Sync file name",
-        "SYNC_INTERVAL": "Sync interval",
-        "UPDATE_SYNC_FILE": "Update sync file"
+        "ENABLE": "فعال کردن همگام سازی با درایو گوگل",
+        "LOAD_FROM": "بارگیری از درایو گوگل",
+        "LOAD_ON_STARTUP": "لود کردن اطلاعات ریموت موقع راه اندازی برنامه",
+        "NOTIFY": "اطلاع دادن هنگام همگام سازی",
+        "SYNC_FILE_NAME": "همگام سازی نام فایل",
+        "SYNC_INTERVAL": "فاصله زمانی همگام سازی",
+        "UPDATE_SYNC_FILE": "بروزرسانی همگام سازی فایل"
       },
       "S_API": {
         "ERR": "خطای GoogleApi : {{errStr}}",
@@ -170,7 +170,7 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",
+        "BLOCK_ACCESS_MSG": "جیرا: برای جلوگیری از بروز مشکل برای API، دسترسی تسوط سوپر پروداکتیویتی مسدود شده است. احتمالا بید تنظیمات جیرا خود را بررسی کنید.!",
         "BLOCK_ACCESS_UNBLOCK": "رفع مسدودیت"
       },
       "CFG_CMP": {
@@ -184,11 +184,11 @@
         "MAP_CUSTOM_FIELDS": "Map Custom Fields",
         "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it.",
         "OPEN": "وضعیت کار متوقف شده",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "مشکل را برای بارگیری انتقال های موجود انتخاب کنید",
         "STORY_POINTS": "Story Points"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary}}</strong> is currently assigned to <strong>{{assignee}}</strong>. Do you want to assign it to yourself?",
+        "MSG": "<strong>{{summary}}</strong> درحال حاضر به <strong>{{assignee}}</strong> ارجاع داده شده است. آیا میخواهید آن را به خودتان اختصاص بدهید?",
         "OK": "انجام بدهید!"
       },
       "DIALOG_INITIAL": {
@@ -202,13 +202,13 @@
         "UPDATE_STATUS": "بروزرسانی وضعیت"
       },
       "DIALOG_WORKLOG": {
-        "CURRENTLY_LOGGED": "Currently logged time: ",
-        "INVALID_DATE": "The entered value is not a date!",
-        "SAVE_WORKLOG": "Save Worklog",
-        "STARTED": "Started",
-        "SUBMIT_WORKLOG_FOR": "Submit a worklog to Jira for",
-        "TIME_SPENT": "Time Spent",
-        "TITLE": "Jira: Submit Worklog"
+        "CURRENTLY_LOGGED": "زمان ورود به سیستم: ",
+        "INVALID_DATE": "مقدار وارد شده تاریخ نیست!",
+        "SAVE_WORKLOG": "دخیره فعالیت",
+        "STARTED": "شروع شده",
+        "SUBMIT_WORKLOG_FOR": "ارسال گزارش کاری به جیرا برای",
+        "TIME_SPENT": "زمان صرف شده",
+        "TITLE": "جیرا: ارسال گزارش کار"
       },
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
