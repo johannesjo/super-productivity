@@ -612,34 +612,34 @@
     },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "Days, worked:",
-        "MONTH_WORKED": "Month worked:",
-        "REPEATING_TASK": "Repeating task",
-        "RESTORE_TASK_FROM_ARCHIVE": "Restore Task From Archive",
-        "TASKS": "Tasks",
-        "TOTAL_TIME": "Time spent total:",
-        "TOTAL_TIME_PROJECT": "Total time spent on project",
-        "WEEK_NR": "Week {{nr}}",
-        "WORKED": "Worked"
+        "DAYS_WORKED": "روزها, کار کرده است:",
+        "MONTH_WORKED": "ماه کار کرده است:",
+        "REPEATING_TASK": "تکرار کار",
+        "RESTORE_TASK_FROM_ARCHIVE": "بازیابی کار از بایگانی",
+        "TASKS": "کارها",
+        "TOTAL_TIME": "زمان صرف شده در کل:",
+        "TOTAL_TIME_PROJECT": "کل زمان صرف شده در پروژه",
+        "WEEK_NR": "هفته {{nr}}",
+        "WORKED": "کار کرد"
       },
-      "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
-      "D_EXPORT_TITLE": "Worklog Export {{start}}–{{end}}",
-      "D_EXPORT_TITLE_SINGLE": "Worklog Export {{day}}",
+      "D_CONFIRM_RESTORE": "آیا شما مطمئن هستید که کار <strong>\"{{title}}\"</strong> را به لیست کارهای امروز اضافه کنید?",
+      "D_EXPORT_TITLE": "خروجی گزارش کار {{start}}–{{end}}",
+      "D_EXPORT_TITLE_SINGLE": "خروجی گرفتن از گزارش کار {{day}}",
       "EXPORT": {
-        "ADD_COL": "Add column",
-        "COPY_TO_CLIPBOARD": "Copy to clipboard",
-        "DONT_ROUND": "don't round",
-        "EDIT_COL": "Edit column",
-        "GROUP_BY": "Group by",
+        "ADD_COL": "ستون را اضافه کنید",
+        "COPY_TO_CLIPBOARD": "کپی به کلیپ بورد",
+        "DONT_ROUND": "گرد نکن",
+        "EDIT_COL": "ستون را ویرایش کنید",
+        "GROUP_BY": "دسته بندی براساس",
         "O": {
-          "DATE": "Date",
-          "ENDED_WORKING": "Ended Working",
-          "ESTIMATE_AS_CLOCK": "Estimate as clock (e.g. 5:23)",
-          "ESTIMATE_AS_MILLISECONDS": "Estimate as milliseconds",
-          "ESTIMATE_AS_STRING": "Estimate as string (e.g. 5h 23m)",
-          "FULL_HALF_HOURS": "full half hours",
-          "FULL_HOURS": "full hours",
-          "FULL_QUARTERS": "full quarters",
+          "DATE": "تاریخ",
+          "ENDED_WORKING": "کار به پایان رسید",
+          "ESTIMATE_AS_CLOCK": "ساعت را تخمین بزنید (مثلا 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "تخمین براساس میلی ثانیه",
+          "ESTIMATE_AS_STRING": "تخمین به عنوان رشته (e.g. 5h 23m)",
+          "FULL_HALF_HOURS": "نیم ساعت کامل",
+          "FULL_HOURS": "ساعات کامل",
+          "FULL_QUARTERS": "ربع کامل",
           "PARENT_TASK": "کار اصلی",
           "PARENT_TASK_TITLES_ONLY": "فقط عنوان کار اصلی",
           "STARTED_WORKING": "کار شروع شد",
@@ -648,20 +648,20 @@
           "TIME_AS_MILLISECONDS": "زمان برحسب میلی ثانیه",
           "TIME_AS_STRING": "زمان به عنوان رشته (مثلا 5h 23m)",
           "TITLES_AND_SUB_TASK_TITLES": "عناوین و عناوین کارهای فرعی",
-          "WORKLOG": "کار (worklog)"
+          "WORKLOG": "گزارش کار"
         },
         "OPTIONS": "گزینه ها",
-        "ROUND_END_TIME_TO": "Round end time to",
-        "ROUND_START_TIME_TO": "Round start time to",
-        "ROUND_TIME_WORKED_TO": "Round time worked to",
+        "ROUND_END_TIME_TO": "گرد کردن پایان زمان تا",
+        "ROUND_START_TIME_TO": "گرد کردن شروع زمان تا",
+        "ROUND_TIME_WORKED_TO": "گرد کردن زمان کار تا",
         "SAVE_TO_FILE": "ذخیره در فایل",
         "SEPARATE_TASKS_BY": "جداکردن کارها با",
         "SHOW_AS_TEXT": "نمایش به عنوان متن"
       },
       "WEEK": {
-        "EXPORT": "Export Week Data",
-        "NO_DATA": "No tasks this week yet.",
-        "TITLE": "Title"
+        "EXPORT": "خروجی گرفتن اطلاعات هفتگی",
+        "NO_DATA": "هیچ کاری در این هفته انجام نشده است.",
+        "TITLE": "عنوان"
       }
     }
   },
@@ -699,12 +699,12 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
-      "IS_HIDE_METRIC_FROM_MENU": "Hide metrics from menu",
-      "TITLE": "Evaluation & Metrics"
+      "IS_HIDE_METRIC_FROM_MENU": "معیارها را از فهرست مخفی کن",
+      "TITLE": "ارزیابی ها و معیارها"
     },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
-      "TITLE": "Sync via Google Drive"
+      "TITLE": "همگام سازی با درایو گوگل"
     },
     "IDLE": {
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
@@ -716,7 +716,7 @@
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
-      "TITLE": "Import/Export"
+      "TITLE": "ورودی/خروجی"
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "اضافه کردن یادداشت جدید",
@@ -726,38 +726,38 @@
       "EXPAND_SUB_TASKS": "بازکردن کارهای فرعی",
       "FOCUS_LAST_ACTIVE_TASK": "تمرکز آخرین کار فعال",
       "GLOBAL_ADD_NOTE": "اضافه کردن کار جدید",
-      "GLOBAL_ADD_TASK": "Add new task",
-      "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
+      "GLOBAL_ADD_TASK": "اضافه کردن کار جدید",
+      "GLOBAL_SHOW_HIDE": "نمایش و پنهان کردن برنامه سوپر پروداکتیویتی",
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
-      "GO_TO_FOCUS_MODE": "Go to Focus Mode",
-      "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_WORK_VIEW": "Go to Work View",
+      "GO_TO_FOCUS_MODE": "رفتن به حالت تمرکز",
+      "GO_TO_SETTINGS": "رفتن به تنظیمات",
+      "GO_TO_WORK_VIEW": "رفتن به نمای کار",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
       "MOVE_TASK_DOWN": "Move Task down in List",
       "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
       "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
-      "SELECT_NEXT_TASK": "Select next Task",
+      "SELECT_NEXT_TASK": "انتخاب کار بعدی",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
-      "TASK_ADD_SUB_TASK": "Add sub Task",
-      "TASK_DELETE": "Delete Task",
-      "TASK_EDIT_TITLE": "Edit Title",
+      "TASK_ADD_SUB_TASK": "اضافه کردن کار فرعی",
+      "TASK_DELETE": "حذف کار",
+      "TASK_EDIT_TITLE": "ویرایش عنوان",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
-      "TASK_SCHEDULE": "Schedule Task",
-      "TASK_SHORTCUTS": "Tasks",
+      "TASK_SCHEDULE": "کار برنامه ریزی شده",
+      "TASK_SHORTCUTS": "کارها",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
       "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
       "TASK_TOGGLE_DONE": "Toggle Done",
-      "TITLE": "Keyboard Shortcuts",
+      "TITLE": "میانبرهای صفحه کلید",
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
-      "TOGGLE_PLAY": "Start/Stop Task",
-      "ZOOM_DEFAULT": "Zoom default (Desktop only)",
-      "ZOOM_IN": "Zoom in (Desktop only)",
-      "ZOOM_OUT": "Zoom out (Desktop only)"
+      "TOGGLE_PLAY": "شروع/توقت کار",
+      "ZOOM_DEFAULT": "بزرگنمایی پیش فرض (فقط دسکتاپ)",
+      "ZOOM_IN": "بزرگنمایی (فقط دسکتاپ)",
+      "ZOOM_OUT": "کوچک نمایی (فقط دسکتاپ)"
     },
     "LANG": {
       "AR": "عربی",
@@ -839,7 +839,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "WORKLOG": "Worklog"
+    "WORKLOG": "گزارش کار"
   },
   "PDS": {
     "BACK": "Wait I forgot something!",
