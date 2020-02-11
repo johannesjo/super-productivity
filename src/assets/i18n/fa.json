@@ -584,29 +584,29 @@
         "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
       },
       "F": {
-        "DEFAULT_ESTIMATE": "Default Estimate",
-        "FRIDAY": "Friday",
-        "MONDAY": "Monday",
-        "SATURDAY": "Saturday",
-        "SUNDAY": "Sunday",
-        "THURSDAY": "Thursday",
-        "TITLE": "Title for task",
-        "TUESDAY": "Tuesday",
-        "WEDNESDAY": "Wednesday"
+        "DEFAULT_ESTIMATE": "تخمین پیش فرض",
+        "FRIDAY": "جمعه",
+        "MONDAY": "دوشنبه",
+        "SATURDAY": "شنبه",
+        "SUNDAY": "یک شنبه",
+        "THURSDAY": "پنج شنبه",
+        "TITLE": "عنوان برای کار",
+        "TUESDAY": "سه شنبه",
+        "WEDNESDAY": "چهارشنبه"
       }
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "I already did",
-        "SNOOZE": "Snooze {{time}}"
+        "ALREADY_DID": "قبلا انجام دادم",
+        "SNOOZE": "تعویق {{time}}"
       },
       "D_IDLE": {
-        "BREAK": "Break",
+        "BREAK": "استراحت",
         "CREATE_AND_TRACK": "<em>Create</em> and track to:",
         "IDLE_FOR": "You have been idle for:",
         "SKIP": "Skip",
-        "TASK": "Task",
-        "TASK_BREAK": "Task+Break",
+        "TASK": "کار",
+        "TASK_BREAK": "کار+استراحت",
         "TRACK_TO": "Track to:"
       }
     },
