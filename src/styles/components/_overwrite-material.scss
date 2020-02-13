@@ -77,6 +77,11 @@ body .mat-form-field {
 
 // BUTTONS
 // -------
+.mat-button {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
 .mat-flat-button,
 .mat-stroked-button,
 .mat-raised-button,
