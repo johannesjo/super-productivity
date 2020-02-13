@@ -1,123 +1,123 @@
 {
   "APP": {
     "B_INSTALL": {
-      "IGNORE": "Ignore",
-      "INSTALL": "Install",
-      "MSG": "Do you want to install Super Productivity as a PWA?"
+      "IGNORE": "نادیده گرفتن",
+      "INSTALL": "نصب",
+      "MSG": "آیا میخواهید سوپر پروداکتیویتی به عنوان PWA نصب بشود؟"
     },
-    "UPDATE_WEB_APP": "New version available. Load New Version?"
+    "UPDATE_WEB_APP": "نسخه جدید موجود است، نسخه جدید بارگیری شود?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "From other Projects",
-    "NO_TASKS": "There are currently no tasks in your backlog",
-    "SCHEDULED": "Scheduled",
-    "TITLE": "Backlog"
+    "FROM_OTHER_PROJECTS": "از پروژه های دیگر",
+    "NO_TASKS": "کاری در بک لاگ شما وجود ندارد",
+    "SCHEDULED": "برنامه ریزی شده است",
+    "TITLE": "بک لاگ"
   },
   "DATETIME_INPUT": {
-    "IN": "in {{time}}",
-    "TOMORROW": "tomorrow {{time}}"
+    "IN": "در {{time}}",
+    "TOMORROW": "فردا {{time}}"
   },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
-        "ADD_ATTACHMENT": "Add Attachment",
-        "EDIT_ATTACHMENT": "Edit Attachment",
+        "ADD_ATTACHMENT": "اضافه کردن پیوست",
+        "EDIT_ATTACHMENT": "ویرایش پیوست",
         "LABELS": {
-          "FILE": "File Path",
-          "IMG": "Image",
-          "LINK": "Url"
+          "FILE": "مسیر فایل",
+          "IMG": "تصویر",
+          "LINK": "لینک"
         },
-        "SELECT_TYPE": "Select a type",
+        "SELECT_TYPE": "یک نوع را انتخاب کنید",
         "TYPES": {
-          "FILE": "File (opened by default system app)",
-          "IMG": "Image (shown as thumbnail)",
-          "LINK": "Link (opens in browser)"
+          "FILE": "فایل (توسط برنامه پیش فرض سیستم باز شد)",
+          "IMG": "تصویر (به عنوان تصویر کوچک نمایش داده شد)",
+          "LINK": "لینک (در مرورگر باز شد)"
         }
       }
     },
     "BOOKMARK": {
       "BAR": {
-        "ADD": "Add Bookmark",
-        "DROP": "Drop here to add a bookmark",
-        "EDIT": "Edit Bookmarks",
-        "NO_BOOKMARKS": "You have no project bookmarks. Add one via drag and drop or by clicking on the 'plus' button."
+        "ADD": "اضافه کردن نشانک",
+        "DROP": "رها کنید اینجا برای اضافه شدن به عنوان نشانک",
+        "EDIT": "ویرایش نشانک ها",
+        "NO_BOOKMARKS": "شما هیچ نشانکی ندارید.با کشیدن و رها کردن یا با کلیک روی دکمه مثبت یکی اضافه کنید."
       },
       "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Add Bookmark",
-        "EDIT_BOOKMARK": "Edit Bookmark",
+        "ADD_BOOKMARK": "اضافه کردن نشانک",
+        "EDIT_BOOKMARK": "ویرایش نشانک",
         "LABELS": {
-          "COMMAND": "Command",
-          "FILE": "File Path",
-          "IMG": "Image",
-          "LINK": "Url"
+          "COMMAND": "دستور",
+          "FILE": "مسیر فایل",
+          "IMG": "تصویر",
+          "LINK": "لینک"
         },
-        "SELECT_ICON": "Select an icon",
-        "SELECT_TYPE": "Select a type",
+        "SELECT_ICON": "یک آیکون انتخاب کنید",
+        "SELECT_TYPE": "یک نوع انتخاب کنید",
         "TYPES": {
-          "COMMAND": "Command (custom shell command)",
-          "FILE": "File (opened by default system app)",
-          "IMG": "Image (shown as thumbnail)",
-          "LINK": "Link (opens in browser)"
+          "COMMAND": "دستور (دستور سفارشی Shell)",
+          "FILE": "فایل (توسط برنامه پیش فرض سیستم باز شد)",
+          "IMG": "تصویر (به عنوان تصویر کوچک نمایش داده شد)",
+          "LINK": "لینک (در مرورگر باز شد)"
         }
       }
     },
     "CONFIG": {
       "S": {
-        "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
+        "UPDATE_SECTION": "تنظیمات برای <strong>{{sectionKey}}</strong> بروز رسانی شد"
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Github for Project"
+        "TITLE": "راه اندازی گیت هاب برای پروژه"
       },
       "FORM": {
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
+        "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
+        "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track",
-        "TOKEN": "Access Token"
+        "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
-        "TITLE": "Github"
+        "TITLE": "گیت هاب"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
-        "AT": "at",
-        "DESCRIPTION": "Description",
-        "LABELS": "Labels",
-        "MARK_AS_CHECKED": "Mark updates as checked",
-        "STATUS": "Status",
-        "SUMMARY": "Summary",
-        "WRITE_A_COMMENT": "Write a comment"
+        "ASSIGNEE": "مسئول",
+        "AT": "در",
+        "DESCRIPTION": "توضیحات",
+        "LABELS": "برچسب ها",
+        "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
+        "STATUS": "وضعیت",
+        "SUMMARY": "خلاصه",
+        "WRITE_A_COMMENT": "دیدگاهتان را بنویسید"
       },
       "S": {
-        "ERR_NETWORK": "Github: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "Github: Is not properly configured",
+        "ERR_NETWORK": "گیت هاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
+        "ERR_NOT_CONFIGURED": "گیت هاب: به درستی پیکربندی نشده است",
         "ERR_REQUEST": "Github: API returned {{statusCode}}. {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
+        "ISSUE_UPDATE": "گیت هاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
+        "NEW_COMMENT": "گیت هاب: دیدگاه جدید برای \"{{issueText}}\"",
         "POLLING": "Github: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "SHOW_ISSUE_BTN": "به من نشان بده"
       }
     },
     "GOOGLE": {
       "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
+        "AUTH_FAIL": "GoogleApi: تأیید هویت انجام نشد ، لطفاً دوباره وارد سیستم شوید!"
       },
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
       },
       "D_CONFIRM_LOAD": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
+        "LAST_MOD": "آخرین تغییرات:",
+        "LAST_SYNC": "آخرین همگام سازی",
         "LOCAL": "local",
         "LOCAL_REMOTE": "local <=> remote",
         "OVERWRITE_LOCAL": "Overwrite local",
@@ -127,8 +127,8 @@
         "TITLE": "Overwrite local data with GDrive Update?"
       },
       "D_CONFIRM_SAVE": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
+        "LAST_MOD": "آخرین تغییرات:",
+        "LAST_SYNC": "آخرین همگام سازی",
         "LOCAL": "local",
         "LOCAL_REMOTE": "local <=> remote",
         "OVERWRITE_LOCAL": "Overwrite local",
@@ -138,77 +138,77 @@
         "TITLE": "Overwrite unsaved data on Google Drive?"
       },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
-        "ERROR": "Google Drive – Error: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
-        "LOCAL_UP_TO_DATE": "Google Drive: Local data already up to date",
+        "DOWNLOADING_UPDATE": "درایو گوگل: یک بروزرسانی از ریموت وجود دارد،در حال دانلود...",
+        "ERROR": "درایو گوگل – خطا: {{errTxt}}",
+        "ERROR_INITIAL_IMPORT": "درایو گوگل: هنگام تلاش برای وارد کردن اطلاعات ابتدای خطایی رخ داد",
+        "LOCAL_UP_TO_DATE": "درایو گوگل: اطلاعات محلی قبلا بروزرسانی شده است",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "NO_UPDATE_REQUIRED": "Google Drive: No updated required",
-        "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
-        "SUCCESS": "Google Drive: Successfully saved backup",
-        "SYNCING": "Google Drive: Syncing"
+        "NO_UPDATE_REQUIRED": "درایو گوگل: نیازی به بروزرسانی نیست",
+        "REMOTE_UP_TO_DATE": "درایو گوگل: اطلاعات ریموت قبلا بروزرسانی شده است",
+        "SUCCESS": "درایو گوگل: پشتیبان گیری با موفقیت ذخیره شد",
+        "SYNCING": "درایو گوگل: همگام سازی"
       },
       "SYNC_CFG": {
-        "AUTO_LOGIN": "Auto login at when starting app",
-        "AUTO_SYNC": "Auto sync data to remote",
-        "BACKUP_NOW": "Backup now",
-        "COMPRESS": "Compress Data",
-        "ENABLE": "Enable syncing via Google Drive",
-        "LOAD_FROM": "Load From GDrive",
-        "LOAD_ON_STARTUP": "Load remote data on startup",
-        "NOTIFY": "Notify when syncing",
-        "SYNC_FILE_NAME": "Sync file name",
-        "SYNC_INTERVAL": "Sync interval",
-        "UPDATE_SYNC_FILE": "Update sync file"
+        "AUTO_LOGIN": "ورود خودکار هنگام شروع برنامه",
+        "AUTO_SYNC": "همگام سازی خودکار اطلاعات به ریموت",
+        "BACKUP_NOW": "همین حالا نسخه  پشتیبان تهیه کن",
+        "COMPRESS": "فشرده سازی اطلاعات",
+        "ENABLE": "فعال کردن همگام سازی با درایو گوگل",
+        "LOAD_FROM": "بارگیری از درایو گوگل",
+        "LOAD_ON_STARTUP": "لود کردن اطلاعات ریموت موقع راه اندازی برنامه",
+        "NOTIFY": "اطلاع دادن هنگام همگام سازی",
+        "SYNC_FILE_NAME": "همگام سازی نام فایل",
+        "SYNC_INTERVAL": "فاصله زمانی همگام سازی",
+        "UPDATE_SYNC_FILE": "بروزرسانی همگام سازی فایل"
       },
       "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
-        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
-        "SUCCESS_LOGIN": "GoogleApi: Login successful"
+        "ERR": "خطای GoogleApi : {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: آیدی فایل مشخص نشده است",
+        "ERR_NO_FILE_NAME": "GoogleApi: نام فایل مشخص نشده است",
+        "SUCCESS_LOGIN": "GoogleApi: ورود موفق به سیستم"
       }
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",
-        "BLOCK_ACCESS_UNBLOCK": "Unblock"
+        "BLOCK_ACCESS_MSG": "جیرا: برای جلوگیری از بروز مشکل برای API، دسترسی تسوط سوپر پروداکتیویتی مسدود شده است. احتمالا بید تنظیمات جیرا خود را بررسی کنید.!",
+        "BLOCK_ACCESS_UNBLOCK": "رفع مسدودیت"
       },
       "CFG_CMP": {
-        "ALWAYS_ASK": "Always open dialog",
-        "DONE": "Status for completing task",
-        "DO_NOT": "Don't transition",
-        "ENABLE": "Enable Jira integration",
-        "ENABLE_TRANSITIONS": "Enable Transition Handling",
-        "IN_PROGRESS": "Status for starting task",
-        "LOAD_SUGGESTIONS": "Load Suggestions",
+        "ALWAYS_ASK": "همیشه گفتگو را باز کن",
+        "DONE": "وضعیت کار انجام شده",
+        "DO_NOT": "انتقال را انجام ندهید",
+        "ENABLE": "فعال کردن ارتباط با جیرا",
+        "ENABLE_TRANSITIONS": "مدیریت انتقال را فعال کنید",
+        "IN_PROGRESS": "وضعیت کار شروع شده",
+        "LOAD_SUGGESTIONS": "بارگیری پیشنهادات",
         "MAP_CUSTOM_FIELDS": "Map Custom Fields",
         "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it.",
-        "OPEN": "Status for pausing task",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
+        "OPEN": "وضعیت کار متوقف شده",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "مشکل را برای بارگیری انتقال های موجود انتخاب کنید",
         "STORY_POINTS": "Story Points"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary}}</strong> is currently assigned to <strong>{{assignee}}</strong>. Do you want to assign it to yourself?",
-        "OK": "Do it!"
+        "MSG": "<strong>{{summary}}</strong> درحال حاضر به <strong>{{assignee}}</strong> ارجاع داده شده است. آیا میخواهید آن را به خودتان اختصاص بدهید?",
+        "OK": "انجام بدهید!"
       },
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Jira for Project"
+        "TITLE": "راه اندازی جیرا برای پروژه"
       },
       "DIALOG_TRANSITION": {
-        "CHOOSE_STATUS": "Choose status to assign",
-        "CURRENT_ASSIGNEE": "Current Assignee:",
-        "CURRENT_STATUS": "Current Status:",
-        "TITLE": "Jira: Update Status",
-        "UPDATE_STATUS": "Update Status"
+        "CHOOSE_STATUS": "یک وضعیت برای کار انتخاب کنید",
+        "CURRENT_ASSIGNEE": "مسئول فعلی:",
+        "CURRENT_STATUS": "وضعیت فعلی:",
+        "TITLE": "جیرا : بروزرسانی وضعیت",
+        "UPDATE_STATUS": "بروزرسانی وضعیت"
       },
       "DIALOG_WORKLOG": {
-        "CURRENTLY_LOGGED": "Currently logged time: ",
-        "INVALID_DATE": "The entered value is not a date!",
-        "SAVE_WORKLOG": "Save Worklog",
-        "STARTED": "Started",
-        "SUBMIT_WORKLOG_FOR": "Submit a worklog to Jira for",
-        "TIME_SPENT": "Time Spent",
-        "TITLE": "Jira: Submit Worklog"
+        "CURRENTLY_LOGGED": "زمان ورود به سیستم: ",
+        "INVALID_DATE": "مقدار وارد شده تاریخ نیست!",
+        "SAVE_WORKLOG": "دخیره فعالیت",
+        "STARTED": "شروع شده",
+        "SUBMIT_WORKLOG_FOR": "ارسال گزارش کاری به جیرا برای",
+        "TIME_SPENT": "زمان صرف شده",
+        "TITLE": "جیرا: ارسال گزارش کار"
       },
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
@@ -227,17 +227,17 @@
         "USER_ASSIGNEE_NAME": "Assignee name to check for"
       },
       "FORM_CRED": {
-        "HOST": "Host (e.g.: http://my-host.de:1234)",
-        "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username"
+        "HOST": "آدرس جیرای شما (مثلا: http://my-jira.ir:1234)",
+        "PASSWORD": "توکن / کلمه عبور",
+        "USER_NAME": "ایمیل / نام کاربری"
       },
       "FORM_SECTION": {
-        "ADV_CFG": "Advanced Config",
+        "ADV_CFG": "تنظیمات پیشرفته",
         "CREDENTIALS": "Credentials",
         "HELP_ARR": {
-          "H1": "Basic configuration",
-          "H2": "Worklog settings",
-          "H3": "Default transitions",
+          "H1": "تنظیمات اولیه",
+          "H2": "تنظیمات کار (Worklog)",
+          "H3": "انتقال پیش فرض",
           "P1_1": "Please provide a login name (can be found on your profile page) and an <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> or password if you can't generate one for some reason. Please not that newer versions of jira sometimes only work with the token. ",
           "P1_2": "You also need to specify a JQL query which is used for the suggestions to add tasks from Jira. If you need help check out this link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.",
@@ -249,21 +249,21 @@
         }
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Assignee",
-        "AT": "at",
-        "ATTACHMENTS": "Attachments",
-        "CHANGED": "changed",
-        "COMMENTS": "Comments",
-        "COMPONENTS": "Components",
-        "DESCRIPTION": "Description",
-        "LIST_OF_CHANGES": "List of changes",
-        "MARK_AS_CHECKED": "Mark updates as checked",
-        "ON": "on",
-        "STATUS": "Status",
+        "ASSIGNEE": "مسئول",
+        "AT": "در",
+        "ATTACHMENTS": "پیوست ها",
+        "CHANGED": "تغییر کرد",
+        "COMMENTS": "نظرات",
+        "COMPONENTS": "اجزاء",
+        "DESCRIPTION": "توضیحات",
+        "LIST_OF_CHANGES": "لیست تغییرات",
+        "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
+        "ON": "روشن",
+        "STATUS": "وضعیت",
         "STORY_POINTS": "Story Points",
-        "SUMMARY": "Summary",
-        "WORKLOG": "Worklog",
-        "WRITE_A_COMMENT": "Write a comment"
+        "SUMMARY": "خلاصه",
+        "WORKLOG": "گزارش کار",
+        "WRITE_A_COMMENT": "یک نظر بنویسید"
       },
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
@@ -293,7 +293,7 @@
     },
     "METRIC": {
       "BANNER": {
-        "CHECK": "I did it!"
+        "CHECK": "من انجام دادم!"
       },
       "CMP": {
         "AVG_BREAKS_PER_DAY": "Avg. breaks per day",
@@ -312,9 +312,9 @@
         "TIME_SPENT": "Time Spent"
       },
       "EVAL_FORM": {
-        "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
+        "ADD_NOTE_FOR_TOMORROW": "برای فردا یادداشت بگذارید",
         "DISABLE_REPEAT_EVERY_DAY": "Disable repeat every day",
-        "ENABLE_REPEAT_EVERY_DAY": "Repeat every day",
+        "ENABLE_REPEAT_EVERY_DAY": "هر روز تکرار کنید",
         "HELP_H1": "Why should I care?",
         "HELP_LINK_TXT": "Go to metrics section",
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
@@ -329,31 +329,31 @@
         "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
       },
       "S": {
-        "SAVE_METRIC": "Metric successfully saved"
+        "SAVE_METRIC": "متریک با موفقیت ذخیره شد"
       }
     },
     "NOTE": {
-      "ADD_REMINDER": "Add reminder",
+      "ADD_REMINDER": "اضافه کردن یادآوری",
       "D_ADD": {
-        "DATETIME_LABEL": "Datetime for reminder (optional)",
-        "NOTE_LABEL": "Enter some text to save as note..."
+        "DATETIME_LABEL": "تاریخ و زمان برای یادآوری (اختیاری)",
+        "NOTE_LABEL": "متنی برای دخیره به عنوان یادداشت وارد کنید..."
       },
       "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "You need to enter a title",
-        "L_DATETIME": "Datetime for reminder",
-        "L_TITLE": "Title for notification",
-        "TITLE_ADD": "Add reminder for note",
-        "TITLE_EDIT": "Edit reminder for note"
+        "E_ENTER_TITLE": "شما باید یک عنوان وارد کنید",
+        "L_DATETIME": "تاریخ و زمان برای یادآوری",
+        "L_TITLE": "عنوان برای اطلاع رسانی",
+        "TITLE_ADD": "اضافه کردن یادآوری برای یک یاد داشت",
+        "TITLE_EDIT": "ویرایش یادآوری برای یک یاد داشت"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": "Snooze",
-        "TITLE": "Note"
+        "SNOOZE": "تعویق",
+        "TITLE": "یادداشت"
       },
-      "EDIT_FULLSCREEN": "Edit in fullscreen",
-      "EDIT_REMINDER": "Edit reminder",
+      "EDIT_FULLSCREEN": "ویرایش در تمام صفحه",
+      "EDIT_REMINDER": "ویرایش یادآوری",
       "NOTES_CMP": {
-        "ADD_BTN": "Add new Note",
-        "DROP_TO_ADD": "Drop here to add new note"
+        "ADD_BTN": "اضافه کردن کار جدید",
+        "DROP_TO_ADD": "برای اضافه کردن کارجدید اینجا رها کنید"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
@@ -368,8 +368,8 @@
       "UPDATE_REMINDER": "Update reminder"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Back to work!",
-      "BREAK_IS_DONE": "Your break is done!",
+      "BACK_TO_WORK": "بازگشت به کار!",
+      "BREAK_IS_DONE": "استراحت شما انجام شد!",
       "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
@@ -379,10 +379,10 @@
       "S": {
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
-      "SKIP_BREAK": "Skip break"
+      "SKIP_BREAK": "ردشدن از استراحت"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "Back to work!",
+      "BACK_TO_WORK": "بازگشت به کار!",
       "COMP": {
         "INTRO": "Showing yourself some compassion is always a great idea. It improves your feeling of self-worth, fosters positive emotions and can help you overcome procrastination, of course. Try a little exercise:",
         "L1": "Sit down for bit and stretch yourself, if you like, calm down a little bit",
@@ -390,7 +390,7 @@
         "L3": "Are you responding to yourself in a way that you would respond to a friend?",
         "L4": "If the answer is no, imagine your friend in your situation. What you would say to them? What you would do for them?",
         "OUTRO": "More exercises <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">can be found here</a> or on <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
-        "TITLE": "Self Compassion"
+        "TITLE": "دلسوزی برای خود"
       },
       "CUR": {
         "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. Enjoy and explore!",
@@ -426,14 +426,14 @@
         }
       },
       "D_CREATE": {
-        "CREATE": "Create Project",
-        "EDIT": "Edit Project",
-        "SETUP_GIT": "Setup Github Integration",
-        "SETUP_JIRA": "Setup Jira Integration"
+        "CREATE": "ایجاد پروژه",
+        "EDIT": "ویرایش پروژه",
+        "SETUP_GIT": "راه اندازی ارتباط با گیت",
+        "SETUP_JIRA": "راه اندازی ارتباط با جیرا"
       },
       "FORM_BASIC": {
-        "L_TITLE": "Project Name",
-        "TITLE": "Basic Settings"
+        "L_TITLE": "نام پروژه",
+        "TITLE": "تنظیمات پایه"
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
@@ -447,9 +447,9 @@
         "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
         "L_IS_DISABLE_BACKGROUND_GRADIENT": "Disable colored background gradient",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
-        "L_THEME_COLOR": "Theme Color",
-        "L_TITLE": "Title",
-        "TITLE": "Theme"
+        "L_THEME_COLOR": "رنگ قالب",
+        "L_TITLE": "عنوان",
+        "TITLE": "قالب"
       },
       "S": {
         "ARCHIVED": "Archived Project",
@@ -463,37 +463,37 @@
       }
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Error for reminder interface"
+      "S_REMINDER_ERR": "خطا در رابط یادآوری"
     },
     "TASK": {
       "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "Add attachment",
-        "ATTACHMENTS": "Attachments ({{nr}})",
-        "FROM_PARENT": "(from Parent)",
-        "LOCAL_ATTACHMENTS": "Local Attachments",
-        "NOTES": "Notes",
-        "PARENT": "Parent",
-        "REMINDER": "Reminder",
-        "REPEAT": "Repeat",
-        "SCHEDULE_TASK": "Schedule Task",
-        "TIME": "Time"
+        "ADD_ATTACHMENT": "اضافه کردن پیوست",
+        "ATTACHMENTS": "پیوست ها ({{nr}})",
+        "FROM_PARENT": "(از کار اصلی)",
+        "LOCAL_ATTACHMENTS": "پیوست های محلی",
+        "NOTES": "یادداشت ها",
+        "PARENT": "اصلی",
+        "REMINDER": "یادآور",
+        "REPEAT": "تکرار",
+        "SCHEDULE_TASK": "برنامه ریزی کار",
+        "TIME": "زمان"
       },
       "ADD_TASK_BAR": {
-        "ADD_TASK": "Add task",
-        "ADD_TASK_TO_BACKLOG": "Add task to backlog",
-        "START": "Press enter one more time to start"
+        "ADD_TASK": "اضافه کردن کار",
+        "ADD_TASK_TO_BACKLOG": "اضافه کردن کار به بک لاگ",
+        "START": "جهت شروع یکبار دیگر دکمه اینتر را بزنید"
       },
       "B": {
-        "ADD_HALF_HOUR": "Add 1/2 hou",
-        "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\""
+        "ADD_HALF_HOUR": "نیم ساعت اضافه کن",
+        "ESTIMATE_EXCEEDED": "تخمین زمان بیشتر برای  \"{{title}}\""
       },
       "CMP": {
-        "ADD_SUB_TASK": "Add sub task",
-        "ADVANCED": "Advanced",
-        "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
+        "ADD_SUB_TASK": "اضافه کردن کار فرعی",
+        "ADVANCED": "پیشرفته",
+        "CONVERT_TO_PARENT_TASK": "تبدیل به کار اصلی",
         "DELETE": "Delete Task",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_REMINDER": "Edit reminder",
+        "EDIT_REMINDER": "ویرایش یادآوری",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
@@ -517,8 +517,8 @@
       },
       "D_REMINDER_ADD": {
         "ADD": "Schedule Task",
-        "DATETIME_FOR": "Datetime for reminder",
-        "EDIT": "Edit Reminder",
+        "DATETIME_FOR": "تاریخ و زمان برای یادآوری",
+        "EDIT": "ویرایش یادآوری",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
         "SCHEDULE": "Schedule",
         "UNSCHEDULE": "Unschedule"
@@ -584,127 +584,127 @@
         "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
       },
       "F": {
-        "DEFAULT_ESTIMATE": "Default Estimate",
-        "FRIDAY": "Friday",
-        "MONDAY": "Monday",
-        "SATURDAY": "Saturday",
-        "SUNDAY": "Sunday",
-        "THURSDAY": "Thursday",
-        "TITLE": "Title for task",
-        "TUESDAY": "Tuesday",
-        "WEDNESDAY": "Wednesday"
+        "DEFAULT_ESTIMATE": "تخمین پیش فرض",
+        "FRIDAY": "جمعه",
+        "MONDAY": "دوشنبه",
+        "SATURDAY": "شنبه",
+        "SUNDAY": "یک شنبه",
+        "THURSDAY": "پنج شنبه",
+        "TITLE": "عنوان برای کار",
+        "TUESDAY": "سه شنبه",
+        "WEDNESDAY": "چهارشنبه"
       }
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "I already did",
-        "SNOOZE": "Snooze {{time}}"
+        "ALREADY_DID": "قبلا انجام دادم",
+        "SNOOZE": "تعویق {{time}}"
       },
       "D_IDLE": {
-        "BREAK": "Break",
+        "BREAK": "استراحت",
         "CREATE_AND_TRACK": "<em>Create</em> and track to:",
         "IDLE_FOR": "You have been idle for:",
         "SKIP": "Skip",
-        "TASK": "Task",
-        "TASK_BREAK": "Task+Break",
+        "TASK": "کار",
+        "TASK_BREAK": "کار+استراحت",
         "TRACK_TO": "Track to:"
       }
     },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "Days, worked:",
-        "MONTH_WORKED": "Month worked:",
-        "REPEATING_TASK": "Repeating task",
-        "RESTORE_TASK_FROM_ARCHIVE": "Restore Task From Archive",
-        "TASKS": "Tasks",
-        "TOTAL_TIME": "Time spent total:",
-        "TOTAL_TIME_PROJECT": "Total time spent on project",
-        "WEEK_NR": "Week {{nr}}",
-        "WORKED": "Worked"
+        "DAYS_WORKED": "روزها, کار کرده است:",
+        "MONTH_WORKED": "ماه کار کرده است:",
+        "REPEATING_TASK": "تکرار کار",
+        "RESTORE_TASK_FROM_ARCHIVE": "بازیابی کار از بایگانی",
+        "TASKS": "کارها",
+        "TOTAL_TIME": "زمان صرف شده در کل:",
+        "TOTAL_TIME_PROJECT": "کل زمان صرف شده در پروژه",
+        "WEEK_NR": "هفته {{nr}}",
+        "WORKED": "کار کرد"
       },
-      "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
-      "D_EXPORT_TITLE": "Worklog Export {{start}}–{{end}}",
-      "D_EXPORT_TITLE_SINGLE": "Worklog Export {{day}}",
+      "D_CONFIRM_RESTORE": "آیا شما مطمئن هستید که کار <strong>\"{{title}}\"</strong> را به لیست کارهای امروز اضافه کنید?",
+      "D_EXPORT_TITLE": "خروجی گزارش کار {{start}}–{{end}}",
+      "D_EXPORT_TITLE_SINGLE": "خروجی گرفتن از گزارش کار {{day}}",
       "EXPORT": {
-        "ADD_COL": "Add column",
-        "COPY_TO_CLIPBOARD": "Copy to clipboard",
-        "DONT_ROUND": "don't round",
-        "EDIT_COL": "Edit column",
-        "GROUP_BY": "Group by",
+        "ADD_COL": "ستون را اضافه کنید",
+        "COPY_TO_CLIPBOARD": "کپی به کلیپ بورد",
+        "DONT_ROUND": "گرد نکن",
+        "EDIT_COL": "ستون را ویرایش کنید",
+        "GROUP_BY": "دسته بندی براساس",
         "O": {
-          "DATE": "Date",
-          "ENDED_WORKING": "Ended Working",
-          "ESTIMATE_AS_CLOCK": "Estimate as clock (e.g. 5:23)",
-          "ESTIMATE_AS_MILLISECONDS": "Estimate as milliseconds",
-          "ESTIMATE_AS_STRING": "Estimate as string (e.g. 5h 23m)",
-          "FULL_HALF_HOURS": "full half hours",
-          "FULL_HOURS": "full hours",
-          "FULL_QUARTERS": "full quarters",
-          "PARENT_TASK": "Parent Task",
-          "PARENT_TASK_TITLES_ONLY": "Parent Task Titles only",
-          "STARTED_WORKING": "Started Working",
-          "TASK_SUBTASK": "Task/Subtask",
-          "TIME_AS_CLOCK": "Time as clock (e.g. 5:23)",
-          "TIME_AS_MILLISECONDS": "Time as milliseconds",
-          "TIME_AS_STRING": "Time as string (e.g. 5h 23m)",
-          "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
-          "WORKLOG": "Worklog"
+          "DATE": "تاریخ",
+          "ENDED_WORKING": "کار به پایان رسید",
+          "ESTIMATE_AS_CLOCK": "ساعت را تخمین بزنید (مثلا 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "تخمین براساس میلی ثانیه",
+          "ESTIMATE_AS_STRING": "تخمین به عنوان رشته (e.g. 5h 23m)",
+          "FULL_HALF_HOURS": "نیم ساعت کامل",
+          "FULL_HOURS": "ساعات کامل",
+          "FULL_QUARTERS": "ربع کامل",
+          "PARENT_TASK": "کار اصلی",
+          "PARENT_TASK_TITLES_ONLY": "فقط عنوان کار اصلی",
+          "STARTED_WORKING": "کار شروع شد",
+          "TASK_SUBTASK": "کار/کار فرعی",
+          "TIME_AS_CLOCK": "ساعت (مثلا 5:23)",
+          "TIME_AS_MILLISECONDS": "زمان برحسب میلی ثانیه",
+          "TIME_AS_STRING": "زمان به عنوان رشته (مثلا 5h 23m)",
+          "TITLES_AND_SUB_TASK_TITLES": "عناوین و عناوین کارهای فرعی",
+          "WORKLOG": "گزارش کار"
         },
-        "OPTIONS": "Options",
-        "ROUND_END_TIME_TO": "Round end time to",
-        "ROUND_START_TIME_TO": "Round start time to",
-        "ROUND_TIME_WORKED_TO": "Round time worked to",
-        "SAVE_TO_FILE": "Save to file",
-        "SEPARATE_TASKS_BY": "Separate tasks by",
-        "SHOW_AS_TEXT": "Show as text"
+        "OPTIONS": "گزینه ها",
+        "ROUND_END_TIME_TO": "گرد کردن پایان زمان تا",
+        "ROUND_START_TIME_TO": "گرد کردن شروع زمان تا",
+        "ROUND_TIME_WORKED_TO": "گرد کردن زمان کار تا",
+        "SAVE_TO_FILE": "ذخیره در فایل",
+        "SEPARATE_TASKS_BY": "جداکردن کارها با",
+        "SHOW_AS_TEXT": "نمایش به عنوان متن"
       },
       "WEEK": {
-        "EXPORT": "Export Week Data",
-        "NO_DATA": "No tasks this week yet.",
-        "TITLE": "Title"
+        "EXPORT": "خروجی گرفتن اطلاعات هفتگی",
+        "NO_DATA": "هیچ کاری در این هفته انجام نشده است.",
+        "TITLE": "عنوان"
       }
     }
   },
   "FILE_IMEX": {
-    "EXPORT_DATA": "Export Data",
-    "IMPORT_FROM_FILE": "Import from file",
-    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
+    "EXPORT_DATA": "خروجی اطلاعات",
+    "IMPORT_FROM_FILE": "وارد کردن از فایل",
+    "S_ERR_INVALID_DATA": "وارد کردن انجام نشد: JSON نامعتبر"
   },
   "G": {
-    "CANCEL": "Cancel",
-    "CLICK_TO_EDIT": "click to edit",
-    "CLOSE": "Close",
-    "DELETE": "Delete",
-    "DISMISS": "Dismiss",
-    "DO_IT": "Do it!",
-    "EDIT": "Edit",
-    "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
-    "LOGIN": "Login",
-    "LOGOUT": "Logout",
-    "MINUTES": "{{m}} minutes",
-    "NEXT": "Next",
-    "OK": "Ok",
-    "PREVIOUS": "Previous",
-    "REMOVE": "Remove",
-    "SAVE": "Save",
-    "TITLE": "Title",
+    "CANCEL": "لغو",
+    "CLICK_TO_EDIT": "برای ویرایش کلیک کنید",
+    "CLOSE": "بستن",
+    "DELETE": "حذف",
+    "DISMISS": "رد کردن",
+    "DO_IT": "انجام بدهید!",
+    "EDIT": "ویرایش",
+    "EXTENSION_INFO": "لطفا برای ارتباط با جیرا و مدیریت زمان <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> افزونه گوگل کروم</a> را دانلود کنید. توجه این افزونه برای نسخه موبایل کروم کار نمی کند.",
+    "LOGIN": "وارد شدن",
+    "LOGOUT": "خارج شدن",
+    "MINUTES": "{{m}} دقیقه",
+    "NEXT": "بعدی",
+    "OK": "اوکی",
+    "PREVIOUS": "قبلی",
+    "REMOVE": "حذف",
+    "SAVE": "ذخیره",
+    "TITLE": "عنوان",
     "UNDO": "Undo",
-    "UPDATE": "Update"
+    "UPDATE": "بروز رسانی"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
-      "LABEL_IS_ENABLED": "Enable automatic backups",
-      "TITLE": "Automatic Backups"
+      "LABEL_IS_ENABLED": "فعال کردن پشتیبان گیری خودکار",
+      "TITLE": "پشتیبان گیری خودکار"
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
-      "IS_HIDE_METRIC_FROM_MENU": "Hide metrics from menu",
-      "TITLE": "Evaluation & Metrics"
+      "IS_HIDE_METRIC_FROM_MENU": "معیارها را از فهرست مخفی کن",
+      "TITLE": "ارزیابی ها و معیارها"
     },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
-      "TITLE": "Sync via Google Drive"
+      "TITLE": "همگام سازی با درایو گوگل"
     },
     "IDLE": {
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
@@ -716,65 +716,65 @@
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
-      "TITLE": "Import/Export"
+      "TITLE": "ورودی/خروجی"
     },
     "KEYBOARD": {
-      "ADD_NEW_NOTE": "Add new note",
-      "ADD_NEW_TASK": "Add New Task",
-      "APP_WIDE_SHORTCUTS": "Global Shortcuts (application wide)",
-      "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
-      "EXPAND_SUB_TASKS": "Expand Sub Tasks",
-      "FOCUS_LAST_ACTIVE_TASK": "Focus last active task",
-      "GLOBAL_ADD_NOTE": "Add new note",
-      "GLOBAL_ADD_TASK": "Add new task",
-      "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
+      "ADD_NEW_NOTE": "اضافه کردن یادداشت جدید",
+      "ADD_NEW_TASK": "اضافه کردن کار جدید",
+      "APP_WIDE_SHORTCUTS": "میانبرهای عمومی (داخل برنامه)",
+      "COLLAPSE_SUB_TASKS": "جمع کردن کارهای فرعی",
+      "EXPAND_SUB_TASKS": "بازکردن کارهای فرعی",
+      "FOCUS_LAST_ACTIVE_TASK": "تمرکز آخرین کار فعال",
+      "GLOBAL_ADD_NOTE": "اضافه کردن کار جدید",
+      "GLOBAL_ADD_TASK": "اضافه کردن کار جدید",
+      "GLOBAL_SHOW_HIDE": "نمایش و پنهان کردن برنامه سوپر پروداکتیویتی",
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
-      "GO_TO_FOCUS_MODE": "Go to Focus Mode",
-      "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_WORK_VIEW": "Go to Work View",
+      "GO_TO_FOCUS_MODE": "رفتن به حالت تمرکز",
+      "GO_TO_SETTINGS": "رفتن به تنظیمات",
+      "GO_TO_WORK_VIEW": "رفتن به نمای کار",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
       "MOVE_TASK_DOWN": "Move Task down in List",
       "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
       "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
-      "SELECT_NEXT_TASK": "Select next Task",
+      "SELECT_NEXT_TASK": "انتخاب کار بعدی",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
-      "TASK_ADD_SUB_TASK": "Add sub Task",
-      "TASK_DELETE": "Delete Task",
-      "TASK_EDIT_TITLE": "Edit Title",
+      "TASK_ADD_SUB_TASK": "اضافه کردن کار فرعی",
+      "TASK_DELETE": "حذف کار",
+      "TASK_EDIT_TITLE": "ویرایش عنوان",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
-      "TASK_SCHEDULE": "Schedule Task",
-      "TASK_SHORTCUTS": "Tasks",
+      "TASK_SCHEDULE": "کار برنامه ریزی شده",
+      "TASK_SHORTCUTS": "کارها",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
       "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
       "TASK_TOGGLE_DONE": "Toggle Done",
-      "TITLE": "Keyboard Shortcuts",
+      "TITLE": "میانبرهای صفحه کلید",
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
-      "TOGGLE_PLAY": "Start/Stop Task",
-      "ZOOM_DEFAULT": "Zoom default (Desktop only)",
-      "ZOOM_IN": "Zoom in (Desktop only)",
-      "ZOOM_OUT": "Zoom out (Desktop only)"
+      "TOGGLE_PLAY": "شروع/توقت کار",
+      "ZOOM_DEFAULT": "بزرگنمایی پیش فرض (فقط دسکتاپ)",
+      "ZOOM_IN": "بزرگنمایی (فقط دسکتاپ)",
+      "ZOOM_OUT": "کوچک نمایی (فقط دسکتاپ)"
     },
     "LANG": {
-      "AR": "Arabic",
-      "DE": "German",
-      "EN": "English",
-      "ES": "Spanish",
-      "FA": "Farsi",
-      "FR": "French",
-      "IT": "Italian",
-      "JA": "Japanese",
-      "KO": "Korean",
-      "LABEL": "Please select a language",
-      "PT": "Portuguese",
-      "RU": "Russian",
-      "TITLE": "Language",
-      "TR": "Turkish",
-      "ZH": "Chinese"
+      "AR": "عربی",
+      "DE": "آلمانی",
+      "EN": "انگلیسی",
+      "ES": "اسپانیایی",
+      "FA": "فارسی",
+      "FR": "فرانسوی",
+      "IT": "ایتالیایی",
+      "JA": "ژاپنی",
+      "KO": "کره ای",
+      "LABEL": "لطفا یک زبان انتخاب کنید",
+      "PT": "پرتغالی",
+      "RU": "روسی",
+      "TITLE": "زبان",
+      "TR": "ترکی",
+      "ZH": "چینی"
     },
     "MISC": {
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
@@ -808,47 +808,47 @@
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-      "TITLE": "Break Reminder"
+      "TITLE": "یادآوری استراحت"
     }
   },
   "GLOBAL_SNACK": {
-    "COPY_TO_CLIPPBOARD": "Copied to clipboard",
-    "ERR_COMPRESSION": "Error for compression interface",
-    "ERR_DB_CLEAR": "Error while clearing the database",
-    "ERR_DB_DELETE": "Error while deleting data",
-    "ERR_DB_LOAD": "Error while loading data",
-    "ERR_DB_SAVE": "Error while saving data",
+    "COPY_TO_CLIPPBOARD": "در کلیپ برد کپی شد",
+    "ERR_COMPRESSION": "خطایی برای رابط فشرده سازی",
+    "ERR_DB_CLEAR": "خطایی هنگام پاک کردن دیتابیس رخ داد",
+    "ERR_DB_DELETE": "هنگام حذف اطلاعات خطایی رخ داد",
+    "ERR_DB_LOAD": "هنگام بارگیری اطلاعات خطایی رخ داد",
+    "ERR_DB_SAVE": "هنگام ذخیره اطلاعات خطایی رخ داد",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "RUNNING_X": "Running \"{{str}}\"."
   },
   "MH": {
-    "ADD_NEW_TASK": "Add new Task",
-    "CREATE_PROJECT": "Create Project",
-    "GO_TO_TASK_LIST": "Go to task list",
-    "MANAGE_PROJECTS": "Manage Projects",
-    "METRICS": "Metrics",
-    "NOTES": "Notes",
-    "PROCRASTINATE": "Procrastinate",
-    "PROJECTS": "Projects",
-    "PROJECT_MENU": "Project Menu",
-    "PROJECT_SETTINGS": "Project Settings",
-    "SCHEDULED": "Scheduled",
-    "SETTINGS": "Settings",
-    "TASKS": "Tasks",
-    "TASK_LIST": "Task List",
+    "ADD_NEW_TASK": "اضافه کردن کار جدید",
+    "CREATE_PROJECT": "ایجاد پروژه",
+    "GO_TO_TASK_LIST": "به لیست کارها برو",
+    "MANAGE_PROJECTS": "مدیریت پروژه ها",
+    "METRICS": "معیارها",
+    "NOTES": "یادداشت ها",
+    "PROCRASTINATE": "به تعویق انداختن",
+    "PROJECTS": "پروژه ها",
+    "PROJECT_MENU": "منوی پروژه",
+    "PROJECT_SETTINGS": "تنظیمات پروژه",
+    "SCHEDULED": "برنامه ریزی شده",
+    "SETTINGS": "تنظیمات",
+    "TASKS": "کارها",
+    "TASK_LIST": "لیست کار",
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "WORKLOG": "Worklog"
+    "WORKLOG": "گزارش کار"
   },
   "PDS": {
-    "BACK": "Wait I forgot something!",
+    "BACK": "صبر کنید من چیزی را فراموش کردم!",
     "BREAK_LABEL": "Breaks (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",
     "CLEAR_ALL_CONTINUE": "Clear all done and continue",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "No, just clear the tasks",
-      "MSG": "Your work is done. Time to go home!",
+      "CANCEL": "نه، فقط وظایف را حذف کن",
+      "MSG": "کارتان تمام شده، وقت رفتن به خانه است!",
       "OK": "Aye aye! Shutdown!"
     },
     "EVALUATION": "Evaluation",
@@ -875,7 +875,7 @@
     "WEEK": "Week"
   },
   "PM": {
-    "TITLE": "Project Metrics"
+    "TITLE": "معیارهای پروژه"
   },
   "PP": {
     "ARCHIVED_PROJECTS": "Archived Projects",
@@ -894,7 +894,7 @@
       "MSG": "Are you sure you want to unarchive this project?",
       "OK": "Unarchive"
     },
-    "EDIT_PROJECT": "Edit Project",
+    "EDIT_PROJECT": "ویرایش پروژه",
     "EXPORT_PROJECT": "Export Project",
     "GITHUB_CONFIGURED": "Github Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
@@ -923,46 +923,46 @@
     "START_TASK": "Start task now and remove reminder"
   },
   "THEMES": {
-    "SELECT_THEME": "Select Theme",
-    "amber": "amber",
-    "blue": "blue",
-    "blue-grey": "blue-grey",
-    "cyan": "cyan",
-    "deep-orange": "deep-orange",
-    "deep-purple": "deep-purple",
-    "green": "green",
-    "indigo": "indigo",
-    "light-blue": "light-blue",
-    "light-green": "light-green",
-    "lime": "lime",
-    "pink": "pink",
-    "purple": "purple",
+    "SELECT_THEME": "انتخاب قالب",
+    "amber": "کهربایی",
+    "blue": "آبی",
+    "blue-grey": "آبی خاکستری",
+    "cyan": "فیروزه ای",
+    "deep-orange": "نارنجی تیره",
+    "deep-purple": "بنفش پررنگ",
+    "green": "سبز",
+    "indigo": "نیلی",
+    "light-blue": "آبی روشن",
+    "light-green": "سبز روشن",
+    "lime": "لیمویی",
+    "pink": "صورتی",
+    "purple": "بنفش",
     "teal": "teal",
-    "yellow": "yellow"
+    "yellow": "زرد"
   },
   "V": {
-    "E_1TO10": "Please enter a value between 1 and 10",
-    "E_DATETIME": "The entered value is not a datetime!",
-    "E_MAX": "Should not be bigger than {{val}}",
-    "E_MAX_LENGTH": "Should be max {{val}} characters long",
-    "E_MIN": "Should be smaller than {{val}}",
-    "E_MIN_LENGTH": "Should be at least {{val}} characters long",
-    "E_PATTERN": "Invalid input",
-    "E_REQUIRED": "This field is required"
+    "E_1TO10": "لطفا مقداری بین ۱ تا ۱۰ وارد کنید",
+    "E_DATETIME": "مقدار وارد شده تاریخ و زمان نیست!",
+    "E_MAX": "نمیتواند بیشتر از {{val}} باشد",
+    "E_MAX_LENGTH": "باید حداکثر {{val}} کاراکتر داشته باشد",
+    "E_MIN": "باید کمتر از  {{val}} باشد",
+    "E_MIN_LENGTH": "باید حداقل {{val}} کاراکتر داشته باشد",
+    "E_PATTERN": "ورودی اشتباه",
+    "E_REQUIRED": "این فیلد اجباری است"
   },
   "WW": {
-    "ADD_MORE": "Add more",
-    "ADD_SOME_TASKS": "Add some tasks to plan your day!",
-    "COMPLETED_TASKS": "Completed Tasks",
-    "ESTIMATE_REMAINING": "Estimate remaining:",
-    "FINISH_DAY": "Finish Day",
+    "ADD_MORE": "اضافه کردن موارد بیشتر",
+    "ADD_SOME_TASKS": "برای برنامه ریزی کارهای امروز، کار اضافه کنید!",
+    "COMPLETED_TASKS": "کارهای انجام شده",
+    "ESTIMATE_REMAINING": "تخمین باقی مانده:",
+    "FINISH_DAY": "پایان روز",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
-    "NO_COMPLETED_TASKS": "There are currently no completed tasks",
-    "NO_PLANNED_TASKS": "No planned tasks",
-    "READY_TO_WORK": "Ready to work!",
-    "RESET_BREAK_TIMER": "Reset without break timer",
-    "TIME_ESTIMATED": "Time Estimated:",
-    "WITHOUT_BREAK": "Without break:",
-    "WORKING_TODAY": "Working today:"
+    "NO_COMPLETED_TASKS": "هیچ کار کاملی وجود ندارد",
+    "NO_PLANNED_TASKS": "کارهای برنامه ریزی نشده",
+    "READY_TO_WORK": "آماده به کار!",
+    "RESET_BREAK_TIMER": "تنظیم مجدد زمان بدون زمان استراحت",
+    "TIME_ESTIMATED": "تخمین زمان:",
+    "WITHOUT_BREAK": "بدون استراحت:",
+    "WORKING_TODAY": "کار امروز:"
   }
 }

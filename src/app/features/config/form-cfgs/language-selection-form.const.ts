@@ -17,6 +17,7 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
           {label: T.GCF.LANG.ZH, value: LanguageCode.zh},
           {label: T.GCF.LANG.EN, value: LanguageCode.en},
           {label: T.GCF.LANG.DE, value: LanguageCode.de},
+          {label: T.GCF.LANG.FA, value: LanguageCode.fa},
           {label: T.GCF.LANG.FR, value: LanguageCode.fr},
           {label: T.GCF.LANG.JA, value: LanguageCode.ja},
           {label: T.GCF.LANG.KO, value: LanguageCode.ko},
