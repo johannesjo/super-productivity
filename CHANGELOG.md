@@ -1,3 +1,19 @@
+## [3.2.1](https://github.com/johannesjo/super-productivity/compare/v3.2.0...v3.2.1) (2020-02-13)
+
+
+### Bug Fixes
+
+* project task overwrite bug [#290](https://github.com/johannesjo/super-productivity/issues/290) ([5d8ded6](https://github.com/johannesjo/super-productivity/commit/5d8ded6054b28482b414123ce6f057afbeb8a5cb))
+* task view not being scrollable [#289](https://github.com/johannesjo/super-productivity/issues/289) ([92120c1](https://github.com/johannesjo/super-productivity/commit/92120c108348bd2cc697b6a1fbfaf09649dcc475))
+
+
+### Features
+
+* **i18n:** make farsi work ([299e6e1](https://github.com/johannesjo/super-productivity/commit/299e6e1aca2c29e5f53a408a8f8fae40a70e014a))
+* improve button styling for long text ([7bed5f9](https://github.com/johannesjo/super-productivity/commit/7bed5f9d5a7ec9505e9251ebc12a045f42a2e9d2))
+
+
+
 # [3.2.0](https://github.com/johannesjo/super-productivity/compare/v3.1.5...v3.2.0) (2020-02-07)
 
 
