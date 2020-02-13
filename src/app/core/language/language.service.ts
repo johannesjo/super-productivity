@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {DateTimeAdapter} from 'ng-pick-datetime';
+import {DateTimeAdapter} from '@danielmoncada/angular-datetime-picker';
 import {DateAdapter} from '@angular/material/core';
 import * as moment from 'moment';
 import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap} from '../../app.constants';

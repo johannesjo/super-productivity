@@ -58,7 +58,7 @@ import {MomentFormatPipe} from './pipes/moment-format.pipe';
 import {InlineInputComponent} from './inline-input/inline-input.component';
 import {ChipListInputComponent} from './chip-list-input/chip-list-input.component';
 import {ValidationModule} from './validation/validation.module';
-import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
+import {OwlDateTimeModule, OwlNativeDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.component';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {FormlyMaterialModule} from '@ngx-formly/material';
