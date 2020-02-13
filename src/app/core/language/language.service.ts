@@ -3,19 +3,19 @@ import {TranslateService} from '@ngx-translate/core';
 import {DateTimeAdapter} from '@danielmoncada/angular-datetime-picker';
 import {DateAdapter} from '@angular/material/core';
 import * as moment from 'moment';
-import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap} from '../../app.constants';
+import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap, RTL_LANGUAGES} from '../../app.constants';
 import {BehaviorSubject, Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LanguageService {
-
-  // Temporary solution for knowing the rtl languages
-  rtlLanguages: LanguageCode[] = [LanguageCode.ar];
   // I think a better approach is to add a field in every [lang].json file to specify the direction of the language
   private isRTL: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isLangRTL: Observable<boolean> = this.isRTL.asObservable();
+
+  // Temporary solution for knowing the rtl languages
+  private readonly rtlLanguages: LanguageCode[] = RTL_LANGUAGES;
 
   constructor(
     private _translateService: TranslateService,

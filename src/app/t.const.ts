@@ -764,6 +764,7 @@ export const T = {
       'DE': 'GCF.LANG.DE',
       'EN': 'GCF.LANG.EN',
       'ES': 'GCF.LANG.ES',
+      'FA': 'GCF.LANG.FA',
       'FR': 'GCF.LANG.FR',
       'IT': 'GCF.LANG.IT',
       'JA': 'GCF.LANG.JA',

@@ -28,6 +28,7 @@ export enum LanguageCode {
   es = 'es',
   de = 'de',
   ar = 'ar',
+  fa = 'fa',
   fr = 'fr',
   ja = 'ja',
   ko = 'ko',
@@ -43,6 +44,7 @@ export enum LanguageCodeMomentMap {
   es = 'es',
   de = 'de',
   ar = 'ar',
+  fa = 'fa',
   fr = 'fr',
   ja = 'ja',
   ko = 'ko',
@@ -83,10 +85,16 @@ export enum HelperClasses {
 export const AUTO_SWITCH_LNGS: LanguageCode[] = [
   LanguageCode.zh,
   LanguageCode.ar,
+  LanguageCode.fa,
   LanguageCode.ja,
   LanguageCode.ko,
   LanguageCode.ru,
   LanguageCode.tr,
+];
+
+export const RTL_LANGUAGES: LanguageCode[] = [
+  LanguageCode.ar,
+  LanguageCode.fa
 ];
 
 export enum THEME_COLOR_MAP {
