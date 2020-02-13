@@ -16,6 +16,7 @@ import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-
 import {BannerService} from '../../../core/banner/banner.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {Router} from '@angular/router';
+import {ProjectService} from '../../project/project.service';
 
 @Injectable()
 export class TaskDbEffects {
@@ -45,6 +46,16 @@ export class TaskDbEffects {
 
         TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
       ),
+
+      withLatestFrom(this._projectService.isProjectChanging$),
+      tap(([action, isChanging]) => {
+        // NOTE: filter out everything happening between project change start and all related data being loaded
+        if (isChanging) {
+          console.warn('ACTION:', action);
+          throw new Error('Project was changing while attempting to do something');
+        }
+      }),
+
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectTaskFeatureState)),
@@ -75,6 +86,7 @@ export class TaskDbEffects {
               private _reminderService: ReminderService,
               private _router: Router,
               private _snackService: SnackService,
+              private _projectService: ProjectService,
               private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {
   }
@@ -83,7 +95,7 @@ export class TaskDbEffects {
     this._persistenceService.saveLastActive();
   }
 
-  private _saveToLs([action, currentProjectId, taskState]) {
+  private _saveToLs([, currentProjectId, taskState]) {
     if (currentProjectId && taskState.isDataLoaded) {
       this._persistenceService.task.save(currentProjectId, taskState);
     } else {
