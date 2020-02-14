@@ -10,7 +10,7 @@
       "prefix": "",
       "schematics": {
         "@schematics/angular:component": {
-          "styleext": "scss",
+          "style": "scss",
           "changeDetection": "OnPush"
         },
         "@ngrx/schematics:component": {
@@ -154,7 +154,7 @@
   },
   "schematics": {
     "@schematics/angular:component": {
-      "styleext": "scss"
+      "style": "scss"
     }
   }
 }
