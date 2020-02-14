@@ -8,7 +8,7 @@ import * as StackTrace from 'stacktrace-js';
 
 let isWasErrorAlertCreated = false;
 
-const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: string, origErr: any) => {
+const _createErrorAlert = (eSvc: ElectronService, err: string = '', stackTrace: string, origErr: any) => {
   if (isWasErrorAlertCreated) {
     return;
   }
@@ -17,7 +17,7 @@ const _createErrorAlert = (eSvc: ElectronService, err: string, stackTrace: strin
   errorAlert.classList.add('global-error-alert');
   errorAlert.style.color = 'black';
   errorAlert.innerHTML = `
-    <h2>Snap! A critical error occurred...<h2>
+    <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${err}<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please Report !</a></p>
     <pre style="line-height: 1.3;">${err}</pre>
     <pre id="stack-trace"
