@@ -53,17 +53,7 @@ script:
     fi
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       echo '____RUNNING DOCKER____'
-      docker run $ENVS --rm \
-        $(env | \
-        grep -Eo '^[^\s=]*(_TOKEN|_KEY)[^\s=]*' | \
-        sed '/^$/d;s/^/-e /' | \
-        paste -sd ' ' \
-        ) \
-        -v ${PWD}:/project \
-        -v ~/.cache/electron:/root/.cache/electron \
-        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
-        electronuserland/builder:wine-chrome \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn --link-duplicates --pure-lockfile && yarn run dist:linuxAndWin -p ${PUB} && ls -l ./dist"
+      bash ${TRAVIS_BUILD_DIR}/build/docker/run-linux-win.sh
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
