@@ -1,3 +1,17 @@
+## [3.2.2](https://github.com/johannesjo/super-productivity/compare/v3.2.1...v3.2.2) (2020-02-15)
+
+
+### Bug Fixes
+
+* work around node version issue by using custom docker file ([488e17f](https://github.com/johannesjo/super-productivity/commit/488e17f33b48275aafdbdad65d1c763f294106cc))
+
+
+### Features
+
+* change error modal title ([3beb97e](https://github.com/johannesjo/super-productivity/commit/3beb97ef142d17a85405e4370f418bd3045f38b3))
+
+
+
 ## [3.2.1](https://github.com/johannesjo/super-productivity/compare/v3.2.0...v3.2.1) (2020-02-13)
 
 
