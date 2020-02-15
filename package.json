@@ -40,7 +40,7 @@
     "localInstall:mac": "sudo echo 'Starting local install. Don`t forget APPLEID & APPLEIDPASS !!' && yarn buildAllElectron && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/superProductivity.app/ /Applications/superProductivity.app",
     "dist": "yarn buildAllElectron && electron-builder",
     "dist:only": "electron-builder",
-    "dist:linuxAndWin": "yarn buildAllElectron && electron-builder build --linux --win",
+    "dist:linuxAndWin": "yarn buildAllElectron && electron-builder --linux --win",
     "dist:win": "yarn buildAllElectron && electron-builder --win",
     "dist:win:only": "electron-builder --win",
     "dist:win:appx": "yarn buildAllElectron && electron-builder --win --config=build/electron-builder.appx.yaml",

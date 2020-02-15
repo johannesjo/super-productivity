@@ -53,7 +53,7 @@ script:
     fi
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       echo '____RUNNING DOCKER____'
-      bash ${TRAVIS_BUILD_DIR}/build/docker/run-linux-win.sh
+      bash ${TRAVIS_BUILD_DIR}/build/docker/run-linux-win.sh ${PUB}
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
