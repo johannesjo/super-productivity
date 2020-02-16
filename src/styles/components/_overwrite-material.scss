@@ -74,6 +74,11 @@ body .mat-form-field {
   white-space: normal !important;
 }
 
+// TODO remove TMP fix for https://github.com/angular/components/pull/18467
+.mat-checkbox-checked .mat-checkbox-background {
+  background-color: rgba(var(--palette-accent-500), 1);
+}
+
 
 // BUTTONS
 // -------
