@@ -70,38 +70,6 @@ export class GithubIssueEffects {
       })
     );
 
-  @Effect({dispatch: false}) refreshIssueData$: any = this._githubApiService.onCacheRefresh$.pipe(
-    delay(5000),
-    throttleTime(10000),
-    withLatestFrom(
-      this._projectService.currentGithubCfg$,
-      this._store$.pipe(select(selectAllGithubIssues)),
-    ),
-    filter(([a, githubCfg]) => githubCfg.isAutoPoll),
-    tap(([x, githubCfg, issues]: [any, GithubCfg, GithubIssue[]]) => {
-      if (issues && issues.length > 0) {
-        this._snackService.open({
-          msg: T.F.GITHUB.S.POLLING,
-          svgIco: 'github',
-          isSpinner: true,
-        });
-        this._githubIssueService.updateIssuesFromApi(issues, githubCfg, true);
-      }
-    })
-  );
-
-  @Effect({dispatch: false}) refreshBacklog: any = this._githubApiService.onCacheRefresh$.pipe(
-    delay(10000),
-    throttleTime(10000),
-    withLatestFrom(
-      this._store$.pipe(select(selectProjectGithubCfg)),
-    ),
-    filter(([a, githubCfg]) => githubCfg.isAutoAddToBacklog),
-    tap(() => {
-      this._githubIssueService.addOpenIssuesToBacklog();
-    })
-  );
-
 
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(

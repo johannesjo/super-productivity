@@ -3,15 +3,13 @@ import {ProjectService} from '../../project/project.service';
 import {GithubCfg} from './github';
 import {SnackService} from '../../../core/snack/snack.service';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-import {GITHUB_API_BASE_URL, GITHUB_MAX_CACHE_AGE} from './github.const';
-import {combineLatest, from, Observable, ObservableInput, Subject, throwError} from 'rxjs';
+import {GITHUB_API_BASE_URL} from './github.const';
+import {combineLatest, Observable, ObservableInput, throwError} from 'rxjs';
 import {GithubOriginalComment, GithubOriginalIssue} from './github-api-responses';
-import {catchError, map, share, switchMap, take, tap} from 'rxjs/operators';
+import {catchError, map, share, switchMap, take} from 'rxjs/operators';
 import {mapGithubIssue, mapGithubIssueToSearchResult} from './github-issue/github-issue-map.util';
 import {GithubComment, GithubIssue} from './github-issue/github-issue.model';
 import {SearchResultItem} from '../issue';
-import {loadFromLs, saveToLs} from '../../../core/persistence/local-storage';
-import {LS_GITHUB_ISSUE_CACHE_PREFIX} from '../../../core/persistence/ls-keys.const';
 import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 import {T} from '../../../t.const';
 
@@ -21,7 +19,6 @@ const BASE = GITHUB_API_BASE_URL;
   providedIn: 'root',
 })
 export class GithubApiService {
-  public onCacheRefresh$ = new Subject<boolean>();
 
   private _cfg: GithubCfg;
   private _header: HttpHeaders;
@@ -47,10 +44,6 @@ export class GithubApiService {
     }
   }
 
-  public getHeader(): HttpHeaders {
-    return this._header;
-  }
-
   getById$(id: number): Observable<GithubIssue> {
     this._checkSettings();
 
@@ -62,33 +55,14 @@ export class GithubApiService {
     if (!isSkipCheck) {
       this._checkSettings();
     }
-
-    const cached = loadFromLs(LS_GITHUB_ISSUE_CACHE_PREFIX + this._projectService.currentId);
-    const cachedIssues: GithubIssue[] = cached && cached.issues;
-    const lastUpdate: number = cached && cached.lastUpdate;
-
-    // console.log('getCompleteIssueDataForRepo isUseCached',
-    //   cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GITHUB_MAX_CACHE_AGE > Date.now()));
-
-    if (
-      !isForceRefresh &&
-      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GITHUB_MAX_CACHE_AGE > Date.now())
-    ) {
-      return from([cachedIssues]);
-    } else {
-      return combineLatest([
-        this._getAllIssuesForRepo$(repo, isSkipCheck),
-        this._getAllCommentsForRepo$(repo, isSkipCheck),
-      ]).pipe(
-        take(1),
-        map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
-        tap(issues => {
-          if (Array.isArray(issues)) {
-            this._updateIssueCache(issues);
-          }
-        }),
-      );
-    }
+    return combineLatest([
+      this._getAllIssuesForRepo$(repo, isSkipCheck),
+      this._getAllCommentsForRepo$(repo, isSkipCheck),
+    ]).pipe(
+      take(1),
+      map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
+    );
+    // }
   }
 
 
@@ -136,14 +110,6 @@ export class GithubApiService {
         };
       }),
     );
-  }
-
-  private _updateIssueCache(issues: GithubIssue[]) {
-    saveToLs(LS_GITHUB_ISSUE_CACHE_PREFIX + this._projectService.currentId, {
-      issues,
-      lastUpdate: Date.now(),
-    });
-    this.onCacheRefresh$.next(true);
   }
 
   private _getAllIssuesForRepo$(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubIssue[]> {

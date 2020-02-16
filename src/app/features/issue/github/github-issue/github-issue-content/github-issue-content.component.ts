@@ -1,10 +1,12 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
 import {GithubIssueService} from '../github-issue.service';
 import {GithubApiService} from '../../github-api.service';
 import {GithubIssue} from '../github-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 import {T} from '../../../../../t.const';
+import {Observable, ReplaySubject} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'github-issue-content',
@@ -13,10 +15,14 @@ import {T} from '../../../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation]
 })
-export class GithubIssueContentComponent implements OnInit {
+export class GithubIssueContentComponent {
   T = T;
   taskData: TaskWithSubTasks;
-  issueData: GithubIssue;
+  task$ = new ReplaySubject<TaskWithSubTasks>(1);
+  issueData$: Observable<GithubIssue> = this.task$.pipe(switchMap(task => {
+    const issueId = +task.issueId;
+    return this._githubApiService.getById$(issueId);
+  }));
 
   constructor(
     private readonly  _githubIssueService: GithubIssueService,
@@ -26,17 +32,7 @@ export class GithubIssueContentComponent implements OnInit {
 
   @Input() set task(task: TaskWithSubTasks) {
     this.taskData = task;
-    this.issueData = task.issueData as GithubIssue;
-  }
-
-  ngOnInit() {
-    // TODO find better solution
-    // this._githubApiService.getIssueById(this.task.issueId, true)
-    //   .then((res) => {
-    //     if (res.updated !== this.task.issueData.updated) {
-    //       this._githubIssueService.update(this.task.issueId, {...res, wasUpdated: true});
-    //     }
-    //   });
+    this.task$.next(task);
   }
 
   hideUpdates() {
