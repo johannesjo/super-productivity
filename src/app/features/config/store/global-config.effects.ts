@@ -5,13 +5,13 @@ import {GlobalConfigActionTypes, LoadGlobalConfig, UpdateGlobalConfigSection} fr
 import {Store} from '@ngrx/store';
 import {CONFIG_FEATURE_NAME} from './global-config.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {ElectronService} from 'ngx-electron';
 import {KeyboardConfig} from '../global-config.model';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {T} from '../../../t.const';
 import {LanguageService} from '../../../core/language/language.service';
 import {SnackService} from '../../../core/snack/snack.service';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 @Injectable()
 export class GlobalConfigEffects {

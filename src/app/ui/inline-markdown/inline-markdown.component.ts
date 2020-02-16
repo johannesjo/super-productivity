@@ -14,12 +14,12 @@ import {
 import {fadeAnimation} from '../animations/fade.ani';
 import {MarkdownComponent} from 'ngx-markdown';
 import {IS_ELECTRON} from '../../app.constants';
-import {ElectronService} from 'ngx-electron';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogFullscreenMarkdownComponent} from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import {ElectronService} from '../../core/electron/electron.service';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 

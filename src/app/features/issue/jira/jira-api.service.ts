@@ -18,7 +18,6 @@ import {
 } from './jira-issue/jira-issue-map.util';
 import {JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser} from './jira-api-responses';
 import {JiraCfg} from './jira';
-import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../app.constants';
@@ -33,6 +32,7 @@ import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-tex
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {T} from '../../../t.const';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 

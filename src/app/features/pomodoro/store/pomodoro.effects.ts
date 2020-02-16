@@ -19,9 +19,9 @@ import {Observable} from 'rxjs';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {IS_ELECTRON} from '../../../app.constants';
 import {IPC} from '../../../../../electron/ipc-events.const';
-import {ElectronService} from 'ngx-electron';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 

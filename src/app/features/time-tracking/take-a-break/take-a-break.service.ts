@@ -25,9 +25,9 @@ import {BannerId} from '../../../core/banner/banner.model';
 import {ProjectService} from '../../project/project.service';
 import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
 import {T} from '../../../t.const';
-import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {NotifyService} from '../../../core/notify/notify.service';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;

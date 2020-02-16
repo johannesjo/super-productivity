@@ -7,11 +7,11 @@ import {selectCurrentTask} from './task.selectors';
 import {TaskService} from '../task.service';
 import {Task} from '../task.model';
 import {Observable} from 'rxjs';
-import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {GlobalConfigState} from '../../config/global-config.model';
 import {GlobalConfigService} from '../../config/global-config.service';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 // TODO send message to electron when current task changes here
 

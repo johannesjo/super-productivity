@@ -6,7 +6,6 @@ import {isTouch} from '../../util/is-touch';
 import {ProjectThemeCfg} from '../../features/project/project.model';
 import {MaterialCssVarsService} from 'angular-material-css-vars';
 import {DOCUMENT} from '@angular/common';
-import {ElectronService} from 'ngx-electron';
 import {ProjectService} from '../../features/project/project.service';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -14,6 +13,7 @@ import {ChromeExtensionInterfaceService} from '../chrome-extension-interface/chr
 import {ThemeService as NgChartThemeService} from 'ng2-charts';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {MiscConfig} from '../../features/config/global-config.model';
+import {ElectronService} from '../electron/electron.service';
 
 @Injectable({
   providedIn: 'root'

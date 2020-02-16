@@ -4,8 +4,8 @@ import {interval, Observable} from 'rxjs';
 import {LocalBackupConfig} from '../../features/config/global-config.model';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {SyncService} from '../sync/sync.service';
-import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../electron/ipc-events.const';
+import {ElectronService} from '../../core/electron/electron.service';
 
 const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 

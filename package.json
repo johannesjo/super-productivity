@@ -24,6 +24,7 @@
     "serveProd": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng serve --prod",
     "buildFrontend": "yarn preCheck && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --aot --prod",
     "buildFrontendElectron": "yarn preCheck && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --aot --prod --base-href=''",
+    "buildFrontendElectron:watch": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --aot --prod --base-href='' --watch",
     "buildAllElectron": "yarn buildFrontendElectron && yarn electron:build",
     "buildApp": "yarn test && yarn buildAllElectron && yarn electron-builder",
     "test": "ng test --watch=false",
