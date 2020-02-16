@@ -67,41 +67,41 @@ script:
 
 
 deploy:
-  # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
-  - edge: true
+  - on:
+      condition: $TRAVIS_OS_NAME = linux
+      tags: false
+      branch: master
     provider: snap
     snap: ./app-builds/*.snap
     channel: edge
     skip_cleanup: true
-    on:
-      tags: false
-      branch: master
+    # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
+    edge: true
+  - on:
       condition: $TRAVIS_OS_NAME = linux
-  # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
-  - edge: true
+      tags: true
+      branch: master
     provider: snap
     snap: ./app-builds/*.snap
     channel: candidate
     skip_cleanup: true
-    on:
-      branch: master
+    # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
+    edge: true
+  - on:
       condition: $TRAVIS_OS_NAME = linux
       tags: true
-  - provider: script
+      branch: master
+    provider: script
     script: sshpass -p "$DEPLOY_PASS" rsync -avz ./dist $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
     skip_cleanup: true
-    on:
-      branch: master
-      condition: $TRAVIS_OS_NAME = linux
-      tags: true
-# NOTE: disabled until next release of electron builder
-#  - provider: script
-#    script: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
-#    skip_cleanup: true
-#    on:
+# NOTE: disabled until next release of electron builder and until electron works with osx again
+#  - on:
 #      branch: master
 #      condition: $TRAVIS_OS_NAME = osx
 #      tags: true
+#    provider: script
+#    script: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u "${APPLEID}" -p "${APPLEIDPASS}"
+#    skip_cleanup: true
 
 
 # NOTE: this would only work, if we could auto publish the github draft
