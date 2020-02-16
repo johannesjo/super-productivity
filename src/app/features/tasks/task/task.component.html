@@ -69,15 +69,15 @@
           </mat-icon>
 
           <mat-icon (click)="handleUpdateBtnClick()"
-                    *ngIf="task.issueData?.wasUpdated"
+                    *ngIf="task.issueWasUpdated"
                     class="task-type-ico"
                     color="accent">update
           </mat-icon>
 
-          <div *ngIf="!task.issueData?.wasUpdated && task.issueData"
+          <div *ngIf="task.issueId && !task.issueWasUpdated"
                class="task-type-ico">
-            <div *ngIf="task.issueData?.storyPoints"
-                 class="mini-badge bgc-primary">{{task.issueData?.storyPoints}}</div>
+            <div *ngIf="task.issuePoints"
+                 class="mini-badge bgc-primary">{{task.issuePoints}}</div>
             <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
           </div>
         </div>
@@ -151,7 +151,7 @@
           </button>
 
           <button (click)="toggleShowAdditionalInfoOpen()"
-                  *ngIf="!task.notes&&!task.issueData&&!isSelected"
+                  *ngIf="!task.notes&&!task.issueId&&!isSelected"
                   [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
                   class="ico-btn show-additional-info-btn"
                   color=""
@@ -171,8 +171,9 @@
           <mat-icon>alarm</mat-icon>
         </button>
 
+        <!-- TODO needs to be handled -->
         <button (click)="toggleShowAttachments()"
-                *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
+                *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueId && task.issueData['attachments']?.length)"
                 [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate"
                 class="ico-btn attachment-btn"
                 color=""
@@ -182,7 +183,7 @@
         </button>
 
         <button (click)="toggleShowAdditionalInfoOpen()"
-                *ngIf="task.notes||task.issueData||isSelected"
+                *ngIf="task.notes||task.issueId||isSelected"
                 [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
                 class="ico-btn show-additional-info-btn"
                 color=""
@@ -262,8 +263,8 @@
                   class="show-touch-only"
                   mat-menu-item
                   tabindex="2">
-            <mat-icon *ngIf="task.notes||task.issueData">chat</mat-icon>
-            <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
+            <mat-icon *ngIf="task.notes||task.issueId">chat</mat-icon>
+            <mat-icon *ngIf="!task.notes&&!task.issueId">chat_bubble_outline</mat-icon>
             {{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}}
           </button>
 
@@ -282,8 +283,9 @@
             {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
           </button>
 
-          <a *ngIf="task.issueData?.url"
-             [href]="task.issueData.url"
+          <!--TODO maybe handle dynamically -->
+          <a *ngIf="task.issueUrl"
+             [href]="task.issueUrl"
              mat-menu-item
              tabindex="2"
              target="_blank">

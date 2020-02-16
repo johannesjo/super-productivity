@@ -71,7 +71,7 @@
   <task-additional-info-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="task.issueData"
+    *ngIf="task.issueId"
     [expanded]="true"
     [type]="'panel'">
     <ng-container panel-header>

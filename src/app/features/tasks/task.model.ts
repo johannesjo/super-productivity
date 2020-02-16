@@ -39,6 +39,9 @@ export interface TaskCopy {
   notes: string;
   issueId: string;
   issueType: IssueProviderKey;
+  issueWasUpdated: boolean;
+  issueUrl: string;
+  issuePoints: number;
   parentId: string;
   attachmentIds: string[];
   reminderId?: string;
@@ -80,7 +83,10 @@ export const DEFAULT_TASK: Task = {
   notes: '',
   parentId: null,
   issueId: null,
+  issuePoints: null,
+  issueUrl: null,
   issueType: null,
+  issueWasUpdated: null,
   reminderId: null,
   created: Date.now(),
   repeatCfgId: null,

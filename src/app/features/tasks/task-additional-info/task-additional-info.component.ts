@@ -112,6 +112,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     const prev = this._taskData;
     this._taskData = newVal;
     this._attachmentIds$.next(this._taskData.attachmentIds);
+    // TODO that needs to be handled
     this.issueAttachments = this._issueService.getMappedAttachments(this._taskData.issueType, this._taskData.issueData);
     this.reminderId$.next(newVal.reminderId);
     this.repeatCfgId$.next(newVal.repeatCfgId);
