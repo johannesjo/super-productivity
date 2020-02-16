@@ -8,7 +8,6 @@ import {combineLatest, from, Observable, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {JiraIssueService} from './jira/jira-issue/jira-issue.service';
-import {GithubIssueService} from './github/github-issue/github-issue.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
 
 @Injectable({
@@ -27,7 +26,7 @@ export class IssueService {
     private _jiraApiService: JiraApiService,
     private _gitApiService: GithubApiService,
     private _jiraIssueService: JiraIssueService,
-    private _gitIssueService: GithubIssueService,
+    // private _gitIssueService: GithubIssueService,
     private _projectService: ProjectService,
   ) {
   }
@@ -36,7 +35,7 @@ export class IssueService {
   public async loadStatesForProject(projectId) {
     return Promise.all([
       this._jiraIssueService.loadStateForProject(projectId),
-      this._gitIssueService.loadStateForProject(projectId),
+      // this._gitIssueService.loadStateForProject(projectId),
     ]);
   }
 
@@ -83,7 +82,9 @@ export class IssueService {
         break;
       }
       case GITHUB_TYPE: {
-        this._gitIssueService.updateIssueFromApi(issueId);
+        // TODO implement
+        console.warn('NOT IMPLEMENTED');
+        // this._gitIssueService.updateIssueFromApi(issueId);
       }
     }
   }

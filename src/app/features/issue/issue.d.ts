@@ -3,7 +3,6 @@ import {JiraCfg} from './jira/jira';
 import {GithubCfg} from './github/github';
 import {GithubIssue} from './github/github-issue/github-issue.model';
 import {JiraIssueState} from './jira/jira-issue/store/jira-issue.reducer';
-import {GithubIssueState} from './github/github-issue/store/github-issue.reducer';
 
 
 export type IssueProviderKey = 'JIRA' | 'GITHUB';
@@ -18,11 +17,10 @@ export interface IssueIntegrationCfgs {
 
 export interface IssueStateMap {
   JIRA: JiraIssueState;
-  GITHUB: GithubIssueState;
 }
 
 
-export type IssueState = JiraIssueState | GithubIssueState;
+export type IssueState = JiraIssueState;
 
 export type IssueData = JiraIssue | GithubIssue;
 

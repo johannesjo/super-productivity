@@ -35,7 +35,6 @@ import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/is
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
 import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
-import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
 import {Metric, MetricState} from '../../features/metric/metric.model';
@@ -516,7 +515,6 @@ export class PersistenceService {
   private async _loadIssueDataForProject(projectId: string): Promise<IssueStateMap> {
     return {
       JIRA: await this.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState,
-      GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
     };
   }
 

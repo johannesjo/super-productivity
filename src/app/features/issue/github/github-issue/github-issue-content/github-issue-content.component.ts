@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
-import {GithubIssueService} from '../github-issue.service';
 import {GithubApiService} from '../../github-api.service';
 import {GithubIssue} from '../github-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
@@ -25,7 +24,6 @@ export class GithubIssueContentComponent {
   }));
 
   constructor(
-    private readonly  _githubIssueService: GithubIssueService,
     private readonly  _githubApiService: GithubApiService,
   ) {
   }
@@ -36,6 +34,8 @@ export class GithubIssueContentComponent {
   }
 
   hideUpdates() {
-    this._githubIssueService.update(+this.taskData.issueId, {wasUpdated: false});
+    // TODO should be on task data level
+    alert('NOT IMPLEMENTED');
+    // this._githubIssueService.update(+this.taskData.issueId, {wasUpdated: false});
   }
 }
