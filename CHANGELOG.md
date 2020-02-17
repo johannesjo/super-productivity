@@ -1,3 +1,13 @@
+## [3.2.4](https://github.com/johannesjo/super-productivity/compare/v3.2.3...v3.2.4) (2020-02-17)
+
+
+### Bug Fixes
+
+* add tmp fix for broken material checkbox ([470a1bd](https://github.com/johannesjo/super-productivity/commit/470a1bd9ad057e87b5180fd6b043faf41c3f10e2))
+* background color after angular material css update ([66ac679](https://github.com/johannesjo/super-productivity/commit/66ac679057593547ed07eff5a8129f86272275c5))
+
+
+
 ## [3.2.3](https://github.com/johannesjo/super-productivity/compare/v3.2.2...v3.2.3) (2020-02-15)
 
 
