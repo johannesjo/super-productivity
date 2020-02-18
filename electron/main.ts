@@ -44,6 +44,8 @@ interface MyApp extends App {
 }
 
 const appIN: MyApp = app;
+// NOTE: to get rid of the warning => https://github.com/electron/electron/issues/18397
+appIN.allowRendererProcessReuse = true;
 
 initDebug({showDevTools: IS_DEV}, IS_DEV);
 
