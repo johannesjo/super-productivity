@@ -40,6 +40,7 @@ export interface TaskCopy {
   issueId: string;
   issueType: IssueProviderKey;
   issueWasUpdated: boolean;
+  // TODO should be dynamic
   issueUrl: string;
   issuePoints: number;
   parentId: string;

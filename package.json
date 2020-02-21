@@ -78,6 +78,7 @@
     "googleapis": "^40.0.0",
     "jira-client-fork": "^4.2.1",
     "moment": "^2.24.0",
+    "node-fetch": "^2.6.0",
     "stacktrace-js": "^2.0.1",
     "tslib": "^1.10.0"
   },
@@ -153,6 +154,7 @@
     "ngx-markdown": "^8.0.2",
     "node-sass": "^4.12.0",
     "protractor": "^5.4.2",
+    "query-string": "^6.11.0",
     "rxjs": "^6.5.3",
     "rxjs-tslint": "0.1.5",
     "sass-loader": "^7.1.0",

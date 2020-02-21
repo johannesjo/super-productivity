@@ -33,14 +33,27 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {T} from '../../../t.const';
 import {ElectronService} from '../../../core/electron/electron.service';
+import {stringify} from 'query-string';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
+
+
+interface JiraRequestLogItem {
+  requestMethod: string;
+  transform: (res: any, cfg: any) => any;
+  xhrRequest: RequestInfo;
+  timeout: number;
+
+  resolve(res: any): Promise<void>;
+
+  reject(reason?: any): Promise<unknown>;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class JiraApiService {
-  private _requestsLog = {};
+  private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
   private _isBlockAccess = loadFromSessionStorage(BLOCK_ACCESS_KEY);
   private _isExtension = false;
   private _isHasCheckedConnection = false;
@@ -112,8 +125,13 @@ export class JiraApiService {
       + ' ' + (this._cfg.searchJqlQuery ? ` AND ${this._cfg.searchJqlQuery}` : '');
 
     return this._sendRequest$({
-      apiMethod: 'searchJira',
       arguments: [searchQuery, options],
+      pathname: 'search',
+      method: 'POST',
+      body: {
+        ...options,
+        jql: searchQuery
+      },
       transform: mapToSearchResults
     });
   }
@@ -123,8 +141,15 @@ export class JiraApiService {
     const jql = (this._cfg.searchJqlQuery ? `${encodeURI(this._cfg.searchJqlQuery)}` : '');
 
     return this._sendRequest$({
-      apiMethod: 'issuePicker',
-      arguments: [searchStr, jql],
+      pathname: 'issue/picker',
+      method: 'GET',
+      followAllRedirects: true,
+      query: {
+        showSubTasks: true,
+        showSubTaskParent: true,
+        query: searchStr,
+        currentJQL: jql
+      },
       transform: mapToSearchResults
     });
   }
@@ -164,7 +189,8 @@ export class JiraApiService {
 
   getCurrentUser$(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
     return this._sendRequest$({
-      apiMethod: 'getCurrentUser',
+      pathname: `myself`,
+      method: 'GET',
       transform: mapResponse,
     }, cfg, isForce);
   }
@@ -235,6 +261,7 @@ export class JiraApiService {
   }
 
   // TODO refactor data madness of request and add types for everything
+  // TODO XhrUriConfig
   private _sendRequest$(request, cfg = this._cfg, isForce = false): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       this._snackService.open({
@@ -262,9 +289,7 @@ export class JiraApiService {
 
     // assign uuid to request to know which responsive belongs to which promise
     request.requestId = shortid();
-    request.config = {...cfg, isJiraEnabled: true};
     request.arguments = request.arguments || [];
-
 
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
@@ -281,8 +306,8 @@ export class JiraApiService {
       resolve: promiseResolve,
       reject: promiseReject,
       requestMethod: request.apiMethod,
-      clientRequest: request,
-      timeout: setTimeout(() => {
+      xhrRequest: request,
+      timeout: window.setTimeout(() => {
         console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod, request);
         // delete entry for promise
         this._snackService.open({
@@ -294,9 +319,31 @@ export class JiraApiService {
       }, JIRA_REQUEST_TIMEOUT_DURATION)
     };
 
+
+    // prepare request
+    const encoded = this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
+    console.log(request);
+    const queryStr = request.query ? `?${stringify(request.query)}` : '';
+    const base = `${cfg.host}/rest/api/latest`;
+    console.log(base);
+
+    // cleanup just in case
+    const url = `${base}/${request.pathname}${queryStr}`.trim();
+    const requestInit: RequestInit = {
+      credentials: 'include',
+      method: request.method || 'GET',
+      body: JSON.stringify(request.body),
+      headers: {
+        authorization: `Basic ${encoded}`,
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const requestToSend = {requestId: request.requestId, requestInit, url};
+
     // send to electron
     if (this._electronService.isElectronApp) {
-      this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, request);
+      this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, requestToSend);
     } else if (this._isExtension) {
       this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', {
         requestId: request.requestId,
@@ -314,6 +361,9 @@ export class JiraApiService {
     return fromPromise(promise)
       .pipe(
         catchError((err) => {
+          console.log(err);
+          console.log(getJiraResponseErrorTxt(err));
+
           const errTxt = `Jira: ${getJiraResponseErrorTxt(err)}`;
           this._snackService.open({type: 'ERROR', msg: errTxt});
           return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
@@ -322,16 +372,65 @@ export class JiraApiService {
       );
   }
 
+  doRequest(orgRequest, request) {
+
+
+    // return new Promise((resolve) => {
+    //   this.xhr({
+    //     uri,
+    //     method: request.method || 'GET',
+    //     body: JSON.stringify(request.body),
+    //     headers: {
+    //       authorization: `Basic ${encoded}`,
+    //       'Content-Type': 'application/json'
+    //     }
+    //   }, (err, res, body) => {
+    //     if (err) {
+    //       resolve({
+    //         error: err,
+    //         requestId: orgRequest.requestId
+    //       });
+    //     } else if (res.statusCode >= 300) {
+    //       resolve({
+    //         error: res.statusCode,
+    //         requestId: orgRequest.requestId
+    //       });
+    //     } else if (body) {
+    //       const parsed = JSON.parse(body);
+    //
+    //       const errIn = parsed.errorMessages || parsed.errors;
+    //       if (errIn) {
+    //         resolve({
+    //           error: errIn,
+    //           requestId: orgRequest.requestId
+    //         });
+    //       } else {
+    //         resolve({
+    //           response: parsed,
+    //           requestId: orgRequest.requestId
+    //         });
+    //       }
+    //     } else if (!body) {
+    //       resolve({
+    //         response: null,
+    //         requestId: orgRequest.requestId
+    //       });
+    //     }
+    //   });
+    // });
+  }
+
+
   private _handleResponse(res) {
     // check if proper id is given in callback and if exists in requestLog
     if (res.requestId && this._requestsLog[res.requestId]) {
       const currentRequest = this._requestsLog[res.requestId];
       // cancel timeout for request
-      clearTimeout(currentRequest.timeout);
+      window.clearTimeout(currentRequest.timeout);
 
       // resolve saved promise
       if (!res || res.error) {
-        console.log('JIRA_RESPONSE_ERROR', res, currentRequest);
+        console.error('JIRA_RESPONSE_ERROR', res, currentRequest);
         // let msg =
         if (res.error &&
           (res.error.statusCode && res.error.statusCode === 401)
@@ -359,5 +458,12 @@ export class JiraApiService {
   private _blockAccess() {
     this._isBlockAccess = true;
     saveToSessionStorage(BLOCK_ACCESS_KEY, true);
+  }
+
+  private _b64EncodeUnicode(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+      function toSolidBytes(match, p1) {
+        return String.fromCharCode(+'0x' + p1);
+      }));
   }
 }

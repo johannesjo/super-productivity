@@ -1,47 +1,38 @@
-import * as JiraApi from 'jira-client-fork';
 import {getWin} from './main-window';
 import {IPC} from './ipc-events.const';
 import {session} from 'electron';
 import {JiraCfg} from '../src/app/features/issue/jira/jira';
+import fetch from 'node-fetch';
 
-export const sendJiraRequest = (request) => {
+export const sendJiraRequest = ({requestId, requestInit, url}: { requestId: string; requestInit: RequestInit; url: string }) => {
   const mainWin = getWin();
-  const config = request.config;
-  const apiMethod = request.apiMethod;
-  const args = request.arguments;
-  const requestId = request.requestId;
+  console.log(url, requestInit, requestId);
 
-
-  const {host, protocol, port} = parseHostAndPort(config);
-
-  const jira = new JiraApi({
-    protocol,
-    host,
-    port,
-    username: config.userName,
-    password: config.password,
-    apiVersion: 'latest',
-
-    // also allow unauthorized certificates
-    strictSSL: false
-  });
-
-  jira[apiMethod](...args)
-    .then(res => {
-      // console.log('JIRA_RESPONSE', error, res);
+  fetch(url, requestInit)
+    .then((response) => {
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+      return response;
+    })
+    .then(res => res.json())
+    .then((response) => {
+      console.log('JIRA_RESPONSE', response);
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-        response: res,
+        response,
         requestId,
       });
     })
-    .catch(err => {
+    .catch((error) => {
+      console.error('error', error);
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-        error: err,
+        error,
         requestId,
       });
     });
 };
 
+// TODO simplify and do encoding in frontend service
 export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
   const {host, protocol, port} = parseHostAndPort(jiraCfg);
 
