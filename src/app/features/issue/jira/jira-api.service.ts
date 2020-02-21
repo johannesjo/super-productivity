@@ -36,7 +36,7 @@ import {ElectronService} from '../../../core/electron/electron.service';
 import {stringify} from 'query-string';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
-
+const API_VERSION = 3;
 
 interface JiraRequestLogItem {
   requestMethod: string;
@@ -322,24 +322,41 @@ export class JiraApiService {
 
     // prepare request
     const encoded = this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
+    console.log(encoded);
+    const _b64EncodeUnicode = (str) => {
+      // tslint:disable-next-line
+      return Buffer.from(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+          return String.fromCharCode(+`0x${p1}`);
+        })).toString('base64');
+    };
+    const encoded2 = _b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
+    console.log(encoded2);
+
+
     console.log(request);
     const queryStr = request.query ? `?${stringify(request.query)}` : '';
-    const base = `${cfg.host}/rest/api/latest`;
+    const base = `${cfg.host}/rest/api/${API_VERSION}`;
     console.log(base);
+    console.log(encoded);
+
 
     // cleanup just in case
     const url = `${base}/${request.pathname}${queryStr}`.trim();
     const requestInit: RequestInit = {
-      credentials: 'include',
+      // mode: 'no-cors',
+      // credentials: 'same-origin',
       method: request.method || 'GET',
-      body: JSON.stringify(request.body),
+      // body: JSON.stringify(request.body) || null,
       headers: {
+        host: 'test-sup3.atlassian.net',
+        // host: request.host,
         authorization: `Basic ${encoded}`,
         'Content-Type': 'application/json'
       }
     };
 
-    const requestToSend = {requestId: request.requestId, requestInit, url};
+    const requestToSend = {requestId: request.requestId, requestInit, url, cfg};
 
     // send to electron
     if (this._electronService.isElectronApp) {
@@ -461,9 +478,6 @@ export class JiraApiService {
   }
 
   private _b64EncodeUnicode(str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-      function toSolidBytes(match, p1) {
-        return String.fromCharCode(+'0x' + p1);
-      }));
+    return new Buffer(str || '').toString('base64');
   }
 }

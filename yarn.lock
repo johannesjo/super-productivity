@@ -7612,7 +7612,7 @@ node-fetch-npm@^2.0.2:
     json-parse-better-errors "^1.0.0"
     safe-buffer "^5.1.1"
 
-node-fetch@^2.3.0, node-fetch@^2.6.0:
+node-fetch@^2.3.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
   integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
@@ -9377,6 +9377,13 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
+request-debug@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/request-debug/-/request-debug-0.2.0.tgz#fc054ec817181b04ca41a052c136f61c48abaf78"
+  integrity sha1-/AVOyBcYGwTKQaBSwTb2HEirr3g=
+  dependencies:
+    stringify-clone "^1.0.0"
+
 request-promise@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/request-promise/-/request-promise-3.0.0.tgz#be1edb26f41c49cd1d5656c6753d6842a1249f46"
@@ -10442,6 +10449,11 @@ string_decoder@~1.1.1:
   integrity sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
   dependencies:
     safe-buffer "~5.1.0"
+
+stringify-clone@^1.0.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/stringify-clone/-/stringify-clone-1.1.1.tgz#309a235fb4ecfccd7d388dbe18ba904facaf433b"
+  integrity sha1-MJojX7Ts/M19OI2+GLqQT6yvQzs=
 
 strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   version "3.0.1"

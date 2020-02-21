@@ -2,46 +2,55 @@ import {getWin} from './main-window';
 import {IPC} from './ipc-events.const';
 import {session} from 'electron';
 import {JiraCfg} from '../src/app/features/issue/jira/jira';
-import fetch from 'node-fetch';
+// import rp from 'request-promise';
+const rp = require('request-promise');
 
-export const sendJiraRequest = ({requestId, requestInit, url}: { requestId: string; requestInit: RequestInit; url: string }) => {
-  const mainWin = getWin();
-  console.log(url, requestInit, requestId);
 
-  fetch(url, requestInit)
-    .then((response) => {
-      if (!response.ok) {
-        throw Error(response.statusText);
-      }
-      return response;
-    })
-    .then(res => res.json())
-    .then((response) => {
-      console.log('JIRA_RESPONSE', response);
-      mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-        response,
-        requestId,
+export const sendJiraRequest = ({requestId, requestInit, url, cfg}: { requestId: string; requestInit: RequestInit; url: string, cfg: any }) => {
+    const mainWin = getWin();
+    console.log('--------------------------------------------------------------------');
+    console.log(url);
+    console.log('--------------------------------------------------------------------');
+
+    const opt = requestInit;
+    // const opt = {
+    //   ...requestInit, strictSSL: false,
+    //   auth: {user: cfg.userName, pass: cfg.password}
+    // };
+    // delete opt.headers;
+
+    rp(url, requestInit)
+      .then((response) => {
+        console.log('JIRA_RAW_RESPONSE', response);
+        return JSON.parse(response);
+        // TODO only required for fetch
+        // if (!res.ok) {
+        //   throw Error(res.statusText);
+        // }
+      })
+      .then((response) => {
+        mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
+          response,
+          requestId,
+        });
+      })
+      .catch((error) => {
+        // console.error('JIRA_ERR_ERR', error);
+        mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
+          error,
+          requestId,
+        });
       });
-    })
-    .catch((error) => {
-      console.error('error', error);
-      mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-        error,
-        requestId,
-      });
-    });
-};
+  }
+;
 
 // TODO simplify and do encoding in frontend service
 export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
   const {host, protocol, port} = parseHostAndPort(jiraCfg);
 
+  // TODO export to util fn
   const _b64EncodeUnicode = (str) => {
-    // tslint:disable-next-line
-    return Buffer.from(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-      function toSolidBytes(match, p1) {
-        return String.fromCharCode(+`0x${p1}`);
-      })).toString('base64');
+    return new Buffer(str || '').toString('base64');
   };
   const encoded = _b64EncodeUnicode(`${jiraCfg.userName}:${jiraCfg.password}`);
   const filter = {
