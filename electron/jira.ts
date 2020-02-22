@@ -3,46 +3,39 @@ import {IPC} from './ipc-events.const';
 import {session} from 'electron';
 import {JiraCfg} from '../src/app/features/issue/jira/jira';
 // import rp from 'request-promise';
-const rp = require('request-promise');
+// const rp = require('request-promise');
+import fetch from 'node-fetch';
 
 
 export const sendJiraRequest = ({requestId, requestInit, url, cfg}: { requestId: string; requestInit: RequestInit; url: string, cfg: any }) => {
-    const mainWin = getWin();
-    console.log('--------------------------------------------------------------------');
-    console.log(url);
-    console.log('--------------------------------------------------------------------');
+  const mainWin = getWin();
+  console.log('--------------------------------------------------------------------');
+  console.log(url);
+  console.log('--------------------------------------------------------------------');
 
-    const opt = requestInit;
-    // const opt = {
-    //   ...requestInit, strictSSL: false,
-    //   auth: {user: cfg.userName, pass: cfg.password}
-    // };
-    // delete opt.headers;
-
-    rp(url, requestInit)
-      .then((response) => {
-        console.log('JIRA_RAW_RESPONSE', response);
-        return JSON.parse(response);
-        // TODO only required for fetch
-        // if (!res.ok) {
-        //   throw Error(res.statusText);
-        // }
-      })
-      .then((response) => {
-        mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-          response,
-          requestId,
-        });
-      })
-      .catch((error) => {
-        // console.error('JIRA_ERR_ERR', error);
-        mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-          error,
-          requestId,
-        });
+  fetch(url, requestInit)
+    .then((response) => {
+      // console.log('JIRA_RAW_RESPONSE', response);
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+      return response;
+    })
+    .then(res => res.json())
+    .then((response) => {
+      mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
+        response,
+        requestId,
       });
-  }
-;
+    })
+    .catch((error) => {
+      console.error('JIRA_ERR_ERR', error);
+      mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
+        error,
+        requestId,
+      });
+    });
+};
 
 // TODO simplify and do encoding in frontend service
 export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {

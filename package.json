@@ -78,7 +78,7 @@
     "googleapis": "^40.0.0",
     "jira-client-fork": "^4.2.1",
     "moment": "^2.24.0",
-    "request-promise": "^3.0.0",
+    "node-fetch": "^2.6.0",
     "stacktrace-js": "^2.0.1",
     "tslib": "^1.10.0"
   },
