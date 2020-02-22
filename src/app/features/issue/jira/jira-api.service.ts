@@ -39,15 +39,19 @@ const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 3;
 
 interface JiraRequestLogItem {
-  requestMethod: string;
   transform: (res: any, cfg: any) => any;
-  xhrRequest: RequestInfo;
-  timeout: number;
+  requestInit: RequestInit;
+  timeoutId: number;
 
   resolve(res: any): Promise<void>;
 
   reject(reason?: any): Promise<unknown>;
 }
+
+interface JiraRequestCfg {
+  [key: string]: any;
+}
+
 
 @Injectable({
   providedIn: 'root',
@@ -262,7 +266,7 @@ export class JiraApiService {
 
   // TODO refactor data madness of request and add types for everything
   // TODO XhrUriConfig
-  private _sendRequest$(request, cfg = this._cfg, isForce = false): Observable<any> {
+  private _sendRequest$(jiraRequestCfg: JiraRequestCfg, cfg = this._cfg, isForce = false): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',
@@ -287,94 +291,43 @@ export class JiraApiService {
       return throwError({[HANDLED_ERROR_PROP_STR]: 'Blocked access to prevent being shut out'});
     }
 
+    // BUILD REQUEST START
+    // -------------------
     // assign uuid to request to know which responsive belongs to which promise
-    request.requestId = shortid();
-    request.arguments = request.arguments || [];
+    const requestId = shortid();
+
+    const requestInit = this._makeRequestInit(cfg, jiraRequestCfg.method);
 
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
-
     const promise = new Promise((resolve, reject) => {
       promiseResolve = resolve;
       promiseReject = reject;
     });
 
     // save to request log
-    this._requestsLog[request.requestId] = {
-      transform: request.transform,
-      resolve: promiseResolve,
-      reject: promiseReject,
-      requestMethod: request.apiMethod,
-      xhrRequest: request,
-      timeout: window.setTimeout(() => {
-        console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod, request);
-        // delete entry for promise
-        this._snackService.open({
-          msg: T.F.JIRA.S.TIMED_OUT,
-          type: 'ERROR',
-        });
-        this._requestsLog[request.requestId].reject('Request timed out');
-        delete this._requestsLog[request.requestId];
-      }, JIRA_REQUEST_TIMEOUT_DURATION)
-    };
+    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, jiraRequestCfg.transform);
 
-
-    // prepare request
-    const encoded = this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
-    console.log(encoded);
-    const _b64EncodeUnicode = (str) => {
-      // tslint:disable-next-line
-      return Buffer.from(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-        function toSolidBytes(match, p1) {
-          return String.fromCharCode(+`0x${p1}`);
-        })).toString('base64');
-    };
-    const encoded2 = _b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
-    console.log(encoded2);
-
-
-    console.log(request);
-    const queryStr = request.query ? `?${stringify(request.query)}` : '';
+    const queryStr = jiraRequestCfg.query ? `?${stringify(jiraRequestCfg.query)}` : '';
     const base = `${cfg.host}/rest/api/${API_VERSION}`;
-    console.log(base);
-    console.log(encoded);
+    const url = `${base}/${jiraRequestCfg.pathname}${queryStr}`.trim();
 
-
-    // cleanup just in case
-    const url = `${base}/${request.pathname}${queryStr}`.trim();
-    const requestInit: RequestInit = {
-      // mode: 'no-cors',
-      // credentials: 'same-origin',
-      method: request.method || 'GET',
-      // body: JSON.stringify(request.body) || null,
-      headers: {
-        host: 'test-sup3.atlassian.net',
-        // host: request.host,
-        authorization: `Basic ${encoded}`,
-        'Content-Type': 'application/json'
-      }
-    };
-
-    const requestToSend = {requestId: request.requestId, requestInit, url, cfg};
+    const requestToSend = {requestId, requestInit, url, cfg};
 
     // send to electron
     if (this._electronService.isElectronApp) {
       this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, requestToSend);
     } else if (this._isExtension) {
-      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', {
-        requestId: request.requestId,
-        apiMethod: request.apiMethod,
-        arguments: request.arguments,
-        config: {
-          host: request.config.host,
-          userName: request.config.userName,
-          password: request.config.password,
-          isJiraEnabled: request.config.isJiraEnabled,
-        }
-      });
+      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST',
+        requestToSend
+        //   {
+        //   requestId: request.requestId,
+        //   apiMethod: request.apiMethod,
+        //   arguments: request.arguments,
+        // }
+      );
     }
-
     return fromPromise(promise)
       .pipe(
         catchError((err) => {
@@ -389,9 +342,46 @@ export class JiraApiService {
       );
   }
 
+  private _makeRequestInit(cfg, method: string = 'GET'): RequestInit {
+    const encoded = this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
+
+    return {
+      // mode: 'no-cors',
+      // credentials: 'same-origin',
+      method,
+      // body: JSON.stringify(request.body) || null,
+      headers: {
+        // TODO make proper host
+        host: 'test-sup3.atlassian.net',
+        // host: request.host,
+        authorization: `Basic ${encoded}`,
+        'Content-Type': 'application/json'
+      }
+    };
+  }
+
+  private _makeJiraRequestLogItem(promiseResolve, promiseReject, requestId: string, requestInit: RequestInit, transform: any): JiraRequestLogItem {
+    return {
+      transform,
+      resolve: promiseResolve,
+      reject: promiseReject,
+      // NOTE: only needed for debug
+      requestInit,
+
+      timeoutId: window.setTimeout(() => {
+        console.log('ERROR', 'Jira Request timed out', requestInit);
+        // delete entry for promise
+        this._snackService.open({
+          msg: T.F.JIRA.S.TIMED_OUT,
+          type: 'ERROR',
+        });
+        this._requestsLog[requestId].reject('Request timed out');
+        delete this._requestsLog[requestId];
+      }, JIRA_REQUEST_TIMEOUT_DURATION)
+    };
+  }
+
   doRequest(orgRequest, request) {
-
-
     // return new Promise((resolve) => {
     //   this.xhr({
     //     uri,
@@ -443,7 +433,7 @@ export class JiraApiService {
     if (res.requestId && this._requestsLog[res.requestId]) {
       const currentRequest = this._requestsLog[res.requestId];
       // cancel timeout for request
-      window.clearTimeout(currentRequest.timeout);
+      window.clearTimeout(currentRequest.timeoutId);
 
       // resolve saved promise
       if (!res || res.error) {
@@ -478,6 +468,8 @@ export class JiraApiService {
   }
 
   private _b64EncodeUnicode(str) {
-    return new Buffer(str || '').toString('base64');
+    return btoa
+      ? btoa(str)
+      : new Buffer(str || '').toString('base64');
   }
 }
