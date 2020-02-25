@@ -5,7 +5,6 @@ import {
   JIRA_ADDITIONAL_ISSUE_FIELDS,
   JIRA_DATETIME_FORMAT,
   JIRA_MAX_RESULTS,
-  JIRA_REDUCED_ISSUE_FIELDS,
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
 import {ProjectService} from '../../project/project.service';
@@ -120,33 +119,12 @@ export class JiraApiService {
     saveToSessionStorage(BLOCK_ACCESS_KEY, false);
   }
 
-  search$(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<SearchResultItem[]> {
-    const options = {
-      maxResults,
-      fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
-    };
-    const searchQuery = `text ~ "${searchTerm}"`
-      + ' ' + (this._cfg.searchJqlQuery ? ` AND ${this._cfg.searchJqlQuery}` : '');
-
-    return this._sendRequest$({
-      arguments: [searchQuery, options],
-      pathname: 'search',
-      method: 'POST',
-      body: {
-        ...options,
-        jql: searchQuery
-      },
-      transform: mapToSearchResults
-    });
-  }
-
   issuePicker$(searchTerm: string): Observable<SearchResultItem[]> {
     const searchStr = `${searchTerm}`;
     const jql = (this._cfg.searchJqlQuery ? `${encodeURI(this._cfg.searchJqlQuery)}` : '');
 
     return this._sendRequest$({
       pathname: 'issue/picker',
-      method: 'GET',
       followAllRedirects: true,
       query: {
         showSubTasks: true,
@@ -160,8 +138,7 @@ export class JiraApiService {
 
   listFields$(): Observable<any> {
     return this._sendRequest$({
-      apiMethod: 'listFields',
-      arguments: [],
+      pathname: 'field',
     });
   }
 
@@ -178,30 +155,36 @@ export class JiraApiService {
 
     return this._sendRequest$({
       apiMethod: 'searchJira',
-      arguments: [searchQuery, options],
-      transform: mapIssuesResponse
+      transform: mapIssuesResponse,
+      pathname: 'search',
+      method: 'POST',
+      body: {
+        ...options,
+        jql: searchQuery
+      },
     });
   }
 
   getIssueById$(issueId, isGetChangelog = false): Observable<JiraIssue> {
     return this._sendRequest$({
-      apiMethod: 'findIssue',
       transform: mapIssueResponse,
-      arguments: [issueId, ...(isGetChangelog ? ['changelog'] : [])]
+      pathname: `issue/${issueId}`,
+      query: {
+        expand: isGetChangelog ? ['changelog'] : []
+      }
     });
   }
 
   getCurrentUser$(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
     return this._sendRequest$({
       pathname: `myself`,
-      method: 'GET',
       transform: mapResponse,
     }, cfg, isForce);
   }
 
   listStatus$(): Observable<JiraOriginalStatus[]> {
     return this._sendRequest$({
-      apiMethod: 'listStatus',
+      pathname: `status`,
       transform: mapResponse,
     });
   }
@@ -209,49 +192,53 @@ export class JiraApiService {
 
   getTransitionsForIssue$(issueId: string): Observable<JiraOriginalTransition[]> {
     return this._sendRequest$({
-      apiMethod: 'listTransitions',
+      pathname: `issue/${issueId}/transitions`,
+      method: 'GET',
+      query: {
+        expand: 'transitions.fields'
+      },
       transform: mapTransitionResponse,
-      arguments: [issueId]
     });
   }
 
   transitionIssue$(issueId, transitionId): Observable<any> {
     return this._sendRequest$({
-      apiMethod: 'transitionIssue',
-      transform: mapResponse,
-      arguments: [issueId, {
+      pathname: `issue/${issueId}/transitions`,
+      method: 'POST',
+      body: {
         transition: {
           id: transitionId,
         }
-      }]
+      },
+      transform: mapResponse,
     });
   }
 
   updateAssignee$(issueId, assignee): Observable<any> {
     return this._sendRequest$({
-      apiMethod: 'updateIssue',
-      arguments: [issueId, {
+      pathname: `issue/${issueId}`,
+      method: 'PUT',
+      body: {
         fields: {
           assignee: {
             name: assignee
           }
         }
-      }]
+      },
     });
   }
 
   addWorklog$(issueId: string, started: string, timeSpent: number, comment: string): Observable<any> {
+    const worklog = {
+      started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
+      timeSpentSeconds: Math.floor(timeSpent / 1000),
+      comment,
+    };
     return this._sendRequest$({
-      apiMethod: 'addWorklog',
+      pathname: `issue/${issueId}/worklog`,
+      method: 'POST',
+      body: worklog,
       transform: mapResponse,
-      arguments: [
-        issueId,
-        {
-          started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
-          timeSpentSeconds: Math.floor(timeSpent / 1000),
-          comment,
-        }
-      ]
     });
   }
 
@@ -319,14 +306,7 @@ export class JiraApiService {
     if (this._electronService.isElectronApp) {
       this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, requestToSend);
     } else if (this._isExtension) {
-      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST',
-        requestToSend
-        //   {
-        //   requestId: request.requestId,
-        //   apiMethod: request.apiMethod,
-        //   arguments: request.arguments,
-        // }
-      );
+      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
     }
     return fromPromise(promise)
       .pipe(
