@@ -113,6 +113,16 @@ export class JiraIssueService {
         const newUpdated = new Date(issue.updated).getTime();
         const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
 
+        if (wasUpdated) {
+          this._taskService.update(task.id, {
+            issueLastUpdated: newUpdated,
+            issueWasUpdated: wasUpdated,
+            issueAttachmentNr: issue.attachments.length,
+            issuePoints: issue.storyPoints
+          });
+        }
+
+        // NOTIFICATIONS
         if (wasUpdated && isNotifyOnUpdate) {
           this._snackService.open({
             msg: T.F.JIRA.S.ISSUE_UPDATE,
@@ -121,11 +131,6 @@ export class JiraIssueService {
             },
             ico: 'cloud_download',
           });
-          this._taskService.update(task.id, {issueLastUpdated: newUpdated, issueWasUpdated: wasUpdated});
-
-        } else if (wasUpdated) {
-          this._taskService.update(task.id, {issueLastUpdated: newUpdated, issueWasUpdated: wasUpdated});
-
         } else if (isNotifyOnNoUpdateRequired) {
           this._snackService.open({
             msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
