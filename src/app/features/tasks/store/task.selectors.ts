@@ -5,6 +5,7 @@ import {Task, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../task.mode
 import {IssueProviderKey} from '../../issue/issue';
 import {filterStartableTasks} from './task.reducer.util';
 import {taskAdapter} from './task.adapter';
+import {GITHUB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 
 const mapIssueDataToTask = (tasksIN, issueEntityMap): TaskWithIssueData[] => {
   return tasksIN && tasksIN.map((task) => {
@@ -94,6 +95,22 @@ export const selectCurrentTaskOrParentWithData = createSelector(
       ...twi,
       subTasks: twi.subTaskIds.map(id => s.entities[id]),
     };
+  });
+
+export const selectJiraTasks = createSelector(
+  selectTaskFeatureState,
+  (s): Task[] => {
+    return s.ids
+      .map(id => s.entities[id])
+      .filter((task: Task) => task.issueType === JIRA_TYPE);
+  });
+
+export const selectGitTasks = createSelector(
+  selectTaskFeatureState,
+  (s): Task[] => {
+    return s.ids
+      .map(id => s.entities[id])
+      .filter((task: Task) => task.issueType === GITHUB_TYPE);
   });
 
 export const selectSelectedTaskId = createSelector(selectTaskFeatureState, (state) => state.selectedTaskId);

@@ -8,25 +8,24 @@ import {mapJiraAttachmentToAttachment} from './jira-issue-map.util';
 import {Attachment} from '../../../attachment/attachment.model';
 import {JiraApiService} from '../jira-api.service';
 import {SnackService} from '../../../../core/snack/snack.service';
-import {IssueData} from '../../issue';
 import {take} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {T} from '../../../../t.const';
 import {JIRA_TYPE} from '../../issue.const';
+import {Task} from 'src/app/features/tasks/task.model';
+import {TaskService} from '../../../tasks/task.service';
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class JiraIssueService {
-  // jiraIssues$: Observable<JiraIssue[]> = this._store.pipe(select(selectAllJiraIssues));
-  // jiraIssuesEntities$: Observable<Dictionary<JiraIssue>> = this._store.pipe(select(selectJiraIssueEntities));
-
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
     private readonly _jiraApiService: JiraApiService,
     private readonly _snackService: SnackService,
+    private readonly _taskService: TaskService,
   ) {
   }
 
@@ -107,41 +106,31 @@ export class JiraIssueService {
 
   // TODO there is probably a better way to to do this
   // TODO refactor to actions
-  updateIssueFromApi(issueId, oldIssueDataIN?: IssueData, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
-    const oldIssueData = oldIssueDataIN as JiraIssue;
-
-    return this._jiraApiService.getIssueById$(issueId, true)
-      .subscribe((updatedIssue) => {
-        const changelog = oldIssueDataIN
-          ? this._createChangelog(updatedIssue, oldIssueData)
-          : [];
-        const wasUpdated = (isNotifyOnUpdate && changelog.length > 0);
-        // used for the case when there is already a changelist shown
-        const isNoUpdateChangelog = (oldIssueData && oldIssueData.wasUpdated && changelog.length === 0);
-
-        const changedFields = {
-          ...updatedIssue,
-          lastUpdateFromRemote: Date.now(),
-          // only update those if we want to
-          ...(wasUpdated ? {wasUpdated} : {}),
-          ...(isNoUpdateChangelog ? {} : {changelog}),
-        };
-
-        this.update(issueId, changedFields, oldIssueData);
+  updateIssueFromApi(task: Task, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
+    return this._jiraApiService.getIssueById$(task.issueId, false)
+      .subscribe((issue: JiraIssue) => {
+        // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
+        const newUpdated = new Date(issue.updated).getTime();
+        const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
 
         if (wasUpdated && isNotifyOnUpdate) {
           this._snackService.open({
             msg: T.F.JIRA.S.ISSUE_UPDATE,
             translateParams: {
-              issueText: `${updatedIssue.key}`
+              issueText: `${issue.key}`
             },
             ico: 'cloud_download',
           });
+          this._taskService.update(task.id, {issueLastUpdated: newUpdated, issueWasUpdated: wasUpdated});
+
+        } else if (wasUpdated) {
+          this._taskService.update(task.id, {issueLastUpdated: newUpdated, issueWasUpdated: wasUpdated});
+
         } else if (isNotifyOnNoUpdateRequired) {
           this._snackService.open({
             msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
             translateParams: {
-              issueText: `${updatedIssue.key}`
+              issueText: `${issue.key}`
             },
             ico: 'cloud_download',
           });
@@ -153,6 +142,7 @@ export class JiraIssueService {
     return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
   }
 
+  // TODO find solution
   private _createChangelog(updatedIssue: JiraIssue, oldIssue: JiraIssue): JiraChangelogEntry[] {
     let changelog: JiraChangelogEntry[] = [];
     const oldCommentLength = oldIssue && oldIssue.comments && oldIssue.comments.length || 0;

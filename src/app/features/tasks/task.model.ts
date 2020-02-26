@@ -37,12 +37,16 @@ export interface TaskCopy {
   isDone: boolean;
 
   notes: string;
+
   issueId: string;
   issueType: IssueProviderKey;
-  issueWasUpdated: boolean;
   // TODO should be dynamic
   issueUrl: string;
+  issueWasUpdated: boolean;
+  issueLastUpdated: number;
+  issueAttachmentNr: number;
   issuePoints: number;
+
   parentId: string;
   attachmentIds: string[];
   reminderId?: string;
@@ -87,6 +91,8 @@ export const DEFAULT_TASK: Task = {
   issuePoints: null,
   issueUrl: null,
   issueType: null,
+  issueAttachmentNr: null,
+  issueLastUpdated: null,
   issueWasUpdated: null,
   reminderId: null,
   created: Date.now(),

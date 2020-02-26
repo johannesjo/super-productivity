@@ -53,8 +53,6 @@ export class DialogJiraAddWorklogComponent {
           msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
           translateParams: {issueKey: this.issue.key}
         });
-        // TODO not ideal...
-        this._jiraIssueService.updateIssueFromApi(this.issue.id, this.issue, false, false);
         this.close();
       });
     }

@@ -269,7 +269,6 @@ export class TaskService {
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
-    private readonly _issueService: IssueService,
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
