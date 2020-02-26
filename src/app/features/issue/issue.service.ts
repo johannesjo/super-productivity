@@ -9,6 +9,8 @@ import {ProjectService} from '../project/project.service';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {JiraIssueService} from './jira/jira-issue/jira-issue.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
+import {TaskService} from '../tasks/task.service';
+import {Task} from '../tasks/task.model';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +30,7 @@ export class IssueService {
     private _jiraIssueService: JiraIssueService,
     // private _gitIssueService: GithubIssueService,
     private _projectService: ProjectService,
+    private _taskService: TaskService,
   ) {
   }
 
@@ -78,7 +81,8 @@ export class IssueService {
   ) {
     switch (issueType) {
       case JIRA_TYPE: {
-        this._jiraIssueService.updateIssueFromApi(issueId, issueData, isNotifySuccess, isNotifyNoUpdateRequired);
+        // TODO fix
+        // this._jiraIssueService.updateIssueFromApi(issueId, issueData, isNotifySuccess, isNotifyNoUpdateRequired);
         break;
       }
       case GITHUB_TYPE: {
@@ -87,6 +91,43 @@ export class IssueService {
         // this._gitIssueService.updateIssueFromApi(issueId);
       }
     }
+  }
+
+  public async addTaskWithIssue(
+    issueType: IssueProviderKey,
+    issueData: IssueData,
+    isAddToBacklog = false
+  ) {
+
+    let title: string;
+    let additionalFields: Partial<Task> = {};
+
+    switch (issueType) {
+      case JIRA_TYPE: {
+        // NOTE we need to reload, because we need to get the story points etc
+        // TODO load additional data afterwards to speed up process
+        const issue = await this._jiraApiService.getIssueById$(issueData.id).toPromise();
+        title = issue.summary;
+        additionalFields = {
+          issuePoints: issue.storyPoints,
+          issueAttachmentNr: issue.attachments ? issue.attachments.length : 0,
+          issueWasUpdated: false,
+          issueLastUpdated: new Date(issue.updated).getTime()
+        };
+        break;
+      }
+      case GITHUB_TYPE: {
+        // TODO implement
+        console.warn('NOT IMPLEMENTED');
+        // this._gitIssueService.updateIssueFromApi(issueId);
+      }
+    }
+
+    this._taskService.add(title, isAddToBacklog, {
+      issueType,
+      issueId: (issueData.id as string),
+      ...additionalFields,
+    });
   }
 
   public getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {

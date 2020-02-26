@@ -650,13 +650,13 @@ export class TaskService {
       .map(task => task.issueId);
   }
 
-  async checkForTaskWithIssue(issue: IssueData): Promise<{
+  async checkForTaskWithIssue(issueId: string | number): Promise<{
     task: TaskWithIssueData,
     subTasks: TaskWithIssueData[],
     isFromArchive: boolean,
   }> {
     const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise() as Task[];
-    const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issue.id);
+    const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issueId);
 
     if (taskWithSameIssue) {
       return {
@@ -668,7 +668,7 @@ export class TaskService {
       const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.load(this._projectService.currentId);
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
-        const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issue.id);
+        const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issueId);
         return archiveTaskWithSameIssue && {
           task: archiveTaskWithSameIssue,
           subTasks: archiveTaskWithSameIssue.subTaskIds && archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState.entities[id]),

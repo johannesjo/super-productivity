@@ -17,7 +17,6 @@ import {BehaviorSubject, Observable, zip} from 'rxjs';
 import {IssueService} from '../../issue/issue.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {JiraApiService} from '../../issue/jira/jira-api.service';
-import {JIRA_TYPE} from '../../issue/issue.const';
 import {T} from '../../../t.const';
 import {Task} from '../task.model';
 import {AddTaskSuggestion} from './add-task-suggestions.model';
@@ -185,16 +184,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         translateParams: {title: item.title},
       });
     } else {
-      const issueData = (item.issueType === JIRA_TYPE)
-        ? await this._jiraApiService.getIssueById$(item.issueData.id).toPromise()
-        : item.issueData;
-
-      const res = await this._taskService.checkForTaskWithIssue(issueData);
+      const res = await this._taskService.checkForTaskWithIssue(item.issueData.id);
       if (!res) {
-        this._taskService.addWithIssue(
-          item.title,
+        this._issueService.addTaskWithIssue(
           item.issueType,
-          issueData,
+          item.issueData,
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {
