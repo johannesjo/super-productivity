@@ -73,16 +73,14 @@ export class IssueService {
   }
 
   public refreshIssue(
-    issueType: IssueProviderKey,
-    issueId: string | number,
-    issueData: IssueData,
+    task: Task,
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
   ) {
-    switch (issueType) {
+    switch (task.issueType) {
       case JIRA_TYPE: {
         // TODO fix
-        // this._jiraIssueService.updateIssueFromApi(issueId, issueData, isNotifySuccess, isNotifyNoUpdateRequired);
+        this._jiraIssueService.updateIssueFromApi(task, isNotifySuccess, isNotifyNoUpdateRequired);
         break;
       }
       case GITHUB_TYPE: {
