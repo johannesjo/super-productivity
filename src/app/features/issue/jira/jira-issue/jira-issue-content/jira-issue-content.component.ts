@@ -61,8 +61,7 @@ export class JiraIssueContentComponent implements OnDestroy {
   }
 
   hideUpdates() {
-    // TODO replace with a dedicated method
-    this._taskService.update(this.taskData.id, {issueWasUpdated: false});
+    this._taskService.markIssueUpdatesAsRead(this.taskData.id);
   }
 
   private _loadIssueData(issueId: string) {

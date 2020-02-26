@@ -96,7 +96,6 @@ import {
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {Actions, ofType} from '@ngrx/effects';
-import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
@@ -564,12 +563,15 @@ export class TaskService {
 
   getByIssueId$(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
     return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));
-
   }
 
 
   setDone(id: string) {
     this.update(id, {isDone: true});
+  }
+
+  markIssueUpdatesAsRead(id: string) {
+    this.update(id, {issueWasUpdated: false});
   }
 
   setUnDone(id: string) {
