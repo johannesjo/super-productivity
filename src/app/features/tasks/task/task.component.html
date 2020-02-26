@@ -173,7 +173,7 @@
 
         <!-- TODO needs to be handled -->
         <button (click)="toggleShowAttachments()"
-                *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueId && task.issueData['attachments']?.length)"
+                *ngIf="task.attachmentIds?.length"
                 [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate"
                 class="ico-btn attachment-btn"
                 color=""

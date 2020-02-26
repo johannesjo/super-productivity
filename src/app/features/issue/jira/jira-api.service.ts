@@ -35,7 +35,7 @@ import {ElectronService} from '../../../core/electron/electron.service';
 import {stringify} from 'query-string';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
-const API_VERSION = 3;
+const API_VERSION = 'latest';
 
 interface JiraRequestLogItem {
   transform: (res: any, cfg: any) => any;
@@ -300,7 +300,7 @@ export class JiraApiService {
     const base = `${cfg.host}/rest/api/${API_VERSION}`;
     const url = `${base}/${jiraRequestCfg.pathname}${queryStr}`.trim();
 
-    const requestToSend = {requestId, requestInit, url, cfg};
+    const requestToSend = {requestId, requestInit, url};
 
     // send to electron
     if (this._electronService.isElectronApp) {
@@ -332,9 +332,10 @@ export class JiraApiService {
       // body: JSON.stringify(request.body) || null,
       headers: {
         // TODO make proper host
-        host: 'test-sup3.atlassian.net',
-        // host: request.host,
+        // host: 'test-sup3.atlassian.net',
+        // host: request.host,A
         authorization: `Basic ${encoded}`,
+        Cookie: '',
         'Content-Type': 'application/json'
       }
     };

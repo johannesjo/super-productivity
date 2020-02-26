@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
 import {T} from '../../../../../t.const';
 
@@ -8,14 +8,10 @@ import {T} from '../../../../../t.const';
   styleUrls: ['./github-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GithubIssueHeaderComponent implements OnInit {
+export class GithubIssueHeaderComponent {
   T = T;
   @Input() public task: TaskWithSubTasks;
 
   constructor() {
   }
-
-  ngOnInit() {
-  }
-
 }

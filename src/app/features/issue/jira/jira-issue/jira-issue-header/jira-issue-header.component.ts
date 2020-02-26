@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
 
 @Component({
@@ -7,13 +7,9 @@ import {TaskWithSubTasks} from '../../../../tasks/task.model';
   styleUrls: ['./jira-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class JiraIssueHeaderComponent implements OnInit {
+export class JiraIssueHeaderComponent {
   @Input() public task: TaskWithSubTasks;
 
   constructor() {
   }
-
-  ngOnInit() {
-  }
-
 }

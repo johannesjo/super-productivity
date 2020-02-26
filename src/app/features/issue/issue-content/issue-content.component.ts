@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {TaskWithSubTasks} from '../../tasks/task.model';
 import {GITHUB_TYPE, JIRA_TYPE} from '../issue.const';
+import {IssueData} from '../issue';
 
 @Component({
   selector: 'issue-content',
@@ -10,6 +11,7 @@ import {GITHUB_TYPE, JIRA_TYPE} from '../issue.const';
 })
 export class IssueContentComponent implements OnInit {
   @Input() task: TaskWithSubTasks;
+  @Input() issueData: IssueData;
   GITHUB_TYPE = GITHUB_TYPE;
   JIRA_TYPE = JIRA_TYPE;
 
