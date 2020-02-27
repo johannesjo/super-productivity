@@ -408,7 +408,7 @@ export class GoogleDriveSyncEffects {
     return of(new LoadFromGoogleDriveCancel());
   }
 
-  private _checkIfRemoteUpdate(): Observable<any> {
+  private _checkIfRemoteUpdate(): Observable<boolean> {
     const lastSync = this._config._lastSync;
     return this._googleApiService.getFileInfo$(this._config._backupDocId)
       .pipe(
@@ -541,13 +541,13 @@ export class GoogleDriveSyncEffects {
   }
 
   // SIMPLE HELPER
-  private _isNewerThan(strDate1: string | number, strDate2: string | number) {
+  private _isNewerThan(strDate1: string | number, strDate2: string | number): boolean {
     const d1 = new Date(strDate1);
     const d2 = new Date(strDate2);
     return (d1.getTime() > d2.getTime());
   }
 
-  private _isEqual(strDate1, strDate2) {
+  private _isEqual(strDate1, strDate2): boolean {
     const d1 = new Date(strDate1);
     const d2 = new Date(strDate2);
     return (d1.getTime() === d2.getTime());
