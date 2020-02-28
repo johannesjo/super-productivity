@@ -1,5 +1,5 @@
 import {Observable} from 'rxjs';
-import {IssueData, IssueProviderKey, SearchResultItem} from './issue';
+import {IssueData, IssueProviderKey, SearchResultItem} from './issue.model';
 import {Task} from '../tasks/task.model';
 import {Attachment} from '../attachment/attachment.model';
 

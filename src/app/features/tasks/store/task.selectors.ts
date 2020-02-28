@@ -2,7 +2,7 @@ import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {TASK_FEATURE_NAME} from './task.reducer';
 import {selectIssueEntityMap} from '../../issue/issue.selector';
 import {Task, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
-import {IssueProviderKey} from '../../issue/issue';
+import {IssueProviderKey} from '../../issue/issue.model';
 import {filterStartableTasks} from './task.reducer.util';
 import {taskAdapter} from './task.adapter';
 import {GITHUB_TYPE, JIRA_TYPE} from '../../issue/issue.const';

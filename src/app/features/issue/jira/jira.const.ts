@@ -1,5 +1,5 @@
 // TODO use as a checklist
-import {JiraCfg} from './jira';
+import {JiraCfg} from './jira.model';
 import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
 import {T} from '../../../t.const';
 import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../config/global-config.model';

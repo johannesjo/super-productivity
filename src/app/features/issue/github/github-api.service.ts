@@ -9,7 +9,7 @@ import {GithubOriginalComment, GithubOriginalIssue} from './github-api-responses
 import {catchError, map, share, switchMap, take} from 'rxjs/operators';
 import {mapGithubIssue, mapGithubIssueToSearchResult} from './github-issue/github-issue-map.util';
 import {GithubComment, GithubIssue} from './github-issue/github-issue.model';
-import {SearchResultItem} from '../issue';
+import {SearchResultItem} from '../issue.model';
 import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 import {T} from '../../../t.const';
 

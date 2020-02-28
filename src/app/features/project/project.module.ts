@@ -7,7 +7,7 @@ import {ProjectEffects} from './store/project.effects';
 import {ProjectService} from './project.service';
 import {DialogCreateProjectComponent} from './dialogs/create-project/dialog-create-project.component';
 import {UiModule} from '../../ui/ui.module';
-import {JiraModule} from '../issue/jira/jira.module';
+import {JiraViewComponentsModule} from '../issue/jira/jira-view-components/jira-view-components.module';
 import {GithubModule} from '../issue/github/github.module';
 
 @NgModule({
@@ -16,7 +16,7 @@ import {GithubModule} from '../issue/github/github.module';
     StoreModule.forFeature(PROJECT_FEATURE_NAME, projectReducer),
     EffectsModule.forFeature([ProjectEffects]),
     UiModule,
-    JiraModule,
+    JiraViewComponentsModule,
     GithubModule,
   ],
   declarations: [

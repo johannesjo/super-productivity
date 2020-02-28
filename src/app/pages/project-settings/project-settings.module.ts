@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {ProjectSettingsComponent} from './project-settings.component';
 import {UiModule} from '../../ui/ui.module';
 import {ConfigModule} from '../../features/config/config.module';
-import {JiraModule} from '../../features/issue/jira/jira.module';
+import {JiraViewComponentsModule} from '../../features/issue/jira/jira-view-components/jira-view-components.module';
 
 
 @NgModule({
@@ -12,7 +12,7 @@ import {JiraModule} from '../../features/issue/jira/jira.module';
     CommonModule,
     ConfigModule,
     UiModule,
-    JiraModule,
+    JiraViewComponentsModule,
   ]
 })
 export class ProjectSettingsModule {

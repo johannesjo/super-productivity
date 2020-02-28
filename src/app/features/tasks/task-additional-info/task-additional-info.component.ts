@@ -36,7 +36,7 @@ import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attach
 import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani';
 import {noopAnimation} from '../../../ui/animations/noop.ani';
 import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-additional-info-item.component';
-import {IssueData} from '../../issue/issue';
+import {IssueData} from '../../issue/issue.model';
 
 @Component({
   selector: 'task-additional-info',

@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {IssueData, IssueProviderKey, SearchResultItem} from './issue';
+import {IssueData, IssueProviderKey, SearchResultItem} from './issue.model';
 import {Attachment} from '../attachment/attachment.model';
 import {from, Observable, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';

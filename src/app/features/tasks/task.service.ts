@@ -56,7 +56,7 @@ import {
 } from './store/task.actions';
 import {initialTaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {IssueData, IssueProviderKey} from '../issue/issue';
+import {IssueData, IssueProviderKey} from '../issue/issue.model';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllRepeatableTaskWithSubTasks,

@@ -19,7 +19,7 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
-import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
+import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue.model';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {initialTaskState, taskReducer} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';

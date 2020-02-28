@@ -15,7 +15,7 @@ import {errorHandler} from './error-handler';
 import {initDebug} from './debug';
 import {IPC} from './ipc-events.const';
 import {backupData} from './backup';
-import {JiraCfg} from '../src/app/features/issue/jira/jira';
+import {JiraCfg} from '../src/app/features/issue/jira/jira.model';
 import {KeyboardConfig} from '../src/app/features/config/global-config.model';
 import lockscreen from './lockscreen';
 import BrowserWindow = Electron.BrowserWindow;

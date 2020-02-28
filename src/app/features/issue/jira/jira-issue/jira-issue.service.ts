@@ -11,10 +11,10 @@ import {T} from '../../../../t.const';
 import {Task} from 'src/app/features/tasks/task.model';
 import {TaskService} from '../../../tasks/task.service';
 import {IssueServiceInterface} from '../../issue-service-interface';
-import {SearchResultItem} from '../../issue';
+import {SearchResultItem} from '../../issue.model';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {ProjectService} from '../../../project/project.service';
-import {JiraCfg} from '../jira';
+import {JiraCfg} from '../jira.model';
 
 
 @Injectable({

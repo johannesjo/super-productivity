@@ -8,7 +8,7 @@ import {
   TaskWithIssueData,
   TaskWithSubTasks
 } from '../task.model';
-import {IssueData} from '../../issue/issue';
+import {IssueData} from '../../issue/issue.model';
 import {RoundTimeOption} from '../../project/project.model';
 
 export enum TaskActionTypes {

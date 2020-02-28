@@ -4,7 +4,7 @@ import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
 import {sortWorklogDates} from '../../../util/sortWorklogDates';
-import {JiraCfg} from '../../issue/jira/jira';
+import {JiraCfg} from '../../issue/jira/jira.model';
 import {GithubCfg} from '../../issue/github/github';
 
 export const PROJECT_FEATURE_NAME = 'projects';

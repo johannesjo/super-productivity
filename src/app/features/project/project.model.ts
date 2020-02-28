@@ -1,4 +1,4 @@
-import {IssueIntegrationCfgs, IssueProviderKey, IssueStateMap} from '../issue/issue';
+import {IssueIntegrationCfgs, IssueProviderKey, IssueStateMap} from '../issue/issue.model';
 import {NoteState} from '../note/store/note.reducer';
 import {BookmarkState} from '../bookmark/store/bookmark.reducer';
 import {EntityState} from '@ngrx/entity';

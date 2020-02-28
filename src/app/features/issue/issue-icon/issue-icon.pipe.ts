@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {IssueProviderKey} from '../issue';
+import {IssueProviderKey} from '../issue.model';
 import {issueProviderIconMap} from '../issue.const';
 
 @Pipe({

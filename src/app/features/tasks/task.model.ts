@@ -1,4 +1,4 @@
-import {IssueData, IssueProviderKey} from '../issue/issue';
+import {IssueData, IssueProviderKey} from '../issue/issue.model';
 import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
 

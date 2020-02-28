@@ -1,6 +1,6 @@
 import {ConfigFormConfig, GenericConfigFormSection} from '../config/global-config.model';
 import {DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION} from './jira/jira.const';
-import {IssueProviderKey} from './issue';
+import {IssueProviderKey} from './issue.model';
 import {DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM_SECTION} from './github/github.const';
 
 export const LEGACY_GITHUB_TYPE = 'GIT';

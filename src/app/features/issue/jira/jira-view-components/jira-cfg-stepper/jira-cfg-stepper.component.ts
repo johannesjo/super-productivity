@@ -8,16 +8,16 @@ import {
   Output
 } from '@angular/core';
 import {FormGroup} from '@angular/forms';
-import {JiraCfg} from '../jira';
-import {DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG} from '../jira.const';
+import {JiraCfg} from '../../jira.model';
+import {DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG} from '../../jira.const';
 import {FormlyFieldConfig} from '@ngx-formly/core';
-import {JiraApiService} from '../jira-api.service';
-import {JiraOriginalUser} from '../jira-api-responses';
-import {expandAnimation} from '../../../../ui/animations/expand.ani';
+import {JiraApiService} from '../../jira-api.service';
+import {JiraOriginalUser} from '../../jira-api-responses';
+import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 import {catchError} from 'rxjs/operators';
 import {Subscription, throwError} from 'rxjs';
-import {T} from '../../../../t.const';
-import {HANDLED_ERROR_PROP_STR, HelperClasses} from '../../../../app.constants';
+import {T} from '../../../../../t.const';
+import {HANDLED_ERROR_PROP_STR, HelperClasses} from '../../../../../app.constants';
 
 @Component({
   selector: 'jira-cfg-stepper',

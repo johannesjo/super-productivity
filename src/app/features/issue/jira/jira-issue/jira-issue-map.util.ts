@@ -6,9 +6,9 @@ import {
   JiraOriginalChangelog,
   JiraOriginalComment
 } from '../jira-api-responses';
-import {JiraCfg} from '../jira';
+import {JiraCfg} from '../jira.model';
 import {DropPasteIcons, DropPasteInputType} from '../../../../core/drop-paste-input/drop-paste-input';
-import {IssueProviderKey, SearchResultItem} from '../../issue';
+import {IssueProviderKey, SearchResultItem} from '../../issue.model';
 import {Attachment} from '../../../attachment/attachment.model';
 import {dedupeByKey} from '../../../../util/de-dupe-by-key';
 import {JIRA_TYPE} from '../../issue.const';

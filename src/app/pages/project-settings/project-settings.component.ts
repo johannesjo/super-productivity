@@ -7,7 +7,7 @@ import {
   GlobalConfigState
 } from '../../features/config/global-config.model';
 import {Project, ProjectAdvancedCfg, ProjectCfgFormKey, ProjectThemeCfg} from '../../features/project/project.model';
-import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue';
+import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue.model';
 import {Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {ProjectService} from '../../features/project/project.service';

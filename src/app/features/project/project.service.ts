@@ -40,8 +40,8 @@ import {
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
-import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
-import {JiraCfg} from '../issue/jira/jira';
+import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue.model';
+import {JiraCfg} from '../issue/jira/jira.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/github/github';
 import {Actions, ofType} from '@ngrx/effects';

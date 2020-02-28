@@ -16,13 +16,13 @@ import {
   mapTransitionResponse
 } from './jira-issue/jira-issue-map.util';
 import {JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser} from './jira-api-responses';
-import {JiraCfg} from './jira';
+import {JiraCfg} from './jira.model';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
 import {combineLatest, Observable, throwError} from 'rxjs';
-import {SearchResultItem} from '../issue';
+import {SearchResultItem} from '../issue.model';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {catchError, first} from 'rxjs/operators';
 import {JiraIssue} from './jira-issue/jira-issue.model';

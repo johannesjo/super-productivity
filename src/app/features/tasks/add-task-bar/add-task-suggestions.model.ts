@@ -1,4 +1,4 @@
-import {IssueData, IssueProviderKey} from '../../issue/issue';
+import {IssueData, IssueProviderKey} from '../../issue/issue.model';
 
 export interface AddTaskSuggestion {
   title: string;
