@@ -64,13 +64,13 @@ export class JiraIssueContentComponent implements OnDestroy {
   }
 
   private _loadIssueData(issueId: string) {
-    this._getIssueSub.unsubscribe();
-    this._getIssueSub = new Subscription();
-    this._getIssueSub.add(this._jiraApiService.getIssueById$(issueId).subscribe((issue) => {
-      this.issue = issue;
-      this.description = issue && issue.description && j2m.to_markdown(issue.description);
-      this.attachments = this._jiraCommonInterfacesService.getMappedAttachmentsFromIssue(issue);
-      this._changeDetectorRef.detectChanges();
-    }));
+    // this._getIssueSub.unsubscribe();
+    // this._getIssueSub = new Subscription();
+    // this._getIssueSub.add(this._jiraApiService.getIssueById$(issueId).subscribe((issue) => {
+    //   this.issue = issue;
+    //   this.description = issue && issue.description && j2m.to_markdown(issue.description);
+    //   this.attachments = this._jiraCommonInterfacesService.getMappedAttachmentsFromIssue(issue);
+    //   this._changeDetectorRef.detectChanges();
+    // }));
   }
 }

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {IssueData, IssueProviderKey, SearchResultItem} from './issue.model';
 import {Attachment} from '../attachment/attachment.model';
-import {from, Observable, zip} from 'rxjs';
+import {from, Observable, of, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
 import {JiraIssueService} from './jira/jira-issue/jira-issue.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
@@ -34,8 +34,14 @@ export class IssueService {
     this._projectService.currentGithubCfg$.subscribe((githubCfg) => this.githubCfg = githubCfg);
   }
 
+  getById$(issueType: IssueProviderKey, id: string | number): Observable<IssueData> {
+    if (typeof this.ISSUE_SERVICE_MAP[issueType].getById$ === 'function') {
+      return this.ISSUE_SERVICE_MAP[issueType].getById$(id);
+    }
+    return of(null);
+  }
 
-  public searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
+  searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
     const obs = Object.keys(this.ISSUE_SERVICE_MAP)
       .map(key => this.ISSUE_SERVICE_MAP[key])
       .filter(provider => typeof provider.searchIssues$ === 'function')
@@ -45,7 +51,7 @@ export class IssueService {
     return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
   }
 
-  public refreshIssue(
+  refreshIssue(
     task: Task,
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
@@ -60,13 +66,15 @@ export class IssueService {
     //   }
   }
 
-  public getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
+  getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
+    console.log(issueType, issueDataIN);
+
     if (typeof this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments === 'function') {
       return this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments(issueDataIN);
     }
   }
 
-  public issueLink(issueType: IssueProviderKey, issueId: string | number): string {
+  issueLink(issueType: IssueProviderKey, issueId: string | number): string {
     if (typeof this.ISSUE_SERVICE_MAP[issueType].issueLink === 'function') {
       return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId);
     }
@@ -76,7 +84,7 @@ export class IssueService {
     // }
   }
 
-  public async addTaskWithIssue(
+  async addTaskWithIssue(
     issueType: IssueProviderKey,
     issueId: string | number,
     isAddToBacklog = false

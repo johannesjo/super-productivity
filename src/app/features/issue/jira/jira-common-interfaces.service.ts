@@ -36,7 +36,10 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     this._projectService.currentJiraCfg$.subscribe((jiraCfg) => this.jiraCfg = jiraCfg);
   }
 
-  // INTERFACE METHODS
+  getById$(issueId: string | number) {
+    return this._jiraApiService.getIssueById$(issueId);
+  }
+
   searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
     return this.isJiraSearchEnabled$.pipe(
       switchMap((isSearchJira) => this._jiraApiService.issuePicker$(searchTerm)
@@ -72,7 +75,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return this.jiraCfg.host + '/browse/' + issueId;
   }
 
-  getMappedAttachmentsFromIssue(issueData: JiraIssue): Attachment[] {
+  getMappedAttachments(issueData: JiraIssue): Attachment[] {
     return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
   }
 }

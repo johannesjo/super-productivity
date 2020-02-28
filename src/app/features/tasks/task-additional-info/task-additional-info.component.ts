@@ -13,9 +13,9 @@ import {
 import {TaskAdditionalInfoTargetPanel, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
-import {Attachment} from '../../attachment/attachment.model';
-import {delay, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {BehaviorSubject, Observable, of, Subject, Subscription} from 'rxjs';
+import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
+import {delay, distinctUntilChanged, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
@@ -36,7 +36,8 @@ import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attach
 import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani';
 import {noopAnimation} from '../../../ui/animations/noop.ani';
 import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-additional-info-item.component';
-import {IssueData} from '../../issue/issue.model';
+import {IssueData, IssueProviderKey} from '../../issue/issue.model';
+import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
 
 @Component({
   selector: 'task-additional-info',
@@ -62,7 +63,25 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       : of(null)
     ),
   );
-  issueData: IssueData;
+
+  issueIdAndType$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
+  issueIdAndTypeShared$ = this.issueIdAndType$.pipe(
+    distinctUntilChanged(distinctUntilChangedObject),
+    shareReplay(1),
+  );
+
+  issueData$: Observable<IssueData> = this.issueIdAndTypeShared$.pipe(
+    switchMap(({id, type}) => (id && type)
+      ? this._issueService.getById$(type, id)
+      : of(null)),
+    shareReplay(1),
+  );
+  issueAttachments$: Observable<AttachmentCopy[]> = this.issueData$.pipe(
+    withLatestFrom(this.issueIdAndTypeShared$),
+    map(([data, {type}]) => (data && type)
+      ? this._issueService.getMappedAttachments(type, data)
+      : [])
+  );
 
   repeatCfgId$ = new BehaviorSubject(null);
   repeatCfgDays$: Observable<string> = this.repeatCfgId$.pipe(
@@ -91,6 +110,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
     switchMap((ids) => this.attachmentService.getByIds$(ids))
   );
+  localAttachments: Attachment[];
+
   private _taskData: TaskWithSubTasks;
   private _focusTimeout: number;
   private _subs = new Subscription();
@@ -104,6 +125,12 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private  _matDialog: MatDialog,
     public attachmentService: AttachmentService,
   ) {
+    // NOTE: needs to be assigned here before any setter is called
+    this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
+    this._subs.add(this.localAttachments$.subscribe((attachments) => this.localAttachments = attachments));
+    // this.issueIdAndTypeShared$.subscribe((v) => console.log('issueIdAndTypeShared$', v));
+    // this.issueData$.subscribe((v) => console.log('issueData$', v));
+    // this.issueAttachments$.subscribe((v) => console.log('issueAttachments$', v));
   }
 
   get task(): TaskWithSubTasks {
@@ -114,14 +141,28 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     const prev = this._taskData;
     this._taskData = newVal;
     this._attachmentIds$.next(this._taskData.attachmentIds);
-    // TODO that needs to be handled
-    this.issueAttachments = this._issueService.getMappedAttachments(this._taskData.issueType, this._taskData.issueData);
-    this.reminderId$.next(newVal.reminderId);
-    this.repeatCfgId$.next(newVal.repeatCfgId);
-    this.parentId$.next(newVal.parentId);
 
     if (!prev || !newVal || (prev.id !== newVal.id)) {
       this._focusFirst();
+    }
+
+    if (!prev || prev.issueId !== newVal.issueId) {
+      this.issueIdAndType$.next({
+        id: newVal.issueId,
+        type: newVal.issueType
+      });
+    }
+
+    if (!prev || prev.issueId !== newVal.issueId) {
+      this.reminderId$.next(newVal.reminderId);
+    }
+
+    if (!prev || prev.issueId !== newVal.issueId) {
+      this.repeatCfgId$.next(newVal.repeatCfgId);
+    }
+
+    if (!prev || prev.issueId !== newVal.issueId) {
+      this.parentId$.next(newVal.parentId);
     }
   }
 

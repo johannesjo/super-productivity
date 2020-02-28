@@ -80,7 +80,7 @@
 
     <ng-container panel-content>
       <issue-content [task]="task"
-                     [issueData]="issueData"
+                     [issueData]="issueData$|async"
                      class="panel-content-wrapper issue-content-wrapper"></issue-content>
     </ng-container>
   </task-additional-info-item>
@@ -115,21 +115,21 @@
     #attachmentPanelElRef
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="issueAttachments?.length || (localAttachments$|async)?.length"
+    *ngIf="issueAttachments?.length || localAttachments?.length"
     [expanded]="true"
     [type]="'panel'">
     <ng-container panel-header>
       <mat-icon>attachment</mat-icon>
-      <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + (localAttachments$|async)?.length} }}</span>
+      <span>{{T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS|translate:{nr: issueAttachments?.length + localAttachments?.length} }}</span>
     </ng-container>
 
     <ng-container panel-content>
-      <div class="panel-content-wrapper attachment-list-panel-content-wrapper">
+      <div class="panel-content-wrapper attachment-list-panel-content-wrapper" style="padding-bottom: 8px;">
         <ng-container *ngIf="task.issueType">
           <attachment-list [attachments]="issueAttachments"
                            [isDisableControls]="true"></attachment-list>
         </ng-container>
-        <h3 *ngIf="issueAttachments?.length"
+        <h3 *ngIf="issueAttachments?.length && localAttachments?.length"
             class="mat-h3"
             style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
         <attachment-list [attachments]="localAttachments$|async"></attachment-list>
@@ -141,7 +141,7 @@
     (collapseParent)="collapseParent()"
     (editActionTriggered)="addAttachment()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!issueAttachments?.length && !(localAttachments$|async)?.length"
+    *ngIf="!issueAttachments?.length && !localAttachments?.length"
     [inputIcon]="'add'"
     class="input-item">
     <ng-container input-title>
