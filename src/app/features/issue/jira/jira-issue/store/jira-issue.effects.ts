@@ -5,7 +5,7 @@ import {select, Store} from '@ngrx/store';
 import {concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
-import {selectJiraIssueEntities, selectJiraIssueFeatureState} from './jira-issue.reducer';
+import {selectJiraIssueFeatureState} from './jira-issue.reducer';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraIssueService} from '../jira-issue.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
@@ -30,7 +30,6 @@ import {IssueLocalState} from '../../../issue';
 import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import {DialogJiraAddWorklogComponent} from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
-import {isEmail} from '../../../../../util/is-email';
 import {T} from '../../../../../t.const';
 import {truncate} from '../../../../../util/truncate';
 import {ProjectService} from '../../../../project/project.service';
@@ -129,7 +128,8 @@ export class JiraIssueEffects {
       })
     );
 
-  @Effect({dispatch: false}) checkForReassignment: any = this._actions$
+  @Effect({dispatch: false})
+  checkForReassignment: any = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.SetCurrentTask,
@@ -139,7 +139,6 @@ export class JiraIssueEffects {
         this._projectService.isJiraEnabled$,
         this._projectService.currentJiraCfg$,
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
-        this._store$.pipe(select(selectJiraIssueEntities)),
       ),
       filter(([action, isEnabled, jiraCfg, currentTaskOrParent]) =>
         isEnabled
@@ -149,45 +148,42 @@ export class JiraIssueEffects {
       throttleTime(15000),
       // TODO there is probably a better way to to do this
       // TODO refactor to actions
-      switchMap(([action, isEnabled, jiraCfg, currentTaskOrParent, issueEntities]) => {
-        const issue = issueEntities[currentTaskOrParent.issueId];
-        const assignee = issue.assignee;
-        const currentUserName = jiraCfg.userAssigneeName || jiraCfg.userName;
+      switchMap(([action, isEnabled, jiraCfg, currentTaskOrParent]) => {
+        return this._jiraApiService.getIssueById$(currentTaskOrParent.issueId).pipe(
+          withLatestFrom(this._jiraApiService.getCurrentUser$()),
+          concatMap(([issue, currentUser]) => {
+            const assignee = issue.assignee;
 
-        if (isEmail(currentUserName)) {
-          this._snackService.open({
-            svgIco: 'jira',
-            msg: T.F.JIRA.S.UNABLE_TO_REASSIGN,
-          });
-          return EMPTY;
-        } else if (!issue) {
-          return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: Issue Data not found'});
-        } else if (!issue.assignee || issue.assignee.name !== currentUserName) {
-          return this._matDialog.open(DialogConfirmComponent, {
-            restoreFocus: true,
-            data: {
-              okTxt: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.OK,
-              translateParams: {
-                summary: issue.summary,
-                assignee: assignee ? assignee.displayName : 'nobody'
-              },
-              message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.MSG,
+            if (!issue) {
+              return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: Issue Data not found'});
+            } else if (!issue.assignee || issue.assignee.accountId !== currentUser.accountId) {
+              return this._matDialog.open(DialogConfirmComponent, {
+                restoreFocus: true,
+                data: {
+                  okTxt: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.OK,
+                  translateParams: {
+                    summary: issue.summary,
+                    assignee: assignee ? assignee.displayName : 'nobody'
+                  },
+                  message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.MSG,
+                }
+              }).afterClosed()
+                .pipe(
+                  switchMap((isConfirm) => {
+                    return isConfirm
+                      ? this._jiraApiService.updateAssignee$(issue.id, currentUser.accountId)
+                      : EMPTY;
+                  }),
+                  tap(() => {
+                    // TODO fix
+                    // this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+                  }),
+                );
+            } else {
+              return EMPTY;
             }
-          }).afterClosed()
-            .pipe(
-              switchMap((isConfirm) => {
-                return isConfirm
-                  ? this._jiraApiService.updateAssignee$(issue.id, currentUserName)
-                  : EMPTY;
-              }),
-              tap(() => {
-                // TODO fix
-                // this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
-              }),
-            );
-        } else {
-          return EMPTY;
-        }
+          })
+        );
       })
     );
 

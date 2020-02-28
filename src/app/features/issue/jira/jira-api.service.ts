@@ -208,7 +208,7 @@ export class JiraApiService {
     });
   }
 
-  transitionIssue$(issueId, transitionId): Observable<any> {
+  transitionIssue$(issueId: string, transitionId: string): Observable<any> {
     return this._sendRequest$({
       pathname: `issue/${issueId}/transitions`,
       method: 'POST',
@@ -221,19 +221,29 @@ export class JiraApiService {
     });
   }
 
-  updateAssignee$(issueId, assignee): Observable<any> {
+  updateAssignee$(issueId: string, accountId: string): Observable<any> {
     return this._sendRequest$({
-      pathname: `issue/${issueId}`,
+      pathname: `issue/${issueId}/assignee`,
       method: 'PUT',
       body: {
-        fields: {
-          assignee: {
-            name: assignee
-          }
-        }
+        accountId,
       },
     });
   }
+
+  // updateAssignee$(issueId: string, assignee: string): Observable<any> {
+  //   return this._sendRequest$({
+  //     pathname: `issue/${issueId}`,
+  //     method: 'PUT',
+  //     body: {
+  //       fields: {
+  //         assignee: {
+  //           name: assignee
+  //         }
+  //       }
+  //     },
+  //   });
+  // }
 
   addWorklog$(issueId: string, started: string, timeSpent: number, comment: string): Observable<any> {
     const worklog = {
