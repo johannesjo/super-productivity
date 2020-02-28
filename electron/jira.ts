@@ -21,7 +21,8 @@ export const sendJiraRequest = ({requestId, requestInit, url, cfg}: { requestId:
       }
       return response;
     })
-    .then(res => res.json())
+    .then(res => res.text())
+    .then(text => text ? JSON.parse(text) : {})
     .then((response) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         response,
