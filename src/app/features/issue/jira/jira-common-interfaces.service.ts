@@ -37,7 +37,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   getById$(issueId: string | number) {
-    return this._jiraApiService.getIssueById$(issueId);
+    return this._jiraApiService.getIssueById$(issueId, true);
   }
 
   searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
@@ -58,7 +58,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   async getAddTaskData(issueId: string | number)
     : Promise<{ title: string; additionalFields: Partial<Task> }> {
-    const issue = await this._jiraApiService.getIssueById$(issueId).toPromise();
+    const issue = await this._jiraApiService.getIssueById$(issueId, true).toPromise();
 
     return {
       title: issue.summary,
