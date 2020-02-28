@@ -15,7 +15,7 @@ import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
 import {BehaviorSubject, merge, Observable, of, Subject, Subscription, timer} from 'rxjs';
 import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
-import {concatMap, delay, filter, map, mapTo, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
+import {delay, delayWhen, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation, expandFadeInOnlyAnimation} from '../../../ui/animations/expand.ani';
@@ -77,7 +77,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     switchMap((args) => (args && args.id && args.type)
       ? this._issueService.getById$(args.type, args.id)
         .pipe(
-          concatMap(data => timer(0).pipe(mapTo(data))),
+          // delayWhen(x => timer(3000))
         )
       : of(null)),
     shareReplay(1),

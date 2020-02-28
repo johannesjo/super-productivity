@@ -76,9 +76,11 @@
 
 .changelog {
   list-style: none;
-  margin: 0;
+  margin: 0 0 $s*2;
   padding: 0 0 $s*2;
+  max-height: 100px;
   display: block;
+  overflow-y: auto;
 
   li {
     padding: 0;
