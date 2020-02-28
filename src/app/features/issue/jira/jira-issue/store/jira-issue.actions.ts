@@ -4,49 +4,12 @@ import {JiraIssue} from '../jira-issue.model';
 
 export enum JiraIssueActionTypes {
   AddOpenJiraIssuesToBacklog = '[JiraIssue] Add open issues to backlog',
-
-  // JiraIssue Actions
-  LoadJiraIssues = '[JiraIssue] Load JiraIssues',
-  UpsertJiraIssue = '[JiraIssue] Upsert JiraIssue',
-  AddJiraIssue = '[JiraIssue] Add JiraIssue',
-  AddJiraIssues = '[JiraIssue] Add JiraIssues',
   UpdateJiraIssue = '[JiraIssue] Update JiraIssue',
-  UpdateJiraIssues = '[JiraIssue] Update JiraIssues',
-  DeleteJiraIssue = '[JiraIssue] Delete JiraIssue',
-  DeleteJiraIssues = '[JiraIssue] Delete JiraIssues',
-  ClearJiraIssues = '[JiraIssue] Clear JiraIssues',
 }
 
+// TODO maybe remove entirely
 export class AddOpenJiraIssuesToBacklog implements Action {
   readonly type = JiraIssueActionTypes.AddOpenJiraIssuesToBacklog;
-}
-
-export class LoadJiraIssues implements Action {
-  readonly type = JiraIssueActionTypes.LoadJiraIssues;
-
-  constructor(public payload: { jiraIssues: JiraIssue[] }) {
-  }
-}
-
-export class AddJiraIssue implements Action {
-  readonly type = JiraIssueActionTypes.AddJiraIssue;
-
-  constructor(public payload: { jiraIssue: JiraIssue }) {
-  }
-}
-
-export class UpsertJiraIssue implements Action {
-  readonly type = JiraIssueActionTypes.UpsertJiraIssue;
-
-  constructor(public payload: { jiraIssue: JiraIssue }) {
-  }
-}
-
-export class AddJiraIssues implements Action {
-  readonly type = JiraIssueActionTypes.AddJiraIssues;
-
-  constructor(public payload: { jiraIssues: JiraIssue[] }) {
-  }
 }
 
 export class UpdateJiraIssue implements Action {
@@ -55,42 +18,4 @@ export class UpdateJiraIssue implements Action {
   constructor(public payload: { jiraIssue: Update<JiraIssue>, oldIssue: JiraIssue }) {
   }
 }
-
-export class UpdateJiraIssues implements Action {
-  readonly type = JiraIssueActionTypes.UpdateJiraIssues;
-
-  constructor(public payload: { jiraIssues: Update<JiraIssue>[] }) {
-  }
-}
-
-export class DeleteJiraIssue implements Action {
-  readonly type = JiraIssueActionTypes.DeleteJiraIssue;
-
-  constructor(public payload: { id: string }) {
-  }
-}
-
-export class DeleteJiraIssues implements Action {
-  readonly type = JiraIssueActionTypes.DeleteJiraIssues;
-
-  constructor(public payload: { ids: string[] }) {
-  }
-}
-
-export class ClearJiraIssues implements Action {
-  readonly type = JiraIssueActionTypes.ClearJiraIssues;
-}
-
-export type JiraIssueActions
-  = LoadJiraIssues
-  | AddOpenJiraIssuesToBacklog
-  | UpsertJiraIssue
-  | AddJiraIssue
-  | AddJiraIssues
-  | UpdateJiraIssue
-  | UpdateJiraIssues
-  | DeleteJiraIssue
-  | DeleteJiraIssues
-  | ClearJiraIssues
-  ;
 

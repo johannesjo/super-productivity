@@ -180,12 +180,6 @@ export const selectEstimatedOnTasksWorkedOnToday$ = createSelector(selectTodaysT
 
 export const selectFocusTaskId = createSelector(selectTaskFeatureState, state => state.focusTaskId);
 
-export const selectTasksWithMissingIssueData = createSelector(
-  selectAllTasksWithIssueData,
-  (tasks: TaskWithIssueData[]): TaskWithSubTasks[] => tasks && tasks.filter(
-    (task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId))
-  )
-);
 export const selectHasTasksToWorkOn = createSelector(
   selectIsTasksLoaded,
   selectTodaysTasksWithSubTasks,

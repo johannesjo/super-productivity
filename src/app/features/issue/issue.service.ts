@@ -37,7 +37,7 @@ export class IssueService {
 
   public async loadStatesForProject(projectId) {
     return Promise.all([
-      this._jiraIssueService.loadStateForProject(projectId),
+      // this._jiraIssueService.loadStateForProject(projectId),
       // this._gitIssueService.loadStateForProject(projectId),
     ]);
   }

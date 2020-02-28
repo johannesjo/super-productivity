@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {JiraChangelogEntry, JiraIssue} from './jira-issue.model';
 import {Store} from '@ngrx/store';
 import {JiraIssueActionTypes} from './store/jira-issue.actions';
-import {PersistenceService} from '../../../../core/persistence/persistence.service';
 import {mapJiraAttachmentToAttachment} from './jira-issue-map.util';
 import {Attachment} from '../../../attachment/attachment.model';
 import {JiraApiService} from '../jira-api.service';
@@ -19,33 +18,11 @@ import {TaskService} from '../../../tasks/task.service';
 export class JiraIssueService {
   constructor(
     private readonly _store: Store<any>,
-    private readonly _persistenceService: PersistenceService,
     private readonly _jiraApiService: JiraApiService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
   ) {
   }
-
-
-  // META
-  // ----
-  async loadStateForProject(projectId: string) {
-  }
-
-  loadState(state) {
-  }
-
-  // CRUD
-  // ----
-  add(jiraIssue: JiraIssue) {
-  }
-
-  upsert(jiraIssue: JiraIssue) {
-  }
-
-  remove(jiraIssueId: string) {
-  }
-
 
   // NOTE: this can stay
   update(jiraIssueId: string, changedFields: Partial<JiraIssue>, oldIssue?: JiraIssue) {

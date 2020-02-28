@@ -37,7 +37,6 @@ import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 @Injectable()
 export class JiraIssueEffects {
 
-
   @Effect() pollNewIssuesToBacklog$: any = this._actions$
     .pipe(
       ofType(
@@ -207,24 +206,6 @@ export class JiraIssueEffects {
       })
     );
 
-  @Effect({dispatch: false}) loadMissingIssues$: any = this._taskService.tasksWithMissingIssueData$
-    .pipe(
-      withLatestFrom(
-        this._projectService.isJiraEnabled$,
-      ),
-      filter(([tasks, isEnabled]) => isEnabled),
-      throttleTime(60 * 1000),
-      map(([tasks]) => tasks.filter(task => task.issueId && task.issueType === JIRA_TYPE)),
-      filter((tasks) => tasks && tasks.length > 0),
-      tap(tasks => {
-        console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
-        this._snackService.open({
-          msg: T.F.JIRA.S.MISSING_ISSUE_DATA,
-          svgIco: 'jira',
-        });
-        tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
-      })
-    );
 
   @Effect() updateTaskTitleIfChanged$: any = this._actions$
     .pipe(
@@ -296,15 +277,6 @@ export class JiraIssueEffects {
               private readonly _persistenceService: PersistenceService,
               private readonly _matDialog: MatDialog,
   ) {
-  }
-
-  private _saveToLs([action, currentProjectId, jiraIssueFeatureState]) {
-    if (currentProjectId) {
-      this._persistenceService.saveLastActive();
-      this._persistenceService.saveIssuesForProject(currentProjectId, JIRA_TYPE, jiraIssueFeatureState);
-    } else {
-      throw new Error('No current project id');
-    }
   }
 
   private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, task: Task): Observable<any> {

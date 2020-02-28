@@ -85,7 +85,6 @@ import {
   selectTaskByIssueId,
   selectTaskEntities,
   selectTasksByRepeatConfigId,
-  selectTasksWithMissingIssueData,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
@@ -240,14 +239,6 @@ export class TaskService {
       );
     }),
     distinctUntilChanged(),
-  );
-
-
-  tasksWithMissingIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(
-    // wait for issue model to be loaded
-    debounceTime(1000),
-    select(selectTasksWithMissingIssueData),
-    shareReplay(1),
   );
 
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
