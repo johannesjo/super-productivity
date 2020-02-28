@@ -128,9 +128,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     // NOTE: needs to be assigned here before any setter is called
     this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
     this._subs.add(this.localAttachments$.subscribe((attachments) => this.localAttachments = attachments));
-    // this.issueIdAndTypeShared$.subscribe((v) => console.log('issueIdAndTypeShared$', v));
-    // this.issueData$.subscribe((v) => console.log('issueData$', v));
-    // this.issueAttachments$.subscribe((v) => console.log('issueAttachments$', v));
   }
 
   get task(): TaskWithSubTasks {
@@ -146,7 +143,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       this._focusFirst();
     }
 
-    if (!prev || prev.issueId !== newVal.issueId) {
+    // NOTE: check for task change or issue update
+    if (!prev || (prev.issueId !== newVal.issueId || newVal.issueWasUpdated === true && !prev.issueWasUpdated)) {
       this.issueIdAndType$.next({
         id: newVal.issueId,
         type: newVal.issueType

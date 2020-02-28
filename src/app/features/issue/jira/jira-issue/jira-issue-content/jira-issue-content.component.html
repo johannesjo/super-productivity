@@ -2,7 +2,7 @@
      *ngIf="issue"
      [@expand]
 >
-  <div *ngIf="taskData.issueWasUpdated"
+  <div *ngIf="task.issueWasUpdated"
        [@expand]
        class="updates">
     <div>
@@ -35,8 +35,8 @@
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.STATUS|translate}}</th>
       <td>
-        <!--<img [src]="issueData?.status?.iconUrl"-->
-        <!--*ngIf="issueData?.status?.iconUrl">-->
+        <!--<img [src]="issue?.status?.iconUrl"-->
+        <!--*ngIf="issue?.status?.iconUrl">-->
         {{issue.status?.name}}</td>
     </tr>
     <tr *ngIf="issue.storyPoints">
@@ -61,7 +61,7 @@
         </mat-chip-list>
       </td>
     </tr>
-    <tr *ngIf="issueData?.description"
+    <tr *ngIf="issue?.description"
         class="description-row">
       <th (click)="isFocusDescription=!isFocusDescription">{{T.F.JIRA.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
       <td>

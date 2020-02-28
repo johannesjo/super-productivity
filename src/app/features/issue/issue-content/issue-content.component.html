@@ -1,5 +1,6 @@
 <ng-container *ngIf="task.issueType===JIRA_TYPE">
-  <jira-issue-content [task]="task"></jira-issue-content>
+  <jira-issue-content [task]="task"
+                      [issue]="issueData"></jira-issue-content>
 </ng-container>
 
 <ng-container *ngIf="task.issueType===GITHUB_TYPE">

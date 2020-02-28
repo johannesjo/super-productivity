@@ -5,9 +5,7 @@ import {JiraIssue} from '../jira-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 import {Attachment} from '../../../../attachment/attachment.model';
 import {T} from '../../../../../t.const';
-import * as j2m from 'jira2md';
 import {Subscription} from 'rxjs';
-import {JIRA_TYPE} from '../../../issue.const';
 import {TaskService} from '../../../../tasks/task.service';
 import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
 
@@ -19,33 +17,16 @@ import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service'
   animations: [expandAnimation]
 })
 export class JiraIssueContentComponent implements OnDestroy {
+  @Input() issue: JiraIssue;
+  @Input() task: TaskWithSubTasks;
 
   description: string;
   attachments: Attachment[];
   isFocusDescription = false;
   T = T;
-  issue: JiraIssue;
-  taskData: TaskWithSubTasks;
 
-  private _taskId: string;
   private _getIssueSub = new Subscription();
 
-
-  @Input()
-  private set task(task: TaskWithSubTasks) {
-    if (!task || task.issueType !== JIRA_TYPE) {
-      throw new Error('No task set on init or no Jira Task');
-    } else if (task && task.id !== this._taskId) {
-      this.issue = null;
-      this._loadIssueData(task.issueId);
-    } else if (task.issueWasUpdated === true && !this.taskData.issueWasUpdated) {
-      this.issue = null;
-      this._loadIssueData(task.issueId);
-    }
-
-    this.taskData = task;
-    this._taskId = task.id;
-  }
 
   constructor(
     private readonly  _jiraCommonInterfacesService: JiraCommonInterfacesService,
@@ -60,17 +41,6 @@ export class JiraIssueContentComponent implements OnDestroy {
   }
 
   hideUpdates() {
-    this._taskService.markIssueUpdatesAsRead(this.taskData.id);
-  }
-
-  private _loadIssueData(issueId: string) {
-    // this._getIssueSub.unsubscribe();
-    // this._getIssueSub = new Subscription();
-    // this._getIssueSub.add(this._jiraApiService.getIssueById$(issueId).subscribe((issue) => {
-    //   this.issue = issue;
-    //   this.description = issue && issue.description && j2m.to_markdown(issue.description);
-    //   this.attachments = this._jiraCommonInterfacesService.getMappedAttachmentsFromIssue(issue);
-    //   this._changeDetectorRef.detectChanges();
-    // }));
+    this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 }
