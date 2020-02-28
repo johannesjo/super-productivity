@@ -361,7 +361,11 @@ export class JiraIssueEffects {
       }
       const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
 
-      const issuesToAdd = issues.filter(issue => !allTaskJiraIssueIds.includes(issue.id));
+      // NOTE: we check for key as well as id although normally the key should suffice
+      const issuesToAdd = issues.filter(
+        issue => !allTaskJiraIssueIds.includes(issue.id) && !allTaskJiraIssueIds.includes(issue.key)
+      );
+
       issuesToAdd.forEach((issue) => {
         this._taskService.addWithIssue(
           `${issue.key} ${issue.summary}`,
