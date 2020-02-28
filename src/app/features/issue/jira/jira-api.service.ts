@@ -48,7 +48,15 @@ interface JiraRequestLogItem {
 }
 
 interface JiraRequestCfg {
-  [key: string]: any;
+  pathname: string;
+  followAllRedirects?: boolean;
+  method?: 'GET' | 'POST' | 'PUT';
+  query?: {
+    // TODO check if string[] works
+    [key: string]: string | boolean | number | string[];
+  };
+  transform?: (res: any, jiraCfg?: JiraCfg) => any;
+  body?: {};
 }
 
 
@@ -154,7 +162,6 @@ export class JiraApiService {
     }
 
     return this._sendRequest$({
-      apiMethod: 'searchJira',
       transform: mapIssuesResponse,
       pathname: 'search',
       method: 'POST',
@@ -281,9 +288,9 @@ export class JiraApiService {
     // BUILD REQUEST START
     // -------------------
     // assign uuid to request to know which responsive belongs to which promise
-    const requestId = shortid();
+    const requestId = `${jiraRequestCfg.pathname}__${jiraRequestCfg.method || 'GET'}__${shortid()}`;
 
-    const requestInit = this._makeRequestInit(cfg, jiraRequestCfg.method);
+    const requestInit = this._makeRequestInit(jiraRequestCfg, cfg);
 
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
@@ -322,18 +329,15 @@ export class JiraApiService {
       );
   }
 
-  private _makeRequestInit(cfg, method: string = 'GET'): RequestInit {
+  private _makeRequestInit(jr: JiraRequestCfg, cfg: JiraCfg): RequestInit {
     const encoded = this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
 
     return {
       // mode: 'no-cors',
       // credentials: 'same-origin',
-      method,
-      // body: JSON.stringify(request.body) || null,
+      method: jr.method || 'GET',
+      ...(jr.body ? {body: JSON.stringify(jr.body)} : {}),
       headers: {
-        // TODO make proper host
-        // host: 'test-sup3.atlassian.net',
-        // host: request.host,A
         authorization: `Basic ${encoded}`,
         Cookie: '',
         'Content-Type': 'application/json'
