@@ -270,7 +270,7 @@ export class JiraApiService {
 
   // TODO refactor data madness of request and add types for everything
   // TODO XhrUriConfig
-  private _sendRequest$(jiraRequestCfg: JiraRequestCfg, cfg = this._cfg, isForce = false): Observable<any> {
+  private _sendRequest$(jiraReqCfg: JiraRequestCfg, cfg = this._cfg, isForce = false): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',
@@ -298,9 +298,9 @@ export class JiraApiService {
     // BUILD REQUEST START
     // -------------------
     // assign uuid to request to know which responsive belongs to which promise
-    const requestId = `${jiraRequestCfg.pathname}__${jiraRequestCfg.method || 'GET'}__${shortid()}`;
+    const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
 
-    const requestInit = this._makeRequestInit(jiraRequestCfg, cfg);
+    const requestInit = this._makeRequestInit(jiraReqCfg, cfg);
 
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
@@ -311,11 +311,11 @@ export class JiraApiService {
     });
 
     // save to request log
-    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, jiraRequestCfg.transform);
+    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, jiraReqCfg.transform);
 
-    const queryStr = jiraRequestCfg.query ? `?${stringify(jiraRequestCfg.query)}` : '';
+    const queryStr = jiraReqCfg.query ? `?${stringify(jiraReqCfg.query)}` : '';
     const base = `${cfg.host}/rest/api/${API_VERSION}`;
-    const url = `${base}/${jiraRequestCfg.pathname}${queryStr}`.trim();
+    const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
 
     const requestToSend = {requestId, requestInit, url};
 
@@ -374,52 +374,6 @@ export class JiraApiService {
         delete this._requestsLog[requestId];
       }, JIRA_REQUEST_TIMEOUT_DURATION)
     };
-  }
-
-  doRequest(orgRequest, request) {
-    // return new Promise((resolve) => {
-    //   this.xhr({
-    //     uri,
-    //     method: request.method || 'GET',
-    //     body: JSON.stringify(request.body),
-    //     headers: {
-    //       authorization: `Basic ${encoded}`,
-    //       'Content-Type': 'application/json'
-    //     }
-    //   }, (err, res, body) => {
-    //     if (err) {
-    //       resolve({
-    //         error: err,
-    //         requestId: orgRequest.requestId
-    //       });
-    //     } else if (res.statusCode >= 300) {
-    //       resolve({
-    //         error: res.statusCode,
-    //         requestId: orgRequest.requestId
-    //       });
-    //     } else if (body) {
-    //       const parsed = JSON.parse(body);
-    //
-    //       const errIn = parsed.errorMessages || parsed.errors;
-    //       if (errIn) {
-    //         resolve({
-    //           error: errIn,
-    //           requestId: orgRequest.requestId
-    //         });
-    //       } else {
-    //         resolve({
-    //           response: parsed,
-    //           requestId: orgRequest.requestId
-    //         });
-    //       }
-    //     } else if (!body) {
-    //       resolve({
-    //         response: null,
-    //         requestId: orgRequest.requestId
-    //       });
-    //     }
-    //   });
-    // });
   }
 
 
