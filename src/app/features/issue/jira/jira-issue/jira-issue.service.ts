@@ -1,17 +1,14 @@
 import {Injectable} from '@angular/core';
 import {JiraChangelogEntry, JiraIssue} from './jira-issue.model';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {JiraIssueActionTypes} from './store/jira-issue.actions';
 import {PersistenceService} from '../../../../core/persistence/persistence.service';
-import {JiraIssueState, selectJiraIssueById} from './store/jira-issue.reducer';
 import {mapJiraAttachmentToAttachment} from './jira-issue-map.util';
 import {Attachment} from '../../../attachment/attachment.model';
 import {JiraApiService} from '../jira-api.service';
 import {SnackService} from '../../../../core/snack/snack.service';
-import {take} from 'rxjs/operators';
-import {Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {T} from '../../../../t.const';
-import {JIRA_TYPE} from '../../issue.const';
 import {Task} from 'src/app/features/tasks/task.model';
 import {TaskService} from '../../../tasks/task.service';
 
@@ -33,49 +30,24 @@ export class JiraIssueService {
   // META
   // ----
   async loadStateForProject(projectId: string) {
-    const lsJiraIssueState = await this._persistenceService.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState;
-    if (lsJiraIssueState) {
-      this.loadState(lsJiraIssueState);
-    }
   }
 
-  loadState(state: JiraIssueState) {
-    this._store.dispatch({
-      type: JiraIssueActionTypes.LoadState,
-      payload: {
-        state,
-      }
-    });
+  loadState(state) {
   }
 
   // CRUD
   // ----
   add(jiraIssue: JiraIssue) {
-    this._store.dispatch({
-      type: JiraIssueActionTypes.AddJiraIssue,
-      payload: {
-        jiraIssue
-      }
-    });
   }
 
   upsert(jiraIssue: JiraIssue) {
-    this._store.dispatch({
-      type: JiraIssueActionTypes.UpsertJiraIssue,
-      payload: {
-        jiraIssue
-      }
-    });
   }
 
   remove(jiraIssueId: string) {
-    this._store.dispatch({
-      type: JiraIssueActionTypes.DeleteJiraIssue,
-      payload: {id: jiraIssueId}
-    });
   }
 
 
+  // NOTE: this can stay
   update(jiraIssueId: string, changedFields: Partial<JiraIssue>, oldIssue?: JiraIssue) {
     this._store.dispatch({
       type: JiraIssueActionTypes.UpdateJiraIssue,
@@ -89,19 +61,9 @@ export class JiraIssueService {
     });
   }
 
-  // HELPER
-  getById$(id: string): Observable<JiraIssue> {
-    return this._store.pipe(select(selectJiraIssueById, {id}), take(1));
-  }
-
-  // TODO improve
+  // TODO remove
   loadMissingIssueData(issueId): Subscription {
-    return this._jiraApiService.getIssueById$(issueId, true)
-      .pipe(take(1))
-      .subscribe(issueData => {
-        this.add(issueData);
-      });
-
+    return new Subscription();
   }
 
   // TODO there is probably a better way to to do this

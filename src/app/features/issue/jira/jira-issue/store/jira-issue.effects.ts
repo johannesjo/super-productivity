@@ -5,7 +5,6 @@ import {select, Store} from '@ngrx/store';
 import {concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
-import {selectJiraIssueFeatureState} from './jira-issue.reducer';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraIssueService} from '../jira-issue.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
@@ -44,7 +43,6 @@ export class JiraIssueEffects {
       ofType(
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
-        JiraIssueActionTypes.LoadState,
       ),
       withLatestFrom(
         this._projectService.isJiraEnabled$,
@@ -58,27 +56,6 @@ export class JiraIssueEffects {
           )
           : EMPTY;
       }),
-    );
-
-  @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskActionTypes.AddTask,
-        TaskActionTypes.DeleteTask,
-        TaskActionTypes.RestoreTask,
-        TaskActionTypes.MoveToArchive,
-        JiraIssueActionTypes.AddJiraIssue,
-        JiraIssueActionTypes.DeleteJiraIssue,
-        JiraIssueActionTypes.UpdateJiraIssue,
-        JiraIssueActionTypes.AddJiraIssues,
-        JiraIssueActionTypes.DeleteJiraIssues,
-        JiraIssueActionTypes.UpsertJiraIssue,
-      ),
-      withLatestFrom(
-        this._projectService.currentId$,
-        this._store$.pipe(select(selectJiraIssueFeatureState)),
-      ),
-      tap(this._saveToLs.bind(this))
     );
 
   @Effect({dispatch: false}) addOpenIssuesToBacklog$: any = this._actions$
@@ -296,7 +273,6 @@ export class JiraIssueEffects {
         // while load state should be enough this just might fix the error of polling for inactive projects?
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
-        JiraIssueActionTypes.LoadState,
       ),
       withLatestFrom(
         this._projectService.isJiraEnabled$,

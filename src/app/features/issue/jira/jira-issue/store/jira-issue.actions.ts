@@ -1,10 +1,8 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
 import {JiraIssue} from '../jira-issue.model';
-import {JiraIssueState} from './jira-issue.reducer';
 
 export enum JiraIssueActionTypes {
-  LoadState = '[JiraIssue] Load JiraIssue State',
   AddOpenJiraIssuesToBacklog = '[JiraIssue] Add open issues to backlog',
 
   // JiraIssue Actions
@@ -17,13 +15,6 @@ export enum JiraIssueActionTypes {
   DeleteJiraIssue = '[JiraIssue] Delete JiraIssue',
   DeleteJiraIssues = '[JiraIssue] Delete JiraIssues',
   ClearJiraIssues = '[JiraIssue] Clear JiraIssues',
-}
-
-export class LoadState implements Action {
-  readonly type = JiraIssueActionTypes.LoadState;
-
-  constructor(public payload: { state: JiraIssueState }) {
-  }
 }
 
 export class AddOpenJiraIssuesToBacklog implements Action {
@@ -92,7 +83,6 @@ export class ClearJiraIssues implements Action {
 
 export type JiraIssueActions
   = LoadJiraIssues
-  | LoadState
   | AddOpenJiraIssuesToBacklog
   | UpsertJiraIssue
   | AddJiraIssue
