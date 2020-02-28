@@ -6,24 +6,79 @@ import {mapJiraAttachmentToAttachment} from './jira-issue-map.util';
 import {Attachment} from '../../../attachment/attachment.model';
 import {JiraApiService} from '../jira-api.service';
 import {SnackService} from '../../../../core/snack/snack.service';
-import {Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {T} from '../../../../t.const';
 import {Task} from 'src/app/features/tasks/task.model';
 import {TaskService} from '../../../tasks/task.service';
+import {IssueServiceInterface} from '../../issue-service-interface';
+import {SearchResultItem} from '../../issue';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {ProjectService} from '../../../project/project.service';
+import {JiraCfg} from '../jira';
 
 
 @Injectable({
   providedIn: 'root',
 })
-export class JiraIssueService {
+export class JiraIssueService implements IssueServiceInterface {
+  isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
+    map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
+  );
+  jiraCfg: JiraCfg;
+
   constructor(
     private readonly _store: Store<any>,
     private readonly _jiraApiService: JiraApiService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
+    private readonly _projectService: ProjectService,
   ) {
+    this._projectService.currentJiraCfg$.subscribe((jiraCfg) => this.jiraCfg = jiraCfg);
   }
 
+  // INTERFACE METHODS
+  searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
+    return this.isJiraSearchEnabled$.pipe(
+      switchMap((isSearchJira) => this._jiraApiService.issuePicker$(searchTerm)
+        .pipe(catchError(() => []))
+      )
+    );
+  }
+
+  refreshIssue(
+    task: Task,
+    isNotifySuccess = true,
+    isNotifyNoUpdateRequired = false
+  ) {
+    this.updateIssueFromApi(task, isNotifySuccess, isNotifyNoUpdateRequired);
+  }
+
+  async getAddTaskData(issueId: string | number)
+    : Promise<{ title: string; additionalFields: Partial<Task> }> {
+    const issue = await this._jiraApiService.getIssueById$(issueId).toPromise();
+
+    return {
+      title: issue.summary,
+      additionalFields: {
+        issuePoints: issue.storyPoints,
+        issueAttachmentNr: issue.attachments ? issue.attachments.length : 0,
+        issueWasUpdated: false,
+        issueLastUpdated: new Date(issue.updated).getTime()
+      }
+    };
+  }
+
+  issueLink(issueId: string | number): string {
+    return this.jiraCfg.host + '/browse/' + issueId;
+  }
+
+  getMappedAttachmentsFromIssue(issueData: JiraIssue): Attachment[] {
+    return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
+  }
+
+
+  // OTHER METHODS
+  // ------------
   // NOTE: this can stay
   update(jiraIssueId: string, changedFields: Partial<JiraIssue>, oldIssue?: JiraIssue) {
     this._store.dispatch({
@@ -36,11 +91,6 @@ export class JiraIssueService {
         oldIssue
       }
     });
-  }
-
-  // TODO remove
-  loadMissingIssueData(issueId): Subscription {
-    return new Subscription();
   }
 
   // TODO there is probably a better way to to do this
@@ -80,10 +130,6 @@ export class JiraIssueService {
           });
         }
       });
-  }
-
-  getMappedAttachmentsFromIssue(issueData: JiraIssue): Attachment[] {
-    return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
   }
 
   // TODO find solution

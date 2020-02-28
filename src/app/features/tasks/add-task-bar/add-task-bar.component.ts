@@ -188,7 +188,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       if (!res) {
         this._issueService.addTaskWithIssue(
           item.issueType,
-          item.issueData,
+          item.issueData.id,
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {
