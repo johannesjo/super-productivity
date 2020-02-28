@@ -9,14 +9,15 @@ import {TaskService} from '../tasks/task.service';
 import {Task} from '../tasks/task.model';
 import {GithubCfg} from './github/github';
 import {IssueServiceInterface} from './issue-service-interface';
+import {JiraCommonInterfacesService} from './jira/jira-common-interfaces.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueService {
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
-    [GITHUB_TYPE]: this._jiraIssueService,
-    [JIRA_TYPE]: this._jiraIssueService
+    [GITHUB_TYPE]: this._jiraCommonInterfacesService,
+    [JIRA_TYPE]: this._jiraCommonInterfacesService
   };
 
   // TODO remove
@@ -28,6 +29,7 @@ export class IssueService {
     // private _gitIssueService: GithubIssueService,
     private _projectService: ProjectService,
     private _taskService: TaskService,
+    private _jiraCommonInterfacesService: JiraCommonInterfacesService,
   ) {
     this._projectService.currentGithubCfg$.subscribe((githubCfg) => this.githubCfg = githubCfg);
   }

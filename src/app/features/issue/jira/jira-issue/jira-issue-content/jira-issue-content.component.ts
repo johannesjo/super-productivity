@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
-import {JiraIssueService} from '../jira-issue.service';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraIssue} from '../jira-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
@@ -10,6 +9,7 @@ import * as j2m from 'jira2md';
 import {Subscription} from 'rxjs';
 import {JIRA_TYPE} from '../../../issue.const';
 import {TaskService} from '../../../../tasks/task.service';
+import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
 
 @Component({
   selector: 'jira-issue-content',
@@ -29,7 +29,6 @@ export class JiraIssueContentComponent implements OnDestroy {
 
   private _taskId: string;
   private _getIssueSub = new Subscription();
-  private _lastUpdated: number;
 
 
   @Input()
@@ -49,7 +48,7 @@ export class JiraIssueContentComponent implements OnDestroy {
   }
 
   constructor(
-    private readonly  _jiraIssueService: JiraIssueService,
+    private readonly  _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private readonly  _jiraApiService: JiraApiService,
     private readonly  _taskService: TaskService,
     private readonly  _changeDetectorRef: ChangeDetectorRef,
@@ -70,7 +69,7 @@ export class JiraIssueContentComponent implements OnDestroy {
     this._getIssueSub.add(this._jiraApiService.getIssueById$(issueId).subscribe((issue) => {
       this.issue = issue;
       this.description = issue && issue.description && j2m.to_markdown(issue.description);
-      this.attachments = this._jiraIssueService.getMappedAttachmentsFromIssue(issue);
+      this.attachments = this._jiraCommonInterfacesService.getMappedAttachmentsFromIssue(issue);
       this._changeDetectorRef.detectChanges();
     }));
   }
