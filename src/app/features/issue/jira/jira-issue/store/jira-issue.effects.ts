@@ -216,6 +216,8 @@ export class JiraIssueEffects {
       ofType(
         TaskActionTypes.UpdateTask,
       ),
+      // only trigger when changing to done
+      filter((a: UpdateTask) => a.payload.task.changes.isDone),
       withLatestFrom(
         this._projectService.isJiraEnabled$,
         this._projectService.currentJiraCfg$,
