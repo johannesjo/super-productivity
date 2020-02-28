@@ -79,8 +79,22 @@
     </ng-container>
 
     <ng-container panel-content>
+      <div style="min-height: 120px; position: relative;"
+           *ngIf="!(issueData$|async)">
+        <mat-spinner style="
+          position: absolute;
+          top: 50%;
+          opacity: 0.7;
+          left: 50%;
+          margin-top: -50px;
+          margin-left: -58px;
+"></mat-spinner>
+      </div>
+
       <issue-content [task]="task"
-                     [issueData]="issueData$|async"
+                     [@expandFadeInOnly]
+                     *ngIf="(issueData$|async)"
+                     [issueData]="(issueData$|async)"
                      class="panel-content-wrapper issue-content-wrapper"></issue-content>
     </ng-container>
   </task-additional-info-item>
@@ -124,7 +138,8 @@
     </ng-container>
 
     <ng-container panel-content>
-      <div class="panel-content-wrapper attachment-list-panel-content-wrapper" style="padding-bottom: 8px;">
+      <div class="panel-content-wrapper attachment-list-panel-content-wrapper"
+           style="padding-bottom: 8px;">
         <ng-container *ngIf="task.issueType">
           <attachment-list [attachments]="issueAttachments"
                            [isDisableControls]="true"></attachment-list>

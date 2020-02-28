@@ -1,20 +1,4 @@
-<ng-template #spinner>
-  <div style="min-height: 120px; position: relative;">
-    <mat-spinner style="
-    position: absolute;
-    top: 50%;
-    opacity: 0.7;
-    left: 50%;
-    margin-top: -50px;
-    margin-left: -58px;
-"></mat-spinner>
-  </div>
-</ng-template>
-
-<div class="wrapper"
-     *ngIf="issue else spinner"
-     [@expandFadeInOnly]
->
+<div class="wrapper">
   <div *ngIf="task.issueWasUpdated"
        [@expand]
        class="updates">

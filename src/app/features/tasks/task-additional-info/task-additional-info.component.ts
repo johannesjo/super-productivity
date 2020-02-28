@@ -15,20 +15,10 @@ import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
 import {BehaviorSubject, merge, Observable, of, Subject, Subscription, timer} from 'rxjs';
 import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
-import {
-  concatMap,
-  delay,
-  distinctUntilChanged,
-  filter,
-  map,
-  mapTo,
-  shareReplay,
-  switchMap,
-  withLatestFrom
-} from 'rxjs/operators';
+import {concatMap, delay, filter, map, mapTo, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
-import {expandAnimation} from '../../../ui/animations/expand.ani';
+import {expandAnimation, expandFadeInOnlyAnimation} from '../../../ui/animations/expand.ani';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
 import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
@@ -47,14 +37,14 @@ import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani'
 import {noopAnimation} from '../../../ui/animations/noop.ani';
 import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-additional-info-item.component';
 import {IssueData, IssueProviderKey} from '../../issue/issue.model';
-import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
 
 @Component({
   selector: 'task-additional-info',
   templateUrl: './task-additional-info.component.html',
   styleUrls: ['./task-additional-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
+  animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
+
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @HostBinding('@noop') alwaysTrue = true;
@@ -76,20 +66,19 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   issueIdAndType$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
   issueIdAndTypeShared$ = this.issueIdAndType$.pipe(
-    distinctUntilChanged(distinctUntilChangedObject),
     shareReplay(1),
   );
 
-  issueDataNullTrigger$ = new Subject();
+  issueDataNullTrigger$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
   issueData$: Observable<IssueData> = merge(
     this.issueIdAndTypeShared$,
     this.issueDataNullTrigger$
   ).pipe(
     switchMap((args) => (args && args.id && args.type)
       ? this._issueService.getById$(args.type, args.id)
-        // .pipe(
-        //   concatMap(data => timer(300).pipe(mapTo(data))),
-        // )
+        .pipe(
+          concatMap(data => timer(0).pipe(mapTo(data))),
+        )
       : of(null)),
     shareReplay(1),
   );
