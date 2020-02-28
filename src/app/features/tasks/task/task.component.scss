@@ -631,12 +631,9 @@ progress-bar {
     justify-content: center;
     align-items: center;
 
-    .first-line:hover & {
-      display: none;
-    }
-
-    :host.isCurrent & {
-    }
+    //.first-line:hover & {
+    //  opacity: .7;
+    //}
 
     :host.isCurrent &::ng-deep mat-icon {
       transform: scale(1.4) !important;
@@ -655,10 +652,10 @@ progress-bar {
 
   .drag-handle-ico {
     @include mq(xs) {
-      opacity: 0;
-      .first-line:hover & {
-        opacity: 1;
-      }
+      opacity: 0.15;
+      //.first-line:hover & {
+      //opacity: 0.3;
+      //}
     }
   }
 
