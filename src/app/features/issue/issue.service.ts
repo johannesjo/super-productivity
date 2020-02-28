@@ -11,6 +11,8 @@ import {JiraIssueService} from './jira/jira-issue/jira-issue.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
 import {TaskService} from '../tasks/task.service';
 import {Task} from '../tasks/task.model';
+import {JiraCfg} from './jira/jira';
+import {GithubCfg} from './github/github';
 
 @Injectable({
   providedIn: 'root',
@@ -19,10 +21,13 @@ export class IssueService {
   public isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
     map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
   );
+  jiraCfg: JiraCfg;
 
   public isGithubSearchEnabled$: Observable<boolean> = this._projectService.currentGithubCfg$.pipe(
     map(gitCfg => gitCfg && gitCfg.isSearchIssuesFromGithub)
   );
+  githubCfg: GithubCfg;
+
 
   constructor(
     private _jiraApiService: JiraApiService,
@@ -32,6 +37,8 @@ export class IssueService {
     private _projectService: ProjectService,
     private _taskService: TaskService,
   ) {
+    this._projectService.currentJiraCfg$.subscribe((jiraCfg) => this.jiraCfg = jiraCfg);
+    this._projectService.currentGithubCfg$.subscribe((githubCfg) => this.githubCfg = githubCfg);
   }
 
 
@@ -133,6 +140,17 @@ export class IssueService {
       case JIRA_TYPE: {
         const issueData = issueDataIN as JiraIssue;
         return this._jiraIssueService.getMappedAttachmentsFromIssue(issueData);
+      }
+    }
+  }
+
+  public issueLink(issueType: IssueProviderKey, issueId: string | number): string {
+    switch (issueType) {
+      case JIRA_TYPE: {
+        return this.jiraCfg.host + '/browse/' + issueId;
+      }
+      case GITHUB_TYPE: {
+        return `https://github.com/${this.githubCfg.repo}/issues/${issueId}`;
       }
     }
   }

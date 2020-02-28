@@ -38,19 +38,18 @@ export interface TaskCopy {
 
   notes: string;
 
-  issueId: string;
-  issueType: IssueProviderKey;
-  // TODO should be dynamic
-  issueUrl: string;
-  issueWasUpdated: boolean;
-  issueLastUpdated: number;
-  issueAttachmentNr: number;
-  issuePoints: number;
-
   parentId: string;
   attachmentIds: string[];
   reminderId?: string;
   repeatCfgId: string;
+
+  // issue stuff
+  issueId: string;
+  issueType: IssueProviderKey;
+  issueWasUpdated: boolean;
+  issueLastUpdated: number;
+  issueAttachmentNr: number;
+  issuePoints: number;
 
   // ui model
   /** @deprecated handled by selectedTaskId now */
@@ -87,19 +86,20 @@ export const DEFAULT_TASK: Task = {
   title: '',
   notes: '',
   parentId: null,
+  reminderId: null,
+  created: Date.now(),
+  repeatCfgId: null,
+
+  _isAdditionalInfoOpen: false,
+  _showSubTasksMode: ShowSubTasksMode.Show,
+  _currentTab: 0,
+
   issueId: null,
   issuePoints: null,
-  issueUrl: null,
   issueType: null,
   issueAttachmentNr: null,
   issueLastUpdated: null,
   issueWasUpdated: null,
-  reminderId: null,
-  created: Date.now(),
-  repeatCfgId: null,
-  _isAdditionalInfoOpen: false,
-  _showSubTasksMode: ShowSubTasksMode.Show,
-  _currentTab: 0,
 };
 
 export const SHORT_SYNTAX_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;

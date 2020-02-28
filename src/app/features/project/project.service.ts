@@ -75,15 +75,16 @@ export class ProjectService {
   );
   currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
     select(selectProjectJiraCfg),
-    // shareReplay(1),
+    shareReplay(1),
   );
+
   isJiraEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectJiraIsEnabled),
   );
 
   currentGithubCfg$: Observable<GithubCfg> = this._store$.pipe(
     select(selectProjectGithubCfg),
-    // shareReplay(1),
+    shareReplay(1),
   );
   isGithubEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectGithubIsEnabled),
