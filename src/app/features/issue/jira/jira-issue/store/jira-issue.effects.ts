@@ -101,11 +101,10 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._projectService.isJiraEnabled$,
         this._projectService.currentJiraCfg$,
-        this._store$.pipe(select(selectJiraIssueEntities)),
         this._store$.pipe(select(selectTaskEntities)),
       ),
       filter(([actIN, isEnabled]) => isEnabled),
-      tap(([actIN, isEnabled, jiraCfg, jiraEntities, taskEntities]) => {
+      tap(([actIN, isEnabled, jiraCfg, taskEntities]) => {
         const act = actIN as UpdateTask;
         const taskId = act.payload.task.id;
         const isDone = act.payload.task.changes.isDone;
@@ -118,13 +117,13 @@ export class JiraIssueEffects {
         if (jiraCfg.isWorklogEnabled
           && task && task.issueType === JIRA_TYPE
           && !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)) {
-          this._openWorklogDialog(task, jiraEntities[task.issueId]);
+          this._openWorklogDialog(task, task.issueId);
 
         } else {
           const parent = task.parentId && taskEntities[task.parentId];
           if (parent && jiraCfg.isAddWorklogOnSubTaskDone && parent.issueType === JIRA_TYPE) {
             // NOTE we're still sending the sub task for the meta data we need
-            this._openWorklogDialog(task, jiraEntities[parent.issueId]);
+            this._openWorklogDialog(task, parent.issueId);
           }
         }
       })
@@ -386,15 +385,16 @@ export class JiraIssueEffects {
     }
   }
 
-  private _openWorklogDialog(task: Task, issue: JiraIssue) {
-    this._matDialog.open(DialogJiraAddWorklogComponent, {
-      restoreFocus: true,
-      data: {
-        issue,
-        task,
-      }
-    }).afterClosed()
-      .subscribe();
+  private _openWorklogDialog(task: Task, issueId: string) {
+    return this._jiraApiService.getIssueById$(issueId).pipe(take(1)).subscribe(issue => {
+      this._matDialog.open(DialogJiraAddWorklogComponent, {
+        restoreFocus: true,
+        data: {
+          issue,
+          task,
+        }
+      });
+    });
   }
 
   private _openTransitionDialog(issue: JiraIssue, localState: IssueLocalState, task: Task): Observable<any> {
