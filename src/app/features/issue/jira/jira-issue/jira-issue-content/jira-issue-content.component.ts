@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy}
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraIssue} from '../jira-issue.model';
-import {expandAnimation} from '../../../../../ui/animations/expand.ani';
+import {expandAnimation, expandFadeInOnlyAnimation} from '../../../../../ui/animations/expand.ani';
 import {Attachment} from '../../../../attachment/attachment.model';
 import {T} from '../../../../../t.const';
 import {Subscription} from 'rxjs';
@@ -14,7 +14,7 @@ import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service'
   templateUrl: './jira-issue-content.component.html',
   styleUrls: ['./jira-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation, expandFadeInOnlyAnimation]
 })
 export class JiraIssueContentComponent implements OnDestroy {
   @Input() issue: JiraIssue;

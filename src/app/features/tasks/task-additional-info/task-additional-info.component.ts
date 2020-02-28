@@ -13,9 +13,19 @@ import {
 import {TaskAdditionalInfoTargetPanel, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, Observable, of, Subject, Subscription} from 'rxjs';
+import {BehaviorSubject, merge, Observable, of, Subject, Subscription, timer} from 'rxjs';
 import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
-import {delay, distinctUntilChanged, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
+import {
+  concatMap,
+  delay,
+  distinctUntilChanged,
+  filter,
+  map,
+  mapTo,
+  shareReplay,
+  switchMap,
+  withLatestFrom
+} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
@@ -70,9 +80,16 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     shareReplay(1),
   );
 
-  issueData$: Observable<IssueData> = this.issueIdAndTypeShared$.pipe(
-    switchMap(({id, type}) => (id && type)
-      ? this._issueService.getById$(type, id)
+  issueDataNullTrigger$ = new Subject();
+  issueData$: Observable<IssueData> = merge(
+    this.issueIdAndTypeShared$,
+    this.issueDataNullTrigger$
+  ).pipe(
+    switchMap((args) => (args && args.id && args.type)
+      ? this._issueService.getById$(args.type, args.id)
+        // .pipe(
+        //   concatMap(data => timer(300).pipe(mapTo(data))),
+        // )
       : of(null)),
     shareReplay(1),
   );
@@ -145,10 +162,14 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
     // NOTE: check for task change or issue update
     if (!prev || (prev.issueId !== newVal.issueId || newVal.issueWasUpdated === true && !prev.issueWasUpdated)) {
+      this.issueDataNullTrigger$.next(null);
       this.issueIdAndType$.next({
         id: newVal.issueId,
         type: newVal.issueType
       });
+    }
+    if (!newVal.issueId) {
+      this.issueDataNullTrigger$.next(null);
     }
 
     if (!prev || prev.issueId !== newVal.issueId) {
