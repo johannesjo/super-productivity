@@ -221,8 +221,7 @@
         "IS_AUTO_POLL_TICKETS": "Controlla automaticamente le modifiche sugli issue importati e notificamelo",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controlla se l'issue sul quale correntemente si sta lavorando è assegnato all'utente corrente",
         "IS_WORKLOG_ENABLED": "Apri una finestra per sottomettere il worklog su jira quando un task è completato",
-        "SEARCH_JQL_QUERY": "JQL Query per limitare i task della ricerca",
-        "USER_ASSIGNEE_NAME": "Nome dell'assegnatario che si vuole controllare"
+        "SEARCH_JQL_QUERY": "JQL Query per limitare i task della ricerca"
       },
       "FORM_CRED": {
         "HOST": "Host (e.g.: http://my-host.de:1234)",

@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "Überprüfen Sie importierte Issues automatisch auf Änderungen und benachrichtigen Sie",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Prüfen Sie, ob das aktuell bearbeitete Issue dem aktuellen Benutzer zugeordnet ist",
         "IS_WORKLOG_ENABLED": "Öffnen Sie das Dialogfeld, um das Arbeitsprotokoll an jira zu senden, wenn die Aufgabe erledigt ist",
-        "SEARCH_JQL_QUERY": "JQL-Abfrage für, um die Sucheraufgaben einzuschränken",
-        "USER_ASSIGNEE_NAME": "Name des zu überprüfenden Empfängers"
+        "SEARCH_JQL_QUERY": "JQL-Abfrage für, um die Sucheraufgaben einzuschränken"
       },
       "FORM_CRED": {
         "HOST": "Host (z. B .: http://my-host.de:1234)",

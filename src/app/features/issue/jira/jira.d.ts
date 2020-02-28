@@ -30,7 +30,6 @@ export interface JiraCfg {
   isShowComponents: boolean;
 
   isCheckToReAssignTicketOnTaskStart: boolean;
-  userAssigneeName: string;
 
   storyPointFieldId: string;
 

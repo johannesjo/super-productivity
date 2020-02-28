@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "İçe aktarılan sorunları otomatik olarak kontrol et ve bildir",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Halen çalışılmakta olan sorun geçerli kullanıcıya atanmış mı kontrol edin",
         "IS_WORKLOG_ENABLED": "Görev tamamlandığında çalışma günlüğünü jira'ya göndermek için iletişim kutusunu aç",
-        "SEARCH_JQL_QUERY": "Arama görevlerini sınırlamak için JQL Sorgusu",
-        "USER_ASSIGNEE_NAME": "Denetlenecek kişinin adı"
+        "SEARCH_JQL_QUERY": "Arama görevlerini sınırlamak için JQL Sorgusu"
       },
       "FORM_CRED": {
         "HOST": "Ev sahibi (örneğin: http://my-host.de:1234)",

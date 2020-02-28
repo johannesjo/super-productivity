@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "Verifica automáticamente los problemas importados por cambios y notifica",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Compruebe si el problema actualmente trabajado está asignado al usuario actual",
         "IS_WORKLOG_ENABLED": "Abrir el cuadro de diálogo para enviar el registro de trabajo a jira cuando se realiza la tarea",
-        "SEARCH_JQL_QUERY": "Consulta JQL para limitar las tareas del buscador.",
-        "USER_ASSIGNEE_NAME": "Nombre del asignado por verificar"
+        "SEARCH_JQL_QUERY": "Consulta JQL para limitar las tareas del buscador."
       },
       "FORM_CRED": {
         "HOST": "Host (por ejemplo, http://my-host.de:1234)",

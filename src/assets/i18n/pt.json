@@ -221,8 +221,7 @@
         "IS_AUTO_POLL_TICKETS": "Verifique os problemas importados para alterações automaticamente e notificar",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Verifique se o problema atualmente trabalhado está atribuído ao usuário atual",
         "IS_WORKLOG_ENABLED": "Abrir caixa de diálogo para enviar o log de trabalho a Jira quando a tarefa estiver concluída",
-        "SEARCH_JQL_QUERY": "Consulta JQL para limitar as tarefas do pesquisador",
-        "USER_ASSIGNEE_NAME": "Nome do responsável a ser verificado"
+        "SEARCH_JQL_QUERY": "Consulta JQL para limitar as tarefas do pesquisador"
       },
       "FORM_CRED": {
         "HOST": "Host (e.g.: http://my-host.de:1234)",

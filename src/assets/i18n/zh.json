@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "自动检查导入的问题以进行更改并通知",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "检查当前处理的问题是否已分配给当前用户",
         "IS_WORKLOG_ENABLED": "打开对话框，在任务完成时将工作日志提交给jira",
-        "SEARCH_JQL_QUERY": "JQL Query用于限制搜索器任务",
-        "USER_ASSIGNEE_NAME": "要检查的受让人姓名"
+        "SEARCH_JQL_QUERY": "JQL Query用于限制搜索器任务"
       },
       "FORM_CRED": {
         "HOST": "主持人（例如：http：//my-host.de：1234）",

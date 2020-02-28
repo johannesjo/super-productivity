@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "تحقق من المشكلات المستوردة بحثًا عن التغييرات تلقائيًا وأبلغ عنها",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "تحقق مما إذا كان قد تم تعيين المشكلة قيد العمل حاليًا للمستخدم الحالي",
         "IS_WORKLOG_ENABLED": "فتح مربع حوار لتقديم worklog إلى جيرا عند الانتهاء من المهمة",
-        "SEARCH_JQL_QUERY": "استعلام JQL عن للحد من مهام الباحث",
-        "USER_ASSIGNEE_NAME": "اسم المتنازل للتحقق منه"
+        "SEARCH_JQL_QUERY": "استعلام JQL عن للحد من مهام الباحث"
       },
       "FORM_CRED": {
         "HOST": "المضيف (على سبيل المثال: http://my-host.de:1234)",

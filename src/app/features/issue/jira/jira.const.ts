@@ -28,7 +28,6 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   isShowComponents: true,
 
   isCheckToReAssignTicketOnTaskStart: false,
-  userAssigneeName: null,
 
   storyPointFieldId: null,
 
@@ -124,15 +123,6 @@ export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     templateOptions: {
       label: T.F.JIRA.FORM_ADV.IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START
     },
-  },
-  {
-    key: 'userAssigneeName',
-    type: 'input',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.USER_ASSIGNEE_NAME,
-      required: true,
-    },
-    hideExpression: '!model.isCheckToReAssignTicketOnTaskStart',
   },
   {
     key: 'isAutoAddToBacklog',

@@ -81,9 +81,6 @@ export class JiraCfgStepperComponent implements OnDestroy {
         .subscribe((user: JiraOriginalUser) => {
           this.user = user;
           this.isTestCredentialsSuccess = true;
-          if (!this.jiraCfg.userAssigneeName) {
-            this.jiraCfg.userAssigneeName = user.name;
-          }
 
           this._changeDetectorRef.detectChanges();
         })
