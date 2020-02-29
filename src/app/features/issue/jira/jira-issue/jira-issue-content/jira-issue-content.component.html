@@ -22,8 +22,7 @@
     </ul>
   </div>
 
-  <table [class.isFocusDescription]="isFocusDescription"
-         class="issue-table">
+  <table class="issue-table">
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.SUMMARY|translate}}</th>
       <td class="summary"><strong><a [href]="issue.url"
@@ -60,7 +59,7 @@
     </tr>
     <tr *ngIf="issue?.description"
         class="description-row">
-      <th (click)="isFocusDescription=!isFocusDescription">{{T.F.JIRA.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
       <td>
         <div *ngIf="description"
              [data]="description"

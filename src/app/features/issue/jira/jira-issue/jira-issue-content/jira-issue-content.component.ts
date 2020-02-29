@@ -22,7 +22,6 @@ export class JiraIssueContentComponent implements OnDestroy {
 
   description: string;
   attachments: Attachment[];
-  isFocusDescription = false;
   T = T;
 
   private _getIssueSub = new Subscription();
