@@ -72,7 +72,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="task.issueId"
-    [expanded]="true"
+    [expanded]="(issueData$|async) !== false"
     [type]="'panel'">
     <ng-container panel-header>
       <issue-header [task]="task"></issue-header>
@@ -80,7 +80,7 @@
 
     <ng-container panel-content>
       <div style="min-height: 120px; position: relative;"
-           *ngIf="!(issueData$|async)">
+           *ngIf="(issueData$|async) === null">
         <mat-spinner style="
           position: absolute;
           top: 50%;
@@ -93,8 +93,8 @@
 
       <issue-content [task]="task"
                      [@expandFadeInOnly]
-                     *ngIf="(issueData$|async)"
-                     [issueData]="(issueData$|async)"
+                     *ngIf="(issueData$|async) as issueData"
+                     [issueData]="issueData"
                      class="panel-content-wrapper issue-content-wrapper"></issue-content>
     </ng-container>
   </task-additional-info-item>

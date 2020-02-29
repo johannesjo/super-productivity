@@ -13,9 +13,9 @@ import {
 import {TaskAdditionalInfoTargetPanel, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, merge, Observable, of, Subject, Subscription, timer} from 'rxjs';
+import {BehaviorSubject, merge, Observable, of, Subject, Subscription} from 'rxjs';
 import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
-import {delay, delayWhen, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, delay, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation, expandFadeInOnlyAnimation} from '../../../ui/animations/expand.ani';
@@ -70,14 +70,22 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   );
 
   issueDataNullTrigger$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
-  issueData$: Observable<IssueData> = merge(
+
+  issueDataTrigger$: Observable<{ id: string | number; type: IssueProviderKey }> = merge(
     this.issueIdAndTypeShared$,
     this.issueDataNullTrigger$
-  ).pipe(
+  );
+
+  issueData$: Observable<IssueData> = this.issueDataTrigger$.pipe(
     switchMap((args) => (args && args.id && args.type)
       ? this._issueService.getById$(args.type, args.id)
+        // ? throwError({[HANDLED_ERROR_PROP_STR]: 'XX'})
         .pipe(
-          // delayWhen(x => timer(3000))
+          // delayWhen(x => timer(300)),
+          // NOTE we need this, otherwise the error is going to weird up the observable
+          catchError(() => {
+            return of(false);
+          }),
         )
       : of(null)),
     shareReplay(1),
@@ -122,19 +130,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   private _focusTimeout: number;
   private _subs = new Subscription();
 
-  constructor(
-    private _resolver: ComponentFactoryResolver,
-    private _issueService: IssueService,
-    public taskService: TaskService,
-    private _reminderService: ReminderService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private  _matDialog: MatDialog,
-    public attachmentService: AttachmentService,
-  ) {
-    // NOTE: needs to be assigned here before any setter is called
-    this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
-    this._subs.add(this.localAttachments$.subscribe((attachments) => this.localAttachments = attachments));
-  }
 
   get task(): TaskWithSubTasks {
     return this._taskData;
@@ -176,6 +171,24 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   get progress() {
     return this._taskData && this._taskData.timeEstimate && (this._taskData.timeSpent / this._taskData.timeEstimate) * 100;
+  }
+
+  constructor(
+    private _resolver: ComponentFactoryResolver,
+    private _issueService: IssueService,
+    public taskService: TaskService,
+    private _reminderService: ReminderService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
+    private  _matDialog: MatDialog,
+    public attachmentService: AttachmentService,
+  ) {
+    // NOTE: needs to be assigned here before any setter is called
+    this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
+    this._subs.add(this.localAttachments$.subscribe((attachments) => this.localAttachments = attachments));
+
+    // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
+    // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
+    // this.issueData$.subscribe((v) => console.log('issueData$', v));
   }
 
   ngAfterViewInit(): void {
