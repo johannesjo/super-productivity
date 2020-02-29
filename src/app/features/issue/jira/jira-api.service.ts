@@ -33,6 +33,7 @@ import {ElectronService} from '../../../core/electron/electron.service';
 import {stringify} from 'query-string';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
+import {isOnline} from '../../../util/is-online';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -271,6 +272,16 @@ export class JiraApiService {
 
         // assign uuid to request to know which responsive belongs to which promise
         const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
+
+
+        if (!isOnline()) {
+          this._snackService.open({
+            type: 'CUSTOM',
+            msg: T.G.NO_CON,
+            ico: 'cloud_off'
+          });
+          return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira Offline ' + requestId});
+        }
 
         if (!this._isMinimalSettings(cfg)) {
           this._snackService.open({

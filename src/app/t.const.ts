@@ -688,7 +688,8 @@ export const T = {
     'SAVE': 'G.SAVE',
     'TITLE': 'G.TITLE',
     'UNDO': 'G.UNDO',
-    'UPDATE': 'G.UPDATE'
+    'UPDATE': 'G.UPDATE',
+    'NO_CON': 'G.NO_CON'
   },
   'GCF': {
     'AUTO_BACKUPS': {

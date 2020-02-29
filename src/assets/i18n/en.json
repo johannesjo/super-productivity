@@ -688,7 +688,8 @@
     "SAVE": "Save",
     "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "Update"
+    "UPDATE": "Update",
+    "NO_CON": "You are currently offline. Please reconnect to the internet."
   },
   "GCF": {
     "AUTO_BACKUPS": {

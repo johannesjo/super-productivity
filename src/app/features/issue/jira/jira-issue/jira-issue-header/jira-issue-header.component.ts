@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
+import {isOnline$} from 'src/app/util/is-online';
 
 @Component({
   selector: 'jira-issue-header',
@@ -9,6 +10,7 @@ import {TaskWithSubTasks} from '../../../../tasks/task.model';
 })
 export class JiraIssueHeaderComponent {
   @Input() public task: TaskWithSubTasks;
+  isOnline$ = isOnline$;
 
   constructor() {
   }
