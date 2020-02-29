@@ -13,9 +13,9 @@ import {
 import {TaskAdditionalInfoTargetPanel, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, merge, Observable, of, Subject, Subscription} from 'rxjs';
+import {BehaviorSubject, merge, Observable, of, Subject, Subscription, timer} from 'rxjs';
 import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
-import {catchError, delay, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, delay, delayWhen, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation, expandFadeInOnlyAnimation} from '../../../ui/animations/expand.ani';
@@ -81,7 +81,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       ? this._issueService.getById$(args.type, args.id)
         // ? throwError({[HANDLED_ERROR_PROP_STR]: 'XX'})
         .pipe(
-          // delayWhen(x => timer(300)),
+          // delayWhen(x => timer(3000)),
           // NOTE we need this, otherwise the error is going to weird up the observable
           catchError(() => {
             return of(false);

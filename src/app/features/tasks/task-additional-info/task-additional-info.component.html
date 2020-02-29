@@ -79,18 +79,8 @@
     </ng-container>
 
     <ng-container panel-content>
-      <div style="min-height: 120px; position: relative;"
-           *ngIf="(issueData$|async) === null">
-        <mat-spinner style="
-          position: absolute;
-          top: 50%;
-          opacity: 0.7;
-          left: 50%;
-          margin-top: -50px;
-          margin-left: -58px;
-"></mat-spinner>
-      </div>
-
+      <mat-progress-bar *ngIf="(issueData$|async) === null"
+                        [mode]="'indeterminate'"></mat-progress-bar>
       <issue-content [task]="task"
                      [@expandFadeInOnly]
                      *ngIf="(issueData$|async) as issueData"
