@@ -23,7 +23,7 @@ import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
 import {Observable, throwError} from 'rxjs';
 import {SearchResultItem} from '../issue.model';
-import {catchError, concatMap, first, shareReplay, switchMap} from 'rxjs/operators';
+import {catchError, concatMap, first, shareReplay, switchMap, take} from 'rxjs/operators';
 import {JiraIssue} from './jira-issue/jira-issue.model';
 import * as moment from 'moment';
 import {BannerService} from '../../../core/banner/banner.service';
@@ -266,48 +266,50 @@ export class JiraApiService {
   }
 
   private _sendRequest$(jiraReqCfg: JiraRequestCfg, customCfg?: JiraCfg, isForce = false): Observable<any> {
-    return this._cfgAfterReady$.pipe(concatMap(currentCfg => {
-      const cfg = customCfg || currentCfg;
+    return this._cfgAfterReady$.pipe(
+      take(1),
+      concatMap(currentCfg => {
+        const cfg = customCfg || currentCfg;
 
-      // assign uuid to request to know which responsive belongs to which promise
-      const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
+        // assign uuid to request to know which responsive belongs to which promise
+        const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
 
-      if (!this._isMinimalSettings(cfg)) {
-        this._snackService.open({
-          type: 'ERROR',
-          msg: (!IS_ELECTRON && !this._isExtension)
-            ? T.F.JIRA.S.EXTENSION_NOT_LOADED
-            : T.F.JIRA.S.INSUFFICIENT_SETTINGS,
-        });
-        return throwError({[HANDLED_ERROR_PROP_STR]: 'Insufficient Settings for Jira ' + requestId});
-      }
+        if (!this._isMinimalSettings(cfg)) {
+          this._snackService.open({
+            type: 'ERROR',
+            msg: (!IS_ELECTRON && !this._isExtension)
+              ? T.F.JIRA.S.EXTENSION_NOT_LOADED
+              : T.F.JIRA.S.INSUFFICIENT_SETTINGS,
+          });
+          return throwError({[HANDLED_ERROR_PROP_STR]: 'Insufficient Settings for Jira ' + requestId});
+        }
 
-      if (this._isBlockAccess && !isForce) {
-        console.error('Blocked Jira Access to prevent being shut out');
-        this._bannerService.open({
-          id: BannerId.JiraUnblock,
-          msg: T.F.JIRA.BANNER.BLOCK_ACCESS_MSG,
-          svgIco: 'jira',
-          action: {
-            label: T.F.JIRA.BANNER.BLOCK_ACCESS_UNBLOCK,
-            fn: () => this.unblockAccess()
-          }
-        });
-        return throwError({[HANDLED_ERROR_PROP_STR]: 'Blocked access to prevent being shut out ' + requestId});
-      }
+        if (this._isBlockAccess && !isForce) {
+          console.error('Blocked Jira Access to prevent being shut out');
+          this._bannerService.open({
+            id: BannerId.JiraUnblock,
+            msg: T.F.JIRA.BANNER.BLOCK_ACCESS_MSG,
+            svgIco: 'jira',
+            action: {
+              label: T.F.JIRA.BANNER.BLOCK_ACCESS_UNBLOCK,
+              fn: () => this.unblockAccess()
+            }
+          });
+          return throwError({[HANDLED_ERROR_PROP_STR]: 'Blocked access to prevent being shut out ' + requestId});
+        }
 
-      // BUILD REQUEST START
-      // -------------------
-      const requestInit = this._makeRequestInit(jiraReqCfg, cfg);
+        // BUILD REQUEST START
+        // -------------------
+        const requestInit = this._makeRequestInit(jiraReqCfg, cfg);
 
-      const queryStr = jiraReqCfg.query ? `?${stringify(jiraReqCfg.query)}` : '';
-      const base = `${cfg.host}/rest/api/${API_VERSION}`;
-      const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
+        const queryStr = jiraReqCfg.query ? `?${stringify(jiraReqCfg.query)}` : '';
+        const base = `${cfg.host}/rest/api/${API_VERSION}`;
+        const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
 
-      const args = [requestId, url, requestInit, jiraReqCfg.transform];
+        const args = [requestId, url, requestInit, jiraReqCfg.transform];
 
-      return this._issueCacheService.cache(url, requestInit, this._sendRequestToExecutor$.bind(this), args);
-    }));
+        return this._issueCacheService.cache(url, requestInit, this._sendRequestToExecutor$.bind(this), args);
+      }));
   }
 
   private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform): Observable<any> {
