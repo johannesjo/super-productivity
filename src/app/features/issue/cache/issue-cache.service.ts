@@ -47,8 +47,10 @@ export class IssueCacheService {
   }
 
   private _isUseCache(cacheId: string) {
-    return false;
-    console.log(this.dummyCache[cacheId], Date.now(), !navigator.onLine);
+    // return false;
+    // console.log(this.dummyCache[cacheId], Date.now(), !navigator.onLine);
+
+    // return environment.production && this.dummyCache[cacheId] && (this.dummyCache[cacheId].e > Date.now() || !navigator.onLine);
     return this.dummyCache[cacheId] && (this.dummyCache[cacheId].e > Date.now() || !navigator.onLine);
   }
 

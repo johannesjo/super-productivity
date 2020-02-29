@@ -61,7 +61,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     const issue = await this._jiraApiService.getIssueById$(issueId, true).toPromise();
 
     return {
-      title: issue.summary,
+      title: `${issue.key} ${issue.summary}`,
       additionalFields: {
         issuePoints: issue.storyPoints,
         issueAttachmentNr: issue.attachments ? issue.attachments.length : 0,
