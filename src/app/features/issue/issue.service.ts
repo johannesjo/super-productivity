@@ -67,8 +67,6 @@ export class IssueService {
   }
 
   getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
-    console.log(issueType, issueDataIN);
-
     if (typeof this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments === 'function') {
       return this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments(issueDataIN);
     }

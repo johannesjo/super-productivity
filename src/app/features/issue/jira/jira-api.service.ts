@@ -23,16 +23,17 @@ import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
 import {Observable, throwError} from 'rxjs';
 import {SearchResultItem} from '../issue.model';
-import {fromPromise} from 'rxjs/internal-compatibility';
 import {catchError, concatMap, first, shareReplay, switchMap} from 'rxjs/operators';
 import {JiraIssue} from './jira-issue/jira-issue.model';
 import * as moment from 'moment';
-import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {T} from '../../../t.const';
 import {ElectronService} from '../../../core/electron/electron.service';
 import {stringify} from 'query-string';
+import {IssueCacheService} from '../cache/issue-cache.service';
+import {fromPromise} from 'rxjs/internal-compatibility';
+import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -87,6 +88,7 @@ export class JiraApiService {
     private _electronService: ElectronService,
     private _snackService: SnackService,
     private _bannerService: BannerService,
+    private _issueCacheService: IssueCacheService,
   ) {
     this._cfg$.subscribe((cfg: JiraCfg) => {
       this._cfg = cfg;
@@ -298,42 +300,46 @@ export class JiraApiService {
       // -------------------
       const requestInit = this._makeRequestInit(jiraReqCfg, cfg);
 
-      // TODO refactor to observable for request canceling etc
-      let promiseResolve;
-      let promiseReject;
-      const promise = new Promise((resolve, reject) => {
-        promiseResolve = resolve;
-        promiseReject = reject;
-      });
-
-      // save to request log
-      this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, jiraReqCfg.transform);
-
       const queryStr = jiraReqCfg.query ? `?${stringify(jiraReqCfg.query)}` : '';
       const base = `${cfg.host}/rest/api/${API_VERSION}`;
       const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
 
-      const requestToSend = {requestId, requestInit, url};
+      const args = [requestId, url, requestInit, jiraReqCfg.transform];
 
-      // send to electron
-      if (this._electronService.isElectronApp) {
-        this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, requestToSend);
-      } else if (this._isExtension) {
-        this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
-      }
-      return fromPromise(promise)
-        .pipe(
-          catchError((err) => {
-            console.log(err);
-            console.log(getJiraResponseErrorTxt(err));
-
-            const errTxt = `Jira: ${getJiraResponseErrorTxt(err)}`;
-            this._snackService.open({type: 'ERROR', msg: errTxt});
-            return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
-          }),
-          first(),
-        );
+      return this._issueCacheService.cache(url, requestInit, this._sendRequestToExecutor$.bind(this), args);
     }));
+  }
+
+  private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform): Observable<any> {
+    // TODO refactor to observable for request canceling etc
+    let promiseResolve;
+    let promiseReject;
+    const promise = new Promise((resolve, reject) => {
+      promiseResolve = resolve;
+      promiseReject = reject;
+    });
+
+    // save to request log (also sets up timeout)
+    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, transform);
+
+    const requestToSend = {requestId, requestInit, url};
+    if (this._electronService.isElectronApp) {
+      this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, requestToSend);
+    } else if (this._isExtension) {
+      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
+    }
+
+    return fromPromise(promise)
+      .pipe(
+        catchError((err) => {
+          console.log(err);
+          console.log(getJiraResponseErrorTxt(err));
+          const errTxt = `Jira: ${getJiraResponseErrorTxt(err)}`;
+          this._snackService.open({type: 'ERROR', msg: errTxt});
+          return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
+        }),
+        first(),
+      );
   }
 
   private _makeRequestInit(jr: JiraRequestCfg, cfg: JiraCfg): RequestInit {
@@ -392,7 +398,7 @@ export class JiraApiService {
 
         currentRequest.reject(res);
       } else {
-        console.log('JIRA_RESPONSE', res);
+        // console.log('JIRA_RESPONSE', res);
         if (currentRequest.transform) {
           currentRequest.resolve(currentRequest.transform(res, this._cfg));
         } else {
