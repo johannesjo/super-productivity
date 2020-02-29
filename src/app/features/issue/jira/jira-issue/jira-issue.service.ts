@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {JiraChangelogEntry, JiraIssue} from './jira-issue.model';
+import {JiraIssue} from './jira-issue.model';
 import {Store} from '@ngrx/store';
 import {JiraIssueActionTypes} from './store/jira-issue.actions';
 import {JiraApiService} from '../jira-api.service';
@@ -73,31 +73,5 @@ export class JiraIssueService {
           });
         }
       });
-  }
-
-  // TODO find solution
-  private _createChangelog(updatedIssue: JiraIssue, oldIssue: JiraIssue): JiraChangelogEntry[] {
-    let changelog: JiraChangelogEntry[] = [];
-    const oldCommentLength = oldIssue && oldIssue.comments && oldIssue.comments.length || 0;
-    const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length || 0;
-    const isCommentsChanged = (oldCommentLength !== newCommentLength);
-
-    if (updatedIssue.updated !== oldIssue.updated || isCommentsChanged) {
-      const lastUpdate = oldIssue.lastUpdateFromRemote && new Date(oldIssue.lastUpdateFromRemote);
-      changelog = updatedIssue.changelog.filter(
-        entry => !lastUpdate || new Date(entry.created) > lastUpdate
-      );
-
-      if (isCommentsChanged) {
-        changelog.unshift({
-          created: new Date().toISOString(),
-          author: null,
-          field: 'Comments',
-          from: oldCommentLength ? oldCommentLength.toString() : '0',
-          to: newCommentLength ? newCommentLength.toString() : '0',
-        });
-      }
-    }
-    return changelog;
   }
 }
