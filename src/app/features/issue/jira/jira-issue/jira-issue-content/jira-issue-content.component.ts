@@ -1,13 +1,11 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../tasks/task.model';
-import {JiraApiService} from '../../jira-api.service';
 import {JiraIssue} from '../jira-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 import {Attachment} from '../../../../attachment/attachment.model';
 import {T} from '../../../../../t.const';
-import {Subscription} from 'rxjs';
 import {TaskService} from '../../../../tasks/task.service';
-import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
+import * as j2m from 'jira2md';
 
 @Component({
   selector: 'jira-issue-content',
@@ -16,27 +14,23 @@ import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service'
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation]
 })
-export class JiraIssueContentComponent implements OnDestroy {
-  @Input() issue: JiraIssue;
+export class JiraIssueContentComponent {
+  issue: JiraIssue;
+
+  @Input('issue') set issueIn(i: JiraIssue) {
+    this.issue = i;
+    this.description = i && i.description && j2m.to_markdown(i.description);
+  }
+
   @Input() task: TaskWithSubTasks;
 
   description: string;
   attachments: Attachment[];
   T = T;
 
-  private _getIssueSub = new Subscription();
-
-
   constructor(
-    private readonly  _jiraCommonInterfacesService: JiraCommonInterfacesService,
-    private readonly  _jiraApiService: JiraApiService,
     private readonly  _taskService: TaskService,
-    private readonly  _changeDetectorRef: ChangeDetectorRef,
   ) {
-  }
-
-  ngOnDestroy(): void {
-    this._getIssueSub.unsubscribe();
   }
 
   hideUpdates() {

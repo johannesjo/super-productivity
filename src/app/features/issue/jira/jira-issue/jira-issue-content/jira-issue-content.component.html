@@ -67,16 +67,16 @@
              markdown></div>
       </td>
     </tr>
-    <tr *ngIf="attachments?.length">
-      <th>{{T.F.JIRA.ISSUE_CONTENT.ATTACHMENTS|translate}}</th>
-      <td>
-        <div [class.hasAttachments]="attachments?.length"
-             class="attachments">
-          <attachment-list [attachments]="attachments"
-                           [isDisableControls]="true"></attachment-list>
-        </div>
-      </td>
-    </tr>
+<!--    <tr *ngIf="attachments?.length">-->
+<!--      <th>{{T.F.JIRA.ISSUE_CONTENT.ATTACHMENTS|translate}}</th>-->
+<!--      <td>-->
+<!--        <div [class.hasAttachments]="attachments?.length"-->
+<!--             class="attachments">-->
+<!--          <attachment-list [attachments]="attachments"-->
+<!--                           [isDisableControls]="true"></attachment-list>-->
+<!--        </div>-->
+<!--      </td>-->
+<!--    </tr>-->
     <tr *ngIf="issue.comments">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMMENTS|translate}}</th>
       <td>

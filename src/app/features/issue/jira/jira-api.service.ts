@@ -31,7 +31,6 @@ import {BannerId} from '../../../core/banner/banner.model';
 import {T} from '../../../t.const';
 import {ElectronService} from '../../../core/electron/electron.service';
 import {stringify} from 'query-string';
-import {IssueCacheService} from '../cache/issue-cache.service';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
 
@@ -88,7 +87,6 @@ export class JiraApiService {
     private _electronService: ElectronService,
     private _snackService: SnackService,
     private _bannerService: BannerService,
-    private _issueCacheService: IssueCacheService,
   ) {
     this._cfg$.subscribe((cfg: JiraCfg) => {
       this._cfg = cfg;
@@ -188,7 +186,7 @@ export class JiraApiService {
       transform: mapIssueResponse,
       pathname: `issue/${issueId}`,
       query: {
-        expand: isGetChangelog ? ['changelog'] : []
+        expand: isGetChangelog ? ['changelog', 'description'] : ['description']
       }
     });
   }
@@ -302,13 +300,17 @@ export class JiraApiService {
         // -------------------
         const requestInit = this._makeRequestInit(jiraReqCfg, cfg);
 
-        const queryStr = jiraReqCfg.query ? `?${stringify(jiraReqCfg.query)}` : '';
+        const queryStr = jiraReqCfg.query
+          ? `?${stringify(jiraReqCfg.query, {arrayFormat: 'comma'})}`
+          : '';
         const base = `${cfg.host}/rest/api/${API_VERSION}`;
         const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
 
-        const args = [requestId, url, requestInit, jiraReqCfg.transform];
 
-        return this._issueCacheService.cache(url, requestInit, this._sendRequestToExecutor$.bind(this), args);
+        return this._sendRequestToExecutor$(requestId, url, requestInit, jiraReqCfg.transform);
+        // NOTE: offline is sexier & easier than cache, but in case we change our mind...
+        // const args = [requestId, url, requestInit, jiraReqCfg.transform];
+        // return this._issueCacheService.cache(url, requestInit, this._sendRequestToExecutor$.bind(this), args);
       }));
   }
 
