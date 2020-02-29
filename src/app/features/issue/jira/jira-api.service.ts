@@ -21,10 +21,10 @@ import {IPC} from '../../../../../electron/ipc-events.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
-import {combineLatest, Observable, throwError} from 'rxjs';
+import {Observable, throwError} from 'rxjs';
 import {SearchResultItem} from '../issue.model';
 import {fromPromise} from 'rxjs/internal-compatibility';
-import {catchError, first} from 'rxjs/operators';
+import {catchError, concatMap, first, shareReplay, switchMap} from 'rxjs/operators';
 import {JiraIssue} from './jira-issue/jira-issue.model';
 import * as moment from 'moment';
 import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
@@ -69,7 +69,17 @@ export class JiraApiService {
   private _isExtension = false;
   private _isHasCheckedConnection = false;
   private _cfg: JiraCfg;
-  private _isReady$: Observable<boolean>;
+  private _cfg$: Observable<JiraCfg> = this._projectService.currentJiraCfg$;
+  private _cfgAfterReady$: Observable<JiraCfg> = IS_ELECTRON
+    ? this._cfg$
+    : this._chromeExtensionInterface.onReady$.pipe(
+      switchMap(() => this._cfg$),
+      shareReplay(1)
+    );
+
+  // IS_ELECTRON
+  // ? ;
+
 
   constructor(
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
@@ -78,9 +88,8 @@ export class JiraApiService {
     private _snackService: SnackService,
     private _bannerService: BannerService,
   ) {
-    this._projectService.currentJiraCfg$.subscribe((cfg: JiraCfg) => {
+    this._cfg$.subscribe((cfg: JiraCfg) => {
       this._cfg = cfg;
-
       if (IS_ELECTRON && this._isMinimalSettings(cfg)) {
         this._electronService.ipcRenderer.send(IPC.JIRA_SETUP_IMG_HEADERS, cfg);
       }
@@ -102,11 +111,8 @@ export class JiraApiService {
       });
 
     // fire a test request once there is enough config
-    const checkConnectionSub = combineLatest([
-      this._chromeExtensionInterface.onReady$,
-      this._projectService.currentJiraCfg$,
-    ]).subscribe(([isExtensionReady, cfg]) => {
-
+    // we do this to avoid lots of request leading us to get kicked out of jira
+    const checkConnectionSub = this._cfgAfterReady$.subscribe((cfg) => {
       if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
         this.getCurrentUser$()
           .pipe(catchError((err) => {
@@ -128,20 +134,23 @@ export class JiraApiService {
   }
 
   issuePicker$(searchTerm: string): Observable<SearchResultItem[]> {
-    const searchStr = `${searchTerm}`;
-    const jql = (this._cfg.searchJqlQuery ? `${encodeURI(this._cfg.searchJqlQuery)}` : '');
+    return this._cfgAfterReady$.pipe(concatMap(cfg => {
+      const searchStr = `${searchTerm}`;
+      const jql = (cfg.searchJqlQuery ? `${encodeURI(cfg.searchJqlQuery)}` : '');
 
-    return this._sendRequest$({
-      pathname: 'issue/picker',
-      followAllRedirects: true,
-      query: {
-        showSubTasks: true,
-        showSubTaskParent: true,
-        query: searchStr,
-        currentJQL: jql
-      },
-      transform: mapToSearchResults
-    });
+      return this._sendRequest$({
+        pathname: 'issue/picker',
+        followAllRedirects: true,
+        query: {
+          showSubTasks: true,
+          showSubTaskParent: true,
+          query: searchStr,
+          currentJQL: jql
+        },
+        transform: mapToSearchResults
+        // NOTE: we pass the cfg as well to avoid race conditions
+      }, cfg);
+    }));
   }
 
   listFields$(): Observable<any> {
@@ -231,20 +240,6 @@ export class JiraApiService {
     });
   }
 
-  // updateAssignee$(issueId: string, assignee: string): Observable<any> {
-  //   return this._sendRequest$({
-  //     pathname: `issue/${issueId}`,
-  //     method: 'PUT',
-  //     body: {
-  //       fields: {
-  //         assignee: {
-  //           name: assignee
-  //         }
-  //       }
-  //     },
-  //   });
-  // }
-
   addWorklog$(issueId: string, started: string, timeSpent: number, comment: string): Observable<any> {
     const worklog = {
       started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
@@ -268,83 +263,83 @@ export class JiraApiService {
       && (IS_ELECTRON || this._isExtension);
   }
 
-  // TODO refactor data madness of request and add types for everything
-  // TODO XhrUriConfig
-  private _sendRequest$(jiraReqCfg: JiraRequestCfg, cfg = this._cfg, isForce = false): Observable<any> {
-    if (!this._isMinimalSettings(cfg)) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: (!IS_ELECTRON && !this._isExtension)
-          ? T.F.JIRA.S.EXTENSION_NOT_LOADED
-          : T.F.JIRA.S.INSUFFICIENT_SETTINGS,
+  private _sendRequest$(jiraReqCfg: JiraRequestCfg, customCfg?: JiraCfg, isForce = false): Observable<any> {
+    return this._cfgAfterReady$.pipe(concatMap(currentCfg => {
+      const cfg = customCfg || currentCfg;
+
+      // assign uuid to request to know which responsive belongs to which promise
+      const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
+
+      if (!this._isMinimalSettings(cfg)) {
+        this._snackService.open({
+          type: 'ERROR',
+          msg: (!IS_ELECTRON && !this._isExtension)
+            ? T.F.JIRA.S.EXTENSION_NOT_LOADED
+            : T.F.JIRA.S.INSUFFICIENT_SETTINGS,
+        });
+        return throwError({[HANDLED_ERROR_PROP_STR]: 'Insufficient Settings for Jira ' + requestId});
+      }
+
+      if (this._isBlockAccess && !isForce) {
+        console.error('Blocked Jira Access to prevent being shut out');
+        this._bannerService.open({
+          id: BannerId.JiraUnblock,
+          msg: T.F.JIRA.BANNER.BLOCK_ACCESS_MSG,
+          svgIco: 'jira',
+          action: {
+            label: T.F.JIRA.BANNER.BLOCK_ACCESS_UNBLOCK,
+            fn: () => this.unblockAccess()
+          }
+        });
+        return throwError({[HANDLED_ERROR_PROP_STR]: 'Blocked access to prevent being shut out ' + requestId});
+      }
+
+      // BUILD REQUEST START
+      // -------------------
+      const requestInit = this._makeRequestInit(jiraReqCfg, cfg);
+
+      // TODO refactor to observable for request canceling etc
+      let promiseResolve;
+      let promiseReject;
+      const promise = new Promise((resolve, reject) => {
+        promiseResolve = resolve;
+        promiseReject = reject;
       });
-      return throwError({[HANDLED_ERROR_PROP_STR]: 'Insufficient Settings for Jira'});
-    }
 
-    if (this._isBlockAccess && !isForce) {
-      console.error('Blocked Jira Access to prevent being shut out');
-      this._bannerService.open({
-        id: BannerId.JiraUnblock,
-        msg: T.F.JIRA.BANNER.BLOCK_ACCESS_MSG,
-        svgIco: 'jira',
-        action: {
-          label: T.F.JIRA.BANNER.BLOCK_ACCESS_UNBLOCK,
-          fn: () => this.unblockAccess()
-        }
-      });
-      return throwError({[HANDLED_ERROR_PROP_STR]: 'Blocked access to prevent being shut out'});
-    }
+      // save to request log
+      this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, jiraReqCfg.transform);
 
-    // BUILD REQUEST START
-    // -------------------
-    // assign uuid to request to know which responsive belongs to which promise
-    const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
+      const queryStr = jiraReqCfg.query ? `?${stringify(jiraReqCfg.query)}` : '';
+      const base = `${cfg.host}/rest/api/${API_VERSION}`;
+      const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
 
-    const requestInit = this._makeRequestInit(jiraReqCfg, cfg);
+      const requestToSend = {requestId, requestInit, url};
 
-    // TODO refactor to observable for request canceling etc
-    let promiseResolve;
-    let promiseReject;
-    const promise = new Promise((resolve, reject) => {
-      promiseResolve = resolve;
-      promiseReject = reject;
-    });
+      // send to electron
+      if (this._electronService.isElectronApp) {
+        this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, requestToSend);
+      } else if (this._isExtension) {
+        this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
+      }
+      return fromPromise(promise)
+        .pipe(
+          catchError((err) => {
+            console.log(err);
+            console.log(getJiraResponseErrorTxt(err));
 
-    // save to request log
-    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, jiraReqCfg.transform);
-
-    const queryStr = jiraReqCfg.query ? `?${stringify(jiraReqCfg.query)}` : '';
-    const base = `${cfg.host}/rest/api/${API_VERSION}`;
-    const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
-
-    const requestToSend = {requestId, requestInit, url};
-
-    // send to electron
-    if (this._electronService.isElectronApp) {
-      this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, requestToSend);
-    } else if (this._isExtension) {
-      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
-    }
-    return fromPromise(promise)
-      .pipe(
-        catchError((err) => {
-          console.log(err);
-          console.log(getJiraResponseErrorTxt(err));
-
-          const errTxt = `Jira: ${getJiraResponseErrorTxt(err)}`;
-          this._snackService.open({type: 'ERROR', msg: errTxt});
-          return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
-        }),
-        first(),
-      );
+            const errTxt = `Jira: ${getJiraResponseErrorTxt(err)}`;
+            this._snackService.open({type: 'ERROR', msg: errTxt});
+            return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
+          }),
+          first(),
+        );
+    }));
   }
 
   private _makeRequestInit(jr: JiraRequestCfg, cfg: JiraCfg): RequestInit {
     const encoded = this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
 
     return {
-      // mode: 'no-cors',
-      // credentials: 'same-origin',
       method: jr.method || 'GET',
       ...(jr.body ? {body: JSON.stringify(jr.body)} : {}),
       headers: {
