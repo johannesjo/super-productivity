@@ -37,7 +37,7 @@ import {IssueService} from '../../../issue.service';
 @Injectable()
 export class JiraIssueEffects {
 
-  @Effect() pollNewIssuesToBacklog$: any = this._actions$
+  @Effect({dispatch: false}) pollNewIssuesToBacklog$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
@@ -51,21 +51,10 @@ export class JiraIssueEffects {
         return (isEnabled && jiraCfg.isAutoAddToBacklog)
           ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
             // tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
-            map(() => new AddOpenJiraIssuesToBacklog())
+            tap(this._importNewIssuesToBacklog.bind(this))
           )
           : EMPTY;
       }),
-    );
-
-  @Effect({dispatch: false}) addOpenIssuesToBacklog$: any = this._actions$
-    .pipe(
-      ofType(
-        JiraIssueActionTypes.AddOpenJiraIssuesToBacklog,
-      ),
-      withLatestFrom(
-        this._store$.pipe(select(selectAllTasks)),
-      ),
-      tap(this._importNewIssuesToBacklog.bind(this))
     );
 
   @Effect({dispatch: false}) addWorklog$: any = this._actions$
