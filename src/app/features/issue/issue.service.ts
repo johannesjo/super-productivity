@@ -3,35 +3,28 @@ import {IssueData, IssueProviderKey, SearchResultItem} from './issue.model';
 import {Attachment} from '../attachment/attachment.model';
 import {from, Observable, of, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
-import {JiraIssueService} from './jira/jira-issue/jira-issue.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
 import {TaskService} from '../tasks/task.service';
 import {Task} from '../tasks/task.model';
-import {GithubCfg} from './github/github';
 import {IssueServiceInterface} from './issue-service-interface';
 import {JiraCommonInterfacesService} from './jira/jira-common-interfaces.service';
+import {GithubCommonInterfacesService} from './github/github-common-interfaces.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueService {
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
-    [GITHUB_TYPE]: this._jiraCommonInterfacesService,
+    [GITHUB_TYPE]: this._githubCommonInterfacesService,
     [JIRA_TYPE]: this._jiraCommonInterfacesService
   };
 
-  // TODO remove
-  githubCfg: GithubCfg;
-
-
   constructor(
-    private _jiraIssueService: JiraIssueService,
-    // private _gitIssueService: GithubIssueService,
     private _projectService: ProjectService,
     private _taskService: TaskService,
     private _jiraCommonInterfacesService: JiraCommonInterfacesService,
+    private _githubCommonInterfacesService: GithubCommonInterfacesService,
   ) {
-    this._projectService.currentGithubCfg$.subscribe((githubCfg) => this.githubCfg = githubCfg);
   }
 
   getById$(issueType: IssueProviderKey, id: string | number): Observable<IssueData> {
@@ -47,6 +40,7 @@ export class IssueService {
       .filter(provider => typeof provider.searchIssues$ === 'function')
       .map(provider => provider.searchIssues$(searchTerm));
     obs.unshift(from([[]]));
+    console.log(obs);
 
     return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
   }
@@ -59,11 +53,6 @@ export class IssueService {
     if (typeof this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue === 'function') {
       this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue(task, isNotifySuccess, isNotifyNoUpdateRequired);
     }
-    //   case GITHUB_TYPE: {
-    //     // TODO implement
-    //     console.warn('NOT IMPLEMENTED');
-    //     // this._gitIssueService.updateIssueFromApi(issueId);
-    //   }
   }
 
   getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
@@ -76,10 +65,6 @@ export class IssueService {
     if (typeof this.ISSUE_SERVICE_MAP[issueType].issueLink === 'function') {
       return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId);
     }
-    //     // TODO implement
-    // GITHUB_TYPE: {
-    //   return `https://github.com/${this.githubCfg.repo}/issues/${issueId}`;
-    // }
   }
 
   async addTaskWithIssue(
