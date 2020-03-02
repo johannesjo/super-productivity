@@ -6,7 +6,6 @@ import {concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFr
 import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../../jira-api.service';
-import {JiraIssueService} from '../jira-issue.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
 import {JiraIssue} from '../jira-issue.model';
 import {JiraCfg, JiraTransitionOption} from '../../jira.model';
@@ -233,6 +232,7 @@ export class JiraIssueEffects {
         })
       ),
     );
+
   private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
     withLatestFrom(
       this._store$.pipe(select(selectJiraTasks)),
@@ -275,7 +275,6 @@ export class JiraIssueEffects {
               private readonly _taskService: TaskService,
               private readonly _jiraApiService: JiraApiService,
               private readonly _issueService: IssueService,
-              private readonly _jiraIssueService: JiraIssueService,
               private readonly _persistenceService: PersistenceService,
               private readonly _matDialog: MatDialog,
   ) {

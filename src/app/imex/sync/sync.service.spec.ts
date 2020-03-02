@@ -8,7 +8,6 @@ import {GlobalConfigService} from '../../features/config/global-config.service';
 import {TaskService} from '../../features/tasks/task.service';
 import {AttachmentService} from '../../features/attachment/attachment.service';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
-import {JiraIssueService} from '../../features/issue/jira/jira-issue/jira-issue.service';
 import {NoteService} from '../../features/note/note.service';
 import {ReminderService} from '../../features/reminder/reminder.service';
 
@@ -22,7 +21,6 @@ describe('SyncService', () => {
       {provide: TaskService, useValue: {}},
       {provide: AttachmentService, useValue: {}},
       {provide: BookmarkService, useValue: {}},
-      {provide: JiraIssueService, useValue: {}},
       {provide: NoteService, useValue: {}},
       {provide: ReminderService, useValue: {}},
     ]

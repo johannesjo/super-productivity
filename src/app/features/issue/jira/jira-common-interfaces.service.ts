@@ -11,7 +11,6 @@ import {TaskService} from '../../tasks/task.service';
 import {ProjectService} from '../../project/project.service';
 import {SearchResultItem} from '../issue.model';
 import {JiraIssue} from './jira-issue/jira-issue.model';
-import {JiraIssueService} from './jira-issue/jira-issue.service';
 import {Attachment} from '../../attachment/attachment.model';
 import {mapJiraAttachmentToAttachment} from './jira-issue/jira-issue-map.util';
 import {T} from '../../../t.const';
@@ -29,7 +28,6 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _store: Store<any>,
     private readonly _jiraApiService: JiraApiService,
-    private readonly _jiraIssueService: JiraIssueService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
     private readonly _projectService: ProjectService,

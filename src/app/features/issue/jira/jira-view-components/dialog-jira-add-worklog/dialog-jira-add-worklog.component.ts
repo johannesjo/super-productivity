@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {JiraIssueService} from '../../jira-issue/jira-issue.service';
 import {JiraApiService} from '../../jira-api.service';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SnackService} from '../../../../../core/snack/snack.service';
@@ -21,7 +20,6 @@ export class DialogJiraAddWorklogComponent {
   issue: JiraIssue;
 
   constructor(
-    private _jiraIssueService: JiraIssueService,
     private _jiraApiService: JiraApiService,
     private _matDialogRef: MatDialogRef<DialogJiraAddWorklogComponent>,
     private _snackService: SnackService,
