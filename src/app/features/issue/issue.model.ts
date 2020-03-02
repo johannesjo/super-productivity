@@ -1,6 +1,6 @@
 import {JiraIssue} from './jira/jira-issue/jira-issue.model';
 import {JiraCfg} from './jira/jira.model';
-import {GithubCfg} from './github/github';
+import {GithubCfg} from './github/github.model';
 import {GithubIssue} from './github/github-issue/github-issue.model';
 
 

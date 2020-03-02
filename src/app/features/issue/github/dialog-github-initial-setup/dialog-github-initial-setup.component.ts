@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {GithubCfg} from '../github';
+import {GithubCfg} from '../github.model';
 import {FormGroup} from '@angular/forms';
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM} from '../github.const';

@@ -1,5 +1,5 @@
 // TODO use as a checklist
-import {GithubCfg} from './github';
+import {GithubCfg} from './github.model';
 import {T} from '../../../t.const';
 import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../config/global-config.model';
 

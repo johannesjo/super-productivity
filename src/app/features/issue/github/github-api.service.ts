@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {ProjectService} from '../../project/project.service';
-import {GithubCfg} from './github';
+import {GithubCfg} from './github.model';
 import {SnackService} from '../../../core/snack/snack.service';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {GITHUB_API_BASE_URL} from './github.const';

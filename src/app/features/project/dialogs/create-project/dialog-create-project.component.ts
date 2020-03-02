@@ -12,7 +12,7 @@ import {DialogJiraInitialSetupComponent} from '../../../issue/jira/jira-view-com
 import {SS_PROJECT_TMP} from '../../../../core/persistence/ls-keys.const';
 import {Subscription} from 'rxjs';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
-import {GithubCfg} from '../../../issue/github/github';
+import {GithubCfg} from '../../../issue/github/github.model';
 import {DialogGithubInitialSetupComponent} from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
 import {GITHUB_TYPE} from '../../../issue/issue.const';
 import {T} from '../../../../t.const';

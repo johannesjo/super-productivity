@@ -43,7 +43,7 @@ import {
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue.model';
 import {JiraCfg} from '../issue/jira/jira.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import {GithubCfg} from '../issue/github/github';
+import {GithubCfg} from '../issue/github/github.model';
 import {Actions, ofType} from '@ngrx/effects';
 import {delayWhen, distinctUntilChanged, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';

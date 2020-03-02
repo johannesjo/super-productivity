@@ -6,7 +6,7 @@ import {IssueServiceInterface} from '../issue-service-interface';
 import {GithubApiService} from './github-api.service';
 import {ProjectService} from '../../project/project.service';
 import {SearchResultItem} from '../issue.model';
-import {GithubCfg} from './github';
+import {GithubCfg} from './github.model';
 import {SnackService} from '../../../core/snack/snack.service';
 import {GithubIssue} from './github-issue/github-issue.model';
 import {truncate} from '../../../util/truncate';
