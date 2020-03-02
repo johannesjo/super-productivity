@@ -10,6 +10,7 @@ import {SnackService} from '../../../../../core/snack/snack.service';
 import {take} from 'rxjs/operators';
 import {T} from '../../../../../t.const';
 import {Task} from '../../../../tasks/task.model';
+import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -24,8 +25,8 @@ export class DialogJiraTransitionComponent {
   chosenTransition: JiraOriginalTransition;
 
   constructor(
-    private _jiraIssueService: JiraIssueService,
     private _jiraApiService: JiraApiService,
+    private _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
     private _snackService: SnackService,
     @Inject(MAT_DIALOG_DATA) public data: {
@@ -45,7 +46,7 @@ export class DialogJiraTransitionComponent {
       this._jiraApiService.transitionIssue$(this.data.issue.id, this.chosenTransition.id)
         .pipe(take(1))
         .subscribe(() => {
-          this._jiraIssueService.updateIssueFromApi(this.data.task, false, false);
+          this._jiraCommonInterfacesService.refreshIssue(this.data.task, false, false);
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.JIRA.S.TRANSITION,

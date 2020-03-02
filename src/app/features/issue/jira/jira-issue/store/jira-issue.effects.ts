@@ -33,6 +33,7 @@ import {T} from '../../../../../t.const';
 import {truncate} from '../../../../../util/truncate';
 import {ProjectService} from '../../../../project/project.service';
 import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
+import {IssueService} from '../../../issue.service';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -150,10 +151,10 @@ export class JiraIssueEffects {
                       ? this._jiraApiService.updateAssignee$(issue.id, currentUser.accountId)
                       : EMPTY;
                   }),
-                  tap(() => {
-                    // TODO fix
-                    // this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
-                  }),
+                  // tap(() => {
+                  // TODO fix
+                  // this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+                  // }),
                 );
             } else {
               return EMPTY;
@@ -243,7 +244,7 @@ export class JiraIssueEffects {
           svgIco: 'jira',
           isSpinner: true,
         });
-        jiraTasks.forEach((task) => this._jiraIssueService.updateIssueFromApi(task, true, false));
+        jiraTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
       }
     }),
   );
@@ -273,6 +274,7 @@ export class JiraIssueEffects {
               private readonly _projectService: ProjectService,
               private readonly _taskService: TaskService,
               private readonly _jiraApiService: JiraApiService,
+              private readonly _issueService: IssueService,
               private readonly _jiraIssueService: JiraIssueService,
               private readonly _persistenceService: PersistenceService,
               private readonly _matDialog: MatDialog,
@@ -318,8 +320,7 @@ export class JiraIssueEffects {
                         chosenTransition: `${chosenTransition.name}`,
                       },
                     });
-                    // TODO fix
-                    // this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+                    this._issueService.refreshIssue(task, false, false);
                   })
                 );
             } else {

@@ -4,8 +4,6 @@ import {Store} from '@ngrx/store';
 import {JiraIssueActionTypes} from './store/jira-issue.actions';
 import {JiraApiService} from '../jira-api.service';
 import {SnackService} from '../../../../core/snack/snack.service';
-import {T} from '../../../../t.const';
-import {Task} from 'src/app/features/tasks/task.model';
 import {TaskService} from '../../../tasks/task.service';
 
 
@@ -21,8 +19,7 @@ export class JiraIssueService {
     private readonly _taskService: TaskService,
   ) {
   }
-
-  // NOTE: this can stay
+  // NOTE: this can stay for now
   update(jiraIssueId: string, changedFields: Partial<JiraIssue>, oldIssue?: JiraIssue) {
     this._store.dispatch({
       type: JiraIssueActionTypes.UpdateJiraIssue,
@@ -34,44 +31,5 @@ export class JiraIssueService {
         oldIssue
       }
     });
-  }
-
-  // TODO there is probably a better way to to do this
-  // TODO refactor to actions
-  updateIssueFromApi(task: Task, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
-    return this._jiraApiService.getIssueById$(task.issueId, false)
-      .subscribe((issue: JiraIssue) => {
-        // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
-        const newUpdated = new Date(issue.updated).getTime();
-        const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
-
-        if (wasUpdated) {
-          this._taskService.update(task.id, {
-            issueLastUpdated: newUpdated,
-            issueWasUpdated: wasUpdated,
-            issueAttachmentNr: issue.attachments.length,
-            issuePoints: issue.storyPoints
-          });
-        }
-
-        // NOTIFICATIONS
-        if (wasUpdated && isNotifyOnUpdate) {
-          this._snackService.open({
-            msg: T.F.JIRA.S.ISSUE_UPDATE,
-            translateParams: {
-              issueText: `${issue.key}`
-            },
-            ico: 'cloud_download',
-          });
-        } else if (isNotifyOnNoUpdateRequired) {
-          this._snackService.open({
-            msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
-            translateParams: {
-              issueText: `${issue.key}`
-            },
-            ico: 'cloud_download',
-          });
-        }
-      });
   }
 }

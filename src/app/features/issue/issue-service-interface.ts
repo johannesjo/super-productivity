@@ -10,7 +10,7 @@ export interface IssueServiceInterface {
 
   searchIssues$?(searchTerm: string): Observable<SearchResultItem[]>;
 
-  refreshIssue?(task: Task, isNotifySuccess: boolean, isNotifyNoUpdateRequired: boolean): Promise<Partial<Task>>;
+  refreshIssue?(task: Task, isNotifySuccess: boolean, isNotifyNoUpdateRequired: boolean): Promise<{ taskChanges: Partial<Task>, issue: IssueData }>;
 
   getAddTaskData?(issueId: string | number): Promise<{ title: string; additionalFields: Partial<Task> }>;
 

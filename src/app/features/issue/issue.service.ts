@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {IssueData, IssueProviderKey, SearchResultItem} from './issue.model';
 import {Attachment} from '../attachment/attachment.model';
-import {from, Observable, of, zip} from 'rxjs';
+import {from, merge, Observable, of, Subject, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
 import {TaskService} from '../tasks/task.service';
@@ -9,14 +9,21 @@ import {Task} from '../tasks/task.model';
 import {IssueServiceInterface} from './issue-service-interface';
 import {JiraCommonInterfacesService} from './jira/jira-common-interfaces.service';
 import {GithubCommonInterfacesService} from './github/github-common-interfaces.service';
+import {switchMap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueService {
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
-    [GITHUB_TYPE]: this._githubCommonInterfacesService,
+    // [GITHUB_TYPE]: this._githubCommonInterfacesService,
     [JIRA_TYPE]: this._jiraCommonInterfacesService
+  };
+
+  // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
+  ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
+    [GITHUB_TYPE]: {},
+    [JIRA_TYPE]: {}
   };
 
   constructor(
@@ -29,7 +36,22 @@ export class IssueService {
 
   getById$(issueType: IssueProviderKey, id: string | number): Observable<IssueData> {
     if (typeof this.ISSUE_SERVICE_MAP[issueType].getById$ === 'function') {
-      return this.ISSUE_SERVICE_MAP[issueType].getById$(id);
+
+      // account for issue refreshment
+      if (this.ISSUE_SERVICE_MAP[issueType].refreshIssue) {
+        if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
+          this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
+        }
+        return this.ISSUE_SERVICE_MAP[issueType].getById$(id).pipe(
+          switchMap(issue => merge<IssueData>(
+            of(issue),
+            this.ISSUE_REFRESH_MAP[issueType][id],
+            ),
+          )
+        );
+      } else {
+        return this.ISSUE_SERVICE_MAP[issueType].getById$(id);
+      }
     }
     return of(null);
   }
@@ -66,7 +88,10 @@ export class IssueService {
       const update = await this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue(task, isNotifySuccess, isNotifyNoUpdateRequired);
 
       if (update) {
-        this._taskService.update(task.id, update);
+        if (this.ISSUE_SERVICE_MAP[task.issueType].getById$ && this.ISSUE_REFRESH_MAP[task.issueType][task.issueId]) {
+          this.ISSUE_REFRESH_MAP[task.issueType][task.issueId].next(update.issue);
+        }
+        this._taskService.update(task.id, update.taskChanges);
       }
     }
   }
