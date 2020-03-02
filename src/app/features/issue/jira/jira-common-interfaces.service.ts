@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../issue-service-interface';
@@ -42,8 +42,9 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
     return this.isJiraSearchEnabled$.pipe(
-      switchMap((isSearchJira) => this._jiraApiService.issuePicker$(searchTerm)
-        .pipe(catchError(() => []))
+      switchMap((isSearchJira) => isSearchJira
+        ? this._jiraApiService.issuePicker$(searchTerm).pipe(catchError(() => []))
+        : of([])
       )
     );
   }
