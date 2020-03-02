@@ -45,13 +45,9 @@ export class IssueService {
     return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
   }
 
-  refreshIssue(
-    task: Task,
-    isNotifySuccess = true,
-    isNotifyNoUpdateRequired = false
-  ): void {
-    if (typeof this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue === 'function') {
-      this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue(task, isNotifySuccess, isNotifyNoUpdateRequired);
+  issueLink(issueType: IssueProviderKey, issueId: string | number): string {
+    if (typeof this.ISSUE_SERVICE_MAP[issueType].issueLink === 'function') {
+      return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId);
     }
   }
 
@@ -61,9 +57,17 @@ export class IssueService {
     }
   }
 
-  issueLink(issueType: IssueProviderKey, issueId: string | number): string {
-    if (typeof this.ISSUE_SERVICE_MAP[issueType].issueLink === 'function') {
-      return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId);
+  async refreshIssue(
+    task: Task,
+    isNotifySuccess = true,
+    isNotifyNoUpdateRequired = false
+  ): Promise<void> {
+    if (typeof this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue === 'function') {
+      const update = await this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue(task, isNotifySuccess, isNotifyNoUpdateRequired);
+
+      if (update) {
+        this._taskService.update(task.id, update);
+      }
     }
   }
 
@@ -85,6 +89,4 @@ export class IssueService {
       ...additionalFields,
     });
   }
-
-
 }

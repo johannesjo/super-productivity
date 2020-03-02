@@ -14,6 +14,7 @@ import {JiraIssue} from './jira-issue/jira-issue.model';
 import {JiraIssueService} from './jira-issue/jira-issue.service';
 import {Attachment} from '../../attachment/attachment.model';
 import {mapJiraAttachmentToAttachment} from './jira-issue/jira-issue-map.util';
+import {T} from '../../../t.const';
 
 
 @Injectable({
@@ -49,12 +50,12 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  refreshIssue(
+  async refreshIssue(
     task: Task,
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
-  ) {
-    this._jiraIssueService.updateIssueFromApi(task, isNotifySuccess, isNotifyNoUpdateRequired);
+  ): Promise<Partial<Task>> {
+    return this.updateIssueFromApi(task, isNotifySuccess, isNotifyNoUpdateRequired);
   }
 
   async getAddTaskData(issueId: string | number)
@@ -78,5 +79,41 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   getMappedAttachments(issueData: JiraIssue): Attachment[] {
     return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
+  }
+
+  async updateIssueFromApi(task: Task, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false): Promise<Partial<Task>> {
+    return this._jiraApiService.getIssueById$(task.issueId, false).toPromise().then((issue: JiraIssue) => {
+      // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
+      const newUpdated = new Date(issue.updated).getTime();
+      const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
+
+      // NOTIFICATIONS
+      if (wasUpdated && isNotifyOnUpdate) {
+        this._snackService.open({
+          msg: T.F.JIRA.S.ISSUE_UPDATE,
+          translateParams: {
+            issueText: `${issue.key}`
+          },
+          ico: 'cloud_download',
+        });
+      } else if (isNotifyOnNoUpdateRequired) {
+        this._snackService.open({
+          msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
+          translateParams: {
+            issueText: `${issue.key}`
+          },
+          ico: 'cloud_download',
+        });
+      }
+
+      if (wasUpdated) {
+        return {
+          issueLastUpdated: newUpdated,
+          issueWasUpdated: wasUpdated,
+          issueAttachmentNr: issue.attachments.length,
+          issuePoints: issue.storyPoints
+        };
+      }
+    });
   }
 }
