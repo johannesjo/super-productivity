@@ -13,8 +13,7 @@ export const DEFAULT_GITHUB_CFG: GithubCfg = {
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
-export const GITHUB_MAX_CACHE_AGE = 10 * 60 * 1000;
-export const GITHUB_POLL_INTERVAL = GITHUB_MAX_CACHE_AGE;
+export const GITHUB_POLL_INTERVAL = 10 * 60 * 1000;
 export const GITHUB_INITIAL_POLL_DELAY = 8 * 1000;
 
 // export const GITHUB_POLL_INTERVAL = 15 * 1000;

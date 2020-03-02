@@ -105,7 +105,7 @@ export const selectJiraTasks = createSelector(
       .filter((task: Task) => task.issueType === JIRA_TYPE);
   });
 
-export const selectGitTasks = createSelector(
+export const selectGithubTasks = createSelector(
   selectTaskFeatureState,
   (s): Task[] => {
     return s.ids
