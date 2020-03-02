@@ -1,38 +1,36 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {AddOpenJiraIssuesToBacklog, JiraIssueActionTypes, UpdateJiraIssue} from './jira-issue.actions';
 import {select, Store} from '@ngrx/store';
-import {concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
-import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
-import {PersistenceService} from '../../../../../core/persistence/persistence.service';
-import {JiraApiService} from '../../jira-api.service';
-import {GlobalConfigService} from '../../../../config/global-config.service';
-import {JiraIssue} from '../jira-issue.model';
-import {JiraCfg, JiraTransitionOption} from '../../jira.model';
-import {SnackService} from '../../../../../core/snack/snack.service';
-import {ProjectActionTypes} from '../../../../project/store/project.actions';
-import {Task, TaskState} from '../../../../tasks/task.model';
-import {JIRA_TYPE} from '../../../issue.const';
+import {concatMap, filter, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {TaskActionTypes, UpdateTask} from '../../../tasks/store/task.actions';
+import {PersistenceService} from '../../../../core/persistence/persistence.service';
+import {JiraApiService} from '../jira-api.service';
+import {GlobalConfigService} from '../../../config/global-config.service';
+import {JiraIssue} from './jira-issue.model';
+import {JiraCfg, JiraTransitionOption} from '../jira.model';
+import {SnackService} from '../../../../core/snack/snack.service';
+import {ProjectActionTypes} from '../../../project/store/project.actions';
+import {Task, TaskState} from '../../../tasks/task.model';
+import {JIRA_TYPE} from '../../issue.const';
 import {
-  selectAllTasks,
   selectCurrentTaskParentOrCurrent,
   selectJiraTasks,
   selectTaskEntities,
   selectTaskFeatureState
-} from '../../../../tasks/store/task.selectors';
-import {TaskService} from '../../../../tasks/task.service';
-import {EMPTY, Observable, of, throwError, timer} from 'rxjs';
+} from '../../../tasks/store/task.selectors';
+import {TaskService} from '../../../tasks/task.service';
+import {EMPTY, Observable, throwError, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
-import {DialogJiraTransitionComponent} from '../../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
-import {IssueLocalState} from '../../../issue.model';
-import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
-import {DialogJiraAddWorklogComponent} from '../../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
-import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
-import {T} from '../../../../../t.const';
-import {truncate} from '../../../../../util/truncate';
-import {ProjectService} from '../../../../project/project.service';
-import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
-import {IssueService} from '../../../issue.service';
+import {DialogJiraTransitionComponent} from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
+import {IssueLocalState} from '../../issue.model';
+import {DialogConfirmComponent} from '../../../../ui/dialog-confirm/dialog-confirm.component';
+import {DialogJiraAddWorklogComponent} from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
+import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../jira.const';
+import {T} from '../../../../t.const';
+import {truncate} from '../../../../util/truncate';
+import {ProjectService} from '../../../project/project.service';
+import {HANDLED_ERROR_PROP_STR} from '../../../../app.constants';
+import {IssueService} from '../../issue.service';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -98,7 +96,6 @@ export class JiraIssueEffects {
     .pipe(
       ofType(
         TaskActionTypes.SetCurrentTask,
-        JiraIssueActionTypes.UpdateJiraIssue,
       ),
       withLatestFrom(
         this._projectService.isJiraEnabled$,
@@ -195,32 +192,6 @@ export class JiraIssueEffects {
       })
     );
 
-
-  @Effect() updateTaskTitleIfChanged$: any = this._actions$
-    .pipe(
-      ofType(
-        JiraIssueActionTypes.UpdateJiraIssue,
-      ),
-      filter((a: UpdateJiraIssue) => {
-        const {jiraIssue, oldIssue} = a.payload;
-        return (jiraIssue.changes.summary && oldIssue && oldIssue.summary
-          && jiraIssue.changes.summary !== oldIssue.summary);
-      }),
-      concatMap((a: UpdateJiraIssue) => of(a).pipe(
-        withLatestFrom(
-          this._taskService.getByIssueId$(a.payload.jiraIssue.id, JIRA_TYPE).pipe(take(1))
-        ),
-      )),
-      map(([a, task]: [UpdateJiraIssue, Task]) => new UpdateTask({
-          task: {
-            id: task.id,
-            changes: {
-              title: a.payload.jiraIssue.changes.summary,
-            }
-          }
-        })
-      ),
-    );
 
   private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
     withLatestFrom(
