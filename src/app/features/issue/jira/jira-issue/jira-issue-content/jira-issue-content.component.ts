@@ -15,12 +15,12 @@ import * as j2m from 'jira2md';
   animations: [expandAnimation]
 })
 export class JiraIssueContentComponent {
-  issue: JiraIssue;
-
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;
     this.description = i && i.description && j2m.to_markdown(i.description);
   }
+
+  issue: JiraIssue;
 
   @Input() task: TaskWithSubTasks;
 

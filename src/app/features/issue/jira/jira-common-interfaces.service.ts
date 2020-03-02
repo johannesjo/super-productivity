@@ -55,43 +55,43 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
   ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue }> {
-    return this._jiraApiService.getIssueById$(task.issueId, false).toPromise().then((issue: JiraIssue) => {
-      // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
-      const newUpdated = new Date(issue.updated).getTime();
-      const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
+    const issue = await this._jiraApiService.getIssueById$(task.issueId, false).toPromise();
 
-      // NOTIFICATIONS
-      if (wasUpdated && isNotifySuccess) {
-        this._snackService.open({
-          msg: T.F.JIRA.S.ISSUE_UPDATE,
-          translateParams: {
-            issueText: `${issue.key}`
-          },
-          ico: 'cloud_download',
-        });
-      } else if (isNotifyNoUpdateRequired) {
-        this._snackService.open({
-          msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
-          translateParams: {
-            issueText: `${issue.key}`
-          },
-          ico: 'cloud_download',
-        });
-      }
+    // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
+    const newUpdated = new Date(issue.updated).getTime();
+    const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
 
-      if (wasUpdated) {
-        return {
-          taskChanges: {
-            title: `${issue.key} ${issue.summary}`,
-            issueLastUpdated: newUpdated,
-            issueWasUpdated: wasUpdated,
-            issueAttachmentNr: issue.attachments.length,
-            issuePoints: issue.storyPoints
-          },
-          issue,
-        };
-      }
-    });
+    // NOTIFICATIONS
+    if (wasUpdated && isNotifySuccess) {
+      this._snackService.open({
+        msg: T.F.JIRA.S.ISSUE_UPDATE,
+        translateParams: {
+          issueText: `${issue.key}`
+        },
+        ico: 'cloud_download',
+      });
+    } else if (isNotifyNoUpdateRequired) {
+      this._snackService.open({
+        msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
+        translateParams: {
+          issueText: `${issue.key}`
+        },
+        ico: 'cloud_download',
+      });
+    }
+
+    if (wasUpdated) {
+      return {
+        taskChanges: {
+          title: `${issue.key} ${issue.summary}`,
+          issueLastUpdated: newUpdated,
+          issueWasUpdated: wasUpdated,
+          issueAttachmentNr: issue.attachments.length,
+          issuePoints: issue.storyPoints
+        },
+        issue,
+      };
+    }
   }
 
   async getAddTaskData(issueId: string | number)

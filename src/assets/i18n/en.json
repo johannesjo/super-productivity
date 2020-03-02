@@ -100,6 +100,7 @@
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
         "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: No update required",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
         "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",

@@ -16,7 +16,7 @@ import {switchMap} from 'rxjs/operators';
 })
 export class IssueService {
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
-    // [GITHUB_TYPE]: this._githubCommonInterfacesService,
+    [GITHUB_TYPE]: this._githubCommonInterfacesService,
     [JIRA_TYPE]: this._jiraCommonInterfacesService
   };
 

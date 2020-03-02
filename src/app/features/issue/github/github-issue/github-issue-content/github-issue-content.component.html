@@ -1,5 +1,5 @@
-<ng-container *ngIf="issueData$|async as issueData">
-  <div *ngIf="issueData?.wasUpdated"
+<ng-container>
+  <div *ngIf="task?.issueWasUpdated"
        @expand
        style="text-align: center;">
     <button (click)="hideUpdates()"
@@ -13,40 +13,40 @@
     <table class="issue-table">
       <tr>
         <th>{{T.F.GITHUB.ISSUE_CONTENT.SUMMARY|translate}}</th>
-        <td><a [href]="issueData.url"
-               target="_blank"><strong>{{issueData?.title}} #{{issueData?.number}}</strong></a></td>
+        <td><a [href]="issue.url"
+               target="_blank"><strong>{{issue?.title}} #{{issue?.number}}</strong></a></td>
       </tr>
       <tr>
         <th>{{T.F.GITHUB.ISSUE_CONTENT.STATUS|translate}}</th>
-        <td>{{issueData?.state}}</td>
+        <td>{{issue?.state}}</td>
       </tr>
-      <tr *ngIf="issueData?.assignee?.html_url">
+      <tr *ngIf="issue?.assignee?.html_url">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
-        <td><a [href]="issueData?.assignee?.html_url"
-               target="_blank">{{issueData?.assignee?.login}}</a></td>
+        <td><a [href]="issue?.assignee?.html_url"
+               target="_blank">{{issue?.assignee?.login}}</a></td>
       </tr>
-      <tr *ngIf="issueData?.labels?.length">
+      <tr *ngIf="issue?.labels?.length">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
           <mat-chip-list>
-            <mat-chip *ngFor="let label of issueData?.labels"
+            <mat-chip *ngFor="let label of issue?.labels"
                       [title]="label.description">{{label.name}}
             </mat-chip>
           </mat-chip-list>
         </td>
       </tr>
-      <tr *ngIf="issueData.body">
+      <tr *ngIf="issue.body">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
-          <div [data]="issueData?.body"
+          <div [data]="issue?.body"
                class="description markdown"
                markdown></div>
         </td>
       </tr>
     </table>
 
-    <div *ngIf="issueData?.comments">
-      <div *ngFor="let comment of (issueData?.comments|sort:'created_at')"
+    <div *ngIf="issue?.comments">
+      <div *ngFor="let comment of (issue?.comments|sort:'created_at')"
            class="comment">
         <!--<img [src]="comment.author.avatarUrl"-->
         <!--class="author-avatar">-->
@@ -62,7 +62,7 @@
     </div>
 
     <div style="text-align: center">
-      <a [href]="issueData?.url"
+      <a [href]="issue?.url"
          class="write-a-comment"
          color="primary"
          mat-stroked-button
@@ -72,7 +72,7 @@
       </a>
     </div>
     <!--<pre><code>-->
-    <!--{{issueData?|json}}-->
+    <!--{{issue?|json}}-->
     <!--</code></pre>-->
 
   </div>

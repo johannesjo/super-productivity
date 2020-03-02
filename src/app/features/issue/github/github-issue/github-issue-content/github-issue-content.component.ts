@@ -4,8 +4,7 @@ import {GithubApiService} from '../../github-api.service';
 import {GithubIssue} from '../github-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 import {T} from '../../../../../t.const';
-import {Observable, ReplaySubject} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {TaskService} from '../../../../tasks/task.service';
 
 @Component({
   selector: 'github-issue-content',
@@ -15,27 +14,19 @@ import {switchMap} from 'rxjs/operators';
   animations: [expandAnimation]
 })
 export class GithubIssueContentComponent {
+  @Input() issue: GithubIssue;
+  @Input() task: TaskWithSubTasks;
+
   T = T;
-  taskData: TaskWithSubTasks;
-  task$ = new ReplaySubject<TaskWithSubTasks>(1);
-  issueData$: Observable<GithubIssue> = this.task$.pipe(switchMap(task => {
-    const issueId = +task.issueId;
-    return this._githubApiService.getById$(issueId);
-  }));
 
   constructor(
     private readonly  _githubApiService: GithubApiService,
+    private readonly  _taskService: TaskService,
   ) {
   }
 
-  @Input() set task(task: TaskWithSubTasks) {
-    this.taskData = task;
-    this.task$.next(task);
-  }
 
   hideUpdates() {
-    // TODO should be on task data level
-    alert('NOT IMPLEMENTED');
-    // this._githubIssueService.update(+this.taskData.issueId, {wasUpdated: false});
+    this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 }
