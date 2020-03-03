@@ -15,15 +15,8 @@ import * as j2m from 'jira2md';
   animations: [expandAnimation]
 })
 export class JiraIssueContentComponent {
-  @Input('issue') set issueIn(i: JiraIssue) {
-    this.issue = i;
-    this.description = i && i.description && j2m.to_markdown(i.description);
-  }
-
   issue: JiraIssue;
-
   @Input() task: TaskWithSubTasks;
-
   description: string;
   attachments: Attachment[];
   T = T;
@@ -31,6 +24,11 @@ export class JiraIssueContentComponent {
   constructor(
     private readonly  _taskService: TaskService,
   ) {
+  }
+
+  @Input('issue') set issueIn(i: JiraIssue) {
+    this.issue = i;
+    this.description = i && i.description && j2m.to_markdown(i.description);
   }
 
   hideUpdates() {

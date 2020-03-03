@@ -40,8 +40,21 @@ export class GithubIssueEffects {
           : EMPTY;
       }),
     );
-
-
+  private _pollChangesForIssues$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL).pipe(
+    withLatestFrom(
+      this._store$.pipe(select(selectGithubTasks)),
+    ),
+    tap(([, githubTasks]: [number, Task[]]) => {
+      if (githubTasks && githubTasks.length > 0) {
+        this._snackService.open({
+          msg: T.F.GITHUB.S.POLLING,
+          svgIco: 'github',
+          isSpinner: true,
+        });
+        githubTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
+      }
+    }),
+  );
   @Effect({dispatch: false})
   pollIssueChangesAndBacklogUpdates: any = this._actions$
     .pipe(
@@ -73,22 +86,6 @@ export class GithubIssueEffects {
               private readonly _persistenceService: PersistenceService
   ) {
   }
-
-  private _pollChangesForIssues$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL).pipe(
-    withLatestFrom(
-      this._store$.pipe(select(selectGithubTasks)),
-    ),
-    tap(([, githubTasks]: [number, Task[]]) => {
-      if (githubTasks && githubTasks.length > 0) {
-        this._snackService.open({
-          msg: T.F.GITHUB.S.POLLING,
-          svgIco: 'github',
-          isSpinner: true,
-        });
-        githubTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
-      }
-    }),
-  );
 
   private async _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     const issues = await this._githubApiService.getLast100IssuesForRepo$().toPromise();
