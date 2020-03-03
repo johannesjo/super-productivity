@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: ShortcutService = TestBed.get(ShortcutService);
+//     const service: ShortcutService = TestBed.inject(ShortcutService);
 //     expect(service).toBeTruthy();
 //   });
 // });

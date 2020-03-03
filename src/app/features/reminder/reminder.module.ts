@@ -3,7 +3,6 @@ import {CommonModule} from '@angular/common';
 import {ReminderService} from './reminder.service';
 import {NoteModule} from '../note/note.module';
 import {MatDialog} from '@angular/material/dialog';
-import {ElectronService} from 'ngx-electron';
 import {IS_ELECTRON} from '../../app.constants';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {DialogViewNoteReminderComponent} from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
@@ -11,6 +10,7 @@ import {TasksModule} from '../tasks/tasks.module';
 import {DialogViewTaskReminderComponent} from '../tasks/dialog-view-task-reminder/dialog-view-task-reminder.component';
 import {filter} from 'rxjs/operators';
 import {Reminder} from './reminder.model';
+import {ElectronService} from '../../core/electron/electron.service';
 
 @NgModule({
   declarations: [],

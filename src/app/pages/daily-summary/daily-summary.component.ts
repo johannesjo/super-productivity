@@ -5,7 +5,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
 import {NoteService} from '../../features/note/note.service';
@@ -21,6 +20,7 @@ import {RoundTimeOption} from '../../features/project/project.model';
 import {T} from '../../t.const';
 import {WorklogService} from '../../features/worklog/worklog.service';
 import {DialogWorklogExportComponent} from '../../features/worklog/dialog-worklog-export/dialog-worklog-export.component';
+import {ElectronService} from '../../core/electron/electron.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 

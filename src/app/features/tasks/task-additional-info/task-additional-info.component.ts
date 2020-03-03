@@ -10,15 +10,15 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {TaskAdditionalInfoTargetPanel, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
+import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
-import {Attachment} from '../../attachment/attachment.model';
-import {delay, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {BehaviorSubject, merge, Observable, of, Subject, Subscription} from 'rxjs';
+import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
+import {catchError, delay, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
-import {expandAnimation} from '../../../ui/animations/expand.ani';
+import {expandAnimation, expandFadeInOnlyAnimation} from '../../../ui/animations/expand.ani';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
 import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
@@ -36,13 +36,15 @@ import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attach
 import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani';
 import {noopAnimation} from '../../../ui/animations/noop.ani';
 import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-additional-info-item.component';
+import {IssueData, IssueProviderKey} from '../../issue/issue.model';
 
 @Component({
   selector: 'task-additional-info',
   templateUrl: './task-additional-info.component.html',
   styleUrls: ['./task-additional-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
+  animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation, taskAdditionalInfoTaskChangeAnimation, noopAnimation]
+
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @HostBinding('@noop') alwaysTrue = true;
@@ -60,6 +62,39 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       ? this._reminderService.getById$(id)
       : of(null)
     ),
+  );
+
+  issueIdAndType$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
+  issueIdAndTypeShared$ = this.issueIdAndType$.pipe(
+    shareReplay(1),
+  );
+
+  issueDataNullTrigger$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
+
+  issueDataTrigger$: Observable<{ id: string | number; type: IssueProviderKey }> = merge(
+    this.issueIdAndTypeShared$,
+    this.issueDataNullTrigger$
+  );
+
+  issueData$: Observable<IssueData> = this.issueDataTrigger$.pipe(
+    switchMap((args) => (args && args.id && args.type)
+      ? this._issueService.getById$(args.type, args.id)
+        // ? throwError({[HANDLED_ERROR_PROP_STR]: 'XX'})
+        .pipe(
+          // delayWhen(x => timer(3000)),
+          // NOTE we need this, otherwise the error is going to weird up the observable
+          catchError(() => {
+            return of(false);
+          }),
+        )
+      : of(null)),
+    shareReplay(1),
+  );
+  issueAttachments$: Observable<AttachmentCopy[]> = this.issueData$.pipe(
+    withLatestFrom(this.issueIdAndTypeShared$),
+    map(([data, {type}]) => (data && type)
+      ? this._issueService.getMappedAttachments(type, data)
+      : [])
   );
 
   repeatCfgId$ = new BehaviorSubject(null);
@@ -82,16 +117,61 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     ),
   );
   parentId$ = new BehaviorSubject<string>(null);
-  parentTaskData$: Observable<TaskWithIssueData> = this.parentId$.pipe(
-    switchMap((id) => id ? this.taskService.getByIdWithIssueData$(id) : of(null))
+  parentTaskData$: Observable<TaskWithSubTasks> = this.parentId$.pipe(
+    switchMap((id) => id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))
   );
   private _attachmentIds$ = new BehaviorSubject([]);
   localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
     switchMap((ids) => this.attachmentService.getByIds$(ids))
   );
+  localAttachments: Attachment[];
+
   private _taskData: TaskWithSubTasks;
   private _focusTimeout: number;
   private _subs = new Subscription();
+
+
+  get task(): TaskWithSubTasks {
+    return this._taskData;
+  }
+
+  @Input() set task(newVal: TaskWithSubTasks) {
+    const prev = this._taskData;
+    this._taskData = newVal;
+    this._attachmentIds$.next(this._taskData.attachmentIds);
+
+    if (!prev || !newVal || (prev.id !== newVal.id)) {
+      this._focusFirst();
+    }
+
+    // NOTE: check for task change or issue update
+    if (!prev || (prev.issueId !== newVal.issueId || newVal.issueWasUpdated === true && !prev.issueWasUpdated)) {
+      this.issueDataNullTrigger$.next(null);
+      this.issueIdAndType$.next({
+        id: newVal.issueId,
+        type: newVal.issueType
+      });
+    }
+    if (!newVal.issueId) {
+      this.issueDataNullTrigger$.next(null);
+    }
+
+    if (!prev || prev.issueId !== newVal.issueId) {
+      this.reminderId$.next(newVal.reminderId);
+    }
+
+    if (!prev || prev.issueId !== newVal.issueId) {
+      this.repeatCfgId$.next(newVal.repeatCfgId);
+    }
+
+    if (!prev || prev.issueId !== newVal.issueId) {
+      this.parentId$.next(newVal.parentId);
+    }
+  }
+
+  get progress() {
+    return this._taskData && this._taskData.timeEstimate && (this._taskData.timeSpent / this._taskData.timeEstimate) * 100;
+  }
 
   constructor(
     private _resolver: ComponentFactoryResolver,
@@ -102,28 +182,13 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private  _matDialog: MatDialog,
     public attachmentService: AttachmentService,
   ) {
-  }
+    // NOTE: needs to be assigned here before any setter is called
+    this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
+    this._subs.add(this.localAttachments$.subscribe((attachments) => this.localAttachments = attachments));
 
-  get task(): TaskWithSubTasks {
-    return this._taskData;
-  }
-
-  @Input() set task(newVal: TaskWithSubTasks) {
-    const prev = this._taskData;
-    this._taskData = newVal;
-    this._attachmentIds$.next(this._taskData.attachmentIds);
-    this.issueAttachments = this._issueService.getMappedAttachments(this._taskData.issueType, this._taskData.issueData);
-    this.reminderId$.next(newVal.reminderId);
-    this.repeatCfgId$.next(newVal.repeatCfgId);
-    this.parentId$.next(newVal.parentId);
-
-    if (!prev || !newVal || (prev.id !== newVal.id)) {
-      this._focusFirst();
-    }
-  }
-
-  get progress() {
-    return this._taskData && this._taskData.timeEstimate && (this._taskData.timeSpent / this._taskData.timeEstimate) * 100;
+    // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
+    // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
+    // this.issueData$.subscribe((v) => console.log('issueData$', v));
   }
 
   ngAfterViewInit(): void {

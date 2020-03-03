@@ -40,10 +40,10 @@ import {
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
-import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
-import {JiraCfg} from '../issue/jira/jira';
+import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue.model';
+import {JiraCfg} from '../issue/providers/jira/jira.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import {GithubCfg} from '../issue/github/github';
+import {GithubCfg} from '../issue/providers/github/github.model';
 import {Actions, ofType} from '@ngrx/effects';
 import {delayWhen, distinctUntilChanged, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
@@ -75,15 +75,16 @@ export class ProjectService {
   );
   currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
     select(selectProjectJiraCfg),
-    // shareReplay(1),
+    shareReplay(1),
   );
+
   isJiraEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectJiraIsEnabled),
   );
 
   currentGithubCfg$: Observable<GithubCfg> = this._store$.pipe(
     select(selectProjectGithubCfg),
-    // shareReplay(1),
+    shareReplay(1),
   );
   isGithubEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectGithubIsEnabled),

@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: WorklogService = TestBed.get(WorklogService);
+//     const service: WorklogService = TestBed.inject(WorklogService);
 //     expect(service).toBeTruthy();
 //   });
 // });

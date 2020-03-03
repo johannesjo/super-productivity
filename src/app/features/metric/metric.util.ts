@@ -1,12 +1,13 @@
 import {Worklog} from '../worklog/worklog.model';
-import {TaskWithIssueData} from '../tasks/task.model';
+import {TaskWithSubTasks} from '../tasks/task.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {SimpleMetrics} from './metric.model';
 import {BreakNr, BreakTime} from '../project/project.model';
 
+// really TaskWithSubTasks?
 export const mapSimpleMetrics = (
   [breakNr, breakTime, worklog, totalTimeSpent, allTasks]:
-    [BreakNr, BreakTime, Worklog, number, TaskWithIssueData[]]): SimpleMetrics => {
+    [BreakNr, BreakTime, Worklog, number, TaskWithSubTasks[]]): SimpleMetrics => {
 
   const s = {
     start: 99999999999999999999999,

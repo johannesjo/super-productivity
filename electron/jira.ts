@@ -1,56 +1,50 @@
-import * as JiraApi from 'jira-client-fork';
 import {getWin} from './main-window';
 import {IPC} from './ipc-events.const';
 import {session} from 'electron';
-import {JiraCfg} from '../src/app/features/issue/jira/jira';
+import {JiraCfg} from '../src/app/features/issue/providers/jira/jira.model';
+// import rp from 'request-promise';
+// const rp = require('request-promise');
+import fetch from 'node-fetch';
 
-export const sendJiraRequest = (request) => {
+
+export const sendJiraRequest = ({requestId, requestInit, url, cfg}: { requestId: string; requestInit: RequestInit; url: string, cfg: any }) => {
   const mainWin = getWin();
-  const config = request.config;
-  const apiMethod = request.apiMethod;
-  const args = request.arguments;
-  const requestId = request.requestId;
+  // console.log('--------------------------------------------------------------------');
+  // console.log(url);
+  // console.log('--------------------------------------------------------------------');
 
-
-  const {host, protocol, port} = parseHostAndPort(config);
-
-  const jira = new JiraApi({
-    protocol,
-    host,
-    port,
-    username: config.userName,
-    password: config.password,
-    apiVersion: 'latest',
-
-    // also allow unauthorized certificates
-    strictSSL: false
-  });
-
-  jira[apiMethod](...args)
-    .then(res => {
-      // console.log('JIRA_RESPONSE', error, res);
+  fetch(url, requestInit)
+    .then((response) => {
+      // console.log('JIRA_RAW_RESPONSE', response);
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+      return response;
+    })
+    .then(res => res.text())
+    .then(text => text ? JSON.parse(text) : {})
+    .then((response) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-        response: res,
+        response,
         requestId,
       });
     })
-    .catch(err => {
+    .catch((error) => {
+      console.error('JIRA_ERR_ERR', error);
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
-        error: err,
+        error,
         requestId,
       });
     });
 };
 
+// TODO simplify and do encoding in frontend service
 export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
   const {host, protocol, port} = parseHostAndPort(jiraCfg);
 
+  // TODO export to util fn
   const _b64EncodeUnicode = (str) => {
-    // tslint:disable-next-line
-    return Buffer.from(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-      function toSolidBytes(match, p1) {
-        return String.fromCharCode(+`0x${p1}`);
-      })).toString('base64');
+    return Buffer.from(str || '').toString('base64');
   };
   const encoded = _b64EncodeUnicode(`${jiraCfg.userName}:${jiraCfg.password}`);
   const filter = {
@@ -60,7 +54,7 @@ export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
   // thankfully only the last attached listener will be used
   // @see: https://electronjs.org/docs/api/web-request
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    details.requestHeaders['authorization'] = `Basic ${encoded}`;
+    details.requestHeaders.authorization = `Basic ${encoded}`;
     callback({requestHeaders: details.requestHeaders});
   });
 };

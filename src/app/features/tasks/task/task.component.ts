@@ -43,13 +43,23 @@ import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-rem
   animations: [expandAnimation, fadeAnimation, swirlAnimation]
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
-  @Input() task: TaskWithSubTasks;
+  task: TaskWithSubTasks;
+
+  @Input('task') set taskSet(v: TaskWithSubTasks) {
+    this.task = v;
+
+    this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
+    this.taskId = 't-' + this.task.id;
+
+    if (v.issueId) {
+      this.issueUrl = this._issueService.issueLink(v.issueType, v.issueId);
+    }
+  }
+
   @Input() isBacklog: boolean;
 
   T = T;
   isDragOver: boolean;
-  isCurrent: boolean;
-  isSelected: boolean;
   isTouch: boolean = IS_TOUCH;
 
   isLockPanLeft = false;
@@ -60,12 +70,20 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition = {x: '0px', y: '0px'};
 
+  issueUrl: string;
+  progress: number;
+
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
   @ViewChild('blockLeft') blockLeftEl: ElementRef;
   @ViewChild('blockRight') blockRightEl: ElementRef;
   @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
 
   @HostBinding('tabindex') tabIndex = 1;
+  @HostBinding('class.isCurrent') isCurrent: boolean;
+  @HostBinding('class.isSelected') isSelected: boolean;
+  @HostBinding('class.isDone') isDone: boolean;
+  @HostBinding('id') taskId: string;
+
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout: number;
@@ -81,32 +99,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _cd: ChangeDetectorRef,
     public readonly projectService: ProjectService,
   ) {
-  }
-
-  public get progress() {
-    return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
-  }
-
-  // TODO do via observable
-  @HostBinding('class.isCurrent')
-  private get _isCurrent() {
-    return this.isCurrent;
-  }
-
-  @HostBinding('class.isSelected')
-  private get _isSelected() {
-    return this.isSelected;
-  }
-
-  // TODO do via observable
-  @HostBinding('class.isDone')
-  private get _isDone() {
-    return this.task.isDone;
-  }
-
-  @HostBinding('id')
-  private get _taskId() {
-    return 't-' + this.task.id;
   }
 
   // methods come last
@@ -214,7 +206,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateIssueData() {
-    this._issueService.refreshIssue(this.task.issueType, this.task.issueId, this.task.issueData);
+    this._issueService.refreshIssue(this.task, true, true);
   }
 
   editTaskRepeatCfg() {

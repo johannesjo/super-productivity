@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: AttachmentService = TestBed.get(AttachmentService);
+//     const service: AttachmentService = TestBed.inject(AttachmentService);
 //     expect(service).toBeTruthy();
 //   });
 // });

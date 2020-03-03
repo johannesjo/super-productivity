@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: GoogleDriveSyncService = TestBed.get(GoogleDriveSyncService);
+//     const service: GoogleDriveSyncService = TestBed.inject(GoogleDriveSyncService);
 //     expect(service).toBeTruthy();
 //   });
 // });

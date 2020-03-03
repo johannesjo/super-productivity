@@ -33,6 +33,17 @@
           "https://fonts.gstatic.com/**"
         ]
       }
+    },
+    {
+      "name": "issueProviderAndAssets",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "urls": [
+          "https://**",
+          "http://**"
+        ]
+      }
     }
   ]
 }

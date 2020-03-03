@@ -3,9 +3,9 @@ import {NotifyModel} from './notify.model';
 import {environment} from '../../../environments/environment';
 import {IS_ELECTRON} from '../../app.constants';
 import {IS_MOBILE} from '../../util/is-mobile';
-import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {TranslateService} from '@ngx-translate/core';
+import {ElectronService} from '../electron/electron.service';
 
 @Injectable({
   providedIn: 'root',

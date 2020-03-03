@@ -19,11 +19,11 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
-import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
+import {IssueProviderKey} from '../../features/issue/issue.model';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {initialTaskState, taskReducer} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
-import {Task, TaskArchive, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {Task, TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {attachmentReducer, AttachmentState} from '../../features/attachment/store/attachment.reducer';
@@ -31,11 +31,9 @@ import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from './database.service';
-import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
+import {issueProviderKeys} from '../../features/issue/issue.const';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
-import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
-import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
 import {Metric, MetricState} from '../../features/metric/metric.model';
@@ -79,7 +77,7 @@ export class PersistenceService {
     'taskRepeatCfg',
     taskRepeatCfgReducer,
   );
-  taskArchive = this._cmProject<TaskArchive, TaskWithIssueData>(
+  taskArchive = this._cmProject<TaskArchive, TaskWithSubTasks>(
     LS_TASK_ARCHIVE,
     'taskArchive',
     // NOTE: this might be problematic, as we don't really have reducer logic for the archive
@@ -206,15 +204,7 @@ export class PersistenceService {
   }
 
   // ISSUES
-  async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: IssueState, isForce = false): Promise<any> {
-    return this._saveToDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
-  }
-
-  async loadIssuesForProject(projectId, issueType: IssueProviderKey): Promise<IssueState> {
-    return this._loadFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
-  }
-
-  async removeIssuesForProject(projectId, issueType: IssueProviderKey): Promise<IssueState> {
+  async removeIssuesForProject(projectId, issueType: IssueProviderKey): Promise<void> {
     return this._removeFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
@@ -272,7 +262,6 @@ export class PersistenceService {
     const projectData = Object.assign({}, ...forProjectsData);
     return {
       ...projectData,
-      issue: await this._loadIssueDataForProject(projectId),
     };
   }
 
@@ -289,9 +278,6 @@ export class PersistenceService {
     await Promise.all(this._projectModels.map((modelCfg) => {
       return modelCfg.save(projectId, data[modelCfg.appDataKey]);
     }));
-    await issueProviderKeys.forEach(async (key) => {
-      await this.saveIssuesForProject(projectId, key, data.issue[key]);
-    });
   }
 
   async archiveProject(projectId: string): Promise<any> {
@@ -339,36 +325,14 @@ export class PersistenceService {
 
     return {
       lastActiveTime: this.getLastActive(),
-
       ...(await this._loadAppDataForProjects(pids)),
       ...(await this._loadAppBaseData()),
-
-      issue: await pids.reduce(async (acc, projectId) => {
-        const prevAcc = await acc;
-        const issueStateMap = {};
-        await Promise.all(issueProviderKeys.map(async (key) => {
-          issueStateMap[key] = await this.loadIssuesForProject(projectId, key);
-        }));
-
-        return {
-          ...prevAcc,
-          [projectId]: issueStateMap as IssueStateMap
-        };
-      }, Promise.resolve({})),
     };
   }
 
   async importComplete(data: AppDataComplete) {
     console.log('IMPORT--->', data);
     this._isBlockSaving = true;
-
-    const issuePromises = [];
-    Object.keys(data.issue).forEach(projectId => {
-      const issueData = data.issue[projectId];
-      Object.keys(issueData).forEach((issueProviderKey: IssueProviderKey) => {
-        issuePromises.push(this.saveIssuesForProject(projectId, issueProviderKey, issueData[issueProviderKey], true));
-      });
-    });
 
     const forBase = Promise.all(this._baseModels.map(async (modelCfg) => {
       return await modelCfg.save(data[modelCfg.appDataKey], true);
@@ -378,7 +342,6 @@ export class PersistenceService {
     }));
 
     return await Promise.all([
-      ...issuePromises,
       forBase,
       forProject
     ])
@@ -511,13 +474,6 @@ export class PersistenceService {
   private async _getProjectIds(): Promise<string[]> {
     const projectState = await this.project.load();
     return projectState.ids as string[];
-  }
-
-  private async _loadIssueDataForProject(projectId: string): Promise<IssueStateMap> {
-    return {
-      JIRA: await this.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState,
-      GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
-    };
   }
 
   private async _loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {

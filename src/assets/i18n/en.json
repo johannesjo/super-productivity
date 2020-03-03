@@ -100,6 +100,7 @@
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
         "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: No update required",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
         "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
@@ -223,8 +224,7 @@
         "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
-        "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks",
-        "USER_ASSIGNEE_NAME": "Assignee name to check for"
+        "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks"
       },
       "FORM_CRED": {
         "HOST": "Host (e.g.: http://my-host.de:1234)",
@@ -689,7 +689,8 @@
     "SAVE": "Save",
     "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "Update"
+    "UPDATE": "Update",
+    "NO_CON": "You are currently offline. Please reconnect to the internet."
   },
   "GCF": {
     "AUTO_BACKUPS": {

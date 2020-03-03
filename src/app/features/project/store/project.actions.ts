@@ -2,7 +2,7 @@ import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
 import {ProjectState} from './project.reducer';
 import {Project, ProjectAdvancedCfgKey} from '../project.model';
-import {IssueIntegrationCfg, IssueProviderKey} from '../../issue/issue';
+import {IssueIntegrationCfg, IssueProviderKey} from '../../issue/issue.model';
 
 export enum ProjectActionTypes {
   LoadProjectState = '[Project] Load Project State',

@@ -179,7 +179,6 @@ export class ProjectEffects {
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
           this._attachmentService.loadStateForProject(projectId),
-          this._issueService.loadStatesForProject(projectId),
           this._taskService.loadStateForProject(projectId),
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),

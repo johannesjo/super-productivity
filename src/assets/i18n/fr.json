@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "Surveiller periodiquement les modifications apportées aux tickets importés et m'en informer",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Vérifier si le ticket actuellement traité est affecté à l'utilisateur actuel",
         "IS_WORKLOG_ENABLED": "Ouvrir la boîte de dialogue pour soumettre à jira le temps de travail lorsque la tâche est terminée",
-        "SEARCH_JQL_QUERY": "Requête JQL pour limiter la recherche des tâches",
-        "USER_ASSIGNEE_NAME": "Nom du responsable à chercher"
+        "SEARCH_JQL_QUERY": "Requête JQL pour limiter la recherche des tâches"
       },
       "FORM_CRED": {
         "HOST": "Hôte (par exemple: http://my-host.de:1234)",

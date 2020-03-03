@@ -1,4 +1,4 @@
-import {IssueIntegrationCfgs, IssueProviderKey, IssueStateMap} from '../issue/issue';
+import {IssueIntegrationCfgs, IssueProviderKey} from '../issue/issue.model';
 import {NoteState} from '../note/store/note.reducer';
 import {BookmarkState} from '../bookmark/store/bookmark.reducer';
 import {EntityState} from '@ngrx/entity';
@@ -80,7 +80,6 @@ export interface ProjectArchivedRelatedData {
   task?: TaskState;
   taskArchive?: EntityState<Task>;
   taskAttachment?: EntityState<Attachment>;
-  issue?: IssueStateMap;
   metric?: MetricState;
   improvement?: ImprovementState;
   obstruction?: ObstructionState;

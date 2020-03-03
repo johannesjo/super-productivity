@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "インポートされたissueに変更がないか自動的に確認して通知する",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "現在作業中の問題が現在のユーザーに割り当てられているかどうかを確認してください",
         "IS_WORKLOG_ENABLED": "タスクが完了したら作業ログをjiraに送信するためのダイアログを開く",
-        "SEARCH_JQL_QUERY": "検索者のタスクを制限するためのJQLクエリ",
-        "USER_ASSIGNEE_NAME": "確認する担当者の名前"
+        "SEARCH_JQL_QUERY": "検索者のタスクを制限するためのJQLクエリ"
       },
       "FORM_CRED": {
         "HOST": "ホスト（例：http://my-host.de:1234）",

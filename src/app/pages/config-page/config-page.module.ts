@@ -4,7 +4,7 @@ import {ConfigPageComponent} from './config-page.component';
 import {ConfigModule} from '../../features/config/config.module';
 import {UiModule} from '../../ui/ui.module';
 import {GoogleModule} from '../../features/google/google.module';
-import {JiraModule} from '../../features/issue/jira/jira.module';
+import {JiraViewComponentsModule} from '../../features/issue/providers/jira/jira-view-components/jira-view-components.module';
 
 @NgModule({
   imports: [
@@ -12,7 +12,7 @@ import {JiraModule} from '../../features/issue/jira/jira.module';
     ConfigModule,
     UiModule,
     GoogleModule,
-    JiraModule,
+    JiraViewComponentsModule,
   ],
   declarations: [ConfigPageComponent]
 })

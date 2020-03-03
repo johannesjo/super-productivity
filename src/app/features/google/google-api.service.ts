@@ -11,10 +11,10 @@ import {GoogleSession} from '../config/global-config.model';
 import {catchError, concatMap, filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {combineLatest, EMPTY, from, merge, Observable, of, throwError, timer} from 'rxjs';
 import {IPC} from '../../../../electron/ipc-events.const';
-import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../../core/banner/banner.service';
 import {BannerId} from '../../core/banner/banner.model';
 import {T} from '../../t.const';
+import {ElectronService} from '../../core/electron/electron.service';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 

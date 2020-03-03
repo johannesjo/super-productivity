@@ -1,10 +1,10 @@
 import {Inject, Injectable} from '@angular/core';
 import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
 import {LS_LOCAL_UI_HELPER} from '../../core/persistence/ls-keys.const';
-import {ElectronService} from 'ngx-electron';
 import {DOCUMENT} from '@angular/common';
 import {LocalUiHelperSettings} from './ui-helper.model';
 import {UI_LOCAL_HELPER_DEFAULT} from './ui-helper.const';
+import {ElectronService} from '../../core/electron/electron.service';
 
 @Injectable({
   providedIn: 'root'

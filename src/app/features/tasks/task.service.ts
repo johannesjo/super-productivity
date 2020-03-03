@@ -1,15 +1,5 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  shareReplay,
-  switchMap,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import {distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
@@ -20,7 +10,6 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
-  TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
 import {select, Store} from '@ngrx/store';
@@ -56,13 +45,12 @@ import {
 } from './store/task.actions';
 import {initialTaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {IssueData, IssueProviderKey} from '../issue/issue';
+import {IssueDataLimited, IssueProviderKey} from '../issue/issue.model';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectAllTasksWithIssueData,
   selectBacklogTaskCount,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
@@ -81,11 +69,10 @@ import {
   selectStartableTasks,
   selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
-  selectTaskByIdWithIssueData,
+  selectTaskByIdWithSubTaskData,
   selectTaskByIssueId,
   selectTaskEntities,
   selectTasksByRepeatConfigId,
-  selectTasksWithMissingIssueData,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
@@ -96,7 +83,6 @@ import {
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {Actions, ofType} from '@ngrx/effects';
-import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
@@ -243,14 +229,6 @@ export class TaskService {
     distinctUntilChanged(),
   );
 
-
-  tasksWithMissingIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(
-    // wait for issue model to be loaded
-    debounceTime(1000),
-    select(selectTasksWithMissingIssueData),
-    shareReplay(1),
-  );
-
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
     TaskActionTypes.MoveToBacklog,
   ));
@@ -263,13 +241,12 @@ export class TaskService {
   allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
 
-  private _allTasksWithIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(select(selectAllTasksWithIssueData));
+  private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasks));
 
 
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
-    private readonly _issueService: IssueService,
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
@@ -333,16 +310,16 @@ export class TaskService {
 
   addWithIssue(title: string,
                issueType: IssueProviderKey,
-               issue: IssueData,
+               issueLimited: IssueDataLimited,
                isAddToBacklog = false,
                isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
       task: this.createNewTaskWithDefaults(title, {
-        issueId: issue && issue.id as string,
+        issueId: issueLimited && issueLimited.id as string,
         issueType,
       }),
-      issue,
+      issue: issueLimited,
       isAddToBacklog,
       isAddToBottom,
     }));
@@ -459,7 +436,7 @@ export class TaskService {
     this._store.dispatch(new ToggleStart());
   }
 
-  restoreTask(task: TaskWithIssueData, subTasks: TaskWithIssueData[]) {
+  restoreTask(task: Task, subTasks: Task[]) {
     this._store.dispatch(new RestoreTask({task, subTasks}));
   }
 
@@ -510,8 +487,8 @@ export class TaskService {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
 
-  getByIdWithIssueData$(id: string): Observable<TaskWithIssueData> {
-    return this._store.pipe(select(selectTaskByIdWithIssueData, {id}), take(1));
+  getByIdWithSubTaskData$(id: string): Observable<TaskWithSubTasks> {
+    return this._store.pipe(select(selectTaskByIdWithSubTaskData, {id}), take(1));
   }
 
   getTasksByRepeatCfgId$(repeatCfgId: string): Observable<Task[]> {
@@ -565,12 +542,15 @@ export class TaskService {
 
   getByIssueId$(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
     return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));
-
   }
 
 
   setDone(id: string) {
     this.update(id, {isDone: true});
+  }
+
+  markIssueUpdatesAsRead(id: string) {
+    this.update(id, {issueWasUpdated: false});
   }
 
   setUnDone(id: string) {
@@ -634,8 +614,8 @@ export class TaskService {
     return null;
   }
 
-  async getAllTasksForCurrentProject(): Promise<TaskWithIssueData[]> {
-    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
+  async getAllTasksForCurrentProject(): Promise<Task[]> {
+    const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
     const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
     const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
@@ -649,13 +629,13 @@ export class TaskService {
       .map(task => task.issueId);
   }
 
-  async checkForTaskWithIssue(issue: IssueData): Promise<{
-    task: TaskWithIssueData,
-    subTasks: TaskWithIssueData[],
+  async checkForTaskWithIssue(issueId: string | number): Promise<{
+    task: Task,
+    subTasks: Task[],
     isFromArchive: boolean,
   }> {
-    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise() as Task[];
-    const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issue.id);
+    const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
+    const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issueId);
 
     if (taskWithSameIssue) {
       return {
@@ -667,7 +647,7 @@ export class TaskService {
       const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.load(this._projectService.currentId);
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
-        const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issue.id);
+        const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issueId);
         return archiveTaskWithSameIssue && {
           task: archiveTaskWithSameIssue,
           subTasks: archiveTaskWithSameIssue.subTaskIds && archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState.entities[id]),

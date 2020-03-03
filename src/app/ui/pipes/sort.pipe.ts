@@ -12,8 +12,6 @@ export class SortPipe implements PipeTransform {
     }
     const arr = [...array];
     arr.sort((a: any, b: any) => {
-      console.log(a[field] < b[field], a[field], b[field]);
-
       if (a[field] < b[field]) {
         return -1 * f;
       } else if (a[field] > b[field]) {

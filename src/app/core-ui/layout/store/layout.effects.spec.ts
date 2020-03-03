@@ -16,7 +16,7 @@
 //       ]
 //     });
 //
-//     effects = TestBed.get(LayoutEffects);
+//     effects = TestBed.inject(LayoutEffects);
 //   });
 //
 //   it('should be created', () => {

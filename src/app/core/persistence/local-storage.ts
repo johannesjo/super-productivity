@@ -33,7 +33,6 @@ export const saveToSessionStorage = (key, state) => {
 //
 //
 // import {IS_ELECTRON} from '../../app.constants';
-// import {ElectronService} from 'ngx-electron';
 //
 // const electronService = new ElectronService();
 //

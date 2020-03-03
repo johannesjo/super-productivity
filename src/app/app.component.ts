@@ -5,7 +5,6 @@ import {ShortcutService} from './core-ui/shortcut/shortcut.service';
 import {GlobalConfigService} from './features/config/global-config.service';
 import {blendInOutAnimation} from './ui/animations/blend-in-out.ani';
 import {LayoutService} from './core-ui/layout/layout.service';
-import {ElectronService} from 'ngx-electron';
 import {IPC} from '../../electron/ipc-events.const';
 import {SnackService} from './core/snack/snack.service';
 import {IS_ELECTRON} from './app.constants';
@@ -27,6 +26,7 @@ import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {TaskService} from './features/tasks/task.service';
 import {LanguageService} from './core/language/language.service';
+import {ElectronService} from './core/electron/electron.service';
 
 
 @Component({

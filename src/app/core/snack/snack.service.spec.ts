@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: SnackService = TestBed.get(SnackService);
+//     const service: SnackService = TestBed.inject(SnackService);
 //     expect(service).toBeTruthy();
 //   });
 // });

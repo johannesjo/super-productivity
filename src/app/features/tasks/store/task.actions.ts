@@ -1,14 +1,7 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {
-  DropListModelSource,
-  Task,
-  TaskAdditionalInfoTargetPanel,
-  TaskState,
-  TaskWithIssueData,
-  TaskWithSubTasks
-} from '../task.model';
-import {IssueData} from '../../issue/issue';
+import {DropListModelSource, Task, TaskAdditionalInfoTargetPanel, TaskState, TaskWithSubTasks} from '../task.model';
+import {IssueDataLimited} from '../../issue/issue.model';
 import {RoundTimeOption} from '../../project/project.model';
 
 export enum TaskActionTypes {
@@ -81,7 +74,7 @@ export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
   constructor(public payload: {
-    task: Task, issue?: IssueData, isAddToBacklog: boolean, isAddToBottom: boolean,
+    task: Task, issue?: IssueDataLimited, isAddToBacklog: boolean, isAddToBottom: boolean,
   }) {
   }
 }
@@ -198,7 +191,7 @@ export class StartFirstStartable implements Action {
 export class RestoreTask implements Action {
   readonly type = TaskActionTypes.RestoreTask;
 
-  constructor(public payload: { task: TaskWithIssueData, subTasks: TaskWithIssueData[] }) {
+  constructor(public payload: { task: TaskWithSubTasks, subTasks: Task[] }) {
   }
 }
 

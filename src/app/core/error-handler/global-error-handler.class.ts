@@ -2,9 +2,9 @@ import {ErrorHandler, Injectable} from '@angular/core';
 import {isObject} from '../../util/is-object';
 import {getJiraResponseErrorTxt} from '../../util/get-jira-response-error-text';
 import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
-import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../banner/banner.service';
 import * as StackTrace from 'stacktrace-js';
+import {ElectronService} from '../electron/electron.service';
 
 let isWasErrorAlertCreated = false;
 

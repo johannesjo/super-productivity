@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {IS_ELECTRON} from '../../app.constants';
 import {ChromeExtensionInterfaceService} from '../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {ProjectService} from '../project/project.service';
-import {ElectronService} from 'ngx-electron';
 import {TaskService} from '../tasks/task.service';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {MatDialog} from '@angular/material/dialog';
@@ -12,6 +11,7 @@ import {GlobalConfigService} from '../config/global-config.service';
 import {Task} from '../tasks/task.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
+import {ElectronService} from '../../core/electron/electron.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;

@@ -9,7 +9,6 @@ import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {TaskService} from '../task.service';
 import {AttachmentActionTypes} from '../../attachment/store/attachment.actions';
-import {ElectronService} from 'ngx-electron';
 import {ReminderService} from '../../reminder/reminder.service';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
@@ -17,6 +16,7 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {Router} from '@angular/router';
 import {ProjectService} from '../../project/project.service';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 @Injectable()
 export class TaskDbEffects {

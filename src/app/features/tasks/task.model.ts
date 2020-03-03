@@ -1,4 +1,4 @@
-import {IssueData, IssueProviderKey} from '../issue/issue';
+import {IssueProviderKey} from '../issue/issue.model';
 import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
 
@@ -19,7 +19,7 @@ export interface TimeSpentOnDayCopy {
   [key: string]: number;
 }
 
-export type TaskArchive = EntityState<TaskWithIssueData>;
+export type TaskArchive = EntityState<Task>;
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 
@@ -37,12 +37,19 @@ export interface TaskCopy {
   isDone: boolean;
 
   notes: string;
-  issueId: string;
-  issueType: IssueProviderKey;
+
   parentId: string;
   attachmentIds: string[];
   reminderId?: string;
   repeatCfgId: string;
+
+  // issue stuff
+  issueId: string;
+  issueType: IssueProviderKey;
+  issueWasUpdated: boolean;
+  issueLastUpdated: number;
+  issueAttachmentNr: number;
+  issuePoints: number;
 
   // ui model
   /** @deprecated handled by selectedTaskId now */
@@ -54,16 +61,12 @@ export interface TaskCopy {
 
 export type Task = Readonly<TaskCopy>;
 
-export interface TaskWithIssueData extends Task {
-  readonly issueData?: IssueData;
-}
-
 export interface TaskWithReminderData extends Task {
   readonly reminderData: Reminder;
 }
 
-export interface TaskWithSubTasks extends TaskWithIssueData {
-  readonly subTasks?: TaskWithIssueData[];
+export interface TaskWithSubTasks extends Task {
+  readonly subTasks?: Task[];
 }
 
 
@@ -79,14 +82,20 @@ export const DEFAULT_TASK: Task = {
   title: '',
   notes: '',
   parentId: null,
-  issueId: null,
-  issueType: null,
   reminderId: null,
   created: Date.now(),
   repeatCfgId: null,
+
   _isAdditionalInfoOpen: false,
   _showSubTasksMode: ShowSubTasksMode.Show,
   _currentTab: 0,
+
+  issueId: null,
+  issuePoints: null,
+  issueType: null,
+  issueAttachmentNr: null,
+  issueLastUpdated: null,
+  issueWasUpdated: null,
 };
 
 export const SHORT_SYNTAX_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;

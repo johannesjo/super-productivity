@@ -1,3 +1,12 @@
 export function getJiraResponseErrorTxt(err: any) {
-  return (err && err.error && (typeof err.error === 'string' && err.error || err.error.name || err.error));
+  if (err && err.error) {
+    return (err.error.message)
+      || (err.error.name)
+      || (err.error.toString && err.error.toString())
+      || err.error;
+  } else if (err && err.toString) {
+    return err.toString();
+  } else {
+    return err;
+  }
 }

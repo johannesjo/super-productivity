@@ -16,7 +16,7 @@
 //       ]
 //     });
 //
-//     effects = TestBed.get(NoteEffects);
+//     effects = TestBed.inject(NoteEffects);
 //   });
 //
 //   it('should be created', () => {

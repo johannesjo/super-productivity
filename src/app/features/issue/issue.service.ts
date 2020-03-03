@@ -1,99 +1,117 @@
 import {Injectable} from '@angular/core';
-import {IssueData, IssueProviderKey, SearchResultItem} from './issue';
-import {JiraIssue} from './jira/jira-issue/jira-issue.model';
+import {IssueData, IssueProviderKey, SearchResultItem} from './issue.model';
 import {Attachment} from '../attachment/attachment.model';
-import {JiraApiService} from './jira/jira-api.service';
-import {GithubApiService} from './github/github-api.service';
-import {combineLatest, from, Observable, zip} from 'rxjs';
+import {from, merge, Observable, of, Subject, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
-import {catchError, map, switchMap} from 'rxjs/operators';
-import {JiraIssueService} from './jira/jira-issue/jira-issue.service';
-import {GithubIssueService} from './github/github-issue/github-issue.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
+import {TaskService} from '../tasks/task.service';
+import {Task} from '../tasks/task.model';
+import {IssueServiceInterface} from './issue-service-interface';
+import {JiraCommonInterfacesService} from './providers/jira/jira-common-interfaces.service';
+import {GithubCommonInterfacesService} from './providers/github/github-common-interfaces.service';
+import {switchMap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueService {
-  public isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
-    map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
-  );
+  ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
+    [GITHUB_TYPE]: this._githubCommonInterfacesService,
+    [JIRA_TYPE]: this._jiraCommonInterfacesService
+  };
 
-  public isGithubSearchEnabled$: Observable<boolean> = this._projectService.currentGithubCfg$.pipe(
-    map(gitCfg => gitCfg && gitCfg.isSearchIssuesFromGithub)
-  );
+  // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
+  ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
+    [GITHUB_TYPE]: {},
+    [JIRA_TYPE]: {}
+  };
 
   constructor(
-    private _jiraApiService: JiraApiService,
-    private _gitApiService: GithubApiService,
-    private _jiraIssueService: JiraIssueService,
-    private _gitIssueService: GithubIssueService,
     private _projectService: ProjectService,
+    private _taskService: TaskService,
+    private _jiraCommonInterfacesService: JiraCommonInterfacesService,
+    private _githubCommonInterfacesService: GithubCommonInterfacesService,
   ) {
   }
 
+  getById$(issueType: IssueProviderKey, id: string | number): Observable<IssueData> {
+    if (typeof this.ISSUE_SERVICE_MAP[issueType].getById$ === 'function') {
 
-  public async loadStatesForProject(projectId) {
-    return Promise.all([
-      this._jiraIssueService.loadStateForProject(projectId),
-      this._gitIssueService.loadStateForProject(projectId),
-    ]);
+      // account for issue refreshment
+      if (this.ISSUE_SERVICE_MAP[issueType].refreshIssue) {
+        if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
+          this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
+        }
+        return this.ISSUE_SERVICE_MAP[issueType].getById$(id).pipe(
+          switchMap(issue => merge<IssueData>(
+            of(issue),
+            this.ISSUE_REFRESH_MAP[issueType][id],
+            ),
+          )
+        );
+      } else {
+        return this.ISSUE_SERVICE_MAP[issueType].getById$(id);
+      }
+    }
+    return of(null);
   }
 
+  searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
+    const obs = Object.keys(this.ISSUE_SERVICE_MAP)
+      .map(key => this.ISSUE_SERVICE_MAP[key])
+      .filter(provider => typeof provider.searchIssues$ === 'function')
+      .map(provider => provider.searchIssues$(searchTerm));
+    obs.unshift(from([[]]));
+    console.log(obs);
 
-  public searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
-    return combineLatest([
-      this.isJiraSearchEnabled$,
-      this.isGithubSearchEnabled$,
-    ]).pipe(
-      switchMap(([isSearchJira, isSearchGithub]) => {
-        const obs = [];
-        obs.push(from([[]]));
-
-        if (isSearchJira) {
-          obs.push(
-            this._jiraApiService.issuePicker$(searchTerm)
-              .pipe(
-                catchError(() => {
-                  return [];
-                })
-              )
-          );
-        }
-
-        if (isSearchGithub) {
-          obs.push(this._gitApiService.searchIssueForRepo$(searchTerm));
-        }
-
-        return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
-      })
-    );
+    return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
   }
 
-  public refreshIssue(
-    issueType: IssueProviderKey,
-    issueId: string | number,
-    issueData: IssueData,
+  issueLink(issueType: IssueProviderKey, issueId: string | number): string {
+    if (typeof this.ISSUE_SERVICE_MAP[issueType].issueLink === 'function') {
+      return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId);
+    }
+  }
+
+  getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
+    if (typeof this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments === 'function') {
+      return this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments(issueDataIN);
+    }
+  }
+
+  async refreshIssue(
+    task: Task,
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
-  ) {
-    switch (issueType) {
-      case JIRA_TYPE: {
-        this._jiraIssueService.updateIssueFromApi(issueId, issueData, isNotifySuccess, isNotifyNoUpdateRequired);
-        break;
-      }
-      case GITHUB_TYPE: {
-        this._gitIssueService.updateIssueFromApi(issueId);
+  ): Promise<void> {
+    if (typeof this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue === 'function') {
+      const update = await this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue(task, isNotifySuccess, isNotifyNoUpdateRequired);
+
+      if (update) {
+        if (this.ISSUE_SERVICE_MAP[task.issueType].getById$ && this.ISSUE_REFRESH_MAP[task.issueType][task.issueId]) {
+          this.ISSUE_REFRESH_MAP[task.issueType][task.issueId].next(update.issue);
+        }
+        this._taskService.update(task.id, update.taskChanges);
       }
     }
   }
 
-  public getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
-    switch (issueType) {
-      case JIRA_TYPE: {
-        const issueData = issueDataIN as JiraIssue;
-        return this._jiraIssueService.getMappedAttachmentsFromIssue(issueData);
-      }
-    }
+  async addTaskWithIssue(
+    issueType: IssueProviderKey,
+    issueId: string | number,
+    isAddToBacklog = false
+  ) {
+    const {title, additionalFields} = this.ISSUE_SERVICE_MAP[issueType].getAddTaskData
+      ? await this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueId)
+      : {
+        title: null,
+        additionalFields: {}
+      };
+
+    this._taskService.add(title, isAddToBacklog, {
+      issueType,
+      issueId: (issueId as string),
+      ...additionalFields,
+    });
   }
 }

@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: CompressionService = TestBed.get(CompressionService);
+//     const service: CompressionService = TestBed.inject(CompressionService);
 //     expect(service).toBeTruthy();
 //   });
 // });

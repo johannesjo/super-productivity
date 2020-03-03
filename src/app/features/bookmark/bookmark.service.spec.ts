@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: BookmarkService = TestBed.get(BookmarkService);
+//     const service: BookmarkService = TestBed.inject(BookmarkService);
 //     expect(service).toBeTruthy();
 //   });
 // });

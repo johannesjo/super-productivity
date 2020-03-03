@@ -1,0 +1,18 @@
+@import 'src/variables';
+
+.welcome {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: $s;
+  margin-bottom: $s;
+
+  img {
+    margin-right: $s;
+  }
+}
+
+
+.wrapper {
+  margin: 0 -24px;
+}

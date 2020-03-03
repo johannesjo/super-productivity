@@ -223,8 +223,7 @@
         "IS_AUTO_POLL_TICKETS": "가져온 변경 사항을 자동으로 확인하고 알립니다.",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "현재 발행 된 문제가 현재 사용자에게 할당되었는지 확인",
         "IS_WORKLOG_ENABLED": "작업이 완료되면 작업 로그를 jira로 제출하기위한 열기 대화 상자",
-        "SEARCH_JQL_QUERY": "검색 자 작업을 제한하기위한 JQL 쿼리",
-        "USER_ASSIGNEE_NAME": "확인 대상자 이름"
+        "SEARCH_JQL_QUERY": "검색 자 작업을 제한하기위한 JQL 쿼리"
       },
       "FORM_CRED": {
         "HOST": "호스트 (예 : http://my-host.de:1234)",
