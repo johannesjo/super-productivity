@@ -9,9 +9,9 @@ import fetch from 'node-fetch';
 
 export const sendJiraRequest = ({requestId, requestInit, url, cfg}: { requestId: string; requestInit: RequestInit; url: string, cfg: any }) => {
   const mainWin = getWin();
-  console.log('--------------------------------------------------------------------');
-  console.log(url);
-  console.log('--------------------------------------------------------------------');
+  // console.log('--------------------------------------------------------------------');
+  // console.log(url);
+  // console.log('--------------------------------------------------------------------');
 
   fetch(url, requestInit)
     .then((response) => {
