@@ -1,7 +1,6 @@
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {TaskArchive, TaskState} from '../../features/tasks/task.model';
-import {IssueStateMap} from '../../features/issue/issue.model';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
@@ -48,9 +47,6 @@ export interface AppDataForProjects {
   };
   obstruction?: {
     [key: string]: ObstructionState;
-  };
-  issue?: {
-    [key: string]: IssueStateMap;
   };
 }
 

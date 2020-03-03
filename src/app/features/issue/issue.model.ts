@@ -3,23 +3,20 @@ import {JiraCfg} from './providers/jira/jira.model';
 import {GithubCfg} from './providers/github/github.model';
 import {GithubIssue, GithubIssueWithoutComments} from './providers/github/github-issue/github-issue.model';
 
-
 export type IssueProviderKey = 'JIRA' | 'GITHUB';
 export type IssueIntegrationCfg = JiraCfg | GithubCfg;
-export type IssueLocalState = 'OPEN' | 'IN_PROGRESS' | 'DONE';
+
+export enum IssueLocalState {
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE'
+}
 
 export interface IssueIntegrationCfgs {
   // should be the same as key IssueProviderKey
   JIRA?: JiraCfg;
   GITHUB?: GithubCfg;
 }
-
-// TODO remove
-export interface IssueStateMap {
-  JIRA: null;
-}
-// TODO remove
-export type IssueState = null;
 
 export type IssueData = JiraIssue | GithubIssue;
 export type IssueDataLimited = IssueData | GithubIssueWithoutComments;

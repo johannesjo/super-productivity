@@ -85,7 +85,6 @@ export class SyncService {
       // && typeof data.taskAttachment === 'object'
       && typeof data.project === 'object'
       && typeof data.globalConfig === 'object'
-      && typeof data.issue === 'object'
       && typeof data.project.currentId === 'string'
       ;
   }

@@ -19,7 +19,7 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
-import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue.model';
+import {IssueProviderKey} from '../../features/issue/issue.model';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {initialTaskState, taskReducer} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
@@ -204,15 +204,7 @@ export class PersistenceService {
   }
 
   // ISSUES
-  async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: IssueState, isForce = false): Promise<any> {
-    return this._saveToDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
-  }
-
-  async loadIssuesForProject(projectId, issueType: IssueProviderKey): Promise<IssueState> {
-    return this._loadFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
-  }
-
-  async removeIssuesForProject(projectId, issueType: IssueProviderKey): Promise<IssueState> {
+  async removeIssuesForProject(projectId, issueType: IssueProviderKey): Promise<void> {
     return this._removeFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
@@ -270,7 +262,6 @@ export class PersistenceService {
     const projectData = Object.assign({}, ...forProjectsData);
     return {
       ...projectData,
-      issue: await this._loadIssueDataForProject(projectId),
     };
   }
 
@@ -287,9 +278,6 @@ export class PersistenceService {
     await Promise.all(this._projectModels.map((modelCfg) => {
       return modelCfg.save(projectId, data[modelCfg.appDataKey]);
     }));
-    await issueProviderKeys.forEach(async (key) => {
-      await this.saveIssuesForProject(projectId, key, data.issue[key]);
-    });
   }
 
   async archiveProject(projectId: string): Promise<any> {
@@ -337,36 +325,14 @@ export class PersistenceService {
 
     return {
       lastActiveTime: this.getLastActive(),
-
       ...(await this._loadAppDataForProjects(pids)),
       ...(await this._loadAppBaseData()),
-
-      issue: await pids.reduce(async (acc, projectId) => {
-        const prevAcc = await acc;
-        const issueStateMap = {};
-        await Promise.all(issueProviderKeys.map(async (key) => {
-          issueStateMap[key] = await this.loadIssuesForProject(projectId, key);
-        }));
-
-        return {
-          ...prevAcc,
-          [projectId]: issueStateMap as IssueStateMap
-        };
-      }, Promise.resolve({})),
     };
   }
 
   async importComplete(data: AppDataComplete) {
     console.log('IMPORT--->', data);
     this._isBlockSaving = true;
-
-    const issuePromises = [];
-    Object.keys(data.issue).forEach(projectId => {
-      const issueData = data.issue[projectId];
-      Object.keys(issueData).forEach((issueProviderKey: IssueProviderKey) => {
-        issuePromises.push(this.saveIssuesForProject(projectId, issueProviderKey, issueData[issueProviderKey], true));
-      });
-    });
 
     const forBase = Promise.all(this._baseModels.map(async (modelCfg) => {
       return await modelCfg.save(data[modelCfg.appDataKey], true);
@@ -376,7 +342,6 @@ export class PersistenceService {
     }));
 
     return await Promise.all([
-      ...issuePromises,
       forBase,
       forProject
     ])
@@ -509,13 +474,6 @@ export class PersistenceService {
   private async _getProjectIds(): Promise<string[]> {
     const projectState = await this.project.load();
     return projectState.ids as string[];
-  }
-
-  // TODO remove
-  private async _loadIssueDataForProject(projectId: string): Promise<IssueStateMap> {
-    return {
-      JIRA: null,
-    };
   }
 
   private async _loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {

@@ -164,7 +164,7 @@ export class JiraIssueEffects {
       filter(([action, isEnabled, jiraCfg, curOrParTask]) =>
         jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === JIRA_TYPE),
       concatMap(([action, isEnabled, jiraCfg, curOrParTask]) =>
-        this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, curOrParTask)
+        this._handleTransitionForIssue(IssueLocalState.IN_PROGRESS, jiraCfg, curOrParTask)
       ),
     );
 
@@ -188,7 +188,7 @@ export class JiraIssueEffects {
       }),
       concatMap(([a, isEnabled, jiraCfg, taskState]: [UpdateTask, boolean, JiraCfg, TaskState]) => {
         const task = taskState.entities[a.payload.task.id];
-        return this._handleTransitionForIssue('DONE', jiraCfg, task);
+        return this._handleTransitionForIssue(IssueLocalState.DONE, jiraCfg, task);
       })
     );
 
