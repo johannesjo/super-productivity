@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: GlobalThemeService = TestBed.get(GlobalThemeService);
+//     const service: GlobalThemeService = TestBed.inject(GlobalThemeService);
 //     expect(service).toBeTruthy();
 //   });
 // });

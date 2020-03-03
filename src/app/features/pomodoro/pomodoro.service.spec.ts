@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: PomodoroService = TestBed.get(PomodoroService);
+//     const service: PomodoroService = TestBed.inject(PomodoroService);
 //     expect(service).toBeTruthy();
 //   });
 // });

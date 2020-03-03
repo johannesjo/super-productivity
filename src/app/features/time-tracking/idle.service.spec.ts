@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: IdleService = TestBed.get(IdleService);
+//     const service: IdleService = TestBed.inject(IdleService);
 //     expect(service).toBeTruthy();
 //   });
 // });

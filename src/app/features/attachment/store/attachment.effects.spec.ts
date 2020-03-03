@@ -16,7 +16,7 @@
 //       ]
 //     });
 //
-//     effects = TestBed.get(AttachmentEffects);
+//     effects = TestBed.inject(AttachmentEffects);
 //   });
 //
 //   it('should be created', () => {

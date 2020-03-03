@@ -7,7 +7,7 @@ describe('TimeTrackingService', () => {
   let service: TimeTrackingService;
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.get(TimeTrackingService);
+    service = TestBed.inject(TimeTrackingService);
   });
 
   it('should be created', () => {

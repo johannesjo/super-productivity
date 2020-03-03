@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: FormlyValidationService = TestBed.get(FormlyValidationService);
+//     const service: FormlyValidationService = TestBed.inject(FormlyValidationService);
 //     expect(service).toBeTruthy();
 //   });
 // });

@@ -16,7 +16,7 @@
 //       ]
 //     });
 //
-//     effects = TestBed.get(TaskEffects);
+//     effects = TestBed.inject(TaskEffects);
 //   });
 //
 //   it('should be created', () => {

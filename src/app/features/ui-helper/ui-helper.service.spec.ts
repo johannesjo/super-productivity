@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: UiHelperService = TestBed.get(UiHelperService);
+//     const service: UiHelperService = TestBed.inject(UiHelperService);
 //     expect(service).toBeTruthy();
 //   });
 // });

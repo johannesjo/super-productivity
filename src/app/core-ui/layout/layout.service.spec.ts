@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: LayoutService = TestBed.get(LayoutService);
+//     const service: LayoutService = TestBed.inject(LayoutService);
 //     expect(service).toBeTruthy();
 //   });
 // });

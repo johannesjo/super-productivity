@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: ReminderService = TestBed.get(ReminderService);
+//     const service: ReminderService = TestBed.inject(ReminderService);
 //     expect(service).toBeTruthy();
 //   });
 // });

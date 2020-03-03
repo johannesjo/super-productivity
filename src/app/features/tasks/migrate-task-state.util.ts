@@ -75,6 +75,7 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
 const _deleteUnusedFields = (task: Task) => {
   const {
     // legacy
+    // tslint:disable-next-line
     _isAdditionalInfoOpen,
     // the rest
     ...cleanTask

@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: PersistenceService = TestBed.get(PersistenceService);
+//     const service: PersistenceService = TestBed.inject(PersistenceService);
 //     expect(service).toBeTruthy();
 //   });
 // });

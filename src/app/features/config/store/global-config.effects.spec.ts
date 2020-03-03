@@ -16,7 +16,7 @@
 //       ]
 //     });
 //
-//     effects = TestBed.get(ConfigEffects);
+//     effects = TestBed.inject(ConfigEffects);
 //   });
 //
 //   it('should be created', () => {

@@ -6,7 +6,7 @@ describe('ImexMetaService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: ImexMetaService = TestBed.get(ImexMetaService);
+    const service: ImexMetaService = TestBed.inject(ImexMetaService);
     expect(service).toBeTruthy();
   });
 });

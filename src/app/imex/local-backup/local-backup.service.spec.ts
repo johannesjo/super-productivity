@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: LocalBackupService = TestBed.get(LocalBackupService);
+//     const service: LocalBackupService = TestBed.inject(LocalBackupService);
 //     expect(service).toBeTruthy();
 //   });
 // });

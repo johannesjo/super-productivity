@@ -16,7 +16,7 @@
 //       ]
 //     });
 //
-//     effects = TestBed.get(BookmarkEffects);
+//     effects = TestBed.inject(BookmarkEffects);
 //   });
 //
 //   it('should be created', () => {

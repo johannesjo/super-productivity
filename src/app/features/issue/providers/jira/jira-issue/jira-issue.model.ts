@@ -62,7 +62,6 @@ export type JiraIssue = Readonly<{
   components: JiraOriginalComponent[];
   timeestimate: number;
   timespent: number;
-  storyPoints?: number;
   description: string | null;
 
   updated: string;
@@ -71,6 +70,8 @@ export type JiraIssue = Readonly<{
   // mapped data
   attachments: JiraAttachment[];
   assignee: JiraAuthor;
+
+  storyPoints?: number;
   changelog?: JiraChangelogEntry[];
 
   // new properties

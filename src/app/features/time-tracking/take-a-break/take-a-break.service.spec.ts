@@ -22,7 +22,7 @@
 //   }));
 //
 //   it('should be created', () => {
-//     service = TestBed.get(TakeABreakService);
+//     service = TestBed.inject(TakeABreakService);
 //     expect(service).toBeTruthy();
 //   });
 // });

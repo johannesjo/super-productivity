@@ -44,7 +44,7 @@ export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
 
   // TODO export to util fn
   const _b64EncodeUnicode = (str) => {
-    return new Buffer(str || '').toString('base64');
+    return Buffer.from(str || '').toString('base64');
   };
   const encoded = _b64EncodeUnicode(`${jiraCfg.userName}:${jiraCfg.password}`);
   const filter = {
@@ -54,7 +54,7 @@ export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
   // thankfully only the last attached listener will be used
   // @see: https://electronjs.org/docs/api/web-request
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    details.requestHeaders['authorization'] = `Basic ${encoded}`;
+    details.requestHeaders.authorization = `Basic ${encoded}`;
     callback({requestHeaders: details.requestHeaders});
   });
 };

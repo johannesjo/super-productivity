@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: ChromeExtensionInterfaceService = TestBed.get(ChromeExtensionInterfaceService);
+//     const service: ChromeExtensionInterfaceService = TestBed.inject(ChromeExtensionInterfaceService);
 //     expect(service).toBeTruthy();
 //   });
 // });

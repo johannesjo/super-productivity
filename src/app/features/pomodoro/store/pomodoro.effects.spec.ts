@@ -16,7 +16,7 @@
 //       ]
 //     });
 //
-//     effects = TestBed.get(PomodoroEffects);
+//     effects = TestBed.inject(PomodoroEffects);
 //   });
 //
 //   it('should be created', () => {

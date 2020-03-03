@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: PlanningModeService = TestBed.get(PlanningModeService);
+//     const service: PlanningModeService = TestBed.inject(PlanningModeService);
 //     expect(service).toBeTruthy();
 //   });
 // });
