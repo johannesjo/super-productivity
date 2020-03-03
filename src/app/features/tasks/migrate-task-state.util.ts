@@ -1,11 +1,12 @@
 import {Dictionary} from '@ngrx/entity';
 import {Task, TaskArchive, TaskState} from './task.model';
-import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../issue/issue.const';
+import {GITHUB_TYPE} from '../issue/issue.const';
 import {MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 
 const MODEL_VERSION = 2;
+export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState, projectId: string): TaskState => {
   if (!taskState || (taskState && taskState[MODEL_VERSION_KEY] === MODEL_VERSION)) {

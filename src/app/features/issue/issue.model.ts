@@ -1,7 +1,7 @@
-import {JiraIssue} from './jira/jira-issue/jira-issue.model';
-import {JiraCfg} from './jira/jira.model';
-import {GithubCfg} from './github/github.model';
-import {GithubIssue} from './github/github-issue/github-issue.model';
+import {JiraIssue} from './providers/jira/jira-issue/jira-issue.model';
+import {JiraCfg} from './providers/jira/jira.model';
+import {GithubCfg} from './providers/github/github.model';
+import {GithubIssue} from './providers/github/github-issue/github-issue.model';
 
 
 export type IssueProviderKey = 'JIRA' | 'GITHUB';

@@ -5,20 +5,20 @@ import {FormGroup} from '@angular/forms';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {ProjectService} from '../../project.service';
 import {DEFAULT_PROJECT} from '../../project.const';
-import {JiraCfg} from '../../../issue/jira/jira.model';
+import {JiraCfg} from '../../../issue/providers/jira/jira.model';
 import {CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG, PROJECT_THEME_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
 import {IssueIntegrationCfgs} from '../../../issue/issue.model';
 // tslint:disable-next-line
-import {DialogJiraInitialSetupComponent} from '../../../issue/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
+import {DialogJiraInitialSetupComponent} from '../../../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import {SS_PROJECT_TMP} from '../../../../core/persistence/ls-keys.const';
 import {Subscription} from 'rxjs';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
-import {GithubCfg} from '../../../issue/github/github.model';
-import {DialogGithubInitialSetupComponent} from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
+import {GithubCfg} from '../../../issue/providers/github/github.model';
+import {DialogGithubInitialSetupComponent} from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
 import {GITHUB_TYPE} from '../../../issue/issue.const';
 import {T} from '../../../../t.const';
-import {DEFAULT_JIRA_CFG} from '../../../issue/jira/jira.const';
-import {DEFAULT_GITHUB_CFG} from '../../../issue/github/github.const';
+import {DEFAULT_JIRA_CFG} from '../../../issue/providers/jira/jira.const';
+import {DEFAULT_GITHUB_CFG} from '../../../issue/providers/github/github.const';
 
 @Component({
   selector: 'dialog-create-project',

@@ -12,11 +12,11 @@ import {
 import {FormControl} from '@angular/forms';
 import {TaskService} from '../task.service';
 import {debounceTime, map, switchMap, tap} from 'rxjs/operators';
-import {JiraIssue} from '../../issue/jira/jira-issue/jira-issue.model';
+import {JiraIssue} from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import {BehaviorSubject, Observable, zip} from 'rxjs';
 import {IssueService} from '../../issue/issue.service';
 import {SnackService} from '../../../core/snack/snack.service';
-import {JiraApiService} from '../../issue/jira/jira-api.service';
+import {JiraApiService} from '../../issue/providers/jira/jira-api.service';
 import {T} from '../../../t.const';
 import {Task} from '../task.model';
 import {AddTaskSuggestion} from './add-task-suggestions.model';

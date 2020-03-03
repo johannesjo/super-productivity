@@ -7,8 +7,8 @@ import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
 import {TaskService} from '../tasks/task.service';
 import {Task} from '../tasks/task.model';
 import {IssueServiceInterface} from './issue-service-interface';
-import {JiraCommonInterfacesService} from './jira/jira-common-interfaces.service';
-import {GithubCommonInterfacesService} from './github/github-common-interfaces.service';
+import {JiraCommonInterfacesService} from './providers/jira/jira-common-interfaces.service';
+import {GithubCommonInterfacesService} from './providers/github/github-common-interfaces.service';
 import {switchMap} from 'rxjs/operators';
 
 @Injectable({
