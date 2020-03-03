@@ -1,15 +1,5 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  shareReplay,
-  switchMap,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import {distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
@@ -20,7 +10,6 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
-  TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
 import {select, Store} from '@ngrx/store';
@@ -56,13 +45,12 @@ import {
 } from './store/task.actions';
 import {initialTaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {IssueData, IssueDataLimited, IssueProviderKey} from '../issue/issue.model';
+import {IssueDataLimited, IssueProviderKey} from '../issue/issue.model';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectAllTasksWithIssueData,
   selectBacklogTaskCount,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
@@ -81,7 +69,7 @@ import {
   selectStartableTasks,
   selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
-  selectTaskByIdWithIssueData,
+  selectTaskByIdWithSubTaskData,
   selectTaskByIssueId,
   selectTaskEntities,
   selectTasksByRepeatConfigId,
@@ -253,7 +241,7 @@ export class TaskService {
   allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
 
-  private _allTasksWithIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(select(selectAllTasksWithIssueData));
+  private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasks));
 
 
   constructor(
@@ -448,7 +436,7 @@ export class TaskService {
     this._store.dispatch(new ToggleStart());
   }
 
-  restoreTask(task: TaskWithIssueData, subTasks: TaskWithIssueData[]) {
+  restoreTask(task: Task, subTasks: Task[]) {
     this._store.dispatch(new RestoreTask({task, subTasks}));
   }
 
@@ -499,8 +487,8 @@ export class TaskService {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
 
-  getByIdWithIssueData$(id: string): Observable<TaskWithIssueData> {
-    return this._store.pipe(select(selectTaskByIdWithIssueData, {id}), take(1));
+  getByIdWithSubTaskData$(id: string): Observable<TaskWithSubTasks> {
+    return this._store.pipe(select(selectTaskByIdWithSubTaskData, {id}), take(1));
   }
 
   getTasksByRepeatCfgId$(repeatCfgId: string): Observable<Task[]> {
@@ -626,8 +614,8 @@ export class TaskService {
     return null;
   }
 
-  async getAllTasksForCurrentProject(): Promise<TaskWithIssueData[]> {
-    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
+  async getAllTasksForCurrentProject(): Promise<Task[]> {
+    const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
     const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
     const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
@@ -642,11 +630,11 @@ export class TaskService {
   }
 
   async checkForTaskWithIssue(issueId: string | number): Promise<{
-    task: TaskWithIssueData,
-    subTasks: TaskWithIssueData[],
+    task: Task,
+    subTasks: Task[],
     isFromArchive: boolean,
   }> {
-    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise() as Task[];
+    const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
     const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issueId);
 
     if (taskWithSameIssue) {

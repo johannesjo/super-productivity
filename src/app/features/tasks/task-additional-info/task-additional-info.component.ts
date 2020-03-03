@@ -10,12 +10,12 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {TaskAdditionalInfoTargetPanel, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
+import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {AttachmentService} from '../../attachment/attachment.service';
-import {BehaviorSubject, merge, Observable, of, Subject, Subscription, timer} from 'rxjs';
+import {BehaviorSubject, merge, Observable, of, Subject, Subscription} from 'rxjs';
 import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
-import {catchError, delay, delayWhen, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, delay, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
 import {expandAnimation, expandFadeInOnlyAnimation} from '../../../ui/animations/expand.ani';
@@ -117,8 +117,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     ),
   );
   parentId$ = new BehaviorSubject<string>(null);
-  parentTaskData$: Observable<TaskWithIssueData> = this.parentId$.pipe(
-    switchMap((id) => id ? this.taskService.getByIdWithIssueData$(id) : of(null))
+  parentTaskData$: Observable<TaskWithSubTasks> = this.parentId$.pipe(
+    switchMap((id) => id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))
   );
   private _attachmentIds$ = new BehaviorSubject([]);
   localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(

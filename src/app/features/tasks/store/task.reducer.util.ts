@@ -17,7 +17,6 @@ export const filterOutId = (idToFilterOut) => (id) => id !== idToFilterOut;
 export const mapTaskWithSubTasksToTask = (task: TaskWithSubTasks): Task => {
   const copy = {...DEFAULT_TASK, ...task};
   delete copy.subTasks;
-  delete copy.issueData;
   return copy;
 };
 

@@ -23,7 +23,7 @@ import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {initialTaskState, taskReducer} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
-import {Task, TaskArchive, TaskState, TaskWithIssueData, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {Task, TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {attachmentReducer, AttachmentState} from '../../features/attachment/store/attachment.reducer';
@@ -31,7 +31,7 @@ import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from './database.service';
-import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
+import {issueProviderKeys} from '../../features/issue/issue.const';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
 import {CompressionService} from '../compression/compression.service';
@@ -77,7 +77,7 @@ export class PersistenceService {
     'taskRepeatCfg',
     taskRepeatCfgReducer,
   );
-  taskArchive = this._cmProject<TaskArchive, TaskWithIssueData>(
+  taskArchive = this._cmProject<TaskArchive, TaskWithSubTasks>(
     LS_TASK_ARCHIVE,
     'taskArchive',
     // NOTE: this might be problematic, as we don't really have reducer logic for the archive

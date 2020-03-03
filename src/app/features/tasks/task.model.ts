@@ -1,4 +1,4 @@
-import {IssueData, IssueProviderKey} from '../issue/issue.model';
+import {IssueProviderKey} from '../issue/issue.model';
 import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
 
@@ -19,7 +19,7 @@ export interface TimeSpentOnDayCopy {
   [key: string]: number;
 }
 
-export type TaskArchive = EntityState<TaskWithIssueData>;
+export type TaskArchive = EntityState<Task>;
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 
@@ -61,16 +61,12 @@ export interface TaskCopy {
 
 export type Task = Readonly<TaskCopy>;
 
-export interface TaskWithIssueData extends Task {
-  readonly issueData?: IssueData;
-}
-
 export interface TaskWithReminderData extends Task {
   readonly reminderData: Reminder;
 }
 
-export interface TaskWithSubTasks extends TaskWithIssueData {
-  readonly subTasks?: TaskWithIssueData[];
+export interface TaskWithSubTasks extends Task {
+  readonly subTasks?: Task[];
 }
 
 
