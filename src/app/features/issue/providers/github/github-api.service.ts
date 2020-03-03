@@ -74,6 +74,7 @@ export class GithubApiService {
   }
 
   getLast100IssuesForRepo$(repo = this._cfg && this._cfg.repo): Observable<GithubIssueWithoutComments[]> {
+    // NOTE: alternate approach (but no caching :( )
     // return this._sendRequest$({
     //   url: `${BASE}search/issues?q=${encodeURI(`+repo:${this._cfg.repo}`)}`
     // }).pipe(
@@ -82,7 +83,6 @@ export class GithubApiService {
     //     ? res && res.items.map(mapGithubIssue)
     //     : []),
     // );
-
     return this._sendRequest$({
       url: `${BASE}repos/${repo}/issues?per_page=100&sort=updated`,
     }).pipe(
@@ -144,22 +144,26 @@ export class GithubApiService {
   }
 
   private _handleRequestError$(error: HttpErrorResponse, caught: Observable<object>): ObservableInput<{}> {
-    console.error(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.GITHUB.S.ERR_NETWORK,
       });
+    } else if (error.error && error.error.message) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Github: ' + error.error.message
+      });
     } else {
       // The backend returned an unsuccessful response code.
       this._snackService.open({
         type: 'ERROR',
         translateParams: {
+          errorMsg: error.error && (error.error.name || error.error.statusText) || error.toString(),
           statusCode: error.status,
-          errorMsg: error.error && error.error.message,
         },
-        msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED,
+        msg: T.F.GITHUB.S.ERR_UNKNOWN,
       });
     }
     if (error && error.message) {
