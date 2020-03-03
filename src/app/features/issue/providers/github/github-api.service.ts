@@ -2,11 +2,11 @@ import {Injectable} from '@angular/core';
 import {ProjectService} from '../../../project/project.service';
 import {GithubCfg} from './github.model';
 import {SnackService} from '../../../../core/snack/snack.service';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {GITHUB_API_BASE_URL} from './github.const';
 import {Observable, ObservableInput, of, throwError} from 'rxjs';
 import {GithubIssueSearchResult} from './github-api-responses';
-import {catchError, map, switchMap} from 'rxjs/operators';
+import {catchError, filter, map, switchMap} from 'rxjs/operators';
 import {mapGithubIssue, mapGithubIssueToSearchResult} from './github-issue/github-issue-map.util';
 import {GithubComment, GithubIssue} from './github-issue/github-issue.model';
 import {SearchResultItem} from '../../issue.model';
@@ -30,23 +30,14 @@ export class GithubApiService {
   ) {
     this._projectService.currentGithubCfg$.subscribe((cfg: GithubCfg) => {
       this._cfg = cfg;
-      this.setHeader(cfg.token);
     });
   }
 
-  public setHeader(accessToken: string) {
-    if (accessToken) {
-      this._header = new HttpHeaders({
-        Authorization: 'token ' + accessToken
-      });
-    } else {
-      this._header = null;
-    }
-  }
 
   getById$(issueId: number, isGetComments = true): Observable<GithubIssue> {
-    this._checkSettings();
-    return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueId}`)
+    return this._sendRequest$({
+      url: `${BASE}repos/${this._cfg.repo}/issues/${issueId}`
+    })
       .pipe(
         switchMap(issue => isGetComments
           ? this.getCommentListForIssue$(issueId).pipe(
@@ -54,28 +45,27 @@ export class GithubApiService {
           )
           : of(issue),
         ),
-        catchError(this._handleRequestError$.bind(this)),
       );
   }
 
   getCommentListForIssue$(issueId: number): Observable<GithubComment[]> {
-    this._checkSettings();
-    return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueId}/comments`)
+    return this._sendRequest$({
+      url: `${BASE}repos/${this._cfg.repo}/issues/${issueId}/comments`
+    })
       .pipe(
-        catchError(this._handleRequestError$.bind(this)),
       );
   }
 
 
   searchIssueForRepo$(searchText: string, isSearchAllGithub = false): Observable<SearchResultItem[]> {
-    this._checkSettings();
     const repoQuery = isSearchAllGithub
       ? '' :
       `+repo:${this._cfg.repo}`;
 
-    return this._http.get(`${BASE}search/issues?q=${encodeURI(searchText + repoQuery)}`)
+    return this._sendRequest$({
+      url: `${BASE}search/issues?q=${encodeURI(searchText + repoQuery)}`
+    })
       .pipe(
-        catchError(this._handleRequestError$.bind(this)),
         map((res: GithubIssueSearchResult) => {
           if (res && res.items) {
             return res.items.map(mapGithubIssue).map(mapGithubIssueToSearchResult);
@@ -85,6 +75,7 @@ export class GithubApiService {
         }),
       );
   }
+
 
   private _checkSettings() {
     if (!this._isValidSettings()) {
@@ -127,5 +118,40 @@ export class GithubApiService {
   private _isValidSettings(): boolean {
     const cfg = this._cfg;
     return cfg && cfg.repo && cfg.repo.length > 0;
+  }
+
+
+  private _sendRequest$(params: HttpRequest<string> | any): Observable<any> {
+    this._checkSettings();
+
+    const p: HttpRequest<any> | any = {
+      ...params,
+      method: params.method || 'GET',
+      headers: {
+        ...(this._cfg.token ? {Authorization: 'token ' + this._cfg.token} : {}),
+        ...(params.headers ? params.headers : {}),
+      }
+    };
+
+    const bodyArg = params.data
+      ? [params.data]
+      : [];
+
+    const allArgs = [...bodyArg, {
+      headers: new HttpHeaders(p.headers),
+      params: new HttpParams({fromObject: p.params}),
+      reportProgress: false,
+      observe: 'response',
+      responseType: params.responseType,
+    }];
+    const req = new HttpRequest(p.method, p.url, ...allArgs);
+    return this._http.request(req).pipe(
+      // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+      filter(res => !(res === Object(res) && res.type === 0)),
+      map((res: any) => (res && res.body)
+        ? res.body
+        : res),
+      catchError(this._handleRequestError$.bind(this)),
+    );
   }
 }

@@ -14,8 +14,7 @@ export type GithubMileStone = GithubOriginalMileStone;
 export type GithubPullRequest = GithubOriginalPullRequest;
 export type GithubComment = GithubOriginalComment;
 
-
-export type GithubIssue = Readonly<{
+export type GithubIssueWithoutComments = Readonly<{
   repository_url: string;
   labels_url: string;
   comments_url: string;
@@ -43,7 +42,6 @@ export type GithubIssue = Readonly<{
   _id: number;
 
   // transformed
-  comments?: GithubComment[];
   url: string;
   // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
   id: number;
@@ -52,5 +50,10 @@ export type GithubIssue = Readonly<{
   // node_id: string;
   // assignees: GithubOriginalUser[];
   // repository: GithubOriginalRepository;
+}>;
+
+
+export type GithubIssue = GithubIssueWithoutComments & Readonly<{
+  comments: GithubComment[];
 }>;
 
