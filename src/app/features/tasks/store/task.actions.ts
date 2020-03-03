@@ -8,7 +8,7 @@ import {
   TaskWithIssueData,
   TaskWithSubTasks
 } from '../task.model';
-import {IssueData} from '../../issue/issue.model';
+import {IssueData, IssueDataLimited} from '../../issue/issue.model';
 import {RoundTimeOption} from '../../project/project.model';
 
 export enum TaskActionTypes {
@@ -81,7 +81,7 @@ export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
   constructor(public payload: {
-    task: Task, issue?: IssueData, isAddToBacklog: boolean, isAddToBottom: boolean,
+    task: Task, issue?: IssueDataLimited, isAddToBacklog: boolean, isAddToBottom: boolean,
   }) {
   }
 }

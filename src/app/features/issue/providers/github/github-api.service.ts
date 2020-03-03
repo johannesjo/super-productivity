@@ -5,13 +5,14 @@ import {SnackService} from '../../../../core/snack/snack.service';
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {GITHUB_API_BASE_URL} from './github.const';
 import {Observable, ObservableInput, of, throwError} from 'rxjs';
-import {GithubIssueSearchResult} from './github-api-responses';
+import {GithubIssueSearchResult, GithubOriginalIssue} from './github-api-responses';
 import {catchError, filter, map, switchMap} from 'rxjs/operators';
 import {mapGithubIssue, mapGithubIssueToSearchResult} from './github-issue/github-issue-map.util';
-import {GithubComment, GithubIssue} from './github-issue/github-issue.model';
+import {GithubComment, GithubIssue, GithubIssueWithoutComments} from './github-issue/github-issue.model';
 import {SearchResultItem} from '../../issue.model';
 import {HANDLED_ERROR_PROP_STR} from '../../../../app.constants';
 import {T} from '../../../../t.const';
+import {throwHandledError} from '../../../../util/throw-handled-error';
 
 const BASE = GITHUB_API_BASE_URL;
 
@@ -19,9 +20,7 @@ const BASE = GITHUB_API_BASE_URL;
   providedIn: 'root',
 })
 export class GithubApiService {
-
   private _cfg: GithubCfg;
-  private _header: HttpHeaders;
 
   constructor(
     private _projectService: ProjectService,
@@ -67,15 +66,31 @@ export class GithubApiService {
     })
       .pipe(
         map((res: GithubIssueSearchResult) => {
-          if (res && res.items) {
-            return res.items.map(mapGithubIssue).map(mapGithubIssueToSearchResult);
-          } else {
-            return [];
-          }
+          return (res && res.items)
+            ? res.items.map(mapGithubIssue).map(mapGithubIssueToSearchResult)
+            : [];
         }),
       );
   }
 
+  getLast100IssuesForRepo$(repo = this._cfg && this._cfg.repo): Observable<GithubIssueWithoutComments[]> {
+    // return this._sendRequest$({
+    //   url: `${BASE}search/issues?q=${encodeURI(`+repo:${this._cfg.repo}`)}`
+    // }).pipe(
+    //   tap(console.log),
+    //   map((res: GithubIssueSearchResult) => res && res.items
+    //     ? res && res.items.map(mapGithubIssue)
+    //     : []),
+    // );
+
+    return this._sendRequest$({
+      url: `${BASE}repos/${repo}/issues?per_page=100&sort=updated`,
+    }).pipe(
+      map((issues: GithubOriginalIssue[]) => issues
+        ? issues.map(mapGithubIssue)
+        : []),
+    );
+  }
 
   private _checkSettings() {
     if (!this._isValidSettings()) {
@@ -83,37 +98,10 @@ export class GithubApiService {
         type: 'ERROR',
         msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED
       });
-      const e = new Error(`Not enough settings`);
-      e[HANDLED_ERROR_PROP_STR] = 'Not enough settings';
-      throw e;
+      throwHandledError('Github: Not enough settings');
     }
   }
 
-  private _handleRequestError$(error: HttpErrorResponse, caught: Observable<object>): ObservableInput<{}> {
-    console.error(error);
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.GITHUB.S.ERR_NETWORK,
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      this._snackService.open({
-        type: 'ERROR',
-        translateParams: {
-          statusCode: error.status,
-          errorMsg: error.error && error.error.message,
-        },
-        msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED,
-      });
-    }
-    if (error && error.message) {
-      return throwError({[HANDLED_ERROR_PROP_STR]: 'Github: ' + error.message});
-    }
-
-    return throwError({[HANDLED_ERROR_PROP_STR]: 'Github: Api request failed.'});
-  }
 
   private _isValidSettings(): boolean {
     const cfg = this._cfg;
@@ -153,5 +141,31 @@ export class GithubApiService {
         : res),
       catchError(this._handleRequestError$.bind(this)),
     );
+  }
+
+  private _handleRequestError$(error: HttpErrorResponse, caught: Observable<object>): ObservableInput<{}> {
+    console.error(error);
+    if (error.error instanceof ErrorEvent) {
+      // A client-side or network error occurred. Handle it accordingly.
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.GITHUB.S.ERR_NETWORK,
+      });
+    } else {
+      // The backend returned an unsuccessful response code.
+      this._snackService.open({
+        type: 'ERROR',
+        translateParams: {
+          statusCode: error.status,
+          errorMsg: error.error && error.error.message,
+        },
+        msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED,
+      });
+    }
+    if (error && error.message) {
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'Github: ' + error.message});
+    }
+
+    return throwError({[HANDLED_ERROR_PROP_STR]: 'Github: Api request failed.'});
   }
 }

@@ -15,6 +15,7 @@ import {EMPTY, Observable, timer} from 'rxjs';
 import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../github.const';
 import {selectGithubTasks} from '../../../../tasks/store/task.selectors';
 import {IssueService} from '../../../issue.service';
+import {GITHUB_TYPE} from '../../../issue.const';
 
 @Injectable()
 export class GithubIssueEffects {
@@ -89,39 +90,37 @@ export class GithubIssueEffects {
     }),
   );
 
-  private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
-    console.log('IMPORT NOT IMPLEMENT');
+  private async _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
+    const issues = await this._githubApiService.getLast100IssuesForRepo$().toPromise();
+    const allTaskGithubIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(GITHUB_TYPE) as number[];
+    const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
 
-    // this._githubApiService.getCompleteIssueDataForRepo$().subscribe(async issues => {
-    //   const allTaskGithubIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(GITHUB_TYPE) as number[];
-    //   const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
-    //   issuesToAdd.forEach((issue) => {
-    //     this._taskService.addWithIssue(
-    //       `#${issue.number} ${issue.title}`,
-    //       GITHUB_TYPE,
-    //       issue,
-    //       true,
-    //     );
-    //   });
-    //
-    //   if (issuesToAdd.length === 1) {
-    //     this._snackService.open({
-    //       ico: 'cloud_download',
-    //       translateParams: {
-    //         issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
-    //       },
-    //       msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
-    //     });
-    //   } else if (issuesToAdd.length > 1) {
-    //     this._snackService.open({
-    //       ico: 'cloud_download',
-    //       translateParams: {
-    //         issuesLength: issuesToAdd.length
-    //       },
-    //       msg: T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES,
-    //     });
-    //   }
-    // });
+    issuesToAdd.forEach((issue) => {
+      this._taskService.addWithIssue(
+        `#${issue.number} ${issue.title}`,
+        GITHUB_TYPE,
+        issue,
+        true,
+      );
+    });
+
+    if (issuesToAdd.length === 1) {
+      this._snackService.open({
+        ico: 'cloud_download',
+        translateParams: {
+          issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
+        },
+        msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
+      });
+    } else if (issuesToAdd.length > 1) {
+      this._snackService.open({
+        ico: 'cloud_download',
+        translateParams: {
+          issuesLength: issuesToAdd.length
+        },
+        msg: T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES,
+      });
+    }
   }
 }
 
