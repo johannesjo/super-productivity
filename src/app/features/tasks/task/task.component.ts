@@ -50,6 +50,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
     this.taskId = 't-' + this.task.id;
+    this.isDone = v.isDone;
 
     if (v.issueId) {
       this.issueUrl = this._issueService.issueLink(v.issueType, v.issueId);
@@ -79,10 +80,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
 
   @HostBinding('tabindex') tabIndex = 1;
-  @HostBinding('class.isCurrent') isCurrent: boolean;
-  @HostBinding('class.isSelected') isSelected: boolean;
   @HostBinding('class.isDone') isDone: boolean;
   @HostBinding('id') taskId: string;
+  // @see ngOnInit
+  @HostBinding('class.isCurrent') isCurrent: boolean;
+  @HostBinding('class.isSelected') isSelected: boolean;
 
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
