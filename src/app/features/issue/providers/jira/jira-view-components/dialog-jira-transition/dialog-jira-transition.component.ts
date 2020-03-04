@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {IssueLocalState} from '../../../../issue.model';
-import {JiraIssue} from '../../jira-issue/jira-issue.model';
+import {JiraIssue, JiraIssueReduced} from '../../jira-issue/jira-issue.model';
 import {Observable} from 'rxjs';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraOriginalTransition} from '../../jira-api-responses';
@@ -29,7 +29,7 @@ export class DialogJiraTransitionComponent {
     private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
     private _snackService: SnackService,
     @Inject(MAT_DIALOG_DATA) public data: {
-      issue: JiraIssue,
+      issue: JiraIssueReduced,
       localState: IssueLocalState,
       task: Task,
     }

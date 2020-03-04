@@ -36,7 +36,6 @@ export type GithubIssueReduced = Readonly<{
   updated_at: string;
 
   // added
-  wasUpdated: boolean;
   commentsNr: number;
   apiUrl: string;
   _id: number;

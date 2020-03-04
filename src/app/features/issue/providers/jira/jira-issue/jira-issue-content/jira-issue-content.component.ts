@@ -6,6 +6,8 @@ import {Attachment} from '../../../../../attachment/attachment.model';
 import {T} from '../../../../../../t.const';
 import {TaskService} from '../../../../../tasks/task.service';
 import * as j2m from 'jira2md';
+import {IssueService} from '../../../../issue.service';
+import {JIRA_TYPE} from '../../../../issue.const';
 
 @Component({
   selector: 'jira-issue-content',
@@ -16,6 +18,7 @@ import * as j2m from 'jira2md';
 })
 export class JiraIssueContentComponent {
   issue: JiraIssue;
+  issueUrl: string;
   @Input() task: TaskWithSubTasks;
   description: string;
   attachments: Attachment[];
@@ -23,12 +26,14 @@ export class JiraIssueContentComponent {
 
   constructor(
     private readonly  _taskService: TaskService,
+    private readonly  _issueService: IssueService,
   ) {
   }
 
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;
     this.description = i && i.description && j2m.to_markdown(i.description);
+    this.issueUrl = this._issueService.issueLink(JIRA_TYPE, i.id);
   }
 
   hideUpdates() {

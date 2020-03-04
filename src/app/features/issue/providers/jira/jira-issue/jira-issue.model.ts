@@ -1,6 +1,6 @@
 // Mapped Data Types
 // -----------------
-import {JiraOriginalComment, JiraOriginalComponent, JiraOriginalStatus} from '../jira-api-responses';
+import {JiraOriginalComponent, JiraOriginalStatus} from '../jira-api-responses';
 
 export type JiraAuthor = Readonly<{
   id: string;
@@ -61,17 +61,12 @@ export type JiraIssueReduced = Readonly<{
   attachments: JiraAttachment[];
   assignee: JiraAuthor;
 
-  // TODO check if here
-  storyPoints?: number;
-
-  // new properties TODO REMOVE
-  url: string;
+  // new properties (mapped)
   comments: JiraComment[];
-  wasUpdated?: boolean;
-  lastUpdateFromRemote?: number;
 }>;
 
 export type JiraIssue = JiraIssueReduced & Readonly<{
+  storyPoints?: number;
   changelog: JiraChangelogEntry[];
 }>;
 

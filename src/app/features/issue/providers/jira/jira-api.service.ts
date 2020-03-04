@@ -182,14 +182,12 @@ export class JiraApiService {
     });
   }
 
-  getIssueById$(issueId, isGetChangelog = false): Observable<JiraIssue> {
-    return this._sendRequest$({
-      transform: mapIssueResponse,
-      pathname: `issue/${issueId}`,
-      query: {
-        expand: isGetChangelog ? ['changelog', 'description'] : ['description']
-      }
-    });
+  getIssueById$(issueId): Observable<JiraIssue> {
+    return this._getIssueById$(issueId, true);
+  }
+
+  getReducedIssueById$(issueId): Observable<JiraIssueReduced> {
+    return this._getIssueById$(issueId, false);
   }
 
   getCurrentUser$(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
@@ -252,6 +250,16 @@ export class JiraApiService {
       method: 'POST',
       body: worklog,
       transform: mapResponse,
+    });
+  }
+
+  private _getIssueById$(issueId, isGetChangelog = false): Observable<JiraIssue> {
+    return this._sendRequest$({
+      transform: mapIssueResponse,
+      pathname: `issue/${issueId}`,
+      query: {
+        expand: isGetChangelog ? ['changelog', 'description'] : ['description']
+      }
     });
   }
 

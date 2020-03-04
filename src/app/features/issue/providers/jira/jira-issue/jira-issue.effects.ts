@@ -111,7 +111,7 @@ export class JiraIssueEffects {
       // TODO there is probably a better way to to do this
       // TODO refactor to actions
       switchMap(([action, isEnabled, jiraCfg, currentTaskOrParent]) => {
-        return this._jiraApiService.getIssueById$(currentTaskOrParent.issueId).pipe(
+        return this._jiraApiService.getReducedIssueById$(currentTaskOrParent.issueId).pipe(
           withLatestFrom(this._jiraApiService.getCurrentUser$()),
           concatMap(([issue, currentUser]) => {
             const assignee = issue.assignee;
@@ -247,7 +247,7 @@ export class JiraIssueEffects {
       case 'DO_NOT':
         return EMPTY;
       case 'ALWAYS_ASK':
-        return this._jiraApiService.getIssueById$(task.issueId).pipe(
+        return this._jiraApiService.getReducedIssueById$(task.issueId).pipe(
           concatMap((issue) => this._openTransitionDialog(issue, localState, task)
           )
         );
@@ -260,12 +260,12 @@ export class JiraIssueEffects {
           // NOTE: we would kill the whole effect chain if we do this
           // return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: No valid transition configured'});
           return timer(2000).pipe(
-            concatMap(() => this._jiraApiService.getIssueById$(task.issueId)),
+            concatMap(() => this._jiraApiService.getReducedIssueById$(task.issueId)),
             concatMap((issue: JiraIssue) => this._openTransitionDialog(issue, localState, task))
           );
         }
 
-        return this._jiraApiService.getIssueById$(task.issueId).pipe(
+        return this._jiraApiService.getReducedIssueById$(task.issueId).pipe(
           concatMap((issue) => {
             if (!issue.status || issue.status.name !== chosenTransition.name) {
               return this._jiraApiService.transitionIssue$(issue.id, chosenTransition.id)
@@ -292,7 +292,7 @@ export class JiraIssueEffects {
   }
 
   private _openWorklogDialog(task: Task, issueId: string) {
-    return this._jiraApiService.getIssueById$(issueId).pipe(take(1)).subscribe(issue => {
+    return this._jiraApiService.getReducedIssueById$(issueId).pipe(take(1)).subscribe(issue => {
       this._matDialog.open(DialogJiraAddWorklogComponent, {
         restoreFocus: true,
         data: {
@@ -303,7 +303,7 @@ export class JiraIssueEffects {
     });
   }
 
-  private _openTransitionDialog(issue: JiraIssue, localState: IssueLocalState, task: Task): Observable<any> {
+  private _openTransitionDialog(issue: JiraIssueReduced, localState: IssueLocalState, task: Task): Observable<any> {
     return this._matDialog.open(DialogJiraTransitionComponent, {
       restoreFocus: true,
       data: {

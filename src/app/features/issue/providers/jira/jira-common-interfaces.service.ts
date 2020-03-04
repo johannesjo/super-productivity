@@ -36,7 +36,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   getById$(issueId: string | number) {
-    return this._jiraApiService.getIssueById$(issueId, true);
+    return this._jiraApiService.getIssueById$(issueId);
   }
 
   searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
@@ -53,7 +53,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
   ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue }> {
-    const issue = await this._jiraApiService.getIssueById$(task.issueId, false).toPromise();
+    const issue = await this._jiraApiService.getIssueById$(task.issueId).toPromise() as JiraIssue;
 
     // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
     const newUpdated = new Date(issue.updated).getTime();
@@ -96,7 +96,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return {
       title: `${issue.key} ${issue.summary}`,
       additionalFields: {
-        issuePoints: issue.storyPoints,
+        // issuePoints: issue.storyPoints,
         issueAttachmentNr: issue.attachments ? issue.attachments.length : 0,
         issueWasUpdated: false,
         issueLastUpdated: new Date(issue.updated).getTime()
