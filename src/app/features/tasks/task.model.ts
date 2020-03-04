@@ -40,7 +40,7 @@ export interface TaskCopy {
 
   parentId: string;
   attachmentIds: string[];
-  reminderId?: string;
+  reminderId: string;
   repeatCfgId: string;
 
   // issue stuff
@@ -52,11 +52,8 @@ export interface TaskCopy {
   issuePoints: number;
 
   // ui model
-  /** @deprecated handled by selectedTaskId now */
-  _isAdditionalInfoOpen?: boolean;
   // 0: show, 1: hide-done tasks, 2: hide all sub tasks
   _showSubTasksMode: ShowSubTasksMode;
-  _currentTab: number;
 }
 
 export type Task = Readonly<TaskCopy>;
@@ -86,9 +83,7 @@ export const DEFAULT_TASK: Task = {
   created: Date.now(),
   repeatCfgId: null,
 
-  _isAdditionalInfoOpen: false,
   _showSubTasksMode: ShowSubTasksMode.Show,
-  _currentTab: 0,
 
   issueId: null,
   issuePoints: null,

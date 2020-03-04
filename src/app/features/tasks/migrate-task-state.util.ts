@@ -3,9 +3,9 @@ import {Task, TaskArchive, TaskState} from './task.model';
 import {GITHUB_TYPE} from '../issue/issue.const';
 import {MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import * as moment from 'moment';
-import { convertToWesternArabic } from '../../util/numeric-converter';
+import {convertToWesternArabic} from '../../util/numeric-converter';
 
-const MODEL_VERSION = 2;
+const MODEL_VERSION = 3;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState, projectId: string): TaskState => {
@@ -16,6 +16,7 @@ export const migrateTaskState = (taskState: TaskState, projectId: string): TaskS
   const taskEntities: Dictionary<Task> = {...taskState.entities};
   Object.keys(taskEntities).forEach((key) => {
     taskEntities[key] = _addProjectId(taskEntities[key], projectId);
+    taskEntities[key] = _addNewIssueFields(taskEntities[key], projectId);
     taskEntities[key] = _replaceLegacyGitType(taskEntities[key]);
     taskEntities[key] = _deleteUnusedFields(taskEntities[key]);
     taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]);
@@ -39,6 +40,27 @@ const _addProjectId = (task: Task, projectId: string): Task => {
     };
 };
 
+const _addNewIssueFields = (task: Task, projectId: string): Task => {
+  if (!task.hasOwnProperty('issueLastUpdated')) {
+    return (task.issueId !== null)
+      ? {
+        // NOTE: we intentionally leave it as is, to allow for an update
+        // issueAttachmentNr: null,
+        // issueLastUpdated: Date.now(),
+        // issueWasUpdated: false,
+        ...task,
+      }
+      : {
+        issueAttachmentNr: null,
+        issueLastUpdated: null,
+        issueWasUpdated: null,
+        ...task
+      };
+  } else {
+    return task;
+  }
+};
+
 const _replaceLegacyGitType = (task: Task) => {
   const issueType = task.issueType as string;
   return (issueType === LEGACY_GITHUB_TYPE)
@@ -57,11 +79,11 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
         }
         const westernArabicKey = date.locale('en').format(WORKLOG_DATE_STR_FORMAT);
 
-        const totalTimeSpentOnDay = Object.keys(task.timeSpentOnDay).filter( (key) => {
+        const totalTimeSpentOnDay = Object.keys(task.timeSpentOnDay).filter((key) => {
           return key === westernArabicKey && westernArabicKey !== dateKey;
-        }).reduce( (tot, val) => {
+        }).reduce((tot, val) => {
           return tot + task.timeSpentOnDay[val];
-        } , task.timeSpentOnDay[dateKey]);
+        }, task.timeSpentOnDay[dateKey]);
 
         return {
           ...acc,
@@ -75,10 +97,10 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
 const _deleteUnusedFields = (task: Task) => {
   const {
     // legacy
-    // tslint:disable-next-line
     _isAdditionalInfoOpen,
+    _currentTab,
     // the rest
     ...cleanTask
-  } = task;
+  }: any | Task = task;
   return cleanTask;
 };
