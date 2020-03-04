@@ -12,6 +12,7 @@ import {Task} from '../tasks/task.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
 import {ElectronService} from '../../core/electron/electron.service';
+import {UiHelperService} from '../ui-helper/ui-helper.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -44,6 +45,7 @@ export class IdleService {
     private _taskService: TaskService,
     private _configService: GlobalConfigService,
     private _matDialog: MatDialog,
+    private _uiHelperService: UiHelperService,
   ) {
   }
 
@@ -81,7 +83,7 @@ export class IdleService {
 
       if (!this.isIdleDialogOpen) {
         if (IS_ELECTRON) {
-          this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
+          this._uiHelperService.focusApp();
         }
 
         if (this._taskService.currentTaskId) {

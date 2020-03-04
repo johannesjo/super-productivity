@@ -28,6 +28,7 @@ import {T} from '../../../t.const';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {ElectronService} from '../../../core/electron/electron.service';
+import {UiHelperService} from '../../ui-helper/ui-helper.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -170,6 +171,7 @@ export class TakeABreakService {
     private _notifyService: NotifyService,
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
+    private _uiHelperService: UiHelperService,
   ) {
     this._triggerReset$.pipe(
       withLatestFrom(this._configService.takeABreak$),
@@ -197,7 +199,7 @@ export class TakeABreakService {
         this._triggerLockScreenCounter$.next(true);
       }
       if (IS_ELECTRON && cfg.takeABreak.isFocusWindow) {
-        this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
+        this._uiHelperService.focusApp();
       }
 
       this._bannerService.open({

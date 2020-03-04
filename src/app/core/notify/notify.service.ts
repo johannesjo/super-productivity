@@ -6,6 +6,7 @@ import {IS_MOBILE} from '../../util/is-mobile';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {TranslateService} from '@ngx-translate/core';
 import {ElectronService} from '../electron/electron.service';
+import {UiHelperService} from '../../features/ui-helper/ui-helper.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,7 @@ export class NotifyService {
   constructor(
     private _electronService: ElectronService,
     private _translateService: TranslateService,
+    private _uiHelperService: UiHelperService,
   ) {
   }
 
@@ -60,7 +62,7 @@ export class NotifyService {
         instance.onclick = () => {
           instance.close();
           if (IS_ELECTRON) {
-            this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
+            this._uiHelperService.focusApp();
           }
         };
         setTimeout(() => {

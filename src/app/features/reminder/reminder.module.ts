@@ -11,6 +11,7 @@ import {DialogViewTaskReminderComponent} from '../tasks/dialog-view-task-reminde
 import {filter} from 'rxjs/operators';
 import {Reminder} from './reminder.model';
 import {ElectronService} from '../../core/electron/electron.service';
+import {UiHelperService} from '../ui-helper/ui-helper.service';
 
 @NgModule({
   declarations: [],
@@ -25,6 +26,7 @@ export class ReminderModule {
     private readonly _reminderService: ReminderService,
     private readonly _matDialog: MatDialog,
     private readonly _electronService: ElectronService,
+    private readonly _uiHelperService: UiHelperService,
   ) {
     _reminderService.init();
     this._reminderService.onReminderActive$.pipe(
@@ -32,7 +34,7 @@ export class ReminderModule {
       filter((reminder) => this._matDialog.openDialogs.length === 0 && !!reminder),
     ).subscribe((reminder: Reminder) => {
       if (IS_ELECTRON) {
-        this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
+        this._uiHelperService.focusApp();
       }
 
       if (reminder.type === 'NOTE') {

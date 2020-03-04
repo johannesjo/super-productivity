@@ -5,6 +5,8 @@ import {DOCUMENT} from '@angular/common';
 import {LocalUiHelperSettings} from './ui-helper.model';
 import {UI_LOCAL_HELPER_DEFAULT} from './ui-helper.const';
 import {ElectronService} from '../../core/electron/electron.service';
+import {IPC} from '../../../../electron/ipc-events.const';
+import {IS_ELECTRON} from '../../app.constants';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +32,14 @@ export class UiHelperService {
 
     this._webFrame.setZoomFactor(zoomFactor);
     this._updateLocalUiHelperSettings({zoomFactor});
+  }
+
+  focusApp() {
+    if (IS_ELECTRON) {
+      this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
+    } else {
+      console.error('Cannot execute focus app window in browser');
+    }
   }
 
   private _initMousewheelZoomForElectron() {
