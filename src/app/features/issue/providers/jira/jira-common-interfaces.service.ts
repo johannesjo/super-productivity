@@ -96,7 +96,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return {
       title: `${issue.key} ${issue.summary}`,
       additionalFields: {
-        // issuePoints: issue.storyPoints,
+        issuePoints: issue.storyPoints,
         issueAttachmentNr: issue.attachments ? issue.attachments.length : 0,
         issueWasUpdated: false,
         issueLastUpdated: new Date(issue.updated).getTime()

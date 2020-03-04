@@ -101,12 +101,14 @@ export type JiraOriginalFields = Readonly<{
 }>;
 
 
-export type JiraIssueOriginalReduced = Readonly<{
-  key: string;
-  id: string;
-  expand: string;
-  self: string;
-}>;
+// export type JiraIssueOriginalReduced = Readonly<{
+//   key: string;
+//   id: string;
+//   expand: string;
+//   self: string;
+//   fields: JiraOriginalFields;
+//   changelog?: JiraOriginalChangelog;
+// }>;
 
 
 export type JiraOriginalChangelog = Readonly<{

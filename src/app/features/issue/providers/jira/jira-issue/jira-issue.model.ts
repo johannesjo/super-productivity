@@ -63,10 +63,10 @@ export type JiraIssueReduced = Readonly<{
 
   // new properties (mapped)
   comments: JiraComment[];
+  storyPoints?: number;
 }>;
 
 export type JiraIssue = JiraIssueReduced & Readonly<{
-  storyPoints?: number;
   changelog: JiraChangelogEntry[];
 }>;
 

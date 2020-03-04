@@ -163,7 +163,10 @@ export class JiraApiService {
   findAutoImportIssues$(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssueReduced[]> {
     const options = {
       maxResults,
-      fields: JIRA_ADDITIONAL_ISSUE_FIELDS,
+      fields: [
+        ...JIRA_ADDITIONAL_ISSUE_FIELDS,
+        ...(this._cfg.storyPointFieldId ? [this._cfg.storyPointFieldId] : [])
+      ],
     };
     const searchQuery = this._cfg.autoAddBacklogJqlQuery;
 
