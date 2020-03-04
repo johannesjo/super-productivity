@@ -79,6 +79,7 @@
     "jira-client-fork": "^4.2.1",
     "moment": "^2.24.0",
     "node-fetch": "^2.6.0",
+    "source-map-support": "^0.5.16",
     "stacktrace-js": "^2.0.1",
     "tslib": "^1.10.0"
   },

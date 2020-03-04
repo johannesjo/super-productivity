@@ -26,6 +26,7 @@ export class ElectronService {
       this.webFrame = electron.webFrame;
       this.remote = electron.remote;
       this.shell = electron.shell;
+      window.require('source-map-support').install();
     }
 
     // NOTE: useful in case we want to disable the node integration
