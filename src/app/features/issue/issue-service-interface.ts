@@ -1,5 +1,5 @@
 import {Observable} from 'rxjs';
-import {IssueData, SearchResultItem} from './issue.model';
+import {IssueData, IssueDataReduced, SearchResultItem} from './issue.model';
 import {Task} from '../tasks/task.model';
 import {Attachment} from '../attachment/attachment.model';
 
@@ -12,7 +12,7 @@ export interface IssueServiceInterface {
 
   refreshIssue?(task: Task, isNotifySuccess: boolean, isNotifyNoUpdateRequired: boolean): Promise<{ taskChanges: Partial<Task>, issue: IssueData }>;
 
-  getAddTaskData?(issueId: string | number): Promise<{ title: string; additionalFields: Partial<Task> }>;
+  getAddTaskData?(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
 
   getMappedAttachments?(issueDataIN: IssueData): Attachment[];
 }

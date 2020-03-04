@@ -14,7 +14,7 @@ export type GithubMileStone = GithubOriginalMileStone;
 export type GithubPullRequest = GithubOriginalPullRequest;
 export type GithubComment = GithubOriginalComment;
 
-export type GithubIssueWithoutComments = Readonly<{
+export type GithubIssueReduced = Readonly<{
   repository_url: string;
   labels_url: string;
   comments_url: string;
@@ -53,7 +53,7 @@ export type GithubIssueWithoutComments = Readonly<{
 }>;
 
 
-export type GithubIssue = GithubIssueWithoutComments & Readonly<{
+export type GithubIssue = GithubIssueReduced & Readonly<{
   comments: GithubComment[];
 }>;
 

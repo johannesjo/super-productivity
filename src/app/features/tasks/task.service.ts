@@ -45,7 +45,7 @@ import {
 } from './store/task.actions';
 import {initialTaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {IssueDataLimited, IssueProviderKey} from '../issue/issue.model';
+import {IssueDataReduced, IssueProviderKey} from '../issue/issue.model';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllRepeatableTaskWithSubTasks,
@@ -308,11 +308,13 @@ export class TaskService {
     }));
   }
 
-  addWithIssue(title: string,
-               issueType: IssueProviderKey,
-               issueLimited: IssueDataLimited,
-               isAddToBacklog = false,
-               isAddToBottom = false,
+  // NOTE: should only ever be called from issue service
+  addWithIssueFromIssueServiceONLY(
+    title: string,
+    issueType: IssueProviderKey,
+    issueLimited: IssueDataReduced,
+    isAddToBacklog = false,
+    isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
       task: this.createNewTaskWithDefaults(title, {

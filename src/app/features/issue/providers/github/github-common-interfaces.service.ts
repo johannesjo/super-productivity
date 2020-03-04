@@ -8,7 +8,7 @@ import {ProjectService} from '../../../project/project.service';
 import {SearchResultItem} from '../../issue.model';
 import {GithubCfg} from './github.model';
 import {SnackService} from '../../../../core/snack/snack.service';
-import {GithubIssue} from './github-issue/github-issue.model';
+import {GithubIssue, GithubIssueReduced} from './github-issue/github-issue.model';
 import {truncate} from '../../../../util/truncate';
 import {T} from '../../../../t.const';
 
@@ -96,15 +96,13 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     }
   }
 
-  async getAddTaskData(issueId: number)
-    : Promise<{ title: string; additionalFields: Partial<Task> }> {
-    const issue = await this._githubApiService.getById$(issueId).toPromise();
-
+  getAddTaskData(issue: GithubIssueReduced): { title: string; additionalFields: Partial<Task> } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
       additionalFields: {
-        issueWasUpdated: false,
-        issueLastUpdated: new Date(issue.updated_at).getTime()
+        // issueWasUpdated: false,
+        // NOTE: we use Date.now() instead to because updated does not account for comments
+        // issueLastUpdated: new Date(issue.updated_at).getTime()
       }
     };
   }

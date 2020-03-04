@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {IssueData, IssueProviderKey, SearchResultItem} from './issue.model';
+import {IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem} from './issue.model';
 import {Attachment} from '../attachment/attachment.model';
 import {from, merge, Observable, of, Subject, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
@@ -98,20 +98,29 @@ export class IssueService {
 
   async addTaskWithIssue(
     issueType: IssueProviderKey,
-    issueId: string | number,
+    issueIdOrData: string | number | IssueDataReduced,
     isAddToBacklog = false
   ) {
-    const {title, additionalFields} = this.ISSUE_SERVICE_MAP[issueType].getAddTaskData
-      ? await this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueId)
-      : {
-        title: null,
-        additionalFields: {}
-      };
+    if (this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
+      const {issueId, issueData} = (typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string')
+        ? {
+          issueId: issueIdOrData,
+          issueData: await this.ISSUE_SERVICE_MAP[issueType].getById$(issueIdOrData).toPromise()
+        }
+        : {
+          issueId: issueIdOrData.id,
+          issueData: issueIdOrData
+        };
 
-    this._taskService.add(title, isAddToBacklog, {
-      issueType,
-      issueId: (issueId as string),
-      ...additionalFields,
-    });
+      const {title = null, additionalFields = {}} = this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueData);
+
+      this._taskService.add(title, isAddToBacklog, {
+        issueType,
+        issueId: (issueId as string),
+        issueWasUpdated: false,
+        issueLastUpdated: Date.now(),
+        ...additionalFields,
+      });
+    }
   }
 }

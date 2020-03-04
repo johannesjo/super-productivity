@@ -327,12 +327,12 @@ export class JiraIssueEffects {
       );
 
       issuesToAdd.forEach((issue) => {
-        this._taskService.addWithIssue(
-          `${issue.key} ${issue.summary}`,
-          JIRA_TYPE,
-          issue,
-          true,
-        );
+        // this._taskService.addWithIssueFromIssueServiceONLY(
+        //   `${issue.key} ${issue.summary}`,
+        //   JIRA_TYPE,
+        //   issue,
+        //   true,
+        // );
       });
 
       if (issuesToAdd.length === 1) {

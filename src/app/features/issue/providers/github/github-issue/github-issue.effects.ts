@@ -93,12 +93,7 @@ export class GithubIssueEffects {
     const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
 
     issuesToAdd.forEach((issue) => {
-      this._taskService.addWithIssue(
-        `#${issue.number} ${issue.title}`,
-        GITHUB_TYPE,
-        issue,
-        true,
-      );
+      this._issueService.addTaskWithIssue(GITHUB_TYPE, issue, true);
     });
 
     if (issuesToAdd.length === 1) {

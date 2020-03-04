@@ -10,7 +10,7 @@ import {SnackService} from '../../../../core/snack/snack.service';
 import {TaskService} from '../../../tasks/task.service';
 import {ProjectService} from '../../../project/project.service';
 import {SearchResultItem} from '../../issue.model';
-import {JiraIssue} from './jira-issue/jira-issue.model';
+import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
 import {Attachment} from '../../../attachment/attachment.model';
 import {mapJiraAttachmentToAttachment} from './jira-issue/jira-issue-map.util';
 import {T} from '../../../../t.const';
@@ -92,10 +92,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     }
   }
 
-  async getAddTaskData(issueId: string | number)
-    : Promise<{ title: string; additionalFields: Partial<Task> }> {
-    const issue = await this._jiraApiService.getIssueById$(issueId, true).toPromise();
-
+  getAddTaskData(issue: JiraIssueReduced): { title: string; additionalFields: Partial<Task> } {
     return {
       title: `${issue.key} ${issue.summary}`,
       additionalFields: {

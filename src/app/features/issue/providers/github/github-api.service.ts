@@ -8,7 +8,7 @@ import {Observable, ObservableInput, of, throwError} from 'rxjs';
 import {GithubIssueSearchResult, GithubOriginalIssue} from './github-api-responses';
 import {catchError, filter, map, switchMap} from 'rxjs/operators';
 import {mapGithubIssue, mapGithubIssueToSearchResult} from './github-issue/github-issue-map.util';
-import {GithubComment, GithubIssue, GithubIssueWithoutComments} from './github-issue/github-issue.model';
+import {GithubComment, GithubIssue, GithubIssueReduced} from './github-issue/github-issue.model';
 import {SearchResultItem} from '../../issue.model';
 import {HANDLED_ERROR_PROP_STR} from '../../../../app.constants';
 import {T} from '../../../../t.const';
@@ -73,7 +73,7 @@ export class GithubApiService {
       );
   }
 
-  getLast100IssuesForRepo$(repo = this._cfg && this._cfg.repo): Observable<GithubIssueWithoutComments[]> {
+  getLast100IssuesForRepo$(repo = this._cfg && this._cfg.repo): Observable<GithubIssueReduced[]> {
     // NOTE: alternate approach (but no caching :( )
     // return this._sendRequest$({
     //   url: `${BASE}search/issues?q=${encodeURI(`+repo:${this._cfg.repo}`)}`
