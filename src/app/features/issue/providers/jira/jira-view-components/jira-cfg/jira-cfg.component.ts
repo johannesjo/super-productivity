@@ -161,7 +161,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   private _filterCustomFieldSuggestions(value: string): string[] {
-    const filterValue = value.toLowerCase();
+    const filterValue = value && value.toLowerCase();
     return this.customFields.filter(field => field
       && (
         field.name.toLowerCase().includes(filterValue)
