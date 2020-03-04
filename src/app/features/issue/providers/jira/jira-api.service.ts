@@ -24,7 +24,7 @@ import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/per
 import {Observable, throwError} from 'rxjs';
 import {SearchResultItem} from '../../issue.model';
 import {catchError, concatMap, first, shareReplay, switchMap, take} from 'rxjs/operators';
-import {JiraIssue} from './jira-issue/jira-issue.model';
+import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
 import * as moment from 'moment';
 import {BannerService} from '../../../../core/banner/banner.service';
 import {BannerId} from '../../../../core/banner/banner.model';
@@ -160,7 +160,7 @@ export class JiraApiService {
     });
   }
 
-  findAutoImportIssues$(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
+  findAutoImportIssues$(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssueReduced[]> {
     const options = {
       maxResults,
       fields: JIRA_ADDITIONAL_ISSUE_FIELDS,

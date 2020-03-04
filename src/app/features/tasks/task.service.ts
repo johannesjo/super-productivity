@@ -308,25 +308,6 @@ export class TaskService {
     }));
   }
 
-  // NOTE: should only ever be called from issue service
-  addWithIssueFromIssueServiceONLY(
-    title: string,
-    issueType: IssueProviderKey,
-    issueLimited: IssueDataReduced,
-    isAddToBacklog = false,
-    isAddToBottom = false,
-  ) {
-    this._store.dispatch(new AddTask({
-      task: this.createNewTaskWithDefaults(title, {
-        issueId: issueLimited && issueLimited.id as string,
-        issueType,
-      }),
-      issue: issueLimited,
-      isAddToBacklog,
-      isAddToBottom,
-    }));
-  }
-
   remove(task: TaskWithSubTasks) {
     this._store.dispatch(new DeleteTask({task}));
   }

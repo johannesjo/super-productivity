@@ -6,7 +6,7 @@ import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions'
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../jira-api.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
-import {JiraIssue} from './jira-issue.model';
+import {JiraIssue, JiraIssueReduced} from './jira-issue.model';
 import {JiraCfg, JiraTransitionOption} from '../jira.model';
 import {SnackService} from '../../../../../core/snack/snack.service';
 import {ProjectActionTypes} from '../../../../project/store/project.actions';
@@ -315,11 +315,12 @@ export class JiraIssueEffects {
   }
 
   private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
-    this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssue[]) => {
+    this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssueReduced[]) => {
       if (!Array.isArray(issues)) {
         return;
       }
       const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
+
 
       // NOTE: we check for key as well as id although normally the key should suffice
       const issuesToAdd = issues.filter(
@@ -327,12 +328,7 @@ export class JiraIssueEffects {
       );
 
       issuesToAdd.forEach((issue) => {
-        // this._taskService.addWithIssueFromIssueServiceONLY(
-        //   `${issue.key} ${issue.summary}`,
-        //   JIRA_TYPE,
-        //   issue,
-        //   true,
-        // );
+        this._issueService.addTaskWithIssue(JIRA_TYPE, issue, true);
       });
 
       if (issuesToAdd.length === 1) {
