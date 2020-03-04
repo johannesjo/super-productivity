@@ -52,10 +52,11 @@ export class TaskInternalEffects {
       TaskActionTypes.Move,
     ),
     withLatestFrom(
+      this._store$.pipe(select(selectMiscConfig)),
       this._store$.pipe(select(selectTaskFeatureState)),
-      (action, state) => ({action, state})
+      (action, miscCfg, state) => ({action, state, isAutoStartNextTask: miscCfg.isAutoStartNextTask})
     ),
-    mergeMap(({action, state}) => {
+    mergeMap(({action, state, isAutoStartNextTask}) => {
       const currentId = state.currentTaskId;
       let nextId: 'NO_UPDATE' | string | null;
 
@@ -101,7 +102,11 @@ export class TaskInternalEffects {
       if (nextId === 'NO_UPDATE') {
         return EMPTY;
       } else {
-        return of(new SetCurrentTask(nextId));
+        if (isAutoStartNextTask) {
+          return of(new SetCurrentTask(nextId));
+        } else {
+          return of(new SetCurrentTask(null));
+        }
       }
     })
   );

@@ -37,6 +37,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isAutoStartNextTask',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_AUTO_START_NEXT_TASK,
+      },
+    },
+    {
       key: 'isDisableRemindWhenForgotToFinishDay',
       type: 'checkbox',
       templateOptions: {

@@ -43,6 +43,7 @@ export type KeyboardConfig = Readonly<{
 export type MiscConfig = Readonly<{
   isDarkMode: boolean;
   isAutMarkParentAsDone: boolean;
+  isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isDisableRemindWhenForgotToFinishDay: boolean;

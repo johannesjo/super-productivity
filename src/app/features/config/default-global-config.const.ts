@@ -10,6 +10,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
     isAutMarkParentAsDone: false,
+    isAutoStartNextTask: true,
     isDisableRemindWhenForgotToFinishDay: false,
     isTurnOffMarkdown: false,
   },

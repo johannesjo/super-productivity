@@ -779,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
+      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
