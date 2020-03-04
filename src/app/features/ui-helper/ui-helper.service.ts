@@ -36,6 +36,12 @@ export class UiHelperService {
 
   focusApp() {
     if (IS_ELECTRON) {
+
+      //  otherwise the last focused task get's focused again leading to unintended keyboard events
+      if (document.activeElement) {
+        (document.activeElement as HTMLElement).blur();
+      }
+
       this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
     } else {
       console.error('Cannot execute focus app window in browser');
