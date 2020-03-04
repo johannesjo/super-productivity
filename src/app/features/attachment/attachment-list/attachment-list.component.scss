@@ -31,6 +31,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 
   @include lightTheme {
     background: #fff;
+    border: 1px solid $light-theme-extra-border-color;
   }
 
   //.controls,
