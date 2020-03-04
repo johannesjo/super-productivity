@@ -61,7 +61,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     goToDailyAgenda: null,
     goToFocusMode: 'Shift+F',
     goToSettings: null,
-    focusLastActiveTask: 'f',
     zoomIn: 'Ctrl++',
     zoomOut: 'Ctrl+-',
     zoomDefault: 'Ctrl+0',

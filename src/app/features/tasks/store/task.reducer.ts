@@ -32,8 +32,6 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   lastCurrentTaskId: null,
   todaysTaskIds: [],
   backlogTaskIds: [],
-  focusTaskId: null,
-  lastActiveFocusTaskId: null,
   stateBefore: null,
   isDataLoaded: false,
 }) as TaskState;
@@ -61,7 +59,6 @@ export function taskReducer(
               attachmentIds: task.attachmentIds ? [...task.attachmentIds, (id as string)] : [id as string],
             }
           },
-        focusTaskId: taskId
       };
     }
 
@@ -82,7 +79,6 @@ export function taskReducer(
               attachmentIds: affectedTask.attachmentIds ? affectedTask.attachmentIds.filter(idIN => idIN !== attachmentId) : [],
             }
           },
-        focusTaskId: affectedTaskId
       };
     }
 
@@ -418,14 +414,6 @@ export function taskReducer(
       );
     }
 
-    case TaskActionTypes.FocusLastActiveTask: {
-      return {
-        ...state,
-        focusTaskId: state.lastActiveFocusTaskId,
-        lastActiveFocusTaskId: state.lastActiveFocusTaskId,
-      };
-    }
-
     case TaskActionTypes.RestoreTask: {
       const task = {...action.payload.task, isDone: false};
       const subTasks = action.payload.subTasks;
@@ -444,14 +432,6 @@ export function taskReducer(
           task.id,
           ...state.todaysTaskIds
         ]
-      };
-    }
-
-    case TaskActionTypes.FocusTask: {
-      return {
-        ...state,
-        focusTaskId: action.payload.id,
-        lastActiveFocusTaskId: state.focusTaskId || state.lastActiveFocusTaskId,
       };
     }
 
@@ -482,8 +462,6 @@ export function taskReducer(
 
       return {
         ...stateCopy,
-        // focus new task
-        focusTaskId: task.id,
         // update current task to new sub task if parent was current before
         ...(
           (state.currentTaskId === parentId)

@@ -19,7 +19,6 @@ import {
   AddTaskReminder,
   AddTimeSpent,
   DeleteTask,
-  FocusLastActiveTask,
   LoadTaskState,
   Move,
   MoveDown,
@@ -45,7 +44,7 @@ import {
 } from './store/task.actions';
 import {initialTaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {IssueDataReduced, IssueProviderKey} from '../issue/issue.model';
+import {IssueProviderKey} from '../issue/issue.model';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllRepeatableTaskWithSubTasks,
@@ -58,7 +57,6 @@ import {
   selectCurrentTaskOrParentWithData,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
-  selectFocusTaskId,
   selectHasTasksToWorkOn,
   selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
@@ -176,12 +174,6 @@ export class TaskService {
 
   allRepeatableTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectAllRepeatableTaskWithSubTasksFlat),
-  );
-
-  focusTaskId$: Observable<string> = this._store.pipe(
-    select(selectFocusTaskId),
-    distinctUntilChanged(),
-    // NOTE: we can't use share here, as we need the last emitted value
   );
 
   scheduledTasksWOData$ = this._store.pipe(
@@ -382,11 +374,6 @@ export class TaskService {
 
   focusTask(id: string) {
     document.getElementById('t-' + id).focus();
-    // this._store.dispatch(new FocusTask({id}));
-  }
-
-  focusLastActiveTask() {
-    this._store.dispatch(new FocusLastActiveTask());
   }
 
   moveToToday(id, isMoveToTop = false) {

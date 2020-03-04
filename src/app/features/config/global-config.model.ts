@@ -21,7 +21,6 @@ export type KeyboardConfig = Readonly<{
   zoomIn: string,
   zoomOut: string,
   zoomDefault: string,
-  focusLastActiveTask: string,
   taskEditTitle: string,
   taskToggleAdditionalInfoOpen: string,
   taskOpenEstimationDialog: string,

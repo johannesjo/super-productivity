@@ -104,8 +104,6 @@ export interface TaskState extends EntityState<Task> {
   selectedTaskId: string | null;
   taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel;
   lastCurrentTaskId: string | null;
-  focusTaskId: string | null;
-  lastActiveFocusTaskId: string | null;
 
   // NOTE: but it is not needed currently
   todaysTaskIds: string[];

@@ -108,10 +108,6 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       this._router.navigate(['/focus-view']);
 
-    } else if (checkKeyCombo(ev, keys.focusLastActiveTask)) {
-      this._router.navigate(['/work-view']);
-      this._taskService.focusLastActiveTask();
-
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();
       ev.preventDefault();

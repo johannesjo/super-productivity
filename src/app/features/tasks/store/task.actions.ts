@@ -35,8 +35,6 @@ export enum TaskActionTypes {
   // Other
   StartFirstStartable = '[Task] Start first startable Task',
   RestoreTask = '[Task] Restore Task',
-  FocusTask = '[Task] Focus Task',
-  FocusLastActiveTask = '[Task] Focus last active Task',
   MoveToBacklog = '[Task] Move to backlog',
   MoveToToday = '[Task] Move to today',
   MoveToArchive = '[Task] Move to archive',
@@ -195,17 +193,6 @@ export class RestoreTask implements Action {
   }
 }
 
-export class FocusTask implements Action {
-  readonly type = TaskActionTypes.FocusTask;
-
-  constructor(public payload: { id: string }) {
-  }
-}
-
-export class FocusLastActiveTask implements Action {
-  readonly type = TaskActionTypes.FocusLastActiveTask;
-}
-
 export class AddSubTask implements Action {
   readonly type = TaskActionTypes.AddSubTask;
 
@@ -274,8 +261,6 @@ export type TaskActions
   | RemoveTaskReminder
   | StartFirstStartable
   | RestoreTask
-  | FocusTask
-  | FocusLastActiveTask
   | AddSubTask
   | MoveToBacklog
   | MoveToToday

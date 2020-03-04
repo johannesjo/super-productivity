@@ -138,13 +138,6 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
-      key: 'focusLastActiveTask',
-      type: 'keyboard',
-      templateOptions: {
-        label: T.GCF.KEYBOARD.FOCUS_LAST_ACTIVE_TASK
-      },
-    },
-    {
       key: 'zoomIn',
       type: 'keyboard',
       templateOptions: {
