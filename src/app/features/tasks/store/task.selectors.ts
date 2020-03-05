@@ -49,7 +49,10 @@ const mapEstimateRemaining = (tasks): number => tasks && tasks.length && tasks.r
 
 
 const mapTasksFromIds = (tasksIN, ids) => {
-  return ids.map(id => tasksIN.find(task => task.id === id));
+  // TODO REMOVE FILTER LATER
+  const tasksOut = ids.map(id => tasksIN.find(task => task.id === id));
+  return tasksOut
+    .filter(task => !!task);
 };
 
 const flattenTasks = (tasksIN): TaskWithSubTasks[] => {
@@ -70,7 +73,6 @@ const mapTotalTimeWorked = (tasks): number => tasks.reduce((acc, task) => acc + 
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
 export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
 export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
-export const selectIsTasksLoaded = createSelector(selectTaskFeatureState, state => state.isDataLoaded);
 export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
 export const selectBacklogTaskCount = createSelector(selectBacklogTaskIds, state => state && state.length);
 export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
@@ -157,9 +159,10 @@ export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTas
 export const selectTotalTimeWorkedOnTodaysTasks = createSelector(selectTodaysTasksWithSubTasks, mapTotalTimeWorked);
 
 export const selectHasTasksToWorkOn = createSelector(
-  selectIsTasksLoaded,
+  selectIsTaskDataLoaded,
   selectTodaysTasksWithSubTasks,
   (isTasksLoaded, tasks) => {
+
     const _tasksToWorkOn = tasks.filter((t) => {
       return !t.isDone && !t.repeatCfgId &&
         ((!t.subTasks || t.subTasks.length === 0) || t.subTasks.filter((st) => !st.isDone).length > 0);

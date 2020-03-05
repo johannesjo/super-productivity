@@ -55,6 +55,7 @@ export class TaskRelatedModelEffects {
       TaskActionTypes.MoveUp,
       TaskActionTypes.MoveDown,
       TaskActionTypes.RestoreTask,
+      TaskActionTypes.DeleteTask,
       TaskActionTypes.MoveToToday,
       TaskActionTypes.MoveToBacklog,
     ),

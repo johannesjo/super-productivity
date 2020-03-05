@@ -59,7 +59,6 @@ import {
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectHasTasksToWorkOn,
-  selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
   selectScheduledTasks,
   selectSelectedTask,
@@ -91,10 +90,6 @@ import {Dictionary} from '@ngrx/entity';
   providedIn: 'root',
 })
 export class TaskService {
-  isDataLoaded$: Observable<boolean> = this._store.pipe(
-    select(selectIsTaskDataLoaded),
-  );
-
   // Currently used in idle service
   currentTaskId: string;
   currentTaskId$: Observable<string> = this._store.pipe(
