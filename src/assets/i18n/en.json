@@ -99,8 +99,8 @@
         "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
         "ISSUE_NO_UPDATE_REQUIRED": "Github: No update required",
+        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
         "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
@@ -683,14 +683,14 @@
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
     "NEXT": "Next",
+    "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
     "SAVE": "Save",
     "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "Update",
-    "NO_CON": "You are currently offline. Please reconnect to the internet."
+    "UPDATE": "Update"
   },
   "GCF": {
     "AUTO_BACKUPS": {

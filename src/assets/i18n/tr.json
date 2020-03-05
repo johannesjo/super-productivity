@@ -95,10 +95,11 @@
       "S": {
         "ERR_NETWORK": "Github: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
         "ERR_NOT_CONFIGURED": "Github: Düzgün yapılandırılmamış",
-        "ERR_REQUEST": "Github: API, {{statusCode}}değerini döndürdü. {{errorMsg}}",
+        "ERR_UNKNOWN": "Github: Bilinmeyen hata {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Git'ten backlog'a {{issuesLength}} yeni sayı alındı",
         "IMPORTED_SINGLE_ISSUE": "Github: Git'ten backlog'a \"{{issueText}}\" sorunu alındı",
         "ISSUE_DELETED_OR_CLOSED": "Github: Sorun \"{{issueText}}\", halindeyken silinmiş veya kapatılmış görünüyor",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: Güncelleme gerekmez",
         "ISSUE_UPDATE": "Github: \"{{issueText}}\" için güncellenmiş veriler",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: \"{{issueText}}\" için güncellenmiş veriler",
         "MISSING_ISSUE_DATA": "Github: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
@@ -682,6 +683,7 @@
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
     "NEXT": "Sonraki",
+    "NO_CON": "Şu anda çevrimdışısınız. Lütfen internete tekrar bağlanın.",
     "OK": "tamam",
     "PREVIOUS": "Önceki",
     "REMOVE": "Kaldır",
@@ -777,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
+      "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
       "IS_DARK_MODE": "Karanlık modu",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",

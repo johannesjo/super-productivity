@@ -95,10 +95,11 @@
       "S": {
         "ERR_NETWORK": "Github：由于客户端网络错误，请求失败",
         "ERR_NOT_CONFIGURED": "Github：没有正确配置",
-        "ERR_REQUEST": "Github：API返回 {{statusCode}}。 {{errorMsg}}",
+        "ERR_UNKNOWN": "Github：未知错误 {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github：从git到backlog导入 {{issuesLength}} 个新问题",
         "IMPORTED_SINGLE_ISSUE": "Github：从git导入问题“{{issueText}}”到积压",
         "ISSUE_DELETED_OR_CLOSED": "Github：问题“{{issueText}}”似乎在git上被删除或关闭",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github：不需要更新",
         "ISSUE_UPDATE": "Github：更新了“{{issueText}}”的数据",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github：更新了“{{issueText}}”的数据",
         "MISSING_ISSUE_DATA": "Github：发现缺少问题数据的任务。重装。",
@@ -682,6 +683,7 @@
     "LOGOUT": "登出",
     "MINUTES": "{{m}} 分钟",
     "NEXT": "下一个",
+    "NO_CON": "您目前离线。请重新连接到互联网。",
     "OK": "好",
     "PREVIOUS": "以前",
     "REMOVE": "去掉",
@@ -777,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>没有看到桌面通知？</strong> 对于Windows，您可能需要检查系统>通知和操作，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
+      "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始跟踪下一个任务",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_DARK_MODE": "暗模式",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "禁用有关遗忘完成日的提醒",

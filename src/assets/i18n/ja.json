@@ -95,10 +95,11 @@
       "S": {
         "ERR_NETWORK": "Github：クライアント側のネットワークエラーが原因で要求が失敗しました",
         "ERR_NOT_CONFIGURED": "Github：正しく設定されていません",
-        "ERR_REQUEST": "Github：APIが {{statusCode}}を返しました。 {{errorMsg}}",
+        "ERR_UNKNOWN": "Github：不明なエラー {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github：gitからバックログに {{issuesLength}} 件の新しい問題をインポートしました",
         "IMPORTED_SINGLE_ISSUE": "Github：gitからバックログへの問題 \"{{issueText}}\"のインポート",
         "ISSUE_DELETED_OR_CLOSED": "Github：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github：更新は不要",
         "ISSUE_UPDATE": "Github： \"{{issueText}}\"のデータを更新しました",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github： \"{{issueText}}\"のデータを更新しました",
         "MISSING_ISSUE_DATA": "Github：課題データが見つからないタスクが見つかりました。再読み込みしています。",
@@ -682,6 +683,7 @@
     "LOGOUT": "ログアウト",
     "MINUTES": "{{m}} 分",
     "NEXT": "次",
+    "NO_CON": "現在オフラインです。インターネットに再接続してください。",
     "OK": "OK",
     "PREVIOUS": "前",
     "REMOVE": "削除する",
@@ -777,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
+      "IS_AUTO_START_NEXT_TASK": "現在の完了マークを付けたときに次のタスクの追跡を開始する",
       "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
       "IS_DARK_MODE": "ダークモード",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "終了日を忘れた場合の通知を無効にする",

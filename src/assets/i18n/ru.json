@@ -95,10 +95,11 @@
       "S": {
         "ERR_NETWORK": "Github: запрос не выполнен из-за ошибки сети на стороне клиента",
         "ERR_NOT_CONFIGURED": "Github: неправильно настроен",
-        "ERR_REQUEST": "Github: API возвратил {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "Github: неизвестная ошибка {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github: импортировано {{issuesLength}} новых заданий из git в список задач",
         "IMPORTED_SINGLE_ISSUE": "Github: импортированная проблема \"{{issueText}}\" из git в список задач",
         "ISSUE_DELETED_OR_CLOSED": "Github: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: обновление не требуется",
         "ISSUE_UPDATE": "Github: обновлены данные для \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: обновлены данные для \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
@@ -682,6 +683,7 @@
     "LOGOUT": "Выйти",
     "MINUTES": "{{m}} минут",
     "NEXT": "Следующий",
+    "NO_CON": "Вы в настоящее время не в сети. Пожалуйста, переподключитесь к интернету.",
     "OK": "Хорошо",
     "PREVIOUS": "Аредыдущий",
     "REMOVE": "Удалить",
@@ -777,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>Не видите уведомления на рабочем столе?</strong> Для окон вы можете проверить Система> Уведомления и действия и проверить, включены ли необходимые уведомления.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Отметить родительскую задачу как выполненную, когда все подзадачи выполнены",
+      "IS_AUTO_START_NEXT_TASK": "Начните отслеживать следующее задание, когда помечаете текущее как выполненное",
       "IS_CONFIRM_BEFORE_EXIT": "Подтвердите перед выходом из приложения",
       "IS_DARK_MODE": "Темный режим",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Отключить напоминание о забытом финишном дне",

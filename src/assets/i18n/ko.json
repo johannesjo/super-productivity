@@ -95,10 +95,11 @@
       "S": {
         "ERR_NETWORK": "Github : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
         "ERR_NOT_CONFIGURED": "Github : 제대로 구성되지 않았습니다.",
-        "ERR_REQUEST": "Github : API가 {{statusCode}}을 (를) 반환했습니다. {{errorMsg}}",
+        "ERR_UNKNOWN": "Github : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
         "IMPORTED_SINGLE_ISSUE": "Github : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
         "ISSUE_DELETED_OR_CLOSED": "Github : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github : 업데이트가 필요하지 않습니다",
         "ISSUE_UPDATE": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
         "MISSING_ISSUE_DATA": "Github : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
@@ -682,6 +683,7 @@
     "LOGOUT": "로그 아웃",
     "MINUTES": "{{m}} 분",
     "NEXT": "다음 것",
+    "NO_CON": "현재 오프라인 상태입니다. 인터넷에 다시 연결하십시오.",
     "OK": "승인",
     "PREVIOUS": "너무 이른",
     "REMOVE": "풀다",
@@ -777,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
+      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "잊혀진 종료일에 대한 알림 사용 중지",

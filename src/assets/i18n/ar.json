@@ -95,10 +95,11 @@
       "S": {
         "ERR_NETWORK": "Github: فشل الطلب بسبب خطأ في شبكة جانب العميل",
         "ERR_NOT_CONFIGURED": "جيثب: لم يتم تكوينه بشكل صحيح",
-        "ERR_REQUEST": "Github: API ارجع {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "جيثب: خطأ غير معروف {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "جيثب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
         "IMPORTED_SINGLE_ISSUE": "Github: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
         "ISSUE_DELETED_OR_CLOSED": "Github: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
+        "ISSUE_NO_UPDATE_REQUIRED": "جيثب: لا يوجد تحديث مطلوب",
         "ISSUE_UPDATE": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "جيثب: المهام مع بيانات القضية المفقودة وجدت. إعادة شحن.",
@@ -682,6 +683,7 @@
     "LOGOUT": "الخروج",
     "MINUTES": "{{m}} دقيقة",
     "NEXT": "التالى",
+    "NO_CON": "أنت غير متصل حاليًا. يرجى إعادة الاتصال بالإنترنت.",
     "OK": "حسنا",
     "PREVIOUS": "سابق",
     "REMOVE": "إزالة",
@@ -777,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>ألا ترى إعلامات سطح المكتب؟</strong> بالنسبة للنوافذ ، قد ترغب في التحقق من النظام> الإشعارات والإجراءات والتحقق من تمكين الإشعارات المطلوبة.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "حدد المهمة الرئيسية كما فعلت ، عند الانتهاء من جميع المهام الفرعية",
+      "IS_AUTO_START_NEXT_TASK": "بدء تعقب المهمة التالية عند وضع علامة على الوضع الحالي",
       "IS_CONFIRM_BEFORE_EXIT": "تأكيد قبل الخروج من التطبيق",
       "IS_DARK_MODE": "وضع الظلام",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "تعطيل تذكير حول نسيان يوم الانتهاء",

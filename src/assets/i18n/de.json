@@ -95,10 +95,11 @@
       "S": {
         "ERR_NETWORK": "Github: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
         "ERR_NOT_CONFIGURED": "Github: Ist nicht richtig konfiguriert",
-        "ERR_REQUEST": "Github: API hat {{statusCode}}zurückgegeben. {{errorMsg}}",
+        "ERR_UNKNOWN": "Github: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} neue Issues von Git in das Backlog importiert",
         "IMPORTED_SINGLE_ISSUE": "Github: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: Kein Update erforderlich",
         "ISSUE_UPDATE": "Github: Aktualisierte Daten für \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aktualisierte Daten für \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
@@ -682,6 +683,7 @@
     "LOGOUT": "Ausloggen",
     "MINUTES": "{{m}} Minuten",
     "NEXT": "Nächster",
+    "NO_CON": "Sie sind derzeit offline. Bitte stellen Sie die Verbindung zum Internet wieder her.",
     "OK": "OK",
     "PREVIOUS": "Bisherige",
     "REMOVE": "Löschen",
@@ -777,6 +779,7 @@
     "MISC": {
       "HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
+      "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der Verfolgung der nächsten Aufgabe, wenn Sie den aktuellen als erledigt markieren",
       "IS_CONFIRM_BEFORE_EXIT": "Bestätigen Sie, bevor Sie die App beenden",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Erinnerung an vergessenen Zieltag deaktivieren",
