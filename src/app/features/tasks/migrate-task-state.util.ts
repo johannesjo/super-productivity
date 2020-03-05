@@ -8,15 +8,14 @@ import {convertToWesternArabic} from '../../util/numeric-converter';
 const MODEL_VERSION = 3;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
-export const migrateTaskState = (taskState: TaskState, projectId: string): TaskState => {
+export const migrateTaskState = (taskState: TaskState): TaskState => {
   if (!taskState || (taskState && taskState[MODEL_VERSION_KEY] === MODEL_VERSION)) {
     return taskState;
   }
 
   const taskEntities: Dictionary<Task> = {...taskState.entities};
   Object.keys(taskEntities).forEach((key) => {
-    taskEntities[key] = _addProjectId(taskEntities[key], projectId);
-    taskEntities[key] = _addNewIssueFields(taskEntities[key], projectId);
+    taskEntities[key] = _addNewIssueFields(taskEntities[key]);
     taskEntities[key] = _replaceLegacyGitType(taskEntities[key]);
     taskEntities[key] = _deleteUnusedFields(taskEntities[key]);
     taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]);
@@ -29,18 +28,9 @@ export const migrateTaskState = (taskState: TaskState, projectId: string): TaskS
 export const migrateTaskArchiveState = (
   taskArchiveState: TaskArchive,
   projectId: string
-): TaskArchive => migrateTaskState((taskArchiveState as TaskState), projectId);
+): TaskArchive => migrateTaskState((taskArchiveState as TaskState));
 
-const _addProjectId = (task: Task, projectId: string): Task => {
-  return (task.hasOwnProperty('projectId') && task.projectId !== null && task.projectId)
-    ? task
-    : {
-      ...task,
-      projectId,
-    };
-};
-
-const _addNewIssueFields = (task: Task, projectId: string): Task => {
+const _addNewIssueFields = (task: Task): Task => {
   if (!task.hasOwnProperty('issueLastUpdated')) {
     return (task.issueId !== null)
       ? {

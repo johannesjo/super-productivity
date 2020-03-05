@@ -35,6 +35,8 @@ export const DEFAULT_PROJECT: Project = {
   advancedCfg: {
     worklogExportSettings: WORKLOG_EXPORT_DEFAULTS,
   },
+  todaysTaskIds: [],
+  backlogTaskIds: [],
   workStart: {},
   workEnd: {},
   lastCompletedDay: getWorklogStr(getYesterdaysDate()),

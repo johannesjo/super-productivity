@@ -105,18 +105,8 @@ export interface TaskState extends EntityState<Task> {
   taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel;
   lastCurrentTaskId: string | null;
 
-  // NOTE: but it is not needed currently
   todaysTaskIds: string[];
   backlogTaskIds: string[];
   stateBefore: TaskState;
   isDataLoaded: boolean;
-
-  // TODO though this not so much maybe
-  // todayDoneTasks: string[];
-  // todayUnDoneTasks: string[];
-
-  // TODO maybe rework time spent updates etc. via
-  // BEWARE of the potential cleanup issues though
-  // lastDeletedTasks: string[];
-  // lastAffectedTasks: string[];
 }

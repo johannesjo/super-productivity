@@ -97,6 +97,7 @@ export class AppComponent implements OnDestroy {
 
     // TODO we are better than this
     // LOAD GLOBAL MODELS
+    this.taskService.load();
     this._projectService.load();
     this._configService.load();
 

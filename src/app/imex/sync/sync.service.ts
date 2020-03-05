@@ -7,6 +7,7 @@ import {GlobalConfigService} from '../../features/config/global-config.service';
 import {ReminderService} from '../../features/reminder/reminder.service';
 import {ImexMetaService} from '../imex-meta/imex-meta.service';
 import {T} from '../../t.const';
+import {TaskService} from '../../features/tasks/task.service';
 
 // TODO some of this can be done in a background script
 
@@ -19,6 +20,7 @@ export class SyncService {
     private _persistenceService: PersistenceService,
     private _snackService: SnackService,
     private _projectService: ProjectService,
+    private _taskService: TaskService,
     private _configService: GlobalConfigService,
     private _reminderService: ReminderService,
     private _imexMetaService: ImexMetaService,
@@ -95,6 +97,7 @@ export class SyncService {
       this._configService.load(true),
       // NOTE: loading the project state should deal with reloading the for project states via effect
       this._projectService.load(),
+      this._taskService.load(),
       this._reminderService.reloadFromLs(),
     ]);
   }

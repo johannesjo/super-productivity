@@ -5,7 +5,7 @@ import {Task} from '../tasks/task.model';
 import {dedupeByKey} from '../../util/de-dupe-by-key';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
-import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
+import {BehaviorSubject, combineLatest, EMPTY, Observable} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
 import {Project} from '../project/project.model';
@@ -29,6 +29,8 @@ export class WorklogService {
     this._archiveUpdateTrigger$,
   ]).pipe(
     switchMap(([curProject]) => {
+      // TODO fix
+      return EMPTY;
       return this._loadForProject(curProject);
     }),
   );
@@ -123,33 +125,35 @@ export class WorklogService {
 
 
   private async _loadForProject(project: Project): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    const archive = await this._persistenceService.taskArchive.load(project.id) || EMPTY_ENTITY;
-    const taskState = await this._persistenceService.task.load(project.id) || EMPTY_ENTITY;
-    const startEnd = {
-      workStart: project.workStart,
-      workEnd: project.workEnd,
-    };
-
-    const completeState: EntityState<Task> = {
-      ids: [...archive.ids, ...taskState.ids] as string[],
-      entities: {
-        ...archive.entities,
-        ...taskState.entities
-      }
-    };
-
-    if (completeState) {
-      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids, startEnd);
-      return {
-        worklog,
-        totalTimeSpent,
-      };
-    } else {
-      return {
-        worklog: {},
-        totalTimeSpent: null
-      };
-    }
+    // TODO fix
+    return null;
+    // const archive = await this._persistenceService.taskArchive.load(project.id) || EMPTY_ENTITY;
+    // const taskState = await this._persistenceService.task.load(project.id) || EMPTY_ENTITY;
+    // const startEnd = {
+    //   workStart: project.workStart,
+    //   workEnd: project.workEnd,
+    // };
+    //
+    // const completeState: EntityState<Task> = {
+    //   ids: [...archive.ids, ...taskState.ids] as string[],
+    //   entities: {
+    //     ...archive.entities,
+    //     ...taskState.entities
+    //   }
+    // };
+    //
+    // if (completeState) {
+    //   const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids, startEnd);
+    //   return {
+    //     worklog,
+    //     totalTimeSpent,
+    //   };
+    // } else {
+    //   return {
+    //     worklog: {},
+    //     totalTimeSpent: null
+    //   };
+    // }
   }
 
   private _createTasksForDay(data: WorklogDay): WorklogTask[] {

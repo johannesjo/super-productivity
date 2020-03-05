@@ -64,14 +64,15 @@ export class PersistenceService {
 
   // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
-  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
-  reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
-  task = this._cmProject<TaskState, Task>(
+  task = this._cmBase<TaskState>(
     LS_TASK_STATE,
     'task',
-    taskReducer,
     migrateTaskState,
   );
+
+  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
+  reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+
   taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
@@ -127,44 +128,48 @@ export class PersistenceService {
   }
 
   async saveTasksToProject(projectId, tasksToSave: TaskWithSubTasks[], isForce = false) {
-    let currentTaskState: TaskState = await this.task.load(projectId);
-    const mainTaskIds = tasksToSave.map(task => task.id);
-    if (!currentTaskState) {
-      console.warn('No valid task state found for project');
-      currentTaskState = initialTaskState;
-    }
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
 
-    const entities = {
-      ...currentTaskState.entities,
-      ...tasksToSave.reduce((acc, task) => {
-        const newAcc = {
-          ...acc,
-          [task.id]: {
-            ...task,
-            projectId,
-            subTasks: null,
-          },
-        };
-        if (task.subTasks) {
-          task.subTasks.forEach((subTask) => {
-            newAcc[subTask.id] = {
-              ...subTask,
-              projectId,
-            };
-          });
-        }
-
-        return newAcc;
-      }, {})
-    };
-
-    const mergedEntities: TaskState = {
-      ...currentTaskState,
-      ids: Object.keys(entities),
-      todaysTaskIds: [...currentTaskState.todaysTaskIds, ...mainTaskIds],
-      entities,
-    };
-    return this.task.save(projectId, mergedEntities, isForce);
+    // let currentTaskState: TaskState = await this.task.load(projectId);
+    // const mainTaskIds = tasksToSave.map(task => task.id);
+    // if (!currentTaskState) {
+    //   console.warn('No valid task state found for project');
+    //   currentTaskState = initialTaskState;
+    // }
+    //
+    // const entities = {
+    //   ...currentTaskState.entities,
+    //   ...tasksToSave.reduce((acc, task) => {
+    //     const newAcc = {
+    //       ...acc,
+    //       [task.id]: {
+    //         ...task,
+    //         projectId,
+    //         subTasks: null,
+    //       },
+    //     };
+    //     if (task.subTasks) {
+    //       task.subTasks.forEach((subTask) => {
+    //         newAcc[subTask.id] = {
+    //           ...subTask,
+    //           projectId,
+    //         };
+    //       });
+    //     }
+    //
+    //     return newAcc;
+    //   }, {})
+    // };
+    //
+    // const mergedEntities: TaskState = {
+    //   ...currentTaskState,
+    //   ids: Object.keys(entities),
+    //   todaysTaskIds: [...currentTaskState.todaysTaskIds, ...mainTaskIds],
+    //   entities,
+    // };
+    // return this.task.save(projectId, mergedEntities, isForce);
   }
 
   // TASK ARCHIVE

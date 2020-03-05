@@ -92,6 +92,18 @@ export function taskReducer(
       };
     }
 
+
+    case TaskActionTypes.UpdateTaskListIds: {
+      const {todaysTaskIds, backlogTaskIds} = action.payload;
+      console.log(backlogTaskIds, todaysTaskIds, state);
+
+      return {
+        ...state,
+        backlogTaskIds,
+        todaysTaskIds,
+      };
+    }
+
     case TaskActionTypes.StartFirstStartable: {
       if (!action.payload.isStartIfHasCurrent && state.currentTaskId) {
         return state;

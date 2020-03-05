@@ -56,6 +56,9 @@ export interface ProjectBasicCfg {
   isReducedTheme?: boolean;
   isArchived: boolean;
   timeWorkedWithoutBreak: number;
+
+  todaysTaskIds: string[];
+  backlogTaskIds: string[];
 }
 
 export type ProjectAdvancedCfgKey = keyof ProjectAdvancedCfg;

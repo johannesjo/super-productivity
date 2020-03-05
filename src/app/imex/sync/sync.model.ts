@@ -14,6 +14,7 @@ import {AttachmentState} from '../../features/attachment/store/attachment.reduce
 
 export interface AppBaseData {
   project: ProjectState;
+  task: TaskState;
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfigState;
   reminders?: Reminder[];
@@ -27,9 +28,9 @@ export interface AppDataForProjects {
   bookmark?: {
     [key: string]: BookmarkState;
   };
-  task?: {
-    [key: string]: TaskState;
-  };
+  // task?: {
+  //   [key: string]: TaskState;
+  // };
   taskRepeatCfg?: {
     [key: string]: TaskRepeatCfgState;
   };

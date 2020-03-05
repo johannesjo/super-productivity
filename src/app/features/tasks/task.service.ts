@@ -39,6 +39,7 @@ import {
   ToggleTaskShowSubTasks,
   UnsetCurrentTask,
   UpdateTask,
+  UpdateTaskListIds,
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
@@ -253,6 +254,10 @@ export class TaskService {
           this.addTimeSpent(currentId, tick.duration, tick.date);
         }
       });
+
+    // for (let i = 0; i < 100; i++) {
+    //   this.add(i);
+    // }
   }
 
   // META
@@ -273,9 +278,37 @@ export class TaskService {
     this._store.dispatch(new StartFirstStartable({isStartIfHasCurrent}));
   }
 
+  async load() {
+    const lsTaskState = await this._persistenceService.task.load();
+    // this.loadState(lsTaskState || initialTaskState);
+    console.log('LOAD TASK BASIC');
+
+    this.loadState(
+      lsTaskState
+        ? {
+          ...lsTaskState,
+          backlogTaskIds: [],
+          todaysTaskIds: []
+        }
+        : initialTaskState
+    );
+  }
+
   async loadStateForProject(projectId) {
-    const lsTaskState = await this._persistenceService.task.load(projectId);
-    this.loadState(lsTaskState || initialTaskState);
+
+    // TODO load todaysIds and backlogIds here
+    console.log('NOT IMPLEMENT');
+    // const lsTaskState = await this._persistenceService.task.load();
+    // this.loadState(lsTaskState || initialTaskState);
+    const projectData = await this._projectService.getById$(projectId).toPromise();
+    console.log('LOAD TASK LIST IDS');
+
+    this._store.dispatch(new UpdateTaskListIds({
+      todaysTaskIds: projectData.todaysTaskIds || [],
+      backlogTaskIds: projectData.backlogTaskIds || [],
+      // todaysTaskIds: [],
+      // backlogTaskIds: [],
+    }));
   }
 
   loadState(state) {
@@ -313,17 +346,21 @@ export class TaskService {
 
   // NOTE: side effects are not executed!!!
   updateForProject(id: string, projectId: string, changedFields: Partial<Task>) {
-    if (projectId === this._projectService.currentId) {
-      this._store.dispatch(new UpdateTask({
-        task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-      }));
-    } else {
-      this._persistenceService.task.update(projectId, (state) => {
-        const task = state.entities[id];
-        state.entities[id] = {...task, ...changedFields};
-        return state;
-      });
-    }
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
+
+    // if (projectId === this._projectService.currentId) {
+    //   this._store.dispatch(new UpdateTask({
+    //     task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    //   }));
+    // } else {
+    //   this._persistenceService.task.update(projectId, (state) => {
+    //     const task = state.entities[id];
+    //     state.entities[id] = {...task, ...changedFields};
+    //     return state;
+    //   });
+    // }
   }
 
 
@@ -561,13 +598,19 @@ export class TaskService {
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
-    return await this._persistenceService.task.ent.getById(projectId, id)
-      || await this._persistenceService.taskArchive.ent.getById(projectId, id);
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
+    // return await this._persistenceService.task.ent.getById(projectId, id)
+    //   || await this._persistenceService.taskArchive.ent.getById(projectId, id);
   }
 
   // NOTE: archived tasks not included
   async getByIdsForProject(taskIds: string[], projectId: string): Promise<Task[]> {
-    return await this._persistenceService.task.ent.getByIds(projectId, taskIds);
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
+    // return await this._persistenceService.task.ent.getByIds(projectId, taskIds);
   }
 
   // NOTE: archived tasks not included
