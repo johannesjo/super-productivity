@@ -21,12 +21,12 @@ import {
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {initialTaskState, taskReducer} from '../../features/tasks/store/task.reducer';
+import {taskReducer} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
 import {Task, TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {attachmentReducer, AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
 import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
@@ -40,7 +40,6 @@ import {Metric, MetricState} from '../../features/metric/metric.model';
 import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
 import {TaskRepeatCfg, TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import {Attachment} from '../../features/attachment/attachment.model';
 import {Bookmark} from '../../features/bookmark/bookmark.model';
 import {Note} from '../../features/note/note.model';
 import {Action} from '@ngrx/store';
@@ -64,15 +63,19 @@ export class PersistenceService {
 
   // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
+  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
+  reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+
+  // ________________
   task = this._cmBase<TaskState>(
     LS_TASK_STATE,
     'task',
     migrateTaskState,
   );
-
-  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
-  reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
-
+  taskAttachment = this._cmBase<AttachmentState>(
+    LS_TASK_ATTACHMENT_STATE,
+    'taskAttachment',
+  );
   taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
@@ -86,11 +89,9 @@ export class PersistenceService {
     taskReducer,
     migrateTaskArchiveState,
   );
-  taskAttachment = this._cmProject<AttachmentState, Attachment>(
-    LS_TASK_ATTACHMENT_STATE,
-    'taskAttachment',
-    attachmentReducer,
-  );
+
+
+  // PROJECT MODELS
   bookmark = this._cmProject<BookmarkState, Bookmark>(
     LS_BOOKMARK_STATE,
     'bookmark',
@@ -251,7 +252,7 @@ export class PersistenceService {
   }
 
   async loadCompleteProject(projectId: string): Promise<ExportedProject> {
-    const allProjects = await this.project.load();
+    const allProjects = await this.project.loadState();
     return {
       ...allProjects.entities[projectId],
       relatedModels: await this.loadAllRelatedModelDataForProject(projectId),
@@ -325,7 +326,7 @@ export class PersistenceService {
 
   // NOTE: not including backup
   async loadComplete(): Promise<AppDataComplete> {
-    const projectState = await this.project.load();
+    const projectState = await this.project.loadState();
     const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
 
     return {
@@ -393,8 +394,8 @@ export class PersistenceService {
   ): PersistenceBaseModel<T> {
     const model = {
       appDataKey,
-      load: () => this._loadFromDb(lsKey).then(migrateFn),
-      save: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+      loadState: () => this._loadFromDb(lsKey).then(migrateFn),
+      saveState: (data, isForce) => this._saveToDb(lsKey, data, isForce),
     };
 
     this._baseModels.push(model);
@@ -477,7 +478,7 @@ export class PersistenceService {
   }
 
   private async _getProjectIds(): Promise<string[]> {
-    const projectState = await this.project.load();
+    const projectState = await this.project.loadState();
     return projectState.ids as string[];
   }
 

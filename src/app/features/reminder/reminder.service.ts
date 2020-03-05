@@ -170,14 +170,14 @@ export class ReminderService {
   }
 
   private async _loadFromLs(): Promise<Reminder[]> {
-    return await this._persistenceService.reminders.load() || [];
+    return await this._persistenceService.reminders.loadState() || [];
   }
 
   private _saveModel(reminders: Reminder[], isSkipLastActive = false) {
     if (!isSkipLastActive) {
       this._persistenceService.saveLastActive();
     }
-    this._persistenceService.reminders.save(reminders);
+    this._persistenceService.reminders.saveState(reminders);
     this._updateRemindersInWorker(this._reminders);
     this._reminders$.next(this._reminders);
   }

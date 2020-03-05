@@ -14,10 +14,11 @@ import {AttachmentState} from '../../features/attachment/store/attachment.reduce
 
 export interface AppBaseData {
   project: ProjectState;
-  task: TaskState;
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfigState;
   reminders?: Reminder[];
+  task: TaskState;
+  taskAttachment: AttachmentState;
 }
 
 // NOTE: [key:string] always refers to projectId
@@ -37,9 +38,7 @@ export interface AppDataForProjects {
   taskArchive?: {
     [key: string]: TaskArchive;
   };
-  taskAttachment?: {
-    [key: string]: AttachmentState;
-  };
+
   metric?: {
     [key: string]: MetricState;
   };

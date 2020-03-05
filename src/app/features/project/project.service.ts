@@ -146,7 +146,7 @@ export class ProjectService {
   }
 
   async load() {
-    const projectStateIN = await this._persistenceService.project.load() || initialProjectState;
+    const projectStateIN = await this._persistenceService.project.loadState() || initialProjectState;
     // we need to do this to migrate to the latest model if new fields are added
     const projectState = migrateProjectState({...projectStateIN});
 
@@ -335,7 +335,7 @@ export class ProjectService {
     console.log(data);
     const {relatedModels, ...project} = data;
     if (isValidProjectExport(data)) {
-      const state = await this._persistenceService.project.load();
+      const state = await this._persistenceService.project.loadState();
       if (state.entities[project.id]) {
         this._snackService.open({
           type: 'ERROR',

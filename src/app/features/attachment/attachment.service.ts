@@ -25,7 +25,6 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
   providedIn: 'root',
 })
 export class AttachmentService {
-  attachments$: Observable<Attachment[]> = this._store$.pipe(select(selectAllAttachments));
 
   constructor(
     private _store$: Store<AttachmentState>,
@@ -34,8 +33,8 @@ export class AttachmentService {
   ) {
   }
 
-  async loadStateForProject(projectId: string) {
-    const lsAttachmentState = await this._persistenceService.taskAttachment.load(projectId);
+  async load() {
+    const lsAttachmentState = await this._persistenceService.taskAttachment.loadState();
     this.loadState(lsAttachmentState || initialAttachmentState);
   }
 

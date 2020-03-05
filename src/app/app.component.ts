@@ -27,6 +27,7 @@ import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {TaskService} from './features/tasks/task.service';
 import {LanguageService} from './core/language/language.service';
 import {ElectronService} from './core/electron/electron.service';
+import {AttachmentService} from './features/attachment/attachment.service';
 
 
 @Component({
@@ -72,6 +73,7 @@ export class AppComponent implements OnDestroy {
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
     private _languageService: LanguageService,
+    private _attachmentService: AttachmentService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly taskService: TaskService,
@@ -98,6 +100,7 @@ export class AppComponent implements OnDestroy {
     // TODO we are better than this
     // LOAD GLOBAL MODELS
     this.taskService.load();
+    this._attachmentService.load();
     this._projectService.load();
     this._configService.load();
 

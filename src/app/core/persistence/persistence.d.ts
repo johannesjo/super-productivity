@@ -19,9 +19,9 @@ export type ProjectDataLsKey
 export interface PersistenceBaseModel<T> {
   appDataKey: keyof AppBaseData;
 
-  load(): Promise<T>;
+  loadState(): Promise<T>;
 
-  save(state: T, isForce?: boolean): Promise<any>;
+  saveState(state: T, isForce?: boolean): Promise<any>;
 }
 
 export interface EntityModelHelpers<S, M> {

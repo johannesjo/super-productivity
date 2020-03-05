@@ -254,10 +254,6 @@ export class TaskService {
           this.addTimeSpent(currentId, tick.duration, tick.date);
         }
       });
-
-    // for (let i = 0; i < 100; i++) {
-    //   this.add(i);
-    // }
   }
 
   // META
@@ -279,7 +275,7 @@ export class TaskService {
   }
 
   async load() {
-    const lsTaskState = await this._persistenceService.task.load();
+    const lsTaskState = await this._persistenceService.task.loadState();
     // this.loadState(lsTaskState || initialTaskState);
     console.log('LOAD TASK BASIC');
 
@@ -309,6 +305,12 @@ export class TaskService {
       // todaysTaskIds: [],
       // backlogTaskIds: [],
     }));
+
+    // for (let i = 1; i < 150; i++) {
+    //   this.add(i, true, {
+    //     isDone: true
+    // });
+    // }
   }
 
   loadState(state) {

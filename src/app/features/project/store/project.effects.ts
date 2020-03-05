@@ -178,12 +178,12 @@ export class ProjectEffects {
           // TODO automatize
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
-          this._attachmentService.loadStateForProject(projectId),
           this._taskService.loadStateForProject(projectId),
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),
           this._obstructionService.loadStateForProject(projectId),
-          this._taskRepeatCfgService.loadStateForProject(projectId),
+          // this._taskRepeatCfgService.loadStateForProject(projectId),
+          // this._attachmentService.loadStateForProject(projectId),
         ]);
       }),
       map(data => {
@@ -314,7 +314,7 @@ export class ProjectEffects {
   }
 
   private _saveToLs([action, projectFeatureState]) {
-    this._persistenceService.project.save(projectFeatureState);
+    this._persistenceService.project.saveState(projectFeatureState);
   }
 }
 
