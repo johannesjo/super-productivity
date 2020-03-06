@@ -21,9 +21,7 @@ import {
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {taskReducer} from '../../features/tasks/store/task.reducer';
-import {EntityState} from '@ngrx/entity';
-import {Task, TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
@@ -66,12 +64,19 @@ export class PersistenceService {
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
-  // ________________
+  // MAIN TASK MODELS
   task = this._cmBase<TaskState>(
     LS_TASK_STATE,
     'task',
     migrateTaskState,
   );
+  taskArchive = this._cmBase<TaskArchive>(
+    LS_TASK_ARCHIVE,
+    'taskArchive',
+    migrateTaskArchiveState,
+  );
+
+  // TASK_RELATED_MODELS
   taskAttachment = this._cmBase<AttachmentState>(
     LS_TASK_ATTACHMENT_STATE,
     'taskAttachment',
@@ -80,14 +85,6 @@ export class PersistenceService {
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
     taskRepeatCfgReducer,
-  );
-  taskArchive = this._cmProject<TaskArchive, TaskWithSubTasks>(
-    LS_TASK_ARCHIVE,
-    'taskArchive',
-    // NOTE: this might be problematic, as we don't really have reducer logic for the archive
-    // TODO add a working reducer for task archive
-    taskReducer,
-    migrateTaskArchiveState,
   );
 
 
@@ -174,8 +171,8 @@ export class PersistenceService {
   }
 
   // TASK ARCHIVE
-  async saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<TaskWithSubTasks>, isForce = false) {
-    const currentArchive: EntityState<Task> = await this.taskArchive.load(projectId);
+  async addTasksToArchive(tasksToArchive: TaskArchive, isForce = false) {
+    const currentArchive: TaskArchive = await this.taskArchive.loadState();
 
     if (currentArchive) {
       const entities = {
@@ -186,14 +183,14 @@ export class PersistenceService {
         ids: Object.keys(entities),
         entities,
       };
-      return this.taskArchive.save(projectId, mergedEntities, isForce);
+      return this.taskArchive.saveState(mergedEntities, isForce);
     } else {
-      return this.taskArchive.save(projectId, tasksToArchive, isForce);
+      return this.taskArchive.saveState(tasksToArchive, isForce);
     }
   }
 
-  async removeTasksFromArchive(projectId: string, taskIds: string[]) {
-    const currentArchive: EntityState<Task> = await this.taskArchive.load(projectId);
+  async removeTasksFromArchive(taskIds: string[]) {
+    const currentArchive: TaskArchive = await this.taskArchive.loadState();
     const allIds = currentArchive.ids as string[] || [];
     const idsToRemove = [];
     taskIds.forEach((taskId) => {
@@ -203,7 +200,7 @@ export class PersistenceService {
       }
     });
 
-    return this.taskArchive.save(projectId, {
+    return this.taskArchive.saveState({
       ...currentArchive,
       ids: allIds.filter((id) => !idsToRemove.includes(id)),
     }, true);

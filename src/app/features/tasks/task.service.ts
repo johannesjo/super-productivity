@@ -286,14 +286,8 @@ export class TaskService {
   }
 
   async loadStateForProject(projectId) {
-
-    // TODO load todaysIds and backlogIds here
-    console.log('NOT IMPLEMENT');
-    // const lsTaskState = await this._persistenceService.task.load();
-    // this.loadState(lsTaskState || initialTaskState);
     const projectData = await this._projectService.getById$(projectId).toPromise();
     console.log('LOAD TASK LIST IDS');
-
     this._store.dispatch(new UpdateTaskListIds({
       todaysTaskIds: projectData.todaysTaskIds || [],
       backlogTaskIds: projectData.backlogTaskIds || [],
@@ -588,10 +582,13 @@ export class TaskService {
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTaskForCurrentProject(id: string, changedFields: Partial<Task>): Promise<any> {
-    const curProId = this._projectService.currentId;
-    return await this._persistenceService.taskArchive.ent.execAction(curProId, new UpdateTask({
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    }));
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
+    // const curProId = this._projectService.currentId;
+    // return await this._persistenceService.taskArchive.ent.execAction(curProId, new UpdateTask({
+    //   task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    // }));
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
@@ -613,6 +610,9 @@ export class TaskService {
   // NOTE: archived tasks not included
   // TODO think about getting data from current project directly from store
   async getByIdsFromAllProjects(projectIdTaskMap: { [key: string]: string[] }): Promise<Task[]> {
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
     const projectIds = Object.keys(projectIdTaskMap);
     const taskData = await Promise.all(projectIds.map(async (projectId) => {
       return this.getByIdsForProject(projectIdTaskMap[projectId], projectId);
@@ -624,11 +624,17 @@ export class TaskService {
     return null;
   }
 
+  // TODO check if that is what we need
   async getAllTasksForCurrentProject(): Promise<Task[]> {
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
-    const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
+    const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
-    const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
+    const archiveTasks = ids
+      .map(id => archiveTaskState.entities[id])
+      .filter(task => task.projectId === this._projectService.currentId);
     return [...allTasks, ...archiveTasks];
   }
 
@@ -639,11 +645,15 @@ export class TaskService {
       .map(task => task.issueId);
   }
 
+  // TODO check with new archive
   async checkForTaskWithIssue(issueId: string | number): Promise<{
     task: Task,
     subTasks: Task[],
     isFromArchive: boolean,
   }> {
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
     const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issueId);
 
@@ -654,7 +664,7 @@ export class TaskService {
         subTasks: null,
       };
     } else {
-      const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.load(this._projectService.currentId);
+      const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
         const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issueId);

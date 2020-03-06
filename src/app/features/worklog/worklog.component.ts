@@ -67,7 +67,7 @@ export class WorklogComponent {
           if (isConfirm) {
             let subTasks;
             if (task.subTaskIds && task.subTaskIds.length) {
-              const archiveState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
+              const archiveState = await this._persistenceService.taskArchive.loadState();
               subTasks = task.subTaskIds
                 .map(id => archiveState.entities[id])
                 .filter(v => !!v);

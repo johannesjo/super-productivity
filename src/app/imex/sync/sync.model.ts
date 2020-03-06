@@ -18,6 +18,7 @@ export interface AppBaseData {
   globalConfig: GlobalConfigState;
   reminders?: Reminder[];
   task: TaskState;
+  taskArchive: TaskArchive;
   taskAttachment: AttachmentState;
 }
 
@@ -29,16 +30,9 @@ export interface AppDataForProjects {
   bookmark?: {
     [key: string]: BookmarkState;
   };
-  // task?: {
-  //   [key: string]: TaskState;
-  // };
   taskRepeatCfg?: {
     [key: string]: TaskRepeatCfgState;
   };
-  taskArchive?: {
-    [key: string]: TaskArchive;
-  };
-
   metric?: {
     [key: string]: MetricState;
   };

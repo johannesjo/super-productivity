@@ -27,8 +27,19 @@ export const migrateTaskState = (taskState: TaskState): TaskState => {
 
 export const migrateTaskArchiveState = (
   taskArchiveState: TaskArchive,
-  projectId: string
-): TaskArchive => migrateTaskState((taskArchiveState as TaskState));
+): TaskArchive => {
+  if (!taskArchiveState || (taskArchiveState && taskArchiveState[MODEL_VERSION_KEY] === MODEL_VERSION)) {
+    return taskArchiveState;
+  }
+
+  const taskEntities: Dictionary<Task> = {...taskArchiveState.entities};
+  Object.keys(taskEntities).forEach((key) => {
+    taskEntities[key] = _addNewIssueFields(taskEntities[key]);
+    taskEntities[key] = _replaceLegacyGitType(taskEntities[key]);
+    taskEntities[key] = _deleteUnusedFields(taskEntities[key]);
+    taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]);
+  });
+};
 
 const _addNewIssueFields = (task: Task): Task => {
   if (!task.hasOwnProperty('issueLastUpdated')) {

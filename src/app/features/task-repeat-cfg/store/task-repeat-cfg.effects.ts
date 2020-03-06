@@ -126,11 +126,8 @@ export class TaskRepeatCfgEffects {
       ofType(
         TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
       ),
-      withLatestFrom(
-        this._projectService.currentId$,
-      ),
-      tap(([a, projectId]: [DeleteTaskRepeatCfg, string]) => {
-        this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id, projectId);
+      tap(([a]: [DeleteTaskRepeatCfg]) => {
+        this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id);
       }),
     );
 
@@ -167,8 +164,8 @@ export class TaskRepeatCfgEffects {
     }
   }
 
-  private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string, projectId: string) {
-    this._persistenceService.taskArchive.load(projectId).then((taskArchive: TaskArchive) => {
+  private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string) {
+    this._persistenceService.taskArchive.loadState().then((taskArchive: TaskArchive) => {
       // if not yet initialized for project
       if (!taskArchive) {
         return;
@@ -182,7 +179,7 @@ export class TaskRepeatCfgEffects {
 
       if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
         tasksWithRepeatCfgId.forEach((task: any) => task.repeatCfgId = null);
-        this._persistenceService.taskArchive.save(projectId, newState);
+        this._persistenceService.taskArchive.saveState(newState);
       }
     });
   }

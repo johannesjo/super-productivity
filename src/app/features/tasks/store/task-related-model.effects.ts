@@ -5,11 +5,12 @@ import {select, Store} from '@ngrx/store';
 import {tap, withLatestFrom} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
-import {TaskWithSubTasks} from '../task.model';
+import {Task, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
 import {ProjectService} from '../../project/project.service';
 import {selectTaskFeatureState} from './task.selectors';
+import {selectAttachmentByIds} from '../../attachment/store/attachment.reducer';
 
 
 @Injectable()
@@ -18,9 +19,6 @@ export class TaskRelatedModelEffects {
   moveToArchive$: any = this._actions$.pipe(
     ofType(
       TaskActionTypes.MoveToArchive,
-    ),
-    withLatestFrom(
-      this._store$.pipe(select(selectCurrentProjectId)),
     ),
     tap(this._moveToArchive.bind(this)),
     tap(this._updateLastActive.bind(this)),
@@ -39,9 +37,6 @@ export class TaskRelatedModelEffects {
   restoreTask$: any = this._actions$.pipe(
     ofType(
       TaskActionTypes.RestoreTask,
-    ),
-    withLatestFrom(
-      this._store$.pipe(select(selectCurrentProjectId)),
     ),
     tap(this._removeFromArchive.bind(this))
   );
@@ -86,13 +81,23 @@ export class TaskRelatedModelEffects {
     this._persistenceService.saveLastActive();
   }
 
-  private _removeFromArchive([action, currentProjectId]) {
-    const task = action.payload.task;
-    const taskIds = [task.id, ...task.subTaskIds];
-    this._persistenceService.removeTasksFromArchive(currentProjectId, taskIds);
+  private async _getTaskRelatedDataForTask(task: Task) {
+    const ids = task.attachmentIds;
+    const attachments = await this._store$.select(selectAttachmentByIds, {ids}).toPromise();
   }
 
-  private _moveToArchive([action, currentProjectId]) {
+  private async _removeRelatedDataForTask(task: Task) {
+    const ids = task.attachmentIds;
+    const attachments = await this._store$.select(selectAttachmentByIds, {ids}).toPromise();
+  }
+
+  private _removeFromArchive([action]) {
+    const task = action.payload.task;
+    const taskIds = [task.id, ...task.subTaskIds];
+    this._persistenceService.removeTasksFromArchive(taskIds);
+  }
+
+  private _moveToArchive([action]) {
     const mainTasks = action.payload.tasks as TaskWithSubTasks[];
     const archive = {
       entities: {},
@@ -125,7 +130,7 @@ export class TaskRelatedModelEffects {
       }
     });
 
-    this._persistenceService.saveToTaskArchiveForProject(currentProjectId, archive);
+    this._persistenceService.addTasksToArchive(archive);
   }
 
   private _moveToOtherProject(action: MoveToOtherProject) {
