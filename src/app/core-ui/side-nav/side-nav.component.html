@@ -2,7 +2,7 @@
   <button class="route-link"
           mat-menu-item
           routerLink="work-view"
-          routerLinkActive="isActiveRoute">
+  >
     <mat-icon>wb_sunny</mat-icon>
     {{T.MH.TASKS|translate}}
   </button>
@@ -12,22 +12,6 @@
           routerLinkActive="isActiveRoute">
     <mat-icon>access_alarms</mat-icon>
     {{T.MH.SCHEDULED|translate}}
-  </button>
-  <button class="route-link"
-          mat-menu-item
-          routerLink="worklog"
-          routerLinkActive="isActiveRoute">
-    <mat-icon>date_range</mat-icon>
-    <span class="text">{{T.MH.WORKLOG|translate}}</span>
-  </button>
-
-  <button class="route-link"
-          mat-menu-item
-          routerLink="metrics"
-          routerLinkActive="isActiveRoute"
-          *ngIf="!(globalConfigService.evaluation$|async)?.isHideMetricFromMenu">
-    <mat-icon>donut_large</mat-icon>
-    <span class="text">{{T.MH.METRICS|translate}}</span>
   </button>
 </section>
 
@@ -71,6 +55,23 @@
           routerLinkActive="isActiveRoute">
     <mat-icon>list</mat-icon>
     {{T.MH.MANAGE_PROJECTS|translate}}
+  </button>
+
+  <button class="route-link"
+          mat-menu-item
+          routerLink="worklog"
+          routerLinkActive="isActiveRoute">
+    <mat-icon>date_range</mat-icon>
+    <span class="text">{{T.MH.WORKLOG|translate}}</span>
+  </button>
+
+  <button class="route-link"
+          mat-menu-item
+          routerLink="metrics"
+          routerLinkActive="isActiveRoute"
+          *ngIf="!(globalConfigService.evaluation$|async)?.isHideMetricFromMenu">
+    <mat-icon>donut_large</mat-icon>
+    <span class="text">{{T.MH.METRICS|translate}}</span>
   </button>
 
 

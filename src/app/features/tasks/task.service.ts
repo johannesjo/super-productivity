@@ -603,7 +603,8 @@ export class TaskService {
   async getByIdsForProject(taskIds: string[], projectId: string): Promise<Task[]> {
     console.log('NOT IMPLEMENT');
     // TODO fix
-    return null;
+    return [];
+
     // return await this._persistenceService.task.ent.getByIds(projectId, taskIds);
   }
 
@@ -612,7 +613,8 @@ export class TaskService {
   async getByIdsFromAllProjects(projectIdTaskMap: { [key: string]: string[] }): Promise<Task[]> {
     console.log('NOT IMPLEMENT');
     // TODO fix
-    return null;
+    return [];
+
     const projectIds = Object.keys(projectIdTaskMap);
     const taskData = await Promise.all(projectIds.map(async (projectId) => {
       return this.getByIdsForProject(projectIdTaskMap[projectId], projectId);
@@ -628,7 +630,7 @@ export class TaskService {
   async getAllTasksForCurrentProject(): Promise<Task[]> {
     console.log('NOT IMPLEMENT');
     // TODO fix
-    return null;
+    return [];
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
     const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
