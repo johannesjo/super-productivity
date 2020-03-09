@@ -287,20 +287,17 @@ export class TaskService {
 
   async loadStateForProject(projectId) {
     const projectData = await this._projectService.getById$(projectId).toPromise();
+    this.loadList(projectData.todaysTaskIds, projectData.backlogTaskIds);
+  }
+
+  loadList(todaysTaskIds: string[], backlogTaskIds: string[] = []) {
     console.log('LOAD TASK LIST IDS');
     this._store.dispatch(new UpdateTaskListIds({
-      todaysTaskIds: projectData.todaysTaskIds || [],
-      backlogTaskIds: projectData.backlogTaskIds || [],
-      // todaysTaskIds: [],
-      // backlogTaskIds: [],
+      todaysTaskIds: todaysTaskIds || [],
+      backlogTaskIds: backlogTaskIds || [],
     }));
-
-    // for (let i = 1; i < 150; i++) {
-    //   this.add(i, true, {
-    //     isDone: true
-    // });
-    // }
   }
+
 
   loadState(state) {
     this._store.dispatch(new LoadTaskState({state}));

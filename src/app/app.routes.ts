@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {WorkViewPageComponent} from './pages/work-view/work-view-page.component';
+import {WorkViewPageComponent} from './pages/work-view-page/work-view-page.component';
 import {ConfigPageComponent} from './pages/config-page/config-page.component';
 import {ProjectPageComponent} from './pages/project-page/project-page.component';
 import {DailySummaryComponent} from './pages/daily-summary/daily-summary.component';
@@ -8,6 +8,7 @@ import {MetricPageComponent} from './pages/metric-page/metric-page.component';
 import {ProcrastinationComponent} from './features/procrastination/procrastination.component';
 import {SchedulePageComponent} from './pages/schedule-page/schedule-page.component';
 import {ProjectSettingsComponent} from './pages/project-settings/project-settings.component';
+import {IntelligentListPageComponent} from './pages/intelligent-list-page/intelligent-list-page.component';
 
 export const APP_ROUTES: Routes = [
   {path: 'work-view', component: WorkViewPageComponent, data: {page: 'work-view'}},
@@ -17,6 +18,7 @@ export const APP_ROUTES: Routes = [
   {path: 'metrics', component: MetricPageComponent, data: {page: 'metrics'}},
   {path: 'procrastination', component: ProcrastinationComponent, data: {page: 'procrastination'}},
   {path: 'daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
+  {path: 'intelligent-list/:id', component: IntelligentListPageComponent, data: {page: 'intelligent-list'}},
   {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'worklog', component: WorklogComponent, data: {page: 'worklog'}},
   {path: 'project-settings', component: ProjectSettingsComponent, data: {page: 'project-settings'}},

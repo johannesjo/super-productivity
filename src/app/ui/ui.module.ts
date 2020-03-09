@@ -40,7 +40,6 @@ import {MsToStringPipe$} from './duration/ms-to-string$.pipe';
 import {CollapsibleComponent} from './collapsible/collapsible.component';
 import {HelpSectionComponent} from './help-section/help-section.component';
 import {NumberToMonthPipe} from './pipes/number-to-month.pipe';
-import {SplitModule} from '../pages/work-view/split/split.module';
 import {SimpleDownloadDirective} from './simple-download/simple-download.directive';
 import {Angular2PromiseButtonModule} from 'angular2-promise-buttons';
 import {DialogConfirmComponent} from './dialog-confirm/dialog-confirm.component';
@@ -198,7 +197,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     FormlyModule,
     MarkdownModule,
     ReactiveFormsModule,
-    SplitModule,
     ValidationModule,
   ],
   providers: [

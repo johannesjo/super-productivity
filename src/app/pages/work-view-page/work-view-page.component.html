@@ -1,0 +1,6 @@
+<work-view
+  [undoneTasks]="taskService.undoneTasks$|async"
+  [doneTasks]="taskService.doneTasks$|async"
+  [backlogTasks]="taskService.backlogTasks$|async"
+  [isShowBacklog]="true"
+></work-view>

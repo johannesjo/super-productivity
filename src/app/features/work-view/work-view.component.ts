@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Input,
   OnDestroy,
   OnInit,
   ViewChild
@@ -29,19 +30,22 @@ const PARENT = 'PARENT';
 
 @Component({
   selector: 'work-view',
-  templateUrl: './work-view-page.component.html',
-  styleUrls: ['./work-view-page.component.scss'],
+  templateUrl: './work-view.component.html',
+  styleUrls: ['./work-view.component.scss'],
   animations: [expandFadeAnimation, expandAnimation, fadeAnimation, workViewProjectChangeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentInit {
+export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
+  @Input() undoneTasks: TaskWithSubTasks[];
+  @Input() doneTasks: TaskWithSubTasks[];
+  @Input() backlogTasks: TaskWithSubTasks[];
+  @Input() isShowBacklog = true;
+
   isShowTimeWorkedWithoutBreak = true;
   splitInputPos = 100;
   isPreloadBacklog = false;
   T = T;
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.undoneTasks$;
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.taskService.doneTasks$;
 
   // NOTE: not perfect but good enough for now
   isTriggerBacklogIconAni$ = this.taskService.onMoveToBacklog$.pipe(
@@ -76,7 +80,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy, AfterContentIni
   ) {
   }
 
-  @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
+  @ViewChild('splitTopEl', {read: ElementRef}) set splitTopElRef(ref: ElementRef) {
     if (ref) {
       this.splitTopEl$.next(ref.nativeElement);
     }

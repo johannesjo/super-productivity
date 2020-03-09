@@ -1,10 +1,18 @@
 <section class="main">
-  <button class="route-link"
+  <!--  <button class="route-link"-->
+  <!--          mat-menu-item-->
+  <!--          routerLink="work-view"-->
+  <!--  >-->
+  <!--    <mat-icon>wb_sunny</mat-icon>-->
+  <!--    {{T.MH.TASKS|translate}}-->
+  <!--  </button>-->
+  <button *ngFor="let list of intelligentListService.intelligentLists$|async"
+          class="route-link"
           mat-menu-item
-          routerLink="work-view"
+          [routerLink]="['intelligent-list', list.id]"
   >
-    <mat-icon>wb_sunny</mat-icon>
-    {{T.MH.TASKS|translate}}
+    <mat-icon>{{list.icon}}</mat-icon>
+    {{list.isTranslate ? (list.title|translate) : list.title}}
   </button>
   <button class="route-link"
           mat-menu-item

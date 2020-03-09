@@ -27,7 +27,7 @@ import {T} from '../../../t.const';
 })
 export class TaskListComponent implements OnDestroy, OnInit {
   T = T;
-  tasksIN: TaskWithSubTasks[];
+  tasksIN: TaskWithSubTasks[] = [];
   tasks$: ReplaySubject<TaskWithSubTasks[]> = new ReplaySubject(1);
   isHideDoneIN: boolean;
   isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject(false);
@@ -71,6 +71,10 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() set tasks(tasks: TaskWithSubTasks[]) {
     this.tasksIN = tasks;
     this.tasks$.next(tasks);
+
+    if (!tasks) {
+      return;
+    }
     this.doneTasksLength = this.tasksIN.filter(task => task.isDone).length;
     this.allTasksLength = this.tasksIN.length;
     this.undoneTasksLength = this.tasksIN.length - this.doneTasksLength;
