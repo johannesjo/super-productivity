@@ -17,7 +17,7 @@ export const initialContextState: ContextState = {
 const _reducer = createReducer<ContextState>(
   initialContextState,
 
-  on(contextActions.setActiveContext, (oldState, {activeId}) => ({...oldState, activeId})),
+  on(contextActions.setActiveContext, (oldState, {activeId, activeType}) => ({...oldState, activeId, activeType})),
   on(contextActions.loadContextState, (oldState, {state}) => ({...oldState, ...state})),
 );
 

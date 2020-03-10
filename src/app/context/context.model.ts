@@ -3,12 +3,13 @@ export interface ContextCopy {
   title: string;
   icon: string;
   isTranslate: boolean;
+  taskIds: string[];
   criteria: any;
 }
 
 export enum ContextType {
-  PROJECT,
-  MULTIPLE_PROJECTS
+  PROJECT = 'PROJECT',
+  MULTIPLE_PROJECTS = 'MULTIPLE_PROJECTS'
 }
 
 export type Context = Readonly<ContextCopy>;
