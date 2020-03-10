@@ -9,7 +9,8 @@ export const selectContextFeatureState = createFeatureSelector<ContextState>(CON
 export const selectActiveContextId = createSelector(selectContextFeatureState, (state) => state.activeId);
 
 export const initialContextState: ContextState = {
-  activeId: null
+  activeId: null,
+  activeType: null
 };
 
 

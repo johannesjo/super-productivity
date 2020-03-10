@@ -3,6 +3,8 @@ import {Store} from '@ngrx/store';
 import {Observable, of} from 'rxjs';
 import {Context, ContextState} from './context.model';
 import {PersistenceService} from '../core/persistence/persistence.service';
+import {loadContextState} from './store/context.actions';
+import {initialContextState} from './store/context.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +31,7 @@ export class ContextService {
   }
 
   async load() {
-    const lsContextState = await this._persistenceService.context.loadState();
-
+    const state = await this._persistenceService.context.loadState() || initialContextState;
+    this._store$.dispatch(loadContextState({state}));
   }
 }

@@ -1,5 +1,5 @@
 import {createAction, props} from '@ngrx/store';
-import {ContextState} from '../context.model';
+import {ContextState, ContextType} from '../context.model';
 
 export const loadContextState = createAction(
   '[Context] Load Context State',
@@ -8,6 +8,6 @@ export const loadContextState = createAction(
 
 export const setActiveContext = createAction(
   '[Context] Set Active Context',
-  props<{ activeId: string }>(),
+  props<{ activeId: string, activeType: ContextType }>(),
 );
 
