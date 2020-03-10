@@ -6,13 +6,13 @@
   <!--    <mat-icon>wb_sunny</mat-icon>-->
   <!--    {{T.MH.TASKS|translate}}-->
   <!--  </button>-->
-  <button *ngFor="let list of intelligentListService.intelligentLists$|async"
+  <button *ngFor="let context of contextService.nonProjectContexts$|async"
           class="route-link"
           mat-menu-item
-          [routerLink]="['intelligent-list', list.id]"
+          [routerLink]="['context', context.id]"
   >
-    <mat-icon>{{list.icon}}</mat-icon>
-    {{list.isTranslate ? (list.title|translate) : list.title}}
+    <mat-icon>{{context.icon}}</mat-icon>
+    {{context.isTranslate ? (context.title|translate) : context.title}}
   </button>
   <button class="route-link"
           mat-menu-item

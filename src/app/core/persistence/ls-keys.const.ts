@@ -2,12 +2,11 @@ import {ProjectDataLsKey} from './persistence';
 
 export const LS_PREFIX = 'SUP_';
 export const LS_PROJECT_PREFIX = LS_PREFIX + 'P_';
-export const LS_IS_V1_MIGRATE = LS_PREFIX + 'IS_V1_MIGRATE';
 export const LS_GLOBAL_CFG = LS_PREFIX + 'GLOBAL_CFG';
 export const LS_BACKUP = LS_PREFIX + 'COMPLETE_BACKUP';
 export const LS_LAST_ACTIVE = LS_PREFIX + 'LAST_ACTIVE';
 export const LS_REMINDER = LS_PREFIX + 'REMINDER';
-export const LS_INTELLIGENT_LIST = LS_PREFIX + 'INTELLIGENT_LIST';
+export const LS_CONTEXT = LS_PREFIX + 'CONTEXT';
 export const LS_PROJECT_ARCHIVE = LS_PREFIX + 'ARCHIVE';
 
 

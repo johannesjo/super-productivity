@@ -2,9 +2,9 @@ import {Injectable} from '@angular/core';
 import {
   LS_BACKUP,
   LS_BOOKMARK_STATE,
+  LS_CONTEXT,
   LS_GLOBAL_CFG,
   LS_IMPROVEMENT_STATE,
-  LS_INTELLIGENT_LIST,
   LS_ISSUE_STATE,
   LS_LAST_ACTIVE,
   LS_METRIC_STATE,
@@ -49,7 +49,7 @@ import {obstructionReducer} from '../../features/metric/obstruction/store/obstru
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
-import {IntelligentList, IntelligentListState} from '../../features/intelligent-list/intelligent-list.model';
+import {ContextState} from '../../context/context.model';
 
 
 @Injectable({
@@ -64,7 +64,7 @@ export class PersistenceService {
   // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
-  intelligentList = this._cmBase<IntelligentListState>(LS_INTELLIGENT_LIST, 'intelligentList');
+  context = this._cmBase<ContextState>(LS_CONTEXT, 'context');
 
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
