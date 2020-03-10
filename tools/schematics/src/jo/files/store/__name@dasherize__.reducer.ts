@@ -16,7 +16,7 @@ export const select<%= classify(name)%>ById = createSelector(
 );
 
 
-export const initial<%= classify(name)%>State: <%= classify(name)%>State = adapter.getInitialState({
+export const initial<%= classify(name)%>State: <%= classify(name)%>State = adapter.getInitialState<<%= classify(name)%>State>({
     // additional entity state properties
 });
 

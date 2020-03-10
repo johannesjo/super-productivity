@@ -28,6 +28,7 @@ import {TaskService} from './features/tasks/task.service';
 import {LanguageService} from './core/language/language.service';
 import {ElectronService} from './core/electron/electron.service';
 import {AttachmentService} from './features/attachment/attachment.service';
+import {IntelligentListService} from './features/intelligent-list/intelligent-list.service';
 
 
 @Component({
@@ -74,6 +75,7 @@ export class AppComponent implements OnDestroy {
     private _store: Store<any>,
     private _languageService: LanguageService,
     private _attachmentService: AttachmentService,
+    private _intelligentListService: IntelligentListService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly taskService: TaskService,
@@ -103,6 +105,7 @@ export class AppComponent implements OnDestroy {
     this._attachmentService.load();
     this._projectService.load();
     this._configService.load();
+    this._intelligentListService.load();
 
     // init theme and body class handlers
     this._globalThemeService.init();

@@ -10,6 +10,7 @@ import {ImprovementState} from '../../features/metric/improvement/improvement.mo
 import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import {IntelligentListState} from '../../features/intelligent-list/intelligent-list.model';
 
 
 export interface AppBaseData {
@@ -20,6 +21,7 @@ export interface AppBaseData {
   task: TaskState;
   taskArchive: TaskArchive;
   taskAttachment: AttachmentState;
+  intelligentList: IntelligentListState;
 }
 
 // NOTE: [key:string] always refers to projectId
