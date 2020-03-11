@@ -36,7 +36,6 @@ import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
-import {tagReducer, TagState} from '../../features/tag/store/tag.reducer';
 import {Metric, MetricState} from '../../features/metric/metric.model';
 import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
@@ -48,7 +47,7 @@ import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-re
 import {metricReducer} from '../../features/metric/store/metric.reducer';
 import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
 import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
-import {Tag} from '../../features/tag/tag.model';
+import {Tag, TagState} from '../../features/tag/tag.model';
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
@@ -84,7 +83,7 @@ export class PersistenceService {
   );
 
   // TASK_RELATED_MODELS
-  taskTag = this._cmBase<TagState>(
+  tag = this._cmBase<TagState>(
     LS_TASK_TAG_STATE,
     'tag'
   );

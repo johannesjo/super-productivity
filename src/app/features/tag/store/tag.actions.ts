@@ -1,43 +1,33 @@
-import {Action} from '@ngrx/store';
-import {Tag} from '../tag.model';
-import {TagState} from './tag.reducer';
+import {createAction, props} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
+import {Tag, TagState } from '../tag.model';
 
-export enum TagActionTypes {
-  LoadTagState = '[Tag] Load Tag State',
-  AddTag = '[Tag] Add Tag',
-  DeleteTag = '[Tag] Delete Tag',
-  UpdateTag = '[Tag] Update Tag'
-}
+export const loadTagState = createAction(
+  '[Tag] Load Tag State',
+  props<{ state: TagState }>(),
+);
 
-export class LoadTagState implements Action {
-  readonly type = TagActionTypes.LoadTagState;
+export const addTag = createAction(
+  '[Tag] Add Tag',
+  props<{ tag: Tag }>(),
+);
 
-  constructor(public payload: { state: TagState }) {
-  }
-}
+export const updateTag = createAction(
+  '[Tag] Update Tag',
+  props<{ tag: Update<Tag> }>(),
+);
 
-export class AddTag implements Action {
-  readonly type = TagActionTypes.AddTag;
+export const upsertTag = createAction(
+  '[Tag] Upsert Tag',
+  props<{ tag: Tag }>(),
+);
 
-  constructor(public payload: { tag: Tag}) {
-  }
-}
+export const deleteTag = createAction(
+  '[Tag] Delete Tag',
+  props<{ id: string }>(),
+);
 
-export class DeleteTag implements Action {
-  readonly type = TagActionTypes.DeleteTag;
-
-  constructor(public payload: { id: string }) {}
-}
-
-export class UpdateTag implements Action {
-  readonly type = TagActionTypes.UpdateTag;
-
-  constructor(public payload: Update<Tag>) {}
-}
-
-export type TagActions =
-  LoadTagState
-  | AddTag
-  | DeleteTag
-  | UpdateTag;
+export const deleteTags = createAction(
+  '[Tag] Delete multiple Tags',
+  props<{ ids: string[] }>(),
+);

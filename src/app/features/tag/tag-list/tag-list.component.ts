@@ -38,7 +38,7 @@ export class TagListComponent implements OnInit, AfterViewInit {
   private _tagIds;
   private _tagIds$ = new BehaviorSubject([]);
   tags$: Observable<Tag[]> = this._tagIds$.pipe(
-    switchMap((ids) => this._tagService.getByIds$((ids))));
+    switchMap((ids) => this._tagService.getTagsById$((ids))));
 
   newTag: Partial<Tag> = {
     name: '',

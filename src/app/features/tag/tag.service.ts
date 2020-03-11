@@ -1,41 +1,33 @@
-import {Tag} from './tag.model';
-
-import {AddTag, DeleteTag, LoadTagState, UpdateTag} from './store/tag.actions';
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {PersistenceService} from '../../core/persistence/persistence.service';
 import {take} from 'rxjs/operators';
-import {
-  initialTagState,
-  selectAllTags,
-  selectTagById,
-  selectTagByName,
-  selectTagsByIds,
-  TagState
-} from './store/tag.reducer';
+import {initialTagState, selectAllTags, selectTagById, selectTagByName, selectTagsByIds,} from './store/tag.reducer';
+import {addTag, deleteTag, deleteTags, loadTagState, updateTag, upsertTag,} from './store/tag.actions';
+import {Observable} from 'rxjs';
+import {Tag, TagState} from './tag.model';
 import shortid from 'shortid';
+import {PersistenceService} from '../../core/persistence/persistence.service';
 import {WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
 import {MY_DAY_TAG} from './tag.const';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TagService {
-  public tags$: Observable<Tag[]> = this._store$.pipe(select(selectAllTags));
+  tags$: Observable<Tag[]> = this._store$.pipe(select(selectAllTags));
 
   constructor(
     private _store$: Store<TagState>,
-    private _persistenceService: PersistenceService
+    private _persistenceService: PersistenceService,
   ) {
   }
 
-  getById$(id: string): Observable<Tag> {
+  getTagById$(id: string): Observable<Tag> {
     return this._store$.pipe(select(selectTagById, {id}), take(1));
   }
 
-  getByIds$(ids: string[]): Observable<Tag[]> {
-    return this._store$.pipe(select(selectTagsByIds, {ids}));
+  getTagsById$(ids: string[]): Observable<Tag[]> {
+    return this._store$.pipe(select(selectTagsByIds, {ids}), take(1));
   }
 
   getByName$(name: string): Observable<Tag> {
@@ -43,33 +35,20 @@ export class TagService {
   }
 
   async load() {
-    const lsTagState = await this._persistenceService.taskTag.loadState() || initialTagState;
+    const lsTagState = await this._persistenceService.tag.loadState() || initialTagState;
     const state = this._addMyDayTag(lsTagState);
     this.loadState(state);
   }
 
-  public loadState(state: TagState) {
-    Object.keys(state.entities).forEach((k, i) => {
-      if (!k) {
-        delete state.entities[i];
-        state.ids.splice(state.ids.indexOf(k as string & number), 1);
-      }
-    });
-    this._store$.dispatch(new LoadTagState({state}));
+
+  loadState(state: TagState) {
+    this._store$.dispatch(loadTagState({state}));
   }
 
-  public addTag(tag: Partial<Tag>): string {
-
-    if (!tag.name) {
-      console.error('Can\'t add an empty tag!');
-      return;
-    }
-
-    const id = shortid();
-
-    this._store$.dispatch(new AddTag({
+  addTag(tag: Tag) {
+    this._store$.dispatch(addTag({
       tag: {
-        id,
+        id: shortid(),
         name: tag.name,
         created: Date.now(),
         modified: Date.now(),
@@ -79,16 +58,30 @@ export class TagService {
         ...tag,
       }
     }));
-
-    return id;
   }
 
-  public removeTag(id: string) {
-    this._store$.dispatch(new DeleteTag({id}));
+  deleteTag(id: string) {
+    this._store$.dispatch(deleteTag({id}));
   }
 
-  public updateColor(id: string, color: string) {
-    this._store$.dispatch(new UpdateTag({id, changes: {color}}));
+  removeTag(id: string) {
+    this._store$.dispatch(deleteTag({id}));
+  }
+
+  updateColor(id: string, color: string) {
+    this._store$.dispatch(updateTag({tag: {id, changes: {color}}}));
+  }
+
+  deleteTags(ids: string[]) {
+    this._store$.dispatch(deleteTags({ids}));
+  }
+
+  updateTag(id: string, changes: Partial<Tag>) {
+    this._store$.dispatch(updateTag({tag: {id, changes}}));
+  }
+
+  upsertTag(tag: Tag) {
+    this._store$.dispatch(upsertTag({tag}));
   }
 
   private _addMyDayTag(state: TagState): TagState {
@@ -105,5 +98,4 @@ export class TagService {
     }
     return state;
   }
-
 }

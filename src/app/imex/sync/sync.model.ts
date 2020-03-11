@@ -3,7 +3,6 @@ import {GlobalConfigState} from '../../features/config/global-config.model';
 import {TaskArchive, TaskState} from '../../features/tasks/task.model';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {NoteState} from '../../features/note/store/note.reducer';
-import {TagState} from '../../features/tag/store/tag.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {ProjectArchive} from '../../features/project/project.model';
 import {MetricState} from '../../features/metric/metric.model';
@@ -12,6 +11,7 @@ import {ObstructionState} from '../../features/metric/obstruction/obstruction.mo
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
 import {WorkContextState} from '../../features/work-context/work-context.model';
+import {TagState} from '../../features/tag/tag.model';
 
 
 export interface AppBaseData {
