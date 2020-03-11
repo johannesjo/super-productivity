@@ -15,7 +15,6 @@ import {
   TagState
 } from './store/tag.reducer';
 import shortid from 'shortid';
-import {TaskService} from '../tasks/task.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +25,8 @@ export class TagService {
   constructor(
     private _store$: Store<TagState>,
     private _persistenceService: PersistenceService
-  ) {}
+  ) {
+  }
 
   getById$(id: string): Observable<Tag> {
     return this._store$.pipe(select(selectTagById, {id}), take(1));
@@ -49,7 +49,7 @@ export class TagService {
     Object.keys(state.entities).forEach((k, i) => {
       if (!k) {
         delete state.entities[i];
-        state.ids.splice(state.ids.indexOf(<string & number> k), 1);
+        state.ids.splice(state.ids.indexOf(k as string & number), 1);
       }
     });
     this._store$.dispatch(new LoadTagState({state}));
@@ -57,7 +57,7 @@ export class TagService {
 
   public addTag(tag: Partial<Tag>): string {
 
-    if ( !tag.name ) {
+    if (!tag.name) {
       console.error('Can\'t add an empty tag!');
       return;
     }
@@ -83,7 +83,7 @@ export class TagService {
   }
 
   public updateColor(id: string, color: string) {
-    this._store$.dispatch(new UpdateTag({id: id, changes: {color: color}}));
+    this._store$.dispatch(new UpdateTag({id, changes: {color}}));
   }
 
 }

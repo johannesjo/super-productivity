@@ -331,8 +331,6 @@ export class TaskService {
 
 
   update(id: string, changedFields: Partial<Task>) {
-    console.log(`TaskService.update(${id}, {...});`);
-    console.log(changedFields);
     this._store.dispatch(new UpdateTask({
       task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
     }));

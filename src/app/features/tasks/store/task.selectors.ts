@@ -249,3 +249,4 @@ export const selectTasksByTag = createSelector(
     return tasks.filter(task => task.tagIds.indexOf(props.tagId) !== -1);
   }
 );
+
