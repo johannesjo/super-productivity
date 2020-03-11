@@ -17,10 +17,7 @@ import {TagService} from '../tag/tag.service';
 export class WorkContextService {
   // TODO properly wait for model load
   mainWorkContexts$: Observable<WorkContext[]> =
-    timer(300).pipe(
-      tap(console.log),
-      concatMap(() => this._tagService.getById$(MY_DAY_TAG.id)),
-      filter(val => !!val),
+    this._tagService.getById$(MY_DAY_TAG.id).pipe(
       switchMap(myDayTag => of([
           ({
             ...myDayTag,

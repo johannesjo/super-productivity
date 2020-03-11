@@ -13,7 +13,7 @@ import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
 import {filter, map, take} from 'rxjs/operators';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {combineLatest, forkJoin, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
 import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
@@ -47,7 +47,18 @@ import {TagService} from './features/tag/tag.service';
 export class AppComponent implements OnDestroy {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
+    // TODO can be removed
     this._store.select(selectIsTaskDataLoaded),
+
+    // LOAD GLOBAL MODELS
+    forkJoin([
+      this.taskService.load(),
+      this._attachmentService.load(),
+      this._projectService.load(),
+      this._configService.load(),
+      this._workContextService.load(),
+      this._tagService.load(),
+    ])
   ]).pipe(
     map(([isProjectDataLoaded, isTaskDataLoaded]) => isProjectDataLoaded && isTaskDataLoaded),
     filter(isLoaded => isLoaded),
@@ -100,15 +111,6 @@ export class AppComponent implements OnDestroy {
         }
       });
     }
-
-    // TODO we are better than this
-    // LOAD GLOBAL MODELS
-    this.taskService.load();
-    this._attachmentService.load();
-    this._projectService.load();
-    this._configService.load();
-    this._workContextService.load();
-    this._tagService.load();
 
     // init theme and body class handlers
     this._globalThemeService.init();
