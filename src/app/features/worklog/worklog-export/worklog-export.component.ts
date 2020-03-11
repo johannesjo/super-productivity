@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnIn
 import {TaskCopy} from '../../tasks/task.model';
 import {ProjectService} from '../../project/project.service';
 import {Subscription} from 'rxjs';
-import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment';
 import 'moment-duration-format';
@@ -19,6 +18,7 @@ import {T} from '../../../t.const';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
 import {WorkStartEnd} from '../../work-context/work-context.model';
+import {WORKLOG_EXPORT_DEFAULTS} from '../../work-context/work-context.const';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';

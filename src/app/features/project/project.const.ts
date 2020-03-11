@@ -5,14 +5,7 @@ import {getWorklogStr} from '../../util/get-work-log-str';
 import {WorklogExportSettings, WorklogGrouping} from '../worklog/worklog.model';
 import {WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
 
-export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
-  cols: ['DATE', 'START', 'END', 'TIME_CLOCK', 'TITLES_INCLUDING_SUB'],
-  roundWorkTimeTo: null,
-  roundStartTimeTo: null,
-  roundEndTimeTo: null,
-  separateTasksBy: ' | ',
-  groupBy: WorklogGrouping.DATE
-};
+
 
 export const DEFAULT_PROJECT_THEME: ProjectThemeCfg = {
   isAutoContrast: true,
@@ -30,12 +23,10 @@ export const DEFAULT_PROJECT: Project = {
   title: '',
   themeColor: '',
   isArchived: false,
+  // TODO move to global cfg
   timeWorkedWithoutBreak: null,
   theme: DEFAULT_PROJECT_THEME,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
-  advancedCfg: {
-    worklogExportSettings: WORKLOG_EXPORT_DEFAULTS,
-  },
   todaysTaskIds: [],
   backlogTaskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON
