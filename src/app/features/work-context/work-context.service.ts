@@ -1,53 +1,37 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Observable, of} from 'rxjs';
+import {Observable, of, timer} from 'rxjs';
 import {WorkContext, WorkContextState, WorkContextType} from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
 import {initialContextState} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
-import {filter} from 'rxjs/operators';
+import {concatMap, filter, switchMap, tap} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
+import {MY_DAY_TAG} from '../tag/tag.const';
+import {TagService} from '../tag/tag.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WorkContextService {
-  // nonProjectContexts$: Observable<WorkContext[]> = of([
-  //   {
-  //     id: 'my-day',
-  //     title: 'My Day',
-  //     icon: 'wb_sunny',
-  //     isTranslate: true,
-  //     taskIds: [],
-  //   },
-  //   {
-  //     id: 'my-work-day',
-  //     title: 'My Work Day',
-  //     icon: 'brightness_4',
-  //     isTranslate: true,
-  //     taskIds: [],
-  //   }
-  // ]);
+  // TODO properly wait for model load
+  mainWorkContexts$: Observable<WorkContext[]> =
+    timer(300).pipe(
+      tap(console.log),
+      concatMap(() => this._tagService.getById$(MY_DAY_TAG.id)),
+      filter(val => !!val),
+      switchMap(myDayTag => of([
+          ({
+            ...myDayTag,
+            title: myDayTag.name,
+            taskIds: [],
+          } as WorkContext)
+        ])
+      ),
+    );
 
-  mainWorkContexts$: Observable<WorkContext[]> = of([
-    // {
-    //   id: 'my-day',
-    //   title: 'My Day',
-    //   icon: 'wb_sunny',
-    //   isTranslate: true,
-    //   taskIds: [],
-    //
-    // },
-    // {
-    //   id: 'my-work-day',
-    //   title: 'My Work Day',
-    //   icon: 'brightness_4',
-    //   isTranslate: true,
-    //   taskIds: [],
-    // }
-  ]);
-  activeList$ = this._router.events.pipe(
+  activeWorkContext$ = this._router.events.pipe(
     filter(event => event instanceof NavigationStart),
   );
 
@@ -55,8 +39,10 @@ export class WorkContextService {
     private _store$: Store<WorkContextState>,
     private _persistenceService: PersistenceService,
     private _taskService: TaskService,
+    private _tagService: TagService,
     private _router: Router,
   ) {
+
     this._router.events.pipe(
       filter(event => event instanceof NavigationStart),
     ).subscribe(({url}: RouterEvent) => {

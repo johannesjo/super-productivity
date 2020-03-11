@@ -68,8 +68,8 @@ export function tagReducer(
       return adapter.updateOne(action.payload, state);
     }
     case TagActionTypes.LoadTagState:
-      console.log('Loading tag state');
-      console.log(action.payload.state);
+      // console.log('Loading tag state');
+      // console.log(action.payload.state);
       return {...action.payload.state};
     default:
       return state;

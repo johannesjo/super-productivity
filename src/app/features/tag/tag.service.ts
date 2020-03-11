@@ -15,6 +15,8 @@ import {
   TagState
 } from './store/tag.reducer';
 import shortid from 'shortid';
+import {WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
+import {MY_DAY_TAG} from './tag.const';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +44,8 @@ export class TagService {
 
   async load() {
     const lsTagState = await this._persistenceService.taskTag.loadState() || initialTagState;
-    this.loadState(lsTagState || initialTagState);
+    const state = this._addMyDayTag(lsTagState);
+    this.loadState(state);
   }
 
   public loadState(state: TagState) {
@@ -70,7 +73,9 @@ export class TagService {
         name: tag.name,
         created: Date.now(),
         modified: Date.now(),
+        icon: null,
         color: tag.color || '#FFDAB9',
+        ...WORK_CONTEXT_DEFAULT_COMMON,
         ...tag,
       }
     }));
@@ -84,6 +89,21 @@ export class TagService {
 
   public updateColor(id: string, color: string) {
     this._store$.dispatch(new UpdateTag({id, changes: {color}}));
+  }
+
+  private _addMyDayTag(state: TagState): TagState {
+    const ids = state.ids as string[];
+    if (ids && !ids.includes(MY_DAY_TAG.id)) {
+      return {
+        ...state,
+        ids: ([MY_DAY_TAG.id, ...ids] as string[]),
+        entities: {
+          ...state.entities,
+          [MY_DAY_TAG.id]: MY_DAY_TAG,
+        }
+      };
+    }
+    return state;
   }
 
 }

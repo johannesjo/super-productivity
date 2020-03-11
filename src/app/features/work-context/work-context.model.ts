@@ -38,8 +38,8 @@ export interface WorkContextCopy extends WorkContextCommon {
   id: string;
   title: string;
   icon: string;
-  isTranslate: boolean;
   taskIds: string[];
+  backlogTaskIds?: string[];
 }
 
 export enum WorkContextType {
