@@ -2,6 +2,7 @@ import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import * as tagActions from './tag.actions';
 import {Tag, TagState} from '../tag.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
+import {TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 
 export const TAG_FEATURE_NAME = 'tag';
 
@@ -56,7 +57,45 @@ export function tagReducer(
   state = initialTagState,
   action: Action,
 ): TagState {
-  return _reducer(state, action);
+  switch (action.type) {
+    // TODO handle delete task and possible add task
+    case TaskActionTypes.UpdateTaskTags: {
+      const {payload} = action as UpdateTaskTags;
+      // const {newTagIds, oldTagIds, taskId} = payload;
+      const {newTagIds = [], oldTagIds = [], taskId} = payload;
+      const removedFrom: string[] = oldTagIds.filter(oldId => !newTagIds.includes(oldId));
+      const addedTo: string[] = newTagIds.filter(newId => !oldTagIds.includes(newId));
+
+      return {
+        ...state,
+        entities: (state.ids as string[]).reduce((acc, id) => {
+          const tag = state.entities[id] as Tag;
+          const tagTaskIds = tag.taskIds || [];
+          if (removedFrom.includes(id)) {
+            return {
+              ...acc,
+              [id]: ({
+                ...tag,
+                taskIds: tagTaskIds.filter(tagTaskId => tagTaskId !== taskId)
+              } as Tag)
+            };
+          }
+          if (addedTo.includes(id)) {
+            return {
+              ...acc,
+              [id]: ({
+                ...tag,
+                taskIds: [...tagTaskIds, taskId]
+              } as Tag)
+            };
+          }
+          return acc;
+        }, state.entities)
+      };
+    }
+    default:
+      return _reducer(state, action);
+  }
 }
 
 

@@ -9,6 +9,7 @@ export interface TagCopy extends WorkContextCommon {
   created: number;
   modified: number;
   color: string;
+  taskIds: string[];
 }
 
 export type Tag = Readonly<TagCopy>;

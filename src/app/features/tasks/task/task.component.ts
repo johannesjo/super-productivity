@@ -326,13 +326,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveToMyDay() {
-    this._taskService.update(this.task.id, {tagIds: [MY_DAY_TAG.id, ...this.task.tagIds]});
+    this.onTagsUpdated([MY_DAY_TAG.id, ...this.task.tagIds]);
   }
 
   removeFromMyDay() {
-    this._taskService.update(this.task.id, {tagIds: this.task.tagIds.filter(tagId => tagId !== MY_DAY_TAG.id)});
+    this.onTagsUpdated(this.task.tagIds.filter(tagId => tagId !== MY_DAY_TAG.id));
   }
-
 
   focusPrevious(isFocusReverseIfNotPossible = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
@@ -396,7 +395,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   onTagsUpdated(tagIds: string[]) {
-    this._taskService.updateTags(this.task.id, tagIds);
+    this._taskService.updateTags(this.task.id, tagIds, this.task.tagIds);
   }
 
   onTagsAdded(tagIds: string[]) {

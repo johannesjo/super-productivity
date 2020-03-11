@@ -356,20 +356,14 @@ export class TaskService {
     // }
   }
 
-  updateTags(taskId: string, newTagIds: string[]) {
-    this._store.dispatch(new UpdateTaskTags({taskId, newTagIds}));
+  updateTags(taskId: string, newTagIds: string[], oldTagIds: string[]) {
+    this._store.dispatch(new UpdateTaskTags({taskId, newTagIds, oldTagIds}));
   }
 
   // TODO: Move logic away from service class (to actions)?
   removeTags(task: Task, tagIdsToRemove: string[]) {
-    const newTags = [...task.tagIds];
-    tagIdsToRemove.forEach(tagId => {
-      const index = newTags.indexOf(tagId);
-      if (index !== -1) {
-        newTags.splice(index, 1);
-      }
-    });
-    this.updateTags(task.id, newTags);
+    const newTags = task.tagIds.filter(tagId => !tagIdsToRemove.includes(tagId));
+    this.updateTags(task.id, newTags, task.tagIds);
   }
 
   // TODO: Move logic away from service class (to actions)?

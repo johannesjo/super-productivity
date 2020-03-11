@@ -104,7 +104,7 @@ export class UpdateTaskUi implements Action {
 export class UpdateTaskTags implements Action {
   readonly type = TaskActionTypes.UpdateTaskTags;
 
-  constructor(public payload: { taskId: string; newTagIds: string[] }) {
+  constructor(public payload: { taskId: string; newTagIds: string[], oldTagIds: string[] }) {
   }
 }
 
