@@ -396,7 +396,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   onTagsUpdated(tagIds: string[]) {
-    this._taskService.update(this.task.id, {tagIds});
+    this._taskService.updateTags(this.task.id, tagIds);
   }
 
   onTagsAdded(tagIds: string[]) {
@@ -410,7 +410,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTagsRemoved(tagIds: string[]) {
-
     this._taskService.removeTags(this.task, tagIds);
     this._taskService.purgeUnusedTags(tagIds);
   }

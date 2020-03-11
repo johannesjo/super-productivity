@@ -41,6 +41,7 @@ import {
   UpdateTask,
   UpdateTaskListIds,
   UpdateTaskReminder,
+  UpdateTaskTags,
   UpdateTaskUi
 } from './store/task.actions';
 import {initialTaskState} from './store/task.reducer';
@@ -355,16 +356,20 @@ export class TaskService {
     // }
   }
 
+  updateTags(taskId: string, newTagIds: string[]) {
+    this._store.dispatch(new UpdateTaskTags({taskId, newTagIds}));
+  }
+
   // TODO: Move logic away from service class (to actions)?
   removeTags(task: Task, tagIdsToRemove: string[]) {
     const newTags = [...task.tagIds];
     tagIdsToRemove.forEach(tagId => {
       const index = newTags.indexOf(tagId);
-      if ( index !== -1) {
+      if (index !== -1) {
         newTags.splice(index, 1);
       }
     });
-    this.update(task.id, {tagIds: newTags});
+    this.updateTags(task.id, newTags);
   }
 
   // TODO: Move logic away from service class (to actions)?
@@ -381,6 +386,7 @@ export class TaskService {
         });
     });
   }
+
   updateUi(id: string, changes: Partial<Task>) {
     this._store.dispatch(new UpdateTaskUi({
       task: {id, changes}

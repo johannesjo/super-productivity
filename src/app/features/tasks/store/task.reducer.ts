@@ -203,6 +203,15 @@ export function taskReducer(
       return taskAdapter.updateOne(action.payload.task, state);
     }
 
+    case TaskActionTypes.UpdateTaskTags: {
+      return taskAdapter.updateOne({
+        id: action.payload.taskId,
+        changes: {
+          tagIds: action.payload.newTagIds,
+        }
+      }, state);
+    }
+
     // TODO simplify
     case TaskActionTypes.ToggleTaskShowSubTasks: {
       const {taskId, isShowLess, isEndless} = action.payload;

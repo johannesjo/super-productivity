@@ -15,6 +15,7 @@ export enum TaskActionTypes {
   // Task Actions
   AddTask = '[Task][Issue] Add Task',
   UpdateTaskUi = '[Task] Update Task Ui',
+  UpdateTaskTags = '[Task] Update Task Tags',
   ToggleTaskShowSubTasks = '[Task] Toggle Show Sub Tasks',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
@@ -97,6 +98,13 @@ export class UpdateTaskUi implements Action {
   readonly type = TaskActionTypes.UpdateTaskUi;
 
   constructor(public payload: { task: Update<Task> }) {
+  }
+}
+
+export class UpdateTaskTags implements Action {
+  readonly type = TaskActionTypes.UpdateTaskTags;
+
+  constructor(public payload: { taskId: string; newTagIds: string[] }) {
   }
 }
 
@@ -259,6 +267,7 @@ export type TaskActions
   | ToggleTaskShowSubTasks
   | UpdateTask
   | UpdateTasks
+  | UpdateTaskTags
   | DeleteTask
   | UndoDeleteTask
   | Move
