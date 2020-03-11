@@ -394,12 +394,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   onTagsUpdated(tagIds: string[]) {
-    this._taskService.update(this.task.id, {tagIds: tagIds});
+    this._taskService.update(this.task.id, {tagIds});
   }
 
   onTagsAdded(tagIds: string[]) {
     tagIds.forEach(tagId => {
-      if (this.task.tagIds.indexOf(tagId) !== -1) {
+      if (this.task.tagIds && this.task.tagIds.indexOf(tagId) !== -1) {
         // TODO: Replace with proper notification or fail silently
         console.warn(`WARNING: Tag '${tagId}' already exists on task!`);
       }
