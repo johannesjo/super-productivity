@@ -33,6 +33,7 @@ import {Router} from '@angular/router';
 import {BannerId} from '../../../core/banner/banner.model';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
+import {TagService} from '../../tag/tag.service';
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
 
@@ -178,6 +179,7 @@ export class ProjectEffects {
           // TODO automatize
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
+          this._tagService.loadStateForProject(projectId),
           this._taskService.loadStateForProject(projectId),
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),
@@ -305,6 +307,7 @@ export class ProjectEffects {
     private _bannerService: BannerService,
     private _globalConfigService: GlobalConfigService,
     private _attachmentService: AttachmentService,
+    private _tagService: TagService,
     private _reminderService: ReminderService,
     private _metricService: MetricService,
     private _obstructionService: ObstructionService,

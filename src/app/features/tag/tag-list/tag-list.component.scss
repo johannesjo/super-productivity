@@ -1,0 +1,75 @@
+.tags-container {
+  position: relative;
+}
+
+.hidden {
+  display: none;
+}
+
+
+.tags {
+  list-style: none;
+  margin: 4px 0 0;
+}
+
+
+.tags li {
+  display: inline-block;
+  margin: 0 1px;
+
+}
+
+.tags-icon {
+  font-size: 1.2em;
+  line-height: 1.2em;
+  height: 1.4em;
+}
+
+.tag {
+  min-width: 1.4em  ;
+  padding: 0 4px;
+  //border-width: 1px;
+  //border-color: black;
+  //border-style: solid;
+  border-radius: 10%;
+  font-size: 0.8em;
+  height: 1.4em;
+  line-height: 1.4em;
+  text-align: center;
+  //background: #FFDAB9;
+}
+
+li.add-tag {
+  border-radius: 50%;
+  line-height: 1.2em;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.tag input {
+  height: 1em;
+  box-sizing: content-box;
+  line-height: 1em;
+  font-size: 1em;
+  margin-top: -1px;
+  border-radius: 10%;
+}
+
+.tag input[type=text] {
+  min-width: 2.8em;
+}
+
+.tag input[type=color] {
+  width: 1.2em;
+  height: 1.4em;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0;
+}
+
+@-moz-document url-prefix() {
+  .tag input[type=color] {
+    width: 1em !important;
+    height: 1em !important;
+  }
+}

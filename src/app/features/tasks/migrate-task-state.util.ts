@@ -5,7 +5,7 @@ import {MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import * as moment from 'moment';
 import {convertToWesternArabic} from '../../util/numeric-converter';
 
-const MODEL_VERSION = 3;
+const MODEL_VERSION = 3.1;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState): TaskState => {
@@ -17,6 +17,7 @@ export const migrateTaskState = (taskState: TaskState): TaskState => {
   Object.keys(taskEntities).forEach((key) => {
     taskEntities[key] = _addNewIssueFields(taskEntities[key]);
     taskEntities[key] = _replaceLegacyGitType(taskEntities[key]);
+    taskEntities[key] = _addTagIds(taskEntities[key]);
     taskEntities[key] = _deleteUnusedFields(taskEntities[key]);
     taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]);
   });
@@ -39,6 +40,15 @@ export const migrateTaskArchiveState = (
     taskEntities[key] = _deleteUnusedFields(taskEntities[key]);
     taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]);
   });
+};
+
+const _addTagIds = (task: Task): Task => {
+  return (task.hasOwnProperty('tagIds'))
+    ? task
+    : {
+      ...task,
+      tagIds: []
+    };
 };
 
 const _addNewIssueFields = (task: Task): Task => {

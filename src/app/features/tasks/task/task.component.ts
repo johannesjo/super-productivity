@@ -31,9 +31,11 @@ import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
+import {unique} from '../../../util/unique';
 import {T} from '../../../t.const';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
+import {TagService} from '../../tag/tag.service';
 
 @Component({
   selector: 'task',
@@ -96,6 +98,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _configService: GlobalConfigService,
     private readonly _issueService: IssueService,
     private readonly _attachmentService: AttachmentService,
+    private readonly _tagService: TagService,
     private readonly _elementRef: ElementRef,
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
@@ -149,6 +152,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    // this._taskService.removeTags(this.task, this.task.tagIds);
+    // this._tagService.tags$.pipe(take(1)).subscribe(tags => {
+    //   this._taskService.purgeUnusedTags(tags.map(tag => tag.id));
+    // });
+
     this._taskService.currentTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
@@ -229,7 +237,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    const tagIds = [...this.task.tagIds];
     this._taskService.remove(this.task);
+    this._taskService.purgeUnusedTags(tagIds);
     this.focusNext(true);
   }
 
@@ -382,6 +392,35 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.contextMenu.openMenu();
   }
 
+
+  onTagsUpdated(tagIds: string[]) {
+    this._taskService.update(this.task.id, {tagIds});
+  }
+
+  onTagsAdded(tagIds: string[]) {
+    tagIds.forEach(tagId => {
+      if (this.task.tagIds && this.task.tagIds.indexOf(tagId) !== -1) {
+        // TODO: Replace with proper notification or fail silently
+        console.warn(`WARNING: Tag '${tagId}' already exists on task!`);
+      }
+    });
+    this.onTagsUpdated(unique([...this.task.tagIds, ...tagIds]));
+  }
+
+  onTagsRemoved(tagIds: string[]) {
+
+    this._taskService.removeTags(this.task, tagIds);
+    this._taskService.purgeUnusedTags(tagIds);
+  }
+
+  onTagReplaced([oldTagId, newTagId]: string[]) {
+    const newTags = [...this.task.tagIds, newTagId];
+    const removeId = newTags.indexOf(oldTagId);
+    if (removeId !== -1) {
+      newTags.splice(removeId, 1);
+    }
+    this.onTagsUpdated(newTags);
+  }
 
   onPanStart(ev) {
     if (!IS_TOUCH) {
