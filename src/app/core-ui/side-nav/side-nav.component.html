@@ -6,7 +6,7 @@
   <!--    <mat-icon>wb_sunny</mat-icon>-->
   <!--    {{T.MH.TASKS|translate}}-->
   <!--  </button>-->
-  <button *ngFor="let context of workContextService.nonProjectContexts$|async"
+  <button *ngFor="let context of workContextService.mainWorkContexts$|async"
           class="route-link"
           mat-menu-item
           [routerLink]="['context', context.id]"

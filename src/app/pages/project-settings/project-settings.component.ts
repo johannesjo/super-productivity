@@ -6,7 +6,7 @@ import {
   GlobalConfigSectionKey,
   GlobalConfigState
 } from '../../features/config/global-config.model';
-import {Project, ProjectAdvancedCfg, ProjectCfgFormKey, ProjectThemeCfg} from '../../features/project/project.model';
+import {Project, ProjectCfgFormKey, ProjectThemeCfg} from '../../features/project/project.model';
 import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue.model';
 import {Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
@@ -20,6 +20,7 @@ import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-for
 import {IS_ELECTRON} from '../../app.constants';
 import {DEFAULT_JIRA_CFG} from '../../features/issue/providers/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../features/issue/providers/github/github.const';
+import {WorkContextAdvancedCfg} from '../../features/work-context/work-context.model';
 
 @Component({
   selector: 'project-settings',
@@ -36,7 +37,7 @@ export class ProjectSettingsComponent implements OnInit, OnDestroy {
 
   currentProject: Project;
   currentProjectTheme: ProjectThemeCfg;
-  projectCfg: ProjectAdvancedCfg;
+  projectCfg: WorkContextAdvancedCfg;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   globalCfg: GlobalConfigState;
 

@@ -13,23 +13,40 @@ import {TaskService} from '../tasks/task.service';
   providedIn: 'root',
 })
 export class WorkContextService {
-  nonProjectContexts$: Observable<WorkContext[]> = of([
-    {
-      id: 'my-day',
-      title: 'My Day',
-      icon: 'wb_sunny',
-      isTranslate: true,
-      taskIds: [],
-    },
-    {
-      id: 'my-work-day',
-      title: 'My Work Day',
-      icon: 'brightness_4',
-      isTranslate: true,
-      taskIds: [],
-    }
-  ]);
+  // nonProjectContexts$: Observable<WorkContext[]> = of([
+  //   {
+  //     id: 'my-day',
+  //     title: 'My Day',
+  //     icon: 'wb_sunny',
+  //     isTranslate: true,
+  //     taskIds: [],
+  //   },
+  //   {
+  //     id: 'my-work-day',
+  //     title: 'My Work Day',
+  //     icon: 'brightness_4',
+  //     isTranslate: true,
+  //     taskIds: [],
+  //   }
+  // ]);
 
+  mainWorkContexts$: Observable<WorkContext[]> = of([
+    // {
+    //   id: 'my-day',
+    //   title: 'My Day',
+    //   icon: 'wb_sunny',
+    //   isTranslate: true,
+    //   taskIds: [],
+    //
+    // },
+    // {
+    //   id: 'my-work-day',
+    //   title: 'My Work Day',
+    //   icon: 'brightness_4',
+    //   isTranslate: true,
+    //   taskIds: [],
+    // }
+  ]);
   activeList$ = this._router.events.pipe(
     filter(event => event instanceof NavigationStart),
   );

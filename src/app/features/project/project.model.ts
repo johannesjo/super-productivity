@@ -7,34 +7,12 @@ import {Attachment} from '../attachment/attachment.model';
 import {MetricState} from '../metric/metric.model';
 import {ImprovementState} from '../metric/improvement/improvement.model';
 import {ObstructionState} from '../metric/obstruction/obstruction.model';
-import {WorklogExportSettings} from '../worklog/worklog.model';
 import {HueValue} from 'angular-material-css-vars';
 import {Tag} from '../tag/tag.model';
-
+import {WorkContextAdvancedCfgKey, WorkContextCommon} from '../work-context/work-context.model';
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
 
-export interface BreakTimeCopy {
-  [key: string]: number;
-}
-
-export type BreakTime = Readonly<BreakTimeCopy>;
-
-export interface BreakNrCopy {
-  [key: string]: number;
-}
-
-export type BreakNr = Readonly<BreakNrCopy>;
-
-export interface WorkStartEndCopy {
-  [key: string]: number;
-}
-
-export type WorkStartEnd = Readonly<WorkStartEndCopy>;
-
-export type ProjectAdvancedCfg = Readonly<{
-  worklogExportSettings: WorklogExportSettings;
-}>;
 
 export type ProjectThemeCfg = Readonly<{
   isAutoContrast: boolean;
@@ -62,17 +40,10 @@ export interface ProjectBasicCfg {
   backlogTaskIds: string[];
 }
 
-export type ProjectAdvancedCfgKey = keyof ProjectAdvancedCfg;
 
-export interface ProjectCopy extends ProjectBasicCfg {
+export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
   id: string;
   issueIntegrationCfgs: IssueIntegrationCfgs;
-  advancedCfg: ProjectAdvancedCfg;
-  workStart: WorkStartEnd;
-  workEnd: WorkStartEnd;
-  lastCompletedDay: string;
-  breakTime: BreakTime;
-  breakNr: BreakNr;
   theme: ProjectThemeCfg;
 }
 
@@ -98,6 +69,6 @@ export interface ProjectArchive {
   [key: string]: string;
 }
 
-export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic' | 'theme';
+export type ProjectCfgFormKey = WorkContextAdvancedCfgKey | IssueProviderKey | 'basic' | 'theme';
 
 

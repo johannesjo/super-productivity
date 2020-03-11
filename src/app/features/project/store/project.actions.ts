@@ -1,8 +1,9 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
 import {ProjectState} from './project.reducer';
-import {Project, ProjectAdvancedCfgKey} from '../project.model';
+import {Project} from '../project.model';
 import {IssueIntegrationCfg, IssueProviderKey} from '../../issue/issue.model';
+import {WorkContextAdvancedCfgKey} from '../../work-context/work-context.model';
 
 export enum ProjectActionTypes {
   LoadProjectState = '[Project] Load Project State',
@@ -112,7 +113,7 @@ export class AddToProjectBreakTime implements Action {
 export class UpdateProjectAdvancedCfg implements Action {
   readonly type = ProjectActionTypes.UpdateProjectAdvancedCfg;
 
-  constructor(public payload: { projectId: string; sectionKey: ProjectAdvancedCfgKey; data: any }) {
+  constructor(public payload: { projectId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }) {
   }
 }
 

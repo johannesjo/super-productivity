@@ -1,12 +1,8 @@
 import {Injectable} from '@angular/core';
 import {interval, Observable, of, Subject} from 'rxjs';
 import {
-  BreakNr,
-  BreakTime,
   ExportedProject,
   Project,
-  ProjectAdvancedCfg,
-  ProjectAdvancedCfgKey,
   ProjectBasicCfg,
   ProjectThemeCfg,
 } from './project.model';
@@ -52,6 +48,12 @@ import {migrateProjectState} from './migrate-projects-state.util';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {T} from '../../t.const';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
+import {
+  BreakNr,
+  BreakTime,
+  WorkContextAdvancedCfg,
+  WorkContextAdvancedCfgKey
+} from '../work-context/work-context.model';
 
 @Injectable({
   providedIn: 'root',
@@ -90,7 +92,7 @@ export class ProjectService {
     select(selectProjectGithubIsEnabled),
   );
 
-  advancedCfg$: Observable<ProjectAdvancedCfg> = this._store$.pipe(
+  advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(
     select(selectAdvancedProjectCfg),
     // shareReplay(1),
   );
@@ -286,7 +288,7 @@ export class ProjectService {
     });
   }
 
-  updateAdvancedCfg(projectId: string, sectionKey: ProjectAdvancedCfgKey, data: any) {
+  updateAdvancedCfg(projectId: string, sectionKey: WorkContextAdvancedCfgKey, data: any) {
     this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectAdvancedCfg,
       payload: {

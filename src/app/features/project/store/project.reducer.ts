@@ -1,11 +1,12 @@
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
-import {BreakNr, BreakNrCopy, Project, ProjectBasicCfg, WorkStartEnd} from '../project.model';
+import {Project, ProjectBasicCfg} from '../project.model';
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
 import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
+import {BreakNr, BreakNrCopy, WorkStartEnd} from '../../work-context/work-context.model';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 

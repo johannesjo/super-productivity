@@ -2,7 +2,7 @@ import {Worklog} from '../worklog/worklog.model';
 import {TaskWithSubTasks} from '../tasks/task.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {SimpleMetrics} from './metric.model';
-import {BreakNr, BreakTime} from '../project/project.model';
+import {BreakNr, BreakTime} from '../work-context/work-context.model';
 
 // really TaskWithSubTasks?
 export const mapSimpleMetrics = (
