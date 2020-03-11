@@ -141,6 +141,27 @@
                   tabindex="2">
             <mat-icon>pause</mat-icon>
           </button>
+
+          <button (click)="moveToMyDay()"
+                  *ngIf="!task.tagIds.includes('MY_DAY')"
+                  [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
+                  class="ico-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon>wb_sunny</mat-icon>
+          </button>
+
+          <button (click)="removeFromMyDay()"
+                  *ngIf="task.tagIds.includes('MY_DAY')"
+                  [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
+                  class="ico-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon>remove_circle_outline</mat-icon>
+          </button>
+
           <button (click)="toggleTaskDone()"
                   [title]="T.F.TASK.CMP.TOGGLE_DONE|translate"
                   class="ico-btn task-done-btn"

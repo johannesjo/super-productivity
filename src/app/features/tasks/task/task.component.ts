@@ -35,7 +35,7 @@ import {unique} from '../../../util/unique';
 import {T} from '../../../t.const';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
-import {TagService} from '../../tag/tag.service';
+import {MY_DAY_TAG} from '../../tag/tag.const';
 
 @Component({
   selector: 'task',
@@ -98,7 +98,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _configService: GlobalConfigService,
     private readonly _issueService: IssueService,
     private readonly _attachmentService: AttachmentService,
-    private readonly _tagService: TagService,
     private readonly _elementRef: ElementRef,
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
@@ -152,11 +151,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
-    // this._taskService.removeTags(this.task, this.task.tagIds);
-    // this._tagService.tags$.pipe(take(1)).subscribe(tags => {
-    //   this._taskService.purgeUnusedTags(tags.map(tag => tag.id));
-    // });
-
     this._taskService.currentTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
@@ -331,6 +325,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
+  moveToMyDay() {
+    this._taskService.update(this.task.id, {tagIds: [MY_DAY_TAG.id, ...this.task.tagIds]});
+  }
+
+  removeFromMyDay() {
+    this._taskService.update(this.task.id, {tagIds: this.task.tagIds.filter(tagId => tagId !== MY_DAY_TAG.id)});
+  }
+
+
   focusPrevious(isFocusReverseIfNotPossible = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
@@ -366,7 +369,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (isFocusReverseIfNotPossible) {
       this.focusPrevious();
     }
-
   }
 
   focusSelf() {
