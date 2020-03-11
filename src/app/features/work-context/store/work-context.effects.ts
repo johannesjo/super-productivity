@@ -2,17 +2,17 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
-import * as contextActions from './context.actions';
-import {selectContextFeatureState} from './context.reducer';
-import {PersistenceService} from '../../core/persistence/persistence.service';
+import * as contextActions from './work-context.actions';
+import {selectContextFeatureState} from './work-context.reducer';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
 
 
 @Injectable()
-export class ContextEffects {
+export class WorkContextEffects {
 
   updateContextsStorage$ = createEffect(() => this._actions$.pipe(
     ofType(
-      contextActions.setActiveContext,
+      contextActions.setActiveWorkContext,
     ),
     withLatestFrom(
       this._store$.pipe(select(selectContextFeatureState)),

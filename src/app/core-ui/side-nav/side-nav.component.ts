@@ -9,7 +9,7 @@ import {Router} from '@angular/router';
 import {DragulaService} from 'ng2-dragula';
 import {Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
-import {ContextService} from '../../context/context.service';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'side-nav',
@@ -29,7 +29,7 @@ export class SideNavComponent implements OnDestroy {
   constructor(
     public readonly projectService: ProjectService,
     public readonly globalConfigService: GlobalConfigService,
-    public readonly contextService: ContextService,
+    public readonly workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
     private readonly _router: Router,
     private readonly _dragulaService: DragulaService,

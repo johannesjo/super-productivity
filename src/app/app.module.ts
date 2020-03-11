@@ -35,7 +35,7 @@ import {ConfigModule} from './features/config/config.module';
 import {ProjectModule} from './features/project/project.module';
 import {EntityDataModule} from '@ngrx/data';
 import {MaterialCssVarsModule} from 'angular-material-css-vars';
-import {ContextModule} from './context/context.module';
+import {WorkContextModule} from './features/work-context/work-context.module';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -50,7 +50,7 @@ export function createTranslateLoader(http: HttpClient) {
     // Those features need to be included first for store not to mess up, probably because we use it initially at many places
     ConfigModule,
     ProjectModule,
-    ContextModule,
+    WorkContextModule,
 
     // Local
     CoreModule,

@@ -49,7 +49,7 @@ import {obstructionReducer} from '../../features/metric/obstruction/store/obstru
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
-import {ContextState} from '../../context/context.model';
+import {WorkContextState} from '../../features/work-context/work-context.model';
 
 
 @Injectable({
@@ -64,7 +64,7 @@ export class PersistenceService {
   // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
-  context = this._cmBase<ContextState>(LS_CONTEXT, 'context');
+  context = this._cmBase<WorkContextState>(LS_CONTEXT, 'context');
 
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
