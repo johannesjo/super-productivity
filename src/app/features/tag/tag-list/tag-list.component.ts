@@ -9,7 +9,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
-import {Tag} from '../tag.model';
+import {Tag, TagCopy} from '../tag.model';
 import {TagService} from '../tag.service';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
@@ -34,13 +34,13 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
   @ViewChild('tagListEl', {static: true}) tagListEl;
 
-  editingTag: undefined | Partial<Tag> = undefined;
+  editingTag: undefined | Partial<TagCopy> = undefined;
   private _tagIds;
   private _tagIds$ = new BehaviorSubject([]);
   tags$: Observable<Tag[]> = this._tagIds$.pipe(
     switchMap((ids) => this._tagService.getTagsById$((ids))));
 
-  newTag: Partial<Tag> = {
+  newTag: Partial<TagCopy> = {
     name: '',
     color: '#FFDAB9'
   };

@@ -45,10 +45,11 @@ export class TagService {
     this._store$.dispatch(loadTagState({state}));
   }
 
-  addTag(tag: Tag) {
+  addTag(tag: Partial<Tag>): string {
+    const id = shortid();
     this._store$.dispatch(addTag({
       tag: {
-        id: shortid(),
+        id,
         name: tag.name,
         created: Date.now(),
         modified: Date.now(),
@@ -58,6 +59,7 @@ export class TagService {
         ...tag,
       }
     }));
+    return id;
   }
 
   deleteTag(id: string) {
