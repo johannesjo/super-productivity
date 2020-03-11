@@ -4,7 +4,7 @@
     <li *ngFor="let tag of tags$|async as tags" class="tag"
         [style.background-color]="tag.color"
       (click)="handleClickOnTag($event, tag)">
-      <label [attr.for]="'tag-input-' + tag.id" [style.color]="tag.color | findContrastColor" *ngIf="editingTag?.id !== tag.id">{{tag?.name}}</label>
+      <label [attr.for]="'tag-input-' + tag.id" [style.color]="tag.color | findContrastColor" *ngIf="editingTag?.id !== tag.id">{{tag?.title}}</label>
       <input type="text"
              size="1"
              [attr.id]="'tag-input-' + tag.id"
@@ -13,7 +13,7 @@
              (blur)="stopEditingTag();"
              (keydown)="onTagEditKeydown($event)"
              *ngIf="editingTag?.id === tag.id"
-             [(ngModel)]="editingTag.name"/>
+             [(ngModel)]="editingTag.title"/>
       <input type="color"
              *ngIf="editingTag?.id === tag.id"
              (change)="applyColorEdit()"
@@ -27,7 +27,7 @@
              (blur)="stopEditingTag();"
              (keydown)="onTagEditKeydown($event)"
              *ngIf="editingTag?.id === undefined"
-             [(ngModel)]="editingTag.name"/>
+             [(ngModel)]="editingTag.title"/>
     </li>
   </ul>
 </div>

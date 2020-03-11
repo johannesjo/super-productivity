@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {take} from 'rxjs/operators';
-import {initialTagState, selectAllTags, selectTagById, selectTagByName, selectTagsByIds,} from './store/tag.reducer';
-import {addTag, deleteTag, deleteTags, loadTagState, updateTag, upsertTag,} from './store/tag.actions';
+import {initialTagState, selectAllTags, selectTagById, selectTagByName, selectTagsByIds} from './store/tag.reducer';
+import {addTag, deleteTag, deleteTags, loadTagState, updateTag, upsertTag} from './store/tag.actions';
 import {Observable} from 'rxjs';
 import {Tag, TagState} from './tag.model';
 import shortid from 'shortid';
@@ -50,11 +50,12 @@ export class TagService {
     this._store$.dispatch(addTag({
       tag: {
         id,
-        name: tag.name,
+        title: tag.title || 'EMPTY',
         created: Date.now(),
         modified: Date.now(),
         icon: null,
         color: tag.color || '#FFDAB9',
+        taskIds: [],
         ...WORK_CONTEXT_DEFAULT_COMMON,
         ...tag,
       }
@@ -98,6 +99,8 @@ export class TagService {
         }
       };
     }
+    console.log(state);
+
     return state;
   }
 }

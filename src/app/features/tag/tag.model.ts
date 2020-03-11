@@ -5,7 +5,7 @@ import {WorkContextCommon} from '../work-context/work-context.model';
 export interface TagCopy extends WorkContextCommon {
   id: string;
   icon: string;
-  name: string;
+  title: string;
   created: number;
   modified: number;
   color: string;

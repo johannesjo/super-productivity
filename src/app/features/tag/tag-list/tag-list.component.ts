@@ -41,7 +41,7 @@ export class TagListComponent implements OnInit, AfterViewInit {
     switchMap((ids) => this._tagService.getTagsById$((ids))));
 
   newTag: Partial<TagCopy> = {
-    name: '',
+    title: '',
     color: '#FFDAB9'
   };
 
@@ -78,11 +78,11 @@ export class TagListComponent implements OnInit, AfterViewInit {
     this.tags$
       .pipe(take(1))
       .subscribe(tags => {
-        if (tags.map(t => t.name).indexOf(this.editingTag.name) !== -1) {
+        if (tags.map(t => t.title).indexOf(this.editingTag.title) !== -1) {
           // TODO: Add proper feedback
           console.log('Error: The requested tag is already present on this task!');
         } else {
-          this._tagService.getByName$(this.editingTag.name)
+          this._tagService.getByName$(this.editingTag.title)
             .pipe(take(1))
             .subscribe(match => {
 
@@ -126,7 +126,7 @@ export class TagListComponent implements OnInit, AfterViewInit {
       this.removedTagsFromTask.emit([tag.id]);
     } else {
       // Clone tag (tags are immutable)
-      this.editingTag = {name: tag.name, id: tag.id || undefined};
+      this.editingTag = {title: tag.title, id: tag.id || undefined};
       if (tag.color) {
         this.editingTag.color = tag.color;
       }

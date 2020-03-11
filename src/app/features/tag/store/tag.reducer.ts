@@ -24,7 +24,7 @@ export const selectTagByName = createSelector(
   selectTagFeatureState,
   (state, props: { name: string }): Tag | undefined => {
     const results = Object.values(state.entities).filter(
-      (tag: Tag) => tag.name === props.name
+      (tag: Tag) => tag.title === props.name
     ) as Tag[];
     return results.length ? results[0] : undefined;
   }

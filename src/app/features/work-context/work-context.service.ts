@@ -21,7 +21,6 @@ export class WorkContextService {
       switchMap(myDayTag => of([
           ({
             ...myDayTag,
-            title: myDayTag.name,
             taskIds: [],
           } as WorkContext)
         ])
