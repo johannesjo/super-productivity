@@ -16,7 +16,8 @@ import {
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_REPEAT_CFG_STATE,
-  LS_TASK_STATE
+  LS_TASK_STATE,
+  LS_TASK_TAG_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
@@ -36,6 +37,7 @@ import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
+import {tagReducer, TagState} from '../../features/tag/store/tag.reducer';
 import {Metric, MetricState} from '../../features/metric/metric.model';
 import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
@@ -48,6 +50,7 @@ import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-re
 import {metricReducer} from '../../features/metric/store/metric.reducer';
 import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
 import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
+import {Tag} from '../../features/tag/tag.model';
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
@@ -66,6 +69,12 @@ export class PersistenceService {
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+
+  taskTag = this._cmProject<TagState, Tag>(
+    LS_TASK_TAG_STATE,
+    'taskTag',
+    tagReducer);
+
   task = this._cmProject<TaskState, Task>(
     LS_TASK_STATE,
     'task',

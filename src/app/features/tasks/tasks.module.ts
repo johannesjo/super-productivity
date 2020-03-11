@@ -30,6 +30,8 @@ import {SubTaskTotalTimeEstimatePipe} from './pipes/sub-task-total-time-estimate
 import {TaskAdditionalInfoItemComponent} from './task-additional-info/task-additional-info-item/task-additional-info-item.component';
 import {TaskAdditionalInfoWrapperComponent} from './task-additional-info/task-additional-info-wrapper/task-additional-info-wrapper.component';
 import {BetterDrawerModule} from '../../ui/better-drawer/better-drawer.module';
+import {TagModule} from '../tag/tag.module';
+import {TagService} from '../tag/tag.service';
 
 @NgModule({
   imports: [
@@ -40,6 +42,7 @@ import {BetterDrawerModule} from '../../ui/better-drawer/better-drawer.module';
     AttachmentModule,
     ReactiveFormsModule,
     TaskRepeatCfgModule,
+    TagModule,
     StoreModule.forFeature(TASK_FEATURE_NAME, taskReducer),
     EffectsModule.forFeature([
       TaskDbEffects,
@@ -82,7 +85,8 @@ import {BetterDrawerModule} from '../../ui/better-drawer/better-drawer.module';
     DialogViewTaskReminderComponent,
     DialogAddTaskReminderComponent,
     DialogAddTimeEstimateForOtherDayComponent,
-  ]
+  ],
+  providers: [TagService]
 
 })
 export class TasksModule {

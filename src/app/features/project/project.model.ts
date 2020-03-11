@@ -9,6 +9,7 @@ import {ImprovementState} from '../metric/improvement/improvement.model';
 import {ObstructionState} from '../metric/obstruction/obstruction.model';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {HueValue} from 'angular-material-css-vars';
+import {Tag} from '../tag/tag.model';
 
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -80,6 +81,7 @@ export interface ProjectArchivedRelatedData {
   task?: TaskState;
   taskArchive?: EntityState<Task>;
   taskAttachment?: EntityState<Attachment>;
+  taskTag?: EntityState<Tag>;
   metric?: MetricState;
   improvement?: ImprovementState;
   obstruction?: ObstructionState;

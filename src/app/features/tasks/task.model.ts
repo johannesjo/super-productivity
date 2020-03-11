@@ -42,6 +42,7 @@ export interface TaskCopy {
   attachmentIds: string[];
   reminderId: string;
   repeatCfgId: string;
+  tagIds: string[];
 
   // issue stuff
   issueId: string;
@@ -78,6 +79,7 @@ export const DEFAULT_TASK: Task = {
   isDone: false,
   title: '',
   notes: '',
+  tagIds: [],
   parentId: null,
   reminderId: null,
   created: Date.now(),

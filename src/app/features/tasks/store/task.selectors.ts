@@ -240,3 +240,9 @@ export const selectTaskWithSubTasksByRepeatConfigId = createSelector(
   }
 );
 
+export const selectTasksByTag = createSelector(
+  selectAllTasksWithSubTasks,
+  (tasks: TaskWithSubTasks[], props: { tagId: string }) => {
+    return tasks.filter(task => task.tagIds.indexOf(props.tagId) !== -1);
+  }
+);
