@@ -34,7 +34,6 @@ export class TagListComponent implements OnInit, AfterViewInit {
 
   @ViewChild('tagListEl', {static: true}) tagListEl;
 
-  counter = 0;
   editingTag: undefined | Partial<Tag> = undefined;
   private _tagIds;
   private _tagIds$ = new BehaviorSubject([]);

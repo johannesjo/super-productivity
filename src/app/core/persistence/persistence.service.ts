@@ -84,10 +84,10 @@ export class PersistenceService {
   );
 
   // TASK_RELATED_MODELS
-  taskTag = this._cmProject<TagState, Tag>(
+  taskTag = this._cmBase<TagState>(
     LS_TASK_TAG_STATE,
-    'taskTag',
-    tagReducer);
+    'tag'
+  );
   taskAttachment = this._cmBase<AttachmentState>(
     LS_TASK_ATTACHMENT_STATE,
     'taskAttachment',

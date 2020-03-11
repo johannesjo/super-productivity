@@ -40,8 +40,8 @@ export class TagService {
     return this._store$.pipe(select(selectTagByName, {name}));
   }
 
-  public async loadStateForProject(projectId) {
-    const lsTagState = await this._persistenceService.taskTag.load(projectId) || initialTagState;
+  async load() {
+    const lsTagState = await this._persistenceService.taskTag.loadState() || initialTagState;
     this.loadState(lsTagState || initialTagState);
   }
 

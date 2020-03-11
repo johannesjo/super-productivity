@@ -29,6 +29,7 @@ import {LanguageService} from './core/language/language.service';
 import {ElectronService} from './core/electron/electron.service';
 import {AttachmentService} from './features/attachment/attachment.service';
 import {WorkContextService} from './features/work-context/work-context.service';
+import {TagService} from './features/tag/tag.service';
 
 
 @Component({
@@ -76,6 +77,7 @@ export class AppComponent implements OnDestroy {
     private _languageService: LanguageService,
     private _attachmentService: AttachmentService,
     private _workContextService: WorkContextService,
+    private _tagService: TagService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly taskService: TaskService,
@@ -106,6 +108,7 @@ export class AppComponent implements OnDestroy {
     this._projectService.load();
     this._configService.load();
     this._workContextService.load();
+    this._tagService.load();
 
     // init theme and body class handlers
     this._globalThemeService.init();

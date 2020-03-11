@@ -34,7 +34,7 @@ export class TagEffects {
   private _saveToLs([action, currentProjectId, tagState]) {
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
-      this._persistenceService.taskTag.save(currentProjectId, tagState);
+      this._persistenceService.taskTag.saveState(tagState);
     } else {
       throw new Error('No current project id');
     }

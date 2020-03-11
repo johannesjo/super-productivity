@@ -5,7 +5,7 @@ import {MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import * as moment from 'moment';
 import {convertToWesternArabic} from '../../util/numeric-converter';
 
-const MODEL_VERSION = 3.1;
+const MODEL_VERSION = 3.13;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState): TaskState => {

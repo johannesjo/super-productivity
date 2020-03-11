@@ -20,6 +20,7 @@ export interface AppBaseData {
   globalConfig: GlobalConfigState;
   reminders?: Reminder[];
   task: TaskState;
+  tag: TagState;
   taskArchive: TaskArchive;
   taskAttachment: AttachmentState;
   context: WorkContextState;
@@ -29,9 +30,6 @@ export interface AppBaseData {
 export interface AppDataForProjects {
   note?: {
     [key: string]: NoteState;
-  };
-  taskTag?: {
-    [key: string]: TagState
   };
   bookmark?: {
     [key: string]: BookmarkState;
