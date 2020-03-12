@@ -6,19 +6,23 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
 import {initialContextState, selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
-import {filter, map, switchMap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, switchMap} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
 import {TaskWithSubTasks} from '../tasks/task.model';
 import {ProjectService} from '../project/project.service';
+import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WorkContextService {
   activeWorkContextId$ = this._store$.pipe(select(selectActiveContextId));
-  activeWorkContextTypeAndId$ = this._store$.pipe(select(selectActiveContextTypeAndId));
+  activeWorkContextTypeAndId$ = this._store$.pipe(
+    select(selectActiveContextTypeAndId),
+    distinctUntilChanged(distinctUntilChangedObject)
+  );
   activeWorkContext$: Observable<WorkContext> = this.activeWorkContextTypeAndId$.pipe(
     switchMap(({activeId, activeType}) => {
       if (activeType === WorkContextType.TAG) {

@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {WorkViewPageComponent} from './pages/work-view-page/work-view-page.component';
+import {ProjectTaskPageComponent} from './pages/project-task-page/project-task-page.component';
 import {ConfigPageComponent} from './pages/config-page/config-page.component';
 import {ProjectPageComponent} from './pages/project-page/project-page.component';
 import {DailySummaryComponent} from './pages/daily-summary/daily-summary.component';
@@ -17,10 +17,13 @@ export const APP_ROUTES: Routes = [
   {path: 'metrics', component: MetricPageComponent, data: {page: 'metrics'}},
   {path: 'procrastination', component: ProcrastinationComponent, data: {page: 'procrastination'}},
   {path: 'daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
-  {path: 'tag/:id', component: TagTaskPageComponent, data: {page: 'tag'}},
   {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'worklog', component: WorklogComponent, data: {page: 'worklog'}},
+
+  {path: 'tag/:id', component: TagTaskPageComponent, data: {page: 'tag'}},
+
   {path: 'project-settings', component: ProjectSettingsComponent, data: {page: 'project-settings'}},
-  {path: 'project/:id', component: WorkViewPageComponent, data: {page: 'project'}},
+  {path: 'project/:id', component: ProjectTaskPageComponent, data: {page: 'project'}},
+
   {path: '**', redirectTo: 'tag/MY_DAY'}
 ];

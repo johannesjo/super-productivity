@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {WorkViewPageComponent} from './work-view-page.component';
+import {ProjectTaskPageComponent} from './project-task-page.component';
 import {WorkViewModule} from '../../features/work-view/work-view.module';
 
 @NgModule({
@@ -8,7 +8,7 @@ import {WorkViewModule} from '../../features/work-view/work-view.module';
     CommonModule,
     WorkViewModule,
   ],
-  declarations: [WorkViewPageComponent],
+  declarations: [ProjectTaskPageComponent],
 })
-export class WorkViewPageModule {
+export class ProjectTaskPageModule {
 }

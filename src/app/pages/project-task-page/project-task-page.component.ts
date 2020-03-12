@@ -3,11 +3,11 @@ import {TaskService} from '../../features/tasks/task.service';
 
 @Component({
   selector: 'work-view-page',
-  templateUrl: './work-view-page.component.html',
-  styleUrls: ['./work-view-page.component.scss'],
+  templateUrl: './project-task-page.component.html',
+  styleUrls: ['./project-task-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkViewPageComponent {
+export class ProjectTaskPageComponent {
   constructor(public taskService: TaskService) {
   }
 
