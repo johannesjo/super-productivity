@@ -1,33 +1,15 @@
-<div class="tags-container">
-  <ul class="tags" #tagListEl>
-    <li class="tags-icon"><mat-icon [inline]="true">style</mat-icon></li>
-    <li *ngFor="let tag of tags$|async as tags" class="tag"
+<div class="tags-container"
+     (click)="editTags()"
+     *ngIf="tags$|async as tags">
+  <ul class="tags"
+      [@standardList]="tags.length">
+    <li *ngFor="let tag of tags"
         [style.background-color]="tag.color"
-      (click)="handleClickOnTag($event, tag)">
-      <label [attr.for]="'tag-input-' + tag.id" [style.color]="tag.color | findContrastColor" *ngIf="editingTag?.id !== tag.id">{{tag?.title}}</label>
-      <input type="text"
-             size="1"
-             [attr.id]="'tag-input-' + tag.id"
-             [style.color]="editingTag.color | findContrastColor"
-             [style.background-color]="editingTag.color"
-             (blur)="stopEditingTag();"
-             (keydown)="onTagEditKeydown($event)"
-             *ngIf="editingTag?.id === tag.id"
-             [(ngModel)]="editingTag.title"/>
-      <input type="color"
-             *ngIf="editingTag?.id === tag.id"
-             (change)="applyColorEdit()"
-             [(ngModel)]="editingTag.color"/>
-    </li>
-    <li class="tag add-tag" (click)="handleClickOnTag($event, newTag)">
-      <label for="tag-input-newtag" class="add-tag-button" *ngIf="editingTag?.id !== undefined">+</label>
-      <input type="text"
-             size="4"
-             id="tag-input-newtag"
-             (blur)="stopEditingTag();"
-             (keydown)="onTagEditKeydown($event)"
-             *ngIf="editingTag?.id === undefined"
-             [(ngModel)]="editingTag.title"/>
+        class="tag"
+    >
+      <mat-icon *ngIf="tag.icon"
+                class="tag-ico">{{tag.icon}}</mat-icon>
+      <span class="tag-title">{{tag.title}}</span>
     </li>
   </ul>
 </div>

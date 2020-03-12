@@ -1,75 +1,61 @@
-.tags-container {
-  position: relative;
+@import "../../../../variables";
+
+:host {
+  display: block;
+  min-height: 24px;
 }
 
-.hidden {
+.tags-container {
+  position: relative;
+  //margin-left: 50px;
+  // Magic number to align icon with task text
+  margin-left: 46px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.isHidden {
   display: none;
 }
 
-
 .tags {
   list-style: none;
-  margin: 4px 0 0;
-}
-
-
-.tags li {
-  display: inline-block;
-  margin: 0 1px;
-
-}
-
-.tags-icon {
-  font-size: 1.2em;
-  line-height: 1.2em;
-  height: 1.4em;
-}
-
-.tag {
-  min-width: 1.4em  ;
-  padding: 0 4px;
-  //border-width: 1px;
-  //border-color: black;
-  //border-style: solid;
-  border-radius: 10%;
-  font-size: 0.8em;
-  height: 1.4em;
-  line-height: 1.4em;
-  text-align: center;
-  //background: #FFDAB9;
-}
-
-li.add-tag {
-  border-radius: 50%;
-  line-height: 1.2em;
-  border-style: solid;
-  border-width: 1px;
-}
-
-.tag input {
-  height: 1em;
-  box-sizing: content-box;
-  line-height: 1em;
-  font-size: 1em;
-  margin-top: -1px;
-  border-radius: 10%;
-}
-
-.tag input[type=text] {
-  min-width: 2.8em;
-}
-
-.tag input[type=color] {
-  width: 1.2em;
-  height: 1.4em;
-  border-width: 1px;
-  border-style: solid;
+  margin: $s*.5 0;
   padding: 0;
 }
 
-@-moz-document url-prefix() {
-  .tag input[type=color] {
-    width: 1em !important;
-    height: 1em !important;
-  }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  flex-direction: row;
+  margin: 0 1px;
+  min-width: 20px;
+  padding: 0 $s;
+  font-size: 10px;
+  border-radius: $s*2;
+  background: $c-primary;
+  color: $c-contrast;
+}
+
+$ico-size: 16px;
+$line-height: 14px;
+$ico-pad: 1px;
+$pad: ($ico-size - $line-height + $ico-pad*2)/2;
+
+.tag-title {
+  display: block;
+  font-size: 12px;
+  line-height: $line-height;
+  padding: $pad 0;
+}
+
+
+.tag-ico {
+  display: block;
+  margin-right: $s*.5;
+  margin-top: $ico-pad;
+  margin-bottom: $ico-pad;
+  font-size: $ico-size;
+  height: $ico-size;
+  width: $ico-size;
 }

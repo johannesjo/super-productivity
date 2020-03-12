@@ -47,7 +47,7 @@ import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-re
 import {metricReducer} from '../../features/metric/store/metric.reducer';
 import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
 import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
-import {Tag, TagState} from '../../features/tag/tag.model';
+import {TagState} from '../../features/tag/tag.model';
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
@@ -85,7 +85,7 @@ export class PersistenceService {
   // TASK_RELATED_MODELS
   tag = this._cmBase<TagState>(
     LS_TASK_TAG_STATE,
-    'tag'
+    'tag',
   );
   taskAttachment = this._cmBase<AttachmentState>(
     LS_TASK_ATTACHMENT_STATE,

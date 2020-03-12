@@ -5,7 +5,7 @@ export const MY_DAY_TAG: Tag = {
   id: 'MY_DAY',
   icon: 'wb_sunny',
   title: 'My Day',
-  color: 'red',
+  color: null,
   created: Date.now(),
   modified: Date.now(),
   taskIds: [],
