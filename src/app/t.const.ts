@@ -465,6 +465,13 @@ export const T = {
     'REMINDER': {
       'S_REMINDER_ERR': 'F.REMINDER.S_REMINDER_ERR'
     },
+    'TAG': {
+      'D_EDIT': {
+        'ADD': 'F.TAG.D_EDIT.ADD',
+        'EDIT': 'F.TAG.D_EDIT.EDIT',
+        'LABEL': 'F.TAG.D_EDIT.LABEL'
+      }
+    },
     'TASK': {
       'ADDITIONAL_INFO': {
         'ADD_ATTACHMENT': 'F.TASK.ADDITIONAL_INFO.ADD_ATTACHMENT',

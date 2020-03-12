@@ -394,10 +394,7 @@
   </div>
 
   <tag-list *ngIf="task.tagIds?.length"
-            (addedTagsToTask)="onTagsAdded($event)"
-            (removedTagsFromTask)="onTagsRemoved($event)"
-            (replacedTagForTask)="onTagReplaced($event)"
-            [tagIds]="task.tagIds"></tag-list>
+            [task]="task"></tag-list>
 
   <progress-bar *ngIf="isCurrent"
                 [cssClass]="'bg-accent'"

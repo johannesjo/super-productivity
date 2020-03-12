@@ -30,6 +30,7 @@ export class ChipListInputComponent {
   @Input() additionalActionTooltip: string;
   @Input() additionalActionTooltipUnToggle: string;
   @Input() toggledItems: string[];
+  @Input() isAutoFocus: boolean;
   suggestionsIn: Suggestion[];
   @Output() addItem = new EventEmitter<string>();
   @Output() addNewItem = new EventEmitter<string>();

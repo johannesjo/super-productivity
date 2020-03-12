@@ -398,30 +398,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.updateTags(this.task.id, tagIds, this.task.tagIds);
   }
 
-  onTagsAdded(tagIds: string[]) {
-    tagIds.forEach(tagId => {
-      if (this.task.tagIds && this.task.tagIds.indexOf(tagId) !== -1) {
-        // TODO: Replace with proper notification or fail silently
-        console.warn(`WARNING: Tag '${tagId}' already exists on task!`);
-      }
-    });
-    this.onTagsUpdated(unique([...this.task.tagIds, ...tagIds]));
-  }
-
-  onTagsRemoved(tagIds: string[]) {
-    this._taskService.removeTags(this.task, tagIds);
-    this._taskService.purgeUnusedTags(tagIds);
-  }
-
-  onTagReplaced([oldTagId, newTagId]: string[]) {
-    const newTags = [...this.task.tagIds, newTagId];
-    const removeId = newTags.indexOf(oldTagId);
-    if (removeId !== -1) {
-      newTags.splice(removeId, 1);
-    }
-    this.onTagsUpdated(newTags);
-  }
-
   onPanStart(ev) {
     if (!IS_TOUCH) {
       return;

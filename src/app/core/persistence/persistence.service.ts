@@ -18,7 +18,7 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_REPEAT_CFG_STATE,
   LS_TASK_STATE,
-  LS_TASK_TAG_STATE
+  LS_TAG_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
@@ -84,7 +84,7 @@ export class PersistenceService {
 
   // TASK_RELATED_MODELS
   tag = this._cmBase<TagState>(
-    LS_TASK_TAG_STATE,
+    LS_TAG_STATE,
     'tag',
   );
   taskAttachment = this._cmBase<AttachmentState>(

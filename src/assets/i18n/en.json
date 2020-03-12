@@ -465,6 +465,13 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Error for reminder interface"
     },
+    "TAG": {
+      "D_EDIT": {
+        "ADD": "Add tags for \"{{title}}\"",
+        "EDIT": "Edit tags for \"{{title}}\"",
+        "LABEL": "Tags"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Add attachment",

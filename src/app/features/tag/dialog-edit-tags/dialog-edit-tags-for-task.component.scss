@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  max-width: 600px;
+  width: 70vw;
+
+  :host-context([dir=rtl]) {
+    direction: rtl;
+  }
+}
+
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+}

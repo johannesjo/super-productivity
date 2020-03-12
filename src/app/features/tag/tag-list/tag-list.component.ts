@@ -5,6 +5,8 @@ import {TagService} from '../tag.service';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
+import {Task} from '../../tasks/task.model';
+import {DialogEditTagsForTaskComponent} from '../dialog-edit-tags/dialog-edit-tags-for-task.component';
 
 @Component({
   selector: 'tag-list',
@@ -14,9 +16,12 @@ import {MatDialog} from '@angular/material/dialog';
   animations: [standardListAnimation]
 })
 export class TagListComponent {
-  @Input() set tagIds(val: string[]) {
-    this._tagIds$.next(val);
+  @Input() set task(task: Task) {
+    this._task = task;
+    this._tagIds$.next(task.tagIds);
   }
+
+  private _task: Task;
 
   @Output() addedTagsToTask: EventEmitter<string[]> = new EventEmitter();
   @Output() removedTagsFromTask: EventEmitter<string[]> = new EventEmitter();
@@ -35,6 +40,11 @@ export class TagListComponent {
 
 
   editTags() {
-
+    this._matDialog.open(DialogEditTagsForTaskComponent, {
+      restoreFocus: true,
+      data: {
+        task: this._task,
+      },
+    });
   }
 }

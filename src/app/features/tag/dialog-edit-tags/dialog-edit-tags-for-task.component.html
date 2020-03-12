@@ -1,0 +1,36 @@
+<form (submit)="save()">
+  <h1 mat-dialog-title>{{isEdit
+    ? (T.F.TAG.D_EDIT.EDIT|translate:{title: title})
+    : (T.F.TAG.D_EDIT.ADD|translate:{title: title})}}</h1>
+
+  <mat-dialog-content>
+    <h3 class="mat-h3"></h3>
+
+    <div class="form-wrapper">
+      <chip-list-input (addItem)="addTag($event)"
+                       (addNewItem)="addNewTag($event)"
+                       (removeItem)="removeTag($event)"
+                       [label]="T.F.TAG.D_EDIT.LABEL|translate"
+                       [model]="newTagIds"
+                       [isAutoFocus]="true"
+                       [suggestions]="(tagSuggestions$|async)"></chip-list-input>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button [mat-dialog-close]="true"
+            color="primary"
+            mat-button
+            type="button">
+      {{T.G.CANCEL|translate}}
+    </button>
+
+    <button (click)="save()"
+            color="primary"
+            mat-stroked-button
+            type="submit">
+      <mat-icon>save</mat-icon>
+      {{T.G.SAVE|translate}}
+    </button>
+  </mat-dialog-actions>
+</form>

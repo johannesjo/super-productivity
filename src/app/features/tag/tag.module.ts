@@ -7,7 +7,7 @@ import {TAG_FEATURE_NAME, tagReducer} from './store/tag.reducer';
 import {UiModule} from '../../ui/ui.module';
 import {FormsModule} from '@angular/forms';
 import {TagListComponent} from './tag-list/tag-list.component';
-import {FindContrastColorPipe} from './find-contrast-color.pipe';
+import {DialogEditTagsForTaskComponent} from './dialog-edit-tags/dialog-edit-tags-for-task.component';
 
 @NgModule({
   imports: [
@@ -19,9 +19,14 @@ import {FindContrastColorPipe} from './find-contrast-color.pipe';
   ],
   declarations: [
     TagListComponent,
-    FindContrastColorPipe
+    DialogEditTagsForTaskComponent,
+    // FindContrastColorPipe
+  ],
+  entryComponents: [
+    DialogEditTagsForTaskComponent,
   ],
   exports: [
+    DialogEditTagsForTaskComponent,
     TagListComponent
   ],
 })

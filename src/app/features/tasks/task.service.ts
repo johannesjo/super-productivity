@@ -72,7 +72,8 @@ import {
   selectTaskByIssueId,
   selectTaskEntities,
   selectTasksByRepeatConfigId,
-  selectTasksByTag, selectTasksWithSubTasksByIds,
+  selectTasksByTag,
+  selectTasksWithSubTasksByIds,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
@@ -87,6 +88,7 @@ import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
 import {TagService} from '../tag/tag.service';
+import {MY_DAY_TAG} from '../tag/tag.const';
 
 
 @Injectable({
@@ -374,7 +376,7 @@ export class TaskService {
         .pipe(take(1))
         .subscribe(tasks => {
           console.log(`Tag is present on ${tasks.length} tasks => ${tasks.length ? 'keeping...' : 'deleting...'}`);
-          if (tasks.length === 0) {
+          if (tasks.length === 0 && tagId !== MY_DAY_TAG.id) {
             this._tagService.removeTag(tagId);
           }
         });

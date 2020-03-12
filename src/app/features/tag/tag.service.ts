@@ -54,7 +54,7 @@ export class TagService {
         created: Date.now(),
         modified: Date.now(),
         icon: null,
-        color: tag.color || '#FFDAB9',
+        color: tag.color || null,
         taskIds: [],
         ...WORK_CONTEXT_DEFAULT_COMMON,
         ...tag,
