@@ -7,19 +7,30 @@ import {MatDialog} from '@angular/material/dialog';
 import {THEME_COLOR_MAP} from '../../app.constants';
 import {Router} from '@angular/router';
 import {DragulaService} from 'ng2-dragula';
-import {Subscription} from 'rxjs';
+import {BehaviorSubject, of, Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {standardListAnimation} from '../../ui/animations/standard-list.ani';
+import {map, switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'side-nav',
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation],
 })
 export class SideNavComponent implements OnDestroy {
-
   @Output() scrollToNotes = new EventEmitter<void>();
+
+  isProjectsExpanded$ = new BehaviorSubject(false);
+  isProjectsExpanded = false;
+  projectList$ = this.isProjectsExpanded$.pipe(
+    switchMap(isExpanded => isExpanded
+      ? this.projectService.list$
+      : this.projectService.currentProject$.pipe(map(p => [p]))
+    )
+  );
 
   T = T;
   PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
@@ -34,10 +45,12 @@ export class SideNavComponent implements OnDestroy {
     private readonly _router: Router,
     private readonly _dragulaService: DragulaService,
   ) {
+    this.projectList$.subscribe((v) => console.log('projectList$', v));
+
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
       moves: (el, container, handle) => {
-        return handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
+        return this.isProjectsExpanded && handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
       }
     });
     this._subs.add(this._dragulaService.dropModel(this.PROJECTS_SIDE_NAV)
@@ -81,5 +94,10 @@ export class SideNavComponent implements OnDestroy {
 
   onScrollToNotesClick() {
     this.scrollToNotes.emit();
+  }
+
+  toggleExpandProjects() {
+    this.isProjectsExpanded = !this.isProjectsExpanded;
+    this.isProjectsExpanded$.next(this.isProjectsExpanded);
   }
 }

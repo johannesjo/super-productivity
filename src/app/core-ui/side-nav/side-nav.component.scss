@@ -108,6 +108,23 @@ section {
   }
 }
 
+.expand-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+
+  ::ng-deep mat-icon:last-of-type {
+    margin-left: auto;
+    margin-right: 0;
+    transition: $transition-standard;
+  }
+
+  &.isExpanded ::ng-deep mat-icon:last-of-type {
+    transform: rotate(180deg);
+  }
+}
+
 
 .project,
 .route-link {

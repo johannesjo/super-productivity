@@ -22,10 +22,20 @@
   </button>
 </section>
 
-<section class="projects">
-  <div [dragulaModel]="projectService.list$|async"
+<section class="projects"
+         *ngIf="projectList$|async as projectList">
+  <button mat-menu-item
+          class="expand-btn"
+          [class.isExpanded]="isProjectsExpanded"
+          (click)="toggleExpandProjects()">
+    <span class="title">Projects</span>
+    <mat-icon>expand_more</mat-icon>
+  </button>
+
+  <div [dragulaModel]="projectList"
+       [@standardList]="projectList?.length"
        [dragula]="PROJECTS_SIDE_NAV">
-    <div *ngFor="let project of (projectService.list$|async); trackBy: trackById;"
+    <div *ngFor="let project of projectList; trackBy: trackById;"
          [class.isCurrentProject]="project.id===(projectService.currentId$|async)"
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
@@ -48,6 +58,7 @@
     </div>
   </div>
   <button (click)="addProject()"
+          *ngIf="isProjectsExpanded"
           mat-menu-item>
     <mat-icon>add</mat-icon>
     {{T.MH.CREATE_PROJECT|translate}}
