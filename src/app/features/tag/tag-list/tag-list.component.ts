@@ -47,4 +47,10 @@ export class TagListComponent {
       },
     });
   }
+
+  trackByFn(i: number, tag: Tag) {
+    return tag
+      ? tag.id
+      : i;
+  }
 }

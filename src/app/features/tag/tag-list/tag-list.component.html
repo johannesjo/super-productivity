@@ -3,7 +3,7 @@
      *ngIf="tags$|async as tags">
   <ul class="tags"
       [@standardList]="tags.length">
-    <li *ngFor="let tag of tags"
+    <li *ngFor="let tag of tags; trackBy: trackByFn"
         [style.background-color]="tag.color"
         class="tag"
     >
