@@ -8,6 +8,13 @@
   min-height: 100vh;
 }
 
+:host {
+  button {
+    height: 44px !important;
+    line-height: 44px !important;
+  }
+}
+
 section {
   display: flex;
   flex-direction: column;
