@@ -24,7 +24,7 @@ h2 {
 }
 
 .wrapper {
-  overflow: hidden;
+  overflow: auto;
   height: 100%;
   width: 100%;
   position: absolute;
@@ -32,6 +32,10 @@ h2 {
   left: 0;
 
   transition: $transition-enter;
+
+  &.isShowBacklog {
+    overflow: hidden;
+  }
 
   &.isFadeOut {
     transition: $transition-ultra-fast;

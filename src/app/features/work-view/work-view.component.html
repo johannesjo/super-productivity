@@ -2,7 +2,8 @@
   *ngIf="!(projectService.isProjectChangingWithDelay$|async)"
   @projectChange>
   <div #containerEl
-       class="wrapper">
+       class="wrapper"
+       [class.isShowBacklog]="isShowBacklog">
     <div #splitTopEl
          class="today">
 
