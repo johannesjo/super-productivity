@@ -25,6 +25,7 @@ export class MainHeaderComponent implements OnInit {
 
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
+  // TODO fix
   isShowTaskTitle$: Observable<boolean> = combineLatest([
     this._router.events.pipe(
       filter(event => event instanceof NavigationStart),

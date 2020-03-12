@@ -9,9 +9,10 @@
 
   <!-- TODO fix link -->
   <div [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
+       *ngIf="(workContextService.activeWorkContext$|async) as activeWorkContext"
        class="current-work-context-title"
        mat-ripple
-       routerLink="work-view">{{(workContextService.activeWorkContext$|async)?.title}}</div>
+       [routerLink]="activeWorkContext.routerLink">{{activeWorkContext.title}}</div>
 
   <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
           class="project-settings-btn"

@@ -26,7 +26,12 @@ export class WorkContextService {
   activeWorkContext$: Observable<WorkContext> = this.activeWorkContextTypeAndId$.pipe(
     switchMap(({activeId, activeType}) => {
       if (activeType === WorkContextType.TAG) {
-        return this._tagService.getTagById$(activeId);
+        return this._tagService.getTagById$(activeId).pipe(
+          map(tag => ({
+            ...tag,
+            routerLink: `tag/${tag.id}`
+          }))
+        );
       }
       if (activeType === WorkContextType.PROJECT) {
         return this._projectService.getByIdLive$(activeId).pipe(
@@ -37,6 +42,7 @@ export class WorkContextService {
             icon: null,
             taskIds: project.todaysTaskIds || [],
             backlogTaskIds: project.backlogTaskIds || [],
+            routerLink: `project/${project.id}`
           })),
         );
       }
@@ -61,6 +67,7 @@ export class WorkContextService {
       switchMap(myDayTag => of([
           ({
             ...myDayTag,
+            routerLink: `tag/${myDayTag.id}`
           } as WorkContext)
         ])
       ),
