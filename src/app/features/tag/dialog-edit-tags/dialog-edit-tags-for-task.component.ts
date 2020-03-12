@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {T} from '../../../t.const';
 import {TaskService} from '../../tasks/task.service';
@@ -7,6 +7,7 @@ import {truncate} from '../../../util/truncate';
 import {TagService} from '../tag.service';
 import {Task} from '../../tasks/task.model';
 import {unique} from '../../../util/unique';
+import {Observable, Subscription} from 'rxjs';
 
 @Component({
   selector: 'dialog-edit-tags',
@@ -14,14 +15,16 @@ import {unique} from '../../../util/unique';
   styleUrls: ['./dialog-edit-tags-for-task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogEditTagsForTaskComponent {
+export class DialogEditTagsForTaskComponent implements OnDestroy {
   T = T;
   title: string = truncate(this.data.task.title, 20);
+  task$: Observable<Task> = this._taskService.getByIdLive$(this.data.task.id);
   task: Task = this.data.task;
-  newTagIds: string[] = [...this.data.task.tagIds];
+  tagIds: string[] = [...this.data.task.tagIds];
   isEdit = this.data.task.tagIds && this.data.task.tagIds.length > 0;
-
   tagSuggestions$ = this._tagService.tags$;
+
+  private _subs = new Subscription();
 
   constructor(
     private _taskService: TaskService,
@@ -29,11 +32,14 @@ export class DialogEditTagsForTaskComponent {
     private _matDialogRef: MatDialogRef<DialogEditTagsForTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogEditTagsForTaskPayload,
   ) {
+    this._subs.add(this.task$.subscribe(task => {
+      this.tagIds = task.tagIds;
+      this.task = task;
+    }));
   }
 
-  save() {
-    this._taskService.updateTags(this.data.task.id, this.newTagIds, this.data.task.tagIds);
-    this.close();
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   close() {
@@ -41,16 +47,16 @@ export class DialogEditTagsForTaskComponent {
   }
 
   addTag(id: string) {
-    this._updateTags(unique([...this.newTagIds, id]));
+    this._updateTags(unique([...this.tagIds, id]));
   }
 
   addNewTag(title: string) {
     const id = this._tagService.addTag({title});
-    this._updateTags(unique([...this.newTagIds, id]));
+    this._updateTags(unique([...this.tagIds, id]));
   }
 
   removeTag(id: string) {
-    const updatedTagIds = this.newTagIds.filter(tagId => tagId !== id);
+    const updatedTagIds = this.tagIds.filter(tagId => tagId !== id);
     this._updateTags(updatedTagIds);
   }
 

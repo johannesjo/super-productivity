@@ -513,6 +513,10 @@ export class TaskService {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
 
+  getByIdLive$(id: string): Observable<Task> {
+    return this._store.pipe(select(selectTaskById, {id}));
+  }
+
   getByIds$(ids: string[]): Observable<TaskWithSubTasks[]> {
     return this._store.pipe(select(selectTasksWithSubTasksByIds, {ids}));
   }
