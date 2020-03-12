@@ -1,5 +1,5 @@
 import * as contextActions from './work-context.actions';
-import {WorkContextState} from '../work-context.model';
+import {WorkContextState, WorkContextType} from '../work-context.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'context';
@@ -7,6 +7,17 @@ export const WORK_CONTEXT_FEATURE_NAME = 'context';
 
 export const selectContextFeatureState = createFeatureSelector<WorkContextState>(WORK_CONTEXT_FEATURE_NAME);
 export const selectActiveContextId = createSelector(selectContextFeatureState, (state) => state.activeId);
+export const selectActiveContextType = createSelector(selectContextFeatureState, (state) => state.activeType);
+
+export const selectActiveContextTypeAndId = createSelector(selectContextFeatureState, (state): {
+  activeId: string;
+  activeType: WorkContextType;
+  // additional entities state properties
+} => ({
+  activeType: state.activeType,
+  activeId: state.activeId,
+}));
+
 
 export const initialContextState: WorkContextState = {
   activeId: null,

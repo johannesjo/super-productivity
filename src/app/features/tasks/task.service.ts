@@ -72,7 +72,7 @@ import {
   selectTaskByIssueId,
   selectTaskEntities,
   selectTasksByRepeatConfigId,
-  selectTasksByTag,
+  selectTasksByTag, selectTasksWithSubTasksByIds,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
@@ -509,6 +509,10 @@ export class TaskService {
   // ------
   getById$(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
+  }
+
+  getByIds$(ids: string[]): Observable<TaskWithSubTasks[]> {
+    return this._store.pipe(select(selectTasksWithSubTasksByIds, {ids}));
   }
 
   getByIdWithSubTaskData$(id: string): Observable<TaskWithSubTasks> {

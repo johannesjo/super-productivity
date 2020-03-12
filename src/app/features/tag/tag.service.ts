@@ -23,11 +23,11 @@ export class TagService {
   }
 
   getTagById$(id: string): Observable<Tag> {
-    return this._store$.pipe(select(selectTagById, {id}), take(1));
+    return this._store$.pipe(select(selectTagById, {id}));
   }
 
   getTagsById$(ids: string[]): Observable<Tag[]> {
-    return this._store$.pipe(select(selectTagsByIds, {ids}), take(1));
+    return this._store$.pipe(select(selectTagsByIds, {ids}));
   }
 
   getByName$(name: string): Observable<Tag> {

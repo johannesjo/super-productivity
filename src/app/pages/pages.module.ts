@@ -8,7 +8,7 @@ import {MetricPageModule} from './metric-page/metric-page.module';
 import {SchedulePageModule} from './schedule-page/schedule-page.module';
 import {WorklogPageModule} from './worklog-page/worklog-page.module';
 import {ProjectSettingsModule} from './project-settings/project-settings.module';
-import {NonProjectContextPageModule} from './non-project-context-page/non-project-context-page.module';
+import {TagTaskPageModule} from './tag-task-page/tag-task-page.module';
 
 @NgModule({
   imports: [
@@ -21,7 +21,7 @@ import {NonProjectContextPageModule} from './non-project-context-page/non-projec
     WorklogPageModule,
     SchedulePageModule,
     ProjectSettingsModule,
-    NonProjectContextPageModule,
+    TagTaskPageModule,
   ],
   declarations: []
 })

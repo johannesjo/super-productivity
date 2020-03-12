@@ -9,10 +9,9 @@
   <button *ngFor="let context of workContextService.mainWorkContexts$|async"
           class="route-link"
           mat-menu-item
-          [routerLink]="['context', context.id]"
-  >
+          [routerLink]="['tag', context.id]">
     <mat-icon>{{context.icon}}</mat-icon>
-    {{context.isTranslate ? (context.title|translate) : context.title}}
+    {{ context.title}}
   </button>
   <button class="route-link"
           mat-menu-item

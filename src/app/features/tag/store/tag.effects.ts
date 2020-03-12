@@ -5,6 +5,7 @@ import {select, Store} from '@ngrx/store';
 import * as tagActions from './tag.actions';
 import {selectTagFeatureState} from './tag.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {TaskActionTypes} from '../../tasks/store/task.actions';
 
 
 @Injectable()
@@ -17,6 +18,7 @@ export class TagEffects {
       tagActions.upsertTag,
       tagActions.deleteTag,
       tagActions.deleteTags,
+      TaskActionTypes.UpdateTaskTags,
     ),
     withLatestFrom(
       this._store$.pipe(select(selectTagFeatureState)),

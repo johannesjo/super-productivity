@@ -34,6 +34,7 @@ export class TaskDbEffects {
         TaskActionTypes.StartFirstStartable,
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
+        TaskActionTypes.UpdateTaskTags,
         TaskActionTypes.Move,
         TaskActionTypes.MoveToArchive,
         TaskActionTypes.MoveToOtherProject,

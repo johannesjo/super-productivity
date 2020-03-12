@@ -1,15 +1,16 @@
 import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {Observable, of, timer} from 'rxjs';
+import {select, Store} from '@ngrx/store';
+import {EMPTY, Observable, of} from 'rxjs';
 import {WorkContext, WorkContextState, WorkContextType} from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
-import {initialContextState} from './store/work-context.reducer';
+import {initialContextState, selectActiveContextTypeAndId} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
-import {concatMap, filter, switchMap, tap} from 'rxjs/operators';
+import {filter, map, switchMap} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
+import {TaskWithSubTasks} from '../tasks/task.model';
 
 @Injectable({
   providedIn: 'root',
@@ -21,14 +22,39 @@ export class WorkContextService {
       switchMap(myDayTag => of([
           ({
             ...myDayTag,
-            taskIds: [],
           } as WorkContext)
         ])
       ),
     );
+  //
+  // activeWorkContext$ = this._router.events.pipe(
+  //   filter(event => event instanceof NavigationStart),
+  // );
 
-  activeWorkContext$ = this._router.events.pipe(
-    filter(event => event instanceof NavigationStart),
+
+  activeWorkContext$ = this._store$.pipe(
+    select(selectActiveContextTypeAndId),
+    switchMap(({activeId, activeType}) => {
+      if (activeType === WorkContextType.TAG) {
+        return this._tagService.getTagById$(activeId);
+      }
+      if (activeType === WorkContextType.PROJECT) {
+        // TODO map project
+        return EMPTY;
+      }
+      return EMPTY;
+    }),
+    filter(ctx => !!ctx),
+  );
+
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
+    switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.taskIds)),
+    map(tasks => tasks.filter(task => !task.isDone))
+  );
+
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
+    switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.taskIds)),
+    map(tasks => tasks.filter(task => task.isDone))
   );
 
   constructor(
@@ -38,6 +64,10 @@ export class WorkContextService {
     private _tagService: TagService,
     private _router: Router,
   ) {
+    this.activeWorkContext$.subscribe((v) => console.log('activeWorkContext$', v));
+
+    this.undoneTasks$.subscribe((v) => console.log('undoneTasks$', v));
+
 
     this._router.events.pipe(
       filter(event => event instanceof NavigationStart),
@@ -45,7 +75,7 @@ export class WorkContextService {
         const split = url.split('/');
         const id = split[split.length - 1];
 
-        if (url.match('context')) {
+        if (url.match('tag')) {
           this.setActiveContext(id, WorkContextType.TAG);
         } else {
           this.setActiveContext(id, WorkContextType.PROJECT);
@@ -61,8 +91,8 @@ export class WorkContextService {
     let url;
     switch (activeType) {
       case WorkContextType.TAG:
-        url = `context/${activeId}`;
-        this._router.navigate(['/context', activeId]);
+        url = `tag/${activeId}`;
+        this._router.navigate(['/tag', activeId]);
         break;
       case WorkContextType.PROJECT:
         // url = `work-view/${state.activeId}`;

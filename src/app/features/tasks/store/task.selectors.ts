@@ -178,6 +178,12 @@ export const selectTaskById = createSelector(
   (state, props: { id: string }): Task => state.entities[props.id]
 );
 
+export const selectTasksWithSubTasksByIds = createSelector(
+  selectTaskFeatureState,
+  (state, props: { ids: string[] }): TaskWithSubTasks[] =>
+    props.ids.map(id => mapSubTasksToTask(state.entities[id], state))
+);
+
 export const selectTaskByIdWithSubTaskData = createSelector(
   selectTaskFeatureState,
   (state, props: { id: string }): TaskWithSubTasks => {
