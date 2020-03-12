@@ -9,9 +9,10 @@
   position: relative;
   //margin-left: 50px;
   // Magic number to align icon with task text
-  margin-left: 46px;
   cursor: pointer;
   user-select: none;
+  margin: $s*.25 0 $s;
+  margin-left: 46px;
 }
 
 .isHidden {
@@ -20,18 +21,19 @@
 
 .tags {
   list-style: none;
-  margin: $s*.5 0;
   padding: 0;
+  margin: 0;
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .tag {
   display: inline-flex;
   align-items: center;
   flex-direction: row;
-  margin: 0 2px;
+  margin: 2px;
   min-width: 20px;
   padding: 0 $s;
   font-size: 10px;
