@@ -6,7 +6,7 @@ import {
   GlobalConfigSectionKey,
   GlobalConfigState
 } from '../../features/config/global-config.model';
-import {Project, ProjectCfgFormKey, ProjectThemeCfg} from '../../features/project/project.model';
+import {Project, ProjectCfgFormKey} from '../../features/project/project.model';
 import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue.model';
 import {Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
@@ -20,7 +20,7 @@ import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-for
 import {IS_ELECTRON} from '../../app.constants';
 import {DEFAULT_JIRA_CFG} from '../../features/issue/providers/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../features/issue/providers/github/github.const';
-import {WorkContextAdvancedCfg} from '../../features/work-context/work-context.model';
+import {WorkContextAdvancedCfg, WorkContextThemeCfg} from '../../features/work-context/work-context.model';
 
 @Component({
   selector: 'project-settings',
@@ -30,13 +30,13 @@ import {WorkContextAdvancedCfg} from '../../features/work-context/work-context.m
 })
 export class ProjectSettingsComponent implements OnInit, OnDestroy {
   T = T;
-  projectThemeSettingsFormCfg: ConfigFormSection<ProjectThemeCfg>;
+  projectThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;
   globalConfigFormCfg: ConfigFormConfig;
   basicFormCfg: ConfigFormSection<Project>;
 
   currentProject: Project;
-  currentProjectTheme: ProjectThemeCfg;
+  currentProjectTheme: WorkContextThemeCfg;
   projectCfg: WorkContextAdvancedCfg;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   globalCfg: GlobalConfigState;
@@ -85,7 +85,7 @@ export class ProjectSettingsComponent implements OnInit, OnDestroy {
     return section.key;
   }
 
-  saveProjectThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: ProjectThemeCfg }) {
+  saveProjectThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: WorkContextThemeCfg }) {
     if (!$event.config) {
       throw new Error('Not enough data');
     } else {

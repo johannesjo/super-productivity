@@ -1,7 +1,7 @@
 import {ProjectState} from './store/project.reducer';
 import {Dictionary} from '@ngrx/entity';
 import {Project} from './project.model';
-import {DEFAULT_PROJECT, DEFAULT_PROJECT_THEME} from './project.const';
+import {DEFAULT_PROJECT} from './project.const';
 import {DEFAULT_ISSUE_PROVIDER_CFGS, issueProviderKeys} from '../issue/issue.const';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {getYesterdaysDate} from '../../util/get-yesterdays-date';
@@ -12,6 +12,7 @@ import {convertToWesternArabic} from '../../util/numeric-converter';
 import {LS_ISSUE_STATE, LS_PROJECT_PREFIX} from '../../core/persistence/ls-keys.const';
 import {IssueProviderKey} from '../issue/issue.model';
 import * as localForage from 'localforage';
+import {WORK_CONTEXT_DEFAULT_THEME} from '../work-context/work-context.const';
 
 const MODEL_VERSION = 3;
 
@@ -110,12 +111,12 @@ const _updateThemeModel = (project: Project): Project => {
       : {
         ...project,
         theme: {
-          ...DEFAULT_PROJECT_THEME,
+          ...WORK_CONTEXT_DEFAULT_THEME,
           // tslint:disable-next-line
           primary: (project.themeColor)
             // tslint:disable-next-line
             ? THEME_COLOR_MAP[project.themeColor]
-            : DEFAULT_PROJECT_THEME.primary,
+            : WORK_CONTEXT_DEFAULT_THEME.primary,
           // tslint:disable-next-line
         }
       };

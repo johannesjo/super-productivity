@@ -1,4 +1,5 @@
 import {WorklogExportSettings} from '../worklog/worklog.model';
+import {HueValue} from 'angular-material-css-vars';
 
 export interface BreakTimeCopy {
   [key: string]: number;
@@ -22,6 +23,17 @@ export type WorkContextAdvancedCfg = Readonly<{
   worklogExportSettings: WorklogExportSettings;
 }>;
 
+export type WorkContextThemeCfg = Readonly<{
+  isAutoContrast: boolean;
+  isDisableBackgroundGradient: boolean;
+  primary: string;
+  huePrimary: HueValue;
+  accent: string;
+  hueAccent: HueValue;
+  warn: string;
+  hueWarn: HueValue;
+}>;
+
 export interface WorkContextCommon {
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
@@ -29,6 +41,7 @@ export interface WorkContextCommon {
   breakTime: BreakTime;
   breakNr: BreakNr;
   advancedCfg: WorkContextAdvancedCfg;
+  theme: WorkContextThemeCfg;
 }
 
 export type WorkContextAdvancedCfgKey = keyof WorkContextAdvancedCfg;

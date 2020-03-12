@@ -4,7 +4,6 @@ import {
   ExportedProject,
   Project,
   ProjectBasicCfg,
-  ProjectThemeCfg,
 } from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
@@ -52,7 +51,7 @@ import {
   BreakNr,
   BreakTime,
   WorkContextAdvancedCfg,
-  WorkContextAdvancedCfgKey
+  WorkContextAdvancedCfgKey, WorkContextThemeCfg
 } from '../work-context/work-context.model';
 
 @Injectable({
@@ -72,7 +71,7 @@ export class ProjectService {
     // TODO investigate share replay issues
     shareReplay(1),
   );
-  currentTheme$: Observable<ProjectThemeCfg> = this._store$.pipe(
+  currentTheme$: Observable<WorkContextThemeCfg> = this._store$.pipe(
     select(selectProjectThemeCfg),
   );
   currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(

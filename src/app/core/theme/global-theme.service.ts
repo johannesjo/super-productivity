@@ -3,7 +3,6 @@ import {BodyClass, IS_ELECTRON} from '../../app.constants';
 import {IS_MAC} from '../../util/is-mac';
 import {take} from 'rxjs/operators';
 import {isTouch} from '../../util/is-touch';
-import {ProjectThemeCfg} from '../../features/project/project.model';
 import {MaterialCssVarsService} from 'angular-material-css-vars';
 import {DOCUMENT} from '@angular/common';
 import {ProjectService} from '../../features/project/project.service';
@@ -14,6 +13,7 @@ import {ThemeService as NgChartThemeService} from 'ng2-charts';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {MiscConfig} from '../../features/config/global-config.model';
 import {ElectronService} from '../electron/electron.service';
+import {WorkContextThemeCfg} from '../../features/work-context/work-context.model';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +45,7 @@ export class GlobalThemeService {
     // this._materialCssVarsService.setDarkTheme(false);
   }
 
-  private _setColorTheme(theme: ProjectThemeCfg) {
+  private _setColorTheme(theme: WorkContextThemeCfg) {
     this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
     this._setBackgroundGradient(theme.isDisableBackgroundGradient);
 
@@ -93,7 +93,7 @@ export class GlobalThemeService {
 
   private _initThemeWatchers() {
     // init theme watchers
-    this._projectService.currentTheme$.subscribe((theme: ProjectThemeCfg) => this._setColorTheme(theme));
+    this._projectService.currentTheme$.subscribe((theme: WorkContextThemeCfg) => this._setColorTheme(theme));
 
 
     // TODO beautify code here

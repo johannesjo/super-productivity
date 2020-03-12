@@ -1,22 +1,7 @@
-import {Project, ProjectThemeCfg} from './project.model';
+import {Project} from './project.model';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
-import {getYesterdaysDate} from '../../util/get-yesterdays-date';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {WorklogExportSettings, WorklogGrouping} from '../worklog/worklog.model';
-import {WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
+import {WORK_CONTEXT_DEFAULT_THEME, WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
 
-
-
-export const DEFAULT_PROJECT_THEME: ProjectThemeCfg = {
-  isAutoContrast: true,
-  isDisableBackgroundGradient: false,
-  primary: '#0b77d2',
-  huePrimary: '500',
-  accent: '#ff4081',
-  hueAccent: '500',
-  warn: '#e11826',
-  hueWarn: '500',
-};
 
 export const DEFAULT_PROJECT: Project = {
   id: null,
@@ -25,7 +10,6 @@ export const DEFAULT_PROJECT: Project = {
   isArchived: false,
   // TODO move to global cfg
   timeWorkedWithoutBreak: null,
-  theme: DEFAULT_PROJECT_THEME,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   todaysTaskIds: [],
   backlogTaskIds: [],
@@ -41,5 +25,5 @@ export const FIRST_PROJECT: Project = {
   title: 'Super Productivity',
   workStart: {},
   workEnd: {},
-  theme: DEFAULT_PROJECT_THEME
+  theme: WORK_CONTEXT_DEFAULT_THEME
 };

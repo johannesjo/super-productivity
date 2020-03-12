@@ -1,6 +1,7 @@
 import {ConfigFormSection, GenericConfigFormSection} from '../config/global-config.model';
 import {T} from '../../t.const';
-import {Project, ProjectThemeCfg} from './project.model';
+import {Project} from './project.model';
+import {WorkContextThemeCfg} from '../work-context/work-context.model';
 
 const HUES = [
   {value: '50', label: '50'},
@@ -15,7 +16,7 @@ const HUES = [
   {value: '900', label: '900'},
 ];
 
-export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectThemeCfg> = {
+export const PROJECT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContextThemeCfg> = {
   title: T.F.PROJECT.FORM_THEME.TITLE,
   key: 'basic',
   help: T.F.PROJECT.FORM_THEME.HELP,
