@@ -14,6 +14,7 @@ import {GlobalConfigService} from '../../features/config/global-config.service';
 import {MiscConfig} from '../../features/config/global-config.model';
 import {ElectronService} from '../electron/electron.service';
 import {WorkContextThemeCfg} from '../../features/work-context/work-context.model';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class GlobalThemeService {
     @Inject(DOCUMENT) private document: Document,
     private _materialCssVarsService: MaterialCssVarsService,
     private _electronService: ElectronService,
-    private _projectService: ProjectService,
+    private _workContextService: WorkContextService,
     private _globalConfigService: GlobalConfigService,
     private _matIconRegistry: MatIconRegistry,
     private _domSanitizer: DomSanitizer,
@@ -93,7 +94,7 @@ export class GlobalThemeService {
 
   private _initThemeWatchers() {
     // init theme watchers
-    this._projectService.currentTheme$.subscribe((theme: WorkContextThemeCfg) => this._setColorTheme(theme));
+    this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) => this._setColorTheme(theme));
 
 
     // TODO beautify code here

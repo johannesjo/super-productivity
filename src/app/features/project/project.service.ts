@@ -71,9 +71,6 @@ export class ProjectService {
     // TODO investigate share replay issues
     shareReplay(1),
   );
-  currentTheme$: Observable<WorkContextThemeCfg> = this._store$.pipe(
-    select(selectProjectThemeCfg),
-  );
   currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
     select(selectProjectJiraCfg),
     shareReplay(1),

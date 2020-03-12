@@ -14,11 +14,11 @@ import {
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
   LS_REMINDER,
+  LS_TAG_STATE,
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_REPEAT_CFG_STATE,
-  LS_TASK_STATE,
-  LS_TAG_STATE
+  LS_TASK_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
@@ -86,6 +86,21 @@ export class PersistenceService {
   tag = this._cmBase<TagState>(
     LS_TAG_STATE,
     'tag',
+    // NOTE: don't forget to trigger save when using this
+    // (tagState: TagState): TagState => {
+    //   const tagEntities = {...tagState.entities};
+    //   Object.keys(tagEntities).forEach((key) => {
+    //     tagEntities[key] = {
+    //       ...tagEntities[key],
+    //       theme: WORK_CONTEXT_DEFAULT_THEME
+    //     };
+    //   });
+    //
+    //   return {
+    //     entities: tagEntities,
+    //     ids: tagState.ids
+    //   };
+    // }
   );
   taskAttachment = this._cmBase<AttachmentState>(
     LS_TASK_ATTACHMENT_STATE,

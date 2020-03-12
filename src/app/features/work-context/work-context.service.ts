@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {EMPTY, Observable, of} from 'rxjs';
-import {WorkContext, WorkContextState, WorkContextType} from './work-context.model';
+import {WorkContext, WorkContextState, WorkContextThemeCfg, WorkContextType} from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
 import {initialContextState, selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
@@ -27,6 +27,8 @@ export class WorkContextService {
     switchMap(({activeId, activeType}) => {
       if (activeType === WorkContextType.TAG) {
         return this._tagService.getTagById$(activeId).pipe(
+          // TODO find out why this is sometimes undefined
+          filter(p => !!p),
           map(tag => ({
             ...tag,
             routerLink: `tag/${tag.id}`
@@ -72,6 +74,10 @@ export class WorkContextService {
         ])
       ),
     );
+
+  currentTheme$: Observable<WorkContextThemeCfg> = this.activeWorkContext$.pipe(
+    map(awc => awc.theme)
+  );
 
   constructor(
     private _store$: Store<WorkContextState>,
