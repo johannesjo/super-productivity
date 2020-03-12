@@ -1,5 +1,5 @@
 import {Dictionary} from '@ngrx/entity';
-import {Task, TaskArchive, TaskState} from './task.model';
+import {ArchiveTask, Task, TaskArchive, TaskState} from './task.model';
 import {GITHUB_TYPE} from '../issue/issue.const';
 import {MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import * as moment from 'moment';
@@ -35,11 +35,14 @@ export const migrateTaskArchiveState = (
 
   const taskEntities: Dictionary<Task> = {...taskArchiveState.entities};
   Object.keys(taskEntities).forEach((key) => {
-    taskEntities[key] = _addNewIssueFields(taskEntities[key]);
-    taskEntities[key] = _replaceLegacyGitType(taskEntities[key]);
-    taskEntities[key] = _deleteUnusedFields(taskEntities[key]);
-    taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]);
+    taskEntities[key] = _addNewIssueFields(taskEntities[key]) as ArchiveTask;
+    taskEntities[key] = _replaceLegacyGitType(taskEntities[key]) as ArchiveTask;
+    taskEntities[key] = _deleteUnusedFields(taskEntities[key]) as ArchiveTask;
+    taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]) as ArchiveTask;
   });
+
+  taskArchiveState[MODEL_VERSION_KEY] = MODEL_VERSION;
+  return {...taskArchiveState, entities: taskEntities as Dictionary<ArchiveTask>};
 };
 
 const _addTagIds = (task: Task): Task => {
