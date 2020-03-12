@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ProjectPageComponent} from './project-page.component';
+import {ProjectOverviewPageComponent} from './project-overview-page.component';
 import {ProjectModule} from '../../features/project/project.module';
 import {UiModule} from '../../ui/ui.module';
 
@@ -10,7 +10,7 @@ import {UiModule} from '../../ui/ui.module';
     UiModule,
     ProjectModule
   ],
-  declarations: [ProjectPageComponent],
+  declarations: [ProjectOverviewPageComponent],
 })
-export class ProjectPageModule {
+export class ProjectOverviewPageModule {
 }

@@ -15,12 +15,12 @@ import {THEME_COLOR_MAP} from '../../app.constants';
 
 @Component({
   selector: 'project-page',
-  templateUrl: './project-page.component.html',
-  styleUrls: ['./project-page.component.scss'],
+  templateUrl: './project-overview-page.component.html',
+  styleUrls: ['./project-overview-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
 })
-export class ProjectPageComponent implements OnInit, OnDestroy {
+export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   T = T;
   private _subs = new Subscription();
 
