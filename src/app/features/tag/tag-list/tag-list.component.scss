@@ -22,13 +22,16 @@
   list-style: none;
   margin: $s*.5 0;
   padding: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .tag {
   display: inline-flex;
   align-items: center;
   flex-direction: row;
-  margin: 0 1px;
+  margin: 0 2px;
   min-width: 20px;
   padding: 0 $s;
   font-size: 10px;
