@@ -91,7 +91,8 @@
            contentEditableOnClick
            contenteditable="true"
            tabindex="2"></div>
-      <div class="spacer" style="width:10px; display: block; border-right-width: 1px; border-right-style: solid"></div>
+      <div class="spacer"
+           style="width:10px; display: block; border-right-width: 1px; border-right-style: solid"></div>
     </div>
 
     <div class="all-controls-wrapper">
@@ -392,10 +393,11 @@
     </div>
   </div>
 
-    <tag-list (addedTagsToTask)="onTagsAdded($event)"
-              (removedTagsFromTask)="onTagsRemoved($event)"
-              (replacedTagForTask)="onTagReplaced($event)"
-              [tagIds]="task.tagIds"></tag-list>
+  <tag-list *ngIf="task.tagIds?.length"
+            (addedTagsToTask)="onTagsAdded($event)"
+            (removedTagsFromTask)="onTagsRemoved($event)"
+            (replacedTagForTask)="onTagReplaced($event)"
+            [tagIds]="task.tagIds"></tag-list>
 
   <progress-bar *ngIf="isCurrent"
                 [cssClass]="'bg-accent'"
