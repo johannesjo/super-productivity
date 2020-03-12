@@ -144,7 +144,7 @@
           </button>
 
           <button (click)="moveToMyDay()"
-                  *ngIf="!task.tagIds.includes('MY_DAY')"
+                  *ngIf="!task.parentId && !task.tagIds.includes('MY_DAY')"
                   [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
                   class="ico-btn"
                   color=""
@@ -154,7 +154,7 @@
           </button>
 
           <button (click)="removeFromMyDay()"
-                  *ngIf="task.tagIds.includes('MY_DAY')"
+                  *ngIf="!task.parentId && task.tagIds.includes('MY_DAY')"
                   [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
                   class="ico-btn"
                   color=""
@@ -333,6 +333,15 @@
             {{T.F.TASK.CMP.MOVE_TO_BACKLOG|translate}}
           </button>
 
+          <button (click)="editTags();"
+                  *ngIf="!task.parentId"
+                  mat-menu-item
+                  tabindex="2">
+            <mat-icon>style</mat-icon>
+            {{T.F.TASK.CMP.EDIT_TAGS|translate}}
+          </button>
+
+
           <button (click)="moveToToday();"
                   *ngIf="!task.parentId && isBacklog"
                   mat-menu-item
@@ -393,7 +402,7 @@
     </div>
   </div>
 
-  <tag-list *ngIf="task.tagIds?.length"
+  <tag-list *ngIf="task.tagIds?.length && !task.parentId"
             [task]="task"></tag-list>
 
   <progress-bar *ngIf="isCurrent"

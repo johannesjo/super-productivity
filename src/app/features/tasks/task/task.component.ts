@@ -31,11 +31,11 @@ import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
-import {unique} from '../../../util/unique';
 import {T} from '../../../t.const';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
 import {MY_DAY_TAG} from '../../tag/tag.const';
+import {DialogEditTagsForTaskComponent} from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 
 @Component({
   selector: 'task',
@@ -231,9 +231,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const tagIds = [...this.task.tagIds];
     this._taskService.remove(this.task);
-    this._taskService.purgeUnusedTags(tagIds);
     this.focusNext(true);
   }
 
@@ -323,6 +321,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   toggleSubTaskMode() {
     this._taskService.toggleSubTaskMode(this.task.id, true, true);
     this.focusSelf();
+  }
+
+  editTags() {
+    this._matDialog.open(DialogEditTagsForTaskComponent, {
+      restoreFocus: true,
+      data: {
+        task: this.task
+      }
+    });
   }
 
   moveToMyDay() {
