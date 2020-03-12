@@ -40,7 +40,8 @@
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
-      <button (click)="switchProject(project.id, 'work-view')"
+      <button [routerLink]="['project', project.id]"
+              routerLinkActive="isActiveRoute"
               mat-menu-item>
         <mat-icon class="drag-handle"
                   drag-handle>list

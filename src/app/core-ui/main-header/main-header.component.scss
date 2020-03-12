@@ -46,7 +46,7 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
   }
 }
 
-.current-project-title {
+.current-work-context-title {
   //font-weight: bold;
   font-size: 18px;
   overflow: hidden;
@@ -80,7 +80,7 @@ $macExtraPadding: (-8px+$mac-title-bar-padding);
   }
 
   &:hover,
-  .current-project-title:hover + & {
+  .current-work-context-title:hover + & {
     opacity: 1;
   }
 }

@@ -9,6 +9,7 @@ import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {NavigationStart, Router} from '@angular/router';
 import {filter, map} from 'rxjs/operators';
 import {combineLatest, Observable} from 'rxjs';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'main-header',
@@ -38,6 +39,7 @@ export class MainHeaderComponent implements OnInit {
 
   constructor(
     public readonly projectService: ProjectService,
+    public readonly workContextService: WorkContextService,
     public readonly bookmarkService: BookmarkService,
     public readonly taskService: TaskService,
     public readonly pomodoroService: PomodoroService,

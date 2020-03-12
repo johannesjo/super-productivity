@@ -7,11 +7,11 @@
     <mat-icon>menu</mat-icon>
   </button>
 
-
+  <!-- TODO fix link -->
   <div [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
-       class="current-project-title"
+       class="current-work-context-title"
        mat-ripple
-       routerLink="work-view">{{(projectService.currentProject$|async).title}}</div>
+       routerLink="work-view">{{(workContextService.activeWorkContext$|async)?.title}}</div>
 
   <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
           class="project-settings-btn"

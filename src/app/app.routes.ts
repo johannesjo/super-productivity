@@ -11,7 +11,6 @@ import {ProjectSettingsComponent} from './pages/project-settings/project-setting
 import {TagTaskPageComponent} from './pages/tag-task-page/tag-task-page.component';
 
 export const APP_ROUTES: Routes = [
-  {path: 'work-view', component: WorkViewPageComponent, data: {page: 'work-view'}},
   {path: 'config', component: ConfigPageComponent, data: {page: 'config'}},
   {path: 'projects', component: ProjectPageComponent, data: {page: 'projects'}},
   {path: 'schedule', component: SchedulePageComponent, data: {page: 'schedule'}},
@@ -22,5 +21,6 @@ export const APP_ROUTES: Routes = [
   {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'worklog', component: WorklogComponent, data: {page: 'worklog'}},
   {path: 'project-settings', component: ProjectSettingsComponent, data: {page: 'project-settings'}},
-  {path: '**', redirectTo: 'work-view'}
+  {path: 'project/:id', component: WorkViewPageComponent, data: {page: 'project'}},
+  {path: '**', redirectTo: 'tag/MY_DAY'}
 ];

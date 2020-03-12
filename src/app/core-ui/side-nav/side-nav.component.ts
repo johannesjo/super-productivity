@@ -60,8 +60,6 @@ export class SideNavComponent implements OnDestroy {
     private readonly _router: Router,
     private readonly _dragulaService: DragulaService,
   ) {
-    this.projectList$.subscribe((v) => console.log('projectList$', v));
-
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
       moves: (el, container, handle) => {
