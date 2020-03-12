@@ -835,6 +835,7 @@
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
     "CREATE_PROJECT": "Create Project",
+    "CREATE_TAG": "Create Tag",
     "GO_TO_TASK_LIST": "Go to task list",
     "MANAGE_PROJECTS": "Manage Projects",
     "METRICS": "Metrics",
@@ -845,6 +846,7 @@
     "PROJECT_SETTINGS": "Project Settings",
     "SCHEDULED": "Scheduled",
     "SETTINGS": "Settings",
+    "TAGS": "Tags",
     "TASKS": "Tasks",
     "TASK_LIST": "Task List",
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",

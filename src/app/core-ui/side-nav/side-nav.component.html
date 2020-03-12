@@ -28,7 +28,7 @@
           class="expand-btn"
           [class.isExpanded]="isProjectsExpanded"
           (click)="toggleExpandProjects()">
-    <span class="title">Projects</span>
+    <span class="title">{{T.MH.PROJECTS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
 
@@ -62,6 +62,50 @@
           mat-menu-item>
     <mat-icon>add</mat-icon>
     {{T.MH.CREATE_PROJECT|translate}}
+  </button>
+</section>
+
+<section class="tags"
+         *ngIf="tagList$|async as tagList">
+  <button mat-menu-item
+          class="expand-btn"
+          [class.isExpanded]="isTagsExpanded"
+          (click)="toggleExpandTags()">
+    <span class="title">{{T.MH.TAGS|translate}}</span>
+    <mat-icon>expand_more</mat-icon>
+  </button>
+
+  <div [dragulaModel]="tagList"
+       [@standardList]="tagList?.length"
+       [dragula]="TAG_SIDE_NAV">
+    <div *ngFor="let tag of tagList; trackBy: trackById;"
+         [class.isCurrentTag]="tag.id===(tagService.currentId$|async)"
+         class="tag">
+      <div [ngStyle]="getThemeColor(tag.theme?.primary || tag.themeColor)"
+           class="tag-color"></div>
+      <button [routerLink]="['tag', tag.id]"
+              routerLinkActive="isActiveRoute"
+              mat-menu-item>
+        <mat-icon class="drag-handle"
+                  drag-handle>style
+        </mat-icon>
+        {{tag.title}}
+      </button>
+
+      <button
+        (click)="switchTag(tag.id, 'tag-settings')"
+        class="tag-settings-btn"
+        mat-icon-button
+        routerLinkActive="isActiveRoute">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </div>
+  </div>
+  <button (click)="addTag()"
+          *ngIf="isTagsExpanded"
+          mat-menu-item>
+    <mat-icon>add</mat-icon>
+    {{T.MH.CREATE_TAG|translate}}
   </button>
 </section>
 

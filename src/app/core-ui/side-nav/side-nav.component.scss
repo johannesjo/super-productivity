@@ -38,6 +38,7 @@ section {
   }
 }
 
+.tag,
 .project {
   display: flex;
   position: relative;
@@ -133,6 +134,7 @@ section {
 }
 
 
+.tag,
 .project,
 .route-link {
   .project-color,
@@ -176,6 +178,13 @@ $spacer: $s;
 
 .projects {
   margin-bottom: $spacer;
+  padding-bottom: $spacer;
+}
+
+.tags {
+  margin-bottom: $spacer;
+  padding-bottom: $spacer;
+
 }
 
 .app {
@@ -188,6 +197,7 @@ $spacer: $s;
 }
 
 .main,
+.tags,
 .app {
   position: relative;
 

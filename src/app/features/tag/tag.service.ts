@@ -1,9 +1,15 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {take} from 'rxjs/operators';
-import {initialTagState, selectAllTags, selectTagById, selectTagByName, selectTagsByIds} from './store/tag.reducer';
+import {
+  initialTagState,
+  selectAllTags,
+  selectAllTagsWithoutMyDay,
+  selectTagById,
+  selectTagByName,
+  selectTagsByIds
+} from './store/tag.reducer';
 import {addTag, deleteTag, deleteTags, loadTagState, updateTag, upsertTag} from './store/tag.actions';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {Tag, TagState} from './tag.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
@@ -15,6 +21,8 @@ import {MY_DAY_TAG} from './tag.const';
 })
 export class TagService {
   tags$: Observable<Tag[]> = this._store$.pipe(select(selectAllTags));
+  tagsNoMyDay$: Observable<Tag[]> = this._store$.pipe(select(selectAllTagsWithoutMyDay));
+  currentId$ = of('XXXX');
 
   constructor(
     private _store$: Store<TagState>,

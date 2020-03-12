@@ -3,6 +3,7 @@ import * as tagActions from './tag.actions';
 import {Tag, TagState} from '../tag.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 import {TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
+import {MY_DAY_TAG} from '../tag.const';
 
 export const TAG_FEATURE_NAME = 'tag';
 
@@ -11,6 +12,11 @@ export const adapter: EntityAdapter<Tag> = createEntityAdapter<Tag>();
 export const selectTagFeatureState = createFeatureSelector<TagState>(TAG_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAllTags = createSelector(selectTagFeatureState, selectAll);
+export const selectAllTagsWithoutMyDay = createSelector(
+  selectAllTags,
+  (tags: Tag[]): Tag[] => tags.filter(tag => tag.id !== MY_DAY_TAG.id)
+);
+
 export const selectTagById = createSelector(
   selectTagFeatureState,
   (state, props: { id: string }): Tag => state.entities[props.id]

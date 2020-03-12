@@ -7,11 +7,13 @@ import {MatDialog} from '@angular/material/dialog';
 import {THEME_COLOR_MAP} from '../../app.constants';
 import {Router} from '@angular/router';
 import {DragulaService} from 'ng2-dragula';
-import {BehaviorSubject, of, Subscription} from 'rxjs';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 import {map, switchMap} from 'rxjs/operators';
+import {TagService} from '../../features/tag/tag.service';
+import {Tag} from '../../features/tag/tag.model';
 
 @Component({
   selector: 'side-nav',
@@ -23,21 +25,34 @@ import {map, switchMap} from 'rxjs/operators';
 export class SideNavComponent implements OnDestroy {
   @Output() scrollToNotes = new EventEmitter<void>();
 
-  isProjectsExpanded$ = new BehaviorSubject(false);
+  isProjectsExpanded$ = new BehaviorSubject<boolean>(false);
   isProjectsExpanded = false;
-  projectList$ = this.isProjectsExpanded$.pipe(
+  projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.projectService.list$
       : this.projectService.currentProject$.pipe(map(p => [p]))
     )
   );
 
+  isTagsExpanded$ = new BehaviorSubject<boolean>(false);
+  isTagsExpanded = false;
+  tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
+    switchMap(isExpanded => isExpanded
+      ? this.tagService.tagsNoMyDay$
+      // : this.tagService.tagsNoMyDay$.pipe(map(tags => [tags[0]]))
+      : this.tagService.tagsNoMyDay$.pipe(map(tags => []))
+      // : this.tagService.currentProject$.pipe(map(p => [p]))
+    )
+  );
+
   T = T;
   PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
+  TAG_SIDE_NAV = 'TAG_SIDE_NAV';
 
   private _subs = new Subscription();
 
   constructor(
+    public readonly tagService: TagService,
     public readonly projectService: ProjectService,
     public readonly globalConfigService: GlobalConfigService,
     public readonly workContextService: WorkContextService,
@@ -53,6 +68,7 @@ export class SideNavComponent implements OnDestroy {
         return this.isProjectsExpanded && handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
       }
     });
+
     this._subs.add(this._dragulaService.dropModel(this.PROJECTS_SIDE_NAV)
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
@@ -72,7 +88,6 @@ export class SideNavComponent implements OnDestroy {
       this._router.navigate([routeToGoAfter]);
     }
   }
-
 
   addProject() {
     this._matDialog.open(DialogCreateProjectComponent, {
@@ -99,5 +114,17 @@ export class SideNavComponent implements OnDestroy {
   toggleExpandProjects() {
     this.isProjectsExpanded = !this.isProjectsExpanded;
     this.isProjectsExpanded$.next(this.isProjectsExpanded);
+  }
+
+  toggleExpandTags() {
+    this.isTagsExpanded = !this.isTagsExpanded;
+    this.isTagsExpanded$.next(this.isTagsExpanded);
+  }
+
+  addTag() {
+  }
+
+  switchTag(a, b) {
+
   }
 }
