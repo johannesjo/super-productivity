@@ -20,7 +20,6 @@ import {
   AddTimeSpent,
   DeleteTask,
   LoadTaskState,
-  Move,
   MoveDown,
   MoveToArchive,
   MoveToBacklog,
@@ -390,15 +389,33 @@ export class TaskService {
   }
 
   move(taskId: string,
-       sourceModelId: DropListModelSource,
-       targetModelId: DropListModelSource,
+       src: DropListModelSource,
+       target: DropListModelSource,
        newOrderedIds: string[]) {
-    this._store.dispatch(new Move({
-      taskId,
-      sourceModelId,
-      targetModelId,
-      newOrderedIds,
-    }));
+    // Task
+    if (src === 'DONE' && target === 'UNDONE') {
+      this.setUnDone(taskId);
+    } else if (src === 'UNDONE' && target === 'DONE') {
+      this.setDone(taskId);
+    }
+
+    // List
+    const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');
+    const isTargetTodayList = (target === 'DONE' || target === 'UNDONE');
+
+    if (isSrcTodayList && isTargetTodayList) {
+      // TODO move inside today
+    } else if (src === 'BACKLOG' && target === 'BACKLOG') {
+      // TODO move inside backlog
+    } else if (src === 'BACKLOG' && isTargetTodayList) {
+      // TODO move from backlog to today
+    } else if (isSrcTodayList && target === 'BACKLOG') {
+      // TODO move from today to backlog
+    } else {
+      // TODO move sub task
+    }
+
+    // TODO unset current via effect
   }
 
   moveUp(id: string) {

@@ -275,6 +275,7 @@ export function taskReducer(
     }
 
     case TaskActionTypes.Move: {
+      return state;
       let newState = state;
       const {taskId, sourceModelId, targetModelId, newOrderedIds} = action.payload;
       const taskToMove = state.entities[taskId];
