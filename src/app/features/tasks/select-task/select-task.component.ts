@@ -2,9 +2,9 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnIn
 import {FormControl} from '@angular/forms';
 import {Task} from '../task.model';
 import {map, startWith, takeUntil, withLatestFrom} from 'rxjs/operators';
-import {TaskService} from '../task.service';
 import {Subject} from 'rxjs';
 import {T} from '../../../t.const';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Component({
   selector: 'select-task',
@@ -20,7 +20,9 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   @Output() taskChange = new EventEmitter<Task | string>();
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
-  constructor(private _taskService: TaskService) {
+  constructor(
+    private _workContextService: WorkContextService,
+  ) {
   }
 
   @Input() set initialTask(task: Task) {
@@ -33,7 +35,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.taskSelectCtrl.valueChanges.pipe(
       startWith(''),
-      withLatestFrom(this._taskService.startableTasks$),
+      withLatestFrom(this._workContextService.startableTasks$),
       map(([str, tasks]) =>
         typeof str === 'string'
           ? tasks.filter(task => task.title.toLowerCase().includes(str.toLowerCase()))

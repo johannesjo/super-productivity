@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {EMPTY, Observable, of} from 'rxjs';
+import {combineLatest, EMPTY, Observable, of} from 'rxjs';
 import {WorkContext, WorkContextState, WorkContextThemeCfg, WorkContextType} from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
@@ -10,7 +10,7 @@ import {distinctUntilChanged, filter, map, shareReplay, switchMap} from 'rxjs/op
 import {TaskService} from '../tasks/task.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
-import {TaskWithSubTasks} from '../tasks/task.model';
+import {Task, TaskWithSubTasks} from '../tasks/task.model';
 import {ProjectService} from '../project/project.service';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -19,8 +19,8 @@ import {getWorklogStr} from '../../util/get-work-log-str';
   providedIn: 'root',
 })
 export class WorkContextService {
-  // CONTEXT LVL
-  // -----------
+  // CONTEXT LEVEL
+  // -------------
   activeWorkContextId$ = this._store$.pipe(select(selectActiveContextId));
   activeWorkContextTypeAndId$ = this._store$.pipe(
     select(selectActiveContextTypeAndId),
@@ -92,8 +92,33 @@ export class WorkContextService {
   );
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
-    switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.backlogTaskIds)),
+    switchMap(activeWorkContext => (activeWorkContext.backlogTaskIds && activeWorkContext.backlogTaskIds.length)
+      ? this._taskService.getByIds$(activeWorkContext.backlogTaskIds)
+      : of([])
+    ),
     map(tasks => tasks.filter(task => task && task.isDone))
+  );
+
+  // TODO make it more efficient
+  startableTasks$: Observable<Task[]> = combineLatest([
+    this.activeWorkContext$,
+    this._taskService.taskEntityState$
+  ]).pipe(
+    switchMap(([activeContext, entities]) => {
+      const taskIds = activeContext.taskIds;
+      return of(
+        Object.keys(entities)
+          .filter((id) => {
+            const t = entities[id];
+            return !t.isDone && (
+              (t.parentId)
+                ? (taskIds.includes(t.parentId))
+                : (taskIds.includes(id) && (!t.subTaskIds || t.subTaskIds.length === 0))
+            );
+          })
+          .map(key => entities[key])
+      );
+    })
   );
 
   backlogTasksCount$: Observable<number> = this.backlogTasks$.pipe(map(tasks => tasks.length));

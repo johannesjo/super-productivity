@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import {distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, filter, first, map, switchMap, take, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
@@ -38,7 +38,6 @@ import {
   ToggleTaskShowSubTasks,
   UnsetCurrentTask,
   UpdateTask,
-  UpdateTaskListIds,
   UpdateTaskReminder,
   UpdateTaskTags,
   UpdateTaskUi
@@ -51,34 +50,23 @@ import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
-  selectBacklogTaskCount,
-  selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
   selectCurrentTaskOrParentWithData,
-  selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectHasTasksToWorkOn,
-  selectIsTaskForTodayPlanned,
   selectScheduledTasks,
   selectSelectedTask,
   selectSelectedTaskId,
-  selectStartableTaskIds,
-  selectStartableTasks,
   selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
-  selectTaskByIssueId,
   selectTaskEntities,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
   selectTasksWithSubTasksByIds,
   selectTasksWorkedOnOrDoneFlat,
-  selectTaskWithSubTasksByRepeatConfigId,
-  selectTodaysDoneTasksWithSubTasks,
-  selectTodaysTasksWithSubTasks,
-  selectTodaysUnDoneTasksWithSubTasks,
-  selectTotalTimeWorkedOnTodaysTasks
+  selectTaskWithSubTasksByRepeatConfigId
 } from './store/task.selectors';
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -127,25 +115,10 @@ export class TaskService {
   );
 
 
-  startableTaskIds$: Observable<string[]> = this._store.pipe(
-    select(selectStartableTaskIds),
-  );
-
-  startableTasks$: Observable<Task[]> = this._store.pipe(
-    select(selectStartableTasks),
-  );
-
   // todays list flat + tasks worked on today
   taskEntityState$: Observable<Dictionary<Task>> = this._store.pipe(
     select(selectTaskEntities),
   );
-
-  // only todays list
-  todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysTasksWithSubTasks),
-    shareReplay(1),
-  );
-
 
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectAllRepeatableTaskWithSubTasks),
@@ -236,7 +209,6 @@ export class TaskService {
         : initialTaskState
     );
   }
-
 
 
   loadState(state) {
@@ -470,6 +442,9 @@ export class TaskService {
   }
 
   getByIds$(ids: string[]): Observable<TaskWithSubTasks[]> {
+    if (!Array.isArray(ids)) {
+      throw new Error('Invalid param provided for getByIds$ :(');
+    }
     return this._store.pipe(select(selectTasksWithSubTasksByIds, {ids}));
   }
 
@@ -491,23 +466,6 @@ export class TaskService {
 
   getTasksByTag(tagId: string): Observable<TaskWithSubTasks[]> {
     return this._store.pipe(select(selectTasksByTag, {tagId}));
-  }
-
-  // TODO could be done better
-  getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
-    return this.todaysTasks$.pipe(
-      map((tasks) => {
-        return tasks && tasks.length && tasks.reduce((acc, task) => {
-            return acc + (
-              (task.timeSpentOnDay && +task.timeSpentOnDay[day])
-                ? +task.timeSpentOnDay[day]
-                : 0
-            );
-          }, 0
-        );
-      }),
-      distinctUntilChanged(),
-    );
   }
 
   setDone(id: string) {
@@ -539,12 +497,16 @@ export class TaskService {
 
   // BEWARE: does only work for task model updates
   async updateEverywhereForCurrentProject(id: string, changedFields: Partial<Task>) {
-    const entities = await this.taskEntityState$.pipe(first()).toPromise();
-    if (entities[id]) {
-      this.update(id, changedFields);
-    } else {
-      await this.updateArchiveTaskForCurrentProject(id, changedFields);
-    }
+    console.log('NOT IMPLEMENT');
+    // TODO fix
+    return null;
+
+    // const entities = await this.taskEntityState$.pipe(first()).toPromise();
+    // if (entities[id]) {
+    //   this.update(id, changedFields);
+    // } else {
+    //   await this.updateArchiveTaskForCurrentProject(id, changedFields);
+    // }
   }
 
   // BEWARE: does only work for task model updates, but not the meta models

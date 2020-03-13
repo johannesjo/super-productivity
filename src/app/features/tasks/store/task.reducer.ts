@@ -10,8 +10,6 @@ import {
   filterStartableTasks,
   getTaskById,
   mapTaskWithSubTasksToTask,
-  moveItemInList,
-  reCalcTimesForParentIfParent,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
 } from './task.reducer.util';
@@ -108,6 +106,9 @@ export function taskReducer(
         return state;
       }
 
+      throw new Error('NOT IMPLEMENTED YET');
+
+      // TODO fix
       const startableTasks = filterStartableTasks(state);
       return {
         ...state,
