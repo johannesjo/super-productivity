@@ -96,9 +96,9 @@ export class WorkContextService {
         const split = url.split('/');
         const id = split[2];
 
-        if (url.match(/tag\/.+\/tasks/)) {
+        if (url.match(/tag\/.+/)) {
           this.setActiveContext(id, WorkContextType.TAG);
-        } else if (url.match(/project\/.+\/tasks/)) {
+        } else if (url.match(/project\/.+/)) {
           this.setActiveContext(id, WorkContextType.PROJECT);
         }
       }
