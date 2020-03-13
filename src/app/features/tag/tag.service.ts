@@ -107,8 +107,6 @@ export class TagService {
         }
       };
     }
-    console.log(state);
-
     return state;
   }
 }

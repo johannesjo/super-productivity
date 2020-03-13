@@ -6,7 +6,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
 import {initialContextState, selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
-import {distinctUntilChanged, filter, map, shareReplay, switchMap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, shareReplay, switchMap, tap} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
@@ -14,7 +14,7 @@ import {Task, TaskWithSubTasks} from '../tasks/task.model';
 import {ProjectService} from '../project/project.service';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import {mapEstimateRemainingFromTasks} from './work-context.util';
+import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.util';
 
 @Injectable({
   providedIn: 'root',
@@ -84,6 +84,13 @@ export class WorkContextService {
     shareReplay(1),
   );
 
+  // todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.isTaskDataLoaded$.pipe(
+  //   filter(isLoaded => !!isLoaded),
+  //   switchMap(() => this.activeWorkContext$),
+  //   switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.taskIds)),
+  //   shareReplay(1),
+  // );
+
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
     map(tasks => tasks.filter(task => task && !task.isDone))
   );
@@ -131,6 +138,11 @@ export class WorkContextService {
   // this._actions$.pipe(ofType(
   // TaskActionTypes.MoveToBacklog,
   // ));
+
+  isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(
+    map(hasTasksToWorkOn),
+    distinctUntilChanged(),
+  );
 
   estimateRemainingToday$: Observable<number> = this.todaysTasks$.pipe(
     map(mapEstimateRemainingFromTasks),

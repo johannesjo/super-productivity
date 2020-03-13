@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import {distinctUntilChanged, filter, first, map, switchMap, take, withLatestFrom} from 'rxjs/operators';
+import {filter, first, map, switchMap, take, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
@@ -33,7 +33,6 @@ import {
   SetCurrentTask,
   SetSelectedTask,
   StartFirstStartable,
-  TaskActionTypes,
   ToggleStart,
   ToggleTaskShowSubTasks,
   UnsetCurrentTask,
@@ -53,7 +52,7 @@ import {
   selectCurrentTask,
   selectCurrentTaskId,
   selectCurrentTaskOrParentWithData,
-  selectHasTasksToWorkOn,
+  selectIsTaskDataLoaded,
   selectScheduledTasks,
   selectSelectedTask,
   selectSelectedTaskId,
@@ -69,7 +68,7 @@ import {
 } from './store/task.selectors';
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import {Actions, ofType} from '@ngrx/effects';
+import {Actions} from '@ngrx/effects';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
@@ -131,16 +130,15 @@ export class TaskService {
     select(selectScheduledTasks),
   );
 
+  isTaskDataLoaded$: Observable<boolean> = this._store.pipe(
+    select(selectIsTaskDataLoaded),
+  );
+
 
   // META FIELDS
   // -----------
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
     map((task) => task && task.timeEstimate > 0 && task.timeSpent / task.timeEstimate)
-  );
-
-  isHasTasksToWorkOn$: Observable<boolean> = this._store.pipe(
-    select(selectHasTasksToWorkOn),
-    distinctUntilChanged(),
   );
 
   private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasks));

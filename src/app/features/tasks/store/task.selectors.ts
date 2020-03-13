@@ -31,8 +31,6 @@ const mapSubTasksToTask = (task: Task, s: TaskState): TaskWithSubTasks => {
 };
 
 
-
-
 const mapTasksFromIds = (tasksIN, ids) => {
   // TODO REMOVE FILTER LATER
   const tasksOut = ids.map(id => tasksIN.find(task => task.id === id));
@@ -128,20 +126,6 @@ export const selectIsTaskForTodayPlanned = createSelector(
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
 
-
-
-export const selectHasTasksToWorkOn = createSelector(
-  selectIsTaskDataLoaded,
-  selectTodaysTasksWithSubTasks,
-  (isTasksLoaded, tasks) => {
-
-    const _tasksToWorkOn = tasks.filter((t) => {
-      return !t.isDone && !t.repeatCfgId &&
-        ((!t.subTasks || t.subTasks.length === 0) || t.subTasks.filter((st) => !st.isDone).length > 0);
-    });
-    return (_tasksToWorkOn && _tasksToWorkOn.length > 0);
-  }
-);
 
 // DYNAMIC SELECTORS
 // -----------------

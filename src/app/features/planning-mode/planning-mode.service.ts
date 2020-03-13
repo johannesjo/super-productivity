@@ -3,6 +3,7 @@ import {BehaviorSubject, merge, Observable} from 'rxjs';
 import {TaskService} from '../tasks/task.service';
 import {delay, map, withLatestFrom} from 'rxjs/operators';
 import {ProjectService} from '../project/project.service';
+import {WorkContextService} from '../work-context/work-context.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,14 +19,14 @@ export class PlanningModeService {
 
   isPlanningMode$: Observable<boolean> = this._triggerCheck$.pipe(
     withLatestFrom(
-      this._taskService.isHasTasksToWorkOn$,
+      this._workContextService.isHasTasksToWorkOn$,
       this._iPlanningModeEndedUser$,
     ),
     map(([t, isHasTasksToWorkOn, isPlanningEndedByUser]) => !isHasTasksToWorkOn && !isPlanningEndedByUser),
   );
 
   constructor(
-    private _taskService: TaskService,
+    private _workContextService: WorkContextService,
     private _projectService: ProjectService,
   ) {
     this.reCheckPlanningMode();
