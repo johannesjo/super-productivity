@@ -146,11 +146,6 @@ export class TaskService {
     shareReplay(1),
   );
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysUnDoneTasksWithSubTasks),
-    shareReplay(1),
-  );
-
 
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectAllRepeatableTaskWithSubTasks),

@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {TaskService} from '../../../features/tasks/task.service';
+import {WorkContextService} from '../../../features/work-context/work-context.service';
 
 @Component({
   selector: 'plan-tasks-tomorrow',
@@ -10,7 +11,7 @@ import {TaskService} from '../../../features/tasks/task.service';
 export class PlanTasksTomorrowComponent {
 
   constructor(
-    public taskService: TaskService,
+    public workContextService: WorkContextService,
   ) {
   }
 }

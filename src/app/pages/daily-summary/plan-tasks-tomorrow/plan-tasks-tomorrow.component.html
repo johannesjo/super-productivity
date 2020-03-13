@@ -4,7 +4,7 @@
                   [isDisableAutoFocus]="true"></add-task-bar>
   </section>
 
-  <task-list [tasks]="taskService.undoneTasks$|async"
+  <task-list [tasks]="workContextService.undoneTasks$|async"
              listId="PARENT"
              listModelId="UNDONE"></task-list>
 </div>
