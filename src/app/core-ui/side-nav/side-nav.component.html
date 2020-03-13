@@ -31,7 +31,7 @@
        [@standardList]="projectList?.length"
        [dragula]="PROJECTS_SIDE_NAV">
     <div *ngFor="let project of projectList; trackBy: trackById;"
-         [class.isCurrentProject]="project.id===activeWorkContextId"
+         [class.isActiveContext]="project.id===activeWorkContextId"
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
@@ -89,7 +89,7 @@
        [@standardList]="tagList?.length"
        [dragula]="TAG_SIDE_NAV">
     <div *ngFor="let tag of tagList; trackBy: trackById;"
-         [class.isCurrentTag]="tag.id===(tagService.currentId$|async)"
+         [class.isActiveContext]="tag.id===activeWorkContextId"
          class="tag">
       <div [ngStyle]="getThemeColor(tag.theme?.primary || tag.themeColor)"
            class="tag-color"></div>

@@ -1,5 +1,9 @@
 @import '../../../variables';
 
+$spacer: $s;
+
+// MAIN LAYOUT
+// -----------
 :host {
   flex-grow: 1;
   max-width: 200px;
@@ -20,24 +24,52 @@ section {
   flex-direction: column;
 }
 
-.drag-handle {
-  cursor: grab;
-  position: relative;
 
-  &:active {
-    cursor: grabbing;
+.main {
+  margin-bottom: $spacer;
+  padding-bottom: $spacer;
+
+  :host-context(.isMac.isElectron) & {
+    padding-top: $mac-title-bar-padding;
   }
 
   &:after {
-    content: '';
-    position: absolute;
-    top: -$s;
-    left: -$s;
-    right: -$s;
-    bottom: -$s;
+    bottom: 0;
   }
 }
 
+.app {
+  margin-top: auto;
+  padding-top: $spacer;
+
+  &:after {
+    top: 0;
+  }
+}
+
+.main,
+.tags,
+.app {
+  position: relative;
+
+  &:after {
+    @include dividerBorderColor();
+    content: '';
+    position: absolute;
+    left: $s*2;
+    right: $s*2;
+    height: 0;
+  }
+}
+
+.tags,
+.projects {
+  margin-bottom: $spacer;
+  padding-bottom: $spacer;
+}
+
+// LIST-ITEMS
+// ----------
 .tag,
 .project {
   display: flex;
@@ -70,69 +102,6 @@ section {
   }
 }
 
-.project-settings-btn:hover,
-.project button:first-of-type:hover,
-.route-link:hover {
-  //position: sticky;
-  //top: 0;
-  font-weight: bold;
-  @include lightTheme {
-    background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
-  }
-  @include darkTheme {
-    background: rgba(255, 255, 255, 0.1);
-
-  }
-}
-
-.route-link.isActiveRoute,
-.project.isCurrentProject {
-  background-color: mat-css-color-primary(500, 0.04);
-}
-
-.route-link.isActiveRoute,
-.project.isCurrentProject button {
-  font-weight: bold;
-}
-
-.route-link.isActiveRoute,
-.route-link.isActiveRoute mat-icon,
-.project.isCurrentProject mat-icon,
-.project.isCurrentProject button {
-  // does not look good for dark theme...
-  @include lightTheme {
-    color: $c-primary-800;
-  }
-}
-
-.scroll-down-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  ::ng-deep mat-icon:last-of-type {
-    margin-left: auto;
-    margin-right: 0;
-  }
-}
-
-.expand-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-
-  ::ng-deep mat-icon:last-of-type {
-    margin-left: auto;
-    margin-right: 0;
-    transition: $transition-standard;
-  }
-
-  &.isExpanded ::ng-deep mat-icon:last-of-type {
-    transform: rotate(180deg);
-  }
-}
-
 
 .tag,
 .project,
@@ -152,61 +121,97 @@ section {
     opacity: 0;
   }
 
-  &.isCurrentProject,
+  &.isActiveContext,
   &:hover {
     .project-color {
       opacity: 1;
     }
   }
-
 }
 
-$spacer: $s;
 
-.main {
-  margin-bottom: $spacer;
-  padding-bottom: $spacer;
+.tag-settings-btn:hover,
+.tag button:first-of-type:hover,
+.project-settings-btn:hover,
+.project button:first-of-type:hover,
+.route-link:hover {
+  font-weight: bold;
 
-  :host-context(.isMac.isElectron) & {
-    padding-top: $mac-title-bar-padding;
+  @include lightTheme {
+    background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
   }
-
-  &:after {
-    bottom: 0;
-  }
-}
-
-.projects {
-  margin-bottom: $spacer;
-  padding-bottom: $spacer;
-}
-
-.tags {
-  margin-bottom: $spacer;
-  padding-bottom: $spacer;
-
-}
-
-.app {
-  margin-top: auto;
-  padding-top: $spacer;
-
-  &:after {
-    top: 0;
+  @include darkTheme {
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 
-.main,
-.tags,
-.app {
+.route-link.isActiveRoute,
+.project.isActiveContext {
+  background-color: mat-css-color-primary(500, 0.04);
+}
+
+.route-link.isActiveRoute,
+.project.isActiveContext button {
+  font-weight: bold;
+}
+
+.route-link.isActiveRoute,
+.route-link.isActiveRoute mat-icon,
+.project.isActiveContext mat-icon,
+.project.isActiveContext button {
+  // does not look good for dark theme...
+  @include lightTheme {
+    color: $c-primary-800;
+  }
+}
+
+// OTHER-ITEMS
+// ----------
+
+.expand-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+
+  ::ng-deep mat-icon:last-of-type {
+    margin-left: auto;
+    margin-right: 0;
+    transition: $transition-standard;
+  }
+
+  &.isExpanded ::ng-deep mat-icon:last-of-type {
+    transform: rotate(180deg);
+  }
+}
+
+.scroll-down-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  ::ng-deep mat-icon:last-of-type {
+    margin-left: auto;
+    margin-right: 0;
+  }
+}
+
+
+.drag-handle {
+  cursor: grab;
   position: relative;
 
+  &:active {
+    cursor: grabbing;
+  }
+
   &:after {
-    @include dividerBorderColor();
     content: '';
     position: absolute;
-    left: $s*2;
-    right: $s*2;
-    height: 0;
+    top: -$s;
+    left: -$s;
+    right: -$s;
+    bottom: -$s;
   }
 }
+
