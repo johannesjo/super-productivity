@@ -160,35 +160,7 @@ export function taskReducer(
         ...action.payload.task,
         timeSpent: calcTotalTimeSpent(action.payload.task.timeSpentOnDay),
       };
-
-      return {
-        ...taskAdapter.addOne(task, state),
-        ...(
-          action.payload.isAddToBacklog
-            ? {
-              backlogTaskIds: action.payload.isAddToBottom
-                ? [
-                  task.id,
-                  ...state.backlogTaskIds
-                ]
-                : [
-                  ...state.backlogTaskIds,
-                  task.id,
-                ]
-            }
-            : {
-              todaysTaskIds: action.payload.isAddToBottom
-                ? [
-                  ...state.todaysTaskIds,
-                  task.id,
-                ]
-                : [
-                  task.id,
-                  ...state.todaysTaskIds
-                ]
-            }
-        ),
-      };
+      return taskAdapter.addOne(task, state);
     }
 
     case TaskActionTypes.UpdateTask: {

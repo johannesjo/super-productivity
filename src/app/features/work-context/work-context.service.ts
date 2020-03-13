@@ -89,13 +89,6 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-  // todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.isTaskDataLoaded$.pipe(
-  //   filter(isLoaded => !!isLoaded),
-  //   switchMap(() => this.activeWorkContext$),
-  //   switchMap(activeWorkContext => this._getTasksByIds$(activeWorkContext.taskIds)),
-  //   shareReplay(1),
-  // );
-
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
     map(tasks => tasks.filter(task => task && !task.isDone))
   );
@@ -105,11 +98,10 @@ export class WorkContextService {
   );
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
-    switchMap(activeWorkContext => (activeWorkContext.backlogTaskIds && activeWorkContext.backlogTaskIds.length)
+    switchMap(activeWorkContext => (activeWorkContext.type === WorkContextType.PROJECT)
       ? this._getTasksByIds$(activeWorkContext.backlogTaskIds)
       : of([])
     ),
-    map(tasks => tasks.filter(task => task && task.isDone))
   );
 
   // TODO make it more efficient
@@ -135,8 +127,6 @@ export class WorkContextService {
       );
     })
   );
-
-  backlogTasksCount$: Observable<number> = this.backlogTasks$.pipe(map(tasks => tasks.length));
 
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
 

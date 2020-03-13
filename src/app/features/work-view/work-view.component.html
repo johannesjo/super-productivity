@@ -64,7 +64,7 @@
                           [@expandFade]></improvement-banner>
 
       <div class="task-list-wrapper">
-        <div *ngIf="!(planningModeService.isPlanningMode$|async) && !(taskService.isHasTasksToWorkOn$|async)"
+        <div *ngIf="!(planningModeService.isPlanningMode$|async) && !(workContextService.isHasTasksToWorkOn$|async)"
              @expandFade
              class="add-more-or-finish">
           <h2>{{T.WW.NO_PLANNED_TASKS|translate}}</h2>
@@ -132,7 +132,7 @@
              (mouseleave)="isPreloadBacklog=false"
              (posChanged)="splitInputPos=$event"
              [containerEl]="containerEl"
-             [counter]="(workContextService.backlogTasksCount$|async)"
+             [counter]="backlogTasks?.length"
              [isAnimateBtn]="isTriggerBacklogIconAni$|async"
              [splitBottomEl]="splitBottomEl"
              [splitPos]="splitInputPos"
