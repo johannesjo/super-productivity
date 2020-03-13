@@ -1,0 +1,45 @@
+@import "../../../variables";
+
+.section-wrapper {
+  //display: grid;
+  //grid-template-columns: 50% 50%;
+  //grid-gap: 0 $s*2;
+}
+
+.config-section {
+  @include dividerBorderColor(1px);
+  break-inside: avoid;
+  margin-bottom: 10px;
+  border-radius: $card-border-radius;
+  background: #ffffff;
+
+  @include darkTheme {
+    background-color: $dark-theme-card-bg;
+  }
+
+
+  .md-title {
+    margin-top: 0;
+  }
+
+  ::ng-deep .collapsible-header {
+    border-bottom: 1px solid transparent;
+  }
+
+  ::ng-deep .isExpanded .collapsible-header {
+    font-weight: bold;
+    border-color: $light-theme-extra-border-color;
+
+    @include darkTheme {
+      border-color: $dark-theme-extra-border-color;
+    }
+  }
+}
+
+.settings-col {
+  margin-bottom: 30px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}

@@ -24,11 +24,11 @@ import {WorkContextAdvancedCfg, WorkContextThemeCfg} from '../../features/work-c
 
 @Component({
   selector: 'project-settings',
-  templateUrl: './project-settings.component.html',
-  styleUrls: ['./project-settings.component.scss'],
+  templateUrl: './project-settings-page.component.html',
+  styleUrls: ['./project-settings-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectSettingsComponent implements OnInit, OnDestroy {
+export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   T = T;
   projectThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;

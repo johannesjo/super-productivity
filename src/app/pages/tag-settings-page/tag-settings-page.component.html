@@ -1,0 +1,26 @@
+<div class="page-wrapper">
+  <div class="component-wrapper">
+    <h1>TAG</h1>
+    <h1 class="mat-h1">{{T.PS.PROJECT_SETTINGS|translate}}</h1>
+
+    <section class="config-section">
+      <config-section (save)="saveBasicSettings($event)"
+                      [cfg]="currentProject"
+                      [section]="basicFormCfg"></config-section>
+    </section>
+
+    <section class="config-section">
+      <config-section (save)="saveProjectThemCfg($event)"
+                      [cfg]="currentProjectTheme"
+                      [section]="projectThemeSettingsFormCfg"></config-section>
+    </section>
+
+    <div *ngFor="let section of issueIntegrationFormCfg; trackBy:trackBySectionKey;">
+      <section class="config-section ">
+        <config-section (save)="saveIssueProviderCfg($event)"
+                        [cfg]="issueIntegrationCfgs[section.key]"
+                        [section]="section"></config-section>
+      </section>
+    </div>
+  </div>
+</div>
