@@ -7,7 +7,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {THEME_COLOR_MAP} from '../../app.constants';
 import {Router} from '@angular/router';
 import {DragulaService} from 'ng2-dragula';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 import {standardListAnimation} from '../../ui/animations/standard-list.ani';
@@ -32,7 +32,12 @@ export class SideNavComponent implements OnDestroy {
   projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.projectService.list$
-      : this.projectService.currentProject$.pipe(map(p => [p]))
+      : combineLatest([
+        this.projectService.list$,
+        this.workContextService.activeWorkContextId$
+      ]).pipe(
+        map(([projects, id]) => projects.filter(p => p.id === id))
+      )
     )
   );
 
@@ -41,9 +46,12 @@ export class SideNavComponent implements OnDestroy {
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.tagService.tagsNoMyDay$
-      // : this.tagService.tagsNoMyDay$.pipe(map(tags => [tags[0]]))
-      : this.tagService.tagsNoMyDay$.pipe(map(tags => []))
-      // : this.tagService.currentProject$.pipe(map(p => [p]))
+      : combineLatest([
+        this.tagService.tagsNoMyDay$,
+        this.workContextService.activeWorkContextId$
+      ]).pipe(
+        map(([tags, id]) => tags.filter(t => t.id === id))
+      )
     )
   );
 
@@ -51,7 +59,6 @@ export class SideNavComponent implements OnDestroy {
   PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
   TAG_SIDE_NAV = 'TAG_SIDE_NAV';
   activeWorkContextId: string;
-  MY_DAY_ID = MY_DAY_TAG.id;
   WorkContextType = WorkContextType;
 
   private _subs = new Subscription();
