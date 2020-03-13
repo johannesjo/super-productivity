@@ -31,6 +31,7 @@ export class WorkContextService {
           filter(p => !!p),
           map(tag => ({
             ...tag,
+            type: WorkContextType.TAG,
             routerLink: `tag/${tag.id}`
           }))
         );
@@ -44,6 +45,7 @@ export class WorkContextService {
             icon: null,
             taskIds: project.todaysTaskIds || [],
             backlogTaskIds: project.backlogTaskIds || [],
+            type: WorkContextType.PROJECT,
             routerLink: `project/${project.id}`
           })),
         );
@@ -69,6 +71,7 @@ export class WorkContextService {
       switchMap(myDayTag => of([
           ({
             ...myDayTag,
+            type: WorkContextType.TAG,
             routerLink: `tag/${myDayTag.id}`
           } as WorkContext)
         ])

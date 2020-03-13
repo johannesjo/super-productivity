@@ -52,7 +52,6 @@ export type MiscConfig = Readonly<{
 
 export type EvaluationConfig = Readonly<{
   isHideEvaluationSheet: boolean;
-  isHideMetricFromMenu: boolean;
 }>;
 
 export type IdleConfig = Readonly<{

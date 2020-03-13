@@ -15,6 +15,7 @@ import {map, switchMap} from 'rxjs/operators';
 import {TagService} from '../../features/tag/tag.service';
 import {Tag} from '../../features/tag/tag.model';
 import {MY_DAY_TAG} from '../../features/tag/tag.const';
+import {WorkContextType} from '../../features/work-context/work-context.model';
 
 @Component({
   selector: 'side-nav',
@@ -51,6 +52,7 @@ export class SideNavComponent implements OnDestroy {
   TAG_SIDE_NAV = 'TAG_SIDE_NAV';
   activeWorkContextId: string;
   MY_DAY_ID = MY_DAY_TAG.id;
+  WorkContextType = WorkContextType;
 
   private _subs = new Subscription();
 

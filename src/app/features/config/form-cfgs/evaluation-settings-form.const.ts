@@ -14,12 +14,5 @@ export const EVALUATION_SETTINGS_FORM_CFG: ConfigFormSection<EvaluationConfig> =
         label: T.GCF.EVALUATION.IS_HIDE_EVALUATION_SHEET,
       },
     },
-    {
-      key: 'isHideMetricFromMenu',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.EVALUATION.IS_HIDE_METRIC_FROM_MENU,
-      },
-    },
   ]
 };

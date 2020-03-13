@@ -9,17 +9,21 @@
 
   <!-- TODO fix link -->
   <div [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
-       *ngIf="(workContextService.activeWorkContext$|async) as activeWorkContext"
        class="current-work-context-title"
        mat-ripple
        routerLink="active/tasks">{{activeWorkContext.title}}</div>
 
   <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
+          [mat-menu-trigger-for]="activeWorkContextMenu"
           class="project-settings-btn"
-          mat-icon-button
-          routerLink="active/settings">
+          mat-icon-button>
     <mat-icon>more_vert</mat-icon>
   </button>
+
+  <mat-menu #activeWorkContextMenu="matMenu">
+    <work-context-menu [contextType]="activeWorkContext.type"
+                       [contextId]="activeWorkContext.id"></work-context-menu>
+  </mat-menu>
 
   <!--    <button [matMenuTriggerFor]="projectMenu"-->
   <!--            [style.pointer-events]="isProjectMenuDisabled ? 'none' : 'all'"-->

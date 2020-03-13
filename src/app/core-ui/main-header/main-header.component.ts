@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {ProjectService} from '../../features/project/project.service';
 import {LayoutService} from '../layout/layout.service';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
@@ -8,8 +8,9 @@ import {T} from '../../t.const';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {NavigationStart, Router} from '@angular/router';
 import {filter, map} from 'rxjs/operators';
-import {combineLatest, Observable} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {WorkContext} from '../../features/work-context/work-context.model';
 
 @Component({
   selector: 'main-header',
@@ -18,7 +19,7 @@ import {WorkContextService} from '../../features/work-context/work-context.servi
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation]
 })
-export class MainHeaderComponent implements OnInit {
+export class MainHeaderComponent implements OnInit, OnDestroy {
   T = T;
   progressCircleRadius = 10;
   circumference = this.progressCircleRadius * Math.PI * 2;
@@ -37,6 +38,8 @@ export class MainHeaderComponent implements OnInit {
     })
   );
 
+  activeWorkContext: WorkContext;
+  private _subs = new Subscription();
 
   constructor(
     public readonly projectService: ProjectService,
@@ -48,6 +51,11 @@ export class MainHeaderComponent implements OnInit {
     private readonly _router: Router,
     private readonly _renderer: Renderer2,
   ) {
+    this._subs.add(this.workContextService.activeWorkContext$.subscribe((activeWorkContext) => this.activeWorkContext = activeWorkContext));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   ngOnInit() {

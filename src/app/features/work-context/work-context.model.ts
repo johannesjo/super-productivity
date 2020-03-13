@@ -34,6 +34,11 @@ export type WorkContextThemeCfg = Readonly<{
   hueWarn: HueValue;
 }>;
 
+export enum WorkContextType {
+  PROJECT = 'PROJECT',
+  TAG = 'TAG'
+}
+
 export interface WorkContextCommon {
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
@@ -54,11 +59,7 @@ export interface WorkContextCopy extends WorkContextCommon {
   routerLink: string;
   taskIds: string[];
   backlogTaskIds?: string[];
-}
-
-export enum WorkContextType {
-  PROJECT = 'PROJECT',
-  TAG = 'TAG'
+  type: WorkContextType;
 }
 
 export type WorkContext = Readonly<WorkContextCopy>;

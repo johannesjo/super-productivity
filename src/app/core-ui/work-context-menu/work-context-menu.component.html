@@ -1,0 +1,17 @@
+<button mat-menu-item
+        routerLink="worklog">
+  <mat-icon>date_range</mat-icon>
+  <span class="text">{{T.MH.WORKLOG|translate}}</span>
+</button>
+
+<button mat-menu-item
+        routerLink="metrics">
+  <mat-icon>donut_large</mat-icon>
+  <span class="text">{{T.MH.METRICS|translate}}</span>
+</button>
+
+<button mat-menu-item
+        [routerLink]="[base,contextId,'settings']">
+  <mat-icon>settings</mat-icon>
+  <span class="text">{{T.MH.SETTINGS|translate}}</span>
+</button>

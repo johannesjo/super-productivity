@@ -1,11 +1,4 @@
 <section class="main">
-  <!--  <button class="route-link"-->
-  <!--          mat-menu-item-->
-  <!--          routerLink="work-view"-->
-  <!--  >-->
-  <!--    <mat-icon>wb_sunny</mat-icon>-->
-  <!--    {{T.MH.TASKS|translate}}-->
-  <!--  </button>-->
   <button *ngFor="let context of workContextService.mainWorkContexts$|async"
           class="route-link"
           mat-menu-item
@@ -51,14 +44,19 @@
       </button>
 
       <button
-        [routerLink]="['project', project.id, 'settings']"
+        [matMenuTriggerFor]="projectMenu"
         class="project-settings-btn"
         mat-icon-button
         routerLinkActive="isActiveRoute">
         <mat-icon>more_vert</mat-icon>
       </button>
+      <mat-menu #projectMenu="matMenu">
+        <work-context-menu [contextType]="WorkContextType.PROJECT"
+                           [contextId]="project.id"></work-context-menu>
+      </mat-menu>
     </div>
   </div>
+
   <button mat-menu-item
           *ngIf="isProjectsExpanded"
           routerLink="project-overview"
@@ -74,6 +72,7 @@
     {{T.MH.CREATE_PROJECT|translate}}
   </button>
 </section>
+
 
 <section class="tags"
          *ngIf="tagList$|async as tagList">
@@ -103,12 +102,17 @@
       </button>
 
       <button
-        [routerLink]="['tag', tag.id, 'settings']"
+        [mat-menu-trigger-for]="tagMenu"
         class="tag-settings-btn"
         mat-icon-button
         routerLinkActive="isActiveRoute">
         <mat-icon>more_vert</mat-icon>
       </button>
+
+      <mat-menu #tagMenu="matMenu">
+        <work-context-menu [contextType]="WorkContextType.TAG"
+                           [contextId]="tag.id"></work-context-menu>
+      </mat-menu>
     </div>
   </div>
   <button (click)="addTag()"
@@ -121,26 +125,6 @@
 
 
 <section class="app">
-
-
-  <button class="route-link"
-          mat-menu-item
-          routerLink="worklog"
-          routerLinkActive="isActiveRoute">
-    <mat-icon>date_range</mat-icon>
-    <span class="text">{{T.MH.WORKLOG|translate}}</span>
-  </button>
-
-  <button class="route-link"
-          mat-menu-item
-          routerLink="metrics"
-          routerLinkActive="isActiveRoute"
-          *ngIf="!(globalConfigService.evaluation$|async)?.isHideMetricFromMenu">
-    <mat-icon>donut_large</mat-icon>
-    <span class="text">{{T.MH.METRICS|translate}}</span>
-  </button>
-
-
   <button class="route-link"
           mat-menu-item
           routerLink="config"

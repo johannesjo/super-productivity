@@ -710,7 +710,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
-      "IS_HIDE_METRIC_FROM_MENU": "Hide metrics from menu",
       "TITLE": "Evaluation & Metrics"
     },
     "GOOGLE_DRIVE_SYNC": {

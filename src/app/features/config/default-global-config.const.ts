@@ -16,7 +16,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   evaluation: {
     isHideEvaluationSheet: false,
-    isHideMetricFromMenu: false,
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,

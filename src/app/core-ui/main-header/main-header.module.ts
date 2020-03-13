@@ -6,6 +6,7 @@ import {ProjectModule} from '../../features/project/project.module';
 import {RouterModule} from '@angular/router';
 import {BookmarkModule} from '../../features/bookmark/bookmark.module';
 import {PomodoroModule} from '../../features/pomodoro/pomodoro.module';
+import {WorkContextMenuModule} from '../work-context-menu/work-context-menu.module';
 
 @NgModule({
   imports: [
@@ -14,7 +15,8 @@ import {PomodoroModule} from '../../features/pomodoro/pomodoro.module';
     ProjectModule,
     RouterModule,
     BookmarkModule,
-    PomodoroModule
+    PomodoroModule,
+    WorkContextMenuModule,
   ],
   declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],
