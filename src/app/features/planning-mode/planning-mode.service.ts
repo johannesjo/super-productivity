@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, merge, Observable} from 'rxjs';
-import {TaskService} from '../tasks/task.service';
 import {delay, map, withLatestFrom} from 'rxjs/operators';
 import {ProjectService} from '../project/project.service';
 import {WorkContextService} from '../work-context/work-context.service';

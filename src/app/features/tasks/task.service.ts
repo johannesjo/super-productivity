@@ -59,10 +59,8 @@ import {
   selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
-  selectTaskEntities,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
-  selectTasksWithSubTasksByIds,
   selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId
 } from './store/task.selectors';
@@ -71,9 +69,10 @@ import {getWorklogStr} from '../../util/get-work-log-str';
 import {Actions} from '@ngrx/effects';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
-import {Dictionary} from '@ngrx/entity';
 import {TagService} from '../tag/tag.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
+import {WorkContextService} from '../work-context/work-context.service';
+import {WorkContextType} from '../work-context/work-context.model';
 
 
 @Injectable({
@@ -113,11 +112,6 @@ export class TaskService {
   );
 
 
-  // todays list flat + tasks worked on today
-  taskEntityState$: Observable<Dictionary<Task>> = this._store.pipe(
-    select(selectTaskEntities),
-  );
-
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectAllRepeatableTaskWithSubTasks),
   );
@@ -149,6 +143,7 @@ export class TaskService {
     private readonly _persistenceService: PersistenceService,
     private readonly _tagService: TagService,
     private readonly _projectService: ProjectService,
+    private readonly _workContextService: WorkContextService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {
@@ -211,11 +206,23 @@ export class TaskService {
   // -----
   add(title: string,
       isAddToBacklog = false,
-      additionalFields?: Partial<Task>,
+      additionalFields: Partial<Task> = {},
       isAddToBottom = false,
   ) {
+    const workContextId = this._workContextService.activeWorkContextId;
+    const workContextType = this._workContextService.activeWorkContextType;
+
+    additionalFields = {
+      tagIds: (workContextType === WorkContextType.TAG)
+        ? [workContextId]
+        : [],
+      ...additionalFields,
+    };
+
     this._store.dispatch(new AddTask({
       task: this.createNewTaskWithDefaults(title, additionalFields),
+      workContextId,
+      workContextType,
       isAddToBacklog,
       isAddToBottom
     }));
@@ -427,13 +434,6 @@ export class TaskService {
 
   getByIdLive$(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}));
-  }
-
-  getByIds$(ids: string[]): Observable<TaskWithSubTasks[]> {
-    if (!Array.isArray(ids)) {
-      throw new Error('Invalid param provided for getByIds$ :(');
-    }
-    return this._store.pipe(select(selectTasksWithSubTasksByIds, {ids}));
   }
 
   getByIdWithSubTaskData$(id: string): Observable<TaskWithSubTasks> {

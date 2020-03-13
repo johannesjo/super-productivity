@@ -42,35 +42,9 @@ export class TaskRelatedModelEffects {
   );
 
 
-  @Effect({dispatch: false})
-  updateProjectList$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.AddTask,
-      TaskActionTypes.Move,
-      TaskActionTypes.MoveUp,
-      TaskActionTypes.MoveDown,
-      TaskActionTypes.RestoreTask,
-      TaskActionTypes.DeleteTask,
-      TaskActionTypes.MoveToToday,
-      TaskActionTypes.MoveToBacklog,
-    ),
-    withLatestFrom(
-      this._store$.pipe(select(selectCurrentProjectId)),
-      this._store$.pipe(select(selectTaskFeatureState)),
-    ),
-    tap(([, projectId, taskState]) => {
-      this._projectService.update(projectId, {
-        todaysTaskIds: taskState.todaysTaskIds,
-        backlogTaskIds: taskState.backlogTaskIds,
-      });
-    })
-  );
-
-
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _projectService: ProjectService,
     private _reminderService: ReminderService,
     private _router: Router,
     private _persistenceService: PersistenceService

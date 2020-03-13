@@ -2,8 +2,9 @@ import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import * as tagActions from './tag.actions';
 import {Tag, TagState} from '../tag.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
-import {TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
+import {AddTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 import {MY_DAY_TAG} from '../tag.const';
+import {WorkContextType} from '../../work-context/work-context.model';
 
 export const TAG_FEATURE_NAME = 'tag';
 
@@ -64,6 +65,32 @@ export function tagReducer(
   action: Action,
 ): TagState {
   switch (action.type) {
+    case TaskActionTypes.AddTask: {
+      const {payload} = action as AddTask;
+      const {workContextId, workContextType, task, isAddToBottom} = payload;
+      const affectedEntity = state.entities[workContextId];
+      return (workContextType === WorkContextType.TAG)
+        ? {
+          ...state,
+          entities: {
+            ...state.entities,
+            [workContextId]: {
+              ...affectedEntity,
+              taskIds: isAddToBottom
+                ? [
+                  ...affectedEntity.taskIds,
+                  task.id,
+                ]
+                : [
+                  task.id,
+                  ...affectedEntity.taskIds
+                ]
+            }
+          },
+        }
+        : state;
+    }
+
     // TODO handle delete task and possible add task
     case TaskActionTypes.UpdateTaskTags: {
       const {payload} = action as UpdateTaskTags;

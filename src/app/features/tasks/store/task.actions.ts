@@ -3,6 +3,7 @@ import {Update} from '@ngrx/entity';
 import {DropListModelSource, Task, TaskAdditionalInfoTargetPanel, TaskState, TaskWithSubTasks} from '../task.model';
 import {IssueDataReduced} from '../../issue/issue.model';
 import {RoundTimeOption} from '../../project/project.model';
+import {WorkContextType} from '../../work-context/work-context.model';
 
 export enum TaskActionTypes {
   LoadTaskState = '[Task] Load Task State',
@@ -82,7 +83,12 @@ export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
   constructor(public payload: {
-    task: Task, issue?: IssueDataReduced, isAddToBacklog: boolean, isAddToBottom: boolean,
+    task: Task,
+    issue?: IssueDataReduced,
+    workContextId: string,
+    workContextType: WorkContextType,
+    isAddToBacklog: boolean,
+    isAddToBottom: boolean,
   }) {
   }
 }
