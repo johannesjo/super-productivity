@@ -37,7 +37,7 @@
        [@standardList]="projectList?.length"
        [dragula]="PROJECTS_SIDE_NAV">
     <div *ngFor="let project of projectList; trackBy: trackById;"
-         [class.isCurrentProject]="project.id===(workContextService.activeWorkContextId$|async)"
+         [class.isCurrentProject]="project.id===activeWorkContextId"
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
@@ -59,6 +59,14 @@
       </button>
     </div>
   </div>
+  <button mat-menu-item
+          *ngIf="isProjectsExpanded"
+          routerLink="project-overview"
+          routerLinkActive="isActiveRoute">
+    <mat-icon>format_list_numbered_rtl</mat-icon>
+    {{T.MH.MANAGE_PROJECTS|translate}}
+  </button>
+
   <button (click)="addProject()"
           *ngIf="isProjectsExpanded"
           mat-menu-item>
@@ -113,13 +121,7 @@
 
 
 <section class="app">
-  <button class="route-link"
-          mat-menu-item
-          routerLink="project-overview"
-          routerLinkActive="isActiveRoute">
-    <mat-icon>list</mat-icon>
-    {{T.MH.MANAGE_PROJECTS|translate}}
-  </button>
+
 
   <button class="route-link"
           mat-menu-item

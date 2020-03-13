@@ -104,18 +104,6 @@ export class WorkContextService {
 
   async load() {
     const state = await this._persistenceService.context.loadState() || initialContextState;
-    const {activeId, activeType} = state;
-    console.log(activeType, activeId);
-
-    // switch (activeType) {
-    //   case WorkContextType.TAG:
-    //     this._router.navigate(['/tag', activeId, 'tasks']);
-    //     break;
-    //   case WorkContextType.PROJECT:
-    //     this._router.navigate(['/project', activeId, 'tasks']);
-    //     break;
-    // }
-
     this._store$.dispatch(loadWorkContextState({state}));
   }
 

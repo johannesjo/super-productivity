@@ -14,6 +14,7 @@ import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 import {map, switchMap} from 'rxjs/operators';
 import {TagService} from '../../features/tag/tag.service';
 import {Tag} from '../../features/tag/tag.model';
+import {MY_DAY_TAG} from '../../features/tag/tag.const';
 
 @Component({
   selector: 'side-nav',
@@ -48,6 +49,8 @@ export class SideNavComponent implements OnDestroy {
   T = T;
   PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
   TAG_SIDE_NAV = 'TAG_SIDE_NAV';
+  activeWorkContextId: string;
+  MY_DAY_ID = MY_DAY_TAG.id;
 
   private _subs = new Subscription();
 
@@ -66,6 +69,7 @@ export class SideNavComponent implements OnDestroy {
         return this.isProjectsExpanded && handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
       }
     });
+    this._subs.add(this.workContextService.activeWorkContextId$.subscribe(id => this.activeWorkContextId = id));
 
     this._subs.add(this._dragulaService.dropModel(this.PROJECTS_SIDE_NAV)
       .subscribe((params: any) => {
