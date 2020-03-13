@@ -103,6 +103,7 @@ section {
 }
 
 
+// color bar left styles
 .tag,
 .project,
 .route-link {
@@ -130,33 +131,39 @@ section {
 }
 
 
-.tag-settings-btn:hover,
-.tag button:first-of-type:hover,
-.project-settings-btn:hover,
-.project button:first-of-type:hover,
-.route-link:hover {
-  font-weight: bold;
+.tag-settings-btn,
+.tag button:first-of-type,
+.project-settings-btn,
+.project button:first-of-type,
+.route-link {
+  &:hover {
+    font-weight: bold;
 
-  @include lightTheme {
-    background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
-  }
-  @include darkTheme {
-    background: rgba(255, 255, 255, 0.1);
+    @include lightTheme {
+      background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+    }
+    @include darkTheme {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 
 .route-link.isActiveRoute,
+.tag.isActiveContext,
 .project.isActiveContext {
   background-color: mat-css-color-primary(500, 0.04);
 }
 
 .route-link.isActiveRoute,
+.tag.isActiveContext button,
 .project.isActiveContext button {
   font-weight: bold;
 }
 
 .route-link.isActiveRoute,
 .route-link.isActiveRoute mat-icon,
+.tag.isActiveContext mat-icon,
+.tag.isActiveContext button,
 .project.isActiveContext mat-icon,
 .project.isActiveContext button {
   // does not look good for dark theme...
