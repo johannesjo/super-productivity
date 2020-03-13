@@ -83,25 +83,34 @@ export class WorkContextService {
 
   // TASK LEVEL
   // ----------
-  // only todays list
-  todaysTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
-    switchMap(activeWorkContext => this._getTasksByIds$(activeWorkContext.taskIds)),
+  todaysTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(
+    map((ac) => ac.taskIds),
+    distinctUntilChanged(distinctUntilChangedObject),
+    shareReplay(1),
+  );
+
+  backlogTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(
+    map((ac) => ac.backlogTaskIds || []),
+    distinctUntilChanged(distinctUntilChangedObject),
+    shareReplay(1),
+  );
+
+
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this.todaysTaskIds$.pipe(
+    switchMap(taskIds => this._getTasksByIds$(taskIds)),
     shareReplay(1),
   );
 
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
-    map(tasks => tasks.filter(task => task && !task.isDone))
+    map(tasks => tasks.filter(task => task && !task.isDone)),
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
     map(tasks => tasks.filter(task => task && task.isDone))
   );
 
-  backlogTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
-    switchMap(activeWorkContext => (activeWorkContext.type === WorkContextType.PROJECT)
-      ? this._getTasksByIds$(activeWorkContext.backlogTaskIds)
-      : of([])
-    ),
+  backlogTasks$: Observable<TaskWithSubTasks[]> = this.backlogTaskIds$.pipe(
+    switchMap(ids => this._getTasksByIds$(ids)),
   );
 
   // TODO make it more efficient
