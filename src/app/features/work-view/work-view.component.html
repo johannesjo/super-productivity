@@ -132,7 +132,7 @@
              (mouseleave)="isPreloadBacklog=false"
              (posChanged)="splitInputPos=$event"
              [containerEl]="containerEl"
-             [counter]="(taskService.backlogTasksCount$|async)"
+             [counter]="(workContextService.backlogTasksCount$|async)"
              [isAnimateBtn]="isTriggerBacklogIconAni$|async"
              [splitBottomEl]="splitBottomEl"
              [splitPos]="splitInputPos"

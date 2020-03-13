@@ -23,6 +23,7 @@ import {T} from '../../t.const';
 import {ImprovementService} from '../../features/metric/improvement/improvement.service';
 import {ProjectService} from '../../features/project/project.service';
 import {workViewProjectChangeAnimation} from '../../ui/animations/work-view-project-change.ani';
+import {WorkContextService} from '../work-context/work-context.service';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -74,6 +75,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     public planningModeService: PlanningModeService,
     public improvementService: ImprovementService,
     public layoutService: LayoutService,
+    public workContextService: WorkContextService,
     private _elementRef: ElementRef,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,

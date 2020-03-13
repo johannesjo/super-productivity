@@ -187,39 +187,13 @@ export class TaskService {
     select(selectEstimateRemainingForToday),
     distinctUntilChanged(),
   );
-  estimateRemainingBacklog$: Observable<number> = this._store.pipe(
-    select(selectEstimateRemainingForBacklog),
-    distinctUntilChanged(),
-  );
 
-  totalTimeWorkedOnTodaysTasks$: Observable<number> = this._store.pipe(
-    select(selectTotalTimeWorkedOnTodaysTasks),
-    distinctUntilChanged(),
-  );
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
     map((task) => task && task.timeEstimate > 0 && task.timeSpent / task.timeEstimate)
   );
 
   // TODO could be done as a dynamic selector
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
-
-  // TODO could be done as a dynamic selector
-  estimatedOnTasksWorkedOnToday$: Observable<number> = this.todaysTasks$.pipe(
-    map((tasks) => {
-      const date = getWorklogStr();
-      return tasks && tasks.length && tasks.reduce((acc, task) => {
-          if (!task.timeSpentOnDay && !(task.timeSpentOnDay[date] > 0)) {
-            return acc;
-          }
-          const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[date]) - task.timeSpent;
-          return (remainingEstimate > 0)
-            ? acc + remainingEstimate
-            : acc;
-        }, 0
-      );
-    }),
-    distinctUntilChanged(),
-  );
 
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
     TaskActionTypes.MoveToBacklog,
@@ -229,9 +203,6 @@ export class TaskService {
     select(selectHasTasksToWorkOn),
     distinctUntilChanged(),
   );
-
-  allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-
 
   private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasks));
 
@@ -290,18 +261,6 @@ export class TaskService {
     );
   }
 
-  async loadStateForProject(projectId) {
-    const projectData = await this._projectService.getById$(projectId).toPromise();
-    this.loadList(projectData.todaysTaskIds, projectData.backlogTaskIds);
-  }
-
-  loadList(todaysTaskIds: string[], backlogTaskIds: string[] = []) {
-    console.log('LOAD TASK LIST IDS');
-    this._store.dispatch(new UpdateTaskListIds({
-      todaysTaskIds: todaysTaskIds || [],
-      backlogTaskIds: backlogTaskIds || [],
-    }));
-  }
 
 
   loadState(state) {

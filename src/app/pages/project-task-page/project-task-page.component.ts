@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {TaskService} from '../../features/tasks/task.service';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'work-view-page',
@@ -8,7 +9,9 @@ import {TaskService} from '../../features/tasks/task.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectTaskPageComponent {
-  constructor(public taskService: TaskService) {
+  constructor(
+    public workContextService: WorkContextService,
+  ) {
   }
 
 }

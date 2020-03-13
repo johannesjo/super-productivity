@@ -21,6 +21,7 @@ import {T} from '../../t.const';
 import {WorklogService} from '../../features/worklog/worklog.service';
 import {DialogWorklogExportComponent} from '../../features/worklog/dialog-worklog-export/dialog-worklog-export.component';
 import {ElectronService} from '../../core/electron/electron.service';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -39,14 +40,14 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   doneAndRepeatingTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
     this._taskService.allRepeatableTasks$,
-    this._taskService.doneTasks$,
+    this._workContextService.doneTasks$,
   ]).pipe(
     map(([repeatableTasks, doneTasks]) => [
       ...repeatableTasks,
       ...doneTasks.filter(task => !task.repeatCfgId || task.repeatCfgId === null),
     ]),
   );
-  todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.todaysTasks$;
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this._workContextService.todaysTasks$;
 
   isTimeSheetExported = true;
   showSuccessAnimation;
@@ -122,6 +123,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
     private readonly _snackService: SnackService,
+    private readonly _workContextService: WorkContextService,
     private readonly _projectService: ProjectService,
     private readonly _googleApiService: GoogleApiService,
     private readonly _electronService: ElectronService,

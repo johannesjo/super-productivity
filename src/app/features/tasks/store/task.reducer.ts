@@ -276,89 +276,89 @@ export function taskReducer(
 
     case TaskActionTypes.Move: {
       return state;
-      let newState = state;
-      const {taskId, sourceModelId, targetModelId, newOrderedIds} = action.payload;
-      const taskToMove = state.entities[taskId];
-
-
-      switch (sourceModelId) {
-        case 'DONE':
-        case 'UNDONE':
-          newState = {
-            ...newState,
-            todaysTaskIds: newState.todaysTaskIds.filter(filterOutId(taskId)),
-          };
-          break;
-
-        case 'BACKLOG':
-          newState = {
-            ...newState,
-            backlogTaskIds: newState.backlogTaskIds.filter(filterOutId(taskId)),
-          };
-          break;
-
-        default:
-          // SUB TASK CASE
-          const oldPar = state.entities[sourceModelId];
-
-          newState = reCalcTimesForParentIfParent(oldPar.id, {
-            ...newState,
-            entities: {
-              ...newState.entities,
-              [oldPar.id]: {
-                ...oldPar,
-                subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
-              }
-            }
-          });
-      }
-
-      switch (targetModelId) {
-        case 'DONE':
-        case 'UNDONE':
-          const isDone = (targetModelId === 'DONE');
-          // NOTE: move to end of complete list for done tasks
-          const emptyListVal = (targetModelId === 'DONE')
-            ? newState.todaysTaskIds.length
-            : 0;
-          return {
-            ...newState,
-            todaysTaskIds: moveItemInList(taskId, newState.todaysTaskIds, newOrderedIds, emptyListVal),
-            entities: {
-              ...newState.entities,
-              [taskId]: {
-                ...taskToMove,
-                isDone
-              }
-            },
-            // unset current task if it was the task moved
-            ...((isDone && taskId === state.currentTaskId) ? {currentTaskId: null} : {})
-          };
-
-        case 'BACKLOG':
-          return {
-            ...newState,
-            backlogTaskIds: newOrderedIds,
-          };
-
-        default:
-          // SUB TASK CASE
-          const newPar = state.entities[targetModelId];
-          return reCalcTimesForParentIfParent(newPar.id, {
-            ...newState,
-            entities: {
-              ...newState.entities,
-              [newPar.id]: {
-                ...newPar,
-                subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
-              },
-              [taskId]: {
-                ...taskToMove,
-                parentId: newPar.id
-              },
-            }
-          });
-      }
+      // let newState = state;
+      // const {taskId, sourceModelId, targetModelId, newOrderedIds} = action.payload;
+      // const taskToMove = state.entities[taskId];
+      //
+      //
+      // switch (sourceModelId) {
+      //   case 'DONE':
+      //   case 'UNDONE':
+      //     newState = {
+      //       ...newState,
+      //       todaysTaskIds: newState.todaysTaskIds.filter(filterOutId(taskId)),
+      //     };
+      //     break;
+      //
+      //   case 'BACKLOG':
+      //     newState = {
+      //       ...newState,
+      //       backlogTaskIds: newState.backlogTaskIds.filter(filterOutId(taskId)),
+      //     };
+      //     break;
+      //
+      //   default:
+      //     // SUB TASK CASE
+      //     const oldPar = state.entities[sourceModelId];
+      //
+      //     newState = reCalcTimesForParentIfParent(oldPar.id, {
+      //       ...newState,
+      //       entities: {
+      //         ...newState.entities,
+      //         [oldPar.id]: {
+      //           ...oldPar,
+      //           subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
+      //         }
+      //       }
+      //     });
+      // }
+      //
+      // switch (targetModelId) {
+      //   case 'DONE':
+      //   case 'UNDONE':
+      //     const isDone = (targetModelId === 'DONE');
+      //     // NOTE: move to end of complete list for done tasks
+      //     const emptyListVal = (targetModelId === 'DONE')
+      //       ? newState.todaysTaskIds.length
+      //       : 0;
+      //     return {
+      //       ...newState,
+      //       todaysTaskIds: moveItemInList(taskId, newState.todaysTaskIds, newOrderedIds, emptyListVal),
+      //       entities: {
+      //         ...newState.entities,
+      //         [taskId]: {
+      //           ...taskToMove,
+      //           isDone
+      //         }
+      //       },
+      //       // unset current task if it was the task moved
+      //       ...((isDone && taskId === state.currentTaskId) ? {currentTaskId: null} : {})
+      //     };
+      //
+      //   case 'BACKLOG':
+      //     return {
+      //       ...newState,
+      //       backlogTaskIds: newOrderedIds,
+      //     };
+      //
+      //   default:
+      //     // SUB TASK CASE
+      //     const newPar = state.entities[targetModelId];
+      //     return reCalcTimesForParentIfParent(newPar.id, {
+      //       ...newState,
+      //       entities: {
+      //         ...newState.entities,
+      //         [newPar.id]: {
+      //           ...newPar,
+      //           subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
+      //         },
+      //         [taskId]: {
+      //           ...taskToMove,
+      //           parentId: newPar.id
+      //         },
+      //       }
+      //     });
+      // }
     }
 
     case TaskActionTypes.MoveUp: {

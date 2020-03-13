@@ -6,7 +6,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
 import {initialContextState, selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
-import {distinctUntilChanged, filter, map, switchMap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, shareReplay, switchMap} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
@@ -18,6 +18,8 @@ import {distinctUntilChangedObject} from '../../util/distinct-until-changed-obje
   providedIn: 'root',
 })
 export class WorkContextService {
+  // CONTEXT LVL
+  // -----------
   activeWorkContextId$ = this._store$.pipe(select(selectActiveContextId));
   activeWorkContextTypeAndId$ = this._store$.pipe(
     select(selectActiveContextTypeAndId),
@@ -56,16 +58,6 @@ export class WorkContextService {
     filter(ctx => !!ctx),
   );
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
-    switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.taskIds)),
-    map(tasks => tasks.filter(task => task && !task.isDone))
-  );
-
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
-    switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.taskIds)),
-    map(tasks => tasks.filter(task => task && task.isDone))
-  );
-
   mainWorkContexts$: Observable<WorkContext[]> =
     this._tagService.getTagById$(MY_DAY_TAG.id).pipe(
       switchMap(myDayTag => of([
@@ -81,6 +73,29 @@ export class WorkContextService {
   currentTheme$: Observable<WorkContextThemeCfg> = this.activeWorkContext$.pipe(
     map(awc => awc.theme)
   );
+
+  // TASK LEVEL
+  // ----------
+  // only todays list
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
+    switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.taskIds)),
+    shareReplay(1),
+  );
+
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
+    map(tasks => tasks.filter(task => task && !task.isDone))
+  );
+
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
+    map(tasks => tasks.filter(task => task && task.isDone))
+  );
+
+  backlogTasks$: Observable<TaskWithSubTasks[]> = this.activeWorkContext$.pipe(
+    switchMap(activeWorkContext => this._taskService.getByIds$(activeWorkContext.backlogTaskIds)),
+    map(tasks => tasks.filter(task => task && task.isDone))
+  );
+
+  backlogTasksCount$: Observable<number> = this.backlogTasks$.pipe(map(tasks => tasks.length));
 
   constructor(
     private _store$: Store<WorkContextState>,

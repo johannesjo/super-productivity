@@ -178,7 +178,6 @@ export class ProjectEffects {
           // TODO automatize
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
-          this._taskService.loadStateForProject(projectId),
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),
           this._obstructionService.loadStateForProject(projectId),
