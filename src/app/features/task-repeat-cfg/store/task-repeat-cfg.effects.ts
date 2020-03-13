@@ -19,6 +19,7 @@ import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
 import {from} from 'rxjs';
 import {isToday} from './is-created-today.util';
 import {ProjectService} from '../../project/project.service';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -83,6 +84,8 @@ export class TaskRepeatCfgEffects {
               repeatCfgId: taskRepeatCfg.id,
               timeEstimate: taskRepeatCfg.defaultEstimate,
             }),
+            workContextType: this._workContextService.activeWorkContextType,
+            workContextId: this._workContextService.activeWorkContextId,
             isAddToBacklog: false,
             isAddToBottom: false,
           }));
@@ -151,6 +154,7 @@ export class TaskRepeatCfgEffects {
     private _projectService: ProjectService,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _workContextService: WorkContextService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
   ) {
   }
