@@ -24,7 +24,7 @@ export interface ProjectBasicCfg {
   isArchived: boolean;
   timeWorkedWithoutBreak: number;
 
-  todaysTaskIds: string[];
+  taskIds: string[];
   backlogTaskIds: string[];
 }
 

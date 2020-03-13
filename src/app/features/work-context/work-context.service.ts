@@ -52,7 +52,7 @@ export class WorkContextService {
           map(project => ({
             ...project,
             icon: null,
-            taskIds: project.todaysTaskIds || [],
+            taskIds: project.taskIds || [],
             backlogTaskIds: project.backlogTaskIds || [],
             type: WorkContextType.PROJECT,
             routerLink: `project/${project.id}`

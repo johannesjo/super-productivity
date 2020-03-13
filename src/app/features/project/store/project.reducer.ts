@@ -8,6 +8,8 @@ import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
+import {workContextMetaReducer} from '../../work-context/store/work-context-meta.reducer';
+import {TagState} from '../../tag/tag.model';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -134,11 +136,12 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
 // REDUCER
 // -------
 export function projectReducer(
-  state: ProjectState = initialProjectState,
+  stateIn: ProjectState = initialProjectState,
   action: ProjectActions | AddTask
 ): ProjectState {
   // tslint:disable-next-line
   const payload = action['payload'];
+  const state = workContextMetaReducer(stateIn, action) as ProjectState;
 
   switch (action.type) {
     // Meta Actions
@@ -170,12 +173,12 @@ export function projectReducer(
                   : {
                     todaysTaskIds: (isAddToBottom)
                       ? [
-                        ...affectedEntity.todaysTaskIds,
+                        ...affectedEntity.taskIds,
                         task.id,
                       ]
                       : [
                         task.id,
-                        ...affectedEntity.todaysTaskIds
+                        ...affectedEntity.taskIds
                       ]
                   }
               ),

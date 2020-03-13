@@ -73,6 +73,9 @@ import {TagService} from '../tag/tag.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContextType} from '../work-context/work-context.model';
+import {
+} from '../work-context/store/work-context.actions';
+import {moveTaskInBacklogList, moveTaskInTodayList} from '../work-context/store/work-context-meta.actions';
 
 
 @Injectable({
@@ -299,15 +302,17 @@ export class TaskService {
     const isTargetTodayList = (target === 'DONE' || target === 'UNDONE');
 
     if (isSrcTodayList && isTargetTodayList) {
-      // TODO move inside today
+      // move inside today
+      this._store.dispatch(moveTaskInTodayList({taskId, newOrderedIds}));
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
-      // TODO move inside backlog
+      this._store.dispatch(moveTaskInBacklogList({taskId, newOrderedIds}));
+      // move inside backlog
     } else if (src === 'BACKLOG' && isTargetTodayList) {
-      // TODO move from backlog to today
+      // move from backlog to today
     } else if (isSrcTodayList && target === 'BACKLOG') {
-      // TODO move from today to backlog
+      // move from today to backlog
     } else {
-      // TODO move sub task
+      // move sub task
     }
 
     // TODO unset current via effect

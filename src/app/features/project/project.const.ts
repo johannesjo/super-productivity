@@ -11,7 +11,7 @@ export const DEFAULT_PROJECT: Project = {
   // TODO move to global cfg
   timeWorkedWithoutBreak: null,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
-  todaysTaskIds: [],
+  taskIds: [],
   backlogTaskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON
 };
