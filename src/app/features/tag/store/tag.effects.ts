@@ -18,7 +18,9 @@ export class TagEffects {
       tagActions.upsertTag,
       tagActions.deleteTag,
       tagActions.deleteTags,
+
       TaskActionTypes.UpdateTaskTags,
+      TaskActionTypes.AddTask,
     ),
     withLatestFrom(
       this._store$.pipe(select(selectTagFeatureState)),

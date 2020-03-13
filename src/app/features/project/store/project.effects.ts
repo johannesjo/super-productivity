@@ -54,6 +54,7 @@ export class ProjectEffects {
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
         ProjectActionTypes.UpdateLastCompletedDay,
+        TaskActionTypes.AddTask,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectFeatureState))
@@ -75,6 +76,7 @@ export class ProjectEffects {
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
         ProjectActionTypes.UpdateLastCompletedDay,
+        TaskActionTypes.AddTask,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
     );

@@ -6,7 +6,8 @@ import {FIRST_PROJECT} from '../project.const';
 import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
-import {BreakNr, BreakNrCopy, WorkStartEnd} from '../../work-context/work-context.model';
+import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
+import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -134,7 +135,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
 // -------
 export function projectReducer(
   state: ProjectState = initialProjectState,
-  action: ProjectActions
+  action: ProjectActions | AddTask
 ): ProjectState {
   // tslint:disable-next-line
   const payload = action['payload'];
@@ -142,6 +143,48 @@ export function projectReducer(
   switch (action.type) {
     // Meta Actions
     // ------------
+
+    case TaskActionTypes.AddTask: {
+      const {workContextId, workContextType, task, isAddToBottom, isAddToBacklog} = payload;
+      const affectedEntity = state.entities[workContextId];
+
+      return (workContextType === WorkContextType.PROJECT)
+        ? {
+          ...state,
+          entities: {
+            ...state.entities,
+            [workContextId]: {
+              ...affectedEntity,
+              ...((isAddToBacklog)
+                  ? {
+                    backlogTaskIds: (isAddToBottom)
+                      ? [
+                        task.id,
+                        ...affectedEntity.backlogTaskIds
+                      ]
+                      : [
+                        ...affectedEntity.backlogTaskIds,
+                        task.id,
+                      ]
+                  }
+                  : {
+                    todaysTaskIds: (isAddToBottom)
+                      ? [
+                        ...affectedEntity.todaysTaskIds,
+                        task.id,
+                      ]
+                      : [
+                        task.id,
+                        ...affectedEntity.todaysTaskIds
+                      ]
+                  }
+              ),
+            }
+          },
+        }
+        : state;
+    }
+
     case ProjectActionTypes.LoadProjectState: {
       return {...action.payload.state};
     }

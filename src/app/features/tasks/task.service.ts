@@ -212,15 +212,8 @@ export class TaskService {
     const workContextId = this._workContextService.activeWorkContextId;
     const workContextType = this._workContextService.activeWorkContextType;
 
-    additionalFields = {
-      tagIds: (workContextType === WorkContextType.TAG)
-        ? [workContextId]
-        : [],
-      ...additionalFields,
-    };
-
     this._store.dispatch(new AddTask({
-      task: this.createNewTaskWithDefaults(title, additionalFields),
+      task: this.createNewTaskWithDefaults(title, additionalFields, workContextType, workContextId),
       workContextId,
       workContextType,
       isAddToBacklog,
@@ -597,14 +590,26 @@ export class TaskService {
   }
 
 
-  createNewTaskWithDefaults(title: string, additional: Partial<Task> = {}): Task {
+  createNewTaskWithDefaults(
+    title: string,
+    additional: Partial<Task> = {},
+    workContextType: WorkContextType = this._workContextService.activeWorkContextType,
+    workContextId: string = this._workContextService.activeWorkContextId
+  ): Task {
     return this._shortSyntax({
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
       created: Date.now(),
       title,
       id: shortid(),
-      projectId: this._projectService.currentId,
+
+      projectId: (workContextType === WorkContextType.PROJECT)
+        ? workContextId
+        : null,
+      tagIds: (workContextType === WorkContextType.TAG && !additional.parentId)
+        ? [workContextId]
+        : [],
+
       ...additional,
     }) as Task;
   }
