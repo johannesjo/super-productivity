@@ -124,9 +124,6 @@ export interface TaskState extends EntityState<Task> {
   selectedTaskId: string | null;
   taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel;
   lastCurrentTaskId: string | null;
-
-  todaysTaskIds: string[];
-  backlogTaskIds: string[];
   stateBefore: TaskState;
   isDataLoaded: boolean;
 }

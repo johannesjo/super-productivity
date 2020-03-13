@@ -1,8 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {TASK_FEATURE_NAME} from './task.reducer';
 import {Task, TaskState, TaskWithSubTasks} from '../task.model';
-import {IssueProviderKey} from '../../issue/issue.model';
-import {filterStartableTasks} from './task.reducer.util';
 import {taskAdapter} from './task.adapter';
 import {GITHUB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 
@@ -31,13 +29,6 @@ const mapSubTasksToTask = (task: Task, s: TaskState): TaskWithSubTasks => {
 };
 
 
-const mapTasksFromIds = (tasksIN, ids) => {
-  // TODO REMOVE FILTER LATER
-  const tasksOut = ids.map(id => tasksIN.find(task => task.id === id));
-  return tasksOut
-    .filter(task => !!task);
-};
-
 const flattenTasks = (tasksIN): TaskWithSubTasks[] => {
   let flatTasks = [];
   tasksIN.forEach(task => {
@@ -49,16 +40,11 @@ const flattenTasks = (tasksIN): TaskWithSubTasks[] => {
   return flatTasks;
 };
 
-const mapTotalTimeWorked = (tasks): number => tasks.reduce((acc, task) => acc + task.timeSpent, 0);
-
 // SELECTORS
 // ---------
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
 export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
 export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
-export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
-export const selectBacklogTaskCount = createSelector(selectBacklogTaskIds, state => state && state.length);
-export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
 export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);
 export const selectIsTaskDataLoaded = createSelector(selectTaskFeatureState, state => state.isDataLoaded);
 export const selectCurrentTask = createSelector(selectTaskFeatureState, s => s.currentTaskId && s.entities[s.currentTaskId]);
@@ -106,25 +92,8 @@ export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeature
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) => tasks.filter(task => task.reminderId));
-export const selectStartableTaskIds = createSelector(
-  selectTaskFeatureState,
-  filterStartableTasks,
-);
-export const selectStartableTasks = createSelector(
-  selectTaskFeatureState,
-  (s) =>
-    filterStartableTasks(s).map(id => s.entities[id])
-);
 
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasks, mapSubTasksToTasks);
-
-
-export const selectIsTaskForTodayPlanned = createSelector(
-  selectTaskFeatureState,
-  (state): boolean => !!state.todaysTaskIds && state.todaysTaskIds.length > 0,
-);
-export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
-export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
 
 
 // DYNAMIC SELECTORS
@@ -148,18 +117,6 @@ export const selectTaskByIdWithSubTaskData = createSelector(
 );
 
 
-export const selectTaskByIssueId = createSelector(
-  selectTaskFeatureState,
-  (state, props: { issueId: string, issueType: IssueProviderKey }): Task => {
-    const ids = state.ids as string[];
-    const taskId = ids.find(idIN => state.entities[idIN]
-      && state.entities[idIN].issueType === props.issueType && state.entities[idIN].issueId === props.issueId);
-
-    return taskId
-      ? state.entities[taskId]
-      : null;
-  }
-);
 export const selectTasksWorkedOnOrDoneFlat = createSelector(selectAllTasks, (tasks, props: { day: string }) => {
   if (!props) {
     return null;

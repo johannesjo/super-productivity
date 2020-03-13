@@ -20,17 +20,6 @@ export const mapTaskWithSubTasksToTask = (task: TaskWithSubTasks): Task => {
   return copy;
 };
 
-export const filterStartableTasks = (s: TaskState): string[] => {
-  return s.ids.filter((id) => {
-    const t = s.entities[id];
-    return !t.isDone && (
-      (t.parentId)
-        ? (s.todaysTaskIds.includes(t.parentId))
-        : (s.todaysTaskIds.includes(id) && (!t.subTaskIds || t.subTaskIds.length === 0))
-    );
-  });
-};
-
 // SHARED REDUCER ACTIONS
 // ----------------------
 export const reCalcTimesForParentIfParent = (parentId, state: TaskState): TaskState => {
@@ -176,8 +165,8 @@ export const deleteTask = (state: TaskState,
   return {
     ...stateCopy,
     // finally delete from backlog or todays tasks
-    backlogTaskIds: state.backlogTaskIds.filter(filterOutId(taskToDelete.id)),
-    todaysTaskIds: state.todaysTaskIds.filter(filterOutId(taskToDelete.id)),
+    // XXXbacklogTaskIds: state.XXXbacklogTaskIds.filter(filterOutId(taskToDelete.id)),
+    // XXXtodaysTaskIds: state.XXXtodaysTaskIds.filter(filterOutId(taskToDelete.id)),
     currentTaskId,
     stateBefore: {...state, stateBefore: null}
   };

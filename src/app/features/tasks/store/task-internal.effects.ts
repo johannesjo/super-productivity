@@ -150,49 +150,51 @@ export class TaskInternalEffects {
   }
 
   private findNextTask(state: TaskState, oldCurrentId?): string {
-    let nextId = null;
-    const {entities, todaysTaskIds} = state;
+    throw new Error('Not implemented');
 
-    const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== oldCurrentId;
-    const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
-      return entities[next].subTaskIds.length > 0
-        ? acc.concat(entities[next].subTaskIds)
-        : acc.concat(next);
-    }, []);
+    // let nextId = null;
+    // const {entities, XXXtodaysTaskIds} = state;
+    //
+    // const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== oldCurrentId;
+    // const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
+    //   return entities[next].subTaskIds.length > 0
+    //     ? acc.concat(entities[next].subTaskIds)
+    //     : acc.concat(next);
+    // }, []);
+    //
+    // if (oldCurrentId) {
+    //   const oldCurTask = entities[oldCurrentId];
+    //   if (oldCurTask && oldCurTask.parentId) {
+    //     entities[oldCurTask.parentId].subTaskIds.some((id) => {
+    //       return (id !== oldCurrentId && entities[id].isDone === false)
+    //         ? (nextId = id) && true // assign !!!
+    //         : false;
+    //     });
+    //   }
+    //
+    //   if (!nextId) {
+    //     const oldCurIndex = XXXtodaysTaskIds.indexOf(oldCurrentId);
+    //     const mainTasksBefore = XXXtodaysTaskIds.slice(0, oldCurIndex);
+    //     const mainTasksAfter = XXXtodaysTaskIds.slice(oldCurIndex + 1);
+    //     const selectableBefore = flattenToSelectable(mainTasksBefore);
+    //     const selectableAfter = flattenToSelectable(mainTasksAfter);
+    //     nextId = selectableAfter.find(filterUndoneNotCurrent)
+    //       || selectableBefore.reverse().find(filterUndoneNotCurrent);
+    //     nextId = (Array.isArray(nextId)) ? nextId[0] : nextId;
+    //
+    //   }
+    // } else {
+    //   const lastTask = entities[state.lastCurrentTaskId];
+    //   const isLastSelectable = state.lastCurrentTaskId && lastTask && !lastTask.isDone && !lastTask.subTaskIds.length;
+    //   if (isLastSelectable) {
+    //     nextId = state.lastCurrentTaskId;
+    //   } else {
+    //     const selectable = flattenToSelectable(XXXtodaysTaskIds).find(filterUndoneNotCurrent);
+    //     nextId = (Array.isArray(selectable)) ? selectable[0] : selectable;
+    //   }
+    // }
 
-    if (oldCurrentId) {
-      const oldCurTask = entities[oldCurrentId];
-      if (oldCurTask && oldCurTask.parentId) {
-        entities[oldCurTask.parentId].subTaskIds.some((id) => {
-          return (id !== oldCurrentId && entities[id].isDone === false)
-            ? (nextId = id) && true // assign !!!
-            : false;
-        });
-      }
-
-      if (!nextId) {
-        const oldCurIndex = todaysTaskIds.indexOf(oldCurrentId);
-        const mainTasksBefore = todaysTaskIds.slice(0, oldCurIndex);
-        const mainTasksAfter = todaysTaskIds.slice(oldCurIndex + 1);
-        const selectableBefore = flattenToSelectable(mainTasksBefore);
-        const selectableAfter = flattenToSelectable(mainTasksAfter);
-        nextId = selectableAfter.find(filterUndoneNotCurrent)
-          || selectableBefore.reverse().find(filterUndoneNotCurrent);
-        nextId = (Array.isArray(nextId)) ? nextId[0] : nextId;
-
-      }
-    } else {
-      const lastTask = entities[state.lastCurrentTaskId];
-      const isLastSelectable = state.lastCurrentTaskId && lastTask && !lastTask.isDone && !lastTask.subTaskIds.length;
-      if (isLastSelectable) {
-        nextId = state.lastCurrentTaskId;
-      } else {
-        const selectable = flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
-        nextId = (Array.isArray(selectable)) ? selectable[0] : selectable;
-      }
-    }
-
-    return nextId;
+    // return nextId;
   }
 }
 

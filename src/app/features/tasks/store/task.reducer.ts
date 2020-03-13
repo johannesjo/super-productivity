@@ -7,7 +7,6 @@ import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repea
 import {
   deleteTask,
   filterOutId,
-  filterStartableTasks,
   getTaskById,
   mapTaskWithSubTasksToTask,
   updateTimeEstimateForTask,
@@ -28,8 +27,6 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   selectedTaskId: null,
   taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
   lastCurrentTaskId: null,
-  todaysTaskIds: [],
-  backlogTaskIds: [],
   stateBefore: null,
   isDataLoaded: false,
 }) as TaskState;
@@ -90,17 +87,6 @@ export function taskReducer(
       };
     }
 
-
-    case TaskActionTypes.UpdateTaskListIds: {
-      const {todaysTaskIds, backlogTaskIds} = action.payload;
-
-      return {
-        ...state,
-        backlogTaskIds,
-        todaysTaskIds,
-      };
-    }
-
     case TaskActionTypes.StartFirstStartable: {
       if (!action.payload.isStartIfHasCurrent && state.currentTaskId) {
         return state;
@@ -109,11 +95,11 @@ export function taskReducer(
       throw new Error('NOT IMPLEMENTED YET');
 
       // TODO fix
-      const startableTasks = filterStartableTasks(state);
-      return {
-        ...state,
-        currentTaskId: startableTasks && startableTasks[0] || null,
-      };
+      // const startableTasks = filterStartableTasks(state);
+      // return {
+      //   ...state,
+      //   currentTaskId: startableTasks && startableTasks[0] || null,
+      // };
     }
 
     case TaskActionTypes.SetCurrentTask: {
@@ -334,50 +320,50 @@ export function taskReducer(
       // }
     }
 
-    case TaskActionTypes.MoveUp: {
-      let updatedState = state;
-      const {id} = action.payload;
-      const taskToMove = state.entities[id];
-      if (taskToMove.parentId) {
-        const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
-        updatedState = taskAdapter.updateOne({
-          id: taskToMove.parentId,
-          changes: {
-            subTaskIds: arrayMoveLeft(parentSubTasks, id)
-          }
-        }, updatedState);
-      }
-
-      return {
-        ...updatedState,
-        ids: arrayMoveLeft(state.ids, id),
-        backlogTaskIds: arrayMoveLeft(state.backlogTaskIds, id),
-        todaysTaskIds: arrayMoveLeft(state.todaysTaskIds, id),
-      };
-    }
-
-
-    case TaskActionTypes.MoveDown: {
-      let updatedState = state;
-      const id = action.payload.id;
-      const taskToMove = state.entities[id];
-      if (taskToMove.parentId) {
-        const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
-        updatedState = taskAdapter.updateOne({
-          id: taskToMove.parentId,
-          changes: {
-            subTaskIds: arrayMoveRight(parentSubTasks, id)
-          }
-        }, updatedState);
-      }
-
-      return {
-        ...updatedState,
-        ids: arrayMoveRight(state.ids, id),
-        backlogTaskIds: arrayMoveRight(state.backlogTaskIds, id),
-        todaysTaskIds: arrayMoveRight(state.todaysTaskIds, id),
-      };
-    }
+    // case TaskActionTypes.MoveUp: {
+    //   let updatedState = state;
+    //   const {id} = action.payload;
+    //   const taskToMove = state.entities[id];
+    //   if (taskToMove.parentId) {
+    //     const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
+    //     updatedState = taskAdapter.updateOne({
+    //       id: taskToMove.parentId,
+    //       changes: {
+    //         subTaskIds: arrayMoveLeft(parentSubTasks, id)
+    //       }
+    //     }, updatedState);
+    //   }
+    //
+    //   return {
+    //     ...updatedState,
+    //     ids: arrayMoveLeft(state.ids, id),
+    //     XXXbacklogTaskIds: arrayMoveLeft(state.XXXbacklogTaskIds, id),
+    //     XXXtodaysTaskIds: arrayMoveLeft(state.XXXtodaysTaskIds, id),
+    //   };
+    // }
+    //
+    //
+    // case TaskActionTypes.MoveDown: {
+    //   let updatedState = state;
+    //   const id = action.payload.id;
+    //   const taskToMove = state.entities[id];
+    //   if (taskToMove.parentId) {
+    //     const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
+    //     updatedState = taskAdapter.updateOne({
+    //       id: taskToMove.parentId,
+    //       changes: {
+    //         subTaskIds: arrayMoveRight(parentSubTasks, id)
+    //       }
+    //     }, updatedState);
+    //   }
+    //
+    //   return {
+    //     ...updatedState,
+    //     ids: arrayMoveRight(state.ids, id),
+    //     XXXbacklogTaskIds: arrayMoveRight(state.XXXbacklogTaskIds, id),
+    //     XXXtodaysTaskIds: arrayMoveRight(state.XXXtodaysTaskIds, id),
+    //   };
+    // }
 
 
     case TaskActionTypes.AddTimeSpent: {
@@ -408,26 +394,26 @@ export function taskReducer(
       );
     }
 
-    case TaskActionTypes.RestoreTask: {
-      const task = {...action.payload.task, isDone: false};
-      const subTasks = action.payload.subTasks;
-      const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
-
-      if (subTasks && subTasks.length) {
-        subTasks.forEach((subTask: TaskWithSubTasks) => {
-          if (subTask && subTask.id) {
-            tasksToAdd.push(mapTaskWithSubTasksToTask(subTask));
-          }
-        });
-      }
-      return {
-        ...taskAdapter.addMany(tasksToAdd, state),
-        todaysTaskIds: [
-          task.id,
-          ...state.todaysTaskIds
-        ]
-      };
-    }
+    // case TaskActionTypes.RestoreTask: {
+    //   const task = {...action.payload.task, isDone: false};
+    //   const subTasks = action.payload.subTasks;
+    //   const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
+    //
+    //   if (subTasks && subTasks.length) {
+    //     subTasks.forEach((subTask: TaskWithSubTasks) => {
+    //       if (subTask && subTask.id) {
+    //         tasksToAdd.push(mapTaskWithSubTasksToTask(subTask));
+    //       }
+    //     });
+    //   }
+    //   return {
+    //     ...taskAdapter.addMany(tasksToAdd, state),
+    //     XXXtodaysTaskIds: [
+    //       task.id,
+    //       ...state.XXXtodaysTaskIds
+    //     ]
+    //   };
+    // }
 
     case TaskActionTypes.AddSubTask: {
       const {task, parentId} = action.payload;
@@ -473,37 +459,37 @@ export function taskReducer(
       };
     }
 
-    case TaskActionTypes.MoveToToday: {
-      if (state.todaysTaskIds.includes(action.payload.id)) {
-        return state;
-      }
+    // case TaskActionTypes.MoveToToday: {
+    //   if (state.XXXtodaysTaskIds.includes(action.payload.id)) {
+    //     return state;
+    //   }
+    //
+    //   const task = state.entities[action.payload.id];
+    //   if (!task || task.parentId) {
+    //     console.error('Trying to move sub task to todays list. This should not happen');
+    //     return state;
+    //   }
+    //
+    //   return {
+    //     ...state,
+    //     XXXbacklogTaskIds: state.XXXbacklogTaskIds.filter(filterOutId(action.payload.id)),
+    //     XXXtodaysTaskIds: action.payload.isMoveToTop
+    //       ? [action.payload.id, ...state.XXXtodaysTaskIds]
+    //       : [...state.XXXtodaysTaskIds, action.payload.id]
+    //   };
+    // }
 
-      const task = state.entities[action.payload.id];
-      if (!task || task.parentId) {
-        console.error('Trying to move sub task to todays list. This should not happen');
-        return state;
-      }
-
-      return {
-        ...state,
-        backlogTaskIds: state.backlogTaskIds.filter(filterOutId(action.payload.id)),
-        todaysTaskIds: action.payload.isMoveToTop
-          ? [action.payload.id, ...state.todaysTaskIds]
-          : [...state.todaysTaskIds, action.payload.id]
-      };
-    }
-
-    case TaskActionTypes.MoveToBacklog: {
-      if (state.backlogTaskIds.includes(action.payload.id)) {
-        return state;
-      }
-
-      return {
-        ...state,
-        todaysTaskIds: state.todaysTaskIds.filter(filterOutId(action.payload.id)),
-        backlogTaskIds: [action.payload.id, ...state.backlogTaskIds],
-      };
-    }
+    // case TaskActionTypes.MoveToBacklog: {
+    //   if (state.XXXbacklogTaskIds.includes(action.payload.id)) {
+    //     return state;
+    //   }
+    //
+    //   return {
+    //     ...state,
+    //     XXXtodaysTaskIds: state.XXXtodaysTaskIds.filter(filterOutId(action.payload.id)),
+    //     XXXbacklogTaskIds: [action.payload.id, ...state.XXXbacklogTaskIds],
+    //   };
+    // }
 
     case TaskActionTypes.MoveToOtherProject:
     case TaskActionTypes.MoveToArchive: {
