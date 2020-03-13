@@ -12,12 +12,12 @@
        *ngIf="(workContextService.activeWorkContext$|async) as activeWorkContext"
        class="current-work-context-title"
        mat-ripple
-       [routerLink]="activeWorkContext.routerLink">{{activeWorkContext.title}}</div>
+       routerLink="active/tasks">{{activeWorkContext.title}}</div>
 
   <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
           class="project-settings-btn"
           mat-icon-button
-          routerLink="project-settings">
+          routerLink="active/settings">
     <mat-icon>more_vert</mat-icon>
   </button>
 

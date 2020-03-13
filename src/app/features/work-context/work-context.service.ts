@@ -91,11 +91,11 @@ export class WorkContextService {
       filter(event => event instanceof NavigationStart),
     ).subscribe(({url}: RouterEvent) => {
         const split = url.split('/');
-        const id = split[split.length - 1];
+        const id = split[2];
 
-        if (url.match('tag')) {
+        if (url.match(/tag\/.+\/tasks/)) {
           this.setActiveContext(id, WorkContextType.TAG);
-        } else {
+        } else if (url.match(/project\/.+\/tasks/)) {
           this.setActiveContext(id, WorkContextType.PROJECT);
         }
       }
@@ -105,33 +105,21 @@ export class WorkContextService {
   async load() {
     const state = await this._persistenceService.context.loadState() || initialContextState;
     const {activeId, activeType} = state;
+    console.log(activeType, activeId);
 
-    let url;
-    switch (activeType) {
-      case WorkContextType.TAG:
-        url = `tag/${activeId}`;
-        this._router.navigate(['/tag', activeId]);
-        break;
-      case WorkContextType.PROJECT:
-        this._router.navigate(['/project', activeId]);
-        break;
-    }
+    // switch (activeType) {
+    //   case WorkContextType.TAG:
+    //     this._router.navigate(['/tag', activeId, 'tasks']);
+    //     break;
+    //   case WorkContextType.PROJECT:
+    //     this._router.navigate(['/project', activeId, 'tasks']);
+    //     break;
+    // }
 
     this._store$.dispatch(loadWorkContextState({state}));
   }
 
   setActiveContext(activeId: string, activeType: WorkContextType) {
-    console.log(activeType, activeId);
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
-
-  private _loadListForProject() {
-
-  }
-
-  private _loadListForMultipleProjects() {
-
-  }
-
-
 }

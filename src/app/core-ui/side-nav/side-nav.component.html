@@ -9,7 +9,8 @@
   <button *ngFor="let context of workContextService.mainWorkContexts$|async"
           class="route-link"
           mat-menu-item
-          [routerLink]="['tag', context.id]">
+          routerLinkActive="isActiveRoute"
+          [routerLink]="['tag', context.id, 'tasks']">
     <mat-icon>{{context.icon}}</mat-icon>
     {{ context.title}}
   </button>
@@ -36,11 +37,11 @@
        [@standardList]="projectList?.length"
        [dragula]="PROJECTS_SIDE_NAV">
     <div *ngFor="let project of projectList; trackBy: trackById;"
-         [class.isCurrentProject]="project.id===(projectService.currentId$|async)"
+         [class.isCurrentProject]="project.id===(workContextService.activeWorkContextId$|async)"
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
-      <button [routerLink]="['project', project.id]"
+      <button [routerLink]="['project', project.id, 'tasks']"
               routerLinkActive="isActiveRoute"
               mat-menu-item>
         <mat-icon class="drag-handle"
@@ -50,7 +51,7 @@
       </button>
 
       <button
-        (click)="switchProject(project.id, 'project-settings')"
+        [routerLink]="['project', project.id, 'settings']"
         class="project-settings-btn"
         mat-icon-button
         routerLinkActive="isActiveRoute">
@@ -84,7 +85,7 @@
          class="tag">
       <div [ngStyle]="getThemeColor(tag.theme?.primary || tag.themeColor)"
            class="tag-color"></div>
-      <button [routerLink]="['tag', tag.id]"
+      <button [routerLink]="['tag', tag.id, 'tasks']"
               routerLinkActive="isActiveRoute"
               mat-menu-item>
         <mat-icon class="drag-handle"
@@ -94,7 +95,7 @@
       </button>
 
       <button
-        (click)="switchTag(tag.id, 'tag-settings')"
+        [routerLink]="['tag', tag.id, 'settings']"
         class="tag-settings-btn"
         mat-icon-button
         routerLinkActive="isActiveRoute">
