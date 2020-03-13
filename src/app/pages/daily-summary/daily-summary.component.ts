@@ -97,9 +97,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     map(tasks => tasks && tasks.length),
   );
 
-  estimatedOnTasksWorkedOn$ = this.dayStr$.pipe(switchMap((dayStr) => this._taskService.getTimeEstimateForDay$(dayStr)));
+  estimatedOnTasksWorkedOn$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getTimeEstimateForDay$(dayStr)));
 
-  timeWorked$ = this.dayStr$.pipe(switchMap((dayStr) => this._taskService.getTimeWorkedForDay$(dayStr)));
+  timeWorked$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getTimeWorkedForDay$(dayStr)));
 
   started$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getWorkStart$(dayStr)));
   end$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getWorkEnd$(dayStr)));

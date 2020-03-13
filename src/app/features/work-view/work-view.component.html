@@ -21,7 +21,7 @@
 
           <div class="item"><span class="label">{{T.WW.WORKING_TODAY|translate}}</span>
             <span class="no-wrap">
-      <strong class="time-val">{{taskService.workingToday$|async|msToString}}</strong>
+      <strong class="time-val">{{workContextService.workingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
           </div>

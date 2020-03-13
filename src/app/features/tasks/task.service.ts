@@ -154,19 +154,12 @@ export class TaskService {
     select(selectBacklogTasksWithSubTasks),
     shareReplay(1),
   );
-  backlogTasksCount$: Observable<number> = this._store.pipe(
-    select(selectBacklogTaskCount),
-  );
 
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysUnDoneTasksWithSubTasks),
     shareReplay(1),
   );
 
-  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysDoneTasksWithSubTasks),
-    shareReplay(1),
-  );
 
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectAllRepeatableTaskWithSubTasks),
@@ -191,9 +184,6 @@ export class TaskService {
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
     map((task) => task && task.timeEstimate > 0 && task.timeSpent / task.timeEstimate)
   );
-
-  // TODO could be done as a dynamic selector
-  workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
 
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
     TaskActionTypes.MoveToBacklog,
@@ -533,31 +523,6 @@ export class TaskService {
       distinctUntilChanged(),
     );
   }
-
-  // TODO could be done better
-  getTimeEstimateForDay$(day: string = getWorklogStr()): Observable<number> {
-    return this.todaysTasks$.pipe(
-      map((tasks) => {
-        return tasks && tasks.length && tasks.reduce((acc, task) => {
-            if (!task.timeSpentOnDay && !(task.timeSpentOnDay[day] > 0)) {
-              return acc;
-            }
-            const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[day]) - task.timeSpent;
-            return (remainingEstimate > 0)
-              ? acc + remainingEstimate
-              : acc;
-          }, 0
-        );
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
-
-  getByIssueId$(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
-    return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));
-  }
-
 
   setDone(id: string) {
     this.update(id, {isDone: true});

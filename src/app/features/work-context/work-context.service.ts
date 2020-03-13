@@ -13,6 +13,7 @@ import {TagService} from '../tag/tag.service';
 import {TaskWithSubTasks} from '../tasks/task.model';
 import {ProjectService} from '../project/project.service';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
+import {getWorklogStr} from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -96,6 +97,45 @@ export class WorkContextService {
   );
 
   backlogTasksCount$: Observable<number> = this.backlogTasks$.pipe(map(tasks => tasks.length));
+
+  workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
+
+
+  // TODO could be done better
+  getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
+    return this.todaysTasks$.pipe(
+      map((tasks) => {
+        return tasks && tasks.length && tasks.reduce((acc, task) => {
+            return acc + (
+              (task.timeSpentOnDay && +task.timeSpentOnDay[day])
+                ? +task.timeSpentOnDay[day]
+                : 0
+            );
+          }, 0
+        );
+      }),
+      distinctUntilChanged(),
+    );
+  }
+
+  // TODO could be done better
+  getTimeEstimateForDay$(day: string = getWorklogStr()): Observable<number> {
+    return this.todaysTasks$.pipe(
+      map((tasks) => {
+        return tasks && tasks.length && tasks.reduce((acc, task) => {
+            if (!task.timeSpentOnDay && !(task.timeSpentOnDay[day] > 0)) {
+              return acc;
+            }
+            const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[day]) - task.timeSpent;
+            return (remainingEstimate > 0)
+              ? acc + remainingEstimate
+              : acc;
+          }, 0
+        );
+      }),
+      distinctUntilChanged(),
+    );
+  }
 
   constructor(
     private _store$: Store<WorkContextState>,
