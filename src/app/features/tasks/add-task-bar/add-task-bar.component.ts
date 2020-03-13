@@ -20,6 +20,7 @@ import {JiraApiService} from '../../issue/providers/jira/jira-api.service';
 import {T} from '../../../t.const';
 import {Task} from '../task.model';
 import {AddTaskSuggestion} from './add-task-suggestions.model';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Component({
   selector: 'add-task-bar',
@@ -49,7 +50,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     tap(() => this.isLoading$.next(true)),
     switchMap((searchTerm) => {
       if (searchTerm && searchTerm.length > 0) {
-        const backlog$ = this._taskService.backlogTasks$.pipe(
+        const backlog$ = this._workContextService.backlogTasks$.pipe(
           map(tasks => tasks
             .filter(task => this._filterBacklog(searchTerm, task))
             .map((task): AddTaskSuggestion => ({
@@ -94,6 +95,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private _taskService: TaskService,
+    private _workContextService: WorkContextService,
     private _issueService: IssueService,
     private _jiraApiService: JiraApiService,
     private _snackService: SnackService,

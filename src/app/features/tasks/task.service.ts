@@ -146,15 +146,6 @@ export class TaskService {
     shareReplay(1),
   );
 
-  isTasksForToday$: Observable<boolean> = this._store.pipe(
-    select(selectIsTaskForTodayPlanned),
-  );
-
-  backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectBacklogTasksWithSubTasks),
-    shareReplay(1),
-  );
-
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysUnDoneTasksWithSubTasks),
     shareReplay(1),

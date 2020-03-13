@@ -109,7 +109,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       });
     }
     // preload
-    this._subs.add(this.taskService.backlogTasks$.subscribe());
+    this._subs.add(this.workContextService.backlogTasks$.subscribe());
 
     this._subs.add(this._activatedRoute.queryParams
       .subscribe((params) => {
