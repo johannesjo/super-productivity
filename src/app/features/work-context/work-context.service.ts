@@ -14,6 +14,7 @@ import {Task, TaskWithSubTasks} from '../tasks/task.model';
 import {ProjectService} from '../project/project.service';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 import {getWorklogStr} from '../../util/get-work-log-str';
+import {mapEstimateRemainingFromTasks} from './work-context.util';
 
 @Injectable({
   providedIn: 'root',
@@ -125,6 +126,16 @@ export class WorkContextService {
 
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
 
+  // TODO fix
+  onMoveToBacklog$: Observable<any> = EMPTY;
+  // this._actions$.pipe(ofType(
+  // TaskActionTypes.MoveToBacklog,
+  // ));
+
+  estimateRemainingToday$: Observable<number> = this.todaysTasks$.pipe(
+    map(mapEstimateRemainingFromTasks),
+    distinctUntilChanged(),
+  );
 
   // TODO could be done better
   getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {

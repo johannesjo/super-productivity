@@ -14,7 +14,7 @@
           <div class="item">
             <span class="label">{{T.WW.ESTIMATE_REMAINING|translate}}</span>
             <span class="no-wrap">
-      ~<strong class="time-val">{{taskService.estimateRemainingToday$|async|msToString}}</strong>
+      ~<strong class="time-val">{{workContextService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
           </div>
@@ -52,7 +52,7 @@
             <div class="item">
               <span class="label">{{T.WW.TIME_ESTIMATED|translate}}</span>
               <span class="no-wrap">
-      <strong class="time-val">~{{taskService.estimateRemainingToday$|async|msToString}}</strong>
+      <strong class="time-val">~{{workContextService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
             </div>

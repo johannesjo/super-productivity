@@ -31,21 +31,6 @@ const mapSubTasksToTask = (task: Task, s: TaskState): TaskWithSubTasks => {
 };
 
 
-const mapEstimateRemaining = (tasks): number => tasks && tasks.length && tasks.reduce((acc, task) => {
-  let isTrackVal;
-  let estimateRemaining;
-  if (task.subTasks && task.subTasks.length > 0) {
-    estimateRemaining = task.subTasks.reduce((subAcc, subTask) => {
-      const estimateRemainingSub = (+subTask.timeEstimate) - (+subTask.timeSpent);
-      const isTrackValSub = ((estimateRemainingSub > 0) && !subTask.isDone);
-      return subAcc + ((isTrackValSub) ? estimateRemainingSub : 0);
-    }, 0);
-  } else {
-    estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
-  }
-  isTrackVal = ((estimateRemaining > 0) && !task.isDone);
-  return acc + ((isTrackVal) ? estimateRemaining : 0);
-}, 0);
 
 
 const mapTasksFromIds = (tasksIN, ids) => {
@@ -142,21 +127,8 @@ export const selectIsTaskForTodayPlanned = createSelector(
 );
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
-export const selectTodaysTasksFlat = createSelector(selectTodaysTasksWithSubTasks, flattenTasks);
 
 
-export const selectTodaysUnDoneTasksWithSubTasks = createSelector(
-  selectTodaysTasksWithSubTasks,
-  (tasks): TaskWithSubTasks[] => tasks.filter(task => !task.isDone)
-);
-export const selectTodaysDoneTasksWithSubTasks = createSelector(
-  selectTodaysTasksWithSubTasks,
-  (tasks): TaskWithSubTasks[] => tasks.filter(task => task.isDone)
-);
-
-export const selectEstimateRemainingForToday = createSelector(selectTodaysTasksWithSubTasks, mapEstimateRemaining);
-export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTasksWithSubTasks, mapEstimateRemaining);
-export const selectTotalTimeWorkedOnTodaysTasks = createSelector(selectTodaysTasksWithSubTasks, mapTotalTimeWorked);
 
 export const selectHasTasksToWorkOn = createSelector(
   selectIsTaskDataLoaded,

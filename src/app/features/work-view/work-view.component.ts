@@ -14,7 +14,7 @@ import {LayoutService} from '../../core-ui/layout/layout.service';
 import {DragulaService} from 'ng2-dragula';
 import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-a-break.service';
 import {ActivatedRoute} from '@angular/router';
-import {from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip} from 'rxjs';
+import {from, fromEvent, ReplaySubject, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {delay, filter, map, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
@@ -49,7 +49,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
 
   // NOTE: not perfect but good enough for now
-  isTriggerBacklogIconAni$ = this.taskService.onMoveToBacklog$.pipe(
+  isTriggerBacklogIconAni$ = this.workContextService.onMoveToBacklog$.pipe(
     switchMap(() =>
       zip(
         from([true, false]),

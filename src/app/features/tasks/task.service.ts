@@ -53,7 +53,6 @@ import {
   selectCurrentTask,
   selectCurrentTaskId,
   selectCurrentTaskOrParentWithData,
-  selectEstimateRemainingForToday,
   selectHasTasksToWorkOn,
   selectScheduledTasks,
   selectSelectedTask,
@@ -135,18 +134,9 @@ export class TaskService {
 
   // META FIELDS
   // -----------
-  estimateRemainingToday$: Observable<number> = this._store.pipe(
-    select(selectEstimateRemainingForToday),
-    distinctUntilChanged(),
-  );
-
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
     map((task) => task && task.timeEstimate > 0 && task.timeSpent / task.timeEstimate)
   );
-
-  onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
-    TaskActionTypes.MoveToBacklog,
-  ));
 
   isHasTasksToWorkOn$: Observable<boolean> = this._store.pipe(
     select(selectHasTasksToWorkOn),
