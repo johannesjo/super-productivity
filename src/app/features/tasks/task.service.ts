@@ -299,13 +299,18 @@ export class TaskService {
       const workContextId = this._workContextService.activeWorkContextId;
       const workContextType = this._workContextService.activeWorkContextType;
       this._store.dispatch(moveTaskInTodayList({taskId, newOrderedIds, src, target, workContextId, workContextType}));
+
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
-      this._store.dispatch(moveTaskInBacklogList({taskId, newOrderedIds}));
       // move inside backlog
+      const workContextId = this._workContextService.activeWorkContextId;
+      this._store.dispatch(moveTaskInBacklogList({taskId, newOrderedIds, workContextId}));
+
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
+
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog
+
     } else {
       // move sub task
       this._store.dispatch(new MoveSubTask({taskId, srcTaskId: src, targetTaskId: target, newOrderedIds}));

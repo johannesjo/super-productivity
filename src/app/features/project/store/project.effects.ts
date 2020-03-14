@@ -35,7 +35,7 @@ import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
-import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {moveTaskInBacklogList, moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 import {WorkContextType} from '../../work-context/work-context.model';
 
 @Injectable()
@@ -57,6 +57,7 @@ export class ProjectEffects {
         ProjectActionTypes.UnarchiveProject,
         ProjectActionTypes.UpdateLastCompletedDay,
         TaskActionTypes.AddTask,
+        moveTaskInBacklogList.type,
       ),
       switchMap(() => this.saveToLs$),
     );
@@ -76,6 +77,7 @@ export class ProjectEffects {
         ProjectActionTypes.UnarchiveProject,
         ProjectActionTypes.UpdateLastCompletedDay,
         moveTaskInTodayList.type,
+        moveTaskInBacklogList.type,
         TaskActionTypes.AddTask,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))

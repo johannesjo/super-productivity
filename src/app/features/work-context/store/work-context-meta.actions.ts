@@ -4,7 +4,7 @@ import {DropListModelSource} from '../../tasks/task.model';
 import {WorkContextType} from '../work-context.model';
 
 export const moveTaskInTodayList = createAction(
-  '[WorkContext Meta] Move Task in Today',
+  '[WorkContextMeta] Move Task in Today',
   props<{
     taskId: string;
     newOrderedIds: string[];
@@ -17,6 +17,6 @@ export const moveTaskInTodayList = createAction(
 
 // TODO move to tags
 export const moveTaskInBacklogList = createAction(
-  '[WorkContext  Meta] Move Task in Backlog',
-  props<{ taskId: string; newOrderedIds: string[] }>(),
+  '[WorkContextMeta] Move Task in Backlog',
+  props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
 );

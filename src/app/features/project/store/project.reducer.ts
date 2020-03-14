@@ -8,7 +8,7 @@ import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
-import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {moveTaskInBacklogList, moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
 
 export const PROJECT_FEATURE_NAME = 'projects';
@@ -156,6 +156,19 @@ export function projectReducer(
       id: workContextId,
       changes: {
         taskIds
+      }
+    }, state);
+  }
+
+  if ((action.type as string) === moveTaskInBacklogList.type) {
+    const {taskId, newOrderedIds, workContextId} = action as any;
+
+    const taskIdsBefore = state.entities[workContextId].backlogTaskIds;
+    const backlogTaskIds = moveTaskForWorkContextLikeState(taskId, newOrderedIds, null, taskIdsBefore);
+    return projectAdapter.updateOne({
+      id: workContextId,
+      changes: {
+        backlogTaskIds
       }
     }, state);
   }
