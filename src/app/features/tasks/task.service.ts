@@ -73,8 +73,6 @@ import {TagService} from '../tag/tag.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContextType} from '../work-context/work-context.model';
-import {
-} from '../work-context/store/work-context.actions';
 import {moveTaskInBacklogList, moveTaskInTodayList} from '../work-context/store/work-context-meta.actions';
 
 
@@ -291,11 +289,11 @@ export class TaskService {
        target: DropListModelSource,
        newOrderedIds: string[]) {
     // Task
-    if (src === 'DONE' && target === 'UNDONE') {
-      this.setUnDone(taskId);
-    } else if (src === 'UNDONE' && target === 'DONE') {
-      this.setDone(taskId);
-    }
+    // if (src === 'DONE' && target === 'UNDONE') {
+    // TODO via effect this.setUnDone(taskId);
+    // } else if (src === 'UNDONE' && target === 'DONE') {
+    // TODO via effect this.setDone(taskId);
+    // }
 
     // List
     const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');
@@ -303,7 +301,9 @@ export class TaskService {
 
     if (isSrcTodayList && isTargetTodayList) {
       // move inside today
-      this._store.dispatch(moveTaskInTodayList({taskId, newOrderedIds}));
+      const workContextId = this._workContextService.activeWorkContextId;
+      const workContextType = this._workContextService.activeWorkContextType;
+      this._store.dispatch(moveTaskInTodayList({taskId, newOrderedIds, src, target, workContextId, workContextType}));
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
       this._store.dispatch(moveTaskInBacklogList({taskId, newOrderedIds}));
       // move inside backlog

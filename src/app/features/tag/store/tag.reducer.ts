@@ -5,6 +5,8 @@ import {Action, createFeatureSelector, createReducer, createSelector, on} from '
 import {AddTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 import {MY_DAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
+import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {filterOutId, moveItemInList} from '../../tasks/store/task.reducer.util';
 
 export const TAG_FEATURE_NAME = 'tag';
 
@@ -45,6 +47,33 @@ export const initialTagState: TagState = adapter.getInitialState({
 
 const _reducer = createReducer<TagState>(
   initialTagState,
+
+  on(moveTaskInTodayList, (state, {
+    taskId,
+    newOrderedIds,
+    src,
+    target,
+    workContextType,
+    workContextId,
+  }) => {
+    const idsFilteredMoving = state.entities[workContextId].taskIds.filter(filterOutId(taskId));
+    // NOTE: move to end of complete list for done tasks
+    // const emptyListVal = (target === 'DONE')
+    //   ? idsFilteredMoving.length
+    //   : 0;
+    const emptyListVal = 0;
+
+
+    return (workContextType === WorkContextType.TAG)
+      ? adapter.updateOne({
+        id: workContextId,
+        changes: {
+          taskIds: moveItemInList(taskId, idsFilteredMoving, newOrderedIds, emptyListVal)
+        }
+      }, state)
+      : state;
+  }),
+
 
   on(tagActions.addTag, (state, {tag}) => adapter.addOne(tag, state)),
 
@@ -92,7 +121,6 @@ export function tagReducer(
         : state;
     }
 
-    // TODO handle delete task and possible add task
     case TaskActionTypes.UpdateTaskTags: {
       const {payload} = action as UpdateTaskTags;
       // const {newTagIds, oldTagIds, taskId} = payload;
