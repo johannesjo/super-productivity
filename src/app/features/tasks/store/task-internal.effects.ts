@@ -10,6 +10,7 @@ import {EMPTY, Observable, of} from 'rxjs';
 import {MiscConfig} from '../../config/global-config.model';
 import {roundDurationVanilla} from '../../../util/round-duration';
 import {moveTaskToBacklogList, moveTaskToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Injectable()
 export class TaskInternalEffects {
@@ -56,15 +57,21 @@ export class TaskInternalEffects {
     withLatestFrom(
       this._store$.pipe(select(selectMiscConfig)),
       this._store$.pipe(select(selectTaskFeatureState)),
-      (action, miscCfg, state) => ({action, state, isAutoStartNextTask: miscCfg.isAutoStartNextTask})
+      this._workContextSession.todaysTaskIds$,
+      (action, miscCfg, state, todaysTaskIds) => ({
+        action,
+        state,
+        isAutoStartNextTask: miscCfg.isAutoStartNextTask,
+        todaysTaskIds,
+      })
     ),
-    mergeMap(({action, state, isAutoStartNextTask}) => {
+    mergeMap(({action, state, isAutoStartNextTask, todaysTaskIds}) => {
       const currentId = state.currentTaskId;
       let nextId: 'NO_UPDATE' | string | null;
 
       switch (action.type) {
         case TaskActionTypes.ToggleStart: {
-          nextId = state.currentTaskId ? null : this.findNextTask(state);
+          nextId = state.currentTaskId ? null : this._findNextTask(state, todaysTaskIds);
           break;
         }
 
@@ -72,7 +79,7 @@ export class TaskInternalEffects {
           const {isDone} = (action as UpdateTask).payload.task.changes;
           const oldId = (action as UpdateTask).payload.task.id;
           const isCurrent = (oldId === currentId);
-          nextId = (isDone && isCurrent) ? this.findNextTask(state, oldId) : 'NO_UPDATE';
+          nextId = (isDone && isCurrent) ? this._findNextTask(state, todaysTaskIds, oldId) : 'NO_UPDATE';
           break;
         }
 
@@ -142,55 +149,54 @@ export class TaskInternalEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
+    private _workContextSession: WorkContextService,
   ) {
   }
 
-  private findNextTask(state: TaskState, oldCurrentId?): string {
-    throw new Error('Not implemented');
+  private _findNextTask(state: TaskState, todaysTaskIds: string[], oldCurrentId?): string {
+    let nextId = null;
+    const {entities} = state;
 
-    // let nextId = null;
-    // const {entities, XXXtodaysTaskIds} = state;
-    //
-    // const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== oldCurrentId;
-    // const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
-    //   return entities[next].subTaskIds.length > 0
-    //     ? acc.concat(entities[next].subTaskIds)
-    //     : acc.concat(next);
-    // }, []);
-    //
-    // if (oldCurrentId) {
-    //   const oldCurTask = entities[oldCurrentId];
-    //   if (oldCurTask && oldCurTask.parentId) {
-    //     entities[oldCurTask.parentId].subTaskIds.some((id) => {
-    //       return (id !== oldCurrentId && entities[id].isDone === false)
-    //         ? (nextId = id) && true // assign !!!
-    //         : false;
-    //     });
-    //   }
-    //
-    //   if (!nextId) {
-    //     const oldCurIndex = XXXtodaysTaskIds.indexOf(oldCurrentId);
-    //     const mainTasksBefore = XXXtodaysTaskIds.slice(0, oldCurIndex);
-    //     const mainTasksAfter = XXXtodaysTaskIds.slice(oldCurIndex + 1);
-    //     const selectableBefore = flattenToSelectable(mainTasksBefore);
-    //     const selectableAfter = flattenToSelectable(mainTasksAfter);
-    //     nextId = selectableAfter.find(filterUndoneNotCurrent)
-    //       || selectableBefore.reverse().find(filterUndoneNotCurrent);
-    //     nextId = (Array.isArray(nextId)) ? nextId[0] : nextId;
-    //
-    //   }
-    // } else {
-    //   const lastTask = entities[state.lastCurrentTaskId];
-    //   const isLastSelectable = state.lastCurrentTaskId && lastTask && !lastTask.isDone && !lastTask.subTaskIds.length;
-    //   if (isLastSelectable) {
-    //     nextId = state.lastCurrentTaskId;
-    //   } else {
-    //     const selectable = flattenToSelectable(XXXtodaysTaskIds).find(filterUndoneNotCurrent);
-    //     nextId = (Array.isArray(selectable)) ? selectable[0] : selectable;
-    //   }
-    // }
+    const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== oldCurrentId;
+    const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
+      return entities[next].subTaskIds.length > 0
+        ? acc.concat(entities[next].subTaskIds)
+        : acc.concat(next);
+    }, []);
 
-    // return nextId;
+    if (oldCurrentId) {
+      const oldCurTask = entities[oldCurrentId];
+      if (oldCurTask && oldCurTask.parentId) {
+        entities[oldCurTask.parentId].subTaskIds.some((id) => {
+          return (id !== oldCurrentId && entities[id].isDone === false)
+            ? (nextId = id) && true // assign !!!
+            : false;
+        });
+      }
+
+      if (!nextId) {
+        const oldCurIndex = todaysTaskIds.indexOf(oldCurrentId);
+        const mainTasksBefore = todaysTaskIds.slice(0, oldCurIndex);
+        const mainTasksAfter = todaysTaskIds.slice(oldCurIndex + 1);
+        const selectableBefore = flattenToSelectable(mainTasksBefore);
+        const selectableAfter = flattenToSelectable(mainTasksAfter);
+        nextId = selectableAfter.find(filterUndoneNotCurrent)
+          || selectableBefore.reverse().find(filterUndoneNotCurrent);
+        nextId = (Array.isArray(nextId)) ? nextId[0] : nextId;
+
+      }
+    } else {
+      const lastTask = entities[state.lastCurrentTaskId];
+      const isLastSelectable = state.lastCurrentTaskId && lastTask && !lastTask.isDone && !lastTask.subTaskIds.length;
+      if (isLastSelectable) {
+        nextId = state.lastCurrentTaskId;
+      } else {
+        const selectable = flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
+        nextId = (Array.isArray(selectable)) ? selectable[0] : selectable;
+      }
+    }
+
+    return nextId;
   }
 }
 
