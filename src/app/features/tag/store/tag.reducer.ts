@@ -5,8 +5,13 @@ import {Action, createFeatureSelector, createReducer, createSelector, on} from '
 import {AddTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 import {MY_DAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
-import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {
+  moveTaskDownInTodayList,
+  moveTaskInTodayList,
+  moveTaskUpInTodayList
+} from '../../work-context/store/work-context-meta.actions';
 import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
+import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 
 export const TAG_FEATURE_NAME = 'tag';
 
@@ -70,6 +75,29 @@ const _reducer = createReducer<TagState>(
     }, state);
   }),
 
+  on(moveTaskUpInTodayList, (state, {taskId, workContextId, workContextType}) => (workContextType === WorkContextType.TAG)
+    ? adapter.updateOne({
+      id: workContextId,
+      changes: {
+        taskIds: arrayMoveLeft(state.entities[workContextId].taskIds, taskId)
+      }
+    }, state)
+    : state
+  ),
+
+  on(moveTaskDownInTodayList, (state, {taskId, workContextId, workContextType}) => (workContextType === WorkContextType.TAG)
+    ? adapter.updateOne({
+      id: workContextId,
+      changes: {
+        taskIds: arrayMoveRight(state.entities[workContextId].taskIds, taskId)
+      }
+    }, state)
+    : state
+  ),
+
+
+  // INTERNAL
+  // --------
   on(tagActions.addTag, (state, {tag}) => adapter.addOne(tag, state)),
 
   on(tagActions.updateTag, (state, {tag}) => adapter.updateOne(tag, state)),

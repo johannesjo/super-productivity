@@ -14,8 +14,28 @@ export const moveTaskInTodayList = createAction(
     target: DropListModelSource;
   }>(),
 );
+export const moveTaskUpInTodayList = createAction(
+  '[WorkContextMeta] Move Task Up in Today',
+  props<{ taskId: string; workContextId: string; workContextType: WorkContextType }>(),
+);
 
-// TODO move to tags maybe
+export const moveTaskDownInTodayList = createAction(
+  '[WorkContextMeta] Move Task Down in Today',
+  props<{ taskId: string; workContextId: string; workContextType: WorkContextType }>(),
+);
+
+// PROJECT ONLY
+// TODO move to project maybe
+export const moveTaskUpInBacklogList = createAction(
+  '[WorkContextMeta] Move Task Up in Backlog',
+  props<{ taskId: string; workContextId: string }>(),
+);
+
+export const moveTaskDownInBacklogList = createAction(
+  '[WorkContextMeta] Move Task Down in Backlog',
+  props<{ taskId: string; workContextId: string }>(),
+);
+
 export const moveTaskInBacklogList = createAction(
   '[WorkContextMeta] Move Task in Backlog',
   props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),

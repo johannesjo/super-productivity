@@ -75,10 +75,14 @@ import {MY_DAY_TAG} from '../tag/tag.const';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContextType} from '../work-context/work-context.model';
 import {
+  moveTaskDownInBacklogList,
+  moveTaskDownInTodayList,
   moveTaskFromBacklogToTodayList,
   moveTaskFromTodayToBacklogList,
   moveTaskInBacklogList,
-  moveTaskInTodayList
+  moveTaskInTodayList,
+  moveTaskUpInBacklogList,
+  moveTaskUpInTodayList
 } from '../work-context/store/work-context-meta.actions';
 
 
@@ -241,22 +245,11 @@ export class TaskService {
   }
 
   // NOTE: side effects are not executed!!!
+  // TODO check if still needed/ makes sense?
   updateForProject(id: string, projectId: string, changedFields: Partial<Task>) {
-    console.log('NOT IMPLEMENT');
-    // TODO fix
-    return null;
-
-    // if (projectId === this._projectService.currentId) {
-    //   this._store.dispatch(new UpdateTask({
-    //     task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    //   }));
-    // } else {
-    //   this._persistenceService.task.update(projectId, (state) => {
-    //     const task = state.entities[id];
-    //     state.entities[id] = {...task, ...changedFields};
-    //     return state;
-    //   });
-    // }
+    this._store.dispatch(new UpdateTask({
+      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    }));
   }
 
   updateTags(taskId: string, newTagIds: string[], oldTagIds: string[]) {
@@ -294,9 +287,6 @@ export class TaskService {
        src: DropListModelSource,
        target: DropListModelSource,
        newOrderedIds: string[]) {
-    console.log('MOVE', src, target);
-
-    // List
     const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');
     const isTargetTodayList = (target === 'DONE' || target === 'UNDONE');
     const workContextId = this._workContextService.activeWorkContextId;
@@ -322,19 +312,37 @@ export class TaskService {
       // move sub task
       this._store.dispatch(new MoveSubTask({taskId, srcTaskId: src, targetTaskId: target, newOrderedIds}));
     }
-
-    // TODO unset current via effect
   }
 
   moveUp(id: string, parentId: string = null, isBacklog: boolean) {
     if (parentId) {
       this._store.dispatch(new MoveSubTaskUp({id, parentId}));
+    } else {
+
+      const workContextId = this._workContextService.activeWorkContextId;
+      const workContextType = this._workContextService.activeWorkContextType;
+
+      if (isBacklog) {
+        this._store.dispatch(moveTaskUpInBacklogList({taskId: id, workContextId}));
+      } else {
+        this._store.dispatch(moveTaskUpInTodayList({taskId: id, workContextType, workContextId}));
+      }
     }
   }
 
   moveDown(id: string, parentId: string = null, isBacklog: boolean) {
     if (parentId) {
       this._store.dispatch(new MoveSubTaskDown({id, parentId}));
+    } else {
+
+      const workContextId = this._workContextService.activeWorkContextId;
+      const workContextType = this._workContextService.activeWorkContextType;
+
+      if (isBacklog) {
+        this._store.dispatch(moveTaskDownInBacklogList({taskId: id, workContextId}));
+      } else {
+        this._store.dispatch(moveTaskDownInTodayList({taskId: id, workContextType, workContextId}));
+      }
     }
   }
 
