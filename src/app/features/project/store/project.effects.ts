@@ -35,7 +35,12 @@ import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
-import {moveTaskInBacklogList, moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {
+  moveTaskFromBacklogToTodayList,
+  moveTaskFromTodayToBacklogList,
+  moveTaskInBacklogList,
+  moveTaskInTodayList
+} from '../../work-context/store/work-context-meta.actions';
 import {WorkContextType} from '../../work-context/work-context.model';
 
 @Injectable()
@@ -56,8 +61,12 @@ export class ProjectEffects {
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
         ProjectActionTypes.UpdateLastCompletedDay,
+
         TaskActionTypes.AddTask,
+
         moveTaskInBacklogList.type,
+        moveTaskFromTodayToBacklogList.type,
+        moveTaskFromBacklogToTodayList.type,
       ),
       switchMap(() => this.saveToLs$),
     );
@@ -76,9 +85,14 @@ export class ProjectEffects {
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
         ProjectActionTypes.UpdateLastCompletedDay,
+
         moveTaskInTodayList.type,
-        moveTaskInBacklogList.type,
+
         TaskActionTypes.AddTask,
+
+        moveTaskInBacklogList.type,
+        moveTaskFromTodayToBacklogList.type,
+        moveTaskFromBacklogToTodayList.type,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
     );

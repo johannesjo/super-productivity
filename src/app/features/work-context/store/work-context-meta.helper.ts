@@ -15,8 +15,10 @@ export const  moveTaskForWorkContextLikeState = (
   return moveItemInList(taskId, idsFilteredMoving, newOrderedIds, emptyListVal);
 };
 
+// TODO I don't understand this anymore...
 export const moveItemInList = (itemId: string, completeList: string[], partialList: string[], emptyListVal = 0): string[] => {
   let newIndex;
+
   const curInUpdateListIndex = partialList.indexOf(itemId);
   const prevItemId = partialList[curInUpdateListIndex - 1];
   const nextItemId = partialList[curInUpdateListIndex + 1];

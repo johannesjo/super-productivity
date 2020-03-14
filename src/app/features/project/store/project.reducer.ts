@@ -181,16 +181,16 @@ export function projectReducer(
   if ((action.type as string) === moveTaskFromTodayToBacklogList.type) {
     const {taskId, newOrderedIds, workContextId} = action as any;
 
-    const taskIdsBefore = state.entities[workContextId].taskIds;
-    const filtered = taskIdsBefore.filter(filterOutId(taskId));
-    const backlogTaskIds = moveItemInList(taskId, newOrderedIds, filtered);
+    const todaysTaskIdsBefore = state.entities[workContextId].taskIds;
+    const backlogIdsBefore = state.entities[workContextId].backlogTaskIds;
 
-    console.log(backlogTaskIds);
+    const filteredToday = todaysTaskIdsBefore.filter(filterOutId(taskId));
+    const backlogTaskIds = moveItemInList(taskId, newOrderedIds, backlogIdsBefore);
 
     return projectAdapter.updateOne({
       id: workContextId,
       changes: {
-        taskIds: taskIdsBefore,
+        taskIds: filteredToday,
         backlogTaskIds,
       }
     }, state);

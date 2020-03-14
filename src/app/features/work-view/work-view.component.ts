@@ -40,7 +40,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   @Input() undoneTasks: TaskWithSubTasks[];
   @Input() doneTasks: TaskWithSubTasks[];
   @Input() backlogTasks: TaskWithSubTasks[];
-  @Input() isShowBacklog = true;
+  @Input() isShowBacklog = false;
 
   isShowTimeWorkedWithoutBreak = true;
   splitInputPos = 100;

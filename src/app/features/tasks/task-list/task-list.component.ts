@@ -36,10 +36,21 @@ export class TaskListComponent implements OnDestroy, OnInit {
   filteredTasks: TaskWithSubTasks[];
 
   @Input() parentId: string;
-  @Input() listId: string;
   @Input() listModelId: string;
   @Input() noTasksMsg: string;
   @Input() isBacklog: boolean;
+
+  @Input('listId') set listIdIn(v: string) {
+    this.listId = v;
+
+    // Disable filtering for non sub task tasks
+    if (v !== 'SUB') {
+      this._filteredTasks$ = this.tasks$;
+    }
+  }
+
+  listId: string;
+
 
   @ViewChild('listEl', {static: true}) listEl;
   isBlockAni = false;

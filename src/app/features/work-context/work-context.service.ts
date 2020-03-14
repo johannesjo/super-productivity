@@ -15,6 +15,8 @@ import {distinctUntilChangedObject} from '../../util/distinct-until-changed-obje
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.util';
 import {selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
+import {Actions, ofType} from '@ngrx/effects';
+import {moveTaskFromTodayToBacklogList} from './store/work-context-meta.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -95,7 +97,6 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-
   todaysTasks$: Observable<TaskWithSubTasks[]> = this.todaysTaskIds$.pipe(
     switchMap(taskIds => this._getTasksByIds$(taskIds)),
     shareReplay(1),
@@ -139,11 +140,9 @@ export class WorkContextService {
 
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
 
-  // TODO fix
-  onMoveToBacklog$: Observable<any> = EMPTY;
-  // this._actions$.pipe(ofType(
-  // TaskActionTypes.MoveToBacklog,
-  // ));
+  onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
+    moveTaskFromTodayToBacklogList,
+  ));
 
   isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(
     map(hasTasksToWorkOn),
@@ -195,6 +194,7 @@ export class WorkContextService {
     private _store$: Store<WorkContextState>,
     private _persistenceService: PersistenceService,
     private _projectService: ProjectService,
+    private _actions$: Actions,
     private _tagService: TagService,
     private _router: Router,
   ) {

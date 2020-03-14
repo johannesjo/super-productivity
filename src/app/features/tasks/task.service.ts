@@ -294,6 +294,7 @@ export class TaskService {
        src: DropListModelSource,
        target: DropListModelSource,
        newOrderedIds: string[]) {
+    console.log('MOVE', src, target);
 
     // List
     const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');

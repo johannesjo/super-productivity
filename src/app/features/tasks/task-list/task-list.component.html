@@ -11,12 +11,12 @@
 </div>
 
 <div #listEl
-     [@standardList]="isBlockAni ? 'BLOCK' : (filteredTasks)?.length"
+     [@standardList]="isBlockAni ? 'BLOCK' : filteredTasks?.length"
      [attr.data-id]="listModelId"
-     [dragulaModel]="(filteredTasks)"
+     [dragulaModel]="filteredTasks"
      [dragula]="listId"
      class="task-list-inner">
-  <task *ngFor="let task of (filteredTasks); trackBy: trackByFn; let i = index;"
+  <task *ngFor="let task of filteredTasks; trackBy: trackByFn; let i = index;"
         [isBacklog]="isBacklog"
         [task]="task">
   </task>
