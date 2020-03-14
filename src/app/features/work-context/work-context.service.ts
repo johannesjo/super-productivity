@@ -210,9 +210,9 @@ export class WorkContextService {
         const id = split[2];
 
         if (url.match(/tag\/.+/)) {
-          this.setActiveContext(id, WorkContextType.TAG);
+          this._setActiveContext(id, WorkContextType.TAG);
         } else if (url.match(/project\/.+/)) {
-          this.setActiveContext(id, WorkContextType.PROJECT);
+          this._setActiveContext(id, WorkContextType.PROJECT);
         }
       }
     );
@@ -223,7 +223,7 @@ export class WorkContextService {
     this._store$.dispatch(loadWorkContextState({state}));
   }
 
-  setActiveContext(activeId: string, activeType: WorkContextType) {
+  private _setActiveContext(activeId: string, activeType: WorkContextType) {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
 

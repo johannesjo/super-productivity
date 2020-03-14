@@ -1,10 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import * as contextActions from './work-context.actions';
 import {selectContextFeatureState} from './work-context.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {UnsetCurrentTask} from '../../tasks/store/task.actions';
+import {TaskService} from '../../tasks/task.service';
 
 
 @Injectable()
@@ -21,11 +23,20 @@ export class WorkContextEffects {
     tap(this._updateLastActive.bind(this)),
   ), {dispatch: false});
 
+  // EXTERNAL
+  // --------
+  unsetCurrentTask$ = createEffect(() => this._actions$.pipe(
+    ofType(contextActions.setActiveWorkContext),
+    withLatestFrom(this._taskService.isTaskDataLoaded$),
+    filter(([, isDataLoaded]) => isDataLoaded),
+    map(() => new UnsetCurrentTask()),
+  ));
 
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _taskService: TaskService,
   ) {
   }
 
