@@ -1,13 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {
-  AddTaskReminder,
-  MoveToBacklog,
-  RemoveTaskReminder,
-  TaskActionTypes,
-  UpdateTask,
-  UpdateTaskReminder
-} from './task.actions';
+import {AddTaskReminder, RemoveTaskReminder, TaskActionTypes, UpdateTask, UpdateTaskReminder} from './task.actions';
 import {select, Store} from '@ngrx/store';
 import {map, mergeMap, tap, withLatestFrom} from 'rxjs/operators';
 import {selectTaskFeatureState} from './task.selectors';
@@ -15,6 +8,8 @@ import {ReminderService} from '../../reminder/reminder.service';
 import {truncate} from '../../../util/truncate';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
+import {moveTaskFromTodayToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -36,11 +31,18 @@ export class TaskReminderEffects {
       const {id, title, remindAt, isMoveToBacklog} = a.payload;
       const reminderId = this._reminderService.addReminder('TASK', id, title, remindAt);
 
+
       return [
         new UpdateTask({
           task: {id, changes: {reminderId}}
         }),
-        ...(isMoveToBacklog ? [new MoveToBacklog({id})] : []),
+        ...(isMoveToBacklog
+            ? [moveTaskFromTodayToBacklogListAuto({
+              taskId: id,
+              workContextId: this._workContextService.activeWorkContextId
+            })]
+            : []
+        ),
       ];
     })
   );
@@ -113,6 +115,7 @@ export class TaskReminderEffects {
     private _store$: Store<any>,
     private _reminderService: ReminderService,
     private _snackService: SnackService,
+    private _workContextService: WorkContextService,
   ) {
   }
 }

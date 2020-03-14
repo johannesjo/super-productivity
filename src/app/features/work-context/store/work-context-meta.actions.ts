@@ -50,3 +50,13 @@ export const moveTaskFromBacklogToTodayList = createAction(
   '[WorkContextMeta] Move Task from backlog to today',
   props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
 );
+
+export const moveTaskFromTodayToBacklogListAuto = createAction(
+  '[WorkContextMeta] Auto Move Task from today to backlog',
+  props<{ taskId: string; workContextId: string }>(),
+);
+
+export const moveTaskFromBacklogToTodayListAuto = createAction(
+  '[WorkContextMeta] Auto Move Task from backlog to today',
+  props<{ taskId: string; workContextId: string; isMoveToTop: boolean }>(),
+);

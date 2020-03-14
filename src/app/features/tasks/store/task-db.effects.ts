@@ -40,8 +40,6 @@ export class TaskDbEffects {
         TaskActionTypes.MoveSubTaskDown,
         TaskActionTypes.MoveToArchive,
         TaskActionTypes.MoveToOtherProject,
-        TaskActionTypes.MoveToBacklog,
-        TaskActionTypes.MoveToToday,
         TaskActionTypes.ToggleStart,
 
         AttachmentActionTypes.DeleteAttachment,

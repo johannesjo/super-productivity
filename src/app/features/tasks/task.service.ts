@@ -24,9 +24,7 @@ import {
   MoveSubTaskDown,
   MoveSubTaskUp,
   MoveToArchive,
-  MoveToBacklog,
   MoveToOtherProject,
-  MoveToToday,
   RemoveTaskReminder,
   RemoveTimeSpent,
   RestoreTask,
@@ -78,7 +76,8 @@ import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
   moveTaskFromBacklogToTodayList,
-  moveTaskFromTodayToBacklogList,
+  moveTaskFromBacklogToTodayListAuto,
+  moveTaskFromTodayToBacklogList, moveTaskFromTodayToBacklogListAuto,
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskUpInBacklogList,
@@ -370,11 +369,13 @@ export class TaskService {
   }
 
   moveToToday(id, isMoveToTop = false) {
-    this._store.dispatch(new MoveToToday({id, isMoveToTop}));
+    const workContextId = this._workContextService.activeWorkContextId;
+    this._store.dispatch(moveTaskFromBacklogToTodayListAuto({taskId: id, isMoveToTop, workContextId}));
   }
 
   moveToBacklog(id) {
-    this._store.dispatch(new MoveToBacklog({id}));
+    const workContextId = this._workContextService.activeWorkContextId;
+    this._store.dispatch(moveTaskFromTodayToBacklogListAuto({taskId: id, workContextId}));
   }
 
   moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]) {

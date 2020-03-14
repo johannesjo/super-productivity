@@ -38,8 +38,6 @@ export enum TaskActionTypes {
   // Other
   StartFirstStartable = '[Task] Start first startable Task',
   RestoreTask = '[Task] Restore Task',
-  MoveToBacklog = '[Task] Move to backlog',
-  MoveToToday = '[Task] Move to today',
   MoveToArchive = '[Task] Move to archive',
   MoveToOtherProject = '[Task] Move tasks to other project',
   ToggleStart = '[Task] Toggle start',
@@ -215,20 +213,6 @@ export class AddSubTask implements Action {
   }
 }
 
-export class MoveToBacklog implements Action {
-  readonly type = TaskActionTypes.MoveToBacklog;
-
-  constructor(public payload: { id: string }) {
-  }
-}
-
-export class MoveToToday implements Action {
-  readonly type = TaskActionTypes.MoveToToday;
-
-  constructor(public payload: { id: string, isMoveToTop: boolean }) {
-  }
-}
-
 export class MoveToArchive implements Action {
   readonly type = TaskActionTypes.MoveToArchive;
 
@@ -278,8 +262,6 @@ export type TaskActions
   | StartFirstStartable
   | RestoreTask
   | AddSubTask
-  | MoveToBacklog
-  | MoveToToday
   | ToggleStart
   | RoundTimeSpentForDay
   | MoveToOtherProject

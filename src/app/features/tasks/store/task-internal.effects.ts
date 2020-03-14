@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {
   MoveSubTask,
-  MoveToBacklog,
   RoundTimeSpentForDay,
   SetCurrentTask,
   TaskActionTypes,
@@ -16,6 +15,7 @@ import {TaskState} from '../task.model';
 import {EMPTY, Observable, of} from 'rxjs';
 import {MiscConfig} from '../../config/global-config.model';
 import {roundDurationVanilla} from '../../../util/round-duration';
+import {moveTaskFromTodayToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
 
 @Injectable()
 export class TaskInternalEffects {
@@ -53,10 +53,9 @@ export class TaskInternalEffects {
       TaskActionTypes.ToggleStart,
       TaskActionTypes.UpdateTask,
       TaskActionTypes.DeleteTask,
-      TaskActionTypes.MoveToBacklog,
       TaskActionTypes.MoveToArchive,
       TaskActionTypes.MoveToOtherProject,
-      TaskActionTypes.MoveSubTask,
+      moveTaskFromTodayToBacklogListAuto.type
     ),
     withLatestFrom(
       this._store$.pipe(select(selectMiscConfig)),
@@ -81,8 +80,8 @@ export class TaskInternalEffects {
           break;
         }
 
-        case TaskActionTypes.MoveToBacklog: {
-          const isCurrent = (currentId === (action as MoveToBacklog).payload.id);
+        case moveTaskFromTodayToBacklogListAuto.type: {
+          const isCurrent = (currentId === (action as any).payload.taskId);
           nextId = (isCurrent) ? null : 'NO_UPDATE';
           break;
         }
