@@ -56,17 +56,18 @@ const _reducer = createReducer<TagState>(
     workContextType,
     workContextId,
   }) => {
+    if (workContextType !== WorkContextType.TAG) {
+      return state;
+    }
+
     const taskIdsBefore = state.entities[workContextId].taskIds;
     const taskIds = moveTaskForWorkContextLikeState(taskId, newOrderedIds, target, taskIdsBefore);
-
-    return (workContextType === WorkContextType.TAG)
-      ? adapter.updateOne({
-        id: workContextId,
-        changes: {
-          taskIds
-        }
-      }, state)
-      : state;
+    return adapter.updateOne({
+      id: workContextId,
+      changes: {
+        taskIds
+      }
+    }, state);
   }),
 
   on(tagActions.addTag, (state, {tag}) => adapter.addOne(tag, state)),

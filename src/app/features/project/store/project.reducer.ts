@@ -142,24 +142,22 @@ export function projectReducer(
   // tslint:disable-next-line
   const payload = action['payload'];
 
+  // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === moveTaskInTodayList.type) {
-    const {
-      taskId,
-      newOrderedIds,
-      target,
-      workContextType,
-      workContextId,
-    } = payload;
+    const {taskId, newOrderedIds, target, workContextType, workContextId} = action as any;
+
+    if (workContextType !== WorkContextType.PROJECT) {
+      return state;
+    }
+
     const taskIdsBefore = state.entities[workContextId].taskIds;
     const taskIds = moveTaskForWorkContextLikeState(taskId, newOrderedIds, target, taskIdsBefore);
-    return (workContextType === WorkContextType.TAG)
-      ? projectAdapter.updateOne({
-        id: workContextId,
-        changes: {
-          taskIds
-        }
-      }, state)
-      : state;
+    return projectAdapter.updateOne({
+      id: workContextId,
+      changes: {
+        taskIds
+      }
+    }, state);
   }
 
   switch (action.type) {
@@ -189,7 +187,7 @@ export function projectReducer(
                       ]
                   }
                   : {
-                    todaysTaskIds: (isAddToBottom)
+                    taskIds: (isAddToBottom)
                       ? [
                         ...affectedEntity.taskIds,
                         task.id,
