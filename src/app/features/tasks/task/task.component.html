@@ -123,7 +123,7 @@
       <div class="controls">
         <div class="hover-controls">
           <button (click)="startTask()"
-                  *ngIf="!task.isDone && !isCurrent && !task.subTasks"
+                  *ngIf="!task.isDone && !isCurrent && !task.subTasks?.length"
                   [title]="T.F.TASK.CMP.TRACK_TIME|translate"
                   class="ico-btn start-task-btn"
                   color=""
@@ -134,7 +134,7 @@
           </button>
 
           <button (click)="pauseTask()"
-                  *ngIf="!task.isDone && isCurrent && !task.subTasks"
+                  *ngIf="!task.isDone && isCurrent && !task.subTasks?.length"
                   [title]="T.F.TASK.CMP.TRACK_TIME_STOP|translate"
                   class="ico-btn"
                   color="accent"
@@ -229,7 +229,7 @@
 
         <mat-menu #menu="matMenu">
           <button (click)="startTask()"
-                  *ngIf="!task.isDone && !isCurrent && !task.subTasks"
+                  *ngIf="!task.isDone && !isCurrent && !task.subTasks?.length"
                   class="show-touch-only"
                   mat-menu-item
                   tabindex="2">
@@ -238,7 +238,7 @@
             {{T.F.TASK.CMP.TRACK_TIME|translate}}
           </button>
           <button (click)="pauseTask()"
-                  *ngIf="!task.isDone && isCurrent && !task.subTasks"
+                  *ngIf="!task.isDone && isCurrent && !task.subTasks?.length"
                   class="show-touch-only"
                   mat-menu-item
                   tabindex="2">
@@ -409,10 +409,10 @@
                 [cssClass]="'bg-accent'"
                 [progress]="progress"></progress-bar>
 
-  <div *ngIf="task.subTasks && task.subTasks.length"
+  <div *ngIf="task.subTasks?.length"
        class="sub-tasks">
     <button (click)="toggleSubTaskMode()"
-            *ngIf="task.subTasks && task.subTasks.length"
+            *ngIf="task.subTasks?.length"
             [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate"
             class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
             color=""
