@@ -2,11 +2,15 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {Tag} from '../tag.model';
 import {TagService} from '../tag.service';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {Task} from '../../tasks/task.model';
 import {DialogEditTagsForTaskComponent} from '../dialog-edit-tags/dialog-edit-tags-for-task.component';
+import {ProjectService} from '../../project/project.service';
+import {WorkContextService} from '../../work-context/work-context.service';
+import {Project} from '../../project/project.model';
+import {WorkContextType} from '../../work-context/work-context.model';
 
 @Component({
   selector: 'tag-list',
@@ -19,6 +23,7 @@ export class TagListComponent {
   @Input() set task(task: Task) {
     this._task = task;
     this._tagIds$.next(task.tagIds);
+    this._projectId$.next(task.projectId);
   }
 
   private _task: Task;
@@ -27,6 +32,17 @@ export class TagListComponent {
   @Output() removedTagsFromTask: EventEmitter<string[]> = new EventEmitter();
   @Output() replacedTagForTask: EventEmitter<string[]> = new EventEmitter();
 
+
+  private _projectId$ = new BehaviorSubject<string>(null);
+  project$: Observable<Project> = this._workContextService.activeWorkContextTypeAndId$.pipe(
+    switchMap(({activeType}) => (activeType === WorkContextType.TAG)
+      ? this._projectId$.pipe(
+        switchMap(id => this._projectService.getById$(id))
+      )
+      : of(null)
+    ),
+  );
+
   private _tagIds$ = new BehaviorSubject([]);
   tags$: Observable<Tag[]> = this._tagIds$.pipe(
     switchMap((ids) => this._tagService.getTagsById$((ids))),
@@ -34,7 +50,9 @@ export class TagListComponent {
 
   constructor(
     private readonly _tagService: TagService,
-    private readonly _matDialog: MatDialog
+    private readonly _projectService: ProjectService,
+    private readonly _workContextService: WorkContextService,
+    private readonly _matDialog: MatDialog,
   ) {
   }
 
