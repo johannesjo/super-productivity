@@ -38,10 +38,10 @@ import {isShowFinishDayNotification} from '../util/is-show-finish-day-notificati
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskToTodayList,
-  moveTaskToBacklogList,
   moveTaskInBacklogList,
   moveTaskInTodayList,
+  moveTaskToBacklogList,
+  moveTaskToTodayList,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
@@ -49,7 +49,8 @@ import {WorkContextType} from '../../work-context/work-context.model';
 
 @Injectable()
 export class ProjectEffects {
-  @Effect({dispatch: false}) syncProjectToLs$: any = this._actions$
+  @Effect({dispatch: false})
+  syncProjectToLs$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.AddProject,
@@ -106,7 +107,9 @@ export class ProjectEffects {
   );
 
 
-  @Effect() updateWorkStart$: any = this._actions$
+  // TODO rethink & migrate
+  @Effect()
+  updateWorkStart$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.LoadProjectState,
@@ -125,7 +128,9 @@ export class ProjectEffects {
       })
     );
 
-  @Effect({dispatch: false}) checkIfDayWasFinished$: any = this._actions$
+  // TODO rethink & migrate
+  @Effect({dispatch: false})
+  checkIfDayWasFinished$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
@@ -162,9 +167,9 @@ export class ProjectEffects {
     );
 
 
-
-
-  @Effect() updateWorkEnd$: any = this._actions$
+  // TODO rethink & migrate
+  @Effect()
+  updateWorkEnd$: any = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.AddTimeSpent,
@@ -183,7 +188,8 @@ export class ProjectEffects {
 
 
   // TODO can be removed later
-  @Effect() onProjectIdChange$: any = this._actions$
+  @Effect()
+  onProjectIdChange$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.LoadProjectState,
@@ -209,36 +215,10 @@ export class ProjectEffects {
       })
     );
 
-  @Effect({dispatch: false}) onProjectCreated: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.AddProject,
-      ),
-      tap((action: AddProject) => {
-        this._snackService.open({
-          ico: 'add',
-          type: 'SUCCESS',
-          msg: T.F.PROJECT.S.CREATED,
-          translateParams: {title: action.payload.project.title}
-        });
-      }),
-    );
 
-  @Effect({dispatch: false}) showDeletionSnack: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.DeleteProject,
-      ),
-      tap((action: DeleteProject) => {
-        this._snackService.open({
-          ico: 'delete_forever',
-          msg: T.F.PROJECT.S.DELETED
-        });
-      }),
-    );
-
-
-  @Effect({dispatch: false}) deleteProjectRelatedData: any = this._actions$
+  // TODO can be removed later, but a solution for orphaned tasks might be needed
+  @Effect({dispatch: false})
+  deleteProjectRelatedData: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.DeleteProject,
@@ -250,7 +230,8 @@ export class ProjectEffects {
     );
 
 
-  @Effect({dispatch: false}) archiveProject: any = this._actions$
+  @Effect({dispatch: false})
+  archiveProject: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.ArchiveProject,
@@ -265,7 +246,8 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect({dispatch: false}) unarchiveProject: any = this._actions$
+  @Effect({dispatch: false})
+  unarchiveProject: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UnarchiveProject,
@@ -280,7 +262,10 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect({dispatch: false}) snackUpdateIssueProvider$: any = this._actions$
+  // PURE SNACKS
+  // -----------
+  @Effect({dispatch: false})
+  snackUpdateIssueProvider$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
@@ -296,7 +281,8 @@ export class ProjectEffects {
       })
     );
 
-  @Effect({dispatch: false}) snackUpdateBaseSettings$: any = this._actions$
+  @Effect({dispatch: false})
+  snackUpdateBaseSettings$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UpdateProject,
@@ -307,6 +293,37 @@ export class ProjectEffects {
           msg: T.F.PROJECT.S.UPDATED,
         });
       })
+    );
+
+
+  @Effect({dispatch: false})
+  onProjectCreatedSnack: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.AddProject,
+      ),
+      tap((action: AddProject) => {
+        this._snackService.open({
+          ico: 'add',
+          type: 'SUCCESS',
+          msg: T.F.PROJECT.S.CREATED,
+          translateParams: {title: action.payload.project.title}
+        });
+      }),
+    );
+
+  @Effect({dispatch: false})
+  showDeletionSnack: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.DeleteProject,
+      ),
+      tap((action: DeleteProject) => {
+        this._snackService.open({
+          ico: 'delete_forever',
+          msg: T.F.PROJECT.S.DELETED
+        });
+      }),
     );
 
   constructor(
