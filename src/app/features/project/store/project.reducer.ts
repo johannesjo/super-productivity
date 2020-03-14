@@ -9,11 +9,13 @@ import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
+  moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
   moveTaskFromBacklogToTodayList,
   moveTaskFromTodayToBacklogList,
   moveTaskInBacklogList,
   moveTaskInTodayList,
+  moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
 import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
@@ -219,6 +221,7 @@ export function projectReducer(
     }, state);
   }
 
+  // up down today
   if ((action.type as string) === moveTaskUpInTodayList.type) {
     const {taskId, workContextType, workContextId} = action as any;
     return (workContextType === WORK_CONTEXT_TYPE)
@@ -241,6 +244,27 @@ export function projectReducer(
         }
       }, state)
       : state;
+  }
+
+  // up down backlog
+  if ((action.type as string) === moveTaskUpInBacklogList.type) {
+    const {taskId, workContextId} = action as any;
+    return projectAdapter.updateOne({
+      id: workContextId,
+      changes: {
+        backlogTaskIds: arrayMoveLeft(state.entities[workContextId].backlogTaskIds, taskId)
+      }
+    }, state);
+  }
+
+  if ((action.type as string) === moveTaskDownInBacklogList.type) {
+    const {taskId, workContextId} = action as any;
+    return projectAdapter.updateOne({
+      id: workContextId,
+      changes: {
+        backlogTaskIds: arrayMoveRight(state.entities[workContextId].backlogTaskIds, taskId)
+      }
+    }, state);
   }
 
 

@@ -1,6 +1,13 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {MoveSubTask, MoveToBacklog, RoundTimeSpentForDay, SetCurrentTask, TaskActionTypes, UpdateTask} from './task.actions';
+import {
+  MoveSubTask,
+  MoveToBacklog,
+  RoundTimeSpentForDay,
+  SetCurrentTask,
+  TaskActionTypes,
+  UpdateTask
+} from './task.actions';
 import {select, Store} from '@ngrx/store';
 import {filter, map, mergeMap, withLatestFrom} from 'rxjs/operators';
 import {selectTaskFeatureState, selectTasksWorkedOnOrDoneFlat} from './task.selectors';
@@ -77,13 +84,6 @@ export class TaskInternalEffects {
         case TaskActionTypes.MoveToBacklog: {
           const isCurrent = (currentId === (action as MoveToBacklog).payload.id);
           nextId = (isCurrent) ? null : 'NO_UPDATE';
-          break;
-        }
-
-        case TaskActionTypes.MoveSubTask: {
-          const isCurrent = (currentId === (action as MoveSubTask).payload.taskId);
-          const isMovedToBacklog = ((action as MoveSubTask).payload.targetModelId === 'BACKLOG');
-          nextId = (isCurrent && isMovedToBacklog) ? null : 'NO_UPDATE';
           break;
         }
 
