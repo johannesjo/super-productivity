@@ -21,7 +21,7 @@ export enum TaskActionTypes {
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
   UndoDeleteTask = '[Task] Undo Delete Task',
-  Move = '[Task] Move task',
+  MoveSubTask = '[Task] Move sub task',
   MoveUp = '[Task] Move up',
   MoveDown = '[Task] Move down',
   AddTimeSpent = '[Task] Add time spent',
@@ -131,13 +131,13 @@ export class UndoDeleteTask implements Action {
   readonly type = TaskActionTypes.UndoDeleteTask;
 }
 
-export class Move implements Action {
-  readonly type = TaskActionTypes.Move;
+export class MoveSubTask implements Action {
+  readonly type = TaskActionTypes.MoveSubTask;
 
   constructor(public payload: {
     taskId: string,
-    sourceModelId: DropListModelSource,
-    targetModelId: DropListModelSource,
+    srcTaskId: string,
+    targetTaskId: string,
     newOrderedIds: string[]
   }) {
   }
@@ -267,7 +267,7 @@ export type TaskActions
   | UpdateTaskTags
   | DeleteTask
   | UndoDeleteTask
-  | Move
+  | MoveSubTask
   | MoveUp
   | MoveDown
   | AddTimeSpent

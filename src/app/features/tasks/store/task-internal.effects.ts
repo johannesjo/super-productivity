@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {Move, MoveToBacklog, RoundTimeSpentForDay, SetCurrentTask, TaskActionTypes, UpdateTask} from './task.actions';
+import {MoveSubTask, MoveToBacklog, RoundTimeSpentForDay, SetCurrentTask, TaskActionTypes, UpdateTask} from './task.actions';
 import {select, Store} from '@ngrx/store';
 import {filter, map, mergeMap, withLatestFrom} from 'rxjs/operators';
 import {selectTaskFeatureState, selectTasksWorkedOnOrDoneFlat} from './task.selectors';
@@ -49,7 +49,7 @@ export class TaskInternalEffects {
       TaskActionTypes.MoveToBacklog,
       TaskActionTypes.MoveToArchive,
       TaskActionTypes.MoveToOtherProject,
-      TaskActionTypes.Move,
+      TaskActionTypes.MoveSubTask,
     ),
     withLatestFrom(
       this._store$.pipe(select(selectMiscConfig)),
@@ -80,9 +80,9 @@ export class TaskInternalEffects {
           break;
         }
 
-        case TaskActionTypes.Move: {
-          const isCurrent = (currentId === (action as Move).payload.taskId);
-          const isMovedToBacklog = ((action as Move).payload.targetModelId === 'BACKLOG');
+        case TaskActionTypes.MoveSubTask: {
+          const isCurrent = (currentId === (action as MoveSubTask).payload.taskId);
+          const isMovedToBacklog = ((action as MoveSubTask).payload.targetModelId === 'BACKLOG');
           nextId = (isCurrent && isMovedToBacklog) ? null : 'NO_UPDATE';
           break;
         }

@@ -21,6 +21,7 @@ import {
   DeleteTask,
   LoadTaskState,
   MoveDown,
+  MoveSubTask,
   MoveToArchive,
   MoveToBacklog,
   MoveToOtherProject,
@@ -288,12 +289,6 @@ export class TaskService {
        src: DropListModelSource,
        target: DropListModelSource,
        newOrderedIds: string[]) {
-    // Task
-    // if (src === 'DONE' && target === 'UNDONE') {
-    // TODO via effect this.setUnDone(taskId);
-    // } else if (src === 'UNDONE' && target === 'DONE') {
-    // TODO via effect this.setDone(taskId);
-    // }
 
     // List
     const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');
@@ -313,6 +308,7 @@ export class TaskService {
       // move from today to backlog
     } else {
       // move sub task
+      this._store.dispatch(new MoveSubTask({taskId, srcTaskId: src, targetTaskId: target, newOrderedIds}));
     }
 
     // TODO unset current via effect

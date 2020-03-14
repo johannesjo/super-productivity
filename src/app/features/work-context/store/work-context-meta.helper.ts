@@ -1,7 +1,7 @@
 import {filterOutId} from '../../tasks/store/task.reducer.util';
 import {DropListModelSource} from '../../tasks/task.model';
 
-export const moveTaskForWorkContextLikeState = (
+export const  moveTaskForWorkContextLikeState = (
   taskId: string,
   newOrderedIds: string[],
   target: DropListModelSource,
@@ -12,10 +12,10 @@ export const moveTaskForWorkContextLikeState = (
   const emptyListVal = (target === 'DONE')
     ? idsFilteredMoving.length
     : 0;
-  return _moveItemInList(taskId, idsFilteredMoving, newOrderedIds, emptyListVal);
+  return moveItemInList(taskId, idsFilteredMoving, newOrderedIds, emptyListVal);
 };
 
-const _moveItemInList = (itemId: string, completeList: string[], partialList: string[], emptyListVal = 0): string[] => {
+export const moveItemInList = (itemId: string, completeList: string[], partialList: string[], emptyListVal = 0): string[] => {
   let newIndex;
   const curInUpdateListIndex = partialList.indexOf(itemId);
   const prevItemId = partialList[curInUpdateListIndex - 1];

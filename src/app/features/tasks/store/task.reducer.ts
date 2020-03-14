@@ -1,18 +1,18 @@
 import {TaskActions, TaskActionTypes} from './task.actions';
-import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskState, TaskWithSubTasks} from '../task.model';
+import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskState} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
-import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../../attachment/store/attachment.actions';
 import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
   deleteTask,
   filterOutId,
   getTaskById,
-  mapTaskWithSubTasksToTask,
+  reCalcTimesForParentIfParent,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
 } from './task.reducer.util';
 import {taskAdapter} from './task.adapter';
+import {moveItemInList} from '../../work-context/store/work-context-meta.helper';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -233,91 +233,40 @@ export function taskReducer(
       return state.stateBefore || state;
     }
 
-    case TaskActionTypes.Move: {
-      return state;
-      // let newState = state;
-      // const {taskId, sourceModelId, targetModelId, newOrderedIds} = action.payload;
-      // const taskToMove = state.entities[taskId];
-      //
-      //
-      // switch (sourceModelId) {
-      //   case 'DONE':
-      //   case 'UNDONE':
-      //     newState = {
-      //       ...newState,
-      //       todaysTaskIds: newState.todaysTaskIds.filter(filterOutId(taskId)),
-      //     };
-      //     break;
-      //
-      //   case 'BACKLOG':
-      //     newState = {
-      //       ...newState,
-      //       backlogTaskIds: newState.backlogTaskIds.filter(filterOutId(taskId)),
-      //     };
-      //     break;
-      //
-      //   default:
-      //     // SUB TASK CASE
-      //     const oldPar = state.entities[sourceModelId];
-      //
-      //     newState = reCalcTimesForParentIfParent(oldPar.id, {
-      //       ...newState,
-      //       entities: {
-      //         ...newState.entities,
-      //         [oldPar.id]: {
-      //           ...oldPar,
-      //           subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
-      //         }
-      //       }
-      //     });
-      // }
-      //
-      // switch (targetModelId) {
-      //   case 'DONE':
-      //   case 'UNDONE':
-      //     const isDone = (targetModelId === 'DONE');
-      //     // NOTE: move to end of complete list for done tasks
-      //     const emptyListVal = (targetModelId === 'DONE')
-      //       ? newState.todaysTaskIds.length
-      //       : 0;
-      //     return {
-      //       ...newState,
-      //       todaysTaskIds: moveItemInList(taskId, newState.todaysTaskIds, newOrderedIds, emptyListVal),
-      //       entities: {
-      //         ...newState.entities,
-      //         [taskId]: {
-      //           ...taskToMove,
-      //           isDone
-      //         }
-      //       },
-      //       // unset current task if it was the task moved
-      //       ...((isDone && taskId === state.currentTaskId) ? {currentTaskId: null} : {})
-      //     };
-      //
-      //   case 'BACKLOG':
-      //     return {
-      //       ...newState,
-      //       backlogTaskIds: newOrderedIds,
-      //     };
-      //
-      //   default:
-      //     // SUB TASK CASE
-      //     const newPar = state.entities[targetModelId];
-      //     return reCalcTimesForParentIfParent(newPar.id, {
-      //       ...newState,
-      //       entities: {
-      //         ...newState.entities,
-      //         [newPar.id]: {
-      //           ...newPar,
-      //           subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
-      //         },
-      //         [taskId]: {
-      //           ...taskToMove,
-      //           parentId: newPar.id
-      //         },
-      //       }
-      //     });
-      // }
+    case TaskActionTypes.MoveSubTask: {
+      let newState = state;
+      const {taskId, srcTaskId, targetTaskId, newOrderedIds} = action.payload;
+      const taskToMove = state.entities[taskId];
+
+      // SUB TASK CASE
+      const oldPar = state.entities[srcTaskId];
+      newState = reCalcTimesForParentIfParent(oldPar.id, {
+        ...newState,
+        entities: {
+          ...newState.entities,
+          [oldPar.id]: {
+            ...oldPar,
+            subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
+          }
+        }
+      });
+
+      // SUB TASK CASE
+      const newPar = state.entities[targetTaskId];
+      return reCalcTimesForParentIfParent(newPar.id, {
+        ...newState,
+        entities: {
+          ...newState.entities,
+          [newPar.id]: {
+            ...newPar,
+            subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
+          },
+          [taskId]: {
+            ...taskToMove,
+            parentId: newPar.id
+          },
+        }
+      });
     }
 
     // case TaskActionTypes.MoveUp: {
