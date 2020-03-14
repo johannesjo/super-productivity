@@ -38,8 +38,8 @@ import {isShowFinishDayNotification} from '../util/is-show-finish-day-notificati
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskFromBacklogToTodayList,
-  moveTaskFromTodayToBacklogList,
+  moveTaskToTodayList,
+  moveTaskToBacklogList,
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskUpInBacklogList,
@@ -69,8 +69,8 @@ export class ProjectEffects {
         TaskActionTypes.AddTask,
 
         moveTaskInBacklogList.type,
-        moveTaskFromTodayToBacklogList.type,
-        moveTaskFromBacklogToTodayList.type,
+        moveTaskToBacklogList.type,
+        moveTaskToTodayList.type,
         moveTaskUpInBacklogList.type,
         moveTaskDownInBacklogList.type,
       ),

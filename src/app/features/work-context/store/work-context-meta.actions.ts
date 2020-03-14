@@ -41,22 +41,22 @@ export const moveTaskInBacklogList = createAction(
   props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
 );
 
-export const moveTaskFromTodayToBacklogList = createAction(
+export const moveTaskToBacklogList = createAction(
   '[WorkContextMeta] Move Task from today to backlog',
   props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
 );
 
-export const moveTaskFromBacklogToTodayList = createAction(
+export const moveTaskToTodayList = createAction(
   '[WorkContextMeta] Move Task from backlog to today',
   props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
 );
 
-export const moveTaskFromTodayToBacklogListAuto = createAction(
+export const moveTaskToBacklogListAuto = createAction(
   '[WorkContextMeta] Auto Move Task from today to backlog',
   props<{ taskId: string; workContextId: string }>(),
 );
 
-export const moveTaskFromBacklogToTodayListAuto = createAction(
+export const moveTaskToTodayListAuto = createAction(
   '[WorkContextMeta] Auto Move Task from backlog to today',
   props<{ taskId: string; workContextId: string; isMoveToTop: boolean }>(),
 );

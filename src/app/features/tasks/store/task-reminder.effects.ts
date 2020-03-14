@@ -8,7 +8,7 @@ import {ReminderService} from '../../reminder/reminder.service';
 import {truncate} from '../../../util/truncate';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
-import {moveTaskFromTodayToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
+import {moveTaskToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
 import {WorkContextService} from '../../work-context/work-context.service';
 
 @Injectable()
@@ -37,7 +37,7 @@ export class TaskReminderEffects {
           task: {id, changes: {reminderId}}
         }),
         ...(isMoveToBacklog
-            ? [moveTaskFromTodayToBacklogListAuto({
+            ? [moveTaskToBacklogListAuto({
               taskId: id,
               workContextId: this._workContextService.activeWorkContextId
             })]

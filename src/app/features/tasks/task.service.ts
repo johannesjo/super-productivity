@@ -75,9 +75,9 @@ import {WorkContextType} from '../work-context/work-context.model';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskFromBacklogToTodayList,
-  moveTaskFromBacklogToTodayListAuto,
-  moveTaskFromTodayToBacklogList, moveTaskFromTodayToBacklogListAuto,
+  moveTaskToTodayList,
+  moveTaskToTodayListAuto,
+  moveTaskToBacklogList, moveTaskToBacklogListAuto,
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskUpInBacklogList,
@@ -301,11 +301,11 @@ export class TaskService {
 
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
-      this._store.dispatch(moveTaskFromBacklogToTodayList({taskId, newOrderedIds, workContextId}));
+      this._store.dispatch(moveTaskToTodayList({taskId, newOrderedIds, workContextId}));
 
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog
-      this._store.dispatch(moveTaskFromTodayToBacklogList({taskId, newOrderedIds, workContextId}));
+      this._store.dispatch(moveTaskToBacklogList({taskId, newOrderedIds, workContextId}));
 
     } else {
       // move sub task
@@ -370,12 +370,12 @@ export class TaskService {
 
   moveToToday(id, isMoveToTop = false) {
     const workContextId = this._workContextService.activeWorkContextId;
-    this._store.dispatch(moveTaskFromBacklogToTodayListAuto({taskId: id, isMoveToTop, workContextId}));
+    this._store.dispatch(moveTaskToTodayListAuto({taskId: id, isMoveToTop, workContextId}));
   }
 
   moveToBacklog(id) {
     const workContextId = this._workContextService.activeWorkContextId;
-    this._store.dispatch(moveTaskFromTodayToBacklogListAuto({taskId: id, workContextId}));
+    this._store.dispatch(moveTaskToBacklogListAuto({taskId: id, workContextId}));
   }
 
   moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]) {

@@ -16,7 +16,7 @@ import {getWorklogStr} from '../../util/get-work-log-str';
 import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.util';
 import {selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
 import {Actions, ofType} from '@ngrx/effects';
-import {moveTaskFromTodayToBacklogList} from './store/work-context-meta.actions';
+import {moveTaskToBacklogList} from './store/work-context-meta.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -141,7 +141,7 @@ export class WorkContextService {
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
 
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
-    moveTaskFromTodayToBacklogList,
+    moveTaskToBacklogList,
   ));
 
   isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(

@@ -11,8 +11,8 @@ import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskFromBacklogToTodayList,
-  moveTaskFromTodayToBacklogList,
+  moveTaskToTodayList,
+  moveTaskToBacklogList,
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskUpInBacklogList,
@@ -185,7 +185,7 @@ export function projectReducer(
     }, state);
   }
 
-  if ((action.type as string) === moveTaskFromTodayToBacklogList.type) {
+  if ((action.type as string) === moveTaskToBacklogList.type) {
     const {taskId, newOrderedIds, workContextId} = action as any;
 
     const todaysTaskIdsBefore = state.entities[workContextId].taskIds;
@@ -203,7 +203,7 @@ export function projectReducer(
     }, state);
   }
 
-  if ((action.type as string) === moveTaskFromBacklogToTodayList.type) {
+  if ((action.type as string) === moveTaskToTodayList.type) {
     const {taskId, newOrderedIds, workContextId} = action as any;
 
     const backlogIdsBefore = state.entities[workContextId].backlogTaskIds;
