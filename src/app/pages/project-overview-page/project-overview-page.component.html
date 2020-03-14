@@ -15,7 +15,7 @@
           </mat-icon>
         </div>
 
-        <div [class.isCurrent]="project.id === (projectService.currentId$|async)"
+        <div [class.isCurrent]="project.id === (workContextService.activeWorkContextId$|async)"
              class="title">{{project.title}}
         </div>
 
@@ -36,7 +36,7 @@
             <mat-icon>edit</mat-icon>
           </button>
           <button (click)="archive(project.id)"
-                  [disabled]="project.id === (projectService.currentId$|async)"
+                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"
                   [title]="T.PP.ARCHIVE_PROJECT|translate"
                   color=""
                   mat-icon-button>
@@ -50,7 +50,7 @@
             <mat-icon>flight</mat-icon>
           </button>
           <button (click)="remove(project.id)"
-                  [disabled]="project.id === (projectService.currentId$|async)"
+                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"
                   [title]="T.PP.DELETE_PROJECT|translate"
                   color="warn"
                   mat-icon-button>
@@ -112,7 +112,7 @@
           <mat-icon>unarchive</mat-icon>
         </button>
         <button (click)="remove(project.id)"
-                *ngIf="project.id !== (projectService.currentId$|async)"
+                *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
                 [title]="T.PP.DELETE_PROJECT|translate"
                 color="warn"
                 mat-icon-button>

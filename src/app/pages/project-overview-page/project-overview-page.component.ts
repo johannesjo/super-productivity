@@ -12,6 +12,7 @@ import {download} from '../../util/download';
 import {SnackService} from '../../core/snack/snack.service';
 import {T} from '../../t.const';
 import {THEME_COLOR_MAP} from '../../app.constants';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'project-page',
@@ -26,6 +27,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
 
   constructor(
     public readonly projectService: ProjectService,
+    public readonly workContextService: WorkContextService,
     public readonly _matDialog: MatDialog,
     private readonly _dragulaService: DragulaService,
     private readonly _snackService: SnackService,
