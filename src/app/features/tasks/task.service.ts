@@ -31,7 +31,6 @@ import {
   RoundTimeSpentForDay,
   SetCurrentTask,
   SetSelectedTask,
-  StartFirstStartable,
   ToggleStart,
   ToggleTaskShowSubTasks,
   UnsetCurrentTask,
@@ -184,8 +183,12 @@ export class TaskService {
     this._store.dispatch(new SetSelectedTask({id, taskAdditionalInfoTargetPanel}));
   }
 
-  startFirstStartable(isStartIfHasCurrent = false) {
-    this._store.dispatch(new StartFirstStartable({isStartIfHasCurrent}));
+  startFirstStartable() {
+    this._workContextService.startableTasks$.pipe(take(1)).subscribe(tasks => {
+      if (tasks[0]) {
+        this.setCurrentId(tasks[0].id);
+      }
+    });
   }
 
   async load() {

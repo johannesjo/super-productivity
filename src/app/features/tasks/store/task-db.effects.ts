@@ -31,7 +31,6 @@ export class TaskDbEffects {
         TaskActionTypes.UndoDeleteTask,
         TaskActionTypes.AddSubTask,
         TaskActionTypes.SetCurrentTask,
-        TaskActionTypes.StartFirstStartable,
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
         TaskActionTypes.UpdateTaskTags,

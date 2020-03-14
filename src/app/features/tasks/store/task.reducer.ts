@@ -88,21 +88,6 @@ export function taskReducer(
       };
     }
 
-    case TaskActionTypes.StartFirstStartable: {
-      if (!action.payload.isStartIfHasCurrent && state.currentTaskId) {
-        return state;
-      }
-
-      throw new Error('NOT IMPLEMENTED YET');
-
-      // TODO fix
-      // const startableTasks = filterStartableTasks(state);
-      // return {
-      //   ...state,
-      //   currentTaskId: startableTasks && startableTasks[0] || null,
-      // };
-    }
-
     case TaskActionTypes.SetCurrentTask: {
       if (action.payload) {
         const subTaskIds = state.entities[action.payload].subTaskIds;
@@ -225,7 +210,6 @@ export function taskReducer(
       }, state);
     }
 
-    // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
       return deleteTask(state, action.payload.task);
     }
@@ -384,38 +368,6 @@ export function taskReducer(
         }
       };
     }
-
-    // case TaskActionTypes.MoveToToday: {
-    //   if (state.XXXtodaysTaskIds.includes(action.payload.id)) {
-    //     return state;
-    //   }
-    //
-    //   const task = state.entities[action.payload.id];
-    //   if (!task || task.parentId) {
-    //     console.error('Trying to move sub task to todays list. This should not happen');
-    //     return state;
-    //   }
-    //
-    //   return {
-    //     ...state,
-    //     XXXbacklogTaskIds: state.XXXbacklogTaskIds.filter(filterOutId(action.payload.id)),
-    //     XXXtodaysTaskIds: action.payload.isMoveToTop
-    //       ? [action.payload.id, ...state.XXXtodaysTaskIds]
-    //       : [...state.XXXtodaysTaskIds, action.payload.id]
-    //   };
-    // }
-
-    // case TaskActionTypes.MoveToBacklog: {
-    //   if (state.XXXbacklogTaskIds.includes(action.payload.id)) {
-    //     return state;
-    //   }
-    //
-    //   return {
-    //     ...state,
-    //     XXXtodaysTaskIds: state.XXXtodaysTaskIds.filter(filterOutId(action.payload.id)),
-    //     XXXbacklogTaskIds: [action.payload.id, ...state.XXXbacklogTaskIds],
-    //   };
-    // }
 
     case TaskActionTypes.MoveToOtherProject:
     case TaskActionTypes.MoveToArchive: {

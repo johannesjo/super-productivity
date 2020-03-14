@@ -36,7 +36,6 @@ export enum TaskActionTypes {
   AddSubTask = '[Task] Add SubTask',
 
   // Other
-  StartFirstStartable = '[Task] Start first startable Task',
   RestoreTask = '[Task] Restore Task',
   MoveToArchive = '[Task] Move to archive',
   MoveToOtherProject = '[Task] Move tasks to other project',
@@ -191,14 +190,6 @@ export class RemoveTaskReminder implements Action {
   }
 }
 
-
-export class StartFirstStartable implements Action {
-  readonly type = TaskActionTypes.StartFirstStartable;
-
-  constructor(public payload: { isStartIfHasCurrent: boolean }) {
-  }
-}
-
 export class RestoreTask implements Action {
   readonly type = TaskActionTypes.RestoreTask;
 
@@ -259,7 +250,6 @@ export type TaskActions
   | AddTaskReminder
   | UpdateTaskReminder
   | RemoveTaskReminder
-  | StartFirstStartable
   | RestoreTask
   | AddSubTask
   | ToggleStart
