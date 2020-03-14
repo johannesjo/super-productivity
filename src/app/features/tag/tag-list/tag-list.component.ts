@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {Tag} from '../tag.model';
 import {TagService} from '../tag.service';
-import {BehaviorSubject, Observable, of} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {Task} from '../../tasks/task.model';
@@ -43,10 +43,18 @@ export class TagListComponent {
     ),
   );
 
+
   private _tagIds$ = new BehaviorSubject([]);
-  tags$: Observable<Tag[]> = this._tagIds$.pipe(
-    switchMap((ids) => this._tagService.getTagsById$((ids))),
+  tags$: Observable<Tag[]> = combineLatest([
+    this._tagIds$,
+    this._workContextService.activeWorkContextId$,
+  ]).pipe(
+    // TODO there should be a better way...
+    switchMap(([ids, activeId]) => this._tagService.getTagsById$((ids.filter(id => id !== activeId)))),
   );
+
+  // NOTE: should normally be enough
+  // private _hideId: string = this._workContextService.activeWorkContextId;
 
   constructor(
     private readonly _tagService: TagService,
