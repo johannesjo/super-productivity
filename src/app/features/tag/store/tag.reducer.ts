@@ -5,7 +5,6 @@ import {Action, createFeatureSelector, createReducer, createSelector, on} from '
 import {AddTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 import {MY_DAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
-import {workContextMetaReducer} from '../../work-context/store/work-context-meta.reducer';
 
 export const TAG_FEATURE_NAME = 'tag';
 
@@ -62,10 +61,9 @@ const _reducer = createReducer<TagState>(
 
 
 export function tagReducer(
-  stateIn = initialTagState,
+  state = initialTagState,
   action: Action,
 ): TagState {
-  const state = workContextMetaReducer(stateIn, action) as TagState;
 
   switch (action.type) {
     case TaskActionTypes.AddTask: {

@@ -8,7 +8,6 @@ import {UiModule} from '../../ui/ui.module';
 import {FormsModule} from '@angular/forms';
 import {TagListComponent} from './tag-list/tag-list.component';
 import {DialogEditTagsForTaskComponent} from './dialog-edit-tags/dialog-edit-tags-for-task.component';
-import {workContextMetaReducer} from '../work-context/store/work-context-meta.reducer';
 
 @NgModule({
   imports: [
