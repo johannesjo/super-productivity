@@ -36,11 +36,14 @@ import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.servic
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
 import {
-  moveTaskDownInBacklogList, moveTaskDownInTodayList,
+  moveTaskDownInBacklogList,
+  moveTaskDownInTodayList,
   moveTaskFromBacklogToTodayList,
   moveTaskFromTodayToBacklogList,
   moveTaskInBacklogList,
-  moveTaskInTodayList, moveTaskUpInBacklogList, moveTaskUpInTodayList
+  moveTaskInTodayList,
+  moveTaskUpInBacklogList,
+  moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
 import {WorkContextType} from '../../work-context/work-context.model';
 
@@ -71,36 +74,19 @@ export class ProjectEffects {
         moveTaskUpInBacklogList.type,
         moveTaskDownInBacklogList.type,
       ),
+      tap((a) => {
+        // exclude ui only actions
+        if (!([
+          ProjectActionTypes.SetCurrentProject,
+          ProjectActionTypes.UpdateProjectWorkStart,
+          ProjectActionTypes.UpdateProjectWorkEnd,
+        ].includes(a.type as any))) {
+          this._persistenceService.saveLastActive.bind(this);
+        }
+      }),
       switchMap(() => this.saveToLs$),
     );
 
-
-  @Effect({dispatch: false}) updateLastActive$: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.AddProject,
-        ProjectActionTypes.DeleteProject,
-        ProjectActionTypes.UpdateProject,
-        ProjectActionTypes.UpdateProjectAdvancedCfg,
-        ProjectActionTypes.UpdateProjectIssueProviderCfg,
-        ProjectActionTypes.UpdateProjectOrder,
-        ProjectActionTypes.AddToProjectBreakTime,
-        ProjectActionTypes.ArchiveProject,
-        ProjectActionTypes.UnarchiveProject,
-        ProjectActionTypes.UpdateLastCompletedDay,
-
-        moveTaskInTodayList.type,
-
-        TaskActionTypes.AddTask,
-
-        moveTaskInBacklogList.type,
-        moveTaskFromTodayToBacklogList.type,
-        moveTaskFromBacklogToTodayList.type,
-        moveTaskUpInBacklogList.type,
-        moveTaskDownInBacklogList.type,
-      ),
-      tap(this._persistenceService.saveLastActive.bind(this))
-    );
 
   @Effect({dispatch: false})
   updateProjectStorageConditional$ = this._actions$.pipe(
