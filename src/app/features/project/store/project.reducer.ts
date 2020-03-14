@@ -9,6 +9,7 @@ import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
+  moveTaskFromBacklogToTodayList,
   moveTaskFromTodayToBacklogList,
   moveTaskInBacklogList,
   moveTaskInTodayList
@@ -192,6 +193,24 @@ export function projectReducer(
       changes: {
         taskIds: filteredToday,
         backlogTaskIds,
+      }
+    }, state);
+  }
+
+  if ((action.type as string) === moveTaskFromBacklogToTodayList.type) {
+    const {taskId, newOrderedIds, workContextId} = action as any;
+
+    const backlogIdsBefore = state.entities[workContextId].backlogTaskIds;
+    const todaysTaskIdsBefore = state.entities[workContextId].taskIds;
+
+    const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
+    const newTodaysTaskIds = moveItemInList(taskId, newOrderedIds, todaysTaskIdsBefore);
+
+    return projectAdapter.updateOne({
+      id: workContextId,
+      changes: {
+        taskIds: newTodaysTaskIds,
+        backlogTaskIds: filteredBacklog,
       }
     }, state);
   }

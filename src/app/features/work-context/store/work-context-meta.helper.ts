@@ -1,7 +1,7 @@
 import {filterOutId} from '../../tasks/store/task.reducer.util';
 import {DropListModelSource} from '../../tasks/task.model';
 
-export const  moveTaskForWorkContextLikeState = (
+export const moveTaskForWorkContextLikeState = (
   taskId: string,
   newOrderedIds: string[],
   target: DropListModelSource,
@@ -24,7 +24,9 @@ export const moveItemInList = (itemId: string, completeList: string[], partialLi
   const nextItemId = partialList[curInUpdateListIndex + 1];
   const newCompleteList = completeList.filter((id) => id !== itemId);
 
-  if (prevItemId) {
+  if (!itemId) {
+    throw new Error('Drop Model Error');
+  } else if (prevItemId) {
     newIndex = newCompleteList.indexOf(prevItemId) + 1;
   } else if (nextItemId) {
     newIndex = newCompleteList.indexOf(nextItemId);
