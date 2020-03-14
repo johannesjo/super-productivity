@@ -11,10 +11,12 @@ import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskToTodayList,
-  moveTaskToBacklogList,
   moveTaskInBacklogList,
   moveTaskInTodayList,
+  moveTaskToBacklogList,
+  moveTaskToBacklogListAuto,
+  moveTaskToTodayList,
+  moveTaskToTodayListAuto,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
@@ -265,6 +267,39 @@ export function projectReducer(
         backlogTaskIds: arrayMoveRight(state.entities[workContextId].backlogTaskIds, taskId)
       }
     }, state);
+  }
+
+  // AUTO move backlog/today
+  if ((action.type as string) === moveTaskToBacklogListAuto.type) {
+    const {taskId, workContextId} = action as any;
+    const todaysTaskIdsBefore = state.entities[workContextId].taskIds;
+    const backlogIdsBefore = state.entities[workContextId].backlogTaskIds;
+    return (backlogIdsBefore.includes(taskId))
+      ? state
+      : projectAdapter.updateOne({
+        id: workContextId,
+        changes: {
+          taskIds: todaysTaskIdsBefore.filter(filterOutId(taskId)),
+          backlogTaskIds: [taskId, ...backlogIdsBefore],
+        }
+      }, state);
+  }
+
+  if ((action.type as string) === moveTaskToTodayListAuto.type) {
+    const {taskId, workContextId, isMoveToTop} = action as any;
+    const todaysTaskIdsBefore = state.entities[workContextId].taskIds;
+    const backlogIdsBefore = state.entities[workContextId].backlogTaskIds;
+    return (todaysTaskIdsBefore.includes(taskId))
+      ? state
+      : projectAdapter.updateOne({
+        id: workContextId,
+        changes: {
+          backlogTaskIds: backlogIdsBefore.filter(filterOutId(taskId)),
+          taskIds: (isMoveToTop)
+            ? [taskId, ...todaysTaskIdsBefore]
+            : [...todaysTaskIdsBefore, taskId]
+        }
+      }, state);
   }
 
 

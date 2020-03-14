@@ -75,11 +75,12 @@ import {WorkContextType} from '../work-context/work-context.model';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
-  moveTaskToTodayList,
-  moveTaskToTodayListAuto,
-  moveTaskToBacklogList, moveTaskToBacklogListAuto,
   moveTaskInBacklogList,
   moveTaskInTodayList,
+  moveTaskToBacklogList,
+  moveTaskToBacklogListAuto,
+  moveTaskToTodayList,
+  moveTaskToTodayListAuto,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../work-context/store/work-context-meta.actions';
@@ -370,12 +371,18 @@ export class TaskService {
 
   moveToToday(id, isMoveToTop = false) {
     const workContextId = this._workContextService.activeWorkContextId;
-    this._store.dispatch(moveTaskToTodayListAuto({taskId: id, isMoveToTop, workContextId}));
+    const workContextType = this._workContextService.activeWorkContextType;
+    if (workContextType === WorkContextType.PROJECT) {
+      this._store.dispatch(moveTaskToTodayListAuto({taskId: id, isMoveToTop, workContextId}));
+    }
   }
 
   moveToBacklog(id) {
     const workContextId = this._workContextService.activeWorkContextId;
-    this._store.dispatch(moveTaskToBacklogListAuto({taskId: id, workContextId}));
+    const workContextType = this._workContextService.activeWorkContextType;
+    if (workContextType === WorkContextType.PROJECT) {
+      this._store.dispatch(moveTaskToBacklogListAuto({taskId: id, workContextId}));
+    }
   }
 
   moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]) {

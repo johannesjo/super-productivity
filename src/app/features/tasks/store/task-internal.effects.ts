@@ -49,6 +49,8 @@ export class TaskInternalEffects {
       TaskActionTypes.DeleteTask,
       TaskActionTypes.MoveToArchive,
       TaskActionTypes.MoveToOtherProject,
+
+      moveTaskToBacklogList.type,
       moveTaskToBacklogListAuto.type
     ),
     withLatestFrom(
@@ -76,7 +78,7 @@ export class TaskInternalEffects {
 
         case moveTaskToBacklogList.type:
         case moveTaskToBacklogListAuto.type: {
-          const isCurrent = (currentId === (action as any).payload.taskId);
+          const isCurrent = (currentId === (action as any).taskId);
           nextId = (isCurrent) ? null : 'NO_UPDATE';
           break;
         }
