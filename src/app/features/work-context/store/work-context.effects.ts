@@ -7,11 +7,13 @@ import {selectContextFeatureState} from './work-context.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {UnsetCurrentTask} from '../../tasks/store/task.actions';
 import {TaskService} from '../../tasks/task.service';
+import {BannerId} from '../../../core/banner/banner.model';
+import {BannerService} from '../../../core/banner/banner.service';
 
 
 @Injectable()
 export class WorkContextEffects {
-
+  // TODO improve
   updateContextsStorage$ = createEffect(() => this._actions$.pipe(
     ofType(
       contextActions.setActiveWorkContext,
@@ -23,6 +25,19 @@ export class WorkContextEffects {
     tap(this._updateLastActive.bind(this)),
   ), {dispatch: false});
 
+
+  dismissContextScopeBannersOnContextChange = createEffect(() => this._actions$
+    .pipe(
+      ofType(
+        contextActions.setActiveWorkContext,
+      ),
+      tap(() => {
+        this._bannerService.dismissIfExisting(BannerId.ForgotToFinishDay);
+        this._bannerService.dismissIfExisting(BannerId.JiraUnblock);
+      }),
+    ), {dispatch: false});
+
+
   // EXTERNAL
   // --------
   unsetCurrentTask$ = createEffect(() => this._actions$.pipe(
@@ -32,11 +47,13 @@ export class WorkContextEffects {
     map(() => new UnsetCurrentTask()),
   ));
 
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
     private _taskService: TaskService,
+    private _bannerService: BannerService,
   ) {
   }
 
