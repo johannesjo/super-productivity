@@ -1,20 +1,20 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {MoveToOtherProject, TaskActionTypes} from './task.actions';
-import {select, Store} from '@ngrx/store';
-import {tap, withLatestFrom} from 'rxjs/operators';
+import {MoveToOtherProject, TaskActionTypes, UpdateTask} from './task.actions';
+import {Store} from '@ngrx/store';
+import {filter, map, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {Task, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
-import {ProjectService} from '../../project/project.service';
-import {selectTaskFeatureState} from './task.selectors';
 import {selectAttachmentByIds} from '../../attachment/store/attachment.reducer';
+import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 
 
 @Injectable()
 export class TaskRelatedModelEffects {
+  // EFFECTS ===> EXTERNAL
+  // ---------------------
   @Effect({dispatch: false})
   moveToArchive$: any = this._actions$.pipe(
     ofType(
@@ -41,6 +41,39 @@ export class TaskRelatedModelEffects {
     tap(this._removeFromArchive.bind(this))
   );
 
+  // EXTERNAL ===> TASKS
+  // -------------------
+  @Effect()
+  moveTaskToUnDone$: any = this._actions$.pipe(
+    ofType(
+      moveTaskInTodayList,
+    ),
+    filter(({src, target}) => src === 'DONE' && target === 'UNDONE'),
+    map(({taskId}) => new UpdateTask({
+      task: {
+        id: taskId,
+        changes: {
+          isDone: false,
+        }
+      }
+    }))
+  );
+
+  @Effect()
+  moveTaskToDone$: any = this._actions$.pipe(
+    ofType(
+      moveTaskInTodayList,
+    ),
+    filter(({src, target}) => src === 'UNDONE' && target === 'DONE'),
+    map(({taskId}) => new UpdateTask({
+      task: {
+        id: taskId,
+        changes: {
+          isDone: true,
+        }
+      }
+    }))
+  );
 
   constructor(
     private _actions$: Actions,
