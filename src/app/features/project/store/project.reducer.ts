@@ -9,15 +9,19 @@ import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
+  moveTaskDownInTodayList,
   moveTaskFromBacklogToTodayList,
   moveTaskFromTodayToBacklogList,
   moveTaskInBacklogList,
-  moveTaskInTodayList
+  moveTaskInTodayList,
+  moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
 import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
 import {filterOutId} from '../../tasks/store/task.reducer.util';
+import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 
 export const PROJECT_FEATURE_NAME = 'projects';
+const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
 
 export interface ProjectState extends EntityState<Project> {
   // additional entities state properties
@@ -152,7 +156,7 @@ export function projectReducer(
   if ((action.type as string) === moveTaskInTodayList.type) {
     const {taskId, newOrderedIds, target, workContextType, workContextId} = action as any;
 
-    if (workContextType !== WorkContextType.PROJECT) {
+    if (workContextType !== WORK_CONTEXT_TYPE) {
       return state;
     }
 
@@ -215,6 +219,31 @@ export function projectReducer(
     }, state);
   }
 
+  if ((action.type as string) === moveTaskUpInTodayList.type) {
+    const {taskId, workContextType, workContextId} = action as any;
+    return (workContextType === WORK_CONTEXT_TYPE)
+      ? projectAdapter.updateOne({
+        id: workContextId,
+        changes: {
+          taskIds: arrayMoveLeft(state.entities[workContextId].taskIds, taskId)
+        }
+      }, state)
+      : state;
+  }
+
+  if ((action.type as string) === moveTaskDownInTodayList.type) {
+    const {taskId, workContextType, workContextId} = action as any;
+    return (workContextType === WORK_CONTEXT_TYPE)
+      ? projectAdapter.updateOne({
+        id: workContextId,
+        changes: {
+          taskIds: arrayMoveRight(state.entities[workContextId].taskIds, taskId)
+        }
+      }, state)
+      : state;
+  }
+
+
   switch (action.type) {
     // Meta Actions
     // ------------
@@ -222,7 +251,7 @@ export function projectReducer(
       const {workContextId, workContextType, task, isAddToBottom, isAddToBacklog} = payload;
       const affectedEntity = state.entities[workContextId];
 
-      return (workContextType === WorkContextType.PROJECT)
+      return (workContextType === WORK_CONTEXT_TYPE)
         ? {
           ...state,
           entities: {

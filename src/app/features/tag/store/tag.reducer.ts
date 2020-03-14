@@ -14,6 +14,7 @@ import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-con
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 
 export const TAG_FEATURE_NAME = 'tag';
+const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
 
 
 export const adapter: EntityAdapter<Tag> = createEntityAdapter<Tag>();
@@ -61,7 +62,7 @@ const _reducer = createReducer<TagState>(
     workContextType,
     workContextId,
   }) => {
-    if (workContextType !== WorkContextType.TAG) {
+    if (workContextType !== WORK_CONTEXT_TYPE) {
       return state;
     }
 
@@ -75,7 +76,7 @@ const _reducer = createReducer<TagState>(
     }, state);
   }),
 
-  on(moveTaskUpInTodayList, (state, {taskId, workContextId, workContextType}) => (workContextType === WorkContextType.TAG)
+  on(moveTaskUpInTodayList, (state, {taskId, workContextId, workContextType}) => (workContextType === WORK_CONTEXT_TYPE)
     ? adapter.updateOne({
       id: workContextId,
       changes: {
@@ -85,7 +86,7 @@ const _reducer = createReducer<TagState>(
     : state
   ),
 
-  on(moveTaskDownInTodayList, (state, {taskId, workContextId, workContextType}) => (workContextType === WorkContextType.TAG)
+  on(moveTaskDownInTodayList, (state, {taskId, workContextId, workContextType}) => (workContextType === WORK_CONTEXT_TYPE)
     ? adapter.updateOne({
       id: workContextId,
       changes: {
@@ -122,7 +123,7 @@ export function tagReducer(
       const {payload} = action as AddTask;
       const {workContextId, workContextType, task, isAddToBottom} = payload;
       const affectedEntity = state.entities[workContextId];
-      return (workContextType === WorkContextType.TAG)
+      return (workContextType === WORK_CONTEXT_TYPE)
         ? {
           ...state,
           entities: {
