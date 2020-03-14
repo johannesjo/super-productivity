@@ -36,10 +36,11 @@ import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.servic
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
 import {
+  moveTaskDownInBacklogList, moveTaskDownInTodayList,
   moveTaskFromBacklogToTodayList,
   moveTaskFromTodayToBacklogList,
   moveTaskInBacklogList,
-  moveTaskInTodayList
+  moveTaskInTodayList, moveTaskUpInBacklogList, moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
 import {WorkContextType} from '../../work-context/work-context.model';
 
@@ -67,6 +68,8 @@ export class ProjectEffects {
         moveTaskInBacklogList.type,
         moveTaskFromTodayToBacklogList.type,
         moveTaskFromBacklogToTodayList.type,
+        moveTaskUpInBacklogList.type,
+        moveTaskDownInBacklogList.type,
       ),
       switchMap(() => this.saveToLs$),
     );
@@ -93,6 +96,8 @@ export class ProjectEffects {
         moveTaskInBacklogList.type,
         moveTaskFromTodayToBacklogList.type,
         moveTaskFromBacklogToTodayList.type,
+        moveTaskUpInBacklogList.type,
+        moveTaskDownInBacklogList.type,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
     );
@@ -100,7 +105,9 @@ export class ProjectEffects {
   @Effect({dispatch: false})
   updateProjectStorageConditional$ = this._actions$.pipe(
     ofType(
-      moveTaskInTodayList
+      moveTaskInTodayList,
+      moveTaskUpInTodayList,
+      moveTaskDownInTodayList,
     ),
     filter((p) => p.workContextType === WorkContextType.PROJECT),
     switchMap(() => this.saveToLs$),
