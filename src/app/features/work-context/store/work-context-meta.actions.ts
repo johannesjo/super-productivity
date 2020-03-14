@@ -15,8 +15,18 @@ export const moveTaskInTodayList = createAction(
   }>(),
 );
 
-// TODO move to tags
+// TODO move to tags maybe
 export const moveTaskInBacklogList = createAction(
   '[WorkContextMeta] Move Task in Backlog',
+  props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
+);
+
+export const moveTaskFromTodayToBacklogList = createAction(
+  '[WorkContextMeta] Move Task from today to backlog',
+  props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
+);
+
+export const moveTaskFromBacklogToTodayList = createAction(
+  '[WorkContextMeta] Move Task from backlog to today',
   props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
 );

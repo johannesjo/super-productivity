@@ -74,7 +74,12 @@ import {TagService} from '../tag/tag.service';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContextType} from '../work-context/work-context.model';
-import {moveTaskInBacklogList, moveTaskInTodayList} from '../work-context/store/work-context-meta.actions';
+import {
+  moveTaskFromBacklogToTodayList,
+  moveTaskFromTodayToBacklogList,
+  moveTaskInBacklogList,
+  moveTaskInTodayList
+} from '../work-context/store/work-context-meta.actions';
 
 
 @Injectable({
@@ -293,23 +298,24 @@ export class TaskService {
     // List
     const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');
     const isTargetTodayList = (target === 'DONE' || target === 'UNDONE');
+    const workContextId = this._workContextService.activeWorkContextId;
 
     if (isSrcTodayList && isTargetTodayList) {
       // move inside today
-      const workContextId = this._workContextService.activeWorkContextId;
       const workContextType = this._workContextService.activeWorkContextType;
       this._store.dispatch(moveTaskInTodayList({taskId, newOrderedIds, src, target, workContextId, workContextType}));
 
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
       // move inside backlog
-      const workContextId = this._workContextService.activeWorkContextId;
       this._store.dispatch(moveTaskInBacklogList({taskId, newOrderedIds, workContextId}));
 
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
+      this._store.dispatch(moveTaskFromBacklogToTodayList({taskId, newOrderedIds, workContextId}));
 
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog
+      this._store.dispatch(moveTaskFromTodayToBacklogList({taskId, newOrderedIds, workContextId}));
 
     } else {
       // move sub task

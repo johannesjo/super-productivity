@@ -8,8 +8,13 @@ import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
-import {moveTaskInBacklogList, moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
-import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
+import {
+  moveTaskFromTodayToBacklogList,
+  moveTaskInBacklogList,
+  moveTaskInTodayList
+} from '../../work-context/store/work-context-meta.actions';
+import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
+import {filterOutId} from '../../tasks/store/task.reducer.util';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -169,6 +174,24 @@ export function projectReducer(
       id: workContextId,
       changes: {
         backlogTaskIds
+      }
+    }, state);
+  }
+
+  if ((action.type as string) === moveTaskFromTodayToBacklogList.type) {
+    const {taskId, newOrderedIds, workContextId} = action as any;
+
+    const taskIdsBefore = state.entities[workContextId].taskIds;
+    const filtered = taskIdsBefore.filter(filterOutId(taskId));
+    const backlogTaskIds = moveItemInList(taskId, newOrderedIds, filtered);
+
+    console.log(backlogTaskIds);
+
+    return projectAdapter.updateOne({
+      id: workContextId,
+      changes: {
+        taskIds: taskIdsBefore,
+        backlogTaskIds,
       }
     }, state);
   }
