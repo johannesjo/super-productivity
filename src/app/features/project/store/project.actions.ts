@@ -4,6 +4,7 @@ import {ProjectState} from './project.reducer';
 import {Project} from '../project.model';
 import {IssueIntegrationCfg, IssueProviderKey} from '../../issue/issue.model';
 import {WorkContextAdvancedCfgKey} from '../../work-context/work-context.model';
+import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 
 export enum ProjectActionTypes {
   LoadProjectState = '[Project] Load Project State',

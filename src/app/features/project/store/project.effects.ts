@@ -35,6 +35,7 @@ import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
+import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 
 @Injectable()
 export class ProjectEffects {
@@ -76,6 +77,7 @@ export class ProjectEffects {
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
         ProjectActionTypes.UpdateLastCompletedDay,
+        moveTaskInTodayList.type,
         TaskActionTypes.AddTask,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))

@@ -8,6 +8,8 @@ import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
+import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -140,10 +142,29 @@ export function projectReducer(
   // tslint:disable-next-line
   const payload = action['payload'];
 
+  if ((action.type as string) === moveTaskInTodayList.type) {
+    const {
+      taskId,
+      newOrderedIds,
+      target,
+      workContextType,
+      workContextId,
+    } = payload;
+    const taskIdsBefore = state.entities[workContextId].taskIds;
+    const taskIds = moveTaskForWorkContextLikeState(taskId, newOrderedIds, target, taskIdsBefore);
+    return (workContextType === WorkContextType.TAG)
+      ? projectAdapter.updateOne({
+        id: workContextId,
+        changes: {
+          taskIds
+        }
+      }, state)
+      : state;
+  }
+
   switch (action.type) {
     // Meta Actions
     // ------------
-
     case TaskActionTypes.AddTask: {
       const {workContextId, workContextType, task, isAddToBottom, isAddToBacklog} = payload;
       const affectedEntity = state.entities[workContextId];
