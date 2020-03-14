@@ -236,37 +236,37 @@ export function taskReducer(
     case TaskActionTypes.MoveSubTask: {
       let newState = state;
       const {taskId, srcTaskId, targetTaskId, newOrderedIds} = action.payload;
-      const taskToMove = state.entities[taskId];
-
-      // SUB TASK CASE
       const oldPar = state.entities[srcTaskId];
-      newState = reCalcTimesForParentIfParent(oldPar.id, {
-        ...newState,
-        entities: {
-          ...newState.entities,
-          [oldPar.id]: {
-            ...oldPar,
-            subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
-          }
-        }
-      });
-
-      // SUB TASK CASE
       const newPar = state.entities[targetTaskId];
-      return reCalcTimesForParentIfParent(newPar.id, {
-        ...newState,
-        entities: {
-          ...newState.entities,
-          [newPar.id]: {
-            ...newPar,
-            subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
-          },
-          [taskId]: {
-            ...taskToMove,
-            parentId: newPar.id
-          },
+
+      // for old parent remove
+      newState = taskAdapter.updateOne({
+        id: oldPar.id,
+        changes: {
+          subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
         }
-      });
+      }, newState);
+      newState = reCalcTimesForParentIfParent(oldPar.id, newState);
+
+      // for new parent add and move
+      newState = taskAdapter.updateOne({
+        id: newPar.id,
+        changes: {
+          subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
+        }
+      }, newState);
+      newState = reCalcTimesForParentIfParent(newPar.id, newState);
+
+      // change parent id for moving task
+      newState = taskAdapter.updateOne({
+        id: taskId,
+        changes: {
+          parentId: newPar.id
+        }
+      }, newState);
+
+
+      return newState;
     }
 
     // case TaskActionTypes.MoveUp: {
