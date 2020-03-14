@@ -10,13 +10,13 @@ import {distinctUntilChanged, filter, map, shareReplay, switchMap} from 'rxjs/op
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
 import {Task, TaskWithSubTasks} from '../tasks/task.model';
-import {ProjectService} from '../project/project.service';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.util';
 import {selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
 import {Actions, ofType} from '@ngrx/effects';
 import {moveTaskToBacklogList} from './store/work-context-meta.actions';
+import {selectProjectById} from '../project/store/project.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +48,9 @@ export class WorkContextService {
         );
       }
       if (activeType === WorkContextType.PROJECT) {
-        return this._projectService.getByIdLive$(activeId).pipe(
+        // return this._projectService.getByIdLive$(activeId).pipe(
+        // NOTE: temporary work around to be able to sync current id
+        return this._store$.pipe(select(selectProjectById, {id: activeId})).pipe(
           // TODO find out why this is sometimes undefined
           filter(p => !!p),
           map(project => ({
@@ -193,7 +195,6 @@ export class WorkContextService {
   constructor(
     private _store$: Store<WorkContextState>,
     private _persistenceService: PersistenceService,
-    private _projectService: ProjectService,
     private _actions$: Actions,
     private _tagService: TagService,
     private _router: Router,

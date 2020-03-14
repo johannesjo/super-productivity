@@ -22,7 +22,6 @@ import {MY_DAY_TAG} from './tag.const';
 export class TagService {
   tags$: Observable<Tag[]> = this._store$.pipe(select(selectAllTags));
   tagsNoMyDay$: Observable<Tag[]> = this._store$.pipe(select(selectAllTagsWithoutMyDay));
-  currentId$ = of('XXXX');
 
   constructor(
     private _store$: Store<TagState>,

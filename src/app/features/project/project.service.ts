@@ -1,10 +1,6 @@
 import {Injectable} from '@angular/core';
 import {interval, Observable, of, Subject} from 'rxjs';
-import {
-  ExportedProject,
-  Project,
-  ProjectBasicCfg,
-} from './project.model';
+import {ExportedProject, Project, ProjectBasicCfg,} from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
 import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
@@ -15,7 +11,6 @@ import {
   selectAdvancedProjectCfg,
   selectArchivedProjects,
   selectCurrentProject,
-  selectCurrentProjectId,
   selectIsRelatedDataLoadedForCurrentProject,
   selectProjectBasicCfg,
   selectProjectBreakNr,
@@ -29,7 +24,6 @@ import {
   selectProjectJiraIsEnabled,
   selectProjectLastCompletedDay,
   selectProjectLastWorkEnd,
-  selectProjectThemeCfg,
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
   selectUnarchivedProjects,
@@ -40,7 +34,7 @@ import {JiraCfg} from '../issue/providers/jira/jira.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/providers/github/github.model';
 import {Actions, ofType} from '@ngrx/effects';
-import {delayWhen, distinctUntilChanged, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
+import {delayWhen, distinctUntilChanged, map, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
@@ -51,8 +45,10 @@ import {
   BreakNr,
   BreakTime,
   WorkContextAdvancedCfg,
-  WorkContextAdvancedCfgKey, WorkContextThemeCfg
+  WorkContextAdvancedCfgKey,
+  WorkContextType
 } from '../work-context/work-context.model';
+import {WorkContextService} from '../work-context/work-context.service';
 
 @Injectable({
   providedIn: 'root',
@@ -98,9 +94,12 @@ export class ProjectService {
     distinctUntilChanged(distinctUntilChangedObject),
   );
 
-  currentId$: Observable<string> = this._store$.pipe(
-    select(selectCurrentProjectId),
-    distinctUntilChanged(),
+  // TODO remove completely
+  currentId$: Observable<string> = this._workContextService.activeWorkContextTypeAndId$.pipe(
+    map(({activeId, activeType}) => activeType === WorkContextType.PROJECT
+      ? activeId
+      : null
+    )
   );
   currentId: string;
 
@@ -136,6 +135,7 @@ export class ProjectService {
   constructor(
     private readonly _persistenceService: PersistenceService,
     private readonly _snackService: SnackService,
+    private readonly _workContextService: WorkContextService,
     // TODO correct type?
     private readonly _store$: Store<any>,
     private readonly _actions$: Actions,
