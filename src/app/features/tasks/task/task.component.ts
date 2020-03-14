@@ -622,14 +622,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // moving items
     // move task up
     if (checkKeyCombo(ev, keys.moveTaskUp)) {
-      this._taskService.moveUp(this.task.id);
+      this._taskService.moveUp(this.task.id, this.task.parentId, this.isBacklog);
       ev.stopPropagation();
       ev.preventDefault();
       // timeout required to let changes take place @TODO hacky
       setTimeout(this.focusSelf.bind(this));
     }
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
-      this._taskService.moveDown(this.task.id);
+      this._taskService.moveDown(this.task.id, this.task.parentId, this.isBacklog);
       ev.stopPropagation();
       ev.preventDefault();
     }

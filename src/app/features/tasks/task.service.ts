@@ -20,13 +20,13 @@ import {
   AddTimeSpent,
   DeleteTask,
   LoadTaskState,
-  MoveDown,
   MoveSubTask,
+  MoveSubTaskDown,
+  MoveSubTaskUp,
   MoveToArchive,
   MoveToBacklog,
   MoveToOtherProject,
   MoveToToday,
-  MoveUp,
   RemoveTaskReminder,
   RemoveTimeSpent,
   RestoreTask,
@@ -326,12 +326,16 @@ export class TaskService {
     // TODO unset current via effect
   }
 
-  moveUp(id: string) {
-    this._store.dispatch(new MoveUp({id}));
+  moveUp(id: string, parentId: string = null, isBacklog: boolean) {
+    if (parentId) {
+      this._store.dispatch(new MoveSubTaskUp({id, parentId}));
+    }
   }
 
-  moveDown(id: string) {
-    this._store.dispatch(new MoveDown({id}));
+  moveDown(id: string, parentId: string = null, isBacklog: boolean) {
+    if (parentId) {
+      this._store.dispatch(new MoveSubTaskDown({id, parentId}));
+    }
   }
 
   addSubTaskTo(parentId) {

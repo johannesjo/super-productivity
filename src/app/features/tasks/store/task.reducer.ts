@@ -13,6 +13,7 @@ import {
 } from './task.reducer.util';
 import {taskAdapter} from './task.adapter';
 import {moveItemInList} from '../../work-context/store/work-context-meta.helper';
+import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -269,51 +270,27 @@ export function taskReducer(
       return newState;
     }
 
-    // case TaskActionTypes.MoveUp: {
-    //   let updatedState = state;
-    //   const {id} = action.payload;
-    //   const taskToMove = state.entities[id];
-    //   if (taskToMove.parentId) {
-    //     const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
-    //     updatedState = taskAdapter.updateOne({
-    //       id: taskToMove.parentId,
-    //       changes: {
-    //         subTaskIds: arrayMoveLeft(parentSubTasks, id)
-    //       }
-    //     }, updatedState);
-    //   }
-    //
-    //   return {
-    //     ...updatedState,
-    //     ids: arrayMoveLeft(state.ids, id),
-    //     XXXbacklogTaskIds: arrayMoveLeft(state.XXXbacklogTaskIds, id),
-    //     XXXtodaysTaskIds: arrayMoveLeft(state.XXXtodaysTaskIds, id),
-    //   };
-    // }
-    //
-    //
-    // case TaskActionTypes.MoveDown: {
-    //   let updatedState = state;
-    //   const id = action.payload.id;
-    //   const taskToMove = state.entities[id];
-    //   if (taskToMove.parentId) {
-    //     const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
-    //     updatedState = taskAdapter.updateOne({
-    //       id: taskToMove.parentId,
-    //       changes: {
-    //         subTaskIds: arrayMoveRight(parentSubTasks, id)
-    //       }
-    //     }, updatedState);
-    //   }
-    //
-    //   return {
-    //     ...updatedState,
-    //     ids: arrayMoveRight(state.ids, id),
-    //     XXXbacklogTaskIds: arrayMoveRight(state.XXXbacklogTaskIds, id),
-    //     XXXtodaysTaskIds: arrayMoveRight(state.XXXtodaysTaskIds, id),
-    //   };
-    // }
+    case TaskActionTypes.MoveSubTaskUp: {
+      const {id, parentId} = action.payload;
+      const parentSubTaskIds = state.entities[parentId].subTaskIds;
+      return taskAdapter.updateOne({
+        id: parentId,
+        changes: {
+          subTaskIds: arrayMoveLeft(parentSubTaskIds, id)
+        }
+      }, state);
+    }
 
+    case TaskActionTypes.MoveSubTaskDown: {
+      const {id, parentId} = action.payload;
+      const parentSubTaskIds = state.entities[parentId].subTaskIds;
+      return taskAdapter.updateOne({
+        id: parentId,
+        changes: {
+          subTaskIds: arrayMoveRight(parentSubTaskIds, id)
+        }
+      }, state);
+    }
 
     case TaskActionTypes.AddTimeSpent: {
       const {id, date, duration} = action.payload;

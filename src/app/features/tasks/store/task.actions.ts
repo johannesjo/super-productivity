@@ -22,8 +22,8 @@ export enum TaskActionTypes {
   DeleteTask = '[Task] Delete Task',
   UndoDeleteTask = '[Task] Undo Delete Task',
   MoveSubTask = '[Task] Move sub task',
-  MoveUp = '[Task] Move up',
-  MoveDown = '[Task] Move down',
+  MoveSubTaskUp = '[Task] Move up',
+  MoveSubTaskDown = '[Task] Move down',
   AddTimeSpent = '[Task] Add time spent',
   RemoveTimeSpent = '[Task] Remove time spent',
 
@@ -143,17 +143,17 @@ export class MoveSubTask implements Action {
   }
 }
 
-export class MoveUp implements Action {
-  readonly type = TaskActionTypes.MoveUp;
+export class MoveSubTaskUp implements Action {
+  readonly type = TaskActionTypes.MoveSubTaskUp;
 
-  constructor(public payload: { id: string }) {
+  constructor(public payload: { id: string, parentId: string }) {
   }
 }
 
-export class MoveDown implements Action {
-  readonly type = TaskActionTypes.MoveDown;
+export class MoveSubTaskDown implements Action {
+  readonly type = TaskActionTypes.MoveSubTaskDown;
 
-  constructor(public payload: { id: string }) {
+  constructor(public payload: { id: string, parentId: string }) {
   }
 }
 
@@ -268,8 +268,8 @@ export type TaskActions
   | DeleteTask
   | UndoDeleteTask
   | MoveSubTask
-  | MoveUp
-  | MoveDown
+  | MoveSubTaskUp
+  | MoveSubTaskDown
   | AddTimeSpent
   | RemoveTimeSpent
   | AddTaskReminder

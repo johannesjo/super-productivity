@@ -36,6 +36,8 @@ export class TaskDbEffects {
         TaskActionTypes.UpdateTask,
         TaskActionTypes.UpdateTaskTags,
         TaskActionTypes.MoveSubTask,
+        TaskActionTypes.MoveSubTaskUp,
+        TaskActionTypes.MoveSubTaskDown,
         TaskActionTypes.MoveToArchive,
         TaskActionTypes.MoveToOtherProject,
         TaskActionTypes.MoveToBacklog,
