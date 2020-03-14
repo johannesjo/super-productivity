@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -36,6 +36,7 @@ import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.servic
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
 import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {WorkContextType} from '../../work-context/work-context.model';
 
 @Injectable()
 export class ProjectEffects {
@@ -57,10 +58,7 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateLastCompletedDay,
         TaskActionTypes.AddTask,
       ),
-      withLatestFrom(
-        this._store$.pipe(select(selectProjectFeatureState))
-      ),
-      tap(this._saveToLs.bind(this))
+      switchMap(() => this.saveToLs$),
     );
 
 
@@ -82,6 +80,22 @@ export class ProjectEffects {
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
     );
+
+  @Effect({dispatch: false})
+  updateProjectStorageConditional$ = this._actions$.pipe(
+    ofType(
+      moveTaskInTodayList
+    ),
+    filter((p) => p.workContextType === WorkContextType.PROJECT),
+    switchMap(() => this.saveToLs$),
+  );
+
+  saveToLs$ = this._store$.pipe(
+    select(selectProjectFeatureState),
+    take(1),
+    switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
+  );
+
 
   @Effect() updateWorkStart$: any = this._actions$
     .pipe(
@@ -314,10 +328,6 @@ export class ProjectEffects {
     private _improvementService: ImprovementService,
     private _router: Router,
   ) {
-  }
-
-  private _saveToLs([action, projectFeatureState]) {
-    this._persistenceService.project.saveState(projectFeatureState);
   }
 }
 
