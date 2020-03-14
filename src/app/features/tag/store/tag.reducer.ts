@@ -6,7 +6,7 @@ import {AddTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.a
 import {MY_DAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
-import {filterOutId, moveItemInList} from '../../tasks/store/task.reducer.util';
+import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
 
 export const TAG_FEATURE_NAME = 'tag';
 
@@ -56,24 +56,18 @@ const _reducer = createReducer<TagState>(
     workContextType,
     workContextId,
   }) => {
-    const idsFilteredMoving = state.entities[workContextId].taskIds.filter(filterOutId(taskId));
-    // NOTE: move to end of complete list for done tasks
-    // const emptyListVal = (target === 'DONE')
-    //   ? idsFilteredMoving.length
-    //   : 0;
-    const emptyListVal = 0;
-
+    const taskIdsBefore = state.entities[workContextId].taskIds;
+    const taskIds = moveTaskForWorkContextLikeState(taskId, newOrderedIds, target, taskIdsBefore);
 
     return (workContextType === WorkContextType.TAG)
       ? adapter.updateOne({
         id: workContextId,
         changes: {
-          taskIds: moveItemInList(taskId, idsFilteredMoving, newOrderedIds, emptyListVal)
+          taskIds
         }
       }, state)
       : state;
   }),
-
 
   on(tagActions.addTag, (state, {tag}) => adapter.addOne(tag, state)),
 
