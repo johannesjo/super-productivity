@@ -156,37 +156,22 @@ export function tagReducer(
 
     case TaskActionTypes.UpdateTaskTags: {
       const {payload} = action as UpdateTaskTags;
-      // const {newTagIds, oldTagIds, taskId} = payload;
       const {newTagIds = [], oldTagIds = [], taskId} = payload;
       const removedFrom: string[] = oldTagIds.filter(oldId => !newTagIds.includes(oldId));
       const addedTo: string[] = newTagIds.filter(newId => !oldTagIds.includes(newId));
-
-      return {
-        ...state,
-        entities: (state.ids as string[]).reduce((acc, id) => {
-          const tag = state.entities[id] as Tag;
-          const tagTaskIds = tag.taskIds || [];
-          if (removedFrom.includes(id)) {
-            return {
-              ...acc,
-              [id]: ({
-                ...tag,
-                taskIds: tagTaskIds.filter(tagTaskId => tagTaskId !== taskId)
-              } as Tag)
-            };
-          }
-          if (addedTo.includes(id)) {
-            return {
-              ...acc,
-              [id]: ({
-                ...tag,
-                taskIds: [...tagTaskIds, taskId]
-              } as Tag)
-            };
-          }
-          return acc;
-        }, state.entities)
-      };
+      const removeFrom: Update<Tag>[] = removedFrom.map(tagId => ({
+        id: tagId,
+        changes: {
+          taskIds: state.entities[tagId].taskIds.filter(id => id !== taskId),
+        }
+      }));
+      const addTo: Update<Tag>[] = addedTo.map(tagId => ({
+        id: tagId,
+        changes: {
+          taskIds: [...state.entities[tagId].taskIds, taskId],
+        }
+      }));
+      return adapter.updateMany([...removeFrom, ...addTo], state);
     }
     default:
       return _reducer(state, action);
