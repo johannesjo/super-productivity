@@ -9,7 +9,6 @@ import {ATTACHMENT_FEATURE_NAME, AttachmentState} from '../features/attachment/s
 import {GlobalConfigState} from '../features/config/global-config.model';
 import {WORK_CONTEXT_FEATURE_NAME} from '../features/work-context/store/work-context.reducer';
 import {WorkContextState} from '../features/work-context/work-context.model';
-import {UNDO_TASK_DELETE, UndoTaskDeleteState} from './meta/undo-task-delete.meta-reducer';
 import {TAG_FEATURE_NAME} from '../features/tag/store/tag.reducer';
 import {TagState} from '../features/tag/tag.model';
 

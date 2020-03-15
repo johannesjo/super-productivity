@@ -21,8 +21,8 @@ import {
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
 import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
-import {filterOutId} from '../../tasks/store/task.reducer.util';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
+import {filterOutId} from '../../../util/filter-out-id';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;

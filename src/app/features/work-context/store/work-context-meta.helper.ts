@@ -1,5 +1,5 @@
-import {filterOutId} from '../../tasks/store/task.reducer.util';
 import {DropListModelSource} from '../../tasks/task.model';
+import {filterOutId} from '../../../util/filter-out-id';
 
 export const moveTaskForWorkContextLikeState = (
   taskId: string,

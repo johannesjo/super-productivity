@@ -5,7 +5,6 @@ import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../../atta
 import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
   deleteTask,
-  filterOutId,
   getTaskById,
   reCalcTimesForParentIfParent,
   updateTimeEstimateForTask,
@@ -14,6 +13,7 @@ import {
 import {taskAdapter} from './task.adapter';
 import {moveItemInList} from '../../work-context/store/work-context-meta.helper';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
+import {filterOutId} from '../../../util/filter-out-id';
 
 export const TASK_FEATURE_NAME = 'tasks';
 

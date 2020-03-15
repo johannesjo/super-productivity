@@ -1,8 +1,9 @@
 // HELPER
 // ------
-import {DEFAULT_TASK, Task, TaskState, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
+import {Task, TaskState, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
 import {taskAdapter} from './task.adapter';
+import {filterOutId} from '../../../util/filter-out-id';
 
 export const getTaskById = (taskId: string, state: TaskState) => {
   if (!state.entities[taskId]) {
@@ -10,14 +11,6 @@ export const getTaskById = (taskId: string, state: TaskState) => {
   } else {
     return state.entities[taskId];
   }
-};
-
-export const filterOutId = (idToFilterOut) => (id) => id !== idToFilterOut;
-
-export const mapTaskWithSubTasksToTask = (task: TaskWithSubTasks): Task => {
-  const copy = {...DEFAULT_TASK, ...task};
-  delete copy.subTasks;
-  return copy;
 };
 
 // SHARED REDUCER ACTIONS
