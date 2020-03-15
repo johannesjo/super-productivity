@@ -21,14 +21,16 @@ export interface UndoTaskDeleteState {
 export const undoTaskDeleteMetaReducer = (reducer) => {
 
   return (state: RootState, action) => {
+    console.log(state, action);
 
     switch (action.type) {
       case TaskActionTypes.DeleteTask:
-        console.log(_createTaskDeleteState(state, action.payload.task));
+        const newState = _createTaskDeleteState(state, action.payload.task);
+        console.log(newState);
 
         return reducer({
           ...state,
-          [UNDO_TASK_DELETE]: _createTaskDeleteState(state, action.payload.task),
+          [UNDO_TASK_DELETE]: newState,
         }, action);
 
 
@@ -50,14 +52,13 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
     : [];
 
   const tagState = state[TAG_FEATURE_NAME];
-  const tagTaskIdMap = (tagState.ids as string[]).reduce((acc, id) => {
+  const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
     const tag = tagState.entities[id];
-    console.log(tag.taskIds, task.id);
-
+    console.log(tag, tag.taskIds, task.id);
     if (tag.taskIds.includes(task.id)) {
       return {
         ...acc,
-        [id]: taskEntities[id],
+        [id]: tag.taskIds,
       };
     } else {
       return acc;

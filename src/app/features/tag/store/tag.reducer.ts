@@ -2,7 +2,7 @@ import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import * as tagActions from './tag.actions';
 import {Tag, TagState} from '../tag.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
-import {AddTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
+import {AddTask, DeleteTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 import {MY_DAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {
@@ -12,6 +12,7 @@ import {
 } from '../../work-context/store/work-context-meta.actions';
 import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
+import {Update} from '@ngrx/entity/src/models';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -124,25 +125,33 @@ export function tagReducer(
       const {workContextId, workContextType, task, isAddToBottom} = payload;
       const affectedEntity = state.entities[workContextId];
       return (workContextType === WORK_CONTEXT_TYPE)
-        ? {
-          ...state,
-          entities: {
-            ...state.entities,
-            [workContextId]: {
-              ...affectedEntity,
-              taskIds: isAddToBottom
-                ? [
-                  ...affectedEntity.taskIds,
-                  task.id,
-                ]
-                : [
-                  task.id,
-                  ...affectedEntity.taskIds
-                ]
-            }
-          },
-        }
+        ? adapter.updateOne({
+          id: workContextId,
+          changes: {
+            taskIds: isAddToBottom
+              ? [
+                ...affectedEntity.taskIds,
+                task.id,
+              ]
+              : [
+                task.id,
+                ...affectedEntity.taskIds
+              ]
+          }
+        }, state)
         : state;
+    }
+
+    case TaskActionTypes.DeleteTask: {
+      const {payload} = action as DeleteTask;
+      const {task} = payload;
+      const updates: Update<Tag>[] = task.tagIds.map(tagId => ({
+        id: tagId,
+        changes: {
+          taskIds: state.entities[tagId].taskIds.filter(taskIdForTag => taskIdForTag !== task.id)
+        }
+      }));
+      return adapter.updateMany(updates, state);
     }
 
     case TaskActionTypes.UpdateTaskTags: {

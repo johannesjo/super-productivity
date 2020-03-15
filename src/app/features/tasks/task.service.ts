@@ -236,7 +236,6 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks) {
-    this.removeTags(task, task.tagIds);
     this._store.dispatch(new DeleteTask({task}));
   }
 
@@ -257,12 +256,6 @@ export class TaskService {
 
   updateTags(taskId: string, newTagIds: string[], oldTagIds: string[]) {
     this._store.dispatch(new UpdateTaskTags({taskId, newTagIds, oldTagIds}));
-  }
-
-  // TODO: Move logic away from service class (to actions)?
-  removeTags(task: Task, tagIdsToRemove: string[]) {
-    const newTags = task.tagIds.filter(tagId => !tagIdsToRemove.includes(tagId));
-    this.updateTags(task.id, newTags, task.tagIds);
   }
 
   // TODO: Move logic away from service class (to actions)?
