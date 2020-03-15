@@ -309,44 +309,29 @@ export function projectReducer(
     case TaskActionTypes.AddTask: {
       const {workContextId, workContextType, task, isAddToBottom, isAddToBacklog} = payload;
       const affectedEntity = state.entities[workContextId];
+      const prop: 'backlogTaskIds' | 'taskIds' = isAddToBacklog ? 'backlogTaskIds' : 'taskIds';
 
       return (workContextType === WORK_CONTEXT_TYPE)
-        ? {
-          ...state,
-          entities: {
-            ...state.entities,
-            [workContextId]: {
-              ...affectedEntity,
-              ...((isAddToBacklog)
-                  ? {
-                    backlogTaskIds: (isAddToBottom)
-                      ? [
-                        task.id,
-                        ...affectedEntity.backlogTaskIds
-                      ]
-                      : [
-                        ...affectedEntity.backlogTaskIds,
-                        task.id,
-                      ]
-                  }
-                  : {
-                    taskIds: (isAddToBottom)
-                      ? [
-                        ...affectedEntity.taskIds,
-                        task.id,
-                      ]
-                      : [
-                        task.id,
-                        ...affectedEntity.taskIds
-                      ]
-                  }
-              ),
-            }
-          },
-        }
+        ? projectAdapter.updateOne({
+          id: workContextId,
+          changes: {
+            [prop]: isAddToBottom
+              ? [
+                task.id,
+                ...affectedEntity[prop]
+              ]
+              : [
+                ...affectedEntity[prop],
+                task.id,
+              ]
+          }
+        }, state)
         : state;
     }
 
+
+    // Project Actions
+    // ------------
     case ProjectActionTypes.LoadProjectState: {
       return {...action.payload.state};
     }
@@ -358,6 +343,7 @@ export function projectReducer(
       };
     }
 
+    // TODO remove
     case ProjectActionTypes.SetCurrentProject: {
       return {
         ...state,
@@ -365,8 +351,6 @@ export function projectReducer(
       };
     }
 
-    // Project Actions
-    // ------------
     case ProjectActionTypes.AddProject: {
       return projectAdapter.addOne(payload.project, state);
     }
