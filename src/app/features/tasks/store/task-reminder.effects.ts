@@ -1,6 +1,13 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {AddTaskReminder, RemoveTaskReminder, TaskActionTypes, UpdateTask, UpdateTaskReminder} from './task.actions';
+import {
+  AddTaskReminder,
+  DeleteTask,
+  RemoveTaskReminder,
+  TaskActionTypes,
+  UpdateTask,
+  UpdateTaskReminder
+} from './task.actions';
 import {select, Store} from '@ngrx/store';
 import {map, mergeMap, tap, withLatestFrom} from 'rxjs/operators';
 import {selectTaskFeatureState} from './task.selectors';
@@ -10,6 +17,7 @@ import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {moveTaskToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {TaskState} from '../task.model';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -100,9 +108,8 @@ export class TaskReminderEffects {
     withLatestFrom(
       this._store$.pipe(select(selectTaskFeatureState)),
     ),
-    tap(([a, state]) => {
-      const idsBefore = state.stateBefore.ids as string[];
-      const deletedTaskIds = idsBefore.filter((id) => !state.ids.includes(id));
+    tap(([a, state]: [DeleteTask, TaskState]) => {
+      const deletedTaskIds = [a.payload.task.id, ...a.payload.task.subTaskIds];
       deletedTaskIds.forEach((id) => {
         this._reminderService.removeReminderByRelatedIdIfSet(id);
       });
