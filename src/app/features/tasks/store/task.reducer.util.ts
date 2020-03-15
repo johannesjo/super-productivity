@@ -165,11 +165,7 @@ export const deleteTask = (state: TaskState,
 
   return {
     ...stateCopy,
-    // finally delete from backlog or todays tasks
-    // XXXbacklogTaskIds: state.XXXbacklogTaskIds.filter(filterOutId(taskToDelete.id)),
-    // XXXtodaysTaskIds: state.XXXtodaysTaskIds.filter(filterOutId(taskToDelete.id)),
-    currentTaskId: null,
-    stateBefore: {...state, stateBefore: null}
+    currentTaskId,
   };
 };
 

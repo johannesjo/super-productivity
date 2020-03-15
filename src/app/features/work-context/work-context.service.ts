@@ -101,6 +101,7 @@ export class WorkContextService {
 
   todaysTasks$: Observable<TaskWithSubTasks[]> = this.todaysTaskIds$.pipe(
     switchMap(taskIds => this._getTasksByIds$(taskIds)),
+    // map(to => to.filter(t => !!t)),
     shareReplay(1),
   );
 

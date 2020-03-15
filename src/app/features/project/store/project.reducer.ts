@@ -325,7 +325,7 @@ export function projectReducer(
     case TaskActionTypes.DeleteTask: {
       const {task} = action.payload;
       const project = state.entities[task.projectId];
-      return (task.projectId && (!task.subTaskIds || !task.subTaskIds.length))
+      return (task.projectId)
         ? projectAdapter.updateOne({
           id: task.projectId,
           changes: {
