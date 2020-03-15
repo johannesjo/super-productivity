@@ -1,8 +1,8 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {Tag} from '../tag.model';
 import {TagService} from '../tag.service';
-import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, of, Subscription} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {Task} from '../../tasks/task.model';
@@ -19,7 +19,7 @@ import {WorkContextType} from '../../work-context/work-context.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation]
 })
-export class TagListComponent {
+export class TagListComponent implements OnDestroy {
   @Input() set task(task: Task) {
     this._task = task;
     this._tagIds$.next(task.tagIds);
@@ -42,6 +42,7 @@ export class TagListComponent {
       : of(null)
     ),
   );
+  project: Project;
 
 
   private _tagIds$ = new BehaviorSubject([]);
@@ -52,9 +53,11 @@ export class TagListComponent {
     // TODO there should be a better way...
     switchMap(([ids, activeId]) => this._tagService.getTagsById$((ids.filter(id => id !== activeId)))),
   );
+  tags: Tag[];
 
   // NOTE: should normally be enough
   // private _hideId: string = this._workContextService.activeWorkContextId;
+  private _subs = new Subscription();
 
   constructor(
     private readonly _tagService: TagService,
@@ -62,6 +65,12 @@ export class TagListComponent {
     private readonly _workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
   ) {
+    this._subs.add(this.project$.subscribe(v => this.project = v));
+    this._subs.add(this.tags$.subscribe(v => this.tags = v));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
 

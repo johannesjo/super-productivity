@@ -26,12 +26,12 @@ export interface UndoTaskDeleteState {
 export const undoTaskDeleteMetaReducer = (reducer) => {
 
   return (state: RootState, action) => {
-    console.log(state, action);
+    // console.log(state, action);
 
     switch (action.type) {
       case TaskActionTypes.DeleteTask:
         const newState = _createTaskDeleteState(state, action.payload.task);
-        console.log(newState);
+        // console.log(newState);
 
         return reducer({
           ...state,
