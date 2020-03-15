@@ -2,7 +2,7 @@ import {RootState} from '../root-state';
 import {Dictionary} from '@ngrx/entity';
 import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {TaskActionTypes} from '../../features/tasks/store/task.actions';
-import {PROJECT_FEATURE_NAME} from '../../features/project/store/project.reducer';
+import {PROJECT_FEATURE_NAME, projectAdapter} from '../../features/project/store/project.reducer';
 import {TASK_FEATURE_NAME} from '../../features/tasks/store/task.reducer';
 import {TAG_FEATURE_NAME, tagAdapter} from '../../features/tag/store/tag.reducer';
 import {taskAdapter} from '../../features/tasks/store/task.adapter';
@@ -27,7 +27,6 @@ let U_STORE: UndoTaskDeleteState;
 
 export const undoTaskDeleteMetaReducer = (reducer) => {
   return (state: RootState, action) => {
-    // console.log(state, action);
 
     switch (action.type) {
       case TaskActionTypes.DeleteTask:
@@ -74,7 +73,26 @@ export const undoTaskDeleteMetaReducer = (reducer) => {
           };
         }
 
-        console.log(updatedState);
+        if (U_STORE.projectId) {
+          updatedState = {
+            ...updatedState,
+            [PROJECT_FEATURE_NAME]: projectAdapter.updateOne({
+              id: U_STORE.projectId,
+              changes: {
+                ...(
+                  U_STORE.taskIdsForProject
+                    ? {taskIds: U_STORE.taskIdsForProject}
+                    : {}
+                ),
+                ...(
+                  U_STORE.taskIdsForProjectBacklog
+                    ? {backlogTaskIds: U_STORE.taskIdsForProjectBacklog}
+                    : {}
+                )
+              }
+            }, updatedState[PROJECT_FEATURE_NAME]),
+          };
+        }
 
         return reducer(updatedState, action);
     }
@@ -85,24 +103,27 @@ export const undoTaskDeleteMetaReducer = (reducer) => {
 
 const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoTaskDeleteState => {
   const taskEntities = state[TASK_FEATURE_NAME].entities;
+  const deletedTaskEntities = [task.id, ...task.subTaskIds].reduce((acc, id) => {
+    return {
+      ...acc,
+      [id]: taskEntities[id],
+    };
+  }, {});
 
+  // SUB TASK CASE
+  // Note: should work independent as sub tasks dont show up in tag or project lists
   if (task.parentId) {
     return {
       projectId: task.projectId,
       parentTaskId: task.parentId,
       subTaskIds: taskEntities[task.parentId].subTaskIds,
-      deletedTaskEntities: {
-        [task.id]: taskEntities[task.id]
-      }
+      deletedTaskEntities,
     };
   } else {
+    // PROJECT CASE
     const project = state[PROJECT_FEATURE_NAME].entities[task.projectId];
-    const taskIdsForProjectBacklog = (task.projectId && project.backlogTaskIds.includes(task.id))
-      ? project.backlogTaskIds
-      : [];
-    const taskIdsForProject = (task.projectId && project.taskIds.includes(task.id))
-      ? project.taskIds
-      : [];
+    const taskIdsForProjectBacklog = (task.projectId && project.backlogTaskIds);
+    const taskIdsForProject = (task.projectId && project.taskIds);
 
     const tagState = state[TAG_FEATURE_NAME];
     const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
@@ -115,13 +136,6 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
       } else {
         return acc;
       }
-    }, {});
-
-    const deletedTaskEntities = [task.id, ...task.subTaskIds].reduce((acc, id) => {
-      return {
-        ...acc,
-        [id]: taskEntities[id],
-      };
     }, {});
 
     // TODO handle sub task only case
