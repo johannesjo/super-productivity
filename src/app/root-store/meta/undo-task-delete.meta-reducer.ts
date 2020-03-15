@@ -10,11 +10,16 @@ export const UNDO_TASK_DELETE = 'undoTaskDelete';
 
 export interface UndoTaskDeleteState {
   projectId: string;
-  taskIdsForProjectBacklog: string[];
-  taskIdsForProject: string[];
-  tagTaskIdMap: {
+  taskIdsForProjectBacklog?: string[];
+  taskIdsForProject?: string[];
+
+  tagTaskIdMap?: {
     [key: string]: string[];
   };
+
+  parentTaskId?: string;
+  subTaskIds?: string[];
+
   deletedTaskEntities: Dictionary<Task>;
 }
 
@@ -43,43 +48,54 @@ export const undoTaskDeleteMetaReducer = (reducer) => {
 };
 
 const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoTaskDeleteState => {
-  const project = state[PROJECT_FEATURE_NAME].entities[task.projectId];
-  const taskIdsForProjectBacklog = (task.projectId && project.backlogTaskIds.includes(task.id))
-    ? project.backlogTaskIds
-    : [];
-  const taskIdsForProject = (task.projectId && project.taskIds.includes(task.id))
-    ? project.taskIds
-    : [];
+  const taskEntities = state[TASK_FEATURE_NAME].entities;
 
-  const tagState = state[TAG_FEATURE_NAME];
-  const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
-    const tag = tagState.entities[id];
-    console.log(tag, tag.taskIds, task.id);
-    if (tag.taskIds.includes(task.id)) {
+  if (task.parentId) {
+    return {
+      projectId: task.projectId,
+      parentTaskId: task.parentId,
+      subTaskIds: taskEntities[task.parentId].subTaskIds,
+      deletedTaskEntities: {
+        [task.id]: taskEntities[task.id]
+      }
+    };
+  } else {
+    const project = state[PROJECT_FEATURE_NAME].entities[task.projectId];
+    const taskIdsForProjectBacklog = (task.projectId && project.backlogTaskIds.includes(task.id))
+      ? project.backlogTaskIds
+      : [];
+    const taskIdsForProject = (task.projectId && project.taskIds.includes(task.id))
+      ? project.taskIds
+      : [];
+
+    const tagState = state[TAG_FEATURE_NAME];
+    const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
+      const tag = tagState.entities[id];
+      if (tag.taskIds.includes(task.id)) {
+        return {
+          ...acc,
+          [id]: tag.taskIds,
+        };
+      } else {
+        return acc;
+      }
+    }, {});
+
+    const deletedTaskEntities = [task.id, ...task.subTaskIds].reduce((acc, id) => {
       return {
         ...acc,
-        [id]: tag.taskIds,
+        [id]: taskEntities[id],
       };
-    } else {
-      return acc;
-    }
-  }, {});
+    }, {});
 
-  const taskEntities = state[TASK_FEATURE_NAME].entities;
-  const deletedTaskEntities = [task.id, ...task.subTaskIds].reduce((acc, id) => {
+    // TODO handle sub task only case
     return {
-      ...acc,
-      [id]: taskEntities[id],
+      projectId: task.projectId,
+      taskIdsForProjectBacklog,
+      taskIdsForProject,
+      tagTaskIdMap,
+      deletedTaskEntities
     };
-  }, {});
-
-  // TODO handle sub task only case
-  return {
-    projectId: task.projectId,
-    taskIdsForProjectBacklog,
-    taskIdsForProject,
-    tagTaskIdMap,
-    deletedTaskEntities
-  };
+  }
 };
 
