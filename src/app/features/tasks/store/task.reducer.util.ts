@@ -130,11 +130,11 @@ export const deleteTask = (state: TaskState,
   if (taskToDelete.parentId) {
     const parentTask = state.entities[taskToDelete.parentId];
     const isWasLastSubTask = (parentTask.subTaskIds.length === 1);
+
     stateCopy = taskAdapter.updateOne({
       id: taskToDelete.parentId,
       changes: {
-        subTaskIds: stateCopy.entities[taskToDelete.parentId].subTaskIds
-          .filter(filterOutId(taskToDelete.id)),
+        subTaskIds: parentTask.subTaskIds.filter(filterOutId(taskToDelete.id)),
 
         // copy over sub task time stuff if it was the last sub task
         ...(
@@ -147,6 +147,7 @@ export const deleteTask = (state: TaskState,
         )
       }
     }, stateCopy);
+
     // also update time spent for parent if it was not copied over from sub task
     if (!isWasLastSubTask) {
       stateCopy = reCalcTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
@@ -167,7 +168,7 @@ export const deleteTask = (state: TaskState,
     // finally delete from backlog or todays tasks
     // XXXbacklogTaskIds: state.XXXbacklogTaskIds.filter(filterOutId(taskToDelete.id)),
     // XXXtodaysTaskIds: state.XXXtodaysTaskIds.filter(filterOutId(taskToDelete.id)),
-    currentTaskId,
+    currentTaskId: null,
     stateBefore: {...state, stateBefore: null}
   };
 };

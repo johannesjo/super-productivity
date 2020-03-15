@@ -28,7 +28,6 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   selectedTaskId: null,
   taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
   lastCurrentTaskId: null,
-  stateBefore: null,
   isDataLoaded: false,
 }) as TaskState;
 
@@ -212,10 +211,6 @@ export function taskReducer(
 
     case TaskActionTypes.DeleteTask: {
       return deleteTask(state, action.payload.task);
-    }
-
-    case TaskActionTypes.UndoDeleteTask: {
-      return state.stateBefore || state;
     }
 
     case TaskActionTypes.MoveSubTask: {

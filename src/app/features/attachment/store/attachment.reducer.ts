@@ -7,7 +7,6 @@ import {DeleteTask, TaskActionTypes, UndoDeleteTask} from '../../tasks/store/tas
 export const ATTACHMENT_FEATURE_NAME = 'attachment';
 
 export interface AttachmentState extends EntityState<Attachment> {
-  stateBeforeDeletingTask: AttachmentState;
 }
 
 export const adapter: EntityAdapter<Attachment> = createEntityAdapter<Attachment>();
@@ -24,7 +23,6 @@ export const selectAttachmentByIds = createSelector(
 );
 
 export const initialAttachmentState: AttachmentState = adapter.getInitialState({
-  stateBeforeDeletingTask: null
 });
 
 export function attachmentReducer(
@@ -37,17 +35,7 @@ export function attachmentReducer(
       const taskIds: string[] = [task.id, ...task.subTaskIds];
       const attachmentIds = state.ids as string[];
       const idsToRemove = attachmentIds.filter(id => taskIds.includes(state.entities[id].taskId));
-      return {
-        ...adapter.removeMany(idsToRemove, state),
-        stateBeforeDeletingTask: {
-          ...state,
-          stateBeforeDeletingTask: null
-        },
-      };
-    }
-
-    case TaskActionTypes.UndoDeleteTask: {
-      return state.stateBeforeDeletingTask || state;
+      return adapter.removeMany(idsToRemove, state);
     }
 
     case AttachmentActionTypes.AddAttachment: {
