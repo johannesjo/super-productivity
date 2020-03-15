@@ -55,6 +55,8 @@ export const initialTagState: TagState = adapter.getInitialState({
 const _reducer = createReducer<TagState>(
   initialTagState,
 
+  // META ACTIONS
+  // ------------
   on(moveTaskInTodayList, (state, {
     taskId,
     newOrderedIds,
@@ -120,6 +122,8 @@ export function tagReducer(
 ): TagState {
 
   switch (action.type) {
+    // TASK STUFF
+    // ---------
     case TaskActionTypes.AddTask: {
       const {payload} = action as AddTask;
       const {workContextId, workContextType, task, isAddToBottom} = payload;

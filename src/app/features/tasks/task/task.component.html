@@ -369,7 +369,7 @@
         </mat-menu>
 
         <mat-menu #advMenu="matMenu">
-          <button *ngIf="!task.parentId && !task.issueId && !task.repeatCfgId"
+          <button *ngIf="task.projectId && !task.parentId && !task.issueId && !task.repeatCfgId"
                   [matMenuTriggerFor]="projectMenu"
                   mat-menu-item>
             <mat-icon>forward</mat-icon>

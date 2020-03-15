@@ -68,6 +68,7 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateLastCompletedDay,
 
         TaskActionTypes.AddTask,
+        TaskActionTypes.DeleteTask,
 
         moveTaskInBacklogList.type,
         moveTaskToBacklogList.type,

@@ -7,7 +7,7 @@ import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
-import {AddTask, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTask, DeleteTask, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
@@ -33,20 +33,13 @@ export interface ProjectState extends EntityState<Project> {
   projectIdForLoadedRelatedData: string;
 }
 
-const sortByTitle = (p1: Project, p2: Project) => {
-  return p1.title.localeCompare(p2.title);
-};
-
-export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>({
-  // sortComparer: sortByTitle,
-});
+export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();
 
 // SELECTORS
 // ---------
 export const selectProjectFeatureState = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSelectors();
 export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentId);
-export const selectProjectEntities = createSelector(selectProjectFeatureState, selectEntities);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => !p.isArchived));
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(
@@ -151,7 +144,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
 // -------
 export function projectReducer(
   state: ProjectState = initialProjectState,
-  action: ProjectActions | AddTask
+  action: ProjectActions | AddTask | DeleteTask
 ): ProjectState {
   // tslint:disable-next-line
   const payload = action['payload'];
@@ -324,6 +317,20 @@ export function projectReducer(
                 ...affectedEntity[prop],
                 task.id,
               ]
+          }
+        }, state)
+        : state;
+    }
+
+    case TaskActionTypes.DeleteTask: {
+      const {task} = action.payload;
+      const project = state.entities[task.projectId];
+      return (task.projectId && (!task.subTaskIds || !task.subTaskIds.length))
+        ? projectAdapter.updateOne({
+          id: task.projectId,
+          changes: {
+            taskIds: project.taskIds.filter(ptId => ptId !== task.id),
+            backlogTaskIds: project.taskIds.filter(ptId => ptId !== task.id)
           }
         }, state)
         : state;
