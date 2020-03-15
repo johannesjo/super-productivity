@@ -36,6 +36,7 @@ import {ProjectModule} from './features/project/project.module';
 import {EntityDataModule} from '@ngrx/data';
 import {MaterialCssVarsModule} from 'angular-material-css-vars';
 import {WorkContextModule} from './features/work-context/work-context.module';
+import {undoTaskDeleteMetaReducer} from './root-store/meta/undo-task-delete.meta-reducer';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -75,23 +76,27 @@ export function createTranslateLoader(http: HttpClient) {
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers,
-      environment.production
-        ? {
-          runtimeChecks: {
-            strictStateImmutability: false,
-            strictActionImmutability: false,
-            strictStateSerializability: false,
-            strictActionSerializability: false,
-          },
-        }
-        : {
-          runtimeChecks: {
-            strictStateImmutability: true,
-            strictActionImmutability: true,
-            strictStateSerializability: true,
-            strictActionSerializability: true,
-          },
-        }),
+      {
+        metaReducers: [undoTaskDeleteMetaReducer],
+        ...(environment.production
+          ? {
+            runtimeChecks: {
+              strictStateImmutability: false,
+              strictActionImmutability: false,
+              strictStateSerializability: false,
+              strictActionSerializability: false,
+            },
+          }
+          : {
+            runtimeChecks: {
+              strictStateImmutability: true,
+              strictActionImmutability: true,
+              strictStateSerializability: true,
+              strictActionSerializability: true,
+            },
+          })
+      }
+    ),
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     ReactiveFormsModule,
