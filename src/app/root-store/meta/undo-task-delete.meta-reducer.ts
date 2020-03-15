@@ -4,7 +4,8 @@ import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {TaskActionTypes} from '../../features/tasks/store/task.actions';
 import {PROJECT_FEATURE_NAME} from '../../features/project/store/project.reducer';
 import {TASK_FEATURE_NAME} from '../../features/tasks/store/task.reducer';
-import {TAG_FEATURE_NAME} from '../../features/tag/store/tag.reducer';
+import {TAG_FEATURE_NAME, tagAdapter} from '../../features/tag/store/tag.reducer';
+import {taskAdapter} from '../../features/tasks/store/task.adapter';
 
 export const UNDO_TASK_DELETE = 'undoTaskDelete';
 
@@ -31,7 +32,7 @@ export const undoTaskDeleteMetaReducer = (reducer) => {
     switch (action.type) {
       case TaskActionTypes.DeleteTask:
         const newState = _createTaskDeleteState(state, action.payload.task);
-        // console.log(newState);
+        console.log(newState);
 
         return reducer({
           ...state,
@@ -39,7 +40,37 @@ export const undoTaskDeleteMetaReducer = (reducer) => {
         }, action);
 
 
-      // case TaskActionTypes.UndoDeleteTask:
+      case TaskActionTypes.UndoDeleteTask:
+        const restoreState = state[UNDO_TASK_DELETE];
+        console.log(restoreState, state);
+
+        let updatedState = state;
+        updatedState = {
+          ...updatedState,
+          [TASK_FEATURE_NAME]: taskAdapter.addMany(
+            Object.keys(restoreState.deletedTaskEntities).map(
+              id => restoreState[id]
+            ), updatedState[TASK_FEATURE_NAME]
+          ),
+        };
+        if (restoreState.tagTaskIdMap) {
+          updatedState = {
+            ...updatedState,
+            [TAG_FEATURE_NAME]: tagAdapter.updateMany(
+              Object.keys(restoreState.tagTaskIdMap).map(id => ({
+                  id,
+                  changes: {
+                    taskIds: restoreState.tagTaskIdMap[id]
+                  }
+                })
+              ), updatedState[TAG_FEATURE_NAME]),
+          };
+        }
+
+        console.log(updatedState);
+
+        return reducer(updatedState, action);
+
 
       default:
         return reducer(state, action);
