@@ -48,6 +48,18 @@ export const undoTaskDeleteMetaReducer = (reducer) => {
           ),
         };
 
+        if (U_STORE.parentTaskId) {
+          updatedState = {
+            ...updatedState,
+            [TASK_FEATURE_NAME]: taskAdapter.updateOne({
+              id: U_STORE.parentTaskId,
+              changes: {
+                subTaskIds: U_STORE.subTaskIds,
+              }
+            }, updatedState[TASK_FEATURE_NAME]),
+          };
+        }
+
         if (U_STORE.tagTaskIdMap) {
           updatedState = {
             ...updatedState,
