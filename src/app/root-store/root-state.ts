@@ -23,5 +23,4 @@ export interface RootState {
   [LAYOUT_FEATURE_NAME]: LayoutState;
   [CONFIG_FEATURE_NAME]: GlobalConfigState;
   [ATTACHMENT_FEATURE_NAME]: AttachmentState;
-  [UNDO_TASK_DELETE]: UndoTaskDeleteState;
 }
