@@ -41,10 +41,12 @@ export interface TaskCopy {
   notes: string;
 
   parentId: string;
-  attachmentIds: string[];
   reminderId: string;
   repeatCfgId: string;
   tagIds: string[];
+
+  // attachments
+  attachments: TaskAttachment[];
 
   // issue stuff
   issueId: string;
@@ -90,7 +92,6 @@ export const DEFAULT_TASK: Task = {
   id: null,
   projectId: null,
   subTaskIds: [],
-  attachmentIds: [],
   timeSpentOnDay: {},
   timeSpent: 0,
   timeEstimate: 0,
@@ -104,6 +105,8 @@ export const DEFAULT_TASK: Task = {
   repeatCfgId: null,
 
   _showSubTasksMode: ShowSubTasksMode.Show,
+
+  attachments: [],
 
   issueId: null,
   issuePoints: null,

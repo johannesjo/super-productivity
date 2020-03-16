@@ -1,25 +1,15 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {
-  TaskAttachmentState,
-  initialAttachmentState,
-  selectAllAttachments,
-  selectAttachmentByIds
-} from './store/attachment.reducer';
-import {
-  AddAttachment,
-  DeleteAttachment,
-  DeleteAttachments,
-  LoadAttachmentState,
-  UpdateAttachment
-} from './store/attachment.actions';
+
 import {Observable} from 'rxjs';
 import {TaskAttachment} from './task-attachment.model';
 import shortid from 'shortid';
 import {DialogEditTaskAttachmentComponent} from './dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {MatDialog} from '@angular/material/dialog';
-import {createFromDrop, createFromPaste, DropPasteInput} from '../../../core/drop-paste-input/drop-paste-input';
+import {createFromDrop, DropPasteInput} from '../../../core/drop-paste-input/drop-paste-input';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {AddTaskAttachment, DeleteTaskAttachment, UpdateTaskAttachment} from './task-attachment.actions';
+import {TaskState} from '../task.model';
 
 @Injectable({
   providedIn: 'root',
@@ -27,51 +17,34 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 export class TaskAttachmentService {
 
   constructor(
-    private _store$: Store<TaskAttachmentState>,
+    private _store$: Store<TaskState>,
     private _matDialog: MatDialog,
     private _persistenceService: PersistenceService,
   ) {
   }
 
-  async load() {
-    const lsAttachmentState = await this._persistenceService.taskAttachment.loadState();
-    this.loadState(lsAttachmentState || initialAttachmentState);
-  }
-
-  loadState(state: TaskAttachmentState) {
-    this._store$.dispatch(new LoadAttachmentState({state}));
-  }
-
-  addAttachment(attachment: TaskAttachment) {
-    if (!attachment) {
+  addAttachment(taskAttachment: TaskAttachment) {
+    if (!taskAttachment) {
       console.error('No valid attachment passed');
       return;
     }
 
-    this._store$.dispatch(new AddAttachment({
-      attachment: {
-        ...attachment,
+    this._store$.dispatch(new AddTaskAttachment({
+      taskAttachment: {
+        ...taskAttachment,
         id: shortid()
       }
     }));
   }
 
   deleteAttachment(id: string) {
-    this._store$.dispatch(new DeleteAttachment({id}));
+    this._store$.dispatch(new DeleteTaskAttachment({id}));
   }
 
-  deleteAttachments(ids: string[]) {
-    this._store$.dispatch(new DeleteAttachments({ids}));
-  }
 
   updateAttachment(id: string, changes: Partial<TaskAttachment>) {
-    this._store$.dispatch(new UpdateAttachment({attachment: {id, changes}}));
+    this._store$.dispatch(new UpdateTaskAttachment({taskAttachment: {id, changes}}));
   }
-
-  getByIds$(ids: string[]): Observable<TaskAttachment[]> {
-    return this._store$.pipe(select(selectAttachmentByIds, {ids}));
-  }
-
 
   // HANDLE INPUT
   // ------------
@@ -80,9 +53,9 @@ export class TaskAttachmentService {
   }
 
 
-  createFromPaste(ev, taskId: string) {
-    this._handleInput(createFromPaste(ev), ev, taskId);
-  }
+  // createFromPaste(ev, taskId: string) {
+  //   this._handleInput(createFromPaste(ev), ev, taskId);
+  // }
 
 
   private _handleInput(attachment: DropPasteInput, ev, taskId) {

@@ -7,7 +7,6 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {Task, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
-import {selectAttachmentByIds} from '../task-attachment/store/attachment.reducer';
 import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 
 
@@ -86,16 +85,6 @@ export class TaskRelatedModelEffects {
 
   private _updateLastActive() {
     this._persistenceService.saveLastActive();
-  }
-
-  private async _getTaskRelatedDataForTask(task: Task) {
-    const ids = task.attachmentIds;
-    const attachments = await this._store$.select(selectAttachmentByIds, {ids}).toPromise();
-  }
-
-  private async _removeRelatedDataForTask(task: Task) {
-    const ids = task.attachmentIds;
-    const attachments = await this._store$.select(selectAttachmentByIds, {ids}).toPromise();
   }
 
   private _removeFromArchive([action]) {

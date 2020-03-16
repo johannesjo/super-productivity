@@ -8,7 +8,6 @@ import {selectTaskFeatureState} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {TaskService} from '../task.service';
-import {AttachmentActionTypes} from '../task-attachment/store/attachment.actions';
 import {ReminderService} from '../../reminder/reminder.service';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
@@ -17,6 +16,7 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {Router} from '@angular/router';
 import {ProjectService} from '../../project/project.service';
 import {ElectronService} from '../../../core/electron/electron.service';
+import {TaskAttachmentActionTypes} from '../task-attachment/task-attachment.actions';
 
 @Injectable()
 export class TaskDbEffects {
@@ -41,9 +41,12 @@ export class TaskDbEffects {
         TaskActionTypes.MoveToOtherProject,
         TaskActionTypes.ToggleStart,
 
-        AttachmentActionTypes.DeleteAttachment,
-        AttachmentActionTypes.AddAttachment,
+        // SUB ACTIONS
+        TaskAttachmentActionTypes.AddTaskAttachment,
+        TaskAttachmentActionTypes.DeleteTaskAttachment,
+        TaskAttachmentActionTypes.UpdateTaskAttachment,
 
+        // RELATED ACTIONS
         TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
       ),
 

@@ -196,7 +196,7 @@
 
         <!-- TODO needs to be handled -->
         <button (click)="toggleShowAttachments()"
-                *ngIf="task.attachmentIds?.length || task.issueAttachmentNr"
+                *ngIf="task.attachments?.length || task.issueAttachmentNr"
                 [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate"
                 class="ico-btn attachment-btn"
                 color=""

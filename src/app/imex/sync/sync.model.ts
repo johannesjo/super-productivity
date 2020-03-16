@@ -11,8 +11,12 @@ import {ObstructionState} from '../../features/metric/obstruction/obstruction.mo
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {WorkContextState} from '../../features/work-context/work-context.model';
 import {TagState} from '../../features/tag/tag.model';
-import {TaskAttachmentState} from '../../features/tasks/task-attachment/store/attachment.reducer';
+import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
+import {EntityState} from '@ngrx/entity';
 
+/** @deprecated */
+export interface TaskAttachmentState extends EntityState<TaskAttachment> {
+}
 
 export interface AppBaseData {
   project: ProjectState;

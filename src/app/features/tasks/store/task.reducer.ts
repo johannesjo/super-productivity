@@ -1,7 +1,6 @@
 import {TaskActions, TaskActionTypes} from './task.actions';
 import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskState} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
-import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../task-attachment/store/attachment.actions';
 import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
   deleteTask,
@@ -35,48 +34,10 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
   state: TaskState = initialTaskState,
-  action: TaskActions | AddAttachment | DeleteAttachment | AddTaskRepeatCfgToTask
+  action: TaskActions | AddTaskRepeatCfgToTask
 ): TaskState {
 
   switch (action.type) {
-    // Meta Actions
-    // ------------
-    case AttachmentActionTypes.AddAttachment: {
-      const {taskId, id} = action.payload.attachment;
-      const task = state.entities[taskId];
-      return {
-        ...state,
-        entities:
-          {
-            ...state.entities,
-            [taskId]: {
-              ...task,
-              attachmentIds: task.attachmentIds ? [...task.attachmentIds, (id as string)] : [id as string],
-            }
-          },
-      };
-    }
-
-    case AttachmentActionTypes.DeleteAttachment: {
-      const attachmentId = action.payload.id;
-      const taskIds = state.ids as string[];
-      const affectedTaskId = taskIds.find(
-        id => state.entities[id].attachmentIds && state.entities[id].attachmentIds.includes(attachmentId)
-      );
-      const affectedTask = state.entities[affectedTaskId];
-      return {
-        ...state,
-        entities:
-          {
-            ...state.entities,
-            [affectedTaskId]: {
-              ...affectedTask,
-              attachmentIds: affectedTask.attachmentIds ? affectedTask.attachmentIds.filter(idIN => idIN !== attachmentId) : [],
-            }
-          },
-      };
-    }
-
     case TaskActionTypes.LoadTaskState: {
       const newState = action.payload.state;
       return {
@@ -394,6 +355,55 @@ export function taskReducer(
       }, state);
     }
 
+
+    // TASK ATTACHMENTS
+    // ----------------
+    // case TaskAttachmentActionTypes.AddTaskAttachment: {
+    //   return adapter.addOne(action.payload.attachment, state);
+    // }
+    //
+    // case TaskAttachmentActionTypes.UpdateTaskAttachment: {
+    //   return adapter.updateOne(action.payload.attachment, state);
+    // }
+    //
+    // case TaskAttachmentActionTypes.DeleteTaskAttachment: {
+    //   return adapter.removeOne(action.payload.id, state);
+    // }
+    // case AttachmentActionTypes.AddAttachment: {
+    //   const {taskId, id} = action.payload.attachment;
+    //   const task = state.entities[taskId];
+    //   return {
+    //     ...state,
+    //     entities:
+    //       {
+    //         ...state.entities,
+    //         [taskId]: {
+    //           ...task,
+    //           attachmentIds: task.attachmentIds ? [...task.attachmentIds, (id as string)] : [id as string],
+    //         }
+    //       },
+    //   };
+    // }
+    //
+    // case AttachmentActionTypes.DeleteAttachment: {
+    //   const attachmentId = action.payload.id;
+    //   const taskIds = state.ids as string[];
+    //   const affectedTaskId = taskIds.find(
+    //     id => state.entities[id].attachmentIds && state.entities[id].attachmentIds.includes(attachmentId)
+    //   );
+    //   const affectedTask = state.entities[affectedTaskId];
+    //   return {
+    //     ...state,
+    //     entities:
+    //       {
+    //         ...state.entities,
+    //         [affectedTaskId]: {
+    //           ...affectedTask,
+    //           attachmentIds: affectedTask.attachmentIds ? affectedTask.attachmentIds.filter(idIN => idIN !== attachmentId) : [],
+    //         }
+    //       },
+    //   };
+    // }
     default: {
       return state;
     }

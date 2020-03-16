@@ -41,6 +41,7 @@ export enum TaskActionTypes {
   MoveToOtherProject = '[Task] Move tasks to other project',
   ToggleStart = '[Task] Toggle start',
   RoundTimeSpentForDay = '[Task] RoundTimeSpentForDay',
+
 }
 
 export class LoadTaskState implements Action {

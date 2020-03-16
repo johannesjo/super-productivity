@@ -120,10 +120,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   parentTaskData$: Observable<TaskWithSubTasks> = this.parentId$.pipe(
     switchMap((id) => id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))
   );
-  private _attachmentIds$ = new BehaviorSubject([]);
-  localAttachments$: Observable<TaskAttachment[]> = this._attachmentIds$.pipe(
-    switchMap((ids) => this.attachmentService.getByIds$(ids))
-  );
   localAttachments: TaskAttachment[];
 
   private _taskData: TaskWithSubTasks;
@@ -138,7 +134,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @Input() set task(newVal: TaskWithSubTasks) {
     const prev = this._taskData;
     this._taskData = newVal;
-    this._attachmentIds$.next(this._taskData.attachmentIds);
+    this.localAttachments = newVal.attachments;
 
     if (!prev || !newVal || (prev.id !== newVal.id)) {
       this._focusFirst();
@@ -184,7 +180,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ) {
     // NOTE: needs to be assigned here before any setter is called
     this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
-    this._subs.add(this.localAttachments$.subscribe((attachments) => this.localAttachments = attachments));
 
     // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
     // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));

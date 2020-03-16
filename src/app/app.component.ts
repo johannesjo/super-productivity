@@ -53,7 +53,6 @@ export class AppComponent implements OnDestroy {
     // LOAD GLOBAL MODELS
     forkJoin([
       this.taskService.load(),
-      this._attachmentService.load(),
       this._projectService.load(),
       this._configService.load(),
       this._workContextService.load(),
