@@ -273,10 +273,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(result => {
         this.focusSelf();
         if (result) {
-          this._attachmentService.addAttachment({
-            ...result,
-            taskId: this.task.id,
-          });
+          this._attachmentService.addAttachment(this.taskId, result);
         }
       });
   }

@@ -1,7 +1,5 @@
 import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-
-import {Observable} from 'rxjs';
+import {Store} from '@ngrx/store';
 import {TaskAttachment} from './task-attachment.model';
 import shortid from 'shortid';
 import {DialogEditTaskAttachmentComponent} from './dialog-edit-attachment/dialog-edit-task-attachment.component';
@@ -23,13 +21,14 @@ export class TaskAttachmentService {
   ) {
   }
 
-  addAttachment(taskAttachment: TaskAttachment) {
+  addAttachment(taskId: string, taskAttachment: TaskAttachment) {
     if (!taskAttachment) {
       console.error('No valid attachment passed');
       return;
     }
 
     this._store$.dispatch(new AddTaskAttachment({
+      taskId,
       taskAttachment: {
         ...taskAttachment,
         id: shortid()
@@ -37,13 +36,13 @@ export class TaskAttachmentService {
     }));
   }
 
-  deleteAttachment(id: string) {
-    this._store$.dispatch(new DeleteTaskAttachment({id}));
+  deleteAttachment(taskId: string, id: string) {
+    this._store$.dispatch(new DeleteTaskAttachment({taskId, id}));
   }
 
 
-  updateAttachment(id: string, changes: Partial<TaskAttachment>) {
-    this._store$.dispatch(new UpdateTaskAttachment({taskAttachment: {id, changes}}));
+  updateAttachment(taskId: string, id: string, changes: Partial<TaskAttachment>) {
+    this._store$.dispatch(new UpdateTaskAttachment({taskId, taskAttachment: {id, changes}}));
   }
 
   // HANDLE INPUT
@@ -81,9 +80,9 @@ export class TaskAttachmentService {
       .subscribe((attachmentIN) => {
         if (attachmentIN) {
           if (attachmentIN.id) {
-            this.updateAttachment(attachmentIN.id, attachmentIN);
+            this.updateAttachment(taskId, attachmentIN.id, attachmentIN);
           } else {
-            this.addAttachment(attachmentIN);
+            this.addAttachment(taskId, attachmentIN);
           }
         }
       });

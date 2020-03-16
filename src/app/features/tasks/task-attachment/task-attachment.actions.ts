@@ -13,21 +13,21 @@ export enum TaskAttachmentActionTypes {
 export class AddTaskAttachment implements Action {
   readonly type = TaskAttachmentActionTypes.AddTaskAttachment;
 
-  constructor(public payload: { taskAttachment: TaskAttachment }) {
+  constructor(public payload: { taskId: string; taskAttachment: TaskAttachment }) {
   }
 }
 
 export class UpdateTaskAttachment implements Action {
   readonly type = TaskAttachmentActionTypes.UpdateTaskAttachment;
 
-  constructor(public payload: { taskAttachment: Update<TaskAttachment> }) {
+  constructor(public payload: { taskId: string; taskAttachment: Update<TaskAttachment> }) {
   }
 }
 
 export class DeleteTaskAttachment implements Action {
   readonly type = TaskAttachmentActionTypes.DeleteTaskAttachment;
 
-  constructor(public payload: { id: string }) {
+  constructor(public payload: { taskId: string; id: string }) {
   }
 }
 

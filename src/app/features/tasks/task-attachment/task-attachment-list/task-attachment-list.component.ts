@@ -14,6 +14,7 @@ import {T} from '../../../../t.const';
   animations: [standardListAnimation]
 })
 export class TaskAttachmentListComponent implements OnInit {
+  @Input() taskId: string;
   @Input() attachments: TaskAttachment[];
   @Input() isDisableControls = false;
 
@@ -30,6 +31,10 @@ export class TaskAttachmentListComponent implements OnInit {
   }
 
   openEditDialog(attachment?: TaskAttachment) {
+    if (!this.taskId) {
+      throw new Error('No task id given');
+    }
+
     this._matDialog.open(DialogEditTaskAttachmentComponent, {
       restoreFocus: true,
       data: {
@@ -39,16 +44,16 @@ export class TaskAttachmentListComponent implements OnInit {
       .subscribe((attachmentIN) => {
         if (attachmentIN) {
           if (attachmentIN.id) {
-            this.attachmentService.updateAttachment(attachmentIN.id, attachmentIN);
+            this.attachmentService.updateAttachment(this.taskId, attachmentIN.id, attachmentIN);
           } else {
-            this.attachmentService.addAttachment(attachmentIN);
+            this.attachmentService.addAttachment(this.taskId, attachmentIN);
           }
         }
       });
   }
 
   remove(id) {
-    this.attachmentService.deleteAttachment(id);
+    this.attachmentService.deleteAttachment(this.taskId, id);
   }
 
   trackByFn(i: number, attachment: TaskAttachment) {

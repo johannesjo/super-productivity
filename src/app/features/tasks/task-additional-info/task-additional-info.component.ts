@@ -255,9 +255,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.attachmentService.addAttachment({
+          this.attachmentService.addAttachment(this.task.id, {
             ...result,
-            taskId: this.task.id,
           });
         }
       });

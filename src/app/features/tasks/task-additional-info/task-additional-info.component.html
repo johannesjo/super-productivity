@@ -95,7 +95,7 @@
     (collapseParent)="collapseParent()"
     (editActionTriggered)="isFocusNotes=true"
     (keyPress)="onItemKeyPress($event)"
-    [expanded]="task.notes || (!(task.issueId) && !task.attachmentIds?.length)"
+    [expanded]="task.notes || (!(task.issueId) && !task.attachments?.length)"
     [type]="'panel'">
     <ng-container panel-header>
       <mat-icon *ngIf="task.notes">chat</mat-icon>
@@ -132,12 +132,14 @@
            style="padding-bottom: 8px;">
         <ng-container *ngIf="task.issueType">
           <task-attachment-list [attachments]="issueAttachments"
-                           [isDisableControls]="true"></task-attachment-list>
+                                [taskId]="task.id"
+                                [isDisableControls]="true"></task-attachment-list>
         </ng-container>
         <h3 *ngIf="issueAttachments?.length && localAttachments?.length"
             class="mat-h3"
             style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
-        <task-attachment-list [attachments]="localAttachments$|async"></task-attachment-list>
+        <task-attachment-list [attachments]="localAttachments"
+                              [taskId]="task.id"></task-attachment-list>
       </div>
     </ng-container>
   </task-additional-info-item>
