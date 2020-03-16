@@ -388,15 +388,11 @@ export class TaskService {
     this._store.dispatch(new MoveToArchive({tasks}));
   }
 
-  moveToProject(tasks: TaskWithSubTasks | TaskWithSubTasks[], projectId: string) {
-    if (!Array.isArray(tasks)) {
-      tasks = [tasks];
+  moveToProject(task: TaskWithSubTasks, projectId: string) {
+    if (!!task.parentId || !!task.issueId) {
+      throw new Error('Wrong task model');
     }
-    if (tasks.find((task) => !!task.parentId || !!task.issueId)) {
-      console.error('Wrong task model');
-      return;
-    }
-    this._store.dispatch(new MoveToOtherProject({tasks, projectId}));
+    this._store.dispatch(new MoveToOtherProject({task, targetProjectId: projectId}));
   }
 
   toggleStartTask() {

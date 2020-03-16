@@ -147,54 +147,8 @@ export class PersistenceService {
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {
-    // this.loadComplete().then(d => console.log('XXXXXXXXX', d, JSON.stringify(d).length));
-    // this.loadAllRelatedModelDataForProject('DEFAULT').then(d => console.log(d));
   }
 
-  async saveTasksToProject(projectId, tasksToSave: TaskWithSubTasks[], isForce = false) {
-    console.log('NOT IMPLEMENT');
-    // TODO fix
-    return null;
-
-    // let currentTaskState: TaskState = await this.task.load(projectId);
-    // const mainTaskIds = tasksToSave.map(task => task.id);
-    // if (!currentTaskState) {
-    //   console.warn('No valid task state found for project');
-    //   currentTaskState = initialTaskState;
-    // }
-    //
-    // const entities = {
-    //   ...currentTaskState.entities,
-    //   ...tasksToSave.reduce((acc, task) => {
-    //     const newAcc = {
-    //       ...acc,
-    //       [task.id]: {
-    //         ...task,
-    //         projectId,
-    //         subTasks: null,
-    //       },
-    //     };
-    //     if (task.subTasks) {
-    //       task.subTasks.forEach((subTask) => {
-    //         newAcc[subTask.id] = {
-    //           ...subTask,
-    //           projectId,
-    //         };
-    //       });
-    //     }
-    //
-    //     return newAcc;
-    //   }, {})
-    // };
-    //
-    // const mergedEntities: TaskState = {
-    //   ...currentTaskState,
-    //   ids: Object.keys(entities),
-    //   todaysTaskIds: [...currentTaskState.todaysTaskIds, ...mainTaskIds],
-    //   entities,
-    // };
-    // return this.task.save(projectId, mergedEntities, isForce);
-  }
 
   // TASK ARCHIVE
   async addTasksToArchive(tasksToArchive: TaskArchive, isForce = false) {

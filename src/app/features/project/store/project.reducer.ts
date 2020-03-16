@@ -1,4 +1,4 @@
-import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {createEntityAdapter, EntityAdapter, EntityState, Update} from '@ngrx/entity';
 import {Project, ProjectBasicCfg} from '../project.model';
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
@@ -7,7 +7,7 @@ import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
-import {AddTask, DeleteTask, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTask, DeleteTask, MoveToOtherProject, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
@@ -144,7 +144,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
 // -------
 export function projectReducer(
   state: ProjectState = initialProjectState,
-  action: ProjectActions | AddTask | DeleteTask
+  action: ProjectActions | AddTask | DeleteTask | MoveToOtherProject
 ): ProjectState {
   // tslint:disable-next-line
   const payload = action['payload'];
@@ -334,6 +334,32 @@ export function projectReducer(
           }
         }, state)
         : state;
+    }
+
+    case TaskActionTypes.MoveToOtherProject: {
+      const {task, targetProjectId} = action.payload;
+      const srcProjectId = task.projectId;
+      const updates: Update<Project>[] = [];
+
+      if (srcProjectId) {
+        updates.push({
+          id: srcProjectId,
+          changes: {
+            taskIds: state.entities[srcProjectId].taskIds.filter(id => id !== task.id),
+            backlogTaskIds: state.entities[srcProjectId].backlogTaskIds.filter(id => id !== task.id),
+          }
+        });
+      }
+      if (targetProjectId) {
+        updates.push({
+          id: targetProjectId,
+          changes: {
+            taskIds: [...state.entities[targetProjectId].taskIds, task.id],
+          }
+        });
+      }
+
+      return projectAdapter.updateMany(updates, state);
     }
 
 

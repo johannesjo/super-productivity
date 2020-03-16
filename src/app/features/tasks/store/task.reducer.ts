@@ -1,5 +1,5 @@
 import {TaskActions, TaskActionTypes} from './task.actions';
-import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskState} from '../task.model';
+import {ShowSubTasksMode, Task, TaskAdditionalInfoTargetPanel, TaskState} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
 import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
@@ -14,6 +14,7 @@ import {moveItemInList} from '../../work-context/store/work-context-meta.helper'
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {filterOutId} from '../../../util/filter-out-id';
 import {TaskAttachmentActions, TaskAttachmentActionTypes} from '../task-attachment/task-attachment.actions';
+import {Update} from '@ngrx/entity';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -316,20 +317,29 @@ export function taskReducer(
       return state;
     }
 
+    case TaskActionTypes.MoveToOtherProject: {
+      const {targetProjectId, task} = action.payload;
+      const updates: Update<Task>[] = [task.id, ...task.subTaskIds].map(id => ({
+        id,
+        changes: {
+          projectId: targetProjectId
+        }
+      }));
+      return taskAdapter.updateMany(updates, state);
+    }
 
     // TASK ARCHIVE STUFF
     // ------------------
     // TODO fix
-    // case TaskActionTypes.MoveToOtherProject:
-    // case TaskActionTypes.MoveToArchive: {
-    //   let copyState = state;
-    //   action.payload.tasks.forEach((task) => {
-    //     copyState = deleteTask(copyState, task);
-    //   });
-    //   return {
-    //     ...copyState
-    //   };
-    // }
+    case TaskActionTypes.MoveToArchive: {
+      let copyState = state;
+      action.payload.tasks.forEach((task) => {
+        copyState = deleteTask(copyState, task);
+      });
+      return {
+        ...copyState
+      };
+    }
 
     // case TaskActionTypes.RestoreTask: {
     //   const task = {...action.payload.task, isDone: false};

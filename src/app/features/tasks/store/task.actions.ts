@@ -215,7 +215,7 @@ export class MoveToArchive implements Action {
 export class MoveToOtherProject implements Action {
   readonly type = TaskActionTypes.MoveToOtherProject;
 
-  constructor(public payload: { tasks: TaskWithSubTasks[]; projectId: string; }) {
+  constructor(public payload: { task: TaskWithSubTasks; targetProjectId: string; }) {
   }
 }
 

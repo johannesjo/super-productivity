@@ -4,7 +4,7 @@ import {MoveToOtherProject, TaskActionTypes, UpdateTask} from './task.actions';
 import {Store} from '@ngrx/store';
 import {filter, map, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {Task, TaskWithSubTasks} from '../task.model';
+import {TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
 import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
@@ -23,13 +23,13 @@ export class TaskRelatedModelEffects {
     tap(this._updateLastActive.bind(this)),
   );
 
+  // TODO remove once reminder is changed
   @Effect({dispatch: false})
   moveToOtherProject: any = this._actions$.pipe(
     ofType(
       TaskActionTypes.MoveToOtherProject,
     ),
     tap(this._moveToOtherProject.bind(this)),
-    tap(this._updateLastActive.bind(this)),
   );
 
   @Effect({dispatch: false})
@@ -130,25 +130,21 @@ export class TaskRelatedModelEffects {
   }
 
   private _moveToOtherProject(action: MoveToOtherProject) {
-    const mainTasks = action.payload.tasks as TaskWithSubTasks[];
-    const projectId = action.payload.projectId;
-    mainTasks.forEach((task: TaskWithSubTasks) => {
-      if (task.reminderId) {
-        this._reminderService.updateReminder(task.reminderId, {projectId});
-      }
+    const mainTasks = action.payload.task as TaskWithSubTasks;
+    const projectId = action.payload.targetProjectId;
 
-      if (task.subTasks) {
-        task.subTasks.forEach((subTask) => {
-          if (subTask.reminderId) {
-            this._reminderService.updateReminder(subTask.reminderId, {projectId});
-          }
-        });
-      }
-    });
+    if (mainTasks.reminderId) {
+      this._reminderService.updateReminder(mainTasks.reminderId, {projectId});
+    }
 
-    this._persistenceService.saveTasksToProject(projectId, mainTasks);
+    if (mainTasks.subTasks) {
+      mainTasks.subTasks.forEach((subTask) => {
+        if (subTask.reminderId) {
+          this._reminderService.updateReminder(subTask.reminderId, {projectId});
+        }
+      });
+    }
   }
-
 }
 
 
