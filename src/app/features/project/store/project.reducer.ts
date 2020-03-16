@@ -330,7 +330,7 @@ export function projectReducer(
           id: task.projectId,
           changes: {
             taskIds: project.taskIds.filter(ptId => ptId !== task.id),
-            backlogTaskIds: project.taskIds.filter(ptId => ptId !== task.id)
+            backlogTaskIds: project.backlogTaskIds.filter(ptId => ptId !== task.id)
           }
         }, state)
         : state;
