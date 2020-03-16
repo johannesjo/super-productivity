@@ -12,9 +12,9 @@ import {
 } from '@angular/core';
 import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
-import {AttachmentService} from '../../attachment/attachment.service';
+import {TaskAttachmentService} from '../task-attachment/task-attachment.service';
 import {BehaviorSubject, merge, Observable, of, Subject, Subscription} from 'rxjs';
-import {Attachment, AttachmentCopy} from '../../attachment/attachment.model';
+import {TaskAttachment, TaskAttachmentCopy} from '../task-attachment/task-attachment.model';
 import {catchError, delay, filter, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {T} from '../../../t.const';
 import {TaskService} from '../task.service';
@@ -32,7 +32,7 @@ import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edi
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {TaskRepeatCfg} from '../../task-repeat-cfg/task-repeat-cfg.model';
 import * as moment from 'moment';
-import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import {DialogEditTaskAttachmentComponent} from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani';
 import {noopAnimation} from '../../../ui/animations/noop.ani';
 import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-additional-info-item.component';
@@ -55,7 +55,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   selectedItemIndex = 0;
   isFocusNotes = false;
   T = T;
-  issueAttachments: Attachment[];
+  issueAttachments: TaskAttachment[];
   reminderId$ = new BehaviorSubject(null);
   reminderData$: Observable<ReminderCopy> = this.reminderId$.pipe(
     switchMap(id => id
@@ -90,7 +90,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       : of(null)),
     shareReplay(1),
   );
-  issueAttachments$: Observable<AttachmentCopy[]> = this.issueData$.pipe(
+  issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
     withLatestFrom(this.issueIdAndTypeShared$),
     map(([data, {type}]) => (data && type)
       ? this._issueService.getMappedAttachments(type, data)
@@ -121,10 +121,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     switchMap((id) => id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))
   );
   private _attachmentIds$ = new BehaviorSubject([]);
-  localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
+  localAttachments$: Observable<TaskAttachment[]> = this._attachmentIds$.pipe(
     switchMap((ids) => this.attachmentService.getByIds$(ids))
   );
-  localAttachments: Attachment[];
+  localAttachments: TaskAttachment[];
 
   private _taskData: TaskWithSubTasks;
   private _focusTimeout: number;
@@ -180,7 +180,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private _reminderService: ReminderService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private  _matDialog: MatDialog,
-    public attachmentService: AttachmentService,
+    public attachmentService: TaskAttachmentService,
   ) {
     // NOTE: needs to be assigned here before any setter is called
     this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
@@ -254,7 +254,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   addAttachment() {
     this._matDialog
-      .open(DialogEditAttachmentComponent, {
+      .open(DialogEditTaskAttachmentComponent, {
         data: {},
       })
       .afterClosed()

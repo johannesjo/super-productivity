@@ -6,14 +6,12 @@ import {EffectsModule} from '@ngrx/effects';
 import {JiraIssueEffects} from './jira-issue.effects';
 import {JiraIssueHeaderComponent} from './jira-issue-header/jira-issue-header.component';
 import {JiraIssueContentComponent} from './jira-issue-content/jira-issue-content.component';
-import {AttachmentModule} from '../../../../attachment/attachment.module';
 
 @NgModule({
   imports: [
     CommonModule,
     UiModule,
     FormsModule,
-    AttachmentModule,
     ReactiveFormsModule,
     EffectsModule.forFeature([JiraIssueEffects]),
   ],

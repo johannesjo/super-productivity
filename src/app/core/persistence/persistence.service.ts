@@ -26,7 +26,7 @@ import {ProjectState} from '../../features/project/store/project.reducer';
 import {TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import {TaskAttachmentState} from '../../features/tasks/task-attachment/store/attachment.reducer';
 import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
@@ -102,10 +102,12 @@ export class PersistenceService {
     //   };
     // }
   );
-  taskAttachment = this._cmBase<AttachmentState>(
+  /** @deprecated */
+  taskAttachment = this._cmBase<TaskAttachmentState>(
     LS_TASK_ATTACHMENT_STATE,
     'taskAttachment',
   );
+
   taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',

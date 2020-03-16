@@ -1,7 +1,7 @@
 import {Observable} from 'rxjs';
 import {IssueData, IssueDataReduced, SearchResultItem} from './issue.model';
 import {Task} from '../tasks/task.model';
-import {Attachment} from '../attachment/attachment.model';
+import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
   issueLink?(issueId: string | number): string;
@@ -14,5 +14,5 @@ export interface IssueServiceInterface {
 
   getAddTaskData?(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
 
-  getMappedAttachments?(issueDataIN: IssueData): Attachment[];
+  getMappedAttachments?(issueDataIN: IssueData): TaskAttachment[];
 }

@@ -3,12 +3,12 @@ import {CommonModule} from '@angular/common';
 import {StoreModule} from '@ngrx/store';
 import {EffectsModule} from '@ngrx/effects';
 import {AttachmentEffects} from './store/attachment.effects';
-import {UiModule} from '../../ui/ui.module';
+import {UiModule} from '../../../ui/ui.module';
 import {ATTACHMENT_FEATURE_NAME, attachmentReducer} from './store/attachment.reducer';
-import {DialogEditAttachmentComponent} from './dialog-edit-attachment/dialog-edit-attachment.component';
+import {DialogEditTaskAttachmentComponent} from './dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {FormsModule} from '@angular/forms';
-import {AttachmentLinkDirective} from './attachment-link/attachment-link.directive';
-import {AttachmentListComponent} from './attachment-list/attachment-list.component';
+import {TaskAttachmentLinkDirective} from './task-attachment-link/task-attachment-link.directive';
+import {TaskAttachmentListComponent} from './task-attachment-list/task-attachment-list.component';
 
 @NgModule({
   imports: [
@@ -19,16 +19,16 @@ import {AttachmentListComponent} from './attachment-list/attachment-list.compone
     EffectsModule.forFeature([AttachmentEffects])
   ],
   declarations: [
-    DialogEditAttachmentComponent,
-    AttachmentLinkDirective,
-    AttachmentListComponent,
+    DialogEditTaskAttachmentComponent,
+    TaskAttachmentLinkDirective,
+    TaskAttachmentListComponent,
   ],
   entryComponents: [
-    DialogEditAttachmentComponent
+    DialogEditTaskAttachmentComponent
   ],
   exports: [
-    AttachmentListComponent,
+    TaskAttachmentListComponent,
   ],
 })
-export class AttachmentModule {
+export class TaskAttachmentModule {
 }

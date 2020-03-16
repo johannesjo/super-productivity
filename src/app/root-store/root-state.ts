@@ -5,7 +5,6 @@ import {NOTE_FEATURE_NAME, NoteState} from '../features/note/store/note.reducer'
 import {BOOKMARK_FEATURE_NAME, BookmarkState} from '../features/bookmark/store/bookmark.reducer';
 import {LAYOUT_FEATURE_NAME, LayoutState} from '../core-ui/layout/store/layout.reducer';
 import {CONFIG_FEATURE_NAME} from '../features/config/store/global-config.reducer';
-import {ATTACHMENT_FEATURE_NAME, AttachmentState} from '../features/attachment/store/attachment.reducer';
 import {GlobalConfigState} from '../features/config/global-config.model';
 import {WORK_CONTEXT_FEATURE_NAME} from '../features/work-context/store/work-context.reducer';
 import {WorkContextState} from '../features/work-context/work-context.model';
@@ -21,5 +20,4 @@ export interface RootState {
   [BOOKMARK_FEATURE_NAME]: BookmarkState;
   [LAYOUT_FEATURE_NAME]: LayoutState;
   [CONFIG_FEATURE_NAME]: GlobalConfigState;
-  [ATTACHMENT_FEATURE_NAME]: AttachmentState;
 }

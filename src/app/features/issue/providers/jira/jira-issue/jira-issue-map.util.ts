@@ -9,7 +9,7 @@ import {
 import {JiraCfg} from '../jira.model';
 import {DropPasteIcons, DropPasteInputType} from '../../../../../core/drop-paste-input/drop-paste-input';
 import {IssueProviderKey, SearchResultItem} from '../../../issue.model';
-import {Attachment} from '../../../../attachment/attachment.model';
+import {TaskAttachment} from '../../../../tasks/task-attachment/task-attachment.model';
 import {dedupeByKey} from '../../../../../util/de-dupe-by-key';
 import {JIRA_TYPE} from '../../../issue.const';
 
@@ -100,7 +100,7 @@ export const mapComments = (comment: JiraOriginalComment): JiraComment => {
   });
 };
 
-export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment): Attachment => {
+export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment): TaskAttachment => {
   const type = mapAttachmentType(jiraAttachment.mimeType);
   return {
     id: null,

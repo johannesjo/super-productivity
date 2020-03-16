@@ -27,7 +27,7 @@ import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {TaskService} from './features/tasks/task.service';
 import {LanguageService} from './core/language/language.service';
 import {ElectronService} from './core/electron/electron.service';
-import {AttachmentService} from './features/attachment/attachment.service';
+import {TaskAttachmentService} from './features/tasks/task-attachment/task-attachment.service';
 import {WorkContextService} from './features/work-context/work-context.service';
 import {TagService} from './features/tag/tag.service';
 
@@ -86,7 +86,7 @@ export class AppComponent implements OnDestroy {
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
     private _languageService: LanguageService,
-    private _attachmentService: AttachmentService,
+    private _attachmentService: TaskAttachmentService,
     private _workContextService: WorkContextService,
     private _tagService: TagService,
     public readonly layoutService: LayoutService,

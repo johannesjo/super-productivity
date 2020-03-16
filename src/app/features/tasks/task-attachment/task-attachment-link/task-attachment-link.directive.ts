@@ -1,19 +1,19 @@
 import {Directive, HostListener, Input} from '@angular/core';
-import {IS_ELECTRON} from '../../../app.constants';
-import {AttachmentType} from '../attachment.model';
-import {SnackService} from '../../../core/snack/snack.service';
-import {IPC} from '../../../../../electron/ipc-events.const';
-import {T} from '../../../t.const';
-import {ElectronService} from '../../../core/electron/electron.service';
+import {IS_ELECTRON} from '../../../../app.constants';
+import {TaskAttachmentType} from '../task-attachment.model';
+import {SnackService} from '../../../../core/snack/snack.service';
+import {IPC} from '../../../../../../electron/ipc-events.const';
+import {T} from '../../../../t.const';
+import {ElectronService} from '../../../../core/electron/electron.service';
 
 
 @Directive({
-  selector: '[attachmentLink]'
+  selector: '[taskAttachmentLink]'
 })
-export class AttachmentLinkDirective {
+export class TaskAttachmentLinkDirective {
 
-  @Input() type: AttachmentType;
-  @Input() href: AttachmentType;
+  @Input() type: TaskAttachmentType;
+  @Input() href: TaskAttachmentType;
 
   constructor(
     private _electronService: ElectronService,

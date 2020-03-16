@@ -1,35 +1,35 @@
 import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {IS_ELECTRON} from '../../../app.constants';
-import {AttachmentCopy, AttachmentType} from '../attachment.model';
-import {T} from '../../../t.const';
+import {IS_ELECTRON} from '../../../../app.constants';
+import {TaskAttachmentCopy, TaskAttachmentType} from '../task-attachment.model';
+import {T} from '../../../../t.const';
 import {TranslateService} from '@ngx-translate/core';
 
-interface AttachmentSelectType {
-  type: AttachmentType;
+interface TaskAttachmentSelectType {
+  type: TaskAttachmentType;
   title: string;
 }
 
 @Component({
-  selector: 'dialog-edit-attachment',
-  templateUrl: './dialog-edit-attachment.component.html',
-  styleUrls: ['./dialog-edit-attachment.component.scss'],
+  selector: 'dialog-edit-task-attachment',
+  templateUrl: './dialog-edit-task-attachment.component.html',
+  styleUrls: ['./dialog-edit-task-attachment.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogEditAttachmentComponent implements OnInit {
-  types: AttachmentSelectType[];
-  attachmentCopy: AttachmentCopy;
+export class DialogEditTaskAttachmentComponent implements OnInit {
+  types: TaskAttachmentSelectType[];
+  attachmentCopy: TaskAttachmentCopy;
   T = T;
 
   constructor(
-    private _matDialogRef: MatDialogRef<DialogEditAttachmentComponent>,
+    private _matDialogRef: MatDialogRef<DialogEditTaskAttachmentComponent>,
     private _translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
   }
 
   ngOnInit() {
-    this.attachmentCopy = {...this.data.attachment} as AttachmentCopy;
+    this.attachmentCopy = {...this.data.attachment} as TaskAttachmentCopy;
 
     if (!this.attachmentCopy.type) {
       this.attachmentCopy.type = 'LINK';
@@ -60,7 +60,7 @@ export class DialogEditAttachmentComponent implements OnInit {
     this.close(this.attachmentCopy);
   }
 
-  mapTypeToLabel(type: AttachmentType): string {
+  mapTypeToLabel(type: TaskAttachmentType): string {
     switch (type) {
       case 'FILE':
         return T.F.ATTACHMENT.DIALOG_EDIT.LABELS.LINK;

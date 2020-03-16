@@ -8,7 +8,7 @@ import {selectTaskFeatureState} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {TaskService} from '../task.service';
-import {AttachmentActionTypes} from '../../attachment/store/attachment.actions';
+import {AttachmentActionTypes} from '../task-attachment/store/attachment.actions';
 import {ReminderService} from '../../reminder/reminder.service';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';

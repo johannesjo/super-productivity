@@ -1,7 +1,7 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {Attachment} from '../attachment.model';
-import {AttachmentState} from './attachment.reducer';
+import {TaskAttachment} from '../task-attachment.model';
+import {TaskAttachmentState} from './attachment.reducer';
 
 export enum AttachmentActionTypes {
   LoadAttachmentState = '[Attachment] Load Attachment State',
@@ -14,21 +14,21 @@ export enum AttachmentActionTypes {
 export class LoadAttachmentState implements Action {
   readonly type = AttachmentActionTypes.LoadAttachmentState;
 
-  constructor(public payload: { state: AttachmentState }) {
+  constructor(public payload: { state: TaskAttachmentState }) {
   }
 }
 
 export class AddAttachment implements Action {
   readonly type = AttachmentActionTypes.AddAttachment;
 
-  constructor(public payload: { attachment: Attachment }) {
+  constructor(public payload: { attachment: TaskAttachment }) {
   }
 }
 
 export class UpdateAttachment implements Action {
   readonly type = AttachmentActionTypes.UpdateAttachment;
 
-  constructor(public payload: { attachment: Update<Attachment> }) {
+  constructor(public payload: { attachment: Update<TaskAttachment> }) {
   }
 }
 

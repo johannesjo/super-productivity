@@ -7,7 +7,7 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {Task, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
-import {selectAttachmentByIds} from '../../attachment/store/attachment.reducer';
+import {selectAttachmentByIds} from '../task-attachment/store/attachment.reducer';
 import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 
 

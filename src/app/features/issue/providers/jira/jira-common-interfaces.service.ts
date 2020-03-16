@@ -11,7 +11,7 @@ import {TaskService} from '../../../tasks/task.service';
 import {ProjectService} from '../../../project/project.service';
 import {SearchResultItem} from '../../issue.model';
 import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
-import {Attachment} from '../../../attachment/attachment.model';
+import {TaskAttachment} from '../../../tasks/task-attachment/task-attachment.model';
 import {mapJiraAttachmentToAttachment} from './jira-issue/jira-issue-map.util';
 import {T} from '../../../../t.const';
 
@@ -108,7 +108,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return this.jiraCfg.host + '/browse/' + issueId;
   }
 
-  getMappedAttachments(issueData: JiraIssue): Attachment[] {
+  getMappedAttachments(issueData: JiraIssue): TaskAttachment[] {
     return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
   }
 }

@@ -1,27 +1,27 @@
 import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
-import {Attachment} from '../attachment.model';
-import {AttachmentService} from '../attachment.service';
+import {TaskAttachment} from '../task-attachment.model';
+import {TaskAttachmentService} from '../task-attachment.service';
 import {MatDialog} from '@angular/material/dialog';
-import {DialogEditAttachmentComponent} from '../dialog-edit-attachment/dialog-edit-attachment.component';
-import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
-import {T} from '../../../t.const';
+import {DialogEditTaskAttachmentComponent} from '../dialog-edit-attachment/dialog-edit-task-attachment.component';
+import {standardListAnimation} from '../../../../ui/animations/standard-list.ani';
+import {T} from '../../../../t.const';
 
 @Component({
-  selector: 'attachment-list',
-  templateUrl: './attachment-list.component.html',
-  styleUrls: ['./attachment-list.component.scss'],
+  selector: 'task-attachment-list',
+  templateUrl: './task-attachment-list.component.html',
+  styleUrls: ['./task-attachment-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation]
 })
-export class AttachmentListComponent implements OnInit {
-  @Input() attachments: Attachment[];
+export class TaskAttachmentListComponent implements OnInit {
+  @Input() attachments: TaskAttachment[];
   @Input() isDisableControls = false;
 
   T = T;
   isError: boolean[] = [];
 
   constructor(
-    public readonly attachmentService: AttachmentService,
+    public readonly attachmentService: TaskAttachmentService,
     private readonly _matDialog: MatDialog,
   ) {
   }
@@ -29,8 +29,8 @@ export class AttachmentListComponent implements OnInit {
   ngOnInit() {
   }
 
-  openEditDialog(attachment?: Attachment) {
-    this._matDialog.open(DialogEditAttachmentComponent, {
+  openEditDialog(attachment?: TaskAttachment) {
+    this._matDialog.open(DialogEditTaskAttachmentComponent, {
       restoreFocus: true,
       data: {
         attachment
@@ -51,7 +51,7 @@ export class AttachmentListComponent implements OnInit {
     this.attachmentService.deleteAttachment(id);
   }
 
-  trackByFn(i: number, attachment: Attachment) {
+  trackByFn(i: number, attachment: TaskAttachment) {
     return attachment
       ? attachment.id
       : i;

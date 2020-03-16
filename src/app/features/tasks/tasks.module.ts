@@ -11,7 +11,7 @@ import {EffectsModule} from '@ngrx/effects';
 import {TASK_FEATURE_NAME, taskReducer} from './store/task.reducer';
 import {TaskAdditionalInfoComponent} from './task-additional-info/task-additional-info.component';
 import {SelectTaskComponent} from './select-task/select-task.component';
-import {AttachmentModule} from '../attachment/attachment.module';
+import {TaskAttachmentModule} from './task-attachment/task-attachment.module';
 import {IssueModule} from '../issue/issue.module';
 import {FilterDoneTasksPipe} from './filter-done-tasks.pipe';
 import {DialogViewTaskReminderComponent} from './dialog-view-task-reminder/dialog-view-task-reminder.component';
@@ -39,7 +39,7 @@ import {TagService} from '../tag/tag.service';
     IssueModule,
     UiModule,
     FormsModule,
-    AttachmentModule,
+    TaskAttachmentModule,
     ReactiveFormsModule,
     TaskRepeatCfgModule,
     TagModule,

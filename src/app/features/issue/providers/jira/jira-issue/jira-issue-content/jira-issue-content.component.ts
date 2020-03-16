@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskWithSubTasks} from '../../../../../tasks/task.model';
 import {JiraIssue} from '../jira-issue.model';
 import {expandAnimation} from '../../../../../../ui/animations/expand.ani';
-import {Attachment} from '../../../../../attachment/attachment.model';
+import {TaskAttachment} from '../../../../../tasks/task-attachment/task-attachment.model';
 import {T} from '../../../../../../t.const';
 import {TaskService} from '../../../../../tasks/task.service';
 import * as j2m from 'jira2md';
@@ -21,7 +21,7 @@ export class JiraIssueContentComponent {
   issueUrl: string;
   @Input() task: TaskWithSubTasks;
   description: string;
-  attachments: Attachment[];
+  attachments: TaskAttachment[];
   T = T;
 
   constructor(

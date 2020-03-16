@@ -17,7 +17,7 @@ import {selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState}
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {TaskService} from '../../tasks/task.service';
 import {BookmarkService} from '../../bookmark/bookmark.service';
-import {AttachmentService} from '../../attachment/attachment.service';
+import {TaskAttachmentService} from '../../tasks/task-attachment/task-attachment.service';
 import {NoteService} from '../../note/note.service';
 import {IssueService} from '../../issue/issue.service';
 import {SnackService} from '../../../core/snack/snack.service';
@@ -340,7 +340,7 @@ export class ProjectEffects {
     private _noteService: NoteService,
     private _bannerService: BannerService,
     private _globalConfigService: GlobalConfigService,
-    private _attachmentService: AttachmentService,
+    private _attachmentService: TaskAttachmentService,
     private _reminderService: ReminderService,
     private _metricService: MetricService,
     private _obstructionService: ObstructionService,

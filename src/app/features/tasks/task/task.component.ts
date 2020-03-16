@@ -22,9 +22,9 @@ import {GlobalConfigService} from '../../config/global-config.service';
 import {checkKeyCombo} from '../../../util/check-key-combo';
 import {takeUntil} from 'rxjs/operators';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
-import {AttachmentService} from '../../attachment/attachment.service';
+import {TaskAttachmentService} from '../task-attachment/task-attachment.service';
 import {IssueService} from '../../issue/issue.service';
-import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import {DialogEditTaskAttachmentComponent} from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
 import {IS_TOUCH, isTouch} from '../../../util/is-touch';
 import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
@@ -97,7 +97,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _matDialog: MatDialog,
     private readonly _configService: GlobalConfigService,
     private readonly _issueService: IssueService,
-    private readonly _attachmentService: AttachmentService,
+    private readonly _attachmentService: TaskAttachmentService,
     private readonly _elementRef: ElementRef,
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
@@ -266,7 +266,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   addAttachment() {
     this._matDialog
-      .open(DialogEditAttachmentComponent, {
+      .open(DialogEditTaskAttachmentComponent, {
         data: {},
       })
       .afterClosed()

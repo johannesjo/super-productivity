@@ -1,16 +1,16 @@
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
 import {AttachmentActions, AttachmentActionTypes} from './attachment.actions';
-import {Attachment} from '../attachment.model';
+import {TaskAttachment} from '../task-attachment.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {DeleteTask, TaskActionTypes, UndoDeleteTask} from '../../tasks/store/task.actions';
+import {DeleteTask, TaskActionTypes, UndoDeleteTask} from '../../store/task.actions';
 
 export const ATTACHMENT_FEATURE_NAME = 'attachment';
 
-export interface AttachmentState extends EntityState<Attachment> {
+export interface TaskAttachmentState extends EntityState<TaskAttachment> {
 }
 
-export const adapter: EntityAdapter<Attachment> = createEntityAdapter<Attachment>();
-export const selectAttachmentFeatureState = createFeatureSelector<AttachmentState>(ATTACHMENT_FEATURE_NAME);
+export const adapter: EntityAdapter<TaskAttachment> = createEntityAdapter<TaskAttachment>();
+export const selectAttachmentFeatureState = createFeatureSelector<TaskAttachmentState>(ATTACHMENT_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAllAttachments = createSelector(selectAttachmentFeatureState, selectAll);
 export const selectAttachmentByIds = createSelector(
@@ -22,13 +22,13 @@ export const selectAttachmentByIds = createSelector(
     : []
 );
 
-export const initialAttachmentState: AttachmentState = adapter.getInitialState({
+export const initialAttachmentState: TaskAttachmentState = adapter.getInitialState({
 });
 
 export function attachmentReducer(
   state = initialAttachmentState,
   action: AttachmentActions | DeleteTask | UndoDeleteTask
-): AttachmentState {
+): TaskAttachmentState {
   switch (action.type) {
     case TaskActionTypes.DeleteTask: {
       const task = action.payload.task;

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {
-  AttachmentState,
+  TaskAttachmentState,
   initialAttachmentState,
   selectAllAttachments,
   selectAttachmentByIds
@@ -14,20 +14,20 @@ import {
   UpdateAttachment
 } from './store/attachment.actions';
 import {Observable} from 'rxjs';
-import {Attachment} from './attachment.model';
+import {TaskAttachment} from './task-attachment.model';
 import shortid from 'shortid';
-import {DialogEditAttachmentComponent} from './dialog-edit-attachment/dialog-edit-attachment.component';
+import {DialogEditTaskAttachmentComponent} from './dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {MatDialog} from '@angular/material/dialog';
-import {createFromDrop, createFromPaste, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
-import {PersistenceService} from '../../core/persistence/persistence.service';
+import {createFromDrop, createFromPaste, DropPasteInput} from '../../../core/drop-paste-input/drop-paste-input';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AttachmentService {
+export class TaskAttachmentService {
 
   constructor(
-    private _store$: Store<AttachmentState>,
+    private _store$: Store<TaskAttachmentState>,
     private _matDialog: MatDialog,
     private _persistenceService: PersistenceService,
   ) {
@@ -38,11 +38,11 @@ export class AttachmentService {
     this.loadState(lsAttachmentState || initialAttachmentState);
   }
 
-  loadState(state: AttachmentState) {
+  loadState(state: TaskAttachmentState) {
     this._store$.dispatch(new LoadAttachmentState({state}));
   }
 
-  addAttachment(attachment: Attachment) {
+  addAttachment(attachment: TaskAttachment) {
     if (!attachment) {
       console.error('No valid attachment passed');
       return;
@@ -64,11 +64,11 @@ export class AttachmentService {
     this._store$.dispatch(new DeleteAttachments({ids}));
   }
 
-  updateAttachment(id: string, changes: Partial<Attachment>) {
+  updateAttachment(id: string, changes: Partial<TaskAttachment>) {
     this._store$.dispatch(new UpdateAttachment({attachment: {id, changes}}));
   }
 
-  getByIds$(ids: string[]): Observable<Attachment[]> {
+  getByIds$(ids: string[]): Observable<TaskAttachment[]> {
     return this._store$.pipe(select(selectAttachmentByIds, {ids}));
   }
 
@@ -99,7 +99,7 @@ export class AttachmentService {
     ev.preventDefault();
     ev.stopPropagation();
 
-    this._matDialog.open(DialogEditAttachmentComponent, {
+    this._matDialog.open(DialogEditTaskAttachmentComponent, {
       restoreFocus: true,
       data: {
         attachment: {...attachment, taskId},

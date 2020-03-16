@@ -1,7 +1,7 @@
 import {TaskActions, TaskActionTypes} from './task.actions';
 import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskState} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
-import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../../attachment/store/attachment.actions';
+import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../task-attachment/store/attachment.actions';
 import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
   deleteTask,

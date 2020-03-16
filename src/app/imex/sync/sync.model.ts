@@ -9,9 +9,9 @@ import {MetricState} from '../../features/metric/metric.model';
 import {ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
 import {WorkContextState} from '../../features/work-context/work-context.model';
 import {TagState} from '../../features/tag/tag.model';
+import {TaskAttachmentState} from '../../features/tasks/task-attachment/store/attachment.reducer';
 
 
 export interface AppBaseData {
@@ -22,8 +22,10 @@ export interface AppBaseData {
   task: TaskState;
   tag: TagState;
   taskArchive: TaskArchive;
-  taskAttachment: AttachmentState;
   context: WorkContextState;
+
+  /** @deprecated */
+  taskAttachment: TaskAttachmentState;
 }
 
 // NOTE: [key:string] always refers to projectId

@@ -1,7 +1,7 @@
 import {IssueProviderKey} from '../issue/issue.model';
 import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
-import {Attachment} from '../attachment/attachment.model';
+import {TaskAttachment} from './task-attachment/task-attachment.model';
 import {TaskRepeatCfg} from '../task-repeat-cfg/task-repeat-cfg.model';
 
 export enum ShowSubTasksMode {
@@ -68,7 +68,7 @@ export interface TaskCopy {
  */
 // attachment data saved to it
 export interface ArchiveTaskCopy extends TaskCopy {
-  attachments: Attachment[];
+  attachments: TaskAttachment[];
   repeatCfg: TaskRepeatCfg;
 }
 

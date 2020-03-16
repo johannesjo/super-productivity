@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem} from './issue.model';
-import {Attachment} from '../attachment/attachment.model';
+import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
 import {from, merge, Observable, of, Subject, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
 import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
@@ -73,7 +73,7 @@ export class IssueService {
     }
   }
 
-  getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): Attachment[] {
+  getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): TaskAttachment[] {
     if (typeof this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments === 'function') {
       return this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments(issueDataIN);
     }
