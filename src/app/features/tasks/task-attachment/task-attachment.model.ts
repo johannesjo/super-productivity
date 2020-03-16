@@ -4,7 +4,6 @@ export type TaskAttachmentType = DropPasteInputType;
 
 export interface TaskAttachmentCopy extends DropPasteInput {
   id: string;
-  taskId?: string;
   originalImgPath?: string;
 }
 

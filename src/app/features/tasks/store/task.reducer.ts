@@ -13,6 +13,7 @@ import {taskAdapter} from './task.adapter';
 import {moveItemInList} from '../../work-context/store/work-context-meta.helper';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {filterOutId} from '../../../util/filter-out-id';
+import {TaskAttachmentActions, TaskAttachmentActionTypes} from '../task-attachment/task-attachment.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -34,7 +35,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
   state: TaskState = initialTaskState,
-  action: TaskActions | AddTaskRepeatCfgToTask
+  action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions
 ): TaskState {
 
   switch (action.type) {
@@ -260,26 +261,6 @@ export function taskReducer(
       );
     }
 
-    // case TaskActionTypes.RestoreTask: {
-    //   const task = {...action.payload.task, isDone: false};
-    //   const subTasks = action.payload.subTasks;
-    //   const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
-    //
-    //   if (subTasks && subTasks.length) {
-    //     subTasks.forEach((subTask: TaskWithSubTasks) => {
-    //       if (subTask && subTask.id) {
-    //         tasksToAdd.push(mapTaskWithSubTasksToTask(subTask));
-    //       }
-    //     });
-    //   }
-    //   return {
-    //     ...taskAdapter.addMany(tasksToAdd, state),
-    //     XXXtodaysTaskIds: [
-    //       task.id,
-    //       ...state.XXXtodaysTaskIds
-    //     ]
-    //   };
-    // }
 
     case TaskActionTypes.AddSubTask: {
       const {task, parentId} = action.payload;
@@ -325,17 +306,6 @@ export function taskReducer(
       };
     }
 
-    case TaskActionTypes.MoveToOtherProject:
-    case TaskActionTypes.MoveToArchive: {
-      let copyState = state;
-      action.payload.tasks.forEach((task) => {
-        copyState = deleteTask(copyState, task);
-      });
-      return {
-        ...copyState
-      };
-    }
-
     case TaskActionTypes.ToggleStart: {
       if (state.currentTaskId) {
         return {
@@ -346,6 +316,45 @@ export function taskReducer(
       return state;
     }
 
+
+    // TASK ARCHIVE STUFF
+    // ------------------
+    // TODO fix
+    // case TaskActionTypes.MoveToOtherProject:
+    // case TaskActionTypes.MoveToArchive: {
+    //   let copyState = state;
+    //   action.payload.tasks.forEach((task) => {
+    //     copyState = deleteTask(copyState, task);
+    //   });
+    //   return {
+    //     ...copyState
+    //   };
+    // }
+
+    // case TaskActionTypes.RestoreTask: {
+    //   const task = {...action.payload.task, isDone: false};
+    //   const subTasks = action.payload.subTasks;
+    //   const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
+    //
+    //   if (subTasks && subTasks.length) {
+    //     subTasks.forEach((subTask: TaskWithSubTasks) => {
+    //       if (subTask && subTask.id) {
+    //         tasksToAdd.push(mapTaskWithSubTasksToTask(subTask));
+    //       }
+    //     });
+    //   }
+    //   return {
+    //     ...taskAdapter.addMany(tasksToAdd, state),
+    //     XXXtodaysTaskIds: [
+    //       task.id,
+    //       ...state.XXXtodaysTaskIds
+    //     ]
+    //   };
+    // }
+
+
+    // REPEAT STUFF
+    // ------------
     case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
       return taskAdapter.updateOne({
         id: action.payload.taskId,
@@ -358,52 +367,48 @@ export function taskReducer(
 
     // TASK ATTACHMENTS
     // ----------------
-    // case TaskAttachmentActionTypes.AddTaskAttachment: {
-    //   return adapter.addOne(action.payload.attachment, state);
-    // }
-    //
-    // case TaskAttachmentActionTypes.UpdateTaskAttachment: {
-    //   return adapter.updateOne(action.payload.attachment, state);
-    // }
-    //
-    // case TaskAttachmentActionTypes.DeleteTaskAttachment: {
-    //   return adapter.removeOne(action.payload.id, state);
-    // }
-    // case AttachmentActionTypes.AddAttachment: {
-    //   const {taskId, id} = action.payload.attachment;
-    //   const task = state.entities[taskId];
-    //   return {
-    //     ...state,
-    //     entities:
-    //       {
-    //         ...state.entities,
-    //         [taskId]: {
-    //           ...task,
-    //           attachmentIds: task.attachmentIds ? [...task.attachmentIds, (id as string)] : [id as string],
-    //         }
-    //       },
-    //   };
-    // }
-    //
-    // case AttachmentActionTypes.DeleteAttachment: {
-    //   const attachmentId = action.payload.id;
-    //   const taskIds = state.ids as string[];
-    //   const affectedTaskId = taskIds.find(
-    //     id => state.entities[id].attachmentIds && state.entities[id].attachmentIds.includes(attachmentId)
-    //   );
-    //   const affectedTask = state.entities[affectedTaskId];
-    //   return {
-    //     ...state,
-    //     entities:
-    //       {
-    //         ...state.entities,
-    //         [affectedTaskId]: {
-    //           ...affectedTask,
-    //           attachmentIds: affectedTask.attachmentIds ? affectedTask.attachmentIds.filter(idIN => idIN !== attachmentId) : [],
-    //         }
-    //       },
-    //   };
-    // }
+    case TaskAttachmentActionTypes.AddTaskAttachment: {
+      const {taskId, taskAttachment} = action.payload;
+      return taskAdapter.updateOne({
+        id: taskId,
+        changes: {
+          attachments: [
+            ...state.entities[taskId].attachments, taskAttachment
+          ]
+        }
+      }, state);
+    }
+
+    case TaskAttachmentActionTypes.UpdateTaskAttachment: {
+      const {taskId, taskAttachment} = action.payload;
+      const attachments = state.entities[taskId].attachments;
+      const updatedAttachments = attachments.map(
+        attachment => attachment.id === taskAttachment.id
+          ? ({
+            ...attachment,
+            ...taskAttachment.changes
+          })
+          : attachment
+      );
+
+      return taskAdapter.updateOne({
+        id: taskId,
+        changes: {
+          attachments: updatedAttachments,
+        }
+      }, state);
+    }
+
+    case TaskAttachmentActionTypes.DeleteTaskAttachment: {
+      const {taskId, id} = action.payload;
+      return taskAdapter.updateOne({
+        id: taskId,
+        changes: {
+          attachments: state.entities[taskId].attachments.filter(at => at.id !== id)
+        }
+      }, state);
+    }
+
     default: {
       return state;
     }
