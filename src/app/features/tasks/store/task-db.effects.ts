@@ -49,16 +49,6 @@ export class TaskDbEffects {
         // RELATED ACTIONS
         TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
       ),
-
-      withLatestFrom(this._projectService.isProjectChanging$),
-      tap(([action, isChanging]) => {
-        // NOTE: filter out everything happening between project change start and all related data being loaded
-        if (isChanging) {
-          console.warn('ACTION:', action);
-          throw new Error('Project was changing while attempting to do something');
-        }
-      }),
-
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectTaskFeatureState)),

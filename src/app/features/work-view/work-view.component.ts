@@ -16,7 +16,7 @@ import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-
 import {ActivatedRoute} from '@angular/router';
 import {from, fromEvent, ReplaySubject, Subscription, timer, zip} from 'rxjs';
 import {TaskWithSubTasks} from '../../features/tasks/task.model';
-import {delay, filter, map, switchMap} from 'rxjs/operators';
+import {delay, filter, map, switchMap, tap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
 import {T} from '../../t.const';
@@ -59,7 +59,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     map(v => v[0]),
   );
   splitTopEl$ = new ReplaySubject<HTMLElement>(1);
-  upperContainerScroll$ = this.projectService.isProjectChanging$.pipe(
+
+  // TODO make this work for tag page without backlog
+  upperContainerScroll$ = this.workContextService.isContextChanging$.pipe(
     filter(isChanging => !isChanging),
     delay(50),
     switchMap(() => this.splitTopEl$),

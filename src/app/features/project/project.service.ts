@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {interval, Observable, of, Subject} from 'rxjs';
-import {ExportedProject, Project, ProjectBasicCfg,} from './project.model';
+import {Observable} from 'rxjs';
+import {ExportedProject, Project,} from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
 import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
@@ -12,7 +12,6 @@ import {
   selectArchivedProjects,
   selectCurrentProject,
   selectIsRelatedDataLoadedForCurrentProject,
-  selectProjectBasicCfg,
   selectProjectBreakNr,
   selectProjectBreakNrForDay,
   selectProjectBreakTime,
@@ -34,13 +33,12 @@ import {JiraCfg} from '../issue/providers/jira/jira.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/providers/github/github.model';
 import {Actions, ofType} from '@ngrx/effects';
-import {delayWhen, distinctUntilChanged, map, mapTo, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
+import {map, shareReplay, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {T} from '../../t.const';
-import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 import {
   BreakNr,
   BreakTime,
@@ -89,10 +87,6 @@ export class ProjectService {
     // shareReplay(1),
   );
 
-  basicCfg$: Observable<ProjectBasicCfg> = this._store$.pipe(
-    select(selectProjectBasicCfg),
-    distinctUntilChanged(distinctUntilChangedObject),
-  );
 
   // TODO remove completely
   currentId$: Observable<string> = this._workContextService.activeWorkContextTypeAndId$.pipe(
@@ -111,23 +105,6 @@ export class ProjectService {
   lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
 
   lastCompletedDay$: Observable<string> = this._store$.pipe(select(selectProjectLastCompletedDay));
-
-  // treated as private but needs to be assigned first
-  _isProjectChanging$ = new Subject<boolean>();
-  isProjectChanging$: Observable<any> = this._isProjectChanging$.pipe(
-    switchMap(() => this.onProjectRelatedDataLoaded$.pipe(
-      mapTo(false),
-      startWith(true),
-    )),
-    startWith(false),
-    shareReplay(1),
-  );
-  isProjectChangingWithDelay$: Observable<boolean> = this.isProjectChanging$.pipe(
-    delayWhen(val => val
-      ? of(undefined)
-      : interval(60)
-    )
-  );
 
 
   constructor(
@@ -309,17 +286,6 @@ export class ProjectService {
     });
   }
 
-  setCurrentId(projectId: string) {
-    if (this.currentId === projectId) {
-      return;
-    }
-
-    this._isProjectChanging$.next(true);
-    this._store$.dispatch({
-      type: ProjectActionTypes.SetCurrentProject,
-      payload: projectId,
-    });
-  }
 
   updateOrder(ids: string[]) {
     this._store$.dispatch(new UpdateProjectOrder({ids}));

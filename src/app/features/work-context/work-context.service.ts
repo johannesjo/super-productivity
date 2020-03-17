@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {combineLatest, EMPTY, Observable, of} from 'rxjs';
+import {combineLatest, EMPTY, Observable, of, timer} from 'rxjs';
 import {WorkContext, WorkContextState, WorkContextThemeCfg, WorkContextType} from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
 import {initialContextState, selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
-import {distinctUntilChanged, filter, map, shareReplay, switchMap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, mapTo, shareReplay, startWith, switchMap} from 'rxjs/operators';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
 import {Task, TaskWithSubTasks} from '../tasks/task.model';
@@ -88,6 +88,15 @@ export class WorkContextService {
   );
 
   onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
+  isContextChanging$: Observable<boolean> = this.onWorkContextChange$.pipe(
+    switchMap(() =>
+      timer(50).pipe(
+        mapTo(false),
+        startWith(true)
+      )
+    ),
+    startWith(false),
+  );
 
   // TASK LEVEL
   // ----------
