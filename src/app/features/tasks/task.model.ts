@@ -2,7 +2,6 @@ import {IssueProviderKey} from '../issue/issue.model';
 import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
 import {TaskAttachment} from './task-attachment/task-attachment.model';
-import {TaskRepeatCfg} from '../task-repeat-cfg/task-repeat-cfg.model';
 
 export enum ShowSubTasksMode {
   HideAll = 0,
@@ -21,7 +20,16 @@ export interface TimeSpentOnDayCopy {
   [key: string]: number;
 }
 
-export type TaskArchive = EntityState<ArchiveTask>;
+export interface TaskArchive extends EntityState<ArchiveTask> {
+  // quick access all tasks for a tag for worklog
+  // tagMap: {
+  //   [key: string]: string[]
+  // };
+  // // quick access all tasks for a project for worklog
+  // projectMap: {
+  //   [key: string]: string[]
+  // };
+}
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 
@@ -64,18 +72,10 @@ export interface TaskCopy {
 /**
  * standard task but with:
  * * reminder removed, if any
- * * attachment data included, if any
- * * repeat cfg data included, if any
  * * sub tasks not included (but copied)
  */
 // attachment data saved to it
-export interface ArchiveTaskCopy extends TaskCopy {
-  attachments: TaskAttachment[];
-  repeatCfg: TaskRepeatCfg;
-}
-
-export type ArchiveTask = Readonly<ArchiveTaskCopy>;
-
+export type ArchiveTask = Readonly<TaskCopy>;
 
 export type Task = Readonly<TaskCopy>;
 

@@ -23,7 +23,7 @@ import {
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {TaskArchive, TaskState, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {TaskArchive, TaskState} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects, TaskAttachmentState} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
@@ -34,7 +34,7 @@ import {issueProviderKeys} from '../../features/issue/issue.const';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
 import {CompressionService} from '../compression/compression.service';
-import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
+import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence.model';
 import {Metric, MetricState} from '../../features/metric/metric.model';
 import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
@@ -149,42 +149,6 @@ export class PersistenceService {
   ) {
   }
 
-
-  // TASK ARCHIVE
-  async addTasksToArchive(tasksToArchive: TaskArchive, isForce = false) {
-    const currentArchive: TaskArchive = await this.taskArchive.loadState();
-
-    if (currentArchive) {
-      const entities = {
-        ...currentArchive.entities,
-        ...tasksToArchive.entities
-      };
-      const mergedEntities = {
-        ids: Object.keys(entities),
-        entities,
-      };
-      return this.taskArchive.saveState(mergedEntities, isForce);
-    } else {
-      return this.taskArchive.saveState(tasksToArchive, isForce);
-    }
-  }
-
-  async removeTasksFromArchive(taskIds: string[]) {
-    const currentArchive: TaskArchive = await this.taskArchive.loadState();
-    const allIds = currentArchive.ids as string[] || [];
-    const idsToRemove = [];
-    taskIds.forEach((taskId) => {
-      if (allIds.indexOf(taskId) > -1) {
-        delete currentArchive.entities[taskId];
-        idsToRemove.push(taskId);
-      }
-    });
-
-    return this.taskArchive.saveState({
-      ...currentArchive,
-      ids: allIds.filter((id) => !idsToRemove.includes(id)),
-    }, true);
-  }
 
   // ISSUES
   async removeIssuesForProject(projectId, issueType: IssueProviderKey): Promise<void> {

@@ -1,4 +1,4 @@
-import {ProjectDataLsKey} from './persistence';
+import {ProjectDataLsKey} from './persistence.model';
 
 export const LS_PREFIX = 'SUP_';
 export const LS_PROJECT_PREFIX = LS_PREFIX + 'P_';

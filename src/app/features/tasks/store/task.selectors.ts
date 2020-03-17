@@ -29,7 +29,7 @@ const mapSubTasksToTask = (task: Task, s: TaskState): TaskWithSubTasks => {
 };
 
 
-const flattenTasks = (tasksIN): TaskWithSubTasks[] => {
+export const flattenTasks = (tasksIN): TaskWithSubTasks[] => {
   let flatTasks = [];
   tasksIN.forEach(task => {
     flatTasks.push(task);

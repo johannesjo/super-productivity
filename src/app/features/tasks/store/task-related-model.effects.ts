@@ -1,13 +1,15 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {MoveToOtherProject, TaskActionTypes, UpdateTask} from './task.actions';
+import {MoveToArchive, MoveToOtherProject, TaskActionTypes, UpdateTask} from './task.actions';
 import {Store} from '@ngrx/store';
 import {filter, map, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {TaskWithSubTasks} from '../task.model';
+import {TaskArchive, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
 import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {taskAdapter} from './task.adapter';
+import {flattenTasks} from './task.selectors';
 
 
 @Injectable()
@@ -87,46 +89,51 @@ export class TaskRelatedModelEffects {
     this._persistenceService.saveLastActive();
   }
 
-  private _removeFromArchive([action]) {
+  private async _removeFromArchive([action]) {
     const task = action.payload.task;
     const taskIds = [task.id, ...task.subTaskIds];
-    this._persistenceService.removeTasksFromArchive(taskIds);
-  }
-
-  private _moveToArchive([action]) {
-    const mainTasks = action.payload.tasks as TaskWithSubTasks[];
-    const archive = {
-      entities: {},
-      ids: []
-    };
-    mainTasks.forEach((task: TaskWithSubTasks) => {
-      const {subTasks, ...taskWithoutSub} = task;
-      archive.entities[task.id] = {
-        ...taskWithoutSub,
-        reminderId: undefined,
-        isDone: true,
-      };
-      if (taskWithoutSub.reminderId) {
-        this._reminderService.removeReminder(taskWithoutSub.reminderId);
-      }
-
-      archive.ids.push(taskWithoutSub.id);
-      if (task.subTasks) {
-        task.subTasks.forEach((subTask) => {
-          archive.entities[subTask.id] = {
-            ...subTask,
-            reminderId: undefined,
-            isDone: true,
-          };
-          archive.ids.push(subTask.id);
-          if (subTask.reminderId) {
-            this._reminderService.removeReminder(subTask.reminderId);
-          }
-        });
+    const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const allIds = currentArchive.ids as string[] || [];
+    const idsToRemove = [];
+    taskIds.forEach((taskId) => {
+      if (allIds.indexOf(taskId) > -1) {
+        delete currentArchive.entities[taskId];
+        idsToRemove.push(taskId);
       }
     });
 
-    this._persistenceService.addTasksToArchive(archive);
+    return this._persistenceService.taskArchive.saveState({
+      ...currentArchive,
+      ids: allIds.filter((id) => !idsToRemove.includes(id)),
+    }, true);
+  }
+
+  private async _moveToArchive(action: MoveToArchive) {
+    const flatTasks = flattenTasks(action.payload.tasks);
+    if (!flatTasks.length) {
+      return;
+    }
+
+    const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState() || {
+      entities: {},
+      ids: []
+    };
+
+    const newArchive = taskAdapter.addMany(flatTasks.map(({subTasks, ...task}) => ({
+      ...task,
+      reminderId: null,
+      isDone: true,
+    })), currentArchive);
+
+    flatTasks
+      .filter(t => !!t.reminderId)
+      .forEach(t => {
+        this._reminderService.removeReminder(t.reminderId);
+      });
+
+    console.log(newArchive);
+
+    return this._persistenceService.taskArchive.saveState(newArchive);
   }
 
   private _moveToOtherProject(action: MoveToOtherProject) {
