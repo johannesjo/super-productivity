@@ -107,6 +107,7 @@ section {
 .tag,
 .project,
 .route-link {
+  .tag-color,
   .project-color,
   &.isActiveRoute:before {
     content: '';
@@ -118,12 +119,14 @@ section {
     background-color: $c-primary;
   }
 
+  .tag-color,
   .project-color {
     opacity: 0;
   }
 
   &.isActiveContext,
   &:hover {
+    .tag-color,
     .project-color {
       opacity: 1;
     }

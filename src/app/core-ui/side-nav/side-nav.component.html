@@ -1,12 +1,28 @@
 <section class="main">
-  <button *ngFor="let context of workContextService.mainWorkContexts$|async"
-          class="route-link"
-          mat-menu-item
-          routerLinkActive="isActiveRoute"
-          [routerLink]="['tag', context.id, 'tasks']">
-    <mat-icon>{{context.icon}}</mat-icon>
-    {{ context.title}}
-  </button>
+  <div *ngFor="let context of (workContextService.mainWorkContexts$|async); trackBy: trackById; "
+       [class.isActiveContext]="context.id===activeWorkContextId"
+       class="tag">
+    <div class="tag-color"
+         [style.background]="context.theme.primary"></div>
+    <button [routerLink]="['tag', context.id, 'tasks']"
+            routerLinkActive="isActiveRoute"
+            mat-menu-item>
+      <mat-icon>{{context.icon}}</mat-icon>
+      {{context.title}}
+    </button>
+
+    <button [mat-menu-trigger-for]="tagMenu"
+            class="tag-settings-btn"
+            mat-icon-button
+            routerLinkActive="isActiveRoute">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #tagMenu="matMenu">
+      <work-context-menu [contextType]="context.type"
+                         [contextId]="context.id"></work-context-menu>
+    </mat-menu>
+  </div>
 
   <button class="route-link"
           mat-menu-item
@@ -36,7 +52,6 @@
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
       <button [routerLink]="['project', project.id, 'tasks']"
-              routerLinkActive="isActiveRoute"
               mat-menu-item>
         <mat-icon class="drag-handle"
                   drag-handle>list
@@ -44,11 +59,10 @@
         {{project.title}}
       </button>
 
-      <button
-        [matMenuTriggerFor]="projectMenu"
-        class="project-settings-btn"
-        mat-icon-button
-        routerLinkActive="isActiveRoute">
+      <button [matMenuTriggerFor]="projectMenu"
+              class="project-settings-btn"
+              mat-icon-button
+              routerLinkActive="isActiveRoute">
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #projectMenu="matMenu">
@@ -91,10 +105,9 @@
     <div *ngFor="let tag of tagList; trackBy: trackById;"
          [class.isActiveContext]="tag.id===activeWorkContextId"
          class="tag">
-      <div [ngStyle]="getThemeColor(tag.theme?.primary || tag.themeColor)"
+      <div [style.background]="tag?.theme.primary"
            class="tag-color"></div>
       <button [routerLink]="['tag', tag.id, 'tasks']"
-              routerLinkActive="isActiveRoute"
               mat-menu-item>
         <mat-icon class="drag-handle"
                   drag-handle>style
@@ -102,11 +115,10 @@
         {{tag.title}}
       </button>
 
-      <button
-        [mat-menu-trigger-for]="tagMenu"
-        class="tag-settings-btn"
-        mat-icon-button
-        routerLinkActive="isActiveRoute">
+      <button [mat-menu-trigger-for]="tagMenu"
+              class="tag-settings-btn"
+              mat-icon-button
+              routerLinkActive="isActiveRoute">
         <mat-icon>more_vert</mat-icon>
       </button>
 
