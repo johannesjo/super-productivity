@@ -476,6 +476,7 @@
         "EDIT": "Edit Tag"
       },
       "FORM_BASIC": {
+        "L_COLOR": "Color (if undefined primary theme color is used)",
         "L_ICON": "Icon",
         "L_TITLE": "Tag Name",
         "TITLE": "Basic Settings"

@@ -70,9 +70,11 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
     if (!$event.config) {
       throw new Error('Not enough data');
     } else {
+      const {title, icon, color} = $event.config;
       this.tagService.updateTag(this.activeWorkContext.id, {
-        title: $event.config.title,
-        icon: $event.config.icon
+        title,
+        icon,
+        color,
       });
     }
   }
