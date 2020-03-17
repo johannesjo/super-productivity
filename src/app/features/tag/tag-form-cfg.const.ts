@@ -1,0 +1,44 @@
+import {ConfigFormSection, GenericConfigFormSection} from '../config/global-config.model';
+import {T} from '../../t.const';
+import {Tag} from './tag.model';
+
+export const BASIC_TAG_CONFIG_FORM_CONFIG: ConfigFormSection<Tag> = {
+  title: T.F.TAG.FORM_BASIC.TITLE,
+  key: 'basic',
+  items: [
+    {
+      key: 'title',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: T.F.TAG.FORM_BASIC.L_TITLE,
+      },
+    },
+  ]
+};
+
+export const CREATE_TAG_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
+  title: 'Tag Settings & Theme',
+  key: 'basic',
+  /* tslint:disable */
+  help: `Very basic settings for your project.`,
+  /* tslint:enable */
+  items: [
+    {
+      key: 'title',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: T.F.TAG.FORM_BASIC.L_TITLE,
+      },
+    },
+    {
+      key: 'theme.primary',
+      type: 'input',
+      templateOptions: {
+        label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
+        type: 'color',
+      },
+    },
+  ]
+};

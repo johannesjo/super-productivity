@@ -470,6 +470,14 @@
         "ADD": "Add tags for \"{{title}}\"",
         "EDIT": "Edit tags for \"{{title}}\"",
         "LABEL": "Tags"
+      },
+      "D_CREATE": {
+        "CREATE": "Create Tag",
+        "EDIT": "Edit Tag"
+      },
+      "FORM_BASIC": {
+        "L_TITLE": "Tag Name",
+        "TITLE": "Basic Settings"
       }
     },
     "TASK": {

@@ -470,6 +470,14 @@ export const T = {
         'ADD': 'F.TAG.D_EDIT.ADD',
         'EDIT': 'F.TAG.D_EDIT.EDIT',
         'LABEL': 'F.TAG.D_EDIT.LABEL'
+      },
+      'D_CREATE': {
+        'CREATE': 'F.TAG.D_CREATE.CREATE',
+        'EDIT': 'F.TAG.D_CREATE.EDIT'
+      },
+      'FORM_BASIC': {
+        'L_TITLE': 'F.TAG.FORM_BASIC.L_TITLE',
+        'TITLE': 'F.TAG.FORM_BASIC.TITLE'
       }
     },
     'TASK': {
