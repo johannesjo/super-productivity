@@ -1,14 +1,15 @@
 import {Injectable} from '@angular/core';
 import {Worklog, WorklogDay, WorklogTask, WorklogWeek} from './worklog.model';
-import {EntityState} from '@ngrx/entity';
-import {Task} from '../tasks/task.model';
 import {dedupeByKey} from '../../util/de-dupe-by-key';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
-import {BehaviorSubject, combineLatest, EMPTY, Observable} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
-import {Project} from '../project/project.model';
+import {WorkContextService} from '../work-context/work-context.service';
+import {WorkContext, WorkContextType} from '../work-context/work-context.model';
+import {Dictionary, EntityState} from '@ngrx/entity';
+import {Task} from '../tasks/task.model';
 import {mapArchiveToWorklog} from './map-archive-to-worklog';
 
 const EMPTY_ENTITY = {
@@ -25,16 +26,15 @@ export class WorklogService {
 
   // NOTE: task updates are not reflected
   worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest([
-    this._projectService.currentProject$,
+    this._workContextService.activeWorkContext$,
     this._archiveUpdateTrigger$,
   ]).pipe(
-    switchMap(([curProject]) => {
-      // TODO fix
-      return EMPTY;
-      return this._loadForProject(curProject);
+    switchMap(([curCtx]) => {
+      return this._loadForWorkContext(curCtx);
     }),
   );
 
+  /** @deprecated */
   worklog: Worklog;
   worklog$: Observable<Worklog> = this.worklogData$.pipe(map(data => data.worklog));
   totalTimeSpent$: Observable<number> = this.worklogData$.pipe(map(data => data.totalTimeSpent));
@@ -53,9 +53,11 @@ export class WorklogService {
 
   constructor(
     private readonly _persistenceService: PersistenceService,
+    private readonly _workContextService: WorkContextService,
     private readonly _projectService: ProjectService,
   ) {
-    this.worklog$.subscribe(worklog => this.worklog = worklog);
+    // TODO not cool
+    // this.worklog$.subscribe(worklog => this.worklog = worklog);
   }
 
 
@@ -124,36 +126,102 @@ export class WorklogService {
   }
 
 
-  private async _loadForProject(project: Project): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    // TODO fix
-    return null;
-    // const archive = await this._persistenceService.taskArchive.load(project.id) || EMPTY_ENTITY;
-    // const taskState = await this._persistenceService.task.load(project.id) || EMPTY_ENTITY;
-    // const startEnd = {
-    //   workStart: project.workStart,
-    //   workEnd: project.workEnd,
-    // };
-    //
-    // const completeState: EntityState<Task> = {
-    //   ids: [...archive.ids, ...taskState.ids] as string[],
-    //   entities: {
-    //     ...archive.entities,
-    //     ...taskState.entities
-    //   }
-    // };
-    //
-    // if (completeState) {
-    //   const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids, startEnd);
-    //   return {
-    //     worklog,
-    //     totalTimeSpent,
-    //   };
-    // } else {
-    //   return {
-    //     worklog: {},
-    //     totalTimeSpent: null
-    //   };
-    // }
+  private async _loadForWorkContext(workContext: WorkContext): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
+    const archive = await this._persistenceService.taskArchive.loadState() || EMPTY_ENTITY;
+    // TODO get from store instead of database
+    const taskState = await this._persistenceService.task.loadState() || EMPTY_ENTITY;
+
+    // TODO simplify
+
+    const startEnd = {
+      workStart: workContext.workStart,
+      workEnd: workContext.workEnd,
+    };
+
+    let completeStateForWorkContext: EntityState<Task>;
+
+    if (workContext.type === WorkContextType.TAG) {
+      const unarchivedIdsForTag: string[] = taskState.ids.reduce((acc, id) => (
+        taskState.entities[id].tagIds.includes(workContext.id)
+          ? [...acc, id]
+          : [...acc]
+      ), []);
+      const archivedIdsForTag: string[] = archive.ids.reduce((acc, id) => (
+        archive.entities[id].tagIds.includes(workContext.id)
+          ? [...acc, id]
+          : [...acc]
+      ), []);
+
+      const unarchivedEntities: Dictionary<Task> = unarchivedIdsForTag.reduce((acc, id) => ({
+        ...acc,
+        [id]: taskState.entities[id]
+      }), {});
+      const archivedEntities: Dictionary<Task> = archivedIdsForTag.reduce((acc, id) => ({
+        ...acc,
+        [id]: archive.entities[id]
+      }), {});
+
+      const allEntities: Dictionary<Task> = {
+        ...unarchivedEntities,
+        ...archivedEntities,
+      };
+
+      completeStateForWorkContext = {
+        ids: [...unarchivedIdsForTag, ...archivedIdsForTag],
+        entities: allEntities,
+      };
+
+      if (completeStateForWorkContext) {
+        const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeStateForWorkContext, unarchivedIdsForTag, startEnd);
+        return {
+          worklog,
+          totalTimeSpent,
+        };
+      }
+    } else if (workContext.type === WorkContextType.PROJECT) {
+      const unarchivedIdsForTag: string[] = taskState.ids.reduce((acc, id) => (
+        taskState.entities[id].projectId === workContext.id
+          ? [...acc, id]
+          : [...acc]
+      ), []);
+      const archivedIdsForTag: string[] = archive.ids.reduce((acc, id) => (
+        archive.entities[id].projectId === workContext.id
+          ? [...acc, id]
+          : [...acc]
+      ), []);
+
+      const unarchivedEntities: Dictionary<Task> = unarchivedIdsForTag.reduce((acc, id) => ({
+        ...acc,
+        [id]: taskState.entities[id]
+      }), {});
+      const archivedEntities: Dictionary<Task> = archivedIdsForTag.reduce((acc, id) => ({
+        ...acc,
+        [id]: archive.entities[id]
+      }), {});
+
+      const allEntities: Dictionary<Task> = {
+        ...unarchivedEntities,
+        ...archivedEntities,
+      };
+
+      completeStateForWorkContext = {
+        ids: [...unarchivedIdsForTag, ...archivedIdsForTag],
+        entities: allEntities,
+      };
+
+      if (completeStateForWorkContext) {
+        const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeStateForWorkContext, unarchivedIdsForTag, startEnd);
+        return {
+          worklog,
+          totalTimeSpent,
+        };
+      }
+    }
+
+    return {
+      worklog: {},
+      totalTimeSpent: null
+    };
   }
 
   private _createTasksForDay(data: WorklogDay): WorklogTask[] {
