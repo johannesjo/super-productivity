@@ -2,7 +2,7 @@ import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import * as tagActions from './tag.actions';
 import {Tag, TagState} from '../tag.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
-import {AddTask, DeleteTask, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
+import {AddTask, DeleteTask, MoveToArchive, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 import {MY_DAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {
@@ -13,6 +13,8 @@ import {
 import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {Update} from '@ngrx/entity/src/models';
+import {unique} from '../../../util/unique';
+import {Project} from '../../project/project.model';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -153,6 +155,25 @@ export function tagReducer(
         id: tagId,
         changes: {
           taskIds: state.entities[tagId].taskIds.filter(taskIdForTag => taskIdForTag !== task.id)
+        }
+      }));
+      return tagAdapter.updateMany(updates, state);
+    }
+
+    case TaskActionTypes.MoveToArchive: {
+      const {payload} = action as MoveToArchive;
+      const {tasks} = payload;
+      const taskIdsToMoveToArchive = tasks.map(t => t.id);
+      const tagIds = unique(
+        tasks.reduce((acc, t) => ([
+          ...acc,
+          ...t.tagIds
+        ]), [])
+      );
+      const updates: Update<Project>[] = tagIds.map(pid => ({
+        id: pid,
+        changes: {
+          taskIds: state.entities[pid].taskIds.filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
         }
       }));
       return tagAdapter.updateMany(updates, state);

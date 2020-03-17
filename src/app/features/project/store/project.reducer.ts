@@ -7,7 +7,7 @@ import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
-import {AddTask, DeleteTask, MoveToOtherProject, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTask, DeleteTask, MoveToArchive, MoveToOtherProject, TaskActionTypes} from '../../tasks/store/task.actions';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
@@ -23,6 +23,7 @@ import {
 import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {filterOutId} from '../../../util/filter-out-id';
+import {unique} from '../../../util/unique';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -144,7 +145,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
 // -------
 export function projectReducer(
   state: ProjectState = initialProjectState,
-  action: ProjectActions | AddTask | DeleteTask | MoveToOtherProject
+  action: ProjectActions | AddTask | DeleteTask | MoveToOtherProject | MoveToArchive
 ): ProjectState {
   // tslint:disable-next-line
   const payload = action['payload'];
@@ -335,6 +336,27 @@ export function projectReducer(
         }, state)
         : state;
     }
+
+
+    case TaskActionTypes.MoveToArchive: {
+      const {tasks} = action.payload;
+      const taskIdsToMoveToArchive = tasks.map(t => t.id);
+      const projectIds = unique(
+        tasks
+          .map(t => t.projectId)
+          .filter(pid => !!pid)
+      );
+
+      const updates: Update<Project>[] = projectIds.map(pid => ({
+        id: pid,
+        changes: {
+          taskIds: state.entities[pid].taskIds.filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
+          backlogTaskIds: state.entities[pid].backlogTaskIds.filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
+        }
+      }));
+      return projectAdapter.updateMany(updates, state);
+    }
+
 
     case TaskActionTypes.MoveToOtherProject: {
       const {task, targetProjectId} = action.payload;
