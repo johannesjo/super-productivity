@@ -205,14 +205,13 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
             });
           } else if (isConfirm === false) {
             this._finishDayForGood(() => {
-              this._router.navigate(['/work-view']);
+              this._router.navigate(['/active/tasks']);
             });
           }
         });
     } else {
       this._finishDayForGood(() => {
-        // $state.go('work-view');
-        this._router.navigate(['/work-view']);
+        this._router.navigate(['/active/tasks']);
       });
     }
   }

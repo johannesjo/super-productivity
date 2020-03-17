@@ -62,7 +62,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
       this._startTask();
       this.dismiss();
     } else {
-      this._router.navigate(['/work-view']);
+      this._router.navigate(['/active/tasks']);
       // TODO probably better handled as effect
       this._subs.add(this._taskService.startTaskFromOtherProject$(this.reminder.relatedId, this.reminder.projectId).subscribe(() => {
         this.dismiss();

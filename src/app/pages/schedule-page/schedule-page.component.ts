@@ -84,12 +84,12 @@ export class SchedulePageComponent {
     }
     this.taskService.removeReminder(task.id, task.reminderId);
     this.taskService.setCurrentId(task.id);
-    this._router.navigate(['/work-view']);
+    this._router.navigate(['/active/tasks']);
   }
 
   private _startTaskFromOtherProject(task: TaskWithReminderData) {
     this.taskService.startTaskFromOtherProject$(task.id, task.reminderData.projectId).pipe(take(1)).subscribe(() => {
-      this._router.navigate(['/work-view']);
+      this._router.navigate(['/active/tasks']);
     });
   }
 }

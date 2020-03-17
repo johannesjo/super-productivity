@@ -92,12 +92,12 @@ export class ShortcutService {
         default:
           backlogPos = 50;
       }
-      this._router.navigate(['/work-view'], {
+      this._router.navigate(['/active/tasks'], {
         queryParams: {backlogPos}
       });
 
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
-      this._router.navigate(['/work-view']);
+      this._router.navigate(['/active/tasks']);
 
     } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
       this._router.navigate(['/daily-agenda']);
