@@ -920,6 +920,8 @@
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Productivity Helper",
     "PROJECT_SETTINGS": "Project Specific Settings",
+    "ISSUE_INTEGRATION": "Issue Integration",
+    "TAG_SETTINGS": "Tag Specific Settings",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },
   "S": {

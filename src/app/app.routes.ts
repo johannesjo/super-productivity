@@ -7,7 +7,7 @@ import {WorklogComponent} from './features/worklog/worklog.component';
 import {MetricPageComponent} from './pages/metric-page/metric-page.component';
 import {ProcrastinationComponent} from './features/procrastination/procrastination.component';
 import {SchedulePageComponent} from './pages/schedule-page/schedule-page.component';
-import {ProjectSettingsPageComponent} from './pages/project-settings/project-settings-page.component';
+import {ProjectSettingsPageComponent} from './pages/project-settings-page/project-settings-page.component';
 import {TagTaskPageComponent} from './pages/tag-task-page/tag-task-page.component';
 import {ActiveWorkContextGuard} from './app.guard';
 import {TagSettingsPageComponent} from './pages/tag-settings-page/tag-settings-page.component';
