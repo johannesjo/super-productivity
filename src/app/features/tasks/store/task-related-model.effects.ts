@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {MoveToArchive, MoveToOtherProject, TaskActionTypes, UpdateTask} from './task.actions';
+import {MoveToArchive, MoveToOtherProject, RestoreTask, TaskActionTypes, UpdateTask} from './task.actions';
 import {Store} from '@ngrx/store';
 import {filter, map, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
@@ -89,12 +89,13 @@ export class TaskRelatedModelEffects {
     this._persistenceService.saveLastActive();
   }
 
-  private async _removeFromArchive([action]) {
+  private async _removeFromArchive(action: RestoreTask) {
     const task = action.payload.task;
     const taskIds = [task.id, ...task.subTaskIds];
     const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState();
     const allIds = currentArchive.ids as string[] || [];
     const idsToRemove = [];
+
     taskIds.forEach((taskId) => {
       if (allIds.indexOf(taskId) > -1) {
         delete currentArchive.entities[taskId];

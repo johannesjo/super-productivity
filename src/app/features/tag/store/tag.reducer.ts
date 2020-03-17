@@ -2,7 +2,14 @@ import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import * as tagActions from './tag.actions';
 import {Tag, TagState} from '../tag.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
-import {AddTask, DeleteTask, MoveToArchive, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
+import {
+  AddTask,
+  DeleteTask,
+  MoveToArchive,
+  RestoreTask,
+  TaskActionTypes,
+  UpdateTaskTags
+} from '../../tasks/store/task.actions';
 import {MY_DAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {
@@ -177,6 +184,22 @@ export function tagReducer(
         }
       }));
       return tagAdapter.updateMany(updates, state);
+    }
+
+    case TaskActionTypes.RestoreTask: {
+      const {payload} = action as RestoreTask;
+      const {task} = payload;
+
+      return tagAdapter.updateMany(task.tagIds
+        // NOTE: if the tag model is gone we don't update
+        .filter(tagId => !!state.entities[tagId])
+        .map(tagId => ({
+            id: tagId,
+            changes: {
+              taskIds: [...state.entities[tagId].taskIds, task.id]
+            }
+          })
+        ), state);
     }
 
     case TaskActionTypes.UpdateTaskTags: {

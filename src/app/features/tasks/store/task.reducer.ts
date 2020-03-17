@@ -341,27 +341,11 @@ export function taskReducer(
       };
     }
 
-    // case TaskActionTypes.RestoreTask: {
-    //   const task = {...action.payload.task, isDone: false};
-    //   const subTasks = action.payload.subTasks;
-    //   const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
-    //
-    //   if (subTasks && subTasks.length) {
-    //     subTasks.forEach((subTask: TaskWithSubTasks) => {
-    //       if (subTask && subTask.id) {
-    //         tasksToAdd.push(mapTaskWithSubTasksToTask(subTask));
-    //       }
-    //     });
-    //   }
-    //   return {
-    //     ...taskAdapter.addMany(tasksToAdd, state),
-    //     XXXtodaysTaskIds: [
-    //       task.id,
-    //       ...state.XXXtodaysTaskIds
-    //     ]
-    //   };
-    // }
-
+    case TaskActionTypes.RestoreTask: {
+      const task = {...action.payload.task, isDone: false};
+      const subTasks = action.payload.subTasks || [];
+      return taskAdapter.addMany([task, ...subTasks], state);
+    }
 
     // REPEAT STUFF
     // ------------
