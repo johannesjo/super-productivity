@@ -17,6 +17,7 @@ import {selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/t
 import {Actions, ofType} from '@ngrx/effects';
 import {moveTaskToBacklogList} from './store/work-context-meta.actions';
 import {selectProjectById} from '../project/store/project.reducer';
+import {WorklogExportSettings} from '../worklog/worklog.model';
 
 @Injectable({
   providedIn: 'root',
@@ -226,6 +227,15 @@ export class WorkContextService {
   async load() {
     const state = await this._persistenceService.context.loadState() || initialContextState;
     this._store$.dispatch(loadWorkContextState({state}));
+  }
+
+  updateWorklogExportSettingsForCurrentContext(data: WorklogExportSettings) {
+    // TODO implement
+    console.error('NOT IMPLEMENTED');
+
+    // this.updateAdvancedCfg(projectId, 'worklogExportSettings', {
+    //   ...data,
+    // });
   }
 
   private _setActiveContext(activeId: string, activeType: WorkContextType) {

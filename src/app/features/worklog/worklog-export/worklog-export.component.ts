@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import {TaskCopy} from '../../tasks/task.model';
 import {ProjectService} from '../../project/project.service';
 import {Subscription} from 'rxjs';
@@ -15,10 +24,11 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
 import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 import {T} from '../../../t.const';
-import {distinctUntilChanged, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, take, withLatestFrom} from 'rxjs/operators';
 import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
 import {WorkStartEnd} from '../../work-context/work-context.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../work-context/work-context.const';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -95,6 +105,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     private _projectService: ProjectService,
     private _snackService: SnackService,
     private _worklogService: WorklogService,
+    private _workContextService: WorkContextService,
+    private _changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
@@ -129,45 +141,48 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           cols: [...WORKLOG_EXPORT_DEFAULTS.cols],
         };
       }
-
+      this._changeDetectorRef.detectChanges();
     }));
 
-    this._subs.add(this._projectService.currentProject$.pipe(
-      withLatestFrom(this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true)),
-    ).subscribe(([pr, tasks]) => {
-      console.log(pr, tasks);
+    this._subs.add(
+      this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true).pipe(
+        withLatestFrom(
+          this._workContextService.activeWorkContext$,
+        ),
+        take(1),
+      ).subscribe(([tasks, ac]) => {
+        if (tasks) {
+          const rows = this._createRows(tasks, ac.workStart, ac.workEnd, this.options.groupBy);
+          this.formattedRows = this._formatRows(rows);
+          // TODO format to csv
 
-      if (tasks) {
-        const rows = this._createRows(tasks, pr.workStart, pr.workEnd, this.options.groupBy);
-        this.formattedRows = this._formatRows(rows);
-        // TODO format to csv
+          this.headlineCols = this.options.cols.map(col => {
+            switch (col) {
+              case 'DATE':
+                return 'Date';
+              case 'START':
+                return 'Start';
+              case 'END':
+                return 'End';
+              case 'TITLES':
+                return 'Titles';
+              case 'TITLES_INCLUDING_SUB':
+                return 'Titles';
+              case 'TIME_MS':
+              case 'TIME_STR':
+              case 'TIME_CLOCK':
+                return 'Worked';
+              case 'ESTIMATE_MS':
+              case 'ESTIMATE_STR':
+              case 'ESTIMATE_CLOCK':
+                return 'Estimate';
+            }
+          });
 
-        this.headlineCols = this.options.cols.map(col => {
-          switch (col) {
-            case 'DATE':
-              return 'Date';
-            case 'START':
-              return 'Start';
-            case 'END':
-              return 'End';
-            case 'TITLES':
-              return 'Titles';
-            case 'TITLES_INCLUDING_SUB':
-              return 'Titles';
-            case 'TIME_MS':
-            case 'TIME_STR':
-            case 'TIME_CLOCK':
-              return 'Worked';
-            case 'ESTIMATE_MS':
-            case 'ESTIMATE_STR':
-            case 'ESTIMATE_CLOCK':
-              return 'Estimate';
-          }
-        });
-
-        this.txt = this._formatText(this.headlineCols, this.formattedRows);
-      }
-    }));
+          this.txt = this._formatText(this.headlineCols, this.formattedRows);
+          this._changeDetectorRef.detectChanges();
+        }
+      }));
 
     // dirty but good enough for now
     const clipboard = new Clipboard('#clipboard-btn');
@@ -190,7 +205,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   onOptionsChange() {
     this.options.cols = this.options.cols.filter(col => !!col);
-    this._projectService.updateWorklogExportSettings(this._projectService.currentId, this.options);
+    this._workContextService.updateWorklogExportSettingsForCurrentContext(this.options);
   }
 
   addCol(colOpt: WorklogColTypes) {
