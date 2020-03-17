@@ -476,6 +476,7 @@
         "EDIT": "Edit Tag"
       },
       "FORM_BASIC": {
+        "L_ICON": "Icon",
         "L_TITLE": "Tag Name",
         "TITLE": "Basic Settings"
       }

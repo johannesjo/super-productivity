@@ -12,6 +12,7 @@ import {UiModule} from '../../ui/ui.module';
 import {KeyboardInputComponent} from './keyboard-input/keyboard-input.component';
 import {GoogleSyncCfgComponent} from '../google/google-sync-cfg/google-sync-cfg.component';
 import {FileImexModule} from '../../imex/file-imex/file-imex.module';
+import {IconInputComponent} from './icon-input/icon-input.component';
 
 @NgModule({
   imports: [
@@ -21,6 +22,11 @@ import {FileImexModule} from '../../imex/file-imex/file-imex.module';
       types: [{
         name: 'keyboard',
         component: KeyboardInputComponent,
+        extends: 'input',
+        wrappers: ['form-field'],
+      }, {
+        name: 'icon',
+        component: IconInputComponent,
         extends: 'input',
         wrappers: ['form-field'],
       }]
@@ -35,7 +41,8 @@ import {FileImexModule} from '../../imex/file-imex/file-imex.module';
     GoogleSyncCfgComponent,
     ConfigSectionComponent,
     ConfigFormComponent,
-    KeyboardInputComponent
+    KeyboardInputComponent,
+    IconInputComponent,
   ],
   entryComponents: [
     GoogleSyncCfgComponent,

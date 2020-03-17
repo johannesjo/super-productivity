@@ -72,6 +72,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
     } else {
       this.tagService.updateTag(this.activeWorkContext.id, {
         title: $event.config.title,
+        icon: $event.config.icon
       });
     }
   }

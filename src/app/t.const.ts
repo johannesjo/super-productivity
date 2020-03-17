@@ -476,6 +476,7 @@ export const T = {
         'EDIT': 'F.TAG.D_CREATE.EDIT'
       },
       'FORM_BASIC': {
+        'L_ICON': 'F.TAG.FORM_BASIC.L_ICON',
         'L_TITLE': 'F.TAG.FORM_BASIC.L_TITLE',
         'TITLE': 'F.TAG.FORM_BASIC.TITLE'
       }
