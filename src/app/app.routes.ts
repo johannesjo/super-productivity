@@ -21,17 +21,20 @@ export const APP_ROUTES: Routes = [
   {path: 'tag/:id/settings', component: TagSettingsPageComponent, data: {page: 'tag-settings'}},
   {path: 'tag/:id/worklog', component: WorklogComponent, data: {page: 'worklog'}},
   {path: 'tag/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}},
+  {path: 'tag/:id/daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
+  {path: 'tag/:id/daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
 
   {path: 'project/:id/tasks', component: ProjectTaskPageComponent, data: {page: 'project-tasks'}},
   {path: 'project/:id/settings', component: ProjectSettingsPageComponent, data: {page: 'project-settings'}},
   {path: 'project/:id/worklog', component: WorklogComponent, data: {page: 'worklog'}},
   {path: 'project/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}},
+  {path: 'project/:id/daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
+  {path: 'project/:id/daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'project-overview', component: ProjectOverviewPageComponent, data: {page: 'project-overview'}},
 
-  {path: 'daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
-  {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
 
-  {path: 'active/:sub-page-type', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
+  {path: 'active/:subPageType', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
+  {path: 'active/:subPageType/:param', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
   {path: 'active', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
 
   {path: '**', redirectTo: 'tag/MY_DAY/tasks'}

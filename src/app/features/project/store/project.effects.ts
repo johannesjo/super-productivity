@@ -161,7 +161,7 @@ export class ProjectEffects {
           action: {
             label: T.F.PROJECT.BANNER.FINISH_DAY.FINISH_DAY,
             fn: () => {
-              this._router.navigate(['/daily-summary', dayStr]);
+              this._router.navigate(['/active/daily-summary', dayStr]);
             }
           },
         });

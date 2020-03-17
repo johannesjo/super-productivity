@@ -19,10 +19,11 @@ export class ActiveWorkContextGuard implements CanActivate {
     return this.workContextService.activeWorkContextTypeAndId$.pipe(
       take(1),
       switchMap(({activeType, activeId}) => {
+        const {subPageType, param} = next.params;
         const base = activeType === WorkContextType.TAG
           ? 'tag'
           : 'project';
-        const url = `/${base}/${activeId}/${next.url[1].path}`;
+        const url = `/${base}/${activeId}/${subPageType}${param ? '/' + param : ''}`;
         return of(this.router.parseUrl(url));
       })
     );
