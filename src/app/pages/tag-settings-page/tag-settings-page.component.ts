@@ -3,8 +3,7 @@ import {T} from '../../t.const';
 import {ConfigFormConfig, ConfigFormSection, GlobalConfigSectionKey,} from '../../features/config/global-config.model';
 import {Subscription} from 'rxjs';
 import {
-  BASIC_PROJECT_CONFIG_FORM_CONFIG,
-  PROJECT_THEME_CONFIG_FORM_CONFIG
+  BASIC_PROJECT_CONFIG_FORM_CONFIG
 } from '../../features/project/project-form-cfg.const';
 import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
 import {IS_ELECTRON} from '../../app.constants';
@@ -13,6 +12,7 @@ import {WorkContextService} from '../../features/work-context/work-context.servi
 import {Tag, TagCfgFormKey} from '../../features/tag/tag.model';
 import {TagService} from '../../features/tag/tag.service';
 import {ProjectCfgFormKey} from '../../features/project/project.model';
+import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../features/work-context/work-context.const';
 
 @Component({
   selector: 'project-settings',
@@ -39,7 +39,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here
-    this.tagThemeSettingsFormCfg = PROJECT_THEME_CONFIG_FORM_CONFIG;
+    this.tagThemeSettingsFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG;
     this.basicFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
   }

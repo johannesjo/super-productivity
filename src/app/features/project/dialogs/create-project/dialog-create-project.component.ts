@@ -6,7 +6,7 @@ import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {ProjectService} from '../../project.service';
 import {DEFAULT_PROJECT} from '../../project.const';
 import {JiraCfg} from '../../../issue/providers/jira/jira.model';
-import {CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG, PROJECT_THEME_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
+import {CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
 import {IssueIntegrationCfgs} from '../../../issue/issue.model';
 // tslint:disable-next-line
 import {DialogJiraInitialSetupComponent} from '../../../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
@@ -19,6 +19,7 @@ import {GITHUB_TYPE} from '../../../issue/issue.const';
 import {T} from '../../../../t.const';
 import {DEFAULT_JIRA_CFG} from '../../../issue/providers/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../../issue/providers/github/github.const';
+import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../../work-context/work-context.const';
 
 @Component({
   selector: 'dialog-create-project',
@@ -60,7 +61,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   ) {
     // somehow they are only unproblematic if assigned here,
     this.basicSettingsFormCfg = CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG.items;
-    this.themeFormCfg = PROJECT_THEME_CONFIG_FORM_CONFIG.items;
+    this.themeFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG.items;
   }
 
   ngOnInit() {

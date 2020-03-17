@@ -12,8 +12,7 @@ import {Subscription} from 'rxjs';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {ProjectService} from '../../features/project/project.service';
 import {
-  BASIC_PROJECT_CONFIG_FORM_CONFIG,
-  PROJECT_THEME_CONFIG_FORM_CONFIG
+  BASIC_PROJECT_CONFIG_FORM_CONFIG
 } from '../../features/project/project-form-cfg.const';
 import {ISSUE_PROVIDER_FORM_CFGS} from '../../features/issue/issue.const';
 import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
@@ -21,6 +20,7 @@ import {IS_ELECTRON} from '../../app.constants';
 import {DEFAULT_JIRA_CFG} from '../../features/issue/providers/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../features/issue/providers/github/github.const';
 import {WorkContextAdvancedCfg, WorkContextThemeCfg} from '../../features/work-context/work-context.model';
+import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../features/work-context/work-context.const';
 
 @Component({
   selector: 'project-settings',
@@ -49,7 +49,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here
-    this.projectThemeSettingsFormCfg = PROJECT_THEME_CONFIG_FORM_CONFIG;
+    this.projectThemeSettingsFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG;
     this.issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
     this.basicFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
