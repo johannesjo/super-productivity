@@ -1,20 +1,20 @@
 // import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { ProjectSettingsComponent } from './project-settings.component';
+// import { TagSettingsComponent } from './project-settings.component';
 //
-// describe('ProjectSettingsComponent', () => {
-//   let component: ProjectSettingsComponent;
-//   let fixture: ComponentFixture<ProjectSettingsComponent>;
+// describe('TagSettingsComponent', () => {
+//   let component: TagSettingsComponent;
+//   let fixture: ComponentFixture<TagSettingsComponent>;
 //
 //   beforeEach(async(() => {
 //     TestBed.configureTestingModule({
-//       declarations: [ ProjectSettingsComponent ]
+//       declarations: [ TagSettingsComponent ]
 //     })
 //     .compileComponents();
 //   }));
 //
 //   beforeEach(() => {
-//     fixture = TestBed.createComponent(ProjectSettingsComponent);
+//     fixture = TestBed.createComponent(TagSettingsComponent);
 //     component = fixture.componentInstance;
 //     fixture.detectChanges();
 //   });

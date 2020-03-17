@@ -7,15 +7,15 @@
     </h1>
     <section class="config-section">
       <config-section (save)="saveBasicSettings($event)"
-                      [cfg]="currentProject"
+                      [cfg]="activeWorkContext"
                       [section]="basicFormCfg"></config-section>
     </section>
 
 
     <section class="config-section">
-      <config-section (save)="saveProjectThemCfg($event)"
-                      [cfg]="currentProjectTheme"
-                      [section]="projectThemeSettingsFormCfg"></config-section>
+      <config-section (save)="saveTagThemCfg($event)"
+                      [cfg]="currentWorkContextTheme"
+                      [section]="tagThemeSettingsFormCfg"></config-section>
     </section>
   </div>
 </div>

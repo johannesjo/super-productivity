@@ -21,6 +21,7 @@ import {FileImexComponent} from '../../../imex/file-imex/file-imex.component';
 import {Subscription} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {TagCfgFormKey} from '../../tag/tag.model';
 
 @Component({
   selector: 'config-section',
@@ -31,7 +32,7 @@ import {WorkContextService} from '../../work-context/work-context.service';
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<{ [key: string]: any }>;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: any }> = new EventEmitter();
   @ViewChild('customForm', {read: ViewContainerRef, static: true}) customFormRef: ViewContainerRef;
   isExpanded = false;
   private _subs = new Subscription();
