@@ -1,7 +1,13 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {combineLatest, EMPTY, Observable, of, timer} from 'rxjs';
-import {WorkContext, WorkContextState, WorkContextThemeCfg, WorkContextType} from './work-context.model';
+import {
+  WorkContext,
+  WorkContextAdvancedCfgKey,
+  WorkContextState,
+  WorkContextThemeCfg,
+  WorkContextType
+} from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
 import {initialContextState, selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
@@ -18,6 +24,8 @@ import {Actions, ofType} from '@ngrx/effects';
 import {moveTaskToBacklogList} from './store/work-context-meta.actions';
 import {selectProjectById} from '../project/store/project.reducer';
 import {WorklogExportSettings} from '../worklog/worklog.model';
+import {ProjectActionTypes} from '../project/store/project.actions';
+import {updateAdvancedConfigForTag} from '../tag/store/tag.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -241,16 +249,33 @@ export class WorkContextService {
   }
 
   updateWorklogExportSettingsForCurrentContext(data: WorklogExportSettings) {
-    // TODO implement
-    console.error('NOT IMPLEMENTED');
-
-    // this.updateAdvancedCfg(projectId, 'worklogExportSettings', {
-    //   ...data,
-    // });
+    this._updateAdvancedCfgForCurrentContext('worklogExportSettings', {
+      ...data,
+    });
   }
+
 
   private _setActiveContext(activeId: string, activeType: WorkContextType) {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
+  }
+
+  private _updateAdvancedCfgForCurrentContext(sectionKey: WorkContextAdvancedCfgKey, data: any) {
+    if (this.activeWorkContextType === WorkContextType.PROJECT) {
+      this._store$.dispatch({
+        type: ProjectActionTypes.UpdateProjectAdvancedCfg,
+        payload: {
+          projectId: this.activeWorkContextId,
+          sectionKey,
+          data,
+        }
+      });
+    } else if (this.activeWorkContextType === WorkContextType.TAG) {
+      this._store$.dispatch(updateAdvancedConfigForTag({
+        tagId: this.activeWorkContextId,
+        sectionKey,
+        data
+      }));
+    }
   }
 
   // we don't want a circular dependency that's why we do it here...

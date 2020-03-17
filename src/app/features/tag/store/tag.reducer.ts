@@ -122,6 +122,22 @@ const _reducer = createReducer<TagState>(
   on(tagActions.deleteTags, (state, {ids}) => tagAdapter.removeMany(ids, state)),
 
   on(tagActions.loadTagState, (oldState, {state}) => ({...oldState, ...state})),
+
+  on(tagActions.updateAdvancedConfigForTag, (state, {tagId, sectionKey, data}) => {
+    const tagToUpdate = state.entities[tagId];
+    return tagAdapter.updateOne({
+      id: tagId,
+      changes: {
+        advancedCfg: {
+          ...tagToUpdate.advancedCfg,
+          [sectionKey]: {
+            ...tagToUpdate.advancedCfg[sectionKey],
+            ...data,
+          }
+        }
+      }
+    }, state);
+  }),
 );
 
 

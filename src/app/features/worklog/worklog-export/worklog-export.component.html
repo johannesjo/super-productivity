@@ -12,8 +12,7 @@
 
   <div *ngIf="!isShowAsText"
        [class.isNoCols]="!options.cols?.length"
-       class="wrapper-wrapper"
-  >
+       class="wrapper-wrapper">
     <button [matMenuTriggerFor]="addColMenu"
             [matTooltip]="T.F.WORKLOG.EXPORT.ADD_COL|translate"
             class="add-col"

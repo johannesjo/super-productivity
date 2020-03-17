@@ -311,10 +311,4 @@ export class ProjectService {
       this._snackService.open({type: 'ERROR', msg: T.F.PROJECT.S.E_INVALID_FILE});
     }
   }
-
-  updateWorklogExportSettings(projectId: string, data: WorklogExportSettings) {
-    this.updateAdvancedCfg(projectId, 'worklogExportSettings', {
-      ...data,
-    });
-  }
 }

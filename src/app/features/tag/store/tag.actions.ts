@@ -1,6 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {Tag, TagState } from '../tag.model';
+import {Tag, TagState} from '../tag.model';
+import {WorkContextAdvancedCfgKey} from '../../work-context/work-context.model';
 
 export const loadTagState = createAction(
   '[Tag] Load Tag State',
@@ -30,4 +31,9 @@ export const deleteTag = createAction(
 export const deleteTags = createAction(
   '[Tag] Delete multiple Tags',
   props<{ ids: string[] }>(),
+);
+
+export const updateAdvancedConfigForTag = createAction(
+  '[Tag] Update Advanced Config',
+  props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),
 );
