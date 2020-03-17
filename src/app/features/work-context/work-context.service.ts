@@ -27,7 +27,8 @@ export class WorkContextService {
   activeWorkContextId$ = this._store$.pipe(select(selectActiveContextId));
   activeWorkContextTypeAndId$ = this._store$.pipe(
     select(selectActiveContextTypeAndId),
-    distinctUntilChanged(distinctUntilChangedObject)
+    distinctUntilChanged(distinctUntilChangedObject),
+    shareReplay(1),
   );
 
   // for convenience...
@@ -201,6 +202,8 @@ export class WorkContextService {
     private _router: Router,
   ) {
     this.activeWorkContextTypeAndId$.subscribe(v => {
+      console.log(v);
+
       this.activeWorkContextId = v.activeId;
       this.activeWorkContextType = v.activeType;
     });

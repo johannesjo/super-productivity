@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from '@angular/router';
 import {WorkContextService} from './features/work-context/work-context.service';
 import {Observable, of} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {switchMap, take} from 'rxjs/operators';
 import {WorkContextType} from './features/work-context/work-context.model';
 
 @Injectable({
@@ -17,6 +17,7 @@ export class ActiveWorkContextGuard implements CanActivate {
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
     return this.workContextService.activeWorkContextTypeAndId$.pipe(
+      take(1),
       switchMap(({activeType, activeId}) => {
         const base = activeType === WorkContextType.TAG
           ? 'tag'

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {WorkContextType} from '../../features/work-context/work-context.model';
 import {T} from 'src/app/t.const';
 
@@ -8,19 +8,19 @@ import {T} from 'src/app/t.const';
   styleUrls: ['./work-context-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WorkContextMenuComponent implements OnInit {
-  @Input() contextType: WorkContextType;
+export class WorkContextMenuComponent {
   @Input() contextId: string;
+
+  @Input('contextType') set contextTypeSet(v: WorkContextType) {
+    this.base = (v === WorkContextType.PROJECT)
+      ? 'project'
+      : 'tag';
+  }
+
 
   base: string;
   T = T;
 
   constructor() {
-  }
-
-  ngOnInit(): void {
-    this.base = (this.contextType === WorkContextType.PROJECT)
-      ? 'project'
-      : 'tag';
   }
 }
