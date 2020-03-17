@@ -7,7 +7,14 @@ import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
-import {AddTask, DeleteTask, MoveToArchive, MoveToOtherProject, TaskActionTypes} from '../../tasks/store/task.actions';
+import {
+  AddTask,
+  DeleteTask,
+  MoveToArchive,
+  MoveToOtherProject,
+  RestoreTask,
+  TaskActionTypes
+} from '../../tasks/store/task.actions';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
@@ -145,7 +152,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
 // -------
 export function projectReducer(
   state: ProjectState = initialProjectState,
-  action: ProjectActions | AddTask | DeleteTask | MoveToOtherProject | MoveToArchive
+  action: ProjectActions | AddTask | DeleteTask | MoveToOtherProject | MoveToArchive | RestoreTask
 ): ProjectState {
   // tslint:disable-next-line
   const payload = action['payload'];
@@ -346,7 +353,6 @@ export function projectReducer(
           .map(t => t.projectId)
           .filter(pid => !!pid)
       );
-
       const updates: Update<Project>[] = projectIds.map(pid => ({
         id: pid,
         changes: {
@@ -355,6 +361,20 @@ export function projectReducer(
         }
       }));
       return projectAdapter.updateMany(updates, state);
+    }
+
+    case TaskActionTypes.RestoreTask: {
+      const {task} = action.payload;
+      if (!task.projectId) {
+        return state;
+      }
+
+      return projectAdapter.updateOne({
+        id: task.projectId,
+        changes: {
+          taskIds: [...state.entities[task.projectId].taskIds, task.id]
+        }
+      }, state);
     }
 
 
