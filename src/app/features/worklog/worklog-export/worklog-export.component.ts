@@ -15,7 +15,7 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
 import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 import {T} from '../../../t.const';
-import {distinctUntilChanged} from 'rxjs/operators';
+import {distinctUntilChanged, withLatestFrom} from 'rxjs/operators';
 import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
 import {WorkStartEnd} from '../../work-context/work-context.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../work-context/work-context.const';
@@ -132,8 +132,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     }));
 
-    this._subs.add(this._projectService.currentProject$.subscribe((pr) => {
-      const tasks: WorklogTask[] = this._worklogService.getTaskListForRange(this.rangeStart, this.rangeEnd, true);
+    this._subs.add(this._projectService.currentProject$.pipe(
+      withLatestFrom(this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true)),
+    ).subscribe(([pr, tasks]) => {
+      console.log(pr, tasks);
 
       if (tasks) {
         const rows = this._createRows(tasks, pr.workStart, pr.workEnd, this.options.groupBy);

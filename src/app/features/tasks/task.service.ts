@@ -10,6 +10,7 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
+  TaskState,
   TaskWithSubTasks
 } from './task.model';
 import {select, Store} from '@ngrx/store';
@@ -57,6 +58,7 @@ import {
   selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
+  selectTaskFeatureState,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
   selectTasksWorkedOnOrDoneFlat,
@@ -136,6 +138,10 @@ export class TaskService {
 
   isTaskDataLoaded$: Observable<boolean> = this._store.pipe(
     select(selectIsTaskDataLoaded),
+  );
+
+  taskFeatureState$: Observable<TaskState> = this._store.pipe(
+    select(selectTaskFeatureState),
   );
 
 

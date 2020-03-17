@@ -4,13 +4,14 @@ import {dedupeByKey} from '../../util/de-dupe-by-key';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {map, switchMap, tap} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContext, WorkContextType} from '../work-context/work-context.model';
 import {Dictionary, EntityState} from '@ngrx/entity';
 import {Task} from '../tasks/task.model';
 import {mapArchiveToWorklog} from './map-archive-to-worklog';
+import {TaskService} from '../tasks/task.service';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -51,10 +52,41 @@ export class WorklogService {
     }),
   );
 
+  worklogTasks$: Observable<WorklogTask[]> = this.worklog$.pipe(
+    map(worklog => {
+      let tasks: WorklogTask[] = [];
+
+      Object.keys(worklog).forEach((yearKeyIN) => {
+        const yearKey = +yearKeyIN;
+        const year = worklog[yearKey];
+
+        if (year && year.ent) {
+          Object.keys(year.ent).forEach(monthKeyIN => {
+            // needs de-normalization
+            const monthKey = +monthKeyIN;
+            const month = year.ent[monthKey];
+
+            if (month && month.ent) {
+              Object.keys(month.ent).forEach(dayKeyIN => {
+                const dayKey = +dayKeyIN;
+                const day: WorklogDay = month.ent[dayKey];
+                if (day) {
+                  tasks = tasks.concat(this._createTasksForDay(day));
+                }
+              });
+            }
+          });
+        }
+      });
+      return tasks;
+    })
+  );
+
   constructor(
     private readonly _persistenceService: PersistenceService,
     private readonly _workContextService: WorkContextService,
     private readonly _projectService: ProjectService,
+    private readonly _taskService: TaskService,
   ) {
     // TODO not cool
     // this.worklog$.subscribe(worklog => this.worklog = worklog);
@@ -66,70 +98,44 @@ export class WorklogService {
   }
 
   // TODO this is not waiting for worklog data
-  getTaskListForRange(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays = false): WorklogTask[] {
-    let tasks = this._getAllWorklogTasks();
-
-    tasks = tasks.filter((task) => {
-      const taskDate = new Date(task.dateStr);
-      return (taskDate >= rangeStart && taskDate <= rangeEnd);
-    });
-
-    if (isFilterOutTimeSpentOnOtherDays) {
-      tasks = tasks.map((task): WorklogTask => {
-
-        const timeSpentOnDay = {};
-        Object.keys(task.timeSpentOnDay).forEach(dateStr => {
-          const date = new Date(dateStr);
-
-          if (date >= rangeStart && date <= rangeEnd) {
-            timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
-          }
+  getTaskListForRange$(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays = false): Observable<WorklogTask[]> {
+    return this.worklogTasks$.pipe(
+      map(tasks => {
+        tasks = tasks.filter((task) => {
+          const taskDate = new Date(task.dateStr);
+          return (taskDate >= rangeStart && taskDate <= rangeEnd);
         });
 
-        return {
-          ...task,
-          timeSpentOnDay
-        };
-      });
-    }
+        if (isFilterOutTimeSpentOnOtherDays) {
+          tasks = tasks.map((task): WorklogTask => {
 
-    return dedupeByKey(tasks, 'id');
-  }
+            const timeSpentOnDay = {};
+            Object.keys(task.timeSpentOnDay).forEach(dateStr => {
+              const date = new Date(dateStr);
 
-  private _getAllWorklogTasks(): WorklogTask[] {
-    const worklog: Worklog = this.worklog;
-    let tasks: WorklogTask[] = [];
-
-    Object.keys(worklog).forEach((yearKeyIN) => {
-      const yearKey = +yearKeyIN;
-      const year = worklog[yearKey];
-
-      if (year && year.ent) {
-        Object.keys(year.ent).forEach(monthKeyIN => {
-          // needs de-normalization
-          const monthKey = +monthKeyIN;
-          const month = year.ent[monthKey];
-
-          if (month && month.ent) {
-            Object.keys(month.ent).forEach(dayKeyIN => {
-              const dayKey = +dayKeyIN;
-              const day: WorklogDay = month.ent[dayKey];
-              if (day) {
-                tasks = tasks.concat(this._createTasksForDay(day));
+              if (date >= rangeStart && date <= rangeEnd) {
+                timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
               }
             });
-          }
-        });
-      }
-    });
-    return tasks;
+
+            return {
+              ...task,
+              timeSpentOnDay
+            };
+          });
+        }
+
+        return dedupeByKey(tasks, 'id');
+      }),
+    );
   }
 
 
   private async _loadForWorkContext(workContext: WorkContext): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
     const archive = await this._persistenceService.taskArchive.loadState() || EMPTY_ENTITY;
-    // TODO get from store instead of database
     const taskState = await this._persistenceService.task.loadState() || EMPTY_ENTITY;
+    // const taskState = await this._taskService.taskFeatureState$.toPromise() || EMPTY_ENTITY;
+
     const {completeStateForWorkContext, unarchivedIds} = this._getCompleteStateForWorkContext(workContext, taskState, archive);
 
     const startEnd = {
