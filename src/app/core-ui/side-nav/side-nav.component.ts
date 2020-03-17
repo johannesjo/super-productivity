@@ -8,13 +8,11 @@ import {THEME_COLOR_MAP} from '../../app.constants';
 import {Router} from '@angular/router';
 import {DragulaService} from 'ng2-dragula';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
-import {GlobalConfigService} from '../../features/config/global-config.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 import {map, switchMap} from 'rxjs/operators';
 import {TagService} from '../../features/tag/tag.service';
 import {Tag} from '../../features/tag/tag.model';
-import {MY_DAY_TAG} from '../../features/tag/tag.const';
 import {WorkContextType} from '../../features/work-context/work-context.model';
 
 @Component({
@@ -66,7 +64,6 @@ export class SideNavComponent implements OnDestroy {
   constructor(
     public readonly tagService: TagService,
     public readonly projectService: ProjectService,
-    public readonly globalConfigService: GlobalConfigService,
     public readonly workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
     private readonly _router: Router,
@@ -91,13 +88,6 @@ export class SideNavComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
-  }
-
-  switchProject(projectId, routeToGoAfter?: string) {
-    this.projectService.setCurrentId(projectId);
-    if (routeToGoAfter) {
-      this._router.navigate([routeToGoAfter]);
-    }
   }
 
   addProject() {

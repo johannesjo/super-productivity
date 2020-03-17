@@ -87,6 +87,8 @@ export class WorkContextService {
     map(awc => awc.theme)
   );
 
+  onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
+
   // TASK LEVEL
   // ----------
   todaysTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(

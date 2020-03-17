@@ -103,8 +103,6 @@ export class ProjectService {
   );
   currentId: string;
 
-  onProjectChange$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.SetCurrentProject));
-
   onProjectRelatedDataLoaded$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess));
 
   breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
@@ -179,10 +177,6 @@ export class ProjectService {
 
   getById$(id: string): Observable<Project> {
     return this._store$.pipe(select(selectProjectById, {id}), take(1));
-  }
-
-  getByIdLive$(id: string): Observable<Project> {
-    return this._store$.pipe(select(selectProjectById, {id}));
   }
 
   // TODO consistent naming

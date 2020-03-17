@@ -13,7 +13,7 @@ export class PlanningModeService {
   private _triggerCheck$ = merge(
     this._manualTriggerCheck$,
     // TODO fix hacky way of waiting for data to be loaded
-    this._projectService.onProjectChange$.pipe(delay(100))
+    this._workContextService.onWorkContextChange$.pipe(delay(100))
   );
 
   isPlanningMode$: Observable<boolean> = this._triggerCheck$.pipe(
@@ -26,7 +26,6 @@ export class PlanningModeService {
 
   constructor(
     private _workContextService: WorkContextService,
-    private _projectService: ProjectService,
   ) {
     this.reCheckPlanningMode();
   }

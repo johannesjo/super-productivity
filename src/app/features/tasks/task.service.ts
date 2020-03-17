@@ -415,7 +415,9 @@ export class TaskService {
 
   // TODO this should be done via action and effects
   startTaskFromOtherProject$(taskId: string, projectId: string): Observable<Task> {
-    this._projectService.setCurrentId(projectId);
+    // this._projectService.setCurrentId(projectId);
+    // TODO change project/tag
+    throw new Error('Not implemented');
 
     const taskInOtherProject$ = this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
       filter(isLoaded => !!isLoaded),

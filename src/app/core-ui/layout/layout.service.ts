@@ -15,7 +15,7 @@ import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {NoteService} from '../../features/note/note.service';
 import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
-import {ProjectService} from '../../features/project/project.service';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 const NAV_ALWAYS_VISIBLE = 1250;
 const NAV_OVER_NOTES_NEXT = 850;
@@ -61,7 +61,7 @@ export class LayoutService {
     private _noteService: NoteService,
     private _router: Router,
     private _activatedRoute: ActivatedRoute,
-    private _projectService: ProjectService,
+    private _workContextService: WorkContextService,
     private _breakPointObserver: BreakpointObserver,
   ) {
     this.isNavOver$.pipe(
@@ -70,7 +70,7 @@ export class LayoutService {
           this._router.events.pipe(
             filter((ev) => ev instanceof NavigationStart)
           ),
-          this._projectService.onProjectChange$
+          this._workContextService.onWorkContextChange$
         ).pipe(
           withLatestFrom(this._isShowSideNav$),
           filter(([, isShowSideNav]) => isShowSideNav),

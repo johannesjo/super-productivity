@@ -18,9 +18,9 @@ import {ProjectCfgFormKey} from '../../project/project.model';
 import {GoogleSyncCfgComponent} from '../../google/google-sync-cfg/google-sync-cfg.component';
 import {JiraCfgComponent} from '../../issue/providers/jira/jira-view-components/jira-cfg/jira-cfg.component';
 import {FileImexComponent} from '../../../imex/file-imex/file-imex.component';
-import {ProjectService} from '../../project/project.service';
 import {Subscription} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Component({
   selector: 'config-section',
@@ -41,7 +41,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   constructor(
     private _cd: ChangeDetectorRef,
     private _componentFactoryResolver: ComponentFactoryResolver,
-    private _projectService: ProjectService,
+    private _workContextService: WorkContextService,
     private _translateService: TranslateService,
   ) {
   }
@@ -70,7 +70,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     }));
 
     // mark for check manually to make it work with ngx formly
-    this._subs.add(this._projectService.onProjectChange$.subscribe(() => {
+    this._subs.add(this._workContextService.onWorkContextChange$.subscribe(() => {
       this._cd.markForCheck();
 
       if (this.section && this.section.customSection) {
