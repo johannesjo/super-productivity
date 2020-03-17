@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {TaskCopy} from '../../tasks/task.model';
 import {ProjectService} from '../../project/project.service';
-import {Subscription} from 'rxjs';
+import {combineLatest, Subscription} from 'rxjs';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment';
 import 'moment-duration-format';
@@ -24,7 +24,7 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
 import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 import {T} from '../../../t.const';
-import {distinctUntilChanged, take, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged} from 'rxjs/operators';
 import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
 import {WorkStartEnd} from '../../work-context/work-context.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../work-context/work-context.const';
@@ -145,12 +145,12 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     }));
 
     this._subs.add(
-      this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true).pipe(
-        withLatestFrom(
-          this._workContextService.activeWorkContext$,
-        ),
-        take(1),
-      ).subscribe(([tasks, ac]) => {
+      combineLatest([
+        this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true),
+        this._workContextService.activeWorkContext$,
+      ])
+        .pipe(
+        ).subscribe(([tasks, ac]) => {
         if (tasks) {
           const rows = this._createRows(tasks, ac.workStart, ac.workEnd, this.options.groupBy);
           this.formattedRows = this._formatRows(rows);
