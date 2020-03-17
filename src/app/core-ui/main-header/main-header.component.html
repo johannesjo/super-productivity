@@ -7,23 +7,26 @@
     <mat-icon>menu</mat-icon>
   </button>
 
-  <!-- TODO fix link -->
-  <div [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
-       class="current-work-context-title"
-       mat-ripple
-       routerLink="active/tasks">{{activeWorkContext?.title}}</div>
 
-  <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
-          [mat-menu-trigger-for]="activeWorkContextMenu"
-          class="project-settings-btn"
-          mat-icon-button>
-    <mat-icon>more_vert</mat-icon>
-  </button>
+  <ng-container *ngIf="workContextService.activeWorkContext$|async as activeWorkContext">
+    <div [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
+         class="current-work-context-title"
+         mat-ripple
+         routerLink="active/tasks">{{activeWorkContext?.title}}</div>
 
-  <mat-menu #activeWorkContextMenu="matMenu">
-    <work-context-menu [contextType]="activeWorkContext?.type"
-                       [contextId]="activeWorkContext?.id"></work-context-menu>
-  </mat-menu>
+    <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
+            [mat-menu-trigger-for]="activeWorkContextMenu"
+            class="project-settings-btn"
+            mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #activeWorkContextMenu="matMenu">
+      <work-context-menu [contextType]="activeWorkContext?.type"
+                         [contextId]="activeWorkContext?.id"></work-context-menu>
+    </mat-menu>
+  </ng-container>
+
 
   <nav class="action-nav">
     <button (click)="layoutService.showAddTaskBar()"

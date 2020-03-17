@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 import {ProjectService} from '../../features/project/project.service';
 import {LayoutService} from '../layout/layout.service';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
@@ -38,7 +47,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     })
   );
 
-  activeWorkContext: WorkContext;
   private _subs = new Subscription();
 
   constructor(
@@ -50,8 +58,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly layoutService: LayoutService,
     private readonly _router: Router,
     private readonly _renderer: Renderer2,
+    private readonly _cd: ChangeDetectorRef,
   ) {
-    this._subs.add(this.workContextService.activeWorkContext$.subscribe((activeWorkContext) => this.activeWorkContext = activeWorkContext));
   }
 
   ngOnDestroy(): void {
