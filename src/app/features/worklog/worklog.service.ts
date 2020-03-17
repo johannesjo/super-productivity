@@ -130,97 +130,62 @@ export class WorklogService {
     const archive = await this._persistenceService.taskArchive.loadState() || EMPTY_ENTITY;
     // TODO get from store instead of database
     const taskState = await this._persistenceService.task.loadState() || EMPTY_ENTITY;
-
-    // TODO simplify
+    const {completeStateForWorkContext, unarchivedIds} = this._getCompleteStateForWorkContext(workContext, taskState, archive);
 
     const startEnd = {
       workStart: workContext.workStart,
       workEnd: workContext.workEnd,
     };
 
-    let completeStateForWorkContext: EntityState<Task>;
 
-    if (workContext.type === WorkContextType.TAG) {
-      const unarchivedIdsForTag: string[] = taskState.ids.reduce((acc, id) => (
-        taskState.entities[id].tagIds.includes(workContext.id)
-          ? [...acc, id]
-          : [...acc]
-      ), []);
-      const archivedIdsForTag: string[] = archive.ids.reduce((acc, id) => (
-        archive.entities[id].tagIds.includes(workContext.id)
-          ? [...acc, id]
-          : [...acc]
-      ), []);
-
-      const unarchivedEntities: Dictionary<Task> = unarchivedIdsForTag.reduce((acc, id) => ({
-        ...acc,
-        [id]: taskState.entities[id]
-      }), {});
-      const archivedEntities: Dictionary<Task> = archivedIdsForTag.reduce((acc, id) => ({
-        ...acc,
-        [id]: archive.entities[id]
-      }), {});
-
-      const allEntities: Dictionary<Task> = {
-        ...unarchivedEntities,
-        ...archivedEntities,
+    if (completeStateForWorkContext) {
+      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeStateForWorkContext, unarchivedIds, startEnd);
+      return {
+        worklog,
+        totalTimeSpent,
       };
-
-      completeStateForWorkContext = {
-        ids: [...unarchivedIdsForTag, ...archivedIdsForTag],
-        entities: allEntities,
-      };
-
-      if (completeStateForWorkContext) {
-        const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeStateForWorkContext, unarchivedIdsForTag, startEnd);
-        return {
-          worklog,
-          totalTimeSpent,
-        };
-      }
-    } else if (workContext.type === WorkContextType.PROJECT) {
-      const unarchivedIdsForTag: string[] = taskState.ids.reduce((acc, id) => (
-        taskState.entities[id].projectId === workContext.id
-          ? [...acc, id]
-          : [...acc]
-      ), []);
-      const archivedIdsForTag: string[] = archive.ids.reduce((acc, id) => (
-        archive.entities[id].projectId === workContext.id
-          ? [...acc, id]
-          : [...acc]
-      ), []);
-
-      const unarchivedEntities: Dictionary<Task> = unarchivedIdsForTag.reduce((acc, id) => ({
-        ...acc,
-        [id]: taskState.entities[id]
-      }), {});
-      const archivedEntities: Dictionary<Task> = archivedIdsForTag.reduce((acc, id) => ({
-        ...acc,
-        [id]: archive.entities[id]
-      }), {});
-
-      const allEntities: Dictionary<Task> = {
-        ...unarchivedEntities,
-        ...archivedEntities,
-      };
-
-      completeStateForWorkContext = {
-        ids: [...unarchivedIdsForTag, ...archivedIdsForTag],
-        entities: allEntities,
-      };
-
-      if (completeStateForWorkContext) {
-        const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeStateForWorkContext, unarchivedIdsForTag, startEnd);
-        return {
-          worklog,
-          totalTimeSpent,
-        };
-      }
     }
-
     return {
       worklog: {},
       totalTimeSpent: null
+    };
+  }
+
+  private _limitStateToIds(stateIn: EntityState<Task>, ids: string[]): Dictionary<Task> {
+    return ids.reduce((acc, id) => ({
+      ...acc,
+      [id]: stateIn.entities[id]
+    }), {});
+  }
+
+  private _getCompleteStateForWorkContext(workContext: WorkContext, taskState: EntityState<Task>, archive: EntityState<Task>): {
+    completeStateForWorkContext: EntityState<Task>,
+    unarchivedIds: string[]
+  } {
+    const filterIdsForProject = (state: EntityState<Task>): string[] => (state.ids as string[]).filter(
+      id => state.entities[id].projectId === workContext.id
+    );
+    const filterIdsForTag = (state: EntityState<Task>): string[] => (state.ids as string[]).filter(
+      id => state.entities[id].tagIds.includes(workContext.id)
+    );
+
+    const unarchivedIds: string[] = (workContext.type === WorkContextType.TAG)
+      ? filterIdsForTag(taskState)
+      : filterIdsForProject(taskState);
+    const archivedIdsForTag: string[] = (workContext.type === WorkContextType.TAG)
+      ? filterIdsForTag(archive)
+      : filterIdsForProject(archive);
+
+
+    return {
+      completeStateForWorkContext: {
+        ids: [...unarchivedIds, ...archivedIdsForTag],
+        entities: {
+          ...this._limitStateToIds(taskState, unarchivedIds),
+          ...this._limitStateToIds(archive, archivedIdsForTag),
+        },
+      },
+      unarchivedIds,
     };
   }
 
