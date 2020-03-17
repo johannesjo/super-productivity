@@ -1,9 +1,12 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect} from '@ngrx/effects';
+import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {switchMap, tap} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {selectTagFeatureState} from './tag.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {T} from '../../../t.const';
+import {SnackService} from '../../../core/snack/snack.service';
+import {updateTag} from './tag.actions';
 
 
 @Injectable()
@@ -43,10 +46,20 @@ export class TagEffects {
     tap(this._updateLastActive.bind(this)),
   ), {dispatch: false});
 
+  @Effect({dispatch: false})
+  snackUpdateBaseSettings$: any = this._actions$.pipe(
+    ofType(updateTag),
+    tap(() => this._snackService.open({
+      type: 'SUCCESS',
+      msg: T.F.TAG.S.UPDATED,
+    }))
+  );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _snackService: SnackService,
   ) {
   }
 

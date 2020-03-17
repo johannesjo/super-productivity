@@ -480,6 +480,9 @@
         "L_ICON": "Icon",
         "L_TITLE": "Tag Name",
         "TITLE": "Basic Settings"
+      },
+      "S": {
+        "UPDATED": "Tag Settings were updated"
       }
     },
     "TASK": {

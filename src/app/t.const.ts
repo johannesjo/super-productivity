@@ -480,6 +480,9 @@ export const T = {
         'L_ICON': 'F.TAG.FORM_BASIC.L_ICON',
         'L_TITLE': 'F.TAG.FORM_BASIC.L_TITLE',
         'TITLE': 'F.TAG.FORM_BASIC.TITLE'
+      },
+      'S': {
+        'UPDATED': 'F.TAG.S.UPDATED'
       }
     },
     'TASK': {

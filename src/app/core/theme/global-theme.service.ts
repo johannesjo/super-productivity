@@ -5,7 +5,6 @@ import {take} from 'rxjs/operators';
 import {isTouch} from '../../util/is-touch';
 import {MaterialCssVarsService} from 'angular-material-css-vars';
 import {DOCUMENT} from '@angular/common';
-import {ProjectService} from '../../features/project/project.service';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ChromeExtensionInterfaceService} from '../chrome-extension-interface/chrome-extension-interface.service';
