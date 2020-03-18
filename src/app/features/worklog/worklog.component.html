@@ -2,7 +2,7 @@
 
 <div *ngIf="worklogService.worklogData$|async as wData"
      [@fade]>
-  <h1 class="mat-headline total-time">{{T.F.WORKLOG.CMP.TOTAL_TIME_PROJECT|translate}}
+  <h1 class="mat-headline total-time">{{T.F.WORKLOG.CMP.TOTAL_TIME|translate }}
     <br><strong>{{wData.totalTimeSpent|msToString}}</strong></h1>
 
   <div class="years">

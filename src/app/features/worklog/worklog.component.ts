@@ -15,6 +15,7 @@ import {getDateRangeForMonth} from '../../util/get-date-range-for-month';
 import {getDateRangeForWeek} from '../../util/get-date-range-for-week';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {T} from '../../t.const';
+import {WorkContextService} from '../work-context/work-context.service';
 
 @Component({
   selector: 'worklog',
@@ -29,11 +30,10 @@ export class WorklogComponent {
 
   constructor(
     public readonly worklogService: WorklogService,
+    public readonly workContextService: WorkContextService,
     private readonly _persistenceService: PersistenceService,
-    private readonly _projectService: ProjectService,
     private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
-    private readonly _cd: ChangeDetectorRef,
     private readonly _router: Router,
   ) {
   }

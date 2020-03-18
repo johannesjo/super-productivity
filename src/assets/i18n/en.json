@@ -641,7 +641,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "Restore Task From Archive",
         "TASKS": "Tasks",
         "TOTAL_TIME": "Time spent total:",
-        "TOTAL_TIME_PROJECT": "Total time spent on project",
         "WEEK_NR": "Week {{nr}}",
         "WORKED": "Worked"
       },
