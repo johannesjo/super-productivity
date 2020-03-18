@@ -11,7 +11,7 @@ import {NoteService} from '../../features/note/note.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
 import {SnackService} from '../../core/snack/snack.service';
-import {filter, map, shareReplay, startWith, switchMap, take, tap} from 'rxjs/operators';
+import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -211,8 +211,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
-  roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp = false) {
-    this._taskService.roundTimeSpentForDay(this.dayStr, roundTo, isRoundUp);
+  async roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp = false) {
+    const taskIds = await this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
+      map(tasks => tasks.map(task => task.id)),
+      take(1),
+    ).toPromise();
+    this._taskService.roundTimeSpentForDay(this.dayStr, taskIds, roundTo, isRoundUp);
   }
 
   onTabIndexChange(i) {

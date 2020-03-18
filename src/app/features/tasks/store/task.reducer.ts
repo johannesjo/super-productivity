@@ -6,6 +6,7 @@ import {
   deleteTask,
   getTaskById,
   reCalcTimesForParentIfParent,
+  reCalcTimeSpentForParentIfParent,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
 } from './task.reducer.util';
@@ -15,6 +16,8 @@ import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {filterOutId} from '../../../util/filter-out-id';
 import {TaskAttachmentActions, TaskAttachmentActionTypes} from '../task-attachment/task-attachment.actions';
 import {Update} from '@ngrx/entity';
+import {unique} from '../../../util/unique';
+import {roundDurationVanilla} from '../../../util/round-duration';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -328,10 +331,44 @@ export function taskReducer(
       return taskAdapter.updateMany(updates, state);
     }
 
+
+    case TaskActionTypes.RoundTimeSpentForDay: {
+      const {day, taskIds, isRoundUp, roundTo} = action.payload;
+      const idsToUpdateDirectly: string[] = taskIds.filter(
+        id => state.entities[id].subTaskIds.length === 0 || !!state.entities[id].parentId
+      );
+      const subTaskIds: string[] = idsToUpdateDirectly.filter(id => !!state.entities[id].parentId);
+      const parentTaskToReCalcIds: string[] = unique(subTaskIds.map(id => state.entities[id].parentId));
+
+      const updateSubsAndMainWithoutSubs: Update<Task>[] = idsToUpdateDirectly.map(id => {
+        const spentOnDayBefore = state.entities[id].timeSpentOnDay;
+        const timeSpentOnDayUpdated = {
+          ...spentOnDayBefore,
+          [day]: roundDurationVanilla(spentOnDayBefore[day], roundTo, isRoundUp)
+        };
+        return {
+          id,
+          changes: {
+            timeSpentOnDay: timeSpentOnDayUpdated,
+            timeSpent: calcTotalTimeSpent(timeSpentOnDayUpdated),
+          }
+        };
+      });
+
+      // // update subs
+      const newState = taskAdapter.updateMany(updateSubsAndMainWithoutSubs, state);
+      // reCalc parents
+      return parentTaskToReCalcIds.reduce((acc, parentId) =>
+        reCalcTimeSpentForParentIfParent(parentId, acc), newState);
+    }
+
+
     // TASK ARCHIVE STUFF
     // ------------------
     // TODO fix
-    case TaskActionTypes.MoveToArchive: {
+    case
+    TaskActionTypes.MoveToArchive
+    : {
       let copyState = state;
       action.payload.tasks.forEach((task) => {
         copyState = deleteTask(copyState, task);
@@ -341,7 +378,9 @@ export function taskReducer(
       };
     }
 
-    case TaskActionTypes.RestoreTask: {
+    case
+    TaskActionTypes.RestoreTask
+    : {
       const task = {...action.payload.task, isDone: false};
       const subTasks = action.payload.subTasks || [];
       return taskAdapter.addMany([task, ...subTasks], state);
@@ -349,7 +388,9 @@ export function taskReducer(
 
     // REPEAT STUFF
     // ------------
-    case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
+    case
+    TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask
+    : {
       return taskAdapter.updateOne({
         id: action.payload.taskId,
         changes: {
@@ -361,7 +402,9 @@ export function taskReducer(
 
     // TASK ATTACHMENTS
     // ----------------
-    case TaskAttachmentActionTypes.AddTaskAttachment: {
+    case
+    TaskAttachmentActionTypes.AddTaskAttachment
+    : {
       const {taskId, taskAttachment} = action.payload;
       return taskAdapter.updateOne({
         id: taskId,
@@ -373,7 +416,9 @@ export function taskReducer(
       }, state);
     }
 
-    case TaskAttachmentActionTypes.UpdateTaskAttachment: {
+    case
+    TaskAttachmentActionTypes.UpdateTaskAttachment
+    : {
       const {taskId, taskAttachment} = action.payload;
       const attachments = state.entities[taskId].attachments;
       const updatedAttachments = attachments.map(
@@ -393,7 +438,9 @@ export function taskReducer(
       }, state);
     }
 
-    case TaskAttachmentActionTypes.DeleteTaskAttachment: {
+    case
+    TaskAttachmentActionTypes.DeleteTaskAttachment
+    : {
       const {taskId, id} = action.payload;
       return taskAdapter.updateOne({
         id: taskId,

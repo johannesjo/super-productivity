@@ -1,6 +1,6 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {DropListModelSource, Task, TaskAdditionalInfoTargetPanel, TaskState, TaskWithSubTasks} from '../task.model';
+import {Task, TaskAdditionalInfoTargetPanel, TaskState, TaskWithSubTasks} from '../task.model';
 import {IssueDataReduced} from '../../issue/issue.model';
 import {RoundTimeOption} from '../../project/project.model';
 import {WorkContextType} from '../../work-context/work-context.model';
@@ -226,7 +226,7 @@ export class ToggleStart implements Action {
 export class RoundTimeSpentForDay implements Action {
   readonly type = TaskActionTypes.RoundTimeSpentForDay;
 
-  constructor(public payload: { day: string, roundTo: RoundTimeOption, isRoundUp: boolean }) {
+  constructor(public payload: { day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean }) {
   }
 }
 

@@ -40,6 +40,7 @@ export class TaskDbEffects {
         TaskActionTypes.MoveToArchive,
         TaskActionTypes.MoveToOtherProject,
         TaskActionTypes.ToggleStart,
+        TaskActionTypes.RoundTimeSpentForDay,
 
         // SUB ACTIONS
         TaskAttachmentActionTypes.AddTaskAttachment,

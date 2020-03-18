@@ -409,8 +409,8 @@ export class TaskService {
     this._store.dispatch(new RestoreTask({task, subTasks}));
   }
 
-  roundTimeSpentForDay(day: string, roundTo: RoundTimeOption, isRoundUp = false) {
-    this._store.dispatch(new RoundTimeSpentForDay({day, roundTo, isRoundUp}));
+  roundTimeSpentForDay(day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp = false) {
+    this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp}));
   }
 
   // TODO this should be done via action and effects

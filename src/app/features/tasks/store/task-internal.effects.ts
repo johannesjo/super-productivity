@@ -1,14 +1,13 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {RoundTimeSpentForDay, SetCurrentTask, TaskActionTypes, UpdateTask} from './task.actions';
+import {SetCurrentTask, TaskActionTypes, UpdateTask} from './task.actions';
 import {select, Store} from '@ngrx/store';
 import {filter, map, mergeMap, withLatestFrom} from 'rxjs/operators';
-import {selectTaskFeatureState, selectTasksWorkedOnOrDoneFlat} from './task.selectors';
+import {selectTaskFeatureState} from './task.selectors';
 import {selectMiscConfig} from '../../config/store/global-config.reducer';
 import {TaskState} from '../task.model';
-import {EMPTY, Observable, of} from 'rxjs';
+import {EMPTY, of} from 'rxjs';
 import {MiscConfig} from '../../config/global-config.model';
-import {roundDurationVanilla} from '../../../util/round-duration';
 import {moveTaskToBacklogList, moveTaskToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
 import {WorkContextService} from '../../work-context/work-context.service';
 
@@ -113,38 +112,6 @@ export class TaskInternalEffects {
       }
     })
   );
-
-  @Effect()
-  roundTimesSpentForDay$: Observable<any> = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.RoundTimeSpentForDay,
-    ),
-    filter((a: RoundTimeSpentForDay) => a.payload && a.payload.day && !!a.payload.roundTo),
-    withLatestFrom(
-      this._store$.pipe(select(selectTasksWorkedOnOrDoneFlat)),
-    ),
-    mergeMap(([act, tasks]): UpdateTask[] => {
-      const {day, roundTo, isRoundUp} = act.payload;
-      return Object.keys(tasks).filter(id => {
-        return !tasks[id].subTaskIds.length && tasks[id].timeSpentOnDay[day];
-      }).map(id => {
-        const task = tasks[id];
-        const updateTimeSpent = roundDurationVanilla(task.timeSpentOnDay[day], roundTo, isRoundUp);
-        return new UpdateTask({
-          task: {
-            id: task.id,
-            changes: {
-              timeSpentOnDay: {
-                ...task.timeSpentOnDay,
-                [day]: updateTimeSpent,
-              }
-            },
-          }
-        });
-      });
-    }),
-  );
-
 
   constructor(
     private _actions$: Actions,
