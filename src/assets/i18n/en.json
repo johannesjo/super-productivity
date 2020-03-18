@@ -548,7 +548,6 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "Dismiss Reminder",
-        "ERR_LOST": "There was a reminder scheduled for the task {{title}}, but it seems to be lost.",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project",

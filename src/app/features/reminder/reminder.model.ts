@@ -7,9 +7,9 @@ export type ReminderType = 'NOTE' | 'TASK';
 
 export interface ReminderCopy {
   id: string;
-  projectId: string;
-  // workContextId: string;
-  // workContextType: WorkContextType;
+  // projectId: string;
+  workContextId: string;
+  workContextType: WorkContextType;
   remindAt: number;
   title: string;
   type: ReminderType;

@@ -4,70 +4,52 @@
 </h1>
 
 <mat-dialog-content>
-  <div *ngIf="!isError"
-       class="content">
+  <div class="content"
+       *ngIf="_task$|async as task">
     <h3>"{{task?.title || reminder.title}}"</h3>
 
-    <p *ngIf="isForCurrentProject">{{T.F.TASK.D_REMINDER_VIEW.FOR_CURRENT|translate}}</p>
-
-    <div *ngIf="!isForCurrentProject"
+    <p *ngIf="isForCurrentContext">{{T.F.TASK.D_REMINDER_VIEW.FOR_CURRENT|translate}}</p>
+    <div *ngIf="!isForCurrentContext"
          class="for-project">
-      <p>{{T.F.TASK.D_REMINDER_VIEW.FROM_PROJECT|translate}}</p>
-      <h3>{{(targetProject$|async)?.title}}</h3>
+      <p>{{T.F.TASK.D_REMINDER_VIEW.FROM_PROJECT|translate}} Xa</p>
+      <h3>{{(targetContext$|async)?.title}}</h3>
       <p>{{T.F.TASK.D_REMINDER_VIEW.FOR_OTHER|translate}}</p>
     </div>
-  </div>
-
-  <div *ngIf="isError"
-       style="color: red">
-    {{T.F.TASK.D_REMINDER_VIEW.ERR_LOST|translate:{title: reminder.title} }}
   </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button (click)="dismissReminderOnly()"
-            *ngIf="isError"
+    <button (dblclick)="snooze(10)"
             [disabled]="isDisableControls"
-            color="warn"
+            [matMenuTriggerFor]="snoozeMenu"
+            color="primary"
+            mat-button
+            type="button">
+      <mat-icon>snooze</mat-icon>
+      {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate }}
+    </button>
+
+    <button (click)="dismiss()"
+            *ngIf="isForCurrentContext"
+            [disabled]="isDisableControls"
+            color="primary"
             mat-stroked-button
             type="button">
       <mat-icon>clear</mat-icon>
-      {{T.F.TASK.D_REMINDER_VIEW.DISMISS|translate}}
+      {{T.G.DISMISS|translate}}
     </button>
 
-    <ng-container *ngIf="!isError">
-      <button (dblclick)="snooze(10)"
-              [disabled]="isDisableControls"
-              [matMenuTriggerFor]="snoozeMenu"
-              color="primary"
-              mat-button
-              type="button">
-        <mat-icon>snooze</mat-icon>
-        {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate }}
-      </button>
-
-      <button (click)="dismiss()"
-              *ngIf="isForCurrentProject"
-              [disabled]="isDisableControls"
-              color="primary"
-              mat-stroked-button
-              type="button">
-        <mat-icon>clear</mat-icon>
-        {{T.G.DISMISS|translate}}
-      </button>
-
-      <button (click)="play()"
-              [disabled]="isDisableControls"
-              color="primary"
-              mat-stroked-button
-              type="button">
-        <mat-icon>play_arrow</mat-icon>
-        {{!isForCurrentProject
-        ? (T.F.TASK.D_REMINDER_VIEW.SWITCH_PROJECT_START|translate)
-        : (T.F.TASK.D_REMINDER_VIEW.START|translate)}}
-      </button>
-    </ng-container>
+    <button (click)="play()"
+            [disabled]="isDisableControls"
+            color="primary"
+            mat-stroked-button
+            type="button">
+      <mat-icon>play_arrow</mat-icon>
+      {{!isForCurrentContext
+      ? (T.F.TASK.D_REMINDER_VIEW.SWITCH_PROJECT_START|translate)
+      : (T.F.TASK.D_REMINDER_VIEW.START|translate)}}
+    </button>
   </div>
 </mat-dialog-actions>
 

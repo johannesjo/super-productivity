@@ -406,11 +406,11 @@ export class TaskService {
     this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp}));
   }
 
-  startTaskFromOtherProject$(taskId: string, projectId: string): Observable<Task> {
-    // this._projectService.setCurrentId(projectId);
-    // TODO change project/tag
-    throw new Error('Not implemented');
-
+  startTaskFromOtherContext$(taskId: string, workContextType: WorkContextType, workContextId: string): Observable<Task> {
+    throw new Error('Implement');
+    if (workContextType === WorkContextType.PROJECT) {
+      // this._workContextService.set
+    }
     const taskInOtherProject$ = this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
       filter(isLoaded => !!isLoaded),
       switchMap(() => this.getById$(taskId).pipe(

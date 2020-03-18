@@ -7,12 +7,15 @@ import {Observable, Subscription} from 'rxjs';
 import {ReminderService} from '../../reminder/reminder.service';
 import {take} from 'rxjs/operators';
 import {ProjectService} from '../../project/project.service';
-import {Project} from '../../project/project.model';
-import {ScheduledTaskService} from '../scheduled-task.service';
 import {Router} from '@angular/router';
 import {T} from '../../../t.const';
 import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
+import {WorkContextService} from '../../work-context/work-context.service';
+import {TagService} from '../../tag/tag.service';
+import {Tag} from '../../tag/tag.model';
+import {Project} from '../../project/project.model';
+import {WorkContextType} from '../../work-context/work-context.model';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -22,34 +25,36 @@ import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-rem
 })
 export class DialogViewTaskReminderComponent implements OnDestroy {
   T = T;
-  task$: Observable<Task> = this._taskService.getById$(this.data.reminder.relatedId);
   task: Task;
   reminder: Reminder = this.data.reminder;
-  isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
-  targetProject$: Observable<Project> = this._projectService.getById$(this.reminder.projectId);
+  isForCurrentContext = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
+
+
+  targetContext$: Observable<Tag | Project> = (this.data.reminder.workContextType === WorkContextType.PROJECT)
+    ? this._projectService.getById$(this.reminder.workContextId)
+    : this._tagService.getTagById$(this.reminder.workContextId);
+
   isDisableControls = false;
+
+  private _task$: Observable<Task> = this._taskService.getById$(this.data.reminder.relatedId);
   private _subs = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewTaskReminderComponent>,
     private _taskService: TaskService,
-    private _scheduledTaskService: ScheduledTaskService,
     private _projectService: ProjectService,
+    private _tagService: TagService,
+    private _workContextService: WorkContextService,
     private _router: Router,
     private _matDialog: MatDialog,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this._matDialogRef.disableClose = true;
-    this._subs.add(this.task$.pipe(take(1)).subscribe(task => this.task = task));
+    this._subs.add(this._task$.pipe(take(1)).subscribe(task => this.task = task));
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this._close();
     }));
-  }
-
-  get isError() {
-    // just for this dialog we make an exception about using getters
-    return !this.task && this.isForCurrentProject;
   }
 
   ngOnDestroy(): void {
@@ -58,13 +63,17 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
 
   play() {
     this.isDisableControls = true;
-    if (this.isForCurrentProject) {
+    if (this.isForCurrentContext) {
       this._startTask();
       this.dismiss();
     } else {
       this._router.navigate(['/active/tasks']);
       // TODO probably better handled as effect
-      this._subs.add(this._taskService.startTaskFromOtherProject$(this.reminder.relatedId, this.reminder.projectId).subscribe(() => {
+      this._subs.add(this._taskService.startTaskFromOtherContext$(
+        this.reminder.relatedId,
+        this.reminder.workContextType,
+        this.reminder.workContextId
+      ).subscribe(() => {
         this.dismiss();
       }));
     }

@@ -88,7 +88,7 @@ export class SchedulePageComponent {
   }
 
   private _startTaskFromOtherProject(task: TaskWithReminderData) {
-    this.taskService.startTaskFromOtherProject$(task.id, task.reminderData.projectId).pipe(take(1)).subscribe(() => {
+    this.taskService.startTaskFromOtherContext$(task.id, task.reminderData.projectId).pipe(take(1)).subscribe(() => {
       this._router.navigate(['/active/tasks']);
     });
   }
