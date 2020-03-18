@@ -26,6 +26,11 @@ export class TagListComponent implements OnDestroy {
     this._projectId$.next(task.projectId);
   }
 
+  @Input() set isShowProjectTagAlways(v: boolean) {
+    this._isShowProjectTagAlways$.next(v);
+  }
+
+  private _isShowProjectTagAlways$ = new BehaviorSubject<boolean>(false);
   private _task: Task;
 
   @Output() addedTagsToTask: EventEmitter<string[]> = new EventEmitter();
@@ -34,8 +39,11 @@ export class TagListComponent implements OnDestroy {
 
 
   private _projectId$ = new BehaviorSubject<string>(null);
-  project$: Observable<Project> = this._workContextService.activeWorkContextTypeAndId$.pipe(
-    switchMap(({activeType}) => (activeType === WorkContextType.TAG)
+  project$: Observable<Project> = combineLatest([
+    this._workContextService.activeWorkContextTypeAndId$,
+    this._isShowProjectTagAlways$
+  ]).pipe(
+    switchMap(([{activeType}, isShowAlways]) => isShowAlways || (activeType === WorkContextType.TAG)
       ? this._projectId$.pipe(
         switchMap(id => this._projectService.getById$(id))
       )

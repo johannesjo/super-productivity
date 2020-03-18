@@ -32,7 +32,8 @@
                    class="task-title"
                    contentEditableOnClick
                    contenteditable="true">{{task.title}}</div>
-              <tag-list [task]="task"></tag-list>
+              <tag-list [task]="task"
+                        [isShowProjectTagAlways]="true"></tag-list>
             </div>
             <div (click)="editReminder(task)"
                  [matTooltip]="task.reminderData.remindAt|date:'short'"
