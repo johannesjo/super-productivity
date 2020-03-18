@@ -18,9 +18,11 @@
                  position="start">
       <side-nav #sideNavElRef
                 (scrollToNotes)="scrollToNotes()"></side-nav>
-      <hr>
-      <notes #notesElRef
-             (scrollToSidenav)="scrollToSidenav()"></notes>
+      <ng-container *ngIf="workContextService.isActiveWorkContextProject$|async">
+        <hr>
+        <notes #notesElRef
+               (scrollToSidenav)="scrollToSidenav()"></notes>
+      </ng-container>
     </mat-sidenav>
 
     <mat-sidenav-content>

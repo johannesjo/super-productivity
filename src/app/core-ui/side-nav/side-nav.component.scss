@@ -6,7 +6,8 @@ $spacer: $s;
 // -----------
 :host {
   flex-grow: 1;
-  max-width: 200px;
+  max-width: $side-nav-width;
+  width: $side-nav-width;
   display: flex;
   flex-direction: column;
   min-height: 100vh;

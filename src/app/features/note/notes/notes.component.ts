@@ -82,6 +82,7 @@ export class NotesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
+    this._dragulaService.destroy('NOTES');
   }
 
   trackById(i: number, note: Note): string {

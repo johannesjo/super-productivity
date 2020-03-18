@@ -146,7 +146,9 @@
     <span class="text">{{T.MH.SETTINGS|translate}}</span>
   </button>
 
-  <button (click)="onScrollToNotesClick()"
+  <button *ngIf="workContextService.isActiveWorkContextProject$|async"
+          [@expandFade]
+          (click)="onScrollToNotesClick()"
           class="route-link scroll-down-btn"
           mat-menu-item>
     <mat-icon>notes</mat-icon>

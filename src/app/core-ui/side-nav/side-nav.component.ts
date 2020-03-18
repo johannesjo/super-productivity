@@ -14,13 +14,14 @@ import {map, switchMap} from 'rxjs/operators';
 import {TagService} from '../../features/tag/tag.service';
 import {Tag} from '../../features/tag/tag.model';
 import {WorkContextType} from '../../features/work-context/work-context.model';
+import {expandFadeAnimation} from '../../ui/animations/expand.ani';
 
 @Component({
   selector: 'side-nav',
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [standardListAnimation],
+  animations: [standardListAnimation, expandFadeAnimation],
 })
 export class SideNavComponent implements OnDestroy {
   @Output() scrollToNotes = new EventEmitter<void>();
