@@ -16,6 +16,7 @@ import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {map} from 'rxjs/operators';
+import {migrateReminders} from './migrate-reminder.util';
 
 @Injectable({
   providedIn: 'root',
@@ -170,9 +171,9 @@ export class ReminderService {
   }
 
   private async _loadFromLs(): Promise<Reminder[]> {
-    // return migrateReminders(
-    return await this._persistenceService.reminders.loadState() || [];
-    // );
+    return migrateReminders(
+      await this._persistenceService.reminders.loadState() || []
+    );
   }
 
   private _saveModel(reminders: Reminder[], isSkipLastActive = false) {
@@ -196,7 +197,6 @@ export class ReminderService {
   private async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {
     switch (type) {
       case 'NOTE':
-        // TODO fix
         return await this._noteService.getByIdFromEverywhere(id, projectId);
       case 'TASK':
         return await this._taskService.getByIdFromEverywhere(id);

@@ -59,6 +59,7 @@ import {
   selectTaskById,
   selectTaskByIdWithSubTaskData,
   selectTaskFeatureState,
+  selectTasksById,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
   selectTasksWorkedOnOrDoneFlat,
@@ -451,6 +452,10 @@ export class TaskService {
 
   getByIdLive$(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}));
+  }
+
+  getByIdsLive$(ids: string[]): Observable<Task[]> {
+    return this._store.pipe(select(selectTasksById, {ids}));
   }
 
   getByIdWithSubTaskData$(id: string): Observable<TaskWithSubTasks> {
