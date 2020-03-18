@@ -47,8 +47,6 @@ import {TagService} from './features/tag/tag.service';
 export class AppComponent implements OnDestroy {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
     this._projectService.isRelatedDataLoadedForCurrentProject$,
-    // TODO can be removed
-    this._store.select(selectIsTaskDataLoaded),
 
     // LOAD GLOBAL MODELS
     forkJoin([
@@ -59,7 +57,7 @@ export class AppComponent implements OnDestroy {
       this._tagService.load(),
     ])
   ]).pipe(
-    map(([isProjectDataLoaded, isTaskDataLoaded]) => isProjectDataLoaded && isTaskDataLoaded),
+    map(([isProjectDataLoaded]) => isProjectDataLoaded),
     filter(isLoaded => isLoaded),
     take(1),
   );
