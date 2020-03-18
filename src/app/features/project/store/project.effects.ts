@@ -197,17 +197,14 @@ export class ProjectEffects {
         setActiveWorkContext
       ),
       filter(({activeType}) => activeType === WorkContextType.PROJECT),
-      withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId))
-      ),
-      switchMap(([action, projectId]) => {
+      switchMap((action) => {
+        const projectId = action.activeId;
         return Promise.all([
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),
           this._obstructionService.loadStateForProject(projectId),
-          // this._taskRepeatCfgService.loadStateForProject(projectId),
         ]);
       }),
       map(data => {
