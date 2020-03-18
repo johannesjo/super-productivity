@@ -21,6 +21,7 @@ import {DEFAULT_JIRA_CFG} from '../../features/issue/providers/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../features/issue/providers/github/github.const';
 import {WorkContextAdvancedCfg, WorkContextThemeCfg} from '../../features/work-context/work-context.model';
 import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../features/work-context/work-context.const';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'project-settings',
@@ -39,12 +40,11 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   currentProjectTheme: WorkContextThemeCfg;
   projectCfg: WorkContextAdvancedCfg;
   issueIntegrationCfgs: IssueIntegrationCfgs;
-  globalCfg: GlobalConfigState;
 
   private _subs = new Subscription();
 
   constructor(
-    public readonly configService: GlobalConfigService,
+    public readonly workContextService: WorkContextService,
     public readonly projectService: ProjectService,
     private _cd: ChangeDetectorRef,
   ) {
@@ -56,14 +56,12 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this.configService.cfg$.subscribe((cfg) => {
-      this.globalCfg = cfg;
-    }));
     this._subs.add(this.projectService.currentProject$.subscribe((project) => {
       this.currentProject = project;
       this.projectCfg = project.advancedCfg;
       this.currentProjectTheme = project.theme;
       this.issueIntegrationCfgs = project.issueIntegrationCfgs;
+
 
       // Unfortunately needed, to make sure we have no empty configs
       // TODO maybe think of a better solution for the defaults

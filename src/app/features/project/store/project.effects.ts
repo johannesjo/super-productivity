@@ -46,6 +46,7 @@ import {
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
 import {WorkContextType} from '../../work-context/work-context.model';
+import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
 
 @Injectable()
 export class ProjectEffects {
@@ -189,27 +190,24 @@ export class ProjectEffects {
     );
 
 
-  // TODO can be removed later
   @Effect()
   onProjectIdChange$: any = this._actions$
     .pipe(
       ofType(
-        ProjectActionTypes.LoadProjectState,
-        ProjectActionTypes.SetCurrentProject,
+        setActiveWorkContext
       ),
+      filter(({activeType}) => activeType === WorkContextType.PROJECT),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId))
       ),
       switchMap(([action, projectId]) => {
         return Promise.all([
-          // TODO automatize
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),
           this._obstructionService.loadStateForProject(projectId),
           // this._taskRepeatCfgService.loadStateForProject(projectId),
-          // this._attachmentService.loadStateForProject(projectId),
         ]);
       }),
       map(data => {
@@ -218,7 +216,7 @@ export class ProjectEffects {
     );
 
 
-  // TODO can be removed later, but a solution for orphaned tasks might be needed
+  // TODO a solution for orphaned tasks might be needed
   @Effect({dispatch: false})
   deleteProjectRelatedData: any = this._actions$
     .pipe(

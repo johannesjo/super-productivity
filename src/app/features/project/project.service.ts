@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {ExportedProject, Project,} from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
@@ -10,16 +10,13 @@ import {
   ProjectState,
   selectAdvancedProjectCfg,
   selectArchivedProjects,
-  selectCurrentProject,
   selectIsRelatedDataLoadedForCurrentProject,
   selectProjectBreakNr,
   selectProjectBreakNrForDay,
   selectProjectBreakTime,
   selectProjectBreakTimeForDay,
   selectProjectById,
-  selectProjectGithubCfg,
   selectProjectGithubIsEnabled,
-  selectProjectJiraCfg,
   selectProjectJiraIsEnabled,
   selectProjectLastCompletedDay,
   selectProjectLastWorkEnd,
@@ -33,11 +30,10 @@ import {JiraCfg} from '../issue/providers/jira/jira.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/providers/github/github.model';
 import {Actions, ofType} from '@ngrx/effects';
-import {map, shareReplay, take} from 'rxjs/operators';
+import {map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
-import {WorklogExportSettings} from '../worklog/worklog.model';
 import {T} from '../../t.const';
 import {
   BreakNr,
@@ -47,6 +43,7 @@ import {
   WorkContextType
 } from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
+import {GITHUB_TYPE, JIRA_TYPE} from '../issue/issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -59,14 +56,17 @@ export class ProjectService {
   listWithoutCurrent$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjectsWithoutCurrent));
 
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
-  currentProject$: Observable<Project> = this._store$.pipe(
-    select(selectCurrentProject),
-    // filter(v => !!v),
-    // TODO investigate share replay issues
+
+  currentProject$: Observable<Project> = this._workContextService.activeWorkContextTypeAndId$.pipe(
+    switchMap(({activeId, activeType}) => activeType === WorkContextType.PROJECT
+      ? this.getByIdLive$(activeId)
+      : of(null)
+    ),
     shareReplay(1),
   );
-  currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
-    select(selectProjectJiraCfg),
+
+  currentJiraCfg$: Observable<JiraCfg> = this.currentProject$.pipe(
+    map(p => p && p.issueIntegrationCfgs && p.issueIntegrationCfgs[JIRA_TYPE] as JiraCfg),
     shareReplay(1),
   );
 
@@ -74,10 +74,11 @@ export class ProjectService {
     select(selectProjectJiraIsEnabled),
   );
 
-  currentGithubCfg$: Observable<GithubCfg> = this._store$.pipe(
-    select(selectProjectGithubCfg),
+  currentGithubCfg$: Observable<GithubCfg> = this.currentProject$.pipe(
+    map(p => p && p.issueIntegrationCfgs && p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg),
     shareReplay(1),
   );
+
   isGithubEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectGithubIsEnabled),
   );
@@ -154,6 +155,10 @@ export class ProjectService {
 
   getById$(id: string): Observable<Project> {
     return this._store$.pipe(select(selectProjectById, {id}), take(1));
+  }
+
+  getByIdLive$(id: string): Observable<Project> {
+    return this._store$.pipe(select(selectProjectById, {id}));
   }
 
   // TODO consistent naming
