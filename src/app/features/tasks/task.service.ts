@@ -252,14 +252,6 @@ export class TaskService {
     }));
   }
 
-  // NOTE: side effects are not executed!!!
-  // TODO check if still needed/ makes sense?
-  updateForProject(id: string, projectId: string, changedFields: Partial<Task>) {
-    this._store.dispatch(new UpdateTask({
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    }));
-  }
-
   updateTags(taskId: string, newTagIds: string[], oldTagIds: string[]) {
     this._store.dispatch(new UpdateTaskTags({taskId, newTagIds, oldTagIds}));
   }
@@ -511,21 +503,18 @@ export class TaskService {
 
   // BEWARE: does only work for task model updates
   async updateEverywhereForCurrentProject(id: string, changedFields: Partial<Task>) {
-    console.log('NOT IMPLEMENT');
-    // TODO fix
-    return null;
-
-    // const entities = await this.taskEntityState$.pipe(first()).toPromise();
-    // if (entities[id]) {
-    //   this.update(id, changedFields);
-    // } else {
-    //   await this.updateArchiveTaskForCurrentProject(id, changedFields);
-    // }
+    const state = await this.taskFeatureState$.pipe(first()).toPromise();
+    const {entities} = state;
+    if (entities[id]) {
+      this.update(id, changedFields);
+    } else {
+      await this.updateArchiveTaskForCurrentProject(id, changedFields);
+    }
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTaskForCurrentProject(id: string, changedFields: Partial<Task>): Promise<any> {
-    console.log('NOT IMPLEMENT');
+    throw new Error('NOT IMPLEMENT');
     // TODO fix
     return null;
     // const curProId = this._projectService.currentId;
@@ -535,7 +524,7 @@ export class TaskService {
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
-    console.log('NOT IMPLEMENT');
+    throw new Error('NOT IMPLEMENT');
     // TODO fix
     return null;
     // return await this._persistenceService.task.ent.getById(projectId, id)
@@ -544,7 +533,7 @@ export class TaskService {
 
   // NOTE: archived tasks not included
   async getByIdsForProject(taskIds: string[], projectId: string): Promise<Task[]> {
-    console.log('NOT IMPLEMENT');
+    throw new Error('NOT IMPLEMENT');
     // TODO fix
     return [];
 
@@ -554,7 +543,7 @@ export class TaskService {
   // NOTE: archived tasks not included
   // TODO think about getting data from current project directly from store
   async getByIdsFromAllProjects(projectIdTaskMap: { [key: string]: string[] }): Promise<Task[]> {
-    console.log('NOT IMPLEMENT');
+    throw new Error('NOT IMPLEMENT');
     // TODO fix
     return [];
 
@@ -571,7 +560,7 @@ export class TaskService {
 
   // TODO check if that is what we need
   async getAllTasksForCurrentProject(): Promise<Task[]> {
-    console.log('NOT IMPLEMENT');
+    throw new Error('NOT IMPLEMENT');
     // TODO fix
     return [];
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
@@ -596,7 +585,7 @@ export class TaskService {
     subTasks: Task[],
     isFromArchive: boolean,
   }> {
-    console.log('NOT IMPLEMENT');
+    throw new Error('NOT IMPLEMENT');
     // TODO fix
     return null;
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];

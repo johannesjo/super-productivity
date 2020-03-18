@@ -58,7 +58,7 @@ export class SchedulePageComponent {
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task) {
     if (isChanged) {
-      this.taskService.updateForProject(task.id, task.projectId, {title: newTitle});
+      this.taskService.update(task.id, {title: newTitle});
     }
     // this.focusSelf();
   }
