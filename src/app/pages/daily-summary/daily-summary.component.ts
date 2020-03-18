@@ -11,7 +11,7 @@ import {NoteService} from '../../features/note/note.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
 import {SnackService} from '../../core/snack/snack.service';
-import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
+import {filter, map, shareReplay, startWith, switchMap, take, tap} from 'rxjs/operators';
 import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -164,7 +164,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   async finishDay() {
-    const doneAndRepeatingTasks = await this.doneAndRepeatingTasks$.toPromise();
+    const doneAndRepeatingTasks = await this.doneAndRepeatingTasks$.pipe(take(1)).toPromise();
+
     this._taskService.moveToArchive(doneAndRepeatingTasks);
     this._projectService.updateLastCompletedDay(this._projectService.currentId, this.dayStr);
 
