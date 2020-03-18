@@ -19,7 +19,7 @@ import {Task, TaskWithSubTasks} from '../tasks/task.model';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.util';
-import {selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
+import {flattenTasks, selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
 import {Actions, ofType} from '@ngrx/effects';
 import {moveTaskToBacklogList} from './store/work-context-meta.actions';
 import {selectProjectById} from '../project/store/project.reducer';
@@ -178,6 +178,21 @@ export class WorkContextService {
     distinctUntilChanged(),
   );
 
+  allNonArchiveTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
+    this.todaysTasks$,
+    this.backlogTasks$
+  ]).pipe(
+    map(([today, backlog]) => ([
+      ...today,
+      ...backlog
+    ]))
+  );
+
+  allRepeatableTasksFlat$: Observable<TaskWithSubTasks[]> = this.allNonArchiveTasks$.pipe(
+    map((tasks) => (tasks.filter(task => !!task.repeatCfgId))),
+    map(tasks => flattenTasks(tasks)),
+  );
+
   // TODO could be done better
   getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
     return this.todaysTasks$.pipe(
@@ -213,6 +228,31 @@ export class WorkContextService {
       distinctUntilChanged(),
     );
   }
+
+  getTasksWorkedOnOrDoneFlat$(dayStr: string): Observable<Task[]> {
+    return this.allNonArchiveTasks$.pipe(
+      map(tasks => flattenTasks(tasks)),
+      map(tasks => tasks.filter(
+        (t: Task) => t.isDone || (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
+      ))
+    );
+  }
+
+  getTasksWorkedOnOrDoneOrRepeatableFlat$(dayStr) {
+    return combineLatest([
+      this.allRepeatableTasksFlat$,
+      this.getTasksWorkedOnOrDoneFlat$(dayStr)
+    ]).pipe(
+      map(([repeatableTasks, workedOnOrDoneTasks]) => [
+        ...repeatableTasks,
+        // NOTE: remove double tasks
+        ...workedOnOrDoneTasks.filter(
+          (task => !task.repeatCfgId || task.repeatCfgId === null)
+        ),
+      ]),
+    );
+  }
+
 
   constructor(
     private _store$: Store<WorkContextState>,
