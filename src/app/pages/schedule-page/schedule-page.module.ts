@@ -2,6 +2,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SchedulePageComponent} from './schedule-page.component';
 import {UiModule} from '../../ui/ui.module';
+import {TagModule} from '../../features/tag/tag.module';
 
 
 @NgModule({
@@ -9,6 +10,7 @@ import {UiModule} from '../../ui/ui.module';
   imports: [
     CommonModule,
     UiModule,
+    TagModule,
   ],
   exports: [SchedulePageComponent]
 })

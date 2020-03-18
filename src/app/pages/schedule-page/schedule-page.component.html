@@ -32,12 +32,7 @@
                    class="task-title"
                    contentEditableOnClick
                    contenteditable="true">{{task.title}}</div>
-              <div *ngIf="(projectService.getById$(task.reminderData.projectId)|async) as project"
-                   class="project">
-                <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
-                     class="project-color"></div>
-                <div class="project-title">{{project.title}}</div>
-              </div>
+              <tag-list [task]="task"></tag-list>
             </div>
             <div (click)="editReminder(task)"
                  [matTooltip]="task.reminderData.remindAt|date:'short'"

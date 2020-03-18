@@ -47,7 +47,15 @@
   .title {
     flex: 1;
     padding-top: $s;
-    padding-bottom: $s;
+    //padding-bottom: $s;
+    display: flex;
+    flex-direction: column;
+
+    ::ng-deep .tags-container {
+      margin-left: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
   }
 
   .due-date {
@@ -81,17 +89,6 @@
   font-size: 11px;
   display: flex;
   align-items: center;
-}
-
-.project-title {
-  line-height: 1;
-}
-
-.project-color {
-  border-radius: 50%;
-  height: $s;
-  width: $s;
-  margin-right: $s;
 }
 
 .no-scheduled-tasks {
