@@ -9,13 +9,15 @@ import {TranslateService} from '@ngx-translate/core';
 import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
 import {Actions, ofType} from '@ngrx/effects';
 import {ProjectActionTypes} from '../../features/project/store/project.actions';
+import {WorkContextService} from '../../features/work-context/work-context.service';
+import {setActiveWorkContext} from '../../features/work-context/store/work-context.actions';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SnackService {
   private _ref: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
-  private _onProjectChange$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.SetCurrentProject));
+  private _onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
 
   constructor(
     private _store$: Store<any>,
@@ -23,7 +25,7 @@ export class SnackService {
     private _actions$: Actions,
     private _matSnackBar: MatSnackBar
   ) {
-    this._onProjectChange$.subscribe(() => {
+    this._onWorkContextChange$.subscribe(() => {
       this.close();
     });
   }
