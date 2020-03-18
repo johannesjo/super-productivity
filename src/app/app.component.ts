@@ -55,7 +55,7 @@ export class AppComponent implements OnDestroy {
       this.taskService.load(),
       this._projectService.load(),
       this._configService.load(),
-      this._workContextService.load(),
+      this.workContextService.load(),
       this._tagService.load(),
     ])
   ]).pipe(
@@ -86,12 +86,11 @@ export class AppComponent implements OnDestroy {
     private _store: Store<any>,
     private _languageService: LanguageService,
     private _attachmentService: TaskAttachmentService,
-    private _workContextService: WorkContextService,
     private _tagService: TagService,
+    public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly taskService: TaskService,
-    public projectService: ProjectService,
   ) {
     this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;

@@ -35,7 +35,8 @@
       <mat-icon>add</mat-icon>
     </button>
 
-    <button (click)="bookmarkService.toggleBookmarks()"
+    <button *ngIf="(workContextService.isActiveWorkContextProject$|async)"
+            (click)="bookmarkService.toggleBookmarks()"
             [class.isOpen]="bookmarkService.isShowBookmarks$|async"
             [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate"
             class="bookmark-btn"

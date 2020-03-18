@@ -27,7 +27,7 @@
       <header [class.isNotScrolled]="!(layoutService.isScrolled$|async)"
               class="header-wrapper">
         <main-header></main-header>
-        <bookmark-bar></bookmark-bar>
+        <bookmark-bar *ngIf="(workContextService.isActiveWorkContextProject$|async)"></bookmark-bar>
         <banner></banner>
       </header>
 

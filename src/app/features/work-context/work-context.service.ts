@@ -39,6 +39,9 @@ export class WorkContextService {
     distinctUntilChanged(distinctUntilChangedObject),
     shareReplay(1),
   );
+  isActiveWorkContextProject$: Observable<boolean> = this.activeWorkContextTypeAndId$.pipe(
+    map(({activeType}) => activeType === WorkContextType.PROJECT)
+  );
 
   // for convenience...
   activeWorkContextId: string;
