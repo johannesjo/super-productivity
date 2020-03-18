@@ -405,7 +405,6 @@ export class TaskService {
     this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp}));
   }
 
-  // TODO this should be done via action and effects
   startTaskFromOtherProject$(taskId: string, projectId: string): Observable<Task> {
     // this._projectService.setCurrentId(projectId);
     // TODO change project/tag
@@ -508,27 +507,20 @@ export class TaskService {
     if (entities[id]) {
       this.update(id, changedFields);
     } else {
-      await this.updateArchiveTaskForCurrentProject(id, changedFields);
+      await this.updateArchiveTask(id, changedFields);
     }
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
-  async updateArchiveTaskForCurrentProject(id: string, changedFields: Partial<Task>): Promise<any> {
-    throw new Error('NOT IMPLEMENT');
-    // TODO fix
-    return null;
-    // const curProId = this._projectService.currentId;
-    // return await this._persistenceService.taskArchive.ent.execAction(curProId, new UpdateTask({
-    //   task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    // }));
+  async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<any> {
+    return await this._persistenceService.taskArchive.execAction(new UpdateTask({
+      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    }));
   }
 
-  async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
-    throw new Error('NOT IMPLEMENT');
-    // TODO fix
-    return null;
-    // return await this._persistenceService.task.ent.getById(projectId, id)
-    //   || await this._persistenceService.taskArchive.ent.getById(projectId, id);
+  async getByIdFromEverywhere(id: string): Promise<Task> {
+    return await this._persistenceService.task.getById(id)
+      || await this._persistenceService.taskArchive.getById(id);
   }
 
   // NOTE: archived tasks not included

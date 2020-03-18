@@ -25,6 +25,18 @@ export interface PersistenceBaseModel<T> {
   saveState(state: T, isForce?: boolean): Promise<any>;
 }
 
+export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S> {
+  getById(id: string): Promise<M>;
+
+  getByIds(id: string[]): Promise<M[]>;
+
+  // NOTE: side effects are not executed!!!
+  bulkUpdate(adjustFn: (model: M) => M): Promise<S>;
+
+  // NOTE: side effects are not executed!!!
+  execAction(action: Action): Promise<S>;
+}
+
 export interface EntityModelHelpers<S, M> {
   getById(projectId: string, id: string): Promise<M>;
 

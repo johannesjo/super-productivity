@@ -23,7 +23,7 @@ import {
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {TaskArchive, TaskState} from '../../features/tasks/task.model';
+import {ArchiveTask, Task, TaskArchive, TaskState} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects, TaskAttachmentState} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
@@ -34,7 +34,7 @@ import {issueProviderKeys} from '../../features/issue/issue.const';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
 import {CompressionService} from '../compression/compression.service';
-import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence.model';
+import {PersistenceBaseEntityModel, PersistenceBaseModel, PersistenceForProjectModel} from './persistence.model';
 import {Metric, MetricState} from '../../features/metric/metric.model';
 import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
@@ -51,6 +51,7 @@ import {migrateProjectState} from '../../features/project/migrate-projects-state
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
 import {WorkContextState} from '../../features/work-context/work-context.model';
+import {taskReducer} from '../../features/tasks/store/task.reducer';
 
 
 @Injectable({
@@ -70,14 +71,16 @@ export class PersistenceService {
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
   // MAIN TASK MODELS
-  task = this._cmBase<TaskState>(
+  task = this._cmBaseEntity<TaskState, Task>(
     LS_TASK_STATE,
     'task',
+    taskReducer,
     migrateTaskState,
   );
-  taskArchive = this._cmBase<TaskArchive>(
+  taskArchive = this._cmBaseEntity<TaskArchive, ArchiveTask>(
     LS_TASK_ARCHIVE,
     'taskArchive',
+    taskReducer,
     migrateTaskArchiveState,
   );
 
@@ -85,21 +88,6 @@ export class PersistenceService {
   tag = this._cmBase<TagState>(
     LS_TAG_STATE,
     'tag',
-    // NOTE: don't forget to trigger save when using this
-    // (tagState: TagState): TagState => {
-    //   const tagEntities = {...tagState.entities};
-    //   Object.keys(tagEntities).forEach((key) => {
-    //     tagEntities[key] = {
-    //       ...tagEntities[key],
-    //       theme: WORK_CONTEXT_DEFAULT_THEME
-    //     };
-    //   });
-    //
-    //   return {
-    //     entities: tagEntities,
-    //     ids: tagState.ids
-    //   };
-    // }
   );
   /** @deprecated */
   taskAttachment = this._cmBase<TaskAttachmentState>(
@@ -337,6 +325,60 @@ export class PersistenceService {
       appDataKey,
       loadState: () => this._loadFromDb(lsKey).then(migrateFn),
       saveState: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+    };
+
+    this._baseModels.push(model);
+    return model;
+  }
+
+  private _cmBaseEntity<S, M>(
+    lsKey: string,
+    appDataKey: keyof AppBaseData,
+    reducerFn: (state: S, action: Action) => S,
+    migrateFn: (state: S) => S = (v) => v,
+  ): PersistenceBaseEntityModel<S, M> {
+    const model = {
+      appDataKey,
+      loadState: () => this._loadFromDb(lsKey).then(migrateFn),
+      saveState: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+      getById: async (id: string): Promise<M> => {
+        const state = await model.loadState() as any;
+        return state && state.entities && state.entities[id] || null;
+      },
+      getByIds: async (ids: string[]): Promise<M[]> => {
+        const state = await model.loadState() as any;
+        if (state && state.entities) {
+          return ids
+            .map(id => state.entities[id])
+            // filter out broken entries
+            .filter((modelIN: M) => !!modelIN);
+        }
+        return null;
+      },
+
+      // NOTE: side effects are not executed!!!
+      execAction: async (action: Action): Promise<S> => {
+        const state = await model.loadState();
+        const newState = reducerFn(state, action);
+        await model.saveState(newState, false);
+        return newState;
+      },
+      // NOTE: side effects are not executed!!!
+      bulkUpdate: async (adjustFn: (model: M) => M): Promise<S> => {
+        const state = await model.loadState() as any;
+        const ids = state.ids as string[];
+        const newState = {
+          ...state,
+          entities: ids.reduce((acc, key) => {
+            return {
+              ...acc,
+              [key]: adjustFn(state.entity[key]),
+            };
+          }, {})
+        };
+        await model.saveState(newState, false);
+        return newState;
+      },
     };
 
     this._baseModels.push(model);

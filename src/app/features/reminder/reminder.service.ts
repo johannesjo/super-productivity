@@ -199,7 +199,7 @@ export class ReminderService {
         // TODO fix
         return await this._noteService.getByIdFromEverywhere(id, projectId);
       case 'TASK':
-        return await this._taskService.getByIdFromEverywhere(id, projectId);
+        return await this._taskService.getByIdFromEverywhere(id);
     }
   }
 }
