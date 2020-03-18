@@ -47,7 +47,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       ...doneTasks.filter(task => !task.repeatCfgId || task.repeatCfgId === null),
     ]),
   );
-  todaysTasks$: Observable<TaskWithSubTasks[]> = this._workContextService.todaysTasks$;
 
   isTimeSheetExported = true;
   showSuccessAnimation;
@@ -109,8 +108,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   isBreakTrackingSupport$: Observable<boolean> = this.configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 
   private _successAnimationTimeout;
-  private _doneAndRepeatingTasks: TaskWithSubTasks[];
-  private _todaysTasks: TaskWithSubTasks[];
 
   // calc time spent on todays tasks today
   private _subs: Subscription = new Subscription();
@@ -135,15 +132,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // TODO fix
-    this._subs.add(this.doneAndRepeatingTasks$.subscribe((val) => {
-      this._doneAndRepeatingTasks = val;
-    }));
-
-    this._subs.add(this.todaysTasks$.subscribe((val) => {
-      this._todaysTasks = val;
-    }));
-
     // we need to wait, otherwise data would get overwritten
     this._subs.add(this._taskService.currentTaskId$.pipe(
       filter(id => !!id),
@@ -184,8 +172,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     });
   }
 
-  finishDay() {
-    this._taskService.moveToArchive(this._doneAndRepeatingTasks);
+  async finishDay() {
+    const doneAndRepeatingTasks = await this.doneAndRepeatingTasks$.toPromise();
+    this._taskService.moveToArchive(doneAndRepeatingTasks);
     this._projectService.updateLastCompletedDay(this._projectService.currentId, this.dayStr);
 
     if (IS_ELECTRON && this.isForToday) {
