@@ -168,10 +168,10 @@ export class TaskService {
 
     // time tracking
     this._timeTrackingService.tick$
-      .pipe(withLatestFrom(this.currentTaskId$))
-      .subscribe(([tick, currentId]) => {
-        if (currentId) {
-          this.addTimeSpent(currentId, tick.duration, tick.date);
+      .pipe(withLatestFrom(this.currentTask$))
+      .subscribe(([tick, currentTask]) => {
+        if (currentTask) {
+          this.addTimeSpent(currentTask, tick.duration, tick.date);
         }
       });
   }
@@ -348,10 +348,10 @@ export class TaskService {
     }));
   }
 
-  addTimeSpent(id: string,
+  addTimeSpent(task: Task,
                duration: number,
                date: string = getWorklogStr()) {
-    this._store.dispatch(new AddTimeSpent({id, date, duration}));
+    this._store.dispatch(new AddTimeSpent({task, date, duration}));
   }
 
   removeTimeSpent(id: string,

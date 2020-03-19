@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {AddTimeSpent, SetCurrentTask, TaskActionTypes} from './task.actions';
 import {select, Store} from '@ngrx/store';
-import {filter, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {selectCurrentTask} from './task.selectors';
 import {TaskService} from '../task.service';
 import {Task} from '../task.model';
@@ -52,7 +52,7 @@ export class TaskElectronEffects {
     withLatestFrom(this._configService.cfg$),
     // we display pomodoro progress for pomodoro
     filter(([a, cfg]: [AddTimeSpent, GlobalConfigState]) => !cfg || !cfg.pomodoro.isEnabled),
-    switchMap(([act]) => this._taskService.getById$(act.payload.id)),
+    map(([act]) => act.payload.task),
     tap((task: Task) => {
       const progress = task.timeSpent / task.timeEstimate;
       this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress});

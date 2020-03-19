@@ -240,12 +240,11 @@ export function taskReducer(
     }
 
     case TaskActionTypes.AddTimeSpent: {
-      const {id, date, duration} = action.payload;
-      const task = getTaskById(id, state);
+      const {task, date, duration} = action.payload;
       const currentTimeSpentForTickDay = task.timeSpentOnDay && +task.timeSpentOnDay[date] || 0;
 
       return updateTimeSpentForTask(
-        id, {
+        task.id, {
           ...task.timeSpentOnDay,
           [date]: (currentTimeSpentForTickDay + duration)
         },

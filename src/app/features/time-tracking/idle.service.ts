@@ -126,7 +126,7 @@ export class IdleService {
                   }
                 });
               } else {
-                this._taskService.addTimeSpent(task.id, timeSpent);
+                this._taskService.addTimeSpent(task, timeSpent);
                 this._taskService.setCurrentId(task.id);
               }
             }

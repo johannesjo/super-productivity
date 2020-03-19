@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {filter, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -13,13 +13,10 @@ import {
   UpdateProjectWorkEnd,
   UpdateProjectWorkStart
 } from './project.actions';
-import {selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState} from './project.reducer';
+import {selectProjectFeatureState} from './project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {TaskService} from '../../tasks/task.service';
 import {BookmarkService} from '../../bookmark/bookmark.service';
-import {TaskAttachmentService} from '../../tasks/task-attachment/task-attachment.service';
 import {NoteService} from '../../note/note.service';
-import {IssueService} from '../../issue/issue.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {TaskActionTypes} from '../../tasks/store/task.actions';
@@ -32,7 +29,6 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {Router} from '@angular/router';
 import {BannerId} from '../../../core/banner/banner.model';
 import {GlobalConfigService} from '../../config/global-config.service';
-import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {T} from '../../../t.const';
 import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
 import {
@@ -47,6 +43,8 @@ import {
 } from '../../work-context/store/work-context-meta.actions';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
+import {WorkContextService} from '../../work-context/work-context.service';
+import {Project} from '../project.model';
 
 @Injectable()
 export class ProjectEffects {
@@ -111,27 +109,6 @@ export class ProjectEffects {
 
 
   // TODO rethink & migrate
-  @Effect()
-  updateWorkStart$: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.LoadProjectState,
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-      ),
-      withLatestFrom(
-        this._store$.pipe(select(selectCurrentProject))
-      ),
-      filter(([a, projectData]) => !projectData.workStart[getWorklogStr()]),
-      map(([a, projectData]) => {
-        return new UpdateProjectWorkStart({
-          id: projectData.id,
-          date: getWorklogStr(),
-          newVal: Date.now(),
-        });
-      })
-    );
-
-  // TODO rethink & migrate
   @Effect({dispatch: false})
   checkIfDayWasFinished$: any = this._actions$
     .pipe(
@@ -170,24 +147,39 @@ export class ProjectEffects {
     );
 
 
-  // TODO rethink & migrate
-  @Effect()
-  updateWorkEnd$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskActionTypes.AddTimeSpent,
-      ),
-      withLatestFrom(
-        this._store$.pipe(select(selectCurrentProject))
-      ),
-      map(([a, projectData]) => {
-        return new UpdateProjectWorkEnd({
-          id: projectData.id,
-          date: getWorklogStr(),
-          newVal: Date.now(),
-        });
-      })
-    );
+  // @Effect()
+  // updateWorkStart$: any = this._actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.AddTimeSpent),
+  //     concatMap(() => this._workContextService.isActiveWorkContextProject$),
+  //     filter((isActiveWorkContextProjectType) => isActiveWorkContextProjectType),
+  //     concatMap(() => this._workContextService.activeWorkContextId$),
+  //     concatMap((id) => this._projectService.getById$(id)),
+  //     filter((project: Project) => !project.workStart[getWorklogStr()]),
+  //     map((project) => {
+  //       return new UpdateProjectWorkStart({
+  //         id: project.id,
+  //         date: getWorklogStr(),
+  //         newVal: Date.now(),
+  //       });
+  //     })
+  //   );
+  //
+  // @Effect()
+  // updateWorkEnd$: any = this._actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.AddTimeSpent),
+  //     concatMap(() => this._workContextService.isActiveWorkContextProject$),
+  //     filter((isActiveWorkContextProjectType) => isActiveWorkContextProjectType),
+  //     concatMap(() => this._workContextService.activeWorkContextId$),
+  //     map((id) => {
+  //       return new UpdateProjectWorkEnd({
+  //         id,
+  //         date: getWorklogStr(),
+  //         newVal: Date.now(),
+  //       });
+  //     })
+  //   );
 
 
   @Effect()
@@ -329,18 +321,15 @@ export class ProjectEffects {
     private _snackService: SnackService,
     private _projectService: ProjectService,
     private _persistenceService: PersistenceService,
-    private _taskService: TaskService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _issueService: IssueService,
     private _bookmarkService: BookmarkService,
     private _noteService: NoteService,
     private _bannerService: BannerService,
     private _globalConfigService: GlobalConfigService,
-    private _attachmentService: TaskAttachmentService,
     private _reminderService: ReminderService,
     private _metricService: MetricService,
     private _obstructionService: ObstructionService,
     private _improvementService: ImprovementService,
+    private _workContextService: WorkContextService,
     private _router: Router,
   ) {
   }
