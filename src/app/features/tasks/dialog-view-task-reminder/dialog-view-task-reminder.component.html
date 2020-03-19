@@ -7,9 +7,10 @@
   <div class="content"
        *ngIf="task">
     <p *ngIf="isForCurrentContext">{{T.F.TASK.D_REMINDER_VIEW.FOR_CURRENT|translate}}</p>
-    <div *ngIf="!isForCurrentContext"
+    <div *ngIf="!isForCurrentContext && (targetContext$|async) as targetContext"
          class="for-project">
-      <h3>{{T.F.TASK.D_REMINDER_VIEW.FROM_LIST|translate:{title: (targetContext$|async)?.title} }}</h3>
+      <h3 *ngIf="isForProject">{{T.F.TASK.D_REMINDER_VIEW.FROM_PROJECT|translate:{title: targetContext?.title} }}</h3>
+      <h3 *ngIf="isForTag">{{T.F.TASK.D_REMINDER_VIEW.FROM_TAG|translate:{title: targetContext?.title} }}</h3>
       <p>{{T.F.TASK.D_REMINDER_VIEW.FOR_OTHER|translate}}</p>
     </div>
   </div>
@@ -28,7 +29,6 @@
     </button>
 
     <button (click)="dismiss()"
-            *ngIf="isForCurrentContext"
             [disabled]="isDisableControls"
             color="primary"
             mat-stroked-button
@@ -44,7 +44,7 @@
             type="button">
       <mat-icon>play_arrow</mat-icon>
       {{!isForCurrentContext
-      ? (T.F.TASK.D_REMINDER_VIEW.SWITCH_PROJECT_START|translate)
+      ? (T.F.TASK.D_REMINDER_VIEW.SWITCH_CONTEXT_START|translate)
       : (T.F.TASK.D_REMINDER_VIEW.START|translate)}}
     </button>
   </div>

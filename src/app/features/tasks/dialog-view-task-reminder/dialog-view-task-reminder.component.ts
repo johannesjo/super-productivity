@@ -30,6 +30,8 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   taskTitle: string;
   reminder: Reminder = this.data.reminder;
   isForCurrentContext = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
+  isForTag = this.reminder.workContextType === WorkContextType.TAG;
+  isForProject = this.reminder.workContextType === WorkContextType.PROJECT;
 
 
   targetContext$: Observable<Tag | Project> = (this.data.reminder.workContextType === WorkContextType.PROJECT)
