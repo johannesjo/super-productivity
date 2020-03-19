@@ -8,6 +8,10 @@ import {ReminderService} from '../../reminder/reminder.service';
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
 import {T} from '../../../t.const';
+import {WorkContextService} from '../../work-context/work-context.service';
+import {Tag} from '../../tag/tag.model';
+import {WorkContextType} from '../../work-context/work-context.model';
+import {TagService} from '../../tag/tag.service';
 
 @Component({
   selector: 'dialog-view-note-reminder',
@@ -19,8 +23,10 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
   T = T;
   note$: Observable<Note> = this._noteService.getById$(this.data.reminder.relatedId);
   reminder: Reminder = this.data.reminder;
-  isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
-  targetProject$: Observable<Project> = this._projectService.getById$(this.reminder.projectId);
+  isForCurrentContext = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
+  targetContext$: Observable<Tag | Project> = (this.data.reminder.workContextType === WorkContextType.PROJECT)
+    ? this._projectService.getById$(this.reminder.workContextId)
+    : this._tagService.getTagById$(this.reminder.workContextId);
 
   private _subs = new Subscription();
 
@@ -28,6 +34,8 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
     private _matDialogRef: MatDialogRef<DialogViewNoteReminderComponent>,
     private _noteService: NoteService,
     private _projectService: ProjectService,
+    private _tagService: TagService,
+    private _workContextService: WorkContextService,
     private _matDialog: MatDialog,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
@@ -36,6 +44,10 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this.close();
     }));
+
+    if (this.reminder.workContextType !== WorkContextType.PROJECT) {
+      throw new Error('This should never happen');
+    }
   }
 
   ngOnDestroy(): void {
@@ -44,7 +56,8 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
 
   dismiss() {
     const reminder = this.reminder;
-    if (this.isForCurrentProject) {
+
+    if (this.isForCurrentContext) {
       this._noteService.update(reminder.relatedId, {
         reminderId: null,
       });
@@ -52,7 +65,7 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
       this.close();
 
     } else {
-      this._noteService.updateFromDifferentProject(reminder.projectId, reminder.relatedId, {
+      this._noteService.updateFromDifferentWorkContext(reminder.workContextId, reminder.relatedId, {
         reminderId: null,
       }).then(() => {
         this._reminderService.removeReminder(reminder.id);

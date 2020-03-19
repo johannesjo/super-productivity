@@ -9,9 +9,8 @@ import {DialogAddTaskReminderComponent} from '../../features/tasks/dialog-add-ta
 import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 import {Router} from '@angular/router';
 import {take} from 'rxjs/operators';
-import {ProjectService} from '../../features/project/project.service';
-import {THEME_COLOR_MAP} from '../../app.constants';
 import {AddTaskReminderInterface} from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
+import {WorkContextService} from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'schedule-page',
@@ -24,17 +23,17 @@ export class SchedulePageComponent {
   T = T;
 
   constructor(
-    public taskService: TaskService,
-    public projectService: ProjectService,
     public scheduledTaskService: ScheduledTaskService,
     public reminderService: ReminderService,
+    private _workContextService: WorkContextService,
+    private _taskService: TaskService,
     private _matDialog: MatDialog,
     private _router: Router,
   ) {
   }
 
   startTask(task: TaskWithReminderData) {
-    if (task.reminderData.projectId === this.projectService.currentId) {
+    if (task.reminderData.workContextId === this._workContextService.activeWorkContextId) {
       this._startTaskFronCurrentProject(task);
     } else {
       this._startTaskFromOtherProject(task);
@@ -42,7 +41,7 @@ export class SchedulePageComponent {
   }
 
   removeReminder(task: TaskWithReminderData) {
-    this.taskService.removeReminder(task.id, task.reminderId);
+    this._taskService.removeReminder(task.id, task.reminderId);
   }
 
   editReminder(task: TaskWithReminderData) {
@@ -58,7 +57,7 @@ export class SchedulePageComponent {
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string, task: Task) {
     if (isChanged) {
-      this.taskService.update(task.id, {title: newTitle});
+      this._taskService.update(task.id, {title: newTitle});
     }
     // this.focusSelf();
   }
@@ -68,28 +67,22 @@ export class SchedulePageComponent {
     return task.id;
   }
 
-  getThemeColor(color: string): { [key: string]: string } {
-    const standardColor = THEME_COLOR_MAP[color];
-    const colorToUse = (standardColor)
-      ? standardColor
-      : color;
-    return {background: colorToUse};
-  }
-
   private _startTaskFronCurrentProject(task: TaskWithReminderData) {
     if (task.parentId) {
-      this.taskService.moveToToday(task.parentId, true);
+      this._taskService.moveToToday(task.parentId, true);
     } else {
-      this.taskService.moveToToday(task.id, true);
+      this._taskService.moveToToday(task.id, true);
     }
-    this.taskService.removeReminder(task.id, task.reminderId);
-    this.taskService.setCurrentId(task.id);
+    this._taskService.removeReminder(task.id, task.reminderId);
+    this._taskService.setCurrentId(task.id);
     this._router.navigate(['/active/tasks']);
   }
 
   private _startTaskFromOtherProject(task: TaskWithReminderData) {
-    this.taskService.startTaskFromOtherContext$(task.id, task.reminderData.projectId).pipe(take(1)).subscribe(() => {
-      this._router.navigate(['/active/tasks']);
-    });
+    this._taskService.startTaskFromOtherContext$(task.id, task.reminderData.workContextType, task.reminderData.workContextId)
+      .pipe(take(1))
+      .subscribe(() => {
+        this._router.navigate(['/active/tasks']);
+      });
   }
 }

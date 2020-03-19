@@ -4,14 +4,14 @@
 </h1>
 
 <mat-dialog-content>
-  <div *ngIf="isForCurrentProject"
+  <div *ngIf="isForCurrentContext"
        class="note">
     {{(note$|async)?.content }}
   </div>
 
-  <ng-container *ngIf="!isForCurrentProject">
+  <ng-container *ngIf="!isForCurrentContext">
     <p>From Project</p>
-    <h3>{{(targetProject$|async)?.title}}</h3>
+    <h3>{{(targetContext$|async)?.title}}</h3>
     <div class="note">
       {{reminder.title }}
     </div>

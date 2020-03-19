@@ -139,16 +139,16 @@ export class TaskRelatedModelEffects {
 
   private _moveToOtherProject(action: MoveToOtherProject) {
     const mainTasks = action.payload.task as TaskWithSubTasks;
-    const projectId = action.payload.targetProjectId;
+    const workContextId = action.payload.targetProjectId;
 
     if (mainTasks.reminderId) {
-      this._reminderService.updateReminder(mainTasks.reminderId, {projectId});
+      this._reminderService.updateReminder(mainTasks.reminderId, {workContextId});
     }
 
     if (mainTasks.subTasks) {
       mainTasks.subTasks.forEach((subTask) => {
         if (subTask.reminderId) {
-          this._reminderService.updateReminder(subTask.reminderId, {projectId});
+          this._reminderService.updateReminder(subTask.reminderId, {workContextId});
         }
       });
     }

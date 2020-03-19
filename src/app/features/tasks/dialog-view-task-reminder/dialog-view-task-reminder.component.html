@@ -5,7 +5,7 @@
 
 <mat-dialog-content>
   <div class="content"
-       *ngIf="_task$|async as task">
+       *ngIf="task">
     <h3>"{{task?.title || reminder.title}}"</h3>
 
     <p *ngIf="isForCurrentContext">{{T.F.TASK.D_REMINDER_VIEW.FOR_CURRENT|translate}}</p>

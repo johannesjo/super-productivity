@@ -78,15 +78,15 @@ export class NoteService {
     }));
   }
 
-  public async updateFromDifferentProject(projectId, id, updates: Partial<Note>) {
-    const noteState = await this._persistenceService.note.load(projectId);
+  public async updateFromDifferentWorkContext(workContextId, id, updates: Partial<Note>) {
+    const noteState = await this._persistenceService.note.load(workContextId);
     const noteToUpdate = noteState.entities[id];
     if (noteToUpdate) {
       Object.assign(noteToUpdate, updates);
     } else {
       console.warn('Note not found while trying to update for different project');
     }
-    return await this._persistenceService.note.save(projectId, noteState);
+    return await this._persistenceService.note.save(workContextId, noteState);
   }
 
   public updateOrder(ids: string[]) {

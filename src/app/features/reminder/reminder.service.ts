@@ -17,6 +17,7 @@ import {T} from '../../t.const';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
+import {WorkContextService} from '../work-context/work-context.service';
 
 @Injectable({
   providedIn: 'root',
@@ -39,6 +40,7 @@ export class ReminderService {
 
   constructor(
     private readonly _projectService: ProjectService,
+    private readonly _workContextService: WorkContextService,
     private readonly _globalSyncService: GlobalSyncService,
     private readonly _persistenceService: PersistenceService,
     private readonly _notifyService: NotifyService,
@@ -92,7 +94,8 @@ export class ReminderService {
     const id = shortid();
     this._reminders.push({
       id,
-      projectId: this._projectService.currentId,
+      workContextId: this._workContextService.activeWorkContextId,
+      workContextType: this._workContextService.activeWorkContextType,
       relatedId,
       title,
       remindAt,
@@ -134,8 +137,8 @@ export class ReminderService {
     }
   }
 
-  removeReminderByProjectId(projectId: string) {
-    const reminders = this._reminders.filter(reminderIN => reminderIN.projectId === projectId);
+  removeReminderByWorkContextId(workContextId: string) {
+    const reminders = this._reminders.filter(reminderIN => reminderIN.workContextId === workContextId);
     if (reminders && reminders.length) {
       reminders.forEach(reminder => {
         this.removeReminder(reminder.id);
@@ -146,7 +149,7 @@ export class ReminderService {
   private async _onReminderActivated(msg: MessageEvent) {
     const reminder = msg.data as Reminder;
 
-    const relatedModel = await this._getRelatedDataForReminder(reminder.relatedId, reminder.projectId, reminder.type);
+    const relatedModel = await this._getRelatedDataForReminder(reminder.relatedId, reminder.workContextId, reminder.type);
     console.log('RelatedModel for Reminder', relatedModel);
 
     // only show when not currently syncing and related model still exists
@@ -194,10 +197,10 @@ export class ReminderService {
     this._snackService.open({type: 'ERROR', msg: T.F.REMINDER.S_REMINDER_ERR});
   }
 
-  private async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {
+  private async _getRelatedDataForReminder(id: string, workContextId: string, type: ReminderType): Promise<Task | Note> {
     switch (type) {
       case 'NOTE':
-        return await this._noteService.getByIdFromEverywhere(id, projectId);
+        return await this._noteService.getByIdFromEverywhere(id, workContextId);
       case 'TASK':
         return await this._taskService.getByIdFromEverywhere(id);
     }
