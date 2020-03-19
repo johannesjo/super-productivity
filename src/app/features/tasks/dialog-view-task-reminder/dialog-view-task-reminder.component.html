@@ -1,18 +1,15 @@
 <h1 mat-dialog-title>
   <mat-icon class="dialog-header-icon">alarm</mat-icon>
-  <span>{{T.F.TASK.D_REMINDER_VIEW.TITLE|translate}}</span>
+  <span>{{task?.title || reminder.title}}</span>
 </h1>
 
 <mat-dialog-content>
   <div class="content"
        *ngIf="task">
-    <h3>"{{task?.title || reminder.title}}"</h3>
-
     <p *ngIf="isForCurrentContext">{{T.F.TASK.D_REMINDER_VIEW.FOR_CURRENT|translate}}</p>
     <div *ngIf="!isForCurrentContext"
          class="for-project">
-      <p>{{T.F.TASK.D_REMINDER_VIEW.FROM_PROJECT|translate}} Xa</p>
-      <h3>{{(targetContext$|async)?.title}}</h3>
+      <h3>{{T.F.TASK.D_REMINDER_VIEW.FROM_LIST|translate:{title: (targetContext$|async)?.title} }}</h3>
       <p>{{T.F.TASK.D_REMINDER_VIEW.FOR_OTHER|translate}}</p>
     </div>
   </div>

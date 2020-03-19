@@ -16,6 +16,7 @@ import {TagService} from '../../tag/tag.service';
 import {Tag} from '../../tag/tag.model';
 import {Project} from '../../project/project.model';
 import {WorkContextType} from '../../work-context/work-context.model';
+import {truncate} from '../../../util/truncate';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -26,6 +27,7 @@ import {WorkContextType} from '../../work-context/work-context.model';
 export class DialogViewTaskReminderComponent implements OnDestroy {
   T = T;
   task: Task;
+  taskTitle: string;
   reminder: Reminder = this.data.reminder;
   isForCurrentContext = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
 
@@ -51,7 +53,10 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this._matDialogRef.disableClose = true;
-    this._subs.add(this._task$.pipe(take(1)).subscribe(task => this.task = task));
+    this._subs.add(this._task$.pipe(take(1)).subscribe(task => {
+      this.task = task;
+      this.taskTitle = truncate(task.title);
+    }));
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this._close();
     }));

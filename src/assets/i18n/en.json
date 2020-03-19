@@ -550,11 +550,10 @@
         "DISMISS": "Dismiss Reminder",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
-        "FROM_PROJECT": "From Project",
+        "FROM_LIST": "From List: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "START": "Start Task",
-        "SWITCH_PROJECT_START": "Switch Project & Start Task",
-        "TITLE": "Scheduled Task"
+        "SWITCH_PROJECT_START": "Switch Project & Start Task"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Add time spent for other day",
