@@ -5,10 +5,11 @@ import {select, Store} from '@ngrx/store';
 import * as contextActions from './work-context.actions';
 import {selectContextFeatureState} from './work-context.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {UnsetCurrentTask} from '../../tasks/store/task.actions';
+import {SetSelectedTask, UnsetCurrentTask} from '../../tasks/store/task.actions';
 import {TaskService} from '../../tasks/task.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {BannerService} from '../../../core/banner/banner.service';
+import {TaskAdditionalInfoTargetPanel} from '../../tasks/task.model';
 
 
 @Injectable()
@@ -45,6 +46,13 @@ export class WorkContextEffects {
     withLatestFrom(this._taskService.isTaskDataLoaded$),
     filter(([, isDataLoaded]) => isDataLoaded),
     map(() => new UnsetCurrentTask()),
+  ));
+
+  unselectSelectedTask$ = createEffect(() => this._actions$.pipe(
+    ofType(contextActions.setActiveWorkContext),
+    withLatestFrom(this._taskService.isTaskDataLoaded$),
+    filter(([, isDataLoaded]) => isDataLoaded),
+    map(() => new SetSelectedTask({id: null})),
   ));
 
 

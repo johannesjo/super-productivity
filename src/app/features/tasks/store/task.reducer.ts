@@ -85,7 +85,9 @@ export function taskReducer(
       const {id, taskAdditionalInfoTargetPanel} = action.payload;
       return {
         ...state,
-        taskAdditionalInfoTargetPanel: (id === state.selectedTaskId) ? null : taskAdditionalInfoTargetPanel,
+        taskAdditionalInfoTargetPanel: (!id || (id === state.selectedTaskId))
+          ? null
+          : taskAdditionalInfoTargetPanel,
         selectedTaskId: (id === state.selectedTaskId) ? null : id,
       };
     }

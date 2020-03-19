@@ -61,7 +61,7 @@ export class SetCurrentTask implements Action {
 export class SetSelectedTask implements Action {
   readonly type = TaskActionTypes.SetSelectedTask;
 
-  constructor(public payload: { id: string; taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel }) {
+  constructor(public payload: { id: string; taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel }) {
   }
 }
 
