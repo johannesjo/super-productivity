@@ -19,7 +19,7 @@ import {BookmarkService} from '../../bookmark/bookmark.service';
 import {NoteService} from '../../note/note.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import {TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTimeSpent, TaskActionTypes} from '../../tasks/store/task.actions';
 import {ReminderService} from '../../reminder/reminder.service';
 import {MetricService} from '../../metric/metric.service';
 import {ObstructionService} from '../../metric/obstruction/obstruction.service';
@@ -147,39 +147,35 @@ export class ProjectEffects {
     );
 
 
-  // @Effect()
-  // updateWorkStart$: any = this._actions$
-  //   .pipe(
-  //     ofType(TaskActionTypes.AddTimeSpent),
-  //     concatMap(() => this._workContextService.isActiveWorkContextProject$),
-  //     filter((isActiveWorkContextProjectType) => isActiveWorkContextProjectType),
-  //     concatMap(() => this._workContextService.activeWorkContextId$),
-  //     concatMap((id) => this._projectService.getById$(id)),
-  //     filter((project: Project) => !project.workStart[getWorklogStr()]),
-  //     map((project) => {
-  //       return new UpdateProjectWorkStart({
-  //         id: project.id,
-  //         date: getWorklogStr(),
-  //         newVal: Date.now(),
-  //       });
-  //     })
-  //   );
-  //
-  // @Effect()
-  // updateWorkEnd$: any = this._actions$
-  //   .pipe(
-  //     ofType(TaskActionTypes.AddTimeSpent),
-  //     concatMap(() => this._workContextService.isActiveWorkContextProject$),
-  //     filter((isActiveWorkContextProjectType) => isActiveWorkContextProjectType),
-  //     concatMap(() => this._workContextService.activeWorkContextId$),
-  //     map((id) => {
-  //       return new UpdateProjectWorkEnd({
-  //         id,
-  //         date: getWorklogStr(),
-  //         newVal: Date.now(),
-  //       });
-  //     })
-  //   );
+  @Effect()
+  updateWorkStart$: any = this._actions$
+    .pipe(
+      ofType(TaskActionTypes.AddTimeSpent),
+      filter((action: AddTimeSpent) => !!action.payload.task.projectId),
+      concatMap((action: AddTimeSpent) => this._projectService.getById$(action.payload.task.projectId)),
+      // filter((project: Project) => !project.workStart[getWorklogStr()]),
+      map((project) => {
+        return new UpdateProjectWorkStart({
+          id: project.id,
+          date: getWorklogStr(),
+          newVal: Date.now(),
+        });
+      })
+    );
+
+  @Effect()
+  updateWorkEnd$: any = this._actions$
+    .pipe(
+      ofType(TaskActionTypes.AddTimeSpent),
+      filter((action: AddTimeSpent) => !!action.payload.task.projectId),
+      map((action: AddTimeSpent) => {
+        return new UpdateProjectWorkEnd({
+          id: action.payload.task.projectId,
+          date: getWorklogStr(),
+          newVal: Date.now(),
+        });
+      })
+    );
 
 
   @Effect()
