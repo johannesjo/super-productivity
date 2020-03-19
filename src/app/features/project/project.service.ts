@@ -20,8 +20,6 @@ import {
   selectProjectJiraIsEnabled,
   selectProjectLastCompletedDay,
   selectProjectLastWorkEnd,
-  selectProjectWorkEndForDay,
-  selectProjectWorkStartForDay,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
@@ -159,23 +157,6 @@ export class ProjectService {
 
   getByIdLive$(id: string): Observable<Project> {
     return this._store$.pipe(select(selectProjectById, {id}));
-  }
-
-  // TODO consistent naming
-  getWorkStart$(day: string = getWorklogStr()): Observable<number> {
-    return this._store$.pipe(select(selectProjectWorkStartForDay, {day}));
-  }
-
-  getWorkEnd$(day: string = getWorklogStr()): Observable<number> {
-    return this._store$.pipe(select(selectProjectWorkEndForDay, {day}));
-  }
-
-  getBreakTime$(day: string = getWorklogStr()): Observable<number> {
-    return this._store$.pipe(select(selectProjectBreakTimeForDay, {day}));
-  }
-
-  getBreakNr$(day: string = getWorklogStr()): Observable<number> {
-    return this._store$.pipe(select(selectProjectBreakNrForDay, {day}));
   }
 
   add(project: Partial<Project>) {

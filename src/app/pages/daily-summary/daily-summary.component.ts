@@ -91,10 +91,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   timeWorked$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getTimeWorkedForDay$(dayStr)));
 
-  started$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getWorkStart$(dayStr)));
-  end$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getWorkEnd$(dayStr)));
-  breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakTime$(dayStr)));
-  breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakNr$(dayStr)));
+  started$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getWorkStart$(dayStr)));
+  end$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getWorkEnd$(dayStr)));
+
+  breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getBreakTime$(dayStr)));
+  breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getBreakNr$(dayStr)));
 
   isBreakTrackingSupport$: Observable<boolean> = this.configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 

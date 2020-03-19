@@ -22,7 +22,11 @@ import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.ut
 import {flattenTasks, selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
 import {Actions, ofType} from '@ngrx/effects';
 import {moveTaskToBacklogList} from './store/work-context-meta.actions';
-import {selectProjectById} from '../project/store/project.reducer';
+import {
+  selectProjectBreakNrForDay,
+  selectProjectBreakTimeForDay,
+  selectProjectById
+} from '../project/store/project.reducer';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {ProjectActionTypes} from '../project/store/project.actions';
 import {updateAdvancedConfigForTag} from '../tag/store/tag.actions';
@@ -80,6 +84,7 @@ export class WorkContextService {
     }),
     // TODO find out why this is sometimes undefined
     filter(ctx => !!ctx),
+    shareReplay(1),
   );
 
   mainWorkContexts$: Observable<WorkContext[]> =
@@ -241,7 +246,7 @@ export class WorkContextService {
     );
   }
 
-  getTasksWorkedOnOrDoneOrRepeatableFlat$(dayStr) {
+  getTasksWorkedOnOrDoneOrRepeatableFlat$(dayStr: string) {
     return combineLatest([
       this.allRepeatableTasksFlat$,
       this.getTasksWorkedOnOrDoneFlat$(dayStr)
@@ -253,6 +258,30 @@ export class WorkContextService {
           (task => !task.repeatCfgId || task.repeatCfgId === null)
         ),
       ]),
+    );
+  }
+
+  getWorkStart$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.workStart[day]),
+    );
+  }
+
+  getWorkEnd$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.workEnd[day]),
+    );
+  }
+
+  getBreakTime$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.breakTime[day]),
+    );
+  }
+
+  getBreakNr$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.breakNr[day]),
     );
   }
 
