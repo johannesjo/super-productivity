@@ -37,3 +37,24 @@ export const updateAdvancedConfigForTag = createAction(
   '[Tag] Update Advanced Config',
   props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),
 );
+
+export const updateWorkStartForTag = createAction(
+  '[Tag] Update Work Start for Tag',
+  props< { id: string; date: string; newVal: number; }>(),
+);
+
+export const updateWorkEndForTag = createAction(
+  '[Tag] Update Work End for Tag',
+  props< { id: string; date: string; newVal: number; }>(),
+);
+
+export const updateBreakTimeForTag = createAction(
+  '[Tag] Update Break Time for Tag',
+  props< { id: string; date: string; newVal: number; }>(),
+);
+
+export const updateBreakNrForTag = createAction(
+  '[Tag] Update Break Nr for Tag',
+  props< { id: string; date: string; newVal: number; }>(),
+);
+

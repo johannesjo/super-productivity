@@ -1,12 +1,20 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {switchMap, tap} from 'rxjs/operators';
+import {concatMap, filter, switchMap, tap} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {selectTagFeatureState} from './tag.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
-import {updateTag} from './tag.actions';
+import {updateTag, updateWorkStartForTag} from './tag.actions';
+import {AddTimeSpent, TaskActionTypes} from '../../tasks/store/task.actions';
+import {TagService} from '../tag.service';
+import {TaskService} from '../../tasks/task.service';
+import {of} from 'rxjs';
+import {Task} from '../../tasks/task.model';
+import {Tag} from '../tag.model';
+import {UpdateProjectWorkStart} from '../../project/store/project.actions';
+import {getWorklogStr} from '../../../util/get-work-log-str';
 
 
 @Injectable()
@@ -55,11 +63,51 @@ export class TagEffects {
     }))
   );
 
+
+  @Effect()
+  updateWorkStart$: any = this._actions$
+    .pipe(
+      ofType(TaskActionTypes.AddTimeSpent),
+      concatMap(({payload}: AddTimeSpent) => payload.task.parentId
+        ? this._taskService.getById$(payload.task.parentId)
+        : of(payload.task)
+      ),
+      filter((task: Task) => task.tagIds && !!task.tagIds.length),
+      concatMap((task: Task) => this._tagService.getTagsByIds$(task.tagIds)),
+      concatMap((tags: Tag[]) => tags
+        // only if empty
+        .filter(tag => !tag.workStart[getWorklogStr()])
+        .map((tag) => updateWorkStartForTag({
+            id: tag.id,
+            date: getWorklogStr(),
+            newVal: Date.now(),
+          })
+        )
+      ),
+      tap(console.log)
+    );
+  //
+  // @Effect()
+  // updateWorkEnd$: any = this._actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.AddTimeSpent),
+  //     filter((action: AddTimeSpent) => !!action.payload.task.tagId),
+  //     map((action: AddTimeSpent) => {
+  //       return new UpdateProjectWorkEnd({
+  //         id: action.payload.task.tagId,
+  //         date: getWorklogStr(),
+  //         newVal: Date.now(),
+  //       });
+  //     })
+  //   );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
     private _snackService: SnackService,
+    private _tagService: TagService,
+    private _taskService: TaskService,
   ) {
   }
 

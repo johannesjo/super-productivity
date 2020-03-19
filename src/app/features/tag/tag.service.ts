@@ -33,7 +33,7 @@ export class TagService {
     return this._store$.pipe(select(selectTagById, {id}));
   }
 
-  getTagsById$(ids: string[]): Observable<Tag[]> {
+  getTagsByIds$(ids: string[]): Observable<Tag[]> {
     return this._store$.pipe(select(selectTagsByIds, {ids}));
   }
 
