@@ -406,28 +406,39 @@ export class TaskService {
     this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp}));
   }
 
-  startTaskFromOtherContext$(taskId: string, workContextType: WorkContextType, workContextId: string): Observable<Task> {
-    throw new Error('Implement');
-    if (workContextType === WorkContextType.PROJECT) {
-      // this._workContextService.set
-    }
-    const taskInOtherProject$ = this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
-      filter(isLoaded => !!isLoaded),
-      switchMap(() => this.getById$(taskId).pipe(
-        take(1))
-      ),
+  startTaskFromOtherContext$(taskId: string, workContextType: WorkContextType, workContextId: string): Observable<any> {
+    this._workContextService.setActiveContext(workContextId, workContextType);
+
+    const contextChanged$ = this._workContextService.activeWorkContextId$.pipe(
+      filter(id => id === workContextId),
+      // wait for actual data to be loaded
+      switchMap(() => this._workContextService.activeWorkContext$),
+      first(),
+      )
+    ;
+    const task$ = contextChanged$.pipe(
+      switchMap(() => this.getById$(taskId)),
       take(1),
     );
 
-    taskInOtherProject$.subscribe(task => {
-      if (task.parentId) {
-        this.moveToToday(task.parentId, true);
-      } else {
-        this.moveToToday(task.id, true);
-      }
-      this.setCurrentId(task.id);
-    });
-    return taskInOtherProject$;
+    if (workContextType === WorkContextType.PROJECT) {
+      task$.subscribe(task => {
+        if (task.parentId) {
+          this.moveToToday(task.parentId, true);
+        } else {
+          this.moveToToday(task.id, true);
+        }
+        this.setCurrentId(task.id);
+      });
+      return task$;
+    } else if (workContextType === WorkContextType.TAG) {
+      task$.subscribe(task => {
+        this.setCurrentId(task.id);
+      });
+    } else {
+      throw new Error('Äh no');
+    }
+    return task$;
   }
 
   // REMINDER

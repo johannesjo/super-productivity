@@ -265,8 +265,6 @@ export class WorkContextService {
     private _router: Router,
   ) {
     this.activeWorkContextTypeAndId$.subscribe(v => {
-      console.log(v);
-
       this.activeWorkContextId = v.activeId;
       this.activeWorkContextType = v.activeType;
     });
@@ -277,10 +275,15 @@ export class WorkContextService {
         const split = url.split('/');
         const id = split[2];
 
+        // prevent issue when setActiveContext is called directly
+        if (this.activeWorkContextId === id) {
+          return;
+        }
+
         if (url.match(/tag\/.+/)) {
-          this._setActiveContext(id, WorkContextType.TAG);
+          this.setActiveContext(id, WorkContextType.TAG);
         } else if (url.match(/project\/.+/)) {
-          this._setActiveContext(id, WorkContextType.PROJECT);
+          this.setActiveContext(id, WorkContextType.PROJECT);
         }
       }
     );
@@ -298,7 +301,7 @@ export class WorkContextService {
   }
 
 
-  private _setActiveContext(activeId: string, activeType: WorkContextType) {
+  setActiveContext(activeId: string, activeType: WorkContextType) {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
 
