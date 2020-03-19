@@ -6,6 +6,8 @@ import {ReminderService} from '../../reminder/reminder.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {T} from '../../../t.const';
 import {AddTaskReminderInterface} from './add-task-reminder-interface';
+import {WorkContextType} from '../../work-context/work-context.model';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -19,12 +21,14 @@ export class DialogAddTaskReminderComponent {
   reminder: ReminderCopy = this.data.reminderId && this._reminderService.getById(this.data.reminderId);
   isEdit: boolean = !!(this.reminder && this.reminder.id);
   dateTime: number = this.reminder && this.reminder.remindAt;
-  isMoveToBacklogPossible: boolean = (!this.isEdit && this.data.isMoveToBacklogPossible);
+  isForProject = this._workContextService.activeWorkContextType === WorkContextType.PROJECT;
+  isMoveToBacklogPossible: boolean = (!this.isEdit && this.data.isMoveToBacklogPossible && this.isForProject);
   isMoveToBacklog: boolean = (this.isMoveToBacklogPossible);
 
   constructor(
     private _taskService: TaskService,
     private _snackService: SnackService,
+    private _workContextService: WorkContextService,
     private _reminderService: ReminderService,
     private _matDialogRef: MatDialogRef<DialogAddTaskReminderComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddTaskReminderInterface,
