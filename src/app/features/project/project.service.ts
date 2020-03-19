@@ -201,28 +201,6 @@ export class ProjectService {
     });
   }
 
-  updateWorkStart(id, date: string, newVal: number) {
-    this._store$.dispatch({
-      type: ProjectActionTypes.UpdateProjectWorkStart,
-      payload: {
-        id,
-        date,
-        newVal,
-      }
-    });
-  }
-
-  updateWorkEnd(id, date: string, newVal: number) {
-    this._store$.dispatch({
-      type: ProjectActionTypes.UpdateProjectWorkEnd,
-      payload: {
-        id,
-        date,
-        newVal,
-      }
-    });
-  }
-
   updateLastCompletedDay(id = this.currentId, date: string) {
     this._store$.dispatch({
       type: ProjectActionTypes.UpdateLastCompletedDay,

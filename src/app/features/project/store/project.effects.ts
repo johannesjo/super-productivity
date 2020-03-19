@@ -153,7 +153,7 @@ export class ProjectEffects {
       ofType(TaskActionTypes.AddTimeSpent),
       filter((action: AddTimeSpent) => !!action.payload.task.projectId),
       concatMap((action: AddTimeSpent) => this._projectService.getById$(action.payload.task.projectId)),
-      // filter((project: Project) => !project.workStart[getWorklogStr()]),
+      filter((project: Project) => !project.workStart[getWorklogStr()]),
       map((project) => {
         return new UpdateProjectWorkStart({
           id: project.id,

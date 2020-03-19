@@ -22,11 +22,7 @@ import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.ut
 import {flattenTasks, selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
 import {Actions, ofType} from '@ngrx/effects';
 import {moveTaskToBacklogList} from './store/work-context-meta.actions';
-import {
-  selectProjectBreakNrForDay,
-  selectProjectBreakTimeForDay,
-  selectProjectById
-} from '../project/store/project.reducer';
+import {selectProjectById} from '../project/store/project.reducer';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {ProjectActionTypes} from '../project/store/project.actions';
 import {updateAdvancedConfigForTag} from '../tag/store/tag.actions';
@@ -332,6 +328,34 @@ export class WorkContextService {
 
   setActiveContext(activeId: string, activeType: WorkContextType) {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
+  }
+
+  updateWorkStartForActiveContext(date: string, newVal: number) {
+    if (this.activeWorkContextType === WorkContextType.PROJECT) {
+      this._store$.dispatch({
+        type: ProjectActionTypes.UpdateProjectWorkStart,
+        payload: {
+          id: this.activeWorkContextId,
+          date,
+          newVal,
+        }
+      });
+    } else if (this.activeWorkContextType === WorkContextType.TAG) {
+    }
+  }
+
+  updateWorkEndForActiveContext(date: string, newVal: number) {
+    if (this.activeWorkContextType === WorkContextType.PROJECT) {
+      this._store$.dispatch({
+        type: ProjectActionTypes.UpdateProjectWorkEnd,
+        payload: {
+          id: this.activeWorkContextId,
+          date,
+          newVal,
+        }
+      });
+    } else if (this.activeWorkContextType === WorkContextType.TAG) {
+    }
   }
 
   private _updateAdvancedCfgForCurrentContext(sectionKey: WorkContextAdvancedCfgKey, data: any) {

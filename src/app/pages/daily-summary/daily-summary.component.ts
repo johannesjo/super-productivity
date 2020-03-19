@@ -201,14 +201,14 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   updateWorkStart(ev) {
     const startTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (startTime) {
-      this._projectService.updateWorkStart(this._projectService.currentId, this.dayStr, startTime);
+      this._workContextService.updateWorkStartForActiveContext(this.dayStr, startTime);
     }
   }
 
   updateWorkEnd(ev) {
     const endTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (endTime) {
-      this._projectService.updateWorkEnd(this._projectService.currentId, this.dayStr, endTime);
+      this._workContextService.updateWorkEndForActiveContext(this.dayStr, endTime);
     }
   }
 
