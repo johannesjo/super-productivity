@@ -17,7 +17,6 @@ import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
 import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
 import {from} from 'rxjs';
 import {isToday} from './is-created-today.util';
-import {ProjectService} from '../../project/project.service';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
 
@@ -76,7 +75,7 @@ export class TaskRepeatCfgEffects {
                       task: this._taskService.createNewTaskWithDefaults(taskRepeatCfg.title, {
                         repeatCfgId: taskRepeatCfg.id,
                         timeEstimate: taskRepeatCfg.defaultEstimate,
-                        tagIds: taskRepeatCfg.tagIds,
+                        tagIds: taskRepeatCfg.tagIds || [],
                       }),
                       workContextType: this._workContextService.activeWorkContextType,
                       workContextId: this._workContextService.activeWorkContextId,

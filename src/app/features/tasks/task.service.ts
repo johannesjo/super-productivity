@@ -202,18 +202,7 @@ export class TaskService {
 
   async load() {
     const lsTaskState = await this._persistenceService.task.loadState();
-    // this.loadState(lsTaskState || initialTaskState);
-    console.log('LOAD TASK BASIC');
-
-    this.loadState(
-      lsTaskState
-        ? {
-          ...lsTaskState,
-          backlogTaskIds: [],
-          todaysTaskIds: []
-        }
-        : initialTaskState
-    );
+    this.loadState(lsTaskState || initialTaskState);
   }
 
 

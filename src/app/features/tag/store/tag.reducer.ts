@@ -188,23 +188,21 @@ export function tagReducer(
     case TaskActionTypes.AddTask: {
       const {payload} = action as AddTask;
       const {workContextId, workContextType, task, isAddToBottom} = payload;
-      const affectedEntity = state.entities[workContextId];
-      return (workContextType === WORK_CONTEXT_TYPE)
-        ? tagAdapter.updateOne({
-          id: workContextId,
-          changes: {
-            taskIds: isAddToBottom
-              ? [
-                ...affectedEntity.taskIds,
-                task.id,
-              ]
-              : [
-                task.id,
-                ...affectedEntity.taskIds
-              ]
-          }
-        }, state)
-        : state;
+      const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
+        id: tagId,
+        changes: {
+          taskIds: isAddToBottom
+            ? [
+              ...state.entities[tagId].taskIds,
+              task.id,
+            ]
+            : [
+              task.id,
+              ...state.entities[tagId].taskIds
+            ]
+        }
+      }));
+      return tagAdapter.updateMany(updates, state);
     }
 
     case TaskActionTypes.DeleteTask: {

@@ -309,12 +309,12 @@ export function projectReducer(
     // ------------
     case TaskActionTypes.AddTask: {
       const {workContextId, workContextType, task, isAddToBottom, isAddToBacklog} = payload;
-      const affectedEntity = state.entities[workContextId];
+      const affectedEntity = task.projectId && state.entities[task.projectId];
       const prop: 'backlogTaskIds' | 'taskIds' = isAddToBacklog ? 'backlogTaskIds' : 'taskIds';
 
-      return (workContextType === WORK_CONTEXT_TYPE)
+      return (affectedEntity)
         ? projectAdapter.updateOne({
-          id: workContextId,
+          id: task.projectId,
           changes: {
             [prop]: isAddToBottom
               ? [
