@@ -13,13 +13,13 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {Task, TaskArchive, TaskWithSubTasks} from '../../tasks/task.model';
 import {AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask} from '../../tasks/store/task.actions';
 import {TaskService} from '../../tasks/task.service';
-import {ProjectActionTypes} from '../../project/store/project.actions';
 import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
 import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
 import {from} from 'rxjs';
 import {isToday} from './is-created-today.util';
 import {ProjectService} from '../../project/project.service';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -43,9 +43,7 @@ export class TaskRepeatCfgEffects {
 
   @Effect() createRepeatableTasks: any = this._actions$
     .pipe(
-      ofType(
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-      ),
+      ofType(setActiveWorkContext),
       withLatestFrom(
         this._taskRepeatCfgService.taskRepeatCfgs$,
       ),
