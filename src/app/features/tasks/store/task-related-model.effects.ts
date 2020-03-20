@@ -132,8 +132,6 @@ export class TaskRelatedModelEffects {
         this._reminderService.removeReminder(t.reminderId);
       });
 
-    console.log(newArchive);
-
     return this._persistenceService.taskArchive.saveState(newArchive);
   }
 
