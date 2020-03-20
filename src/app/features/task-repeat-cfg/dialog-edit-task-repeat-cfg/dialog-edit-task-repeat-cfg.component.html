@@ -19,6 +19,13 @@
                    [model]="taskRepeatCfg"
                    [options]="options">
       </formly-form>
+
+      <chip-list-input (addItem)="addTag($event)"
+                       (addNewItem)="addNewTag($event)"
+                       (removeItem)="removeTag($event)"
+                       [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL|translate"
+                       [model]="taskRepeatCfg.tagIds"
+                       [suggestions]="(tagSuggestions$|async)"></chip-list-input>
     </div>
   </mat-dialog-content>
 

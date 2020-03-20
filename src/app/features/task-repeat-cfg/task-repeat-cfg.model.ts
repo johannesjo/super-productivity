@@ -22,6 +22,7 @@ export interface TaskRepeatCfgCopy {
   friday: boolean;
   saturday: boolean;
   sunday: boolean;
+  tagIds: string[];
 }
 
 export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;
@@ -43,4 +44,5 @@ export const DEFAULT_TASK_REPEAT_CFG: TaskRepeatCfgCopy = {
   friday: true,
   saturday: false,
   sunday: false,
+  tagIds: [],
 };

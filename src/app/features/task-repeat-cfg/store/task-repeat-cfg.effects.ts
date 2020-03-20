@@ -76,6 +76,7 @@ export class TaskRepeatCfgEffects {
                       task: this._taskService.createNewTaskWithDefaults(taskRepeatCfg.title, {
                         repeatCfgId: taskRepeatCfg.id,
                         timeEstimate: taskRepeatCfg.defaultEstimate,
+                        tagIds: taskRepeatCfg.tagIds,
                       }),
                       workContextType: this._workContextService.activeWorkContextType,
                       workContextId: this._workContextService.activeWorkContextId,

@@ -601,6 +601,7 @@ export const T = {
       'D_EDIT': {
         'ADD': 'F.TASK_REPEAT.D_EDIT.ADD',
         'EDIT': 'F.TASK_REPEAT.D_EDIT.EDIT',
+        'TAG_LABEL': 'F.TASK_REPEAT.D_EDIT.TAG_LABEL',
         'HELP1': 'F.TASK_REPEAT.D_EDIT.HELP1',
         'HELP2': 'F.TASK_REPEAT.D_EDIT.HELP2',
         'HELP3': 'F.TASK_REPEAT.D_EDIT.HELP3'
