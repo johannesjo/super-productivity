@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import {filter, first, map, switchMap, take, withLatestFrom} from 'rxjs/operators';
+import {delay, filter, first, map, switchMap, take, withLatestFrom} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
@@ -413,6 +413,8 @@ export class TaskService {
       filter(id => id === workContextId),
       // wait for actual data to be loaded
       switchMap(() => this._workContextService.activeWorkContext$),
+      // dirty dirty fix
+      delay(50),
       first(),
       )
     ;
