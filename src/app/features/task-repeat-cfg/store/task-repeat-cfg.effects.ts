@@ -33,7 +33,6 @@ export class TaskRepeatCfgEffects {
       TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs,
     ),
     withLatestFrom(
-      this._projectService.currentId$,
       this._store$.pipe(select(selectTaskRepeatCfgFeatureState)),
     ),
     tap(this._saveToLs.bind(this))
@@ -145,7 +144,6 @@ export class TaskRepeatCfgEffects {
   constructor(
     private _actions$: Actions,
     private _taskService: TaskService,
-    private _projectService: ProjectService,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
     private _workContextService: WorkContextService,
@@ -153,13 +151,9 @@ export class TaskRepeatCfgEffects {
   ) {
   }
 
-  private _saveToLs([action, currentProjectId, taskRepeatCfgState]) {
-    if (currentProjectId) {
-      this._persistenceService.saveLastActive();
-      this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState);
-    } else {
-      throw new Error('No current project id');
-    }
+  private _saveToLs([action, taskRepeatCfgState]) {
+    this._persistenceService.saveLastActive();
+    this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState);
   }
 
   private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string) {
