@@ -44,7 +44,9 @@ export class TaskRepeatCfgEffects {
     concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(
       take(1),
     )),
-    map((taskRepeatCfgs): TaskRepeatCfg[] => {
+    // filter out the configs which have been created today already
+    // and those which are not scheduled for the current week day
+    map((taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
       const day = new Date().getDay();
       const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
       return taskRepeatCfgs && taskRepeatCfgs.filter(
@@ -53,49 +55,50 @@ export class TaskRepeatCfgEffects {
       );
     }),
     filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
+
+    // existing tasks with sub tasks are loaded, because need to move them to the archive
     flatMap(taskRepeatCfgs => from(taskRepeatCfgs).pipe(
       flatMap((taskRepeatCfg: TaskRepeatCfg) =>
+        // NOTE: there might be multiple configs in case something went wrong
+        // we want to move all of them to the archive
         this._taskService.getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id).pipe(
           take(1),
-          map((tasks): [TaskRepeatCfg, TaskWithSubTasks[]] => [taskRepeatCfg, tasks]),
+          concatMap((tasks) => {
+            const isCreateNew = (tasks.filter(task => isToday(task.created)).length === 0);
+            const moveToArchiveActions: (MoveToArchive | AddTask | UpdateTaskRepeatCfg)[] = tasks
+              .filter(task => isToday(task.created))
+              .map(task => new MoveToArchive({tasks: [task]}));
+
+            return from([
+              ...moveToArchiveActions,
+              ...(isCreateNew
+                  ? [
+                    new AddTask({
+                      task: this._taskService.createNewTaskWithDefaults(taskRepeatCfg.title, {
+                        repeatCfgId: taskRepeatCfg.id,
+                        timeEstimate: taskRepeatCfg.defaultEstimate,
+                      }),
+                      workContextType: this._workContextService.activeWorkContextType,
+                      workContextId: this._workContextService.activeWorkContextId,
+                      isAddToBacklog: false,
+                      isAddToBottom: false,
+                    }),
+                    new UpdateTaskRepeatCfg({
+                      taskRepeatCfg: {
+                        id: taskRepeatCfg.id,
+                        changes: {
+                          lastTaskCreation: Date.now(),
+                        }
+                      }
+                    })
+                  ]
+                  : []
+              )
+            ]);
+          }),
         )
       )
     )),
-    concatMap(([taskRepeatCfg, tasks]) => {
-      let isCreateNew = true;
-      const actions = [];
-
-      tasks.forEach(task => {
-        if (isToday(task.created)) {
-          actions.push(new MoveToArchive({tasks: [task]}));
-        } else {
-          isCreateNew = false;
-        }
-      });
-
-      if (isCreateNew) {
-        actions.push(new AddTask({
-          task: this._taskService.createNewTaskWithDefaults(taskRepeatCfg.title, {
-            repeatCfgId: taskRepeatCfg.id,
-            timeEstimate: taskRepeatCfg.defaultEstimate,
-          }),
-          workContextType: this._workContextService.activeWorkContextType,
-          workContextId: this._workContextService.activeWorkContextId,
-          isAddToBacklog: false,
-          isAddToBottom: false,
-        }));
-        actions.push(new UpdateTaskRepeatCfg({
-          taskRepeatCfg: {
-            id: taskRepeatCfg.id,
-            changes: {
-              lastTaskCreation: Date.now(),
-            }
-          }
-        }));
-      }
-
-      return from(actions);
-    }),
   );
 
 
