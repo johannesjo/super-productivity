@@ -27,6 +27,7 @@ export interface AppBaseData {
   tag: TagState;
   taskArchive: TaskArchive;
   context: WorkContextState;
+  taskRepeatCfg: TaskRepeatCfgState;
 
   /** @deprecated */
   taskAttachment: TaskAttachmentState;
@@ -39,9 +40,6 @@ export interface AppDataForProjects {
   };
   bookmark?: {
     [key: string]: BookmarkState;
-  };
-  taskRepeatCfg?: {
-    [key: string]: TaskRepeatCfgState;
   };
   metric?: {
     [key: string]: MetricState;

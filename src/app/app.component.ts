@@ -30,6 +30,7 @@ import {ElectronService} from './core/electron/electron.service';
 import {TaskAttachmentService} from './features/tasks/task-attachment/task-attachment.service';
 import {WorkContextService} from './features/work-context/work-context.service';
 import {TagService} from './features/tag/tag.service';
+import {TaskRepeatCfgService} from './features/task-repeat-cfg/task-repeat-cfg.service';
 
 
 @Component({
@@ -55,6 +56,7 @@ export class AppComponent implements OnDestroy {
       this._configService.load(),
       this.workContextService.load(),
       this._tagService.load(),
+      this._taskRepeatCfgService.load(),
     ])
   ]).pipe(
     map(([isProjectDataLoaded]) => isProjectDataLoaded),
@@ -85,6 +87,7 @@ export class AppComponent implements OnDestroy {
     private _languageService: LanguageService,
     private _attachmentService: TaskAttachmentService,
     private _tagService: TagService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,

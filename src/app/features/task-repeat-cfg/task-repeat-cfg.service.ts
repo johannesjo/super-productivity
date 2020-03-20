@@ -34,17 +34,13 @@ export class TaskRepeatCfgService {
   ) {
   }
 
-  async loadStateForProject(projectId: string) {
-    const lsTaskRepeatCfgState = await this._persistenceService.taskRepeatCfg.load(projectId);
-    this.loadState(lsTaskRepeatCfgState || initialTaskRepeatCfgState);
+  async load() {
+    const lsTaskRepeatCfgState = await this._persistenceService.taskRepeatCfg.loadState();
+    this._loadState(lsTaskRepeatCfgState || initialTaskRepeatCfgState);
   }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
     return this._store$.pipe(select(selectTaskRepeatCfgById, {id}));
-  }
-
-  loadState(state: TaskRepeatCfgState) {
-    this._store$.dispatch(new LoadTaskRepeatCfgState({state}));
   }
 
   addTaskRepeatCfgToTask(taskId: string, taskRepeatCfg: TaskRepeatCfg) {
@@ -86,5 +82,9 @@ export class TaskRepeatCfgService {
           this.deleteTaskRepeatCfg(id);
         }
       });
+  }
+
+  private _loadState(state: TaskRepeatCfgState) {
+    this._store$.dispatch(new LoadTaskRepeatCfgState({state}));
   }
 }

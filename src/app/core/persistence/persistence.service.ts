@@ -83,8 +83,12 @@ export class PersistenceService {
     taskReducer,
     migrateTaskArchiveState,
   );
+  taskRepeatCfg = this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
+    LS_TASK_REPEAT_CFG_STATE,
+    'taskRepeatCfg',
+    taskRepeatCfgReducer,
+  );
 
-  // TASK_RELATED_MODELS
   tag = this._cmBase<TagState>(
     LS_TAG_STATE,
     'tag',
@@ -94,13 +98,6 @@ export class PersistenceService {
     LS_TASK_ATTACHMENT_STATE,
     'taskAttachment',
   );
-
-  taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
-    LS_TASK_REPEAT_CFG_STATE,
-    'taskRepeatCfg',
-    taskRepeatCfgReducer,
-  );
-
 
   // PROJECT MODELS
   bookmark = this._cmProject<BookmarkState, Bookmark>(

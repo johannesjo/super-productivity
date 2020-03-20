@@ -162,7 +162,7 @@ export class TaskRepeatCfgEffects {
   private _saveToLs([action, currentProjectId, taskRepeatCfgState]) {
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
-      this._persistenceService.taskRepeatCfg.save(currentProjectId, taskRepeatCfgState);
+      this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState);
     } else {
       throw new Error('No current project id');
     }
