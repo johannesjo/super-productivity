@@ -102,47 +102,44 @@ export class TaskRepeatCfgEffects {
   );
 
 
-  @Effect() removeConfigIdFromTaskStateTasks$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
+  @Effect() removeConfigIdFromTaskStateTasks$: any = this._actions$.pipe(
+    ofType(
+      TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
+    ),
+    concatMap((action: DeleteTaskRepeatCfg) =>
+      this._taskService.getTasksByRepeatCfgId$(action.payload.id).pipe(
+        take(1)
       ),
-      concatMap((action: DeleteTaskRepeatCfg) =>
-        this._taskService.getTasksByRepeatCfgId$(action.payload.id).pipe(
-          take(1)
-        ),
-      ),
-      filter(tasks => tasks && !!tasks.length),
-      flatMap((tasks: Task[]) => tasks.map(task => new UpdateTask({
-        task: {
-          id: task.id,
-          changes: {repeatCfgId: null}
-        }
-      }))),
-    );
-
-  @Effect({dispatch: false}) removeConfigIdFromTaskArchiveTasks$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
-      ),
-      tap(([a]: [DeleteTaskRepeatCfg]) => {
-        this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id);
-      }),
-    );
-
-  @Effect() removeRemindersOnCreation$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
-      ),
-      concatMap((a: AddTaskRepeatCfgToTask) => this._taskService.getById$(a.payload.taskId).pipe(take(1))),
-      filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
-      map((task: TaskWithSubTasks) => new RemoveTaskReminder({
+    ),
+    filter(tasks => tasks && !!tasks.length),
+    flatMap((tasks: Task[]) => tasks.map(task => new UpdateTask({
+      task: {
         id: task.id,
-        reminderId: task.reminderId
-      })),
-    );
+        changes: {repeatCfgId: null}
+      }
+    }))),
+  );
+
+  @Effect({dispatch: false}) removeConfigIdFromTaskArchiveTasks$: any = this._actions$.pipe(
+    ofType(
+      TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
+    ),
+    tap(([a]: [DeleteTaskRepeatCfg]) => {
+      this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id);
+    }),
+  );
+
+  @Effect() removeRemindersOnCreation$: any = this._actions$.pipe(
+    ofType(
+      TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
+    ),
+    concatMap((a: AddTaskRepeatCfgToTask) => this._taskService.getById$(a.payload.taskId).pipe(take(1))),
+    filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
+    map((task: TaskWithSubTasks) => new RemoveTaskReminder({
+      id: task.id,
+      reminderId: task.reminderId
+    })),
+  );
 
 
   constructor(
