@@ -12,7 +12,7 @@ import {SwUpdate} from '@angular/service-worker';
 import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
-import {filter, map, take} from 'rxjs/operators';
+import {filter, map, shareReplay, take} from 'rxjs/operators';
 import {combineLatest, forkJoin, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
@@ -31,6 +31,7 @@ import {TaskAttachmentService} from './features/tasks/task-attachment/task-attac
 import {WorkContextService} from './features/work-context/work-context.service';
 import {TagService} from './features/tag/tag.service';
 import {TaskRepeatCfgService} from './features/task-repeat-cfg/task-repeat-cfg.service';
+import {DataInitService} from './core/data-init/data-init.service';
 
 
 @Component({
@@ -46,23 +47,7 @@ import {TaskRepeatCfgService} from './features/task-repeat-cfg/task-repeat-cfg.s
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {
-  isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
-    this._projectService.isRelatedDataLoadedForCurrentProject$,
 
-    // LOAD GLOBAL MODELS
-    forkJoin([
-      this.taskService.load(),
-      this._projectService.load(),
-      this._configService.load(),
-      this.workContextService.load(),
-      this._tagService.load(),
-      this._taskRepeatCfgService.load(),
-    ])
-  ]).pipe(
-    map(([isProjectDataLoaded]) => isProjectDataLoaded),
-    filter(isLoaded => isLoaded),
-    take(1),
-  );
 
   @ViewChild('notesElRef', {read: ViewContainerRef}) notesElRef: ViewContainerRef;
   @ViewChild('sideNavElRef', {read: ViewContainerRef}) sideNavElRef: ViewContainerRef;
@@ -75,7 +60,6 @@ export class AppComponent implements OnDestroy {
     private _configService: GlobalConfigService,
     private _shortcutService: ShortcutService,
     private _bannerService: BannerService,
-    private _projectService: ProjectService,
     private _electronService: ElectronService,
     private _snackService: SnackService,
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
@@ -85,13 +69,10 @@ export class AppComponent implements OnDestroy {
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
     private _languageService: LanguageService,
-    private _attachmentService: TaskAttachmentService,
-    private _tagService: TagService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
-    public readonly taskService: TaskService,
+    public readonly dataInitService: DataInitService,
   ) {
     this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;

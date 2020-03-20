@@ -1,4 +1,4 @@
-<ng-container *ngIf="(isAllDataLoadedInitially$|async)">
+<ng-container *ngIf="(dataInitService.isAllDataLoadedInitially$|async)">
 
   <!--TODO move inside page container somehow -->
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
