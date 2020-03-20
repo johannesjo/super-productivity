@@ -9,10 +9,22 @@ import {
   WorkContextType
 } from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {loadWorkContextState, setActiveWorkContext} from './store/work-context.actions';
-import {initialContextState, selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
+import {setActiveWorkContext} from './store/work-context.actions';
+import {selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
-import {distinctUntilChanged, filter, map, mapTo, shareReplay, startWith, switchMap} from 'rxjs/operators';
+import {
+  concatMap,
+  distinctUntilChanged,
+  filter,
+  map,
+  mapTo,
+  shareReplay,
+  startWith,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom
+} from 'rxjs/operators';
 import {MY_DAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
 import {Task, TaskWithSubTasks} from '../tasks/task.model';
@@ -26,6 +38,7 @@ import {selectProjectById} from '../project/store/project.reducer';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {ProjectActionTypes} from '../project/store/project.actions';
 import {updateAdvancedConfigForTag} from '../tag/store/tag.actions';
+import {allDataLoaded} from '../../core/data-init/data-init.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -197,6 +210,14 @@ export class WorkContextService {
     map(tasks => flattenTasks(tasks)),
   );
 
+  // here because to avoid circular dependencies
+  private _isAllDataLoaded$: Observable<boolean> = this._actions$.pipe(
+    ofType(allDataLoaded),
+    mapTo(true),
+    startWith(false),
+    shareReplay(1),
+  );
+
   // TODO could be done better
   getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
     return this.todaysTasks$.pipe(
@@ -294,8 +315,18 @@ export class WorkContextService {
       this.activeWorkContextType = v.activeType;
     });
 
+    // we need all data to be loaded before we dispatch a setActiveContext action
     this._router.events.pipe(
       filter(event => event instanceof NavigationStart),
+      withLatestFrom(this._isAllDataLoaded$),
+      concatMap(([next, isAllDataLoaded]) => isAllDataLoaded
+        ? of(next)
+        : this._isAllDataLoaded$.pipe(
+          filter(isLoaded => isLoaded),
+          take(1),
+          mapTo(next),
+        )
+      ),
     ).subscribe(({url}: RouterEvent) => {
         const split = url.split('/');
         const id = split[2];
@@ -306,28 +337,25 @@ export class WorkContextService {
         }
 
         if (url.match(/tag\/.+/)) {
-          this.setActiveContext(id, WorkContextType.TAG);
+          this._setActiveContext(id, WorkContextType.TAG);
         } else if (url.match(/project\/.+/)) {
-          this.setActiveContext(id, WorkContextType.PROJECT);
+          this._setActiveContext(id, WorkContextType.PROJECT);
         }
       }
     );
   }
 
   async load() {
-    const state = await this._persistenceService.context.loadState() || initialContextState;
-    this._store$.dispatch(loadWorkContextState({state}));
+    // NOTE: currently route has prevalence over everything else and as there is not state apart from
+    // activeContextId, and activeContextType, we don't need to load it
+    // const state = await this._persistenceService.context.loadState() || initialContextState;
+    // this._store$.dispatch(loadWorkContextState({state}));
   }
 
   updateWorklogExportSettingsForCurrentContext(data: WorklogExportSettings) {
     this._updateAdvancedCfgForCurrentContext('worklogExportSettings', {
       ...data,
     });
-  }
-
-
-  setActiveContext(activeId: string, activeType: WorkContextType) {
-    this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
 
   updateWorkStartForActiveContext(date: string, newVal: number) {
@@ -384,4 +412,10 @@ export class WorkContextService {
     }
     return this._store$.pipe(select(selectTasksWithSubTasksByIds, {ids}));
   }
+
+  // NOTE: NEVER call this from some place other than the route change stuff
+  private _setActiveContext(activeId: string, activeType: WorkContextType) {
+    this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
+  }
+
 }

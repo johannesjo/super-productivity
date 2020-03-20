@@ -86,6 +86,7 @@ import {
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../work-context/store/work-context-meta.actions';
+import {Router} from '@angular/router';
 
 
 @Injectable({
@@ -163,6 +164,7 @@ export class TaskService {
     private readonly _workContextService: WorkContextService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
+    private readonly _router: Router,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 
@@ -407,7 +409,10 @@ export class TaskService {
   }
 
   startTaskFromOtherContext$(taskId: string, workContextType: WorkContextType, workContextId: string): Observable<any> {
-    this._workContextService.setActiveContext(workContextId, workContextType);
+    const base = (workContextType === WorkContextType.TAG ? 'tag' : 'project');
+    this._router.navigate([`/${base}/${workContextId}/tasks`]);
+    // NOTE: route is the only mechanism to trigger this
+    // this._workContextService._setActiveContext(workContextId, workContextType);
 
     const contextChanged$ = this._workContextService.activeWorkContextId$.pipe(
       filter(id => id === workContextId),

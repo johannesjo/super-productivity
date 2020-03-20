@@ -7,6 +7,8 @@ import {TaskRepeatCfgService} from '../../features/task-repeat-cfg/task-repeat-c
 import {TaskService} from '../../features/tasks/task.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {Store} from '@ngrx/store';
+import {allDataLoaded} from './data-init.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +41,14 @@ export class DataInitService {
     private _taskService: TaskService,
     private _configService: GlobalConfigService,
     private _workContextService: WorkContextService,
+    private _store$: Store<any>,
   ) {
+    // TODO better construction than this
+    this.isAllDataLoadedInitially$.pipe(
+      take(1)
+    ).subscribe(() => {
+      // here because to avoid circular dependencies
+      this._store$.dispatch(allDataLoaded());
+    });
   }
 }
