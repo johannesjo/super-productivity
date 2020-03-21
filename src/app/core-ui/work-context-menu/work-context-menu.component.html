@@ -4,7 +4,8 @@
   <span class="text">{{T.MH.WORKLOG|translate}}</span>
 </button>
 
-<button mat-menu-item
+<button *ngIf="isForProject"
+        mat-menu-item
         [routerLink]="[base,contextId,'metrics']">
   <mat-icon>donut_large</mat-icon>
   <span class="text">{{T.MH.METRICS|translate}}</span>

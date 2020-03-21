@@ -40,7 +40,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   doneAndRepeatingTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
     this._taskService.allRepeatableTasks$,
-    this._workContextService.doneTasks$,
+    this.workContextService.doneTasks$,
   ]).pipe(
     map(([repeatableTasks, doneTasks]) => [
       ...repeatableTasks,
@@ -73,7 +73,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   );
 
   tasksWorkedOnOrDoneOrRepeatableFlat$ = this.dayStr$.pipe(
-    switchMap((dayStr) => this._workContextService.getTasksWorkedOnOrDoneOrRepeatableFlat$(dayStr)),
+    switchMap((dayStr) => this.workContextService.getTasksWorkedOnOrDoneOrRepeatableFlat$(dayStr)),
     shareReplay(1),
   );
 
@@ -87,15 +87,15 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     map(tasks => tasks && tasks.length),
   );
 
-  estimatedOnTasksWorkedOn$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getTimeEstimateForDay$(dayStr)));
+  estimatedOnTasksWorkedOn$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeEstimateForDay$(dayStr)));
 
-  timeWorked$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getTimeWorkedForDay$(dayStr)));
+  timeWorked$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeWorkedForDay$(dayStr)));
 
-  started$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getWorkStart$(dayStr)));
-  end$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getWorkEnd$(dayStr)));
+  started$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkStart$(dayStr)));
+  end$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkEnd$(dayStr)));
 
-  breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getBreakTime$(dayStr)));
-  breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this._workContextService.getBreakNr$(dayStr)));
+  breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getBreakTime$(dayStr)));
+  breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getBreakNr$(dayStr)));
 
   isBreakTrackingSupport$: Observable<boolean> = this.configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 
@@ -106,13 +106,13 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   constructor(
     public readonly configService: GlobalConfigService,
+    public readonly workContextService: WorkContextService,
     private readonly _taskService: TaskService,
     private readonly _googleDriveSync: GoogleDriveSyncService,
     private readonly _router: Router,
     private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
     private readonly _snackService: SnackService,
-    private readonly _workContextService: WorkContextService,
     private readonly _projectService: ProjectService,
     private readonly _googleApiService: GoogleApiService,
     private readonly _electronService: ElectronService,
@@ -200,14 +200,14 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   updateWorkStart(ev) {
     const startTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (startTime) {
-      this._workContextService.updateWorkStartForActiveContext(this.dayStr, startTime);
+      this.workContextService.updateWorkStartForActiveContext(this.dayStr, startTime);
     }
   }
 
   updateWorkEnd(ev) {
     const endTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (endTime) {
-      this._workContextService.updateWorkEndForActiveContext(this.dayStr, endTime);
+      this.workContextService.updateWorkEndForActiveContext(this.dayStr, endTime);
     }
   }
 

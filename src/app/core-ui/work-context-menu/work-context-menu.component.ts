@@ -12,11 +12,12 @@ export class WorkContextMenuComponent {
   @Input() contextId: string;
 
   @Input('contextType') set contextTypeSet(v: WorkContextType) {
-    this.base = (v === WorkContextType.PROJECT)
+    this.isForProject = (v === WorkContextType.PROJECT);
+    this.base = (this.isForProject)
       ? 'project'
       : 'tag';
   }
-
+  isForProject: boolean;
 
   base: string;
   T = T;

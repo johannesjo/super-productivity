@@ -133,7 +133,7 @@
       </mat-tab>
 
 
-      <mat-tab *ngIf="!(configService.evaluation$|async)?.isHideEvaluationSheet"
+      <mat-tab *ngIf="(workContextService.isActiveWorkContextProject$|async) && !(configService.evaluation$|async)?.isHideEvaluationSheet"
                [label]="T.PDS.EVALUATION|translate">
         <section class="tab-inner"
                  style="max-width: 600px">

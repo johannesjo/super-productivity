@@ -20,7 +20,7 @@ export const APP_ROUTES: Routes = [
   {path: 'tag/:id/tasks', component: TagTaskPageComponent, data: {page: 'tag-tasks'}},
   {path: 'tag/:id/settings', component: TagSettingsPageComponent, data: {page: 'tag-settings'}},
   {path: 'tag/:id/worklog', component: WorklogComponent, data: {page: 'worklog'}},
-  {path: 'tag/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}},
+  // {path: 'tag/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}},
   {path: 'tag/:id/daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'tag/:id/daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
 
