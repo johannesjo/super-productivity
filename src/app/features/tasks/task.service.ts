@@ -63,7 +63,6 @@ import {
   selectTasksById,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
-  selectTasksWorkedOnOrDoneFlat,
   selectTaskWithSubTasksByRepeatConfigId
 } from './store/task.selectors';
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
@@ -482,10 +481,6 @@ export class TaskService {
     return this._store.pipe(select(selectTaskWithSubTasksByRepeatConfigId, {repeatCfgId}));
   }
 
-  getTasksWorkedOnOrDoneFlat$(day: string = getWorklogStr()): Observable<TaskWithSubTasks[]> {
-    return this._store.pipe(select(selectTasksWorkedOnOrDoneFlat, {day}));
-  }
-
   getTasksByTag(tagId: string): Observable<TaskWithSubTasks[]> {
     return this._store.pipe(select(selectTasksByTag, {tagId}));
   }
@@ -540,45 +535,16 @@ export class TaskService {
       || await this._persistenceService.taskArchive.getById(id);
   }
 
-  // NOTE: archived tasks not included
-  async getByIdsForProject(taskIds: string[], projectId: string): Promise<Task[]> {
-    throw new Error('NOT IMPLEMENT');
-    // TODO fix
-    return [];
-
-    // return await this._persistenceService.task.ent.getByIds(projectId, taskIds);
-  }
-
-  // NOTE: archived tasks not included
-  // TODO think about getting data from current project directly from store
-  async getByIdsFromAllProjects(projectIdTaskMap: { [key: string]: string[] }): Promise<Task[]> {
-    throw new Error('NOT IMPLEMENT');
-    // TODO fix
-    return [];
-
-    const projectIds = Object.keys(projectIdTaskMap);
-    const taskData = await Promise.all(projectIds.map(async (projectId) => {
-      return this.getByIdsForProject(projectIdTaskMap[projectId], projectId);
-    }));
-
-    if (taskData) {
-      return taskData.reduce((acc, val) => acc.concat(val), []);
-    }
-    return null;
-  }
-
-  // TODO check if that is what we need
   async getAllTasksForCurrentProject(): Promise<Task[]> {
-    throw new Error('NOT IMPLEMENT');
-    // TODO fix
-    return [];
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
     const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
     const archiveTasks = ids
       .map(id => archiveTaskState.entities[id])
       .filter(task => task.projectId === this._projectService.currentId);
-    return [...allTasks, ...archiveTasks];
+    return [...allTasks, ...archiveTasks].filter(
+      task => task.projectId === this._workContextService.activeWorkContextId
+    );
   }
 
   async getAllIssueIdsForCurrentProject(issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
