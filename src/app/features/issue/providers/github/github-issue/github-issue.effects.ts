@@ -8,8 +8,17 @@ import {SnackService} from '../../../../../core/snack/snack.service';
 import {TaskService} from '../../../../tasks/task.service';
 import {ProjectService} from '../../../../project/project.service';
 import {ProjectActionTypes} from '../../../../project/store/project.actions';
-import {withLatestFrom} from 'rxjs/operators';
+import {first, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {IssueService} from '../../../issue.service';
+import {forkJoin, Observable, timer} from 'rxjs';
+import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../github.const';
+import {TaskWithSubTasks} from 'src/app/features/tasks/task.model';
+import {T} from '../../../../../t.const';
+import {WorkContextService} from '../../../../work-context/work-context.service';
+import {GITHUB_TYPE} from '../../../issue.const';
+import {GithubCfg} from '../github.model';
+import {isGithubEnabled} from '../is-github-enabled.util';
+import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 
 @Injectable()
 export class GithubIssueEffects {
@@ -34,41 +43,42 @@ export class GithubIssueEffects {
       //     : EMPTY;
       // }),
     );
-  //
-  // private _pollChangesForIssues$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL).pipe(
-  //   withLatestFrom(
-  //     this._store$.pipe(select(selectGithubTasks)),
-  //   ),
-  //   tap(([, githubTasks]: [number, Task[]]) => {
-  //     if (githubTasks && githubTasks.length > 0) {
-  //       this._snackService.open({
-  //         msg: T.F.GITHUB.S.POLLING,
-  //         svgIco: 'github',
-  //         isSpinner: true,
-  //       });
-  //       githubTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
-  //     }
-  //   }),
-  // );
-  // @Effect({dispatch: false})
-  // pollIssueChangesAndBacklogUpdates: any = this._actions$
-  //   .pipe(
-  //     ofType(
-  //       // while load state should be enough this just might fix the error of polling for inactive projects?
-  //       ProjectActionTypes.LoadProjectRelatedDataSuccess,
-  //       ProjectActionTypes.UpdateProjectIssueProviderCfg,
-  //     ),
-  //     tap(console.log),
-  //     withLatestFrom(
-  //       this._projectService.isGithubEnabled$,
-  //       this._projectService.currentGithubCfg$,
-  //     ),
-  //     switchMap(([a, isEnabled, githubCfg]) => {
-  //       return (isEnabled && githubCfg.isAutoPoll)
-  //         ? this._pollChangesForIssues$
-  //         : EMPTY;
-  //     })
-  //   );
+
+
+  @Effect({dispatch: false})
+  pollIssueChangesForCurrentContext$: any = this._actions$
+    .pipe(
+      ofType(
+        setActiveWorkContext,
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
+      ),
+      switchMap(() => this._pollTimer$),
+      switchMap(() => this._updateIssuesForCurrentContext$),
+    );
+
+  private _pollTimer$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
+
+  private _updateIssuesForCurrentContext$ = this._workContextService.allTasksForCurrentContext$.pipe(
+    first(),
+    switchMap((tasks) => {
+      const gitIssueTasks = tasks.filter(task => task.issueType === GITHUB_TYPE);
+      return forkJoin(gitIssueTasks.map(task => this._projectService.getGithubCfgForProject$(task.projectId).pipe(
+        first(),
+        map(cfg => ({
+          cfg,
+          task,
+        }))
+        ))
+      );
+    }),
+    map((cos) => cos
+      .filter(({cfg, task}: { cfg: GithubCfg, task: TaskWithSubTasks }) =>
+        isGithubEnabled(cfg) && cfg.isAutoPoll
+      )
+      .map(({task}: { cfg: GithubCfg, task: TaskWithSubTasks }) => task)
+    ),
+    tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
+  );
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
@@ -78,8 +88,20 @@ export class GithubIssueEffects {
               private readonly _githubApiService: GithubApiService,
               private readonly _issueService: IssueService,
               private readonly _taskService: TaskService,
+              private readonly _workContextService: WorkContextService,
               private readonly _persistenceService: PersistenceService
   ) {
+  }
+
+  private _refreshIssues(githubTasks: TaskWithSubTasks[]) {
+    if (githubTasks && githubTasks.length > 0) {
+      this._snackService.open({
+        msg: T.F.GITHUB.S.POLLING,
+        svgIco: 'github',
+        isSpinner: true,
+      });
+      githubTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
+    }
   }
 
   // private async _importNewIssuesToBacklog([action]: [Actions, Task[]]) {

@@ -41,8 +41,8 @@ import {selectProjectById} from '../project/store/project.reducer';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {ProjectActionTypes} from '../project/store/project.actions';
 import {
-  updateAdvancedConfigForTag,
   addToBreakTimeForTag,
+  updateAdvancedConfigForTag,
   updateWorkEndForTag,
   updateWorkStartForTag
 } from '../tag/store/tag.actions';
@@ -166,6 +166,13 @@ export class WorkContextService {
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this.backlogTaskIds$.pipe(
     switchMap(ids => this._getTasksByIds$(ids)),
+  );
+
+  allTasksForCurrentContext$: Observable<TaskWithSubTasks[]> = combineLatest([
+    this.todaysTasks$,
+    this.backlogTasks$,
+  ]).pipe(
+    map(([today, backlog]) => [...today, ...backlog])
   );
 
   // TODO make it more efficient
