@@ -560,9 +560,6 @@ export class TaskService {
     subTasks: Task[],
     isFromArchive: boolean,
   }> {
-    throw new Error('NOT IMPLEMENT');
-    // TODO fix
-    return null;
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
     const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issueId);
 
