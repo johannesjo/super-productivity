@@ -24,8 +24,6 @@ export class TagListComponent implements OnDestroy {
     this._task = task;
     this._tagIds$.next(task.tagIds);
     this._projectId$.next(task.projectId);
-    console.log('I am here!');
-
   }
 
   @Input() set isShowProjectTagAlways(v: boolean) {

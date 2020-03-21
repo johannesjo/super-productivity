@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {TaskService} from '../task.service';
-import {debounceTime, first, flatMap, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, first, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {JiraIssue} from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import {BehaviorSubject, forkJoin, from, Observable, of, zip} from 'rxjs';
 import {IssueService} from '../../issue/issue.service';
@@ -57,8 +57,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     tap(() => this.isLoading$.next(true)),
     withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
     switchMap(([searchTerm, {activeType, activeId}]) => (activeType === WorkContextType.PROJECT)
-      ? this._searchForProject(searchTerm)
-      : this._searchForTag(searchTerm, activeId)
+      ? this._searchForProject$(searchTerm)
+      : this._searchForTag$(searchTerm, activeId)
     ),
     // don't show issues twice
     // NOTE: this only works because backlog items come first
@@ -237,7 +237,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   // TODO improve typing
-  private _searchForProject(searchTerm): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
+  private _searchForProject$(searchTerm): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
     if (searchTerm && searchTerm.length > 0) {
       const backlog$ = this._workContextService.backlogTasks$.pipe(
         map(tasks => tasks
@@ -259,7 +259,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private _searchForTag(searchTerm: string, currentTagId: string): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
+  private _searchForTag$(searchTerm: string, currentTagId: string): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
     if (searchTerm && searchTerm.length > 0) {
       return this._taskService.getAllParentWithoutTag$(currentTagId).pipe(
         take(1),
@@ -278,18 +278,22 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             };
           })
         ),
-        flatMap(tasks => forkJoin(tasks.map(task => {
-          const isFromProject = !!task.projectId;
-          return from(this._getCtxForTaskSuggestion(task)).pipe(map(ctx => {
-            return {
-              ...task,
-              ctx: {
-                ...ctx,
-                icon: (ctx as Tag).icon || (isFromProject && 'list')
-              },
-            };
-          }));
-        })))
+        switchMap(tasks => tasks.length
+          ? forkJoin(tasks.map(task => {
+            const isFromProject = !!task.projectId;
+            return from(this._getCtxForTaskSuggestion(task)).pipe(
+              first(),
+              map(ctx => ({
+                ...task,
+                ctx: {
+                  ...ctx,
+                  icon: (ctx as Tag).icon || (isFromProject && 'list')
+                },
+              })),
+            );
+          }))
+          : of([])
+        ),
       );
     } else {
       return of([]);
