@@ -221,7 +221,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     return ctx.title;
   }
 
-  private async _getCtxForTaskSuggestion({projectId, tagIds}: AddTaskSuggestion): Promise<Tag|Project> {
+  private async _getCtxForTaskSuggestion({projectId, tagIds}: AddTaskSuggestion): Promise<Tag | Project> {
     return projectId
       ? await this._projectService.getByIdOnce$(projectId).toPromise()
       : await this._tagService.getTagById$(tagIds[0]).pipe(first()).toPromise();
@@ -283,9 +283,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           return from(this._getCtxForTaskSuggestion(task)).pipe(map(ctx => {
             return {
               ...task,
-              ctxTitle: ctx.title,
-              ctxIcon: isFromProject ? 'list' : 'style',
-              ctx,
+              ctx: {
+                ...ctx,
+                icon: (ctx as Tag).icon || (isFromProject && 'list')
+              },
             };
           }));
         })))
