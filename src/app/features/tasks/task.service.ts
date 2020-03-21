@@ -52,6 +52,7 @@ import {
   selectCurrentTaskId,
   selectCurrentTaskOrParentWithData,
   selectIsTaskDataLoaded,
+  selectMainTasksWithoutTag,
   selectScheduledTasks,
   selectSelectedTask,
   selectSelectedTaskId,
@@ -155,6 +156,10 @@ export class TaskService {
 
   private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasks));
 
+
+  getAllParentWithoutTag$(tagId: string) {
+    return this._store.pipe(select(selectMainTasksWithoutTag, {tagId}));
+  }
 
   constructor(
     private readonly _store: Store<any>,

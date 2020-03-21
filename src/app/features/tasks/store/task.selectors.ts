@@ -122,6 +122,12 @@ export const selectTaskByIdWithSubTaskData = createSelector(
   }
 );
 
+export const selectMainTasksWithoutTag = createSelector(
+  selectAllTasks,
+  (tasks: Task[], props: { tagId: string }): Task[] => tasks.filter(
+    task => !task.parentId && !task.tagIds.includes(props.tagId)
+  )
+);
 
 export const selectTasksWorkedOnOrDoneFlat = createSelector(selectAllTasks, (tasks, props: { day: string }) => {
   if (!props) {

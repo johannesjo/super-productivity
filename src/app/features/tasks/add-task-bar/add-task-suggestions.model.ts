@@ -13,4 +13,7 @@ export interface AddTaskSuggestion {
   // task only
   taskId?: string;
   taskIssueId?: string;
+  isFromOtherContext?: boolean;
+  tagIds?: string[];
+  projectId?: string;
 }

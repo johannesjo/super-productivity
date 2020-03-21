@@ -11,9 +11,9 @@ import {
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {TaskService} from '../task.service';
-import {debounceTime, map, switchMap, tap} from 'rxjs/operators';
+import {debounceTime, first, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {JiraIssue} from '../../issue/providers/jira/jira-issue/jira-issue.model';
-import {BehaviorSubject, Observable, zip} from 'rxjs';
+import {BehaviorSubject, Observable, of, zip} from 'rxjs';
 import {IssueService} from '../../issue/issue.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {JiraApiService} from '../../issue/providers/jira/jira-api.service';
@@ -21,6 +21,11 @@ import {T} from '../../../t.const';
 import {Task} from '../task.model';
 import {AddTaskSuggestion} from './add-task-suggestions.model';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {WorkContextType} from '../../work-context/work-context.model';
+import {SearchResultItem} from '../../issue/issue.model';
+import {truncate} from '../../../util/truncate';
+import {TagService} from '../../tag/tag.service';
+import {ProjectService} from '../../project/project.service';
 
 @Component({
   selector: 'add-task-bar',
@@ -48,28 +53,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   filteredIssueSuggestions$: Observable<(AddTaskSuggestion)[]> = this.taskSuggestionsCtrl.valueChanges.pipe(
     debounceTime(300),
     tap(() => this.isLoading$.next(true)),
-    switchMap((searchTerm) => {
-      if (searchTerm && searchTerm.length > 0) {
-        const backlog$ = this._workContextService.backlogTasks$.pipe(
-          map(tasks => tasks
-            .filter(task => this._filterBacklog(searchTerm, task))
-            .map((task): AddTaskSuggestion => ({
-              title: task.title,
-              taskId: task.id,
-              taskIssueId: task.issueId,
-              issueType: task.issueType,
-            }))
-          )
-        );
-        const issues$ = this._issueService.searchIssues$(searchTerm);
-        return zip(backlog$, issues$).pipe(
-          map(([backlog, issues]) => ([...backlog, ...issues])),
-        );
-      } else {
-        // Note: the outer array signifies the observable stream the other is the value
-        return [[]];
-      }
-    }),
+    withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
+    switchMap(([searchTerm, {activeType, activeId}]) => (activeType === WorkContextType.PROJECT)
+      ? this._searchForProject(searchTerm)
+      : this._searchForTag(searchTerm, activeId)
+    ),
     // don't show issues twice
     // NOTE: this only works because backlog items come first
     map((items: AddTaskSuggestion[]) => items.reduce(
@@ -99,6 +87,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _issueService: IssueService,
     private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
+    private _projectService: ProjectService,
+    private _tagService: TagService,
     private _cd: ChangeDetectorRef,
   ) {
   }
@@ -176,6 +166,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       } else if (this.isDoubleEnterMode) {
         this.doubleEnterCount++;
       }
+
+    } else if (item.taskId && item.isFromOtherContext) {
+      this._taskService.updateTags(item.taskId, [...item.tagIds, this._workContextService.activeWorkContextId], item.tagIds);
+      const ctxTitle = await this._getProjectOrTagTitleForTask(item);
+      this._snackService.open({
+        ico: 'playlist_add',
+        msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
+        translateParams: {title: truncate(item.title), contextTitle: truncate(ctxTitle)},
+      });
       // NOTE: it's important that this comes before the issue check
       // so that backlog issues are found first
     } else if (item.taskId) {
@@ -214,12 +213,65 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     this._isAddInProgress = false;
   }
 
+  private async _getProjectOrTagTitleForTask({projectId, tagIds}: AddTaskSuggestion): Promise<string> {
+    const ctx = projectId
+      ? await this._projectService.getByIdOnce$(projectId).toPromise()
+      : await this._tagService.getTagById$(tagIds[0]).pipe(first()).toPromise();
+    return ctx.title;
+  }
+
   private _filterBacklog(searchText: string, task: Task) {
     try {
       return task.title.toLowerCase().match(searchText.toLowerCase());
     } catch (e) {
       console.warn('RegEx Error', e);
       return false;
+    }
+  }
+
+  // TODO improve typing
+  private _searchForProject(searchTerm): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
+    if (searchTerm && searchTerm.length > 0) {
+      const backlog$ = this._workContextService.backlogTasks$.pipe(
+        map(tasks => tasks
+          .filter(task => this._filterBacklog(searchTerm, task))
+          .map((task): AddTaskSuggestion => ({
+            title: task.title,
+            taskId: task.id,
+            taskIssueId: task.issueId,
+            issueType: task.issueType,
+          }))
+        )
+      );
+      const issues$ = this._issueService.searchIssues$(searchTerm);
+      return zip(backlog$, issues$).pipe(
+        map(([backlog, issues]) => ([...backlog, ...issues])),
+      );
+    } else {
+      return of([]);
+    }
+  }
+
+  private _searchForTag(searchTerm: string, currentTagId: string): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
+    if (searchTerm && searchTerm.length > 0) {
+      return this._taskService.getAllParentWithoutTag$(currentTagId).pipe(
+        take(1),
+        map(tasks => tasks
+          .filter(task => this._filterBacklog(searchTerm, task))
+          .map((task): AddTaskSuggestion => ({
+            title: task.title,
+            taskId: task.id,
+            taskIssueId: task.issueId,
+            issueType: task.issueType,
+            projectId: task.projectId,
+
+            isFromOtherContext: true,
+            tagIds: task.tagIds,
+          }))
+        )
+      );
+    } else {
+      return of([]);
     }
   }
 }

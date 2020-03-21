@@ -10,7 +10,11 @@ import {
 } from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {setActiveWorkContext} from './store/work-context.actions';
-import {selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
+import {
+  selectActiveContextId,
+  selectActiveContextType,
+  selectActiveContextTypeAndId
+} from './store/work-context.reducer';
 import {NavigationStart, Router, RouterEvent} from '@angular/router';
 import {
   concatMap,
@@ -22,7 +26,6 @@ import {
   startWith,
   switchMap,
   take,
-  tap,
   withLatestFrom
 } from 'rxjs/operators';
 import {MY_DAY_TAG} from '../tag/tag.const';
@@ -46,8 +49,13 @@ import {allDataLoaded} from '../../core/data-init/data-init.actions';
 export class WorkContextService {
   // CONTEXT LEVEL
   // -------------
-  activeWorkContextId$ = this._store$.pipe(select(selectActiveContextId));
-  activeWorkContextTypeAndId$ = this._store$.pipe(
+  activeWorkContextId$: Observable<string> = this._store$.pipe(select(selectActiveContextId));
+  activeWorkContextType$: Observable<WorkContextType> = this._store$.pipe(select(selectActiveContextType));
+
+  activeWorkContextTypeAndId$: Observable<{
+    activeId: string;
+    activeType: WorkContextType;
+  }> = this._store$.pipe(
     select(selectActiveContextTypeAndId),
     distinctUntilChanged(distinctUntilChangedObject),
     shareReplay(1),
