@@ -10,11 +10,13 @@ import {
   ProjectState,
   selectAdvancedProjectCfg,
   selectArchivedProjects,
+  selectGithubCfgByProjectId,
+  selectIsGithubEnabledByProjectId,
+  selectIsJiraEnabledByProjectId,
   selectIsRelatedDataLoadedForCurrentProject,
+  selectJiraCfgByProjectId,
   selectProjectBreakNr,
-  selectProjectBreakNrForDay,
   selectProjectBreakTime,
-  selectProjectBreakTimeForDay,
   selectProjectById,
   selectProjectGithubIsEnabled,
   selectProjectJiraIsEnabled,
@@ -83,7 +85,6 @@ export class ProjectService {
 
   advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(
     select(selectAdvancedProjectCfg),
-    // shareReplay(1),
   );
 
 
@@ -96,14 +97,31 @@ export class ProjectService {
   );
   currentId: string;
 
-  onProjectRelatedDataLoaded$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess));
-
   breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
   breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
 
   lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
 
   lastCompletedDay$: Observable<string> = this._store$.pipe(select(selectProjectLastCompletedDay));
+
+
+  // DYNAMIC
+  // -------
+  isJiraEnabledForProject$(projectId: string): Observable<boolean> {
+    return this._store$.pipe(select(selectIsJiraEnabledByProjectId, {id: projectId}));
+  }
+
+  getJiraCfgForProject$(projectId: string): Observable<JiraCfg> {
+    return this._store$.pipe(select(selectJiraCfgByProjectId, {id: projectId}));
+  }
+
+  isGithubEnabledForProject$(projectId: string): Observable<boolean> {
+    return this._store$.pipe(select(selectIsGithubEnabledByProjectId, {id: projectId}));
+  }
+
+  getGithubCfgForProject$(projectId: string): Observable<GithubCfg> {
+    return this._store$.pipe(select(selectGithubCfgByProjectId, {id: projectId}));
+  }
 
 
   constructor(
@@ -151,7 +169,7 @@ export class ProjectService {
     });
   }
 
-  getById$(id: string): Observable<Project> {
+  getByIdOnce$(id: string): Observable<Project> {
     return this._store$.pipe(select(selectProjectById, {id}), take(1));
   }
 

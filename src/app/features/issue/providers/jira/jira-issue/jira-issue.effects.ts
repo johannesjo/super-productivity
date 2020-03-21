@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {concatMap, filter, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, first, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../jira-api.service';
@@ -19,7 +19,7 @@ import {
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
 import {TaskService} from '../../../../tasks/task.service';
-import {EMPTY, Observable, throwError, timer} from 'rxjs';
+import {combineLatest, EMPTY, Observable, throwError, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogJiraTransitionComponent} from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import {IssueLocalState} from '../../../issue.model';
@@ -31,65 +31,65 @@ import {truncate} from '../../../../../util/truncate';
 import {ProjectService} from '../../../../project/project.service';
 import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 import {IssueService} from '../../../issue.service';
+import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
+import {WorkContextType} from '../../../../work-context/work-context.model';
 
 @Injectable()
 export class JiraIssueEffects {
 
-  @Effect({dispatch: false}) pollNewIssuesToBacklog$: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-        ProjectActionTypes.UpdateProjectIssueProviderCfg,
-      ),
-      withLatestFrom(
-        this._projectService.isJiraEnabled$,
-        this._projectService.currentJiraCfg$,
-      ),
-      switchMap(([a, isEnabled, jiraCfg]) => {
-        return (isEnabled && jiraCfg.isAutoAddToBacklog)
-          ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
-            // tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
-            tap(this._importNewIssuesToBacklog.bind(this))
-          )
-          : EMPTY;
-      }),
-    );
+  @Effect({dispatch: false})
+  pollNewIssuesToBacklog$: any = this._actions$.pipe(
+    ofType(setActiveWorkContext),
+    filter(a => a.activeType === WorkContextType.PROJECT),
+    switchMap(({activeId}) => combineLatest([
+        this._projectService.isJiraEnabledForProject$(activeId),
+        this._projectService.getJiraCfgForProject$(activeId),
+      ]).pipe(first())
+    ),
+    switchMap(([isEnabled, jiraCfg]) => {
+      return (isEnabled && jiraCfg.isAutoAddToBacklog)
+        ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
+          tap(() => this._importNewIssuesToBacklog())
+        )
+        : EMPTY;
+    }),
+  );
 
-  @Effect({dispatch: false}) addWorklog$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskActionTypes.UpdateTask,
-      ),
-      withLatestFrom(
-        this._projectService.isJiraEnabled$,
-        this._projectService.currentJiraCfg$,
-        this._store$.pipe(select(selectTaskEntities)),
-      ),
-      filter(([actIN, isEnabled]) => isEnabled),
-      tap(([actIN, isEnabled, jiraCfg, taskEntities]) => {
-        const act = actIN as UpdateTask;
-        const taskId = act.payload.task.id;
-        const isDone = act.payload.task.changes.isDone;
-        const task = taskEntities[taskId];
+  @Effect({dispatch: false})
+  addWorklog$: any = this._actions$.pipe(
+    ofType(
+      TaskActionTypes.UpdateTask,
+    ),
+    withLatestFrom(
+      this._projectService.isJiraEnabled$,
+      this._projectService.currentJiraCfg$,
+      this._store$.pipe(select(selectTaskEntities)),
+    ),
+    filter(([actIN, isEnabled]) => isEnabled),
+    tap(([actIN, isEnabled, jiraCfg, taskEntities]) => {
+      const act = actIN as UpdateTask;
+      const taskId = act.payload.task.id;
+      const isDone = act.payload.task.changes.isDone;
+      const task = taskEntities[taskId];
 
-        if (!isDone || !jiraCfg) {
-          return;
+      if (!isDone || !jiraCfg) {
+        return;
+      }
+
+      if (jiraCfg.isWorklogEnabled
+        && task && task.issueType === JIRA_TYPE
+        && !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)) {
+        this._openWorklogDialog(task, task.issueId);
+
+      } else {
+        const parent = task.parentId && taskEntities[task.parentId];
+        if (parent && jiraCfg.isAddWorklogOnSubTaskDone && parent.issueType === JIRA_TYPE) {
+          // NOTE we're still sending the sub task for the meta data we need
+          this._openWorklogDialog(task, parent.issueId);
         }
-
-        if (jiraCfg.isWorklogEnabled
-          && task && task.issueType === JIRA_TYPE
-          && !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)) {
-          this._openWorklogDialog(task, task.issueId);
-
-        } else {
-          const parent = task.parentId && taskEntities[task.parentId];
-          if (parent && jiraCfg.isAddWorklogOnSubTaskDone && parent.issueType === JIRA_TYPE) {
-            // NOTE we're still sending the sub task for the meta data we need
-            this._openWorklogDialog(task, parent.issueId);
-          }
-        }
-      })
-    );
+      }
+    })
+  );
 
   @Effect({dispatch: false})
   checkForReassignment: any = this._actions$
@@ -314,7 +314,7 @@ export class JiraIssueEffects {
     }).afterClosed();
   }
 
-  private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
+  private _importNewIssuesToBacklog() {
     this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssueReduced[]) => {
       if (!Array.isArray(issues)) {
         return;

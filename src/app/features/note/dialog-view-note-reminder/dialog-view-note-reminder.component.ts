@@ -25,7 +25,7 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
   reminder: Reminder = this.data.reminder;
   isForCurrentContext = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
   targetContext$: Observable<Tag | Project> = (this.data.reminder.workContextType === WorkContextType.PROJECT)
-    ? this._projectService.getById$(this.reminder.workContextId)
+    ? this._projectService.getByIdOnce$(this.reminder.workContextId)
     : this._tagService.getTagById$(this.reminder.workContextId);
 
   private _subs = new Subscription();

@@ -6,7 +6,7 @@ import {FIRST_PROJECT} from '../project.const';
 import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
-import {BreakNr, BreakNrCopy, WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
+import {WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
 import {
   AddTask,
   DeleteTask,
@@ -31,6 +31,7 @@ import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-contex
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {filterOutId} from '../../../util/filter-out-id';
 import {unique} from '../../../util/unique';
+import {GITHUB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -110,27 +111,27 @@ export const selectProjectLastWorkEnd = createSelector(
 // -----------------
 export const selectProjectById = createSelector(
   selectProjectFeatureState,
-  (state, props: { id: string }) => state.entities[props.id]
+  (state, props: { id: string }): Project => state.entities[props.id]
 );
 
-export const selectProjectWorkStartForDay = createSelector(
-  selectProjectWorkStart,
-  (workStart: WorkStartEnd, props: { day: string }) => workStart[props.day]
+export const selectJiraCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): JiraCfg => p.issueIntegrationCfgs[JIRA_TYPE] as JiraCfg
 );
 
-export const selectProjectWorkEndForDay = createSelector(
-  selectProjectWorkEnd,
-  (workEnd: WorkStartEnd, props: { day: string }) => workEnd[props.day]
+export const selectIsJiraEnabledByProjectId = createSelector(
+  selectJiraCfgByProjectId,
+  (jiraCfg: JiraCfg): boolean => jiraCfg.isEnabled,
 );
 
-export const selectProjectBreakTimeForDay = createSelector(
-  selectProjectBreakTime,
-  (breakTime: BreakNr, props: { day: string }) => breakTime[props.day]
+export const selectGithubCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): GithubCfg => p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg
 );
 
-export const selectProjectBreakNrForDay = createSelector(
-  selectProjectBreakNr,
-  (breaks: BreakNrCopy, props: { day: string }) => breaks[props.day]
+export const selectIsGithubEnabledByProjectId = createSelector(
+  selectGithubCfgByProjectId,
+  (githubCfg: GithubCfg): boolean => githubCfg && githubCfg.repo && githubCfg.repo.length > 2,
 );
 
 

@@ -45,7 +45,7 @@ export class TagListComponent implements OnDestroy {
   ]).pipe(
     switchMap(([{activeType}, isShowAlways]) => isShowAlways || (activeType === WorkContextType.TAG)
       ? this._projectId$.pipe(
-        switchMap(id => this._projectService.getById$(id))
+        switchMap(id => this._projectService.getByIdOnce$(id))
       )
       : of(null)
     ),

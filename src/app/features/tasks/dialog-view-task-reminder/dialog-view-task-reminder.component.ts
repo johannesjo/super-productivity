@@ -35,7 +35,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
 
 
   targetContext$: Observable<Tag | Project> = (this.data.reminder.workContextType === WorkContextType.PROJECT)
-    ? this._projectService.getById$(this.reminder.workContextId)
+    ? this._projectService.getByIdOnce$(this.reminder.workContextId)
     : this._tagService.getTagById$(this.reminder.workContextId);
 
   isDisableControls = false;
