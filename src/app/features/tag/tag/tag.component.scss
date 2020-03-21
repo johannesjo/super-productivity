@@ -28,10 +28,12 @@ $pad: ($ico-size - $line-height + $ico-pad*2)/2;
 
 .tag-ico {
   display: block;
-  margin-right: $s*.5;
   margin-top: $ico-pad;
   margin-bottom: $ico-pad;
   font-size: $ico-size;
   height: $ico-size;
   width: $ico-size;
+
+  // needs to be important to overwrite inside mat option
+  margin-right: $s*.5 !important;
 }
