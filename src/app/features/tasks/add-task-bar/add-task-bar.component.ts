@@ -125,17 +125,17 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   onBlur(ev) {
-    // if (ev.relatedTarget && ev.relatedTarget.className.includes('switch-add-to-btn')) {
-    //   this.inputEl.nativeElement.focus();
-    // } else if (ev.relatedTarget && ev.relatedTarget.className.includes('mat-option')) {
-    //   this._blurTimeout = window.setTimeout(() => {
-    //     if (!this._isAddInProgress) {
-    //       this.blurred.emit(ev);
-    //     }
-    //   }, 300);
-    // } else {
-    //   this.blurred.emit(ev);
-    // }
+    if (ev.relatedTarget && ev.relatedTarget.className.includes('switch-add-to-btn')) {
+      this.inputEl.nativeElement.focus();
+    } else if (ev.relatedTarget && ev.relatedTarget.className.includes('mat-option')) {
+      this._blurTimeout = window.setTimeout(() => {
+        if (!this._isAddInProgress) {
+          this.blurred.emit(ev);
+        }
+      }, 300);
+    } else {
+      this.blurred.emit(ev);
+    }
   }
 
   displayWith(issue: JiraIssue) {
@@ -174,7 +174,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       this._snackService.open({
         ico: 'playlist_add',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
-        translateParams: {title: truncate(item.title), contextTitle: truncate(item.ctxTitle)},
+        translateParams: {title: truncate(item.title), contextTitle: truncate(item.ctx.title)},
       });
       // NOTE: it's important that this comes before the issue check
       // so that backlog issues are found first

@@ -17,8 +17,7 @@ export interface AddTaskSuggestion {
   taskIssueId?: string;
   isFromOtherContext?: boolean;
 
-  ctxIcon?: string;
-  ctxTitle?: string;
+  // for add from tag context only
   ctx?: Tag | Project;
   tagIds?: string[];
   projectId?: string;
