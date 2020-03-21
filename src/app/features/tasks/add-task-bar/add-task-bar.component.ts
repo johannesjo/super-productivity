@@ -11,9 +11,9 @@ import {
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {TaskService} from '../task.service';
-import {debounceTime, first, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, first, flatMap, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {JiraIssue} from '../../issue/providers/jira/jira-issue/jira-issue.model';
-import {BehaviorSubject, Observable, of, zip} from 'rxjs';
+import {BehaviorSubject, forkJoin, from, Observable, of, zip} from 'rxjs';
 import {IssueService} from '../../issue/issue.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {JiraApiService} from '../../issue/providers/jira/jira-api.service';
@@ -26,6 +26,8 @@ import {SearchResultItem} from '../../issue/issue.model';
 import {truncate} from '../../../util/truncate';
 import {TagService} from '../../tag/tag.service';
 import {ProjectService} from '../../project/project.service';
+import {Tag} from '../../tag/tag.model';
+import {Project} from '../../project/project.model';
 
 @Component({
   selector: 'add-task-bar',
@@ -169,11 +171,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
     } else if (item.taskId && item.isFromOtherContext) {
       this._taskService.updateTags(item.taskId, [...item.tagIds, this._workContextService.activeWorkContextId], item.tagIds);
-      const ctxTitle = await this._getProjectOrTagTitleForTask(item);
       this._snackService.open({
         ico: 'playlist_add',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
-        translateParams: {title: truncate(item.title), contextTitle: truncate(ctxTitle)},
+        translateParams: {title: truncate(item.title), contextTitle: truncate(item.ctxTitle)},
       });
       // NOTE: it's important that this comes before the issue check
       // so that backlog issues are found first
@@ -220,6 +221,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     return ctx.title;
   }
 
+  private async _getCtxForTaskSuggestion({projectId, tagIds}: AddTaskSuggestion): Promise<Tag|Project> {
+    return projectId
+      ? await this._projectService.getByIdOnce$(projectId).toPromise()
+      : await this._tagService.getTagById$(tagIds[0]).pipe(first()).toPromise();
+  }
+
   private _filterBacklog(searchText: string, task: Task) {
     try {
       return task.title.toLowerCase().match(searchText.toLowerCase());
@@ -258,17 +265,30 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         take(1),
         map(tasks => tasks
           .filter(task => this._filterBacklog(searchTerm, task))
-          .map((task): AddTaskSuggestion => ({
-            title: task.title,
-            taskId: task.id,
-            taskIssueId: task.issueId,
-            issueType: task.issueType,
-            projectId: task.projectId,
+          .map((task): AddTaskSuggestion => {
+            return {
+              title: task.title,
+              taskId: task.id,
+              taskIssueId: task.issueId,
+              issueType: task.issueType,
+              projectId: task.projectId,
 
-            isFromOtherContext: true,
-            tagIds: task.tagIds,
-          }))
-        )
+              isFromOtherContext: true,
+              tagIds: task.tagIds,
+            };
+          })
+        ),
+        flatMap(tasks => forkJoin(tasks.map(task => {
+          const isFromProject = !!task.projectId;
+          return from(this._getCtxForTaskSuggestion(task)).pipe(map(ctx => {
+            return {
+              ...task,
+              ctxTitle: ctx.title,
+              ctxIcon: isFromProject ? 'list' : 'style',
+              ctx,
+            };
+          }));
+        })))
       );
     } else {
       return of([]);

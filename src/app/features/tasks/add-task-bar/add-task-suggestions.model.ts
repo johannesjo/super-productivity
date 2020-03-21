@@ -1,4 +1,6 @@
 import {IssueData, IssueProviderKey} from '../../issue/issue.model';
+import {Tag} from '../../tag/tag.model';
+import {Project} from '../../project/project.model';
 
 export interface AddTaskSuggestion {
   title: string;
@@ -14,6 +16,10 @@ export interface AddTaskSuggestion {
   taskId?: string;
   taskIssueId?: string;
   isFromOtherContext?: boolean;
+
+  ctxIcon?: string;
+  ctxTitle?: string;
+  ctx?: Tag | Project;
   tagIds?: string[];
   projectId?: string;
 }
