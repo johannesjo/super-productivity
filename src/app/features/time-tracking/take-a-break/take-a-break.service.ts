@@ -29,6 +29,7 @@ import {IPC} from '../../../../../electron/ipc-events.const';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {ElectronService} from '../../../core/electron/electron.service';
 import {UiHelperService} from '../../ui-helper/ui-helper.service';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -166,7 +167,7 @@ export class TakeABreakService {
     private _timeTrackingService: TimeTrackingService,
     private _idleService: IdleService,
     private _configService: GlobalConfigService,
-    private _projectService: ProjectService,
+    private _workContextService: WorkContextService,
     private _electronService: ElectronService,
     private _notifyService: NotifyService,
     private _bannerService: BannerService,
@@ -233,7 +234,7 @@ export class TakeABreakService {
 
   resetTimerAndCountAsBreak() {
     const min5 = 1000 * 60 * 5;
-    this._projectService.addToBreakTime(undefined, undefined, min5);
+    this._workContextService.addToBreakTimeForActiveContext( undefined, min5);
     this.resetTimer();
 
     this._triggerLockScreenCounter$.next(false);

@@ -141,23 +141,25 @@ const _reducer = createReducer<TagState>(
     }
   }, state)),
 
-  on(tagActions.updateBreakTimeForTag, (state, {id, newVal, date}) => tagAdapter.updateOne({
-    id, changes: {
-      breakTime: {
-        ...state.entities[id].breakTime,
-        [date]: newVal,
-      }
+  on(tagActions.addToBreakTimeForTag, (state, {id, newVal, date}) => {
+      const oldTag = state.entities[id];
+      const oldBreakTime = oldTag.breakTime[date] || 0;
+      const oldBreakNr = oldTag.breakNr[date] || 0;
+      return tagAdapter.updateOne({
+        id,
+        changes: {
+          breakNr: {
+            ...oldTag.breakNr,
+            [date]: oldBreakNr + 1,
+          },
+          breakTime: {
+            ...oldTag.breakTime,
+            [date]: oldBreakTime + newVal,
+          }
+        }
+      }, state);
     }
-  }, state)),
-
-  on(tagActions.updateBreakNrForTag, (state, {id, newVal, date}) => tagAdapter.updateOne({
-    id, changes: {
-      breakNr: {
-        ...state.entities[id].breakNr,
-        [date]: newVal,
-      }
-    }
-  }, state)),
+  ),
 
   on(tagActions.updateAdvancedConfigForTag, (state, {tagId, sectionKey, data}) => {
     const tagToUpdate = state.entities[tagId];

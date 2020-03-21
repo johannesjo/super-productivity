@@ -229,28 +229,6 @@ export class ProjectService {
     });
   }
 
-  addToBreakTime(id = this.currentId, date: string = getWorklogStr(), val: number) {
-    this._store$.dispatch({
-      type: ProjectActionTypes.AddToProjectBreakTime,
-      payload: {
-        id,
-        date,
-        val,
-      }
-    });
-  }
-
-  updateAdvancedCfg(projectId: string, sectionKey: WorkContextAdvancedCfgKey, data: any) {
-    this._store$.dispatch({
-      type: ProjectActionTypes.UpdateProjectAdvancedCfg,
-      payload: {
-        projectId,
-        sectionKey,
-        data,
-      }
-    });
-  }
-
   updateIssueProviderConfig(
     projectId: string,
     issueProviderKey: IssueProviderKey,

@@ -48,13 +48,7 @@ export const updateWorkEndForTag = createAction(
   props< { id: string; date: string; newVal: number; }>(),
 );
 
-export const updateBreakTimeForTag = createAction(
+export const addToBreakTimeForTag = createAction(
   '[Tag] Update Break Time for Tag',
   props< { id: string; date: string; newVal: number; }>(),
 );
-
-export const updateBreakNrForTag = createAction(
-  '[Tag] Update Break Nr for Tag',
-  props< { id: string; date: string; newVal: number; }>(),
-);
-

@@ -13,6 +13,7 @@ import {getWorklogStr} from '../../util/get-work-log-str';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
 import {ElectronService} from '../../core/electron/electron.service';
 import {UiHelperService} from '../ui-helper/ui-helper.service';
+import {WorkContextService} from '../work-context/work-context.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -40,7 +41,7 @@ export class IdleService {
 
   constructor(
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
-    private _projectService: ProjectService,
+    private _workContextService: WorkContextService,
     private _electronService: ElectronService,
     private _taskService: TaskService,
     private _configService: GlobalConfigService,
@@ -113,8 +114,7 @@ export class IdleService {
             }
 
             if (isTrackAsBreak) {
-              // TODO
-              this._projectService.addToBreakTime(undefined, undefined, timeSpent);
+              this._workContextService.addToBreakTimeForActiveContext( undefined, timeSpent);
             }
 
             if (task) {
