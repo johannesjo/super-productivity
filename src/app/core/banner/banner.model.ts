@@ -1,8 +1,6 @@
 export enum BannerId {
   TakeABreak = 'TakeABreak',
-  ForgotToFinishDay = 'ForgotToFinishDay',
   GoogleLogin = 'GoogleLogin',
-  GlobalError = 'GlobalError',
   JiraUnblock = 'JiraUnblock',
   InstallWebApp = 'InstallWebApp',
   TimeEstimateExceeded = 'TimeEstimateExceeded',

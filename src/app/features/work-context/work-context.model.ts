@@ -42,7 +42,6 @@ export enum WorkContextType {
 export interface WorkContextCommon {
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
-  lastCompletedDay: string;
   breakTime: BreakTime;
   breakNr: BreakNr;
   advancedCfg: WorkContextAdvancedCfg;

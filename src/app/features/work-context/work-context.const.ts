@@ -1,6 +1,4 @@
 import {WorkContextCommon, WorkContextThemeCfg} from './work-context.model';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {getYesterdaysDate} from '../../util/get-yesterdays-date';
 import {WorklogExportSettings, WorklogGrouping} from '../worklog/worklog.model';
 import {ConfigFormSection} from '../config/global-config.model';
 import {T} from '../../t.const';
@@ -32,7 +30,6 @@ export const WORK_CONTEXT_DEFAULT_COMMON: WorkContextCommon = {
   theme: WORK_CONTEXT_DEFAULT_THEME,
   workStart: {},
   workEnd: {},
-  lastCompletedDay: getWorklogStr(getYesterdaysDate()),
   breakTime: {},
   breakNr: {},
 };

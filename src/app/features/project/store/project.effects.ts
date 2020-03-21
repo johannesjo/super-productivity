@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {concatMap, filter, first, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -27,10 +27,8 @@ import {ImprovementService} from '../../metric/improvement/improvement.service';
 import {ProjectService} from '../project.service';
 import {BannerService} from '../../../core/banner/banner.service';
 import {Router} from '@angular/router';
-import {BannerId} from '../../../core/banner/banner.model';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {T} from '../../../t.const';
-import {isShowFinishDayNotification} from '../util/is-show-finish-day-notification';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
@@ -64,7 +62,6 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProjectOrder,
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
-        ProjectActionTypes.UpdateLastCompletedDay,
 
         TaskActionTypes.AddTask,
         TaskActionTypes.DeleteTask,
@@ -106,45 +103,6 @@ export class ProjectEffects {
     take(1),
     switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
   );
-
-
-  // TODO rethink & migrate
-  @Effect({dispatch: false})
-  checkIfDayWasFinished$: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-      ),
-      withLatestFrom(
-        this._projectService.lastWorkEnd$,
-        this._projectService.lastCompletedDay$,
-        this._globalConfigService.misc$,
-      ),
-      map(([a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg]) =>
-        ({a, lastWorkEndTimestamp, lastCompletedDayStr, miscCfg})),
-      filter(({miscCfg}) =>
-        miscCfg && !miscCfg.isDisableRemindWhenForgotToFinishDay),
-      filter(({lastWorkEndTimestamp, lastCompletedDayStr}) => {
-        return isShowFinishDayNotification(lastWorkEndTimestamp, lastCompletedDayStr);
-      }),
-      tap(({lastWorkEndTimestamp}) => {
-        const dayStr = getWorklogStr(lastWorkEndTimestamp);
-        this._bannerService.open({
-          id: BannerId.ForgotToFinishDay,
-          ico: 'info',
-          msg: T.F.PROJECT.BANNER.FINISH_DAY.MSG,
-          translateParams: {
-            dayStr
-          },
-          action: {
-            label: T.F.PROJECT.BANNER.FINISH_DAY.FINISH_DAY,
-            fn: () => {
-              this._router.navigate(['/active/daily-summary', dayStr]);
-            }
-          },
-        });
-      }),
-    );
 
 
   @Effect()

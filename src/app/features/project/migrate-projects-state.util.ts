@@ -24,7 +24,6 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
   const projectEntities: Dictionary<Project> = {...projectState.entities};
   Object.keys(projectEntities).forEach((key) => {
     projectEntities[key] = _updateThemeModel(projectEntities[key]);
-    projectEntities[key] = _addFirstEntryForDayCompleted(projectEntities[key]);
     projectEntities[key] = _convertToWesternArabicDateKeys(projectEntities[key]);
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
@@ -65,14 +64,6 @@ const _removeOutdatedData = (project: Project): Project => {
   // return copy;
 };
 
-const _addFirstEntryForDayCompleted = (project: Project): Project => {
-  return (project.hasOwnProperty('lastCompletedDay'))
-    ? project
-    : {
-      ...project,
-      lastCompletedDay: getWorklogStr(getYesterdaysDate())
-    };
-};
 
 const ___convertToWesternArabicDateKeys = (workStartEnd: {
   [key: string]: any;

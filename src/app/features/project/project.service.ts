@@ -20,28 +20,19 @@ import {
   selectProjectById,
   selectProjectGithubIsEnabled,
   selectProjectJiraIsEnabled,
-  selectProjectLastCompletedDay,
-  selectProjectLastWorkEnd,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue.model';
 import {JiraCfg} from '../issue/providers/jira/jira.model';
-import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/providers/github/github.model';
-import {Actions, ofType} from '@ngrx/effects';
+import {Actions} from '@ngrx/effects';
 import {map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
 import {T} from '../../t.const';
-import {
-  BreakNr,
-  BreakTime,
-  WorkContextAdvancedCfg,
-  WorkContextAdvancedCfgKey,
-  WorkContextType
-} from '../work-context/work-context.model';
+import {BreakNr, BreakTime, WorkContextAdvancedCfg, WorkContextType} from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
 import {GITHUB_TYPE, JIRA_TYPE} from '../issue/issue.const';
 
@@ -99,10 +90,6 @@ export class ProjectService {
 
   breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
   breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
-
-  lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
-
-  lastCompletedDay$: Observable<string> = this._store$.pipe(select(selectProjectLastCompletedDay));
 
 
   // DYNAMIC
@@ -215,16 +202,6 @@ export class ProjectService {
           id: projectId,
           changes: changedFields
         }
-      }
-    });
-  }
-
-  updateLastCompletedDay(id = this.currentId, date: string) {
-    this._store$.dispatch({
-      type: ProjectActionTypes.UpdateLastCompletedDay,
-      payload: {
-        id,
-        date,
       }
     });
   }

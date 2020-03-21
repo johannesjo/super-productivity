@@ -419,12 +419,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "Finish Day",
-          "MSG": "You forgot to finish your day on {{dayStr}}"
-        }
-      },
       "D_CREATE": {
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
@@ -804,7 +798,6 @@
       "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",

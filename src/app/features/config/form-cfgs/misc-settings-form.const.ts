@@ -44,13 +44,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
-      key: 'isDisableRemindWhenForgotToFinishDay',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.MISC.IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY,
-      },
-    },
-    {
       key: 'isTurnOffMarkdown',
       type: 'checkbox',
       templateOptions: {

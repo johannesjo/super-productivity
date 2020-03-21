@@ -4,7 +4,6 @@ import {ProjectState} from './project.reducer';
 import {Project} from '../project.model';
 import {IssueIntegrationCfg, IssueProviderKey} from '../../issue/issue.model';
 import {WorkContextAdvancedCfgKey} from '../../work-context/work-context.model';
-import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
 
 export enum ProjectActionTypes {
   LoadProjectState = '[Project] Load Project State',
@@ -19,7 +18,6 @@ export enum ProjectActionTypes {
   UpdateProject = '[Project] Update Project',
   UpdateProjectWorkStart = '[Project] Update Work Start',
   UpdateProjectWorkEnd = '[Project] Update Work End',
-  UpdateLastCompletedDay = '[Project] Update Last Completed Day',
   AddToProjectBreakTime = '[Project] Add to Break Time',
   UpdateProjectAdvancedCfg = '[Project] Update Project Advanced Cfg',
   UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
@@ -97,13 +95,6 @@ export class UpdateProjectWorkEnd implements Action {
   }
 }
 
-export class UpdateLastCompletedDay implements Action {
-  readonly type = ProjectActionTypes.UpdateLastCompletedDay;
-
-  constructor(public payload: { id: string; date: string; }) {
-  }
-}
-
 export class AddToProjectBreakTime implements Action {
   readonly type = ProjectActionTypes.AddToProjectBreakTime;
 
@@ -177,7 +168,6 @@ export type ProjectActions
   | UpdateProject
   | UpdateProjectWorkStart
   | UpdateProjectWorkEnd
-  | UpdateLastCompletedDay
   | AddToProjectBreakTime
   | UpdateProjectAdvancedCfg
   | UpdateProjectIssueProviderCfg

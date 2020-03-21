@@ -9,7 +9,6 @@ import {SetSelectedTask, UnsetCurrentTask} from '../../tasks/store/task.actions'
 import {TaskService} from '../../tasks/task.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {BannerService} from '../../../core/banner/banner.service';
-import {TaskAdditionalInfoTargetPanel} from '../../tasks/task.model';
 
 
 @Injectable()
@@ -33,7 +32,7 @@ export class WorkContextEffects {
         contextActions.setActiveWorkContext,
       ),
       tap(() => {
-        this._bannerService.dismissIfExisting(BannerId.ForgotToFinishDay);
+        // this._bannerService.dismissIfExisting(BannerId.ForgotToFinishDay);
         this._bannerService.dismissIfExisting(BannerId.JiraUnblock);
       }),
     ), {dispatch: false});

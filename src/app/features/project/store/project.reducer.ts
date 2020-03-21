@@ -86,7 +86,6 @@ export const selectProjectGithubIsEnabled = createSelector(
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
-export const selectProjectLastCompletedDay = createSelector(selectCurrentProject, (project): string => project.lastCompletedDay);
 export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
 export const selectProjectBreakNr = createSelector(selectCurrentProject, (project) => project.breakNr);
 export const selectProjectBasicCfg = createSelector(selectCurrentProject, (project): ProjectBasicCfg => {
@@ -467,16 +466,6 @@ export function projectReducer(
             ...oldP.workEnd,
             [date]: newVal,
           }
-        }
-      }, state);
-    }
-
-    case ProjectActionTypes.UpdateLastCompletedDay: {
-      const {id, date} = action.payload;
-      return projectAdapter.updateOne({
-        id,
-        changes: {
-          lastCompletedDay: date
         }
       }, state);
     }

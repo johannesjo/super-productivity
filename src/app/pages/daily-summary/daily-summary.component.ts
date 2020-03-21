@@ -168,7 +168,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     const doneAndRepeatingTasks = await this.doneAndRepeatingTasks$.pipe(take(1)).toPromise();
 
     this._taskService.moveToArchive(doneAndRepeatingTasks);
-    this._projectService.updateLastCompletedDay(this._projectService.currentId, this.dayStr);
 
     if (IS_ELECTRON && this.isForToday) {
       this._matDialog.open(DialogConfirmComponent, {

@@ -46,7 +46,6 @@ export type MiscConfig = Readonly<{
   isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
-  isDisableRemindWhenForgotToFinishDay: boolean;
   isTurnOffMarkdown: boolean;
 }>;
 
