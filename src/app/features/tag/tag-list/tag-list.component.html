@@ -3,9 +3,8 @@
      (click)="editTags()">
   <div class="tags"
        [@standardList]="tags.length">
-    <tag *ngIf="projectTag"
-         [tag]="projectTag"
-         [style.background-color]="projectTag.theme.primary"></tag>
+    <tag *ngIf="(projectTag$|async) as projectTag"
+         [tag]="projectTag"></tag>
     <tag *ngFor="let tag of tags; trackBy: trackByFn"
          [tag]="tag"
          [style.background-color]="tag.color"></tag>

@@ -29,7 +29,8 @@ import { TagComponent } from './tag/tag.component';
   ],
   exports: [
     DialogEditTagsForTaskComponent,
-    TagListComponent
+    TagListComponent,
+    TagComponent
   ],
 })
 export class TagModule {

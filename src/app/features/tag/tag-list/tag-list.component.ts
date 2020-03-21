@@ -24,6 +24,8 @@ export class TagListComponent implements OnDestroy {
     this._task = task;
     this._tagIds$.next(task.tagIds);
     this._projectId$.next(task.projectId);
+    console.log('I am here!');
+
   }
 
   @Input() set isShowProjectTagAlways(v: boolean) {
@@ -46,7 +48,7 @@ export class TagListComponent implements OnDestroy {
     switchMap(([{activeType}, isShowAlways]) => isShowAlways || (activeType === WorkContextType.TAG)
       ? this._projectId$.pipe(
         switchMap(id => this._projectService.getByIdOnce$(id)),
-        map(project => ({
+        map(project => (project && {
           ...project,
           icon: 'list'
         }))

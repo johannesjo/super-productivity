@@ -32,11 +32,9 @@
                 [value]="item">
       <mat-icon *ngIf="item.issueType"
                 [svgIcon]="item.issueType|issueIcon"></mat-icon>
-      <mat-icon *ngIf="!item.issueType && !item.ctxIcon">library_books</mat-icon>
-      <mat-icon *ngIf="!item.issueType && item.ctxIcon">{{item.ctxIcon}}</mat-icon>
-      <span *ngIf="item.ctx"
-            [style.background]="item.ctx.theme.primary"
-            class="ctx-title">{{item.ctxTitle}}</span>
+      <mat-icon *ngIf="!item.issueType && !item.ctx">library_books</mat-icon>
+      <tag *ngIf="item.ctx"
+           [tag]="item.ctx"></tag>
       <span [innerHTML]="item?.titleHighlighted||item?.title"></span>
     </mat-option>
 
