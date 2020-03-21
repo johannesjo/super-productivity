@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {combineLatest, forkJoin, Observable} from 'rxjs';
-import {filter, map, shareReplay, take} from 'rxjs/operators';
+import {combineLatest, forkJoin, Observable, of} from 'rxjs';
+import {filter, shareReplay, switchMap, take} from 'rxjs/operators';
 import {ProjectService} from '../../features/project/project.service';
 import {TagService} from '../../features/tag/tag.service';
 import {TaskRepeatCfgService} from '../../features/task-repeat-cfg/task-repeat-cfg.service';
@@ -15,8 +15,6 @@ import {allDataLoaded} from './data-init.actions';
 })
 export class DataInitService {
   isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
-    this._projectService.isRelatedDataLoadedForCurrentProject$,
-
     // LOAD GLOBAL MODELS
     forkJoin([
       this._taskService.load(),
@@ -27,7 +25,11 @@ export class DataInitService {
       this._workContextService.load(),
     ])
   ]).pipe(
-    map(([isProjectDataLoaded]) => isProjectDataLoaded),
+    switchMap(() => this._workContextService.isActiveWorkContextProject$),
+    switchMap(isProject => isProject
+      ? this._projectService.isRelatedDataLoadedForCurrentProject$
+      : of(true)
+    ),
     filter(isLoaded => isLoaded),
     take(1),
     // only ever load once
