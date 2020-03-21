@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
-import {catchError, first, map, switchMap} from 'rxjs/operators';
+import {catchError, concatMap, first, map, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
 import {GithubApiService} from './github-api.service';
 import {ProjectService} from '../../../project/project.service';
@@ -32,34 +32,38 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
-    console.log(issueId, projectId);
-    
-    return this._projectService.getGithubCfgForProject$(projectId).pipe(
-      first(),
+    return this._getCfgOnce$(projectId).pipe(
       map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`)
     );
   }
 
-  getById$(issueId: number) {
-    return this._githubApiService.getById$(issueId);
+  getById$(issueId: number, projectId: string) {
+    // return this._getCfgOnce$(projectId).pipe(
+    //   concatMap(githubCfg => )
+    // );
+    return this._getCfgOnce$(projectId).pipe(
+      concatMap(githubCfg => this._githubApiService.getById$(issueId, githubCfg))
+    );
   }
 
-  searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
-    return this.isGithubSearchEnabled$.pipe(
-      switchMap((isSearchGithub) => isSearchGithub
-        ? this._githubApiService.searchIssueForRepo$(searchTerm).pipe(catchError(() => []))
-        : of([])
-      )
+  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
+    return this._getCfgOnce$(projectId).pipe(
+      concatMap(githubCfg => this.isGithubSearchEnabled$.pipe(
+        switchMap((isSearchGithub) => isSearchGithub
+          ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg).pipe(catchError(() => []))
+          : of([])
+        )
+      ))
     );
   }
 
   async refreshIssue(
     task: Task,
     isNotifySuccess = true,
-    isNotifyNoUpdateRequired = false
+    isNotifyNoUpdateRequired = false,
   ): Promise<{ taskChanges: Partial<Task>, issue: GithubIssue }> {
-    const cfg = this.githubCfg;
-    const issue = await this._githubApiService.getById$(+task.issueId).toPromise();
+    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
 
     const issueUpdate: number = new Date(issue.updated_at).getTime();
     const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
@@ -119,5 +123,9 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
   private _formatIssueTitleForSnack(id: number, title: string): string {
     return `${truncate(this._formatIssueTitle(id, title))}`;
+  }
+
+  private _getCfgOnce$(projectId: string): Observable<GithubCfg> {
+    return this._projectService.getGithubCfgForProject$(projectId).pipe(first());
   }
 }

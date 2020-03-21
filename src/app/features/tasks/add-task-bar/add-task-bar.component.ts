@@ -191,6 +191,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         this._issueService.addTaskWithIssue(
           item.issueType,
           item.issueData.id,
+          this._workContextService.activeWorkContextId,
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {
@@ -250,7 +251,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           }))
         )
       );
-      const issues$ = this._issueService.searchIssues$(searchTerm);
+      const issues$ = this._issueService.searchIssues$(searchTerm, this._workContextService.activeWorkContextId);
       return zip(backlog$, issues$).pipe(
         map(([backlog, issues]) => ([...backlog, ...issues])),
       );

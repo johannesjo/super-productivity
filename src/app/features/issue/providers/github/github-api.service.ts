@@ -27,19 +27,17 @@ export class GithubApiService {
     private _snackService: SnackService,
     private _http: HttpClient,
   ) {
-    this._projectService.currentGithubCfg$.subscribe((cfg: GithubCfg) => {
-      this._cfg = cfg;
-    });
+
   }
 
 
-  getById$(issueId: number, isGetComments = true): Observable<GithubIssue> {
+  getById$(issueId: number, cfg: GithubCfg, isGetComments = true): Observable<GithubIssue> {
     return this._sendRequest$({
-      url: `${BASE}repos/${this._cfg.repo}/issues/${issueId}`
-    })
+      url: `${BASE}repos/${cfg.repo}/issues/${issueId}`
+    }, cfg)
       .pipe(
         switchMap(issue => isGetComments
-          ? this.getCommentListForIssue$(issueId).pipe(
+          ? this.getCommentListForIssue$(issueId, cfg).pipe(
             map(comments => ({...issue, comments}))
           )
           : of(issue),
@@ -47,23 +45,23 @@ export class GithubApiService {
       );
   }
 
-  getCommentListForIssue$(issueId: number): Observable<GithubComment[]> {
+  getCommentListForIssue$(issueId: number, cfg: GithubCfg): Observable<GithubComment[]> {
     return this._sendRequest$({
-      url: `${BASE}repos/${this._cfg.repo}/issues/${issueId}/comments`
-    })
+      url: `${BASE}repos/${cfg.repo}/issues/${issueId}/comments`
+    }, cfg)
       .pipe(
       );
   }
 
 
-  searchIssueForRepo$(searchText: string, isSearchAllGithub = false): Observable<SearchResultItem[]> {
+  searchIssueForRepo$(searchText: string, cfg: GithubCfg, isSearchAllGithub = false): Observable<SearchResultItem[]> {
     const repoQuery = isSearchAllGithub
       ? '' :
-      `+repo:${this._cfg.repo}`;
+      `+repo:${cfg.repo}`;
 
     return this._sendRequest$({
       url: `${BASE}search/issues?q=${encodeURI(searchText + repoQuery)}`
-    })
+    }, cfg)
       .pipe(
         map((res: GithubIssueSearchResult) => {
           return (res && res.items)
@@ -73,10 +71,11 @@ export class GithubApiService {
       );
   }
 
-  getLast100IssuesForRepo$(repo = this._cfg && this._cfg.repo): Observable<GithubIssueReduced[]> {
+  getLast100IssuesForRepo$(cfg: GithubCfg): Observable<GithubIssueReduced[]> {
+    const repo = cfg.repo;
     // NOTE: alternate approach (but no caching :( )
     // return this._sendRequest$({
-    //   url: `${BASE}search/issues?q=${encodeURI(`+repo:${this._cfg.repo}`)}`
+    //   url: `${BASE}search/issues?q=${encodeURI(`+repo:${cfg.repo}`)}`
     // }).pipe(
     //   tap(console.log),
     //   map((res: GithubIssueSearchResult) => res && res.items
@@ -85,15 +84,15 @@ export class GithubApiService {
     // );
     return this._sendRequest$({
       url: `${BASE}repos/${repo}/issues?per_page=100&sort=updated`,
-    }).pipe(
+    }, cfg).pipe(
       map((issues: GithubOriginalIssue[]) => issues
         ? issues.map(mapGithubIssue)
         : []),
     );
   }
 
-  private _checkSettings() {
-    if (!this._isValidSettings()) {
+  private _checkSettings(cfg: GithubCfg) {
+    if (!this._isValidSettings(cfg)) {
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED
@@ -103,20 +102,19 @@ export class GithubApiService {
   }
 
 
-  private _isValidSettings(): boolean {
-    const cfg = this._cfg;
+  private _isValidSettings(cfg: GithubCfg): boolean {
     return cfg && cfg.repo && cfg.repo.length > 0;
   }
 
 
-  private _sendRequest$(params: HttpRequest<string> | any): Observable<any> {
-    this._checkSettings();
+  private _sendRequest$(params: HttpRequest<string> | any, cfg: GithubCfg): Observable<any> {
+    this._checkSettings(cfg);
 
     const p: HttpRequest<any> | any = {
       ...params,
       method: params.method || 'GET',
       headers: {
-        ...(this._cfg.token ? {Authorization: 'token ' + this._cfg.token} : {}),
+        ...(cfg.token ? {Authorization: 'token ' + cfg.token} : {}),
         ...(params.headers ? params.headers : {}),
       }
     };

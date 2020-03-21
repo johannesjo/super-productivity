@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {IssueLocalState} from '../../../../issue.model';
-import {JiraIssue, JiraIssueReduced} from '../../jira-issue/jira-issue.model';
+import {JiraIssueReduced} from '../../jira-issue/jira-issue.model';
 import {Observable} from 'rxjs';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraOriginalTransition} from '../../jira-api-responses';

@@ -36,7 +36,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     this._projectService.currentJiraCfg$.subscribe((jiraCfg) => this.jiraCfg = jiraCfg);
   }
 
-  getById$(issueId: string | number) {
+  getById$(issueId: string | number, projectId: string) {
     return this._jiraApiService.getIssueById$(issueId);
   }
 

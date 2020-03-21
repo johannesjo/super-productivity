@@ -78,7 +78,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   issueData$: Observable<IssueData> = this.issueDataTrigger$.pipe(
     switchMap((args) => (args && args.id && args.type)
-      ? this._issueService.getById$(args.type, args.id)
+      ? this._issueService.getById$(args.type, args.id, this._taskData.projectId)
         // ? throwError({[HANDLED_ERROR_PROP_STR]: 'XX'})
         .pipe(
           // delayWhen(x => timer(3000)),

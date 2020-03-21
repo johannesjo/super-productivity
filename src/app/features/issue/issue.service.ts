@@ -34,7 +34,7 @@ export class IssueService {
   ) {
   }
 
-  getById$(issueType: IssueProviderKey, id: string | number): Observable<IssueData> {
+  getById$(issueType: IssueProviderKey, id: string | number, projectId: string): Observable<IssueData> {
     if (typeof this.ISSUE_SERVICE_MAP[issueType].getById$ === 'function') {
 
       // account for issue refreshment
@@ -42,7 +42,7 @@ export class IssueService {
         if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
           this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
         }
-        return this.ISSUE_SERVICE_MAP[issueType].getById$(id).pipe(
+        return this.ISSUE_SERVICE_MAP[issueType].getById$(id, projectId).pipe(
           switchMap(issue => merge<IssueData>(
             of(issue),
             this.ISSUE_REFRESH_MAP[issueType][id],
@@ -50,17 +50,17 @@ export class IssueService {
           )
         );
       } else {
-        return this.ISSUE_SERVICE_MAP[issueType].getById$(id);
+        return this.ISSUE_SERVICE_MAP[issueType].getById$(id, projectId);
       }
     }
     return of(null);
   }
 
-  searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
+  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     const obs = Object.keys(this.ISSUE_SERVICE_MAP)
       .map(key => this.ISSUE_SERVICE_MAP[key])
       .filter(provider => typeof provider.searchIssues$ === 'function')
-      .map(provider => provider.searchIssues$(searchTerm));
+      .map(provider => provider.searchIssues$(searchTerm, projectId));
     obs.unshift(from([[]]));
     console.log(obs);
 
@@ -99,13 +99,14 @@ export class IssueService {
   async addTaskWithIssue(
     issueType: IssueProviderKey,
     issueIdOrData: string | number | IssueDataReduced,
-    isAddToBacklog = false
+    projectId: string,
+    isAddToBacklog = false,
   ) {
     if (this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
       const {issueId, issueData} = (typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string')
         ? {
           issueId: issueIdOrData,
-          issueData: await this.ISSUE_SERVICE_MAP[issueType].getById$(issueIdOrData).toPromise()
+          issueData: await this.ISSUE_SERVICE_MAP[issueType].getById$(issueIdOrData, projectId).toPromise()
         }
         : {
           issueId: issueIdOrData.id,

@@ -46,13 +46,13 @@ export class JiraIssueEffects {
         this._projectService.getJiraCfgForProject$(activeId),
       ]).pipe(first())
     ),
-    switchMap(([isEnabled, jiraCfg]) => {
-      return (isEnabled && jiraCfg.isAutoAddToBacklog)
-        ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
-          tap(() => this._importNewIssuesToBacklog())
-        )
-        : EMPTY;
-    }),
+    // switchMap(([isEnabled, jiraCfg]) => {
+    //   return (isEnabled && jiraCfg.isAutoAddToBacklog)
+    //     ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
+    //       tap(() => this._importNewIssuesToBacklog())
+    //     )
+    //     : EMPTY;
+    // }),
   );
 
   @Effect({dispatch: false})
@@ -193,39 +193,39 @@ export class JiraIssueEffects {
     );
 
 
-  private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
-    withLatestFrom(
-      this._store$.pipe(select(selectJiraTasks)),
-    ),
-    tap(([, jiraTasks]: [number, Task[]]) => {
-      if (jiraTasks && jiraTasks.length > 0) {
-        this._snackService.open({
-          msg: T.F.JIRA.S.POLLING,
-          svgIco: 'jira',
-          isSpinner: true,
-        });
-        jiraTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
-      }
-    }),
-  );
-
-  @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
-    .pipe(
-      ofType(
-        // while load state should be enough this just might fix the error of polling for inactive projects?
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-        ProjectActionTypes.UpdateProjectIssueProviderCfg,
-      ),
-      withLatestFrom(
-        this._projectService.isJiraEnabled$,
-        this._projectService.currentJiraCfg$,
-      ),
-      switchMap(([a, isEnabled, jiraCfg]) => {
-        return (isEnabled && jiraCfg.isAutoPollTickets)
-          ? this._pollChangesForIssues$
-          : EMPTY;
-      })
-    );
+  // private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
+  //   withLatestFrom(
+  //     this._store$.pipe(select(selectJiraTasks)),
+  //   ),
+  //   tap(([, jiraTasks]: [number, Task[]]) => {
+  //     if (jiraTasks && jiraTasks.length > 0) {
+  //       this._snackService.open({
+  //         msg: T.F.JIRA.S.POLLING,
+  //         svgIco: 'jira',
+  //         isSpinner: true,
+  //       });
+  //       jiraTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
+  //     }
+  //   }),
+  // );
+  //
+  // @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
+  //   .pipe(
+  //     ofType(
+  //       // while load state should be enough this just might fix the error of polling for inactive projects?
+  //       ProjectActionTypes.LoadProjectRelatedDataSuccess,
+  //       ProjectActionTypes.UpdateProjectIssueProviderCfg,
+  //     ),
+  //     withLatestFrom(
+  //       this._projectService.isJiraEnabled$,
+  //       this._projectService.currentJiraCfg$,
+  //     ),
+  //     switchMap(([a, isEnabled, jiraCfg]) => {
+  //       return (isEnabled && jiraCfg.isAutoPollTickets)
+  //         ? this._pollChangesForIssues$
+  //         : EMPTY;
+  //     })
+  //   );
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
@@ -314,41 +314,41 @@ export class JiraIssueEffects {
     }).afterClosed();
   }
 
-  private _importNewIssuesToBacklog() {
-    this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssueReduced[]) => {
-      if (!Array.isArray(issues)) {
-        return;
-      }
-      const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
-
-
-      // NOTE: we check for key as well as id although normally the key should suffice
-      const issuesToAdd = issues.filter(
-        issue => !allTaskJiraIssueIds.includes(issue.id) && !allTaskJiraIssueIds.includes(issue.key)
-      );
-
-      issuesToAdd.forEach((issue) => {
-        this._issueService.addTaskWithIssue(JIRA_TYPE, issue, true);
-      });
-
-      if (issuesToAdd.length === 1) {
-        this._snackService.open({
-          translateParams: {
-            issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
-          },
-          msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
-          ico: 'cloud_download',
-        });
-      } else if (issuesToAdd.length > 1) {
-        this._snackService.open({
-          translateParams: {
-            issuesLength: issuesToAdd.length
-          },
-          msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
-          ico: 'cloud_download',
-        });
-      }
-    });
-  }
+  // private _importNewIssuesToBacklog() {
+  //   this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssueReduced[]) => {
+  //     if (!Array.isArray(issues)) {
+  //       return;
+  //     }
+  //     const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
+  //
+  //
+  //     // NOTE: we check for key as well as id although normally the key should suffice
+  //     const issuesToAdd = issues.filter(
+  //       issue => !allTaskJiraIssueIds.includes(issue.id) && !allTaskJiraIssueIds.includes(issue.key)
+  //     );
+  //
+  //     issuesToAdd.forEach((issue) => {
+  //       this._issueService.addTaskWithIssue(JIRA_TYPE, issue, true);
+  //     });
+  //
+  //     if (issuesToAdd.length === 1) {
+  //       this._snackService.open({
+  //         translateParams: {
+  //           issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
+  //         },
+  //         msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
+  //         ico: 'cloud_download',
+  //       });
+  //     } else if (issuesToAdd.length > 1) {
+  //       this._snackService.open({
+  //         translateParams: {
+  //           issuesLength: issuesToAdd.length
+  //         },
+  //         msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
+  //         ico: 'cloud_download',
+  //       });
+  //     }
+  //   });
+  // }
 }
 

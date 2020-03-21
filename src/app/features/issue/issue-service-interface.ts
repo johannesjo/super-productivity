@@ -6,11 +6,16 @@ import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
 export interface IssueServiceInterface {
   issueLink$?(issueId: string | number, projectId: string): Observable<string>;
 
-  getById$?(id: string | number): Observable<IssueData>;
+  getById$?(id: string | number, projectId: string): Observable<IssueData>;
 
-  searchIssues$?(searchTerm: string): Observable<SearchResultItem[]>;
+  searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
-  refreshIssue?(task: Task, isNotifySuccess: boolean, isNotifyNoUpdateRequired: boolean): Promise<{ taskChanges: Partial<Task>, issue: IssueData }>;
+  refreshIssue?(task: Task,
+                isNotifySuccess: boolean,
+                isNotifyNoUpdateRequired: boolean): Promise<{
+    taskChanges: Partial<Task>,
+    issue: IssueData
+  }>;
 
   getAddTaskData?(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
 
