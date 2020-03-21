@@ -66,6 +66,7 @@ export class ProjectEffects {
         TaskActionTypes.AddTask,
         TaskActionTypes.DeleteTask,
         TaskActionTypes.MoveToOtherProject,
+        TaskActionTypes.MoveToArchive,
 
         moveTaskInBacklogList.type,
         moveTaskToBacklogList.type,
