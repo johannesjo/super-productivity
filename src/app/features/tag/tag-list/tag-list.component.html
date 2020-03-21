@@ -1,20 +1,13 @@
 <div class="tags-container"
-     *ngIf="(tags && tags.length) || (project)"
+     *ngIf="(tags && tags.length) || (projectTag)"
      (click)="editTags()">
-  <ul class="tags"
-      [@standardList]="tags.length">
-    <li *ngIf="project$|async as project"
-        [style.background-color]="project.theme.primary"
-        class="tag">
-      <mat-icon class="tag-ico">list</mat-icon>
-      <span class="tag-title">{{project.title}}</span>
-    </li>
-    <li *ngFor="let tag of tags; trackBy: trackByFn"
-        [style.background-color]="tag.color"
-        class="tag">
-      <mat-icon *ngIf="tag.icon"
-                class="tag-ico">{{tag.icon}}</mat-icon>
-      <span class="tag-title">{{tag.title}}</span>
-    </li>
-  </ul>
+  <div class="tags"
+       [@standardList]="tags.length">
+    <tag *ngIf="projectTag"
+         [tag]="projectTag"
+         [style.background-color]="projectTag.theme.primary"></tag>
+    <tag *ngFor="let tag of tags; trackBy: trackByFn"
+         [tag]="tag"
+         [style.background-color]="tag.color"></tag>
+  </div>
 </div>

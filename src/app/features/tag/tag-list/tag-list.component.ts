@@ -3,14 +3,14 @@ import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {Tag} from '../tag.model';
 import {TagService} from '../tag.service';
 import {BehaviorSubject, combineLatest, Observable, of, Subscription} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {Task} from '../../tasks/task.model';
 import {DialogEditTagsForTaskComponent} from '../dialog-edit-tags/dialog-edit-tags-for-task.component';
 import {ProjectService} from '../../project/project.service';
 import {WorkContextService} from '../../work-context/work-context.service';
-import {Project} from '../../project/project.model';
 import {WorkContextType} from '../../work-context/work-context.model';
+import {TagComponentTag} from '../tag/tag.component';
 
 @Component({
   selector: 'tag-list',
@@ -39,18 +39,22 @@ export class TagListComponent implements OnDestroy {
 
 
   private _projectId$ = new BehaviorSubject<string>(null);
-  project$: Observable<Project> = combineLatest([
+  projectTag$: Observable<TagComponentTag> = combineLatest([
     this._workContextService.activeWorkContextTypeAndId$,
     this._isShowProjectTagAlways$
   ]).pipe(
     switchMap(([{activeType}, isShowAlways]) => isShowAlways || (activeType === WorkContextType.TAG)
       ? this._projectId$.pipe(
-        switchMap(id => this._projectService.getByIdOnce$(id))
+        switchMap(id => this._projectService.getByIdOnce$(id)),
+        map(project => ({
+          ...project,
+          icon: 'list'
+        }))
       )
       : of(null)
     ),
   );
-  project: Project;
+  projectTag: TagComponentTag;
 
 
   private _tagIds$ = new BehaviorSubject([]);
@@ -73,7 +77,7 @@ export class TagListComponent implements OnDestroy {
     private readonly _workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
   ) {
-    this._subs.add(this.project$.subscribe(v => this.project = v));
+    this._subs.add(this.projectTag$.subscribe(v => this.projectTag = v));
     this._subs.add(this.tags$.subscribe(v => this.tags = v));
   }
 

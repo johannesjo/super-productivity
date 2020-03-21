@@ -28,39 +28,3 @@
   align-items: center;
   flex-wrap: wrap;
 }
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  flex-direction: row;
-  margin: 2px;
-  min-width: 20px;
-  padding: 0 $s;
-  font-size: 10px;
-  border-radius: $s*2;
-  background: $c-primary;
-  color: $c-contrast;
-}
-
-$ico-size: 16px;
-$line-height: 14px;
-$ico-pad: 1px;
-$pad: ($ico-size - $line-height + $ico-pad*2)/2;
-
-.tag-title {
-  display: block;
-  font-size: 12px;
-  line-height: $line-height;
-  padding: $pad 0;
-}
-
-
-.tag-ico {
-  display: block;
-  margin-right: $s*.5;
-  margin-top: $ico-pad;
-  margin-bottom: $ico-pad;
-  font-size: $ico-size;
-  height: $ico-size;
-  width: $ico-size;
-}

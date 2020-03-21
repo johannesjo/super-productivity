@@ -8,6 +8,7 @@ import {UiModule} from '../../ui/ui.module';
 import {FormsModule} from '@angular/forms';
 import {TagListComponent} from './tag-list/tag-list.component';
 import {DialogEditTagsForTaskComponent} from './dialog-edit-tags/dialog-edit-tags-for-task.component';
+import { TagComponent } from './tag/tag.component';
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import {DialogEditTagsForTaskComponent} from './dialog-edit-tags/dialog-edit-tag
   declarations: [
     TagListComponent,
     DialogEditTagsForTaskComponent,
+    TagComponent,
     // FindContrastColorPipe
   ],
   entryComponents: [
