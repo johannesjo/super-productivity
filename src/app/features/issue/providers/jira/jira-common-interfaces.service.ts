@@ -4,7 +4,6 @@ import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
 import {catchError, first, map, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
-import {JiraCfg} from './jira.model';
 import {JiraApiService} from './jira-api.service';
 import {SnackService} from '../../../../core/snack/snack.service';
 import {TaskService} from '../../../tasks/task.service';
@@ -23,8 +22,6 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
     map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
   );
-  /** @deprecated */
-  jiraCfg: JiraCfg;
 
   constructor(
     private readonly _store: Store<any>,
@@ -33,7 +30,6 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     private readonly _taskService: TaskService,
     private readonly _projectService: ProjectService,
   ) {
-    this._projectService.currentJiraCfg$.subscribe((jiraCfg) => this.jiraCfg = jiraCfg);
   }
 
   getById$(issueId: string | number, projectId: string) {

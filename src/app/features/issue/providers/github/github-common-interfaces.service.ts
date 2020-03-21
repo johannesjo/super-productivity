@@ -20,15 +20,12 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   isGithubSearchEnabled$: Observable<boolean> = this._projectService.currentGithubCfg$.pipe(
     map(githubCfg => githubCfg && githubCfg.isSearchIssuesFromGithub)
   );
-  /** @deprecated */
-  githubCfg: GithubCfg;
 
   constructor(
     private readonly _githubApiService: GithubApiService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
   ) {
-    this._projectService.currentGithubCfg$.subscribe((githubCfg) => this.githubCfg = githubCfg);
   }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
@@ -38,9 +35,6 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   }
 
   getById$(issueId: number, projectId: string) {
-    // return this._getCfgOnce$(projectId).pipe(
-    //   concatMap(githubCfg => )
-    // );
     return this._getCfgOnce$(projectId).pipe(
       concatMap(githubCfg => this._githubApiService.getById$(issueId, githubCfg))
     );
