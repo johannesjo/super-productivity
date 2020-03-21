@@ -53,7 +53,7 @@ export class WorklogWeekComponent {
   }
 
   async updateTimeSpentTodayForTask(task: Task, dateStr: string, newVal: number | string) {
-    await this._taskService.updateEverywhereForCurrentProject(task.id, {
+    await this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
         [dateStr]: +newVal,

@@ -512,8 +512,8 @@ export class TaskService {
   // GLOBAL TASK MODEL STUFF
   // -----------------------
 
-  // BEWARE: does only work for task model updates
-  async updateEverywhereForCurrentProject(id: string, changedFields: Partial<Task>) {
+  // BEWARE: does only work for task model updates, but not for related models
+  async updateEverywhere(id: string, changedFields: Partial<Task>) {
     const state = await this.taskFeatureState$.pipe(first()).toPromise();
     const {entities} = state;
     if (entities[id]) {
