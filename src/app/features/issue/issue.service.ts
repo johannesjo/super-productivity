@@ -67,9 +67,9 @@ export class IssueService {
     return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
   }
 
-  issueLink(issueType: IssueProviderKey, issueId: string | number): string {
-    if (typeof this.ISSUE_SERVICE_MAP[issueType].issueLink === 'function') {
-      return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId);
+  issueLink$(issueType: IssueProviderKey, issueId: string | number, projectId: string): Observable<string> {
+    if (typeof this.ISSUE_SERVICE_MAP[issueType].issueLink$ === 'function') {
+      return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, projectId);
     }
   }
 

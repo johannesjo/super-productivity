@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
-import {catchError, map, switchMap} from 'rxjs/operators';
+import {catchError, first, map, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
 import {GithubApiService} from './github-api.service';
 import {ProjectService} from '../../../project/project.service';
@@ -20,6 +20,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   isGithubSearchEnabled$: Observable<boolean> = this._projectService.currentGithubCfg$.pipe(
     map(githubCfg => githubCfg && githubCfg.isSearchIssuesFromGithub)
   );
+  /** @deprecated */
   githubCfg: GithubCfg;
 
   constructor(
@@ -30,8 +31,13 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     this._projectService.currentGithubCfg$.subscribe((githubCfg) => this.githubCfg = githubCfg);
   }
 
-  issueLink(issueId: number): string {
-    return `https://github.com/${this.githubCfg.repo}/issues/${issueId}`;
+  issueLink$(issueId: number, projectId: string): Observable<string> {
+    console.log(issueId, projectId);
+    
+    return this._projectService.getGithubCfgForProject$(projectId).pipe(
+      first(),
+      map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`)
+    );
   }
 
   getById$(issueId: number) {

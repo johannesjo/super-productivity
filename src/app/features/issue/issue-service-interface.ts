@@ -4,7 +4,7 @@ import {Task} from '../tasks/task.model';
 import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
-  issueLink?(issueId: string | number): string;
+  issueLink$?(issueId: string | number, projectId: string): Observable<string>;
 
   getById$?(id: string | number): Observable<IssueData>;
 

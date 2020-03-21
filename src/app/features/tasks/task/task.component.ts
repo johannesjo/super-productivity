@@ -13,14 +13,14 @@ import {
   ViewChild
 } from '@angular/core';
 import {TaskService} from '../task.service';
-import {Subject} from 'rxjs';
+import {Observable, of, ReplaySubject, Subject} from 'rxjs';
 import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {checkKeyCombo} from '../../../util/check-key-combo';
-import {takeUntil} from 'rxjs/operators';
+import {switchMap, take, takeUntil} from 'rxjs/operators';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {TaskAttachmentService} from '../task-attachment/task-attachment.service';
 import {IssueService} from '../../issue/issue.service';
@@ -54,9 +54,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.taskId = 't-' + this.task.id;
     this.isDone = v.isDone;
 
-    if (v.issueId) {
-      this.issueUrl = this._issueService.issueLink(v.issueType, v.issueId);
-    }
+    this._task$.next(v);
   }
 
   @Input() isBacklog: boolean;
@@ -72,9 +70,17 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isContextMenuDisabled = false;
   ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition = {x: '0px', y: '0px'};
-
-  issueUrl: string;
   progress: number;
+
+  private _task$ = new ReplaySubject<TaskWithSubTasks>(1);
+  issueUrl$: Observable<string> = this._task$.pipe(
+    switchMap((v) => {
+      return (v.issueType && v.issueId && v.projectId)
+        ? this._issueService.issueLink$(v.issueType, v.issueId, v.projectId)
+        : of(null);
+    }),
+    take(1),
+  );
 
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
   @ViewChild('blockLeft') blockLeftEl: ElementRef;

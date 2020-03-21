@@ -33,7 +33,12 @@ export class JiraIssueContentComponent {
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;
     this.description = i && i.description && j2m.to_markdown(i.description);
-    this.issueUrl = this._issueService.issueLink(JIRA_TYPE, i.id);
+    // TODO fix
+    // this.issueUrl = this._issueService.issueLink$(JIRA_TYPE, i.id);
+  }
+
+  getIssueLink$(id) {
+    // this._issueService.issueLink$(JIRA_TYPE, i.id)
   }
 
   hideUpdates() {

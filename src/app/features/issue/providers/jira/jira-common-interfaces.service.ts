@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
-import {catchError, map, switchMap} from 'rxjs/operators';
+import {catchError, first, map, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
 import {JiraCfg} from './jira.model';
 import {JiraApiService} from './jira-api.service';
@@ -23,6 +23,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
     map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
   );
+  /** @deprecated */
   jiraCfg: JiraCfg;
 
   constructor(
@@ -104,8 +105,11 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  issueLink(issueId: string | number): string {
-    return this.jiraCfg.host + '/browse/' + issueId;
+  issueLink$(issueId: string | number, projectId: string): Observable<string> {
+    return this._projectService.getJiraCfgForProject$(projectId).pipe(
+      first(),
+      map((jiraCfg) => jiraCfg.host + '/browse/' + issueId)
+    );
   }
 
   getMappedAttachments(issueData: JiraIssue): TaskAttachment[] {

@@ -307,8 +307,8 @@
           </button>
 
           <!--TODO maybe handle dynamically -->
-          <a *ngIf="issueUrl"
-             [href]="issueUrl"
+          <a *ngIf="task.issueId"
+             [href]="issueUrl$|async"
              style="color: inherit"
              mat-menu-item
              tabindex="2"
