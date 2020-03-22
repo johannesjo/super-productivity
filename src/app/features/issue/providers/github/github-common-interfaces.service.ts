@@ -17,10 +17,6 @@ import {T} from '../../../../t.const';
   providedIn: 'root',
 })
 export class GithubCommonInterfacesService implements IssueServiceInterface {
-  isGithubSearchEnabled$: Observable<boolean> = this._projectService.currentGithubCfg$.pipe(
-    map(githubCfg => githubCfg && githubCfg.isSearchIssuesFromGithub)
-  );
-
   constructor(
     private readonly _githubApiService: GithubApiService,
     private readonly _projectService: ProjectService,
@@ -42,12 +38,10 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(projectId).pipe(
-      concatMap(githubCfg => this.isGithubSearchEnabled$.pipe(
-        switchMap((isSearchGithub) => isSearchGithub
-          ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg).pipe(catchError(() => []))
-          : of([])
-        )
-      ))
+      switchMap((githubCfg) => (githubCfg && githubCfg.isSearchIssuesFromGithub)
+        ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg).pipe(catchError(() => []))
+        : of([])
+      )
     );
   }
 
