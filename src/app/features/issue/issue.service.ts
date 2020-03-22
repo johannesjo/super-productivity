@@ -3,25 +3,28 @@ import {IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem} from '.
 import {Attachment} from '../attachment/attachment.model';
 import {from, merge, Observable, of, Subject, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
-import {GITHUB_TYPE, JIRA_TYPE} from './issue.const';
+import {GITHUB_TYPE, JIRA_TYPE, GITLAB_TYPE} from './issue.const';
 import {TaskService} from '../tasks/task.service';
 import {Task} from '../tasks/task.model';
 import {IssueServiceInterface} from './issue-service-interface';
 import {JiraCommonInterfacesService} from './providers/jira/jira-common-interfaces.service';
 import {GithubCommonInterfacesService} from './providers/github/github-common-interfaces.service';
 import {switchMap} from 'rxjs/operators';
+import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueService {
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
+    [GITLAB_TYPE]: this._gitlabCommonInterfacesService,
     [GITHUB_TYPE]: this._githubCommonInterfacesService,
     [JIRA_TYPE]: this._jiraCommonInterfacesService
   };
 
   // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
   ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
+    [GITLAB_TYPE]: {},
     [GITHUB_TYPE]: {},
     [JIRA_TYPE]: {}
   };
@@ -31,6 +34,7 @@ export class IssueService {
     private _taskService: TaskService,
     private _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private _githubCommonInterfacesService: GithubCommonInterfacesService,
+    private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
   ) {
   }
 
