@@ -1,15 +1,15 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {filter, first, switchMap, tap} from 'rxjs/operators';
+import {filter, first, map, switchMap, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../jira-api.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
 import {JiraIssueReduced} from './jira-issue.model';
 import {SnackService} from '../../../../../core/snack/snack.service';
-import {Task} from '../../../../tasks/task.model';
+import {Task, TaskWithSubTasks} from '../../../../tasks/task.model';
 import {TaskService} from '../../../../tasks/task.service';
-import {Observable, timer} from 'rxjs';
+import {forkJoin, Observable, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogJiraTransitionComponent} from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import {IssueLocalState} from '../../../issue.model';
@@ -26,7 +26,6 @@ import {JiraCfg} from '../jira.model';
 
 @Injectable()
 export class JiraIssueEffects {
-
   @Effect({dispatch: false})
   pollNewIssuesToBacklog$: any = this._actions$.pipe(
     ofType(
@@ -47,6 +46,78 @@ export class JiraIssueEffects {
       )),
     )),
   );
+
+  @Effect({dispatch: false})
+  pollIssueChangesForCurrentContext$: any = this._actions$.pipe(
+    ofType(
+      setActiveWorkContext,
+      ProjectActionTypes.UpdateProjectIssueProviderCfg,
+    ),
+    switchMap(() => this._pollTimer$),
+    switchMap(() => this._workContextService.allTasksForCurrentContext$.pipe(
+      first(),
+      switchMap((tasks) => {
+        const jiraIssueTasks = tasks.filter(task => task.issueType === JIRA_TYPE);
+        return forkJoin(jiraIssueTasks.map(task =>
+          this._projectService.getJiraCfgForProject$(task.projectId).pipe(
+            first(),
+            map(cfg => ({cfg, task}))
+          ))
+        );
+      }),
+      map((cos) => cos
+        .filter(({cfg, task}: { cfg: JiraCfg, task: TaskWithSubTasks }) =>
+          cfg.isEnabled && cfg.isAutoPollTickets
+        )
+        .map(({task}: { cfg: JiraCfg, task: TaskWithSubTasks }) => task)
+      ),
+      tap((jiraTasks: TaskWithSubTasks[]) => {
+        if (jiraTasks && jiraTasks.length > 0) {
+          this._snackService.open({
+            msg: T.F.JIRA.S.POLLING,
+            svgIco: 'jira',
+            isSpinner: true,
+          });
+          jiraTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
+        }
+      }),
+    )),
+  );
+
+
+  // private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
+  //   withLatestFrom(
+  //     this._store$.pipe(select(selectJiraTasks)),
+  //   ),
+  //   tap(([, jiraTasks]: [number, Task[]]) => {
+  //     if (jiraTasks && jiraTasks.length > 0) {
+  //       this._snackService.open({
+  //         msg: T.F.JIRA.S.POLLING,
+  //         svgIco: 'jira',
+  //         isSpinner: true,
+  //       });
+  //       jiraTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
+  //     }
+  //   }),
+  // );
+  // @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
+  //   .pipe(
+  //     ofType(
+  //       // while load state should be enough this just might fix the error of polling for inactive projects?
+  //       ProjectActionTypes.LoadProjectRelatedDataSuccess,
+  //       ProjectActionTypes.UpdateProjectIssueProviderCfg,
+  //     ),
+  //     withLatestFrom(
+  //       this._projectService.isJiraEnabled$,
+  //       this._projectService.currentJiraCfg$,
+  //     ),
+  //     switchMap(([a, isEnabled, jiraCfg]) => {
+  //       return (isEnabled && jiraCfg.isAutoPollTickets)
+  //         ? this._pollChangesForIssues$
+  //         : EMPTY;
+  //     })
+  //   );
+
 
   // @Effect({dispatch: false})
   // addWorklog$: any = this._actions$.pipe(
@@ -185,40 +256,6 @@ export class JiraIssueEffects {
   //     })
   //   );
 
-
-  // private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
-  //   withLatestFrom(
-  //     this._store$.pipe(select(selectJiraTasks)),
-  //   ),
-  //   tap(([, jiraTasks]: [number, Task[]]) => {
-  //     if (jiraTasks && jiraTasks.length > 0) {
-  //       this._snackService.open({
-  //         msg: T.F.JIRA.S.POLLING,
-  //         svgIco: 'jira',
-  //         isSpinner: true,
-  //       });
-  //       jiraTasks.forEach((task) => this._issueService.refreshIssue(task, true, false));
-  //     }
-  //   }),
-  // );
-  //
-  // @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
-  //   .pipe(
-  //     ofType(
-  //       // while load state should be enough this just might fix the error of polling for inactive projects?
-  //       ProjectActionTypes.LoadProjectRelatedDataSuccess,
-  //       ProjectActionTypes.UpdateProjectIssueProviderCfg,
-  //     ),
-  //     withLatestFrom(
-  //       this._projectService.isJiraEnabled$,
-  //       this._projectService.currentJiraCfg$,
-  //     ),
-  //     switchMap(([a, isEnabled, jiraCfg]) => {
-  //       return (isEnabled && jiraCfg.isAutoPollTickets)
-  //         ? this._pollChangesForIssues$
-  //         : EMPTY;
-  //     })
-  //   );
 
   private _pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL);
 

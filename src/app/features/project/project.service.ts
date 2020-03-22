@@ -18,8 +18,6 @@ import {
   selectProjectBreakNr,
   selectProjectBreakTime,
   selectProjectById,
-  selectProjectGithubIsEnabled,
-  selectProjectJiraIsEnabled,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
@@ -34,7 +32,6 @@ import {migrateProjectState} from './migrate-projects-state.util';
 import {T} from '../../t.const';
 import {BreakNr, BreakTime, WorkContextAdvancedCfg, WorkContextType} from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
-import {GITHUB_TYPE, JIRA_TYPE} from '../issue/issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -54,24 +51,6 @@ export class ProjectService {
       : of(null)
     ),
     shareReplay(1),
-  );
-
-  currentJiraCfg$: Observable<JiraCfg> = this.currentProject$.pipe(
-    map(p => p && p.issueIntegrationCfgs && p.issueIntegrationCfgs[JIRA_TYPE] as JiraCfg),
-    shareReplay(1),
-  );
-
-  isJiraEnabled$: Observable<boolean> = this._store$.pipe(
-    select(selectProjectJiraIsEnabled),
-  );
-
-  currentGithubCfg$: Observable<GithubCfg> = this.currentProject$.pipe(
-    map(p => p && p.issueIntegrationCfgs && p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg),
-    shareReplay(1),
-  );
-
-  isGithubEnabled$: Observable<boolean> = this._store$.pipe(
-    select(selectProjectGithubIsEnabled),
   );
 
   advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(
