@@ -1,3 +1,4 @@
+import * as windowStateKeeper from 'electron-window-state';
 import {BrowserWindow, dialog, ipcMain, Menu, MenuItemConstructorOptions, MessageBoxReturnValue, shell} from 'electron';
 import {errorHandler} from './error-handler';
 import {join, normalize} from 'path';
@@ -40,9 +41,16 @@ export const createWindow = (params) => {
     Menu.setApplicationMenu(null);
   }
 
+  const mainWindowState = windowStateKeeper({
+    defaultWidth: 800,
+    defaultHeight: 800
+  });
+
   mainWin = new BrowserWindow({
-    width: 800,
-    height: 800,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
     titleBarStyle: IS_MAC ? 'hidden' : 'default',
     show: false,
     webPreferences: {
@@ -52,6 +60,8 @@ export const createWindow = (params) => {
     },
     icon: ICONS_FOLDER + '/icon_256x256.png'
   });
+
+  mainWindowState.manage(mainWin);
 
   const url = (IS_DEV)
     ? 'http://localhost:4200'

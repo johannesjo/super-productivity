@@ -75,6 +75,7 @@
     "electron-dl": "^1.13.0",
     "electron-localshortcut": "^3.1.0",
     "electron-log": "^3.0.1",
+    "electron-window-state": "^5.0.3",
     "googleapis": "^40.0.0",
     "jira-client-fork": "^4.2.1",
     "moment": "^2.24.0",
