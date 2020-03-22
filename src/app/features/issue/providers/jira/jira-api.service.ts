@@ -199,15 +199,15 @@ export class JiraApiService {
     }, cfg, isForce);
   }
 
-  listStatus$(): Observable<JiraOriginalStatus[]> {
+  listStatus$(cfg: JiraCfg): Observable<JiraOriginalStatus[]> {
     return this._sendRequest$({
       pathname: `status`,
       transform: mapResponse,
-    });
+    }, cfg);
   }
 
 
-  getTransitionsForIssue$(issueId: string): Observable<JiraOriginalTransition[]> {
+  getTransitionsForIssue$(issueId: string, cfg: JiraCfg): Observable<JiraOriginalTransition[]> {
     return this._sendRequest$({
       pathname: `issue/${issueId}/transitions`,
       method: 'GET',
@@ -215,7 +215,7 @@ export class JiraApiService {
         expand: 'transitions.fields'
       },
       transform: mapTransitionResponse,
-    });
+    }, cfg);
   }
 
   transitionIssue$(issueId: string, transitionId: string): Observable<any> {

@@ -6,10 +6,11 @@ import {Observable} from 'rxjs';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraOriginalTransition} from '../../jira-api-responses';
 import {SnackService} from '../../../../../../core/snack/snack.service';
-import {take} from 'rxjs/operators';
+import {first, switchMap, take} from 'rxjs/operators';
 import {T} from '../../../../../../t.const';
 import {Task} from '../../../../../tasks/task.model';
 import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
+import {ProjectService} from '../../../../../project/project.service';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -19,12 +20,16 @@ import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service'
 })
 export class DialogJiraTransitionComponent {
   T = T;
-  availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraApiService.getTransitionsForIssue$(this.data.issue.id);
+  availableTransitions$: Observable<JiraOriginalTransition[]> = this._projectService.getJiraCfgForProject$(this.data.task.projectId).pipe(
+    first(),
+    switchMap((cfg) => this._jiraApiService.getTransitionsForIssue$(this.data.issue.id, cfg))
+  );
 
   chosenTransition: JiraOriginalTransition;
 
   constructor(
     private _jiraApiService: JiraApiService,
+    private _projectService: ProjectService,
     private _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
     private _snackService: SnackService,

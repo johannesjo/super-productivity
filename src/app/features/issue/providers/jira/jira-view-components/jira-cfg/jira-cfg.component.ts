@@ -155,7 +155,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     } else {
       const issueId = searchResultItem.issueData.id as string;
       this._subs.add(
-        this._jiraApiService.getTransitionsForIssue$(issueId)
+        this._jiraApiService.getTransitionsForIssue$(issueId, this.cfg)
           .subscribe((val) => {
             this.cfg.availableTransitions = val;
             this._snackService.open({
