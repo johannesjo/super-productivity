@@ -90,7 +90,7 @@ export class ProjectService {
     return this._store$.pipe(select(selectGithubCfgByProjectId, {id: projectId}));
   }
 
-  getIssueProviderCfgForProject$(projectId: string, issueProviderKey: IssueProviderKey): Observable<GithubCfg|JiraCfg> {
+  getIssueProviderCfgForProject$(projectId: string, issueProviderKey: IssueProviderKey): Observable<IssueIntegrationCfg> {
     if (issueProviderKey === GITHUB_TYPE) {
       return this.getGithubCfgForProject$(projectId);
     } else if (issueProviderKey === JIRA_TYPE) {

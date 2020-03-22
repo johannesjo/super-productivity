@@ -3,9 +3,10 @@ import {ProjectService} from '../project/project.service';
 import {Actions, ofType} from '@ngrx/effects';
 import {setActiveWorkContext} from '../work-context/store/work-context.actions';
 import {ProjectActionTypes} from '../project/store/project.actions';
-import {filter, first, switchMap, tap} from 'rxjs/operators';
+import {filter, first, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {WorkContextService} from '../work-context/work-context.service';
-import {Observable, of} from 'rxjs';
+import {Observable} from 'rxjs';
+import {IssueIntegrationCfg, IssueProviderKey} from './issue.model';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +25,6 @@ export class IssueEffectHelperService {
     )
   );
   pollToBacklogTriggerToProjectId$: Observable<string> = this.pollToBacklogActions$.pipe(
-    tap(() => console.log('TRIGGER action')),
     switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
     // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
     filter(isProject => isProject),
@@ -38,4 +38,14 @@ export class IssueEffectHelperService {
   ) {
   }
 
+  getIssueProviderCfgIfIsProject$(issueProviderKey: IssueProviderKey): Observable<IssueIntegrationCfg> {
+    return this._workContextService.isActiveWorkContextProject$.pipe(
+      first(),
+      tap(console.log),
+      filter(isProject => isProject),
+      withLatestFrom(this._workContextService.activeWorkContextId$),
+      switchMap(([, pId]) => this._projectService.getIssueProviderCfgForProject$(pId, issueProviderKey))
+    );
+  }
 }
+
