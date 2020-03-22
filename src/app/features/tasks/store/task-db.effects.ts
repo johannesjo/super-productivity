@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {TaskActionTypes} from './task.actions';
 import {select, Store} from '@ngrx/store';
-import {tap, withLatestFrom} from 'rxjs/operators';
+import {filter, tap, withLatestFrom} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectTaskFeatureState} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
@@ -48,12 +48,13 @@ export class TaskDbEffects {
       ),
 
       withLatestFrom(this._projectService.isProjectChanging$),
-      tap(([action, isChanging]) => {
+      filter(([action, isChanging]) => {
         // NOTE: filter out everything happening between project change start and all related data being loaded
         if (isChanging) {
+          console.warn('Project was changing while attempting to do something');
           console.warn('ACTION:', action);
-          throw new Error('Project was changing while attempting to do something');
         }
+        return !isChanging;
       }),
 
       withLatestFrom(
