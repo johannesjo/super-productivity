@@ -8,7 +8,7 @@ import {SnackService} from '../../../../../core/snack/snack.service';
 import {TaskService} from '../../../../tasks/task.service';
 import {ProjectService} from '../../../../project/project.service';
 import {ProjectActionTypes} from '../../../../project/store/project.actions';
-import {filter, first, map, switchMap, tap} from 'rxjs/operators';
+import {filter, first, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {IssueService} from '../../../issue.service';
 import {forkJoin, Observable, timer} from 'rxjs';
 import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../github.const';
@@ -19,6 +19,7 @@ import {GITHUB_TYPE} from '../../../issue.const';
 import {GithubCfg} from '../github.model';
 import {isGithubEnabled} from '../is-github-enabled.util';
 import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
+import {GithubIssueReduced} from './github-issue.model';
 
 @Injectable()
 export class GithubIssueEffects {
@@ -29,23 +30,28 @@ export class GithubIssueEffects {
       setActiveWorkContext,
       ProjectActionTypes.UpdateProjectIssueProviderCfg,
     ),
-    switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(
-      first(),
-      filter(isProject => isProject),
-    )),
+    // tap(() => console.log('TRIGGER')),
+    switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
+    // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
+    filter(isProject => isProject),
     switchMap(() => this._workContextService.activeWorkContextId$.pipe(first())),
-    switchMap((pId) => {
-      return this._projectService.getGithubCfgForProject$(pId).pipe(
-        first(),
-        filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
-        switchMap(githubCfg => this._pollTimer$.pipe(
-          tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
-          tap(() => this._importNewIssuesToBacklog(pId, githubCfg))
-        )),
-      );
-    }),
+    switchMap((pId) => this._projectService.getGithubCfgForProject$(pId).pipe(
+      first(),
+      filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
+      // tap(() => console.log('POLL TIMER STARTED')),
+      switchMap(githubCfg => this._pollTimer$.pipe(
+        tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
+        withLatestFrom(
+          this._githubApiService.getLast100IssuesForRepo$(githubCfg),
+          this._taskService.getAllIssueIdsForCurrentProject(GITHUB_TYPE)
+        ),
+        tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
+          const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
+          this._importNewIssuesToBacklog(pId, issuesToAdd);
+        })
+      )),
+    )),
   );
-
 
   @Effect({dispatch: false})
   pollIssueChangesForCurrentContext$: any = this._actions$
@@ -106,11 +112,7 @@ export class GithubIssueEffects {
     }
   }
 
-  private async _importNewIssuesToBacklog(projectId: string, githubCfg: GithubCfg) {
-    const issues = await this._githubApiService.getLast100IssuesForRepo$(githubCfg).toPromise();
-    const allTaskGithubIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(GITHUB_TYPE) as number[];
-    const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
-
+  private _importNewIssuesToBacklog(projectId: string, issuesToAdd: GithubIssueReduced[]) {
     issuesToAdd.forEach((issue) => {
       this._issueService.addTaskWithIssue(GITHUB_TYPE, issue, projectId, true);
     });
