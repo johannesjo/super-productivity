@@ -176,8 +176,6 @@ appIN.on('will-quit', () => {
 // ---------------
 ipcMain.on(IPC.SHUTDOWN_NOW, quitAppNow);
 
-ipcMain.on(IPC.SHUTDOWN, quitApp);
-
 ipcMain.on(IPC.EXEC, exec);
 
 ipcMain.on(IPC.BACKUP, backupData);
@@ -316,7 +314,7 @@ function showApp() {
 }
 
 function quitApp() {
-  mainWin.webContents.send(IPC.ON_BEFORE_QUIT);
+  quitAppNow();
 }
 
 function quitAppNow() {

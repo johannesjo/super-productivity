@@ -1,3 +1,12 @@
+## [4.0.1](https://github.com/johannesjo/super-productivity/compare/v4.0.0...v4.0.1) (2020-03-19)
+
+
+### Bug Fixes
+
+* app quit from menu not doing anything [#296](https://github.com/johannesjo/super-productivity/issues/296) ([af113d6](https://github.com/johannesjo/super-productivity/commit/af113d664581adcd922939aef110aef46853fe4d))
+
+
+
 # [4.0.0](https://github.com/johannesjo/super-productivity/compare/v3.2.4...v4.0.0) (2020-03-05)
 
 
