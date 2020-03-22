@@ -114,20 +114,20 @@ export class JiraApiService {
     // fire a test request once there is enough config
     // we do this to avoid lots of request leading us to get kicked out of jira
     // TODO move to effect
-    const checkConnectionSub = this._cfgAfterReady$.subscribe((cfg) => {
-      if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
-        this.getCurrentUser$()
-          .pipe(catchError((err) => {
-            this._blockAccess();
-            checkConnectionSub.unsubscribe();
-            return throwError({[HANDLED_ERROR_PROP_STR]: err});
-          }))
-          .subscribe(() => {
-            this.unblockAccess();
-            checkConnectionSub.unsubscribe();
-          });
-      }
-    });
+    // const checkConnectionSub = this._cfgAfterReady$.subscribe((cfg) => {
+    //   if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
+    //     this.getCurrentUser$()
+    //       .pipe(catchError((err) => {
+    //         this._blockAccess();
+    //         checkConnectionSub.unsubscribe();
+    //         return throwError({[HANDLED_ERROR_PROP_STR]: err});
+    //       }))
+    //       .subscribe(() => {
+    //         this.unblockAccess();
+    //         checkConnectionSub.unsubscribe();
+    //       });
+    //   }
+    // });
   }
 
   unblockAccess() {
@@ -192,7 +192,7 @@ export class JiraApiService {
     return this._getIssueById$(issueId, cfg, false);
   }
 
-  getCurrentUser$(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
+  getCurrentUser$(cfg: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
     return this._sendRequest$({
       pathname: `myself`,
       transform: mapResponse,
