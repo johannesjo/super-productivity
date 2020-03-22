@@ -315,6 +315,7 @@ export class JiraIssueEffects {
   }
 
   // private _importNewIssuesToBacklog() {
+  // TODO add config
   //   this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssueReduced[]) => {
   //     if (!Array.isArray(issues)) {
   //       return;

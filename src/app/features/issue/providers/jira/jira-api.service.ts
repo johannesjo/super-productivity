@@ -159,7 +159,7 @@ export class JiraApiService {
     }, cfg);
   }
 
-  findAutoImportIssues$(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssueReduced[]> {
+  findAutoImportIssues$(cfg: JiraCfg, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssueReduced[]> {
     const options = {
       maxResults,
       fields: [
@@ -181,7 +181,7 @@ export class JiraApiService {
         ...options,
         jql: searchQuery
       },
-    });
+    }, cfg);
   }
 
   getIssueById$(issueId): Observable<JiraIssue> {
