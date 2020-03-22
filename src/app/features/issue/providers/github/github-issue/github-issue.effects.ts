@@ -8,7 +8,7 @@ import {SnackService} from '../../../../../core/snack/snack.service';
 import {TaskService} from '../../../../tasks/task.service';
 import {ProjectService} from '../../../../project/project.service';
 import {ProjectActionTypes} from '../../../../project/store/project.actions';
-import {filter, first, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, first, map, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
 import {IssueService} from '../../../issue.service';
 import {forkJoin, Observable, timer} from 'rxjs';
 import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../github.const';
@@ -20,26 +20,19 @@ import {GithubCfg} from '../github.model';
 import {isGithubEnabled} from '../is-github-enabled.util';
 import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 import {GithubIssueReduced} from './github-issue.model';
+import {IssueEffectHelperService} from '../../../issue-effect-helper.service';
 
 @Injectable()
 export class GithubIssueEffects {
 
   @Effect({dispatch: false})
-  pollNewIssuesToBacklog$: any = this._actions$.pipe(
-    ofType(
-      setActiveWorkContext,
-      ProjectActionTypes.UpdateProjectIssueProviderCfg,
-    ),
-    // tap(() => console.log('TRIGGER')),
-    switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
-    // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
-    filter(isProject => isProject),
-    switchMap(() => this._workContextService.activeWorkContextId$.pipe(first())),
+  pollNewIssuesToBacklog$: any = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
     switchMap((pId) => this._projectService.getGithubCfgForProject$(pId).pipe(
       first(),
       filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
       // tap(() => console.log('POLL TIMER STARTED')),
       switchMap(githubCfg => this._pollTimer$.pipe(
+        takeUntil(this._issueEffectHelperService.pollToBacklogTriggerActions$),
         tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
         withLatestFrom(
           this._githubApiService.getLast100IssuesForRepo$(githubCfg),
@@ -88,16 +81,18 @@ export class GithubIssueEffects {
     tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
   );
 
-  constructor(private readonly _actions$: Actions,
-              private readonly _store$: Store<any>,
-              private readonly _configService: GlobalConfigService,
-              private readonly _snackService: SnackService,
-              private readonly _projectService: ProjectService,
-              private readonly _githubApiService: GithubApiService,
-              private readonly _issueService: IssueService,
-              private readonly _taskService: TaskService,
-              private readonly _workContextService: WorkContextService,
-              private readonly _persistenceService: PersistenceService
+  constructor(
+    private readonly _actions$: Actions,
+    private readonly _store$: Store<any>,
+    private readonly _configService: GlobalConfigService,
+    private readonly _snackService: SnackService,
+    private readonly _projectService: ProjectService,
+    private readonly _githubApiService: GithubApiService,
+    private readonly _issueService: IssueService,
+    private readonly _taskService: TaskService,
+    private readonly _workContextService: WorkContextService,
+    private readonly _persistenceService: PersistenceService,
+    private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {
   }
 

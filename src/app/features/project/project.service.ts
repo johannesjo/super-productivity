@@ -32,6 +32,7 @@ import {migrateProjectState} from './migrate-projects-state.util';
 import {T} from '../../t.const';
 import {BreakNr, BreakTime, WorkContextAdvancedCfg, WorkContextType} from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
+import {GITHUB_TYPE, JIRA_TYPE} from '../issue/issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -87,6 +88,16 @@ export class ProjectService {
 
   getGithubCfgForProject$(projectId: string): Observable<GithubCfg> {
     return this._store$.pipe(select(selectGithubCfgByProjectId, {id: projectId}));
+  }
+
+  getIssueProviderCfgForProject$(projectId: string, issueProviderKey: IssueProviderKey): Observable<GithubCfg|JiraCfg> {
+    if (issueProviderKey === GITHUB_TYPE) {
+      return this.getGithubCfgForProject$(projectId);
+    } else if (issueProviderKey === JIRA_TYPE) {
+      return this.getJiraCfgForProject$(projectId);
+    } else {
+      throw new Error('Invalid IssueProviderKey');
+    }
   }
 
 
