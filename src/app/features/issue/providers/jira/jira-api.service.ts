@@ -153,10 +153,10 @@ export class JiraApiService {
     }, cfg);
   }
 
-  listFields$(): Observable<any> {
+  listFields$(cfg: JiraCfg): Observable<any> {
     return this._sendRequest$({
       pathname: 'field',
-    });
+    }, cfg);
   }
 
   findAutoImportIssues$(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssueReduced[]> {

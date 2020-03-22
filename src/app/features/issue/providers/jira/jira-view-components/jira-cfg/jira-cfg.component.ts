@@ -7,7 +7,7 @@ import {JiraCfg} from '../../jira.model';
 import {expandAnimation} from '../../../../../../ui/animations/expand.ani';
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {SearchResultItem} from '../../../../issue.model';
-import {catchError, debounceTime, first, map, switchMap, tap} from 'rxjs/operators';
+import {catchError, concatMap, debounceTime, first, map, switchMap, tap} from 'rxjs/operators';
 import {JiraApiService} from '../../jira-api.service';
 import {DEFAULT_JIRA_CFG} from '../../jira.const';
 import {JiraIssue} from '../../jira-issue/jira-issue.model';
@@ -45,7 +45,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
         ? this._projectService.getJiraCfgForProject$(this._workContextService.activeWorkContextId)
           .pipe(
             first(),
-            switchMap((cfg) =>  this._jiraApiService.issuePicker$(searchTerm, cfg)),
+            switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
             catchError(() => {
               return [];
             })
@@ -136,7 +136,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   loadCustomFields() {
-    this.customFieldsPromise = this._jiraApiService.listFields$().toPromise();
+    this.customFieldsPromise = this._projectService.getJiraCfgForProject$(this._workContextService.activeWorkContextId).pipe(
+      first(),
+      concatMap((jiraCfg) => this._jiraApiService.listFields$(jiraCfg))
+    ).toPromise();
     this.customFieldsPromise.then((v: any) => {
       if (v && Array.isArray(v.response)) {
         this.customFields = v.response;
