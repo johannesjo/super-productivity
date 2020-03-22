@@ -1,58 +1,51 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {select, Store} from '@ngrx/store';
-import {concatMap, filter, first, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
-import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
+import {Store} from '@ngrx/store';
+import {filter, first, switchMap, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../jira-api.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
-import {JiraIssue, JiraIssueReduced} from './jira-issue.model';
-import {JiraCfg, JiraTransitionOption} from '../jira.model';
+import {JiraIssueReduced} from './jira-issue.model';
 import {SnackService} from '../../../../../core/snack/snack.service';
-import {ProjectActionTypes} from '../../../../project/store/project.actions';
-import {Task, TaskState} from '../../../../tasks/task.model';
-import {JIRA_TYPE} from '../../../issue.const';
-import {
-  selectCurrentTaskParentOrCurrent,
-  selectJiraTasks,
-  selectTaskEntities,
-  selectTaskFeatureState
-} from '../../../../tasks/store/task.selectors';
+import {Task} from '../../../../tasks/task.model';
 import {TaskService} from '../../../../tasks/task.service';
-import {combineLatest, EMPTY, Observable, throwError, timer} from 'rxjs';
+import {Observable, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogJiraTransitionComponent} from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import {IssueLocalState} from '../../../issue.model';
-import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
-import {DialogJiraAddWorklogComponent} from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
-import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../jira.const';
-import {T} from '../../../../../t.const';
-import {truncate} from '../../../../../util/truncate';
+import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL} from '../jira.const';
 import {ProjectService} from '../../../../project/project.service';
-import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 import {IssueService} from '../../../issue.service';
 import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
-import {WorkContextType} from '../../../../work-context/work-context.model';
+import {JIRA_TYPE} from '../../../issue.const';
+import {T} from '../../../../../t.const';
+import {truncate} from '../../../../../util/truncate';
+import {ProjectActionTypes} from '../../../../project/store/project.actions';
+import {WorkContextService} from '../../../../work-context/work-context.service';
+import {JiraCfg} from '../jira.model';
 
 @Injectable()
 export class JiraIssueEffects {
 
   @Effect({dispatch: false})
   pollNewIssuesToBacklog$: any = this._actions$.pipe(
-    ofType(setActiveWorkContext),
-    filter(a => a.activeType === WorkContextType.PROJECT),
-    switchMap(({activeId}) => combineLatest([
-        this._projectService.isJiraEnabledForProject$(activeId),
-        this._projectService.getJiraCfgForProject$(activeId),
-      ]).pipe(first())
+    ofType(
+      setActiveWorkContext,
+      ProjectActionTypes.UpdateProjectIssueProviderCfg,
     ),
-    // switchMap(([isEnabled, jiraCfg]) => {
-    //   return (isEnabled && jiraCfg.isAutoAddToBacklog)
-    //     ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
-    //       tap(() => this._importNewIssuesToBacklog())
-    //     )
-    //     : EMPTY;
-    // }),
+    switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
+    // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
+    filter(isProject => isProject),
+    switchMap(() => this._workContextService.activeWorkContextId$.pipe(first())),
+    switchMap((pId) => this._projectService.getJiraCfgForProject$(pId).pipe(
+      first(),
+      filter(jiraCfg => jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoAddToBacklog),
+      // tap(() => console.log('POLL TIMER STARTED')),
+      switchMap(jiraCfg => this._pollTimer$.pipe(
+        tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
+        tap(() => this._importNewIssuesToBacklog(pId, jiraCfg))
+      )),
+    )),
   );
 
   // @Effect({dispatch: false})
@@ -227,12 +220,15 @@ export class JiraIssueEffects {
   //     })
   //   );
 
+  private _pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL);
+
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
               private readonly _configService: GlobalConfigService,
               private readonly _snackService: SnackService,
               private readonly _projectService: ProjectService,
               private readonly _taskService: TaskService,
+              private readonly _workContextService: WorkContextService,
               private readonly _jiraApiService: JiraApiService,
               private readonly _issueService: IssueService,
               private readonly _persistenceService: PersistenceService,
@@ -314,42 +310,42 @@ export class JiraIssueEffects {
     }).afterClosed();
   }
 
-  // private _importNewIssuesToBacklog() {
-  // TODO add config
-  //   this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssueReduced[]) => {
-  //     if (!Array.isArray(issues)) {
-  //       return;
-  //     }
-  //     const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
-  //
-  //
-  //     // NOTE: we check for key as well as id although normally the key should suffice
-  //     const issuesToAdd = issues.filter(
-  //       issue => !allTaskJiraIssueIds.includes(issue.id) && !allTaskJiraIssueIds.includes(issue.key)
-  //     );
-  //
-  //     issuesToAdd.forEach((issue) => {
-  //       this._issueService.addTaskWithIssue(JIRA_TYPE, issue, true);
-  //     });
-  //
-  //     if (issuesToAdd.length === 1) {
-  //       this._snackService.open({
-  //         translateParams: {
-  //           issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
-  //         },
-  //         msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
-  //         ico: 'cloud_download',
-  //       });
-  //     } else if (issuesToAdd.length > 1) {
-  //       this._snackService.open({
-  //         translateParams: {
-  //           issuesLength: issuesToAdd.length
-  //         },
-  //         msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
-  //         ico: 'cloud_download',
-  //       });
-  //     }
-  //   });
-  // }
+  private _importNewIssuesToBacklog(projectId: string, cfg: JiraCfg) {
+    this._jiraApiService.findAutoImportIssues$(cfg).subscribe(async (issues: JiraIssueReduced[]) => {
+
+      if (!Array.isArray(issues)) {
+        return;
+      }
+      const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
+
+
+      // NOTE: we check for key as well as id although normally the key should suffice
+      const issuesToAdd = issues.filter(
+        issue => !allTaskJiraIssueIds.includes(issue.id) && !allTaskJiraIssueIds.includes(issue.key)
+      );
+
+      issuesToAdd.forEach((issue) => {
+        this._issueService.addTaskWithIssue(JIRA_TYPE, issue, projectId, true);
+      });
+
+      if (issuesToAdd.length === 1) {
+        this._snackService.open({
+          translateParams: {
+            issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
+          },
+          msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
+          ico: 'cloud_download',
+        });
+      } else if (issuesToAdd.length > 1) {
+        this._snackService.open({
+          translateParams: {
+            issuesLength: issuesToAdd.length
+          },
+          msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
+          ico: 'cloud_download',
+        });
+      }
+    });
+  }
 }
 
