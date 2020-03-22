@@ -1,3 +1,12 @@
+## [4.0.2](https://github.com/johannesjo/super-productivity/compare/v4.0.1...v4.0.2) (2020-03-22)
+
+
+### Bug Fixes
+
+* error when changing project [#302](https://github.com/johannesjo/super-productivity/issues/302) ([9b28f0f](https://github.com/johannesjo/super-productivity/commit/9b28f0fa9e40eb7f4a07cc2863a631f04c811e29))
+
+
+
 ## [4.0.1](https://github.com/johannesjo/super-productivity/compare/v4.0.0...v4.0.1) (2020-03-19)
 
 
