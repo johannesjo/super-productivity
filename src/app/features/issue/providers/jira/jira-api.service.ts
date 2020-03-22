@@ -184,12 +184,12 @@ export class JiraApiService {
     }, cfg);
   }
 
-  getIssueById$(issueId): Observable<JiraIssue> {
-    return this._getIssueById$(issueId, true);
+  getIssueById$(issueId, cfg: JiraCfg): Observable<JiraIssue> {
+    return this._getIssueById$(issueId, cfg, true);
   }
 
-  getReducedIssueById$(issueId): Observable<JiraIssueReduced> {
-    return this._getIssueById$(issueId, false);
+  getReducedIssueById$(issueId, cfg: JiraCfg): Observable<JiraIssueReduced> {
+    return this._getIssueById$(issueId, cfg, false);
   }
 
   getCurrentUser$(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
@@ -255,14 +255,14 @@ export class JiraApiService {
     });
   }
 
-  private _getIssueById$(issueId, isGetChangelog = false): Observable<JiraIssue> {
+  private _getIssueById$(issueId, cfg: JiraCfg, isGetChangelog = false): Observable<JiraIssue> {
     return this._sendRequest$({
       transform: mapIssueResponse,
       pathname: `issue/${issueId}`,
       query: {
         expand: isGetChangelog ? ['changelog', 'description'] : ['description']
       }
-    });
+    }, cfg);
   }
 
   // Complex Functions

@@ -13,7 +13,6 @@ import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
 import {TaskAttachment} from '../../../tasks/task-attachment/task-attachment.model';
 import {mapJiraAttachmentToAttachment} from './jira-issue/jira-issue-map.util';
 import {T} from '../../../../t.const';
-import {GithubCfg} from '../github/github.model';
 import {JiraCfg} from './jira.model';
 
 
@@ -32,7 +31,9 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   getById$(issueId: string | number, projectId: string) {
-    return this._jiraApiService.getIssueById$(issueId);
+    return this._getCfgOnce$(projectId).pipe(
+      switchMap(jiraCfg => this._jiraApiService.getIssueById$(issueId, jiraCfg))
+    );
   }
 
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
@@ -49,7 +50,8 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
   ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue }> {
-    const issue = await this._jiraApiService.getIssueById$(task.issueId).toPromise() as JiraIssue;
+    const cfg = await  this._getCfgOnce$(task.projectId).toPromise();
+    const issue = await this._jiraApiService.getIssueById$(task.issueId, cfg).toPromise() as JiraIssue;
 
     // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
     const newUpdated = new Date(issue.updated).getTime();
