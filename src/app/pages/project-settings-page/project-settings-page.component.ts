@@ -1,19 +1,11 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {T} from '../../t.const';
-import {
-  ConfigFormConfig,
-  ConfigFormSection,
-  GlobalConfigSectionKey,
-  GlobalConfigState
-} from '../../features/config/global-config.model';
+import {ConfigFormConfig, ConfigFormSection, GlobalConfigSectionKey} from '../../features/config/global-config.model';
 import {Project, ProjectCfgFormKey} from '../../features/project/project.model';
 import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue.model';
 import {Subscription} from 'rxjs';
-import {GlobalConfigService} from '../../features/config/global-config.service';
 import {ProjectService} from '../../features/project/project.service';
-import {
-  BASIC_PROJECT_CONFIG_FORM_CONFIG
-} from '../../features/project/project-form-cfg.const';
+import {BASIC_PROJECT_CONFIG_FORM_CONFIG} from '../../features/project/project-form-cfg.const';
 import {ISSUE_PROVIDER_FORM_CFGS} from '../../features/issue/issue.const';
 import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
 import {IS_ELECTRON} from '../../app.constants';
@@ -76,6 +68,8 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    console.log('UNSUB');
+
     this._subs.unsubscribe();
   }
 

@@ -15,7 +15,7 @@ import {
   selectActiveContextType,
   selectActiveContextTypeAndId
 } from './store/work-context.reducer';
-import {NavigationStart, Router, RouterEvent} from '@angular/router';
+import {NavigationEnd, Router, RouterEvent} from '@angular/router';
 import {
   concatMap,
   distinctUntilChanged,
@@ -337,7 +337,9 @@ export class WorkContextService {
 
     // we need all data to be loaded before we dispatch a setActiveContext action
     this._router.events.pipe(
-      filter(event => event instanceof NavigationStart),
+      // NOTE: when we use any other router event than NavigationEnd, the changes triggered
+      // by the active context may occur before the current page component is unloaded
+      filter(event => event instanceof NavigationEnd),
       withLatestFrom(this._isAllDataLoaded$),
       concatMap(([next, isAllDataLoaded]) => isAllDataLoaded
         ? of(next)
