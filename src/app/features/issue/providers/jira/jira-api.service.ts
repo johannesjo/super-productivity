@@ -42,6 +42,7 @@ interface JiraRequestLogItem {
   transform: (res: any, cfg: any) => any;
   requestInit: RequestInit;
   timeoutId: number;
+  jiraCfg: JiraCfg;
 
   resolve(res: any): Promise<void>;
 
@@ -53,7 +54,6 @@ interface JiraRequestCfg {
   followAllRedirects?: boolean;
   method?: 'GET' | 'POST' | 'PUT';
   query?: {
-    // TODO check if string[] works
     [key: string]: string | boolean | number | string[];
   };
   transform?: (res: any, jiraCfg?: JiraCfg) => any;
@@ -68,9 +68,7 @@ export class JiraApiService {
   private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
   private _isBlockAccess = loadFromSessionStorage(BLOCK_ACCESS_KEY);
   private _isExtension = false;
-  private _isHasCheckedConnection = false;
   private _cfg: JiraCfg;
-  private _cfg$: Observable<JiraCfg> = this._projectService.currentJiraCfg$;
   private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
     ? of(true).pipe()
     : this._chromeExtensionInterface.onReady$.pipe(
@@ -85,12 +83,13 @@ export class JiraApiService {
     private _snackService: SnackService,
     private _bannerService: BannerService,
   ) {
-    this._cfg$.subscribe((cfg: JiraCfg) => {
-      this._cfg = cfg;
-      if (IS_ELECTRON && this._isMinimalSettings(cfg)) {
-        this._electronService.ipcRenderer.send(IPC.JIRA_SETUP_IMG_HEADERS, cfg);
-      }
-    });
+    // TODO move to task additional content
+    // cfg$.subscribe((cfg: JiraCfg) => {
+    //   cfg = cfg;
+    //   if (IS_ELECTRON && this._isMinimalSettings(cfg)) {
+    //     this._electronService.ipcRenderer.send(IPC.JIRA_SETUP_IMG_HEADERS, cfg);
+    //   }
+    // });
 
     // set up callback listener for electron
     if (this._electronService.isElectronApp) {
@@ -160,10 +159,10 @@ export class JiraApiService {
       maxResults,
       fields: [
         ...JIRA_ADDITIONAL_ISSUE_FIELDS,
-        ...(this._cfg.storyPointFieldId ? [this._cfg.storyPointFieldId] : [])
+        ...(cfg.storyPointFieldId ? [cfg.storyPointFieldId] : [])
       ],
     };
-    const searchQuery = this._cfg.autoAddBacklogJqlQuery;
+    const searchQuery = cfg.autoAddBacklogJqlQuery;
 
     if (!searchQuery) {
       return throwError({[HANDLED_ERROR_PROP_STR]: 'JiraApi: No search query for auto import'});
@@ -334,14 +333,14 @@ export class JiraApiService {
         const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
 
 
-        return this._sendRequestToExecutor$(requestId, url, requestInit, jiraReqCfg.transform);
+        return this._sendRequestToExecutor$(requestId, url, requestInit, jiraReqCfg.transform, cfg);
         // NOTE: offline is sexier & easier than cache, but in case we change our mind...
         // const args = [requestId, url, requestInit, jiraReqCfg.transform];
         // return this._issueCacheService.cache(url, requestInit, this._sendRequestToExecutor$.bind(this), args);
       }));
   }
 
-  private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform): Observable<any> {
+  private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform, jiraCfg: JiraCfg): Observable<any> {
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
@@ -351,7 +350,7 @@ export class JiraApiService {
     });
 
     // save to request log (also sets up timeout)
-    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, transform);
+    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, transform, jiraCfg);
 
     const requestToSend = {requestId, requestInit, url};
     if (this._electronService.isElectronApp) {
@@ -387,13 +386,14 @@ export class JiraApiService {
     };
   }
 
-  private _makeJiraRequestLogItem(promiseResolve, promiseReject, requestId: string, requestInit: RequestInit, transform: any): JiraRequestLogItem {
+  private _makeJiraRequestLogItem(promiseResolve, promiseReject, requestId: string, requestInit: RequestInit, transform: any, jiraCfg: JiraCfg): JiraRequestLogItem {
     return {
       transform,
       resolve: promiseResolve,
       reject: promiseReject,
       // NOTE: only needed for debug
       requestInit,
+      jiraCfg,
 
       timeoutId: window.setTimeout(() => {
         console.log('ERROR', 'Jira Request timed out', requestInit);
@@ -431,7 +431,7 @@ export class JiraApiService {
       } else {
         // console.log('JIRA_RESPONSE', res);
         if (currentRequest.transform) {
-          currentRequest.resolve(currentRequest.transform(res, this._cfg));
+          currentRequest.resolve(currentRequest.transform(res, currentRequest.jiraCfg));
         } else {
           currentRequest.resolve(res);
         }
