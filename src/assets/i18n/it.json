@@ -105,6 +105,47 @@
         "SHOW_ISSUE_BTN": "Mostra"
       }
     },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configura Gitlab per il progetto"
+      },
+      "FORM": {
+        "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da Github al backlog",
+        "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
+        "REPO": "\"username%2FProjectName\" per il repository git che vuoi tracciare",
+        "TOKEN": "Token di accesso"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione task nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti al backlog dei task.</p>",
+        "TITLE": "Gitlab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assegnatario",
+        "AT": "a",
+        "DESCRIPTION": "Descrizione",
+        "LABELS": "Etichetta",
+        "MARK_AS_CHECKED": "Segna gli aggiornamenti come verificati",
+        "STATUS": "Stato",
+        "SUMMARY": "Riepilogo",
+        "WRITE_A_COMMENT": "Scrivi un commento"
+      },
+      "S": {
+        "ERR_NETWORK": "Gitlab: Richiesta fallita a causa di un erore di rete lato client",
+        "ERR_NOT_CONFIGURED": "Gitlab: Non è configurato correttamente",
+        "ERR_REQUEST": "Gitlab: Le API hanno restituito {{statusCode}}. {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importati {{issuesLength}} nuovi issue da git al backlog",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab: Importati gli issue \"{{issueText}}\" da git al backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
+        "ISSUE_UPDATE": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Gitlab: Trovati task con dati mancanti. Ricarico.",
+        "NEW_COMMENT": "Gitlab: Nuovo commento per \"{{issueText}}\"",
+        "POLLING": "Gitlab: Sto facendo il polling dei cambiamenti per gli issue",
+        "SHOW_ISSUE_BTN": "Mostra"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi: Autenticazione fallita, per favore effettua nuovamente il login!"
@@ -425,6 +466,7 @@
         "CREATE": "Crea progetto",
         "EDIT": "Modifica progetto",
         "SETUP_GIT": "Configura integrazione Githun",
+        "SETUP_GITLAB": "Configura integrazione Gitlab",
         "SETUP_JIRA": "Configura integrazione Jira"
       },
       "FORM_BASIC": {
@@ -877,6 +919,7 @@
     "EDIT_PROJECT": "Modifica progetto",
     "EXPORT_PROJECT": "Esporta progetto",
     "GITHUB_CONFIGURED": "Integrazione Github configurata",
+    "GITLAB_CONFIGURED": "Integrazione Gitlab configurata",
     "IMPORT_FROM_FILE": "Importa da file",
     "JIRA_CONFIGURED": "Integrazione Jira configurata",
     "S_INVALID_JSON": "JSON non valido per file di progetto",

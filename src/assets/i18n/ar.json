@@ -108,6 +108,48 @@
         "SHOW_ISSUE_BTN": "أرني"
       }
     },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "إعداد جيتلاب للمشروع"
+      },
+      "FORM": {
+        "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
+        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Gitlab إلى العمل المتراكم",
+        "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا gitlab المستوردة للتغييرات",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "إظهار المشكلات من gitlab كاقتراحات عند إضافة مهام جديدة",
+        "PROJECT": "\"اسم المستخدم%2Fاسم المشروع\" لمستودع gitlab الذي تريد تتبعه",
+        "TOKEN": "رمز الوصول"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>هنا يمكنك تكوين SuperProductivity لسرد مشكلات Gitlab المفتوحة لمستودع معين في لوحة إنشاء المهام في عرض التخطيط اليومي. سيتم إدراجها كاقتراحات وستوفر رابطًا للمشكلة بالإضافة إلى مزيد من المعلومات عنها.</p> <p>بالإضافة إلى ذلك ، يمكنك تلقائيًا إضافة جميع المشكلات المفتوحة ومزامنتها إلى تراكم المهام.</p>",
+        "TITLE": "جيتلاب"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "المحال",
+        "AT": "ملخص",
+        "DESCRIPTION": "وصف",
+        "LABELS": "ملصقات",
+        "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
+        "STATUS": "الحالة",
+        "SUMMARY": "ملخص",
+        "WRITE_A_COMMENT": "أكتب تعليقا"
+      },
+      "S": {
+        "ERR_NETWORK": "Gitlab: فشل الطلب بسبب خطأ في شبكة جانب العميل",
+        "ERR_NOT_CONFIGURED": "جيتلاب: لم يتم تكوينه بشكل صحيح",
+        "ERR_UNKNOWN": "جيتلاب: خطأ غير معروف {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "جيتلاب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
+        "ISSUE_NO_UPDATE_REQUIRED": "جيتلاب: لا يوجد تحديث مطلوب",
+        "ISSUE_UPDATE": "جيتلاب: بيانات محدثة لـ \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "جيتلاب: بيانات محدثة لـ \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "جيتلاب: المهام مع بيانات القضية المفقودة وجدت. إعادة شحن.",
+        "NEW_COMMENT": "جيتلاب: تعليق جديد لـ \"{{issueText}}\"",
+        "POLLING": "جيتلاب: تغييرات الاقتراع للقضايا",
+        "SHOW_ISSUE_BTN": "أرني"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi: فشل في المصادقة ، يرجى محاولة تسجيل الدخول مرة أخرى!"
@@ -429,6 +471,7 @@
         "CREATE": "إنشاء مشروع",
         "EDIT": "تحرير المشروع",
         "SETUP_GIT": "إعداد جيثب التكامل",
+        "SETUP_GITLAB": "إعداد جيتلاب التكامل",
         "SETUP_JIRA": "إعداد جيرا التكامل"
       },
       "FORM_BASIC": {
@@ -898,6 +941,7 @@
     "EDIT_PROJECT": "تحرير المشروع",
     "EXPORT_PROJECT": "تصدير المشروع",
     "GITHUB_CONFIGURED": "جيثب التكامل تكوين",
+    "GITLAB_CONFIGURED": "جيتلاب التكامل تكوين",
     "IMPORT_FROM_FILE": "استيراد من الملف",
     "JIRA_CONFIGURED": "جيرا تكامل التكوين",
     "S_INVALID_JSON": "ملف json غير صالح لملف المشروع",

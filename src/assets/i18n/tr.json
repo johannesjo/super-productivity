@@ -108,6 +108,48 @@
         "SHOW_ISSUE_BTN": "Göster bana"
       }
     },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Project için Gitlab Kurulumu"
+      },
+      "FORM": {
+        "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Gitlab'dan backlog'a ekle",
+        "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
+        "PROJECT": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
+        "TOKEN": "Erişim Simgesi"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Burada Süper Verimliliği, günlük planlama görünümünde görev oluşturma panelinde belirli bir depo için açık Gitlab sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili daha fazla bilgi sunacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz.</p>",
+        "TITLE": "Gitlab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "vekil",
+        "AT": "en",
+        "DESCRIPTION": "Açıklama",
+        "LABELS": "Etiketler",
+        "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
+        "STATUS": "durum",
+        "SUMMARY": "özet",
+        "WRITE_A_COMMENT": "Bir yorum Yaz"
+      },
+      "S": {
+        "ERR_NETWORK": "Gitlab: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
+        "ERR_NOT_CONFIGURED": "Gitlab: Düzgün yapılandırılmamış",
+        "ERR_UNKNOWN": "Gitlab: Bilinmeyen hata {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Git'ten backlog'a {{issuesLength}} yeni sayı alındı",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab: Git'ten backlog'a \"{{issueText}}\" sorunu alındı",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Sorun \"{{issueText}}\", halindeyken silinmiş veya kapatılmış görünüyor",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Güncelleme gerekmez",
+        "ISSUE_UPDATE": "Gitlab: \"{{issueText}}\" için güncellenmiş veriler",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: \"{{issueText}}\" için güncellenmiş veriler",
+        "MISSING_ISSUE_DATA": "Gitlab: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
+        "NEW_COMMENT": "Gitlab: \"{{issueText}}\" için yeni yorum",
+        "POLLING": "Gitlab: Sorunların Sorgulanması Değişiklikleri",
+        "SHOW_ISSUE_BTN": "Göster bana"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi: Kimlik doğrulaması başarısız oldu, lütfen tekrar giriş yapmayı deneyin!"
@@ -429,6 +471,7 @@
         "CREATE": "Proje Yarat",
         "EDIT": "Projeyi Düzenle",
         "SETUP_GIT": "Github Entegrasyonunu Ayarla",
+        "SETUP_GITLAB": "Gitlab Entegrasyonunu Ayarla",
         "SETUP_JIRA": "Jira Entegrasyonunu Kur"
       },
       "FORM_BASIC": {
@@ -898,6 +941,7 @@
     "EDIT_PROJECT": "Projeyi Düzenle",
     "EXPORT_PROJECT": "İhracat Projesi",
     "GITHUB_CONFIGURED": "Github Entegrasyonu Yapılandırıldı",
+    "GITLAB_CONFIGURED": "Gitlab Entegrasyonu Yapılandırıldı",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
     "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
     "S_INVALID_JSON": "Proje dosyası için geçersiz json",

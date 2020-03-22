@@ -108,6 +108,48 @@
         "SHOW_ISSUE_BTN": "Show me"
       }
     },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Gitlab for Project"
+      },
+      "FORM": {
+        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Gitlab to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
+        "PROJECT": "\"username%2FProjectName\" for the gitlab project you want to track",
+        "TOKEN": "Access Token"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open Gitlab issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "TITLE": "Gitlab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "at",
+        "DESCRIPTION": "Description",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "WRITE_A_COMMENT": "Write a comment"
+      },
+      "S": {
+        "ERR_NETWORK": "Gitlab: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "Gitlab: Is not properly configured",
+        "ERR_UNKNOWN": "Gitlab: Unknown error {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab: Imported issue \"{{issueText}}\" from git to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: No update required",
+        "ISSUE_UPDATE": "Gitlab: Updated data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Gitlab: Tasks with missing issue data found. Reloading.",
+        "NEW_COMMENT": "Gitlab: New comment for \"{{issueText}}\"",
+        "POLLING": "Gitlab: Polling Changes for issues",
+        "SHOW_ISSUE_BTN": "Show me"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
@@ -429,7 +471,8 @@
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
         "SETUP_GIT": "Setup Github Integration",
-        "SETUP_JIRA": "Setup Jira Integration"
+        "SETUP_JIRA": "Setup Jira Integration",
+        "SETUP_GITLAB": "Setup Gitlab Integration"
       },
       "FORM_BASIC": {
         "L_TITLE": "Project Name",
@@ -898,6 +941,7 @@
     "EDIT_PROJECT": "Edit Project",
     "EXPORT_PROJECT": "Export Project",
     "GITHUB_CONFIGURED": "Github Integration Configured",
+    "GITLAB_CONFIGURED": "Gitlab Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
     "JIRA_CONFIGURED": "Jira Integration Configured",
     "S_INVALID_JSON": "Invalid json for project file",
