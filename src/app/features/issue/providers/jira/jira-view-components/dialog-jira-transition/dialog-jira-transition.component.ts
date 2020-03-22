@@ -6,11 +6,12 @@ import {Observable} from 'rxjs';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraOriginalTransition} from '../../jira-api-responses';
 import {SnackService} from '../../../../../../core/snack/snack.service';
-import {first, switchMap, take} from 'rxjs/operators';
+import {concatMap, first, switchMap} from 'rxjs/operators';
 import {T} from '../../../../../../t.const';
 import {Task} from '../../../../../tasks/task.model';
 import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
 import {ProjectService} from '../../../../../project/project.service';
+import {JiraCfg} from '../../jira.model';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -20,7 +21,10 @@ import {ProjectService} from '../../../../../project/project.service';
 })
 export class DialogJiraTransitionComponent {
   T = T;
-  availableTransitions$: Observable<JiraOriginalTransition[]> = this._projectService.getJiraCfgForProject$(this.data.task.projectId).pipe(
+
+  _jiraCfg$: Observable<JiraCfg> = this._projectService.getJiraCfgForProject$(this.data.task.projectId);
+
+  availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraCfg$.pipe(
     first(),
     switchMap((cfg) => this._jiraApiService.getTransitionsForIssue$(this.data.issue.id, cfg))
   );
@@ -47,17 +51,18 @@ export class DialogJiraTransitionComponent {
 
   transitionIssue() {
     if (this.chosenTransition && this.chosenTransition.id) {
-      this._jiraApiService.transitionIssue$(this.data.issue.id, this.chosenTransition.id)
-        .pipe(take(1))
-        .subscribe(() => {
-          this._jiraCommonInterfacesService.refreshIssue(this.data.task, false, false);
-          this._snackService.open({
-            type: 'SUCCESS',
-            msg: T.F.JIRA.S.TRANSITION,
-            translateParams: {issueKey: this.data.issue.key, name: this.chosenTransition.name}
-          });
-          this.close();
+      this._jiraCfg$.pipe(
+        concatMap((jiraCfg) => this._jiraApiService.transitionIssue$(this.data.issue.id, this.chosenTransition.id, jiraCfg)),
+        first(),
+      ).subscribe(() => {
+        this._jiraCommonInterfacesService.refreshIssue(this.data.task, false, false);
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.JIRA.S.TRANSITION,
+          translateParams: {issueKey: this.data.issue.key, name: this.chosenTransition.name}
         });
+        this.close();
+      });
     }
   }
 }

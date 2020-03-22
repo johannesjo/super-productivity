@@ -218,7 +218,7 @@ export class JiraApiService {
     }, cfg);
   }
 
-  transitionIssue$(issueId: string, transitionId: string): Observable<any> {
+  transitionIssue$(issueId: string, transitionId: string, cfg: JiraCfg): Observable<any> {
     return this._sendRequest$({
       pathname: `issue/${issueId}/transitions`,
       method: 'POST',
@@ -228,7 +228,7 @@ export class JiraApiService {
         }
       },
       transform: mapResponse,
-    });
+    }, cfg);
   }
 
   updateAssignee$(issueId: string, accountId: string): Observable<any> {
