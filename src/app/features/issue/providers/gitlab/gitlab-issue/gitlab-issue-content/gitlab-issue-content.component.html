@@ -30,7 +30,7 @@
         <td>
           <mat-chip-list>
             <mat-chip *ngFor="let label of issue?.labels"
-                      [title]="label.description">{{label.name}}
+                      [title]="label">{{label}}
             </mat-chip>
           </mat-chip-list>
         </td>
@@ -48,10 +48,8 @@
     <div *ngIf="issue?.comments">
       <div *ngFor="let comment of (issue?.comments|sort:'created_at')"
            class="comment">
-        <!--<img [src]="comment.author.avatarUrl"-->
-        <!--class="author-avatar">-->
         <div class="name-and-comment-content">
-          <div><span class="author-name">{{comment.user?.login}}</span>
+          <div><span class="author-name">{{comment.author?.username}}</span>
             <span class="when">{{T.F.GITLAB.ISSUE_CONTENT.AT|translate}} {{comment.created_at|date:'short'}}</span>
           </div>
           <div *ngIf="comment.body"
@@ -71,9 +69,6 @@
         {{T.F.GITLAB.ISSUE_CONTENT.WRITE_A_COMMENT|translate}}
       </a>
     </div>
-    <!--<pre><code>-->
-    <!--{{issue?|json}}-->
-    <!--</code></pre>-->
 
   </div>
 </ng-container>
