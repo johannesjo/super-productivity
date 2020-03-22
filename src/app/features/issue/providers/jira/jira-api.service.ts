@@ -231,17 +231,29 @@ export class JiraApiService {
     }, cfg);
   }
 
-  updateAssignee$(issueId: string, accountId: string): Observable<any> {
+  updateAssignee$(issueId: string, accountId: string, cfg: JiraCfg): Observable<any> {
     return this._sendRequest$({
       pathname: `issue/${issueId}/assignee`,
       method: 'PUT',
       body: {
         accountId,
       },
-    });
+    }, cfg);
   }
 
-  addWorklog$(issueId: string, started: string, timeSpent: number, comment: string): Observable<any> {
+  addWorklog$({
+                issueId,
+                started,
+                timeSpent,
+                comment,
+                cfg
+              }: {
+    issueId: string,
+    started: string,
+    timeSpent: number,
+    comment: string,
+    cfg: JiraCfg
+  }): Observable<any> {
     const worklog = {
       started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
       timeSpentSeconds: Math.floor(timeSpent / 1000),
@@ -252,7 +264,7 @@ export class JiraApiService {
       method: 'POST',
       body: worklog,
       transform: mapResponse,
-    });
+    }, cfg);
   }
 
   private _getIssueById$(issueId, cfg: JiraCfg, isGetChangelog = false): Observable<JiraIssue> {
@@ -274,7 +286,7 @@ export class JiraApiService {
       && (IS_ELECTRON || this._isExtension);
   }
 
-  private _sendRequest$(jiraReqCfg: JiraRequestCfg, customCfg?: JiraCfg, isForce = false): Observable<any> {
+  private _sendRequest$(jiraReqCfg: JiraRequestCfg, customCfg: JiraCfg, isForce = false): Observable<any> {
     return this._cfgAfterReady$.pipe(
       take(1),
       concatMap(currentCfg => {

@@ -5,6 +5,8 @@ import {SnackService} from '../../../../../../core/snack/snack.service';
 import {JiraIssue} from '../../jira-issue/jira-issue.model';
 import {Task} from '../../../../../tasks/task.model';
 import {T} from '../../../../../../t.const';
+import {ProjectService} from '../../../../../project/project.service';
+import {first} from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -23,6 +25,7 @@ export class DialogJiraAddWorklogComponent {
     private _jiraApiService: JiraApiService,
     private _matDialogRef: MatDialogRef<DialogJiraAddWorklogComponent>,
     private _snackService: SnackService,
+    private _projectService: ProjectService,
     @Inject(MAT_DIALOG_DATA) public data: {
       issue: JiraIssue,
       task: Task,
@@ -38,14 +41,16 @@ export class DialogJiraAddWorklogComponent {
     this._matDialogRef.close();
   }
 
-  submitWorklog() {
+  async submitWorklog() {
     if (this.issue.id && this.started && this.timeSpent) {
-      this._jiraApiService.addWorklog$(
-        this.issue.id,
-        this.started,
-        this.timeSpent,
-        this.comment,
-      ).subscribe(res => {
+      const cfg = await this._projectService.getJiraCfgForProject$(this.data.task.projectId).pipe(first()).toPromise();
+      this._jiraApiService.addWorklog$({
+        issueId: this.issue.id,
+        started: this.started,
+        timeSpent: this.timeSpent,
+        comment: this.comment,
+        cfg,
+      }).subscribe(res => {
         this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
