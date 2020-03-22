@@ -62,7 +62,6 @@ export class IssueService {
       .filter(provider => typeof provider.searchIssues$ === 'function')
       .map(provider => provider.searchIssues$(searchTerm, projectId));
     obs.unshift(from([[]]));
-    console.log(obs);
 
     return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
   }

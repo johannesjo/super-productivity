@@ -13,15 +13,14 @@ import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
 import {TaskAttachment} from '../../../tasks/task-attachment/task-attachment.model';
 import {mapJiraAttachmentToAttachment} from './jira-issue/jira-issue-map.util';
 import {T} from '../../../../t.const';
+import {GithubCfg} from '../github/github.model';
+import {JiraCfg} from './jira.model';
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class JiraCommonInterfacesService implements IssueServiceInterface {
-  isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
-    map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
-  );
 
   constructor(
     private readonly _store: Store<any>,
@@ -36,10 +35,10 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return this._jiraApiService.getIssueById$(issueId);
   }
 
-  searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
-    return this.isJiraSearchEnabled$.pipe(
-      switchMap((isSearchJira) => isSearchJira
-        ? this._jiraApiService.issuePicker$(searchTerm).pipe(catchError(() => []))
+  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
+    return this._getCfgOnce$(projectId).pipe(
+      switchMap((jiraCfg) => (jiraCfg && jiraCfg.isEnabled)
+        ? this._jiraApiService.issuePicker$(searchTerm, jiraCfg).pipe(catchError(() => []))
         : of([])
       )
     );
@@ -110,5 +109,9 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   getMappedAttachments(issueData: JiraIssue): TaskAttachment[] {
     return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
+  }
+
+  private _getCfgOnce$(projectId: string): Observable<JiraCfg> {
+    return this._projectService.getJiraCfgForProject$(projectId).pipe(first());
   }
 }

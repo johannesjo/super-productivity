@@ -7,7 +7,7 @@ import {JiraCfg} from '../../jira.model';
 import {expandAnimation} from '../../../../../../ui/animations/expand.ani';
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {SearchResultItem} from '../../../../issue.model';
-import {catchError, debounceTime, map, switchMap, tap} from 'rxjs/operators';
+import {catchError, debounceTime, first, map, switchMap, tap} from 'rxjs/operators';
 import {JiraApiService} from '../../jira-api.service';
 import {DEFAULT_JIRA_CFG} from '../../jira.const';
 import {JiraIssue} from '../../jira-issue/jira-issue.model';
@@ -15,6 +15,7 @@ import {SnackService} from '../../../../../../core/snack/snack.service';
 import {T} from '../../../../../../t.const';
 import {HelperClasses} from '../../../../../../app.constants';
 import {ProjectService} from '../../../../../project/project.service';
+import {WorkContextService} from '../../../../../work-context/work-context.service';
 
 @Component({
   selector: 'jira-cfg',
@@ -41,8 +42,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     tap(() => this.isLoading$.next(true)),
     switchMap((searchTerm) => {
       return (searchTerm && searchTerm.length > 1)
-        ? this._jiraApiService.issuePicker$(searchTerm)
+        ? this._projectService.getJiraCfgForProject$(this._workContextService.activeWorkContextId)
           .pipe(
+            first(),
+            switchMap((cfg) =>  this._jiraApiService.issuePicker$(searchTerm, cfg)),
             catchError(() => {
               return [];
             })
@@ -63,6 +66,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
     private _projectService: ProjectService,
+    private _workContextService: WorkContextService,
   ) {
   }
 

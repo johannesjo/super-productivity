@@ -113,6 +113,7 @@ export class JiraApiService {
 
     // fire a test request once there is enough config
     // we do this to avoid lots of request leading us to get kicked out of jira
+    // TODO move to effect
     const checkConnectionSub = this._cfgAfterReady$.subscribe((cfg) => {
       if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
         this.getCurrentUser$()
@@ -134,24 +135,22 @@ export class JiraApiService {
     saveToSessionStorage(BLOCK_ACCESS_KEY, false);
   }
 
-  issuePicker$(searchTerm: string): Observable<SearchResultItem[]> {
-    return this._cfgAfterReady$.pipe(concatMap(cfg => {
-      const searchStr = `${searchTerm}`;
-      const jql = (cfg.searchJqlQuery ? `${encodeURI(cfg.searchJqlQuery)}` : '');
+  issuePicker$(searchTerm: string, cfg: JiraCfg): Observable<SearchResultItem[]> {
+    const searchStr = `${searchTerm}`;
+    const jql = (cfg.searchJqlQuery ? `${encodeURI(cfg.searchJqlQuery)}` : '');
 
-      return this._sendRequest$({
-        pathname: 'issue/picker',
-        followAllRedirects: true,
-        query: {
-          showSubTasks: true,
-          showSubTaskParent: true,
-          query: searchStr,
-          currentJQL: jql
-        },
-        transform: mapToSearchResults
-        // NOTE: we pass the cfg as well to avoid race conditions
-      }, cfg);
-    }));
+    return this._sendRequest$({
+      pathname: 'issue/picker',
+      followAllRedirects: true,
+      query: {
+        showSubTasks: true,
+        showSubTaskParent: true,
+        query: searchStr,
+        currentJQL: jql
+      },
+      transform: mapToSearchResults
+      // NOTE: we pass the cfg as well to avoid race conditions
+    }, cfg);
   }
 
   listFields$(): Observable<any> {
