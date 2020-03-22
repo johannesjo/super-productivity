@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, Effect} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {filter, first, map, switchMap, tap} from 'rxjs/operators';
+import {filter, first, map, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../jira-api.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
@@ -16,31 +16,24 @@ import {IssueLocalState} from '../../../issue.model';
 import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL} from '../jira.const';
 import {ProjectService} from '../../../../project/project.service';
 import {IssueService} from '../../../issue.service';
-import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 import {JIRA_TYPE} from '../../../issue.const';
 import {T} from '../../../../../t.const';
 import {truncate} from '../../../../../util/truncate';
-import {ProjectActionTypes} from '../../../../project/store/project.actions';
 import {WorkContextService} from '../../../../work-context/work-context.service';
 import {JiraCfg} from '../jira.model';
+import {IssueEffectHelperService} from '../../../issue-effect-helper.service';
 
 @Injectable()
 export class JiraIssueEffects {
   @Effect({dispatch: false})
-  pollNewIssuesToBacklog$: any = this._actions$.pipe(
-    ofType(
-      setActiveWorkContext,
-      ProjectActionTypes.UpdateProjectIssueProviderCfg,
-    ),
-    switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
-    // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
-    filter(isProject => isProject),
-    switchMap(() => this._workContextService.activeWorkContextId$.pipe(first())),
+  pollNewIssuesToBacklog$: any = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
     switchMap((pId) => this._projectService.getJiraCfgForProject$(pId).pipe(
       first(),
       filter(jiraCfg => jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoAddToBacklog),
       // tap(() => console.log('POLL TIMER STARTED')),
       switchMap(jiraCfg => this._pollTimer$.pipe(
+        // NOTE: required otherwise timer stays alive for filtered actions
+        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
         tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
         tap(() => this._importNewIssuesToBacklog(pId, jiraCfg))
       )),
@@ -48,11 +41,7 @@ export class JiraIssueEffects {
   );
 
   @Effect({dispatch: false})
-  pollIssueChangesForCurrentContext$: any = this._actions$.pipe(
-    ofType(
-      setActiveWorkContext,
-      ProjectActionTypes.UpdateProjectIssueProviderCfg,
-    ),
+  pollIssueChangesForCurrentContext$: any = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
     switchMap(() => this._pollTimer$),
     switchMap(() => this._workContextService.allTasksForCurrentContext$.pipe(
       first(),
@@ -270,6 +259,7 @@ export class JiraIssueEffects {
               private readonly _issueService: IssueService,
               private readonly _persistenceService: PersistenceService,
               private readonly _matDialog: MatDialog,
+              private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {
   }
 

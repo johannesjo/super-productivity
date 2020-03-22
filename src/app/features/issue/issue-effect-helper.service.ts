@@ -11,13 +11,19 @@ import {Observable, of} from 'rxjs';
   providedIn: 'root',
 })
 export class IssueEffectHelperService {
-  pollToBacklogTriggerActions$ = this._actions$.pipe(
+  pollIssueTaskUpdatesActions$ = this._actions$.pipe(
     ofType(
       setActiveWorkContext,
       ProjectActionTypes.UpdateProjectIssueProviderCfg,
     )
   );
-  pollToBacklogTriggerToProjectId$: Observable<string> = this.pollToBacklogTriggerActions$.pipe(
+  pollToBacklogActions$ = this._actions$.pipe(
+    ofType(
+      setActiveWorkContext,
+      ProjectActionTypes.UpdateProjectIssueProviderCfg,
+    )
+  );
+  pollToBacklogTriggerToProjectId$: Observable<string> = this.pollToBacklogActions$.pipe(
     tap(() => console.log('TRIGGER action')),
     switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
     // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled

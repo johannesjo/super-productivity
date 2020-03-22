@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, Effect} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {GithubApiService} from '../github-api.service';
@@ -7,7 +7,6 @@ import {GlobalConfigService} from '../../../../config/global-config.service';
 import {SnackService} from '../../../../../core/snack/snack.service';
 import {TaskService} from '../../../../tasks/task.service';
 import {ProjectService} from '../../../../project/project.service';
-import {ProjectActionTypes} from '../../../../project/store/project.actions';
 import {filter, first, map, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
 import {IssueService} from '../../../issue.service';
 import {forkJoin, Observable, timer} from 'rxjs';
@@ -18,7 +17,6 @@ import {WorkContextService} from '../../../../work-context/work-context.service'
 import {GITHUB_TYPE} from '../../../issue.const';
 import {GithubCfg} from '../github.model';
 import {isGithubEnabled} from '../is-github-enabled.util';
-import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 import {GithubIssueReduced} from './github-issue.model';
 import {IssueEffectHelperService} from '../../../issue-effect-helper.service';
 
@@ -30,9 +28,9 @@ export class GithubIssueEffects {
     switchMap((pId) => this._projectService.getGithubCfgForProject$(pId).pipe(
       first(),
       filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
-      // tap(() => console.log('POLL TIMER STARTED')),
       switchMap(githubCfg => this._pollTimer$.pipe(
-        takeUntil(this._issueEffectHelperService.pollToBacklogTriggerActions$),
+        // NOTE: required otherwise timer stays alive for filtered actions
+        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
         tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
         withLatestFrom(
           this._githubApiService.getLast100IssuesForRepo$(githubCfg),
@@ -47,12 +45,8 @@ export class GithubIssueEffects {
   );
 
   @Effect({dispatch: false})
-  pollIssueChangesForCurrentContext$: any = this._actions$
+  pollIssueChangesForCurrentContext$: any = this._issueEffectHelperService.pollIssueTaskUpdatesActions$
     .pipe(
-      ofType(
-        setActiveWorkContext,
-        ProjectActionTypes.UpdateProjectIssueProviderCfg,
-      ),
       switchMap(() => this._pollTimer$),
       switchMap(() => this._updateIssuesForCurrentContext$),
     );
