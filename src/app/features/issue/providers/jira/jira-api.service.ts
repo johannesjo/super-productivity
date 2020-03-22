@@ -21,9 +21,9 @@ import {IPC} from '../../../../../../electron/ipc-events.const';
 import {SnackService} from '../../../../core/snack/snack.service';
 import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
-import {Observable, throwError} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import {SearchResultItem} from '../../issue.model';
-import {catchError, concatMap, first, shareReplay, switchMap, take} from 'rxjs/operators';
+import {catchError, concatMap, first, mapTo, shareReplay, take} from 'rxjs/operators';
 import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
 import * as moment from 'moment';
 import {BannerService} from '../../../../core/banner/banner.service';
@@ -71,16 +71,12 @@ export class JiraApiService {
   private _isHasCheckedConnection = false;
   private _cfg: JiraCfg;
   private _cfg$: Observable<JiraCfg> = this._projectService.currentJiraCfg$;
-  private _cfgAfterReady$: Observable<JiraCfg> = IS_ELECTRON
-    ? this._cfg$
+  private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
+    ? of(true).pipe()
     : this._chromeExtensionInterface.onReady$.pipe(
-      switchMap(() => this._cfg$),
+      mapTo(true),
       shareReplay(1)
     );
-
-  // IS_ELECTRON
-  // ? ;
-
 
   constructor(
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
@@ -114,9 +110,9 @@ export class JiraApiService {
     // fire a test request once there is enough config
     // we do this to avoid lots of request leading us to get kicked out of jira
     // TODO move to effect
-    // const checkConnectionSub = this._cfgAfterReady$.subscribe((cfg) => {
+    // const checkConnectionSub = this._isInterfacesReadyIfNeeded$.subscribe((cfg) => {
     //   if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
-    //     this.getCurrentUser$()
+    //     this.getCurrentUser$(cfg)
     //       .pipe(catchError((err) => {
     //         this._blockAccess();
     //         checkConnectionSub.unsubscribe();
@@ -286,12 +282,10 @@ export class JiraApiService {
       && (IS_ELECTRON || this._isExtension);
   }
 
-  private _sendRequest$(jiraReqCfg: JiraRequestCfg, customCfg: JiraCfg, isForce = false): Observable<any> {
-    return this._cfgAfterReady$.pipe(
+  private _sendRequest$(jiraReqCfg: JiraRequestCfg, cfg: JiraCfg, isForce = false): Observable<any> {
+    return this._isInterfacesReadyIfNeeded$.pipe(
       take(1),
-      concatMap(currentCfg => {
-        const cfg = customCfg || currentCfg;
-
+      concatMap(() => {
         // assign uuid to request to know which responsive belongs to which promise
         const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
 
