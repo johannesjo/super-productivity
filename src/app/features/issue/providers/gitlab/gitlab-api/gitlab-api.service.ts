@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {EMPTY, forkJoin, Observable, ObservableInput, throwError} from 'rxjs';
 
 import {ProjectService} from 'src/app/features/project/project.service';
@@ -10,7 +10,7 @@ import {GitlabOriginalComment, GitlabOriginalIssue} from './gitlab-api-responses
 import {HANDLED_ERROR_PROP_STR} from 'src/app/app.constants';
 import {GITLAB_API_BASE_URL} from '../gitlab.const';
 import {T} from 'src/app/t.const';
-import {catchError, flatMap, map, share, switchMap, take} from 'rxjs/operators';
+import {catchError, filter, flatMap, map, share, switchMap, take} from 'rxjs/operators';
 import {GitlabIssue} from '../gitlab-issue/gitlab-issue.model';
 import {mapGitlabIssue, mapGitlabIssueToSearchResult} from '../gitlab-issue/gitlab-issue-map.util';
 import {SearchResultItem} from '../../../issue.model';
@@ -37,19 +37,14 @@ export class GitlabApiService {
     }
     return this._getProjectIssues$(1, cfg).pipe(
       flatMap(
-        issues => forkJoin(
-          [
-            ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
-          ]
-        )
+        issues => forkJoin([
+          ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
+        ])
       ),
     );
   }
 
   getById$(id: number, cfg: GitlabCfg): Observable<GitlabIssue> {
-    if (!this._isValidSettings(cfg)) {
-      return EMPTY;
-    }
     return this.getProjectData$(cfg)
       .pipe(switchMap(issues => {
         return issues.filter(issue => issue.id === id);
@@ -83,7 +78,6 @@ export class GitlabApiService {
     }
     return this.getProjectData$(cfg)
       .pipe(
-        catchError(this._handleRequestError$.bind(this)),
         // a single request should suffice
         share(),
         map((issues: GitlabIssue[]) =>
@@ -93,22 +87,10 @@ export class GitlabApiService {
       );
   }
 
-  private setHeader(accessToken: string) {
-    if (accessToken) {
-      this._header = new HttpHeaders({
-        Authorization: 'Bearer ' + accessToken
-      });
-    } else {
-      this._header = null;
-    }
-  }
-
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
-    return this._http.get(
-      `${BASE}/${cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`,
-      {headers: this._header ? this._header : {}}
-    ).pipe(
-      catchError(this._handleRequestError$.bind(this)),
+    return this._sendRequest$({
+      url: `${BASE}/${cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`
+    }, cfg).pipe(
       take(1),
       map((issues: GitlabOriginalIssue[]) => {
         return issues ? issues.map(mapGitlabIssue) : [];
@@ -120,18 +102,15 @@ export class GitlabApiService {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this._http.get(
-      `${BASE}/${cfg.project}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
-      {headers: this._header ? this._header : {}}
-    ).pipe(
-      catchError(this._handleRequestError$.bind(this)),
+    return this._sendRequest$({
+      url: `${BASE}/${cfg.project}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
+    }, cfg).pipe(
       map((comments: GitlabOriginalComment[]) => {
         return comments ? comments : [];
       }),
     );
   }
 
-  // TODO fix
   private _isValidSettings(cfg: GitlabCfg): boolean {
     if (cfg && cfg.project && cfg.project.length > 0) {
       return true;
@@ -141,6 +120,41 @@ export class GitlabApiService {
       msg: T.F.GITLAB.S.ERR_NOT_CONFIGURED
     });
     return false;
+  }
+
+
+  private _sendRequest$(params: HttpRequest<string> | any, cfg: GitlabCfg): Observable<any> {
+    this._isValidSettings(cfg);
+
+    const p: HttpRequest<any> | any = {
+      ...params,
+      method: params.method || 'GET',
+      headers: {
+        ...(cfg.token ? {Authorization: 'Bearer ' + cfg.token} : {}),
+        ...(params.headers ? params.headers : {}),
+      }
+    };
+
+    const bodyArg = params.data
+      ? [params.data]
+      : [];
+
+    const allArgs = [...bodyArg, {
+      headers: new HttpHeaders(p.headers),
+      params: new HttpParams({fromObject: p.params}),
+      reportProgress: false,
+      observe: 'response',
+      responseType: params.responseType,
+    }];
+    const req = new HttpRequest(p.method, p.url, ...allArgs);
+    return this._http.request(req).pipe(
+      // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+      filter(res => !(res === Object(res) && res.type === 0)),
+      map((res: any) => (res && res.body)
+        ? res.body
+        : res),
+      catchError(this._handleRequestError$.bind(this)),
+    );
   }
 
   private _handleRequestError$(error: HttpErrorResponse, caught: Observable<object>): ObservableInput<{}> {
