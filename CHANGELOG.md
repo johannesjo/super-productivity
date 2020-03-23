@@ -1,3 +1,12 @@
+## [4.0.3](https://github.com/johannesjo/super-productivity/compare/v4.0.2...v4.0.3) (2020-03-23)
+
+
+### Bug Fixes
+
+* lint ([293de6a](https://github.com/johannesjo/super-productivity/commit/293de6a44a6a0b0bff0bd01b7634ddb20bab9173))
+
+
+
 ## [4.0.2](https://github.com/johannesjo/super-productivity/compare/v4.0.1...v4.0.2) (2020-03-22)
 
 
