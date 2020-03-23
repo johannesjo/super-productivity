@@ -1,7 +1,18 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {concatMap, filter, first, map, switchMap, take, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
+import {
+  concatMap,
+  filter,
+  first,
+  map,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+  throttleTime,
+  withLatestFrom
+} from 'rxjs/operators';
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../jira-api.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
@@ -9,7 +20,7 @@ import {JiraIssueReduced} from './jira-issue.model';
 import {SnackService} from '../../../../../core/snack/snack.service';
 import {Task, TaskWithSubTasks} from '../../../../tasks/task.model';
 import {TaskService} from '../../../../tasks/task.service';
-import {forkJoin, Observable, timer} from 'rxjs';
+import {EMPTY, forkJoin, Observable, throwError, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogJiraTransitionComponent} from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import {IssueLocalState} from '../../../issue.model';
@@ -24,15 +35,18 @@ import {JiraCfg} from '../jira.model';
 import {IssueEffectHelperService} from '../../../issue-effect-helper.service';
 import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 import {DialogJiraAddWorklogComponent} from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
-import {selectTaskEntities} from '../../../../tasks/store/task.selectors';
+import {selectCurrentTaskParentOrCurrent, selectTaskEntities} from '../../../../tasks/store/task.selectors';
 import {Dictionary} from '@ngrx/entity';
+import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
+import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 
 @Injectable()
 export class JiraIssueEffects {
+  // POLLING & UPDATES
+  // -----------------
   @Effect({dispatch: false})
   pollNewIssuesToBacklog$: any = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-    switchMap((pId) => this._projectService.getJiraCfgForProject$(pId).pipe(
-      first(),
+    switchMap((pId) => this._getCfgOnce$(pId).pipe(
       filter(jiraCfg => jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoAddToBacklog),
       // tap(() => console.log('POLL TIMER STARTED')),
       switchMap(jiraCfg => this._pollTimer$.pipe(
@@ -52,8 +66,7 @@ export class JiraIssueEffects {
       switchMap((tasks) => {
         const jiraIssueTasks = tasks.filter(task => task.issueType === JIRA_TYPE);
         return forkJoin(jiraIssueTasks.map(task =>
-          this._projectService.getJiraCfgForProject$(task.projectId).pipe(
-            first(),
+          this._getCfgOnce$(task.projectId).pipe(
             map(cfg => ({cfg, task}))
           ))
         );
@@ -77,6 +90,8 @@ export class JiraIssueEffects {
     )),
   );
 
+  // HOOKS
+  // -----
   @Effect({dispatch: false})
   addWorklog$: any = this._actions$.pipe(
     ofType(TaskActionTypes.UpdateTask),
@@ -86,8 +101,7 @@ export class JiraIssueEffects {
       this._workContextService.activeWorkContextId$
     ),
     filter(([, isActiveContextProject]) => isActiveContextProject),
-    concatMap(([act, , projectId]) => this._projectService.getJiraCfgForProject$(projectId).pipe(
-      first(),
+    concatMap(([act, , projectId]) => this._getCfgOnce$(projectId).pipe(
       map(jiraCfg => ({
         act,
         projectId,
@@ -119,63 +133,62 @@ export class JiraIssueEffects {
     })
   );
 
-  // @Effect({dispatch: false})
-  // checkForReassignment: any = this._actions$
-  //   .pipe(
-  //     ofType(
-  //       TaskActionTypes.SetCurrentTask,
-  //     ),
-  //     withLatestFrom(
-  //       this._projectService.isJiraEnabled$,
-  //       this._projectService.currentJiraCfg$,
-  //       this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
-  //     ),
-  //     filter(([action, isEnabled, jiraCfg, currentTaskOrParent]) =>
-  //       isEnabled
-  //       && jiraCfg.isCheckToReAssignTicketOnTaskStart
-  //       && currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE),
-  //     // show every 15s max to give time for updates
-  //     throttleTime(15000),
-  //     // TODO there is probably a better way to to do this
-  //     // TODO refactor to actions
-  //     switchMap(([action, isEnabled, jiraCfg, currentTaskOrParent]) => {
-  //       return this._jiraApiService.getReducedIssueById$(currentTaskOrParent.issueId).pipe(
-  //         withLatestFrom(this._jiraApiService.getCurrentUser$()),
-  //         concatMap(([issue, currentUser]) => {
-  //           const assignee = issue.assignee;
-  //
-  //           if (!issue) {
-  //             return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: Issue Data not found'});
-  //           } else if (!issue.assignee || issue.assignee.accountId !== currentUser.accountId) {
-  //             return this._matDialog.open(DialogConfirmComponent, {
-  //               restoreFocus: true,
-  //               data: {
-  //                 okTxt: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.OK,
-  //                 translateParams: {
-  //                   summary: issue.summary,
-  //                   assignee: assignee ? assignee.displayName : 'nobody'
-  //                 },
-  //                 message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.MSG,
-  //               }
-  //             }).afterClosed()
-  //               .pipe(
-  //                 switchMap((isConfirm) => {
-  //                   return isConfirm
-  //                     ? this._jiraApiService.updateAssignee$(issue.id, currentUser.accountId)
-  //                     : EMPTY;
-  //                 }),
-  //                 // tap(() => {
-  //                 // TODO fix
-  //                 // this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
-  //                 // }),
-  //               );
-  //           } else {
-  //             return EMPTY;
-  //           }
-  //         })
-  //       );
-  //     })
-  //   );
+  @Effect({dispatch: false})
+  checkForReassignment: any = this._actions$
+    .pipe(
+      ofType(TaskActionTypes.SetCurrentTask),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
+      ),
+      concatMap(([, currentTaskOrParent]) =>
+        this._getCfgOnce$(currentTaskOrParent.projectId).pipe(
+          map((jiraCfg) => ({jiraCfg, currentTaskOrParent}))
+        )),
+      filter(({jiraCfg, currentTaskOrParent}) =>
+        (currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE)
+        && jiraCfg.isEnabled && jiraCfg.isCheckToReAssignTicketOnTaskStart),
+      // show every 15s max to give time for updates
+      throttleTime(15000),
+      // TODO there is probably a better way to to do this
+      // TODO refactor to actions
+      switchMap(({jiraCfg, currentTaskOrParent}) => {
+        return this._jiraApiService.getReducedIssueById$(currentTaskOrParent.issueId, jiraCfg).pipe(
+          withLatestFrom(this._jiraApiService.getCurrentUser$(jiraCfg)),
+          concatMap(([issue, currentUser]) => {
+            const assignee = issue.assignee;
+
+            if (!issue) {
+              return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: Issue Data not found'});
+            } else if (!issue.assignee || issue.assignee.accountId !== currentUser.accountId) {
+              return this._matDialog.open(DialogConfirmComponent, {
+                restoreFocus: true,
+                data: {
+                  okTxt: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.OK,
+                  translateParams: {
+                    summary: issue.summary,
+                    assignee: assignee ? assignee.displayName : 'nobody'
+                  },
+                  message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.MSG,
+                }
+              }).afterClosed()
+                .pipe(
+                  switchMap((isConfirm) => {
+                    return isConfirm
+                      ? this._jiraApiService.updateAssignee$(issue.id, currentUser.accountId, jiraCfg)
+                      : EMPTY;
+                  }),
+                  // tap(() => {
+                  // TODO fix
+                  // this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+                  // }),
+                );
+            } else {
+              return EMPTY;
+            }
+          })
+        );
+      })
+    );
 
   // @Effect({dispatch: false})
   // checkForStartTransition$: Observable<any> = this._actions$
@@ -348,6 +361,10 @@ export class JiraIssueEffects {
         });
       }
     });
+  }
+
+  private _getCfgOnce$(projectId: string): Observable<JiraCfg> {
+    return this._projectService.getJiraCfgForProject$(projectId).pipe(first());
   }
 }
 
