@@ -31,7 +31,7 @@ import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-contex
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {filterOutId} from '../../../util/filter-out-id';
 import {unique} from '../../../util/unique';
-import {GITHUB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
+import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
 
 export const PROJECT_FEATURE_NAME = 'projects';
@@ -139,6 +139,12 @@ export const selectIsGithubEnabledByProjectId = createSelector(
   selectGithubCfgByProjectId,
   (githubCfg: GithubCfg): boolean => githubCfg && githubCfg.repo && githubCfg.repo.length > 2,
 );
+
+export const selectGitlabCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): GitlabCfg => p.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg
+);
+
 
 
 // DEFAULT

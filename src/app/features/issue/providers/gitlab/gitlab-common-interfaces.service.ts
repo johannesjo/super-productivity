@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
-import {catchError, map, switchMap} from 'rxjs/operators';
+import {catchError, first, map, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
 import {GitlabApiService} from './gitlab-api/gitlab-api.service';
 import {ProjectService} from '../../../project/project.service';
@@ -31,8 +31,8 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     this._projectService.currentGitlabCfg$.subscribe((gitlabCfg) => this.gitlabCfg = gitlabCfg);
   }
 
-  issueLink(issueId: number): string {
-    return `${GITLAB_API_BASE_URL}/issues/${issueId}`;
+  issueLink$(issueId: number, projectId: string): Observable<string> {
+    return of(`${GITLAB_API_BASE_URL}/issues/${issueId}`);
   }
 
   getById$(issueId: number) {
@@ -114,5 +114,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   private _formatIssueTitleForSnack(id: number, title: string): string {
     return `${truncate(this._formatIssueTitle(id, title))}`;
+  }
+
+  private _getCfgOnce$(projectId: string): Observable<GitlabCfg> {
+    return this._projectService.getGitlabCfgForProject$(projectId).pipe(first());
   }
 }

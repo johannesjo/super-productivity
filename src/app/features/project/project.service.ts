@@ -11,6 +11,7 @@ import {
   selectAdvancedProjectCfg,
   selectArchivedProjects,
   selectGithubCfgByProjectId,
+  selectGitlabCfgByProjectId,
   selectIsGithubEnabledByProjectId,
   selectIsJiraEnabledByProjectId,
   selectIsRelatedDataLoadedForCurrentProject,
@@ -34,7 +35,7 @@ import {migrateProjectState} from './migrate-projects-state.util';
 import {T} from '../../t.const';
 import {BreakNr, BreakTime, WorkContextAdvancedCfg, WorkContextType} from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
-import {GITHUB_TYPE, JIRA_TYPE} from '../issue/issue.const';
+import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../issue/issue.const';
 import {GitlabCfg} from '../issue/providers/gitlab/gitlab';
 
 @Injectable({
@@ -101,11 +102,17 @@ export class ProjectService {
     return this._store$.pipe(select(selectGithubCfgByProjectId, {id: projectId}));
   }
 
+  getGitlabCfgForProject$(projectId: string): Observable<GitlabCfg> {
+    return this._store$.pipe(select(selectGitlabCfgByProjectId, {id: projectId}));
+  }
+
   getIssueProviderCfgForProject$(projectId: string, issueProviderKey: IssueProviderKey): Observable<IssueIntegrationCfg> {
     if (issueProviderKey === GITHUB_TYPE) {
       return this.getGithubCfgForProject$(projectId);
     } else if (issueProviderKey === JIRA_TYPE) {
       return this.getJiraCfgForProject$(projectId);
+    } else if (issueProviderKey === GITLAB_TYPE) {
+      return this.getGitlabCfgForProject$(projectId);
     } else {
       throw new Error('Invalid IssueProviderKey');
     }
