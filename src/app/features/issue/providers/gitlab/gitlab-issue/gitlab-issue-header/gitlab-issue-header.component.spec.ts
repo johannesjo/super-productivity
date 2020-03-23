@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { GitlabIssueHeaderComponent } from './gitlab-issue-header.component';
+import {GitlabIssueHeaderComponent} from './gitlab-issue-header.component';
 
 describe('GitlabIssueHeaderComponent', () => {
   let component: GitlabIssueHeaderComponent;
@@ -8,9 +8,9 @@ describe('GitlabIssueHeaderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GitlabIssueHeaderComponent ]
+      declarations: [GitlabIssueHeaderComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

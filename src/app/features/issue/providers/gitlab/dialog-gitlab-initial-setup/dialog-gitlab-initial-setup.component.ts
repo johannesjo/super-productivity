@@ -1,10 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormGroup } from '@angular/forms';
-import { FormlyFieldConfig } from '@ngx-formly/core';
-import { T } from 'src/app/t.const';
-import { GitlabCfg } from '../gitlab';
-import { GITLAB_CONFIG_FORM, DEFAULT_GITLAB_CFG } from '../gitlab.const';
+import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {FormGroup} from '@angular/forms';
+import {FormlyFieldConfig} from '@ngx-formly/core';
+import {T} from 'src/app/t.const';
+import {GitlabCfg} from '../gitlab';
+import {DEFAULT_GITLAB_CFG, GITLAB_CONFIG_FORM} from '../gitlab.const';
 
 @Component({
   selector: 'dialog-gitlab-initial-setup',

@@ -11,7 +11,7 @@ import {SnackService} from '../../../../core/snack/snack.service';
 import {GitlabIssue} from './gitlab-issue/gitlab-issue.model';
 import {truncate} from '../../../../util/truncate';
 import {T} from '../../../../t.const';
-import { GITLAB_API_BASE_URL } from './gitlab.const';
+import {GITLAB_API_BASE_URL} from './gitlab.const';
 
 
 @Injectable({

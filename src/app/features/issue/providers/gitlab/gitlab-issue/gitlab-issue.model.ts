@@ -1,8 +1,8 @@
 import {
   GitlabOriginalComment,
   GitlabOriginalIssueState,
-  GitlabOriginalUser,
   GitlabOriginalMilestone,
+  GitlabOriginalUser,
 } from '../gitlab-api/gitlab-api-responses';
 
 export type GitlabState = GitlabOriginalIssueState;

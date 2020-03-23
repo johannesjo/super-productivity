@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DialogGitlabInitialSetupComponent } from './dialog-gitlab-initial-setup.component';
+import {DialogGitlabInitialSetupComponent} from './dialog-gitlab-initial-setup.component';
 
 describe('DialogGitlabInitialSetupComponent', () => {
   let component: DialogGitlabInitialSetupComponent;
@@ -8,9 +8,9 @@ describe('DialogGitlabInitialSetupComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogGitlabInitialSetupComponent ]
+      declarations: [DialogGitlabInitialSetupComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

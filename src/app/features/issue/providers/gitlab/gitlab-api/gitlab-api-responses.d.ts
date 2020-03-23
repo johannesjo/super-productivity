@@ -50,27 +50,27 @@ export type GitlabOriginalIssue = Readonly<{
   discussion_locked: boolean;
   web_url: string;
   time_stats: {
-      time_estimate: number;
-      total_time_spent: number;
-      human_time_estimate: string;
-      human_total_time_spent: string;
+    time_estimate: number;
+    total_time_spent: number;
+    human_time_estimate: string;
+    human_total_time_spent: string;
   };
   task_completion_status: {
-      count: number;
-      completed_count: number;
+    count: number;
+    completed_count: number;
   };
   has_tasks: boolean;
   task_status: string;
   _links: {
-      self: string;
-      notes: string;
-      award_emoji: string;
-      project: string;
+    self: string;
+    notes: string;
+    award_emoji: string;
+    project: string;
   };
   references: {
-      short: string;
-      relative: string;
-      full: string;
+    short: string;
+    relative: string;
+    full: string;
   };
   moved_to_id: number;
 }>;

@@ -1,6 +1,6 @@
-import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
-import { T } from 'src/app/t.const';
-import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {T} from 'src/app/t.const';
+import {TaskWithSubTasks} from 'src/app/features/tasks/task.model';
 
 @Component({
   selector: 'gitlab-issue-header',
@@ -12,7 +12,8 @@ export class GitlabIssueHeaderComponent implements OnInit {
   T = T;
   @Input() public task: TaskWithSubTasks;
 
-  constructor() { }
+  constructor() {
+  }
 
   ngOnInit() {
     console.log('=========================');

@@ -37,16 +37,6 @@ export class GitlabApiService {
     });
   }
 
-  private setHeader(accessToken: string) {
-    if (accessToken) {
-      this._header = new HttpHeaders({
-        Authorization: 'Bearer ' + accessToken
-      });
-    } else {
-      this._header = null;
-    }
-  }
-
   public getProjectData$(): Observable<GitlabIssue[]> {
     if (!this._isValidSettings()) {
       console.log('SS');
@@ -92,21 +82,6 @@ export class GitlabApiService {
       ));
   }
 
-  private _getProjectIssues$(pageNumber: number): Observable<GitlabIssue[]> {
-    console.log('getProjectIssues');
-
-    return this._http.get(
-      `${BASE}/${this._cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`,
-      {headers: this._header ? this._header : {}}
-    ).pipe(
-      catchError(this._handleRequestError$.bind(this)),
-      take(1),
-      map((issues: GitlabOriginalIssue[]) => {
-        return issues ? issues.map(mapGitlabIssue) : [];
-      }),
-    );
-  }
-
   searchIssueInProject$(searchText: string): Observable<SearchResultItem[]> {
     const filterFn = issue => {
       try {
@@ -130,6 +105,29 @@ export class GitlabApiService {
             .map(mapGitlabIssueToSearchResult)
         ),
       );
+  }
+
+  private setHeader(accessToken: string) {
+    if (accessToken) {
+      this._header = new HttpHeaders({
+        Authorization: 'Bearer ' + accessToken
+      });
+    } else {
+      this._header = null;
+    }
+  }
+
+  private _getProjectIssues$(pageNumber: number): Observable<GitlabIssue[]> {
+    return this._http.get(
+      `${BASE}/${this._cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`,
+      {headers: this._header ? this._header : {}}
+    ).pipe(
+      catchError(this._handleRequestError$.bind(this)),
+      take(1),
+      map((issues: GitlabOriginalIssue[]) => {
+        return issues ? issues.map(mapGitlabIssue) : [];
+      }),
+    );
   }
 
   private _getIssueComments$(issueid: number, pageNumber: number) {

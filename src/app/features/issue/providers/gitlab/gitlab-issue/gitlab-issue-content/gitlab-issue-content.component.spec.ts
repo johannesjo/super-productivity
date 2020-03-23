@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { GitlabIssueContentComponent } from './gitlab-issue-content.component';
+import {GitlabIssueContentComponent} from './gitlab-issue-content.component';
 
 describe('GitlabIssueContentComponent', () => {
   let component: GitlabIssueContentComponent;
@@ -8,9 +8,9 @@ describe('GitlabIssueContentComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GitlabIssueContentComponent ]
+      declarations: [GitlabIssueContentComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
