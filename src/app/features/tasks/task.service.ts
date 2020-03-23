@@ -555,13 +555,15 @@ export class TaskService {
   }
 
   // TODO check with new archive
-  async checkForTaskWithIssue(issueId: string | number): Promise<{
+  async checkForTaskWithIssue(issueId: string | number, issueProviderKey: IssueProviderKey): Promise<{
     task: Task,
     subTasks: Task[],
     isFromArchive: boolean,
   }> {
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
-    const taskWithSameIssue: Task = allTasks.find(task => task.issueId === issueId);
+    const taskWithSameIssue: Task = allTasks.find(
+      task => task.issueId === issueId && task.issueType === issueProviderKey
+    );
 
     if (taskWithSameIssue) {
       return {

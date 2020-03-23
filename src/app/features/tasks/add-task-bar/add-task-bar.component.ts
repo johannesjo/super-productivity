@@ -186,7 +186,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         translateParams: {title: item.title},
       });
     } else {
-      const res = await this._taskService.checkForTaskWithIssue(item.issueData.id);
+      const res = await this._taskService.checkForTaskWithIssue(item.issueData.id, item.issueType);
       if (!res) {
         this._issueService.addTaskWithIssue(
           item.issueType,
@@ -213,13 +213,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
     this.taskSuggestionsCtrl.setValue('');
     this._isAddInProgress = false;
-  }
-
-  private async _getProjectOrTagTitleForTask({projectId, tagIds}: AddTaskSuggestion): Promise<string> {
-    const ctx = projectId
-      ? await this._projectService.getByIdOnce$(projectId).toPromise()
-      : await this._tagService.getTagById$(tagIds[0]).pipe(first()).toPromise();
-    return ctx.title;
   }
 
   private async _getCtxForTaskSuggestion({projectId, tagIds}: AddTaskSuggestion): Promise<Tag | Project> {

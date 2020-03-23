@@ -33,7 +33,17 @@ export interface TaskArchive extends EntityState<ArchiveTask> {
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 
-export interface TaskCopy {
+export interface IssueFieldsForTask {
+  // issue stuff
+  issueId: string;
+  issueType: IssueProviderKey;
+  issueWasUpdated: boolean;
+  issueLastUpdated: number;
+  issueAttachmentNr: number;
+  issuePoints: number;
+}
+
+export interface TaskCopy extends IssueFieldsForTask {
   id: string;
   projectId: string;
   title: string;
@@ -55,14 +65,6 @@ export interface TaskCopy {
 
   // attachments
   attachments: TaskAttachment[];
-
-  // issue stuff
-  issueId: string;
-  issueType: IssueProviderKey;
-  issueWasUpdated: boolean;
-  issueLastUpdated: number;
-  issueAttachmentNr: number;
-  issuePoints: number;
 
   // ui model
   // 0: show, 1: hide-done tasks, 2: hide all sub tasks
