@@ -39,10 +39,8 @@ export class GitlabApiService {
 
   public getProjectData$(): Observable<GitlabIssue[]> {
     if (!this._isValidSettings()) {
-      console.log('SS');
       return EMPTY;
     }
-    console.log('lol');
     return this._getProjectIssues$(1).pipe(
       flatMap(
         issues => forkJoin(
@@ -51,10 +49,6 @@ export class GitlabApiService {
           ]
         )
       ),
-      tap(issues => {
-        console.log('Issues');
-        console.log(issues);
-      }),
     );
   }
 
@@ -64,8 +58,6 @@ export class GitlabApiService {
     }
     return this.getProjectData$()
       .pipe(switchMap(issues => {
-        console.log('WAAAAAAT');
-        console.log(issues);
         return issues.filter(issue => issue.id === id);
       }));
   }
