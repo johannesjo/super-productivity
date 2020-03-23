@@ -16,7 +16,7 @@ import {
 import {PersistenceService} from '../../../../../core/persistence/persistence.service';
 import {JiraApiService} from '../jira-api.service';
 import {GlobalConfigService} from '../../../../config/global-config.service';
-import {JiraIssueReduced} from './jira-issue.model';
+import {JiraIssue, JiraIssueReduced} from './jira-issue.model';
 import {SnackService} from '../../../../../core/snack/snack.service';
 import {Task, TaskWithSubTasks} from '../../../../tasks/task.model';
 import {TaskService} from '../../../../tasks/task.service';
@@ -31,9 +31,9 @@ import {JIRA_TYPE} from '../../../issue.const';
 import {T} from '../../../../../t.const';
 import {truncate} from '../../../../../util/truncate';
 import {WorkContextService} from '../../../../work-context/work-context.service';
-import {JiraCfg} from '../jira.model';
+import {JiraCfg, JiraTransitionOption} from '../jira.model';
 import {IssueEffectHelperService} from '../../../issue-effect-helper.service';
-import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
+import {SetCurrentTask, TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 import {DialogJiraAddWorklogComponent} from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import {selectCurrentTaskParentOrCurrent, selectTaskEntities} from '../../../../tasks/store/task.selectors';
 import {Dictionary} from '@ngrx/entity';
@@ -143,7 +143,8 @@ export class JiraIssueEffects {
       concatMap(([, currentTaskOrParent]) =>
         this._getCfgOnce$(currentTaskOrParent.projectId).pipe(
           map((jiraCfg) => ({jiraCfg, currentTaskOrParent}))
-        )),
+        )
+      ),
       filter(({jiraCfg, currentTaskOrParent}) =>
         (currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE)
         && jiraCfg.isEnabled && jiraCfg.isCheckToReAssignTicketOnTaskStart),
@@ -190,24 +191,28 @@ export class JiraIssueEffects {
       })
     );
 
-  // @Effect({dispatch: false})
-  // checkForStartTransition$: Observable<any> = this._actions$
-  //   .pipe(
-  //     ofType(
-  //       TaskActionTypes.SetCurrentTask,
-  //     ),
-  //     withLatestFrom(
-  //       this._projectService.isJiraEnabled$,
-  //       this._projectService.currentJiraCfg$,
-  //       this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
-  //     ),
-  //     filter(([action, isEnabled]) => isEnabled),
-  //     filter(([action, isEnabled, jiraCfg, curOrParTask]) =>
-  //       jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === JIRA_TYPE),
-  //     concatMap(([action, isEnabled, jiraCfg, curOrParTask]) =>
-  //       this._handleTransitionForIssue(IssueLocalState.IN_PROGRESS, jiraCfg, curOrParTask)
-  //     ),
-  //   );
+  @Effect({dispatch: false})
+  checkForStartTransition$: Observable<any> = this._actions$
+    .pipe(
+      ofType(TaskActionTypes.SetCurrentTask),
+      // only if a task is started
+      filter((a: SetCurrentTask) => !!a.payload),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
+      ),
+      filter(([, currentTaskOrParent]) =>
+        (currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE)),
+      concatMap(([, currentTaskOrParent]) =>
+        this._getCfgOnce$(currentTaskOrParent.projectId).pipe(
+          map((jiraCfg) => ({jiraCfg, currentTaskOrParent}))
+        )
+      ),
+      filter(({jiraCfg, currentTaskOrParent}) =>
+        jiraCfg.isEnabled && jiraCfg.isTransitionIssuesEnabled),
+      concatMap(({jiraCfg, currentTaskOrParent}) =>
+        this._handleTransitionForIssue(IssueLocalState.IN_PROGRESS, jiraCfg, currentTaskOrParent)
+      ),
+    );
 
   // @Effect({dispatch: false})
   // checkForDoneTransition$: Observable<any> = this._actions$
@@ -251,57 +256,57 @@ export class JiraIssueEffects {
   ) {
   }
 
-  // private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, task: Task): Observable<any> {
-  //   const chosenTransition: JiraTransitionOption = jiraCfg.transitionConfig[localState];
-  //
-  //   switch (chosenTransition) {
-  //     case 'DO_NOT':
-  //       return EMPTY;
-  //     case 'ALWAYS_ASK':
-  //       return this._jiraApiService.getReducedIssueById$(task.issueId).pipe(
-  //         concatMap((issue) => this._openTransitionDialog(issue, localState, task)
-  //         )
-  //       );
-  //     default:
-  //       if (!chosenTransition || !chosenTransition.id) {
-  //         this._snackService.open({
-  //           msg: T.F.JIRA.S.NO_VALID_TRANSITION,
-  //           type: 'ERROR',
-  //         });
-  //         // NOTE: we would kill the whole effect chain if we do this
-  //         // return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: No valid transition configured'});
-  //         return timer(2000).pipe(
-  //           concatMap(() => this._jiraApiService.getReducedIssueById$(task.issueId)),
-  //           concatMap((issue: JiraIssue) => this._openTransitionDialog(issue, localState, task))
-  //         );
-  //       }
-  //
-  //       return this._jiraApiService.getReducedIssueById$(task.issueId).pipe(
-  //         concatMap((issue) => {
-  //           if (!issue.status || issue.status.name !== chosenTransition.name) {
-  //             return this._jiraApiService.transitionIssue$(issue.id, chosenTransition.id)
-  //               .pipe(
-  //                 tap(() => {
-  //                   this._snackService.open({
-  //                     type: 'SUCCESS',
-  //                     msg: T.F.JIRA.S.TRANSITION_SUCCESS,
-  //                     translateParams: {
-  //                       issueKey: `${issue.key}`,
-  //                       chosenTransition: `${chosenTransition.name}`,
-  //                     },
-  //                   });
-  //                   this._issueService.refreshIssue(task, false, false);
-  //                 })
-  //               );
-  //           } else {
-  //             // no transition required
-  //             return EMPTY;
-  //           }
-  //         })
-  //       );
-  //   }
-  // }
-  //
+  private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, task: Task): Observable<any> {
+    const chosenTransition: JiraTransitionOption = jiraCfg.transitionConfig[localState];
+
+    switch (chosenTransition) {
+      case 'DO_NOT':
+        return EMPTY;
+      case 'ALWAYS_ASK':
+        return this._jiraApiService.getReducedIssueById$(task.issueId, jiraCfg).pipe(
+          concatMap((issue) => this._openTransitionDialog(issue, localState, task)
+          )
+        );
+      default:
+        if (!chosenTransition || !chosenTransition.id) {
+          this._snackService.open({
+            msg: T.F.JIRA.S.NO_VALID_TRANSITION,
+            type: 'ERROR',
+          });
+          // NOTE: we would kill the whole effect chain if we do this
+          // return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: No valid transition configured'});
+          return timer(2000).pipe(
+            concatMap(() => this._jiraApiService.getReducedIssueById$(task.issueId, jiraCfg)),
+            concatMap((issue: JiraIssue) => this._openTransitionDialog(issue, localState, task))
+          );
+        }
+
+        return this._jiraApiService.getReducedIssueById$(task.issueId, jiraCfg).pipe(
+          concatMap((issue) => {
+            if (!issue.status || issue.status.name !== chosenTransition.name) {
+              return this._jiraApiService.transitionIssue$(issue.id, chosenTransition.id, jiraCfg)
+                .pipe(
+                  tap(() => {
+                    this._snackService.open({
+                      type: 'SUCCESS',
+                      msg: T.F.JIRA.S.TRANSITION_SUCCESS,
+                      translateParams: {
+                        issueKey: `${issue.key}`,
+                        chosenTransition: `${chosenTransition.name}`,
+                      },
+                    });
+                    this._issueService.refreshIssue(task, false, false);
+                  })
+                );
+            } else {
+              // no transition required
+              return EMPTY;
+            }
+          })
+        );
+    }
+  }
+
   private _openWorklogDialog(task: Task, issueId: string, jiraCfg: JiraCfg) {
     return this._jiraApiService.getReducedIssueById$(issueId, jiraCfg).pipe(take(1)).subscribe(issue => {
       this._matDialog.open(DialogJiraAddWorklogComponent, {
