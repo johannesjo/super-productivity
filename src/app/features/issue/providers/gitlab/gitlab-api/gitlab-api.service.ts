@@ -47,7 +47,7 @@ export class GitlabApiService {
       flatMap(
         issues => forkJoin(
           [
-            ...issues.map(issue => this.getIssueWithComments$(issue))
+            ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
           ]
         )
       ),
@@ -64,7 +64,7 @@ export class GitlabApiService {
       }));
   }
 
-  getIssueWithComments$(issue: GitlabIssue): Observable<GitlabIssue> {
+  getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
     return this._getIssueComments$(issue.id, 1).pipe(
       map((comments) => {
           return {
