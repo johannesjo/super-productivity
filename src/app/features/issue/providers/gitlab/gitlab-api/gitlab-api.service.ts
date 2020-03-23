@@ -22,8 +22,6 @@ const BASE = GITLAB_API_BASE_URL;
 })
 export class GitlabApiService {
   /** @deprecated */
-  private _cfg: GitlabCfg;
-  /** @deprecated */
   private _header: HttpHeaders;
 
   constructor(
@@ -31,19 +29,13 @@ export class GitlabApiService {
     private _snackService: SnackService,
     private _http: HttpClient,
   ) {
-    this._projectService.currentGitlabCfg$.subscribe((cfg: GitlabCfg) => {
-      this._cfg = cfg;
-      if (cfg) {
-        this.setHeader(cfg.token);
-      }
-    });
   }
 
   getProjectData$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this._getProjectIssues$(1).pipe(
+    return this._getProjectIssues$(1, cfg).pipe(
       flatMap(
         issues => forkJoin(
           [
@@ -111,9 +103,9 @@ export class GitlabApiService {
     }
   }
 
-  private _getProjectIssues$(pageNumber: number): Observable<GitlabIssue[]> {
+  private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._http.get(
-      `${BASE}/${this._cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`,
+      `${BASE}/${cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`,
       {headers: this._header ? this._header : {}}
     ).pipe(
       catchError(this._handleRequestError$.bind(this)),
@@ -125,11 +117,11 @@ export class GitlabApiService {
   }
 
   private _getIssueComments$(issueid: number, pageNumber: number, cfg: GitlabCfg) {
-    if (!this._isValidSettings()) {
+    if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
     return this._http.get(
-      `${BASE}/${this._cfg.project}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
+      `${BASE}/${cfg.project}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
       {headers: this._header ? this._header : {}}
     ).pipe(
       catchError(this._handleRequestError$.bind(this)),
@@ -140,8 +132,7 @@ export class GitlabApiService {
   }
 
   // TODO fix
-  private _isValidSettings(cfgIn?: GitlabCfg): boolean {
-    const cfg = cfgIn || this._cfg;
+  private _isValidSettings(cfg: GitlabCfg): boolean {
     if (cfg && cfg.project && cfg.project.length > 0) {
       return true;
     }
