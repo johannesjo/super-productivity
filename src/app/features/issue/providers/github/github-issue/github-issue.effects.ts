@@ -63,7 +63,6 @@ export class GithubIssueEffects {
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
-      tap(console.log),
       withLatestFrom(
         this._projectService.isGithubEnabled$,
         this._projectService.currentGithubCfg$,

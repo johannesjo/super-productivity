@@ -63,7 +63,6 @@ export class GitlabIssueEffects {
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
-      tap(console.log),
       withLatestFrom(
         this._projectService.isGitlabEnabled$,
         this._projectService.currentGitlabCfg$,
