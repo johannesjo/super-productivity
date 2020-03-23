@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
-import {Task} from 'src/app/features/tasks/task.model';
+import {IssueFieldsForTask, Task} from 'src/app/features/tasks/task.model';
 import {catchError, concatMap, first, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
 import {GitlabApiService} from './gitlab-api/gitlab-api.service';
@@ -97,10 +97,12 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
   }
 
-  getAddTaskData(issue: GitlabIssue): { title: string; additionalFields: Partial<Task> } {
+  getAddTaskData(issue: GitlabIssue): { title: string; additionalFields: Partial<IssueFieldsForTask> } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
-      additionalFields: {}
+      additionalFields: {
+        issuePoints: issue.weight
+      }
     };
   }
 
