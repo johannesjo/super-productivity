@@ -76,6 +76,8 @@ deploy:
     snap: ./app-builds/*.snap
     channel: edge
     skip_cleanup: true
+    # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
+    edge: true
   - on:
       condition: $TRAVIS_OS_NAME = linux
       tags: true
@@ -84,6 +86,8 @@ deploy:
     snap: ./app-builds/*.snap
     channel: candidate
     skip_cleanup: true
+    # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
+    edge: true
   # Web deployment
   - on:
       condition: $TRAVIS_OS_NAME = linux
