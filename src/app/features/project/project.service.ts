@@ -38,7 +38,9 @@ import {
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
   selectUnarchivedProjects,
-  selectUnarchivedProjectsWithoutCurrent
+  selectUnarchivedProjectsWithoutCurrent,
+  selectProjectGitlabCfg,
+  selectProjectGitlabIsEnabled
 } from './store/project.reducer';
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue.model';
 import {JiraCfg} from '../issue/providers/jira/jira.model';
@@ -52,6 +54,7 @@ import {migrateProjectState} from './migrate-projects-state.util';
 import {WorklogExportSettings} from '../worklog/worklog.model';
 import {T} from '../../t.const';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
+import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
 
 @Injectable({
   providedIn: 'root',
@@ -88,6 +91,14 @@ export class ProjectService {
   );
   isGithubEnabled$: Observable<boolean> = this._store$.pipe(
     select(selectProjectGithubIsEnabled),
+  );
+
+  currentGitlabCfg$: Observable<GitlabCfg> = this._store$.pipe(
+    select(selectProjectGitlabCfg),
+    shareReplay(1),
+  );
+  isGitlabEnabled$: Observable<boolean> = this._store$.pipe(
+    select(selectProjectGitlabIsEnabled),
   );
 
   advancedCfg$: Observable<ProjectAdvancedCfg> = this._store$.pipe(

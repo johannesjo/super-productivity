@@ -9,6 +9,7 @@ import {DialogCreateProjectComponent} from './dialogs/create-project/dialog-crea
 import {UiModule} from '../../ui/ui.module';
 import {JiraViewComponentsModule} from '../issue/providers/jira/jira-view-components/jira-view-components.module';
 import {GithubViewComponentsModule} from '../issue/providers/github/github-view-components/github-view-components.module';
+import { DialogGitlabInitialSetupModule } from '../issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.module';
 
 @NgModule({
   imports: [
@@ -18,6 +19,7 @@ import {GithubViewComponentsModule} from '../issue/providers/github/github-view-
     UiModule,
     JiraViewComponentsModule,
     GithubViewComponentsModule,
+    DialogGitlabInitialSetupModule,
   ],
   declarations: [
     DialogCreateProjectComponent,

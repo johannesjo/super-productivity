@@ -26,6 +26,9 @@
           <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
                     [title]="T.PP.GITHUB_CONFIGURED|translate"
                     svgIcon="github"></mat-icon>
+          <mat-icon *ngIf="project.issueIntegrationCfgs?.GITLAB?.project"
+                    [title]="T.PP.GITLAB_CONFIGURED|translate"
+                    svgIcon="gitlab"></mat-icon>
         </div>
 
         <div class="controls">
@@ -102,6 +105,9 @@
         <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
                   [title]="T.PP.GITHUB_CONFIGURED|translate"
                   svgIcon="github"></mat-icon>
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.GITLAB?.project"
+                  [title]="T.PP.GITLAB_CONFIGURED|translate"
+                  svgIcon="gitlab"></mat-icon>
       </div>
 
       <div class="controls">

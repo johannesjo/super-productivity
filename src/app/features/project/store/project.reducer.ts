@@ -6,6 +6,7 @@ import {FIRST_PROJECT} from '../project.const';
 import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
+import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -61,6 +62,12 @@ export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (is
 export const selectProjectGithubIsEnabled = createSelector(
   selectProjectGithubCfg,
   (gitCfg: GithubCfg): boolean => gitCfg && gitCfg.repo && gitCfg.repo.length > 2
+);
+
+export const selectProjectGitlabCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs && issueProviderCfgs.GITLAB);
+export const selectProjectGitlabIsEnabled = createSelector(
+  selectProjectGitlabCfg,
+  (gitlabCfg: GitlabCfg): boolean => gitlabCfg && gitlabCfg.project && gitlabCfg.project.length > 2
 );
 
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
