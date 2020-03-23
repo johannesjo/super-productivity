@@ -108,6 +108,48 @@
         "SHOW_ISSUE_BTN": "見せて"
       }
     },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "プロジェクト用Gitlabのセットアップ"
+      },
+      "FORM": {
+        "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
+        "IS_AUTO_ADD_TO_BACKLOG": "未解決の問題をGitlabからバックログに自動的に追加",
+        "IS_AUTO_POLL": "変更についてインポートされたGitの問題を自動的にポーリングします",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "新しいタスクを追加するときにgitからの問題を提案として表示する",
+        "REPO": "追跡したいgitリポジトリの \"username / repositoryName\"",
+        "TOKEN": "アクセストークン"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>ここでは、毎日の計画ビューのタスク作成パネルに、特定のリポジトリの未解決のGitlab issueを一覧表示するようにSuperProductivityを設定できます。それらは提案としてリストされ、問題へのリンクとそれに関する詳細情報を提供します。</p> <p>さらに、未解決の課題をすべて自動的にタスクバックログに追加して同期することができます。</p>",
+        "TITLE": "Gitlab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "譲受人",
+        "AT": "で",
+        "DESCRIPTION": "説明",
+        "LABELS": "ラベル",
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
+        "STATUS": "状態",
+        "SUMMARY": "概要",
+        "WRITE_A_COMMENT": "コメントを書く"
+      },
+      "S": {
+        "ERR_NETWORK": "Gitlab：クライアント側のネットワークエラーが原因で要求が失敗しました",
+        "ERR_NOT_CONFIGURED": "Gitlab：正しく設定されていません",
+        "ERR_UNKNOWN": "Gitlab：不明なエラー {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab：gitからバックログに {{issuesLength}} 件の新しい問題をインポートしました",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab：gitからバックログへの問題 \"{{issueText}}\"のインポート",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab：更新は不要",
+        "ISSUE_UPDATE": "Gitlab： \"{{issueText}}\"のデータを更新しました",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab： \"{{issueText}}\"のデータを更新しました",
+        "MISSING_ISSUE_DATA": "Gitlab：課題データが見つからないタスクが見つかりました。再読み込みしています。",
+        "NEW_COMMENT": "Gitlab： \"{{issueText}}\"への新しいコメント",
+        "POLLING": "Gitlab：問題に対する投票の変更",
+        "SHOW_ISSUE_BTN": "見せて"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi：認証に失敗しましたもう一度ログインしてください。"
@@ -429,6 +471,7 @@
         "CREATE": "プロジェクトを作成",
         "EDIT": "プロジェクトを編集",
         "SETUP_GIT": "Githubとの統合のセットアップ",
+        "SETUP_GITLAB": "Gitlabとの統合のセットアップ",
         "SETUP_JIRA": "セットアップJira統合"
       },
       "FORM_BASIC": {
@@ -898,6 +941,7 @@
     "EDIT_PROJECT": "プロジェクトを編集",
     "EXPORT_PROJECT": "プロジェクトをエクスポート",
     "GITHUB_CONFIGURED": "Github統合を設定済み",
+    "GITLAB_CONFIGURED": "Gitlab統合を設定済み",
     "IMPORT_FROM_FILE": "ファイルからインポート",
     "JIRA_CONFIGURED": "Jira統合が設定されました",
     "S_INVALID_JSON": "プロジェクトファイルのjsonが無効です",

@@ -108,6 +108,48 @@
         "SHOW_ISSUE_BTN": "Покажи мне"
       }
     },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Настройка Gitlab для проекта"
+      },
+      "FORM": {
+        "FILTER_USER": "Имя пользователя (чтобы, например, самостоятельно отфильтровать изменения)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из Github в отставание",
+        "IS_AUTO_POLL": "Автоматически проверять импортированные проблемы git на предмет изменений",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Показывать проблемы из git в качестве подсказок при добавлении новых задач",
+        "PROJECT": "\"username%2FProjectName\" для репозитория git, который вы хотите отслеживать",
+        "TOKEN": "Токен доступа"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Здесь вы можете настроить SuperProductivity для отображения списка открытых проблем Gitlab для конкретного хранилища на панели создания задач в представлении ежедневного планирования. Они будут перечислены в качестве предложений и предоставят ссылку на проблему, а также дополнительную информацию о ней.</p> <p>Кроме того, вы можете автоматически добавлять и синхронизировать все открытые проблемы в своем задании.</p>",
+        "TITLE": "Gitlab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Исполнитель",
+        "AT": "В",
+        "DESCRIPTION": "Описание",
+        "LABELS": "Этикетки",
+        "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
+        "STATUS": "Статус",
+        "SUMMARY": "Резюме",
+        "WRITE_A_COMMENT": "Написать комментарий"
+      },
+      "S": {
+        "ERR_NETWORK": "Gitlab: запрос не выполнен из-за ошибки сети на стороне клиента",
+        "ERR_NOT_CONFIGURED": "Gitlab: неправильно настроен",
+        "ERR_UNKNOWN": "Gitlab: неизвестная ошибка {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: импортировано {{issuesLength}} новых заданий из git в список задач",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab: импортированная проблема \"{{issueText}}\" из git в список задач",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: обновление не требуется",
+        "ISSUE_UPDATE": "Gitlab: обновлены данные для \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: обновлены данные для \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Gitlab: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
+        "NEW_COMMENT": "Gitlab: новый комментарий для \"{{issueText}}\"",
+        "POLLING": "Gitlab: Опрос Изменения для проблем",
+        "SHOW_ISSUE_BTN": "Покажи мне"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi: Не удалось пройти аутентификацию, попробуйте войти снова!"
@@ -429,6 +471,7 @@
         "CREATE": "Создать проект",
         "EDIT": "Редактировать проект",
         "SETUP_GIT": "Настройка Github Интеграция",
+        "SETUP_GITLAB": "Настройка Gitlab Интеграция",
         "SETUP_JIRA": "Настройка интеграции Jira"
       },
       "FORM_BASIC": {
@@ -898,6 +941,7 @@
     "EDIT_PROJECT": "Редактировать проект",
     "EXPORT_PROJECT": "Экспортировать проект",
     "GITHUB_CONFIGURED": "Интеграция Github настроена",
+    "GITLAB_CONFIGURED": "Интеграция Gitlab настроена",
     "IMPORT_FROM_FILE": "Импорт из файла",
     "JIRA_CONFIGURED": "Интеграция Jira настроена",
     "S_INVALID_JSON": "Неверный JSON для файла проекта",

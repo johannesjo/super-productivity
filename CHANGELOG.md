@@ -1,3 +1,53 @@
+## [4.1.1](https://github.com/johannesjo/super-productivity/compare/v4.1.0...v4.1.1) (2020-03-23)
+
+
+### Bug Fixes
+
+* remove failing tests ([b7fcbd3](https://github.com/johannesjo/super-productivity/commit/b7fcbd31e22d9c2b12935f6c1e6622db371b748f))
+
+
+
+# [4.1.0](https://github.com/johannesjo/super-productivity/compare/v4.0.3...v4.1.0) (2020-03-23)
+
+
+### Bug Fixes
+
+* make gitlab work for new instances ([1adc22c](https://github.com/johannesjo/super-productivity/commit/1adc22c5e1a6704629053f6b5fd0023f37eae719))
+
+
+### Features
+
+* Add Basic Gitlab Integration ([dedcf26](https://github.com/johannesjo/super-productivity/commit/dedcf268b9ced74ded25a37cdcf53adc00506e63))
+
+
+
+## [4.0.3](https://github.com/johannesjo/super-productivity/compare/v4.0.2...v4.0.3) (2020-03-23)
+
+
+### Bug Fixes
+
+* lint ([293de6a](https://github.com/johannesjo/super-productivity/commit/293de6a44a6a0b0bff0bd01b7634ddb20bab9173))
+
+
+
+## [4.0.2](https://github.com/johannesjo/super-productivity/compare/v4.0.1...v4.0.2) (2020-03-22)
+
+
+### Bug Fixes
+
+* error when changing project [#302](https://github.com/johannesjo/super-productivity/issues/302) ([9b28f0f](https://github.com/johannesjo/super-productivity/commit/9b28f0fa9e40eb7f4a07cc2863a631f04c811e29))
+
+
+
+## [4.0.1](https://github.com/johannesjo/super-productivity/compare/v4.0.0...v4.0.1) (2020-03-19)
+
+
+### Bug Fixes
+
+* app quit from menu not doing anything [#296](https://github.com/johannesjo/super-productivity/issues/296) ([af113d6](https://github.com/johannesjo/super-productivity/commit/af113d664581adcd922939aef110aef46853fe4d))
+
+
+
 # [4.0.0](https://github.com/johannesjo/super-productivity/compare/v3.2.4...v4.0.0) (2020-03-05)
 
 

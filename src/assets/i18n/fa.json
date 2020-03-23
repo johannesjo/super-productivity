@@ -75,7 +75,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track",
+        "PROJECT": "\"username%2FProjectName\" for the git repository you want to track",
         "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
@@ -104,6 +104,47 @@
         "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
         "NEW_COMMENT": "گیت هاب: دیدگاه جدید برای \"{{issueText}}\"",
         "POLLING": "Github: Polling Changes for issues",
+        "SHOW_ISSUE_BTN": "به من نشان بده"
+      }
+    },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "راه اندازی گیت لاب برای پروژه"
+      },
+      "FORM": {
+        "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
+        "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
+        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
+        "REPO": "\"username/repositoryName\" for the git repository you want to track",
+        "TOKEN": "توکن دسترسی"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open Gitlab issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "TITLE": "گیت لاب"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "مسئول",
+        "AT": "در",
+        "DESCRIPTION": "توضیحات",
+        "LABELS": "برچسب ها",
+        "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
+        "STATUS": "وضعیت",
+        "SUMMARY": "خلاصه",
+        "WRITE_A_COMMENT": "دیدگاهتان را بنویسید"
+      },
+      "S": {
+        "ERR_NETWORK": "گیت لاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
+        "ERR_NOT_CONFIGURED": "گیت لاب: به درستی پیکربندی نشده است",
+        "ERR_REQUEST": "Gitlab: API returned {{statusCode}}. {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab: Imported issue \"{{issueText}}\" from git to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_UPDATE": "گیت لاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Gitlab: Tasks with missing issue data found. Reloading.",
+        "NEW_COMMENT": "گیت لاب: دیدگاه جدید برای \"{{issueText}}\"",
+        "POLLING": "Gitlab: Polling Changes for issues",
         "SHOW_ISSUE_BTN": "به من نشان بده"
       }
     },
@@ -428,6 +469,7 @@
         "CREATE": "ایجاد پروژه",
         "EDIT": "ویرایش پروژه",
         "SETUP_GIT": "راه اندازی ارتباط با گیت",
+        "SETUP_GITLAB": "راه اندازی ارتباط با گیت لاب",
         "SETUP_JIRA": "راه اندازی ارتباط با جیرا"
       },
       "FORM_BASIC": {
@@ -895,6 +937,7 @@
     "EDIT_PROJECT": "ویرایش پروژه",
     "EXPORT_PROJECT": "Export Project",
     "GITHUB_CONFIGURED": "Github Integration Configured",
+    "GITLAB_CONFIGURED": "Gitlab Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
     "JIRA_CONFIGURED": "Jira Integration Configured",
     "S_INVALID_JSON": "Invalid json for project file",

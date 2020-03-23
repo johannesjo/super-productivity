@@ -15,11 +15,14 @@ import {Subscription} from 'rxjs';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
 import {GithubCfg} from '../../../issue/providers/github/github.model';
 import {DialogGithubInitialSetupComponent} from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import {GITHUB_TYPE} from '../../../issue/issue.const';
+import {GITHUB_TYPE, GITLAB_TYPE} from '../../../issue/issue.const';
 import {T} from '../../../../t.const';
 import {DEFAULT_JIRA_CFG} from '../../../issue/providers/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../../issue/providers/github/github.const';
 import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../../work-context/work-context.const';
+import {GitlabCfg} from 'src/app/features/issue/providers/gitlab/gitlab';
+import {DEFAULT_GITLAB_CFG} from 'src/app/features/issue/providers/gitlab/gitlab.const';
+import {DialogGitlabInitialSetupComponent} from 'src/app/features/issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.component';
 
 @Component({
   selector: 'dialog-create-project',
@@ -32,6 +35,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   projectData: ProjectCopy | Partial<ProjectCopy> = DEFAULT_PROJECT;
   jiraCfg: JiraCfg;
   githubCfg: GithubCfg;
+  gitlabCfg: GitlabCfg;
 
   formBasic = new FormGroup({});
   formTheme = new FormGroup({});
@@ -84,6 +88,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           ...this.projectData.issueIntegrationCfgs,
           JIRA: this.jiraCfg,
           GITHUB: this.githubCfg,
+          GITLAB: this.gitlabCfg,
         };
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -102,6 +107,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (this.projectData.issueIntegrationCfgs.GITHUB) {
         this.githubCfg = this.projectData.issueIntegrationCfgs.GITHUB;
       }
+      if (this.projectData.issueIntegrationCfgs.GITLAB) {
+        this.gitlabCfg = this.projectData.issueIntegrationCfgs.GITLAB;
+      }
     }
   }
 
@@ -114,6 +122,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       ...this.projectData.issueIntegrationCfgs,
       JIRA: this.jiraCfg || DEFAULT_JIRA_CFG,
       GITHUB: this.githubCfg || DEFAULT_GITHUB_CFG,
+      GITLAB: this.gitlabCfg || DEFAULT_GITLAB_CFG,
     };
 
     const projectDataToSave: Project | Partial<Project> = {
@@ -164,6 +173,20 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }));
   }
 
+  openGitlabCfg() {
+    this._subs.add(this._matDialog.open(DialogGitlabInitialSetupComponent, {
+      restoreFocus: true,
+      data: {
+        gitlabCfg: this.gitlabCfg,
+      }
+    }).afterClosed().subscribe((gitlabCfg: GitlabCfg) => {
+
+      if (gitlabCfg) {
+        this._saveGitlabCfg(gitlabCfg);
+      }
+    }));
+  }
+
   private _saveJiraCfg(jiraCfg: JiraCfg) {
     this.jiraCfg = jiraCfg;
     this._cd.markForCheck();
@@ -181,6 +204,16 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     // if we're editing save right away
     if (this.projectData.id) {
       this._projectService.updateIssueProviderConfig(this.projectData.id, GITHUB_TYPE, this.githubCfg);
+    }
+  }
+
+  private _saveGitlabCfg(gitlabCfg: GitlabCfg) {
+    this.gitlabCfg = gitlabCfg;
+    this._cd.markForCheck();
+
+    // if we're editing save right away
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(this.projectData.id, GITLAB_TYPE, this.gitlabCfg);
     }
   }
 }

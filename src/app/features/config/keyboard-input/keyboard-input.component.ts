@@ -47,10 +47,16 @@ export class KeyboardInputComponent extends FieldType {
         val += 'Meta+';
       }
 
+      // custom key handling
+      let keyName = ev.key;
+      if (ev.keyCode === 32) {
+        keyName = 'Space';
+      }
+
       // fail safe for MacOsX crashing bug
-      if (ev.key === 'Meta') {
+      if (keyName === 'Meta') {
       } else {
-        this.formControl.setValue(val + ev.key);
+        this.formControl.setValue(val + keyName);
       }
     }
   }

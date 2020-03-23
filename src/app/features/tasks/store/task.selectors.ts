@@ -2,7 +2,7 @@ import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {TASK_FEATURE_NAME} from './task.reducer';
 import {Task, TaskState, TaskWithSubTasks} from '../task.model';
 import {taskAdapter} from './task.adapter';
-import {GITHUB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
+import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 
 const mapSubTasksToTasks = (tasksIN): TaskWithSubTasks[] => {
   return tasksIN.filter((task) => !task.parentId)
@@ -72,6 +72,14 @@ export const selectGithubTasks = createSelector(
     return s.ids
       .map(id => s.entities[id])
       .filter((task: Task) => task.issueType === GITHUB_TYPE);
+  });
+
+export const selectGitlabTasks = createSelector(
+  selectTaskFeatureState,
+  (s): Task[] => {
+    return s.ids
+      .map(id => s.entities[id])
+      .filter((task: Task) => task.issueType === GITLAB_TYPE);
   });
 
 export const selectSelectedTaskId = createSelector(selectTaskFeatureState, (state) => state.selectedTaskId);

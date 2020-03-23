@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {TaskActionTypes} from './task.actions';
 import {select, Store} from '@ngrx/store';
-import {tap, withLatestFrom} from 'rxjs/operators';
+import {filter, tap, withLatestFrom} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectTaskFeatureState} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';

@@ -2,9 +2,11 @@ import {JiraIssue, JiraIssueReduced} from './providers/jira/jira-issue/jira-issu
 import {JiraCfg} from './providers/jira/jira.model';
 import {GithubCfg} from './providers/github/github.model';
 import {GithubIssue, GithubIssueReduced} from './providers/github/github-issue/github-issue.model';
+import { GitlabCfg } from './providers/gitlab/gitlab';
+import { GitlabIssue } from './providers/gitlab/gitlab-issue/gitlab-issue.model';
 
-export type IssueProviderKey = 'JIRA' | 'GITHUB';
-export type IssueIntegrationCfg = JiraCfg | GithubCfg;
+export type IssueProviderKey = 'JIRA' | 'GITHUB' | 'GITLAB';
+export type IssueIntegrationCfg = JiraCfg | GithubCfg | GitlabCfg;
 
 export enum IssueLocalState {
   OPEN = 'OPEN',
@@ -16,10 +18,11 @@ export interface IssueIntegrationCfgs {
   // should be the same as key IssueProviderKey
   JIRA?: JiraCfg;
   GITHUB?: GithubCfg;
+  GITLAB?: GitlabCfg;
 }
 
-export type IssueData = JiraIssue | GithubIssue;
-export type IssueDataReduced = GithubIssueReduced | JiraIssueReduced;
+export type IssueData = JiraIssue | GithubIssue | GitlabIssue;
+export type IssueDataReduced = GithubIssueReduced | JiraIssueReduced | GitlabIssue;
 
 export interface SearchResultItem {
   title: string;

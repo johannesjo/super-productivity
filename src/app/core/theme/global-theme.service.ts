@@ -82,6 +82,10 @@ export class GlobalThemeService {
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/github.svg`)
     );
     this._matIconRegistry.addSvgIcon(
+      `gitlab`,
+      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/gitlab.svg`)
+    );
+    this._matIconRegistry.addSvgIcon(
       `jira`,
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/jira.svg`)
     );

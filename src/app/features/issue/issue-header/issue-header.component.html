@@ -5,3 +5,7 @@
 <ng-container *ngIf="task.issueType===GITHUB_TYPE">
   <github-issue-header [task]="task"></github-issue-header>
 </ng-container>
+
+<ng-container *ngIf="task.issueType===GITLAB_TYPE">
+  <gitlab-issue-header [task]="task"></gitlab-issue-header>
+</ng-container>

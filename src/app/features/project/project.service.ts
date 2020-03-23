@@ -18,6 +18,8 @@ import {
   selectProjectBreakNr,
   selectProjectBreakTime,
   selectProjectById,
+  selectProjectGitlabCfg,
+  selectProjectGitlabIsEnabled,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
@@ -33,6 +35,7 @@ import {T} from '../../t.const';
 import {BreakNr, BreakTime, WorkContextAdvancedCfg, WorkContextType} from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
 import {GITHUB_TYPE, JIRA_TYPE} from '../issue/issue.const';
+import {GitlabCfg} from '../issue/providers/gitlab/gitlab';
 
 @Injectable({
   providedIn: 'root',
@@ -56,6 +59,14 @@ export class ProjectService {
 
   advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(
     select(selectAdvancedProjectCfg),
+  );
+
+  currentGitlabCfg$: Observable<GitlabCfg> = this._store$.pipe(
+    select(selectProjectGitlabCfg),
+    shareReplay(1),
+  );
+  isGitlabEnabled$: Observable<boolean> = this._store$.pipe(
+    select(selectProjectGitlabIsEnabled),
   );
 
 

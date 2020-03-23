@@ -14,6 +14,7 @@ import {DEFAULT_GITHUB_CFG} from '../../features/issue/providers/github/github.c
 import {WorkContextAdvancedCfg, WorkContextThemeCfg} from '../../features/work-context/work-context.model';
 import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../features/work-context/work-context.const';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {DEFAULT_GITLAB_CFG} from 'src/app/features/issue/providers/gitlab/gitlab.const';
 
 @Component({
   selector: 'project-settings',
@@ -52,7 +53,9 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
       this.currentProject = project;
       this.projectCfg = project.advancedCfg;
       this.currentProjectTheme = project.theme;
-      this.issueIntegrationCfgs = project.issueIntegrationCfgs;
+
+      // in case there are new ones...
+      this.issueIntegrationCfgs = {...project.issueIntegrationCfgs};
 
 
       // Unfortunately needed, to make sure we have no empty configs
@@ -63,13 +66,14 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
       if (!this.issueIntegrationCfgs.GITHUB) {
         this.issueIntegrationCfgs.GITHUB = DEFAULT_GITHUB_CFG;
       }
+      if (!this.issueIntegrationCfgs.GITLAB) {
+        this.issueIntegrationCfgs.GITLAB = DEFAULT_GITLAB_CFG;
+      }
       this._cd.detectChanges();
     }));
   }
 
   ngOnDestroy() {
-    console.log('UNSUB');
-
     this._subs.unsubscribe();
   }
 

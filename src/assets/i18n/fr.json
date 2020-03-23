@@ -108,6 +108,48 @@
         "SHOW_ISSUE_BTN": "Montre moi"
       }
     },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurer Gitlab pour le projet"
+      },
+      "FORM": {
+        "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de Gitlab au backlog",
+        "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
+        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
+        "TOKEN": "Jeton d'accès"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues Gitlab ouvertes pour un repository spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
+        "TITLE": "Gitlab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Responsable",
+        "AT": "à",
+        "DESCRIPTION": "Description",
+        "LABELS": "Étiquettes",
+        "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
+        "STATUS": "Statut",
+        "SUMMARY": "Résumé",
+        "WRITE_A_COMMENT": "Écrire un commentaire"
+      },
+      "S": {
+        "ERR_NETWORK": "Gitlab : la requête a échouée à cause d'une erreur réseau côté client",
+        "ERR_NOT_CONFIGURED": "Gitlab : n'est pas configuré correctement",
+        "ERR_UNKNOWN": "Gitlab: erreur inconnue {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab : {{issuesLength}} nouvelles issues de git dans le backlog",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab : Issue \"{{issueText}}\" importée de git dans le backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab : l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: aucune mise à jour requise",
+        "ISSUE_UPDATE": "Gitlab : données mises à jour pour \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab : données mises à jour pour \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Gitlab : Tâches avec données d'issue manquantes trouvées. Rechargement.",
+        "NEW_COMMENT": "Gitlab : Nouveau commentaire pour \"{{issueText}}\"",
+        "POLLING": "Gitlab : Recherche de modification sur les issues",
+        "SHOW_ISSUE_BTN": "Montre moi"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi : Échec de l'authentification, essayez de vous reconnecter!"
@@ -429,6 +471,7 @@
         "CREATE": "Créer un projet",
         "EDIT": "Modifier le projet",
         "SETUP_GIT": "Configurer l'intégration de Github",
+        "SETUP_GITLAB": "Configurer l'intégration de Gitlab",
         "SETUP_JIRA": "Configurer l'intégration de Jira"
       },
       "FORM_BASIC": {
@@ -898,6 +941,7 @@
     "EDIT_PROJECT": "Modifier le projet",
     "EXPORT_PROJECT": "Exporter le projet",
     "GITHUB_CONFIGURED": "Intégration Github configurée",
+    "GITLAB_CONFIGURED": "Intégration Gitlab configurée",
     "IMPORT_FROM_FILE": "Importer depuis un fichier",
     "JIRA_CONFIGURED": "Intégration Jira configurée",
     "S_INVALID_JSON": "JSON non valide pour le fichier de projet",
