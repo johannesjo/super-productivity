@@ -2,6 +2,7 @@
 import {GitlabCfg} from './gitlab';
 import {T} from '../../../../t.const';
 import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../../config/global-config.model';
+import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   project: null,
@@ -15,7 +16,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
 // NOTE: we need a high limit because git has low usage limits :(
 export const GITLAB_MAX_CACHE_AGE = 10 * 60 * 1000;
 export const GITLAB_POLL_INTERVAL = GITLAB_MAX_CACHE_AGE;
-export const GITLAB_INITIAL_POLL_DELAY = 8 * 1000;
+export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 
 // export const GITLAB_POLL_INTERVAL = 15 * 1000;
 export const GITLAB_API_BASE_URL = 'https://gitlab.com/api/v4/projects';
