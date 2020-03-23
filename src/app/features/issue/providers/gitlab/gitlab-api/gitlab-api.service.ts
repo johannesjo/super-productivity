@@ -65,7 +65,7 @@ export class GitlabApiService {
   }
 
   getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
-    return this._getIssueComments$(issue.id, 1).pipe(
+    return this._getIssueComments$(issue.id, 1, cfg).pipe(
       map((comments) => {
           return {
             ...issue,
@@ -124,7 +124,7 @@ export class GitlabApiService {
     );
   }
 
-  private _getIssueComments$(issueid: number, pageNumber: number) {
+  private _getIssueComments$(issueid: number, pageNumber: number, cfg: GitlabCfg) {
     if (!this._isValidSettings()) {
       return EMPTY;
     }
