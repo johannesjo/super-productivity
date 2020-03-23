@@ -40,7 +40,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
 
   isDisableControls = false;
 
-  private _task$: Observable<Task> = this._taskService.getById$(this.data.reminder.relatedId);
+  private _task$: Observable<Task> = this._taskService.getByIdOnce$(this.data.reminder.relatedId);
   private _subs = new Subscription();
 
   constructor(

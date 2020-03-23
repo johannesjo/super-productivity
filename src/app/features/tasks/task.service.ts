@@ -417,7 +417,7 @@ export class TaskService {
       )
     ;
     const task$ = contextChanged$.pipe(
-      switchMap(() => this.getById$(taskId)),
+      switchMap(() => this.getByIdOnce$(taskId)),
       take(1),
     );
 
@@ -457,7 +457,7 @@ export class TaskService {
 
   // HELPER
   // ------
-  getById$(id: string): Observable<Task> {
+  getByIdOnce$(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
 

@@ -68,7 +68,7 @@ export class TagEffects {
     .pipe(
       ofType(TaskActionTypes.AddTimeSpent),
       concatMap(({payload}: AddTimeSpent) => payload.task.parentId
-        ? this._taskService.getById$(payload.task.parentId).pipe(first())
+        ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
         : of(payload.task)
       ),
       filter((task: Task) => task.tagIds && !!task.tagIds.length),
@@ -90,7 +90,7 @@ export class TagEffects {
     .pipe(
       ofType(TaskActionTypes.AddTimeSpent),
       concatMap(({payload}: AddTimeSpent) => payload.task.parentId
-        ? this._taskService.getById$(payload.task.parentId).pipe(first())
+        ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
         : of(payload.task)
       ),
       filter((task: Task) => task.tagIds && !!task.tagIds.length),

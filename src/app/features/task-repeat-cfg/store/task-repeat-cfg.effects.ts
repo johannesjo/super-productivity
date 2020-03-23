@@ -132,7 +132,7 @@ export class TaskRepeatCfgEffects {
     ofType(
       TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
     ),
-    concatMap((a: AddTaskRepeatCfgToTask) => this._taskService.getById$(a.payload.taskId).pipe(take(1))),
+    concatMap((a: AddTaskRepeatCfgToTask) => this._taskService.getByIdOnce$(a.payload.taskId).pipe(take(1))),
     filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
     map((task: TaskWithSubTasks) => new RemoveTaskReminder({
       id: task.id,

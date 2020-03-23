@@ -15,7 +15,7 @@ import {T} from '../../../t.const';
 })
 export class DialogIdleComponent implements OnInit {
   T = T;
-  lastCurrentTask$: Observable<Task> = this._taskService.getById$(this.data.lastCurrentTaskId);
+  lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(this.data.lastCurrentTaskId);
   selectedTask: Task;
   newTaskTitle: string;
   isCreate: boolean;

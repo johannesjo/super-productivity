@@ -16,7 +16,7 @@
     <ng-container input-value>
       <mat-icon *ngIf="(parentTaskData$|async)?.issueType as issueType"
                 [svgIcon]="issueType|issueIcon"></mat-icon>
-      <span>{{(taskService.getById$(task.parentId)|async)?.title}}</span>
+      <span>{{(taskService.getByIdOnce$(task.parentId)|async)?.title}}</span>
     </ng-container>
 
   </task-additional-info-item>

@@ -201,42 +201,38 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
       ),
       filter(([, currentTaskOrParent]) =>
-        (currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE)),
+        (currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE)
+      ),
       concatMap(([, currentTaskOrParent]) =>
         this._getCfgOnce$(currentTaskOrParent.projectId).pipe(
           map((jiraCfg) => ({jiraCfg, currentTaskOrParent}))
         )
       ),
       filter(({jiraCfg, currentTaskOrParent}) =>
-        jiraCfg.isEnabled && jiraCfg.isTransitionIssuesEnabled),
+        jiraCfg.isEnabled && jiraCfg.isTransitionIssuesEnabled
+      ),
       concatMap(({jiraCfg, currentTaskOrParent}) =>
         this._handleTransitionForIssue(IssueLocalState.IN_PROGRESS, jiraCfg, currentTaskOrParent)
       ),
     );
 
-  // @Effect({dispatch: false})
-  // checkForDoneTransition$: Observable<any> = this._actions$
-  //   .pipe(
-  //     ofType(
-  //       TaskActionTypes.UpdateTask,
-  //     ),
-  //     // only trigger when changing to done
-  //     filter((a: UpdateTask) => a.payload.task.changes.isDone),
-  //     withLatestFrom(
-  //       this._projectService.isJiraEnabled$,
-  //       this._projectService.currentJiraCfg$,
-  //       this._store$.pipe(select(selectTaskFeatureState)),
-  //     ),
-  //     filter(([a, isEnabled]) => isEnabled),
-  //     filter(([a, isEnabled, jiraCfg, taskState]: [UpdateTask, boolean, JiraCfg, TaskState]) => {
-  //       const task = taskState.entities[a.payload.task.id];
-  //       return jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === JIRA_TYPE && task.isDone;
-  //     }),
-  //     concatMap(([a, isEnabled, jiraCfg, taskState]: [UpdateTask, boolean, JiraCfg, TaskState]) => {
-  //       const task = taskState.entities[a.payload.task.id];
-  //       return this._handleTransitionForIssue(IssueLocalState.DONE, jiraCfg, task);
-  //     })
-  //   );
+  @Effect({dispatch: false})
+  checkForDoneTransition$: Observable<any> = this._actions$
+    .pipe(
+      ofType(TaskActionTypes.UpdateTask),
+      filter((a: UpdateTask) => a.payload.task.changes.isDone),
+      concatMap((a: UpdateTask) => this._taskService.getByIdOnce$(a.payload.task.id as string)),
+      filter((task: Task) => (task && task.issueType === JIRA_TYPE)),
+      concatMap((task: Task) => this._getCfgOnce$(task.projectId).pipe(
+        map((jiraCfg) => ({jiraCfg, task})),
+      )),
+      filter(({jiraCfg, task}) =>
+        jiraCfg.isEnabled && jiraCfg.isTransitionIssuesEnabled
+      ),
+      concatMap(({jiraCfg, task}) => {
+        return this._handleTransitionForIssue(IssueLocalState.DONE, jiraCfg, task);
+      })
+    );
 
 
   private _pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL);
