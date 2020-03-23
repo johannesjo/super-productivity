@@ -1,3 +1,12 @@
+## [4.1.1](https://github.com/johannesjo/super-productivity/compare/v4.1.0...v4.1.1) (2020-03-23)
+
+
+### Bug Fixes
+
+* remove failing tests ([b7fcbd3](https://github.com/johannesjo/super-productivity/commit/b7fcbd31e22d9c2b12935f6c1e6622db371b748f))
+
+
+
 # [4.1.0](https://github.com/johannesjo/super-productivity/compare/v4.0.3...v4.1.0) (2020-03-23)
 
 
