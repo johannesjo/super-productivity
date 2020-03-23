@@ -67,6 +67,7 @@ script:
 
 
 deploy:
+  # Snap Deployment
   - on:
       condition: $TRAVIS_OS_NAME = linux
       tags: false
@@ -75,8 +76,6 @@ deploy:
     snap: ./app-builds/*.snap
     channel: edge
     skip_cleanup: true
-    # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
-    edge: true
   - on:
       condition: $TRAVIS_OS_NAME = linux
       tags: true
@@ -85,8 +84,7 @@ deploy:
     snap: ./app-builds/*.snap
     channel: candidate
     skip_cleanup: true
-    # we use edge because of this: https://travis-ci.community/t/snap-deployment-stopped-working-out-of-nowhere/6908/2
-    edge: true
+  # Web deployment
   - on:
       condition: $TRAVIS_OS_NAME = linux
       tags: true
@@ -104,7 +102,7 @@ deploy:
 #    skip_cleanup: true
 
 
-# NOTE: this would only work, if we could auto publish the github draft
+# NOTE: this would only work, if we could and wanted to auto publish the github draft
 #  - provider: script
 #    script: brew update && brew install vitorgalvao/tiny-scripts/cask-repair && openssl aes-256-cbc -K $encrypted_c04542ca1075_key -iv $encrypted_c04542ca1075_iv -in build/hub.enc -out ~/.config/hub -d && cask-repair -b -v $TRAVIS_TAG superproductivity
 #    skip_cleanup: true
