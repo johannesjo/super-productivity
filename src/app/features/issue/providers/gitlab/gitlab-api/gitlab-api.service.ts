@@ -1,20 +1,19 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, ObservableInput, throwError, Subject, EMPTY, from, combineLatest, forkJoin } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {EMPTY, forkJoin, Observable, ObservableInput, throwError} from 'rxjs';
 
-import { ProjectService } from 'src/app/features/project/project.service';
-import { SnackService } from 'src/app/core/snack/snack.service';
+import {ProjectService} from 'src/app/features/project/project.service';
+import {SnackService} from 'src/app/core/snack/snack.service';
 
-import { GitlabCfg } from '../gitlab';
-import { GitlabOriginalIssue, GitlabOriginalComment } from './gitlab-api-responses';
-import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
-import { GITLAB_API_BASE_URL, GITLAB_MAX_CACHE_AGE } from '../gitlab.const';
-import { T } from 'src/app/t.const';
-import { catchError, map, tap, share, switchMap, take, flatMap } from 'rxjs/operators';
-import { GitlabIssue, GitlabComment } from '../gitlab-issue/gitlab-issue.model';
-import { loadFromLs, saveToLs } from 'src/app/core/persistence/local-storage';
-import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
-import { SearchResultItem } from '../../../issue.model';
+import {GitlabCfg} from '../gitlab';
+import {GitlabOriginalComment, GitlabOriginalIssue} from './gitlab-api-responses';
+import {HANDLED_ERROR_PROP_STR} from 'src/app/app.constants';
+import {GITLAB_API_BASE_URL} from '../gitlab.const';
+import {T} from 'src/app/t.const';
+import {catchError, flatMap, map, share, switchMap, take, tap} from 'rxjs/operators';
+import {GitlabIssue} from '../gitlab-issue/gitlab-issue.model';
+import {mapGitlabIssue, mapGitlabIssueToSearchResult} from '../gitlab-issue/gitlab-issue-map.util';
+import {SearchResultItem} from '../../../issue.model';
 
 const BASE = GITLAB_API_BASE_URL;
 
@@ -32,7 +31,9 @@ export class GitlabApiService {
   ) {
     this._projectService.currentGitlabCfg$.subscribe((cfg: GitlabCfg) => {
       this._cfg = cfg;
-      this.setHeader(cfg.token);
+      if (cfg) {
+        this.setHeader(cfg.token);
+      }
     });
   }
 
@@ -44,14 +45,6 @@ export class GitlabApiService {
     } else {
       this._header = null;
     }
-  }
-
-  private getHeader(): HttpHeaders {
-    return this._header;
-  }
-
-  public refreshIssuesCacheIfOld(): void {
-    this.getProjectData$().subscribe();
   }
 
   public getProjectData$(): Observable<GitlabIssue[]> {
@@ -89,35 +82,14 @@ export class GitlabApiService {
 
   getIssueWithComments$(issue: GitlabIssue): Observable<GitlabIssue> {
     return this._getIssueComments$(issue.id, 1).pipe(
-      map( (comments) => {
-        return {
-          ...issue,
-          comments,
-          commentsNr: comments.length,
-        };
-      }
-    ));
-  }
-
-  getIssueWithCommentsByIssueNumber$(issueNumber: number): Observable<GitlabIssue> {
-    console.log('getIssueWithComments');
-    if (!this._isValidSettings()) {
-      return EMPTY;
-    }
-    return combineLatest([
-      this._getProjectIssue$(issueNumber),
-      this._getIssueComments$(issueNumber, 1),
-    ]).pipe(
-      take(1),
-      map(([issue, comments]: [GitlabIssue, GitlabComment[]]) => {
-        console.log('s', issue);
-        console.log('a', comments);
-        return {
-          ...issue,
-          comments,
-        };
-      })
-    );
+      map((comments) => {
+          return {
+            ...issue,
+            comments,
+            commentsNr: comments.length,
+          };
+        }
+      ));
   }
 
   private _getProjectIssues$(pageNumber: number): Observable<GitlabIssue[]> {
@@ -125,25 +97,12 @@ export class GitlabApiService {
 
     return this._http.get(
       `${BASE}/${this._cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`,
-      { headers: this._header ? this._header : {} }
+      {headers: this._header ? this._header : {}}
     ).pipe(
       catchError(this._handleRequestError$.bind(this)),
       take(1),
       map((issues: GitlabOriginalIssue[]) => {
         return issues ? issues.map(mapGitlabIssue) : [];
-      }),
-    );
-  }
-
-  private _getProjectIssue$(issueId: number): Observable<GitlabIssue> {
-    console.log('getProjectIssue');
-    return this._http.get(
-      `${BASE}/${this._cfg.project}/issues/${issueId}`,
-      { headers: this._header ? this._header : {} }
-    ).pipe(
-      catchError(this._handleRequestError$.bind(this)),
-      map((issue: GitlabOriginalIssue) => {
-        return issue ? mapGitlabIssue(issue) : null;
       }),
     );
   }
@@ -179,7 +138,7 @@ export class GitlabApiService {
     }
     return this._http.get(
       `${BASE}/${this._cfg.project}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
-      { headers: this._header ? this._header : {} }
+      {headers: this._header ? this._header : {}}
     ).pipe(
       catchError(this._handleRequestError$.bind(this)),
       map((comments: GitlabOriginalComment[]) => {
@@ -220,8 +179,8 @@ export class GitlabApiService {
       });
     }
     if (error && error.message) {
-      return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitlab: ' + error.message });
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'Gitlab: ' + error.message});
     }
-    return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.' });
+    return throwError({[HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.'});
   }
 }

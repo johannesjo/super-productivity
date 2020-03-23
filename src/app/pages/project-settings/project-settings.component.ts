@@ -20,7 +20,7 @@ import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-for
 import {IS_ELECTRON} from '../../app.constants';
 import {DEFAULT_JIRA_CFG} from '../../features/issue/providers/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../features/issue/providers/github/github.const';
-import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitlab.const';
+import {DEFAULT_GITLAB_CFG} from 'src/app/features/issue/providers/gitlab/gitlab.const';
 
 @Component({
   selector: 'project-settings',
@@ -63,7 +63,9 @@ export class ProjectSettingsComponent implements OnInit, OnDestroy {
       this.currentProject = project;
       this.projectCfg = project.advancedCfg;
       this.currentProjectTheme = project.theme;
-      this.issueIntegrationCfgs = project.issueIntegrationCfgs;
+
+      // in case there are new ones...
+      this.issueIntegrationCfgs = {...project.issueIntegrationCfgs};
 
       // Unfortunately needed, to make sure we have no empty configs
       // TODO maybe think of a better solution for the defaults
