@@ -51,8 +51,6 @@ export class GithubIssueEffects {
       switchMap(() => this._updateIssuesForCurrentContext$),
     );
 
-  private _pollTimer$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
-
   private _updateIssuesForCurrentContext$ = this._workContextService.allTasksForCurrentContext$.pipe(
     first(),
     switchMap((tasks) => {
@@ -74,6 +72,8 @@ export class GithubIssueEffects {
     ),
     tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
   );
+
+  private _pollTimer$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
 
   constructor(
     private readonly _actions$: Actions,

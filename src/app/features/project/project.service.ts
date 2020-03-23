@@ -86,16 +86,8 @@ export class ProjectService {
 
   // DYNAMIC
   // -------
-  isJiraEnabledForProject$(projectId: string): Observable<boolean> {
-    return this._store$.pipe(select(selectIsJiraEnabledByProjectId, {id: projectId}));
-  }
-
   getJiraCfgForProject$(projectId: string): Observable<JiraCfg> {
     return this._store$.pipe(select(selectJiraCfgByProjectId, {id: projectId}));
-  }
-
-  isGithubEnabledForProject$(projectId: string): Observable<boolean> {
-    return this._store$.pipe(select(selectIsGithubEnabledByProjectId, {id: projectId}));
   }
 
   getGithubCfgForProject$(projectId: string): Observable<GithubCfg> {
