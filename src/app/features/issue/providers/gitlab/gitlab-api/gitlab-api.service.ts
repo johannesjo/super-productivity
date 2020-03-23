@@ -10,7 +10,7 @@ import {GitlabOriginalComment, GitlabOriginalIssue} from './gitlab-api-responses
 import {HANDLED_ERROR_PROP_STR} from 'src/app/app.constants';
 import {GITLAB_API_BASE_URL} from '../gitlab.const';
 import {T} from 'src/app/t.const';
-import {catchError, flatMap, map, share, switchMap, take, tap} from 'rxjs/operators';
+import {catchError, flatMap, map, share, switchMap, take} from 'rxjs/operators';
 import {GitlabIssue} from '../gitlab-issue/gitlab-issue.model';
 import {mapGitlabIssue, mapGitlabIssueToSearchResult} from '../gitlab-issue/gitlab-issue-map.util';
 import {SearchResultItem} from '../../../issue.model';
@@ -21,7 +21,9 @@ const BASE = GITLAB_API_BASE_URL;
   providedIn: 'root',
 })
 export class GitlabApiService {
+  /** @deprecated */
   private _cfg: GitlabCfg;
+  /** @deprecated */
   private _header: HttpHeaders;
 
   constructor(
@@ -37,8 +39,8 @@ export class GitlabApiService {
     });
   }
 
-  public getProjectData$(): Observable<GitlabIssue[]> {
-    if (!this._isValidSettings()) {
+  getProjectData$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
+    if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
     return this._getProjectIssues$(1).pipe(
@@ -52,11 +54,11 @@ export class GitlabApiService {
     );
   }
 
-  getById$(id: number): Observable<GitlabIssue> {
-    if (!this._isValidSettings()) {
+  getById$(id: number, cfg: GitlabCfg): Observable<GitlabIssue> {
+    if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this.getProjectData$()
+    return this.getProjectData$(cfg)
       .pipe(switchMap(issues => {
         return issues.filter(issue => issue.id === id);
       }));
@@ -74,7 +76,7 @@ export class GitlabApiService {
       ));
   }
 
-  searchIssueInProject$(searchText: string): Observable<SearchResultItem[]> {
+  searchIssueInProject$(searchText: string, cfg: GitlabCfg): Observable<SearchResultItem[]> {
     const filterFn = issue => {
       try {
         return issue.title.toLowerCase().match(searchText.toLowerCase())
@@ -84,10 +86,10 @@ export class GitlabApiService {
         return false;
       }
     };
-    if (!this._isValidSettings()) {
+    if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this.getProjectData$()
+    return this.getProjectData$(cfg)
       .pipe(
         catchError(this._handleRequestError$.bind(this)),
         // a single request should suffice
@@ -137,8 +139,9 @@ export class GitlabApiService {
     );
   }
 
-  private _isValidSettings(): boolean {
-    const cfg = this._cfg;
+  // TODO fix
+  private _isValidSettings(cfgIn?: GitlabCfg): boolean {
+    const cfg = cfgIn || this._cfg;
     if (cfg && cfg.project && cfg.project.length > 0) {
       return true;
     }

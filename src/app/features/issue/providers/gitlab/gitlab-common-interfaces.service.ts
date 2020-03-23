@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
-import {catchError, first, map, switchMap} from 'rxjs/operators';
+import {catchError, concatMap, first, switchMap} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
 import {GitlabApiService} from './gitlab-api/gitlab-api.service';
 import {ProjectService} from '../../../project/project.service';
@@ -18,9 +18,7 @@ import {GITLAB_API_BASE_URL} from './gitlab.const';
   providedIn: 'root',
 })
 export class GitlabCommonInterfacesService implements IssueServiceInterface {
-  isGitlabSearchEnabled$: Observable<boolean> = this._projectService.currentGitlabCfg$.pipe(
-    map(gitlabCfg => gitlabCfg && gitlabCfg.isSearchIssuesFromGitlab)
-  );
+  /** @deprecated */
   gitlabCfg: GitlabCfg;
 
   constructor(
@@ -35,14 +33,16 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return of(`${GITLAB_API_BASE_URL}/issues/${issueId}`);
   }
 
-  getById$(issueId: number) {
-    return this._gitlabApiService.getById$(issueId);
+  getById$(issueId: number, projectId: string) {
+    return this._getCfgOnce$(projectId).pipe(
+      concatMap(gitlabCfg => this._gitlabApiService.getById$(issueId, gitlabCfg)),
+    );
   }
 
-  searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
-    return this.isGitlabSearchEnabled$.pipe(
-      switchMap((isSearchGitlab) => isSearchGitlab
-        ? this._gitlabApiService.searchIssueInProject$(searchTerm).pipe(catchError(() => []))
+  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
+    return this._getCfgOnce$(projectId).pipe(
+      switchMap((gitlabCfg) => (gitlabCfg && gitlabCfg.isSearchIssuesFromGitlab)
+        ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg).pipe(catchError(() => []))
         : of([])
       )
     );
@@ -53,8 +53,8 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
   ): Promise<{ taskChanges: Partial<Task>, issue: GitlabIssue }> {
-    const cfg = this.gitlabCfg;
-    const issue = await this._gitlabApiService.getById$(+task.issueId).toPromise();
+    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
 
     const issueUpdate: number = new Date(issue.updated_at).getTime();
     const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
@@ -100,11 +100,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   getAddTaskData(issue: GitlabIssue): { title: string; additionalFields: Partial<Task> } {
     return {
       title: this._formatIssueTitle(issue.number, issue.title),
-      additionalFields: {
-        // issueWasUpdated: false,
-        // NOTE: we use Date.now() instead to because updated does not account for comments
-        // issueLastUpdated: new Date(issue.updated_at).getTime()
-      }
+      additionalFields: {}
     };
   }
 
