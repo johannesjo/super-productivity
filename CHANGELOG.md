@@ -1,3 +1,17 @@
+# [4.1.0](https://github.com/johannesjo/super-productivity/compare/v4.0.3...v4.1.0) (2020-03-23)
+
+
+### Bug Fixes
+
+* make gitlab work for new instances ([1adc22c](https://github.com/johannesjo/super-productivity/commit/1adc22c5e1a6704629053f6b5fd0023f37eae719))
+
+
+### Features
+
+* Add Basic Gitlab Integration ([dedcf26](https://github.com/johannesjo/super-productivity/commit/dedcf268b9ced74ded25a37cdcf53adc00506e63))
+
+
+
 ## [4.0.3](https://github.com/johannesjo/super-productivity/compare/v4.0.2...v4.0.3) (2020-03-23)
 
 
