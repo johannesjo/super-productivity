@@ -25,7 +25,7 @@
   <table class="issue-table">
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.SUMMARY|translate}}</th>
-      <td class="summary"><strong><a [href]="issueUrl"
+      <td class="summary"><strong><a [href]="issueUrl$|async"
                                      target="_blank">{{issue.key}} {{issue.summary}}</a></strong></td>
     </tr>
     <tr>
@@ -96,7 +96,7 @@
           </div>
         </div>
 
-        <a [href]="issue.url"
+        <a [href]="issueUrl$|async"
            mat-stroked-button
            target="_blank">
           <mat-icon>textsms</mat-icon>

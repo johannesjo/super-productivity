@@ -6,8 +6,9 @@ import {TaskAttachment} from '../../../../../tasks/task-attachment/task-attachme
 import {T} from '../../../../../../t.const';
 import {TaskService} from '../../../../../tasks/task.service';
 import * as j2m from 'jira2md';
-import {IssueService} from '../../../../issue.service';
-import {JIRA_TYPE} from '../../../../issue.const';
+import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
+import {ReplaySubject} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'jira-issue-content',
@@ -17,29 +18,36 @@ import {JIRA_TYPE} from '../../../../issue.const';
   animations: [expandAnimation]
 })
 export class JiraIssueContentComponent {
-  issue: JiraIssue;
-  issueUrl: string;
-  @Input() task: TaskWithSubTasks;
   description: string;
   attachments: TaskAttachment[];
   T = T;
 
-  constructor(
-    private readonly  _taskService: TaskService,
-    private readonly  _issueService: IssueService,
-  ) {
-  }
-
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;
     this.description = i && i.description && j2m.to_markdown(i.description);
-    // TODO fix
-    // this.issueUrl = this._issueService.issueLink$(JIRA_TYPE, i.id);
   }
 
-  getIssueLink$(id) {
-    // this._issueService.issueLink$(JIRA_TYPE, i.id)
+  issue: JiraIssue;
+
+  @Input('task') set taskIn(v: TaskWithSubTasks) {
+    this.task = v;
+    this._task$.next(v);
   }
+
+  task: TaskWithSubTasks;
+
+  private _task$ = new ReplaySubject<TaskWithSubTasks>(1);
+
+  issueUrl$ = this._task$.pipe(
+    switchMap((task) => this._jiraCommonInterfacesService.issueLink$(task.issueId, task.projectId))
+  );
+
+  constructor(
+    private readonly  _taskService: TaskService,
+    private readonly  _jiraCommonInterfacesService: JiraCommonInterfacesService,
+  ) {
+  }
+
 
   hideUpdates() {
     this._taskService.markIssueUpdatesAsRead(this.task.id);
