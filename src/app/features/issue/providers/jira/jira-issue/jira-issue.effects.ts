@@ -39,9 +39,23 @@ import {selectCurrentTaskParentOrCurrent, selectTaskEntities} from '../../../../
 import {Dictionary} from '@ngrx/entity';
 import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
+import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
+import {WorkContextType} from '../../../../work-context/work-context.model';
 
 @Injectable()
 export class JiraIssueEffects {
+  // CHECK CONNECTION
+  // ----------------
+  @Effect({dispatch: false})
+  checkConnection$: Observable<any> = this._actions$.pipe(
+    ofType(setActiveWorkContext),
+    filter(({activeType}) => (activeType === WorkContextType.PROJECT)),
+    concatMap(({activeId}) => this._getCfgOnce$(activeId)),
+    filter(jiraCfg => jiraCfg.isEnabled),
+    // just fire any single request
+    concatMap((jiraCfg) => this._jiraApiService.getCurrentUser$(jiraCfg)),
+  );
+
   // POLLING & UPDATES
   // -----------------
   @Effect({dispatch: false})

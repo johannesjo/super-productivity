@@ -68,7 +68,6 @@ export class JiraApiService {
   private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
   private _isBlockAccess = loadFromSessionStorage(BLOCK_ACCESS_KEY);
   private _isExtension = false;
-  private _cfg: JiraCfg;
   private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
     ? of(true).pipe()
     : this._chromeExtensionInterface.onReady$.pipe(
@@ -105,24 +104,6 @@ export class JiraApiService {
           this._handleResponse(data);
         });
       });
-
-    // fire a test request once there is enough config
-    // we do this to avoid lots of request leading us to get kicked out of jira
-    // TODO move to effect
-    // const checkConnectionSub = this._isInterfacesReadyIfNeeded$.subscribe((cfg) => {
-    //   if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
-    //     this.getCurrentUser$(cfg)
-    //       .pipe(catchError((err) => {
-    //         this._blockAccess();
-    //         checkConnectionSub.unsubscribe();
-    //         return throwError({[HANDLED_ERROR_PROP_STR]: err});
-    //       }))
-    //       .subscribe(() => {
-    //         this.unblockAccess();
-    //         checkConnectionSub.unsubscribe();
-    //       });
-    //   }
-    // });
   }
 
   unblockAccess() {
@@ -418,6 +399,7 @@ export class JiraApiService {
 
       timeoutId: window.setTimeout(() => {
         console.log('ERROR', 'Jira Request timed out', requestInit);
+        this._blockAccess();
         // delete entry for promise
         this._snackService.open({
           msg: T.F.JIRA.S.TIMED_OUT,

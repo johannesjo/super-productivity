@@ -37,15 +37,5 @@ export class IssueEffectHelperService {
     private _workContextService: WorkContextService,
   ) {
   }
-
-  getIssueProviderCfgIfIsProject$(issueProviderKey: IssueProviderKey): Observable<IssueIntegrationCfg> {
-    return this._workContextService.isActiveWorkContextProject$.pipe(
-      first(),
-      tap(console.log),
-      filter(isProject => isProject),
-      withLatestFrom(this._workContextService.activeWorkContextId$),
-      switchMap(([, pId]) => this._projectService.getIssueProviderCfgForProject$(pId, issueProviderKey))
-    );
-  }
 }
 
