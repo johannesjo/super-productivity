@@ -55,12 +55,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   dayStr = getWorklogStr();
 
-  dayStr$ = combineLatest([
-    this._activatedRoute.paramMap,
-    this._projectService.isRelatedDataLoadedForCurrentProject$,
-  ]).pipe(
-    filter(([route, isLoaded]) => isLoaded),
-    map(([route]) => route),
+  dayStr$ = this._activatedRoute.paramMap.pipe(
     startWith({params: {dayStr: getWorklogStr()}}),
     map((s: any) => {
       if (s && s.params.dayStr) {
