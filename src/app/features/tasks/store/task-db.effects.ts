@@ -2,10 +2,9 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {TaskActionTypes} from './task.actions';
 import {select, Store} from '@ngrx/store';
-import {filter, tap, withLatestFrom} from 'rxjs/operators';
+import {tap, withLatestFrom} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectTaskFeatureState} from './task.selectors';
-import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {TaskService} from '../task.service';
 import {ReminderService} from '../../reminder/reminder.service';
@@ -17,6 +16,7 @@ import {Router} from '@angular/router';
 import {ProjectService} from '../../project/project.service';
 import {ElectronService} from '../../../core/electron/electron.service';
 import {TaskAttachmentActionTypes} from '../task-attachment/task-attachment.actions';
+import {TaskState} from '../task.model';
 
 @Injectable()
 export class TaskDbEffects {
@@ -51,10 +51,9 @@ export class TaskDbEffects {
         TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(this._saveToLs.bind(this)),
+      tap(([, taskState]) => this._saveToLs(taskState)),
       tap(this._updateLastActive.bind(this)),
     );
 
@@ -65,10 +64,9 @@ export class TaskDbEffects {
         TaskActionTypes.ToggleTaskShowSubTasks,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(this._saveToLs.bind(this))
+      tap(([, taskState]) => this._saveToLs(taskState)),
     );
 
   constructor(private _actions$: Actions,
@@ -89,13 +87,8 @@ export class TaskDbEffects {
     this._persistenceService.saveLastActive();
   }
 
-  private _saveToLs([, currentProjectId, taskState]) {
-    if (currentProjectId && taskState.isDataLoaded) {
-      // this._persistenceService.task.save(currentProjectId, taskState);
-      this._persistenceService.task.saveState(taskState);
-    } else {
-      throw new Error('No current project id or data not loaded yet');
-    }
+  private _saveToLs(taskState: TaskState) {
+    this._persistenceService.task.saveState(taskState);
   }
 }
 
