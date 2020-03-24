@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
-import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, first, map, switchMap, tap} from 'rxjs/operators';
 import {
   addNote,
   addNoteReminder,
@@ -12,11 +12,12 @@ import {
   updateNoteOrder,
   updateNoteReminder
 } from './note.actions';
-import {selectNoteFeatureState} from './note.reducer';
+import {NoteState, selectNoteFeatureState} from './note.reducer';
 import {ReminderService} from '../../reminder/reminder.service';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {combineLatest} from 'rxjs';
 
 @Injectable()
 export class NoteEffects {
@@ -27,11 +28,11 @@ export class NoteEffects {
       updateNote,
       updateNoteOrder,
     ),
-    withLatestFrom(
+    switchMap(() => combineLatest([
       this._workContextService.activeWorkContextIdIfProject$,
       this._store$.pipe(select(selectNoteFeatureState)),
-    ),
-    tap(this._saveToLs.bind(this)),
+    ]).pipe(first())),
+    tap(([projectId, state]) => this._saveToLs(projectId, state)),
     tap(this._updateLastActive.bind(this)),
   ), {dispatch: false});
 
@@ -123,7 +124,7 @@ export class NoteEffects {
     this._persistenceService.saveLastActive();
   }
 
-  private async _saveToLs([action, currentProjectId, noteState]) {
+  private async _saveToLs(currentProjectId: string, noteState: NoteState) {
     if (currentProjectId) {
       this._persistenceService.note.save(currentProjectId, noteState);
     } else {

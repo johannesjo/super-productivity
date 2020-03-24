@@ -26,6 +26,7 @@ import {
   startWith,
   switchMap,
   take,
+  tap,
   withLatestFrom
 } from 'rxjs/operators';
 import {MY_DAY_TAG} from '../tag/tag.const';
@@ -70,6 +71,7 @@ export class WorkContextService {
     map(({activeType}) => activeType === WorkContextType.PROJECT)
   );
   activeWorkContextIdIfProject$: Observable<string> = this.activeWorkContextTypeAndId$.pipe(
+    tap(() => console.log('TIRGGER')),
     map(({activeType, activeId}) => {
       if (activeType !== WorkContextType.PROJECT) {
         throw Error('Not in project context');

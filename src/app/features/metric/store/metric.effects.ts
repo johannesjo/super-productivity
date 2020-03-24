@@ -1,12 +1,13 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {tap, withLatestFrom} from 'rxjs/operators';
+import {first, switchMap, tap} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {MetricActionTypes} from './metric.actions';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectMetricFeatureState} from './metric.selectors';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {combineLatest} from 'rxjs';
 
 @Injectable()
 export class MetricEffects {
@@ -19,11 +20,11 @@ export class MetricEffects {
         MetricActionTypes.DeleteMetric,
         MetricActionTypes.UpsertMetric,
       ),
-      withLatestFrom(
+      switchMap(() => combineLatest([
         this._workContextService.activeWorkContextIdIfProject$,
         this._store$.pipe(select(selectMetricFeatureState)),
-      ),
-      tap(this._saveToLs.bind(this))
+      ]).pipe(first())),
+      tap(([projectId, state]) => this._saveToLs(projectId, state)),
     );
 
   // @Effect({dispatch: false}) saveMetrics$: any = this._actions$
@@ -48,7 +49,7 @@ export class MetricEffects {
   ) {
   }
 
-  private _saveToLs([action, currentProjectId, metricState]) {
+  private _saveToLs(currentProjectId, metricState) {
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
       this._persistenceService.metric.save(currentProjectId, metricState);
