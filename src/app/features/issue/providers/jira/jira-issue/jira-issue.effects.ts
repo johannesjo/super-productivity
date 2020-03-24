@@ -151,6 +151,8 @@ export class JiraIssueEffects {
   checkForReassignment: any = this._actions$
     .pipe(
       ofType(TaskActionTypes.SetCurrentTask),
+      // only if a task is started
+      filter((a: SetCurrentTask) => !!a.payload),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
       ),
