@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {initialMetricState} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
-import {combineLatest, from, Observable, of} from 'rxjs';
+import {combineLatest, EMPTY, from, Observable, of} from 'rxjs';
 import {LineChartData, Metric, MetricState, PieChartData, SimpleMetrics} from './metric.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -23,6 +23,8 @@ import {ProjectService} from '../project/project.service';
 import {mapSimpleMetrics} from './metric.util';
 import {DEFAULT_METRIC_FOR_DAY} from './metric.const';
 import {selectCheckedImprovementIdsForDay, selectRepeatedImprovementIds} from './improvement/store/improvement.reducer';
+import {WorkContextService} from '../work-context/work-context.service';
+import {WorkContextType} from '../work-context/work-context.model';
 
 @Injectable({
   providedIn: 'root',
@@ -35,19 +37,23 @@ export class MetricService {
   obstructionCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectObstructionCountsPieChartData));
   productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
 
-  simpleMetrics$: Observable<SimpleMetrics> = this._projectService.currentId$.pipe(
-    switchMap(() => {
-      return combineLatest([
-        this._projectService.breakNr$,
-        this._projectService.breakTime$,
-        this._worklogService.worklog$,
-        this._worklogService.totalTimeSpent$,
-        from(this._taskService.getAllTasksForCurrentProject()),
-      ]).pipe(
-        map(mapSimpleMetrics),
-        // because otherwise the page is always redrawn if a task is active
-        take(1),
-      );
+  simpleMetrics$: Observable<SimpleMetrics> = this._workContextService.activeWorkContextTypeAndId$.pipe(
+    switchMap(({activeType, activeId}) => {
+      return (activeType === WorkContextType.PROJECT)
+
+        ? combineLatest([
+          this._projectService.breakNr$,
+          this._projectService.breakTime$,
+          this._worklogService.worklog$,
+          this._worklogService.totalTimeSpent$,
+          from(this._taskService.getAllTasksForCurrentProject())
+        ]).pipe(
+          map(mapSimpleMetrics),
+          // because otherwise the page is always redrawn if a task is active
+          take(1),
+        )
+
+        : EMPTY;
     }),
   );
 
@@ -56,6 +62,7 @@ export class MetricService {
     private _taskService: TaskService,
     private _projectService: ProjectService,
     private _worklogService: WorklogService,
+    private _workContextService: WorkContextService,
     private _persistenceService: PersistenceService,
   ) {
   }

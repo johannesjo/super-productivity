@@ -65,14 +65,6 @@ export class ProjectService {
     shareReplay(1),
   );
 
-  // TODO remove completely
-  currentId$: Observable<string> = this._workContextService.activeWorkContextTypeAndId$.pipe(
-    map(({activeId, activeType}) => (activeType === WorkContextType.PROJECT)
-      ? activeId
-      : null
-    )
-  );
-
   breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
   breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
 
