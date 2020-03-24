@@ -50,13 +50,7 @@ export const selectProjectFeatureState = createFeatureSelector<ProjectState>(PRO
 const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSelectors();
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => !p.isArchived));
-export const selectUnarchivedProjectsWithoutCurrent = createSelector(
-  selectProjectFeatureState,
-  (s) => {
-    const ids = s.ids as string[];
-    return ids.filter(id => id !== s.currentId).map(id => s.entities[id]).filter(p => !p.isArchived && p.id);
-  },
-);
+
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => p.isArchived));
 
 export const selectIsRelatedDataLoadedForCurrentProject = createSelector(
@@ -95,6 +89,13 @@ export const selectGitlabCfgByProjectId = createSelector(
   (p: Project): GitlabCfg => p.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg
 );
 
+export const selectUnarchivedProjectsWithoutCurrent = createSelector(
+  selectProjectFeatureState,
+  (s, props: { currentId: string }) => {
+    const ids = s.ids as string[];
+    return ids.filter(id => id !== props.currentId).map(id => s.entities[id]).filter(p => !p.isArchived && p.id);
+  },
+);
 
 // DEFAULT
 // -------

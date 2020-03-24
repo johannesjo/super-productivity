@@ -375,6 +375,16 @@
             <mat-icon>forward</mat-icon>
             {{T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT|translate}}
           </button>
+          <mat-menu #projectMenu="matMenu">
+            <ng-container *ngIf="task.projectId">
+              <button (click)="moveTaskToProject(project.id)"
+                      *ngFor="let project of (projectService.getProjectsWithoutId$(task.projectId)|async); trackBy:trackByProjectId;"
+                      mat-menu-item>
+                {{project.title}}
+              </button>
+            </ng-container>
+          </mat-menu>
+
 
           <!--          <button mat-menu-item-->
           <!--                  *ngIf="task.parentId">-->
@@ -391,13 +401,7 @@
           </button>
         </mat-menu>
 
-        <mat-menu #projectMenu="matMenu">
-          <button (click)="moveTaskToProject(project.id)"
-                  *ngFor="let project of (projectService.listWithoutCurrent$|async); trackBy:trackByProjectId;"
-                  mat-menu-item>
-            {{project.title}}
-          </button>
-        </mat-menu>
+
       </div>
     </div>
   </div>

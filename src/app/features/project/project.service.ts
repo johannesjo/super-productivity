@@ -42,8 +42,6 @@ export class ProjectService {
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
 
-  listWithoutCurrent$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjectsWithoutCurrent));
-
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
 
   currentProject$: Observable<Project> = this._workContextService.activeWorkContextTypeAndId$.pipe(
@@ -74,6 +72,10 @@ export class ProjectService {
 
   getGitlabCfgForProject$(projectId: string): Observable<GitlabCfg> {
     return this._store$.pipe(select(selectGitlabCfgByProjectId, {id: projectId}));
+  }
+
+  getProjectsWithoutId$(projectId: string): Observable<Project[]> {
+    return this._store$.pipe(select(selectUnarchivedProjectsWithoutCurrent, {currentId: projectId}));
   }
 
   getIssueProviderCfgForProject$(projectId: string, issueProviderKey: IssueProviderKey): Observable<IssueIntegrationCfg> {
