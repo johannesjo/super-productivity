@@ -38,7 +38,6 @@ const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
 
 export interface ProjectState extends EntityState<Project> {
   // additional entities state properties
-  currentId: string | null;
   projectIdForLoadedRelatedData: string;
 }
 
@@ -53,8 +52,9 @@ export const selectUnarchivedProjects = createSelector(selectAllProjects, (proje
 
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => p.isArchived));
 
+// TODO remove
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
-  (state) => state.entities[state.currentId]
+  (state) => state.entities[0]
 );
 
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
@@ -101,7 +101,6 @@ export const selectIsRelatedDataLoadedForProject = createSelector(
 // DEFAULT
 // -------
 export const initialProjectState: ProjectState = projectAdapter.getInitialState({
-  currentId: FIRST_PROJECT.id,
   ids: [
     FIRST_PROJECT.id
   ],
@@ -378,15 +377,7 @@ export function projectReducer(
     case ProjectActionTypes.LoadProjectRelatedDataSuccess: {
       return {
         ...state,
-        projectIdForLoadedRelatedData: state.currentId,
-      };
-    }
-
-    // TODO remove
-    case ProjectActionTypes.SetCurrentProject: {
-      return {
-        ...state,
-        currentId: payload,
+        projectIdForLoadedRelatedData: action.payload.projectId,
       };
     }
 

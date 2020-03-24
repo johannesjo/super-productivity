@@ -11,7 +11,8 @@ import {
   selectAdvancedProjectCfg,
   selectArchivedProjects,
   selectGithubCfgByProjectId,
-  selectGitlabCfgByProjectId, selectIsRelatedDataLoadedForProject,
+  selectGitlabCfgByProjectId,
+  selectIsRelatedDataLoadedForProject,
   selectJiraCfgByProjectId,
   selectProjectBreakNr,
   selectProjectBreakTime,
@@ -108,9 +109,6 @@ export class ProjectService {
     const projectState = migrateProjectState({...projectStateIN});
 
     if (projectState) {
-      if (!projectState.currentId) {
-        projectState.currentId = projectState.ids[0] as string;
-      }
       this.loadState(projectState);
     }
   }

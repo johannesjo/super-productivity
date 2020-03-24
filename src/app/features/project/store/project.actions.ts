@@ -37,6 +37,9 @@ export class LoadProjectState implements Action {
 
 export class LoadProjectRelatedDataSuccess implements Action {
   readonly type = ProjectActionTypes.LoadProjectRelatedDataSuccess;
+
+  constructor(public payload: { projectId: string }) {
+  }
 }
 
 export class SetCurrentProject implements Action {

@@ -53,12 +53,10 @@ export class SyncService {
     }
 
     if (this._checkData(data)) {
-      const curId = data.project.currentId;
-
       try {
         // save data to database first then load to store from there
         await this._persistenceService.importComplete(data);
-        await this._loadAllFromDatabaseToStore(curId);
+        await this._loadAllFromDatabaseToStore();
         this._imexMetaService.setInProgress(false);
         this._snackService.open({type: 'SUCCESS', msg: T.S.SYNC.SUCCESS});
 
@@ -90,7 +88,7 @@ export class SyncService {
       ;
   }
 
-  private async _loadAllFromDatabaseToStore(curId: string): Promise<any> {
+  private async _loadAllFromDatabaseToStore(): Promise<any> {
     return await Promise.all([
       // reload view model from ls
       this._configService.load(true),

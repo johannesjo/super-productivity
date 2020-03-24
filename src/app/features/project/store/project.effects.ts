@@ -52,7 +52,6 @@ export class ProjectEffects {
       ofType(
         ProjectActionTypes.AddProject,
         ProjectActionTypes.DeleteProject,
-        ProjectActionTypes.SetCurrentProject,
         ProjectActionTypes.UpdateProject,
         ProjectActionTypes.UpdateProjectAdvancedCfg,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
@@ -77,7 +76,6 @@ export class ProjectEffects {
       tap((a) => {
         // exclude ui only actions
         if (!([
-          ProjectActionTypes.SetCurrentProject,
           ProjectActionTypes.UpdateProjectWorkStart,
           ProjectActionTypes.UpdateProjectWorkEnd,
         ].includes(a.type as any))) {
@@ -152,10 +150,10 @@ export class ProjectEffects {
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),
           this._obstructionService.loadStateForProject(projectId),
-        ]);
+        ]).then(() => projectId);
       }),
-      map(data => {
-        return new LoadProjectRelatedDataSuccess();
+      map(projectId => {
+        return new LoadProjectRelatedDataSuccess({projectId});
       })
     );
 
