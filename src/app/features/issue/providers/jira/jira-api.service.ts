@@ -350,7 +350,14 @@ export class JiraApiService {
     });
 
     // save to request log (also sets up timeout)
-    this._requestsLog[requestId] = this._makeJiraRequestLogItem(promiseResolve, promiseReject, requestId, requestInit, transform, jiraCfg);
+    this._requestsLog[requestId] = this._makeJiraRequestLogItem({
+      promiseResolve,
+      promiseReject,
+      requestId,
+      requestInit,
+      transform,
+      jiraCfg
+    });
 
     const requestToSend = {requestId, requestInit, url};
     if (this._electronService.isElectronApp) {
@@ -386,7 +393,21 @@ export class JiraApiService {
     };
   }
 
-  private _makeJiraRequestLogItem(promiseResolve, promiseReject, requestId: string, requestInit: RequestInit, transform: any, jiraCfg: JiraCfg): JiraRequestLogItem {
+  private _makeJiraRequestLogItem({
+                                    promiseResolve,
+                                    promiseReject,
+                                    requestId,
+                                    requestInit,
+                                    transform,
+                                    jiraCfg
+                                  }: {
+    promiseResolve,
+    promiseReject,
+    requestId: string,
+    requestInit: RequestInit,
+    transform: any,
+    jiraCfg: JiraCfg
+  }): JiraRequestLogItem {
     return {
       transform,
       resolve: promiseResolve,

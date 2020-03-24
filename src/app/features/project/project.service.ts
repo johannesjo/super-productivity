@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
-import {ExportedProject, Project,} from './project.model';
+import {ExportedProject, Project} from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
 import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
@@ -12,8 +12,6 @@ import {
   selectArchivedProjects,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
-  selectIsGithubEnabledByProjectId,
-  selectIsJiraEnabledByProjectId,
   selectIsRelatedDataLoadedForCurrentProject,
   selectJiraCfgByProjectId,
   selectProjectBreakNr,
