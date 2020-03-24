@@ -57,6 +57,7 @@ export class WorkContextService {
   activeWorkContextId$: Observable<string> = this._store$.pipe(select(selectActiveContextId));
   activeWorkContextType$: Observable<WorkContextType> = this._store$.pipe(select(selectActiveContextType));
 
+
   activeWorkContextTypeAndId$: Observable<{
     activeId: string;
     activeType: WorkContextType;
@@ -68,6 +69,15 @@ export class WorkContextService {
   isActiveWorkContextProject$: Observable<boolean> = this.activeWorkContextTypeAndId$.pipe(
     map(({activeType}) => activeType === WorkContextType.PROJECT)
   );
+  activeWorkContextIdIfProject$: Observable<string> = this.activeWorkContextTypeAndId$.pipe(
+    map(({activeType, activeId}) => {
+      if (activeType !== WorkContextType.PROJECT) {
+        throw Error('Not in project context');
+      }
+      return activeId;
+    })
+  );
+
 
   // for convenience...
   activeWorkContextId: string;

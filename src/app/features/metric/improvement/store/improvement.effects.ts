@@ -5,10 +5,10 @@ import {select, Store} from '@ngrx/store';
 import {ClearHiddenImprovements, DeleteImprovements, ImprovementActionTypes} from './improvement.actions';
 import {selectImprovementFeatureState, selectImprovementHideDay} from './improvement.reducer';
 import {PersistenceService} from '../../../../core/persistence/persistence.service';
-import {selectCurrentProjectId} from '../../../project/store/project.reducer';
 import {selectUnusedImprovementIds} from '../../store/metric.selectors';
 import {ProjectActionTypes} from '../../../project/store/project.actions';
 import {getWorklogStr} from '../../../../util/get-work-log-str';
+import {WorkContextService} from '../../../work-context/work-context.service';
 
 @Injectable()
 export class ImprovementEffects {
@@ -25,7 +25,7 @@ export class ImprovementEffects {
         ImprovementActionTypes.AddImprovementCheckedDay,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
+        this._workContextService.activeWorkContextIdIfProject$,
         this._store$.pipe(select(selectImprovementFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
@@ -55,7 +55,8 @@ export class ImprovementEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _persistenceService: PersistenceService
+    private _persistenceService: PersistenceService,
+    private _workContextService: WorkContextService,
   ) {
   }
 

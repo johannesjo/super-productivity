@@ -5,9 +5,9 @@ import {select, Store} from '@ngrx/store';
 import {DeleteObstructions, ObstructionActionTypes} from './obstruction.actions';
 import {selectObstructionFeatureState} from './obstruction.reducer';
 import {PersistenceService} from '../../../../core/persistence/persistence.service';
-import {selectCurrentProjectId} from '../../../project/store/project.reducer';
 import {MetricActionTypes} from '../../store/metric.actions';
 import {selectUnusedObstructionIds} from '../../store/metric.selectors';
+import {WorkContextService} from '../../../work-context/work-context.service';
 
 @Injectable()
 export class ObstructionEffects {
@@ -20,7 +20,7 @@ export class ObstructionEffects {
         ObstructionActionTypes.DeleteObstruction,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
+        this._workContextService.activeWorkContextIdIfProject$,
         this._store$.pipe(select(selectObstructionFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
@@ -42,7 +42,8 @@ export class ObstructionEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _persistenceService: PersistenceService
+    private _persistenceService: PersistenceService,
+    private _workContextService: WorkContextService,
   ) {
   }
 

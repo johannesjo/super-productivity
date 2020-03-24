@@ -2,10 +2,10 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
-import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {BookmarkActionTypes} from './bookmark.actions';
 import {selectBookmarkFeatureState} from './bookmark.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Injectable()
 export class BookmarkEffects {
@@ -21,7 +21,7 @@ export class BookmarkEffects {
         BookmarkActionTypes.ToggleBookmarks,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
+        this._workContextService.activeWorkContextIdIfProject$,
         this._store$.pipe(select(selectBookmarkFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
@@ -30,7 +30,8 @@ export class BookmarkEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _persistenceService: PersistenceService
+    private _persistenceService: PersistenceService,
+    private _workContextService: WorkContextService,
   ) {
   }
 

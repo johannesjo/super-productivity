@@ -146,7 +146,6 @@ export const selectGitlabCfgByProjectId = createSelector(
 );
 
 
-
 // DEFAULT
 // -------
 export const initialProjectState: ProjectState = projectAdapter.getInitialState({

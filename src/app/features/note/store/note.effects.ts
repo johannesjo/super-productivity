@@ -3,7 +3,6 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
 import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
-import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {
   addNote,
   addNoteReminder,
@@ -17,6 +16,7 @@ import {selectNoteFeatureState} from './note.reducer';
 import {ReminderService} from '../../reminder/reminder.service';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Injectable()
 export class NoteEffects {
@@ -28,7 +28,7 @@ export class NoteEffects {
       updateNoteOrder,
     ),
     withLatestFrom(
-      this._store$.pipe(select(selectCurrentProjectId)),
+      this._workContextService.activeWorkContextIdIfProject$,
       this._store$.pipe(select(selectNoteFeatureState)),
     ),
     tap(this._saveToLs.bind(this)),
@@ -114,6 +114,7 @@ export class NoteEffects {
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
     private _reminderService: ReminderService,
+    private _workContextService: WorkContextService,
     private _snackService: SnackService,
   ) {
   }
