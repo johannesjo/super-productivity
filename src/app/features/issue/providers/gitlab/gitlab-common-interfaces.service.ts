@@ -18,15 +18,11 @@ import {GITLAB_API_BASE_URL} from './gitlab.const';
   providedIn: 'root',
 })
 export class GitlabCommonInterfacesService implements IssueServiceInterface {
-  /** @deprecated */
-  gitlabCfg: GitlabCfg;
-
   constructor(
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
   ) {
-    this._projectService.currentGitlabCfg$.subscribe((gitlabCfg) => this.gitlabCfg = gitlabCfg);
   }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {

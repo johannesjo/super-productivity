@@ -17,8 +17,6 @@ import {
   selectProjectBreakNr,
   selectProjectBreakTime,
   selectProjectById,
-  selectProjectGitlabCfg,
-  selectProjectGitlabIsEnabled,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
@@ -26,7 +24,7 @@ import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue.model';
 import {JiraCfg} from '../issue/providers/jira/jira.model';
 import {GithubCfg} from '../issue/providers/github/github.model';
 import {Actions} from '@ngrx/effects';
-import {map, shareReplay, switchMap, take} from 'rxjs/operators';
+import {shareReplay, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
@@ -58,11 +56,6 @@ export class ProjectService {
 
   advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(
     select(selectAdvancedProjectCfg),
-  );
-
-  currentGitlabCfg$: Observable<GitlabCfg> = this._store$.pipe(
-    select(selectProjectGitlabCfg),
-    shareReplay(1),
   );
 
   breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));

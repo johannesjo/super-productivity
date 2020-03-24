@@ -1,12 +1,11 @@
 import {createEntityAdapter, EntityAdapter, EntityState, Update} from '@ngrx/entity';
-import {Project, ProjectBasicCfg} from '../project.model';
+import {Project} from '../project.model';
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
-import {sortWorklogDates} from '../../../util/sortWorklogDates';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
-import {WorkContextType, WorkStartEnd} from '../../work-context/work-context.model';
+import {WorkContextType} from '../../work-context/work-context.model';
 import {
   AddTask,
   DeleteTask,
@@ -49,7 +48,6 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 // ---------
 export const selectProjectFeatureState = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSelectors();
-export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentId);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => !p.isArchived));
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(
@@ -69,48 +67,10 @@ export const selectIsRelatedDataLoadedForCurrentProject = createSelector(
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
 );
-export const selectProjectIssueCfgs = createSelector(selectCurrentProject, (project) => project.issueIntegrationCfgs);
-
-export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs && issueProviderCfgs.JIRA);
-export const selectProjectThemeCfg = createSelector(selectCurrentProject, (project) => project.theme);
-export const selectProjectJiraIsEnabled = createSelector(
-  selectProjectJiraCfg,
-  (jiraCfg: JiraCfg): boolean => jiraCfg && jiraCfg.isEnabled
-);
-
-export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs && issueProviderCfgs.GITHUB);
-export const selectProjectGithubIsEnabled = createSelector(
-  selectProjectGithubCfg,
-  (gitCfg: GithubCfg): boolean => gitCfg && gitCfg.repo && gitCfg.repo.length > 2
-);
-
-export const selectProjectGitlabCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs && issueProviderCfgs.GITLAB);
-export const selectProjectGitlabIsEnabled = createSelector(
-  selectProjectGitlabCfg,
-  (gitlabCfg: GitlabCfg): boolean => gitlabCfg && gitlabCfg.project && gitlabCfg.project.length > 2
-);
 
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
-export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
-export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
 export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
 export const selectProjectBreakNr = createSelector(selectCurrentProject, (project) => project.breakNr);
-export const selectProjectBasicCfg = createSelector(selectCurrentProject, (project): ProjectBasicCfg => {
-  const {advancedCfg, id, breakTime, workStart, workEnd, breakNr, ...basic} = project;
-  return basic;
-});
-
-export const selectProjectLastWorkEnd = createSelector(
-  selectProjectWorkEnd,
-  (workEnd: WorkStartEnd): number => {
-    if (!workEnd) {
-      return;
-    }
-    const allDates = Object.keys(workEnd);
-    const lastDate = sortWorklogDates(allDates)[allDates.length - 1];
-    return workEnd[lastDate];
-  }
-);
 
 
 // DYNAMIC SELECTORS
@@ -125,19 +85,9 @@ export const selectJiraCfgByProjectId = createSelector(
   (p: Project): JiraCfg => p.issueIntegrationCfgs[JIRA_TYPE] as JiraCfg
 );
 
-export const selectIsJiraEnabledByProjectId = createSelector(
-  selectJiraCfgByProjectId,
-  (jiraCfg: JiraCfg): boolean => jiraCfg.isEnabled,
-);
-
 export const selectGithubCfgByProjectId = createSelector(
   selectProjectById,
   (p: Project): GithubCfg => p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg
-);
-
-export const selectIsGithubEnabledByProjectId = createSelector(
-  selectGithubCfgByProjectId,
-  (githubCfg: GithubCfg): boolean => githubCfg && githubCfg.repo && githubCfg.repo.length > 2,
 );
 
 export const selectGitlabCfgByProjectId = createSelector(
