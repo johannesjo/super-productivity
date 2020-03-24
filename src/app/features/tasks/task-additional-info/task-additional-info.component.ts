@@ -37,6 +37,11 @@ import {taskAdditionalInfoTaskChangeAnimation} from './task-additional-info.ani'
 import {noopAnimation} from '../../../ui/animations/noop.ani';
 import {TaskAdditionalInfoItemComponent} from './task-additional-info-item/task-additional-info-item.component';
 import {IssueData, IssueProviderKey} from '../../issue/issue.model';
+import {JIRA_TYPE} from '../../issue/issue.const';
+import {ProjectService} from '../../project/project.service';
+import {IS_ELECTRON} from '../../../app.constants';
+import {IPC} from '../../../../../electron/ipc-events.const';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 @Component({
   selector: 'task-additional-info',
@@ -170,17 +175,31 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   constructor(
+    public attachmentService: TaskAttachmentService,
+    public taskService: TaskService,
     private _resolver: ComponentFactoryResolver,
     private _issueService: IssueService,
-    public taskService: TaskService,
     private _reminderService: ReminderService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
-    private  _matDialog: MatDialog,
-    public attachmentService: TaskAttachmentService,
+    private _matDialog: MatDialog,
+    private _projectService: ProjectService,
+    private _electronService: ElectronService,
   ) {
     // NOTE: needs to be assigned here before any setter is called
     this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
 
+    // NOTE: this works as long as there is no other place to display issue attachments for jira
+    if (IS_ELECTRON) {
+      this._subs.add(this.issueIdAndTypeShared$.pipe(
+        filter(({id, type}) => type === JIRA_TYPE),
+        // not strictly reactive reactive but should work a 100% as issueIdAndType are triggered after task data
+        switchMap(() => this._projectService.getJiraCfgForProject$(this._taskData.projectId))
+      ).subscribe((jiraCfg) => {
+        if (jiraCfg.isEnabled) {
+          this._electronService.ipcRenderer.send(IPC.JIRA_SETUP_IMG_HEADERS, jiraCfg);
+        }
+      }));
+    }
     // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
     // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
     // this.issueData$.subscribe((v) => console.log('issueData$', v));

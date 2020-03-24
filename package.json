@@ -151,7 +151,6 @@
     "ng2-charts": "^2.3.0",
     "ng2-charts-schematics": "^0.1.7",
     "ng2-dragula": "^2.1.1",
-    "ngx-electron": "^2.1.1",
     "ngx-markdown": "^8.0.2",
     "node-sass": "^4.12.0",
     "protractor": "^5.4.2",

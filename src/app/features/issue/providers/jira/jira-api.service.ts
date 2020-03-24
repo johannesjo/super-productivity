@@ -82,14 +82,6 @@ export class JiraApiService {
     private _snackService: SnackService,
     private _bannerService: BannerService,
   ) {
-    // TODO move to task additional content
-    // cfg$.subscribe((cfg: JiraCfg) => {
-    //   cfg = cfg;
-    //   if (IS_ELECTRON && this._isMinimalSettings(cfg)) {
-    //     this._electronService.ipcRenderer.send(IPC.JIRA_SETUP_IMG_HEADERS, cfg);
-    //   }
-    // });
-
     // set up callback listener for electron
     if (this._electronService.isElectronApp) {
       this._electronService.ipcRenderer.on(IPC.JIRA_CB_EVENT, (ev, res) => {
