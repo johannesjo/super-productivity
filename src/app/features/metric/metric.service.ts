@@ -42,8 +42,8 @@ export class MetricService {
       return (activeType === WorkContextType.PROJECT)
 
         ? combineLatest([
-          this._projectService.breakNr$,
-          this._projectService.breakTime$,
+          this._projectService.getBreakNrForProject$(activeId),
+          this._projectService.getBreakTimeForProject$(activeId),
           this._worklogService.worklog$,
           this._worklogService.totalTimeSpent$,
           from(this._taskService.getAllTasksForCurrentProject())

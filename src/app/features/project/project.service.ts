@@ -8,14 +8,14 @@ import shortid from 'shortid';
 import {
   initialProjectState,
   ProjectState,
-  selectAdvancedProjectCfg,
+  selectAdvancedProjectCfgForProject,
   selectArchivedProjects,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
   selectIsRelatedDataLoadedForProject,
   selectJiraCfgByProjectId,
-  selectProjectBreakNr,
-  selectProjectBreakTime,
+  selectProjectBreakNrForProject,
+  selectProjectBreakTimeForProject,
   selectProjectById,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent
@@ -54,13 +54,7 @@ export class ProjectService {
     switchMap(id => this._store$.pipe(select(selectIsRelatedDataLoadedForProject, {id})))
   );
 
-  advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(
-    select(selectAdvancedProjectCfg),
-  );
-
-  breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
-  breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
-
+  advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(select(selectAdvancedProjectCfgForProject));
 
   // DYNAMIC
   // -------
@@ -78,6 +72,18 @@ export class ProjectService {
 
   getProjectsWithoutId$(projectId: string): Observable<Project[]> {
     return this._store$.pipe(select(selectUnarchivedProjectsWithoutCurrent, {currentId: projectId}));
+  }
+
+  getBreakNrForProject$(projectId: string): Observable<BreakNr> {
+    return this._store$.pipe(select(selectProjectBreakNrForProject, {id: projectId}));
+  }
+
+  getBreakTimeForProject$(projectId: string): Observable<BreakTime> {
+    return this._store$.pipe(select(selectProjectBreakTimeForProject, {id: projectId}));
+  }
+
+  getAdvancedCfgForProject$(projectId: string): Observable<WorkContextAdvancedCfg> {
+    return this._store$.pipe(select(selectAdvancedProjectCfgForProject, {id: projectId}));
   }
 
   getIssueProviderCfgForProject$(projectId: string, issueProviderKey: IssueProviderKey): Observable<IssueIntegrationCfg> {

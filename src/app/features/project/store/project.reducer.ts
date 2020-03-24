@@ -52,15 +52,6 @@ export const selectUnarchivedProjects = createSelector(selectAllProjects, (proje
 
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => p.isArchived));
 
-// TODO remove
-export const selectCurrentProject = createSelector(selectProjectFeatureState,
-  (state) => state.entities[0]
-);
-
-export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
-export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
-export const selectProjectBreakNr = createSelector(selectCurrentProject, (project) => project.breakNr);
-
 
 // DYNAMIC SELECTORS
 // -----------------
@@ -96,6 +87,11 @@ export const selectIsRelatedDataLoadedForProject = createSelector(
   selectProjectFeatureState,
   (state, props: { id: string }): boolean => (props.id === state.projectIdForLoadedRelatedData)
 );
+
+
+export const selectAdvancedProjectCfgForProject = createSelector(selectProjectById, (project) => project.advancedCfg);
+export const selectProjectBreakTimeForProject = createSelector(selectProjectById, (project) => project.breakTime);
+export const selectProjectBreakNrForProject = createSelector(selectProjectById, (project) => project.breakNr);
 
 
 // DEFAULT
