@@ -72,7 +72,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="task.issueId"
-    [expanded]="(issueData$|async) !== false"
+    [expanded]="!!(issueData$|async)"
     [type]="'panel'">
     <ng-container panel-header>
       <issue-header [task]="task"></issue-header>

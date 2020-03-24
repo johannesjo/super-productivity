@@ -39,7 +39,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   constructor(
     public readonly googleApiService: GoogleApiService,
-    private readonly googleDriveSyncService: GoogleDriveSyncService,
+    public readonly googleDriveSyncService: GoogleDriveSyncService,
     private readonly _configService: GlobalConfigService,
     private readonly _snackService: SnackService,
     private readonly _cd: ChangeDetectorRef,
