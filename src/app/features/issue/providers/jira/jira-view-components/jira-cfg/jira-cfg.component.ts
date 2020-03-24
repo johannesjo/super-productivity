@@ -16,6 +16,8 @@ import {T} from '../../../../../../t.const';
 import {HelperClasses} from '../../../../../../app.constants';
 import {ProjectService} from '../../../../../project/project.service';
 import {WorkContextService} from '../../../../../work-context/work-context.service';
+import {WorkContextType} from '../../../../../work-context/work-context.model';
+import {JIRA_TYPE} from '../../../../issue.const';
 
 @Component({
   selector: 'jira-cfg',
@@ -107,7 +109,11 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   toggleEnabled(isEnabled) {
-    this._projectService.updateIssueProviderConfig(this._projectService.currentId, 'JIRA', {
+    if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
+      throw new Error('Should only be called when in project context');
+    }
+    const projectId = this._workContextService.activeWorkContextId;
+    this._projectService.updateIssueProviderConfig(projectId, JIRA_TYPE, {
       isEnabled,
     });
   }

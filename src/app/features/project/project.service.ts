@@ -64,19 +64,14 @@ export class ProjectService {
     select(selectProjectGitlabCfg),
     shareReplay(1),
   );
-  isGitlabEnabled$: Observable<boolean> = this._store$.pipe(
-    select(selectProjectGitlabIsEnabled),
-  );
-
 
   // TODO remove completely
   currentId$: Observable<string> = this._workContextService.activeWorkContextTypeAndId$.pipe(
-    map(({activeId, activeType}) => activeType === WorkContextType.PROJECT
+    map(({activeId, activeType}) => (activeType === WorkContextType.PROJECT)
       ? activeId
       : null
     )
   );
-  currentId: string;
 
   breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
   breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
@@ -117,7 +112,6 @@ export class ProjectService {
     private readonly _store$: Store<any>,
     private readonly _actions$: Actions,
   ) {
-    this.currentId$.subscribe((id) => this.currentId = id);
   }
 
   async load() {
