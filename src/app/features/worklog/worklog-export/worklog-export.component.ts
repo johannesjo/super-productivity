@@ -9,7 +9,6 @@ import {
   Output
 } from '@angular/core';
 import {TaskCopy} from '../../tasks/task.model';
-import {ProjectService} from '../../project/project.service';
 import {combineLatest, Subscription} from 'rxjs';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment';
@@ -102,7 +101,6 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor(
-    private _projectService: ProjectService,
     private _snackService: SnackService,
     private _worklogService: WorklogService,
     private _workContextService: WorkContextService,
@@ -121,7 +119,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       ;
     }
 
-    this._subs.add(this._projectService.advancedCfg$.pipe(
+    this._subs.add(this._workContextService.advancedCfg$.pipe(
       distinctUntilChanged(distinctUntilChangedObject)
     ).subscribe(advancedCfg => {
       if (advancedCfg.worklogExportSettings) {

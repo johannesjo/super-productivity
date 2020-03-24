@@ -8,7 +8,6 @@ import shortid from 'shortid';
 import {
   initialProjectState,
   ProjectState,
-  selectAdvancedProjectCfgForProject,
   selectArchivedProjects,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
@@ -29,7 +28,7 @@ import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
 import {T} from '../../t.const';
-import {BreakNr, BreakTime, WorkContextAdvancedCfg, WorkContextType} from '../work-context/work-context.model';
+import {BreakNr, BreakTime, WorkContextType} from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
 import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../issue/issue.const';
 import {GitlabCfg} from '../issue/providers/gitlab/gitlab';
@@ -54,7 +53,6 @@ export class ProjectService {
     switchMap(id => this._store$.pipe(select(selectIsRelatedDataLoadedForProject, {id})))
   );
 
-  advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(select(selectAdvancedProjectCfgForProject));
 
   // DYNAMIC
   // -------
@@ -82,9 +80,6 @@ export class ProjectService {
     return this._store$.pipe(select(selectProjectBreakTimeForProject, {id: projectId}));
   }
 
-  getAdvancedCfgForProject$(projectId: string): Observable<WorkContextAdvancedCfg> {
-    return this._store$.pipe(select(selectAdvancedProjectCfgForProject, {id: projectId}));
-  }
 
   getIssueProviderCfgForProject$(projectId: string, issueProviderKey: IssueProviderKey): Observable<IssueIntegrationCfg> {
     if (issueProviderKey === GITHUB_TYPE) {

@@ -89,7 +89,6 @@ export const selectIsRelatedDataLoadedForProject = createSelector(
 );
 
 
-export const selectAdvancedProjectCfgForProject = createSelector(selectProjectById, (project) => project.advancedCfg);
 export const selectProjectBreakTimeForProject = createSelector(selectProjectById, (project) => project.breakTime);
 export const selectProjectBreakNrForProject = createSelector(selectProjectById, (project) => project.breakNr);
 

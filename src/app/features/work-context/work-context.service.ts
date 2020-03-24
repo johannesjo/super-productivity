@@ -3,6 +3,7 @@ import {select, Store} from '@ngrx/store';
 import {combineLatest, EMPTY, Observable, of, timer} from 'rxjs';
 import {
   WorkContext,
+  WorkContextAdvancedCfg,
   WorkContextAdvancedCfgKey,
   WorkContextState,
   WorkContextThemeCfg,
@@ -10,11 +11,7 @@ import {
 } from './work-context.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {setActiveWorkContext} from './store/work-context.actions';
-import {
-  selectActiveContextId,
-  selectActiveContextType,
-  selectActiveContextTypeAndId
-} from './store/work-context.reducer';
+import {selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
 import {NavigationEnd, Router, RouterEvent} from '@angular/router';
 import {
   concatMap,
@@ -26,7 +23,6 @@ import {
   startWith,
   switchMap,
   take,
-  tap,
   withLatestFrom
 } from 'rxjs/operators';
 import {MY_DAY_TAG} from '../tag/tag.const';
@@ -56,7 +52,7 @@ export class WorkContextService {
   // CONTEXT LEVEL
   // -------------
   activeWorkContextId$: Observable<string> = this._store$.pipe(select(selectActiveContextId));
-  activeWorkContextType$: Observable<WorkContextType> = this._store$.pipe(select(selectActiveContextType));
+  // activeWorkContextType$: Observable<WorkContextType> = this._store$.pipe(select(selectActiveContextType));
 
 
   activeWorkContextTypeAndId$: Observable<{
@@ -71,7 +67,6 @@ export class WorkContextService {
     map(({activeType}) => activeType === WorkContextType.PROJECT)
   );
   activeWorkContextIdIfProject$: Observable<string> = this.activeWorkContextTypeAndId$.pipe(
-    tap(() => console.log('TIRGGER')),
     map(({activeType, activeId}) => {
       if (activeType !== WorkContextType.PROJECT) {
         throw Error('Not in project context');
@@ -135,6 +130,10 @@ export class WorkContextService {
 
   currentTheme$: Observable<WorkContextThemeCfg> = this.activeWorkContext$.pipe(
     map(awc => awc.theme)
+  );
+
+  advancedCfg$: Observable<WorkContextAdvancedCfg> = this.activeWorkContext$.pipe(
+    map(awc => awc.advancedCfg)
   );
 
   onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
