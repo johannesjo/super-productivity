@@ -53,11 +53,6 @@ export const selectUnarchivedProjects = createSelector(selectAllProjects, (proje
 
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => p.isArchived));
 
-export const selectIsRelatedDataLoadedForCurrentProject = createSelector(
-  selectProjectFeatureState,
-  (state): boolean => state.currentId === state.projectIdForLoadedRelatedData
-);
-
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
 );
@@ -96,6 +91,12 @@ export const selectUnarchivedProjectsWithoutCurrent = createSelector(
     return ids.filter(id => id !== props.currentId).map(id => s.entities[id]).filter(p => !p.isArchived && p.id);
   },
 );
+
+export const selectIsRelatedDataLoadedForProject = createSelector(
+  selectProjectFeatureState,
+  (state, props: { id: string }): boolean => (props.id === state.projectIdForLoadedRelatedData)
+);
+
 
 // DEFAULT
 // -------

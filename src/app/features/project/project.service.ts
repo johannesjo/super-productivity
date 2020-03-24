@@ -11,8 +11,7 @@ import {
   selectAdvancedProjectCfg,
   selectArchivedProjects,
   selectGithubCfgByProjectId,
-  selectGitlabCfgByProjectId,
-  selectIsRelatedDataLoadedForCurrentProject,
+  selectGitlabCfgByProjectId, selectIsRelatedDataLoadedForProject,
   selectJiraCfgByProjectId,
   selectProjectBreakNr,
   selectProjectBreakTime,
@@ -38,8 +37,6 @@ import {GitlabCfg} from '../issue/providers/gitlab/gitlab';
   providedIn: 'root',
 })
 export class ProjectService {
-  isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._store$.pipe(select(selectIsRelatedDataLoadedForCurrentProject));
-
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
 
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
@@ -50,6 +47,10 @@ export class ProjectService {
       : of(null)
     ),
     shareReplay(1),
+  );
+
+  isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._workContextService.activeWorkContextIdIfProject$.pipe(
+    switchMap(id => this._store$.pipe(select(selectIsRelatedDataLoadedForProject, {id})))
   );
 
   advancedCfg$: Observable<WorkContextAdvancedCfg> = this._store$.pipe(
