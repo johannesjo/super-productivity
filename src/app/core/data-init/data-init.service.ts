@@ -26,12 +26,12 @@ export class DataInitService {
 
       if (isNeedsMigration) {
         const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
-        // const r = confirm(msg);
-        // if (r === true) {
-        return this._migrationService.migrate$(projectState);
-        // } else {
-        //   alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
-        // }
+        const r = confirm(msg);
+        if (r === true) {
+          return this._migrationService.migrate$(projectState);
+        } else {
+          alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
+        }
       }
 
       return isNeedsMigration

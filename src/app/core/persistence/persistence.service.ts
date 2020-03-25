@@ -313,7 +313,7 @@ export class PersistenceService {
 
   async _loadAppBaseData(): Promise<AppBaseData> {
     const promises = this._baseModels.map(async (modelCfg) => {
-      const modelState = await modelCfg.load();
+      const modelState = await modelCfg.loadState();
       return {
         [modelCfg.appDataKey]: modelState,
       };

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {concat, forkJoin, from, Observable} from 'rxjs';
-import {concatMap, filter, map, take, tap, toArray} from 'rxjs/operators';
+import {concatMap, filter, map, mapTo, take, tap, toArray} from 'rxjs/operators';
 import {
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
@@ -15,6 +15,8 @@ import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachme
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {initialTaskRepeatCfgState} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import {MODEL_VERSION_KEY} from '../../app.constants';
+import {UpdateProject} from '../../features/project/store/project.actions';
 
 interface TaskToProject {
   projectId: string;
@@ -41,40 +43,40 @@ export class MigrationService {
     // return forkJoin([
     return concat(
       this._migrateTaskListsFromTaskToProjectState$(ids).pipe(
-        // concatMap((taskListToPs: TaskToProject []) => forkJoin(
-        //   taskListToPs
-        //     .map(({backlog, today, projectId}) => this._persistenceService.project.execAction(new UpdateProject({
-        //       project: {
-        //         id: projectId,
-        //         changes: {
-        //           backlogTaskIds: backlog || [],
-        //           taskIds: today || [],
-        //         }
-        //       }
-        //     })))
-        // )),
+        concatMap((taskListToPs: TaskToProject []) => forkJoin(
+          taskListToPs
+            .map(({backlog, today, projectId}) => this._persistenceService.project.execAction(new UpdateProject({
+              project: {
+                id: projectId,
+                changes: {
+                  backlogTaskIds: backlog || [],
+                  taskIds: today || [],
+                }
+              }
+            })))
+        )),
       ),
       this._migrateTaskFromProjectToSingle$(ids).pipe(
         concatMap((taskState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskState)),
-        // concatMap((migratedTaskState: TaskState) => this._persistenceService.task.saveState(migratedTaskState)),
+        concatMap((migratedTaskState: TaskState) => this._persistenceService.task.saveState(migratedTaskState)),
       ),
       this._migrateTaskArchiveFromProjectToSingle$(ids).pipe(
         concatMap((taskArchiveState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskArchiveState)),
-        // concatMap((migratedTaskArchiveState: TaskState) => this._persistenceService.taskArchive.saveState(migratedTaskArchiveState)),
+        concatMap((migratedTaskArchiveState: TaskState) => this._persistenceService.taskArchive.saveState(migratedTaskArchiveState)),
       ),
       this._migrateTaskRepeatFromProjectIntoSingle(ids).pipe(
-        // concatMap((migratedTaskRepeatState: TaskState) => this._persistenceService.taskRepeat.saveState(migratedTaskRepeatState)),
+        concatMap((migratedTaskRepeatState: TaskRepeatCfgState) => this._persistenceService.taskRepeatCfg.saveState(migratedTaskRepeatState)),
       ),
     ).pipe(
       toArray(),
-      // concatMap(() => this._persistenceService.cleanDatabase()),
-      // concatMap(() => {
-      //   const updatedState = {
-      //     ...projectState,
-      //     [MODEL_VERSION_KEY]: UPDATED_VERSION,
-      //   };
-      //   return from(this._persistenceService.project.saveState(updatedState)).pipe(mapTo(updatedState));
-      // }),
+      concatMap(() => this._persistenceService.cleanDatabase()),
+      concatMap(() => {
+        const updatedState = {
+          ...projectState,
+          [MODEL_VERSION_KEY]: UPDATED_VERSION,
+        };
+        return from(this._persistenceService.project.saveState(updatedState)).pipe(mapTo(updatedState));
+      }),
       concatMap(() => this._persistenceService.project.loadState()),
     );
   }
