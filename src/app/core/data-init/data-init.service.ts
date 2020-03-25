@@ -13,6 +13,7 @@ import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {TranslateService} from '@ngx-translate/core';
 import {T} from '../../t.const';
+import {MigrationService} from '../migration/migration.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,12 +25,12 @@ export class DataInitService {
       const isNeedsMigration = (projectState && (!projectState.__modelVersion || projectState.__modelVersion <= 3));
       if (isNeedsMigration) {
         const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
-        const r = confirm(msg);
-        if (r === true) {
-
-        } else {
-          alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
-        }
+        // const r = confirm(msg);
+        // if (r === true) {
+        return this._migrationService.migrate$(projectState);
+        // } else {
+        //   alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
+        // }
       }
 
       return isNeedsMigration
@@ -62,6 +63,7 @@ export class DataInitService {
 
   constructor(
     private _persistenceService: PersistenceService,
+    private _migrationService: MigrationService,
     private _projectService: ProjectService,
     private _tagService: TagService,
     private _taskRepeatCfgService: TaskRepeatCfgService,

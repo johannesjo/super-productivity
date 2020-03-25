@@ -9,20 +9,22 @@ export const LS_REMINDER = LS_PREFIX + 'REMINDER';
 export const LS_CONTEXT = LS_PREFIX + 'CONTEXT';
 export const LS_PROJECT_ARCHIVE = LS_PREFIX + 'ARCHIVE';
 
+// Former project models
+export const LS_TASK_ARCHIVE = 'TASKS_ARCHIVE';
+export const LS_TASK_STATE = 'TASKS_STATE';
+export const LS_TASK_REPEAT_CFG_STATE = 'TASK_REPEAT_CFG_STATE';
+export const LS_TASK_ATTACHMENT_STATE = 'TASK_ATTACHMENT_STATE';
 
 export const LS_PROJECT_META_LIST = LS_PREFIX + 'PROJECT_META_LIST';
 
-export const LS_TASK_ARCHIVE: ProjectDataLsKey = 'TASKS_ARCHIVE';
-export const LS_TASK_STATE: ProjectDataLsKey = 'TASKS_STATE';
-export const LS_TASK_REPEAT_CFG_STATE: ProjectDataLsKey = 'TASK_REPEAT_CFG_STATE';
-export const LS_TASK_ATTACHMENT_STATE: ProjectDataLsKey = 'TASK_ATTACHMENT_STATE';
 export const LS_TAG_STATE: ProjectDataLsKey = 'TAG_STATE';
-export const LS_ISSUE_STATE: ProjectDataLsKey = 'ISSUE_STATE';
 export const LS_NOTE_STATE: ProjectDataLsKey = 'NOTE_STATE';
 export const LS_BOOKMARK_STATE: ProjectDataLsKey = 'BOOKMARK_STATE';
 export const LS_METRIC_STATE: ProjectDataLsKey = 'METRIC_STATE';
 export const LS_IMPROVEMENT_STATE: ProjectDataLsKey = 'IMPROVEMENT_STATE';
 export const LS_OBSTRUCTION_STATE: ProjectDataLsKey = 'OBSTRUCTION_STATE';
+// TODO remove later
+export const LS_ISSUE_STATE: ProjectDataLsKey = 'ISSUE_STATE';
 
 // REAL LS
 export const LS_GITHUB_ISSUE_CACHE_PREFIX = LS_PREFIX + 'GITHUB_ISSUE_CACHE_';

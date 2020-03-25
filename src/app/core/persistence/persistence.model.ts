@@ -3,11 +3,11 @@ import {Action} from '@ngrx/store';
 
 export type ProjectDataLsKey
   = 'CFG'
-  | 'TASKS_STATE'
-  | 'TASK_REPEAT_CFG_STATE'
-  | 'TASK_ATTACHMENT_STATE'
+  // | 'TASKS_STATE'
+  // | 'TASK_REPEAT_CFG_STATE'
+  // | 'TASK_ATTACHMENT_STATE'
+  // | 'TASKS_ARCHIVE'
   | 'TAG_STATE'
-  | 'TASKS_ARCHIVE'
   | 'ISSUE_STATE'
   | 'NOTE_STATE'
   | 'BOOKMARK_STATE'

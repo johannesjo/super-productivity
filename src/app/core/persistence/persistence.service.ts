@@ -135,6 +135,10 @@ export class PersistenceService {
   }
 
 
+  async loadLegacyProjectModel(lsKey: string, projectId): Promise<any> {
+    return this._loadFromDb(this._makeProjectKey(projectId, lsKey));
+  }
+
   // ISSUES
   async removeIssuesForProject(projectId, issueType: IssueProviderKey): Promise<void> {
     return this._removeFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
