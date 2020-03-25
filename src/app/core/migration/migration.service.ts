@@ -14,6 +14,7 @@ import {EntityState} from '@ngrx/entity';
 import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import {initialTaskRepeatCfgState} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -88,7 +89,7 @@ export class MigrationService {
     )).pipe(
       tap((args) => console.log('TASK_REPEAT_CFG_BEFORE', args)),
       map((taskRepeatStates: TaskRepeatCfgState[]) =>
-        this._mergeEntities(taskRepeatStates, {ids: [], entities: {}}) as TaskRepeatCfgState
+        this._mergeEntities(taskRepeatStates, initialTaskRepeatCfgState) as TaskRepeatCfgState
       ),
       tap((args) => console.log('TASK_REPEAT_CFG_AFTER', args)),
     );
