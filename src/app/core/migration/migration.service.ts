@@ -1,13 +1,14 @@
 import {Injectable} from '@angular/core';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {forkJoin, Observable} from 'rxjs';
-import {concatMap, map, take, tap} from 'rxjs/operators';
+import {forkJoin, from, Observable} from 'rxjs';
+import {concatMap, map, mapTo, take, tap} from 'rxjs/operators';
 import {LS_TASK_ARCHIVE, LS_TASK_ATTACHMENT_STATE, LS_TASK_STATE} from '../persistence/ls-keys.const';
 import {TaskArchive, TaskState} from 'src/app/features/tasks/task.model';
 import {EntityState} from '@ngrx/entity';
 import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
+import {MODEL_VERSION_KEY} from '../../app.constants';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,8 @@ export class MigrationService {
 
   migrate$(projectState: ProjectState): Observable<ProjectState> {
     const ids = projectState.ids as string[];
-    console.log(projectState);
+    console.log('projectState', projectState);
+    const UPDATED_VERSION = 4;
 
     return forkJoin([
       this._migrateTaskFromProjectToSingle$(ids).pipe(
@@ -34,7 +36,14 @@ export class MigrationService {
       ),
     ]).pipe(
       // concatMap(() => this._persistenceService.cleanDatabase()),
-      concatMap(() => this._persistenceService.project.loadState())
+      // concatMap(() => {
+      //   const updatedState = {
+      //     ...projectState,
+      //     [MODEL_VERSION_KEY]: UPDATED_VERSION,
+      //   };
+      //   return from(this._persistenceService.project.saveState(updatedState)).pipe(mapTo(updatedState));
+      // }),
+      concatMap(() => this._persistenceService.project.loadState()),
     );
   }
 

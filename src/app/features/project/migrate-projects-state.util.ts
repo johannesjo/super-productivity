@@ -14,7 +14,7 @@ import {IssueProviderKey} from '../issue/issue.model';
 import * as localForage from 'localforage';
 import {WORK_CONTEXT_DEFAULT_THEME} from '../work-context/work-context.const';
 
-const MODEL_VERSION = 3;
+const MODEL_VERSION = 4;
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   if (!isMigrateModel(projectState, MODEL_VERSION)) {
