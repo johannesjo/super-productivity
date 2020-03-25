@@ -9,6 +9,7 @@ import {ImexMetaService} from '../imex-meta/imex-meta.service';
 import {T} from '../../t.const';
 import {TaskService} from '../../features/tasks/task.service';
 import {MigrationService} from '../../core/migration/migration.service';
+import {DataInitService} from '../../core/data-init/data-init.service';
 
 // TODO some of this can be done in a background script
 
@@ -26,6 +27,7 @@ export class SyncService {
     private _reminderService: ReminderService,
     private _imexMetaService: ImexMetaService,
     private _migrationService: MigrationService,
+    private _dataInitService: DataInitService,
   ) {
   }
 
@@ -56,7 +58,7 @@ export class SyncService {
 
     if (this._checkData(data)) {
       try {
-        const migratedData = await this._migrationService.migrateIfNecessary$(data.project).toPromise();
+        const migratedData = this._migrationService.migrateIfNecessary(data);
         // save data to database first then load to store from there
         await this._persistenceService.importComplete(migratedData);
         await this._loadAllFromDatabaseToStore();
@@ -94,10 +96,7 @@ export class SyncService {
   private async _loadAllFromDatabaseToStore(): Promise<any> {
     return await Promise.all([
       // reload view model from ls
-      this._configService.load(true),
-      // NOTE: loading the project state should deal with reloading the for project states via effect
-      this._projectService.load(),
-      this._taskService.load(),
+      this._dataInitService.reInit$(null, true).toPromise(),
       this._reminderService.reloadFromLs(),
     ]);
   }

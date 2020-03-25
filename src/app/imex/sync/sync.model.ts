@@ -23,6 +23,7 @@ export interface AppBaseData {
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfigState;
   reminders?: Reminder[];
+
   task: TaskState;
   tag: TagState;
   taskArchive: TaskArchive;
@@ -30,7 +31,7 @@ export interface AppBaseData {
   taskRepeatCfg: TaskRepeatCfgState;
 
   /** @deprecated */
-  taskAttachment: TaskAttachmentState;
+  taskAttachment?: TaskAttachmentState;
 }
 
 // NOTE: [key:string] always refers to projectId

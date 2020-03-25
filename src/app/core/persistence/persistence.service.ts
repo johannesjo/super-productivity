@@ -278,10 +278,10 @@ export class PersistenceService {
     console.log('IMPORT--->', data);
     this._isBlockSaving = true;
 
-    const forBase = Promise.all(this._baseModels.map(async (modelCfg) => {
-      return await modelCfg.save(data[modelCfg.appDataKey], true);
+    const forBase = Promise.all(this._baseModels.map(async (modelCfg: PersistenceBaseEntityModel<any, any>) => {
+      return await modelCfg.saveState(data[modelCfg.appDataKey], true);
     }));
-    const forProject = Promise.all(this._projectModels.map(async (modelCfg) => {
+    const forProject = Promise.all(this._projectModels.map(async (modelCfg: PersistenceForProjectModel<any, any>) => {
       return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg.save, true);
     }));
 
