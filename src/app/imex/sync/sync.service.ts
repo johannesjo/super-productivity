@@ -8,6 +8,7 @@ import {ReminderService} from '../../features/reminder/reminder.service';
 import {ImexMetaService} from '../imex-meta/imex-meta.service';
 import {T} from '../../t.const';
 import {TaskService} from '../../features/tasks/task.service';
+import {MigrationService} from '../../core/migration/migration.service';
 
 // TODO some of this can be done in a background script
 
@@ -24,6 +25,7 @@ export class SyncService {
     private _configService: GlobalConfigService,
     private _reminderService: ReminderService,
     private _imexMetaService: ImexMetaService,
+    private _migrationService: MigrationService,
   ) {
   }
 
@@ -54,8 +56,9 @@ export class SyncService {
 
     if (this._checkData(data)) {
       try {
+        const migratedData = await this._migrationService.migrateIfNecessary$(data.project).toPromise();
         // save data to database first then load to store from there
-        await this._persistenceService.importComplete(data);
+        await this._persistenceService.importComplete(migratedData);
         await this._loadAllFromDatabaseToStore();
         this._imexMetaService.setInProgress(false);
         this._snackService.open({type: 'SUCCESS', msg: T.S.SYNC.SUCCESS});

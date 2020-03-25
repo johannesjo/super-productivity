@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {concat, forkJoin, from, Observable} from 'rxjs';
+import {concat, EMPTY, forkJoin, from, Observable, of} from 'rxjs';
 import {concatMap, filter, map, mapTo, take, tap, toArray} from 'rxjs/operators';
 import {
   LS_TASK_ARCHIVE,
@@ -17,6 +17,11 @@ import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg
 import {initialTaskRepeatCfgState} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import {MODEL_VERSION_KEY} from '../../app.constants';
 import {UpdateProject} from '../../features/project/store/project.actions';
+import {T} from '../../t.const';
+import {TranslateService} from '@ngx-translate/core';
+import {LegacyAppDataComplete} from './legacy-models';
+import {LegacyPersistenceService} from './legacy-persistence.sevice';
+import {AppDataComplete} from '../../imex/sync/sync.model';
 
 interface TaskToProject {
   projectId: string;
@@ -29,14 +34,43 @@ interface TaskToProject {
 })
 export class MigrationService {
 
+
   constructor(
     private _persistenceService: PersistenceService,
+    private _legacyPersistenceService: LegacyPersistenceService,
+    private _translateService: TranslateService,
   ) {
   }
 
-  migrate$(projectState: ProjectState): Observable<ProjectState> {
-    const ids = projectState.ids as string[];
-    console.log('projectState', projectState);
+  migrateIfNecessary$(projectState: ProjectState, legacyAppDataComplete?: LegacyAppDataComplete): Observable<ProjectState | never> {
+    const isNeedsMigration = (projectState && (!(projectState as any).__modelVersion || (projectState as any).__modelVersion <= 3));
+
+    if (isNeedsMigration) {
+      const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
+      const r = confirm(msg);
+      if (r === true) {
+        return legacyAppDataComplete
+          ? this._migrate$(legacyAppDataComplete).pipe(
+            concatMap(() => this._persistenceService.project.loadState()),
+          )
+          : from(this._legacyPersistenceService.loadCompleteLegacy()).pipe(
+            concatMap(() => this._migrate$(projectState)),
+            concatMap(() => this._persistenceService.project.loadState()),
+          );
+      } else {
+        alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
+      }
+    }
+
+    return isNeedsMigration
+      ? EMPTY
+      : of(projectState);
+  }
+
+
+  private _migrate$(legacyAppDataComplete: LegacyAppDataComplete): Observable<AppDataComplete> {
+    const ids = legacyAppDataComplete.project.ids as string[];
+    console.log('projectState', legacyAppDataComplete);
     console.log('projectIds', ids);
     const UPDATED_VERSION = 4;
 
@@ -58,11 +92,11 @@ export class MigrationService {
       ),
       this._migrateTaskFromProjectToSingle$(ids).pipe(
         concatMap((taskState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskState)),
-        concatMap((migratedTaskState: TaskState) => this._persistenceService.task.saveState(migratedTaskState)),
+        // concatMap((migratedTaskState: TaskState) => this._persistenceService.task.saveState(migratedTaskState)),
       ),
       this._migrateTaskArchiveFromProjectToSingle$(ids).pipe(
         concatMap((taskArchiveState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskArchiveState)),
-        concatMap((migratedTaskArchiveState: TaskState) => this._persistenceService.taskArchive.saveState(migratedTaskArchiveState)),
+        // concatMap((migratedTaskArchiveState: TaskState) => this._persistenceService.taskArchive.saveState(migratedTaskArchiveState)),
       ),
       this._migrateTaskRepeatFromProjectIntoSingle(ids).pipe(
         concatMap((migratedTaskRepeatState: TaskRepeatCfgState) => this._persistenceService.taskRepeatCfg.saveState(migratedTaskRepeatState)),
@@ -77,7 +111,6 @@ export class MigrationService {
         };
         return from(this._persistenceService.project.saveState(updatedState)).pipe(mapTo(updatedState));
       }),
-      concatMap(() => this._persistenceService.project.loadState()),
     );
   }
 
