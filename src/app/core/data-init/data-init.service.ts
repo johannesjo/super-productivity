@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {combineLatest, forkJoin, Observable, of} from 'rxjs';
-import {filter, shareReplay, switchMap, take} from 'rxjs/operators';
+import {EMPTY, forkJoin, from, Observable, of} from 'rxjs';
+import {concatMap, filter, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 import {ProjectService} from '../../features/project/project.service';
 import {TagService} from '../../features/tag/tag.service';
 import {TaskRepeatCfgService} from '../../features/task-repeat-cfg/task-repeat-cfg.service';
@@ -9,22 +9,46 @@ import {GlobalConfigService} from '../../features/config/global-config.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 import {Store} from '@ngrx/store';
 import {allDataLoaded} from './data-init.actions';
+import {PersistenceService} from '../persistence/persistence.service';
+import {ProjectState} from '../../features/project/store/project.reducer';
+import {TranslateService} from '@ngx-translate/core';
+import {T} from '../../t.const';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataInitService {
-  isAllDataLoadedInitially$: Observable<boolean> = combineLatest([
-    // LOAD GLOBAL MODELS
-    forkJoin([
-      this._taskService.load(),
-      this._taskRepeatCfgService.load(),
-      this._configService.load(),
-      this._tagService.load(),
-      this._projectService.load(),
-      this._workContextService.load(),
-    ])
-  ]).pipe(
+  private _checkMigration$: Observable<ProjectState | never> = from(this._persistenceService.project.loadState()).pipe(
+    tap(console.log),
+    concatMap((projectState: ProjectState | any) => {
+      const isNeedsMigration = (projectState && (!projectState.__modelVersion || projectState.__modelVersion <= 3));
+      if (isNeedsMigration) {
+        const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
+        const r = confirm(msg);
+        if (r === true) {
+
+        } else {
+          alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
+        }
+      }
+
+      return isNeedsMigration
+        ? EMPTY
+        : of(projectState);
+    })
+  );
+
+  isAllDataLoadedInitially$: Observable<boolean> = this._checkMigration$.pipe(
+    concatMap((projectState: ProjectState) => forkJoin([
+        // LOAD GLOBAL MODELS
+        this._configService.load(),
+        this._projectService.load(projectState),
+        this._tagService.load(),
+        this._workContextService.load(),
+        this._taskService.load(),
+        this._taskRepeatCfgService.load(),
+      ]),
+    ),
     switchMap(() => this._workContextService.isActiveWorkContextProject$),
     switchMap(isProject => isProject
       ? this._projectService.isRelatedDataLoadedForCurrentProject$
@@ -37,12 +61,14 @@ export class DataInitService {
   );
 
   constructor(
+    private _persistenceService: PersistenceService,
     private _projectService: ProjectService,
     private _tagService: TagService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _taskService: TaskService,
     private _configService: GlobalConfigService,
     private _workContextService: WorkContextService,
+    private _translateService: TranslateService,
     private _store$: Store<any>,
   ) {
     // TODO better construction than this
