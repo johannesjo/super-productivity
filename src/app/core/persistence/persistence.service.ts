@@ -57,6 +57,7 @@ import {migrateGlobalConfigState} from '../../features/config/migrate-global-con
 import {WorkContextState} from '../../features/work-context/work-context.model';
 import {taskReducer} from '../../features/tasks/store/task.reducer';
 import {tagReducer} from '../../features/tag/store/tag.reducer';
+import {migrateTaskRepeatCfgState} from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 
 
 @Injectable({
@@ -102,6 +103,7 @@ export class PersistenceService {
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
     taskRepeatCfgReducer,
+    migrateTaskRepeatCfgState,
   );
 
 
