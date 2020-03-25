@@ -3,8 +3,8 @@ import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {forkJoin, Observable} from 'rxjs';
 import {concatMap, map, take, tap} from 'rxjs/operators';
-import {LS_TASK_ATTACHMENT_STATE, LS_TASK_STATE} from '../persistence/ls-keys.const';
-import {TaskState} from 'src/app/features/tasks/task.model';
+import {LS_TASK_ARCHIVE, LS_TASK_ATTACHMENT_STATE, LS_TASK_STATE} from '../persistence/ls-keys.const';
+import {TaskArchive, TaskState} from 'src/app/features/tasks/task.model';
 import {EntityState} from '@ngrx/entity';
 import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
@@ -28,6 +28,10 @@ export class MigrationService {
         concatMap((taskState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskState)),
         // concatMap((migratedTaskState: TaskState) => this._persistenceService.task.saveState(migratedTaskState)),
       ),
+      this._migrateTaskArchiveFromProjectToSingle$(ids).pipe(
+        concatMap((taskArchiveState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskArchiveState)),
+        // concatMap((migratedTaskArchiveState: TaskState) => this._persistenceService.taskArchive.saveState(migratedTaskArchiveState)),
+      ),
     ]).pipe(
       // concatMap(() => this._persistenceService.cleanDatabase()),
       concatMap(() => this._persistenceService.project.loadState())
@@ -41,24 +45,29 @@ export class MigrationService {
       id => this._persistenceService.loadLegacyProjectModel(LS_TASK_STATE, id)
     )).pipe(
       tap((args) => console.log('TASK_BEFORE', args)),
-      map((taskStates: TaskState[]) => taskStates.reduce(
-        (acc, s) => {
-          if (!s || !s.ids) {
-            return acc;
-          }
-          return {
-            ...acc,
-            ids: [...acc.ids, ...s.ids],
-            entities: {...acc.entities, ...s.entities}
-          };
-        }, initialTaskState)
+      map((taskStates: TaskArchive[]) =>
+        this._mergeEntities(taskStates, initialTaskState) as TaskState
       ),
       tap((args) => console.log('TASK_AFTER', args)),
     );
   }
 
-  private _migrateTaskAttachmentsToTaskStates$(projectIds: string[], taskState: TaskState): Observable<any> {
-    // LS_TASK_ATTACHMENT_STATE
+
+  private _migrateTaskArchiveFromProjectToSingle$(projectIds: string[]): Observable<TaskArchive> {
+    console.log(projectIds);
+    return forkJoin(...projectIds.map(
+      id => this._persistenceService.loadLegacyProjectModel(LS_TASK_ARCHIVE, id)
+    )).pipe(
+      tap((args) => console.log('TASK_ARCHIVE_BEFORE', args)),
+      map((taskArchiveStates: TaskArchive[]) =>
+        this._mergeEntities(taskArchiveStates, {ids: [], entities: {}}) as TaskArchive
+      ),
+      tap((args) => console.log('TASK_ARCHIVE_AFTER', args)),
+    );
+  }
+
+
+  private _migrateTaskAttachmentsToTaskStates$(projectIds: string[], taskState: TaskState | TaskArchive): Observable<TaskState | TaskArchive> {
     const allAttachments$ = forkJoin(...projectIds.map(
       id => this._persistenceService.loadLegacyProjectModel(LS_TASK_ATTACHMENT_STATE, id)
     )).pipe(
@@ -84,7 +93,7 @@ export class MigrationService {
     return allAttachments$.pipe(
       take(1),
       map((allAttachments) => {
-        return taskState.ids.reduce((acc, id) => {
+        return (taskState.ids as string[]).reduce((acc, id) => {
           const {attachmentIds, ...tEnt} = acc.entities[id] as any;
           return {
             ...acc,
@@ -108,7 +117,18 @@ export class MigrationService {
     );
   }
 
-  // private _finalCleanup$() {
-  // this._persistenceService.cleanDatabase()
-  // }
+  private _mergeEntities(states: EntityState<any>[], initial: EntityState<any>): EntityState<any> {
+    return states.reduce(
+      (acc, s) => {
+        if (!s || !s.ids) {
+          return acc;
+        }
+        return {
+          ...acc,
+          ids: [...acc.ids, ...s.ids] as string[],
+          entities: {...acc.entities, ...s.entities}
+        };
+      }, initial
+    );
+  }
 }
