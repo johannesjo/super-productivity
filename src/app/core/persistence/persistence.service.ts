@@ -16,15 +16,14 @@ import {
   LS_REMINDER,
   LS_TAG_STATE,
   LS_TASK_ARCHIVE,
-  LS_TASK_ATTACHMENT_STATE,
   LS_TASK_REPEAT_CFG_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey} from '../../features/issue/issue.model';
-import {ProjectState} from '../../features/project/store/project.reducer';
+import {projectReducer, ProjectState} from '../../features/project/store/project.reducer';
 import {ArchiveTask, Task, TaskArchive, TaskState} from '../../features/tasks/task.model';
-import {AppBaseData, AppDataComplete, AppDataForProjects, TaskAttachmentState} from '../../imex/sync/sync.model';
+import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
@@ -32,7 +31,12 @@ import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from './database.service';
 import {issueProviderKeys} from '../../features/issue/issue.const';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
-import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
+import {
+  ExportedProject,
+  Project,
+  ProjectArchive,
+  ProjectArchivedRelatedData
+} from '../../features/project/project.model';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseEntityModel, PersistenceBaseModel, PersistenceForProjectModel} from './persistence.model';
 import {Metric, MetricState} from '../../features/metric/metric.model';
@@ -46,12 +50,13 @@ import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-re
 import {metricReducer} from '../../features/metric/store/metric.reducer';
 import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
 import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
-import {TagState} from '../../features/tag/tag.model';
+import {Tag, TagState} from '../../features/tag/tag.model';
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
 import {WorkContextState} from '../../features/work-context/work-context.model';
 import {taskReducer} from '../../features/tasks/store/task.reducer';
+import {tagReducer} from '../../features/tag/store/tag.reducer';
 
 
 @Injectable({
@@ -64,11 +69,21 @@ export class PersistenceService {
   _projectModels = [];
 
   // TODO auto generate ls keys from appDataKey where possible
-  project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
   context = this._cmBase<WorkContextState>(LS_CONTEXT, 'context');
-
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+
+  project = this._cmBaseEntity<ProjectState, Project>(
+    LS_PROJECT_META_LIST,
+    'project',
+    projectReducer,
+    migrateProjectState,
+  );
+  tag = this._cmBaseEntity<TagState, Tag>(
+    LS_TAG_STATE,
+    'tag',
+    tagReducer,
+  );
 
   // MAIN TASK MODELS
   task = this._cmBaseEntity<TaskState, Task>(
@@ -89,15 +104,6 @@ export class PersistenceService {
     taskRepeatCfgReducer,
   );
 
-  tag = this._cmBase<TagState>(
-    LS_TAG_STATE,
-    'tag',
-  );
-  /** @deprecated */
-  taskAttachment = this._cmBase<TaskAttachmentState>(
-    LS_TASK_ATTACHMENT_STATE,
-    'taskAttachment',
-  );
 
   // PROJECT MODELS
   bookmark = this._cmProject<BookmarkState, Bookmark>(
