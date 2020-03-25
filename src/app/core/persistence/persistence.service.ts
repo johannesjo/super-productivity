@@ -332,7 +332,9 @@ export class PersistenceService {
   ): PersistenceBaseModel<T> {
     const model = {
       appDataKey,
-      loadState: () => this._loadFromDb(lsKey).then(migrateFn),
+      loadState: (isSkipMigrate = false) => isSkipMigrate
+        ? this._loadFromDb(lsKey)
+        : this._loadFromDb(lsKey).then(migrateFn),
       saveState: (data, isForce) => this._saveToDb(lsKey, data, isForce),
     };
 
@@ -348,7 +350,9 @@ export class PersistenceService {
   ): PersistenceBaseEntityModel<S, M> {
     const model = {
       appDataKey,
-      loadState: () => this._loadFromDb(lsKey).then(migrateFn),
+      loadState: (isSkipMigrate = false) => isSkipMigrate
+        ? this._loadFromDb(lsKey)
+        : this._loadFromDb(lsKey).then(migrateFn),
       saveState: (data, isForce) => this._saveToDb(lsKey, data, isForce),
       getById: async (id: string): Promise<M> => {
         const state = await model.loadState() as any;

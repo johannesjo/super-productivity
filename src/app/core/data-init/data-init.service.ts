@@ -19,10 +19,11 @@ import {MigrationService} from '../migration/migration.service';
   providedIn: 'root'
 })
 export class DataInitService {
-  private _checkMigration$: Observable<ProjectState | never> = from(this._persistenceService.project.loadState()).pipe(
+  private _checkMigration$: Observable<ProjectState | never> = from(this._persistenceService.project.loadState(true)).pipe(
     tap(console.log),
     concatMap((projectState: ProjectState | any) => {
       const isNeedsMigration = (projectState && (!projectState.__modelVersion || projectState.__modelVersion <= 3));
+
       if (isNeedsMigration) {
         const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
         // const r = confirm(msg);

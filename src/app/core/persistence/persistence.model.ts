@@ -20,7 +20,7 @@ export type ProjectDataLsKey
 export interface PersistenceBaseModel<T> {
   appDataKey: keyof AppBaseData;
 
-  loadState(): Promise<T>;
+  loadState(isSkipMigration?: boolean): Promise<T>;
 
   saveState(state: T, isForce?: boolean): Promise<any>;
 }

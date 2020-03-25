@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {forkJoin, Observable} from 'rxjs';
-import {concatMap, map, take, tap} from 'rxjs/operators';
+import {concat, forkJoin, Observable} from 'rxjs';
+import {concatMap, map, take, tap, toArray} from 'rxjs/operators';
 import {
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
@@ -32,7 +32,8 @@ export class MigrationService {
     console.log('projectIds', ids);
     const UPDATED_VERSION = 4;
 
-    return forkJoin([
+    // return forkJoin([
+    return concat(
       this._migrateTaskFromProjectToSingle$(ids).pipe(
         concatMap((taskState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskState)),
         // concatMap((migratedTaskState: TaskState) => this._persistenceService.task.saveState(migratedTaskState)),
@@ -44,7 +45,8 @@ export class MigrationService {
       this._migrateTaskRepeatFromProjectIntoSingle(ids).pipe(
         // concatMap((migratedTaskRepeatState: TaskState) => this._persistenceService.taskRepeat.saveState(migratedTaskRepeatState)),
       ),
-    ]).pipe(
+    ).pipe(
+      toArray(),
       // concatMap(() => this._persistenceService.cleanDatabase()),
       // concatMap(() => {
       //   const updatedState = {
@@ -100,21 +102,9 @@ export class MigrationService {
     const allAttachments$ = forkJoin(...projectIds.map(
       id => this._persistenceService.loadLegacyProjectModel(LS_TASK_ATTACHMENT_STATE, id)
     )).pipe(
-      tap((args) => console.log('TASK_ATTACHMENTS_FOUND', args)),
-      map((taskStates: EntityState<TaskAttachment>[]) => taskStates.reduce(
-        (acc, s) => {
-          if (!s || !s.ids) {
-            return acc;
-          }
-          return {
-            ...acc,
-            ids: [...acc.ids, ...s.ids],
-            entities: {...acc.entities, ...s.entities}
-          };
-        }, {
-          ids: [],
-          entities: {}
-        })
+      tap((args) => console.log('ALL_TASK_ATTACHMENT_STATES', args)),
+      map((attachmentStates: EntityState<TaskAttachment>[]) =>
+        this._mergeEntities(attachmentStates, initialTaskRepeatCfgState) as EntityState<TaskAttachment>
       ),
     );
 
@@ -130,13 +120,18 @@ export class MigrationService {
               ...acc.entities,
               [id]: {
                 ...tEnt,
-                attachments: attachmentIds.map(attachmentId => {
-                  const result = allAttachments.entities[attachmentId];
-                  if (!result) {
-                    throw new Error('Attachment not found');
-                  }
-                  return result;
-                })
+                attachments: tEnt.attachments || (attachmentIds
+                  ? attachmentIds.map(attachmentId => {
+                    const result = allAttachments.entities[attachmentId];
+                    if (!result) {
+                      console.log('ATTACHMENT NOT FOUND: Will be removed', attachmentIds);
+                      // throw new Error('Attachment not found');
+                    } else {
+                      console.log('ATTACHMENT FOUND', result.title);
+                    }
+                    return result;
+                  }).filter(v => !!v)
+                  : [])
               },
             }
           };
