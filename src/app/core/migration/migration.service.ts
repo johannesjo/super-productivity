@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {concat, forkJoin, Observable} from 'rxjs';
+import {concat, forkJoin, from, Observable} from 'rxjs';
 import {concatMap, map, take, tap, toArray} from 'rxjs/operators';
 import {
   LS_TASK_ARCHIVE,
@@ -15,6 +15,13 @@ import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachme
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {initialTaskRepeatCfgState} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import {UpdateProject} from '../../features/project/store/project.actions';
+
+interface TaskToProject {
+  projectId: string;
+  today: string[];
+  backlog: string[];
+}
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +41,21 @@ export class MigrationService {
 
     // return forkJoin([
     return concat(
+      this._migrateTaskListsFromTaskToProjectState$(ids).pipe(
+        // concatMap((taskListToPs: TaskToProject []) => forkJoin(
+        //   taskListToPs
+        //     .filter(({backlog, today}) => (backlog && backlog.length) || today && today.length)
+        //     .map(({backlog, today, projectId}) => this._persistenceService.project.execAction(new UpdateProject({
+        //       project: {
+        //         id: projectId,
+        //         changes: {
+        //           backlogTaskIds: backlog || [],
+        //           taskIds: today || [],
+        //         }
+        //       }
+        //     })))
+        // )),
+      ),
       this._migrateTaskFromProjectToSingle$(ids).pipe(
         concatMap((taskState) => this._migrateTaskAttachmentsToTaskStates$(ids, taskState)),
         // concatMap((migratedTaskState: TaskState) => this._persistenceService.task.saveState(migratedTaskState)),
@@ -59,6 +81,20 @@ export class MigrationService {
     );
   }
 
+
+  private _migrateTaskListsFromTaskToProjectState$(projectIds: string[]): Observable<TaskToProject[]> {
+    return forkJoin(...projectIds.map(
+      id => from(this._persistenceService.loadLegacyProjectModel(LS_TASK_STATE, id)).pipe(
+        map((taskState: TaskState) => ({
+          projectId: id,
+          today: (taskState as any).todaysTaskIds,
+          backlog: (taskState as any).backlogTaskIds
+        }))
+      )
+    )).pipe(
+      tap((args) => console.log('LIST_MIGRATE_META_MODEL', args)),
+    );
+  }
 
   private _migrateTaskFromProjectToSingle$(projectIds: string[]): Observable<TaskState> {
     return forkJoin(...projectIds.map(
