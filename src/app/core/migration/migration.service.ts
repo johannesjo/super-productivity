@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {concat, forkJoin, from, Observable} from 'rxjs';
-import {concatMap, map, take, tap, toArray} from 'rxjs/operators';
+import {concatMap, filter, map, take, tap, toArray} from 'rxjs/operators';
 import {
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
@@ -15,7 +15,6 @@ import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachme
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {initialTaskRepeatCfgState} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
-import {UpdateProject} from '../../features/project/store/project.actions';
 
 interface TaskToProject {
   projectId: string;
@@ -44,7 +43,6 @@ export class MigrationService {
       this._migrateTaskListsFromTaskToProjectState$(ids).pipe(
         // concatMap((taskListToPs: TaskToProject []) => forkJoin(
         //   taskListToPs
-        //     .filter(({backlog, today}) => (backlog && backlog.length) || today && today.length)
         //     .map(({backlog, today, projectId}) => this._persistenceService.project.execAction(new UpdateProject({
         //       project: {
         //         id: projectId,
@@ -85,6 +83,7 @@ export class MigrationService {
   private _migrateTaskListsFromTaskToProjectState$(projectIds: string[]): Observable<TaskToProject[]> {
     return forkJoin(...projectIds.map(
       id => from(this._persistenceService.loadLegacyProjectModel(LS_TASK_STATE, id)).pipe(
+        filter(taskState => !!taskState),
         map((taskState: TaskState) => ({
           projectId: id,
           today: (taskState as any).todaysTaskIds,
