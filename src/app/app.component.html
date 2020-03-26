@@ -14,7 +14,7 @@
     [dir]="isRTL ? 'rtl' : 'ltr'">
     <mat-sidenav (closedStart)="layoutService.hideSideNav()"
                  [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
-                 [opened]="true"
+                 [opened]="(layoutService.isShowSideNav$|async)"
                  position="start">
       <side-nav #sideNavElRef
                 (scrollToNotes)="scrollToNotes()"></side-nav>
