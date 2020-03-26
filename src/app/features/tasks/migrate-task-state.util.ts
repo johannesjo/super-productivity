@@ -50,7 +50,7 @@ const _addTagIds = (task: Task): Task => {
     ? task
     : {
       ...task,
-      tagIds: []
+        tagIds: []
     };
 };
 

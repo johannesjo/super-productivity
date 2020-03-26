@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {EMPTY, Observable, of} from 'rxjs';
+import {EMPTY, from, Observable, of} from 'rxjs';
 import {TaskArchive, TaskState} from 'src/app/features/tasks/task.model';
 import {Dictionary, EntityState} from '@ngrx/entity';
 import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
@@ -16,12 +16,9 @@ import {initialTaskState} from '../../features/tasks/store/task.reducer';
 import {initialTagState} from '../../features/tag/store/tag.reducer';
 import {initialContextState} from '../../features/work-context/store/work-context.reducer';
 import {Project} from '../../features/project/project.model';
+import {concatMap, map} from 'rxjs/operators';
+import {migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 
-interface TaskToProject {
-  projectId: string;
-  today: string[];
-  backlog: string[];
-}
 
 const EMTPY_ENTITY = () => ({ids: [], entities: {}});
 
@@ -38,25 +35,17 @@ export class MigrationService {
   ) {
   }
 
-  migrateIfNecessaryToProjectState$(projectState: ProjectState, legacyAppDataComplete?: LegacyAppDataComplete): Observable<ProjectState | never> {
-    const isNeedsMigration = (projectState && (!(projectState as any).__modelVersion || (projectState as any).__modelVersion <= 3));
+  migrateIfNecessaryToProjectState$(projectState: ProjectState): Observable<ProjectState | never> {
+    const isNeedsMigration = this._isNeedsMigration(projectState);
+    console.log('IS NEEDS MIGRATION', isNeedsMigration);
 
-    // if (isNeedsMigration) {
-    //   const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
-    //   const r = confirm(msg);
-    //   if (r === true) {
-    //     return legacyAppDataComplete
-    //       ? this._migrate$(legacyAppDataComplete).pipe(
-    //         concatMap(() => this._persistenceService.project.loadState()),
-    //       )
-    //       : from(this._legacyPersistenceService.loadCompleteLegacy()).pipe(
-    //         concatMap((legacyData) => this._migrate$(legacyData)),
-    //         concatMap(() => this._persistenceService.project.loadState()),
-    //       );
-    //   } else {
-    //     alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
-    //   }
-    // }
+    if (isNeedsMigration && this._isConfirmMigrateDialog()) {
+      return from(this._legacyPersistenceService.loadCompleteLegacy()).pipe(
+        map((legacyData) => this._migrate(legacyData)),
+        concatMap((migratedData) => this._persistenceService.importComplete(migratedData)),
+        concatMap(() => this._persistenceService.project.loadState()),
+      );
+    }
 
     return isNeedsMigration
       ? EMPTY
@@ -66,16 +55,11 @@ export class MigrationService {
 
   migrateIfNecessary(appDataComplete: LegacyAppDataComplete | AppDataComplete): AppDataComplete {
     const projectState = appDataComplete.project;
-    const isNeedsMigration = (projectState && (!(projectState as any).__modelVersion || (projectState as any).__modelVersion <= 3));
-
+    const isNeedsMigration = this._isNeedsMigration(projectState);
     if (isNeedsMigration) {
       const legacyAppDataComplete = appDataComplete as LegacyAppDataComplete;
-      const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
-      const r = confirm(msg);
-      if (r === true) {
+      if (this._isConfirmMigrateDialog()) {
         return this._migrate(legacyAppDataComplete);
-      } else {
-        alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
       }
     } else {
       return appDataComplete as AppDataComplete;
@@ -86,7 +70,6 @@ export class MigrationService {
     const ids = legacyAppDataComplete.project.ids as string[];
     console.log('projectState', legacyAppDataComplete);
     console.log('projectIds', ids);
-    const UPDATED_VERSION = 4;
 
     const newAppData: AppDataComplete = {
       lastActiveTime: legacyAppDataComplete.lastActiveTime,
@@ -97,7 +80,10 @@ export class MigrationService {
       tag: initialTagState,
       context: initialContextState,
       // migrated
-      project: this._migrateTaskListsFromTaskToProjectState(legacyAppDataComplete),
+      project: {
+        ...this._migrateTaskListsFromTaskToProjectState(legacyAppDataComplete),
+        __modelVersion: 4,
+      } as any,
       taskRepeatCfg: this._migrateTaskRepeatFromProjectIntoSingle(legacyAppDataComplete),
 
       task: this._migrateTaskState(legacyAppDataComplete),
@@ -128,12 +114,14 @@ export class MigrationService {
 
   private _migrateTaskState(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
     const singleState = this._migrateTaskFromProjectToSingle(legacyAppDataComplete);
-    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, singleState) as TaskState;
+    const standardMigration = migrateTaskState(singleState as TaskState);
+    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskState;
   }
 
   private _migrateTaskArchiveState(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
-    const singleState = this._migrateTaskArchiveFromProjectToSingle(legacyAppDataComplete);
-    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, singleState) as TaskArchive;
+    const singleState = this._migrateTaskArchiveFromProjectToSingle(legacyAppDataComplete) as TaskArchive;
+    const standardMigration = migrateTaskState(singleState as TaskState);
+    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskArchive;
   }
 
   private _migrateTaskFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
@@ -199,5 +187,18 @@ export class MigrationService {
         };
       }, initial
     );
+  }
+
+  private _isNeedsMigration(projectState: ProjectState): boolean {
+    return (projectState && (!(projectState as any).__modelVersion || (projectState as any).__modelVersion <= 3));
+  }
+
+  private _isConfirmMigrateDialog(): boolean {
+    const msg = this._translateService.instant(T.APP.UPDATE_MAIN_MODEL);
+    const r = confirm(msg);
+    if (r !== true) {
+      alert(this._translateService.instant(T.APP.UPDATE_MAIN_MODEL_NO_UPDATE));
+    }
+    return r;
   }
 }
