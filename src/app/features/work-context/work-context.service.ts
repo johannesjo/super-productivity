@@ -12,7 +12,7 @@ import {
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {setActiveWorkContext} from './store/work-context.actions';
 import {selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
-import {NavigationEnd, Router, RouterEvent} from '@angular/router';
+import {NavigationEnd, Router} from '@angular/router';
 import {
   concatMap,
   distinctUntilChanged,
@@ -365,8 +365,8 @@ export class WorkContextService {
           mapTo(next),
         )
       ),
-    ).subscribe(({url}: RouterEvent) => {
-        const split = url.split('/');
+    ).subscribe(({urlAfterRedirects}: NavigationEnd) => {
+        const split = urlAfterRedirects.split('/');
         const id = split[2];
 
         // prevent issue when setActiveContext is called directly
@@ -374,9 +374,9 @@ export class WorkContextService {
           return;
         }
 
-        if (url.match(/tag\/.+/)) {
+        if (urlAfterRedirects.match(/tag\/.+/)) {
           this._setActiveContext(id, WorkContextType.TAG);
-        } else if (url.match(/project\/.+/)) {
+        } else if (urlAfterRedirects.match(/project\/.+/)) {
           this._setActiveContext(id, WorkContextType.PROJECT);
         }
       }
