@@ -15,27 +15,41 @@ export const moveTaskForWorkContextLikeState = (
   return moveItemInList(taskId, idsFilteredMoving, newOrderedIds, emptyListVal);
 };
 
-// TODO I don't understand this anymore...
+/*
+We use this function because the dom list provided by the drag & drop event, might not
+be the same as actual list, because items might be sorted differently (done/undone) or
+items might be hidden (done sub tasks).
+Please note that the completeList depending on the circumstances might or might not
+include the itemId, while the partialList always should.
+*/
 export const moveItemInList = (itemId: string, completeList: string[], partialList: string[], emptyListVal = 0): string[] => {
   let newIndex;
-
   const curInUpdateListIndex = partialList.indexOf(itemId);
   const prevItemId = partialList[curInUpdateListIndex - 1];
   const nextItemId = partialList[curInUpdateListIndex + 1];
-  const newCompleteList = completeList.filter((id) => id !== itemId);
+  const newCompleteListWithoutItem = completeList.filter((id) => id !== itemId);
+
+  if (!partialList.includes(itemId)) {
+    throw new Error('Drop Model Error');
+  }
 
   if (!itemId) {
     throw new Error('Drop Model Error');
+    // } else if (newCompleteListWithoutItem.length === 0) {
+    //   newIndex = 0;
   } else if (prevItemId) {
-    newIndex = newCompleteList.indexOf(prevItemId) + 1;
+    newIndex = newCompleteListWithoutItem.indexOf(prevItemId) + 1;
   } else if (nextItemId) {
-    newIndex = newCompleteList.indexOf(nextItemId);
+    newIndex = newCompleteListWithoutItem.indexOf(nextItemId);
   } else if (partialList.length === 1) {
     newIndex = emptyListVal;
   } else {
     throw new Error('Drop Model Error');
   }
 
+  const newCompleteList = [...newCompleteListWithoutItem];
+  // NOTE: splice does NOT return the updated array... :/
   newCompleteList.splice(newIndex, 0, itemId);
+
   return newCompleteList;
 };
