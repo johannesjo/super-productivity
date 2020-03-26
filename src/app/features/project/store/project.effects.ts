@@ -7,7 +7,7 @@ import {
   ArchiveProject,
   DeleteProject,
   LoadProjectRelatedDataSuccess,
-  ProjectActionTypes,
+  ProjectActionTypes, UnarchiveProject,
   UpdateProject,
   UpdateProjectIssueProviderCfg,
   UpdateProjectWorkEnd,
@@ -165,7 +165,7 @@ export class ProjectEffects {
       ofType(
         ProjectActionTypes.DeleteProject,
       ),
-      tap(async (action: ArchiveProject) => {
+      tap(async (action: DeleteProject) => {
         await this._persistenceService.removeCompleteRelatedDataForProject(action.payload.id);
         this._reminderService.removeReminderByWorkContextId(action.payload.id);
       }),
@@ -194,7 +194,7 @@ export class ProjectEffects {
       ofType(
         ProjectActionTypes.UnarchiveProject,
       ),
-      tap(async (action: ArchiveProject) => {
+      tap(async (action: UnarchiveProject) => {
         await this._persistenceService.unarchiveProject(action.payload.id);
 
         this._snackService.open({
