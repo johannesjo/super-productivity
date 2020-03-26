@@ -38,27 +38,27 @@
                   mat-icon-button>
             <mat-icon>edit</mat-icon>
           </button>
-          <button (click)="archive(project.id)"
-                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"
-                  [title]="T.PP.ARCHIVE_PROJECT|translate"
-                  color=""
-                  mat-icon-button>
-            <mat-icon>archive</mat-icon>
-          </button>
-          <button (click)="export(project.id, project.title)"
-                  [title]="T.PP.EXPORT_PROJECT|translate"
-                  class="hide-xs"
-                  color=""
-                  mat-icon-button>
-            <mat-icon>flight</mat-icon>
-          </button>
-          <button (click)="remove(project.id)"
-                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"
-                  [title]="T.PP.DELETE_PROJECT|translate"
-                  color="warn"
-                  mat-icon-button>
-            <mat-icon>delete</mat-icon>
-          </button>
+          <!--          <button (click)="archive(project.id)"-->
+          <!--                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"-->
+          <!--                  [title]="T.PP.ARCHIVE_PROJECT|translate"-->
+          <!--                  color=""-->
+          <!--                  mat-icon-button>-->
+          <!--            <mat-icon>archive</mat-icon>-->
+          <!--          </button>-->
+          <!--          <button (click)="export(project.id, project.title)"-->
+          <!--                  [title]="T.PP.EXPORT_PROJECT|translate"-->
+          <!--                  class="hide-xs"-->
+          <!--                  color=""-->
+          <!--                  mat-icon-button>-->
+          <!--            <mat-icon>flight</mat-icon>-->
+          <!--          </button>-->
+          <!--          <button (click)="remove(project.id)"-->
+          <!--                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"-->
+          <!--                  [title]="T.PP.DELETE_PROJECT|translate"-->
+          <!--                  color="warn"-->
+          <!--                  mat-icon-button>-->
+          <!--            <mat-icon>delete</mat-icon>-->
+          <!--          </button>-->
         </div>
 
       </mat-card>
@@ -111,19 +111,19 @@
       </div>
 
       <div class="controls">
-        <button (click)="unarchive(project.id)"
-                [title]="T.PP.UN_ARCHIVE_PROJECT|translate"
-                color=""
-                mat-icon-button>
-          <mat-icon>unarchive</mat-icon>
-        </button>
-        <button (click)="remove(project.id)"
-                *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
-                [title]="T.PP.DELETE_PROJECT|translate"
-                color="warn"
-                mat-icon-button>
-          <mat-icon>delete</mat-icon>
-        </button>
+        <!--        <button (click)="unarchive(project.id)"-->
+        <!--                [title]="T.PP.UN_ARCHIVE_PROJECT|translate"-->
+        <!--                color=""-->
+        <!--                mat-icon-button>-->
+        <!--          <mat-icon>unarchive</mat-icon>-->
+        <!--        </button>-->
+        <!--        <button (click)="remove(project.id)"-->
+        <!--                *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"-->
+        <!--                [title]="T.PP.DELETE_PROJECT|translate"-->
+        <!--                color="warn"-->
+        <!--                mat-icon-button>-->
+        <!--          <mat-icon>delete</mat-icon>-->
+        <!--        </button>-->
       </div>
 
     </mat-card>
