@@ -349,11 +349,8 @@ export class PersistenceService {
     migrateFn: (state: S) => S = (v) => v,
   ): PersistenceBaseEntityModel<S, M> {
     const model = {
-      appDataKey,
-      loadState: (isSkipMigrate = false) => isSkipMigrate
-        ? this._loadFromDb(lsKey)
-        : this._loadFromDb(lsKey).then(migrateFn),
-      saveState: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+      ...this._cmBase(lsKey, appDataKey, migrateFn),
+
       getById: async (id: string): Promise<M> => {
         const state = await model.loadState() as any;
         return state && state.entities && state.entities[id] || null;

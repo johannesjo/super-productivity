@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {concatMap, filter, first, switchMap, take, tap} from 'rxjs/operators';
+import {concatMap, filter, first, skip, switchMap, tap} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {selectTagFeatureState} from './tag.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
@@ -49,6 +49,8 @@ export class TagEffects {
 
   updateLs$ = createEffect(() => this._store$.pipe(
     select(selectTagFeatureState),
+    // skip initial state
+    skip(1),
     switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
     tap(this._updateLastActive.bind(this)),
   ), {dispatch: false});
