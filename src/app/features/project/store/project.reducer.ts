@@ -79,8 +79,6 @@ export const selectUnarchivedProjectsWithoutCurrent = createSelector(
   selectProjectFeatureState,
   (s, props: { currentId: string }) => {
     const ids = s.ids as string[];
-    console.log(props.currentId, ids);
-
     return ids.filter(id => id !== props.currentId).map(id => s.entities[id]).filter(p => !p.isArchived && p.id);
   },
 );

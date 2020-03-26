@@ -20,7 +20,7 @@ import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-e
 import {expandAnimation} from '../../../ui/animations/expand.ani';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {checkKeyCombo} from '../../../util/check-key-combo';
-import {switchMap, take, takeUntil} from 'rxjs/operators';
+import {distinctUntilChanged, map, switchMap, take, takeUntil} from 'rxjs/operators';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {TaskAttachmentService} from '../task-attachment/task-attachment.service';
 import {IssueService} from '../../issue/issue.service';
@@ -80,6 +80,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         : of(null);
     }),
     take(1),
+  );
+  moveToProjectList$: Observable<Project[]> = this._task$.pipe(
+    map(t => t.projectId),
+    distinctUntilChanged(),
+    switchMap((pid) => this.projectService.getProjectsWithoutId$(pid)),
   );
 
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;

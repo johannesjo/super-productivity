@@ -378,7 +378,7 @@
           <mat-menu #projectMenu="matMenu">
             <ng-container>
               <button (click)="moveTaskToProject(project.id)"
-                      *ngFor="let project of (projectService.getProjectsWithoutId$(task.projectId)|async); trackBy:trackByProjectId;"
+                      *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
                       mat-menu-item>
                 {{project.title}}
               </button>

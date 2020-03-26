@@ -69,8 +69,6 @@ export class ProjectService {
   }
 
   getProjectsWithoutId$(projectId: string): Observable<Project[]> {
-    console.log('GET');
-    
     return this._store$.pipe(select(selectUnarchivedProjectsWithoutCurrent, {currentId: projectId}));
   }
 
