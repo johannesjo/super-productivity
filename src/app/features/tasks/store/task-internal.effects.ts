@@ -78,7 +78,13 @@ export class TaskInternalEffects {
           const {isDone} = (action as UpdateTask).payload.task.changes;
           const oldId = (action as UpdateTask).payload.task.id;
           const isCurrent = (oldId === currentId);
-          nextId = (isDone && isCurrent) ? this._findNextTask(state, todaysTaskIds, oldId) : 'NO_UPDATE';
+          nextId = (isDone && isCurrent)
+
+            ? ((isAutoStartNextTask)
+              ? this._findNextTask(state, todaysTaskIds, oldId)
+              : null)
+
+            : 'NO_UPDATE';
           break;
         }
 
@@ -104,11 +110,7 @@ export class TaskInternalEffects {
       if (nextId === 'NO_UPDATE') {
         return EMPTY;
       } else {
-        if (isAutoStartNextTask) {
-          return of(new SetCurrentTask(nextId));
-        } else {
-          return of(new SetCurrentTask(null));
-        }
+        return of(new SetCurrentTask(nextId));
       }
     })
   );
