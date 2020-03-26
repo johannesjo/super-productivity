@@ -156,14 +156,13 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
       ),
+      filter(([, currentTaskOrParent]) => (currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE)),
       concatMap(([, currentTaskOrParent]) =>
         this._getCfgOnce$(currentTaskOrParent.projectId).pipe(
           map((jiraCfg) => ({jiraCfg, currentTaskOrParent}))
         )
       ),
-      filter(({jiraCfg, currentTaskOrParent}) =>
-        (currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE)
-        && jiraCfg.isEnabled && jiraCfg.isCheckToReAssignTicketOnTaskStart),
+      filter(({jiraCfg, currentTaskOrParent}) => jiraCfg.isEnabled && jiraCfg.isCheckToReAssignTicketOnTaskStart),
       // show every 15s max to give time for updates
       throttleTime(15000),
       // TODO there is probably a better way to to do this
