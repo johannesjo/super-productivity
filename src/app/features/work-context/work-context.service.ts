@@ -36,7 +36,12 @@ import {Actions, ofType} from '@ngrx/effects';
 import {moveTaskToBacklogList} from './store/work-context-meta.actions';
 import {selectProjectById} from '../project/store/project.reducer';
 import {WorklogExportSettings} from '../worklog/worklog.model';
-import {ProjectActionTypes} from '../project/store/project.actions';
+import {
+  AddToProjectBreakTime,
+  UpdateProjectAdvancedCfg,
+  UpdateProjectWorkEnd,
+  UpdateProjectWorkStart
+} from '../project/store/project.actions';
 import {
   addToBreakTimeForTag,
   updateAdvancedConfigForTag,
@@ -392,54 +397,48 @@ export class WorkContextService {
   }
 
   updateWorkStartForActiveContext(date: string, newVal: number) {
-    this._store$.dispatch({
-      type: (this.activeWorkContextType === WorkContextType.PROJECT)
-        ? ProjectActionTypes.UpdateProjectWorkStart
-        : updateWorkStartForTag.type,
-      payload: {
-        id: this.activeWorkContextId,
-        date,
-        newVal,
-      }
-    });
+    const payload = {
+      id: this.activeWorkContextId,
+      date,
+      newVal,
+    };
+    const action = (this.activeWorkContextType === WorkContextType.PROJECT)
+      ? new UpdateProjectWorkStart(payload)
+      : updateWorkStartForTag(payload);
+    this._store$.dispatch(action);
   }
 
   updateWorkEndForActiveContext(date: string, newVal: number) {
-    this._store$.dispatch({
-      type: (this.activeWorkContextType === WorkContextType.PROJECT)
-        ? ProjectActionTypes.UpdateProjectWorkEnd
-        : updateWorkEndForTag.type,
-      payload: {
-        id: this.activeWorkContextId,
-        date,
-        newVal,
-      }
-    });
+    const payload = {
+      id: this.activeWorkContextId,
+      date,
+      newVal,
+    };
+    const action = (this.activeWorkContextType === WorkContextType.PROJECT)
+      ? new UpdateProjectWorkEnd(payload)
+      : updateWorkEndForTag(payload);
+    this._store$.dispatch(action);
   }
 
-  addToBreakTimeForActiveContext(date: string = getWorklogStr(), val: number) {
-    this._store$.dispatch({
-      type: (this.activeWorkContextType === WorkContextType.PROJECT)
-        ? ProjectActionTypes.AddToProjectBreakTime
-        : addToBreakTimeForTag.type,
-      payload: {
-        id: this.activeWorkContextId,
-        date,
-        val,
-      }
-    });
+  addToBreakTimeForActiveContext(date: string = getWorklogStr(), valToAdd: number) {
+    const payload = {
+      id: this.activeWorkContextId,
+      date,
+      valToAdd,
+    };
+    const action = (this.activeWorkContextType === WorkContextType.PROJECT)
+      ? new AddToProjectBreakTime(payload)
+      : addToBreakTimeForTag(payload);
+    this._store$.dispatch(action);
   }
 
   private _updateAdvancedCfgForCurrentContext(sectionKey: WorkContextAdvancedCfgKey, data: any) {
     if (this.activeWorkContextType === WorkContextType.PROJECT) {
-      this._store$.dispatch({
-        type: ProjectActionTypes.UpdateProjectAdvancedCfg,
-        payload: {
-          projectId: this.activeWorkContextId,
-          sectionKey,
-          data,
-        }
-      });
+      this._store$.dispatch(new UpdateProjectAdvancedCfg({
+        projectId: this.activeWorkContextId,
+        sectionKey,
+        data,
+      }));
     } else if (this.activeWorkContextType === WorkContextType.TAG) {
       this._store$.dispatch(updateAdvancedConfigForTag({
         tagId: this.activeWorkContextId,

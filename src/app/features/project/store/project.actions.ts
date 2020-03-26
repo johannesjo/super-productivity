@@ -101,7 +101,7 @@ export class UpdateProjectWorkEnd implements Action {
 export class AddToProjectBreakTime implements Action {
   readonly type = ProjectActionTypes.AddToProjectBreakTime;
 
-  constructor(public payload: { id: string; date: string; val: number; }) {
+  constructor(public payload: { id: string; date: string; valToAdd: number; }) {
   }
 }
 

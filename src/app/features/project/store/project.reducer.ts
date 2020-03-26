@@ -421,7 +421,7 @@ export function projectReducer(
     }
 
     case ProjectActionTypes.AddToProjectBreakTime: {
-      const {id, date, val} = action.payload;
+      const {id, date, valToAdd} = action.payload;
       const oldP = state.entities[id];
       const oldBreakTime = oldP.breakTime[date] || 0;
       const oldBreakNr = oldP.breakNr[date] || 0;
@@ -435,7 +435,7 @@ export function projectReducer(
           },
           breakTime: {
             ...oldP.breakTime,
-            [date]: oldBreakTime + val,
+            [date]: oldBreakTime + valToAdd,
           }
         }
       }, state);

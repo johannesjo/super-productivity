@@ -141,7 +141,7 @@ const _reducer = createReducer<TagState>(
     }
   }, state)),
 
-  on(tagActions.addToBreakTimeForTag, (state, {id, newVal, date}) => {
+  on(tagActions.addToBreakTimeForTag, (state, {id, valToAdd, date}) => {
       const oldTag = state.entities[id];
       const oldBreakTime = oldTag.breakTime[date] || 0;
       const oldBreakNr = oldTag.breakNr[date] || 0;
@@ -154,7 +154,7 @@ const _reducer = createReducer<TagState>(
           },
           breakTime: {
             ...oldTag.breakTime,
-            [date]: oldBreakTime + newVal,
+            [date]: oldBreakTime + valToAdd,
           }
         }
       }, state);

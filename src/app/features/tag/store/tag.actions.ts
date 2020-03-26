@@ -50,5 +50,5 @@ export const updateWorkEndForTag = createAction(
 
 export const addToBreakTimeForTag = createAction(
   '[Tag] Update Break Time for Tag',
-  props< { id: string; date: string; newVal: number; }>(),
+  props< { id: string; date: string; valToAdd: number; }>(),
 );
