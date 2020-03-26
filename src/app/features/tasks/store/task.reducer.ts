@@ -105,7 +105,7 @@ export function taskReducer(
     case TaskActionTypes.UpdateTask: {
       let stateCopy = state;
       const id = action.payload.task.id as string;
-      const {timeSpentOnDay, timeEstimate, isDone} = action.payload.task.changes;
+      const {timeSpentOnDay, timeEstimate} = action.payload.task.changes;
       stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
       return taskAdapter.updateOne(action.payload.task, stateCopy);
@@ -367,9 +367,7 @@ export function taskReducer(
     // TASK ARCHIVE STUFF
     // ------------------
     // TODO fix
-    case
-    TaskActionTypes.MoveToArchive
-    : {
+    case TaskActionTypes.MoveToArchive: {
       let copyState = state;
       action.payload.tasks.forEach((task) => {
         copyState = deleteTask(copyState, task);
@@ -379,9 +377,7 @@ export function taskReducer(
       };
     }
 
-    case
-    TaskActionTypes.RestoreTask
-    : {
+    case TaskActionTypes.RestoreTask: {
       const task = {...action.payload.task, isDone: false};
       const subTasks = action.payload.subTasks || [];
       return taskAdapter.addMany([task, ...subTasks], state);
@@ -389,9 +385,7 @@ export function taskReducer(
 
     // REPEAT STUFF
     // ------------
-    case
-    TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask
-    : {
+    case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
       return taskAdapter.updateOne({
         id: action.payload.taskId,
         changes: {
@@ -403,9 +397,7 @@ export function taskReducer(
 
     // TASK ATTACHMENTS
     // ----------------
-    case
-    TaskAttachmentActionTypes.AddTaskAttachment
-    : {
+    case TaskAttachmentActionTypes.AddTaskAttachment: {
       const {taskId, taskAttachment} = action.payload;
       return taskAdapter.updateOne({
         id: taskId,
@@ -417,9 +409,7 @@ export function taskReducer(
       }, state);
     }
 
-    case
-    TaskAttachmentActionTypes.UpdateTaskAttachment
-    : {
+    case TaskAttachmentActionTypes.UpdateTaskAttachment: {
       const {taskId, taskAttachment} = action.payload;
       const attachments = state.entities[taskId].attachments;
       const updatedAttachments = attachments.map(
@@ -439,9 +429,7 @@ export function taskReducer(
       }, state);
     }
 
-    case
-    TaskAttachmentActionTypes.DeleteTaskAttachment
-    : {
+    case TaskAttachmentActionTypes.DeleteTaskAttachment: {
       const {taskId, id} = action.payload;
       return taskAdapter.updateOne({
         id: taskId,

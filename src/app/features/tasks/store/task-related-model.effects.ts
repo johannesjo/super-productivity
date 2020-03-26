@@ -7,7 +7,7 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {TaskArchive, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
-import {moveTaskInTodayList} from '../../work-context/store/work-context-meta.actions';
+import {moveTaskInTodayList, moveTaskToTodayList} from '../../work-context/store/work-context-meta.actions';
 import {taskAdapter} from './task.adapter';
 import {flattenTasks} from './task.selectors';
 
@@ -48,8 +48,9 @@ export class TaskRelatedModelEffects {
   moveTaskToUnDone$: any = this._actions$.pipe(
     ofType(
       moveTaskInTodayList,
+      moveTaskToTodayList,
     ),
-    filter(({src, target}) => src === 'DONE' && target === 'UNDONE'),
+    filter(({src, target}) => (src === 'DONE' || src === 'BACKLOG') && target === 'UNDONE'),
     map(({taskId}) => new UpdateTask({
       task: {
         id: taskId,
@@ -64,8 +65,9 @@ export class TaskRelatedModelEffects {
   moveTaskToDone$: any = this._actions$.pipe(
     ofType(
       moveTaskInTodayList,
+      moveTaskToTodayList,
     ),
-    filter(({src, target}) => src === 'UNDONE' && target === 'DONE'),
+    filter(({src, target}) => (src === 'UNDONE' || src === 'BACKLOG') && target === 'DONE'),
     map(({taskId}) => new UpdateTask({
       task: {
         id: taskId,

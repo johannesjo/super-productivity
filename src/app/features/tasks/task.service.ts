@@ -292,7 +292,7 @@ export class TaskService {
 
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
-      this._store.dispatch(moveTaskToTodayList({taskId, newOrderedIds, workContextId}));
+      this._store.dispatch(moveTaskToTodayList({taskId, newOrderedIds, src, target, workContextId}));
 
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog

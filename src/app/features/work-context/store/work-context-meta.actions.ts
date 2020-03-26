@@ -48,7 +48,13 @@ export const moveTaskToBacklogList = createAction(
 
 export const moveTaskToTodayList = createAction(
   '[WorkContextMeta] Move Task from backlog to today',
-  props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
+  props<{
+    taskId: string;
+    newOrderedIds: string[];
+    workContextId: string;
+    src: DropListModelSource;
+    target: DropListModelSource;
+  }>(),
 );
 
 export const moveTaskToBacklogListAuto = createAction(
