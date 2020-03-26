@@ -9,7 +9,7 @@ import {ProcrastinationComponent} from './features/procrastination/procrastinati
 import {SchedulePageComponent} from './pages/schedule-page/schedule-page.component';
 import {ProjectSettingsPageComponent} from './pages/project-settings-page/project-settings-page.component';
 import {TagTaskPageComponent} from './pages/tag-task-page/tag-task-page.component';
-import {ActiveWorkContextGuard} from './app.guard';
+import {ActiveWorkContextGuard, ValidProjectIdGuard, ValidTagIdGuard} from './app.guard';
 import {TagSettingsPageComponent} from './pages/tag-settings-page/tag-settings-page.component';
 
 export const APP_ROUTES: Routes = [
@@ -17,19 +17,74 @@ export const APP_ROUTES: Routes = [
   {path: 'schedule', component: SchedulePageComponent, data: {page: 'schedule'}},
   {path: 'procrastination', component: ProcrastinationComponent, data: {page: 'procrastination'}},
 
-  {path: 'tag/:id/tasks', component: TagTaskPageComponent, data: {page: 'tag-tasks'}},
-  {path: 'tag/:id/settings', component: TagSettingsPageComponent, data: {page: 'tag-settings'}},
-  {path: 'tag/:id/worklog', component: WorklogComponent, data: {page: 'worklog'}},
-  // {path: 'tag/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}},
-  {path: 'tag/:id/daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
-  {path: 'tag/:id/daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
+  {
+    path: 'tag/:id/tasks',
+    component: TagTaskPageComponent,
+    data: {page: 'tag-tasks'},
+    canActivate: [ValidTagIdGuard]
+  },
+  {
+    path: 'tag/:id/settings',
+    component: TagSettingsPageComponent,
+    data: {page: 'tag-settings'},
+    canActivate: [ValidTagIdGuard]
+  },
+  {
+    path: 'tag/:id/worklog',
+    component: WorklogComponent,
+    data: {page: 'worklog'},
+    canActivate: [ValidTagIdGuard]
+  },
+  // {path: 'tag/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}, canActivate: [ValidContextIdGuard]},
+  {
+    path: 'tag/:id/daily-summary',
+    component: DailySummaryComponent,
+    data: {page: 'daily-summary'},
+    canActivate: [ValidTagIdGuard]
+  },
+  {
+    path: 'tag/:id/daily-summary/:dayStr',
+    component: DailySummaryComponent,
+    data: {page: 'daily-summary'},
+    canActivate: [ValidTagIdGuard]
+  },
 
-  {path: 'project/:id/tasks', component: ProjectTaskPageComponent, data: {page: 'project-tasks'}},
-  {path: 'project/:id/settings', component: ProjectSettingsPageComponent, data: {page: 'project-settings'}},
-  {path: 'project/:id/worklog', component: WorklogComponent, data: {page: 'worklog'}},
-  {path: 'project/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}},
-  {path: 'project/:id/daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
-  {path: 'project/:id/daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
+  {
+    path: 'project/:id/tasks',
+    component: ProjectTaskPageComponent,
+    data: {page: 'project-tasks'},
+    canActivate: [ValidProjectIdGuard]
+  },
+  {
+    path: 'project/:id/settings',
+    component: ProjectSettingsPageComponent,
+    data: {page: 'project-settings'},
+    canActivate: [ValidProjectIdGuard]
+  },
+  {
+    path: 'project/:id/worklog',
+    component: WorklogComponent,
+    data: {page: 'worklog'},
+    canActivate: [ValidProjectIdGuard]
+  },
+  {
+    path: 'project/:id/metrics',
+    component: MetricPageComponent,
+    data: {page: 'metrics'},
+    canActivate: [ValidProjectIdGuard]
+  },
+  {
+    path: 'project/:id/daily-summary',
+    component: DailySummaryComponent,
+    data: {page: 'daily-summary'},
+    canActivate: [ValidProjectIdGuard]
+  },
+  {
+    path: 'project/:id/daily-summary/:dayStr',
+    component: DailySummaryComponent,
+    data: {page: 'daily-summary'},
+    canActivate: [ValidProjectIdGuard]
+  },
   {path: 'project-overview', component: ProjectOverviewPageComponent, data: {page: 'project-overview'}},
 
 

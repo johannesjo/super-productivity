@@ -457,8 +457,11 @@ export class WorkContextService {
   }
 
   // NOTE: NEVER call this from some place other than the route change stuff
-  private _setActiveContext(activeId: string, activeType: WorkContextType) {
+  private async _setActiveContext(activeId: string, activeType: WorkContextType) {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
 
+  private async _isValidContextId(id: string): Promise<boolean> {
+
+  }
 }
