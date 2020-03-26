@@ -2,7 +2,7 @@
 @import '~angular-material-css-vars/main';
 
 // INIT THEMING
-@include initMaterialCssVars();
+@include init-material-css-vars();
 
 
 .bg-card {
@@ -18,7 +18,7 @@
 }
 
 .bgc-primary {
-  @include mat-css-color-and-contrast(500);
+  @include mat-css-color-and-contrast-primary(500);
 }
 
 .bg-accent {
@@ -42,7 +42,7 @@
 }
 
 .bgc-400 {
-  @include mat-css-color-and-contrast(400);
+  @include mat-css-color-and-contrast-primary(400);
 }
 
 .bg-600 {
@@ -50,7 +50,7 @@
 }
 
 .bgc-600 {
-  @include mat-css-color-and-contrast(600);
+  @include mat-css-color-and-contrast-primary(600);
 }
 
 .cc-600 {
@@ -62,18 +62,18 @@
 }
 
 .bgc-800 {
-  @include mat-css-color-and-contrast(800);
+  @include mat-css-color-and-contrast-primary(800);
 }
 
 // for buttons
 .isDarkTheme .mat-lighter,
 .mat-lighter {
-  @include mat-css-color-and-contrast(300);
+  @include mat-css-color-and-contrast-primary(300);
 }
 
 .isDarkTheme .mat-darker,
 .mat-darker {
-  @include mat-css-color-and-contrast(600);
+  @include mat-css-color-and-contrast-primary(600);
 }
 
 .color-contrast {
