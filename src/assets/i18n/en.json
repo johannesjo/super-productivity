@@ -548,6 +548,7 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Add sub task",
+        "ADD_TO_PROJECT": "Add to a Project",
         "ADVANCED": "Advanced",
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
         "DELETE": "Delete Task",

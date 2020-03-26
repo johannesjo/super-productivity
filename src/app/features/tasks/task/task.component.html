@@ -373,10 +373,10 @@
                   [matMenuTriggerFor]="projectMenu"
                   mat-menu-item>
             <mat-icon>forward</mat-icon>
-            {{T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT|translate}}
+            {{(task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT : T.F.TASK.CMP.ADD_TO_PROJECT )|translate}}
           </button>
           <mat-menu #projectMenu="matMenu">
-            <ng-container *ngIf="task.projectId">
+            <ng-container>
               <button (click)="moveTaskToProject(project.id)"
                       *ngFor="let project of (projectService.getProjectsWithoutId$(task.projectId)|async); trackBy:trackByProjectId;"
                       mat-menu-item>

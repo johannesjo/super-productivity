@@ -548,6 +548,7 @@ export const T = {
       },
       'CMP': {
         'ADD_SUB_TASK': 'F.TASK.CMP.ADD_SUB_TASK',
+        'ADD_TO_PROJECT': 'F.TASK.CMP.ADD_TO_PROJECT',
         'ADVANCED': 'F.TASK.CMP.ADVANCED',
         'CONVERT_TO_PARENT_TASK': 'F.TASK.CMP.CONVERT_TO_PARENT_TASK',
         'DELETE': 'F.TASK.CMP.DELETE',
