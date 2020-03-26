@@ -43,6 +43,7 @@ export class MigrationService {
       return from(this._legacyPersistenceService.loadCompleteLegacy()).pipe(
         map((legacyData) => this._migrate(legacyData)),
         concatMap((migratedData) => this._persistenceService.importComplete(migratedData)),
+        concatMap((migratedData) => this._persistenceService.cleanDatabase()),
         concatMap(() => this._persistenceService.project.loadState()),
       );
     }
