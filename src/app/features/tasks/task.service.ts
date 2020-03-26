@@ -170,6 +170,9 @@ export class TaskService {
     private readonly _actions$: Actions,
     private readonly _router: Router,
   ) {
+    // TODO remove
+    this.removeOrphanTasksForProject('DEFAULT');
+
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 
     // time tracking
@@ -588,6 +591,27 @@ export class TaskService {
     }
   }
 
+
+  async removeOrphanTasksForProject(projectIdToDelete: string): Promise<{ today: string[] }> {
+    const taskState: TaskState = await this.taskFeatureState$.pipe(
+      filter(s => s.isDataLoaded),
+      first(),
+    ).toPromise();
+    const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
+      const t = taskState.entities[id];
+      return t.projectId === projectIdToDelete;
+    });
+    const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
+      const t = taskArchiveState.entities[id];
+      return t.projectId === projectIdToDelete;
+    });
+    // TODO just filter all tags for those ids
+    console.log('TaskIds to remove', nonArchiveTaskIdsToDelete, archiveTaskIdsToDelete);
+    return {
+      today: nonArchiveTaskIdsToDelete,
+    };
+  }
 
   createNewTaskWithDefaults(
     title: string,

@@ -52,13 +52,13 @@
           <!--                  mat-icon-button>-->
           <!--            <mat-icon>flight</mat-icon>-->
           <!--          </button>-->
-          <!--          <button (click)="remove(project.id)"-->
-          <!--                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"-->
-          <!--                  [title]="T.PP.DELETE_PROJECT|translate"-->
-          <!--                  color="warn"-->
-          <!--                  mat-icon-button>-->
-          <!--            <mat-icon>delete</mat-icon>-->
-          <!--          </button>-->
+          <button (click)="remove(project.id)"
+                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"
+                  [title]="T.PP.DELETE_PROJECT|translate"
+                  color="warn"
+                  mat-icon-button>
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
 
       </mat-card>

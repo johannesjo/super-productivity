@@ -43,6 +43,7 @@ import {WorkContextType} from '../../work-context/work-context.model';
 import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {Project} from '../project.model';
+import {TaskService} from '../../tasks/task.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -168,6 +169,7 @@ export class ProjectEffects {
       tap(async (action: DeleteProject) => {
         await this._persistenceService.removeCompleteRelatedDataForProject(action.payload.id);
         this._reminderService.removeReminderByWorkContextId(action.payload.id);
+        this._taskService.removeOrphanTasksForProject(action.payload.id);
       }),
     );
 
@@ -283,6 +285,7 @@ export class ProjectEffects {
     private _obstructionService: ObstructionService,
     private _improvementService: ImprovementService,
     private _workContextService: WorkContextService,
+    private _taskService: TaskService,
     private _router: Router,
   ) {
   }
