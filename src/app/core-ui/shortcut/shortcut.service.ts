@@ -99,14 +99,14 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/active/tasks']);
 
-    } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
-      this._router.navigate(['/daily-agenda']);
-
     } else if (checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/settings']);
 
-    } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
-      this._router.navigate(['/focus-view']);
+      // } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
+      //   this._router.navigate(['/daily-agenda']);
+      //
+      // } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
+      //   this._router.navigate(['/focus-view']);
 
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();

@@ -460,8 +460,4 @@ export class WorkContextService {
   private async _setActiveContext(activeId: string, activeType: WorkContextType) {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
-
-  private async _isValidContextId(id: string): Promise<boolean> {
-
-  }
 }

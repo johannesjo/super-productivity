@@ -116,20 +116,20 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
         label: T.GCF.KEYBOARD.GO_TO_WORK_VIEW
       },
     },
-    {
-      key: 'goToFocusMode',
-      type: 'keyboard',
-      templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_FOCUS_MODE
-      },
-    },
-    {
-      key: 'goToDailyAgenda',
-      type: 'keyboard',
-      templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_DAILY_AGENDA
-      },
-    },
+    // {
+    //   key: 'goToFocusMode',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: T.GCF.KEYBOARD.GO_TO_FOCUS_MODE
+    //   },
+    // },
+    // {
+    //   key: 'goToDailyAgenda',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: T.GCF.KEYBOARD.GO_TO_DAILY_AGENDA
+    //   },
+    // },
     {
       key: 'goToSettings',
       type: 'keyboard',
