@@ -153,7 +153,7 @@ export function projectReducer(
     const backlogIdsBefore = state.entities[workContextId].backlogTaskIds;
 
     const filteredToday = todaysTaskIdsBefore.filter(filterOutId(taskId));
-    const backlogTaskIds = moveItemInList(taskId, newOrderedIds, backlogIdsBefore);
+    const backlogTaskIds = moveItemInList(taskId, backlogIdsBefore, newOrderedIds);
 
     return projectAdapter.updateOne({
       id: workContextId,
@@ -171,7 +171,7 @@ export function projectReducer(
     const todaysTaskIdsBefore = state.entities[workContextId].taskIds;
 
     const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
-    const newTodaysTaskIds = moveItemInList(taskId, newOrderedIds, todaysTaskIdsBefore);
+    const newTodaysTaskIds = moveItemInList(taskId, todaysTaskIdsBefore, newOrderedIds);
 
     return projectAdapter.updateOne({
       id: workContextId,

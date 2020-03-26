@@ -23,6 +23,8 @@ Please note that the completeList depending on the circumstances might or might 
 include the itemId, while the partialList always should.
 */
 export const moveItemInList = (itemId: string, completeList: string[], partialList: string[], emptyListVal = 0): string[] => {
+  // console.log(itemId, completeList, partialList);
+
   let newIndex;
   const curInUpdateListIndex = partialList.indexOf(itemId);
   const prevItemId = partialList[curInUpdateListIndex - 1];

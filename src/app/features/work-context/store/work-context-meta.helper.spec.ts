@@ -25,4 +25,25 @@ describe('moveItemInList()', () => {
     const result = moveItemInList('x', ['A', 'B', 'C'], ['x', 'C']);
     expect(result).toEqual(['A', 'B', 'x', 'C']);
   });
+
+  it('should work for moving INTO a filtered list with only one item after', () => {
+    const result = moveItemInList('x', ['A', 'B', 'C'], ['x', 'C']);
+    expect(result).toEqual(['A', 'B', 'x', 'C']);
+  });
+
+
+  it('should work for moving INTO an empty filtered list with hidden items', () => {
+    const result = moveItemInList('x', ['A', 'B', 'C'], ['x'], 0);
+    expect(result).toEqual(['x', 'A', 'B', 'C']);
+  });
+
+  it('should work for moving INTO an empty filtered list with hidden items 2', () => {
+    const result = moveItemInList('x', ['A', 'B', 'C'], ['x'], 3);
+    expect(result).toEqual(['A', 'B', 'C', 'x']);
+  });
+
+  it('should work for moving INTO an empty list (without unfiltered items)', () => {
+    const result = moveItemInList('x', [], ['x']);
+    expect(result).toEqual(['x']);
+  });
 });
