@@ -22,7 +22,6 @@ export class WorkContextEffects {
       this._store$.pipe(select(selectContextFeatureState)),
     ),
     tap(this._saveToLs.bind(this)),
-    tap(this._updateLastActive.bind(this)),
   ), {dispatch: false});
 
 
@@ -65,11 +64,6 @@ export class WorkContextEffects {
   }
 
   private _saveToLs([action, contextState]) {
-    this._persistenceService.saveLastActive();
     this._persistenceService.context.saveState(contextState);
-  }
-
-  private _updateLastActive() {
-    this._persistenceService.saveLastActive();
   }
 }
