@@ -19,8 +19,8 @@ import {
   AddTask,
   AddTaskReminder,
   AddTimeSpent,
-  DeleteTask,
   DeleteMainTasks,
+  DeleteTask,
   LoadTaskState,
   MoveSubTask,
   MoveSubTaskDown,
@@ -607,8 +607,13 @@ export class TaskService {
       const t = taskArchiveState.entities[id];
       return t.projectId === projectIdToDelete;
     });
+    // console.log(await this._persistenceService.taskArchive.loadState());
+    await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
+    // console.log(await this._persistenceService.taskArchive.loadState());
+
     // TODO just filter all tags for those ids
-    console.log('TaskIds to remove', nonArchiveTaskIdsToDelete, archiveTaskIdsToDelete);
+    console.log('TaskIds to remove', nonArchiveTaskIdsToDelete);
+    console.log('Archive TaskIds to remove', archiveTaskIdsToDelete);
     this.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
     return {
       today: nonArchiveTaskIdsToDelete,
