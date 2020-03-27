@@ -296,16 +296,7 @@ export class ProjectEffects {
         })),
       )),
       filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
-      tap(() => console.error('NOOO. We had to delete some tasks with wrong project id')),
-      tap(({wrongProjectTasks}) => console.log('Error INFO Today:', wrongProjectTasks.map(t => t.projectId), wrongProjectTasks)),
-      tap(() => {
-        this._snackService.open({
-          ico: 'delete_forever',
-          type: 'ERROR',
-          // msg: T.F.PROJECT.S.DELETED
-          msg: 'NOOO. We had to delete some tasks with wrong project id'
-        });
-      }),
+      tap((arg) => console.log('Error INFO Today:', arg)),
       tap(({activeId, wrongProjectTasks, allTasks}) => {
         const allIds = allTasks.map(t => t.id);
         const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
@@ -335,15 +326,73 @@ export class ProjectEffects {
         })),
       )),
       filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
-      tap(() => console.error('NOOO. We had to delete some tasks with wrong project id')),
-      tap(({wrongProjectTasks}) => console.log('Error INFO Backlog:', wrongProjectTasks.map(t => t.projectId), wrongProjectTasks)),
+      tap((arg) => console.log('Error INFO Backlog:', arg)),
       tap(({activeId, wrongProjectTasks, allTasks}) => {
         const allIds = allTasks.map(t => t.id);
         const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
-        const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+        const r = confirm('Nooo! We found some backlog tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
         if (r) {
           this._projectService.update(activeId, {
             backlogTaskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
+          });
+          alert('Done!');
+        }
+      }),
+    );
+
+
+  @Effect({dispatch: false})
+  cleanupNullTasksForTaskList: any = this._workContextService.activeWorkContextTypeAndId$
+    .pipe(
+      // only run in prod, because we want to debug this
+      // filter(() => environment.production),
+      filter(({activeType}) => activeType === WorkContextType.PROJECT),
+      switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
+        take(1),
+        map((tasks) => ({
+          allTasks: tasks,
+          nullTasks: tasks.filter(task => !task),
+          activeType,
+          activeId,
+        })),
+      )),
+      filter(({nullTasks}) => nullTasks.length > 0),
+      tap((arg) => console.log('Error INFO Today:', arg)),
+      tap(({activeId, allTasks}) => {
+        const allIds = allTasks.map(t => t && t.id);
+        const r = confirm('Nooo! We found some tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+        if (r) {
+          this._projectService.update(activeId, {
+            taskIds: allIds.filter((id => !!id)),
+          });
+          alert('Done!');
+        }
+      }),
+    );
+
+  @Effect({dispatch: false})
+  cleanupNullTasksForBacklog: any = this._workContextService.activeWorkContextTypeAndId$
+    .pipe(
+      // only run in prod, because we want to debug this
+      // filter(() => environment.production),
+      filter(({activeType}) => activeType === WorkContextType.PROJECT),
+      switchMap(({activeType, activeId}) => this._workContextService.backlogTasks$.pipe(
+        take(1),
+        map((tasks) => ({
+          allTasks: tasks,
+          nullTasks: tasks.filter(task => !task),
+          activeType,
+          activeId,
+        })),
+      )),
+      filter(({nullTasks}) => nullTasks.length > 0),
+      tap((arg) => console.log('Error INFO Today:', arg)),
+      tap(({activeId, allTasks}) => {
+        const allIds = allTasks.map(t => t && t.id);
+        const r = confirm('Nooo! We found some backlog tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+        if (r) {
+          this._projectService.update(activeId, {
+            backlogTaskIds: allIds.filter((id => !!id)),
           });
           alert('Done!');
         }
