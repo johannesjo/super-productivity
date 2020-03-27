@@ -147,6 +147,9 @@ export class MigrationService {
       return {
         ...state,
         entities: (state.ids as string[]).reduce((acc, entityId) => {
+          if (projectId !== state.entities[entityId].projectId) {
+            console.log('OVERWRITING PROJECT ID', projectId, state.entities[entityId].projectId, state.entities[entityId]);
+          }
           return {
             ...acc,
             [entityId]: {
