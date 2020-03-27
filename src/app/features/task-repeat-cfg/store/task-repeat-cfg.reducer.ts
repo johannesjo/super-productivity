@@ -33,6 +33,14 @@ export function taskRepeatCfgReducer(
       return adapter.updateOne(action.payload.taskRepeatCfg, state);
     }
 
+    case TaskRepeatCfgActionTypes.UpdateTaskRepeatCfgs: {
+      const {ids, changes} = action.payload;
+      return adapter.updateMany(ids.map(id => ({
+        id,
+        changes,
+      })), state);
+    }
+
     case TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg: {
       return adapter.upsertOne(action.payload.taskRepeatCfg, state);
     }

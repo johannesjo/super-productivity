@@ -175,6 +175,7 @@ export class ProjectEffects {
         this._reminderService.removeRemindersByWorkContextId(action.payload.id);
         this._removeAllTasksForProject(action.payload.id);
         this._removeAllArchiveTasksForProject(action.payload.id);
+        this._removeAllRepeatingTasksForProject(action.payload.id);
       }),
     );
 
@@ -322,6 +323,24 @@ export class ProjectEffects {
     console.log('Archive TaskIds to remove/unique', archiveTaskIdsToDelete, unique(archiveTaskIdsToDelete));
     // remove archive
     await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
+  }
+
+  private async _removeAllRepeatingTasksForProject(projectIdToDelete: string): Promise<any> {
+    const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(first()).toPromise();
+
+    const cfgsIdsToRemove = taskRepeatCfgs
+      .filter(cfg => cfg.projectId === projectIdToDelete && (!cfg.tagIds || cfg.tagIds.length === 0))
+      .map(cfg => cfg.id);
+    if (cfgsIdsToRemove.length > 0) {
+      this._taskRepeatCfgService.deleteTaskRepeatCfgs(cfgsIdsToRemove);
+    }
+
+    const cfgsToUpdate = taskRepeatCfgs
+      .filter(cfg => cfg.projectId === projectIdToDelete && cfg.tagIds && cfg.tagIds.length > 0)
+      .map(taskRepeatCfg => taskRepeatCfg.id);
+    if (cfgsToUpdate.length > 0) {
+      this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, {projectId: null});
+    }
   }
 }
 
