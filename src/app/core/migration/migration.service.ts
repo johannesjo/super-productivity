@@ -209,9 +209,27 @@ export class MigrationService {
   }
 
   private _mergeEntities(states: EntityState<any>[], initial: EntityState<any>): EntityState<any> {
-    const replacedIdsMap: ReplaceIdMap = {};
-
     return states.reduce(
+      (acc, s) => {
+        if (!s || !s.ids) {
+          return acc;
+        }
+        return {
+          ...acc,
+          ids: [...acc.ids, ...s.ids] as string[],
+          // NOTE: that this can lead to overwrite when the ids are the same for some reason
+          entities: {...acc.entities, ...s.entities}
+        };
+      }, initial
+    );
+  }
+
+  private _mergeEntitiesWithIdReplacement(
+    states: EntityState<any>[],
+    initial: EntityState<any>): { mergedState: EntityState<any>, replaceIdMap: ReplaceIdMap } {
+    const replaceIdMap: ReplaceIdMap = {};
+
+    const mergedState = states.reduce(
       (acc, s) => {
         if (!s || !s.ids) {
           return acc;
@@ -222,11 +240,11 @@ export class MigrationService {
         if (alreadyExistingIds.length) {
           const replacingIds = alreadyExistingIds.map((idToReplace) => {
             const newId = shortid();
-            replacedIdsMap[idToReplace] = newId;
+            replaceIdMap[idToReplace] = newId;
             return newId;
           });
           const replacingEntities = alreadyExistingIds.reduce((newEnts, alreadyExistingId) => {
-            const replacingId = replacedIdsMap[alreadyExistingId];
+            const replacingId = replaceIdMap[alreadyExistingId];
             return {
               ...newEnts,
               [replacingId]: {
@@ -252,7 +270,13 @@ export class MigrationService {
         }
       }, initial
     );
+
+    return {
+      mergedState,
+      replaceIdMap,
+    };
   }
+
 
   private _isNeedsMigration(projectState: ProjectState): boolean {
     return (projectState && (!(projectState as any).__modelVersion || (projectState as any).__modelVersion <= 3));
