@@ -11,6 +11,7 @@ import {ProjectSettingsPageComponent} from './pages/project-settings-page/projec
 import {TagTaskPageComponent} from './pages/tag-task-page/tag-task-page.component';
 import {ActiveWorkContextGuard, ValidProjectIdGuard, ValidTagIdGuard} from './app.guard';
 import {TagSettingsPageComponent} from './pages/tag-settings-page/tag-settings-page.component';
+import {TODAY_TAG} from './features/tag/tag.const';
 
 export const APP_ROUTES: Routes = [
   {path: 'config', component: ConfigPageComponent, data: {page: 'config'}},
@@ -92,5 +93,5 @@ export const APP_ROUTES: Routes = [
   {path: 'active/:subPageType/:param', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
   {path: 'active', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
 
-  {path: '**', redirectTo: 'tag/MY_DAY/tasks'}
+  {path: '**', redirectTo: `tag/${TODAY_TAG.id}/task`}
 ];
