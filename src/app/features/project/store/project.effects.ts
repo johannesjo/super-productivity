@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {concatMap, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
+import {concatMap, delay, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -278,6 +278,75 @@ export class ProjectEffects {
           ico: 'delete_forever',
           msg: T.F.PROJECT.S.DELETED
         });
+      }),
+    );
+
+  @Effect({dispatch: false})
+  cleanupTaskListOfNonProjectTasks: any = this._workContextService.activeWorkContextTypeAndId$
+    .pipe(
+      filter(({activeType}) => activeType === WorkContextType.PROJECT),
+      delay(100),
+      switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
+        take(1),
+        map((tasks) => ({
+          allTasks: tasks,
+          wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
+          activeType,
+          activeId,
+        })),
+      )),
+      filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
+      tap(() => console.error('NOOO. We had to delete some tasks with wrong project id')),
+      tap(({wrongProjectTasks}) => console.log('Error INFO Today:', wrongProjectTasks.map(t => t.projectId), wrongProjectTasks)),
+      tap(() => {
+        this._snackService.open({
+          ico: 'delete_forever',
+          type: 'ERROR',
+          // msg: T.F.PROJECT.S.DELETED
+          msg: 'NOOO. We had to delete some tasks with wrong project id'
+        });
+      }),
+      tap(({activeId, wrongProjectTasks, allTasks}) => {
+        const allIds = allTasks.map(t => t.id);
+        const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
+        const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+        if (r) {
+          this._projectService.update(activeId, {
+            taskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
+          });
+          alert('Done!');
+        }
+      }),
+    );
+
+
+  @Effect({dispatch: false})
+  cleanupBacklogOfNonProjectTasks: any = this._workContextService.activeWorkContextTypeAndId$
+    .pipe(
+      filter(({activeType}) => activeType === WorkContextType.PROJECT),
+      delay(100),
+      switchMap(({activeType, activeId}) => this._workContextService.backlogTasks$.pipe(
+        take(1),
+        map((tasks) => ({
+          allTasks: tasks,
+          wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
+          activeType,
+          activeId,
+        })),
+      )),
+      filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
+      tap(() => console.error('NOOO. We had to delete some tasks with wrong project id')),
+      tap(({wrongProjectTasks}) => console.log('Error INFO Backlog:', wrongProjectTasks.map(t => t.projectId), wrongProjectTasks)),
+      tap(({activeId, wrongProjectTasks, allTasks}) => {
+        const allIds = allTasks.map(t => t.id);
+        const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
+        const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+        if (r) {
+          this._projectService.update(activeId, {
+            backlogTaskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
+          });
+          alert('Done!');
+        }
       }),
     );
 
