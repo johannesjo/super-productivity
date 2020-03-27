@@ -69,7 +69,7 @@ export class MigrationService {
 
   private _migrate(legacyAppDataComplete: LegacyAppDataComplete): AppDataComplete {
     const ids = legacyAppDataComplete.project.ids as string[];
-    console.log('projectState', legacyAppDataComplete);
+    console.log('legacyAppDataComplete', legacyAppDataComplete);
     console.log('projectIds', ids);
 
     const newAppData: AppDataComplete = {
@@ -82,19 +82,21 @@ export class MigrationService {
       context: initialContextState,
       // migrated
       project: {
-        ...this._migrateTaskListsFromTaskToProjectState(legacyAppDataComplete),
+        ...this._mTaskListsFromTaskToProjectState(legacyAppDataComplete),
         __modelVersion: 4,
       } as any,
-      taskRepeatCfg: this._migrateTaskRepeatFromProjectIntoSingle(legacyAppDataComplete),
+      taskRepeatCfg: this._mTaskRepeatCfg(legacyAppDataComplete),
 
-      task: this._migrateTaskState(legacyAppDataComplete),
-      taskArchive: this._migrateTaskArchiveState(legacyAppDataComplete),
+      task: this._mTaskState(legacyAppDataComplete),
+      taskArchive: this._mTaskArchiveState(legacyAppDataComplete),
     };
+
+    console.log('DATA AFTER MIGRATIONS', newAppData);
 
     return newAppData;
   }
 
-  private _migrateTaskListsFromTaskToProjectState(legacyAppDataComplete: LegacyAppDataComplete): ProjectState {
+  private _mTaskListsFromTaskToProjectState(legacyAppDataComplete: LegacyAppDataComplete): ProjectState {
     const projectStateBefore = legacyAppDataComplete.project;
     return {
       ...projectStateBefore,
@@ -113,38 +115,66 @@ export class MigrationService {
   }
 
 
-  private _migrateTaskState(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
-    const singleState = this._migrateTaskFromProjectToSingle(legacyAppDataComplete);
+  private _mTaskState(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
+    const singleState = this._mTaskFromProjectToSingle(legacyAppDataComplete);
     const standardMigration = migrateTaskState(singleState as TaskState);
-    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskState;
+    return this._mTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskState;
   }
 
-  private _migrateTaskArchiveState(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
-    const singleState = this._migrateTaskArchiveFromProjectToSingle(legacyAppDataComplete) as TaskArchive;
+  private _mTaskArchiveState(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
+    const singleState = this._mTaskArchiveFromProjectToSingle(legacyAppDataComplete) as TaskArchive;
     const standardMigration = migrateTaskState(singleState as TaskState);
-    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskArchive;
+    return this._mTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskArchive;
   }
 
-  private _migrateTaskFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
+  private _mTaskRepeatCfg(legacyAppDataComplete: LegacyAppDataComplete): TaskRepeatCfgState {
+    const pids = legacyAppDataComplete.project.ids as string[];
+
+    const repeatStates: TaskRepeatCfgState[] = pids.map((projectId) => {
+      const repeatState = legacyAppDataComplete.taskRepeatCfg[projectId];
+      if (!repeatState) {
+        return null;
+      }
+
+      // add projectId to model
+      return {
+        ...repeatState,
+        entities: (repeatState.ids as string[]).reduce((acc, entityId) => {
+          return {
+            ...acc,
+            [entityId]: {
+              ...repeatState.entities[entityId],
+              projectId,
+              tagIds: [],
+            }
+          };
+        }, {})
+      };
+    });
+
+    return this._mergeEntities(repeatStates, initialTaskRepeatCfgState) as TaskRepeatCfgState;
+  }
+
+  private _mTaskFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
     const pids = legacyAppDataComplete.project.ids as string[];
     const taskStates: TaskState[] = pids.map((id) => legacyAppDataComplete.task[id]);
     return this._mergeEntities(taskStates, initialTaskState) as TaskState;
   }
 
-  private _migrateTaskArchiveFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
+  private _mTaskArchiveFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
     const pids = legacyAppDataComplete.project.ids as string[];
     const taskStates: TaskArchive[] = pids.map((id) => legacyAppDataComplete.taskArchive[id]);
     return this._mergeEntities(taskStates, EMTPY_ENTITY()) as TaskArchive;
   }
 
-  private _migrateTaskRepeatFromProjectIntoSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskRepeatCfgState {
+  private _mTaskRepeatFromProjectIntoSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskRepeatCfgState {
     const pids = legacyAppDataComplete.project.ids as string[];
     const taskStates: TaskRepeatCfgState[] = pids.map((id) => legacyAppDataComplete.taskRepeatCfg[id]);
     return this._mergeEntities(taskStates, initialTaskRepeatCfgState) as TaskRepeatCfgState;
   }
 
 
-  private _migrateTaskAttachmentsToTaskStates(legacyAppDataComplete: LegacyAppDataComplete, taskState: (TaskState | TaskArchive)):
+  private _mTaskAttachmentsToTaskStates(legacyAppDataComplete: LegacyAppDataComplete, taskState: (TaskState | TaskArchive)):
     TaskState | TaskArchive {
     const attachmentStates = Object.keys(legacyAppDataComplete.taskAttachment).map(id => legacyAppDataComplete.taskAttachment[id]);
     const allAttachmentState = this._mergeEntities(attachmentStates, initialTaskRepeatCfgState) as EntityState<TaskAttachment>;
