@@ -82,6 +82,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() set tasks(tasks: TaskWithSubTasks[]) {
     this.tasksIN = tasks;
     this.tasks$.next(tasks);
+    console.log(tasks.map(t => t.projectId));
 
     if (!tasks) {
       return;
