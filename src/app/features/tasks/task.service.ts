@@ -88,6 +88,7 @@ import {
   moveTaskUpInTodayList
 } from '../work-context/store/work-context-meta.actions';
 import {Router} from '@angular/router';
+import {unique} from '../../util/unique';
 
 
 @Injectable({
@@ -600,21 +601,23 @@ export class TaskService {
     ).toPromise();
     const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
       const t = taskState.entities[id];
-      return t.projectId === projectIdToDelete;
+      // NOTE sub tasks are accounted for in DeleteMainTasks action
+      return t.projectId === projectIdToDelete && !t.parentId;
     });
     const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
     const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
       const t = taskArchiveState.entities[id];
-      return t.projectId === projectIdToDelete;
+      // NOTE sub tasks are accounted for in DeleteMainTasks action
+      return t.projectId === projectIdToDelete && !t.parentId;
     });
     // console.log(await this._persistenceService.taskArchive.loadState());
     await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
     // console.log(await this._persistenceService.taskArchive.loadState());
 
     // TODO just filter all tags for those ids
-    console.log('TaskIds to remove', nonArchiveTaskIdsToDelete);
-    console.log('Archive TaskIds to remove', archiveTaskIdsToDelete);
-    this.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
+    console.log('TaskIds to remove', nonArchiveTaskIdsToDelete, unique(nonArchiveTaskIdsToDelete));
+    console.log('Archive TaskIds to remove', archiveTaskIdsToDelete, unique(archiveTaskIdsToDelete));
+    this.removeMultipleMainTasks(unique(nonArchiveTaskIdsToDelete));
     return {
       today: nonArchiveTaskIdsToDelete,
     };
