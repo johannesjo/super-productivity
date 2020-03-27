@@ -18,7 +18,11 @@ import {initialContextState} from '../../features/work-context/store/work-contex
 import {Project} from '../../features/project/project.model';
 import {concatMap, map} from 'rxjs/operators';
 import {migrateTaskState} from '../../features/tasks/migrate-task-state.util';
+import shortid from 'shortid';
 
+interface ReplaceIdMap {
+  [key: string]: string;
+}
 
 const EMTPY_ENTITY = () => ({ids: [], entities: {}});
 
@@ -26,8 +30,6 @@ const EMTPY_ENTITY = () => ({ids: [], entities: {}});
   providedIn: 'root'
 })
 export class MigrationService {
-
-
   constructor(
     private _persistenceService: PersistenceService,
     private _legacyPersistenceService: LegacyPersistenceService,
@@ -207,17 +209,47 @@ export class MigrationService {
   }
 
   private _mergeEntities(states: EntityState<any>[], initial: EntityState<any>): EntityState<any> {
+    const replacedIdsMap: ReplaceIdMap = {};
+
     return states.reduce(
       (acc, s) => {
         if (!s || !s.ids) {
           return acc;
         }
-        return {
-          ...acc,
-          ids: [...acc.ids, ...s.ids] as string[],
-          // NOTE: that this can lead to overwrite when the ids are the same for some reason
-          entities: {...acc.entities, ...s.entities}
-        };
+        // for bad reasons there might be double ids, we copy those
+        const alreadyExistingIds = (s.ids as string[]).filter((id: string) =>
+          (acc.ids as string[]).includes(id));
+        if (alreadyExistingIds.length) {
+          const replacingIds = alreadyExistingIds.map((idToReplace) => {
+            const newId = shortid();
+            replacedIdsMap[idToReplace] = newId;
+            return newId;
+          });
+          const replacingEntities = alreadyExistingIds.reduce((newEnts, alreadyExistingId) => {
+            const replacingId = replacedIdsMap[alreadyExistingId];
+            return {
+              ...newEnts,
+              [replacingId]: {
+                ...s.entities[alreadyExistingId],
+                id: replacingId,
+              }
+            };
+          }, {});
+          return {
+            ...acc,
+            ids: [...acc.ids, ...replacingIds] as string[],
+            // NOTE: that this can lead to overwrite when the ids are the same for some reason
+            entities: {...acc.entities, ...replacingEntities}
+          };
+        } else {
+
+          return {
+            ...acc,
+            ids: [...acc.ids, ...s.ids] as string[],
+            // NOTE: that this can lead to overwrite when the ids are the same for some reason
+            entities: {...acc.entities, ...s.entities}
+          };
+        }
       }, initial
     );
   }
