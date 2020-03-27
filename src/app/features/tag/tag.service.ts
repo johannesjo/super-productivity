@@ -14,7 +14,7 @@ import {Tag, TagState} from './tag.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
-import {MY_DAY_TAG} from './tag.const';
+import {TODAY_TAG} from './tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -96,13 +96,13 @@ export class TagService {
 
   private _addMyDayTag(state: TagState): TagState {
     const ids = state.ids as string[];
-    if (ids && !ids.includes(MY_DAY_TAG.id)) {
+    if (ids && !ids.includes(TODAY_TAG.id)) {
       return {
         ...state,
-        ids: ([MY_DAY_TAG.id, ...ids] as string[]),
+        ids: ([TODAY_TAG.id, ...ids] as string[]),
         entities: {
           ...state.entities,
-          [MY_DAY_TAG.id]: MY_DAY_TAG,
+          [TODAY_TAG.id]: TODAY_TAG,
         }
       };
     }

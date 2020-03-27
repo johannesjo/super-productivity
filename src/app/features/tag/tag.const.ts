@@ -1,10 +1,10 @@
 import {Tag} from './tag.model';
 import {WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
 
-export const MY_DAY_TAG: Tag = {
-  id: 'MY_DAY',
+export const TODAY_TAG: Tag = {
+  id: 'TODAY',
   icon: 'wb_sunny',
-  title: 'My Day',
+  title: 'Today',
   color: null,
   created: Date.now(),
   modified: Date.now(),

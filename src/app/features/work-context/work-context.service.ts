@@ -25,7 +25,7 @@ import {
   take,
   withLatestFrom
 } from 'rxjs/operators';
-import {MY_DAY_TAG} from '../tag/tag.const';
+import {TODAY_TAG} from '../tag/tag.const';
 import {TagService} from '../tag/tag.service';
 import {Task, TaskWithSubTasks} from '../tasks/task.model';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
@@ -122,7 +122,7 @@ export class WorkContextService {
   );
 
   mainWorkContexts$: Observable<WorkContext[]> =
-    this._tagService.getTagById$(MY_DAY_TAG.id).pipe(
+    this._tagService.getTagById$(TODAY_TAG.id).pipe(
       switchMap(myDayTag => of([
           ({
             ...myDayTag,

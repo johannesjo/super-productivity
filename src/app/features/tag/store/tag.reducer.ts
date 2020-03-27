@@ -11,7 +11,7 @@ import {
   TaskActionTypes,
   UpdateTaskTags
 } from '../../tasks/store/task.actions';
-import {MY_DAY_TAG} from '../tag.const';
+import {TODAY_TAG} from '../tag.const';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
@@ -34,7 +34,7 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = tagAdapter.ge
 export const selectAllTags = createSelector(selectTagFeatureState, selectAll);
 export const selectAllTagsWithoutMyDay = createSelector(
   selectAllTags,
-  (tags: Tag[]): Tag[] => tags.filter(tag => tag.id !== MY_DAY_TAG.id)
+  (tags: Tag[]): Tag[] => tags.filter(tag => tag.id !== TODAY_TAG.id)
 );
 
 export const selectTagById = createSelector(
