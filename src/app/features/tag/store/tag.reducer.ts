@@ -4,6 +4,7 @@ import {Tag, TagState} from '../tag.model';
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 import {
   AddTask,
+  DeleteMainTasks,
   DeleteTask,
   MoveToArchive,
   RestoreTask,
@@ -233,6 +234,19 @@ export function tagReducer(
         id: pid,
         changes: {
           taskIds: state.entities[pid].taskIds.filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
+        }
+      }));
+      return tagAdapter.updateMany(updates, state);
+    }
+
+    // cleans up all occurrences
+    case TaskActionTypes.DeleteMainTasks: {
+      const {payload} = action as DeleteMainTasks;
+      const {taskIds} = payload;
+      const updates: Update<Project>[] = (state.ids as string[]).map(tagId => ({
+        id: tagId,
+        changes: {
+          taskIds: state.entities[tagId].taskIds.filter(taskId => !taskIds.includes(taskId)),
         }
       }));
       return tagAdapter.updateMany(updates, state);

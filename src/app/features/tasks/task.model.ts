@@ -89,7 +89,6 @@ export interface TaskWithSubTasks extends Task {
   readonly subTasks?: Task[];
 }
 
-
 export const DEFAULT_TASK: Task = {
   id: null,
   projectId: null,

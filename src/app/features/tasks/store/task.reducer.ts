@@ -181,6 +181,17 @@ export function taskReducer(
       return deleteTask(state, action.payload.task);
     }
 
+    case TaskActionTypes.DeleteMainTasks: {
+      const allIds = action.payload.taskIds.reduce((acc, id) => {
+        return [
+          ...acc,
+          id,
+          ...state.entities[id].subTaskIds
+        ];
+      }, []);
+      return taskAdapter.removeMany(allIds, state);
+    }
+
     case TaskActionTypes.MoveSubTask: {
       let newState = state;
       const {taskId, srcTaskId, targetTaskId, newOrderedIds} = action.payload;

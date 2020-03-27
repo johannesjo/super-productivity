@@ -137,7 +137,7 @@ export class ReminderService {
     }
   }
 
-  removeReminderByWorkContextId(workContextId: string) {
+  removeRemindersByWorkContextId(workContextId: string) {
     const reminders = this._reminders.filter(reminderIN => reminderIN.workContextId === workContextId);
     if (reminders && reminders.length) {
       reminders.forEach(reminder => {

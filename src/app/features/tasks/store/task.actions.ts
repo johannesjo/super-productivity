@@ -20,6 +20,7 @@ export enum TaskActionTypes {
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
+  DeleteMainTasks = '[Task] Delete Main Tasks',
   UndoDeleteTask = '[Task] Undo Delete Task',
   MoveSubTask = '[Task] Move sub task',
   MoveSubTaskUp = '[Task] Move up',
@@ -122,6 +123,12 @@ export class DeleteTask implements Action {
   readonly type = TaskActionTypes.DeleteTask;
 
   constructor(public payload: { task: TaskWithSubTasks }) {
+  }
+}
+
+export class DeleteMainTasks implements Action {
+  readonly type = TaskActionTypes.DeleteMainTasks;
+  constructor(public payload: { taskIds: string[] }) {
   }
 }
 
@@ -242,6 +249,7 @@ export type TaskActions
   | UpdateTasks
   | UpdateTaskTags
   | DeleteTask
+  | DeleteMainTasks
   | UndoDeleteTask
   | MoveSubTask
   | MoveSubTaskUp

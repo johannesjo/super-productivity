@@ -168,7 +168,7 @@ export class ProjectEffects {
       ),
       tap(async (action: DeleteProject) => {
         await this._persistenceService.removeCompleteRelatedDataForProject(action.payload.id);
-        this._reminderService.removeReminderByWorkContextId(action.payload.id);
+        this._reminderService.removeRemindersByWorkContextId(action.payload.id);
         this._taskService.removeOrphanTasksForProject(action.payload.id);
       }),
     );
@@ -182,7 +182,7 @@ export class ProjectEffects {
       ),
       tap(async (action: ArchiveProject) => {
         await this._persistenceService.archiveProject(action.payload.id);
-        this._reminderService.removeReminderByWorkContextId(action.payload.id);
+        this._reminderService.removeRemindersByWorkContextId(action.payload.id);
         this._snackService.open({
           ico: 'archive',
           msg: T.F.PROJECT.S.ARCHIVED,

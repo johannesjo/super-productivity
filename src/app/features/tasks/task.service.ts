@@ -20,6 +20,7 @@ import {
   AddTaskReminder,
   AddTimeSpent,
   DeleteTask,
+  DeleteMainTasks,
   LoadTaskState,
   MoveSubTask,
   MoveSubTaskDown,
@@ -241,6 +242,9 @@ export class TaskService {
     this._store.dispatch(new DeleteTask({task}));
   }
 
+  removeMultipleMainTasks(taskIds: string[]) {
+    this._store.dispatch(new DeleteMainTasks({taskIds}));
+  }
 
   update(id: string, changedFields: Partial<Task>) {
     this._store.dispatch(new UpdateTask({
@@ -605,6 +609,7 @@ export class TaskService {
     });
     // TODO just filter all tags for those ids
     console.log('TaskIds to remove', nonArchiveTaskIdsToDelete, archiveTaskIdsToDelete);
+    this.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
     return {
       today: nonArchiveTaskIdsToDelete,
     };

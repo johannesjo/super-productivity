@@ -28,6 +28,7 @@ export class TaskDbEffects {
         TaskActionTypes.AddTimeSpent,
         TaskActionTypes.RemoveTaskReminder,
         TaskActionTypes.DeleteTask,
+        TaskActionTypes.DeleteMainTasks,
         TaskActionTypes.UndoDeleteTask,
         TaskActionTypes.AddSubTask,
         // TaskActionTypes.SetCurrentTask,
