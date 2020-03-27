@@ -36,7 +36,9 @@ import {
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskToBacklogList,
+  moveTaskToBacklogListAuto,
   moveTaskToTodayList,
+  moveTaskToTodayListAuto,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
@@ -77,6 +79,8 @@ export class ProjectEffects {
         moveTaskToTodayList.type,
         moveTaskUpInBacklogList.type,
         moveTaskDownInBacklogList.type,
+        moveTaskToBacklogListAuto.type,
+        moveTaskToTodayListAuto.type,
       ),
       tap((a) => {
         // exclude ui only actions
@@ -103,6 +107,7 @@ export class ProjectEffects {
   );
 
   saveToLs$ = this._store$.pipe(
+    // tap(() => console.log('SAVE')),
     select(selectProjectFeatureState),
     take(1),
     switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
@@ -275,6 +280,7 @@ export class ProjectEffects {
         });
       }),
     );
+
 
   constructor(
     private _actions$: Actions,
