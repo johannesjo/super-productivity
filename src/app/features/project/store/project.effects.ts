@@ -7,7 +7,8 @@ import {
   ArchiveProject,
   DeleteProject,
   LoadProjectRelatedDataSuccess,
-  ProjectActionTypes, UnarchiveProject,
+  ProjectActionTypes,
+  UnarchiveProject,
   UpdateProject,
   UpdateProjectIssueProviderCfg,
   UpdateProjectWorkEnd,
@@ -19,7 +20,7 @@ import {BookmarkService} from '../../bookmark/bookmark.service';
 import {NoteService} from '../../note/note.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import {AddTimeSpent, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTimeSpent, DeleteMainTasks, TaskActionTypes} from '../../tasks/store/task.actions';
 import {ReminderService} from '../../reminder/reminder.service';
 import {MetricService} from '../../metric/metric.service';
 import {ObstructionService} from '../../metric/obstruction/obstruction.service';
@@ -44,6 +45,9 @@ import {setActiveWorkContext} from '../../work-context/store/work-context.action
 import {WorkContextService} from '../../work-context/work-context.service';
 import {Project} from '../project.model';
 import {TaskService} from '../../tasks/task.service';
+import {TaskArchive, TaskState} from '../../tasks/task.model';
+import {unique} from '../../../util/unique';
+import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -169,7 +173,7 @@ export class ProjectEffects {
       tap(async (action: DeleteProject) => {
         await this._persistenceService.removeCompleteRelatedDataForProject(action.payload.id);
         this._reminderService.removeRemindersByWorkContextId(action.payload.id);
-        this._taskService.removeOrphanTasksForProject(action.payload.id);
+        this._removeOrphanTasksForProject(action.payload.id);
       }),
     );
 
@@ -286,8 +290,42 @@ export class ProjectEffects {
     private _improvementService: ImprovementService,
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _router: Router,
   ) {
+  }
+
+
+  private async _removeOrphanTasksForProject(projectIdToDelete: string): Promise<{ today: string[] }> {
+    const taskState: TaskState = await this._taskService.taskFeatureState$.pipe(
+      filter(s => s.isDataLoaded),
+      first(),
+    ).toPromise();
+    const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
+      const t = taskState.entities[id];
+      // NOTE sub tasks are accounted for in DeleteMainTasks action
+      return t.projectId === projectIdToDelete && !t.parentId;
+    });
+
+
+    const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
+      const t = taskArchiveState.entities[id];
+      // NOTE sub tasks are accounted for in DeleteMainTasks action
+      return t.projectId === projectIdToDelete && !t.parentId;
+    });
+
+    console.log('TaskIds to remove/unique', nonArchiveTaskIdsToDelete, unique(nonArchiveTaskIdsToDelete));
+    console.log('Archive TaskIds to remove/unique', archiveTaskIdsToDelete, unique(archiveTaskIdsToDelete));
+    // remove archive
+    await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
+    // remove main today list
+    this._taskService.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
+    // remove task repeat configs
+
+    return {
+      today: nonArchiveTaskIdsToDelete,
+    };
   }
 }
 

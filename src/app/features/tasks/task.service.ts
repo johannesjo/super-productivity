@@ -593,36 +593,6 @@ export class TaskService {
     }
   }
 
-
-  async removeOrphanTasksForProject(projectIdToDelete: string): Promise<{ today: string[] }> {
-    const taskState: TaskState = await this.taskFeatureState$.pipe(
-      filter(s => s.isDataLoaded),
-      first(),
-    ).toPromise();
-    const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
-      const t = taskState.entities[id];
-      // NOTE sub tasks are accounted for in DeleteMainTasks action
-      return t.projectId === projectIdToDelete && !t.parentId;
-    });
-    const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
-    const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
-      const t = taskArchiveState.entities[id];
-      // NOTE sub tasks are accounted for in DeleteMainTasks action
-      return t.projectId === projectIdToDelete && !t.parentId;
-    });
-    // console.log(await this._persistenceService.taskArchive.loadState());
-    await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
-    // console.log(await this._persistenceService.taskArchive.loadState());
-
-    // TODO just filter all tags for those ids
-    console.log('TaskIds to remove', nonArchiveTaskIdsToDelete, unique(nonArchiveTaskIdsToDelete));
-    console.log('Archive TaskIds to remove', archiveTaskIdsToDelete, unique(archiveTaskIdsToDelete));
-    this.removeMultipleMainTasks(unique(nonArchiveTaskIdsToDelete));
-    return {
-      today: nonArchiveTaskIdsToDelete,
-    };
-  }
-
   createNewTaskWithDefaults(
     title: string,
     additional: Partial<Task> = {},
