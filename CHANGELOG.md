@@ -1,3 +1,24 @@
+## [5.0.1](https://github.com/johannesjo/super-productivity/compare/v5.0.0...v5.0.1) (2020-03-27)
+
+
+### Bug Fixes
+
+* **sharedTaskList:** redirect not activating work context ([b9522dd](https://github.com/johannesjo/super-productivity/commit/b9522ddc1e36706c91d641107ab3b13e46312a3d))
+* **sharedTaskList:** remove invalid keyboard shortcuts ([23322c1](https://github.com/johannesjo/super-productivity/commit/23322c1773e1bb41840e97ae9b58c844aaf967dd))
+
+
+### Features
+
+* **project:** make delete all archive tasks work for project delete ([4e0aa09](https://github.com/johannesjo/super-productivity/commit/4e0aa095a64331bd732499864576608e10f67fd7))
+* **project:** make delete all non archive data work for project delete ([69848be](https://github.com/johannesjo/super-productivity/commit/69848be087a082c69b751d21954f2017d8833bd5))
+* **sharedTaskList:** minor stuff ([71a78b7](https://github.com/johannesjo/super-productivity/commit/71a78b7c8c2b1bf6dce0e8b225de6e0245681005))
+* prepare project delete cleanup ([e749b91](https://github.com/johannesjo/super-productivity/commit/e749b91d6a8370f6449c19bc57fb04b6eafbf3ba))
+* **sharedTaskList:** improve performance ([8b3721e](https://github.com/johannesjo/super-productivity/commit/8b3721ed8a46d9ca2586f9b26d0366820c53c753))
+* **sharedTaskList:** make move to project work from tag page ([9c80b7b](https://github.com/johannesjo/super-productivity/commit/9c80b7b9ced14857564e8582babcdef0e210519f))
+* **sharedTaskList:** prevent invalid tags and projects from being triggered ([42ea124](https://github.com/johannesjo/super-productivity/commit/42ea124bbc4e753ac9f731aaa20fdaba1074f744))
+
+
+
 # [5.0.0](https://github.com/johannesjo/super-productivity/compare/v4.1.1...v5.0.0) (2020-03-26)
 
 
