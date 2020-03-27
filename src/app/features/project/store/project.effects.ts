@@ -173,7 +173,8 @@ export class ProjectEffects {
       tap(async (action: DeleteProject) => {
         await this._persistenceService.removeCompleteRelatedDataForProject(action.payload.id);
         this._reminderService.removeRemindersByWorkContextId(action.payload.id);
-        this._removeOrphanTasksForProject(action.payload.id);
+        this._removeAllTasksForProject(action.payload.id);
+        this._removeAllArchiveTasksForProject(action.payload.id);
       }),
     );
 
@@ -296,7 +297,7 @@ export class ProjectEffects {
   }
 
 
-  private async _removeOrphanTasksForProject(projectIdToDelete: string): Promise<{ today: string[] }> {
+  private async _removeAllTasksForProject(projectIdToDelete: string): Promise<any> {
     const taskState: TaskState = await this._taskService.taskFeatureState$.pipe(
       filter(s => s.isDataLoaded),
       first(),
@@ -307,25 +308,20 @@ export class ProjectEffects {
       return t.projectId === projectIdToDelete && !t.parentId;
     });
 
+    console.log('TaskIds to remove/unique', nonArchiveTaskIdsToDelete, unique(nonArchiveTaskIdsToDelete));
+    this._taskService.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
+  }
 
+  private async _removeAllArchiveTasksForProject(projectIdToDelete: string): Promise<any> {
     const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
     const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
       const t = taskArchiveState.entities[id];
       // NOTE sub tasks are accounted for in DeleteMainTasks action
       return t.projectId === projectIdToDelete && !t.parentId;
     });
-
-    console.log('TaskIds to remove/unique', nonArchiveTaskIdsToDelete, unique(nonArchiveTaskIdsToDelete));
     console.log('Archive TaskIds to remove/unique', archiveTaskIdsToDelete, unique(archiveTaskIdsToDelete));
     // remove archive
     await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
-    // remove main today list
-    this._taskService.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
-    // remove task repeat configs
-
-    return {
-      today: nonArchiveTaskIdsToDelete,
-    };
   }
 }
 
