@@ -212,6 +212,7 @@ export class MigrationService {
         return {
           ...acc,
           ids: [...acc.ids, ...s.ids] as string[],
+          // NOTE: that this can lead to overwrite when the ids are the same for some reason
           entities: {...acc.entities, ...s.entities}
         };
       }, initial
