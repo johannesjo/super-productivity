@@ -93,7 +93,7 @@ import {Router} from '@angular/router';
   providedIn: 'root',
 })
 export class TaskService {
-  // Currently used in idle service
+  // Currently used in idle service TODO remove
   currentTaskId: string;
   currentTaskId$: Observable<string> = this._store.pipe(
     select(selectCurrentTaskId),
@@ -170,9 +170,6 @@ export class TaskService {
     private readonly _actions$: Actions,
     private readonly _router: Router,
   ) {
-    // TODO remove
-    this.removeOrphanTasksForProject('DEFAULT');
-
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 
     // time tracking

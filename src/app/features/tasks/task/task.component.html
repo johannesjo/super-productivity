@@ -194,7 +194,6 @@
           <mat-icon>alarm</mat-icon>
         </button>
 
-        <!-- TODO needs to be handled -->
         <button (click)="toggleShowAttachments()"
                 *ngIf="task.attachments?.length || task.issueAttachmentNr"
                 [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate"
