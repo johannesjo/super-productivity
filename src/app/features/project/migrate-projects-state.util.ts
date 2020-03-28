@@ -3,8 +3,6 @@ import {Dictionary} from '@ngrx/entity';
 import {Project} from './project.model';
 import {DEFAULT_PROJECT} from './project.const';
 import {DEFAULT_ISSUE_PROVIDER_CFGS, issueProviderKeys} from '../issue/issue.const';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {getYesterdaysDate} from '../../util/get-yesterdays-date';
 import {MODEL_VERSION_KEY, THEME_COLOR_MAP, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import {isMigrateModel} from '../../util/model-version';
 import * as moment from 'moment';
@@ -13,6 +11,7 @@ import {LS_ISSUE_STATE, LS_PROJECT_PREFIX} from '../../core/persistence/ls-keys.
 import {IssueProviderKey} from '../issue/issue.model';
 import * as localForage from 'localforage';
 import {WORK_CONTEXT_DEFAULT_THEME} from '../work-context/work-context.const';
+import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
 
 const MODEL_VERSION = 4;
 
@@ -55,13 +54,11 @@ const _extendProjectDefaults = (project: Project): Project => {
 };
 
 const _removeOutdatedData = (project: Project): Project => {
-  return project;
-
-  // TODO use this after a some period to give people time to complain about the missing feature
-  // const copy: any = dirtyDeepCopy(project);
-  // delete copy.advancedCfg.googleTimeSheetExport;
-  // delete copy.advancedCfg.simpleSummarySettings;
-  // return copy;
+  const copy: any = dirtyDeepCopy(project);
+  delete copy.advancedCfg.googleTimeSheetExport;
+  delete copy.advancedCfg.simpleSummarySettings;
+  delete copy.timeWorkedWithoutBreak;
+  return copy;
 };
 
 

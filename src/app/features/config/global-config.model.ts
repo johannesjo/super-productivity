@@ -125,7 +125,7 @@ export type GlobalConfigState = Readonly<{
   pomodoro: PomodoroConfig;
   googleDriveSync: GoogleDriveSyncConfig;
   keyboard: KeyboardConfig;
-  localBackup: LocalBackupConfig,
+  localBackup: LocalBackupConfig;
   _googleSession: GoogleSession;
 }>;
 

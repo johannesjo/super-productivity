@@ -22,7 +22,6 @@ export interface ProjectBasicCfg {
   /** @deprecated use new theme model instead. */
   isReducedTheme?: boolean;
   isArchived: boolean;
-  timeWorkedWithoutBreak: number;
 
   taskIds: string[];
   backlogTaskIds: string[];

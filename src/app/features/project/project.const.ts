@@ -8,8 +8,6 @@ export const DEFAULT_PROJECT: Project = {
   title: '',
   themeColor: '',
   isArchived: false,
-  // TODO move to global cfg
-  timeWorkedWithoutBreak: null,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   taskIds: [],
   backlogTaskIds: [],
