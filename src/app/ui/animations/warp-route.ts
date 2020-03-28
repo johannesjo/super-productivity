@@ -30,7 +30,7 @@ export const warpRouteAnimation =
 
     transition('* <=> *', [
 
-      /* 1 */ query(':enter, :leave', style({position: 'absolute', width: '100%'})
+      /* 1 */ query(':enter, :leave', style({position: 'absolute', width: '100%', minHeight: '100%', height: '100%'})
         , {optional: true}),
       group([
         query(
