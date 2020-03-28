@@ -11,6 +11,7 @@ import {
   DeleteTaskRepeatCfgs,
   LoadTaskRepeatCfgState,
   UpdateTaskRepeatCfg,
+  UpdateTaskRepeatCfgs,
   UpsertTaskRepeatCfg,
 } from './store/task-repeat-cfg.actions';
 import {Observable} from 'rxjs';
@@ -43,7 +44,7 @@ export class TaskRepeatCfgService {
     return this._store$.pipe(select(selectTaskRepeatCfgById, {id}));
   }
 
-  addTaskRepeatCfgToTask(taskId: string, taskRepeatCfg: TaskRepeatCfg) {
+  addTaskRepeatCfgToTask(taskId: string, projectId: string, taskRepeatCfg: TaskRepeatCfg) {
     this._store$.dispatch(new AddTaskRepeatCfgToTask({
       taskRepeatCfg: {
         ...taskRepeatCfg,
@@ -63,6 +64,10 @@ export class TaskRepeatCfgService {
 
   updateTaskRepeatCfg(id: string, changes: Partial<TaskRepeatCfg>) {
     this._store$.dispatch(new UpdateTaskRepeatCfg({taskRepeatCfg: {id, changes}}));
+  }
+
+  updateTaskRepeatCfgs(ids: string[], changes: Partial<TaskRepeatCfg>) {
+    this._store$.dispatch(new UpdateTaskRepeatCfgs({ids, changes}));
   }
 
   upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {

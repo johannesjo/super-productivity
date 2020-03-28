@@ -18,7 +18,11 @@ import {initialContextState} from '../../features/work-context/store/work-contex
 import {Project} from '../../features/project/project.model';
 import {concatMap, map} from 'rxjs/operators';
 import {migrateTaskState} from '../../features/tasks/migrate-task-state.util';
+import shortid from 'shortid';
 
+interface ReplaceIdMap {
+  [key: string]: string;
+}
 
 const EMTPY_ENTITY = () => ({ids: [], entities: {}});
 
@@ -26,8 +30,6 @@ const EMTPY_ENTITY = () => ({ids: [], entities: {}});
   providedIn: 'root'
 })
 export class MigrationService {
-
-
   constructor(
     private _persistenceService: PersistenceService,
     private _legacyPersistenceService: LegacyPersistenceService,
@@ -69,7 +71,7 @@ export class MigrationService {
 
   private _migrate(legacyAppDataComplete: LegacyAppDataComplete): AppDataComplete {
     const ids = legacyAppDataComplete.project.ids as string[];
-    console.log('projectState', legacyAppDataComplete);
+    console.log('legacyAppDataComplete', legacyAppDataComplete);
     console.log('projectIds', ids);
 
     const newAppData: AppDataComplete = {
@@ -82,19 +84,21 @@ export class MigrationService {
       context: initialContextState,
       // migrated
       project: {
-        ...this._migrateTaskListsFromTaskToProjectState(legacyAppDataComplete),
+        ...this._mTaskListsFromTaskToProjectState(legacyAppDataComplete),
         __modelVersion: 4,
       } as any,
-      taskRepeatCfg: this._migrateTaskRepeatFromProjectIntoSingle(legacyAppDataComplete),
+      taskRepeatCfg: this._mTaskRepeatCfg(legacyAppDataComplete),
 
-      task: this._migrateTaskState(legacyAppDataComplete),
-      taskArchive: this._migrateTaskArchiveState(legacyAppDataComplete),
+      task: this._mTaskState(legacyAppDataComplete),
+      taskArchive: this._mTaskArchiveState(legacyAppDataComplete),
     };
+
+    console.log('DATA AFTER MIGRATIONS', newAppData);
 
     return newAppData;
   }
 
-  private _migrateTaskListsFromTaskToProjectState(legacyAppDataComplete: LegacyAppDataComplete): ProjectState {
+  private _mTaskListsFromTaskToProjectState(legacyAppDataComplete: LegacyAppDataComplete): ProjectState {
     const projectStateBefore = legacyAppDataComplete.project;
     return {
       ...projectStateBefore,
@@ -113,38 +117,67 @@ export class MigrationService {
   }
 
 
-  private _migrateTaskState(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
-    const singleState = this._migrateTaskFromProjectToSingle(legacyAppDataComplete);
+  private _mTaskState(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
+    const singleState = this._mTaskFromProjectToSingle(legacyAppDataComplete);
     const standardMigration = migrateTaskState(singleState as TaskState);
-    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskState;
+    return this._mTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskState;
   }
 
-  private _migrateTaskArchiveState(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
-    const singleState = this._migrateTaskArchiveFromProjectToSingle(legacyAppDataComplete) as TaskArchive;
+  private _mTaskArchiveState(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
+    const singleState = this._mTaskArchiveFromProjectToSingle(legacyAppDataComplete) as TaskArchive;
     const standardMigration = migrateTaskState(singleState as TaskState);
-    return this._migrateTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskArchive;
+    return this._mTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskArchive;
   }
 
-  private _migrateTaskFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
+
+  private _mTaskRepeatCfg(legacyAppDataComplete: LegacyAppDataComplete): TaskRepeatCfgState {
     const pids = legacyAppDataComplete.project.ids as string[];
-    const taskStates: TaskState[] = pids.map((id) => legacyAppDataComplete.task[id]);
+    const repeatStates = this._addProjectIdToEntity(pids, legacyAppDataComplete.taskRepeatCfg, {tagIds: []});
+    return this._mergeEntities(repeatStates, initialTaskRepeatCfgState) as TaskRepeatCfgState;
+  }
+
+  private _addProjectIdToEntity(
+    pids: string[],
+    entityProjectStates: { [key: string]: EntityState<any> },
+    additionalChanges = {}
+  ): EntityState<any>[] {
+    return pids.map((projectId) => {
+      const state = entityProjectStates[projectId];
+      if (!state) {
+        return null;
+      }
+      return {
+        ...state,
+        entities: (state.ids as string[]).reduce((acc, entityId) => {
+          if (projectId !== state.entities[entityId].projectId) {
+            console.log('OVERWRITING PROJECT ID', projectId, state.entities[entityId].projectId, state.entities[entityId]);
+          }
+          return {
+            ...acc,
+            [entityId]: {
+              ...state.entities[entityId],
+              projectId,
+              ...additionalChanges,
+            }
+          };
+        }, {})
+      };
+    });
+  }
+
+  private _mTaskFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
+    const pids = legacyAppDataComplete.project.ids as string[];
+    const taskStates: TaskState[] = this._addProjectIdToEntity(pids, legacyAppDataComplete.task) as TaskState[];
     return this._mergeEntities(taskStates, initialTaskState) as TaskState;
   }
 
-  private _migrateTaskArchiveFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
+  private _mTaskArchiveFromProjectToSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskArchive {
     const pids = legacyAppDataComplete.project.ids as string[];
-    const taskStates: TaskArchive[] = pids.map((id) => legacyAppDataComplete.taskArchive[id]);
+    const taskStates: TaskArchive[] = this._addProjectIdToEntity(pids, legacyAppDataComplete.taskArchive) as TaskArchive[];
     return this._mergeEntities(taskStates, EMTPY_ENTITY()) as TaskArchive;
   }
 
-  private _migrateTaskRepeatFromProjectIntoSingle(legacyAppDataComplete: LegacyAppDataComplete): TaskRepeatCfgState {
-    const pids = legacyAppDataComplete.project.ids as string[];
-    const taskStates: TaskRepeatCfgState[] = pids.map((id) => legacyAppDataComplete.taskRepeatCfg[id]);
-    return this._mergeEntities(taskStates, initialTaskRepeatCfgState) as TaskRepeatCfgState;
-  }
-
-
-  private _migrateTaskAttachmentsToTaskStates(legacyAppDataComplete: LegacyAppDataComplete, taskState: (TaskState | TaskArchive)):
+  private _mTaskAttachmentsToTaskStates(legacyAppDataComplete: LegacyAppDataComplete, taskState: (TaskState | TaskArchive)):
     TaskState | TaskArchive {
     const attachmentStates = Object.keys(legacyAppDataComplete.taskAttachment).map(id => legacyAppDataComplete.taskAttachment[id]);
     const allAttachmentState = this._mergeEntities(attachmentStates, initialTaskRepeatCfgState) as EntityState<TaskAttachment>;
@@ -184,11 +217,66 @@ export class MigrationService {
         return {
           ...acc,
           ids: [...acc.ids, ...s.ids] as string[],
+          // NOTE: that this can lead to overwrite when the ids are the same for some reason
           entities: {...acc.entities, ...s.entities}
         };
       }, initial
     );
   }
+
+  private _mergeEntitiesWithIdReplacement(
+    states: EntityState<any>[],
+    initial: EntityState<any>): { mergedState: EntityState<any>, replaceIdMap: ReplaceIdMap } {
+    const replaceIdMap: ReplaceIdMap = {};
+
+    const mergedState = states.reduce(
+      (acc, s) => {
+        if (!s || !s.ids) {
+          return acc;
+        }
+        // for bad reasons there might be double ids, we copy those
+        const alreadyExistingIds = (s.ids as string[]).filter((id: string) =>
+          (acc.ids as string[]).includes(id));
+        if (alreadyExistingIds.length) {
+          const replacingIds = alreadyExistingIds.map((idToReplace) => {
+            const newId = shortid();
+            replaceIdMap[idToReplace] = newId;
+            return newId;
+          });
+          const replacingEntities = alreadyExistingIds.reduce((newEnts, alreadyExistingId) => {
+            const replacingId = replaceIdMap[alreadyExistingId];
+            return {
+              ...newEnts,
+              [replacingId]: {
+                ...s.entities[alreadyExistingId],
+                id: replacingId,
+              }
+            };
+          }, {});
+          return {
+            ...acc,
+            ids: [...acc.ids, ...replacingIds] as string[],
+            // NOTE: that this can lead to overwrite when the ids are the same for some reason
+            entities: {...acc.entities, ...replacingEntities}
+          };
+        } else {
+
+          return {
+            ...acc,
+            ids: [...acc.ids, ...s.ids] as string[],
+            // NOTE: that this can lead to overwrite when the ids are the same for some reason
+            entities: {...acc.entities, ...s.entities}
+          };
+        }
+      }, initial
+    );
+
+    return {
+      mergedState,
+      replaceIdMap,
+    };
+  }
+
 
   private _isNeedsMigration(projectState: ProjectState): boolean {
     return (projectState && (!(projectState as any).__modelVersion || (projectState as any).__modelVersion <= 3));

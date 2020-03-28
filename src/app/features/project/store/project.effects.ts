@@ -1,13 +1,14 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {concatMap, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
+import {concatMap, delay, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
   DeleteProject,
   LoadProjectRelatedDataSuccess,
-  ProjectActionTypes, UnarchiveProject,
+  ProjectActionTypes,
+  UnarchiveProject,
   UpdateProject,
   UpdateProjectIssueProviderCfg,
   UpdateProjectWorkEnd,
@@ -19,7 +20,7 @@ import {BookmarkService} from '../../bookmark/bookmark.service';
 import {NoteService} from '../../note/note.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import {AddTimeSpent, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTimeSpent, DeleteMainTasks, TaskActionTypes} from '../../tasks/store/task.actions';
 import {ReminderService} from '../../reminder/reminder.service';
 import {MetricService} from '../../metric/metric.service';
 import {ObstructionService} from '../../metric/obstruction/obstruction.service';
@@ -35,7 +36,9 @@ import {
   moveTaskInBacklogList,
   moveTaskInTodayList,
   moveTaskToBacklogList,
+  moveTaskToBacklogListAuto,
   moveTaskToTodayList,
+  moveTaskToTodayListAuto,
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
@@ -44,6 +47,9 @@ import {setActiveWorkContext} from '../../work-context/store/work-context.action
 import {WorkContextService} from '../../work-context/work-context.service';
 import {Project} from '../project.model';
 import {TaskService} from '../../tasks/task.service';
+import {TaskArchive, TaskState} from '../../tasks/task.model';
+import {unique} from '../../../util/unique';
+import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -73,6 +79,8 @@ export class ProjectEffects {
         moveTaskToTodayList.type,
         moveTaskUpInBacklogList.type,
         moveTaskDownInBacklogList.type,
+        moveTaskToBacklogListAuto.type,
+        moveTaskToTodayListAuto.type,
       ),
       tap((a) => {
         // exclude ui only actions
@@ -99,6 +107,7 @@ export class ProjectEffects {
   );
 
   saveToLs$ = this._store$.pipe(
+    // tap(() => console.log('SAVE')),
     select(selectProjectFeatureState),
     take(1),
     switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
@@ -169,7 +178,9 @@ export class ProjectEffects {
       tap(async (action: DeleteProject) => {
         await this._persistenceService.removeCompleteRelatedDataForProject(action.payload.id);
         this._reminderService.removeRemindersByWorkContextId(action.payload.id);
-        this._taskService.removeOrphanTasksForProject(action.payload.id);
+        this._removeAllTasksForProject(action.payload.id);
+        this._removeAllArchiveTasksForProject(action.payload.id);
+        this._removeAllRepeatingTasksForProject(action.payload.id);
       }),
     );
 
@@ -270,6 +281,76 @@ export class ProjectEffects {
       }),
     );
 
+  @Effect({dispatch: false})
+  cleanupTaskListOfNonProjectTasks: any = this._workContextService.activeWorkContextTypeAndId$
+    .pipe(
+      filter(({activeType}) => activeType === WorkContextType.PROJECT),
+      delay(100),
+      switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
+        take(1),
+        map((tasks) => ({
+          allTasks: tasks,
+          wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
+          activeType,
+          activeId,
+        })),
+      )),
+      filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
+      tap(() => console.error('NOOO. We had to delete some tasks with wrong project id')),
+      tap(({wrongProjectTasks}) => console.log('Error INFO Today:', wrongProjectTasks.map(t => t.projectId), wrongProjectTasks)),
+      tap(() => {
+        this._snackService.open({
+          ico: 'delete_forever',
+          type: 'ERROR',
+          // msg: T.F.PROJECT.S.DELETED
+          msg: 'NOOO. We had to delete some tasks with wrong project id'
+        });
+      }),
+      tap(({activeId, wrongProjectTasks, allTasks}) => {
+        const allIds = allTasks.map(t => t.id);
+        const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
+        const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+        if (r) {
+          this._projectService.update(activeId, {
+            taskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
+          });
+          alert('Done!');
+        }
+      }),
+    );
+
+
+  @Effect({dispatch: false})
+  cleanupBacklogOfNonProjectTasks: any = this._workContextService.activeWorkContextTypeAndId$
+    .pipe(
+      filter(({activeType}) => activeType === WorkContextType.PROJECT),
+      delay(100),
+      switchMap(({activeType, activeId}) => this._workContextService.backlogTasks$.pipe(
+        take(1),
+        map((tasks) => ({
+          allTasks: tasks,
+          wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
+          activeType,
+          activeId,
+        })),
+      )),
+      filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
+      tap(() => console.error('NOOO. We had to delete some tasks with wrong project id')),
+      tap(({wrongProjectTasks}) => console.log('Error INFO Backlog:', wrongProjectTasks.map(t => t.projectId), wrongProjectTasks)),
+      tap(({activeId, wrongProjectTasks, allTasks}) => {
+        const allIds = allTasks.map(t => t.id);
+        const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
+        const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+        if (r) {
+          this._projectService.update(activeId, {
+            backlogTaskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
+          });
+          alert('Done!');
+        }
+      }),
+    );
+
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
@@ -286,8 +367,55 @@ export class ProjectEffects {
     private _improvementService: ImprovementService,
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _router: Router,
   ) {
+  }
+
+
+  private async _removeAllTasksForProject(projectIdToDelete: string): Promise<any> {
+    const taskState: TaskState = await this._taskService.taskFeatureState$.pipe(
+      filter(s => s.isDataLoaded),
+      first(),
+    ).toPromise();
+    const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
+      const t = taskState.entities[id];
+      // NOTE sub tasks are accounted for in DeleteMainTasks action
+      return t.projectId === projectIdToDelete && !t.parentId;
+    });
+
+    console.log('TaskIds to remove/unique', nonArchiveTaskIdsToDelete, unique(nonArchiveTaskIdsToDelete));
+    this._taskService.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
+  }
+
+  private async _removeAllArchiveTasksForProject(projectIdToDelete: string): Promise<any> {
+    const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
+      const t = taskArchiveState.entities[id];
+      // NOTE sub tasks are accounted for in DeleteMainTasks action
+      return t.projectId === projectIdToDelete && !t.parentId;
+    });
+    console.log('Archive TaskIds to remove/unique', archiveTaskIdsToDelete, unique(archiveTaskIdsToDelete));
+    // remove archive
+    await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
+  }
+
+  private async _removeAllRepeatingTasksForProject(projectIdToDelete: string): Promise<any> {
+    const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(first()).toPromise();
+
+    const cfgsIdsToRemove = taskRepeatCfgs
+      .filter(cfg => cfg.projectId === projectIdToDelete && (!cfg.tagIds || cfg.tagIds.length === 0))
+      .map(cfg => cfg.id);
+    if (cfgsIdsToRemove.length > 0) {
+      this._taskRepeatCfgService.deleteTaskRepeatCfgs(cfgsIdsToRemove);
+    }
+
+    const cfgsToUpdate = taskRepeatCfgs
+      .filter(cfg => cfg.projectId === projectIdToDelete && cfg.tagIds && cfg.tagIds.length > 0)
+      .map(taskRepeatCfg => taskRepeatCfg.id);
+    if (cfgsToUpdate.length > 0) {
+      this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, {projectId: null});
+    }
   }
 }
 

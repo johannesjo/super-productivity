@@ -220,7 +220,8 @@ export function taskReducer(
       newState = taskAdapter.updateOne({
         id: taskId,
         changes: {
-          parentId: newPar.id
+          parentId: newPar.id,
+          projectId: newPar.projectId,
         }
       }, newState);
 

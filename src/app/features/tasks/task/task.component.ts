@@ -34,7 +34,7 @@ import {Project} from '../../project/project.model';
 import {T} from '../../../t.const';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
-import {MY_DAY_TAG} from '../../tag/tag.const';
+import {TODAY_TAG} from '../../tag/tag.const';
 import {DialogEditTagsForTaskComponent} from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 
 @Component({
@@ -345,11 +345,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveToMyDay() {
-    this.onTagsUpdated([MY_DAY_TAG.id, ...this.task.tagIds]);
+    this.onTagsUpdated([TODAY_TAG.id, ...this.task.tagIds]);
   }
 
   removeFromMyDay() {
-    this.onTagsUpdated(this.task.tagIds.filter(tagId => tagId !== MY_DAY_TAG.id));
+    this.onTagsUpdated(this.task.tagIds.filter(tagId => tagId !== TODAY_TAG.id));
   }
 
   focusPrevious(isFocusReverseIfNotPossible = false) {

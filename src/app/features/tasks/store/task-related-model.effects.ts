@@ -18,9 +18,7 @@ export class TaskRelatedModelEffects {
   // ---------------------
   @Effect({dispatch: false})
   moveToArchive$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.MoveToArchive,
-    ),
+    ofType(TaskActionTypes.MoveToArchive),
     tap(this._moveToArchive.bind(this)),
     tap(this._updateLastActive.bind(this)),
   );
@@ -28,17 +26,13 @@ export class TaskRelatedModelEffects {
   // TODO remove once reminder is changed
   @Effect({dispatch: false})
   moveToOtherProject: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.MoveToOtherProject,
-    ),
+    ofType(TaskActionTypes.MoveToOtherProject),
     tap(this._moveToOtherProject.bind(this)),
   );
 
   @Effect({dispatch: false})
   restoreTask$: any = this._actions$.pipe(
-    ofType(
-      TaskActionTypes.RestoreTask,
-    ),
+    ofType(TaskActionTypes.RestoreTask),
     tap(this._removeFromArchive.bind(this))
   );
 

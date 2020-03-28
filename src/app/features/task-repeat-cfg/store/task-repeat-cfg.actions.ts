@@ -6,6 +6,7 @@ export enum TaskRepeatCfgActionTypes {
   LoadTaskRepeatCfgState = '[TaskRepeatCfg] Load TaskRepeatCfg State',
   AddTaskRepeatCfgToTask = '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
   UpdateTaskRepeatCfg = '[TaskRepeatCfg] Update TaskRepeatCfg',
+  UpdateTaskRepeatCfgs = '[TaskRepeatCfg] Update multiple TaskRepeatCfgs',
   UpsertTaskRepeatCfg = '[TaskRepeatCfg] Upsert TaskRepeatCfg',
   DeleteTaskRepeatCfg = '[TaskRepeatCfg] Delete TaskRepeatCfg',
   DeleteTaskRepeatCfgs = '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
@@ -29,6 +30,13 @@ export class UpdateTaskRepeatCfg implements Action {
   readonly type = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg;
 
   constructor(public payload: { taskRepeatCfg: Update<TaskRepeatCfg> }) {
+  }
+}
+
+export class UpdateTaskRepeatCfgs implements Action {
+  readonly type = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfgs;
+
+  constructor(public payload: { ids: string[], changes: Partial<TaskRepeatCfg> }) {
   }
 }
 
@@ -58,6 +66,7 @@ export type TaskRepeatCfgActions =
   LoadTaskRepeatCfgState
   | AddTaskRepeatCfgToTask
   | UpdateTaskRepeatCfg
+  | UpdateTaskRepeatCfgs
   | UpsertTaskRepeatCfg
   | DeleteTaskRepeatCfg
   | DeleteTaskRepeatCfgs

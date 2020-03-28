@@ -72,7 +72,7 @@ import {Actions} from '@ngrx/effects';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {TagService} from '../tag/tag.service';
-import {MY_DAY_TAG} from '../tag/tag.const';
+import {TODAY_TAG} from '../tag/tag.const';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContextType} from '../work-context/work-context.model';
 import {
@@ -88,6 +88,7 @@ import {
   moveTaskUpInTodayList
 } from '../work-context/store/work-context-meta.actions';
 import {Router} from '@angular/router';
+import {unique} from '../../util/unique';
 
 
 @Injectable({
@@ -264,7 +265,7 @@ export class TaskService {
         .pipe(take(1))
         .subscribe(tasks => {
           console.log(`Tag is present on ${tasks.length} tasks => ${tasks.length ? 'keeping...' : 'deleting...'}`);
-          if (tasks.length === 0 && tagId !== MY_DAY_TAG.id) {
+          if (tasks.length === 0 && tagId !== TODAY_TAG.id) {
             this._tagService.removeTag(tagId);
           }
         });
@@ -590,34 +591,6 @@ export class TaskService {
         };
       }
     }
-  }
-
-
-  async removeOrphanTasksForProject(projectIdToDelete: string): Promise<{ today: string[] }> {
-    const taskState: TaskState = await this.taskFeatureState$.pipe(
-      filter(s => s.isDataLoaded),
-      first(),
-    ).toPromise();
-    const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
-      const t = taskState.entities[id];
-      return t.projectId === projectIdToDelete;
-    });
-    const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
-    const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
-      const t = taskArchiveState.entities[id];
-      return t.projectId === projectIdToDelete;
-    });
-    // console.log(await this._persistenceService.taskArchive.loadState());
-    await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
-    // console.log(await this._persistenceService.taskArchive.loadState());
-
-    // TODO just filter all tags for those ids
-    console.log('TaskIds to remove', nonArchiveTaskIdsToDelete);
-    console.log('Archive TaskIds to remove', archiveTaskIdsToDelete);
-    this.removeMultipleMainTasks(nonArchiveTaskIdsToDelete);
-    return {
-      today: nonArchiveTaskIdsToDelete,
-    };
   }
 
   createNewTaskWithDefaults(
