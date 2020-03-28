@@ -99,6 +99,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('class.isCurrent') isCurrent: boolean;
   @HostBinding('class.isSelected') isSelected: boolean;
 
+  TODAY_TAG_ID = TODAY_TAG.id;
+
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout: number;

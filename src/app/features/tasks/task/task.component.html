@@ -144,7 +144,7 @@
           </button>
 
           <button (click)="moveToMyDay()"
-                  *ngIf="!task.parentId && !task.tagIds.includes('MY_DAY')"
+                  *ngIf="!task.parentId && !task.tagIds.includes(TODAY_TAG_ID)"
                   [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
                   class="ico-btn"
                   color=""
@@ -154,7 +154,7 @@
           </button>
 
           <button (click)="removeFromMyDay()"
-                  *ngIf="!task.parentId && task.tagIds.includes('MY_DAY')"
+                  *ngIf="!task.parentId && task.tagIds.includes(TODAY_TAG_ID)"
                   [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
                   class="ico-btn"
                   color=""
