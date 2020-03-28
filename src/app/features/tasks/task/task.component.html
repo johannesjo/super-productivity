@@ -83,16 +83,20 @@
         </div>
       </div>
 
-      <div #contentEditableOnClickEl
-           (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
-           [isResetAfterEdit]="true"
-           [value]="task.title"
-           class="task-title"
-           contentEditableOnClick
-           contenteditable="true"
-           tabindex="2"></div>
-      <div class="spacer"
-           style="width:10px; display: block; border-right-width: 1px; border-right-style: solid"></div>
+      <div class="title-and-tags-wrapper">
+        <div #contentEditableOnClickEl
+             (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
+             [isResetAfterEdit]="true"
+             [value]="task.title"
+             class="task-title"
+             contentEditableOnClick
+             contenteditable="true"
+             tabindex="2"></div>
+        <tag-list *ngIf="task.tagIds?.length && !task.parentId"
+                  [task]="task"></tag-list>
+        <div class="spacer"
+             style="width:10px; display: block; border-right-width: 1px; border-right-style: solid"></div>
+      </div>
     </div>
 
     <div class="all-controls-wrapper">
@@ -372,7 +376,7 @@
                   [matMenuTriggerFor]="projectMenu"
                   mat-menu-item>
             <mat-icon>forward</mat-icon>
-            {{(task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT : T.F.TASK.CMP.ADD_TO_PROJECT )|translate}}
+            {{(task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT : T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
           </button>
           <mat-menu #projectMenu="matMenu">
             <ng-container>
@@ -404,9 +408,6 @@
       </div>
     </div>
   </div>
-
-  <tag-list *ngIf="task.tagIds?.length && !task.parentId"
-            [task]="task"></tag-list>
 
   <progress-bar *ngIf="isCurrent"
                 [cssClass]="'bg-accent'"
