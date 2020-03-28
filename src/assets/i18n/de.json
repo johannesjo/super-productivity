@@ -5,6 +5,8 @@
       "INSTALL": "Installieren",
       "MSG": "Möchten Sie Super Productivity als PWA installieren?"
     },
+    "UPDATE_MAIN_MODEL": "Superproduktivität hat ein großes Update bekommen! Einige Migrationen für Ihre Daten sind erforderlich. Bitte beachten Sie, dass Ihre Daten dadurch nicht mit älteren Versionen der App kompatibel sind.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Kein Modellupdate ausgewählt. Bitte beachten Sie, dass Sie entweder ein Downgrade auf die letzte Version durchführen müssen, wenn Sie das Modell-Upgrade nicht durchführen möchten.",
     "UPDATE_WEB_APP": "Neue Version verfügbar. Neue Version laden?"
   },
   "BL": {
@@ -118,6 +120,7 @@
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "PROJECT": "\"Benutzername%2FProjectname\" für das Git-Repository, das Sie verfolgen möchten",
+        "REPO": "",
         "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
@@ -461,12 +464,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "Tag beenden",
-          "MSG": "Sie haben vergessen, Ihren Tag am {{dayStr}} zu beenden."
-        }
-      },
       "D_CREATE": {
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
@@ -508,6 +505,26 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
     },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "Tag erstellen",
+        "EDIT": "Tag bearbeiten"
+      },
+      "D_EDIT": {
+        "ADD": "Tags für \"{{title}}\" hinzufügen",
+        "EDIT": "Tags für \"{{title}}\" bearbeiten",
+        "LABEL": "Stichworte"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "Farbe (wenn undefinierte primäre Themenfarbe verwendet wird)",
+        "L_ICON": "Symbol",
+        "L_TITLE": "Verlinke den Namen",
+        "TITLE": "Grundeinstellungen"
+      },
+      "S": {
+        "UPDATED": "Die Tag-Einstellungen wurden aktualisiert"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Anhang hinzufügen",
@@ -532,11 +549,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Unteraufgabe hinzufügen",
+        "ADD_TO_MY_DAY": "Zu meinem Tag hinzufügen",
+        "ADD_TO_PROJECT": "Zu einem Projekt hinzufügen",
         "ADVANCED": "Erweitert",
         "CONVERT_TO_PARENT_TASK": "In übergeordnete Aufgabe konvertieren",
         "DELETE": "Aufgabe löschen",
         "DROP_ATTACHMENT": "Hier ablegen und an \"{{title}}\" anhängen",
         "EDIT_REMINDER": "Erinnerung bearbeiten",
+        "EDIT_TAGS": "Stichworte bearbeiten",
         "MARK_DONE": "Als erledigt markieren",
         "MARK_UNDONE": "Als rückgängig machen markieren",
         "MOVE_TO_BACKLOG": "In das Backlog verschieben",
@@ -546,6 +566,7 @@
         "OPEN_ISSUE": "Öffnen Sie das Issue in einem neuen Browser-Tab",
         "OPEN_TASK_MENU": "Aufgabenmenü öffnen",
         "OPEN_TIME": "Zeit schätzen / Zeit hinzufügen",
+        "REMOVE_FROM_MY_DAY": "Von meinem Tag entfernen",
         "REPEAT_EDIT": "Bearbeiten Task wiederholen Konfig",
         "REPEAT_TASK": "Aufgabe wiederholen",
         "SCHEDULE": "Task planen",
@@ -568,14 +589,13 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "Erinnerung verwerfen",
-        "ERR_LOST": "Für die Aufgabe {{title}}ist eine Erinnerung geplant, die jedoch verloren zu gehen scheint.",
         "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FROM_PROJECT": "Aus dem Projekt",
+        "FROM_TAG": "Vom Tag: \"{{title}}\"",
         "SNOOZE": "Snooze {{time}}",
         "START": "Task starten",
-        "SWITCH_PROJECT_START": "Projekt wechseln & Task starten",
-        "TITLE": "Geplante Aufgabe"
+        "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Für anderen Tag",
@@ -599,6 +619,7 @@
       "S": {
         "DELETED": "\"{{title}}\" wurde gelöscht",
         "FOUND_MOVE_FROM_BACKLOG": "Die vorhandene Aufgabe <strong>{{title}}</strong> wurde in die Aufgabenliste von heute verschoben",
+        "FOUND_MOVE_FROM_OTHER_LIST": "Aufgabe <strong>{{title}}</strong> von <strong>{{contextTitle}}</strong> zur aktuellen Liste hinzugefügt",
         "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
         "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
         "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
@@ -624,7 +645,8 @@
         "EDIT": "Bearbeiten Task wiederholen Konfig",
         "HELP1": "Sich wiederholende Aufgaben sind für tägliche Aufgaben gedacht, z. B .: \"Organisation\", \"Tägliche Besprechung\", \"Codeüberprüfung\", \"Überprüfen von E-Mails\" oder ähnliche Aufgaben, die wahrscheinlich immer wieder auftreten.",
         "HELP2": "Einmal konfiguriert, wird eine sich wiederholende Aufgabe an jedem unten ausgewählten Tag neu erstellt, sobald Sie Ihr Projekt öffnen, und wird am Ende des Tages automatisch als erledigt markiert. Sie werden als unterschiedliche Instanzen behandelt. So können Sie Unteraufgaben usw. frei hinzufügen.",
-        "HELP3": "Aus Jira oder Git importierte Aufgaben können nicht wiederholt werden. Alle Erinnerungen werden auch bei einer sich wiederholenden Aufgabe gelöscht."
+        "HELP3": "Aus Jira oder Git importierte Aufgaben können nicht wiederholt werden. Alle Erinnerungen werden auch bei einer sich wiederholenden Aufgabe gelöscht.",
+        "TAG_LABEL": "Tags zum Hinzufügen"
       },
       "F": {
         "DEFAULT_ESTIMATE": "Standardschätzung",
@@ -661,7 +683,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "Task aus Archiv wiederherstellen",
         "TASKS": "Aufgaben",
         "TOTAL_TIME": "Insgesamt aufgewendete Zeit:",
-        "TOTAL_TIME_PROJECT": "Gesamtdauer des Projekts",
         "WEEK_NR": "Woche {{nr}}",
         "WORKED": "Gearbeitet"
       },
@@ -743,7 +764,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Bewertungsbogen in der Tageszusammenfassung ausblenden",
-      "IS_HIDE_METRIC_FROM_MENU": "Messwerte im Menü ausblenden",
       "TITLE": "Auswertung & Metriken"
     },
     "GOOGLE_DRIVE_SYNC": {
@@ -825,7 +845,6 @@
       "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der Verfolgung der nächsten Aufgabe, wenn Sie den aktuellen als erledigt markieren",
       "IS_CONFIRM_BEFORE_EXIT": "Bestätigen Sie, bevor Sie die App beenden",
       "IS_DARK_MODE": "Dark Mode",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Erinnerung an vergessenen Zieltag deaktivieren",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
@@ -868,6 +887,7 @@
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
     "CREATE_PROJECT": "Projekt erstellen",
+    "CREATE_TAG": "Tag erstellen",
     "GO_TO_TASK_LIST": "Gehe zur Aufgabenliste",
     "MANAGE_PROJECTS": "Projekte verwalten",
     "METRICS": "Metriken",
@@ -878,6 +898,7 @@
     "PROJECT_SETTINGS": "Projekt Einstellungen",
     "SCHEDULED": "Geplant",
     "SETTINGS": "Einstellungen",
+    "TAGS": "Stichworte",
     "TASKS": "Aufgaben",
     "TASK_LIST": "Aufgabenliste",
     "TOGGLE_SHOW_BOOKMARKS": "Lesezeichen ein- / ausblenden",
@@ -950,9 +971,11 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale Einstellungen",
+    "ISSUE_INTEGRATION": "Problemintegration",
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Produktivitäts-Helfer",
     "PROJECT_SETTINGS": "Projektspezifische Einstellungen",
+    "TAG_SETTINGS": "Tag-spezifische Einstellungen",
     "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"
   },
   "S": {

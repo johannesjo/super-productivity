@@ -5,6 +5,8 @@
       "INSTALL": "설치",
       "MSG": "PWA로 Super Productivity를 설치 하시겠습니까?"
     },
+    "UPDATE_MAIN_MODEL": "슈퍼 생산성이 대폭 업데이트되었습니다! 데이터에 대한 일부 마이그레이션이 필요합니다. 이로 인해 데이터가 이전 버전의 앱과 호환되지 않습니다.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "선택된 모델 업데이트가 없습니다. 모델 업그레이드를 수행하지 않으려면 마지막 버전으로 다운 그레이드해야합니다.",
     "UPDATE_WEB_APP": "새 버전을 사용할 수 있습니다. 새 버전을로드 하시겠습니까?"
   },
   "BL": {
@@ -118,6 +120,7 @@
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "PROJECT": "추적하고자하는 gitlab 저장소의 \"username%2FProjectName\"",
+        "REPO": "",
         "TOKEN": "액세스 토큰"
       },
       "FORM_SECTION": {
@@ -461,12 +464,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "피니시 데이",
-          "MSG": "오늘 {{dayStr}}일을 끝내는 걸 잊었 네."
-        }
-      },
       "D_CREATE": {
         "CREATE": "프로젝트 만들기",
         "EDIT": "프로젝트 수정",
@@ -508,6 +505,26 @@
     "REMINDER": {
       "S_REMINDER_ERR": "알림 인터페이스 오류"
     },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "태그 생성",
+        "EDIT": "태그 편집"
+      },
+      "D_EDIT": {
+        "ADD": "\"{{title}}\"에 대한 태그 추가",
+        "EDIT": "\"{{title}}\"에 대한 태그 편집",
+        "LABEL": "태그"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "색상 (정의되지 않은 기본 테마 색상이 사용 된 경우)",
+        "L_ICON": "상",
+        "L_TITLE": "태그 이름",
+        "TITLE": "기본 설정"
+      },
+      "S": {
+        "UPDATED": "태그 설정이 업데이트되었습니다"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "첨부 파일 추가",
@@ -532,11 +549,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "하위 작업 추가",
+        "ADD_TO_MY_DAY": "내 날에 추가",
+        "ADD_TO_PROJECT": "프로젝트에 추가",
         "ADVANCED": "많은",
         "CONVERT_TO_PARENT_TASK": "상위 작업으로 변환 작업",
         "DELETE": "작업 삭제",
         "DROP_ATTACHMENT": "'{{title}}'에 연결하려면 여기로 드래그하십시오.",
         "EDIT_REMINDER": "알림 수정",
+        "EDIT_TAGS": "태그 편집",
         "MARK_DONE": "완료로 표시",
         "MARK_UNDONE": "실행 취소로 표시",
         "MOVE_TO_BACKLOG": "백 로그로 이동",
@@ -546,6 +566,7 @@
         "OPEN_ISSUE": "새 브라우저 탭에서 문제 열기",
         "OPEN_TASK_MENU": "작업 메뉴 열기",
         "OPEN_TIME": "시간 예측 / 소요 시간 추가",
+        "REMOVE_FROM_MY_DAY": "내 날에서 제거",
         "REPEAT_EDIT": "반복 작업 구성 편집",
         "REPEAT_TASK": "작업 반복",
         "SCHEDULE": "작업 예약",
@@ -568,14 +589,13 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "알림 일시 중지",
-        "ERR_LOST": "작업 {{title}}에 대한 미리 알림이 있었지만 손실 된 것으로 보입니다.",
         "FOR_CURRENT": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FOR_OTHER": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FROM_PROJECT": "프로젝트에서",
+        "FROM_TAG": "태그에서 : \"{{title}}\"",
         "SNOOZE": "다시 알림 {{time}}",
         "START": "작업 시작",
-        "SWITCH_PROJECT_START": "프로젝트 전환 및 시작 작업",
-        "TITLE": "예정된 작업"
+        "SWITCH_CONTEXT_START": "상황 전환 및 시작"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "다른 날에 보낸 시간을 추가하십시오.",
@@ -599,6 +619,7 @@
       "S": {
         "DELETED": "\"{{title}}\"작업을 삭제했습니다.",
         "FOUND_MOVE_FROM_BACKLOG": "기존 작업 <strong>{{title}}</strong> 을 (를) 현재 작업 목록으로 이동했습니다.",
+        "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 의 작업 <strong>{{title}}</strong> 을 (를) 현재 목록에 추가했습니다.",
         "FOUND_RESTORE_FROM_ARCHIVE": "아카이브의 문제와 관련된 복원 된 작업 <strong>{{title}}</strong> ",
         "REMINDER_ADDED": "예약 된 작업 \"{{title}}\"",
         "REMINDER_DELETED": "할 일 목록 삭제",
@@ -624,7 +645,8 @@
         "EDIT": "반복 작업 구성 편집",
         "HELP1": "반복 작업은 일별 잡일을 의미합니다 (예 : \"조직\", \"일일 모임\", \"코드 검토\", \"이메일 확인\"또는 여러 번 반복 될 수있는 유사한 작업).",
         "HELP2": "일단 구성되면 반복 작업은 프로젝트를 여는 즉시 아래에서 선택한 매일에 다시 작성되며 하루가 끝날 때 자동 완성으로 표시됩니다. 그들은 다른 인스턴스로 처리됩니다. 따라서 하위 작업 등을 자유롭게 추가 할 수 있습니다.",
-        "HELP3": "Jira 또는 Git Issues에서 가져온 작업은 반복 할 수 없습니다. 모든 미리 알림은 반복 작업에서 삭제됩니다."
+        "HELP3": "Jira 또는 Git Issues에서 가져온 작업은 반복 할 수 없습니다. 모든 미리 알림은 반복 작업에서 삭제됩니다.",
+        "TAG_LABEL": "추가 할 태그"
       },
       "F": {
         "DEFAULT_ESTIMATE": "기본 견적",
@@ -661,7 +683,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "아카이브에서 작업 복원",
         "TASKS": "할 일 목록",
         "TOTAL_TIME": "총 소요 시간 :",
-        "TOTAL_TIME_PROJECT": "프로젝트에 소요 된 총 시간",
         "WEEK_NR": "주 {{nr}}",
         "WORKED": "근무한"
       },
@@ -743,7 +764,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "일일 요약에서 평가 시트 숨기기",
-      "IS_HIDE_METRIC_FROM_MENU": "메뉴에서 메트릭 숨기기",
       "TITLE": "평가 및 측정 항목"
     },
     "GOOGLE_DRIVE_SYNC": {
@@ -825,7 +845,6 @@
       "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "잊혀진 종료일에 대한 알림 사용 중지",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
@@ -868,6 +887,7 @@
   "MH": {
     "ADD_NEW_TASK": "새 작업 추가",
     "CREATE_PROJECT": "프로젝트 만들기",
+    "CREATE_TAG": "태그 생성",
     "GO_TO_TASK_LIST": "작업 목록으로 이동",
     "MANAGE_PROJECTS": "프로젝트 관리",
     "METRICS": "측정 항목",
@@ -878,6 +898,7 @@
     "PROJECT_SETTINGS": "프로젝트 설정",
     "SCHEDULED": "예정",
     "SETTINGS": "설정",
+    "TAGS": "태그",
     "TASKS": "할 일 목록",
     "TASK_LIST": "작업 목록",
     "TOGGLE_SHOW_BOOKMARKS": "북마크 표시 / 숨기기",
@@ -950,9 +971,11 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "전체 설정",
+    "ISSUE_INTEGRATION": "이슈 통합",
     "PRIVATE_POLICY": "개인 정책",
     "PRODUCTIVITY_HELPER": "생산성 도우미",
     "PROJECT_SETTINGS": "프로젝트 별 설정",
+    "TAG_SETTINGS": "태그 별 설정",
     "TOGGLE_DARK_MODE": "어두운 모드 전환"
   },
   "S": {

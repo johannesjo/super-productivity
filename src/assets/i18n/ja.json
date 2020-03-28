@@ -5,6 +5,8 @@
       "INSTALL": "インストール",
       "MSG": "あなたはPWAとしてSuper Productivityをインストールしますか？"
     },
+    "UPDATE_MAIN_MODEL": "超生産性が大幅に更新されました！データのいくつかの移行が必要です。これにより、データが古いバージョンのアプリと互換性がなくなることに注意してください。",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "モデルの更新が選択されていません。モデルのアップグレードを実行しない場合は、前のバージョンにダウングレードする必要があることに注意してください。",
     "UPDATE_WEB_APP": "新しいバージョンがあります。新しいバージョンをロードしますか？"
   },
   "BL": {
@@ -117,6 +119,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "未解決の問題をGitlabからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの問題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "新しいタスクを追加するときにgitからの問題を提案として表示する",
+        "PROJECT": "追跡するgitlabプロジェクトの「username%2FProjectName」",
         "REPO": "追跡したいgitリポジトリの \"username / repositoryName\"",
         "TOKEN": "アクセストークン"
       },
@@ -461,12 +464,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "終了日",
-          "MSG": "あなたは {{dayStr}}に一日を終えるのを忘れました"
-        }
-      },
       "D_CREATE": {
         "CREATE": "プロジェクトを作成",
         "EDIT": "プロジェクトを編集",
@@ -508,6 +505,26 @@
     "REMINDER": {
       "S_REMINDER_ERR": "リマインダーインターフェースのエラー"
     },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "タグを作成",
+        "EDIT": "タグを編集"
+      },
+      "D_EDIT": {
+        "ADD": "「{{title}}」のタグを追加",
+        "EDIT": "「{{title}}」のタグを編集",
+        "LABEL": "タグ"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "色（未定義のプライマリテーマの色が使用されている場合）",
+        "L_ICON": "アイコン",
+        "L_TITLE": "タグ名",
+        "TITLE": "基本設定"
+      },
+      "S": {
+        "UPDATED": "タグ設定が更新されました"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添付ファイルを追加する",
@@ -532,11 +549,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "サブタスクを追加",
+        "ADD_TO_MY_DAY": "今日に追加",
+        "ADD_TO_PROJECT": "プロジェクトに追加",
         "ADVANCED": "高度な",
         "CONVERT_TO_PARENT_TASK": "親タスクに変換",
         "DELETE": "タスクを削除",
         "DROP_ATTACHMENT": "ここにドロップして \"{{title}}\"に添付します",
         "EDIT_REMINDER": "リマインダーを編集",
+        "EDIT_TAGS": "タグを編集",
         "MARK_DONE": "完了としてマークする",
         "MARK_UNDONE": "元に戻すとしてマーク",
         "MOVE_TO_BACKLOG": "バックログに移動",
@@ -546,6 +566,7 @@
         "OPEN_ISSUE": "新しいブラウザタブで課題を開く",
         "OPEN_TASK_MENU": "タスクメニューを開く",
         "OPEN_TIME": "見積もり時間/追加に費やした時間",
+        "REMOVE_FROM_MY_DAY": "今日から削除",
         "REPEAT_EDIT": "繰り返しタスク設定の編集",
         "REPEAT_TASK": "繰り返し作業",
         "SCHEDULE": "スケジュールタスク",
@@ -568,14 +589,13 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "リマインダーを却下",
-        "ERR_LOST": "タスク {{title}}に予定されている通知がありましたが、失われたようです。",
         "FOR_CURRENT": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
         "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
         "FROM_PROJECT": "プロジェクトから",
+        "FROM_TAG": "タグから：「{{title}}」",
         "SNOOZE": "スヌーズ {{time}}",
         "START": "開始タスク",
-        "SWITCH_PROJECT_START": "プロジェクト切り替えとタスク開始",
-        "TITLE": "スケジュールされたタスク"
+        "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "他の日に費やした時間を追加",
@@ -599,6 +619,7 @@
       "S": {
         "DELETED": "削除されたタスク \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "既存のタスク <strong>{{title}}</strong> を今日のタスクリストに移動しました",
+        "FOUND_MOVE_FROM_OTHER_LIST": "タスク <strong>{{title}}</strong> を <strong>{{contextTitle}}</strong> から現在のリストに追加しました",
         "FOUND_RESTORE_FROM_ARCHIVE": "アーカイブからの発行に関連する復元されたタスク <strong>{{title}}</strong> ",
         "REMINDER_ADDED": "スケジュール済みタスク \"{{title}}\"",
         "REMINDER_DELETED": "タスクの通知を削除しました",
@@ -624,7 +645,8 @@
         "EDIT": "繰り返しタスク設定の編集",
         "HELP1": "繰り返しの作業は、日々の雑用、たとえば「組織」、「毎日の会議」、「コードレビュー」、「Eメールの確認」、または何度も繰り返し発生する可能性がある同様の作業を対象としています。",
         "HELP2": "一度設定すると、プロジェクトを開くとすぐに以下で選択した毎日に繰り返しタスクが再作成され、1日の終わりに自動的に完了としてマークされます。それらは異なるインスタンスとして扱われます。だから、あなたは自由にサブタスクなどを追加することができます",
-        "HELP3": "JiraまたはGit Issueからインポートしたタスクを繰り返すことはできません。繰り返しのタスクでは、すべてのアラームも削除されます。"
+        "HELP3": "JiraまたはGit Issueからインポートしたタスクを繰り返すことはできません。繰り返しのタスクでは、すべてのアラームも削除されます。",
+        "TAG_LABEL": "追加するタグ"
       },
       "F": {
         "DEFAULT_ESTIMATE": "デフォルト見積もり",
@@ -661,7 +683,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "アーカイブからタスクを復元",
         "TASKS": "タスク",
         "TOTAL_TIME": "合計時間：",
-        "TOTAL_TIME_PROJECT": "プロジェクトに費やした合計時間",
         "WEEK_NR": "週 {{nr}}",
         "WORKED": "働いた"
       },
@@ -743,7 +764,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "日次サマリーの評価シートを非表示",
-      "IS_HIDE_METRIC_FROM_MENU": "メニューから指標を非表示",
       "TITLE": "評価と指標"
     },
     "GOOGLE_DRIVE_SYNC": {
@@ -825,7 +845,6 @@
       "IS_AUTO_START_NEXT_TASK": "現在の完了マークを付けたときに次のタスクの追跡を開始する",
       "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
       "IS_DARK_MODE": "ダークモード",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "終了日を忘れた場合の通知を無効にする",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
@@ -868,6 +887,7 @@
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
     "CREATE_PROJECT": "プロジェクトを作成",
+    "CREATE_TAG": "タグを作成",
     "GO_TO_TASK_LIST": "タスクリストへ",
     "MANAGE_PROJECTS": "プロジェクトを管理する",
     "METRICS": "メトリック",
@@ -878,6 +898,7 @@
     "PROJECT_SETTINGS": "プロジェクト設定",
     "SCHEDULED": "予定",
     "SETTINGS": "設定",
+    "TAGS": "タグ",
     "TASKS": "タスク",
     "TASK_LIST": "タスクリスト",
     "TOGGLE_SHOW_BOOKMARKS": "ブックマークの表示/非表示",
@@ -950,9 +971,11 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "全体設定",
+    "ISSUE_INTEGRATION": "問題の統合",
     "PRIVATE_POLICY": "プライベートポリシー",
     "PRODUCTIVITY_HELPER": "生産性ヘルパー",
     "PROJECT_SETTINGS": "プロジェクト固有の設定",
+    "TAG_SETTINGS": "タグ固有の設定",
     "TOGGLE_DARK_MODE": "ダークモードの切り替え"
   },
   "S": {

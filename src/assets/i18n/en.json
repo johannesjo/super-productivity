@@ -5,9 +5,9 @@
       "INSTALL": "Install",
       "MSG": "Do you want to install Super Productivity as a PWA?"
     },
-    "UPDATE_WEB_APP": "New version available. Load New Version?",
     "UPDATE_MAIN_MODEL": "Super Productivity has gotten a major update! Some migrations for your data are required. Please note that this renders your data incompatible with older versions of the app.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade."
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
+    "UPDATE_WEB_APP": "New version available. Load New Version?"
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "From other Projects",
@@ -120,6 +120,7 @@
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "\"username%2FProjectName\" for the gitlab project you want to track",
+        "REPO": "",
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
@@ -467,8 +468,8 @@
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
         "SETUP_GIT": "Setup Github Integration",
-        "SETUP_JIRA": "Setup Jira Integration",
-        "SETUP_GITLAB": "Setup Gitlab Integration"
+        "SETUP_GITLAB": "Setup Gitlab Integration",
+        "SETUP_JIRA": "Setup Jira Integration"
       },
       "FORM_BASIC": {
         "L_TITLE": "Project Name",
@@ -505,14 +506,14 @@
       "S_REMINDER_ERR": "Error for reminder interface"
     },
     "TAG": {
+      "D_CREATE": {
+        "CREATE": "Create Tag",
+        "EDIT": "Edit Tag"
+      },
       "D_EDIT": {
         "ADD": "Add tags for \"{{title}}\"",
         "EDIT": "Edit tags for \"{{title}}\"",
         "LABEL": "Tags"
-      },
-      "D_CREATE": {
-        "CREATE": "Create Tag",
-        "EDIT": "Edit Tag"
       },
       "FORM_BASIC": {
         "L_COLOR": "Color (if undefined primary theme color is used)",
@@ -548,13 +549,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Add sub task",
+        "ADD_TO_MY_DAY": "Add to My Day",
         "ADD_TO_PROJECT": "Add to a Project",
         "ADVANCED": "Advanced",
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
         "DELETE": "Delete Task",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_TAGS": "Edit tags",
         "EDIT_REMINDER": "Edit reminder",
+        "EDIT_TAGS": "Edit tags",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
@@ -564,6 +566,7 @@
         "OPEN_ISSUE": "Open in browser",
         "OPEN_TASK_MENU": "Open task menu",
         "OPEN_TIME": "Time Tracking",
+        "REMOVE_FROM_MY_DAY": "Remove from My Day",
         "REPEAT_EDIT": "Edit repeat task config",
         "REPEAT_TASK": "Repeat task",
         "SCHEDULE": "Schedule task",
@@ -572,8 +575,6 @@
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
-        "ADD_TO_MY_DAY": "Add to My Day",
-        "REMOVE_FROM_MY_DAY": "Remove from My Day",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
@@ -590,8 +591,8 @@
         "DISMISS": "Dismiss Reminder",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
-        "FROM_TAG": "From Tag: \"{{title}}\"",
         "FROM_PROJECT": "From Project: \"{{title}}\"",
+        "FROM_TAG": "From Tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "START": "Start Task",
         "SWITCH_CONTEXT_START": "Switch Context & Start"
@@ -642,10 +643,10 @@
       "D_EDIT": {
         "ADD": "Add Repeat Task Config",
         "EDIT": "Edit Repeat Task Config",
-        "TAG_LABEL": "Tags to add",
         "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
         "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
-        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
+        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task.",
+        "TAG_LABEL": "Tags to add"
       },
       "F": {
         "DEFAULT_ESTIMATE": "Default Estimate",
@@ -970,10 +971,10 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
+    "ISSUE_INTEGRATION": "Issue Integration",
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Productivity Helper",
     "PROJECT_SETTINGS": "Project Specific Settings",
-    "ISSUE_INTEGRATION": "Issue Integration",
     "TAG_SETTINGS": "Tag Specific Settings",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },

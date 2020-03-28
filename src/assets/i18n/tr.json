@@ -5,6 +5,8 @@
       "INSTALL": "kurmak",
       "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
     },
+    "UPDATE_MAIN_MODEL": "Süper Verimlilik büyük bir güncelleme aldı! Verileriniz için bazı taşıma işlemleri gerekiyor. Bunun verilerinizi uygulamanın eski sürümleriyle uyumsuz hale getirdiğini lütfen unutmayın.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Hiçbir model güncellemesi seçilmedi. Model yükseltmesini gerçekleştirmek istemiyorsanız, ya son sürüme geçmeniz gerektiğini lütfen unutmayın.",
     "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yükle?"
   },
   "BL": {
@@ -118,6 +120,7 @@
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "PROJECT": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
+        "REPO": "",
         "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
@@ -461,12 +464,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "Bitiş günü",
-          "MSG": " {{dayStr}}tarihinde gününüzü bitirmeyi unuttunuz"
-        }
-      },
       "D_CREATE": {
         "CREATE": "Proje Yarat",
         "EDIT": "Projeyi Düzenle",
@@ -508,6 +505,26 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
     },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "Etiket Oluştur",
+        "EDIT": "Etiketi düzenle"
+      },
+      "D_EDIT": {
+        "ADD": "\"{{title}}\" için etiket ekle",
+        "EDIT": "\"{{title}}\" için etiketleri düzenleyin",
+        "LABEL": "Etiketler"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "Renk (tanımlanmamış ana tema rengi kullanılıyorsa)",
+        "L_ICON": "ikon",
+        "L_TITLE": "Etiket adı",
+        "TITLE": "Temel ayarlar"
+      },
+      "S": {
+        "UPDATED": "Etiket Ayarları güncellendi"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Eklenti ekle",
@@ -532,11 +549,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Alt Görev ekle",
+        "ADD_TO_MY_DAY": "Günüme Ekle",
+        "ADD_TO_PROJECT": "Bir Projeye Ekle",
         "ADVANCED": "İleri",
         "CONVERT_TO_PARENT_TASK": "Üst Göreve Dönüştür",
         "DELETE": "Görevi Sil",
         "DROP_ATTACHMENT": "\"{{title}}\" öğesine eklemek için buraya bırakın",
         "EDIT_REMINDER": "Hatırlatıcıyı düzenle",
+        "EDIT_TAGS": "Etiketleri düzenle",
         "MARK_DONE": "tamamlandı olarak işaretle",
         "MARK_UNDONE": "Bitti olarak işaretle",
         "MOVE_TO_BACKLOG": "Backlog'a taşı",
@@ -546,6 +566,7 @@
         "OPEN_ISSUE": "Sorunu yeni bir tarayıcı sekmesinde aç",
         "OPEN_TASK_MENU": "Görev menüsünü aç",
         "OPEN_TIME": "Tahmini süre / Harcanan zamanı ekle",
+        "REMOVE_FROM_MY_DAY": "Günümden Kaldır",
         "REPEAT_EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
         "REPEAT_TASK": "Görevi tekrarla",
         "SCHEDULE": "Görev Takvimi",
@@ -568,14 +589,13 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "Hatırlatmayı Sil",
-        "ERR_LOST": " {{title}}görevi için zamanlanmış bir hatırlatıcı vardı, ancak kaybolmuş gibi görünüyor.",
         "FOR_CURRENT": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FROM_PROJECT": "Projeden",
+        "FROM_TAG": "Etiketten: \"{{title}}\"",
         "SNOOZE": "Erteleme {{time}}",
         "START": "Görevi Başlat",
-        "SWITCH_PROJECT_START": "Proje Değiştir ve Görevi Başlat",
-        "TITLE": "Planli gorev"
+        "SWITCH_CONTEXT_START": "Bağlam Değiştir ve Başlat"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Diğer gün için harcanan zamanı ekle",
@@ -599,6 +619,7 @@
       "S": {
         "DELETED": "\"{{title}}\" görevi silindi",
         "FOUND_MOVE_FROM_BACKLOG": " <strong>{{title}}</strong> görevini bugünkü görev listesine taşıdı",
+        "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 'den geçerli listeye <strong>{{title}}</strong> görevi eklendi",
         "FOUND_RESTORE_FROM_ARCHIVE": "Geri yüklenen görev <strong>{{title}}</strong> arşivden konu ile ilgili",
         "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
         "REMINDER_DELETED": "Görev için silinen hatırlatıcı",
@@ -624,7 +645,8 @@
         "EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
         "HELP1": "Tekrarlanan görevler günlük işler, örneğin: \"Organizasyon\", \"Günlük Toplantı\", \"Kod İnceleme\", \"E-postaları Kontrol Etme\" veya tekrar tekrar gerçekleşmesi muhtemel benzer işler içindir.",
         "HELP2": "Yapılandırıldıktan sonra, projenizi açar açmaz aşağıda seçilen her gün tekrarlanan bir görev yeniden oluşturulur ve günün sonunda otomatik olarak tamamlanır olarak işaretlenir. Farklı örnekler olarak ele alınacaklar. Böylece serbestçe alt görevler vb ekleyebilirsiniz.",
-        "HELP3": "Jira veya Git'den alınan görevler tekrarlanamaz. Tüm hatırlatıcılar, tekrar eden bir görevde silinecektir."
+        "HELP3": "Jira veya Git'den alınan görevler tekrarlanamaz. Tüm hatırlatıcılar, tekrar eden bir görevde silinecektir.",
+        "TAG_LABEL": "Eklenecek etiketler"
       },
       "F": {
         "DEFAULT_ESTIMATE": "Varsayılan Tahmini",
@@ -661,7 +683,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "Görevi Arşivden Geri Yükle",
         "TASKS": "Görevler",
         "TOTAL_TIME": "Toplam harcanan zaman:",
-        "TOTAL_TIME_PROJECT": "Projeye harcanan toplam süre",
         "WEEK_NR": "{{nr}} haftası",
         "WORKED": "işlenmiş"
       },
@@ -743,7 +764,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
-      "IS_HIDE_METRIC_FROM_MENU": "Metrikleri menüden gizle",
       "TITLE": "Değerlendirme ve Metrikler"
     },
     "GOOGLE_DRIVE_SYNC": {
@@ -825,7 +845,6 @@
       "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
       "IS_DARK_MODE": "Karanlık modu",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
@@ -868,6 +887,7 @@
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
     "CREATE_PROJECT": "Proje Yarat",
+    "CREATE_TAG": "Etiket Oluştur",
     "GO_TO_TASK_LIST": "Görev listesine git",
     "MANAGE_PROJECTS": "Projeleri Yönet",
     "METRICS": "Metrik",
@@ -878,6 +898,7 @@
     "PROJECT_SETTINGS": "Proje ayarları",
     "SCHEDULED": "tarifeli",
     "SETTINGS": "ayarlar",
+    "TAGS": "Etiketler",
     "TASKS": "Görevler",
     "TASK_LIST": "Görev listesi",
     "TOGGLE_SHOW_BOOKMARKS": "Yer İşaretlerini Göster / Gizle",
@@ -950,9 +971,11 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Genel Ayarlar",
+    "ISSUE_INTEGRATION": "Sorun Entegrasyonu",
     "PRIVATE_POLICY": "Özel politika",
     "PRODUCTIVITY_HELPER": "Verimlilik Yardımcısı",
     "PROJECT_SETTINGS": "Projeye Özel Ayarlar",
+    "TAG_SETTINGS": "Etikete Özgü Ayarlar",
     "TOGGLE_DARK_MODE": "Koyu Modu Değiştir"
   },
   "S": {

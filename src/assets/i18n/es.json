@@ -5,6 +5,8 @@
       "INSTALL": "instalar",
       "MSG": "¿Desea instalar Super Productividad como PWA?"
     },
+    "UPDATE_MAIN_MODEL": "¡Super Productivity ha recibido una actualización importante! Se requieren algunas migraciones para sus datos. Tenga en cuenta que esto hace que sus datos sean incompatibles con versiones anteriores de la aplicación.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "No se eligió ninguna actualización del modelo. Tenga en cuenta que, si no desea realizar la actualización del modelo, debe bajar a la última versión.",
     "UPDATE_WEB_APP": "Nueva versión disponible. ¿Cargar nueva versión?"
   },
   "BL": {
@@ -118,6 +120,7 @@
         "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "PROJECT": "\"username%2FProjectName\" para el repositorio de git que desea seguir",
+        "REPO": "",
         "TOKEN": "Token de acceso"
       },
       "FORM_SECTION": {
@@ -461,12 +464,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "Fin de dia",
-          "MSG": "Olvidaste terminar tu día en {{dayStr}}"
-        }
-      },
       "D_CREATE": {
         "CREATE": "Crear proyecto",
         "EDIT": "Editar proyecto",
@@ -508,6 +505,26 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Error para la interfaz de recordatorio"
     },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "Crear etiqueta",
+        "EDIT": "Editar etiqueta"
+      },
+      "D_EDIT": {
+        "ADD": "Agregar etiquetas para \"{{title}}\"",
+        "EDIT": "Editar etiquetas para \"{{title}}\"",
+        "LABEL": "Etiquetas"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "Color (si se utiliza un color de tema primario indefinido)",
+        "L_ICON": "Icono",
+        "L_TITLE": "Nombre de etiqueta",
+        "TITLE": "Ajustes básicos"
+      },
+      "S": {
+        "UPDATED": "La configuración de etiquetas se actualizó"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Añadir un adjunto",
@@ -532,11 +549,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Añadir subtarea",
+        "ADD_TO_MY_DAY": "Agregar a mi día",
+        "ADD_TO_PROJECT": "Agregar a un proyecto",
         "ADVANCED": "Avanzado",
         "CONVERT_TO_PARENT_TASK": "Convertir a tarea principal",
         "DELETE": "Eliminar tarea",
         "DROP_ATTACHMENT": "Suelta aquí para adjuntar a \"{{title}}\"",
         "EDIT_REMINDER": "Editar recordatorio",
+        "EDIT_TAGS": "Editar etiquetas",
         "MARK_DONE": "marcar como realizada",
         "MARK_UNDONE": "Marcar como no realizada",
         "MOVE_TO_BACKLOG": "Mover al registro de trabajo",
@@ -546,6 +566,7 @@
         "OPEN_ISSUE": "Abrir problema en una nueva pestaña del navegador",
         "OPEN_TASK_MENU": "Abrir menú de tareas",
         "OPEN_TIME": "Estimar tiempo / Agregar tiempo empleado",
+        "REMOVE_FROM_MY_DAY": "Eliminar de mi día",
         "REPEAT_EDIT": "Editar Repetir Tarea Config.",
         "REPEAT_TASK": "Repetir la tarea",
         "SCHEDULE": "Programar tarea",
@@ -568,14 +589,13 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "Descartar recordatorio",
-        "ERR_LOST": "Hubo un recordatorio programado para la tarea {{title}}, pero parece estar perdido.",
         "FOR_CURRENT": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FROM_PROJECT": "Del proyecto",
+        "FROM_TAG": "De la etiqueta: \"{{title}}\"",
         "SNOOZE": "Posponer {{time}}",
         "START": "Iniciar tarea",
-        "SWITCH_PROJECT_START": "Cambiar Proyecto y Iniciar Tarea",
-        "TITLE": "Tarea programada"
+        "SWITCH_CONTEXT_START": "Cambiar contexto e inicio"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Añadir tiempo empleado para otro día",
@@ -599,6 +619,7 @@
       "S": {
         "DELETED": "Tarea eliminada \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Se movió la tarea existente <strong>{{title}}</strong> a la lista de tareas de hoy",
+        "FOUND_MOVE_FROM_OTHER_LIST": "Se agregó la tarea <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> a la lista actual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarea restaurada <strong>{{title}}</strong> relacionada con el problema desde el archivo",
         "REMINDER_ADDED": "Tarea programada \"{{title}}\"",
         "REMINDER_DELETED": "Recordatorio eliminado para la tarea",
@@ -624,7 +645,8 @@
         "EDIT": "Editar Repetir Tarea Config.",
         "HELP1": "Las tareas repetitivas están destinadas a las tareas diarias, por ejemplo, \"Organización\", \"Reunión diaria\", \"Revisión de código\", \"Comprobación de correos electrónicos\" o tareas similares que pueden ocurrir una y otra vez.",
         "HELP2": "Una vez configurada, se volverá a crear una tarea repetitiva en cada día seleccionado a continuación tan pronto como abra su proyecto y se marcará automáticamente como finalizada al final del día. Serán manejados como diferentes instancias. Así que puedes agregar libremente subtareas, etc.",
-        "HELP3": "Las tareas importadas desde Jira o Git Issues no se pueden repetir. Todos los recordatorios también se eliminarán en una tarea repetitiva."
+        "HELP3": "Las tareas importadas desde Jira o Git Issues no se pueden repetir. Todos los recordatorios también se eliminarán en una tarea repetitiva.",
+        "TAG_LABEL": "Etiquetas para agregar"
       },
       "F": {
         "DEFAULT_ESTIMATE": "Estimación por defecto",
@@ -661,7 +683,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "Restaurar tarea desde archivo",
         "TASKS": "Tareas",
         "TOTAL_TIME": "Tiempo total empleado:",
-        "TOTAL_TIME_PROJECT": "Tiempo total empleado en el proyecto",
         "WEEK_NR": "Semana {{nr}}",
         "WORKED": "Trabajo"
       },
@@ -743,7 +764,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Ocultar hoja de evaluación en resumen diario",
-      "IS_HIDE_METRIC_FROM_MENU": "Ocultar métricas del menú",
       "TITLE": "Evaluación y métrica"
     },
     "GOOGLE_DRIVE_SYNC": {
@@ -825,7 +845,6 @@
       "IS_AUTO_START_NEXT_TASK": "Comience a rastrear la siguiente tarea cuando marque actual como hecha",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación",
       "IS_DARK_MODE": "Modo oscuro",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Deshabilitar el recordatorio sobre el día de finalización olvidado",
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace sobre el encabezado principal (solo para escritorio)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
       "IS_TURN_OFF_MARKDOWN": "Desactiva el análisis de descuento para notas",
@@ -868,6 +887,7 @@
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",
     "CREATE_PROJECT": "Crear proyecto",
+    "CREATE_TAG": "Crear etiqueta",
     "GO_TO_TASK_LIST": "Ir a la lista de tareas",
     "MANAGE_PROJECTS": "Administrar proyectos",
     "METRICS": "Métrica",
@@ -878,6 +898,7 @@
     "PROJECT_SETTINGS": "Ajustes del proyecto",
     "SCHEDULED": "Programado",
     "SETTINGS": "Ajustes",
+    "TAGS": "Etiquetas",
     "TASKS": "Tareas",
     "TASK_LIST": "Lista de tareas",
     "TOGGLE_SHOW_BOOKMARKS": "Mostrar / Ocultar Marcadores",
@@ -950,9 +971,11 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Ajustes globales",
+    "ISSUE_INTEGRATION": "Integración de problemas",
     "PRIVATE_POLICY": "Política privada",
     "PRODUCTIVITY_HELPER": "Ayudante de productividad",
     "PROJECT_SETTINGS": "Ajustes Específicos del Proyecto",
+    "TAG_SETTINGS": "Configuraciones específicas de etiqueta",
     "TOGGLE_DARK_MODE": "Cambiar modo oscuro"
   },
   "S": {

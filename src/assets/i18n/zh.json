@@ -5,6 +5,8 @@
       "INSTALL": "安装",
       "MSG": "您想将Super Productivity安装为PWA吗？"
     },
+    "UPDATE_MAIN_MODEL": "超级生产力有了重大更新！您的数据需要进行一些迁移。请注意，这会使您的数据与该应用的旧版本不兼容。",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "未选择模型更新。请注意，如果您不想执行模型升级，则必须降级到最新版本。",
     "UPDATE_WEB_APP": "新版本可用。加载新版本？"
   },
   "BL": {
@@ -118,6 +120,7 @@
         "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的问题显示为建议",
         "PROJECT": "您要跟踪的git存储库的“username%2FProjectName”",
+        "REPO": "",
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
@@ -461,12 +464,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "完成日",
-          "MSG": "你忘了在 {{dayStr}}完成一天"
-        }
-      },
       "D_CREATE": {
         "CREATE": "创建项目",
         "EDIT": "编辑项目",
@@ -508,6 +505,26 @@
     "REMINDER": {
       "S_REMINDER_ERR": "提醒界面出错"
     },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "创建标签",
+        "EDIT": "编辑标签"
+      },
+      "D_EDIT": {
+        "ADD": "为“{{title}}”添加标签",
+        "EDIT": "编辑“{{title}}”的标签",
+        "LABEL": "标签"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "颜色（如果使用了未定义的主要主题颜色）",
+        "L_ICON": "图标",
+        "L_TITLE": "标签名称",
+        "TITLE": "基本设置"
+      },
+      "S": {
+        "UPDATED": "标签设置已更新"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添加附件",
@@ -532,11 +549,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "添加子任务",
+        "ADD_TO_MY_DAY": "添加到我的一天",
+        "ADD_TO_PROJECT": "添加到项目",
         "ADVANCED": "高级",
         "CONVERT_TO_PARENT_TASK": "转换为父任务",
         "DELETE": "删除任务",
         "DROP_ATTACHMENT": "放在此处以附加到“{{title}}”",
         "EDIT_REMINDER": "编辑提醒",
+        "EDIT_TAGS": "编辑标签",
         "MARK_DONE": "标为已完成",
         "MARK_UNDONE": "标记为撤消",
         "MOVE_TO_BACKLOG": "转到积压",
@@ -546,6 +566,7 @@
         "OPEN_ISSUE": "在新的浏览器选项卡中打开问题",
         "OPEN_TASK_MENU": "打开任务菜单",
         "OPEN_TIME": "估计时间/增加花费的时间",
+        "REMOVE_FROM_MY_DAY": "从我的日子中删除",
         "REPEAT_EDIT": "编辑重复任务配置",
         "REPEAT_TASK": "重复任务",
         "SCHEDULE": "安排任务",
@@ -568,14 +589,13 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "解雇提醒",
-        "ERR_LOST": "有一个提醒安排任务 {{title}}，但它似乎丢失了。",
         "FOR_CURRENT": "任务到期了。你想开始工作吗？",
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
         "FROM_PROJECT": "来自项目",
+        "FROM_TAG": "来自标签：“{{title}}”",
         "SNOOZE": "暂停 {{time}}",
         "START": "开始任务",
-        "SWITCH_PROJECT_START": "切换项目和启动任务",
-        "TITLE": "预定任务"
+        "SWITCH_CONTEXT_START": "切换上下文并开始"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "添加其他时间花费的时间",
@@ -599,6 +619,7 @@
       "S": {
         "DELETED": "已删除任务“{{title}}”",
         "FOUND_MOVE_FROM_BACKLOG": "将现有任务 <strong>{{title}}</strong> 移至今日任务列表",
+        "FOUND_MOVE_FROM_OTHER_LIST": "已将任务 <strong>{{title}}</strong> 从 <strong>{{contextTitle}}</strong> 添加到当前列表",
         "FOUND_RESTORE_FROM_ARCHIVE": "已恢复的任务 <strong>{{title}}</strong> 与存档问题相关",
         "REMINDER_ADDED": "计划任务“{{title}}”",
         "REMINDER_DELETED": "已删除任务提醒",
@@ -624,7 +645,8 @@
         "EDIT": "编辑重复任务配置",
         "HELP1": "重复任务适用于日常琐事，例如：“组织”，“每日会议”，“代码审查”，“检查电子邮件”或可能一次又一次发生的类似任务。",
         "HELP2": "配置完成后，一旦打开项目，将在下面选择的每一天重新创建重复任务，并在一天结束时自动标记为已完成。它们将作为不同的实例处理。所以你可以自由添加子任务等。",
-        "HELP3": "从Jira或Git问题导入的任务不能重复。所有提醒也将在重复任务中删除。"
+        "HELP3": "从Jira或Git问题导入的任务不能重复。所有提醒也将在重复任务中删除。",
+        "TAG_LABEL": "要添加的标签"
       },
       "F": {
         "DEFAULT_ESTIMATE": "默认估计",
@@ -661,7 +683,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "从存档还原任务",
         "TASKS": "任务",
         "TOTAL_TIME": "花费的时间总计：",
-        "TOTAL_TIME_PROJECT": "花在项目上的总时间",
         "WEEK_NR": "周 {{nr}}",
         "WORKED": "工作"
       },
@@ -743,7 +764,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
-      "IS_HIDE_METRIC_FROM_MENU": "从菜单隐藏指标",
       "TITLE": "评估与指标"
     },
     "GOOGLE_DRIVE_SYNC": {
@@ -825,7 +845,6 @@
       "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始跟踪下一个任务",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_DARK_MODE": "暗模式",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "禁用有关遗忘完成日的提醒",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "超出时间估算时通知",
       "IS_TURN_OFF_MARKDOWN": "关闭标记的降价解析",
@@ -868,6 +887,7 @@
   "MH": {
     "ADD_NEW_TASK": "添加新任务",
     "CREATE_PROJECT": "创建项目",
+    "CREATE_TAG": "创建标签",
     "GO_TO_TASK_LIST": "转到任务列表",
     "MANAGE_PROJECTS": "管理项目",
     "METRICS": "度量",
@@ -878,6 +898,7 @@
     "PROJECT_SETTINGS": "项目设置",
     "SCHEDULED": "计划",
     "SETTINGS": "设置",
+    "TAGS": "标签",
     "TASKS": "任务",
     "TASK_LIST": "任务列表",
     "TOGGLE_SHOW_BOOKMARKS": "显示/隐藏书签",
@@ -950,9 +971,11 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "全局设置",
+    "ISSUE_INTEGRATION": "问题整合",
     "PRIVATE_POLICY": "私人政策",
     "PRODUCTIVITY_HELPER": "生产力助手",
     "PROJECT_SETTINGS": "项目特定设置",
+    "TAG_SETTINGS": "标签特定设置",
     "TOGGLE_DARK_MODE": "切换暗模式"
   },
   "S": {
