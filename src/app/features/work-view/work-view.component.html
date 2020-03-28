@@ -1,4 +1,5 @@
 <task-additional-info-wrapper
+  *ngIf="!(workContextService.isContextChangingWithDelay$|async)"
   @projectChange>
   <div #containerEl
        class="wrapper"

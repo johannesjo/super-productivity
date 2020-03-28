@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {combineLatest, EMPTY, Observable, of, timer} from 'rxjs';
+import {combineLatest, EMPTY, interval, Observable, of, timer} from 'rxjs';
 import {
   WorkContext,
   WorkContextAdvancedCfg,
@@ -15,6 +15,7 @@ import {selectActiveContextId, selectActiveContextTypeAndId} from './store/work-
 import {NavigationEnd, Router} from '@angular/router';
 import {
   concatMap,
+  delayWhen,
   distinctUntilChanged,
   filter,
   map,
@@ -150,6 +151,12 @@ export class WorkContextService {
       )
     ),
     startWith(false),
+  );
+  isContextChangingWithDelay$: Observable<boolean> = this.isContextChanging$.pipe(
+    delayWhen(val => val
+      ? of(undefined)
+      : interval(60)
+    )
   );
 
   // TASK LEVEL
