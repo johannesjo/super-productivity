@@ -20,4 +20,8 @@ export interface IssueServiceInterface {
   getAddTaskData?(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
 
   getMappedAttachments?(issueDataIN: IssueData): TaskAttachment[];
+
+  closeIssue?(task: Task);
+
+  reopenIssue?(task: Task);
 }

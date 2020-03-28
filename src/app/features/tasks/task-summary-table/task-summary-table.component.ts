@@ -3,6 +3,7 @@ import {Task} from '../task.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {TaskService} from '../task.service';
 import {T} from '../../../t.const';
+import { IssueService } from '../../issue/issue.service';
 
 @Component({
   selector: 'task-summary-table',
@@ -19,6 +20,7 @@ export class TaskSummaryTableComponent {
 
   constructor(
     private _taskService: TaskService,
+    private _issueService: IssueService,
   ) {
   }
 
@@ -40,9 +42,13 @@ export class TaskSummaryTableComponent {
   }
 
   toggleTaskDone(task: Task) {
-    task.isDone
-      ? this._taskService.setUnDone(task.id)
-      : this._taskService.setDone(task.id);
+    if (task.isDone) {
+      this._taskService.setUnDone(task.id);
+      this._issueService.reopenIssue(task);
+    } else {
+      this._taskService.setDone(task.id);
+      this._issueService.closeIssue(task);
+    }
     this.updated.emit();
   }
 }

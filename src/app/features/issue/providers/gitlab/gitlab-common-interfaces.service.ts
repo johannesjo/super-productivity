@@ -5,7 +5,7 @@ import {catchError, concatMap, first, switchMap, map} from 'rxjs/operators';
 import {IssueServiceInterface} from '../../issue-service-interface';
 import {GitlabApiService} from './gitlab-api/gitlab-api.service';
 import {ProjectService} from '../../../project/project.service';
-import {SearchResultItem} from '../../issue.model';
+import {SearchResultItem, IssueData} from '../../issue.model';
 import {GitlabCfg} from './gitlab';
 import {SnackService} from '../../../../core/snack/snack.service';
 import {GitlabIssue} from './gitlab-issue/gitlab-issue.model';
@@ -105,6 +105,16 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         issuePoints: issue.weight
       }
     };
+  }
+
+  async closeIssue(task: Task) {
+    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    this._gitlabApiService.closeIssue(+task.issueId, cfg).subscribe();
+  }
+
+  async reopenIssue(task: Task) {
+    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    this._gitlabApiService.reopenIssue(+task.issueId, cfg).subscribe();
   }
 
   private _formatIssueTitle(id: number, title: string): string {

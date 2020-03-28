@@ -8,6 +8,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   project: null,
   token: null,
   isSearchIssuesFromGitlab: false,
+  isCloseReopenEnabled: false,
   isAutoPoll: false,
   isAutoAddToBacklog: false,
   filterUsername: null,
@@ -50,6 +51,13 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_AUTO_POLL
+    },
+  },
+  {
+    key: 'isCloseReopenEnabled',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.GITLAB.FORM.IS_COLSE_REOPEN
     },
   },
   {

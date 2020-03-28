@@ -87,6 +87,30 @@ export class GitlabApiService {
       );
   }
 
+  closeIssue(issueId: number, cfg: GitlabCfg): Observable<GitlabIssue> {
+    return this._sendRequest$({
+      url: `${BASE}/${cfg.project}/issues/${issueId}?state_event=close`,
+      method: 'PUT'
+    }, cfg).pipe(
+      take(1),
+      map((issue: GitlabOriginalIssue) => {
+        return mapGitlabIssue(issue);
+      }),
+    );
+  }
+
+  reopenIssue(issueId: number, cfg: GitlabCfg): Observable<GitlabIssue> {
+    return this._sendRequest$({
+      url: `${BASE}/${cfg.project}/issues/${issueId}?state_event=reopen`,
+      method: 'PUT'
+    }, cfg).pipe(
+      take(1),
+      map((issue: GitlabOriginalIssue) => {
+        return mapGitlabIssue(issue);
+      }),
+    );
+  }
+
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendRequest$({
       url: `${BASE}/${cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`

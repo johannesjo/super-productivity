@@ -119,6 +119,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Gitlab to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
+        "IS_CLOSE_REOPEN": "Allow Super Productivity to close and reopen issue on task completion and reopening",
         "PROJECT": "\"username%2FProjectName\" for the gitlab project you want to track",
         "TOKEN": "Access Token"
       },

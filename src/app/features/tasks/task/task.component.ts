@@ -297,9 +297,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.task.parentId) {
       this.focusNext(true);
     }
-    this.task.isDone
-      ? this._taskService.setUnDone(this.task.id)
-      : this._taskService.setDone(this.task.id);
+    if (this.task.isDone) {
+      this._taskService.setUnDone(this.task.id);
+      this._issueService.reopenIssue(this.task);
+    } else {
+      this._taskService.setDone(this.task.id);
+      this._issueService.closeIssue(this.task);
+    }
   }
 
 

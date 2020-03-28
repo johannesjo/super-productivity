@@ -127,4 +127,16 @@ export class IssueService {
       });
     }
   }
+
+  closeIssue(task: Task) {
+    if (typeof this.ISSUE_SERVICE_MAP[task.issueType].closeIssue === 'function') {
+      return this.ISSUE_SERVICE_MAP[task.issueType].closeIssue(task);
+    }
+  }
+
+  reopenIssue(task: Task) {
+    if (typeof this.ISSUE_SERVICE_MAP[task.issueType].reopenIssue === 'function') {
+      return this.ISSUE_SERVICE_MAP[task.issueType].reopenIssue(task);
+    }
+  }
 }
