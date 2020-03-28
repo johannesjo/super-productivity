@@ -9,10 +9,8 @@
   position: relative;
   //margin-left: 50px;
   // Magic number to align icon with task text
-  cursor: pointer;
   user-select: none;
-  margin: $s*.25 0 $s;
-  margin-left: 46px;
+  margin: 0 0 ($s*.5) 52px;
 }
 
 .tags {

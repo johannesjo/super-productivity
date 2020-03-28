@@ -7,16 +7,25 @@
   margin: 2px;
   min-width: 20px;
   padding: 0 $s;
+  padding-left: 0;
   font-size: 10px;
   border-radius: $s*2;
-  background: $c-primary;
-  color: $c-contrast;
+  cursor: pointer;
+
+  @include darkTheme() {
+    background: $dark-theme-bg-lighter;
+  }
+  @include lightTheme() {
+    color: $light-theme-text-color-less-intense;
+  }
 }
 
-$ico-size: 16px;
-$line-height: 14px;
-$ico-pad: 1px;
+$dot-size: 15px;
+$ico-size: 13px;
+$line-height: 15px;
+$ico-pad: ($dot-size -$ico-size)/2;
 $pad: ($ico-size - $line-height + $ico-pad*2)/2;
+
 
 .tag-title {
   display: block;
@@ -28,11 +37,12 @@ $pad: ($ico-size - $line-height + $ico-pad*2)/2;
 
 .tag-ico {
   display: block;
-  margin-top: $ico-pad;
-  margin-bottom: $ico-pad;
+  padding: $ico-pad;
   font-size: $ico-size;
-  height: $ico-size;
-  width: $ico-size;
+  height: $dot-size;
+  width: $dot-size;
+  border-radius: 50%;
+  color: $c-contrast;
 
   // needs to be important to overwrite inside mat option
   margin-right: $s*.5 !important;

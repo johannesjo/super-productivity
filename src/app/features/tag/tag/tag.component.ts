@@ -20,7 +20,8 @@ export class TagComponent {
 
   tag: TagComponentTag;
 
-  @HostBinding('style.background') color;
+  // @HostBinding('style.background')
+  color;
 
   constructor() {
   }

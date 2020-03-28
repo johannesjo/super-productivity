@@ -1,11 +1,12 @@
 <div class="tags-container"
-     *ngIf="(tags && tags.length) || (projectTag)"
-     (click)="editTags()">
+     *ngIf="(tags && tags.length) || (projectTag)">
   <div class="tags"
        [@standardList]="tags.length">
     <tag *ngIf="(projectTag$|async) as projectTag"
+         (click)="editTags()"
          [tag]="projectTag"></tag>
     <tag *ngFor="let tag of tags; trackBy: trackByFn"
+         (click)="editTags()"
          [tag]="tag"
          [style.background-color]="tag.color"></tag>
   </div>
