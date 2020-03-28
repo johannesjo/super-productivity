@@ -1,3 +1,41 @@
+## [5.0.2](https://github.com/johannesjo/super-productivity/compare/v5.0.1...v5.0.2) (2020-03-28)
+
+
+### Bug Fixes
+
+* routing issue ([b75dc19](https://github.com/johannesjo/super-productivity/commit/b75dc191dce0e43b60570fe6c9535c0f0685e355))
+* show current task in header ([9b8cdf2](https://github.com/johannesjo/super-productivity/commit/9b8cdf2f2159abb802720f473cbc2b2828ab0967))
+* **project:** error with deleting project ([b04c3ce](https://github.com/johannesjo/super-productivity/commit/b04c3ce6d285aa4211ec6648055d9298b202e656))
+* **tag:** my day not being handled correctly for task ([0540c8f](https://github.com/johannesjo/super-productivity/commit/0540c8fcba37e6dbe895f7c109c9abf543ad96e0))
+
+
+### Features
+
+* show current task title always in header ([3945b87](https://github.com/johannesjo/super-productivity/commit/3945b871b35ea5093e3b2f4c6f95f256ae78d039))
+* **task:** move handle to the center left of tags and title ([0b148cf](https://github.com/johannesjo/super-productivity/commit/0b148cfdbe989a360ff48a78bef1772e05f8e2cd))
+* improve context to context transition ([7f5ed82](https://github.com/johannesjo/super-productivity/commit/7f5ed82cea4baedde6e88dadb5e321c33f33784e))
+* improve page to page transition ([1374d1b](https://github.com/johannesjo/super-productivity/commit/1374d1b58b04654cd8bdcfd71d0bbac0f981c765))
+* **i18n:** add all missing translations ([8493ba4](https://github.com/johannesjo/super-productivity/commit/8493ba475805ce97de955b9e3dcc11499d998596))
+* **migrate:** add _mergeEntitiesWithIdReplacement as separate fn ([c9fc76a](https://github.com/johannesjo/super-productivity/commit/c9fc76a86626ae5a7344357023fe8dd449a221da))
+* **migrate:** add double id replacing for messed up states ([66e9b8d](https://github.com/johannesjo/super-productivity/commit/66e9b8dc90574851524e78d5bd04d20bd0d8b3d0))
+* **project:** add delete cleanup confirm to cleanup tasks with wrong project id ([407bf59](https://github.com/johannesjo/super-productivity/commit/407bf59949f7c197a42d29d03fe68aa3a379454c))
+* **project:** add missing save action for moveUp/Down auto ([f479f46](https://github.com/johannesjo/super-productivity/commit/f479f46d378802cce3a5b1f948c8d3ddd850af59))
+* **project:** add more cleanup stuff ([6e5c199](https://github.com/johannesjo/super-productivity/commit/6e5c199dfe02aacc945938a04816c817615a209c))
+* **project:** remove outdated model ([8a24bff](https://github.com/johannesjo/super-productivity/commit/8a24bffee6c7731493da727a0aaddbb873e652d4))
+* **tag:** always make takes unique ([a5177e5](https://github.com/johannesjo/super-productivity/commit/a5177e5901b015982e48fe7bc9b1bf4042467453))
+* **tag:** improve styling of tags ([06f8481](https://github.com/johannesjo/super-productivity/commit/06f8481ede0d3f613d99471e60f0c1d1e59d3944))
+* **tag:** improve styling of tags dark theme ([50d5e6d](https://github.com/johannesjo/super-productivity/commit/50d5e6d68d045f56aa7c7701d29d05fa51b997c6))
+* add migration fixup for project id for tasks and archiveTasks ([d67a33d](https://github.com/johannesjo/super-productivity/commit/d67a33dcf8779bae99815ab858ac39c79ac778b1))
+* make default route work again ([f42ba52](https://github.com/johannesjo/super-productivity/commit/f42ba52a0b833498ab3991b155cf0de966a192ca))
+* **task:** rename my day to today ([fdcdbc4](https://github.com/johannesjo/super-productivity/commit/fdcdbc43c082a8bc20c6c60abe32b4e2e816cc61))
+* **task:** update project id on sub task move ([e0ef0f6](https://github.com/johannesjo/super-productivity/commit/e0ef0f60b07453de0fac12ce91e77c93643c344e))
+* add more logging for migration ([5c613f8](https://github.com/johannesjo/super-productivity/commit/5c613f87e6ac347bfc77f80e10e0047697f19eca))
+* **taskRepeat:** add project id when migrating ([dc81981](https://github.com/johannesjo/super-productivity/commit/dc81981693142462e2a1ff05f49072f2f8cbe69f))
+* **taskRepeat:** add projectId to model ([894a0bd](https://github.com/johannesjo/super-productivity/commit/894a0bd78474108ab64dad0748193839845e08a4))
+* **taskRepeat:** cleanup on project deletion ([02aa22c](https://github.com/johannesjo/super-productivity/commit/02aa22c4a156b28dab8d13bf92964b93fbce77a2))
+
+
+
 ## [5.0.1](https://github.com/johannesjo/super-productivity/compare/v5.0.0...v5.0.1) (2020-03-27)
 
 
