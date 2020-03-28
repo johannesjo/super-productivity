@@ -254,7 +254,11 @@ export class TaskService {
   }
 
   updateTags(taskId: string, newTagIds: string[], oldTagIds: string[]) {
-    this._store.dispatch(new UpdateTaskTags({taskId, newTagIds, oldTagIds}));
+    this._store.dispatch(new UpdateTaskTags({
+      taskId,
+      newTagIds: unique(newTagIds),
+      oldTagIds
+    }));
   }
 
   // TODO: Move logic away from service class (to actions)?
