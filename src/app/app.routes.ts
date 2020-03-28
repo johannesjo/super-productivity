@@ -93,5 +93,5 @@ export const APP_ROUTES: Routes = [
   {path: 'active/:subPageType/:param', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
   {path: 'active', canActivate: [ActiveWorkContextGuard], component: ConfigPageComponent},
 
-  {path: '**', redirectTo: `tag/${TODAY_TAG.id}/task`}
+  {path: '**', redirectTo: `tag/${TODAY_TAG.id}/tasks`},
 ];
