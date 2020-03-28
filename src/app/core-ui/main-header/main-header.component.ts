@@ -15,7 +15,7 @@ import {TaskService} from '../../features/tasks/task.service';
 import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
 import {T} from '../../t.const';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
-import {NavigationStart, Router} from '@angular/router';
+import {NavigationEnd, NavigationStart, Router} from '@angular/router';
 import {filter, map} from 'rxjs/operators';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {WorkContextService} from '../../features/work-context/work-context.service';
@@ -35,15 +35,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
-  // TODO fix
   isShowTaskTitle$: Observable<boolean> = combineLatest([
     this._router.events.pipe(
-      filter(event => event instanceof NavigationStart),
+      filter(event => event instanceof NavigationEnd),
     ),
     this.taskService.currentTaskId$,
   ]).pipe(
-    map(([routerEv, currentTaskId]: [NavigationStart, string]): boolean => {
-      return routerEv.url !== '/work-view' && !!currentTaskId;
+    map(([{urlAfterRedirects}, currentTaskId]: [NavigationEnd, string]): boolean => {
+      return !!currentTaskId && !urlAfterRedirects.match(/tasks$/);
     })
   );
 
