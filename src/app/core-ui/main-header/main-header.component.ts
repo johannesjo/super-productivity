@@ -15,11 +15,10 @@ import {TaskService} from '../../features/tasks/task.service';
 import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
 import {T} from '../../t.const';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
-import {NavigationEnd, NavigationStart, Router} from '@angular/router';
-import {filter, map} from 'rxjs/operators';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {Router} from '@angular/router';
+import {map} from 'rxjs/operators';
+import {Observable, Subscription} from 'rxjs';
 import {WorkContextService} from '../../features/work-context/work-context.service';
-import {WorkContext} from '../../features/work-context/work-context.model';
 
 @Component({
   selector: 'main-header',
@@ -35,15 +34,19 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
-  isShowTaskTitle$: Observable<boolean> = combineLatest([
-    this._router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-    ),
-    this.taskService.currentTaskId$,
-  ]).pipe(
-    map(([{urlAfterRedirects}, currentTaskId]: [NavigationEnd, string]): boolean => {
-      return !!currentTaskId && !urlAfterRedirects.match(/tasks$/);
-    })
+  // isShowTaskTitle$: Observable<boolean> = combineLatest([
+  //   this._router.events.pipe(
+  //     filter(event => event instanceof NavigationEnd),
+  //   ),
+  //   this.taskService.currentTaskId$,
+  // ]).pipe(
+  //   map(([{urlAfterRedirects}, currentTaskId]: [NavigationEnd, string]): boolean => {
+  //     return !!currentTaskId && !urlAfterRedirects.match(/tasks$/);
+  //   })
+  // );
+
+  isShowTaskTitle$: Observable<boolean> = this.taskService.currentTaskId$.pipe(
+    map((currentTaskId): boolean => !!currentTaskId),
   );
 
   private _subs = new Subscription();
