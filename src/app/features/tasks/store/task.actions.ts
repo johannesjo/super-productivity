@@ -16,6 +16,7 @@ export enum TaskActionTypes {
   AddTask = '[Task][Issue] Add Task',
   UpdateTaskUi = '[Task] Update Task Ui',
   UpdateTaskTags = '[Task] Update Task Tags',
+  RemoveTagsForAllTasks = '[Task] Remove Tags from all Tasks',
   ToggleTaskShowSubTasks = '[Task] Toggle Show Sub Tasks',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
@@ -102,6 +103,13 @@ export class UpdateTaskTags implements Action {
   readonly type = TaskActionTypes.UpdateTaskTags;
 
   constructor(public payload: { taskId: string; newTagIds: string[], oldTagIds: string[] }) {
+  }
+}
+
+export class RemoveTagsForAllTasks implements Action {
+  readonly type = TaskActionTypes.RemoveTagsForAllTasks;
+
+  constructor(public payload: { tagIdsToRemove: string[] }) {
   }
 }
 
@@ -248,6 +256,7 @@ export type TaskActions
   | UpdateTask
   | UpdateTasks
   | UpdateTaskTags
+  | RemoveTagsForAllTasks
   | DeleteTask
   | DeleteMainTasks
   | UndoDeleteTask

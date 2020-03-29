@@ -28,6 +28,7 @@ import {
   MoveToArchive,
   MoveToOtherProject,
   RemoveTaskReminder,
+  RemoveTagsForAllTasks,
   RemoveTimeSpent,
   RestoreTask,
   RoundTimeSpentForDay,
@@ -258,6 +259,12 @@ export class TaskService {
       taskId,
       newTagIds: unique(newTagIds),
       oldTagIds
+    }));
+  }
+
+  removeTagsForAllTask(tagsToRemove: string[]) {
+    this._store.dispatch(new RemoveTagsForAllTasks({
+      tagIdsToRemove: tagsToRemove,
     }));
   }
 

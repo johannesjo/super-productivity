@@ -124,6 +124,18 @@ export function taskReducer(
       }, state);
     }
 
+    case TaskActionTypes.RemoveTagsForAllTasks: {
+      const updates: Update<Task>[] = state.ids.map((taskId) => ({
+        id: taskId,
+        changes: {
+          tagIds: state.entities[taskId].tagIds.filter(
+            tagId => !action.payload.tagIdsToRemove.includes(tagId)
+          ),
+        }
+      }));
+      return taskAdapter.updateMany(updates, state);
+    }
+
     // TODO simplify
     case TaskActionTypes.ToggleTaskShowSubTasks: {
       const {taskId, isShowLess, isEndless} = action.payload;

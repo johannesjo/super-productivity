@@ -7,7 +7,7 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {deleteTag, deleteTags, updateTag, updateWorkEndForTag, updateWorkStartForTag} from './tag.actions';
-import {AddTimeSpent, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTimeSpent, RemoveTagsForAllTasks, TaskActionTypes} from '../../tasks/store/task.actions';
 import {TagService} from '../tag.service';
 import {TaskService} from '../../tasks/task.service';
 import {of} from 'rxjs';
@@ -115,12 +115,12 @@ export class TagEffects {
         deleteTags,
       ),
       map((a: any) => a.ids ? a.ids : [a.id]),
-      tap(console.log),
-      // tap(async (action: DeleteTag) => {
-      // await this._persistenceService.removeCompleteRelatedDataForTag(action.payload.id);
-      // this._reminderService.removeRemindersByWorkContextId(action.payload.id);
-      // this._removeAllTasksForTag(action.payload.id);
-      // }),
+      tap(async (tagIdsToRemove: string[]) => {
+        // remove from all tasks
+        this._taskService.removeTagsForAllTask(tagIdsToRemove);
+        // remove from archive
+        await this._persistenceService.taskArchive.execAction(new RemoveTagsForAllTasks({tagIdsToRemove}));
+      }),
     );
 
 

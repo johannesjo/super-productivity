@@ -44,9 +44,8 @@ export class WorkContextMenuComponent implements OnDestroy {
 
   deleteTag() {
     this._subs.add(this._confirmTagDelete().subscribe(isDelete => {
-      console.log(isDelete);
       if (isDelete) {
-        // this._tagService.removeTag(this.contextId);
+        this._tagService.removeTag(this.contextId);
       }
     }));
   }
