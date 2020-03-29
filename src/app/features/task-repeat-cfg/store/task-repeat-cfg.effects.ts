@@ -121,11 +121,9 @@ export class TaskRepeatCfgEffects {
   );
 
   @Effect({dispatch: false}) removeConfigIdFromTaskArchiveTasks$: any = this._actions$.pipe(
-    ofType(
-      TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
-    ),
-    tap(([a]: [DeleteTaskRepeatCfg]) => {
-      this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id);
+    ofType(TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg),
+    tap((a: DeleteTaskRepeatCfg) => {
+      this._removeRepeatCfgFromArchiveTasks(a.payload.id);
     }),
   );
 

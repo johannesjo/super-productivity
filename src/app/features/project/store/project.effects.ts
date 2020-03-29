@@ -456,7 +456,7 @@ export class ProjectEffects {
       .filter(cfg => cfg.projectId === projectIdToDelete && (!cfg.tagIds || cfg.tagIds.length === 0))
       .map(cfg => cfg.id);
     if (cfgsIdsToRemove.length > 0) {
-      this._taskRepeatCfgService.deleteTaskRepeatCfgs(cfgsIdsToRemove);
+      this._taskRepeatCfgService.deleteTaskRepeatCfgsNoTaskCleanup(cfgsIdsToRemove);
     }
 
     const cfgsToUpdate = taskRepeatCfgs

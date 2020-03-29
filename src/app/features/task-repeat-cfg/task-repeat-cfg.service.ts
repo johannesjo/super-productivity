@@ -48,6 +48,7 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(new AddTaskRepeatCfgToTask({
       taskRepeatCfg: {
         ...taskRepeatCfg,
+        projectId,
         id: shortid()
       },
       taskId,
@@ -58,7 +59,7 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(new DeleteTaskRepeatCfg({id}));
   }
 
-  deleteTaskRepeatCfgs(ids: string[]) {
+  deleteTaskRepeatCfgsNoTaskCleanup(ids: string[]) {
     this._store$.dispatch(new DeleteTaskRepeatCfgs({ids}));
   }
 
