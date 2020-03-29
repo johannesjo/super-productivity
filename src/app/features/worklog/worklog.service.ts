@@ -4,7 +4,7 @@ import {dedupeByKey} from '../../util/de-dupe-by-key';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {map, switchMap, tap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContext, WorkContextType} from '../work-context/work-context.model';
@@ -35,8 +35,6 @@ export class WorklogService {
     }),
   );
 
-  /** @deprecated */
-  worklog: Worklog;
   worklog$: Observable<Worklog> = this.worklogData$.pipe(map(data => data.worklog));
   totalTimeSpent$: Observable<number> = this.worklogData$.pipe(map(data => data.totalTimeSpent));
   currentWeek$: Observable<WorklogWeek> = this.worklog$.pipe(
@@ -88,8 +86,6 @@ export class WorklogService {
     private readonly _projectService: ProjectService,
     private readonly _taskService: TaskService,
   ) {
-    // TODO not cool
-    // this.worklog$.subscribe(worklog => this.worklog = worklog);
   }
 
 
