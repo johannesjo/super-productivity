@@ -27,7 +27,7 @@ export class WorklogService {
 
   // NOTE: task updates are not reflected
   worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest([
-    this._workContextService.activeWorkContext$,
+    this._workContextService.activeWorkContextOnceOnContextChange$,
     this._archiveUpdateTrigger$,
   ]).pipe(
     switchMap(([curCtx]) => {

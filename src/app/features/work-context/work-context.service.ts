@@ -18,6 +18,7 @@ import {
   delayWhen,
   distinctUntilChanged,
   filter,
+  first,
   map,
   mapTo,
   shareReplay,
@@ -120,6 +121,11 @@ export class WorkContextService {
     // TODO find out why this is sometimes undefined
     filter(ctx => !!ctx),
     shareReplay(1),
+  );
+
+  activeWorkContextOnceOnContextChange$: Observable<WorkContext> = this.activeWorkContextId$.pipe(
+    distinctUntilChanged(),
+    switchMap(() => this.activeWorkContext$.pipe(first())),
   );
 
   mainWorkContexts$: Observable<WorkContext[]> =
