@@ -156,10 +156,16 @@ export class WorklogService {
   }
 
   private _limitStateToIds(stateIn: EntityState<Task>, ids: string[]): Dictionary<Task> {
-    return ids.reduce((acc, id) => ({
-      ...acc,
-      [id]: stateIn.entities[id]
-    }), {});
+    const newState = {};
+    ids.forEach(id => {
+      newState[id] = stateIn.entities[id];
+    });
+    return newState;
+    // might be prettier, but is much much much much slower
+    // return ids.reduce((acc, id) => ({
+    //   ...acc,
+    //   [id]: stateIn.entities[id]
+    // }), {});
   }
 
   private _getCompleteStateForWorkContext(workContext: WorkContext, taskState: EntityState<Task>, archive: EntityState<Task>): {
@@ -181,12 +187,15 @@ export class WorklogService {
       : filterIdsForProject(archive);
 
 
+    const unarchivedEntities = this._limitStateToIds(taskState, unarchivedIds);
+    const archivedEntities = this._limitStateToIds(archive, archivedIdsForTag);
+
     return {
       completeStateForWorkContext: {
         ids: [...unarchivedIds, ...archivedIdsForTag],
         entities: {
-          ...this._limitStateToIds(taskState, unarchivedIds),
-          ...this._limitStateToIds(archive, archivedIdsForTag),
+          ...unarchivedEntities,
+          ...archivedEntities,
         },
       },
       unarchivedIds,
