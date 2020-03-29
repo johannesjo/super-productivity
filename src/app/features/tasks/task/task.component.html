@@ -356,10 +356,10 @@
           <button (click)="deleteTask()"
                   *ngIf="!task.repeatCfgId"
                   mat-menu-item
+                  class="color-warn"
                   tabindex="2">
 
-            <mat-icon style="color:#e15d63;">delete_forever
-            </mat-icon>
+            <mat-icon class="color-warn-i">delete_forever</mat-icon>
             {{T.F.TASK.CMP.DELETE|translate}}
           </button>
 

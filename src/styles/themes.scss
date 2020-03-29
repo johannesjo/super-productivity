@@ -85,6 +85,11 @@
   stroke: $c-primary;
 }
 
+.color-warn-i {
+  color: $c-warn!important;
+  stroke: $c-warn!important;
+}
+
 .border-color-primary {
   border-color: $c-primary !important;
 }
