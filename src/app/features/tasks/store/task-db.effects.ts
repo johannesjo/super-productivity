@@ -35,6 +35,7 @@ export class TaskDbEffects {
         // TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
         TaskActionTypes.UpdateTaskTags,
+        TaskActionTypes.RemoveTagsForAllTasks,
         TaskActionTypes.MoveSubTask,
         TaskActionTypes.MoveSubTaskUp,
         TaskActionTypes.MoveSubTaskDown,
