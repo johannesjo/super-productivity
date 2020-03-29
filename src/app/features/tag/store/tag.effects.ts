@@ -70,77 +70,73 @@ export class TagEffects {
 
 
   @Effect()
-  updateWorkStart$: any = this._actions$
-    .pipe(
-      ofType(TaskActionTypes.AddTimeSpent),
-      concatMap(({payload}: AddTimeSpent) => payload.task.parentId
-        ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
-        : of(payload.task)
-      ),
-      filter((task: Task) => task.tagIds && !!task.tagIds.length),
-      concatMap((task: Task) => this._tagService.getTagsByIds$(task.tagIds).pipe(first())),
-      concatMap((tags: Tag[]) => tags
-        // only if not assigned for day already
-        .filter(tag => !tag.workStart[getWorklogStr()])
-        .map((tag) => updateWorkStartForTag({
-            id: tag.id,
-            date: getWorklogStr(),
-            newVal: Date.now(),
-          })
-        )
-      ),
-    );
+  updateWorkStart$: any = this._actions$.pipe(
+    ofType(TaskActionTypes.AddTimeSpent),
+    concatMap(({payload}: AddTimeSpent) => payload.task.parentId
+      ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
+      : of(payload.task)
+    ),
+    filter((task: Task) => task.tagIds && !!task.tagIds.length),
+    concatMap((task: Task) => this._tagService.getTagsByIds$(task.tagIds).pipe(first())),
+    concatMap((tags: Tag[]) => tags
+      // only if not assigned for day already
+      .filter(tag => !tag.workStart[getWorklogStr()])
+      .map((tag) => updateWorkStartForTag({
+          id: tag.id,
+          date: getWorklogStr(),
+          newVal: Date.now(),
+        })
+      )
+    ),
+  );
 
   @Effect()
-  updateWorkEnd$: any = this._actions$
-    .pipe(
-      ofType(TaskActionTypes.AddTimeSpent),
-      concatMap(({payload}: AddTimeSpent) => payload.task.parentId
-        ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
-        : of(payload.task)
-      ),
-      filter((task: Task) => task.tagIds && !!task.tagIds.length),
-      concatMap((task: Task) => this._tagService.getTagsByIds$(task.tagIds).pipe(first())),
-      concatMap((tags: Tag[]) => tags
-        .map((tag) => updateWorkEndForTag({
-            id: tag.id,
-            date: getWorklogStr(),
-            newVal: Date.now(),
-          })
-        )
-      ),
-    );
+  updateWorkEnd$: any = this._actions$.pipe(
+    ofType(TaskActionTypes.AddTimeSpent),
+    concatMap(({payload}: AddTimeSpent) => payload.task.parentId
+      ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
+      : of(payload.task)
+    ),
+    filter((task: Task) => task.tagIds && !!task.tagIds.length),
+    concatMap((task: Task) => this._tagService.getTagsByIds$(task.tagIds).pipe(first())),
+    concatMap((tags: Tag[]) => tags
+      .map((tag) => updateWorkEndForTag({
+          id: tag.id,
+          date: getWorklogStr(),
+          newVal: Date.now(),
+        })
+      )
+    ),
+  );
 
   @Effect({dispatch: false})
-  deleteTagRelatedData: any = this._actions$
-    .pipe(
-      ofType(
-        deleteTag,
-        deleteTags,
-      ),
-      map((a: any) => a.ids ? a.ids : [a.id]),
-      tap(async (tagIdsToRemove: string[]) => {
-        // remove from all tasks
-        this._taskService.removeTagsForAllTask(tagIdsToRemove);
-        // remove from archive
-        await this._persistenceService.taskArchive.execAction(new RemoveTagsForAllTasks({tagIdsToRemove}));
-      }),
-    );
+  deleteTagRelatedData: any = this._actions$.pipe(
+    ofType(
+      deleteTag,
+      deleteTags,
+    ),
+    map((a: any) => a.ids ? a.ids : [a.id]),
+    tap(async (tagIdsToRemove: string[]) => {
+      // remove from all tasks
+      this._taskService.removeTagsForAllTask(tagIdsToRemove);
+      // remove from archive
+      await this._persistenceService.taskArchive.execAction(new RemoveTagsForAllTasks({tagIdsToRemove}));
+    }),
+  );
 
   @Effect({dispatch: false})
-  redirectIfCurrentTagIsDeleted: any = this._actions$
-    .pipe(
-      ofType(
-        deleteTag,
-        deleteTags,
-      ),
-      map((a: any) => a.ids ? a.ids : [a.id]),
-      tap(async (tagIdsToRemove: string[]) => {
-        if (tagIdsToRemove.includes(this._workContextService.activeWorkContextId)) {
-          this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
-        }
-      }),
-    );
+  redirectIfCurrentTagIsDeleted: any = this._actions$.pipe(
+    ofType(
+      deleteTag,
+      deleteTags,
+    ),
+    map((a: any) => a.ids ? a.ids : [a.id]),
+    tap(async (tagIdsToRemove: string[]) => {
+      if (tagIdsToRemove.includes(this._workContextService.activeWorkContextId)) {
+        this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
+      }
+    }),
+  );
 
   @Effect({dispatch: false})
   cleanupNullTasksForTaskList: any = this._workContextService.activeWorkContextTypeAndId$.pipe(

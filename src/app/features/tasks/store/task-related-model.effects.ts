@@ -47,6 +47,25 @@ export class TaskRelatedModelEffects {
     tap(this._removeFromArchive.bind(this))
   );
 
+  @Effect()
+  autoAddTodayTag: any = this._actions$.pipe(
+    ofType(TaskActionTypes.AddTimeSpent),
+    filter((a: AddTimeSpent) => !a.payload.task.tagIds.includes(TODAY_TAG.id)),
+    concatMap((a: AddTimeSpent) => this._globalConfigService.misc$.pipe(
+      first(),
+      map(miscCfg => ({
+        miscCfg,
+        task: a.payload.task,
+      }))
+    )),
+    filter(({miscCfg, task}) => miscCfg.isAutoAddWorkedOnToToday),
+    map(({miscCfg, task}) => new UpdateTaskTags({
+      taskId: task.id,
+      newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+      oldTagIds: task.tagIds,
+    }))
+  );
+
   // EXTERNAL ===> TASKS
   // -------------------
   @Effect()
@@ -83,24 +102,6 @@ export class TaskRelatedModelEffects {
     }))
   );
 
-  @Effect()
-  autoAddTodayTag: any = this._actions$.pipe(
-    ofType(TaskActionTypes.AddTimeSpent),
-    filter((a: AddTimeSpent) => !a.payload.task.tagIds.includes(TODAY_TAG.id)),
-    concatMap((a: AddTimeSpent) => this._globalConfigService.misc$.pipe(
-      first(),
-      map(miscCfg => ({
-        miscCfg,
-        task: a.payload.task,
-      }))
-    )),
-    filter(({miscCfg, task}) => miscCfg.isAutoAddWorkedOnToToday),
-    map(({miscCfg, task}) => new UpdateTaskTags({
-      taskId: task.id,
-      newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-      oldTagIds: task.tagIds,
-    }))
-  );
 
   constructor(
     private _actions$: Actions,
