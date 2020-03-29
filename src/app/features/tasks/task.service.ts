@@ -27,8 +27,8 @@ import {
   MoveSubTaskUp,
   MoveToArchive,
   MoveToOtherProject,
-  RemoveTaskReminder,
   RemoveTagsForAllTasks,
+  RemoveTaskReminder,
   RemoveTimeSpent,
   RestoreTask,
   RoundTimeSpentForDay,
@@ -147,6 +147,10 @@ export class TaskService {
 
   taskFeatureState$: Observable<TaskState> = this._store.pipe(
     select(selectTaskFeatureState),
+  );
+
+  allTasks$: Observable<Task[]> = this._store.pipe(
+    select(selectAllTasks),
   );
 
 

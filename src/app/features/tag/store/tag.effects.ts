@@ -7,11 +7,11 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {deleteTag, deleteTags, updateTag, updateWorkEndForTag, updateWorkStartForTag} from './tag.actions';
-import {AddTimeSpent, RemoveTagsForAllTasks, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTimeSpent, DeleteMainTasks, RemoveTagsForAllTasks, TaskActionTypes} from '../../tasks/store/task.actions';
 import {TagService} from '../tag.service';
 import {TaskService} from '../../tasks/task.service';
 import {of} from 'rxjs';
-import {Task} from '../../tasks/task.model';
+import {Task, TaskArchive} from '../../tasks/task.model';
 import {Tag} from '../tag.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {WorkContextType} from '../../work-context/work-context.model';
@@ -121,6 +121,21 @@ export class TagEffects {
       this._taskService.removeTagsForAllTask(tagIdsToRemove);
       // remove from archive
       await this._persistenceService.taskArchive.execAction(new RemoveTagsForAllTasks({tagIdsToRemove}));
+
+      const isOrphanedParentTask = (t: Task) => !t.projectId && !t.tagIds.length && !t.parentId;
+
+      // remove orphaned
+      const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+      const taskIdsToRemove: string[] = tasks.filter(isOrphanedParentTask).map(t => t.id);
+      this._taskService.removeMultipleMainTasks(taskIdsToRemove);
+
+      // remove orphaned for archive
+      const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+      const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
+        const t = taskArchiveState.entities[id];
+        return isOrphanedParentTask(t);
+      });
+      await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
     }),
   );
 
