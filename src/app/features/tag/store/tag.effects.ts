@@ -16,6 +16,8 @@ import {Tag} from '../tag.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {Router} from '@angular/router';
+import {TODAY_TAG} from '../tag.const';
 
 
 @Injectable()
@@ -126,6 +128,21 @@ export class TagEffects {
     );
 
   @Effect({dispatch: false})
+  redirectIfCurrentTagIsDeleted: any = this._actions$
+    .pipe(
+      ofType(
+        deleteTag,
+        deleteTags,
+      ),
+      map((a: any) => a.ids ? a.ids : [a.id]),
+      tap(async (tagIdsToRemove: string[]) => {
+        if (tagIdsToRemove.includes(this._workContextService.activeWorkContextId)) {
+          this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
+        }
+      }),
+    );
+
+  @Effect({dispatch: false})
   cleanupNullTasksForTaskList: any = this._workContextService.activeWorkContextTypeAndId$.pipe(
     filter(({activeType}) => activeType === WorkContextType.TAG),
     switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
@@ -160,6 +177,7 @@ export class TagEffects {
     private _tagService: TagService,
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
+    private _router: Router,
   ) {
   }
 
