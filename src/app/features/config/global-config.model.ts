@@ -47,6 +47,7 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTurnOffMarkdown: boolean;
+  isAutoAddWorkedOnToToday: boolean;
 }>;
 
 export type EvaluationConfig = Readonly<{

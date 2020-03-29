@@ -1,8 +1,16 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {MoveToArchive, MoveToOtherProject, RestoreTask, TaskActionTypes, UpdateTask} from './task.actions';
+import {
+  AddTimeSpent,
+  MoveToArchive,
+  MoveToOtherProject,
+  RestoreTask,
+  TaskActionTypes,
+  UpdateTask,
+  UpdateTaskTags
+} from './task.actions';
 import {Store} from '@ngrx/store';
-import {filter, map, tap} from 'rxjs/operators';
+import {concatMap, filter, first, map, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {TaskArchive, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
@@ -10,6 +18,9 @@ import {Router} from '@angular/router';
 import {moveTaskInTodayList, moveTaskToTodayList} from '../../work-context/store/work-context-meta.actions';
 import {taskAdapter} from './task.adapter';
 import {flattenTasks} from './task.selectors';
+import {GlobalConfigService} from '../../config/global-config.service';
+import {TODAY_TAG} from '../../tag/tag.const';
+import {unique} from '../../../util/unique';
 
 
 @Injectable()
@@ -72,10 +83,30 @@ export class TaskRelatedModelEffects {
     }))
   );
 
+  @Effect()
+  autoAddTodayTag: any = this._actions$.pipe(
+    ofType(TaskActionTypes.AddTimeSpent),
+    filter((a: AddTimeSpent) => !a.payload.task.tagIds.includes(TODAY_TAG.id)),
+    concatMap((a: AddTimeSpent) => this._globalConfigService.misc$.pipe(
+      first(),
+      map(miscCfg => ({
+        miscCfg,
+        task: a.payload.task,
+      }))
+    )),
+    filter(({miscCfg, task}) => miscCfg.isAutoAddWorkedOnToToday),
+    map(({miscCfg, task}) => new UpdateTaskTags({
+      taskId: task.id,
+      newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+      oldTagIds: task.tagIds,
+    }))
+  );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
     private _reminderService: ReminderService,
+    private _globalConfigService: GlobalConfigService,
     private _router: Router,
     private _persistenceService: PersistenceService
   ) {

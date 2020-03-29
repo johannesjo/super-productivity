@@ -50,5 +50,12 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_TURN_OFF_MARKDOWN,
       },
     },
+    {
+      key: 'isAutoAddWorkedOnToToday',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_AUTO_ADD_WORKED_ON_TO_TODAY,
+      },
+    },
   ]
 };

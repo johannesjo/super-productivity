@@ -12,6 +12,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isAutMarkParentAsDone: false,
     isAutoStartNextTask: true,
     isTurnOffMarkdown: false,
+    isAutoAddWorkedOnToToday: false,
   },
   evaluation: {
     isHideEvaluationSheet: false,
