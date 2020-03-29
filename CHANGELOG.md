@@ -1,3 +1,29 @@
+## [5.0.3](https://github.com/johannesjo/super-productivity/compare/v5.0.2...v5.0.3) (2020-03-29)
+
+
+### Bug Fixes
+
+* **worklog:** task tracking affecting worklog ([67df8de](https://github.com/johannesjo/super-productivity/commit/67df8de496d51bf46b57f6047fb7b756b7dbd451))
+* wait i forgot something link ([b3b4ea5](https://github.com/johannesjo/super-productivity/commit/b3b4ea5178bcd48442203f20244e51fc66b11391))
+
+
+### Features
+
+* **tag:** add missing save for tag deletion ([c56406a](https://github.com/johannesjo/super-productivity/commit/c56406a011eb4a0b12a585c7afe4f51f5953b9ee))
+* **tag:** add null task check as well ([9a997b5](https://github.com/johannesjo/super-productivity/commit/9a997b562ab5ecf36642ecb116c424a364b0363d))
+* **tag:** add option to auto add today tag to worked on tasks ([5587057](https://github.com/johannesjo/super-productivity/commit/558705787d7473d26b11af172b8719dc7a051eca))
+* **tag:** add stronger warning for tag deletion ([0750675](https://github.com/johannesjo/super-productivity/commit/0750675f8564dcfcd041ec2efaf141c71ba9fa08))
+* **tag:** add ui for tag deletion ([af0db42](https://github.com/johannesjo/super-productivity/commit/af0db42c2de0a1d98151c84d45d9edcbb908927d))
+* **tag:** make tag deletion work ([c520f4b](https://github.com/johannesjo/super-productivity/commit/c520f4b80d54e7d6e8abc6176847698746d90eed))
+* **tag:** navigate away if current task is deleted ([c28f239](https://github.com/johannesjo/super-productivity/commit/c28f2397ac2b5d13311b6391461d9efd1d166ca6))
+* **tag:** remove orphaned parent tasks after tag deletion ([c4fc293](https://github.com/johannesjo/super-productivity/commit/c4fc293329ae4a177e1ba0f3b90e9f1c1c4939d8))
+* **task:** use warn color for delete icon ([5f6263a](https://github.com/johannesjo/super-productivity/commit/5f6263a5cff050675c3efb9800c4694baab4196a))
+* **taskRepeat:** make removing and adding to project work again ([05fc591](https://github.com/johannesjo/super-productivity/commit/05fc591b96e58bb22112aa0bf471e0fd06042bfa))
+* **worklog:** increase loading performance ([5b4dfd5](https://github.com/johannesjo/super-productivity/commit/5b4dfd5a9e639289a09de7ba59ca90c1fb804718))
+* **worklog:** make loading slightly faster ([ac10f75](https://github.com/johannesjo/super-productivity/commit/ac10f759887ac0dd0f8d5a3d9f56459a4e8cecec))
+
+
+
 ## [5.0.2](https://github.com/johannesjo/super-productivity/compare/v5.0.1...v5.0.2) (2020-03-28)
 
 
