@@ -16,3 +16,10 @@
   <mat-icon>settings</mat-icon>
   <span class="text">{{T.MH.SETTINGS|translate}}</span>
 </button>
+
+<button *ngIf="!isForProject && contextId !== TODAY_TAG_ID"
+        mat-menu-item
+        (click)="deleteTag()">
+  <mat-icon class="color-warn-i">delete_forever</mat-icon>
+  <span class="text">{{T.MH.DELETE_TAG|translate}}</span>
+</button>

@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {concatMap, filter, first, skip, switchMap, tap} from 'rxjs/operators';
+import {concatMap, filter, first, map, skip, switchMap, tap} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {selectTagFeatureState} from './tag.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
-import {updateTag, updateWorkEndForTag, updateWorkStartForTag} from './tag.actions';
+import {deleteTag, deleteTags, updateTag, updateWorkEndForTag, updateWorkStartForTag} from './tag.actions';
 import {AddTimeSpent, TaskActionTypes} from '../../tasks/store/task.actions';
 import {TagService} from '../tag.service';
 import {TaskService} from '../../tasks/task.service';
@@ -105,6 +105,22 @@ export class TagEffects {
           })
         )
       ),
+    );
+
+  @Effect({dispatch: false})
+  deleteTagRelatedData: any = this._actions$
+    .pipe(
+      ofType(
+        deleteTag,
+        deleteTags,
+      ),
+      map((a: any) => a.ids ? a.ids : [a.id]),
+      tap(console.log),
+      // tap(async (action: DeleteTag) => {
+      // await this._persistenceService.removeCompleteRelatedDataForTag(action.payload.id);
+      // this._reminderService.removeRemindersByWorkContextId(action.payload.id);
+      // this._removeAllTasksForTag(action.payload.id);
+      // }),
     );
 
 

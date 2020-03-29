@@ -510,6 +510,9 @@
         "CREATE": "Create Tag",
         "EDIT": "Edit Tag"
       },
+      "D_DELETE": {
+        "CONFIRM_MSG": "Do you really want to delete the tag \"{{tagName}}\"? It will be removed from all tasks."
+      },
       "D_EDIT": {
         "ADD": "Add tags for \"{{title}}\"",
         "EDIT": "Edit tags for \"{{title}}\"",
@@ -888,6 +891,7 @@
     "ADD_NEW_TASK": "Add new Task",
     "CREATE_PROJECT": "Create Project",
     "CREATE_TAG": "Create Tag",
+    "DELETE_TAG": "Delete Tag",
     "GO_TO_TASK_LIST": "Go to task list",
     "MANAGE_PROJECTS": "Manage Projects",
     "METRICS": "Metrics",
