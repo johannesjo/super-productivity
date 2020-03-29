@@ -21,7 +21,6 @@ export class TaskUiEffects {
     ofType(
       TaskActionTypes.AddTask,
     ),
-    filter(() => this._router.url !== '/work-view'),
     tap((a: AddTask) => this._snackService.open({
       type: 'SUCCESS',
       translateParams: {
