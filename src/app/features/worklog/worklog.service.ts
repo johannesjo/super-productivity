@@ -4,7 +4,7 @@ import {dedupeByKey} from '../../util/de-dupe-by-key';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {first, map, shareReplay, switchMap} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContext, WorkContextType} from '../work-context/work-context.model';
@@ -30,9 +30,10 @@ export class WorklogService {
     this._workContextService.activeWorkContextOnceOnContextChange$,
     this._archiveUpdateTrigger$,
   ]).pipe(
-    switchMap(([curCtx]) => {
+    switchMap(([curCtx, trigger]) => {
       return this._loadForWorkContext(curCtx);
     }),
+    shareReplay(1)
   );
 
   worklog$: Observable<Worklog> = this.worklogData$.pipe(map(data => data.worklog));
@@ -129,10 +130,11 @@ export class WorklogService {
 
   private async _loadForWorkContext(workContext: WorkContext): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
     const archive = await this._persistenceService.taskArchive.loadState() || EMPTY_ENTITY;
-    const taskState = await this._persistenceService.task.loadState() || EMPTY_ENTITY;
-    // const taskState = await this._taskService.taskFeatureState$.toPromise() || EMPTY_ENTITY;
+    const taskState = await this._taskService.taskFeatureState$.pipe(first()).toPromise() || EMPTY_ENTITY;
 
+    // console.time('calcTime');
     const {completeStateForWorkContext, unarchivedIds} = this._getCompleteStateForWorkContext(workContext, taskState, archive);
+    // console.timeEnd('calcTime');
 
     const startEnd = {
       workStart: workContext.workStart,

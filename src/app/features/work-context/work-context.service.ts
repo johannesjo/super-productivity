@@ -58,7 +58,11 @@ import {allDataLoaded} from '../../core/data-init/data-init.actions';
 export class WorkContextService {
   // CONTEXT LEVEL
   // -------------
-  activeWorkContextId$: Observable<string> = this._store$.pipe(select(selectActiveContextId));
+  activeWorkContextId$: Observable<string> = this._store$.pipe(
+    select(selectActiveContextId),
+    distinctUntilChanged(),
+    shareReplay(1),
+  );
   // activeWorkContextType$: Observable<WorkContextType> = this._store$.pipe(select(selectActiveContextType));
 
 
@@ -124,7 +128,6 @@ export class WorkContextService {
   );
 
   activeWorkContextOnceOnContextChange$: Observable<WorkContext> = this.activeWorkContextId$.pipe(
-    distinctUntilChanged(),
     switchMap(() => this.activeWorkContext$.pipe(first())),
   );
 
