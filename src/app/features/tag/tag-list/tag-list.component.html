@@ -7,7 +7,6 @@
          [tag]="projectTag"></tag>
     <tag *ngFor="let tag of tags; trackBy: trackByFn"
          (click)="editTags()"
-         [tag]="tag"
-         [style.background-color]="tag.color"></tag>
+         [tag]="tag"></tag>
   </div>
 </div>
