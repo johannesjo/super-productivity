@@ -12,10 +12,14 @@ export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   groupBy: WorklogGrouping.DATE
 };
 
+export const DEFAULT_PROJECT_COLOR = '#29a1aa';
+export const DEFAULT_TAG_COLOR = '#a05db1';
+export const DEFAULT_TODAY_TAG_COLOR = '#0b77d2';
+
 export const WORK_CONTEXT_DEFAULT_THEME: WorkContextThemeCfg = {
   isAutoContrast: true,
   isDisableBackgroundGradient: false,
-  primary: '#0b77d2',
+  primary: DEFAULT_TAG_COLOR,
   huePrimary: '500',
   accent: '#ff4081',
   hueAccent: '500',

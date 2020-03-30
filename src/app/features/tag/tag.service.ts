@@ -13,8 +13,7 @@ import {Observable, of} from 'rxjs';
 import {Tag, TagState} from './tag.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {WORK_CONTEXT_DEFAULT_COMMON} from '../work-context/work-context.const';
-import {TODAY_TAG} from './tag.const';
+import {DEFAULT_TAG, TODAY_TAG} from './tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -56,6 +55,7 @@ export class TagService {
     const id = shortid();
     this._store$.dispatch(addTag({
       tag: {
+        ...DEFAULT_TAG,
         id,
         title: tag.title || 'EMPTY',
         created: Date.now(),
@@ -63,7 +63,6 @@ export class TagService {
         icon: null,
         color: tag.color || null,
         taskIds: [],
-        ...WORK_CONTEXT_DEFAULT_COMMON,
         ...tag,
       }
     }));
