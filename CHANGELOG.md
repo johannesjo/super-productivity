@@ -1,3 +1,17 @@
+## [5.0.4](https://github.com/johannesjo/super-productivity/compare/v5.0.3...v5.0.4) (2020-03-30)
+
+
+### Bug Fixes
+
+* **tag:** background color ([c938023](https://github.com/johannesjo/super-productivity/commit/c938023169c611577e629ad9bccef672244272c6))
+
+
+### Features
+
+* add different default colors for tags, projects and today tag ([604c9d8](https://github.com/johannesjo/super-productivity/commit/604c9d87f1fa24fef54c456cc0d797550b6a29a9))
+
+
+
 ## [5.0.3](https://github.com/johannesjo/super-productivity/compare/v5.0.2...v5.0.3) (2020-03-29)
 
 
