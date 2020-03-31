@@ -9,7 +9,7 @@ import {SnackType} from '../../core/snack/snack.model';
 import {GlobalConfigService} from '../config/global-config.service';
 import {GoogleSession} from '../config/global-config.model';
 import {catchError, concatMap, filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
-import {combineLatest, EMPTY, from, merge, Observable, of, throwError, timer} from 'rxjs';
+import {EMPTY, from, merge, Observable, of, throwError, timer} from 'rxjs';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {BannerService} from '../../core/banner/banner.service';
 import {BannerId} from '../../core/banner/banner.model';
@@ -236,27 +236,26 @@ export class GoogleApiService {
       throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
     }
 
-    const loadFile = this._mapHttp$({
-      method: 'GET',
-      url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
-      params: {
-        key: GOOGLE_SETTINGS.API_KEY,
-        supportsTeamDrives: true,
-        alt: 'media',
-      },
-      responseType: 'text',
-    });
-    const metaData = this.getFileInfo$(fileId);
-
-    return combineLatest([metaData, loadFile])
-      .pipe(
+    return this.getFileInfo$(fileId).pipe(
+      concatMap((meta) => this._mapHttp$({
+        method: 'GET',
+        // workaround for: https://issuetracker.google.com/issues/149891169
+        url: `https://www.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
+        params: {
+          key: GOOGLE_SETTINGS.API_KEY,
+          supportsTeamDrives: true,
+          alt: 'media',
+        },
+        responseType: 'text',
+      }).pipe(
         map((res) => {
           return {
-            backup: res[1],
-            meta: res[0],
+            backup: res,
+            meta,
           };
         }),
-      );
+      )),
+    );
   }
 
   saveFile$(content: any, metadata: any = {}): Observable<{}> {
