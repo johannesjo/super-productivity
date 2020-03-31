@@ -101,7 +101,7 @@ export class GoogleDriveSyncEffects {
     withLatestFrom(this.config$),
     filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
     concatMap(() => from(this._googleApiService.login(true))),
-    concatMap(() => this._checkIfRemoteUpdate()),
+    concatMap(() => this._checkIfRemoteUpdate$()),
     concatMap((isUpdate): any => {
       if (isUpdate) {
         this._snackService.open({
@@ -143,7 +143,7 @@ export class GoogleDriveSyncEffects {
             });
             return EMPTY;
           } else if (!filesFound || filesFound.length === 0) {
-            return this._confirmSaveNewFile(newFileName).pipe(
+            return this._confirmSaveNewFile$(newFileName).pipe(
               concatMap((isSave) => {
                 return isSave
                   ? of(new CreateSyncFile({newFileName}))
@@ -151,7 +151,7 @@ export class GoogleDriveSyncEffects {
               })
             );
           } else if (filesFound.length === 1) {
-            return this._confirmUsingExistingFileDialog(newFileName).pipe(
+            return this._confirmUsingExistingFileDialog$(newFileName).pipe(
               concatMap((isConfirmUseExisting) => {
                 const fileToUpdate = filesFound[0];
                 return isConfirmUseExisting
@@ -203,7 +203,7 @@ export class GoogleDriveSyncEffects {
       } else {
         // otherwise update
         return this._googleApiService.getFileInfo$(cfg._backupDocId).pipe(
-          catchError(err => this._handleError(err)),
+          catchError(err => this._handleError$(err)),
           concatMap((res: any): Observable<any> => {
 
             const lastActiveLocal: number = this._syncService.getLastActive();
@@ -229,7 +229,7 @@ export class GoogleDriveSyncEffects {
         );
       }
     }),
-    catchError(err => this._handleError(err)),
+    catchError(err => this._handleError$(err)),
   );
 
   @Effect() save$: any = this._actions$.pipe(
@@ -259,7 +259,7 @@ export class GoogleDriveSyncEffects {
           response,
           isSkipSnack: action.payload && action.payload.isSkipSnack
         })),
-        catchError(err => this._handleError(err)),
+        catchError(err => this._handleError$(err)),
       )
     ),
   );
@@ -299,10 +299,10 @@ export class GoogleDriveSyncEffects {
         );
       } else {
         // otherwise update
-        return this._checkIfRemoteUpdate().pipe(
+        return this._checkIfRemoteUpdate$().pipe(
           concatMap((isUpdated: boolean): Observable<any> => {
             if (isUpdated) {
-              return this._loadFile().pipe(
+              return this._loadFile$().pipe(
                 concatMap((loadRes) => {
                   return zip(
                     of(loadRes),
@@ -328,7 +328,7 @@ export class GoogleDriveSyncEffects {
                     return of(new LoadFromGoogleDriveCancel());
                   }
                 }),
-                catchError(err => this._handleError(err)),
+                catchError(err => this._handleError$(err)),
               );
               // no update required
             } else {
@@ -340,11 +340,11 @@ export class GoogleDriveSyncEffects {
               return of(new LoadFromGoogleDriveCancel());
             }
           }),
-          catchError(err => this._handleError(err)),
+          catchError(err => this._handleError$(err)),
         );
       }
     }),
-    catchError(err => this._handleError(err)),
+    catchError(err => this._handleError$(err)),
   );
 
   @Effect() load$: any = this._actions$.pipe(
@@ -359,7 +359,7 @@ export class GoogleDriveSyncEffects {
     }),
     concatMap((loadRes) => this._import(loadRes)),
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
-    catchError(err => this._handleError(err)),
+    catchError(err => this._handleError$(err)),
   );
 
   @Effect() loadSuccess$: any = this._actions$.pipe(
@@ -395,7 +395,7 @@ export class GoogleDriveSyncEffects {
     });
   }
 
-  private _handleError(err): Observable<any> {
+  private _handleError$(err): Observable<any> {
     console.warn('Google Drive Sync Error:', err);
     const errTxt = (typeof err === 'string' && err) || (err.toString && err.toString()) || 'Unknown';
     this._snackService.open({
@@ -408,7 +408,7 @@ export class GoogleDriveSyncEffects {
     return of(new LoadFromGoogleDriveCancel());
   }
 
-  private _checkIfRemoteUpdate(): Observable<boolean> {
+  private _checkIfRemoteUpdate$(): Observable<boolean> {
     const lastSync = this._config._lastSync;
     return this._googleApiService.getFileInfo$(this._config._backupDocId)
       .pipe(
@@ -472,7 +472,7 @@ export class GoogleDriveSyncEffects {
   }
 
 
-  private _confirmSaveNewFile(fileName): Observable<boolean> {
+  private _confirmSaveNewFile$(fileName): Observable<boolean> {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
@@ -482,7 +482,7 @@ export class GoogleDriveSyncEffects {
     }).afterClosed();
   }
 
-  private _confirmUsingExistingFileDialog(fileName): Observable<boolean> {
+  private _confirmUsingExistingFileDialog$(fileName): Observable<boolean> {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
@@ -493,7 +493,7 @@ export class GoogleDriveSyncEffects {
   }
 
   // DATE HELPER
-  private _loadFile(): Observable<any> {
+  private _loadFile$(): Observable<any> {
     if (!this._config.syncFileName) {
       return throwError({[HANDLED_ERROR_PROP_STR]: 'No file name specified'});
     }
@@ -536,7 +536,7 @@ export class GoogleDriveSyncEffects {
     });
   }
 
-  private _getLocalAppData() {
+  private _getLocalAppData(): Promise<AppDataComplete> {
     return this._syncService.getCompleteSyncData();
   }
 
