@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
-import {EMPTY, forkJoin, Observable, ObservableInput, throwError} from 'rxjs';
+import {EMPTY, forkJoin, Observable, ObservableInput, throwError, of} from 'rxjs';
 
 import {ProjectService} from 'src/app/features/project/project.service';
 import {SnackService} from 'src/app/core/snack/snack.service';
@@ -37,10 +37,15 @@ export class GitlabApiService {
     }
     return this._getProjectIssues$(1, cfg).pipe(
       flatMap(
-        issues => forkJoin([
-          ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
-        ])
-      ),
+        (issues: GitlabIssue[]) => {
+          if (issues && issues.length) {
+            return forkJoin([
+              ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
+            ]);
+          } else {
+            return of([]);
+          }
+        }),
     );
   }
 
