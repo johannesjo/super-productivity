@@ -92,7 +92,7 @@
              contentEditableOnClick
              contenteditable="true"
              tabindex="2"></div>
-        <tag-list *ngIf="task.tagIds?.length && !task.parentId"
+        <tag-list *ngIf="!task.parentId"
                   [task]="task"></tag-list>
         <div class="spacer"
              style="width:10px; display: block; border-right-width: 1px; border-right-style: solid"></div>

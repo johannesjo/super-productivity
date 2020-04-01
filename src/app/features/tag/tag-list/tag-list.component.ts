@@ -11,13 +11,14 @@ import {ProjectService} from '../../project/project.service';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {TagComponentTag} from '../tag/tag.component';
+import {expandFadeAnimation} from '../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'tag-list',
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [standardListAnimation]
+  animations: [standardListAnimation, expandFadeAnimation]
 })
 export class TagListComponent implements OnDestroy {
   @Input() set task(task: Task) {
