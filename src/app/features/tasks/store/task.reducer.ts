@@ -117,7 +117,7 @@ export function taskReducer(
 
     case TaskActionTypes.UpdateTaskTags: {
       return taskAdapter.updateOne({
-        id: action.payload.taskId,
+        id: action.payload.task.id,
         changes: {
           tagIds: action.payload.newTagIds,
         }

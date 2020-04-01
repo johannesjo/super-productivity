@@ -62,6 +62,6 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
 
 
   private _updateTags(newTagIds: string[]) {
-    this._taskService.updateTags(this.task.id, unique(newTagIds), this.task.tagIds);
+    this._taskService.updateTags(this.task, unique(newTagIds), this.task.tagIds);
   }
 }

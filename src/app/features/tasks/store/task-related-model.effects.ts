@@ -60,7 +60,7 @@ export class TaskRelatedModelEffects {
     )),
     filter(({miscCfg, task}) => miscCfg.isAutoAddWorkedOnToToday),
     map(({miscCfg, task}) => new UpdateTaskTags({
-      taskId: task.id,
+      task,
       newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
       oldTagIds: task.tagIds,
     }))

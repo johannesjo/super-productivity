@@ -258,9 +258,9 @@ export class TaskService {
     }));
   }
 
-  updateTags(taskId: string, newTagIds: string[], oldTagIds: string[]) {
+  updateTags(task: Task, newTagIds: string[], oldTagIds: string[]) {
     this._store.dispatch(new UpdateTaskTags({
-      taskId,
+      task,
       newTagIds: unique(newTagIds),
       oldTagIds
     }));

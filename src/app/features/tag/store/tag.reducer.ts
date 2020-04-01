@@ -270,7 +270,8 @@ export function tagReducer(
 
     case TaskActionTypes.UpdateTaskTags: {
       const {payload} = action as UpdateTaskTags;
-      const {newTagIds = [], oldTagIds = [], taskId} = payload;
+      const {newTagIds = [], oldTagIds = [], task} = payload;
+      const taskId = task.id;
       const removedFrom: string[] = oldTagIds.filter(oldId => !newTagIds.includes(oldId));
       const addedTo: string[] = newTagIds.filter(newId => !oldTagIds.includes(newId));
       const removeFrom: Update<Tag>[] = removedFrom.map(tagId => ({

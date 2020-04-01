@@ -20,7 +20,7 @@ import {BookmarkService} from '../../bookmark/bookmark.service';
 import {NoteService} from '../../note/note.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import {AddTimeSpent, DeleteMainTasks, TaskActionTypes} from '../../tasks/store/task.actions';
+import {AddTimeSpent, DeleteMainTasks, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
 import {ReminderService} from '../../reminder/reminder.service';
 import {MetricService} from '../../metric/metric.service';
 import {ObstructionService} from '../../metric/obstruction/obstruction.service';
@@ -50,6 +50,7 @@ import {TaskService} from '../../tasks/task.service';
 import {TaskArchive, TaskState} from '../../tasks/task.model';
 import {unique} from '../../../util/unique';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
+import {TODAY_TAG} from '../../tag/tag.const';
 
 @Injectable()
 export class ProjectEffects {
@@ -399,6 +400,49 @@ export class ProjectEffects {
       }),
     );
 
+  @Effect()
+  moveToTodayListOnAddTodayTag: any = this._actions$.pipe(
+    ofType(TaskActionTypes.UpdateTaskTags),
+    filter((action: UpdateTaskTags) =>
+      action.payload.task.projectId &&
+      action.payload.newTagIds.includes(TODAY_TAG.id)
+    ),
+    concatMap((action) => this._projectService.getByIdOnce$(action.payload.task.projectId).pipe(
+      map((project) => ({
+        project,
+        p: action.payload,
+      }))
+    )),
+    filter(({project}) => !project.taskIds.includes(TODAY_TAG.id)),
+    map(({p, project}) => moveTaskToTodayListAuto({
+      workContextId: project.id,
+      taskId: p.task.id,
+      isMoveToTop: false,
+    })),
+  );
+
+  // @Effect()
+  // moveToBacklogOnRemoveTodayTag: any = this._actions$.pipe(
+  //   ofType(TaskActionTypes.UpdateTaskTags),
+  //   filter((action: UpdateTaskTags) =>
+  //     action.payload.task.projectId &&
+  //     action.payload.oldTagIds.includes(TODAY_TAG.id)
+  //   ),
+  //   concatMap((action) => this._projectService.getByIdOnce$(action.payload.task.projectId).pipe(
+  //     map((project) => ({
+  //       project,
+  //       p: action.payload,
+  //     }))
+  //   )),
+  //   filter(({project}) => !project.taskIds.includes(TODAY_TAG.id)),
+  //   map(({p, project}) => moveTaskToTodayList({
+  //     workContextId: project.id,
+  //     taskId: p.task.id,
+  //     newOrderedIds: [p.task.id, ...project.backlogTaskIds],
+  //     src: 'DONE',
+  //     target: 'BACKLOG'
+  //   })),
+  // );
 
   constructor(
     private _actions$: Actions,

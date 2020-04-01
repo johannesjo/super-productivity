@@ -170,7 +170,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       }
 
     } else if (item.taskId && item.isFromOtherContext) {
-      this._taskService.updateTags(item.taskId, [...item.tagIds, this._workContextService.activeWorkContextId], item.tagIds);
+      this._taskService.updateTags(item as Task, [...item.tagIds, this._workContextService.activeWorkContextId], item.tagIds);
       this._snackService.open({
         ico: 'playlist_add',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
