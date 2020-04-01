@@ -174,7 +174,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       this._snackService.open({
         ico: 'playlist_add',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
-        translateParams: {title: truncate(item.title), contextTitle: truncate(item.ctx.title)},
+        translateParams: {
+          title: truncate(item.title),
+          contextTitle: (item.ctx && item.ctx.title)
+            ? truncate(item.ctx.title)
+            : '~the void~'
+        },
       });
       // NOTE: it's important that this comes before the issue check
       // so that backlog issues are found first
@@ -281,7 +286,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
                 ...task,
                 ctx: {
                   ...ctx,
-                  icon: (ctx as Tag).icon || (isFromProject && 'list')
+                  icon: (ctx && (ctx as Tag).icon) || (isFromProject && 'list')
                 },
               })),
             );
