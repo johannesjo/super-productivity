@@ -1,3 +1,13 @@
+## [5.0.6](https://github.com/johannesjo/super-productivity/compare/v5.0.5...v5.0.6) (2020-04-01)
+
+
+### Bug Fixes
+
+* cannot read property icon of undefined ([11353f2](https://github.com/johannesjo/super-productivity/commit/11353f20b293235a35f5b7b54cb98f92afd69c70))
+* filter error for projects with no issues ([22596a4](https://github.com/johannesjo/super-productivity/commit/22596a42144727790b4597ba70c152896f2ca9a9))
+
+
+
 ## [5.0.5](https://github.com/johannesjo/super-productivity/compare/v5.0.4...v5.0.5) (2020-03-31)
 
 
