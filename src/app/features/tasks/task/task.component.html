@@ -329,11 +329,19 @@
           </button>
 
           <button (click)="moveToBacklog();"
-                  *ngIf="!task.parentId && !isBacklog"
+                  *ngIf="!task.parentId && !isBacklog && (workContextService.isActiveWorkContextProject$|async)"
                   mat-menu-item
                   tabindex="2">
             <mat-icon>arrow_downward</mat-icon>
             {{T.F.TASK.CMP.MOVE_TO_BACKLOG|translate}}
+          </button>
+
+          <button (click)="moveToToday();"
+                  *ngIf="!task.parentId && isBacklog && (workContextService.isActiveWorkContextProject$|async)"
+                  mat-menu-item
+                  tabindex="2">
+            <mat-icon>arrow_upward</mat-icon>
+            {{T.F.TASK.CMP.MOVE_TO_TODAY|translate}}
           </button>
 
           <button (click)="editTags();"
@@ -342,15 +350,6 @@
                   tabindex="2">
             <mat-icon>style</mat-icon>
             {{T.F.TASK.CMP.EDIT_TAGS|translate}}
-          </button>
-
-
-          <button (click)="moveToToday();"
-                  *ngIf="!task.parentId && isBacklog"
-                  mat-menu-item
-                  tabindex="2">
-            <mat-icon>arrow_upward</mat-icon>
-            {{T.F.TASK.CMP.MOVE_TO_TODAY|translate}}
           </button>
 
           <button (click)="deleteTask()"

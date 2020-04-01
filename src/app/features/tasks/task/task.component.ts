@@ -36,6 +36,7 @@ import {MatMenuTrigger} from '@angular/material/menu';
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
 import {TODAY_TAG} from '../../tag/tag.const';
 import {DialogEditTagsForTaskComponent} from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
+import {WorkContextService} from '../../work-context/work-context.service';
 
 @Component({
   selector: 'task',
@@ -84,7 +85,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   moveToProjectList$: Observable<Project[]> = this._task$.pipe(
     map(t => t.projectId),
     distinctUntilChanged(),
-    switchMap((pid) => this.projectService.getProjectsWithoutId$(pid)),
+    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
 
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
@@ -114,7 +115,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _elementRef: ElementRef,
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
-    public readonly projectService: ProjectService,
+    private readonly _projectService: ProjectService,
+    public readonly workContextService: WorkContextService,
   ) {
   }
 
