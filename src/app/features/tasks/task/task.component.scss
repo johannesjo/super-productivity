@@ -225,7 +225,17 @@
   button {
     margin-top: auto;
     margin-bottom: auto;
-    //height: 100%;
+    border-radius: $card-border-radius;
+    height: 100%;
+
+    &:hover {
+      @include darkTheme() {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      @include lightTheme() {
+        background: rgba(0, 0, 0, 0.05);
+      }
+    }
   }
 
   @include mq(xs, max) {
