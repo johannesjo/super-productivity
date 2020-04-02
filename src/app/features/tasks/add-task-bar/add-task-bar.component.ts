@@ -169,8 +169,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         this.doubleEnterCount++;
       }
 
-    } else if (item.taskId && item.isFromOtherContext) {
-      this._taskService.updateTags(item as Task, [...item.tagIds, this._workContextService.activeWorkContextId], item.tagIds);
+    } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
+      const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
+      this._taskService.updateTags(task, [...task.tagIds, this._workContextService.activeWorkContextId], task.tagIds);
+
       this._snackService.open({
         ico: 'playlist_add',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
@@ -272,7 +274,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
               issueType: task.issueType,
               projectId: task.projectId,
 
-              isFromOtherContext: true,
+              isFromOtherContextAndTagOnlySearch: true,
               tagIds: task.tagIds,
             };
           })
