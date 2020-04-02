@@ -1,3 +1,22 @@
+## [5.0.7](https://github.com/johannesjo/super-productivity/compare/v5.0.6...v5.0.7) (2020-04-02)
+
+
+### Bug Fixes
+
+* **github:** issue link ([e12a340](https://github.com/johannesjo/super-productivity/commit/e12a340d585a07830df8fd15c6fd21fee614e237))
+* add task crashing app [#321](https://github.com/johannesjo/super-productivity/issues/321) ([e89bdce](https://github.com/johannesjo/super-productivity/commit/e89bdce777e5f054041ed2da072f282048a10c30))
+* zoom by keyboard crashing app [#314](https://github.com/johannesjo/super-productivity/issues/314) ([d9a5b6f](https://github.com/johannesjo/super-productivity/commit/d9a5b6f1bc83d472d5595e6b9f96cc920e45224c))
+
+
+### Features
+
+* better indicate task hover actions ([d2fdc6a](https://github.com/johannesjo/super-productivity/commit/d2fdc6a653e0e505b9c774d810400ec5c769fb52))
+* **project:** auto add task to today list if today tag is added ([17b7abe](https://github.com/johannesjo/super-productivity/commit/17b7abe14379106c437f7bf933c3f78d95018832))
+* **tag:** add animation for adding and removing first tag ([7935b63](https://github.com/johannesjo/super-productivity/commit/7935b63c9a6ed91ea4b6dc6bbb3a81e587b73ffe))
+* **task:** remove move to backlog/today for tag contexts ([5233146](https://github.com/johannesjo/super-productivity/commit/523314662116ed65c4d7dcd9daecb065dbc6c54d))
+
+
+
 ## [5.0.6](https://github.com/johannesjo/super-productivity/compare/v5.0.5...v5.0.6) (2020-04-01)
 
 
