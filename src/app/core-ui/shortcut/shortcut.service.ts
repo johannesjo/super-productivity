@@ -132,11 +132,11 @@ export class ShortcutService {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
         this._electronService.ipcRenderer.send('TOGGLE_DEV_TOOLS');
       } else if (checkKeyCombo(ev, keys.zoomIn)) {
-        this._uiHelperService.zoom(0.05);
+        this._uiHelperService.zoomBy(0.05);
       } else if (checkKeyCombo(ev, keys.zoomOut)) {
-        this._uiHelperService.zoom(-0.05);
+        this._uiHelperService.zoomBy(-0.05);
       } else if (checkKeyCombo(ev, keys.zoomDefault)) {
-        this._uiHelperService.zoom(0);
+        this._uiHelperService.zoomTo(1);
       }
     }
   }

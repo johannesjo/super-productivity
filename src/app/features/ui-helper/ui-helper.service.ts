@@ -24,7 +24,7 @@ export class UiHelperService {
     this._initMousewheelZoomForElectron();
   }
 
-  zoom(zoomFactor: number) {
+  zoomTo(zoomFactor: number) {
     if (Number.isNaN(zoomFactor) || typeof zoomFactor !== 'number') {
       console.error('Invalid zoom factor', zoomFactor);
       return;
@@ -33,6 +33,19 @@ export class UiHelperService {
     this._webFrame.setZoomFactor(zoomFactor);
     this._updateLocalUiHelperSettings({zoomFactor});
   }
+
+  zoomBy(zoomBy: number) {
+    if (Number.isNaN(zoomBy) || typeof zoomBy !== 'number') {
+      console.error('Invalid zoom factor', zoomBy);
+      return;
+    }
+    const currentZoom = this._webFrame.getZoomFactor();
+    const zoomFactor = currentZoom + zoomBy;
+
+    this._webFrame.setZoomFactor(zoomFactor);
+    this._updateLocalUiHelperSettings({zoomFactor});
+  }
+
 
   focusApp() {
     if (IS_ELECTRON) {
@@ -48,11 +61,12 @@ export class UiHelperService {
     }
   }
 
+
   private _initMousewheelZoomForElectron() {
     const ZOOM_DELTA = 0.05;
 
     // set initial zoom
-    this.zoom(this._getLocalUiHelperSettings().zoomFactor);
+    this.zoomTo(this._getLocalUiHelperSettings().zoomFactor);
 
     this._document.addEventListener('mousewheel', (event: WheelEvent) => {
       if (event && event.ctrlKey) {
@@ -63,7 +77,7 @@ export class UiHelperService {
           zoomFactor += ZOOM_DELTA;
         }
         zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
-        this.zoom(zoomFactor);
+        this.zoomTo(zoomFactor);
       }
     }, false);
   }
