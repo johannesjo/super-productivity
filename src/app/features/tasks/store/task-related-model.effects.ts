@@ -10,9 +10,9 @@ import {
   UpdateTaskTags
 } from './task.actions';
 import {Store} from '@ngrx/store';
-import {concatMap, filter, first, map, tap} from 'rxjs/operators';
+import {concatMap, filter, first, map, switchMap, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {TaskArchive, TaskWithSubTasks} from '../task.model';
+import {Task, TaskArchive, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {Router} from '@angular/router';
 import {moveTaskInTodayList, moveTaskToTodayList} from '../../work-context/store/work-context-meta.actions';
@@ -21,6 +21,8 @@ import {flattenTasks} from './task.selectors';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TODAY_TAG} from '../../tag/tag.const';
 import {unique} from '../../../util/unique';
+import {TaskService} from '../task.service';
+import {of} from 'rxjs';
 
 
 @Injectable()
@@ -50,12 +52,16 @@ export class TaskRelatedModelEffects {
   @Effect()
   autoAddTodayTag: any = this._actions$.pipe(
     ofType(TaskActionTypes.AddTimeSpent),
-    filter((a: AddTimeSpent) => !a.payload.task.tagIds.includes(TODAY_TAG.id)),
-    concatMap((a: AddTimeSpent) => this._globalConfigService.misc$.pipe(
+    switchMap((a: AddTimeSpent) => a.payload.task.parentId
+      ? this._taskService.getByIdOnce$(a.payload.task.parentId)
+      : of(a.payload.task),
+    ),
+    filter((task: Task) => !task.tagIds.includes(TODAY_TAG.id)),
+    concatMap((task: Task) => this._globalConfigService.misc$.pipe(
       first(),
       map(miscCfg => ({
         miscCfg,
-        task: a.payload.task,
+        task,
       }))
     )),
     filter(({miscCfg, task}) => miscCfg.isAutoAddWorkedOnToToday),
@@ -107,6 +113,7 @@ export class TaskRelatedModelEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _reminderService: ReminderService,
+    private _taskService: TaskService,
     private _globalConfigService: GlobalConfigService,
     private _router: Router,
     private _persistenceService: PersistenceService
