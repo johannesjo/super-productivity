@@ -24,18 +24,13 @@ h2 {
 }
 
 .wrapper {
-  overflow: auto;
   height: 100%;
   width: 100%;
   position: absolute;
   top: 0;
   left: 0;
-
   transition: $transition-enter;
-
-  &.isShowBacklog {
-    overflow: hidden;
-  }
+  overflow: hidden;
 
   &.isFadeOut {
     transition: $transition-ultra-fast;
@@ -180,6 +175,7 @@ h2 {
   overflow-x: hidden;
   @include scrollYImportant();
   top: 0;
+  bottom: 0;
 }
 
 .backlog {
