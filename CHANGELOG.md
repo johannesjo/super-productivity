@@ -1,3 +1,21 @@
+## [5.0.8](https://github.com/johannesjo/super-productivity/compare/v5.0.7...v5.0.8) (2020-04-03)
+
+
+### Bug Fixes
+
+* **task:** duplicated sub task error ([f59b6e8](https://github.com/johannesjo/super-productivity/commit/f59b6e8bb8ce703498cb2cf57be95593805cea53))
+* sticky tasks for tag list and header border too ([96428bd](https://github.com/johannesjo/super-productivity/commit/96428bde8957161becf030126efa4e6fbe0c760e))
+
+
+### Features
+
+* **github:** warn about rate limit ([174b73b](https://github.com/johannesjo/super-productivity/commit/174b73b3978e84b130bcf7a7c9c1ee77142607f1))
+* **issue:** improve handling in task additional info ([063e1ca](https://github.com/johannesjo/super-productivity/commit/063e1ca476fead9bd5c56ccf7d0a59771a9ceb28))
+* **task:** allow to keep tracking when changing context [#322](https://github.com/johannesjo/super-productivity/issues/322) ([63f88b3](https://github.com/johannesjo/super-productivity/commit/63f88b36614967dfb504b2a235274a8763ab381b))
+* **task:** move updated icon to the right ([1e86cec](https://github.com/johannesjo/super-productivity/commit/1e86cec620af3129931302f4f0f61b9486a013a5))
+
+
+
 ## [5.0.7](https://github.com/johannesjo/super-productivity/compare/v5.0.6...v5.0.7) (2020-04-02)
 
 
