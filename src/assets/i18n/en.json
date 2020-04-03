@@ -97,7 +97,7 @@
       "S": {
         "ERR_NETWORK": "Github: Request failed because of a client side network error",
         "ERR_NOT_CONFIGURED": "Github: Is not properly configured",
-        "ERR_UNKNOWN": "Github: Unknown error {{statusCode}} {{errorMsg}}",
+        "ERR_UNKNOWN": "Github: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
