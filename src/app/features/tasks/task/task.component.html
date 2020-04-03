@@ -62,19 +62,12 @@
 
 
         <div class="type-ico-wrapper">
-          <mat-icon (click)="editTaskRepeatCfg()"
-                    *ngIf="task.repeatCfgId"
+          <mat-icon *ngIf="task.repeatCfgId"
                     [style.transform]="isCurrent ? 'scale(1.4) rotate(45deg)': 'rotate(45deg)'"
                     class="task-type-ico">repeat
           </mat-icon>
 
-          <mat-icon (click)="handleUpdateBtnClick()"
-                    *ngIf="task.issueWasUpdated"
-                    class="task-type-ico"
-                    color="accent">update
-          </mat-icon>
-
-          <div *ngIf="task.issueId && !task.issueWasUpdated"
+          <div *ngIf="task.issueId"
                class="task-type-ico">
             <div *ngIf="task.issuePoints"
                  class="mini-badge bgc-primary">{{task.issuePoints}}</div>
@@ -184,7 +177,10 @@
                   color=""
                   mat-icon-button
                   tabindex="2">
-            <mat-icon>chat_bubble_outline</mat-icon>
+            <mat-icon *ngIf="!task.issueWasUpdated">chat_bubble_outline</mat-icon>
+            <mat-icon *ngIf="task.issueWasUpdated"
+                      color="accent">update
+            </mat-icon>
           </button>
         </div>
 
@@ -208,16 +204,22 @@
           <mat-icon>attach_file</mat-icon>
         </button>
 
-        <button (click)="toggleShowAdditionalInfoOpen()"
-                *ngIf="task.notes||task.issueId||isSelected"
-                [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
-                class="ico-btn show-additional-info-btn"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon *ngIf="!isSelected">chat</mat-icon>
-          <mat-icon *ngIf="isSelected">close</mat-icon>
-        </button>
+        <div>
+          <button (click)="toggleShowAdditionalInfoOpen()"
+                  *ngIf="task.notes||task.issueId||isSelected"
+                  [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
+                  class="ico-btn show-additional-info-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon *ngIf="!task.issueWasUpdated && !isSelected">chat</mat-icon>
+            <mat-icon *ngIf="!task.issueWasUpdated && isSelected">close</mat-icon>
+            <mat-icon *ngIf="task.issueWasUpdated"
+                      class="updated-icon"
+                      color="accent">update
+            </mat-icon>
+          </button>
+        </div>
 
         <button (menuClosed)="isContextMenuDisabled = false"
                 (menuOpened)="isContextMenuDisabled = true"

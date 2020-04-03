@@ -788,10 +788,14 @@ $this-play-size: 22px;
     transition: transform $transition-standard;
     backface-visibility: hidden;
   }
+}
 
-  &.isActive mat-icon {
-    transform: rotate(45deg);
-  }
+.updated-icon {
+  position: absolute;
+  transform: scale(1.5) translate(-50%, -50%);
+  transform-origin: top left;
+  top: 50%;
+  left: 50%;
 }
 
 
