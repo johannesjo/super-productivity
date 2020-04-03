@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ComponentFactoryResolver,
   HostBinding,
@@ -95,6 +95,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       : of(null)),
     shareReplay(1),
   );
+  issueData: IssueData;
   issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
     withLatestFrom(this.issueIdAndTypeShared$),
     map(([data, {type}]) => (data && type)
@@ -184,9 +185,14 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private _matDialog: MatDialog,
     private _projectService: ProjectService,
     private _electronService: ElectronService,
+    private _cd: ChangeDetectorRef,
   ) {
     // NOTE: needs to be assigned here before any setter is called
     this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
+    this._subs.add(this.issueData$.subscribe((issueData) => {
+      this.issueData = issueData;
+      this._cd.detectChanges();
+    }));
 
     // NOTE: this works as long as there is no other place to display issue attachments for jira
     if (IS_ELECTRON) {

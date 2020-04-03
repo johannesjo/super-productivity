@@ -72,18 +72,18 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="task.issueId"
-    [expanded]="!!(issueData$|async)"
+    [expanded]="!!issueData"
     [type]="'panel'">
     <ng-container panel-header>
       <issue-header [task]="task"></issue-header>
     </ng-container>
 
     <ng-container panel-content>
-      <mat-progress-bar *ngIf="(issueData$|async) === null"
+      <mat-progress-bar *ngIf="issueData === null"
                         [mode]="'indeterminate'"></mat-progress-bar>
       <issue-content [task]="task"
                      [@expandFadeInOnly]
-                     *ngIf="(issueData$|async) as issueData"
+                     *ngIf="issueData"
                      [issueData]="issueData"
                      class="panel-content-wrapper issue-content-wrapper"></issue-content>
     </ng-container>
