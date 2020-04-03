@@ -79,3 +79,17 @@ export const expandFadeFastAnimation = [
     ])
   ])
 ];
+
+
+export const expandFadeHorizontalAnimation = [
+  trigger('expandFadeHorizontal', [
+    transition(':enter', [
+      style({width: 0, opacity: 0, overflow: 'hidden'}),
+      animate(ANI_ENTER_TIMING, style({width: '*', opacity: 1}))
+    ]), // void => *
+    transition(':leave', [
+      style({overflow: 'hidden', opacity: 1}),
+      animate(ANI_LEAVE_TIMING, style({width: 0, opacity: 0}))
+    ])
+  ])
+];

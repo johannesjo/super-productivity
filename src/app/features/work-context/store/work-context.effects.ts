@@ -39,12 +39,12 @@ export class WorkContextEffects {
 
   // EXTERNAL
   // --------
-  unsetCurrentTask$ = createEffect(() => this._actions$.pipe(
-    ofType(contextActions.setActiveWorkContext),
-    withLatestFrom(this._taskService.isTaskDataLoaded$),
-    filter(([, isDataLoaded]) => isDataLoaded),
-    map(() => new UnsetCurrentTask()),
-  ));
+  // unsetCurrentTask$ = createEffect(() => this._actions$.pipe(
+  //   ofType(contextActions.setActiveWorkContext),
+  //   withLatestFrom(this._taskService.isTaskDataLoaded$),
+  //   filter(([, isDataLoaded]) => isDataLoaded),
+  //   map(() => new UnsetCurrentTask()),
+  // ));
 
   unselectSelectedTask$ = createEffect(() => this._actions$.pipe(
     ofType(contextActions.setActiveWorkContext),

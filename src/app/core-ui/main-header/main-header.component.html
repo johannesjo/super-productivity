@@ -61,9 +61,14 @@
     </button>
 
     <div class="play-btn-wrapper">
-      <div *ngIf="(isShowTaskTitle$|async)"
+      <div *ngIf="(taskService.currentTask$|async) as currentTask"
            @fade
-           class="current-task-title">{{(taskService.currentTask$|async)?.title}}
+           class="current-task-title">
+        <div class="title">{{currentTask.title}}</div>
+        <tag class="project"
+             *ngIf="(currentTaskContext$|async) as currentTaskContext"
+             @expandFadeHorizontal
+             [tag]="currentTaskContext"></tag>
       </div>
       <button (click)="taskService.toggleStartTask()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"

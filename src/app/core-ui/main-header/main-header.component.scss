@@ -241,16 +241,14 @@ button {
   min-width: 50px;
   white-space: nowrap;
   padding: $s/2 2*$s;
-  padding-right: $s*3;
+  padding-right: $s*2.5;
   margin-right: -$s*2;
   top: 50%;
   transform: translateY(-50%);
   background: #fff;
   pointer-events: none;
   transition: $transition-standard;
-  max-width: 250px;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  display: flex;
 
   @include mq(xs, max) {
     display: none;
@@ -258,6 +256,16 @@ button {
 
   @include darkTheme() {
     background: $dark-theme-bg-lighter;
+  }
+
+  .title {
+    max-width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .project {
+    padding-right: 0;
   }
 
   :host:hover & {

@@ -16,16 +16,20 @@ import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
 import {T} from '../../t.const';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {Router} from '@angular/router';
-import {map} from 'rxjs/operators';
-import {Observable, Subscription} from 'rxjs';
+import {filter, first, switchMap, withLatestFrom} from 'rxjs/operators';
+import {Observable, of, Subscription} from 'rxjs';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {TagService} from '../../features/tag/tag.service';
+import {Tag} from '../../features/tag/tag.model';
+import {Project} from '../../features/project/project.model';
+import {expandFadeHorizontalAnimation} from '../../ui/animations/expand.ani';
 
 @Component({
   selector: 'main-header',
   templateUrl: './main-header.component.html',
   styleUrls: ['./main-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeAnimation]
+  animations: [fadeAnimation, expandFadeHorizontalAnimation]
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
   T = T;
@@ -34,19 +38,17 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
-  // isShowTaskTitle$: Observable<boolean> = combineLatest([
-  //   this._router.events.pipe(
-  //     filter(event => event instanceof NavigationEnd),
-  //   ),
-  //   this.taskService.currentTaskId$,
-  // ]).pipe(
-  //   map(([{urlAfterRedirects}, currentTaskId]: [NavigationEnd, string]): boolean => {
-  //     return !!currentTaskId && !urlAfterRedirects.match(/tasks$/);
-  //   })
-  // );
-
-  isShowTaskTitle$: Observable<boolean> = this.taskService.currentTaskId$.pipe(
-    map((currentTaskId): boolean => !!currentTaskId),
+  currentTaskContext$: Observable<Project | Tag> = this.taskService.currentTask$.pipe(
+    filter(ct => !!ct),
+    withLatestFrom(this.workContextService.activeWorkContextId$),
+    switchMap(([currentTask, activeWorkContextId]) => {
+      if (currentTask.projectId === activeWorkContextId || currentTask.tagIds.includes(activeWorkContextId)) {
+        return of(null);
+      }
+      return currentTask.projectId
+        ? this.projectService.getByIdOnce$(currentTask.projectId)
+        : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
+    }),
   );
 
   private _subs = new Subscription();
@@ -59,6 +61,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly pomodoroService: PomodoroService,
     public readonly layoutService: LayoutService,
     private readonly _router: Router,
+    private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
   ) {
