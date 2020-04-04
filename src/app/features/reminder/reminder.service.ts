@@ -5,7 +5,7 @@ import {RecurringConfig, Reminder, ReminderCopy, ReminderType} from './reminder.
 import {SnackService} from '../../core/snack/snack.service';
 import shortid from 'shortid';
 import {NotifyService} from '../../core/notify/notify.service';
-import {BehaviorSubject, Observable, ReplaySubject, Subject} from 'rxjs';
+import {BehaviorSubject, merge, Observable, ReplaySubject, Subject, timer} from 'rxjs';
 import {throttle} from 'throttle-debounce';
 import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
 import {ImexMetaService} from '../../imex/imex-meta/imex-meta.service';
@@ -15,10 +15,12 @@ import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
-import {map} from 'rxjs/operators';
+import {first, map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
 import {environment} from '../../../environments/environment';
+
+const MAX_WAIT_FOR_INITIAL_SYNC = 10000;
 
 @Injectable({
   providedIn: 'root',
@@ -61,7 +63,10 @@ export class ReminderService {
 
       // TODO we need a better solution for this
       // we do this to wait for syncing and the like
-      this._globalSyncService.afterInitialSyncDone$.subscribe(async () => {
+      merge(
+        this._globalSyncService.afterInitialSyncDone$,
+        timer(MAX_WAIT_FOR_INITIAL_SYNC),
+      ).pipe(first()).subscribe(async () => {
         this._w.addEventListener('message', this._onReminderActivated.bind(this));
         this._w.addEventListener('error', this._handleError.bind(this));
         await this.reloadFromLs();
