@@ -328,7 +328,7 @@ export class GoogleApiService {
     }
 
     return new Promise((resolve, reject) => {
-      this._loadJs(() => {
+      return this._loadJs().then(() => {
         // tslint:disable-next-line
         this._gapi = window['gapi'];
         this._gapi.load('client:auth2', () => {
@@ -450,31 +450,38 @@ export class GoogleApiService {
   }
 
 
-  private _loadJs(cb) {
-    if (this._isScriptLoaded) {
-      cb();
-      return;
-    }
-
-    const url = 'https://apis.google.com/js/api.js';
-    const that = this;
-    const script = document.createElement('script');
-    script.setAttribute('src', url);
-    script.setAttribute('type', 'text/javascript');
-
-    this._isScriptLoaded = false;
-    const loadFunction = () => {
-      if (that._isScriptLoaded) {
-        return;
+  private _loadJs(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (this._isScriptLoaded) {
+        resolve();
       }
-      that._isScriptLoaded = true;
-      if (cb) {
-        cb();
-      }
-    };
-    script.onload = loadFunction.bind(that);
-    // script['onreadystatechange'] = loadFunction.bind(that);
-    document.getElementsByTagName('head')[0].appendChild(script);
+
+      const loadFunction = () => {
+        if (this._isScriptLoaded) {
+          resolve();
+        }
+        this._isScriptLoaded = true;
+        resolve();
+      };
+
+      const errorFunction = (e) => {
+        reject(e);
+      };
+
+      const url = 'https://apis.google.com/js/api.js';
+      const script = document.createElement('script');
+      script.setAttribute('type', 'text/javascript');
+      script.setAttribute('crossorigin', 'anonymous');
+      script.setAttribute('src', url);
+
+      this._isScriptLoaded = false;
+
+      script.onload = loadFunction.bind(this);
+      script.onerror = errorFunction.bind(this);
+      // script['onreadystatechange'] = loadFunction.bind(this);
+      document.getElementsByTagName('head')[0].appendChild(script);
+    });
+
   }
 
   private _isTokenExpired(session): boolean {
