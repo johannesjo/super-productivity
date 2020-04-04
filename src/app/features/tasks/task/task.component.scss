@@ -389,6 +389,12 @@
   justify-content: stretch;
   margin-right: $s;
   z-index: $z-time-wrapper;
+  // note: fixes styles for empty time for very small mobile
+  min-width: 25px;
+
+  @include mq(xxs) {
+    min-width: 0;
+  }
 
   &.isEditable {
     cursor: pointer;
