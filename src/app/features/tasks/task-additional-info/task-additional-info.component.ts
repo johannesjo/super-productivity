@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ComponentFactoryResolver,
   HostBinding,
@@ -10,7 +11,7 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
+import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks, ShowSubTasksMode} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {TaskAttachmentService} from '../task-attachment/task-attachment.service';
 import {BehaviorSubject, merge, Observable, of, Subject, Subscription} from 'rxjs';
@@ -57,6 +58,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
   @ViewChild('attachmentPanelElRef') attachmentPanelElRef: TaskAdditionalInfoItemComponent;
 
+  ShowSubTasksMode = ShowSubTasksMode;
   selectedItemIndex = 0;
   isFocusNotes = false;
   T = T;
@@ -313,6 +315,12 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         cmpInstance.elementRef.nativeElement.focus();
       }
     }, timeoutDuration);
+  }
+
+  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
+    if (isChanged) {
+      this.taskService.update(this._taskData.id, {title: newTitle});
+    }
   }
 
   private _focusFirst() {
