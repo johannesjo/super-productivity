@@ -35,8 +35,6 @@ progress-bar {
 }
 
 
-
-
 .task-title-wrapper {
   min-height: $bar-height;
   display: flex;
@@ -44,7 +42,10 @@ progress-bar {
   position: sticky;
   background: inherit;
   top: 0;
-  margin-top: -1px;
+  margin-top: -4px;
+  margin-right: -4px;
+  margin-left: -4px;
+  padding: 0 $s;
   z-index: 44;
 
   @include lightTheme() {
@@ -52,8 +53,8 @@ progress-bar {
     box-shadow: $whiteframe-shadow-1dp;
   }
   @include darkTheme() {
-    background: $dark-theme-bg-slightly-lighter;
-    border: 1px solid $dark-theme-extra-border-color;
+    background: $dark-theme-bg-lighter;
+    border-bottom: 1px solid $dark-theme-extra-border-color;
   }
 }
 
@@ -69,38 +70,3 @@ progress-bar {
   line-height: 1.4;
 }
 
-
-
-// OTHER
-.toggle-sub-tasks-btn.toggle-sub-tasks-btn {
-  position: absolute !important;
-  transform: translateY(-50%);
-  left: -24px;
-  top: 50%;
-  //z-index: $z-toggle-sub-task-btn !important;
-  min-width: 0;
-  min-height: 0;
-  width: 32px;
-  height: 32px;
-  margin-top: -1px !important;
-  transform-origin: left top;
-  transition-property: all;
-
-  :host-context(.isNoTouchDevice) & {
-    opacity: 0;
-  }
-
-  :host:hover & {
-    opacity: 1;
-  }
-
-  mat-icon {
-    transition: $transition-standard;
-    margin-top: -8px;
-    //opacity: $task-icon-default-opacity;
-
-    &.isHideDoneTasks {
-      transform: rotate(-45deg);
-    }
-  }
-}
