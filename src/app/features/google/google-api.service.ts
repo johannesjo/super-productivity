@@ -468,10 +468,11 @@ export class GoogleApiService {
         reject(e);
       };
 
-      const url = 'https://apis.google.com/js/api.js';
+      const url = 'https://apis.google.com/js/api.js?ngsw-bypass=true';
       const script = document.createElement('script');
       script.setAttribute('type', 'text/javascript');
-      script.setAttribute('crossorigin', 'anonymous');
+      // NOTE: don't!
+      // script.setAttribute('crossorigin', 'anonymous');
       script.setAttribute('src', url);
 
       this._isScriptLoaded = false;
