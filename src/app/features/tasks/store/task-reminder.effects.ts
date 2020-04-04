@@ -8,16 +8,14 @@ import {
   UpdateTask,
   UpdateTaskReminder
 } from './task.actions';
-import {select, Store} from '@ngrx/store';
-import {map, mergeMap, tap, withLatestFrom} from 'rxjs/operators';
-import {selectTaskFeatureState} from './task.selectors';
+import {Store} from '@ngrx/store';
+import {map, mergeMap, tap} from 'rxjs/operators';
 import {ReminderService} from '../../reminder/reminder.service';
 import {truncate} from '../../../util/truncate';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {moveTaskToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
 import {WorkContextService} from '../../work-context/work-context.service';
-import {TaskState} from '../task.model';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -105,10 +103,7 @@ export class TaskReminderEffects {
     ofType(
       TaskActionTypes.DeleteTask,
     ),
-    withLatestFrom(
-      this._store$.pipe(select(selectTaskFeatureState)),
-    ),
-    tap(([a, state]: [DeleteTask, TaskState]) => {
+    tap((a: DeleteTask) => {
       const deletedTaskIds = [a.payload.task.id, ...a.payload.task.subTaskIds];
       deletedTaskIds.forEach((id) => {
         this._reminderService.removeReminderByRelatedIdIfSet(id);
