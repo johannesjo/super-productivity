@@ -221,15 +221,18 @@
           </button>
         </div>
 
-        <button (menuClosed)="isContextMenuDisabled = false"
-                (menuOpened)="isContextMenuDisabled = true"
-                [matMenuTriggerFor]="menu"
-                [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
-                [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
-                class="ico-btn menu-trigger show-touch-only"
+        <button (click)="toggleShowAdditionalInfoOpen()"
+                [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
+                class="ico-btn show-additional-info-btn show-touch-only"
                 color=""
-                mat-icon-button>
-          <mat-icon>more_vert</mat-icon>
+                mat-icon-button
+                tabindex="2"
+                *ngIf="!task.notes && !task.issueId">
+          <mat-icon *ngIf="!task.issueWasUpdated">chat_bubble_outline</mat-icon>
+          <mat-icon *ngIf="task.issueWasUpdated"
+                    class="updated-icon"
+                    color="accent">update
+          </mat-icon>
         </button>
 
         <mat-menu #menu="matMenu">
