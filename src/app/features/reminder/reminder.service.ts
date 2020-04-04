@@ -18,6 +18,7 @@ import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -74,6 +75,16 @@ export class ReminderService {
 
   async reloadFromLs() {
     this._reminders = await this._loadFromLs() || [];
+    if (!Array.isArray(this._reminders)) {
+      if (environment.production) {
+        console.error('Something went wrong with the reminders', this._reminders);
+        this._reminders = [];
+      } else {
+        console.log('this._reminders', this._reminders);
+        throw new Error('Reminders are wrong');
+      }
+    }
+
     this._onReloadModel$.next(this._reminders);
     this._saveModel(this._reminders, true);
   }
