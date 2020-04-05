@@ -33,16 +33,20 @@
           "https://fonts.gstatic.com/**"
         ]
       }
-    },
+    }
+  ],
+  "dataGroups": [
     {
       "name": "issueProviderAndAssets",
-      "installMode": "lazy",
-      "updateMode": "lazy",
-      "resources": {
-        "urls": [
-          "https://**",
-          "http://**"
-        ]
+      "urls": [
+        "https://**",
+        "http://**",
+        "!https://apis.google.com/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 4000,
+        "maxAge": "30d",
+        "timeout": "9s"
       }
     }
   ]
