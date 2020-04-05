@@ -120,7 +120,6 @@
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "PROJECT": "\"username% 2FProjectName\" pour le projet gitlab que vous souhaitez suivre",
-        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
         "TOKEN": "Jeton d'accès"
       },
       "FORM_SECTION": {
@@ -510,6 +509,9 @@
         "CREATE": "Créer un tag",
         "EDIT": "Modifier la balise"
       },
+      "D_DELETE": {
+        "CONFIRM_MSG": "Voulez-vous vraiment supprimer la balise \"{{tagName}}\"? Il sera supprimé de toutes les tâches. Ça ne peut pas être annulé."
+      },
       "D_EDIT": {
         "ADD": "Ajouter des balises pour \"{{title}}\"",
         "EDIT": "Modifier les balises pour \"{{title}}\"",
@@ -528,6 +530,7 @@
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Ajouter une pièce jointe",
+        "ADD_SUB_TASK": "Ajouter une sous-tâche",
         "ATTACHMENTS": "Pièces jointes {{nr}}",
         "FROM_PARENT": "(du parent)",
         "LOCAL_ATTACHMENTS": "Pièces jointes locales",
@@ -536,6 +539,7 @@
         "REMINDER": "Rappel",
         "REPEAT": "Répéter",
         "SCHEDULE_TASK": "Planifier une tâche",
+        "SUB_TASKS": "Sous-tâches ({{nr}})",
         "TIME": "Temps"
       },
       "ADD_TASK_BAR": {
@@ -564,7 +568,6 @@
         "MOVE_TO_TODAY": "Déplacer vers la liste quotidienne",
         "OPEN_ATTACH": "Joindre un fichier ou un lien",
         "OPEN_ISSUE": "Ouvrir le ticket dans un nouvel onglet du navigateur",
-        "OPEN_TASK_MENU": "Ouvrir le menu de la tâche",
         "OPEN_TIME": "Estimer le temps / Ajouter le temps passé",
         "REMOVE_FROM_MY_DAY": "Supprimer de ma journée",
         "REPEAT_EDIT": "Modifier la répétition de la tâche",
@@ -841,6 +844,7 @@
     },
     "MISC": {
       "HELP": "<p><strong>Vous ne voyez pas les notifications de bureau ?</strong> Pour Windows, vous pouvez vérifier Système> Notifications et actions et vérifier si les notifications requises ont été activées.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Ajouter automatiquement la balise d'aujourd'hui aux tâches travaillées",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marquer la tâche parent comme terminée lorsque toutes les sous-tâches sont terminées",
       "IS_AUTO_START_NEXT_TASK": "Commencer le suivi de la tâche suivante lors du marquage du courant comme terminé",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmez avant de quitter l'application",
@@ -888,6 +892,7 @@
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
     "CREATE_PROJECT": "Créer un projet",
     "CREATE_TAG": "Créer un tag",
+    "DELETE_TAG": "Supprimer la balise",
     "GO_TO_TASK_LIST": "Aller à la liste des tâches",
     "MANAGE_PROJECTS": "Gérer les projets",
     "METRICS": "Métriques",

@@ -120,7 +120,6 @@
         "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的问题显示为建议",
         "PROJECT": "您要跟踪的git存储库的“username%2FProjectName”",
-        "REPO": "",
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
@@ -510,6 +509,9 @@
         "CREATE": "创建标签",
         "EDIT": "编辑标签"
       },
+      "D_DELETE": {
+        "CONFIRM_MSG": "您是否真的要删除标签“{{tagName}}”？它将从所有任务中删除。这不能被撤消。"
+      },
       "D_EDIT": {
         "ADD": "为“{{title}}”添加标签",
         "EDIT": "编辑“{{title}}”的标签",
@@ -528,6 +530,7 @@
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添加附件",
+        "ADD_SUB_TASK": "添加子任务",
         "ATTACHMENTS": "附件 {{nr}}",
         "FROM_PARENT": "（来自家长）",
         "LOCAL_ATTACHMENTS": "本地附件",
@@ -536,6 +539,7 @@
         "REMINDER": "提醒",
         "REPEAT": "重复",
         "SCHEDULE_TASK": "安排任务",
+        "SUB_TASKS": "子任务（{{nr}}）",
         "TIME": "时间"
       },
       "ADD_TASK_BAR": {
@@ -564,7 +568,6 @@
         "MOVE_TO_TODAY": "转到今天的列表",
         "OPEN_ATTACH": "附加文件或链接",
         "OPEN_ISSUE": "在新的浏览器选项卡中打开问题",
-        "OPEN_TASK_MENU": "打开任务菜单",
         "OPEN_TIME": "估计时间/增加花费的时间",
         "REMOVE_FROM_MY_DAY": "从我的日子中删除",
         "REPEAT_EDIT": "编辑重复任务配置",
@@ -841,6 +844,7 @@
     },
     "MISC": {
       "HELP": "<p><strong>没有看到桌面通知？</strong> 对于Windows，您可能需要检查系统>通知和操作，并检查是否已启用所需的通知。</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
       "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始跟踪下一个任务",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
@@ -888,6 +892,7 @@
     "ADD_NEW_TASK": "添加新任务",
     "CREATE_PROJECT": "创建项目",
     "CREATE_TAG": "创建标签",
+    "DELETE_TAG": "删除标签",
     "GO_TO_TASK_LIST": "转到任务列表",
     "MANAGE_PROJECTS": "管理项目",
     "METRICS": "度量",

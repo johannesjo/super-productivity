@@ -120,7 +120,6 @@
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "PROJECT": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
-        "REPO": "",
         "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
@@ -510,6 +509,9 @@
         "CREATE": "Etiket Oluştur",
         "EDIT": "Etiketi düzenle"
       },
+      "D_DELETE": {
+        "CONFIRM_MSG": "\"{{tagName}}\" etiketini gerçekten silmek istiyor musunuz? Tüm görevlerden kaldırılacak. Bu geri alınamaz."
+      },
       "D_EDIT": {
         "ADD": "\"{{title}}\" için etiket ekle",
         "EDIT": "\"{{title}}\" için etiketleri düzenleyin",
@@ -528,6 +530,7 @@
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Eklenti ekle",
+        "ADD_SUB_TASK": "Alt Görev ekle",
         "ATTACHMENTS": "Ekler {{nr}}",
         "FROM_PARENT": "(Ebeveynden)",
         "LOCAL_ATTACHMENTS": "Yerel Ekler",
@@ -536,6 +539,7 @@
         "REMINDER": "Hatırlatma",
         "REPEAT": "Tekrar et",
         "SCHEDULE_TASK": "Görev Takvimi",
+        "SUB_TASKS": "Alt Görevler ({{nr}})",
         "TIME": "zaman"
       },
       "ADD_TASK_BAR": {
@@ -564,7 +568,6 @@
         "MOVE_TO_TODAY": "Bugünün listesine git",
         "OPEN_ATTACH": "Dosya veya bağlantı ekle",
         "OPEN_ISSUE": "Sorunu yeni bir tarayıcı sekmesinde aç",
-        "OPEN_TASK_MENU": "Görev menüsünü aç",
         "OPEN_TIME": "Tahmini süre / Harcanan zamanı ekle",
         "REMOVE_FROM_MY_DAY": "Günümden Kaldır",
         "REPEAT_EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
@@ -841,6 +844,7 @@
     },
     "MISC": {
       "HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Çalışılan görevlere bugün etiketini otomatik olarak ekle",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
       "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
@@ -888,6 +892,7 @@
     "ADD_NEW_TASK": "Yeni Görev ekle",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
+    "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
     "MANAGE_PROJECTS": "Projeleri Yönet",
     "METRICS": "Metrik",

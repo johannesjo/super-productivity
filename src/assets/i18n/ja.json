@@ -120,7 +120,6 @@
         "IS_AUTO_POLL": "変更についてインポートされたGitの問題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "新しいタスクを追加するときにgitからの問題を提案として表示する",
         "PROJECT": "追跡するgitlabプロジェクトの「username%2FProjectName」",
-        "REPO": "追跡したいgitリポジトリの \"username / repositoryName\"",
         "TOKEN": "アクセストークン"
       },
       "FORM_SECTION": {
@@ -510,6 +509,9 @@
         "CREATE": "タグを作成",
         "EDIT": "タグを編集"
       },
+      "D_DELETE": {
+        "CONFIRM_MSG": "タグ「{{tagName}}」を本当に削除しますか？すべてのタスクから削除されます。これは、元に戻すことはできません。"
+      },
       "D_EDIT": {
         "ADD": "「{{title}}」のタグを追加",
         "EDIT": "「{{title}}」のタグを編集",
@@ -528,6 +530,7 @@
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添付ファイルを追加する",
+        "ADD_SUB_TASK": "サブタスクを追加",
         "ATTACHMENTS": "添付ファイル {{nr}}",
         "FROM_PARENT": "（親から）",
         "LOCAL_ATTACHMENTS": "ローカル添付",
@@ -536,6 +539,7 @@
         "REMINDER": "リマインダー",
         "REPEAT": "繰り返す",
         "SCHEDULE_TASK": "スケジュールタスク",
+        "SUB_TASKS": "サブタスク（{{nr}}）",
         "TIME": "時間"
       },
       "ADD_TASK_BAR": {
@@ -564,7 +568,6 @@
         "MOVE_TO_TODAY": "今日のリストに移動する",
         "OPEN_ATTACH": "ファイルまたはリンクを添付する",
         "OPEN_ISSUE": "新しいブラウザタブで課題を開く",
-        "OPEN_TASK_MENU": "タスクメニューを開く",
         "OPEN_TIME": "見積もり時間/追加に費やした時間",
         "REMOVE_FROM_MY_DAY": "今日から削除",
         "REPEAT_EDIT": "繰り返しタスク設定の編集",
@@ -841,6 +844,7 @@
     },
     "MISC": {
       "HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "タスクに取り組むために今日タグを自動的に追加します",
       "IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
       "IS_AUTO_START_NEXT_TASK": "現在の完了マークを付けたときに次のタスクの追跡を開始する",
       "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
@@ -888,6 +892,7 @@
     "ADD_NEW_TASK": "新しいタスクを追加する",
     "CREATE_PROJECT": "プロジェクトを作成",
     "CREATE_TAG": "タグを作成",
+    "DELETE_TAG": "タグを削除",
     "GO_TO_TASK_LIST": "タスクリストへ",
     "MANAGE_PROJECTS": "プロジェクトを管理する",
     "METRICS": "メトリック",

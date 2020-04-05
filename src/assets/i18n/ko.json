@@ -120,7 +120,6 @@
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "PROJECT": "추적하고자하는 gitlab 저장소의 \"username%2FProjectName\"",
-        "REPO": "",
         "TOKEN": "액세스 토큰"
       },
       "FORM_SECTION": {
@@ -510,6 +509,9 @@
         "CREATE": "태그 생성",
         "EDIT": "태그 편집"
       },
+      "D_DELETE": {
+        "CONFIRM_MSG": "태그 \"{{tagName}}\"을 (를) 정말로 삭제 하시겠습니까? 모든 작업에서 제거됩니다. 이 취소 할 수 없습니다."
+      },
       "D_EDIT": {
         "ADD": "\"{{title}}\"에 대한 태그 추가",
         "EDIT": "\"{{title}}\"에 대한 태그 편집",
@@ -528,6 +530,7 @@
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "첨부 파일 추가",
+        "ADD_SUB_TASK": "하위 작업 추가",
         "ATTACHMENTS": "첨부 파일 {{nr}}",
         "FROM_PARENT": "(부모님)",
         "LOCAL_ATTACHMENTS": "로컬 첨부 파일",
@@ -536,6 +539,7 @@
         "REMINDER": "조언",
         "REPEAT": "반복",
         "SCHEDULE_TASK": "작업 예약",
+        "SUB_TASKS": "하위 작업 ({{nr}})",
         "TIME": "시각"
       },
       "ADD_TASK_BAR": {
@@ -564,7 +568,6 @@
         "MOVE_TO_TODAY": "오늘의 목록으로 이동",
         "OPEN_ATTACH": "파일 또는 링크 첨부",
         "OPEN_ISSUE": "새 브라우저 탭에서 문제 열기",
-        "OPEN_TASK_MENU": "작업 메뉴 열기",
         "OPEN_TIME": "시간 예측 / 소요 시간 추가",
         "REMOVE_FROM_MY_DAY": "내 날에서 제거",
         "REPEAT_EDIT": "반복 작업 구성 편집",
@@ -841,6 +844,7 @@
     },
     "MISC": {
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "작업에 사용할 오늘 태그를 자동으로 추가",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
       "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
@@ -888,6 +892,7 @@
     "ADD_NEW_TASK": "새 작업 추가",
     "CREATE_PROJECT": "프로젝트 만들기",
     "CREATE_TAG": "태그 생성",
+    "DELETE_TAG": "태그 삭제",
     "GO_TO_TASK_LIST": "작업 목록으로 이동",
     "MANAGE_PROJECTS": "프로젝트 관리",
     "METRICS": "측정 항목",

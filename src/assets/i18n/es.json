@@ -120,7 +120,6 @@
         "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "PROJECT": "\"username%2FProjectName\" para el repositorio de git que desea seguir",
-        "REPO": "",
         "TOKEN": "Token de acceso"
       },
       "FORM_SECTION": {
@@ -510,6 +509,9 @@
         "CREATE": "Crear etiqueta",
         "EDIT": "Editar etiqueta"
       },
+      "D_DELETE": {
+        "CONFIRM_MSG": "¿Realmente desea eliminar la etiqueta \"{{tagName}}\"? Se eliminará de todas las tareas. Esto no se puede deshacer."
+      },
       "D_EDIT": {
         "ADD": "Agregar etiquetas para \"{{title}}\"",
         "EDIT": "Editar etiquetas para \"{{title}}\"",
@@ -528,6 +530,7 @@
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Añadir un adjunto",
+        "ADD_SUB_TASK": "Añadir sub tarea",
         "ATTACHMENTS": "Adjuntos {{nr}}",
         "FROM_PARENT": "(del padre)",
         "LOCAL_ATTACHMENTS": "Adjuntos locales",
@@ -536,6 +539,7 @@
         "REMINDER": "Recordatorio",
         "REPEAT": "Repetir",
         "SCHEDULE_TASK": "Tarea programada",
+        "SUB_TASKS": "Subtareas ({{nr}})",
         "TIME": "hora"
       },
       "ADD_TASK_BAR": {
@@ -564,7 +568,6 @@
         "MOVE_TO_TODAY": "Mover a la lista de hoy",
         "OPEN_ATTACH": "Adjuntar archivo o enlace",
         "OPEN_ISSUE": "Abrir problema en una nueva pestaña del navegador",
-        "OPEN_TASK_MENU": "Abrir menú de tareas",
         "OPEN_TIME": "Estimar tiempo / Agregar tiempo empleado",
         "REMOVE_FROM_MY_DAY": "Eliminar de mi día",
         "REPEAT_EDIT": "Editar Repetir Tarea Config.",
@@ -841,6 +844,7 @@
     },
     "MISC": {
       "HELP": "<p><strong>¿No ve las notificaciones de escritorio?</strong> Para Windows, es posible que desee revisar Sistema> Notificaciones y acciones y verificar si se han habilitado las notificaciones requeridas.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Agregue automáticamente la etiqueta de hoy a las tareas trabajadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque la tarea principal como realizada, cuando todas las subtareas estén listas",
       "IS_AUTO_START_NEXT_TASK": "Comience a rastrear la siguiente tarea cuando marque actual como hecha",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación",
@@ -888,6 +892,7 @@
     "ADD_NEW_TASK": "Agregar nueva tarea",
     "CREATE_PROJECT": "Crear proyecto",
     "CREATE_TAG": "Crear etiqueta",
+    "DELETE_TAG": "Eliminar etiqueta",
     "GO_TO_TASK_LIST": "Ir a la lista de tareas",
     "MANAGE_PROJECTS": "Administrar proyectos",
     "METRICS": "Métrica",

@@ -26,7 +26,7 @@
     class="show-xs-only">
     <ng-container panel-header>
       <mat-icon class="panel-header-icon">list</mat-icon>
-      <span>Sub Tasks ({{task.subTasks?.length}})</span>
+      <span>{{T.F.TASK.ADDITIONAL_INFO.SUB_TASKS|translate:{nr: task.subTasks?.length} }}</span>
     </ng-container>
 
     <ng-container panel-content>
@@ -45,8 +45,7 @@
         <button mat-button
                 (click)="addSubTask()">
           <mat-icon>add</mat-icon>
-          <!--      <span>{{T.F.TASK.ADDITIONAL_INFO.TIME|translate}}</span>-->
-          Add Sub Task
+          <span>{{T.F.TASK.ADDITIONAL_INFO.ADD_SUB_TASK|translate}}</span>
         </button>
       </div>
     </ng-container>
