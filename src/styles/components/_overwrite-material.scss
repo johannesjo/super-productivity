@@ -19,6 +19,12 @@ body .mat-dialog-content {
   }
 }
 
+.cdk-overlay-pane {
+  @include mq(xs, max) {
+    max-width: 100vw !important;
+  }
+}
+
 // overwrite mat typography
 .mat-dialog-title.mat-dialog-title {
   font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
