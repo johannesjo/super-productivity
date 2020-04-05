@@ -60,11 +60,11 @@ progress-bar {
 
 .task-title {
   @include taskTitle;
+  font-weight: bold;
   transform-origin: top center;
   padding-top: $s;
   padding-bottom: $s;
   font-size: 15px;
-  font-weight: normal;
   margin: 0;
   flex-grow: 1;
   line-height: 1.4;
