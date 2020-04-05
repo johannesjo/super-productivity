@@ -1,4 +1,4 @@
-import {ipcMain, Menu, systemPreferences, Tray} from 'electron';
+import {ipcMain, Menu, Tray} from 'electron';
 import {existsSync, readFileSync} from 'fs';
 // const dbus = require('./dbus');
 import * as moment from 'moment';
@@ -42,9 +42,7 @@ export const initIndicator = (params) => {
     // switch tray icon based on
     let trayIcoFile;
     if (IS_MAC) {
-      trayIcoFile = systemPreferences.isDarkMode()
-        ? 'tray-ico.png'
-        : 'tray-ico-dark.png';
+      trayIcoFile = 'tray-icoTemplate.png';
     } else {
       trayIcoFile = 'tray-ico.png';
     }
