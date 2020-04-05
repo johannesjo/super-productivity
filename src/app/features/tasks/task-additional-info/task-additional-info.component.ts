@@ -11,7 +11,7 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {TaskAdditionalInfoTargetPanel, TaskWithSubTasks, ShowSubTasksMode} from '../task.model';
+import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
 import {IssueService} from '../../issue/issue.service';
 import {TaskAttachmentService} from '../task-attachment/task-attachment.service';
 import {BehaviorSubject, merge, Observable, of, Subject, Subscription} from 'rxjs';
@@ -287,6 +287,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
           });
         }
       });
+  }
+
+  addSubTask() {
+    this.taskService.addSubTaskTo(this.task.parentId || this.task.id);
   }
 
   collapseParent() {

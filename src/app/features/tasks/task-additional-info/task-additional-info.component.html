@@ -14,16 +14,14 @@
         contenteditable="true"
         contentEditableOnClick
         tabindex="2">{{task.title}}</h2>
-<!--    <button mat-icon-button>-->
-<!--      <mat-icon>more_vert</mat-icon>-->
-<!--    </button>-->
+    <!--    <button mat-icon-button>-->
+    <!--      <mat-icon>more_vert</mat-icon>-->
+    <!--    </button>-->
   </header>
-
 
   <task-additional-info-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="task.subTasks?.length"
     [type]="'panel'"
     class="show-xs-only">
     <ng-container panel-header>
@@ -42,6 +40,14 @@
                    [parentId]="task.id"
                    [tasks]="task.subTasks"
                    listId="SUB"></task-list>
+      </div>
+      <div style="text-align: center;">
+        <button mat-button
+                (click)="addSubTask()">
+          <mat-icon>add</mat-icon>
+          <!--      <span>{{T.F.TASK.ADDITIONAL_INFO.TIME|translate}}</span>-->
+          Add Sub Task
+        </button>
       </div>
     </ng-container>
   </task-additional-info-item>
