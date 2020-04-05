@@ -1,3 +1,32 @@
+## [5.0.9](https://github.com/johannesjo/super-productivity/compare/v5.0.8...v5.0.9) (2020-04-05)
+
+
+### Bug Fixes
+
+* **googleApi:** remove gapi from service worker caching ([4e775ad](https://github.com/johannesjo/super-productivity/commit/4e775adb675bf47f12598296ee27888be5067b8c))
+* **reminder:** don't wait for initial sync forever ([ae3527f](https://github.com/johannesjo/super-productivity/commit/ae3527fd1bbe3c4ceadb4afab139da45275abd3f))
+* **reminders:** specific error case ([fa98a46](https://github.com/johannesjo/super-productivity/commit/fa98a462e09c76f57ddcae908950eef2212252b7))
+* **task:** styling for empty time on very small mobile ([946b1a6](https://github.com/johannesjo/super-productivity/commit/946b1a68b8c46c943cef0dd59ef53d668d519a0b))
+
+
+### Features
+
+* **googleApi:** improve script loading ([2a58084](https://github.com/johannesjo/super-productivity/commit/2a58084788fd7843d90a9f510f42dcb91662efa6))
+* **googleDriveSync:** increase default syncing interval ([0ae2785](https://github.com/johannesjo/super-productivity/commit/0ae2785129d6b000a89208c2f5711277094d523c))
+* **i18n:** add missing translations ([cccfd22](https://github.com/johannesjo/super-productivity/commit/cccfd22cf9a3f404d834a7450d8284c993e7a4d5))
+* **task:** add expand button to task for mobile only ([98d40c7](https://github.com/johannesjo/super-productivity/commit/98d40c7d2f98780e793b178b2bd67c89c374657d))
+* **task:** add most basic mobile side panel ([da2edd2](https://github.com/johannesjo/super-productivity/commit/da2edd23176067b56c8fa3f430a70e5226fd7486))
+* **task:** add sub task button for mobile ([e543bad](https://github.com/johannesjo/super-productivity/commit/e543bad24955e2d2857c4ec2ae520e1f89cff1f8))
+* **task:** beautify sub task view for mobile ([2237f85](https://github.com/johannesjo/super-productivity/commit/2237f85498c09ad64703b1f204782ec235b15c46))
+* **task:** beautify task header for mobile ([354278e](https://github.com/johannesjo/super-productivity/commit/354278eaec05305185ad59b12ba0d6d92e6b21a0))
+* **task:** hide empty time spent for mobile as well if not set ([da07c8f](https://github.com/johannesjo/super-productivity/commit/da07c8fad2461acb3bf43fff283eb4cae0fe62a2))
+* **task:** improve mobile styling ([2ad6a15](https://github.com/johannesjo/super-productivity/commit/2ad6a1515ab980ea27d33b60e863f7e68d98b445))
+* **task:** improve task title for mobile ([025435b](https://github.com/johannesjo/super-productivity/commit/025435b9b5798b2443a952a64fd269503b13abf8))
+* improve styling for mobile dialogs ([78c54af](https://github.com/johannesjo/super-productivity/commit/78c54af66e90ca6b26924e2bc0f55299863d98ab))
+* use dataGroup rather than assetGroup for issue provider caching ([5adaef3](https://github.com/johannesjo/super-productivity/commit/5adaef3d7284dda2f3a51f36476aa2407ce4639d))
+
+
+
 ## [5.0.8](https://github.com/johannesjo/super-productivity/compare/v5.0.7...v5.0.8) (2020-04-03)
 
 
