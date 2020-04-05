@@ -407,10 +407,8 @@
     }
   }
 
-  @include noTouchDevice {
-    &.hasNoTimeSpentOrEstimate {
-      display: none;
-    }
+  &.hasNoTimeSpentOrEstimate {
+    display: none;
   }
 
   .time {
