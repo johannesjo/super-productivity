@@ -18,8 +18,8 @@ import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 
 const NAV_ALWAYS_VISIBLE = 1250;
-const NAV_OVER_NOTES_NEXT = 850;
-const BOTH_OVER = 780;
+const NAV_OVER_NOTES_NEXT = 800;
+const BOTH_OVER = 720;
 
 @Injectable({
   providedIn: 'root',
