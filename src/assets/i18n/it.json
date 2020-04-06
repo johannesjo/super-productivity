@@ -5,6 +5,8 @@
       "INSTALL": "Installa",
       "MSG": "Vuoi installare Super Productivity come PWA?"
     },
+    "UPDATE_MAIN_MODEL": "Super Productivity ha ricevuto un importante aggiornamento! Sarà necessario migrare i tuoi dati. Nota che questo renderà i tuoi dati incompatibili con versioni precedenti dell'app.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Hai scelto di non aggiornare i dati. Nota che dovrai usare una versione precedente dell'app, se davvero non vuoi aggiornare.",
     "UPDATE_WEB_APP": "Una nuova versione è disponibile. Vuoi caricare la nuova versione?"
   },
   "BL": {
@@ -37,7 +39,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "Aggiungi segnalibro",
         "DROP": "Trascina qui per aggiungere un segnalibro",
+        "EDIT": "Modifica segnalibro",
         "NO_BOOKMARKS": "Non hai segnalibri nel progetto. Aggiungine uno tramite drag-and-drop oppure cliccando il pulsante 'più'."
       },
       "DIALOG_EDIT": {
@@ -93,10 +97,11 @@
       "S": {
         "ERR_NETWORK": "Github: Richiesta fallita a causa di un erore di rete lato client",
         "ERR_NOT_CONFIGURED": "Github: Non è configurato correttamente",
-        "ERR_REQUEST": "Github: Le API hanno restituito {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "Github: Errore sconosciuto {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Importati {{issuesLength}} nuovi issue da git al backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Importati gli issue \"{{issueText}}\" da git al backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: Nessun aggiornamento necessario",
         "ISSUE_UPDATE": "Github: Aggiornati dati per \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aggiornati dati per \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Trovati task con dati mancanti. Ricarico.",
@@ -114,7 +119,8 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da Github al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
-        "REPO": "\"username%2FProjectName\" per il repository git che vuoi tracciare",
+        "PROJECT": "\"username%2FProjectName\" per il progetto su Gitlab che vuoi tracciare",
+        "REPO": "",
         "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
@@ -134,10 +140,11 @@
       "S": {
         "ERR_NETWORK": "Gitlab: Richiesta fallita a causa di un erore di rete lato client",
         "ERR_NOT_CONFIGURED": "Gitlab: Non è configurato correttamente",
-        "ERR_REQUEST": "Gitlab: Le API hanno restituito {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "Gitlab: Errore sconosciuto {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importati {{issuesLength}} nuovi issue da git al backlog",
         "IMPORTED_SINGLE_ISSUE": "Gitlab: Importati gli issue \"{{issueText}}\" da git al backlog",
         "ISSUE_DELETED_OR_CLOSED": "Gitlab: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Nessun aggiornamento necessario",
         "ISSUE_UPDATE": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Gitlab: Trovati task con dati mancanti. Ricarico.",
@@ -387,6 +394,7 @@
         "SNOOZE": "Silenzia",
         "TITLE": "Note"
       },
+      "EDIT_FULLSCREEN": "Modifica in schermo intero",
       "EDIT_REMINDER": "Modifica promemoria",
       "NOTES_CMP": {
         "ADD_BTN": "Aggiungi nuova nota",
@@ -456,12 +464,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "Termina la giornata",
-          "MSG": "Ti sei dimenticato di terminare la giornata del {{dayStr}}"
-        }
-      },
       "D_CREATE": {
         "CREATE": "Crea progetto",
         "EDIT": "Modifica progetto",
@@ -474,15 +476,16 @@
         "TITLE": "Impostazioni base"
       },
       "FORM_THEME": {
-        "D_IS_DARK_THEME": "Non verrà usato se il sistema supporta la dark mode globalmente.",
+        "D_IS_DARK_THEME": "Non verrà usato se il sistema supporta una modalità scura globale.",
         "HELP": "Impostazioni sul tema del tuo progetto.",
         "L_COLOR_ACCENT": "Colore di accento",
         "L_COLOR_PRIMARY": "Colore primario",
-        "L_COLOR_WARN": "Colore errori/warning",
+        "L_COLOR_WARN": "Colore errori/avvertimenti",
         "L_HUE_ACCENT": "Soglia per il testo scuro su sfondo del colore di accento",
         "L_HUE_PRIMARY": "Soglia per il testo scuro su sfondo del colore primario",
         "L_HUE_WARN": "Soglia per il testo scuro su sfondo del colore di warning",
         "L_IS_AUTO_CONTRAST": "Imposta automaticamente il colore del testo per ottimizzare la leggibilità",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Disabilita il gradiente colorato di sfondo",
         "L_IS_REDUCED_THEME": "Usa UI ridotta (nessuna box intorno ai task)",
         "L_THEME_COLOR": "Colore del tema",
         "L_TITLE": "Titolo",
@@ -502,12 +505,41 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Errore per interfaccia promemoria"
     },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "Crea etichetta",
+        "EDIT": "Modifica etichetta"
+      },
+      "D_DELETE": {
+        "CONFIRM_MSG": "Vuoi davvero cancellare l'etichetta \"{{tagName}}\"? Sarà rimossa da tutti i task. Questo non potrà essere annullato."
+      },
+      "D_EDIT": {
+        "ADD": "Aggiunti etichette per \"{{title}}\"",
+        "EDIT": "Modifica etichette per \"{{title}}\"",
+        "LABEL": "etichette"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "Colore (se non definito, verrà usato il colore primario del tema)",
+        "L_ICON": "Icona",
+        "L_TITLE": "Nome dell'etichetta",
+        "TITLE": "Impostazioni base"
+      },
+      "S": {
+        "UPDATED": "Impostazioni dell'etichetta aggiornate"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
-        "ATTACHMENTS": "Allegati {{nr}}",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} allegati",
-        "LOCAL_ATTACHMENTS": "Allegati locali",
-        "NOTES": "Note"
+        "ADD_ATTACHMENT": "Aggiungi allegato",
+        "ATTACHMENTS": "Allegati ({{nr}})",
+        "FROM_PARENT": "(da genitore)",
+        "LOCAL_ATTACHMENTS": "Allegato locale",
+        "NOTES": "Note",
+        "PARENT": "Genitore",
+        "REMINDER": "Promemoria",
+        "REPEAT": "Ripeti",
+        "SCHEDULE_TASK": "Pianifica Task",
+        "TIME": "Tempo"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "Aggiungi task",
@@ -520,11 +552,14 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Aggiungi sotto-task",
+        "ADD_TO_MY_DAY": "Aggiungi a La mia giornata",
+        "ADD_TO_PROJECT": "Aggiungi ad un progetto",
         "ADVANCED": "Avanzate",
         "CONVERT_TO_PARENT_TASK": "Converti a task padre",
         "DELETE": "Cancella task",
         "DROP_ATTACHMENT": "Trascina qui per allegare a \"{{title}}\"",
         "EDIT_REMINDER": "Modifica promemoria",
+        "EDIT_TAGS": "Modifica etichette",
         "MARK_DONE": "Segna come completato",
         "MARK_UNDONE": "Segna come non completato",
         "MOVE_TO_BACKLOG": "Sposta nel backlog",
@@ -532,8 +567,8 @@
         "MOVE_TO_TODAY": "Sposta nella lista di oggi",
         "OPEN_ATTACH": "Allega file o link",
         "OPEN_ISSUE": "Apri issue in una nuova scheda del browser",
-        "OPEN_TASK_MENU": "Apri il menu dei task",
         "OPEN_TIME": "Stima il tempo/Aggiungi il tempo impiegato",
+        "REMOVE_FROM_MY_DAY": "Rimuovi da La mia giornata",
         "REPEAT_EDIT": "Modifica ripetizione configurazione task",
         "REPEAT_TASK": "Ripeti task",
         "SCHEDULE": "Pianifica task",
@@ -556,14 +591,13 @@
       },
       "D_REMINDER_VIEW": {
         "DISMISS": "Rimuovi promemoria",
-        "ERR_LOST": "Un promemoria era pianificato per il task {{title}}, ma sembra essersi perso.",
         "FOR_CURRENT": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
         "FOR_OTHER": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
-        "FROM_PROJECT": "Da progetto",
+        "FROM_PROJECT": "Da progetto: \"{{title}}\"",
+        "FROM_TAG": "Da etichetta: \"{{title}}\"",
         "SNOOZE": "Silenzia",
         "START": "Inizia task",
-        "SWITCH_PROJECT_START": "Cambia progetto & inizia task",
-        "TITLE": "Task pianificato"
+        "SWITCH_CONTEXT_START": "Cambia progetto & inizia task"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Aggiungi il tempo impiegato per un'altro giorno",
@@ -587,6 +621,7 @@
       "S": {
         "DELETED": "Cancellato task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Spostato task <strong>{{title}}</strong> dal backlog alla lista dei task di oggi",
+        "FOUND_MOVE_FROM_OTHER_LIST": "Aggiunto task <strong>{{title}}</strong> da <strong>{{contextTitle}}</strong> alla lista attuale",
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinato task <strong>{{title}}</strong> relativo ad issue dall'archivio",
         "REMINDER_ADDED": "Pianificato task \"{{title}}\"",
         "REMINDER_DELETED": "Cancellato promemoria per task",
@@ -612,7 +647,8 @@
         "EDIT": "Modifica configurazione ripeti task",
         "HELP1": "I task ripetuti servono ai doveri quotidiani, es: \"Organizzazione\", \"Meeting giornalieri\", \"Code Review\", \"Controllare email\" o task simili, che è probabile accadano più e più volte.",
         "HELP2": "Una volta configurato, un task ripetuto sarà ricreato per ognuno dei giorni selezionati sotto non appena aprirai il progetto, e sarà automaticamente segnato come completato alla fine della giornata. Saranno gestiti come istanze separate, quindi puoi liberamente aggiungere sotto-task etc.",
-        "HELP3": "I tasks importati da Jira o gli issue di Git non possono essere ripetuti. Su un task ripetuto, saranno anche eliminati tutti i promemoria."
+        "HELP3": "I tasks importati da Jira o gli issue di Git non possono essere ripetuti. Su un task ripetuto, saranno anche eliminati tutti i promemoria.",
+        "TAG_LABEL": "Etichette da aggiungere"
       },
       "F": {
         "DEFAULT_ESTIMATE": "Stima di default",
@@ -649,7 +685,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "Ripristina task dall'archivio",
         "TASKS": "Task",
         "TOTAL_TIME": "tempo impiegato in totale:",
-        "TOTAL_TIME_PROJECT": "Tempo impiegato sul progetto",
         "WEEK_NR": "Settimana {{nr}}",
         "WORKED": "Lavorato"
       },
@@ -715,6 +750,7 @@
     "MINUTES": "{{m}} minuti",
     "NEXT": "Prossimo",
     "OK": "Ok",
+    "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
     "PREVIOUS": "Precedente",
     "REMOVE": "Rimuovi",
     "SAVE": "Salva",
@@ -727,6 +763,10 @@
       "HELP": "Salva automaticamente tutti i dati sulla cartella dell'applicazione in modo da averli pronti nel caso succedesse qualcosa.",
       "LABEL_IS_ENABLED": "Abilita backup automatici",
       "TITLE": "Backup automatici"
+    },
+    "EVALUATION": {
+      "IS_HIDE_EVALUATION_SHEET": "Nascondi la scheda di valutazione nel riepilogo giornaliero",
+      "TITLE": "Valutazione & Metriche"
     },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Qui puoi configurare la tua app per sincronizzarsi automaticamente da e su un singolo file di google drive. Tutti i dati saranno salvati non criptati, quindi assicurati di non condividere accidentalmente questo file con qualcunaltro.",
@@ -791,9 +831,11 @@
       "ES": "Spagnolo",
       "FA": "Persiano",
       "FR": "Francese",
+      "IT": "Italiano",
       "JA": "Giapponese",
       "KO": "Coreano",
       "LABEL": "Seleziona la lingua",
+      "PT": "Portoguese",
       "RU": "Russo",
       "TITLE": "Lingua",
       "TR": "Turco",
@@ -808,6 +850,7 @@
       "IS_HIDE_EVALUATION_SHEET": "Nascondi il foglio di valutazione sul riepilogo giornagliero",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
+      "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "TITLE": "Impostazioni varie"
     },
     "POMODORO": {
@@ -847,15 +890,19 @@
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuovo task",
     "CREATE_PROJECT": "Crea progetto",
+    "CREATE_TAG": "Crea etichetta",
+    "DELETE_TAG": "Cancella etichetta",
     "GO_TO_TASK_LIST": "Vai alla lista dei task",
     "MANAGE_PROJECTS": "Gestisci progetti",
     "METRICS": "Metriche",
+    "NOTES": "Note",
     "PROCRASTINATE": "Procastina",
     "PROJECTS": "Progetti",
     "PROJECT_MENU": "Menu di progetto",
     "PROJECT_SETTINGS": "Impostazioni di progetto",
     "SCHEDULED": "Pianificati",
     "SETTINGS": "Impostazioni",
+    "TAGS": "Etichette",
     "TASKS": "Task",
     "TASK_LIST": "Lista dei task",
     "TOGGLE_SHOW_BOOKMARKS": "Mostra/nascondi segnalibri",
@@ -928,7 +975,11 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Impostazioni globali",
-    "PROJECT_SETTINGS": "Impostazioni specifiche al progetto",
+    "ISSUE_INTEGRATION": "Integrazione Issue",
+    "PRIVATE_POLICY": "Private Policy",
+    "PRODUCTIVITY_HELPER": "Aiuto produttività",
+    "PROJECT_SETTINGS": "Impostazioni specifiche del progetto",
+    "TAG_SETTINGS": "Impostazioni specifiche dell'etichetta",
     "TOGGLE_DARK_MODE": "Abilita/disabilita tema scuro"
   },
   "S": {
@@ -987,4 +1038,3 @@
     "WORKING_TODAY": "Lavorate oggi:"
   }
 }
-
