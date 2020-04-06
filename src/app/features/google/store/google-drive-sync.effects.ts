@@ -203,7 +203,7 @@ export class GoogleDriveSyncEffects {
       } else {
         // otherwise update
         return this._googleApiService.getFileInfo$(cfg._backupDocId).pipe(
-          catchError(err => this._handleError$(err)),
+          catchError(err => this._handleErrorForSave$(err)),
           concatMap((res: any): Observable<any> => {
 
             const lastActiveLocal: number = this._syncService.getLastActive();
@@ -229,7 +229,7 @@ export class GoogleDriveSyncEffects {
         );
       }
     }),
-    catchError(err => this._handleError$(err)),
+    catchError(err => this._handleErrorForSave$(err)),
   );
 
   @Effect() save$: any = this._actions$.pipe(
@@ -259,7 +259,7 @@ export class GoogleDriveSyncEffects {
           response,
           isSkipSnack: action.payload && action.payload.isSkipSnack
         })),
-        catchError(err => this._handleError$(err)),
+        catchError(err => this._handleErrorForSave$(err)),
       )
     ),
   );
@@ -328,7 +328,7 @@ export class GoogleDriveSyncEffects {
                     return of(new LoadFromGoogleDriveCancel());
                   }
                 }),
-                catchError(err => this._handleError$(err)),
+                catchError(err => this._handleErrorForLoad$(err)),
               );
               // no update required
             } else {
@@ -340,11 +340,11 @@ export class GoogleDriveSyncEffects {
               return of(new LoadFromGoogleDriveCancel());
             }
           }),
-          catchError(err => this._handleError$(err)),
+          catchError(err => this._handleErrorForLoad$(err)),
         );
       }
     }),
-    catchError(err => this._handleError$(err)),
+    catchError(err => this._handleErrorForLoad$(err)),
   );
 
   @Effect() load$: any = this._actions$.pipe(
@@ -359,7 +359,7 @@ export class GoogleDriveSyncEffects {
     }),
     concatMap((loadRes) => this._import(loadRes)),
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
-    catchError(err => this._handleError$(err)),
+    catchError(err => this._handleErrorForLoad$(err)),
   );
 
   @Effect() loadSuccess$: any = this._actions$.pipe(
@@ -395,15 +395,11 @@ export class GoogleDriveSyncEffects {
     });
   }
 
-  private _handleError$(err): Observable<any> {
-    console.warn('Google Drive Sync Error:', err);
-    const errTxt = (typeof err === 'string' && err) || (err.toString && err.toString()) || 'Unknown';
-    this._snackService.open({
-      type: 'ERROR',
-      msg: T.F.GOOGLE.S.ERROR,
-      translateParams: {errTxt}
+  private _handleErrorForSave$(err): Observable<any> {
+    return of(new SaveToGoogleDriveCancel());
+  }
 
-    });
+  private _handleErrorForLoad$(err): Observable<any> {
     this._setInitialSyncDone();
     return of(new LoadFromGoogleDriveCancel());
   }

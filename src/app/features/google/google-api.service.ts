@@ -329,7 +329,7 @@ export class GoogleApiService {
       return Promise.resolve(getUser());
     } else if (!isOnline()) {
       this._snackService.open({
-        type: 'CUSTOM',
+        type: 'ERROR',
         msg: T.G.NO_CON,
         ico: 'cloud_off'
       });
@@ -446,7 +446,7 @@ export class GoogleApiService {
         catchError((res) => {
           if (!isOnline()) {
             this._snackService.open({
-              type: 'CUSTOM',
+              type: 'ERROR',
               msg: T.G.NO_CON,
               ico: 'cloud_off'
             });
