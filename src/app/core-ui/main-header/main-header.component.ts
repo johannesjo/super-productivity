@@ -16,7 +16,7 @@ import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
 import {T} from '../../t.const';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {Router} from '@angular/router';
-import {filter, first, switchMap, withLatestFrom} from 'rxjs/operators';
+import {filter, first, switchMap} from 'rxjs/operators';
 import {Observable, of, Subscription} from 'rxjs';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 import {TagService} from '../../features/tag/tag.service';
@@ -38,17 +38,18 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
-  currentTaskContext$: Observable<Project | Tag> = this.taskService.currentTask$.pipe(
+  currentTaskContext$: Observable<Project | Tag> = this.taskService.currentTaskParentOrCurrent$.pipe(
     filter(ct => !!ct),
-    withLatestFrom(this.workContextService.activeWorkContextId$),
-    switchMap(([currentTask, activeWorkContextId]) => {
-      if (currentTask.projectId === activeWorkContextId || currentTask.tagIds.includes(activeWorkContextId)) {
-        return of(null);
-      }
-      return currentTask.projectId
-        ? this.projectService.getByIdOnce$(currentTask.projectId)
-        : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
-    }),
+    switchMap((currentTask) => this.workContextService.activeWorkContextId$.pipe(
+      switchMap((activeWorkContextId) => {
+        if (currentTask.projectId === activeWorkContextId || currentTask.tagIds.includes(activeWorkContextId)) {
+          return of(null);
+        }
+        return currentTask.projectId
+          ? this.projectService.getByIdOnce$(currentTask.projectId)
+          : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
+      }),
+    )),
   );
 
   private _subs = new Subscription();

@@ -53,6 +53,7 @@ import {
   selectCurrentTask,
   selectCurrentTaskId,
   selectCurrentTaskOrParentWithData,
+  selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
   selectScheduledTasks,
@@ -107,6 +108,11 @@ export class TaskService {
 
   currentTask$: Observable<Task> = this._store.pipe(
     select(selectCurrentTask),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
+
+  currentTaskParentOrCurrent$: Observable<Task> = this._store.pipe(
+    select(selectCurrentTaskParentOrCurrent),
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
