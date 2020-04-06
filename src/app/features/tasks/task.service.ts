@@ -90,6 +90,8 @@ import {
 } from '../work-context/store/work-context-meta.actions';
 import {Router} from '@angular/router';
 import {unique} from '../../util/unique';
+import {SnackService} from '../../core/snack/snack.service';
+import {T} from '../../t.const';
 
 
 @Injectable({
@@ -173,6 +175,7 @@ export class TaskService {
     private readonly _tagService: TagService,
     private readonly _projectService: ProjectService,
     private readonly _workContextService: WorkContextService,
+    private readonly _snackService: SnackService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
     private readonly _router: Router,
@@ -259,11 +262,15 @@ export class TaskService {
   }
 
   updateTags(task: Task, newTagIds: string[], oldTagIds: string[]) {
-    this._store.dispatch(new UpdateTaskTags({
-      task,
-      newTagIds: unique(newTagIds),
-      oldTagIds
-    }));
+    if (!task.projectId && newTagIds.length === 0) {
+      this._snackService.open({type: 'ERROR', msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING});
+    } else {
+      this._store.dispatch(new UpdateTaskTags({
+        task,
+        newTagIds: unique(newTagIds),
+        oldTagIds
+      }));
+    }
   }
 
   removeTagsForAllTask(tagsToRemove: string[]) {
