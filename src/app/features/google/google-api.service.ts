@@ -15,6 +15,7 @@ import {BannerService} from '../../core/banner/banner.service';
 import {BannerId} from '../../core/banner/banner.model';
 import {T} from '../../t.const';
 import {ElectronService} from '../../core/electron/electron.service';
+import {isOnline} from '../../util/is-online';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -315,6 +316,7 @@ export class GoogleApiService {
     });
   }
 
+
   private _initClientLibraryIfNotDone() {
     const getUser = () => {
       const GoogleAuth = this._gapi.auth2.getAuthInstance();
@@ -325,6 +327,13 @@ export class GoogleApiService {
 
     if (this._isGapiInitialized) {
       return Promise.resolve(getUser());
+    } else if (!isOnline()) {
+      this._snackService.open({
+        type: 'CUSTOM',
+        msg: T.G.NO_CON,
+        ico: 'cloud_off'
+      });
+      return Promise.reject('No internet');
     }
 
     return new Promise((resolve, reject) => {
@@ -335,9 +344,10 @@ export class GoogleApiService {
           this.initClient()
             .then(() => {
               resolve(getUser());
-            });
+            })
+            .catch(reject);
         });
-      });
+      }).catch(reject);
     });
   }
 
@@ -434,8 +444,13 @@ export class GoogleApiService {
         filter(res => !(res === Object(res) && res.type === 0)),
         map((res: any) => (res && res.body) ? res.body : res),
         catchError((res) => {
-          console.warn('GoogleApi Error:', res);
-          if (!res) {
+          if (!isOnline()) {
+            this._snackService.open({
+              type: 'CUSTOM',
+              msg: T.G.NO_CON,
+              ico: 'cloud_off'
+            });
+          } else if (!res) {
             this._handleError('No response body');
           } else if (res && res.status === 401) {
             this._handleUnAuthenticated(res);
@@ -465,6 +480,8 @@ export class GoogleApiService {
       };
 
       const errorFunction = (e) => {
+        console.log('ERROR FB');
+
         reject(e);
       };
 
