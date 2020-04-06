@@ -313,7 +313,11 @@ export function taskReducer(
           (parentTask.subTaskIds.length === 0 && !task.timeEstimate)
             ? {timeEstimate: parentTask.timeEstimate}
             : {}
-        )
+        ),
+        // should always be empty
+        tagIds: [],
+        // should always be the one of the parent
+        projectId: parentTask.projectId
       }, state);
 
       return {
