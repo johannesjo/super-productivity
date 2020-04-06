@@ -151,7 +151,7 @@
           </button>
 
           <button (click)="removeFromMyDay()"
-                  *ngIf="!task.parentId && task.tagIds.includes(TODAY_TAG_ID)"
+                  *ngIf="!task.parentId && task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds > 1)"
                   [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
                   class="ico-btn"
                   color=""
