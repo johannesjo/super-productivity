@@ -6,7 +6,7 @@
       "MSG": "Vuoi installare Super Productivity come PWA?"
     },
     "UPDATE_MAIN_MODEL": "Super Productivity ha ricevuto un importante aggiornamento! Sarà necessario migrare i tuoi dati. Nota che questo renderà i tuoi dati incompatibili con versioni precedenti dell'app.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "Hai scelto di non aggiornare i dati. Nota che dovrai usase un versione precedente dell'app, se davvero non vuoi aggiornare.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Hai scelto di non aggiornare i dati. Nota che dovrai usare una versione precedente dell'app, se davvero non vuoi aggiornare.",
     "UPDATE_WEB_APP": "Una nuova versione è disponibile. Vuoi caricare la nuova versione?"
   },
   "BL": {
@@ -750,7 +750,7 @@
     "MINUTES": "{{m}} minuti",
     "NEXT": "Prossimo",
     "OK": "Ok",
-    "NO_CON": "Attualmente sei offline. Per favore, riconnettersi ad internet.",
+    "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
     "PREVIOUS": "Precedente",
     "REMOVE": "Rimuovi",
     "SAVE": "Salva",
@@ -978,7 +978,7 @@
     "ISSUE_INTEGRATION": "Integrazione Issue",
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Aiuto produttività",
-    "PROJECT_SETTINGS": "Impostazioni specifiche dell progetto",
+    "PROJECT_SETTINGS": "Impostazioni specifiche del progetto",
     "TAG_SETTINGS": "Impostazioni specifiche dell'etichetta",
     "TOGGLE_DARK_MODE": "Abilita/disabilita tema scuro"
   },
