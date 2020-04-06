@@ -37,6 +37,7 @@ import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-rem
 import {TODAY_TAG} from '../../tag/tag.const';
 import {DialogEditTagsForTaskComponent} from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {environment} from '../../../../environments/environment';
 
 @Component({
   selector: 'task',
@@ -72,6 +73,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition = {x: '0px', y: '0px'};
   progress: number;
+  isDev = !environment.production;
 
   private _task$ = new ReplaySubject<TaskWithSubTasks>(1);
   issueUrl$: Observable<string> = this._task$.pipe(
