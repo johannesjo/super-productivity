@@ -532,7 +532,7 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Aggiungi allegato",
         "ATTACHMENTS": "Allegati ({{nr}})",
-        "FROM_PARENT": "(from genitore)",
+        "FROM_PARENT": "(da genitore)",
         "LOCAL_ATTACHMENTS": "Allegato locale",
         "NOTES": "Note",
         "PARENT": "Genitore",
@@ -765,7 +765,7 @@
       "TITLE": "Backup automatici"
     },
     "EVALUATION": {
-      "IS_HIDE_EVALUATION_SHEET": "Nascondi la scheda di valutazione nel riassunto giornaliero",
+      "IS_HIDE_EVALUATION_SHEET": "Nascondi la scheda di valutazione nel riepilogo giornaliero",
       "TITLE": "Valutazione & Metriche"
     },
     "GOOGLE_DRIVE_SYNC": {
