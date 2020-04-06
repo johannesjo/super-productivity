@@ -27,9 +27,12 @@
       </div>
 
       <div #blockRight
+           [style.visibility]="task.parentId && 'hidden'"
            class="block-right bg-400">
-        <mat-icon *ngIf="!task.isDone">alarm_add</mat-icon>
-        <mat-icon *ngIf="task.isDone">undo</mat-icon>
+        <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
+        <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)">
+          remove_circle_outline
+        </mat-icon>
       </div>
     </ng-container>
 
@@ -140,7 +143,7 @@
             <mat-icon>pause</mat-icon>
           </button>
 
-          <button (click)="moveToMyDay()"
+          <button (click)="addToMyDay()"
                   *ngIf="!task.parentId && !task.tagIds.includes(TODAY_TAG_ID)"
                   [title]="T.F.TASK.CMP.ADD_TO_MY_DAY|translate"
                   class="ico-btn"

@@ -344,7 +344,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  moveToMyDay() {
+  addToMyDay() {
     this.onTagsUpdated([TODAY_TAG.id, ...this.task.tagIds]);
   }
 
@@ -455,10 +455,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
-          if (this.task.isDone) {
-            this.toggleTaskDone();
+          if (this.task.parentId) {
+            // NOTHING
           } else {
-            this.editReminder();
+            if (this.task.tagIds.includes(TODAY_TAG.id)) {
+              this.removeFromMyDay();
+            } else {
+              this.addToMyDay();
+            }
           }
           this._resetAfterPan();
         }, 100);

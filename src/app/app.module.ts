@@ -1,4 +1,4 @@
-import {BrowserModule, HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
+import {BrowserModule, HAMMER_GESTURE_CONFIG, HammerModule} from '@angular/platform-browser';
 import {ErrorHandler, NgModule} from '@angular/core';
 import {AppComponent} from './app.component';
 import {ServiceWorkerModule} from '@angular/service-worker';
@@ -73,6 +73,7 @@ export function createTranslateLoader(http: HttpClient) {
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    HammerModule,
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers,
