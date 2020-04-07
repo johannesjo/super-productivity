@@ -69,8 +69,9 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
     // TODO remove after this is resolved
-    console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate',  lastRemoteUpdate);
-    console.log(isNotifySuccess, commentsByOthers, updates);
+    console.log('---------github issue update debugging--------');
+    console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
+    console.log(commentsByOthers, updates);
     console.log('cfg', cfg);
 
     if (wasUpdated && isNotifySuccess) {
