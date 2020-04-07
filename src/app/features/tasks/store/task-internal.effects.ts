@@ -48,7 +48,6 @@ export class TaskInternalEffects {
       TaskActionTypes.UpdateTask,
       TaskActionTypes.DeleteTask,
       TaskActionTypes.MoveToArchive,
-      TaskActionTypes.MoveToOtherProject,
 
       moveTaskToBacklogList.type,
       moveTaskToBacklogListAuto.type
