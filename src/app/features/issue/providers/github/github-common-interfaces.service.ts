@@ -54,8 +54,9 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
 
     const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
-      ? issue.comments.filter(comment => comment.user.login !== cfg.filterUsername)
+    const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
+    const commentsByOthers = (filterUserName && filterUserName.length > 1)
+      ? issue.comments.filter(comment => comment.user.login.toLowerCase() !== cfg.filterUsername)
       : issue.comments;
 
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
@@ -66,6 +67,11 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     const lastRemoteUpdate = updates[updates.length - 1];
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
+
+    // TODO remove after this is resolved
+    console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate',  lastRemoteUpdate);
+    console.log(isNotifySuccess, commentsByOthers, updates);
+    console.log('cfg', cfg);
 
     if (wasUpdated && isNotifySuccess) {
       this._snackService.open({
