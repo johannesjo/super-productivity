@@ -1,3 +1,30 @@
+## [5.0.10](https://github.com/johannesjo/super-productivity/compare/v5.0.9...v5.0.10) (2020-04-07)
+
+
+### Bug Fixes
+
+* **task:** moving task to project stopping time tracking ([2d4bf27](https://github.com/johannesjo/super-productivity/commit/2d4bf27c461f3830d27f4a91000e46f4bee538ab))
+* google drive import throwing error ([43dc6a8](https://github.com/johannesjo/super-productivity/commit/43dc6a8d4e8975d74915b0989cede25a4cf03512))
+* **task:** remove from today display logic ([4a42915](https://github.com/johannesjo/super-productivity/commit/4a42915fe876c3d6a0fc76b7976fed4639d6c8b2))
+
+
+### Features
+
+* **github:** adjust own update check ([ea47e68](https://github.com/johannesjo/super-productivity/commit/ea47e68ebcfb3b5e970ae66ecf63ae930b36437e))
+* **googleDriveSync:** better handle errors for google drive ([b059138](https://github.com/johannesjo/super-productivity/commit/b05913808266e16bfb55ef181fda8ee54982e6fc))
+* **googleDriveSync:** better handle offline state ([413ecd8](https://github.com/johannesjo/super-productivity/commit/413ecd862813e7c53abc0ce74ce85106fa2ad7e8))
+* **task:** add migration script to fix invalid project ids and tags for sub tasks ([c57621f](https://github.com/johannesjo/super-productivity/commit/c57621f8b632dffae73df3832030b2ef725b01f2))
+* **task:** adjust context menu ([2d96239](https://github.com/johannesjo/super-productivity/commit/2d962398ad0a07eba9388072da94add81649b759))
+* **task:** always use parent project id for sub tasks ([11eca78](https://github.com/johannesjo/super-productivity/commit/11eca78b73c1479cf99db38ac29c1966a3b4a8d4))
+* allow for window to be smaller before "over" states ([0040f52](https://github.com/johannesjo/super-productivity/commit/0040f52d4856994d8ae69ba76fd817f73b027b8d))
+* bring back touch slide actions ([6ee77e3](https://github.com/johannesjo/super-productivity/commit/6ee77e3c0de8936266fbe2bb41820795abba99f7))
+* display child task tags for development mode ([503b815](https://github.com/johannesjo/super-productivity/commit/503b815ef9e87ea68b2fb73fb8afcacaf4a91c13))
+* make top right current indicator work consistently for context ([f17d8fc](https://github.com/johannesjo/super-productivity/commit/f17d8fce6eaf59bfa9c8ec80683c69a81295151c))
+* **task:** disallow last tag deletion [#325](https://github.com/johannesjo/super-productivity/issues/325) ([7842f6e](https://github.com/johannesjo/super-productivity/commit/7842f6e064188ac5578d28f6d7a8183a10cb26e3))
+* **task:** only show remove from my day button if tasks belongs to a project or other tag [#325](https://github.com/johannesjo/super-productivity/issues/325) ([d5adacf](https://github.com/johannesjo/super-productivity/commit/d5adacfa8b6d3c28b7993b3dba673581f9139ef4))
+
+
+
 ## [5.0.9](https://github.com/johannesjo/super-productivity/compare/v5.0.8...v5.0.9) (2020-04-05)
 
 
