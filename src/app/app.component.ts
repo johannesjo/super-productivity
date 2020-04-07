@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, HostListener, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
-import {ProjectService} from './features/project/project.service';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
 import {GlobalConfigService} from './features/config/global-config.service';
@@ -12,11 +11,9 @@ import {SwUpdate} from '@angular/service-worker';
 import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
-import {filter, map, shareReplay, take} from 'rxjs/operators';
-import {combineLatest, forkJoin, Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
-import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
 import {BannerService} from './core/banner/banner.service';
 import {SS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
 import {BannerId} from './core/banner/banner.model';
@@ -24,14 +21,12 @@ import {T} from './t.const';
 import {TranslateService} from '@ngx-translate/core';
 import {GlobalThemeService} from './core/theme/global-theme.service';
 import {UiHelperService} from './features/ui-helper/ui-helper.service';
-import {TaskService} from './features/tasks/task.service';
 import {LanguageService} from './core/language/language.service';
 import {ElectronService} from './core/electron/electron.service';
-import {TaskAttachmentService} from './features/tasks/task-attachment/task-attachment.service';
 import {WorkContextService} from './features/work-context/work-context.service';
-import {TagService} from './features/tag/tag.service';
-import {TaskRepeatCfgService} from './features/task-repeat-cfg/task-repeat-cfg.service';
 import {DataInitService} from './core/data-init/data-init.service';
+import {SyncService} from './imex/sync/sync.service';
+import {ImexMetaService} from './imex/imex-meta/imex-meta.service';
 
 
 @Component({
@@ -69,6 +64,7 @@ export class AppComponent implements OnDestroy {
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
     private _languageService: LanguageService,
+    public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,

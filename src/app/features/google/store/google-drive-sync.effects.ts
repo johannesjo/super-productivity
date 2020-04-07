@@ -50,6 +50,7 @@ import {T} from '../../../t.const';
 import {GlobalSyncService} from '../../../core/global-sync/global-sync.service';
 import {SyncProvider} from '../../../core/global-sync/sync-provider';
 import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
+import {DataInitService} from '../../../core/data-init/data-init.service';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -93,11 +94,12 @@ export class GoogleDriveSyncEffects {
     map(() => new SaveToGoogleDriveFlow({isSkipSnack: true})),
   );
 
-  @Effect() initialImport$: any = this._actions$.pipe(
-    ofType(
-      GlobalConfigActionTypes.LoadGlobalConfig,
-    ),
-    take(1),
+  @Effect() initialImport$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    // this._actions$.pipe(
+    // ofType(
+    //   GlobalConfigActionTypes.LoadGlobalConfig,
+    // ),
+    // take(1),
     withLatestFrom(this.config$),
     filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
     concatMap(() => from(this._googleApiService.login(true))),
@@ -388,6 +390,7 @@ export class GoogleDriveSyncEffects {
     private _translateService: TranslateService,
     private _compressionService: CompressionService,
     private _matDialog: MatDialog,
+    private _dataInitService: DataInitService,
     private _syncService: SyncService,
   ) {
     this._configService.cfg$.subscribe((cfg) => {

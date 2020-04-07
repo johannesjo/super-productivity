@@ -89,6 +89,8 @@ export class SideNavComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+    this._dragulaService.destroy(this.PROJECTS_SIDE_NAV);
+    this._dragulaService.destroy(this.TAG_SIDE_NAV);
   }
 
   addProject() {

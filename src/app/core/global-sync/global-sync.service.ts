@@ -5,6 +5,8 @@ import {distinctUntilChanged, filter, map, shareReplay, startWith, switchMap, ta
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {SyncProvider} from './sync-provider';
 
+// Weird view service
+// TODO poor design, replace with something better
 @Injectable({
   providedIn: 'root',
 })
