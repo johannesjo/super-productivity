@@ -293,15 +293,6 @@
             </ng-container>
           </button>
 
-          <button (click)="toggleShowAdditionalInfoOpen()"
-                  class="show-touch-only"
-                  mat-menu-item
-                  tabindex="2">
-            <mat-icon *ngIf="task.notes||task.issueId">chat</mat-icon>
-            <mat-icon *ngIf="!task.notes&&!task.issueId">chat_bubble_outline</mat-icon>
-            {{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}}
-          </button>
-
           <button (click)="addSubTask();"
                   *ngIf="!task.parentId&&!task.isDone"
                   mat-menu-item
