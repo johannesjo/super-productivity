@@ -1,5 +1,10 @@
 @import "../../../../variables";
 
+:host {
+  margin-top: $s;
+  display: block;
+}
+
 .summary-table {
   width: 100%;
 

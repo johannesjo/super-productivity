@@ -17,9 +17,13 @@ $summary-point-inner-margin: $s;
 }
 
 .tab-inner {
-  padding: $s;
+  padding: 0;
   margin: auto;
   max-width: $component-max-width;
+
+  @include mq(xs){
+    padding: $s;
+  }
 
   &.full-width {
     max-width: none;
