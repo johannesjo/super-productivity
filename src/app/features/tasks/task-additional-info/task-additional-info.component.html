@@ -189,6 +189,14 @@
             style="margin-bottom: 0;">{{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}</h3>
         <task-attachment-list [attachments]="localAttachments"
                               [taskId]="task.id"></task-attachment-list>
+
+        <div style="text-align: center;">
+          <button mat-button
+                  (click)="addAttachment()">
+            <mat-icon>add</mat-icon>
+            <span>{{T.F.TASK.ADDITIONAL_INFO.ADD_ATTACHMENT|translate}}</span>
+          </button>
+        </div>
       </div>
     </ng-container>
   </task-additional-info-item>
