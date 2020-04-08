@@ -259,14 +259,16 @@
 
           <button (click)="estimateTime()"
                   *ngIf="!task.subTasks?.length"
-                  mat-menu-item>
+                  mat-menu-item
+                  class="hide-xs">
             <mat-icon>timer</mat-icon>
             {{T.F.TASK.CMP.OPEN_TIME|translate}}
           </button>
 
           <button (click)="editReminder()"
                   *ngIf="!task.repeatCfgId"
-                  mat-menu-item>
+                  mat-menu-item
+                  class="hide-xs">
             <ng-container *ngIf="!task.reminderId">
               <mat-icon>alarm_add</mat-icon>
               {{T.F.TASK.CMP.SCHEDULE|translate}}
@@ -287,7 +289,8 @@
 
           <button (click)="addAttachment();"
                   mat-menu-item
-                  tabindex="2">
+                  tabindex="2"
+                  class="hide-xs">
             <mat-icon>attachment</mat-icon>
             {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
           </button>
