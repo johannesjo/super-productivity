@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Super Productivity</string>
+    <string name="asset_statements">
+        [{
+        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+        \"target\": {
+        \"namespace\": \"web\",
+        \"site\": \"https://app.super-productivity.com\"}
+        }]
+    </string>
 </resources>
