@@ -1,9 +1,41 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.superproductivity.superproductivity">
-    <application android:allowBackup="true"
-                 android:label="@string/app_name"
-                 android:icon="@mipmap/ic_launcher"
-                 android:roundIcon="@mipmap/ic_launcher_round"
-                 android:supportsRtl="true"
-                 android:theme="@style/AppTheme"/>
+    <application
+            android:allowBackup="true"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme">
+        <activity
+                android:name="com.google.androidbrowserhelper.trusted.LauncherActivity">
+
+            <!-- Edit android:value to change the url opened by the Trusted Web Activity -->
+            <meta-data
+                    android:name="android.support.customtabs.trusted.DEFAULT_URL"
+                    android:value="https://app.super-productivity.com"/>
+
+            <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!--
+              This intent-filter allows the Trusted Web Activity to handle Intents to open
+              app.super-productivity.com.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <!-- Edit android:host to handle links to the target URL-->
+                <data
+                        android:scheme="https"
+                        android:host="app.super-productivity.com"/>
+            </intent-filter>
+        </activity>
+
+    </application>
 </manifest>
