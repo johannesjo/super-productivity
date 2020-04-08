@@ -257,22 +257,6 @@
             {{T.F.TASK.CMP.TRACK_TIME_STOP|translate}}
           </button>
 
-          <button (click)="toggleTaskDone()"
-                  class="show-touch-only"
-                  mat-menu-item
-                  tabindex="2">
-            <ng-container *ngIf="task.isDone">
-              <mat-icon>undo
-              </mat-icon>
-              {{T.F.TASK.CMP.MARK_UNDONE|translate}}
-            </ng-container>
-            <ng-container *ngIf="!task.isDone">
-              <mat-icon>check
-              </mat-icon>
-              {{T.F.TASK.CMP.MARK_DONE|translate}}
-            </ng-container>
-          </button>
-
           <button (click)="estimateTime()"
                   *ngIf="!task.subTasks?.length"
                   mat-menu-item>
