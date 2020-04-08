@@ -13,6 +13,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 
 .content {
   flex-grow: 1;
+  max-width: 100vw;
   position: relative;
   z-index: $z-this-content;
 }
