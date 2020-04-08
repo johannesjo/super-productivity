@@ -1,4 +1,5 @@
 import {HammerGestureConfig} from '@angular/platform-browser';
+import * as Hammer from 'hammerjs';
 import {Injectable} from '@angular/core';
 
 @Injectable({
@@ -6,6 +7,7 @@ import {Injectable} from '@angular/core';
 })
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = {
+    swipe: {direction: Hammer.DIRECTION_HORIZONTAL},
     pan: {direction: 6},
     pinch: {enable: false},
     rotate: {enable: false}

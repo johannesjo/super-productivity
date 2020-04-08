@@ -27,6 +27,8 @@
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: -ms-autohiding-scrollbar;
   overflow-y: scroll;
+  // important for touch events like hammer swipe to work
+  touch-action: pan-y;
 
   .isNoMac &,
   :host-context(.isNoMac) & {
@@ -63,6 +65,8 @@
   -ms-overflow-style: -ms-autohiding-scrollbar;
   overflow-x: hidden;
   overflow-y: scroll !important;
+  // important for touch events like hammer swipe to work
+  touch-action: pan-y;
 
   :host-context(.isNoMac) & {
     @supports (overflow:overlay) {
