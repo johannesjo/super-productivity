@@ -8,7 +8,13 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
-                android:name="com.google.androidbrowserhelper.trusted.LauncherActivity">
+                android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+                android:theme="@style/Theme.LauncherActivity">
+
+
+            <meta-data
+                    android:name="asset_statements"
+                    android:resource="@string/asset_statements"/>
 
             <!-- Edit android:value to change the url opened by the Trusted Web Activity -->
             <meta-data
