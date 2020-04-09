@@ -437,7 +437,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (ev.deltaX > 0) {
       this.isLockPanRight = true;
     } else {
-      this.isLockPanLeft = true;
+      const isRemoveOrAddTodayPossible = (
+        !this.task.tagIds.includes(this.TODAY_TAG_ID)
+        || this.task.tagIds.includes(this.TODAY_TAG_ID) && (this.task.projectId || this.task.tagIds?.length > 1)
+      );
+
+      if (isRemoveOrAddTodayPossible) {
+        this.isLockPanLeft = true;
+      }
     }
   }
 
@@ -512,7 +519,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const targetRef = this.isLockPanRight ? this.blockLeftEl : this.blockRightEl;
+    const targetRef = this.isLockPanRight
+      ? this.blockLeftEl
+      : this.blockRightEl;
+
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
     // this.contentEditableOnClickEl.nativeElement.blur();
