@@ -146,3 +146,11 @@
   </div>
 </task-additional-info-wrapper>
 
+<button (click)="layoutService.showAddTaskBar()"
+        [matTooltip]="T.MH.ADD_NEW_TASK|translate"
+        [class.isRight]="isShowBacklog"
+        color="primary"
+        mat-fab
+        class="show-xs-only add-task-btn">
+  <mat-icon>add</mat-icon>
+</button>

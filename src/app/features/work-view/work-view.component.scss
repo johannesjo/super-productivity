@@ -250,3 +250,16 @@ h2 {
     margin-top: $s*3;
   }
 }
+
+.add-task-btn {
+  z-index: 45;
+  position: fixed;
+  right: 50%;
+  bottom: $s*2;
+  transform: translateX(50%);
+
+  &.isRight {
+    transform: none;
+    right: $s*2;
+  }
+}
