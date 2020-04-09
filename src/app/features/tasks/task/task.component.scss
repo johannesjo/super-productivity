@@ -534,14 +534,15 @@
 // SWIPE BLOCKS
 .block-left,
 .block-right {
+  pointer-events: none;
+  color: $c-contrast;
   position: absolute;
-  top: -1* $task-inner-padding-top-bottom;
-  bottom: -1* $task-inner-padding-top-bottom;
-  width: 33%;
-  min-width: 100px;
+  top: 0;
+  bottom: 0;
+  width: 0;
   z-index: $z-swipe-block;
   transition: $transition-standard;
-  transform: scaleX(0);
+  border-radius: $task-border-radius;
 
   &.isActive {
     background-color: $c-accent;
@@ -557,19 +558,11 @@
 
 
 .block-left {
-  pointer-events: none;
-  color: #fff;
   left: 0;
-  transform-origin: left center;
-  box-shadow: $shadow-card-shadow;
 }
 
 .block-right {
-  pointer-events: none;
-  color: #fff;
   right: 0;
-  transform-origin: right center;
-  box-shadow: $shadow-card-shadow;
 }
 
 progress-bar {

@@ -93,6 +93,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
   @ViewChild('blockLeft') blockLeftEl: ElementRef;
   @ViewChild('blockRight') blockRightEl: ElementRef;
+  @ViewChild('innerWrapperElRef') innerWrapperElRef: ElementRef;
   @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
 
   @HostBinding('tabindex') tabIndex = 1;
@@ -526,8 +527,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isActionTriggered = false;
         this._renderer.removeClass(targetRef.nativeElement, 'isActive');
       }
-      this._renderer.setStyle(targetRef.nativeElement, 'transform', `scaleX(${scale})`);
+      const moveBy = this.isLockPanLeft ? ev.deltaX * -1 : ev.deltaX;
+      this._renderer.setStyle(targetRef.nativeElement, 'width', `${moveBy}px`);
       this._renderer.setStyle(targetRef.nativeElement, 'transition', `none`);
+      this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', `translateX(${ev.deltaX}px`);
     }
   }
 
@@ -537,10 +540,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLockPanLeft = false;
     this.isLockPanRight = false;
     const scale = 0;
-    this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
-    this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
+    // this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
+    // this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
     this._renderer.removeClass(this.blockLeftEl.nativeElement, 'isActive');
     this._renderer.removeClass(this.blockRightEl.nativeElement, 'isActive');
+    this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
   }
 
 

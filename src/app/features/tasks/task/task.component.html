@@ -1,4 +1,22 @@
+<ng-container *ngIf="isTouch">
+  <div #blockLeft
+       class="block-left bg-400">
+    <mat-icon *ngIf="!task.isDone">check</mat-icon>
+    <mat-icon *ngIf="task.isDone">undo</mat-icon>
+  </div>
+
+  <div #blockRight
+       [style.visibility]="task.parentId && 'hidden'"
+       class="block-right bg-400">
+    <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
+    <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)">
+      remove_circle_outline
+    </mat-icon>
+  </div>
+</ng-container>
+
 <div [class.isSelected]="isSelected"
+     #innerWrapperElRef
      class="inner-wrapper">
 
   <div [matMenuTriggerFor]="menu"
@@ -19,22 +37,7 @@
        class="first-line">
 
 
-    <ng-container *ngIf="isTouch">
-      <div #blockLeft
-           class="block-left bg-400">
-        <mat-icon *ngIf="!task.isDone">check</mat-icon>
-        <mat-icon *ngIf="task.isDone">undo</mat-icon>
-      </div>
 
-      <div #blockRight
-           [style.visibility]="task.parentId && 'hidden'"
-           class="block-right bg-400">
-        <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
-        <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)">
-          remove_circle_outline
-        </mat-icon>
-      </div>
-    </ng-container>
 
     <button (click)="toggleTaskDone()"
             *ngIf="task.isDone"
