@@ -1,11 +1,11 @@
 <ng-container *ngIf="isTouch">
-  <div #blockLeft
+  <div #blockLeftEl
        class="block-left bg-400">
     <mat-icon *ngIf="!task.isDone">check</mat-icon>
     <mat-icon *ngIf="task.isDone">undo</mat-icon>
   </div>
 
-  <div #blockRight
+  <div #blockRightEl
        [style.visibility]="task.parentId && 'hidden'"
        class="block-right bg-400">
     <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
@@ -16,10 +16,11 @@
 </ng-container>
 
 <div [class.isSelected]="isSelected"
-     #innerWrapperElRef
+     #innerWrapperEl
      class="inner-wrapper">
 
   <div [matMenuTriggerFor]="menu"
+       #contextMenuEl
        [style.left]="contextMenuPosition.x"
        [style.top]="contextMenuPosition.y"
        style="visibility: hidden; position: fixed">
@@ -35,8 +36,6 @@
        (panstart)="onPanStart($event)"
        [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning"
        class="first-line">
-
-
 
 
     <button (click)="toggleTaskDone()"
@@ -360,13 +359,11 @@
         </mat-menu>
 
         <mat-menu #projectMenu="matMenu">
-          <ng-container>
-            <button (click)="moveTaskToProject(project.id)"
-                    *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
-                    mat-menu-item>
-              {{project.title}}
-            </button>
-          </ng-container>
+          <button (click)="moveTaskToProject(project.id)"
+                  *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
+                  mat-menu-item>
+            {{project.title}}
+          </button>
         </mat-menu>
       </div>
     </div>

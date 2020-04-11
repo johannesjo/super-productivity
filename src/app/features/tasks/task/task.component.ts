@@ -91,10 +91,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   );
 
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
-  @ViewChild('blockLeft') blockLeftEl: ElementRef;
-  @ViewChild('blockRight') blockRightEl: ElementRef;
-  @ViewChild('innerWrapperElRef') innerWrapperElRef: ElementRef;
-  @ViewChild(MatMenuTrigger, {static: true}) contextMenu: MatMenuTrigger;
+  @ViewChild('blockLeftEl') blockLeftElRef: ElementRef;
+  @ViewChild('blockRightEl') blockRightElRef: ElementRef;
+  @ViewChild('innerWrapperEl', {static: true}) innerWrapperElRef: ElementRef;
+
+  // only works because item comes first in dom
+  @ViewChild('contextMenuEl', {static: true, read: MatMenuTrigger}) contextMenu: MatMenuTrigger;
+  // @ViewChild('projectMenuTriggerEl', {static: true, read: MatMenuTrigger}) projectMenuTrigger: MatMenuTrigger;
 
   @HostBinding('tabindex') tabIndex = 1;
   @HostBinding('class.isDone') isDone: boolean;
@@ -454,8 +457,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.isPreventPointerEventsWhilePanning = false;
-    this._renderer.removeStyle(this.blockLeftEl.nativeElement, 'transition');
-    this._renderer.removeStyle(this.blockRightEl.nativeElement, 'transition');
+    this._renderer.removeStyle(this.blockLeftElRef.nativeElement, 'transition');
+    this._renderer.removeStyle(this.blockRightElRef.nativeElement, 'transition');
 
     if (this._currentPanTimeout) {
       window.clearTimeout(this._currentPanTimeout);
@@ -463,7 +466,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (this.isActionTriggered) {
       if (this.isLockPanLeft) {
-        this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(1)`);
+        this._renderer.setStyle(this.blockRightElRef.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
           if (this.task.parentId) {
             // NOTHING
@@ -477,7 +480,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
           this._resetAfterPan();
         }, 100);
       } else if (this.isLockPanRight) {
-        this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(1)`);
+        this._renderer.setStyle(this.blockLeftElRef.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
           this.toggleTaskDone();
           this._resetAfterPan();
@@ -520,8 +523,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const targetRef = this.isLockPanRight
-      ? this.blockLeftEl
-      : this.blockRightEl;
+      ? this.blockLeftElRef
+      : this.blockRightElRef;
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
@@ -552,8 +555,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     const scale = 0;
     // this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
     // this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
-    this._renderer.removeClass(this.blockLeftEl.nativeElement, 'isActive');
-    this._renderer.removeClass(this.blockRightEl.nativeElement, 'isActive');
+    this._renderer.removeClass(this.blockLeftElRef.nativeElement, 'isActive');
+    this._renderer.removeClass(this.blockRightElRef.nativeElement, 'isActive');
     this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
   }
 
