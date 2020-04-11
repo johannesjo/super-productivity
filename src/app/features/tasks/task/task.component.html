@@ -348,6 +348,7 @@
           <button *ngIf="!task.parentId && !task.issueId && !task.repeatCfgId"
                   #projectMenuTriggerEl
                   [matMenuTriggerFor]="projectMenu"
+                  (closed)="focusSelf()"
                   mat-menu-item>
             <mat-icon>forward</mat-icon>
             {{(task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT : T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
@@ -364,7 +365,8 @@
           </button>
         </mat-menu>
 
-        <mat-menu #projectMenu="matMenu">
+        <mat-menu #projectMenu="matMenu"
+                  (closed)="focusSelf()">
           <button (click)="moveTaskToProject(project.id)"
                   *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
                   mat-menu-item>
