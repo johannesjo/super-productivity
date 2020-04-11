@@ -55,6 +55,7 @@ export interface TaskCopy extends IssueFieldsForTask {
 
   created: number;
   isDone: boolean;
+  doneOn: number;
 
   notes: string;
 
@@ -97,6 +98,7 @@ export const DEFAULT_TASK: Task = {
   timeSpent: 0,
   timeEstimate: 0,
   isDone: false,
+  doneOn: null,
   title: '',
   notes: '',
   tagIds: [],

@@ -6,7 +6,7 @@ import {
   deleteTask,
   getTaskById,
   reCalcTimesForParentIfParent,
-  reCalcTimeSpentForParentIfParent,
+  reCalcTimeSpentForParentIfParent, updateDoneOnForTask,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
 } from './task.reducer.util';
@@ -64,7 +64,7 @@ export function taskReducer(
         return {
           ...(taskAdapter.updateOne({
             id: taskToStartId,
-            changes: {isDone: false}
+            changes: {isDone: false, doneOn: null}
           }, state)),
           currentTaskId: taskToStartId,
           selectedTaskId: state.selectedTaskId && taskToStartId,
@@ -108,6 +108,7 @@ export function taskReducer(
       const {timeSpentOnDay, timeEstimate} = action.payload.task.changes;
       stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
+      stateCopy = updateDoneOnForTask(action.payload.task, stateCopy);
       return taskAdapter.updateOne(action.payload.task, stateCopy);
     }
 
@@ -406,7 +407,7 @@ export function taskReducer(
     }
 
     case TaskActionTypes.RestoreTask: {
-      const task = {...action.payload.task, isDone: false};
+      const task = {...action.payload.task, isDone: false, doneOn: null};
       const subTasks = action.payload.subTasks || [];
       return taskAdapter.addMany([task, ...subTasks], state);
     }

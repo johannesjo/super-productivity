@@ -4,6 +4,7 @@ import {Task, TaskState, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
 import {taskAdapter} from './task.adapter';
 import {filterOutId} from '../../../util/filter-out-id';
+import {Update} from '@ngrx/entity';
 
 export const getTaskById = (taskId: string, state: TaskState) => {
   if (!state.entities[taskId]) {
@@ -58,6 +59,28 @@ export const reCalcTimeEstimateForParentIfParent = (parentId, state: TaskState):
       changes: {
         timeEstimate: subTasks.reduce((acc, task) => acc + task.timeEstimate, 0),
       }
+    }, state);
+  } else {
+    return state;
+  }
+};
+
+
+export const updateDoneOnForTask = (
+  upd: Update<Task>,
+  state: TaskState,
+): TaskState => {
+  const task = state.entities[upd.id];
+  const isToDone = (upd.changes.isDone === true);
+  const isToUnDone = (upd.changes.isDone === false);
+  if (isToDone || isToUnDone) {
+    const changes = {
+      ...(isToDone ? {doneOn: Date.now()} : {}),
+      ...(isToUnDone ? {doneOn: null} : {}),
+    };
+    return taskAdapter.updateOne({
+      id: task.id,
+      changes
     }, state);
   } else {
     return state;

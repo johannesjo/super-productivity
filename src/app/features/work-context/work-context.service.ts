@@ -316,7 +316,7 @@ export class WorkContextService {
     );
   }
 
-  getTasksWorkedOnOrDoneFlat$(dayStr: string): Observable<Task[]> {
+  getTasksWorkedOnOrDoneTodayFlat$(dayStr: string): Observable<Task[]> {
     return this.allNonArchiveTasks$.pipe(
       map(tasks => flattenTasks(tasks)),
       map(tasks => tasks.filter(
@@ -325,10 +325,10 @@ export class WorkContextService {
     );
   }
 
-  getTasksWorkedOnOrDoneOrRepeatableFlat$(dayStr: string) {
+  getTasksWorkedOnOrDoneTodayOrRepeatableFlat$(dayStr: string) {
     return combineLatest([
       this.allRepeatableTasksFlat$,
-      this.getTasksWorkedOnOrDoneFlat$(dayStr)
+      this.getTasksWorkedOnOrDoneTodayFlat$(dayStr)
     ]).pipe(
       map(([repeatableTasks, workedOnOrDoneTasks]) => [
         ...repeatableTasks,

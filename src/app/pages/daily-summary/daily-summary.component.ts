@@ -68,7 +68,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   );
 
   tasksWorkedOnOrDoneOrRepeatableFlat$ = this.dayStr$.pipe(
-    switchMap((dayStr) => this.workContextService.getTasksWorkedOnOrDoneOrRepeatableFlat$(dayStr)),
+    switchMap((dayStr) => this.workContextService.getTasksWorkedOnOrDoneTodayOrRepeatableFlat$(dayStr)),
     shareReplay(1),
   );
 
