@@ -811,6 +811,7 @@
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TITLE": "Edit Title",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
+      "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
       "TASK_SCHEDULE": "Schedule Task",
       "TASK_SHORTCUTS": "Tasks",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",

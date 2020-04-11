@@ -26,6 +26,7 @@ export type KeyboardConfig = Readonly<{
   taskOpenEstimationDialog: string,
   taskToggleDone: string,
   taskAddSubTask: string,
+  taskMoveToProject: string,
   taskDelete: string,
   taskSchedule: string,
   selectPreviousTask: string,

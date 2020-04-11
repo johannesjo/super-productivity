@@ -19,11 +19,16 @@
      #innerWrapperEl
      class="inner-wrapper">
 
-  <div [matMenuTriggerFor]="menu"
-       #contextMenuEl
+  <div [matMenuTriggerFor]="contextMenu"
+       #contextMenuTriggerEl
        [style.left]="contextMenuPosition.x"
        [style.top]="contextMenuPosition.y"
        style="visibility: hidden; position: fixed">
+  </div>
+
+  <div [matMenuTriggerFor]="projectMenu"
+       #projectMenuTriggerEl
+       style="visibility: hidden;">
   </div>
 
   <div class="box"></div>
@@ -240,7 +245,7 @@
           </mat-icon>
         </button>
 
-        <mat-menu #menu="matMenu">
+        <mat-menu #contextMenu="matMenu">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks?.length"
                   class="show-touch-only"
@@ -341,6 +346,7 @@
           </button>
 
           <button *ngIf="!task.parentId && !task.issueId && !task.repeatCfgId"
+                  #projectMenuTriggerEl
                   [matMenuTriggerFor]="projectMenu"
                   mat-menu-item>
             <mat-icon>forward</mat-icon>

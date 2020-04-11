@@ -226,6 +226,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'taskMoveToProject',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_MOVE_TO_PROJECT
+      },
+    },
+    {
       key: 'selectPreviousTask',
       type: 'keyboard',
       templateOptions: {

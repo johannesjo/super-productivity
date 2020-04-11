@@ -71,6 +71,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskToggleDone: 'd',
     taskAddSubTask: 'a',
     taskDelete: 'Delete',
+    taskMoveToProject: null,
     selectPreviousTask: 'k',
     selectNextTask: 'j',
     moveTaskUp: 'Ctrl+Shift+ArrowUp',

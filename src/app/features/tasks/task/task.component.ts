@@ -96,8 +96,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('innerWrapperEl', {static: true}) innerWrapperElRef: ElementRef;
 
   // only works because item comes first in dom
-  @ViewChild('contextMenuEl', {static: true, read: MatMenuTrigger}) contextMenu: MatMenuTrigger;
-  // @ViewChild('projectMenuTriggerEl', {static: true, read: MatMenuTrigger}) projectMenuTrigger: MatMenuTrigger;
+  @ViewChild('contextMenuTriggerEl', {static: true, read: MatMenuTrigger}) contextMenu: MatMenuTrigger;
+  @ViewChild('projectMenuTriggerEl', {static: false, read: MatMenuTrigger}) projectMenuTrigger: MatMenuTrigger;
 
   @HostBinding('tabindex') tabIndex = 1;
   @HostBinding('class.isDone') isDone: boolean;
@@ -588,6 +588,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();
+    }
+    if (checkKeyCombo(ev, keys.taskMoveToProject)) {
+      this.projectMenuTrigger.openMenu();
     }
 
     if (checkKeyCombo(ev, keys.togglePlay)) {
