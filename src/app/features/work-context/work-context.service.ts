@@ -52,6 +52,7 @@ import {
 } from '../tag/store/tag.actions';
 import {allDataLoaded} from '../../core/data-init/data-init.actions';
 import {isToday} from '../../util/is-today.util';
+import {unique} from '../../util/unique';
 
 @Injectable({
   providedIn: 'root',
@@ -317,21 +318,12 @@ export class WorkContextService {
     );
   }
 
-  getTasksWorkedOnOrDoneSubTaskTodayFlat$(dayStr: string): Observable<Task[]> {
-    return this.allNonArchiveTasks$.pipe(
-      map(tasks => flattenTasks(tasks)),
-      map(tasks => tasks.filter(
-        (t: Task) =>
-          (t.isDone && (!t.parentId || !t.doneOn || isToday((t.doneOn))))
-          || (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
-      ))
-    );
-  }
 
-  getTasksWorkedOnOrDoneTodayOrRepeatableFlat$(dayStr: string) {
+
+  getDailySummaryTasksFlat$(dayStr: string) {
     return combineLatest([
       this.allRepeatableTasksFlat$,
-      this.getTasksWorkedOnOrDoneSubTaskTodayFlat$(dayStr)
+      this._getDailySummaryTasksFlatWithoutRepeatable$(dayStr)
     ]).pipe(
       map(([repeatableTasks, workedOnOrDoneTasks]) => [
         ...repeatableTasks,
@@ -488,5 +480,26 @@ export class WorkContextService {
   // NOTE: NEVER call this from some place other than the route change stuff
   private async _setActiveContext(activeId: string, activeType: WorkContextType) {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
+  }
+
+  private _getDailySummaryTasksFlatWithoutRepeatable$(dayStr: string): Observable<Task[]> {
+    return this.allNonArchiveTasks$.pipe(
+      map(tasks => flattenTasks(tasks)),
+      map(tasks => {
+          const tasksWorkedOnToday = tasks.filter(t => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0));
+
+          const doneParentAndSubTasksDoneToday = tasks.filter((t: Task) =>
+            (t.isDone && (!t.parentId || !t.doneOn || isToday((t.doneOn))))
+          );
+
+          const doneIdsShown = doneParentAndSubTasksDoneToday.map(t => t.id);
+
+          const parentsWithShownSubTasks = tasks.filter(
+            (t: Task) => (t.subTaskIds.length && t.subTaskIds.filter(tid => doneIdsShown.includes(tid)))
+          );
+          return unique(tasksWorkedOnToday.concat(doneParentAndSubTasksDoneToday, parentsWithShownSubTasks));
+        }
+      )
+    );
   }
 }
