@@ -52,7 +52,6 @@ import {
 } from '../tag/store/tag.actions';
 import {allDataLoaded} from '../../core/data-init/data-init.actions';
 import {isToday} from '../../util/is-today.util';
-import {unique} from '../../util/unique';
 
 @Injectable({
   providedIn: 'root',
@@ -319,7 +318,6 @@ export class WorkContextService {
   }
 
 
-
   getDailySummaryTasksFlat$(dayStr: string) {
     return combineLatest([
       this.allRepeatableTasksFlat$,
@@ -483,23 +481,25 @@ export class WorkContextService {
   }
 
   private _getDailySummaryTasksFlatWithoutRepeatable$(dayStr: string): Observable<Task[]> {
+    const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
+      || (t.isDone && (!t.doneOn || isToday((t.doneOn))));
+
     return this.allNonArchiveTasks$.pipe(
-      map(tasks => flattenTasks(tasks)),
       map(tasks => {
-          const tasksWorkedOnToday = tasks.filter(t => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0));
-
-          const doneParentAndSubTasksDoneToday = tasks.filter((t: Task) =>
-            (t.isDone && (!t.parentId || !t.doneOn || isToday((t.doneOn))))
-          );
-
-          const doneIdsShown = doneParentAndSubTasksDoneToday.map(t => t.id);
-
-          const parentsWithShownSubTasks = tasks.filter(
-            (t: Task) => (t.subTaskIds.length && t.subTaskIds.filter(tid => doneIdsShown.includes(tid)))
-          );
-          return unique(tasksWorkedOnToday.concat(doneParentAndSubTasksDoneToday, parentsWithShownSubTasks));
-        }
-      )
+        let flatTasks: Task[] = [];
+        tasks.forEach(pt => {
+          if (pt.subTasks && pt.subTasks.length) {
+            const subTasks = pt.subTasks.filter(st => _isWorkedOnOrDoneToday(st));
+            if (subTasks.length) {
+              flatTasks.push(pt);
+              flatTasks = flatTasks.concat(subTasks);
+            }
+          } else if (_isWorkedOnOrDoneToday(pt)) {
+            flatTasks.push(pt);
+          }
+        });
+        return flatTasks;
+      }),
     );
   }
 }
