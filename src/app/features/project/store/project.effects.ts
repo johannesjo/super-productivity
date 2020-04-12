@@ -483,11 +483,14 @@ export class ProjectEffects {
 
   private async _removeAllArchiveTasksForProject(projectIdToDelete: string): Promise<any> {
     const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
-    const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
-      const t = taskArchiveState.entities[id];
-      // NOTE sub tasks are accounted for in DeleteMainTasks action
-      return t.projectId === projectIdToDelete && !t.parentId;
-    });
+    // NOTE: task archive might not if there never was a day completed
+    const archiveTaskIdsToDelete = !!(taskArchiveState)
+      ? (taskArchiveState.ids as string[]).filter((id) => {
+        const t = taskArchiveState.entities[id];
+        // NOTE sub tasks are accounted for in DeleteMainTasks action
+        return t.projectId === projectIdToDelete && !t.parentId;
+      })
+      : [];
     console.log('Archive TaskIds to remove/unique', archiveTaskIdsToDelete, unique(archiveTaskIdsToDelete));
     // remove archive
     await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
