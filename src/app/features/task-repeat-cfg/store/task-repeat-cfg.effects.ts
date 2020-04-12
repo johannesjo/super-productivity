@@ -16,7 +16,7 @@ import {TaskService} from '../../tasks/task.service';
 import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
 import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
 import {from} from 'rxjs';
-import {isToday} from './is-created-today.util';
+import {isToday} from '../../../util/is-today.util';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
 import {GlobalSyncService} from '../../../core/global-sync/global-sync.service';
