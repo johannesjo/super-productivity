@@ -51,6 +51,7 @@ import {
   updateWorkStartForTag
 } from '../tag/store/tag.actions';
 import {allDataLoaded} from '../../core/data-init/data-init.actions';
+import {isToday} from '../../util/is-today.util';
 
 @Injectable({
   providedIn: 'root',
@@ -316,11 +317,13 @@ export class WorkContextService {
     );
   }
 
-  getTasksWorkedOnOrDoneTodayFlat$(dayStr: string): Observable<Task[]> {
+  getTasksWorkedOnOrDoneSubTaskTodayFlat$(dayStr: string): Observable<Task[]> {
     return this.allNonArchiveTasks$.pipe(
       map(tasks => flattenTasks(tasks)),
       map(tasks => tasks.filter(
-        (t: Task) => t.isDone || (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
+        (t: Task) =>
+          (t.isDone && (!t.parentId || !t.doneOn || isToday((t.doneOn))))
+          || (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
       ))
     );
   }
@@ -328,7 +331,7 @@ export class WorkContextService {
   getTasksWorkedOnOrDoneTodayOrRepeatableFlat$(dayStr: string) {
     return combineLatest([
       this.allRepeatableTasksFlat$,
-      this.getTasksWorkedOnOrDoneTodayFlat$(dayStr)
+      this.getTasksWorkedOnOrDoneSubTaskTodayFlat$(dayStr)
     ]).pipe(
       map(([repeatableTasks, workedOnOrDoneTasks]) => [
         ...repeatableTasks,
