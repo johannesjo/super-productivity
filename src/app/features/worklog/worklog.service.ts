@@ -12,11 +12,7 @@ import {Dictionary, EntityState} from '@ngrx/entity';
 import {Task} from '../tasks/task.model';
 import {mapArchiveToWorklog} from './map-archive-to-worklog';
 import {TaskService} from '../tasks/task.service';
-
-const EMPTY_ENTITY = {
-  ids: [],
-  entities: {},
-};
+import {createEmptyEntity} from '../../util/create-empty-entity';
 
 @Injectable({
   providedIn: 'root'
@@ -129,8 +125,8 @@ export class WorklogService {
 
 
   private async _loadForWorkContext(workContext: WorkContext): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    const archive = await this._persistenceService.taskArchive.loadState() || EMPTY_ENTITY;
-    const taskState = await this._taskService.taskFeatureState$.pipe(first()).toPromise() || EMPTY_ENTITY;
+    const archive = await this._persistenceService.taskArchive.loadState() || createEmptyEntity();
+    const taskState = await this._taskService.taskFeatureState$.pipe(first()).toPromise() || createEmptyEntity();
 
     // console.time('calcTime');
     const {completeStateForWorkContext, unarchivedIds} = this._getCompleteStateForWorkContext(workContext, taskState, archive);

@@ -18,6 +18,7 @@ import {WorkContextType} from '../../work-context/work-context.model';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {Router} from '@angular/router';
 import {TODAY_TAG} from '../tag.const';
+import {createEmptyEntity} from '../../../util/create-empty-entity';
 
 
 @Injectable()
@@ -130,7 +131,7 @@ export class TagEffects {
       this._taskService.removeMultipleMainTasks(taskIdsToRemove);
 
       // remove orphaned for archive
-      const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+      const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState() || createEmptyEntity();
       const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
         const t = taskArchiveState.entities[id];
         return isOrphanedParentTask(t);

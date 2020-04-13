@@ -23,6 +23,7 @@ import {TODAY_TAG} from '../../tag/tag.const';
 import {unique} from '../../../util/unique';
 import {TaskService} from '../task.service';
 import {of} from 'rxjs';
+import {createEmptyEntity} from '../../../util/create-empty-entity';
 
 
 @Injectable()
@@ -127,7 +128,7 @@ export class TaskRelatedModelEffects {
   private async _removeFromArchive(action: RestoreTask) {
     const task = action.payload.task;
     const taskIds = [task.id, ...task.subTaskIds];
-    const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState() || createEmptyEntity();
     const allIds = currentArchive.ids as string[] || [];
     const idsToRemove = [];
 
@@ -150,10 +151,7 @@ export class TaskRelatedModelEffects {
       return;
     }
 
-    const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState() || {
-      entities: {},
-      ids: []
-    };
+    const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState() || createEmptyEntity();
 
     const newArchive = taskAdapter.addMany(flatTasks.map(({subTasks, ...task}) => ({
       ...task,
