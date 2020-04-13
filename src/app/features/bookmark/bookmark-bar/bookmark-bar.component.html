@@ -16,14 +16,12 @@
               *ngIf="!isEditMode"
               [matMenuTriggerFor]="menu"
               [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
-              [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
               mat-stroked-button
               tabindex="1">
         <mat-icon>more_vert</mat-icon>
       </button>
       <button (click)="isEditMode=false"
               *ngIf="isEditMode"
-              [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate"
               color="accent"
               mat-stroked-button
               tabindex="1">

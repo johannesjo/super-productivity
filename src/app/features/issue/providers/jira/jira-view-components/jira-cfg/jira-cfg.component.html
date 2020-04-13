@@ -55,7 +55,7 @@
         </mat-autocomplete>
       </mat-form-field>
 
-      <div *ngFor="let opt of cfg.transitionConfig|keyvalue">
+      <div *ngFor="let opt of transitionConfigOpts">
         <mat-form-field>
           <label *ngIf="opt.key==='OPEN'">{{T.F.JIRA.CFG_CMP.OPEN|translate}}</label>
           <label *ngIf="opt.key==='IN_PROGRESS'">{{T.F.JIRA.CFG_CMP.IN_PROGRESS|translate}}</label>

@@ -3,7 +3,7 @@ import {ConfigFormSection, GlobalConfigSectionKey} from '../../../../../config/g
 import {ProjectCfgFormKey} from '../../../../../project/project.model';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {JiraCfg} from '../../jira.model';
+import {JiraCfg, JiraTransitionConfig, JiraTransitionOption} from '../../jira.model';
 import {expandAnimation} from '../../../../../../ui/animations/expand.ani';
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {SearchResultItem} from '../../../../issue.model';
@@ -62,6 +62,8 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   filteredCustomFieldSuggestions$: Observable<any[]> = this.customFieldSuggestionsCtrl.valueChanges.pipe(
     map(value => this._filterCustomFieldSuggestions(value)),
   );
+  transitionConfigOpts: { key: keyof JiraTransitionConfig; val: JiraTransitionOption }[];
+
   private _subs = new Subscription();
 
   constructor(
@@ -98,6 +100,11 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     if (!Array.isArray(this._cfg.availableTransitions)) {
       this._cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
     }
+
+    this.transitionConfigOpts = Object.keys(this._cfg.transitionConfig).map((key: keyof JiraTransitionConfig) => ({
+      key,
+      val: this._cfg.transitionConfig[key]
+    }));
   }
 
   ngOnInit(): void {

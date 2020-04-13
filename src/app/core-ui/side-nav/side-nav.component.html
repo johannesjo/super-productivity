@@ -90,7 +90,7 @@
 
 
 <section class="tags"
-         *ngIf="tagList$|async as tagList">
+         *ngIf="(tagList$|async) as tagList">
   <button mat-menu-item
           class="expand-btn"
           [class.isExpanded]="isTagsExpanded"
