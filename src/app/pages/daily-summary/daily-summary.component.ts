@@ -38,16 +38,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
 
-  doneAndRepeatingTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
-    this._taskService.allRepeatableTasks$,
-    this.workContextService.doneTasks$,
-  ]).pipe(
-    map(([repeatableTasks, doneTasks]) => [
-      ...repeatableTasks,
-      ...doneTasks.filter(task => !task.repeatCfgId || task.repeatCfgId === null),
-    ]),
-  );
-
   isTimeSheetExported = true;
   showSuccessAnimation;
   selectedTabIndex = 0;
@@ -160,9 +150,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   async finishDay() {
-    const doneAndRepeatingTasks = await this.doneAndRepeatingTasks$.pipe(take(1)).toPromise();
+    const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
 
-    this._taskService.moveToArchive(doneAndRepeatingTasks);
+    this._taskService.moveToArchive(doneTasks);
 
     if (IS_ELECTRON && this.isForToday) {
       this._matDialog.open(DialogConfirmComponent, {
