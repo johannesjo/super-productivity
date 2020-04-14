@@ -65,9 +65,10 @@ export class TaskRepeatCfgEffects {
           take(1),
           concatMap((tasks) => {
             const isCreateNew = (tasks.filter(task => isToday(task.created)).length === 0);
-            const moveToArchiveActions: (MoveToArchive | AddTask | UpdateTaskRepeatCfg)[] = tasks
-              .filter(task => isToday(task.created))
-              .map(task => new MoveToArchive({tasks: [task]}));
+            const moveToArchiveActions: (MoveToArchive | AddTask | UpdateTaskRepeatCfg)[] = isCreateNew
+              ? tasks.filter(task => isToday(task.created))
+                .map(task => new MoveToArchive({tasks: [task]}))
+              : [];
 
             return from([
               ...moveToArchiveActions,
