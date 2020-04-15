@@ -19,4 +19,10 @@ public class JavaScriptInterface {
     public void showToast(String toast) {
         Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
     }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void testData(String str) {
+
+    }
 }

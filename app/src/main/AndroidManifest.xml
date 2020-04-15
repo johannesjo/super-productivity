@@ -13,6 +13,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
 
+        <!-- App in WebFrame -->
         <activity
                 android:name=".FullscreenActivity"
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
@@ -43,6 +44,8 @@
             </intent-filter>
         </activity>
 
+
+        <!-- Widget -->
         <receiver android:name=".TaskListWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -53,6 +56,8 @@
                     android:resource="@xml/task_list_widget_info" />
         </receiver>
 
+
+        <!-- TWA Stuff TODO remove all -->
         <activity android:name=".TaskListWidgetConfigureActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
@@ -69,8 +74,6 @@
             <meta-data
                     android:name="android.support.customtabs.trusted.DEFAULT_URL"
                     android:value="https://app.super-productivity.com" />
-
-
         </activity>
     </application>
 
