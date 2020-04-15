@@ -5,6 +5,8 @@ import {AppModule} from './app/app.module';
 import {environment} from './environments/environment';
 import {IS_ELECTRON} from './app/app.constants';
 import 'hammerjs';
+import {isAndroidWebView} from './app/util/is-android-web-view';
+import {androidInterface} from './app/util/android-interface';
 
 if (environment.production) {
   enableProdMode();
@@ -25,3 +27,11 @@ declare global {
 // fix mobile scrolling while dragging
 window.addEventListener('touchmove', () => {
 });
+
+
+if (!environment.production && isAndroidWebView) {
+  setTimeout(() => {
+    androidInterface.showToast('Android DEV works');
+    console.log(androidInterface);
+  }, 1000);
+}
