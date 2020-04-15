@@ -73,6 +73,8 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
     console.log(commentsByOthers, updates);
     console.log('cfg', cfg);
+    console.log('issue', issue);
+    console.log('--------end-------');
 
     if (wasUpdated && isNotifySuccess) {
       this._snackService.open({
