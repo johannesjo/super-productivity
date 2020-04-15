@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -14,6 +15,7 @@ import androidx.annotation.NonNull;
  * App Widget Configuration implemented in {@link TaskListWidgetConfigureActivity TaskListWidgetConfigureActivity}
  */
 public class TaskListWidget extends AppWidgetProvider {
+    public static final String LIST_CHANGED = "com.superproductivity.superproductivity.LIST_CHANGED";
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -28,6 +30,18 @@ public class TaskListWidget extends AppWidgetProvider {
 
     private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
         views.setRemoteAdapter(R.id.widget_list, new Intent(context, TaskListWidgetService.class));
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+        Log.v("XXXXXXXXXXXXXXXXXX", "yeeees");
+        Log.v("XXXXXXXXXXXXXXXXXX", intent.getAction());
+        if (intent.getAction().equals(LIST_CHANGED)) {
+            // handle intent here
+            String s = intent.getStringExtra("NewString");
+            Log.v("XXXXXXXYY", s);
+        }
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.superproductivity.superproductivity;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
@@ -23,6 +25,9 @@ public class JavaScriptInterface {
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void testData(String str) {
-
+        Intent intent = new Intent(TaskListWidget.LIST_CHANGED);
+        intent.putExtra("NewString", str);
+        Log.v("jsInterface", str);
+        mContext.getApplicationContext().sendBroadcast(intent);
     }
 }
