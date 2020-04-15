@@ -2,7 +2,10 @@ package com.superproductivity.superproductivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 /**
@@ -15,19 +18,31 @@ public class FullscreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_fullscreen);
+        // if your build is in debug mode, enable inspecting of web views
+        if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+            WebView.setWebContentsDebuggingEnabled(true);
 
-        WebView myWebView = (WebView) findViewById(R.id.webview);
-        myWebView.loadUrl("https://app.super-productivity.com");
+        }
 
-//        myWebView.setWebChromeClient(new MyCustomChromeClient(this));
-//        myWebView.setWebViewClient(new MyCustomWebViewClient(this));
-        myWebView.clearCache(true);
-        myWebView.clearHistory();
-        myWebView.getSettings().setJavaScriptEnabled(true);
-        myWebView.getSettings().setDomStorageEnabled(true);
-        myWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        // hide action bar
         getSupportActionBar().hide();
 
+        setContentView(R.layout.activity_fullscreen);
+
+        // init web view
+        WebView wv = (WebView) findViewById(R.id.webview);
+
+        wv.setWebChromeClient(new WebChromeClient());
+        wv.clearCache(true);
+        wv.clearHistory();
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.getSettings().setDomStorageEnabled(true);
+        wv.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+        wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        JavaScriptInterface jsi = new JavaScriptInterface(this);
+        wv.addJavascriptInterface(jsi, "SUPAndroid");
+
+        wv.loadUrl("http://10.0.2.2:4200");
+        //        wv.loadUrl("https://app.super-productivity.com");
     }
 }
