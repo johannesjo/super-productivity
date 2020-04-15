@@ -62,25 +62,12 @@
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
 
 
-        <!-- TWA Stuff TODO remove all -->
         <activity
                 android:name=".TaskListWidgetConfigureActivity"
                 android:permission="android.permission.BIND_REMOTEVIEWS">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
-        </activity>
-        <activity
-                android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
-                android:theme="@style/Theme.LauncherActivity">
-            <meta-data
-                    android:name="asset_statements"
-                    android:resource="@string/asset_statements" />
-
-            <!-- Edit android:value to change the url opened by the Trusted Web Activity -->
-            <meta-data
-                    android:name="android.support.customtabs.trusted.DEFAULT_URL"
-                    android:value="https://app.super-productivity.com" />
         </activity>
     </application>
 
