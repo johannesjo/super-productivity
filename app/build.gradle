@@ -10,9 +10,9 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
-                hostName: "app.super-productivity.com",
-                defaultUrl: "https://app.super-productivity.com",
-                launcherName: "Super Productivity",
+                hostName       : "app.super-productivity.com",
+                defaultUrl     : "https://app.super-productivity.com",
+                launcherName   : "Super Productivity",
                 assetStatements: '[{ "relation": ["delegate_permission/common.handle_all_urls"], ' +
                         '"target": {"namespace": "web", "site": "https://app.super-productivity.com"}}]'
         ]
@@ -33,6 +33,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:1.1.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
