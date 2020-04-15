@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.superproductivity.superproductivity">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
@@ -9,9 +10,9 @@
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
-            android:usesCleartextTraffic="true"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:usesCleartextTraffic="true">
 
         <!-- App in WebFrame -->
         <activity
@@ -56,9 +57,15 @@
                     android:resource="@xml/task_list_widget_info" />
         </receiver>
 
+        <service
+                android:name=".TaskListWidgetService"
+                android:permission="android.permission.BIND_REMOTEVIEWS" />
+
 
         <!-- TWA Stuff TODO remove all -->
-        <activity android:name=".TaskListWidgetConfigureActivity">
+        <activity
+                android:name=".TaskListWidgetConfigureActivity"
+                android:permission="android.permission.BIND_REMOTEVIEWS">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
