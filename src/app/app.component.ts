@@ -26,6 +26,8 @@ import {ElectronService} from './core/electron/electron.service';
 import {WorkContextService} from './features/work-context/work-context.service';
 import {DataInitService} from './core/data-init/data-init.service';
 import {ImexMetaService} from './imex/imex-meta/imex-meta.service';
+import {AndroidService} from './core/android/android.service';
+import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
 
 
 @Component({
@@ -63,6 +65,7 @@ export class AppComponent implements OnDestroy {
     private _uiHelperService: UiHelperService,
     private _store: Store<any>,
     private _languageService: LanguageService,
+    private _androidService: AndroidService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
@@ -89,6 +92,10 @@ export class AppComponent implements OnDestroy {
 
     // init theme and body class handlers
     this._globalThemeService.init();
+
+    if (IS_ANDROID_WEB_VIEW) {
+      this._androidService.init();
+    }
 
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC.APP_READY);

@@ -5,8 +5,8 @@ import {AppModule} from './app/app.module';
 import {environment} from './environments/environment';
 import {IS_ELECTRON} from './app/app.constants';
 import 'hammerjs';
-import {isAndroidWebView} from './app/util/is-android-web-view';
-import {androidInterface} from './app/util/android-interface';
+import {IS_ANDROID_WEB_VIEW} from './app/util/is-android-web-view';
+import {androidInterface} from './app/core/android/android-interface';
 
 if (environment.production) {
   enableProdMode();
@@ -29,7 +29,7 @@ window.addEventListener('touchmove', () => {
 });
 
 
-if (!environment.production && isAndroidWebView) {
+if (!environment.production && IS_ANDROID_WEB_VIEW) {
   setTimeout(() => {
     androidInterface.showToast('Android DEV works');
     console.log(androidInterface);

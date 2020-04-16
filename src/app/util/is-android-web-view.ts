@@ -1,1 +1,1 @@
-export const isAndroidWebView = !!(window as any).SUPAndroid;
+export const IS_ANDROID_WEB_VIEW = !!(window as any).SUPAndroid;
