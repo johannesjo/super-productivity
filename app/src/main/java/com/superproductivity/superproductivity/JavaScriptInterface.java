@@ -24,9 +24,9 @@ public class JavaScriptInterface {
 
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void testData(String str) {
+    public void updateTaskData(String str) {
         Intent intent = new Intent(TaskListWidget.LIST_CHANGED);
-        intent.putExtra("NewString", str);
+        intent.putExtra("taskJson", str);
         Log.v("jsInterface", str);
         mContext.getApplicationContext().sendBroadcast(intent);
     }

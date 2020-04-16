@@ -39,7 +39,7 @@ public class TaskListWidget extends AppWidgetProvider {
         Log.v("XXXXXXXXXXXXXXXXXX", intent.getAction());
         if (intent.getAction().equals(LIST_CHANGED)) {
             // handle intent here
-            String s = intent.getStringExtra("NewString");
+            String s = intent.getStringExtra("taskJson");
             Log.v("XXXXXXXYY", s);
         }
     }
