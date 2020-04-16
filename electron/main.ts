@@ -56,7 +56,7 @@ if (!IS_MAC) {
 let mainWin: BrowserWindow;
 const nestedWinParams = {isDarwinForceQuit: false};
 // keep app active to keep time tracking running
-powerSaveBlocker.start('prevent-app-suspension');
+// powerSaveBlocker.start('prevent-app-suspension');
 
 appIN.on('second-instance', () => {
   if (mainWin) {
