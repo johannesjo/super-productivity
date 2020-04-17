@@ -8,11 +8,6 @@
         \"site\": \"https://app.super-productivity.com\"}
         }]
     </string>
-    <string name="appwidget_text">EXAMPLE</string>
-    <string name="configure">Configure</string>
-    <string name="add_widget">Add widget</string>
-
-    <string name="title_activity_fullscreen">SUP FullscreenActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_fullscreen">Super Productivity</string>
+    <string name="widget_no_data">Please tap here to load data</string>
 </resources>
