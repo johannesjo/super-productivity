@@ -6,8 +6,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.RemoteViews;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,27 +40,9 @@ public class TaskListWidget extends AppWidgetProvider {
         if (taskJsonStr != null) {
 //            Log.v("TaskListWidget", taskJsonStr);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.task_list_widget);
-//            views.setTextViewText(R.id.test_text, taskJsonStr);
-//            views.setRemoteAdapter(R.id., new Intent(context, TaskListWidgetService.class));
 
             parseJSONToList(taskJsonStr);
             views.setTextViewText(R.id.test_text, taskJsonStr);
-
-//            views.setTextViewText(R.id.task_list, taskJsonStr);
-
-//
-//            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-//                    android.R.layout.simple_list_item_1, android.R.id.text1, taskList);
-//
-//            // Initialise a listview adapter with the project titles and use it
-//            // in the listview to show the list of project.
-//            mListView = (ListView) findViewById(R.id.list);
-//            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-//                    android.R.layout.simple_list_item_1, android.R.id.text1,
-//                    taskList.toArray(new String[taskList.size()]));
-//
-//            mListView.setAdapter(adapter);
-//            lv = (ListView) findViewById(R.id.list);
 
             AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context, TaskListWidget.class), views);
         }
@@ -78,6 +61,31 @@ public class TaskListWidget extends AppWidgetProvider {
             }
         } catch (final JSONException e) {
             Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
+        }
+    }
+
+
+    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
+                                int appWidgetId) {
+
+        // Construct the RemoteViews object
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.task_list_widget);
+        setRemoteAdapter(context, views);
+
+        // Instruct the widget manager to update the widget
+        appWidgetManager.updateAppWidget(appWidgetId, views);
+    }
+
+    private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
+        views.setRemoteAdapter(R.id.task_list, new Intent(context, TaskListWidgetService.class));
+    }
+
+
+    @Override
+    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        // There may be multiple widgets active, so update all of them
+        for (int appWidgetId : appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 }
