@@ -26,28 +26,16 @@ public class TaskListWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+//        Log.v("TaskListWidget", intent.toString());
 
-//        if (intent.getAction().equals(LIST_CHANGED)) {
-//            Log.v("XXXXXXXYY", "DDDD");
-//            // handle intent here
-//            String s = intent.getStringExtra("taskJson");
-//
-//            RemoteViews views = new RemoteViews(context.getPackageName(), R.id.test_text);
-//            views.setTextViewText(R.id.test_text, s);
-//            AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context, TaskListWidget.class), views);
-//            Log.v("XXXXXXXYY", s);
-//        }
-
-        String str = intent.getStringExtra("taskJson");
-        if (str != null) {
-            Log.v("XXXXXXXYY", str);
-            Log.v("XXXXXXXYY", str);
-
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.task_list_widget);
-            views.setTextViewText(R.id.test_text, str);
-//        views.setTextViewText(R.id.test_text, "aaaaaa");
-
-            AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context, TaskListWidget.class), views);
+        if (intent.getAction().equals(LIST_CHANGED)) {
+            String str = intent.getStringExtra("taskJson");
+            if (str != null) {
+//            Log.v("TaskListWidget", str);
+                RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.task_list_widget);
+                views.setTextViewText(R.id.test_text, str);
+                AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context, TaskListWidget.class), views);
+            }
         }
     }
 
