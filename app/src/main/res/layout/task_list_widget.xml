@@ -19,14 +19,13 @@
         <TextView
                 android:id="@+id/test_text"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/widget_no_data" >
-        </TextView>
+                android:layout_height="50dp"
+                android:text="@string/widget_no_data" />
 
-<!--        <ListView-->
-<!--                android:id="@+id/widget_list"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"></ListView>-->
+        <ListView
+                android:id="@+id/task_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
     </LinearLayout>
 
 </FrameLayout>
