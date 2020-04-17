@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.RemoteViews;
+
 import androidx.annotation.NonNull;
 
 
@@ -28,7 +29,7 @@ public class TaskListWidget extends AppWidgetProvider {
 
             // Trigger Standard Update
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), AppWidgetProvider.class.getName());
+            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), TaskListWidget.class.getName());
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
             onUpdate(context, appWidgetManager, appWidgetIds);
         }
