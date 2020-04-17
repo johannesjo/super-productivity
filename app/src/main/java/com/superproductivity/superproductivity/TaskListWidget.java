@@ -7,14 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.RemoteViews;
-
 import androidx.annotation.NonNull;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 /**
  * Implementation of App Widget functionality.
@@ -22,9 +16,6 @@ import java.util.ArrayList;
 public class TaskListWidget extends AppWidgetProvider {
     public static final String LIST_CHANGED = "com.superproductivity.superproductivity.LIST_CHANGED";
     public static String tag = "TaskListWidget";
-    String taskJsonStr;
-    ArrayList<String> taskList;
-
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -33,8 +24,6 @@ public class TaskListWidget extends AppWidgetProvider {
 
         // Log.v(tag, intent.toString());
         if (intent.getAction().equals(LIST_CHANGED)) {
-            taskJsonStr = intent.getStringExtra("taskJson");
-//            updateView(context);
             Log.v(tag, "onReceive: LIST_CHANGED triggered");
 
             // Trigger Standard Update

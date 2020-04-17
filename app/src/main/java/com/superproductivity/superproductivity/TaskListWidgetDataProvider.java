@@ -37,7 +37,6 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
 
     @Override
     public void onDestroy() {
-
     }
 
     @Override
@@ -47,8 +46,7 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews view = new RemoteViews(mContext.getPackageName(),
-                simple_list_item_1);
+        RemoteViews view = new RemoteViews(mContext.getPackageName(), simple_list_item_1);
         view.setTextViewText(text1, myList.get(position));
         return view;
     }
@@ -78,18 +76,20 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
         String jsonStr = TaskListDataService.getInstance().getData();
         Log.v("TaskListWidget", jsonStr);
 
-        try {
-            JSONArray tasks = new JSONArray(jsonStr);
-            // looping through All Contacts
-            myList.clear();
+        if (jsonStr != null) {
+            try {
+                JSONArray tasks = new JSONArray(jsonStr);
+                // looping through All Contacts
+                myList.clear();
 
-            for (int i = 0; i < tasks.length(); i++) {
-                JSONObject c = tasks.getJSONObject(i);
-                String title = c.getString("title");
-                myList.add(title);
+                for (int i = 0; i < tasks.length(); i++) {
+                    JSONObject c = tasks.getJSONObject(i);
+                    String title = c.getString("title");
+                    myList.add(title);
+                }
+            } catch (final JSONException e) {
+                Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
             }
-        } catch (final JSONException e) {
-            Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
         }
     }
 }
