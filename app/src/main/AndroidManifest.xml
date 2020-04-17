@@ -61,15 +61,6 @@
         <service
                 android:name=".TaskListWidgetService"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
-
-
-        <activity
-                android:name=".TaskListWidgetConfigureActivity"
-                android:permission="android.permission.BIND_REMOTEVIEWS">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>
