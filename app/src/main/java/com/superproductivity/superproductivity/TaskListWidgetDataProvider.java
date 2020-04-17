@@ -27,12 +27,14 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
 
     @Override
     public void onCreate() {
-        initListData();
+        Log.v("TaskListWidget", "onCreate");
+        loadListData();
     }
 
     @Override
     public void onDataSetChanged() {
-        initListData();
+        Log.v("TaskListWidget", "onDataSetChanged");
+        loadListData();
     }
 
     @Override
@@ -71,8 +73,8 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
         return true;
     }
 
-    private void initListData() {
-        Log.v("TaskListWidget", "initListData");
+    private void loadListData() {
+        Log.v("TaskListWidget", "loadListData");
         String jsonStr = TaskListDataService.getInstance().getData();
         Log.v("TaskListWidget", jsonStr);
 

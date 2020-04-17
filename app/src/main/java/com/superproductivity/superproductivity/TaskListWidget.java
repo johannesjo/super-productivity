@@ -31,6 +31,7 @@ public class TaskListWidget extends AppWidgetProvider {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), TaskListWidget.class.getName());
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
+            //            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, AgendaWidgetProvider.class));
             onUpdate(context, appWidgetManager, appWidgetIds);
         }
     }
@@ -45,6 +46,9 @@ public class TaskListWidget extends AppWidgetProvider {
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
+
+        // The list needs also to be notified for whatever reason
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.task_list);
     }
 
     private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
