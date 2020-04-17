@@ -35,14 +35,25 @@ public class FullscreenActivity extends AppCompatActivity {
         wv.setWebChromeClient(new WebChromeClient());
         wv.clearCache(true);
         wv.clearHistory();
+
         wv.getSettings().setJavaScriptEnabled(true);
         wv.getSettings().setDomStorageEnabled(true);
         wv.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+        wv.getSettings().setLoadsImagesAutomatically(true);
+        wv.getSettings().setLoadWithOverviewMode(true);
+
+
+        // allow google login
+        // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
+        wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+//        wv.getSettings().setUserAgentString("Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36");
+        wv.getSettings().setUserAgentString(wv.getSettings().getUserAgentString().replace("; wv",""));
+
         wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         JavaScriptInterface jsi = new JavaScriptInterface(this);
         wv.addJavascriptInterface(jsi, "SUPAndroid");
 
-        wv.loadUrl("http://10.0.2.2:4200");
-        //        wv.loadUrl("https://app.super-productivity.com");
+//        wv.loadUrl("http://10.0.2.2:4200");
+        wv.loadUrl("https://app.super-productivity.com");
     }
 }
