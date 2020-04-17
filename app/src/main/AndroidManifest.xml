@@ -59,7 +59,7 @@
         </receiver>
 
         <service
-                android:name=".TaskListWidgetService"
+                android:name=".TaskListWidgetViewsService"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 

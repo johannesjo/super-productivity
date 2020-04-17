@@ -53,7 +53,7 @@ public class TaskListWidget extends AppWidgetProvider {
 
     private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
         Log.v(tag, "setRemoteAdapter");
-        views.setRemoteAdapter(R.id.task_list, new Intent(context, TaskListWidgetService.class));
+        views.setRemoteAdapter(R.id.task_list, new Intent(context, TaskListWidgetViewsService.class));
     }
 
 
