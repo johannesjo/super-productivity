@@ -11,12 +11,12 @@ import java.util.List;
 import static android.R.id.text1;
 import static android.R.layout.simple_list_item_1;
 
-public class ListDataProvider implements RemoteViewsService.RemoteViewsFactory {
+public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteViewsFactory {
 
     List<String> myListView = new ArrayList<>();
     Context mContext = null;
 
-    public ListDataProvider(Context context, Intent intent) {
+    public TaskListWidgetDataProvider(Context context, Intent intent) {
         mContext = context;
     }
 

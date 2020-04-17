@@ -6,6 +6,6 @@ import android.widget.RemoteViewsService;
 public class TaskListWidgetService extends RemoteViewsService {
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new ListDataProvider(this, intent);
+        return new TaskListWidgetDataProvider(this, intent);
     }
 }
