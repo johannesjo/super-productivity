@@ -21,6 +21,7 @@ import java.util.ArrayList;
  */
 public class TaskListWidget extends AppWidgetProvider {
     public static final String LIST_CHANGED = "com.superproductivity.superproductivity.LIST_CHANGED";
+    public static String tag = "TaskListWidget";
     String taskJsonStr;
     ArrayList<String> taskList;
 
@@ -28,45 +29,25 @@ public class TaskListWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        Log.v(tag, "onReceive");
 
-        // Log.v("TaskListWidget", intent.toString());
+        // Log.v(tag, intent.toString());
         if (intent.getAction().equals(LIST_CHANGED)) {
             taskJsonStr = intent.getStringExtra("taskJson");
-            updateView(context);
-        }
-    }
+//            updateView(context);
+            Log.v(tag, "onReceive: LIST_CHANGED triggered");
 
-    void updateView(Context context) {
-        if (taskJsonStr != null) {
-//            Log.v("TaskListWidget", taskJsonStr);
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.task_list_widget);
-
-            parseJSONToList(taskJsonStr);
-            views.setTextViewText(R.id.test_text, taskJsonStr);
-
-            AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context, TaskListWidget.class), views);
-        }
-    }
-
-    void parseJSONToList(String jsonStr) {
-        try {
-            JSONArray tasks = new JSONArray(jsonStr);
-
-            // looping through All Contacts
-            taskList = new ArrayList<>();
-            for (int i = 0; i < tasks.length(); i++) {
-                JSONObject c = tasks.getJSONObject(i);
-                String title = c.getString("title");
-                taskList.add(title);
-            }
-        } catch (final JSONException e) {
-            Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
+            // Trigger Standard Update
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), AppWidgetProvider.class.getName());
+            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
+            onUpdate(context, appWidgetManager, appWidgetIds);
         }
     }
 
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
+    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        Log.v(tag, "updateAppWidget");
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.task_list_widget);
@@ -77,12 +58,14 @@ public class TaskListWidget extends AppWidgetProvider {
     }
 
     private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
+        Log.v(tag, "setRemoteAdapter");
         views.setRemoteAdapter(R.id.task_list, new Intent(context, TaskListWidgetService.class));
     }
 
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        Log.v(tag, "onUpdate");
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);

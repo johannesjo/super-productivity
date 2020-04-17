@@ -27,6 +27,8 @@ public class JavaScriptInterface {
         Intent intent = new Intent(mContext.getApplicationContext(), TaskListWidget.class);
         intent.setAction(TaskListWidget.LIST_CHANGED);
         intent.putExtra("taskJson", str);
+
+        TaskListDataService.getInstance().setData(str);
         mContext.sendBroadcast(intent);
     }
 }

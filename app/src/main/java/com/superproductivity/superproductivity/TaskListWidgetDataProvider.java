@@ -2,8 +2,13 @@ package com.superproductivity.superproductivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +18,7 @@ import static android.R.layout.simple_list_item_1;
 
 public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteViewsFactory {
 
-    List<String> myListView = new ArrayList<>();
+    List<String> myList = new ArrayList<>();
     Context mContext = null;
 
     public TaskListWidgetDataProvider(Context context, Intent intent) {
@@ -22,12 +27,12 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
 
     @Override
     public void onCreate() {
-        initData();
+        initListData();
     }
 
     @Override
     public void onDataSetChanged() {
-        initData();
+        initListData();
     }
 
     @Override
@@ -37,14 +42,14 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
 
     @Override
     public int getCount() {
-        return myListView.size();
+        return myList.size();
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
         RemoteViews view = new RemoteViews(mContext.getPackageName(),
                 simple_list_item_1);
-        view.setTextViewText(text1, myListView.get(position));
+        view.setTextViewText(text1, myList.get(position));
         return view;
     }
 
@@ -68,11 +73,23 @@ public class TaskListWidgetDataProvider implements RemoteViewsService.RemoteView
         return true;
     }
 
-    private void initData() {
-        myListView.clear();
-        for (int i = 1; i <= 15; i++) {
-            myListView.add("ListView item " + i);
-        }
+    private void initListData() {
+        Log.v("TaskListWidget", "initListData");
+        String jsonStr = TaskListDataService.getInstance().getData();
+        Log.v("TaskListWidget", jsonStr);
 
+        try {
+            JSONArray tasks = new JSONArray(jsonStr);
+            // looping through All Contacts
+            myList.clear();
+
+            for (int i = 0; i < tasks.length(); i++) {
+                JSONObject c = tasks.getJSONObject(i);
+                String title = c.getString("title");
+                myList.add(title);
+            }
+        } catch (final JSONException e) {
+            Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
+        }
     }
 }
