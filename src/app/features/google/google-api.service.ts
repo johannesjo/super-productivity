@@ -152,50 +152,6 @@ export class GoogleApiService {
     }
   }
 
-  // -----------------
-  appendRow$(spreadsheetId, row): Observable<any> {
-    // @see: https://developers.google.com/sheets/api/reference/rest/
-    const range = 'A1:Z99';
-    return this._mapHttp$({
-      method: 'POST',
-      url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
-      params: {
-        key: GOOGLE_SETTINGS.API_KEY,
-        insertDataOption: 'INSERT_ROWS',
-        valueInputOption: 'USER_ENTERED'
-      },
-      data: {values: [row]}
-    });
-  }
-
-  getSpreadsheetData$(spreadsheetId, range): Observable<any> {
-    // @see: https://developers.google.com/sheets/api/reference/rest/
-    return this._mapHttp$({
-      method: 'GET',
-      url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
-      params: {
-        key: GOOGLE_SETTINGS.API_KEY,
-      },
-    });
-  }
-
-  getSpreadsheetHeadingsAndLastRow$(spreadsheetId): Observable<{ headings: any, lastRow: any } | Observable<never>> {
-    return this.getSpreadsheetData$(spreadsheetId, 'A1:Z99')
-      .pipe(map((response: any) => {
-        const range = response.body || response;
-
-        if (range && range.values && range.values[0]) {
-          return {
-            headings: range.values[0],
-            lastRow: range.values[range.values.length - 1],
-          };
-        } else {
-          this._handleError('No data found');
-          return throwError({[HANDLED_ERROR_PROP_STR]: 'No data found'});
-        }
-      }));
-  }
-
   getFileInfo$(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);

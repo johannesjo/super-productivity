@@ -3,9 +3,8 @@ export const GOOGLE_SETTINGS = {
   API_KEY: 'AIzaSyBqr3r5B5QGb_drLTK8_q9HW7YUez83Bik',
 };
 
-export const GOOGLE_DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
+export const GOOGLE_DISCOVERY_DOCS = [];
 export const GOOGLE_SCOPES = '' +
-  'https://www.googleapis.com/auth/spreadsheets.readonly' +
   ' https://www.googleapis.com/auth/drive.install' +
   ' https://www.googleapis.com/auth/drive';
 

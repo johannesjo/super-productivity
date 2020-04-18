@@ -8,9 +8,9 @@ const A = {
   API_KEY: 'AIzaSyBqr3r5B5QGb_drLTK8_q9HW7YUez83Bik',
   EL_CLIENT_ID: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
   EL_API_KEY: 'Er6sAwgXCDKPgw7y8jSuQQTv',
-  DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-  SCOPES: 'https://www.googleapis.com/auth/spreadsheets.readonly' +
-    ' https://www.googleapis.com/auth/drive'
+  DISCOVERY_DOCS: [],
+  // NOTE: separate by space if multiple
+  SCOPES: 'https://www.googleapis.com/auth/drive'
 };
 
 const CLIENT_ID = A.EL_CLIENT_ID;
@@ -18,7 +18,6 @@ const CLIENT_SECRET = A.EL_API_KEY;
 const SCOPES = [
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/drive.install',
-  'https://www.googleapis.com/auth/spreadsheets.readonly'
 ];
 
 const POPUP_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36';
