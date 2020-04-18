@@ -36,20 +36,23 @@ public class FullscreenActivity extends AppCompatActivity {
         wv.clearCache(true);
         wv.clearHistory();
 
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.getSettings().setDomStorageEnabled(true);
-        wv.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
-        wv.getSettings().setLoadsImagesAutomatically(true);
-        wv.getSettings().setLoadWithOverviewMode(true);
+        WebSettings wSettings = wv.getSettings();
+        wSettings.setJavaScriptEnabled(true);
+        wSettings.setDomStorageEnabled(true);
+        wSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        wSettings.setLoadsImagesAutomatically(true);
+        wSettings.setLoadWithOverviewMode(true);
 
 
         // allow google login
         // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
-        wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-//        wv.getSettings().setUserAgentString("Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36");
-        wv.getSettings().setUserAgentString(wv.getSettings().getUserAgentString().replace("; wv",""));
+        // Force links and redirects to open in the WebView instead of in a browser
+//        wv.setWebViewClient(new WebViewClient());
+        wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+//        wSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36");
+//        wSettings.setUserAgentString(wSettings.getUserAgentString().replace("; wv",""));
 
-        wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         JavaScriptInterface jsi = new JavaScriptInterface(this);
         wv.addJavascriptInterface(jsi, "SUPAndroid");
 
