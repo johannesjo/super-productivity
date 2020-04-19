@@ -16,7 +16,7 @@ import androidx.annotation.NonNull;
  */
 public class TaskListWidget extends AppWidgetProvider {
     public static final String LIST_CHANGED = "com.superproductivity.superproductivity.LIST_CHANGED";
-    public static String tag = "TaskListWidget";
+    public static String tag = "TW";
 
     @Override
     public void onReceive(Context context, Intent intent) {

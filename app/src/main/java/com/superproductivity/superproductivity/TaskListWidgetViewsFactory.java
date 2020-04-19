@@ -24,13 +24,13 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
     @Override
     public void onCreate() {
-        Log.v("TaskListWidget", "onCreate");
+        Log.v("TW", "onCreate");
         loadListData();
     }
 
     @Override
     public void onDataSetChanged() {
-        Log.v("TaskListWidget", "onDataSetChanged");
+        Log.v("TW", "onDataSetChanged");
         loadListData();
     }
 
@@ -73,20 +73,20 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
     }
 
     private void loadListData() {
-        Log.v("TaskListWidget", "loadListData");
+        Log.v("TW", "loadListData");
         String jsonStr = null;
 
         try {
             jsonStr = TaskListDataService.getInstance().getData();
         } catch (Exception e) {
-            Log.e("TaskListWidget", e.toString());
+            Log.e("TW", e.toString());
         }
 
-        Log.v("TaskListWidget", "jsonStr");
+        Log.v("TW", "jsonStr");
 
         if (jsonStr != null  || !jsonStr.isEmpty()) {
-            Log.v("TaskListWidget", jsonStr.length() + "");
-            Log.v("TaskListWidget", jsonStr);
+            Log.v("TW", jsonStr.length() + "");
+            Log.v("TW", jsonStr);
 
             try {
                 JSONArray tasks = new JSONArray(jsonStr);
@@ -102,7 +102,7 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
                 Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
             }
         } else {
-            Log.d("TaskListWidget", "No jsonStr data (yet)");
+            Log.d("TW", "No jsonStr data (yet)");
         }
     }
 }

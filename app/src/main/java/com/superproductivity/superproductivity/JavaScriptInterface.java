@@ -79,7 +79,7 @@ public class JavaScriptInterface {
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w("TaskListWidget", "signInResult:failed code=" + e.getStatusCode());
+            Log.w("TW", "signInResult:failed code=" + e.getStatusCode());
             _callJavaScriptFunction("window.googleGetTokenErrorCallback(\'" + e.getStatusCode() + "\')");
         }
     }
@@ -101,7 +101,7 @@ public class JavaScriptInterface {
             try {
                 accessToken = GoogleAuthUtil.getToken(activity, account.getEmail(), "oauth2:profile email");
                 activity.callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + accessToken + "\')");
-                Log.d("TaskListWidget", "accessToken " + accessToken);
+                Log.d("TW", "accessToken " + accessToken);
             } catch (IOException | GoogleAuthException e) {
                 e.printStackTrace();
             }
