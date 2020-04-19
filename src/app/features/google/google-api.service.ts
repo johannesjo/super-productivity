@@ -16,6 +16,8 @@ import {BannerId} from '../../core/banner/banner.model';
 import {T} from '../../t.const';
 import {ElectronService} from '../../core/electron/electron.service';
 import {isOnline} from '../../util/is-online';
+import {IS_ANDROID_WEB_VIEW} from '../../util/is-android-web-view';
+import {androidInterface} from '../../core/android/android-interface';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -98,6 +100,16 @@ export class GoogleApiService {
         this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
           reject(err);
         });
+      });
+    } else if (IS_ANDROID_WEB_VIEW) {
+      return androidInterface.getGoogleToken().then((token) => {
+        console.log(token);
+        this._saveToken({
+          access_token: token,
+          // TODO check if we can get a real value if existant
+          expires_at: Date.now() + (1000 * 60 * 30),
+        });
+        showSuccessMsg();
       });
     } else {
       return this._initClientLibraryIfNotDone()
@@ -307,9 +319,19 @@ export class GoogleApiService {
     });
   }
 
-  private _saveToken(res) {
+  private _saveToken(res: {
+    [key: string]: any;
+    accessToken?: string;
+    access_token?: string;
+    expires_at?: string | number;
+    expiresAt?: string | number;
+    Zi?: {
+      access_token?: string;
+      expires_at?: string | number;
+    }
+  }) {
     const accessToken = res.accessToken || res.access_token || res.Zi.access_token;
-    const expiresAt = res.expiresAt || res.expires_at || res.Zi.expires_at;
+    const expiresAt = +(res.expiresAt || res.expires_at || res.Zi.expires_at);
 
     if (accessToken !== this._session.accessToken || expiresAt !== this._session.expiresAt) {
       this._updateSession({accessToken, expiresAt});
