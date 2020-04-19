@@ -31,6 +31,20 @@ public class Google {
                 .requestIdToken(CLIENT_ID)
                 .requestEmail();
 
+        try {
+            JSONArray scopeArray = new JSONArray();
+            scopeArray.put("https://www.googleapis.com/auth/drive");
+
+            Scope[] scopes = new Scope[scopeArray.length() - 1];
+            Scope firstScope = new Scope(scopeArray.getString(0));
+            for (int i = 1; i < scopeArray.length(); i++) {
+                scopes[i - 1] = new Scope(scopeArray.getString(i));
+            }
+            googleSignInBuilder.requestScopes(firstScope, scopes);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         GoogleSignInOptions googleSignInOptions = googleSignInBuilder.build();
         googleSignInClient = GoogleSignIn.getClient((Context) ctxIn, googleSignInOptions);
         return googleSignInClient;
