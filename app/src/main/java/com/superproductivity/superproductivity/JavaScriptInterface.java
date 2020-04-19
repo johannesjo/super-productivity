@@ -1,18 +1,23 @@
 package com.superproductivity.superproductivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class JavaScriptInterface {
-    Context mContext;
+    AppCompatActivity mContext;
 
     /**
      * Instantiate the interface and set the context
      */
-    JavaScriptInterface(Context c) {
+    JavaScriptInterface(AppCompatActivity c) {
         mContext = c;
+    }
+
+    void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Toast.makeText(mContext, "JavaScriptInterface onActivityResult", Toast.LENGTH_SHORT).show();
     }
 
     @SuppressWarnings("unused")
@@ -33,12 +38,12 @@ public class JavaScriptInterface {
     }
 
 
-
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void googleSignIn() {
+    public void getGoogleToken() {
         Google g = new Google();
         g.load(mContext);
+        g.signIn(mContext);
     }
 
 }

@@ -9,8 +9,8 @@ import android.util.Log;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException;
@@ -23,6 +23,7 @@ import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
  * status bar and navigation/system bar) with user interaction.
  */
 public class FullscreenActivity extends AppCompatActivity {
+    JavaScriptInterface jsi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,43 +64,37 @@ public class FullscreenActivity extends AppCompatActivity {
 //        wSettings.setUserAgentString(wSettings.getUserAgentString().replace("; wv",""));
 
         wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        JavaScriptInterface jsi = new JavaScriptInterface(this);
+        jsi = new JavaScriptInterface(this);
         wv.addJavascriptInterface(jsi, "SUPAndroid");
 
 //        wv.loadUrl("http://10.0.2.2:4200");
         wv.loadUrl("https://app.super-productivity.com");
 
         googleSignIn();
+//        jsi.getGoogleToken();
+
     }
 
     void googleSignIn() {
         Google g = new Google();
         GoogleSignInClient googleSignInClient = g.load(this);
-
-        Intent signInIntent = googleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+        g.signIn(this);
     }
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        Log.w("TaskListWidget", "onActivityResult requestCode " + requestCode);
-
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }
+        Toast.makeText(this, "Google onActivityResult", Toast.LENGTH_SHORT).show();
+        jsi.onActivityResult(requestCode, resultCode, data);
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Log.v("TaskListWidget", "signInSUCCESS " + account.toString());
+            Log.v("TaskListWidget", "TOKEN " + account.getIdToken());
+            Toast.makeText(this, "Google Login Success", Toast.LENGTH_SHORT).show();
 
 
             // Signed in successfully, show authenticated UI.
