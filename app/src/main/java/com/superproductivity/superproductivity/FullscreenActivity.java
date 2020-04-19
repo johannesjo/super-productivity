@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -16,6 +18,7 @@ import android.widget.Toast;
  */
 public class FullscreenActivity extends AppCompatActivity {
     JavaScriptInterface jsi;
+    WebView wv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +35,7 @@ public class FullscreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fullscreen);
 
         // init web view
-        WebView wv = (WebView) findViewById(R.id.webview);
+        wv = (WebView) findViewById(R.id.webview);
 
         wv.setWebChromeClient(new WebChromeClient());
         wv.clearCache(true);
@@ -59,8 +62,8 @@ public class FullscreenActivity extends AppCompatActivity {
         jsi = new JavaScriptInterface(this, wv);
         wv.addJavascriptInterface(jsi, "SUPAndroid");
 
-        wv.loadUrl("http://10.0.2.2:4200");
-//        wv.loadUrl("https://app.super-productivity.com");
+//        wv.loadUrl("http://10.0.2.2:4200");
+        wv.loadUrl("https://app.super-productivity.com");
 
         // TODO remove
 //        jsi.getGoogleToken();
@@ -72,5 +75,27 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Toast.makeText(this, "Google onActivityResult", Toast.LENGTH_SHORT).show();
         jsi.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    public void callJavaScriptFunction(final String script) {
+        if (wv == null) {
+            return;
+        }
+        wv.post(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    wv.evaluateJavascript(script, new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String value) {
+
+                        }
+                    });
+                } else {
+                    wv.loadUrl("javascript:" + script);
+                }
+            }
+        });
     }
 }

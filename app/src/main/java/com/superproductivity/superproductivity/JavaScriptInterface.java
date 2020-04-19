@@ -2,14 +2,10 @@ package com.superproductivity.superproductivity;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -24,14 +20,14 @@ import java.lang.ref.WeakReference;
 import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 
 public class JavaScriptInterface {
-    private AppCompatActivity mContext;
+    private FullscreenActivity mContext;
     private WebView webView;
     private Google g;
 
     /**
      * Instantiate the interface and set the context
      */
-    JavaScriptInterface(AppCompatActivity c, WebView wv) {
+    JavaScriptInterface(FullscreenActivity c, WebView wv) {
         mContext = c;
         webView = wv;
     }
@@ -89,22 +85,22 @@ public class JavaScriptInterface {
     }
 
     private static class GetAccessToken extends AsyncTask<Void, Void, String> {
-        private WeakReference<AppCompatActivity> activityReference;
+        private WeakReference<FullscreenActivity> activityReference;
         private GoogleSignInAccount account;
 
         // only retain a weak reference to the activity
-        GetAccessToken(AppCompatActivity context, GoogleSignInAccount accountIn) {
+        GetAccessToken(FullscreenActivity context, GoogleSignInAccount accountIn) {
             activityReference = new WeakReference<>(context);
             account = accountIn;
         }
 
         @Override
         protected String doInBackground(Void... params) {
-            AppCompatActivity activity = activityReference.get();
+            FullscreenActivity activity = activityReference.get();
             String accessToken = null;
             try {
                 accessToken = GoogleAuthUtil.getToken(activity, account.getEmail(), "oauth2:profile email");
-//                activity._callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + accessToken + "\')");
+                activity.callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + accessToken + "\')");
                 Log.d("TaskListWidget", "accessToken " + accessToken);
             } catch (IOException | GoogleAuthException e) {
                 e.printStackTrace();
@@ -116,29 +112,12 @@ public class JavaScriptInterface {
         @Override
         protected void onPostExecute(String result) {
             // get a reference to the activity if it is still there
-            AppCompatActivity activity = activityReference.get();
+            FullscreenActivity activity = activityReference.get();
         }
     }
 
 
     private void _callJavaScriptFunction(final String script) {
-        if (webView == null) {
-            return;
-        }
-        webView.post(new Runnable() {
-            @Override
-            public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    webView.evaluateJavascript(script, new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String value) {
-
-                        }
-                    });
-                } else {
-                    webView.loadUrl("javascript:" + script);
-                }
-            }
-        });
+        mContext.callJavaScriptFunction(script);
     }
 }
