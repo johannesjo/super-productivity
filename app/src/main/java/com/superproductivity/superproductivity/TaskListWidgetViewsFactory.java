@@ -3,11 +3,8 @@ package com.superproductivity.superproductivity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,9 +12,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.R.id.text1;
-import static android.R.layout.simple_list_item_1;
 
 public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
@@ -80,10 +74,20 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
     private void loadListData() {
         Log.v("TaskListWidget", "loadListData");
-        String jsonStr = TaskListDataService.getInstance().getData();
-        Log.v("TaskListWidget", jsonStr);
+        String jsonStr = null;
 
-        if (jsonStr != null) {
+        try {
+            jsonStr = TaskListDataService.getInstance().getData();
+        } catch (Exception e) {
+            Log.e("TaskListWidget", e.toString());
+        }
+
+        Log.v("TaskListWidget", "jsonStr");
+
+        if (jsonStr != null  || !jsonStr.isEmpty()) {
+            Log.v("TaskListWidget", jsonStr.length() + "");
+            Log.v("TaskListWidget", jsonStr);
+
             try {
                 JSONArray tasks = new JSONArray(jsonStr);
                 // looping through All Contacts
@@ -97,6 +101,8 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
             } catch (final JSONException e) {
                 Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
             }
+        } else {
+            Log.d("TaskListWidget", "No jsonStr data (yet)");
         }
     }
 }

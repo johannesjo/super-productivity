@@ -48,7 +48,8 @@ public class TaskListWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
         // The list needs also to be notified for whatever reason
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.task_list);
+//        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.task_list);
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.layout.task_list_widget);
     }
 
     private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
