@@ -20,6 +20,7 @@ import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 public class JavaScriptInterface {
     private AppCompatActivity mContext;
     private WebView webView;
+    private Google g;
 
     /**
      * Instantiate the interface and set the context
@@ -62,7 +63,7 @@ public class JavaScriptInterface {
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void triggerGetGoogleToken() {
-        Google g = new Google();
+        g = new Google();
         g.load(mContext);
         g.signIn(mContext);
     }
@@ -78,11 +79,11 @@ public class JavaScriptInterface {
     private void _handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.v("TaskListWidget", "signInSUCCESS " + account.toString());
-            Log.v("TaskListWidget", "TOKEN " + account.getIdToken());
-            Toast.makeText(mContext, "Google Login Success", Toast.LENGTH_SHORT).show();
-            String token = account.getIdToken();
-            _callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + token + "\')");
+
+            String accessToken = g.requestAccessToken(account);
+            Toast.makeText(mContext, "accessToken: " + accessToken, Toast.LENGTH_SHORT).show();
+
+            _callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + accessToken + "\')");
             // Signed in successfully, show authenticated UI.
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
