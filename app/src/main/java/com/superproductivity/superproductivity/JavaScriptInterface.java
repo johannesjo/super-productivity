@@ -1,8 +1,11 @@
 package com.superproductivity.superproductivity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,12 +19,14 @@ import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 
 public class JavaScriptInterface {
     private AppCompatActivity mContext;
+    private WebView webView;
 
     /**
      * Instantiate the interface and set the context
      */
-    JavaScriptInterface(AppCompatActivity c) {
+    JavaScriptInterface(AppCompatActivity c, WebView wv) {
         mContext = c;
+        webView = wv;
     }
 
     void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -56,11 +61,18 @@ public class JavaScriptInterface {
 
     @SuppressWarnings("unused")
     @JavascriptInterface
-    public void getGoogleToken() {
+    public void triggerGetGoogleToken() {
         Google g = new Google();
         g.load(mContext);
         g.signIn(mContext);
     }
+
+//    @JavascriptInterface
+//    public void setWebViewTextCallback(){
+//        String script = WebViewUtils.formatScript("setText","This is a text from Android which is set " +
+//                "in the html page.");
+//        WebViewUtils.callJavaScriptFunction(webView,script);
+//    }
 
 
     private void _handleSignInResult(Task<GoogleSignInAccount> completedTask) {
@@ -69,11 +81,35 @@ public class JavaScriptInterface {
             Log.v("TaskListWidget", "signInSUCCESS " + account.toString());
             Log.v("TaskListWidget", "TOKEN " + account.getIdToken());
             Toast.makeText(mContext, "Google Login Success", Toast.LENGTH_SHORT).show();
+            String token = account.getIdToken();
+            _callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + token + "\')");
             // Signed in successfully, show authenticated UI.
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w("TaskListWidget", "signInResult:failed code=" + e.getStatusCode());
+            _callJavaScriptFunction("window.googleGetTokenErrorCallback(\'" + e.getStatusCode() + "\')");
         }
+    }
+
+    private void _callJavaScriptFunction(final String script) {
+        if (webView == null) {
+            return;
+        }
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    webView.evaluateJavascript(script, new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String value) {
+
+                        }
+                    });
+                } else {
+                    webView.loadUrl("javascript:" + script);
+                }
+            }
+        });
     }
 }

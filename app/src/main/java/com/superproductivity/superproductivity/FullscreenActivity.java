@@ -5,18 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
-
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
-
-import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -31,7 +23,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         // if your build is in debug mode, enable inspecting of web views
         if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
-            WebView.setWebContentsDebuggingEnabled(false);
+            WebView.setWebContentsDebuggingEnabled(true);
         }
 
         // hide action bar
@@ -63,14 +55,15 @@ public class FullscreenActivity extends AppCompatActivity {
 //        wSettings.setUserAgentString(wSettings.getUserAgentString().replace("; wv",""));
 
         wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        jsi = new JavaScriptInterface(this);
+
+        jsi = new JavaScriptInterface(this, wv);
         wv.addJavascriptInterface(jsi, "SUPAndroid");
 
-//        wv.loadUrl("http://10.0.2.2:4200");
-        wv.loadUrl("https://app.super-productivity.com");
+        wv.loadUrl("http://10.0.2.2:4200");
+//        wv.loadUrl("https://app.super-productivity.com");
 
         // TODO remove
-        jsi.getGoogleToken();
+//        jsi.getGoogleToken();
 
     }
 
