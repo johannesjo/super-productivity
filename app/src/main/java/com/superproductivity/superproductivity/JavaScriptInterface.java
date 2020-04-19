@@ -15,7 +15,7 @@ import com.google.android.gms.tasks.Task;
 import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 
 public class JavaScriptInterface {
-    AppCompatActivity mContext;
+    private AppCompatActivity mContext;
 
     /**
      * Instantiate the interface and set the context
@@ -31,7 +31,7 @@ public class JavaScriptInterface {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
+            _handleSignInResult(task);
         }
     }
 
@@ -63,7 +63,7 @@ public class JavaScriptInterface {
     }
 
 
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+    private void _handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Log.v("TaskListWidget", "signInSUCCESS " + account.toString());

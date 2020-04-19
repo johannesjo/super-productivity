@@ -31,8 +31,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         // if your build is in debug mode, enable inspecting of web views
         if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
-            WebView.setWebContentsDebuggingEnabled(true);
-
+            WebView.setWebContentsDebuggingEnabled(false);
         }
 
         // hide action bar
