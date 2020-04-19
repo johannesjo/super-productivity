@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 public class TaskListWidget extends AppWidgetProvider {
     public static final String LIST_CHANGED = "com.superproductivity.superproductivity.LIST_CHANGED";
     public static String tag = "TW";
+    public static int WIDGET_WRAPPER = R.layout.task_list_widget;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -41,15 +42,14 @@ public class TaskListWidget extends AppWidgetProvider {
         Log.v(tag, "updateAppWidget");
 
         // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.task_list_widget);
+        RemoteViews views = new RemoteViews(context.getPackageName(), WIDGET_WRAPPER);
         setRemoteAdapter(context, views);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
         // The list needs also to be notified for whatever reason
-//        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.task_list);
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.layout.task_list_widget);
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, WIDGET_WRAPPER);
     }
 
     private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
@@ -60,7 +60,7 @@ public class TaskListWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Log.v(tag, "onUpdate");
+        Log.v(tag, "onUpdate " + appWidgetIds.length + appWidgetIds.toString());
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
