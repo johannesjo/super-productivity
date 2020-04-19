@@ -19,34 +19,35 @@ import org.json.JSONObject;
 public class Google extends Activity {
     static final int RC_SIGN_IN = 1337;
 
-    private String CLIENT_ID = "37646582031-ul08eo7090slhah296crb354roun6o89.apps.googleusercontent.com";
+    private String CLIENT_ID_WEB = "37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com";
     private GoogleSignInClient googleSignInClient;
     private Context ctx;
 
-    public void load(Context ctxIn) {
+    public GoogleSignInClient load(Context ctxIn) {
         ctx = ctxIn;
 
         GoogleSignInOptions.Builder googleSignInBuilder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(CLIENT_ID)
-                .requestServerAuthCode(CLIENT_ID)
+//                .requestServerAuthCode(CLIENT_ID)
                 .requestEmail();
 
-        try {
-            JSONArray scopeArray = new JSONArray();
-            scopeArray.put("");
-
-            Scope[] scopes = new Scope[scopeArray.length() - 1];
-            Scope firstScope = new Scope(scopeArray.getString(0));
-            for (int i = 1; i < scopeArray.length(); i++) {
-                scopes[i - 1] = new Scope(scopeArray.getString(i));
-            }
-            googleSignInBuilder.requestScopes(firstScope, scopes);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            JSONArray scopeArray = new JSONArray();
+////            scopeArray.put("https://www.googleapis.com/auth/drive");
+//
+//            Scope[] scopes = new Scope[scopeArray.length() - 1];
+//            Scope firstScope = new Scope(scopeArray.getString(0));
+//            for (int i = 1; i < scopeArray.length(); i++) {
+//                scopes[i - 1] = new Scope(scopeArray.getString(i));
+//            }
+//            googleSignInBuilder.requestScopes(firstScope, scopes);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
 
         GoogleSignInOptions googleSignInOptions = googleSignInBuilder.build();
         googleSignInClient = GoogleSignIn.getClient(ctx, googleSignInOptions);
+        return googleSignInClient;
     }
 
     public void signIn() {
