@@ -70,38 +70,15 @@ public class FullscreenActivity extends AppCompatActivity {
 //        wv.loadUrl("http://10.0.2.2:4200");
         wv.loadUrl("https://app.super-productivity.com");
 
-        googleSignIn();
-//        jsi.getGoogleToken();
+        // TODO remove
+        jsi.getGoogleToken();
 
     }
-
-    void googleSignIn() {
-        Google g = new Google();
-        GoogleSignInClient googleSignInClient = g.load(this);
-        g.signIn(this);
-    }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Toast.makeText(this, "Google onActivityResult", Toast.LENGTH_SHORT).show();
         jsi.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.v("TaskListWidget", "signInSUCCESS " + account.toString());
-            Log.v("TaskListWidget", "TOKEN " + account.getIdToken());
-            Toast.makeText(this, "Google Login Success", Toast.LENGTH_SHORT).show();
-
-
-            // Signed in successfully, show authenticated UI.
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w("TaskListWidget", "signInResult:failed code=" + e.getStatusCode());
-        }
     }
 }
