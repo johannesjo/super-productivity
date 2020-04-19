@@ -1,6 +1,8 @@
 package com.superproductivity.superproductivity;
 
+import android.accounts.Account;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
@@ -10,10 +12,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 
@@ -68,22 +76,11 @@ public class JavaScriptInterface {
         g.signIn(mContext);
     }
 
-//    @JavascriptInterface
-//    public void setWebViewTextCallback(){
-//        String script = WebViewUtils.formatScript("setText","This is a text from Android which is set " +
-//                "in the html page.");
-//        WebViewUtils.callJavaScriptFunction(webView,script);
-//    }
-
 
     private void _handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-
-            String accessToken = g.requestAccessToken(account);
-            Toast.makeText(mContext, "accessToken: " + accessToken, Toast.LENGTH_SHORT).show();
-
-            _callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + accessToken + "\')");
+            new GetAccessToken(mContext, account).execute();
             // Signed in successfully, show authenticated UI.
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
@@ -92,6 +89,39 @@ public class JavaScriptInterface {
             _callJavaScriptFunction("window.googleGetTokenErrorCallback(\'" + e.getStatusCode() + "\')");
         }
     }
+
+    private static class GetAccessToken extends AsyncTask<Void, Void, String> {
+        private WeakReference<AppCompatActivity> activityReference;
+        private GoogleSignInAccount account;
+
+        // only retain a weak reference to the activity
+        GetAccessToken(AppCompatActivity context, GoogleSignInAccount accountIn) {
+            activityReference = new WeakReference<>(context);
+            account = accountIn;
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            AppCompatActivity activity = activityReference.get();
+            String accessToken = null;
+            try {
+                accessToken = GoogleAuthUtil.getToken(activity, account.getEmail(), "oauth2:profile email");
+//                activity._callJavaScriptFunction("window.googleGetTokenSuccessCallback(\'" + accessToken + "\')");
+                Log.d("TaskListWidget", "accessToken " + accessToken);
+            } catch (IOException | GoogleAuthException e) {
+                e.printStackTrace();
+            }
+            return accessToken;
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            // get a reference to the activity if it is still there
+            AppCompatActivity activity = activityReference.get();
+        }
+    }
+
 
     private void _callJavaScriptFunction(final String script) {
         if (webView == null) {
