@@ -3,8 +3,11 @@ package com.superproductivity.superproductivity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,8 +51,10 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews view = new RemoteViews(mContext.getPackageName(), simple_list_item_1);
-        view.setTextViewText(text1, myList.get(position));
+        RemoteViews view = new RemoteViews(mContext.getPackageName(), R.layout.row_layout);
+
+        view.setTextViewText(R.id.firstLine, myList.get(position));
+
         return view;
     }
 

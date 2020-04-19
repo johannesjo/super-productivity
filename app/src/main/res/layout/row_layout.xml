@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dip">
+
+<!--    <ImageView-->
+<!--            android:id="@+id/icon"-->
+<!--            android:layout_width="30dp"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:layout_alignParentTop="true"-->
+<!--            android:layout_alignParentBottom="true"-->
+<!--            android:layout_marginEnd="6dip"-->
+<!--            android:contentDescription="TODO"-->
+<!--            android:src="@mipmap/ic_launcher" />-->
+
+<!--    <TextView-->
+<!--            android:id="@+id/secondLine"-->
+<!--            android:layout_width="fill_parent"-->
+<!--            android:layout_height="14dip"-->
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:layout_alignParentBottom="true"-->
+<!--            android:layout_toEndOf="@id/icon"-->
+<!--            android:maxLines="2"-->
+<!--            android:text="Description"-->
+<!--            android:textSize="10sp" />-->
+
+    <TextView
+            android:id="@+id/firstLine"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:gravity="center_vertical"
+            android:text="Example application hehrehre"
+            android:textSize="14sp" />
+
+</LinearLayout>
