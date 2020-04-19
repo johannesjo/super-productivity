@@ -31,4 +31,14 @@ public class JavaScriptInterface {
         TaskListDataService.getInstance().setData(str);
         mContext.sendBroadcast(intent);
     }
+
+
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void googleSignIn() {
+        Google g = new Google();
+        g.load(mContext);
+    }
+
 }
