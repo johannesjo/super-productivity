@@ -13,7 +13,6 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#bbDEDFDE"
             android:orientation="vertical">
 
         <ListView
@@ -21,6 +20,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="0dp"
+                android:background="@color/white"
                 android:padding="0dp" />
     </LinearLayout>
 

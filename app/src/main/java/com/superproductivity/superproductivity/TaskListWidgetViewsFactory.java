@@ -47,8 +47,10 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
         view.setTextViewText(R.id.firstLine, task.title);
         if (task.isDone) {
             view.setInt(R.id.firstLine, "setPaintFlags", Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
+            view.setTextColor(R.id.firstLine, mContext.getResources().getColor(R.color.mutedText));
         } else {
             view.setInt(R.id.firstLine, "setPaintFlags", Paint.ANTI_ALIAS_FLAG);
+            view.setTextColor(R.id.firstLine, mContext.getResources().getColor(R.color.emphasizedText));
         }
         return view;
     }
