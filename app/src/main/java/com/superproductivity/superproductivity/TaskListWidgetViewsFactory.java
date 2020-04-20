@@ -2,15 +2,12 @@ package com.superproductivity.superproductivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
@@ -47,9 +44,12 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
     public RemoteViews getViewAt(int position) {
         RemoteViews view = new RemoteViews(mContext.getPackageName(), R.layout.row_layout);
         SpTask task = tasks[position];
-        Log.v("TW", task.title);
         view.setTextViewText(R.id.firstLine, task.title);
-
+        if (task.isDone) {
+            view.setInt(R.id.firstLine, "setPaintFlags", Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
+        } else {
+            view.setInt(R.id.firstLine, "setPaintFlags", Paint.ANTI_ALIAS_FLAG);
+        }
         return view;
     }
 
@@ -70,7 +70,8 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
     @Override
     public boolean hasStableIds() {
-        return true;
+//        return true;
+        return false;
     }
 
     private void loadListData() {
