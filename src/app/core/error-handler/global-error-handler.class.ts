@@ -9,18 +9,25 @@ import {environment} from '../../../environments/environment';
 
 let isWasErrorAlertCreated = false;
 
+const _cleanHtml = (str: string): string => {
+  const div = document.createElement('div');
+  div.innerHTML = str;
+  return div.textContent || div.innerText || '';
+};
+
 const _createErrorAlert = (eSvc: ElectronService, err: string = '', stackTrace: string, origErr: any) => {
   if (isWasErrorAlertCreated) {
     return;
   }
+  // it seems for whatever reasons, sometimes we get tags in our error which break the html
+  const errEscaped = _cleanHtml(err);
 
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
   errorAlert.style.color = 'black';
   errorAlert.innerHTML = `
-    <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${err}<h2>
-    <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please Report !</a></p>
-    <pre style="line-height: 1.3;">${err}</pre>
+    <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
+    <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please copy & report !</a></p>
     <pre id="stack-trace"
          style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
     <pre style="line-height: 1.3; font-size: 12px;">${getSimpleMeta()}</pre>
@@ -71,7 +78,7 @@ async function getStacktrace(err): Promise<string> {
 
 const getSimpleMeta = (): string => {
   const n = window.navigator;
-  return `META: SPV:{${environment.version} ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${n.language} – ${n.platform} – ${n.userAgent}`;
+  return `META: SP${environment.version} ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${n.language} – ${n.platform} – ${n.userAgent}`;
 };
 
 const isHandledError = (err): boolean => {
