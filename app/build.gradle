@@ -35,6 +35,7 @@ dependencies {
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:1.2.0'
     implementation 'com.google.android.gms:play-services-auth:18.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

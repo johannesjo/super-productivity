@@ -6,17 +6,17 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
-    private List<String> myList = new ArrayList<>();
+    private SpTask[] tasks;
     private Context mContext = null;
+    private Gson gson = new Gson();
 
     TaskListWidgetViewsFactory(Context context, Intent intent) {
         mContext = context;
@@ -40,14 +40,15 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
     @Override
     public int getCount() {
-        return myList.size();
+        return tasks.length;
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
         RemoteViews view = new RemoteViews(mContext.getPackageName(), R.layout.row_layout);
-
-        view.setTextViewText(R.id.firstLine, myList.get(position));
+        SpTask task = tasks[position];
+        Log.v("TW", task.title);
+        view.setTextViewText(R.id.firstLine, task.title);
 
         return view;
     }
@@ -84,23 +85,13 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
         Log.v("TW", "jsonStr...");
 
-        if (jsonStr != null  && !jsonStr.isEmpty()) {
+        if (jsonStr != null && !jsonStr.isEmpty()) {
             Log.v("TW", jsonStr.length() + "");
-            Log.v("TW", jsonStr);
+            tasks = gson.fromJson(jsonStr, SpTask[].class);
+//            Log.v("TW", jsonStr);
+            Log.v("TW", "______________________");
+            Log.v("TW", gson.toJson(tasks));
 
-            try {
-                JSONArray tasks = new JSONArray(jsonStr);
-                // looping through All Contacts
-                myList.clear();
-
-                for (int i = 0; i < tasks.length(); i++) {
-                    JSONObject c = tasks.getJSONObject(i);
-                    String title = c.getString("title");
-                    myList.add(title);
-                }
-            } catch (final JSONException e) {
-                Log.e("Sup Widget", "Json parsing error: " + e.getMessage());
-            }
         } else {
             Log.d("TW", "No jsonStr data (yet)");
         }
