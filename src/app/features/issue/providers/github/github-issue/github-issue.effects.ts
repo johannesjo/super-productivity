@@ -34,7 +34,7 @@ export class GithubIssueEffects {
         tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
         withLatestFrom(
           this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-          this._taskService.getAllIssueIdsForCurrentProject(GITHUB_TYPE)
+          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE)
         ),
         tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
           const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));

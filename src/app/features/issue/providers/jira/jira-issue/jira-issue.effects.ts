@@ -347,7 +347,7 @@ export class JiraIssueEffects {
       if (!Array.isArray(issues)) {
         return;
       }
-      const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
+      const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForProject(projectId, JIRA_TYPE) as string[];
 
 
       // NOTE: we check for key as well as id although normally the key should suffice

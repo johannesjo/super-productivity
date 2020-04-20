@@ -583,8 +583,18 @@ export class TaskService {
     );
   }
 
-  async getAllIssueIdsForCurrentProject(issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
-    const allTasks = await this.getAllTasksForCurrentProject();
+  async getAllTasksForProject(projectId: string): Promise<Task[]> {
+    const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
+    const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
+    const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
+    return [...allTasks, ...archiveTasks].filter(
+      task => (task.projectId === projectId)
+    );
+  }
+
+  async getAllIssueIdsForProject(projectId: string, issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
+    const allTasks = await this.getAllTasksForProject(projectId);
     return allTasks
       .filter(task => task.issueType === issueProviderKey)
       .map(task => task.issueId);

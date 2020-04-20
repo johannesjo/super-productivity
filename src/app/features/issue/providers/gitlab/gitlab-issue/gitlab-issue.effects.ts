@@ -96,7 +96,7 @@ export class GitlabIssueEffects {
 
   private async _importNewIssuesToBacklog(projectId: string, gitlabCfg: GitlabCfg) {
     const issues = await this._gitlabApiService.getProjectData$(gitlabCfg).toPromise();
-    const allTaskGitlabIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(GITLAB_TYPE) as number[];
+    const allTaskGitlabIssueIds = await this._taskService.getAllIssueIdsForProject(projectId, GITLAB_TYPE) as number[];
     const issuesToAdd = issues.filter(issue => !allTaskGitlabIssueIds.includes(issue.id));
 
     issuesToAdd.forEach((issue) => {
