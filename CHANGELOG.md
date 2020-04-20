@@ -1,3 +1,54 @@
+## [5.0.11](https://github.com/johannesjo/super-productivity/compare/v5.0.10...v5.0.11) (2020-04-20)
+
+
+### Bug Fixes
+
+* keyboard focus behaviour for task side panel not working as expected ([fde2b5b](https://github.com/johannesjo/super-productivity/commit/fde2b5bc7584e7cf8f8870f86e26572f1a8c3d17))
+* **issue:** avoid other potential error for issue import to backlog ([ca166b3](https://github.com/johannesjo/super-productivity/commit/ca166b3a0dac34b73005bceb30964d6a220ca861))
+* add attachment from context menu throwing error ([aeb01e6](https://github.com/johannesjo/super-productivity/commit/aeb01e6376291e95fcb158870d1e48ac86950d44))
+* daily summary overlapping ([c203977](https://github.com/johannesjo/super-productivity/commit/c203977d84c034ad3554f2d9a91657a3c06f7c87))
+* error on project delete [#338](https://github.com/johannesjo/super-productivity/issues/338) ([d95ff10](https://github.com/johannesjo/super-productivity/commit/d95ff10ee94270fdecef826033040560a436510c))
+* **android:** error outside web view ([ae988f8](https://github.com/johannesjo/super-productivity/commit/ae988f8711fb07dbe2eb05e9adb5eb674bda19cd))
+* project delete throwing error when task archive is not yet created [#334](https://github.com/johannesjo/super-productivity/issues/334) ([44763f0](https://github.com/johannesjo/super-productivity/commit/44763f08cd8b8bdd83a6269e18a0813fbc77593d))
+* wait for initial sync before creating repeated tasks ([f0f369d](https://github.com/johannesjo/super-productivity/commit/f0f369d5090928347f5e7261927531a48fd19820))
+
+
+### Features
+
+* **issue:** avoid potential error for issue import to backlog ([57a3539](https://github.com/johannesjo/super-productivity/commit/57a353910deb5e04141e331e9ae43b088b480aa9))
+* **task:** focus last created task after closing add task bar ([7c23f91](https://github.com/johannesjo/super-productivity/commit/7c23f917620724d1750d32d36dcbfc2ebeda4254))
+* also add version number to error meta ([840c7dd](https://github.com/johannesjo/super-productivity/commit/840c7dd0dd53345bf30af336bfd30f57b1cad9ba))
+* wait for all data being loaded before polling new issues to backlog ([cc962f3](https://github.com/johannesjo/super-productivity/commit/cc962f37a51c3a5016017f03a01bcaf0197e4229))
+* **android:** add handling for google sign in ([ed807d9](https://github.com/johannesjo/super-productivity/commit/ed807d9cb6f75df359d152763ed2a3ef59774feb))
+* **android:** add interface for widget ([7090139](https://github.com/johannesjo/super-productivity/commit/7090139921273f32449438ec70e7f5bb434c5255))
+* **android:** add svg in white ([87882a0](https://github.com/johannesjo/super-productivity/commit/87882a07efd35a52e44809fdc21e7c1124c78f46))
+* **android:** improve data loading ([ec58ea3](https://github.com/johannesjo/super-productivity/commit/ec58ea349e11319c1018dbc1dc0432bc94ff61c7))
+* **github:** remove check for issue itself and check comments only ([1c40402](https://github.com/johannesjo/super-productivity/commit/1c404027d25f45613521e95b6800607f51fd61c4))
+* add big add task button for mobile ([01a7aba](https://github.com/johannesjo/super-productivity/commit/01a7abad0c9185b601e5fbd61d6394e1e77be62d))
+* handle task archive not being created yet ([cd03d75](https://github.com/johannesjo/super-productivity/commit/cd03d75d41d03fb3681b1100177c623114be9b32))
+* improve daily summary tasks ([271952a](https://github.com/johannesjo/super-productivity/commit/271952a1e492ca8b48e2f8256ecf7d457eb8c6fe))
+* improve daily summary tasks for good :) ([6333d40](https://github.com/johannesjo/super-productivity/commit/6333d4040492ec3620e3dde73a578b0e1de417da))
+* improve mobile styling for daily summary ([a605498](https://github.com/johannesjo/super-productivity/commit/a605498898971e97e75346208951a4d2ec2fd419))
+* only clear done tasks on finish day ([85cf90b](https://github.com/johannesjo/super-productivity/commit/85cf90be9705d0b017eb3c8fa81862281f2e7948))
+* reduce battery usage ([85dc1ef](https://github.com/johannesjo/super-productivity/commit/85dc1ef04a055cb090bbdf28e5e9febb52916fdc))
+* **mobileApp:** make most basic android interface work ([f0d3d4b](https://github.com/johannesjo/super-productivity/commit/f0d3d4bd4f5982755d213221c0acd1496815956a))
+* only move repeatable tasks to archive when creating new ones ([32e99ca](https://github.com/johannesjo/super-productivity/commit/32e99ca0bd26e6f9111f1825af00ba533a41ab74))
+* only show sub tasks done today for daily summary ([21588d2](https://github.com/johannesjo/super-productivity/commit/21588d20ecf26f2a0a5e0f7059daed273eb2aa40))
+* **task:** add attachment button to attachment panel ([4e4069c](https://github.com/johannesjo/super-productivity/commit/4e4069c2d0679759a99f4246ca5f6b4bf3919644))
+* **task:** add doneOn model ([5ab04c9](https://github.com/johannesjo/super-productivity/commit/5ab04c97389c66ac839f305bc1fa5faebdf25530))
+* **task:** add keyboard shortcut for moving task to other project ([1a5817d](https://github.com/johannesjo/super-productivity/commit/1a5817d6cf6d29ae524506021088b06c5aa52d00))
+* **task:** make swiping even more satisfying ([c44ad67](https://github.com/johannesjo/super-productivity/commit/c44ad67ce684bf50543f83aa283c3c0ad725db9c))
+* **task:** make swiping more satisfying ([d2d71ff](https://github.com/johannesjo/super-productivity/commit/d2d71ff720c4f61a983d8893f332d81ebe814a65))
+* **task:** refocus task after closing context menu and move to project menu ([3fce563](https://github.com/johannesjo/super-productivity/commit/3fce5632153ab01cfe785887a8abd61de84bf271))
+* make add task button of a different color ([fa750d7](https://github.com/johannesjo/super-productivity/commit/fa750d76d5dde785586b571c9a50c0e70129fb88))
+* make backlog button a bit lighter ([a073dc8](https://github.com/johannesjo/super-productivity/commit/a073dc8ce0d0ab140fce40aaafb9d9d52a45a391))
+* **task:** hide redundant context menu entries for mobile ([b02ea3f](https://github.com/johannesjo/super-productivity/commit/b02ea3f910bca155b500b03504d9d1ab7f2d8c19))
+* **task:** remove advanced task menu ([23207de](https://github.com/johannesjo/super-productivity/commit/23207de92498b493adecd966de012df94bac41ef))
+* **task:** remove mark as done button for mobile ([8c90050](https://github.com/johannesjo/super-productivity/commit/8c90050d710609aa7e58564020bb45fcc8c7eea5))
+* **task:** swipe right closes task additional info ([bbb9efe](https://github.com/johannesjo/super-productivity/commit/bbb9efe67346015dd321335c37f3a866a6d9e87f))
+
+
+
 ## [5.0.10](https://github.com/johannesjo/super-productivity/compare/v5.0.9...v5.0.10) (2020-04-07)
 
 
