@@ -22,7 +22,7 @@ public class Google {
     GoogleSignInClient load(AppCompatActivity ctxIn) {
 
         GoogleSignInOptions.Builder googleSignInBuilder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(CLIENT_ID)
+                .requestIdToken(CLIENT_ID_WEB)
                 .requestEmail();
 
         try {
