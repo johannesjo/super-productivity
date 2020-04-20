@@ -69,13 +69,12 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    // TODO remove after this is resolved
-    console.log('---------github issue update debugging--------');
-    console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
-    console.log(commentsByOthers, updates);
-    console.log('cfg', cfg);
-    console.log('issue', issue);
-    console.log('--------end-------');
+    // console.log('---------github issue update debugging--------');
+    // console.log('wasUpdated', wasUpdated, ' lastRemoteUpdate', lastRemoteUpdate, 'task.issueLastUpdated', task.issueLastUpdated);
+    // console.log(commentsByOthers, updates);
+    // console.log('cfg', cfg);
+    // console.log('issue', issue);
+    // console.log('--------end-------');
 
     if (wasUpdated && isNotifySuccess) {
       this._snackService.open({
