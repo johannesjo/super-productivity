@@ -82,6 +82,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _blurTimeout: number;
   private _autofocusTimeout: number;
   private _attachKeyDownHandlerTimeout: number;
+  private _lastAddedTaskId: string;
 
   constructor(
     private _taskService: TaskService,
@@ -122,6 +123,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     if (this._attachKeyDownHandlerTimeout) {
       window.clearTimeout(this._attachKeyDownHandlerTimeout);
     }
+
+    if (this._lastAddedTaskId) {
+      this._taskService.focusTaskIfPossible(this._lastAddedTaskId);
+    }
   }
 
   onBlur(ev) {
@@ -156,7 +161,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       const newTaskStr = item as string;
       if (newTaskStr.length > 0) {
         this.doubleEnterCount = 0;
-        this._taskService.add(
+        this._lastAddedTaskId = this._taskService.add(
           newTaskStr,
           this.isAddToBacklog,
           {},
@@ -170,6 +175,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       }
 
     } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
+      this._lastAddedTaskId = item.taskId;
       const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
       this._taskService.updateTags(task, [...task.tagIds, this._workContextService.activeWorkContextId], task.tagIds);
 
@@ -186,6 +192,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       // NOTE: it's important that this comes before the issue check
       // so that backlog issues are found first
     } else if (item.taskId) {
+      this._lastAddedTaskId = item.taskId;
       this._taskService.moveToToday(item.taskId);
       this._snackService.open({
         ico: 'arrow_upward',
@@ -195,13 +202,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     } else {
       const res = await this._taskService.checkForTaskWithIssue(item.issueData.id, item.issueType);
       if (!res) {
-        this._issueService.addTaskWithIssue(
+        this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
           item.issueType,
           item.issueData.id,
           this._workContextService.activeWorkContextId,
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {
+        this._lastAddedTaskId = res.task.id;
         this._taskService.restoreTask(res.task, res.subTasks);
         this._snackService.open({
           ico: 'info',
@@ -209,6 +217,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           translateParams: {title: res.task.title},
         });
       } else {
+        this._lastAddedTaskId = res.task.id;
         this._taskService.moveToToday(res.task.id);
         this._snackService.open({
           ico: 'arrow_upward',

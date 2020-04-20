@@ -3,14 +3,14 @@ import {IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem} from '.
 import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
 import {from, merge, Observable, of, Subject, zip} from 'rxjs';
 import {ProjectService} from '../project/project.service';
-import {GITHUB_TYPE, JIRA_TYPE, GITLAB_TYPE} from './issue.const';
+import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from './issue.const';
 import {TaskService} from '../tasks/task.service';
 import {Task} from '../tasks/task.model';
 import {IssueServiceInterface} from './issue-service-interface';
 import {JiraCommonInterfacesService} from './providers/jira/jira-common-interfaces.service';
 import {GithubCommonInterfacesService} from './providers/github/github-common-interfaces.service';
 import {switchMap} from 'rxjs/operators';
-import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
+import {GitlabCommonInterfacesService} from './providers/gitlab/gitlab-common-interfaces.service';
 
 @Injectable({
   providedIn: 'root',
@@ -104,7 +104,7 @@ export class IssueService {
     issueIdOrData: string | number | IssueDataReduced,
     projectId: string,
     isAddToBacklog = false,
-  ) {
+  ): Promise<string> {
     if (this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
       const {issueId, issueData} = (typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string')
         ? {
@@ -118,7 +118,7 @@ export class IssueService {
 
       const {title = null, additionalFields = {}} = this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueData);
 
-      this._taskService.add(title, isAddToBacklog, {
+      return this._taskService.add(title, isAddToBacklog, {
         issueType,
         issueId: (issueId as string),
         issueWasUpdated: false,

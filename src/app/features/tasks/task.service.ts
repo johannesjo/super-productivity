@@ -240,17 +240,19 @@ export class TaskService {
       isAddToBacklog = false,
       additionalFields: Partial<Task> = {},
       isAddToBottom = false,
-  ) {
+  ): string {
     const workContextId = this._workContextService.activeWorkContextId;
     const workContextType = this._workContextService.activeWorkContextType;
+    const task = this.createNewTaskWithDefaults(title, additionalFields, workContextType, workContextId);
 
     this._store.dispatch(new AddTask({
-      task: this.createNewTaskWithDefaults(title, additionalFields, workContextType, workContextId),
+      task,
       workContextId,
       workContextType,
       isAddToBacklog,
       isAddToBottom
     }));
+    return task && task.id;
   }
 
   remove(task: TaskWithSubTasks) {
@@ -390,6 +392,14 @@ export class TaskService {
 
   focusTask(id: string) {
     document.getElementById('t-' + id).focus();
+  }
+
+  focusTaskIfPossible(id: string) {
+    const tEl = document.getElementById('t-' + id);
+
+    if (tEl) {
+      tEl.focus();
+    }
   }
 
   moveToToday(id, isMoveToTop = false) {
