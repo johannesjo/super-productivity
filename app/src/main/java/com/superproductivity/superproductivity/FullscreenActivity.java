@@ -64,7 +64,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
         // needs to come last for some settings to take effect
         if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
-            wv.loadUrl("http://10.0.2.2:4200");
+//            wv.loadUrl("http://10.0.2.2:4200");
+            wv.loadUrl("https://app.super-productivity.com");
         } else {
             wv.loadUrl("https://app.super-productivity.com");
         }
@@ -73,7 +74,7 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Toast.makeText(this, "Google onActivityResult", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Google onActivityResult", Toast.LENGTH_SHORT).show();
         jsi.onActivityResult(requestCode, resultCode, data);
     }
 

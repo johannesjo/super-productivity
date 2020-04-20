@@ -42,7 +42,7 @@ public class JavaScriptInterface {
     }
 
     void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Toast.makeText(mContext, "JavaScriptInterface onActivityResult", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(mContext, "JavaScriptInterface onActivityResult", Toast.LENGTH_SHORT).show();
 
         if (requestCode == RC_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach
