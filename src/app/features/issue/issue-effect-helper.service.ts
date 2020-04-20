@@ -7,6 +7,7 @@ import {concatMap, filter, first, switchMap} from 'rxjs/operators';
 import {WorkContextService} from '../work-context/work-context.service';
 import {Observable} from 'rxjs';
 import {DataInitService} from '../../core/data-init/data-init.service';
+import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,7 @@ export class IssueEffectHelperService {
     )
   );
   pollToBacklogTriggerToProjectId$: Observable<string> = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    concatMap(() => this._globalSyncService.afterInitialSyncDone$),
     concatMap(() => this.pollToBacklogActions$),
     switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
     // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
@@ -37,6 +39,7 @@ export class IssueEffectHelperService {
     private _projectService: ProjectService,
     private _workContextService: WorkContextService,
     private _dataInitService: DataInitService,
+    private _globalSyncService: GlobalSyncService,
   ) {
   }
 }
