@@ -53,9 +53,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.task = v;
 
     this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
-    this.taskId = 't-' + this.task.id;
+    this.taskIdWithPrefix = 't-' + this.task.id;
     this.isDone = v.isDone;
-
     this._task$.next(v);
   }
 
@@ -101,7 +100,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @HostBinding('tabindex') tabIndex = 1;
   @HostBinding('class.isDone') isDone: boolean;
-  @HostBinding('id') taskId: string;
+  @HostBinding('id') taskIdWithPrefix: string;
   // @see ngOnInit
   @HostBinding('class.isCurrent') isCurrent: boolean;
   @HostBinding('class.isSelected') isSelected: boolean;
@@ -294,7 +293,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(result => {
         this.focusSelf();
         if (result) {
-          this._attachmentService.addAttachment(this.taskId, result);
+          this._attachmentService.addAttachment(this.task.id, result);
         }
       });
   }
