@@ -62,7 +62,8 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
     const updates: number[] = [
       ...(commentsByOthers.map(comment => new Date(comment.created_at).getTime())),
-      issueUpdate
+      // todo check if this can be re-implemented
+      // issueUpdate
     ].sort();
     const lastRemoteUpdate = updates[updates.length - 1];
 
