@@ -1,11 +1,19 @@
 package com.superproductivity.superproductivity;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
+
+import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -17,6 +25,7 @@ import com.google.android.gms.tasks.Task;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.superproductivity.superproductivity.Google.RC_SIGN_IN;
 
 public class JavaScriptInterface {
@@ -61,6 +70,44 @@ public class JavaScriptInterface {
         mContext.sendBroadcast(intent);
     }
 
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void showNotification(String title, String body) {
+        Log.d("TW", "title " + title);
+        Log.d("TW", "body " + body);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext.getApplicationContext(), "notify_001");
+        Intent ii = new Intent(mContext.getApplicationContext(), FullscreenActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, ii, 0);
+
+        NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
+        bigText.setBigContentTitle(title);
+
+        if (body != null) {
+            bigText.bigText(body);
+        }
+        mBuilder.setContentIntent(pendingIntent);
+        mBuilder.setSmallIcon(R.mipmap.ic_launcher_round);
+//        mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        mBuilder.setPriority(Notification.PRIORITY_MAX);
+        mBuilder.setStyle(bigText);
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+// === Removed some obsoletes
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "SUP_CHANNEL_ID";
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    "Super Productivity",
+                    NotificationManager.IMPORTANCE_HIGH);
+            mNotificationManager.createNotificationChannel(channel);
+            mBuilder.setChannelId(channelId);
+        }
+
+        mNotificationManager.notify(0, mBuilder.build());
+    }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
