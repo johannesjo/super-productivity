@@ -2,7 +2,8 @@
      [@taskAdditionalInfoTaskChange]="task.id"
      class="wrapper">
 
-  <header class="task-title-wrapper show-xs-only">
+  <header *ngIf="(layoutService.isScreenXs$|async)"
+          class="task-title-wrapper">
     <button mat-icon-button
             (click)="close()">
       <mat-icon>arrow_back</mat-icon>
@@ -23,7 +24,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     [type]="'panel'"
-    class="show-xs-only">
+    *ngIf="(layoutService.isScreenXs$|async)">
     <ng-container panel-header>
       <mat-icon class="panel-header-icon">list</mat-icon>
       <span>{{T.F.TASK.ADDITIONAL_INFO.SUB_TASKS|translate:{nr: task.subTasks?.length} }}</span>

@@ -43,6 +43,7 @@ import {ProjectService} from '../../project/project.service';
 import {IS_ELECTRON} from '../../../app.constants';
 import {IPC} from '../../../../../electron/ipc-events.const';
 import {ElectronService} from '../../../core/electron/electron.service';
+import {LayoutService} from '../../../core-ui/layout/layout.service';
 
 @Component({
   selector: 'task-additional-info',
@@ -180,6 +181,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   constructor(
     public attachmentService: TaskAttachmentService,
     public taskService: TaskService,
+    public layoutService: LayoutService,
     private _resolver: ComponentFactoryResolver,
     private _issueService: IssueService,
     private _reminderService: ReminderService,

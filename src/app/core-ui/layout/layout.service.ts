@@ -20,11 +20,16 @@ import {WorkContextService} from '../../features/work-context/work-context.servi
 const NAV_ALWAYS_VISIBLE = 1250;
 const NAV_OVER_NOTES_NEXT = 800;
 const BOTH_OVER = 720;
+const XS_MAX = 599;
 
 @Injectable({
   providedIn: 'root',
 })
 export class LayoutService {
+  isScreenXs$ = this._breakPointObserver.observe([
+    `(max-width: ${XS_MAX}px)`,
+  ]).pipe(map(result => result.matches));
+
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver.observe([
     `(min-width: ${NAV_ALWAYS_VISIBLE}px)`,
