@@ -534,6 +534,7 @@ export class PersistenceService {
   }
 
   private async _loadFromDb(key: string): Promise<any> {
-    return this._databaseService.load(key);
+    // NOTE: we use undefined as null does not trigger default function arguments
+    return await this._databaseService.load(key) || undefined;
   }
 }
