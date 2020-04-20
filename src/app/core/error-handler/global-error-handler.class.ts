@@ -5,6 +5,7 @@ import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
 import {BannerService} from '../banner/banner.service';
 import * as StackTrace from 'stacktrace-js';
 import {ElectronService} from '../electron/electron.service';
+import {environment} from '../../../environments/environment';
 
 let isWasErrorAlertCreated = false;
 
@@ -70,7 +71,7 @@ async function getStacktrace(err): Promise<string> {
 
 const getSimpleMeta = (): string => {
   const n = window.navigator;
-  return `META: ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${n.language} – ${n.platform} – ${n.userAgent}`;
+  return `META: SPV:{${environment.version} ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${n.language} – ${n.platform} – ${n.userAgent}`;
 };
 
 const isHandledError = (err): boolean => {
