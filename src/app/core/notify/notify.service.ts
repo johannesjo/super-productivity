@@ -6,6 +6,8 @@ import {IS_MOBILE} from '../../util/is-mobile';
 import {TranslateService} from '@ngx-translate/core';
 import {ElectronService} from '../electron/electron.service';
 import {UiHelperService} from '../../features/ui-helper/ui-helper.service';
+import {IS_ANDROID_WEB_VIEW} from '../../util/is-android-web-view';
+import {androidInterface} from '../android/android-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -42,6 +44,8 @@ export class NotifyService {
         ...options,
         body,
       });
+    } else if (IS_ANDROID_WEB_VIEW) {
+      androidInterface.showNotification(title || 'NO_TITLE', body);
     } else if (this._isBasicNotificationSupport()) {
       const permission = await Notification.requestPermission();
       // not supported for basic notifications so we delete them

@@ -29,6 +29,9 @@ const _createErrorAlert = (eSvc: ElectronService, err: string = '', stackTrace: 
   errorAlert.innerHTML = `
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please copy & report !</a></p>
+    <!-- second error is needed, because it might be too long -->
+    <pre style="line-height: 1.3;">${errEscaped}</pre>
+
     <pre id="stack-trace"
          style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
     <pre style="line-height: 1.3; font-size: 12px;">${getSimpleMeta()}</pre>

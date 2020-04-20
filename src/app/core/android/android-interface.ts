@@ -3,6 +3,8 @@ import {IS_ANDROID_WEB_VIEW} from '../../util/is-android-web-view';
 export interface AndroidInterface {
   showToast(s: string): void;
 
+  showNotification(title: string, body: string): void;
+
   updateTaskData(s: string): void;
 
   triggerGetGoogleToken(): void;
