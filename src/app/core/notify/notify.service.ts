@@ -30,8 +30,8 @@ export class NotifyService {
 
     const svcReg = this._isServiceWorkerAvailable() && await navigator.serviceWorker.getRegistration('ngsw-worker.js');
 
-    if (svcReg) {
-      svcReg.showNotification(title, {
+    if (svcReg && svcReg.showNotification) {
+      await svcReg.showNotification(title, {
         icon: 'assets/icons/icon-128x128.png',
         vibrate: [100, 50, 100],
         silent: false,
