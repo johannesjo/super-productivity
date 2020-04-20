@@ -20,7 +20,7 @@ import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
 import {environment} from '../../../environments/environment';
 
-const MAX_WAIT_FOR_INITIAL_SYNC = 10000;
+const MAX_WAIT_FOR_INITIAL_SYNC = 20000;
 
 @Injectable({
   providedIn: 'root',
