@@ -124,6 +124,8 @@ export class IssueService {
         issueWasUpdated: false,
         issueLastUpdated: Date.now(),
         ...additionalFields,
+        // this is very important as chances are we are in another context already when adding!
+        projectId,
       });
     }
   }
