@@ -15,10 +15,10 @@ import java.util.List;
 
 public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
-    List<String> myList = new ArrayList<>();
-    Context mContext = null;
+    private List<String> myList = new ArrayList<>();
+    private Context mContext = null;
 
-    public TaskListWidgetViewsFactory(Context context, Intent intent) {
+    TaskListWidgetViewsFactory(Context context, Intent intent) {
         mContext = context;
     }
 
@@ -82,9 +82,9 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
             Log.e("TW", e.toString());
         }
 
-        Log.v("TW", "jsonStr");
+        Log.v("TW", "jsonStr...");
 
-        if (jsonStr != null  || !jsonStr.isEmpty()) {
+        if (jsonStr != null  && !jsonStr.isEmpty()) {
             Log.v("TW", jsonStr.length() + "");
             Log.v("TW", jsonStr);
 

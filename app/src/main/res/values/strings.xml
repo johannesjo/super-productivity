@@ -10,4 +10,5 @@
     </string>
     <string name="title_activity_fullscreen">Super Productivity</string>
     <string name="widget_no_data">Please tap here to load data</string>
+    <string name="empty_task_list_text">No tasks yet</string>
 </resources>

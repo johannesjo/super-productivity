@@ -15,34 +15,34 @@
             android:usesCleartextTraffic="true">
 
         <!-- App in TWA -->
-<!--        <activity-->
-<!--                android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"-->
-<!--                android:theme="@style/Theme.LauncherActivity">-->
+        <!--        <activity-->
+        <!--                android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"-->
+        <!--                android:theme="@style/Theme.LauncherActivity">-->
 
-<!--            <meta-data-->
-<!--                    android:name="asset_statements"-->
-<!--                    android:resource="@string/asset_statements" />-->
+        <!--            <meta-data-->
+        <!--                    android:name="asset_statements"-->
+        <!--                    android:resource="@string/asset_statements" />-->
 
-<!--            <meta-data-->
-<!--                    android:name="android.support.customtabs.trusted.DEFAULT_URL"-->
-<!--                    android:value="https://app.super-productivity.com" />-->
+        <!--            <meta-data-->
+        <!--                    android:name="android.support.customtabs.trusted.DEFAULT_URL"-->
+        <!--                    android:value="https://app.super-productivity.com" />-->
 
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+        <!--            <intent-filter>-->
+        <!--                <action android:name="android.intent.action.MAIN" />-->
+        <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+        <!--            </intent-filter>-->
 
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.VIEW" />-->
+        <!--            <intent-filter>-->
+        <!--                <action android:name="android.intent.action.VIEW" />-->
 
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+        <!--                <category android:name="android.intent.category.DEFAULT" />-->
+        <!--                <category android:name="android.intent.category.BROWSABLE" />-->
 
-<!--                <data-->
-<!--                        android:host="app.super-productivity.com"-->
-<!--                        android:scheme="https" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+        <!--                <data-->
+        <!--                        android:host="app.super-productivity.com"-->
+        <!--                        android:scheme="https" />-->
+        <!--            </intent-filter>-->
+        <!--        </activity>-->
 
 
         <!-- App in WebFrame -->
@@ -53,10 +53,10 @@
                 android:theme="@style/FullscreenTheme">
 
             <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
-                        <intent-filter>
-                            <action android:name="android.intent.action.MAIN" />
-                            <category android:name="android.intent.category.LAUNCHER" />
-                        </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
             <!--
               This intent-filter allows the Trusted Web Activity to handle Intents to open
@@ -90,6 +90,7 @@
 
         <service
                 android:name=".TaskListWidgetViewsService"
+                android:exported="false"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 

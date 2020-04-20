@@ -24,4 +24,14 @@
                 android:padding="0dp" />
     </LinearLayout>
 
+    <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/empty_task_list_text"
+            android:textColor="#F8F8F8"
+            android:textSize="20sp"
+            android:visibility="gone" />
+
 </FrameLayout>
