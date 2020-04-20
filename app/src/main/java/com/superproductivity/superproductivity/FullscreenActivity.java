@@ -63,9 +63,11 @@ public class FullscreenActivity extends AppCompatActivity {
         wv.addJavascriptInterface(jsi, "SUPAndroid");
 
         // needs to come last for some settings to take effect
-        wv.loadUrl("http://10.0.2.2:4200");
-//        wv.loadUrl("https://app.super-productivity.com");
-
+        if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+            wv.loadUrl("http://10.0.2.2:4200");
+        } else {
+            wv.loadUrl("https://app.super-productivity.com");
+        }
     }
 
     @Override
