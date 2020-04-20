@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
@@ -76,18 +77,20 @@ public class JavaScriptInterface {
         Log.d("TW", "title " + title);
         Log.d("TW", "body " + body);
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext.getApplicationContext(), "notify_001");
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext.getApplicationContext(), "SUP_CHANNEL_ID");
         Intent ii = new Intent(mContext.getApplicationContext(), FullscreenActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, ii, 0);
 
         NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
         bigText.setBigContentTitle(title);
 
-        if (body != null) {
+        if (body != null && !body.isEmpty()) {
             bigText.bigText(body);
         }
         mBuilder.setContentIntent(pendingIntent);
-        mBuilder.setSmallIcon(R.mipmap.ic_launcher_round);
+        mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        mBuilder.setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(),
+                R.mipmap.ic_launcher));
 //        mBuilder.setSmallIcon(R.mipmap.ic_launcher);
         mBuilder.setPriority(Notification.PRIORITY_MAX);
         mBuilder.setStyle(bigText);
