@@ -28,6 +28,7 @@ import {DataInitService} from './core/data-init/data-init.service';
 import {ImexMetaService} from './imex/imex-meta/imex-meta.service';
 import {AndroidService} from './core/android/android.service';
 import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
+import {isOnline} from './util/is-online';
 
 
 @Component({
@@ -108,14 +109,17 @@ export class AppComponent implements OnDestroy {
       });
     } else {
       // WEB VERSION
-      this._chromeExtensionInterface.init();
       if (this._swUpdate.isEnabled) {
+        if (isOnline()) {
+          this._swUpdate.checkForUpdate();
+        }
         this._swUpdate.available.subscribe(() => {
           if (confirm(this._translateService.instant(T.APP.UPDATE_WEB_APP))) {
             window.location.reload();
           }
         });
       }
+      this._chromeExtensionInterface.init();
 
       window.addEventListener('beforeunload', (e) => {
         if (this._configService.cfg.misc.isConfirmBeforeExit) {
