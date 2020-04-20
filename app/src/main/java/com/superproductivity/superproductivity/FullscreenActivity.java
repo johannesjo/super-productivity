@@ -47,7 +47,7 @@ public class FullscreenActivity extends AppCompatActivity {
         wSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         wSettings.setLoadsImagesAutomatically(true);
         wSettings.setLoadWithOverviewMode(true);
-
+        wSettings.setDatabaseEnabled(true);
 
         // allow google login
         // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
@@ -62,11 +62,9 @@ public class FullscreenActivity extends AppCompatActivity {
         jsi = new JavaScriptInterface(this, wv);
         wv.addJavascriptInterface(jsi, "SUPAndroid");
 
-//        wv.loadUrl("http://10.0.2.2:4200");
-        wv.loadUrl("https://app.super-productivity.com");
-
-        // TODO remove
-//        jsi.getGoogleToken();
+        // needs to come last for some settings to take effect
+        wv.loadUrl("http://10.0.2.2:4200");
+//        wv.loadUrl("https://app.super-productivity.com");
 
     }
 
