@@ -568,21 +568,6 @@ export class TaskService {
       || await this._persistenceService.taskArchive.getById(id);
   }
 
-  async getAllTasksForCurrentProject(): Promise<Task[]> {
-    if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
-      throw new Error('Should only be called when in project context');
-    }
-    const projectId = this._workContextService.activeWorkContextId;
-
-    const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
-    const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
-    const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
-    return [...allTasks, ...archiveTasks].filter(
-      task => (task.projectId === projectId)
-    );
-  }
-
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
     const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();

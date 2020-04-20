@@ -46,7 +46,7 @@ export class MetricService {
           this._projectService.getBreakTimeForProject$(activeId),
           this._worklogService.worklog$,
           this._worklogService.totalTimeSpent$,
-          from(this._taskService.getAllTasksForCurrentProject())
+          from(this._taskService.getAllTasksForProject(activeId))
         ]).pipe(
           map(mapSimpleMetrics),
           // because otherwise the page is always redrawn if a task is active
