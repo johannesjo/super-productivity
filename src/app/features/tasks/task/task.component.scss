@@ -543,6 +543,7 @@
   z-index: $z-swipe-block;
   transition: $transition-standard;
   border-radius: $task-border-radius;
+  overflow: hidden;
 
   &.isActive {
     background-color: $c-accent;
