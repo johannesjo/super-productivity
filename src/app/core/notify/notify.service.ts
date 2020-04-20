@@ -3,7 +3,6 @@ import {NotifyModel} from './notify.model';
 import {environment} from '../../../environments/environment';
 import {IS_ELECTRON} from '../../app.constants';
 import {IS_MOBILE} from '../../util/is-mobile';
-import {IPC} from '../../../../electron/ipc-events.const';
 import {TranslateService} from '@ngx-translate/core';
 import {ElectronService} from '../electron/electron.service';
 import {UiHelperService} from '../../features/ui-helper/ui-helper.service';
@@ -29,9 +28,10 @@ export class NotifyService {
     const title = this._translateService.instant(options.title, options.translateParams);
     const body = options.body && this._translateService.instant(options.body, options.translateParams);
 
-    if (this._isServiceWorkerAvailable()) {
-      const reg = await navigator.serviceWorker.getRegistration('ngsw-worker.js');
-      reg.showNotification(title, {
+    const svcReg = this._isServiceWorkerAvailable() && await navigator.serviceWorker.getRegistration('ngsw-worker.js');
+
+    if (svcReg) {
+      svcReg.showNotification(title, {
         icon: 'assets/icons/icon-128x128.png',
         vibrate: [100, 50, 100],
         silent: false,
@@ -42,7 +42,6 @@ export class NotifyService {
         ...options,
         body,
       });
-
     } else if (this._isBasicNotificationSupport()) {
       const permission = await Notification.requestPermission();
       // not supported for basic notifications so we delete them
