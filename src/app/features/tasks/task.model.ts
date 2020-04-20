@@ -34,7 +34,7 @@ export interface TaskArchive extends EntityState<ArchiveTask> {
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 
 export interface IssueFieldsForTask {
-  // issue stuff
+  // NOTE: keep in mind that the issueId is not unique (especially for github)
   issueId: string;
   issueType: IssueProviderKey;
   issueWasUpdated: boolean;

@@ -3,10 +3,10 @@ import {ProjectService} from '../project/project.service';
 import {Actions, ofType} from '@ngrx/effects';
 import {setActiveWorkContext} from '../work-context/store/work-context.actions';
 import {ProjectActionTypes} from '../project/store/project.actions';
-import {filter, first, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, first, switchMap} from 'rxjs/operators';
 import {WorkContextService} from '../work-context/work-context.service';
 import {Observable} from 'rxjs';
-import {IssueIntegrationCfg, IssueProviderKey} from './issue.model';
+import {DataInitService} from '../../core/data-init/data-init.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +24,8 @@ export class IssueEffectHelperService {
       ProjectActionTypes.UpdateProjectIssueProviderCfg,
     )
   );
-  pollToBacklogTriggerToProjectId$: Observable<string> = this.pollToBacklogActions$.pipe(
+  pollToBacklogTriggerToProjectId$: Observable<string> = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    concatMap(() => this.pollToBacklogActions$),
     switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
     // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
     filter(isProject => isProject),
@@ -35,6 +36,7 @@ export class IssueEffectHelperService {
     private  _actions$: Actions,
     private _projectService: ProjectService,
     private _workContextService: WorkContextService,
+    private _dataInitService: DataInitService,
   ) {
   }
 }
