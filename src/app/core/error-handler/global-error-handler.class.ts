@@ -25,6 +25,7 @@ const _createErrorAlert = (eSvc: ElectronService, err: string = '', stackTrace: 
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
   errorAlert.style.color = 'black';
+  errorAlert.style.maxHeight = '100vh';
   errorAlert.innerHTML = `
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please copy & report !</a></p>
