@@ -24,7 +24,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     [type]="'panel'"
-    *ngIf="(layoutService.isScreenXs$|async)">
+    *ngIf="!task.parentId && (layoutService.isScreenXs$|async)">
     <ng-container panel-header>
       <mat-icon class="panel-header-icon">list</mat-icon>
       <span>{{T.F.TASK.ADDITIONAL_INFO.SUB_TASKS|translate:{nr: task.subTasks?.length} }}</span>
