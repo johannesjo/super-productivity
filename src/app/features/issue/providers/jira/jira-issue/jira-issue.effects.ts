@@ -41,6 +41,7 @@ import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 import {WorkContextType} from '../../../../work-context/work-context.model';
+import {GlobalSyncService} from '../../../../../core/global-sync/global-sync.service';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -51,7 +52,8 @@ export class JiraIssueEffects {
     ofType(setActiveWorkContext),
     filter(({activeType}) => (activeType === WorkContextType.PROJECT)),
     concatMap(({activeId}) => this._getCfgOnce$(activeId)),
-    filter(jiraCfg => jiraCfg.isEnabled),
+    // NOTE: might not be loaded yet
+    filter(jiraCfg => jiraCfg && jiraCfg.isEnabled),
     // just fire any single request
     concatMap((jiraCfg) => this._jiraApiService.getCurrentUser$(jiraCfg)),
   );
@@ -257,6 +259,7 @@ export class JiraIssueEffects {
               private readonly _configService: GlobalConfigService,
               private readonly _snackService: SnackService,
               private readonly _projectService: ProjectService,
+              private readonly _globalSyncService: GlobalSyncService,
               private readonly _taskService: TaskService,
               private readonly _workContextService: WorkContextService,
               private readonly _jiraApiService: JiraApiService,
