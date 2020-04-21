@@ -64,7 +64,7 @@ export class ReminderService {
       // TODO we need a better solution for this
       // we do this to wait for syncing and the like
       merge(
-        this._globalSyncService.afterInitialSyncDone$,
+        this._globalSyncService.afterInitialSyncDoneAndDataLoadedInitially$,
         timer(MAX_WAIT_FOR_INITIAL_SYNC),
       ).pipe(first()).subscribe(async () => {
         this._w.addEventListener('message', this._onReminderActivated.bind(this));

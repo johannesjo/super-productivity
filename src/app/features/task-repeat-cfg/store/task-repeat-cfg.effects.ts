@@ -40,7 +40,7 @@ export class TaskRepeatCfgEffects {
 
   @Effect() createRepeatableTasks: any = this._actions$.pipe(
     ofType(setActiveWorkContext),
-    concatMap((() => this._globalSyncService.afterInitialSyncDone$)),
+    concatMap((() => this._globalSyncService.afterInitialSyncDoneAndDataLoadedInitially$)),
     concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(
       take(1),
     )),

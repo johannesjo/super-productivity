@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable, of, ReplaySubject} from 'rxjs';
-import {distinctUntilChanged, filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
+import {concatMap, distinctUntilChanged, filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {SyncProvider} from './sync-provider';
+import {DataInitService} from '../data-init/data-init.service';
 
 // Weird view service
 // TODO poor design, replace with something better
@@ -30,15 +31,19 @@ export class GlobalSyncService {
     startWith(false),
   );
 
-  afterInitialSyncDone$: Observable<boolean> = this._isInitialSyncDone$.pipe(
+  afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
     filter(isDone => isDone),
     take(1),
+    // NOTE: just makes sense
+    // should normally be already loaded, but if there is NO initial sync it makes sense to wait here
+    concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
     shareReplay(1),
   );
 
   constructor(
     private readonly _store: Store<any>,
     private readonly _globalConfigService: GlobalConfigService,
+    private readonly _dataInitService: DataInitService,
   ) {
   }
 
