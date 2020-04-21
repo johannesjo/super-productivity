@@ -28,7 +28,8 @@
       <button (click)="openEditDialog(attachment)"
               class="view-btn"
               mat-flat-button>
-        <mat-icon>search</mat-icon>
+        <mat-icon *ngIf="attachment?.type==='IMG'">search</mat-icon>
+        <mat-icon *ngIf="attachment?.type!=='IMG'">open_in_new</mat-icon>
       </button>
 
       <button (click)="openEditDialog(attachment)"
