@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -29,45 +30,49 @@ public class FullscreenActivity extends AppCompatActivity {
             WebView.setWebContentsDebuggingEnabled(true);
         }
 
-        // hide action bar
-        getSupportActionBar().hide();
+        Log.v("TW", "onCreate");
+        if (savedInstanceState == null) {
+            Log.v("TW", "onCreate reeeeeeeeeeeeeeeeeekload");
+            // hide action bar
+            getSupportActionBar().hide();
 
-        setContentView(R.layout.activity_fullscreen);
+            setContentView(R.layout.activity_fullscreen);
 
-        // init web view
-        wv = (WebView) findViewById(R.id.webview);
+            // init web view
+            wv = (WebView) findViewById(R.id.webview);
 
-        wv.setWebChromeClient(new WebChromeClient());
-        wv.clearCache(true);
-        wv.clearHistory();
+            wv.setWebChromeClient(new WebChromeClient());
+            wv.clearCache(true);
+            wv.clearHistory();
 
-        WebSettings wSettings = wv.getSettings();
-        wSettings.setJavaScriptEnabled(true);
-        wSettings.setDomStorageEnabled(true);
-        wSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        wSettings.setLoadsImagesAutomatically(true);
-        wSettings.setLoadWithOverviewMode(true);
-        wSettings.setDatabaseEnabled(true);
+            WebSettings wSettings = wv.getSettings();
+            wSettings.setJavaScriptEnabled(true);
+            wSettings.setDomStorageEnabled(true);
+            wSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            wSettings.setLoadsImagesAutomatically(true);
+            wSettings.setLoadWithOverviewMode(true);
+            wSettings.setDatabaseEnabled(true);
 
-        // allow google login
-        // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
-        // Force links and redirects to open in the WebView instead of in a browser
+            // allow google login
+            // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
+            // Force links and redirects to open in the WebView instead of in a browser
 //        wv.setWebViewClient(new WebViewClient());
-        wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+            wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 //        wSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36");
 //        wSettings.setUserAgentString(wSettings.getUserAgentString().replace("; wv",""));
 
-        wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+            wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
-        jsi = new JavaScriptInterface(this, wv);
-        wv.addJavascriptInterface(jsi, "SUPAndroid");
+            jsi = new JavaScriptInterface(this, wv);
+            wv.addJavascriptInterface(jsi, "SUPAndroid");
 
-        // needs to come last for some settings to take effect
-        if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+            // needs to come last for some settings to take effect
+            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
 //            wv.loadUrl("http://10.0.2.2:4200");
-            wv.loadUrl("https://app.super-productivity.com");
-        } else {
-            wv.loadUrl("https://app.super-productivity.com");
+                wv.loadUrl("https://app.super-productivity.com");
+            } else {
+                wv.loadUrl("https://app.super-productivity.com");
+            }
         }
     }
 
