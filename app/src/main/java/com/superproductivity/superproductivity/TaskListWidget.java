@@ -1,5 +1,6 @@
 package com.superproductivity.superproductivity;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -43,6 +44,13 @@ public class TaskListWidget extends AppWidgetProvider {
 
         // Construct the RemoteViews object
         RemoteViews rvs = createAppWidgetRemoteViews(context, appWidgetId);
+
+        // Click stuff, needs to be set here too ;/
+        Intent clickIntent = new Intent(context, FullscreenActivity.class);
+        PendingIntent clickPI = PendingIntent.getActivity(context, 0,
+                clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        rvs.setPendingIntentTemplate(WIDGET_LIST, clickPI);
+
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, rvs);

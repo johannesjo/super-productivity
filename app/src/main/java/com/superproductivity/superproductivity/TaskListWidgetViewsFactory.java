@@ -7,6 +7,8 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.Gson;
 
 public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteViewsFactory {
@@ -30,6 +32,7 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
         Log.v("TW", "onDataSetChanged");
         loadListData();
     }
+
 
     @Override
     public void onDestroy() {
@@ -58,6 +61,11 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
             view.setTextColor(R.id.firstLine, mContext.getResources().getColor(R.color.emphasizedText));
             view.setTextViewText(R.id.button, "");
         }
+
+
+        view.setOnClickFillInIntent(R.id.firstLine, this.getPendingSelfIntent(null));
+        view.setOnClickFillInIntent(R.id.button, this.getPendingSelfIntent(null));
+
         return view;
     }
 
@@ -104,5 +112,16 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
         } else {
             Log.d("TW", "No jsonStr data (yet)");
         }
+    }
+
+
+    private Intent getPendingSelfIntent(@Nullable String action) {
+        Intent intent = new Intent(mContext, FullscreenActivity.class);
+//        intent.setAction(action);
+//        Bundle extras = new Bundle();
+//        Intent fillInIntent = new Intent();
+//        intent.putExtra("xxx", "xxxxxx");
+
+        return intent;
     }
 }
