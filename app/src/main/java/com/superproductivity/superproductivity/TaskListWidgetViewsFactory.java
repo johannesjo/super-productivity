@@ -37,7 +37,11 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
     @Override
     public int getCount() {
-        return tasks.length;
+        if (tasks != null) {
+            return tasks.length;
+        } else {
+            return 0;
+        }
     }
 
     @Override
