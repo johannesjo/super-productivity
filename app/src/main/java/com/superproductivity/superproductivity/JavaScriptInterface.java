@@ -91,7 +91,7 @@ public class JavaScriptInterface {
         mBuilder.setSmallIcon(R.mipmap.ic_launcher);
         mBuilder.setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(),
                 R.mipmap.ic_launcher));
-//        mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        mBuilder.setSmallIcon(R.drawable.ic_stat_name);
         mBuilder.setPriority(Notification.PRIORITY_MAX);
         mBuilder.setStyle(bigText);
 
