@@ -4,35 +4,48 @@
         android:layout_height="wrap_content"
         android:padding="4dip">
 
-<!--    <ImageView-->
-<!--            android:id="@+id/icon"-->
-<!--            android:layout_width="30dp"-->
-<!--            android:layout_height="30dp"-->
-<!--            android:layout_alignParentTop="true"-->
-<!--            android:layout_alignParentBottom="true"-->
-<!--            android:layout_marginEnd="6dip"-->
-<!--            android:contentDescription="TODO"-->
-<!--            android:src="@mipmap/ic_launcher" />-->
+    <Button
+            android:id="@+id/button"
+            android:padding="0dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="4dp"
+            android:orientation="vertical"
+            android:text=""></Button>
 
-<!--    <TextView-->
-<!--            android:id="@+id/secondLine"-->
-<!--            android:layout_width="fill_parent"-->
-<!--            android:layout_height="14dip"-->
-<!--            android:layout_alignParentEnd="true"-->
-<!--            android:layout_alignParentBottom="true"-->
-<!--            android:layout_toEndOf="@id/icon"-->
-<!--            android:maxLines="2"-->
-<!--            android:text="Description"-->
-<!--            android:textSize="10sp" />-->
+
+    <!--    <ImageView-->
+    <!--            android:id="@+id/icon"-->
+    <!--            android:layout_width="30dp"-->
+    <!--            android:layout_height="30dp"-->
+    <!--            android:layout_alignParentTop="true"-->
+    <!--            android:layout_alignParentBottom="true"-->
+    <!--            android:layout_marginEnd="6dip"-->
+    <!--            android:contentDescription="TODO"-->
+    <!--            android:src="@mipmap/ic_launcher" />-->
+
+    <!--    <TextView-->
+    <!--            android:id="@+id/secondLine"-->
+    <!--            android:layout_width="fill_parent"-->
+    <!--            android:layout_height="14dip"-->
+    <!--            android:layout_alignParentEnd="true"-->
+    <!--            android:layout_alignParentBottom="true"-->
+    <!--            android:layout_toEndOf="@id/icon"-->
+    <!--            android:maxLines="2"-->
+    <!--            android:text="Description"-->
+    <!--            android:textSize="10sp" />-->
 
     <TextView
             android:id="@+id/firstLine"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:minHeight="28dp"
             android:layout_alignWithParentIfMissing="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:gravity="center_vertical"
+            android:orientation="vertical"
             android:text="Example application hehrehre"
             android:textSize="14sp" />
 
