@@ -83,13 +83,18 @@ export class SyncService {
 
   private _checkData(data: AppDataComplete) {
     return typeof data === 'object'
-      && typeof data.task === 'object'
-      && typeof data.taskArchive === 'object'
       && typeof data.note === 'object'
       && typeof data.bookmark === 'object'
+      && typeof data.task === 'object'
+
+      // NOTE this is not there yet for projects with old data
+      // && typeof data.tag === 'object'
+
+      // NOTE these might not yet have been created yet...
+      // && typeof data.globalConfig === 'object'
+      // && typeof data.taskArchive === 'object'
       // && typeof data.taskAttachment === 'object'
-      && typeof data.project === 'object'
-      && typeof data.globalConfig === 'object'
+      // && typeof data.project === 'object'
       ;
   }
 
