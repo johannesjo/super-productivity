@@ -63,6 +63,7 @@ public class JavaScriptInterface {
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void updateTaskData(String str) {
+        Log.w("TW", "JavascriptInterface: updateTaskData");
         Intent intent = new Intent(mContext.getApplicationContext(), TaskListWidget.class);
         intent.setAction(TaskListWidget.LIST_CHANGED);
         intent.putExtra("taskJson", str);
