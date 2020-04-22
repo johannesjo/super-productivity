@@ -1,5 +1,6 @@
 package com.superproductivity.superproductivity;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -10,7 +11,6 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.Toast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -21,7 +21,7 @@ public class FullscreenActivity extends AppCompatActivity {
     WebView wv;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // if your build is in debug mode, enable inspecting of web views
