@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -60,6 +61,14 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
             view.setInt(R.id.firstLine, "setPaintFlags", Paint.ANTI_ALIAS_FLAG);
             view.setTextColor(R.id.firstLine, mContext.getResources().getColor(R.color.emphasizedText));
             view.setTextViewText(R.id.button, "");
+        }
+
+        if (task.category != null && task.category.length() > 0) {
+            view.setViewVisibility(R.id.secondLine, View.VISIBLE);
+            view.setTextViewText(R.id.secondLine, task.category);
+        } else {
+            view.setViewVisibility(R.id.secondLine, View.GONE);
+            view.setTextViewText(R.id.secondLine, "");
         }
 
 
