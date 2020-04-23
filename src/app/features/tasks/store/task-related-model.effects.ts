@@ -109,6 +109,29 @@ export class TaskRelatedModelEffects {
     }))
   );
 
+  @Effect()
+  setDefaultProjectId$: any = this._actions$.pipe(
+    ofType(
+      TaskActionTypes.AddTask,
+    ),
+    concatMap((task: Task) => this._globalConfigService.misc$.pipe(
+      first(),
+      map(miscCfg => ({
+        miscCfg,
+        task,
+      }))
+    )),
+    filter(({miscCfg, task}) => miscCfg.defaultProjectId && !task.projectId),
+    map(({task, miscCfg}) => new UpdateTask({
+      task: {
+        id: task.id,
+        changes: {
+          projectId: miscCfg.defaultProjectId,
+        }
+      }
+    }))
+  );
+
 
   constructor(
     private _actions$: Actions,
