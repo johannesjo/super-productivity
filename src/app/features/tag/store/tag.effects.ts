@@ -1,12 +1,22 @@
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {concatMap, filter, first, map, skip, switchMap, take, tap} from 'rxjs/operators';
+import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {concatMap, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {selectTagFeatureState} from './tag.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
-import {deleteTag, deleteTags, updateTag, updateWorkEndForTag, updateWorkStartForTag} from './tag.actions';
+import {
+  addTag,
+  addToBreakTimeForTag,
+  deleteTag,
+  deleteTags,
+  updateAdvancedConfigForTag,
+  updateTag,
+  updateWorkEndForTag,
+  updateWorkStartForTag,
+  upsertTag
+} from './tag.actions';
 import {AddTimeSpent, DeleteMainTasks, RemoveTagsForAllTasks, TaskActionTypes} from '../../tasks/store/task.actions';
 import {TagService} from '../tag.service';
 import {TaskService} from '../../tasks/task.service';
@@ -20,49 +30,57 @@ import {Router} from '@angular/router';
 import {TODAY_TAG} from '../tag.const';
 import {createEmptyEntity} from '../../../util/create-empty-entity';
 import {DataInitService} from '../../../core/data-init/data-init.service';
+import {
+  moveTaskDownInTodayList,
+  moveTaskInTodayList,
+  moveTaskUpInTodayList
+} from '../../work-context/store/work-context-meta.actions';
 
 
 @Injectable()
 export class TagEffects {
-  // updateTagsStorage$ = createEffect(() => this._actions$.pipe(
-  //   ofType(
-  //     tagActions.addTag,
-  //     tagActions.updateTag,
-  //     tagActions.upsertTag,
-  //     tagActions.deleteTag,
-  //     tagActions.deleteTags,
-  //
-  //     TaskActionTypes.UpdateTaskTags,
-  //     TaskActionTypes.AddTask,
-  //   ),
-  //   switchMap(() => this.saveToLs$),
-  // ), {dispatch: false});
-  //
-  // updateTagsStorageConditional$ = createEffect(() => this._actions$.pipe(
-  //   ofType(
-  //     moveTaskInTodayList
-  //   ),
-  //   filter((p) => p.workContextType === WorkContextType.TAG),
-  //   switchMap(() => this.saveToLs$),
-  // ), {dispatch: false});
-  // saveToLs$ = this._store$.pipe(
-  //   select(selectTagFeatureState),
-  //   take(1),
-  //   switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
-  //   tap(this._updateLastActive.bind(this)),
-  //   tap(() => console.log('SAVE'))
-  // );
+  updateTagsStorage$ = createEffect(() => this._actions$.pipe(
+    ofType(
+      addTag,
+      updateTag,
+      upsertTag,
+      deleteTag,
+      deleteTags,
 
-  @Effect({dispatch: false})
-  updateLs$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    // NOTE: because _dataInitService.isAllDataLoadedInitially$ is ready before the effects are run
-    // (but after the update is there) we need to skip the initial update
-    skip(1),
-    tap(console.log),
-    concatMap(() => this._store$.pipe(select(selectTagFeatureState))),
+      updateAdvancedConfigForTag,
+      updateWorkStartForTag,
+      updateWorkEndForTag,
+      addToBreakTimeForTag,
+
+      TaskActionTypes.AddTask,
+      TaskActionTypes.DeleteTask,
+      TaskActionTypes.MoveToOtherProject,
+      TaskActionTypes.MoveToArchive,
+      TaskActionTypes.DeleteMainTasks,
+      TaskActionTypes.RestoreTask,
+      TaskActionTypes.UpdateTaskTags,
+    ),
+    switchMap(() => this.saveToLs$),
+  ), {dispatch: false});
+
+  updateTagsStorageConditional$ = createEffect(() => this._actions$.pipe(
+    ofType(
+      moveTaskInTodayList,
+      moveTaskUpInTodayList,
+      moveTaskDownInTodayList,
+    ),
+    filter((p) => p.workContextType === WorkContextType.TAG),
+    switchMap(() => this.saveToLs$),
+  ), {dispatch: false});
+
+
+  saveToLs$ = this._store$.pipe(
+    select(selectTagFeatureState),
+    take(1),
     switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
     tap(this._updateLastActive.bind(this)),
   );
+
 
   @Effect({dispatch: false})
   snackUpdateBaseSettings$: any = this._actions$.pipe(
