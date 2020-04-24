@@ -84,7 +84,7 @@ export class AppComponent implements OnDestroy {
         if (granted) {
           console.log('Persistent store granted');
         } else {
-          const msg = this._translateService.instant(T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED);
+          const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
           console.warn('Persistence not allowed');
           this._snackService.open({msg});
         }
