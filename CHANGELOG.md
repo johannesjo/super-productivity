@@ -1,3 +1,12 @@
+## [5.0.13](https://github.com/johannesjo/super-productivity/compare/v5.0.12...v5.0.13) (2020-04-24)
+
+
+### Bug Fixes
+
+* remove invalid last active update [#336](https://github.com/johannesjo/super-productivity/issues/336) ([384c25a](https://github.com/johannesjo/super-productivity/commit/384c25af5156e5444f80888322aed00c583426f5))
+
+
+
 ## [5.0.12](https://github.com/johannesjo/super-productivity/compare/v5.0.11...v5.0.12) (2020-04-24)
 
 
