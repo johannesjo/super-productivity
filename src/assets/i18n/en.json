@@ -749,6 +749,7 @@
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
     "NEXT": "Next",
+    "NONE": "None",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "OK": "Ok",
     "PREVIOUS": "Previous",
@@ -843,6 +844,7 @@
       "ZH": "Chinese"
     },
     "MISC": {
+      "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",

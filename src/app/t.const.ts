@@ -749,6 +749,7 @@ export const T = {
     'LOGOUT': 'G.LOGOUT',
     'MINUTES': 'G.MINUTES',
     'NEXT': 'G.NEXT',
+    'NONE': 'G.NONE',
     'NO_CON': 'G.NO_CON',
     'OK': 'G.OK',
     'PREVIOUS': 'G.PREVIOUS',
@@ -843,6 +844,7 @@ export const T = {
       'ZH': 'GCF.LANG.ZH'
     },
     'MISC': {
+      'DEFAULT_PROJECT': 'GCF.MISC.DEFAULT_PROJECT',
       'HELP': 'GCF.MISC.HELP',
       'IS_AUTO_ADD_WORKED_ON_TO_TODAY': 'GCF.MISC.IS_AUTO_ADD_WORKED_ON_TO_TODAY',
       'IS_AUTO_MARK_PARENT_AS_DONE': 'GCF.MISC.IS_AUTO_MARK_PARENT_AS_DONE',

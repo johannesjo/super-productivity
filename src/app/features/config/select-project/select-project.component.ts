@@ -3,6 +3,7 @@ import {FieldType} from '@ngx-formly/material';
 import {MatInput} from '@angular/material/input';
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'select-project',
@@ -12,6 +13,8 @@ import {Project} from '../../project/project.model';
 })
 export class SelectProjectComponent extends FieldType {
   @ViewChild(MatInput) formFieldControl: MatInput;
+
+  T = T;
 
   constructor(
     public projectService: ProjectService,

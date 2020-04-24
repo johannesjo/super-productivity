@@ -61,7 +61,7 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       key: 'defaultProjectId',
       type: 'project-select',
       templateOptions: {
-        label: T.F.TAG.FORM_BASIC.L_ICON,
+        label: T.GCF.MISC.DEFAULT_PROJECT,
       },
     },
   ]

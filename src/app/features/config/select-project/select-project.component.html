@@ -4,7 +4,7 @@
         [errorStateMatcher]="errorStateMatcher"
         [formControl]="formControl"
         [formlyAttributes]="field">
-  <option [ngValue]="null">Keins</option>
+  <option [ngValue]="null">{{T.G.NONE|translate}}</option>
   <ng-container *ngFor="let opt of projectService.list$|async">
     <option [ngValue]="opt.id">{{ opt.title }}</option>
   </ng-container>
