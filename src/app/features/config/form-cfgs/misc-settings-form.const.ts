@@ -57,5 +57,12 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_AUTO_ADD_WORKED_ON_TO_TODAY,
       },
     },
+    {
+      key: 'defaultProjectId',
+      type: 'project-select',
+      templateOptions: {
+        label: T.F.TAG.FORM_BASIC.L_ICON,
+      },
+    },
   ]
 };

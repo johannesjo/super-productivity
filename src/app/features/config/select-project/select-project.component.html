@@ -1,0 +1,11 @@
+<select matNativeControl
+        [id]="id"
+        [readonly]="to.readonly"
+        [errorStateMatcher]="errorStateMatcher"
+        [formControl]="formControl"
+        [formlyAttributes]="field">
+  <option [ngValue]="null">Keins</option>
+  <ng-container *ngFor="let opt of projectService.list$|async">
+    <option [ngValue]="opt.id">{{ opt.title }}</option>
+  </ng-container>
+</select>

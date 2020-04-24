@@ -13,6 +13,7 @@ import {KeyboardInputComponent} from './keyboard-input/keyboard-input.component'
 import {GoogleSyncCfgComponent} from '../google/google-sync-cfg/google-sync-cfg.component';
 import {FileImexModule} from '../../imex/file-imex/file-imex.module';
 import {IconInputComponent} from './icon-input/icon-input.component';
+import {SelectProjectComponent} from './select-project/select-project.component';
 
 @NgModule({
   imports: [
@@ -29,6 +30,12 @@ import {IconInputComponent} from './icon-input/icon-input.component';
         component: IconInputComponent,
         extends: 'input',
         wrappers: ['form-field'],
+      }, {
+        name: 'project-select',
+        component: SelectProjectComponent,
+        // technically no input, but as the properties get us what we need...
+        extends: 'input',
+        wrappers: ['form-field'],
       }]
     }),
     CommonModule,
@@ -43,6 +50,7 @@ import {IconInputComponent} from './icon-input/icon-input.component';
     ConfigFormComponent,
     KeyboardInputComponent,
     IconInputComponent,
+    SelectProjectComponent,
   ],
   entryComponents: [
     GoogleSyncCfgComponent,
