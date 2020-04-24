@@ -52,6 +52,8 @@ export class DataInitService {
     });
   }
 
+  // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
+  // because the data load is triggered, but not necessarily already reflected inside the store
   reInit$(projectState: ProjectState = null, isOmitTokens = false): Observable<any> {
     return forkJoin([
       // LOAD GLOBAL MODELS

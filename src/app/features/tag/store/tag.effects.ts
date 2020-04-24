@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Actions, Effect, ofType} from '@ngrx/effects';
 import {concatMap, filter, first, map, skip, switchMap, take, tap} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {selectTagFeatureState} from './tag.reducer';
@@ -19,6 +19,7 @@ import {WorkContextService} from '../../work-context/work-context.service';
 import {Router} from '@angular/router';
 import {TODAY_TAG} from '../tag.const';
 import {createEmptyEntity} from '../../../util/create-empty-entity';
+import {DataInitService} from '../../../core/data-init/data-init.service';
 
 
 @Injectable()
@@ -52,13 +53,16 @@ export class TagEffects {
   //   tap(() => console.log('SAVE'))
   // );
 
-  updateLs$ = createEffect(() => this._store$.pipe(
-    select(selectTagFeatureState),
-    // skip initial state
+  @Effect({dispatch: false})
+  updateLs$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    // NOTE: because _dataInitService.isAllDataLoadedInitially$ is ready before the effects are run
+    // (but after the update is there) we need to skip the initial update
     skip(1),
+    tap(console.log),
+    concatMap(() => this._store$.pipe(select(selectTagFeatureState))),
     switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
     tap(this._updateLastActive.bind(this)),
-  ), {dispatch: false});
+  );
 
   @Effect({dispatch: false})
   snackUpdateBaseSettings$: any = this._actions$.pipe(
@@ -185,6 +189,7 @@ export class TagEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _dataInitService: DataInitService,
     private _snackService: SnackService,
     private _tagService: TagService,
     private _workContextService: WorkContextService,
