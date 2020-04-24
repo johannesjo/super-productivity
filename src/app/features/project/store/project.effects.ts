@@ -182,6 +182,12 @@ export class ProjectEffects {
         this._removeAllTasksForProject(action.payload.id);
         this._removeAllArchiveTasksForProject(action.payload.id);
         this._removeAllRepeatingTasksForProject(action.payload.id);
+
+        // we also might need to account for this unlikely but very nasty scenario
+        const misc = await this._globalConfigService.misc$.pipe(take(1)).toPromise();
+        if (action.payload.id === misc.defaultProjectId) {
+          this._globalConfigService.updateSection('misc', {defaultProjectId: null});
+        }
       }),
     );
 
