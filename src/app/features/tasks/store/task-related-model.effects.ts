@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {
+  AddTask,
   AddTimeSpent,
   MoveToArchive,
   MoveToOtherProject,
@@ -114,22 +115,18 @@ export class TaskRelatedModelEffects {
     ofType(
       TaskActionTypes.AddTask,
     ),
-    concatMap((task: Task) => this._globalConfigService.misc$.pipe(
+    concatMap((act: AddTask) => this._globalConfigService.misc$.pipe(
       first(),
       map(miscCfg => ({
         miscCfg,
-        task,
+        task: act.payload.task,
       }))
     )),
-    filter(({miscCfg, task}) => miscCfg.defaultProjectId && !task.projectId),
-    map(({task, miscCfg}) => new UpdateTask({
-      task: {
-        id: task.id,
-        changes: {
-          projectId: miscCfg.defaultProjectId,
-        }
-      }
-    }))
+    filter(({miscCfg, task}) => miscCfg.defaultProjectId && !task.projectId && !task.parentId),
+    map(({task, miscCfg}) => new MoveToOtherProject({
+      task,
+      targetProjectId: miscCfg.defaultProjectId,
+    })),
   );
 
 
