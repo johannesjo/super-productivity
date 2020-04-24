@@ -13,7 +13,7 @@ export class ImexMetaService {
     this.isDataImportInProgress$.subscribe((val) => this.isDataImportInProgress = val);
   }
 
-  setInProgress(isInProgress: boolean) {
+  setDataImportInProgress(isInProgress: boolean) {
     this._isDataImportInProgress$.next(isInProgress);
   }
 }

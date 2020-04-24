@@ -48,7 +48,7 @@ export class SyncService {
 
   async loadCompleteSyncData(data: AppDataComplete, isBackupReload = false) {
     this._snackService.open({msg: T.S.SYNC.IMPORTING, ico: 'cloud_download'});
-    this._imexMetaService.setInProgress(true);
+    this._imexMetaService.setDataImportInProgress(true);
 
     // get rid of outdated project data
     if (!isBackupReload) {
@@ -62,7 +62,7 @@ export class SyncService {
         // save data to database first then load to store from there
         await this._persistenceService.importComplete(migratedData);
         await this._loadAllFromDatabaseToStore();
-        this._imexMetaService.setInProgress(false);
+        this._imexMetaService.setDataImportInProgress(false);
         this._snackService.open({type: 'SUCCESS', msg: T.S.SYNC.SUCCESS});
 
       } catch (e) {
@@ -72,12 +72,12 @@ export class SyncService {
         });
         console.error(e);
         await this._loadBackup();
-        this._imexMetaService.setInProgress(false);
+        this._imexMetaService.setDataImportInProgress(false);
       }
     } else {
       this._snackService.open({type: 'ERROR', msg: T.S.SYNC.ERROR_INVALID_DATA});
       console.error(data);
-      this._imexMetaService.setInProgress(false);
+      this._imexMetaService.setDataImportInProgress(false);
     }
   }
 
