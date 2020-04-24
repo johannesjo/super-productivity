@@ -1,3 +1,39 @@
+## [5.0.12](https://github.com/johannesjo/super-productivity/compare/v5.0.11...v5.0.12) (2020-04-24)
+
+
+### Bug Fixes
+
+* allow import of virgin data [#343](https://github.com/johannesjo/super-productivity/issues/343) ([17e95f5](https://github.com/johannesjo/super-productivity/commit/17e95f5950da1186baa1f10d76d01f215b710a5f))
+* jira cfg not loaded yet [#341](https://github.com/johannesjo/super-productivity/issues/341) ([26785b3](https://github.com/johannesjo/super-productivity/commit/26785b328c74713621205a35a031e02c306ef07b))
+* persistent storage disallowed message ([b3bbd42](https://github.com/johannesjo/super-productivity/commit/b3bbd4258628e7e566b527e2f1b5b6356c29ce83))
+* prevent error dialog from getting to high ([00fc709](https://github.com/johannesjo/super-productivity/commit/00fc709b914fb23c5bf7fae22060986560a169f2))
+* **task:** hide sub task panel for sub tasks on mobile ([9169a19](https://github.com/johannesjo/super-productivity/commit/9169a19f436cce2fef57ce24eee1f5363a06d4ed))
+* **task:** overflowing icons for swipe blocks ([c2d6d5d](https://github.com/johannesjo/super-productivity/commit/c2d6d5d8aad6a0ace8358d9c1981870e50233d1c))
+
+
+### Features
+
+* **i18n:** update translations ([046dead](https://github.com/johannesjo/super-productivity/commit/046deada1b99efcf383e0aece03eff0a80c7ff04))
+* account for edge case when default project is deleted [#325](https://github.com/johannesjo/super-productivity/issues/325) ([f755350](https://github.com/johannesjo/super-productivity/commit/f755350c7143e5fbfefaf8a5f353fa1f7012aceb))
+* add config property for default project id [#325](https://github.com/johannesjo/super-productivity/issues/325) ([dac46f9](https://github.com/johannesjo/super-productivity/commit/dac46f90c88c54c1a28b7e77b1e14e39feef51a9))
+* add effect for default project id [#325](https://github.com/johannesjo/super-productivity/issues/325) ([c8f5bbb](https://github.com/johannesjo/super-productivity/commit/c8f5bbbeb22ee175de8faf2a6fd28ede2b07ed68))
+* add project select component [#325](https://github.com/johannesjo/super-productivity/issues/325) ([02d4f58](https://github.com/johannesjo/super-productivity/commit/02d4f587e4816276bf0d4412f2180498af2bdc53))
+* add translations [#325](https://github.com/johannesjo/super-productivity/issues/325) ([1e139a0](https://github.com/johannesjo/super-productivity/commit/1e139a0b35ce790d2976c03cee6404c1bea13f5a))
+* check for service worker update right after load ([6a2bdd2](https://github.com/johannesjo/super-productivity/commit/6a2bdd2e2e53c72b1dbede0e3d716928cbcf28f6))
+* cleanup error title from html to prevent dialog from breaking ([de7180a](https://github.com/johannesjo/super-productivity/commit/de7180a15b74d72b9f5e4aff1814ee53f532b3d2))
+* improve initial wait handling ([9029979](https://github.com/johannesjo/super-productivity/commit/90299798803b7d9c923524e039766e4adff4c691))
+* make add default project id effect work [#325](https://github.com/johannesjo/super-productivity/issues/325) ([3ee46fb](https://github.com/johannesjo/super-productivity/commit/3ee46fbff26f4607b152b14197015e55b3349ff7))
+* **android:** also add project or tag to android model ([e058959](https://github.com/johannesjo/super-productivity/commit/e05895944b4b546157cfd896b143798a8e8454a9))
+* **android:** make notifications work ([44ca1ed](https://github.com/johannesjo/super-productivity/commit/44ca1ed420119e4228f38afda5fbfc57066d2830))
+* **attachment:** add different icon for non images ([7bee38b](https://github.com/johannesjo/super-productivity/commit/7bee38b974ed6ef8ac5af54b696aec3547d37da8))
+* improve service worker registration check ([7f2a104](https://github.com/johannesjo/super-productivity/commit/7f2a1041085de8d4cebb6d6abbcbdd49e60e6b45))
+* increase wait for sync wait time for reminders ([445b174](https://github.com/johannesjo/super-productivity/commit/445b1742514b9a93ea76c985f7c10a1b250591a7))
+* **issue:** disable polling until initial sync is done ([f18f9cf](https://github.com/johannesjo/super-productivity/commit/f18f9cfbc0ccab9db8fff41034ccfca70e79ec13))
+* improve service worker notifications check ([3f3c762](https://github.com/johannesjo/super-productivity/commit/3f3c762bbdd47368adb559c4aa0cf63100f113bb))
+* sort done tasks last for android widget tasks ([98abd10](https://github.com/johannesjo/super-productivity/commit/98abd1086711c7c2e7fdc178146c056e27a0b0af))
+
+
+
 ## [5.0.11](https://github.com/johannesjo/super-productivity/compare/v5.0.10...v5.0.11) (2020-04-20)
 
 
