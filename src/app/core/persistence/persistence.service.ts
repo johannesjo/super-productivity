@@ -59,7 +59,7 @@ import {taskReducer} from '../../features/tasks/store/task.reducer';
 import {tagReducer} from '../../features/tag/store/tag.reducer';
 import {migrateTaskRepeatCfgState} from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 import {environment} from '../../../environments/environment';
-import {checkEntityStateConsistency} from '../../util/check-entity-state-consistency';
+import {checkFixEntityStateConsistency} from '../../util/check-fix-entity-state-consistency';
 
 
 @Injectable({
@@ -339,9 +339,19 @@ export class PersistenceService {
       loadState: (isSkipMigrate = false) => isSkipMigrate
         ? this._loadFromDb(lsKey)
         : this._loadFromDb(lsKey).then(migrateFn),
+      // In case we want to check on load
+      // loadState: async (isSkipMigrate = false) => {
+      //   const data = isSkipMigrate
+      //     ? await this._loadFromDb(lsKey)
+      //     : await this._loadFromDb(lsKey).then(migrateFn);
+      //   if (data && data.ids && data.entities) {
+      //     checkFixEntityStateConsistency(data, appDataKey);
+      //   }
+      //   return data;
+      // },
       saveState: (data, isForce) => {
         if (data && data.ids && data.entities) {
-          checkEntityStateConsistency(data, appDataKey);
+          data = checkFixEntityStateConsistency(data, appDataKey);
         }
         return this._saveToDb(lsKey, data, isForce);
       },
