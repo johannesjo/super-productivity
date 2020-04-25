@@ -59,6 +59,7 @@ import {taskReducer} from '../../features/tasks/store/task.reducer';
 import {tagReducer} from '../../features/tag/store/tag.reducer';
 import {migrateTaskRepeatCfgState} from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 import {environment} from '../../../environments/environment';
+import {checkEntityStateConsistency} from '../../util/check-entity-state-consistency';
 
 
 @Injectable({
@@ -338,7 +339,12 @@ export class PersistenceService {
       loadState: (isSkipMigrate = false) => isSkipMigrate
         ? this._loadFromDb(lsKey)
         : this._loadFromDb(lsKey).then(migrateFn),
-      saveState: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+      saveState: (data, isForce) => {
+        if (data && data.ids && data.entities) {
+          checkEntityStateConsistency(data, appDataKey);
+        }
+        return this._saveToDb(lsKey, data, isForce);
+      },
     };
 
     this._baseModels.push(model);
