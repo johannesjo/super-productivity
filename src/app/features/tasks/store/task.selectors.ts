@@ -28,7 +28,7 @@ const mapSubTasksToTask = (task: Task, s: TaskState): TaskWithSubTasks => {
     subTasks: task.subTaskIds.map(id => {
       const subTask = s.entities[id];
       if (!subTask) {
-        devError('Task data not found');
+        devError('Task data not found for ' + id);
       }
       return subTask;
     })
@@ -130,7 +130,7 @@ export const selectTasksWithSubTasksByIds = createSelector(
     props.ids.map(id => {
       const task = state.entities[id];
       if (!task) {
-        devError('Task data not found');
+        devError('Task data not found for ' + id);
       }
       return mapSubTasksToTask(task, state);
     })
@@ -141,7 +141,7 @@ export const selectTaskByIdWithSubTaskData = createSelector(
   (state, props: { id: string }): TaskWithSubTasks => {
     const task = state.entities[props.id];
     if (!task) {
-      devError('Task data not found');
+      devError('Task data not found for ' + props.id);
     }
     return mapSubTasksToTask(task, state);
   }
