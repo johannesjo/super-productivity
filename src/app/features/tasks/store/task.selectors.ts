@@ -3,6 +3,7 @@ import {TASK_FEATURE_NAME} from './task.reducer';
 import {Task, TaskState, TaskWithSubTasks} from '../task.model';
 import {taskAdapter} from './task.adapter';
 import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
+import {devError} from '../../../util/dev-error';
 
 const mapSubTasksToTasks = (tasksIN): TaskWithSubTasks[] => {
   return tasksIN.filter((task) => !task.parentId)
@@ -24,7 +25,13 @@ const mapSubTasksToTask = (task: Task, s: TaskState): TaskWithSubTasks => {
   }
   return {
     ...task,
-    subTasks: task.subTaskIds.map(id => s.entities[id])
+    subTasks: task.subTaskIds.map(id => {
+      const subTask = s.entities[id];
+      if (!subTask) {
+        devError('Task data not found');
+      }
+      return subTask;
+    })
   };
 };
 
@@ -120,13 +127,23 @@ export const selectTasksById = createSelector(
 export const selectTasksWithSubTasksByIds = createSelector(
   selectTaskFeatureState,
   (state, props: { ids: string[] }): TaskWithSubTasks[] =>
-    props.ids.map(id => mapSubTasksToTask(state.entities[id], state))
+    props.ids.map(id => {
+      const task = state.entities[id];
+      if (!task) {
+        devError('Task data not found');
+      }
+      return mapSubTasksToTask(task, state);
+    })
 );
 
 export const selectTaskByIdWithSubTaskData = createSelector(
   selectTaskFeatureState,
   (state, props: { id: string }): TaskWithSubTasks => {
-    return mapSubTasksToTask(state.entities[props.id], state);
+    const task = state.entities[props.id];
+    if (!task) {
+      devError('Task data not found');
+    }
+    return mapSubTasksToTask(task, state);
   }
 );
 
