@@ -2,6 +2,8 @@ import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import {TaskRepeatCfgActions, TaskRepeatCfgActionTypes} from './task-repeat-cfg.actions';
 import {TaskRepeatCfg, TaskRepeatCfgState} from '../task-repeat-cfg.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {AppDataComplete} from '../../../imex/sync/sync.model';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -24,6 +26,13 @@ export function taskRepeatCfgReducer(
   state = initialTaskRepeatCfgState,
   action: TaskRepeatCfgActions
 ): TaskRepeatCfgState {
+
+  // TODO fix this hackyness once we use the new syntax everywhere
+  if ((action.type as string) === loadDataComplete.type) {
+    const appDataComplete: AppDataComplete = action as any;
+    return {...appDataComplete.taskRepeatCfg};
+  }
+
   switch (action.type) {
     case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
       return adapter.addOne(action.payload.taskRepeatCfg, state);

@@ -6,7 +6,8 @@ import {
   deleteTask,
   getTaskById,
   reCalcTimesForParentIfParent,
-  reCalcTimeSpentForParentIfParent, updateDoneOnForTask,
+  reCalcTimeSpentForParentIfParent,
+  updateDoneOnForTask,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
 } from './task.reducer.util';
@@ -18,6 +19,8 @@ import {TaskAttachmentActions, TaskAttachmentActionTypes} from '../task-attachme
 import {Update} from '@ngrx/entity';
 import {unique} from '../../../util/unique';
 import {roundDurationVanilla} from '../../../util/round-duration';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {AppDataComplete} from '../../../imex/sync/sync.model';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -41,6 +44,12 @@ export function taskReducer(
   state: TaskState = initialTaskState,
   action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions
 ): TaskState {
+
+  // TODO fix this hackyness once we use the new syntax everywhere
+  if ((action.type as string) === loadDataComplete.type) {
+    const appDataComplete: AppDataComplete = action as any;
+    return {...appDataComplete.task};
+  }
 
   switch (action.type) {
     case TaskActionTypes.LoadTaskState: {

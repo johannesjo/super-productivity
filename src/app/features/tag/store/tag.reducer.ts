@@ -23,6 +23,7 @@ import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {Update} from '@ngrx/entity/src/models';
 import {unique} from '../../../util/unique';
 import {Project} from '../../project/project.model';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -67,6 +68,8 @@ const _reducer = createReducer<TagState>(
 
   // META ACTIONS
   // ------------
+  on(loadDataComplete, (oldState, data) => ({...data.tag})),
+
   on(moveTaskInTodayList, (state, {
     taskId,
     newOrderedIds,

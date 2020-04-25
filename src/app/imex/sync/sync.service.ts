@@ -101,7 +101,7 @@ export class SyncService {
   private async _loadAllFromDatabaseToStore(): Promise<any> {
     return await Promise.all([
       // reload view model from ls
-      this._dataInitService.reInit$(null, true).toPromise(),
+      this._dataInitService.reInit(null, true),
       this._reminderService.reloadFromLs(),
     ]);
   }

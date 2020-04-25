@@ -32,6 +32,8 @@ import {filterOutId} from '../../../util/filter-out-id';
 import {unique} from '../../../util/unique';
 import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {AppDataComplete} from '../../../imex/sync/sync.model';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -116,6 +118,11 @@ export function projectReducer(
   const payload = action['payload'];
 
   // TODO fix this hackyness once we use the new syntax everywhere
+  if ((action.type as string) === loadDataComplete.type) {
+    const appDataComplete: AppDataComplete = action as any;
+    return {...appDataComplete.project};
+  }
+
   if ((action.type as string) === moveTaskInTodayList.type) {
     const {taskId, newOrderedIds, target, workContextType, workContextId} = action as any;
 

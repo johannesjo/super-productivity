@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {forkJoin, from, Observable, of} from 'rxjs';
+import {from, Observable, of} from 'rxjs';
 import {concatMap, filter, shareReplay, switchMap, take} from 'rxjs/operators';
 import {ProjectService} from '../../features/project/project.service';
 import {TagService} from '../../features/tag/tag.service';
@@ -12,6 +12,7 @@ import {allDataLoaded} from './data-init.actions';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {MigrationService} from '../migration/migration.service';
+import {loadDataComplete} from '../../root-store/meta/load-data-complete.action';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +20,7 @@ import {MigrationService} from '../migration/migration.service';
 export class DataInitService {
   isAllDataLoadedInitially$: Observable<boolean> = from(this._persistenceService.project.loadState(true)).pipe(
     concatMap((projectState: ProjectState) => this._migrationService.migrateIfNecessaryToProjectState$(projectState)),
-    concatMap((projectState: ProjectState) => this.reInit$(projectState),
-    ),
+    concatMap((projectState: ProjectState) => from(this.reInit(projectState))),
     switchMap(() => this._workContextService.isActiveWorkContextProject$),
     switchMap(isProject => isProject
       ? this._projectService.isRelatedDataLoadedForCurrentProject$
@@ -54,16 +54,19 @@ export class DataInitService {
 
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
-  reInit$(projectState: ProjectState = null, isOmitTokens = false): Observable<any> {
-    return forkJoin([
-      // LOAD GLOBAL MODELS
-      this._configService.load(isOmitTokens),
-      this._tagService.load(),
-      this._workContextService.load(),
-      this._taskService.load(),
-      this._taskRepeatCfgService.load(),
-      // NOTE: loading the project state should deal with reloading the for project states via effect
-      this._projectService.load(projectState),
-    ]);
+  async reInit(projectState: ProjectState = null, isOmitTokens = false): Promise<any> {
+    const completeData = await this._persistenceService.loadComplete();
+    this._store$.dispatch(loadDataComplete(completeData));
+
+    // return forkJoin([
+    //   // LOAD GLOBAL MODELS
+    //   this._configService.load(isOmitTokens),
+    //   this._tagService.load(),
+    //   this._workContextService.load(),
+    //   this._taskService.load(),
+    //   this._taskRepeatCfgService.load(),
+    //   // NOTE: loading the project state should deal with reloading the for project states via effect
+    //   this._projectService.load(projectState),
+    // ]);
   }
 }
