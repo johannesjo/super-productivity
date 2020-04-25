@@ -42,6 +42,7 @@ import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-co
 import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 import {WorkContextType} from '../../../../work-context/work-context.model';
 import {GlobalSyncService} from '../../../../../core/global-sync/global-sync.service';
+import {isJiraEnabled} from '../is-jira-enabled.util';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -53,7 +54,7 @@ export class JiraIssueEffects {
     filter(({activeType}) => (activeType === WorkContextType.PROJECT)),
     concatMap(({activeId}) => this._getCfgOnce$(activeId)),
     // NOTE: might not be loaded yet
-    filter(jiraCfg => jiraCfg && jiraCfg.isEnabled),
+    filter(jiraCfg => isJiraEnabled(jiraCfg)),
     // just fire any single request
     concatMap((jiraCfg) => this._jiraApiService.getCurrentUser$(jiraCfg)),
   );
@@ -63,7 +64,7 @@ export class JiraIssueEffects {
   @Effect({dispatch: false})
   pollNewIssuesToBacklog$: any = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
     switchMap((pId) => this._getCfgOnce$(pId).pipe(
-      filter(jiraCfg => jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoAddToBacklog),
+      filter(jiraCfg => isJiraEnabled(jiraCfg) && jiraCfg.isAutoAddToBacklog),
       // tap(() => console.log('POLL TIMER STARTED')),
       switchMap(jiraCfg => this._pollTimer$.pipe(
         // NOTE: required otherwise timer stays alive for filtered actions
@@ -89,7 +90,7 @@ export class JiraIssueEffects {
       }),
       map((cos) => cos
         .filter(({cfg, task}: { cfg: JiraCfg, task: TaskWithSubTasks }) =>
-          cfg.isEnabled && cfg.isAutoPollTickets
+          isJiraEnabled(cfg) && cfg.isAutoPollTickets
         )
         .map(({task}: { cfg: JiraCfg, task: TaskWithSubTasks }) => task)
       ),
@@ -124,7 +125,7 @@ export class JiraIssueEffects {
         jiraCfg
       })),
     )),
-    filter(({jiraCfg}) => jiraCfg.isEnabled),
+    filter(({jiraCfg}) => isJiraEnabled(jiraCfg)),
     withLatestFrom(this._store$.pipe(select(selectTaskEntities))),
     tap(([{act, projectId, jiraCfg}, taskEntities]: [{
       act: UpdateTask,
@@ -164,7 +165,7 @@ export class JiraIssueEffects {
           map((jiraCfg) => ({jiraCfg, currentTaskOrParent}))
         )
       ),
-      filter(({jiraCfg, currentTaskOrParent}) => jiraCfg.isEnabled && jiraCfg.isCheckToReAssignTicketOnTaskStart),
+      filter(({jiraCfg, currentTaskOrParent}) => isJiraEnabled(jiraCfg) && jiraCfg.isCheckToReAssignTicketOnTaskStart),
       // show every 15s max to give time for updates
       throttleTime(15000),
       // TODO there is probably a better way to to do this
@@ -226,7 +227,7 @@ export class JiraIssueEffects {
         )
       ),
       filter(({jiraCfg, currentTaskOrParent}) =>
-        jiraCfg.isEnabled && jiraCfg.isTransitionIssuesEnabled
+        isJiraEnabled(jiraCfg) && jiraCfg.isTransitionIssuesEnabled
       ),
       concatMap(({jiraCfg, currentTaskOrParent}) =>
         this._handleTransitionForIssue(IssueLocalState.IN_PROGRESS, jiraCfg, currentTaskOrParent)
@@ -244,7 +245,7 @@ export class JiraIssueEffects {
         map((jiraCfg) => ({jiraCfg, task})),
       )),
       filter(({jiraCfg, task}) =>
-        jiraCfg.isEnabled && jiraCfg.isTransitionIssuesEnabled
+        isJiraEnabled(jiraCfg) && jiraCfg.isTransitionIssuesEnabled
       ),
       concatMap(({jiraCfg, task}) => {
         return this._handleTransitionForIssue(IssueLocalState.DONE, jiraCfg, task);
