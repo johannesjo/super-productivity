@@ -22,7 +22,7 @@ appx:
   publisher: CN=___-___
   identityName: ___johannesjo.SuperProductivity
 linux:
-  category: Utility
+  category: Productivity
   target:
     - AppImage
     - deb
