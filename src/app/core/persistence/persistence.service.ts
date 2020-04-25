@@ -58,6 +58,7 @@ import {WorkContextState} from '../../features/work-context/work-context.model';
 import {taskReducer} from '../../features/tasks/store/task.reducer';
 import {tagReducer} from '../../features/tag/store/tag.reducer';
 import {migrateTaskRepeatCfgState} from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
+import {environment} from '../../../environments/environment';
 
 
 @Injectable({
@@ -239,7 +240,9 @@ export class PersistenceService {
   // BACKUP AND SYNC RELATED
   // -----------------------
   saveLastActive(date: number = Date.now()) {
-    // console.log('Save LastAct', date);
+    if (!environment || !environment.production) {
+      console.log('Save LastAct', date);
+    }
     localStorage.setItem(LS_LAST_ACTIVE, date.toString());
   }
 
