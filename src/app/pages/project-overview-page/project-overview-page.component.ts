@@ -13,6 +13,7 @@ import {SnackService} from '../../core/snack/snack.service';
 import {T} from '../../t.const';
 import {THEME_COLOR_MAP} from '../../app.constants';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {withLatestFrom} from 'rxjs/operators';
 
 @Component({
   selector: 'project-page',
@@ -42,11 +43,14 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this._dragulaService.dropModel('PROJECTS')
-      .subscribe((params: any) => {
+    this._subs.add(this._dragulaService.dropModel('PROJECTS').pipe(
+      withLatestFrom(this.projectService.archived$),
+      ).subscribe(([params, archived]: any) => {
         const {target, source, targetModel, item} = params;
         const targetNewIds = targetModel.map((project) => project.id);
-        this.projectService.updateOrder(targetNewIds);
+
+        const archivedIds = archived ? archived.map(p => p.id) : [];
+        this.projectService.updateOrder([...targetNewIds, ...archivedIds]);
       })
     );
   }
