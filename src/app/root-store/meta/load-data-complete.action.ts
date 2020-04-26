@@ -3,5 +3,5 @@ import {AppDataComplete} from '../../imex/sync/sync.model';
 
 export const loadDataComplete = createAction(
   '[SP_ALL] Import data',
-  props<{ appDataComplete: AppDataComplete }>(),
+  props<{ appDataComplete: AppDataComplete; isOmitTokens: boolean }>(),
 );

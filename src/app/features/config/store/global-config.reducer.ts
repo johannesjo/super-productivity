@@ -31,10 +31,28 @@ export function globalConfigReducer(
 
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadDataComplete.type) {
-    const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.globalConfig
+    const {appDataComplete, isOmitTokens}: { appDataComplete: AppDataComplete, isOmitTokens: boolean } = action as any;
+    const cfg = appDataComplete.globalConfig
       ? {...appDataComplete.globalConfig}
       : state;
+
+    if (isOmitTokens) {
+      const currentGoogleSession = state._googleSession
+        ? state._googleSession
+        : {};
+
+      return {
+        ...cfg,
+        _googleSession: {
+          ...cfg._googleSession,
+          ...currentGoogleSession
+        },
+      };
+    } else {
+      return {
+        ...cfg
+      };
+    }
   }
 
   switch (action.type) {
