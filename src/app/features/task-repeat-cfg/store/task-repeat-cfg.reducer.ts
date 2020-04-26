@@ -30,7 +30,9 @@ export function taskRepeatCfgReducer(
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadDataComplete.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
-    return {...appDataComplete.taskRepeatCfg};
+    return appDataComplete.taskRepeatCfg
+      ? {...appDataComplete.taskRepeatCfg}
+      : state;
   }
 
   switch (action.type) {

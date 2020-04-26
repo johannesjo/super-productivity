@@ -120,7 +120,9 @@ export function projectReducer(
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadDataComplete.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
-    return {...appDataComplete.project};
+    return appDataComplete.project
+      ? {...appDataComplete.project}
+      : state;
   }
 
   if ((action.type as string) === moveTaskInTodayList.type) {

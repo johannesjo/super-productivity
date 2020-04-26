@@ -68,7 +68,7 @@ const _reducer = createReducer<TagState>(
 
   // META ACTIONS
   // ------------
-  on(loadDataComplete, (oldState, {appDataComplete}) => ({...appDataComplete.tag})),
+  on(loadDataComplete, (oldState, {appDataComplete}) => (appDataComplete.tag ? {...appDataComplete.tag} : oldState)),
 
   on(moveTaskInTodayList, (state, {
     taskId,
