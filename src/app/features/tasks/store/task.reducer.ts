@@ -57,16 +57,6 @@ export function taskReducer(
   }
 
   switch (action.type) {
-    case TaskActionTypes.LoadTaskState: {
-      const newState = action.payload.state;
-      return {
-        ...newState,
-        currentTaskId: null,
-        lastCurrentTaskId: newState.currentTaskId,
-        isDataLoaded: true,
-      };
-    }
-
     case TaskActionTypes.SetCurrentTask: {
       if (action.payload) {
         const subTaskIds = state.entities[action.payload].subTaskIds;

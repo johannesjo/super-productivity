@@ -21,7 +21,6 @@ import {
   AddTimeSpent,
   DeleteMainTasks,
   DeleteTask,
-  LoadTaskState,
   MoveSubTask,
   MoveSubTaskDown,
   MoveSubTaskUp,
@@ -42,7 +41,6 @@ import {
   UpdateTaskTags,
   UpdateTaskUi
 } from './store/task.actions';
-import {initialTaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {IssueProviderKey} from '../issue/issue.model';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
@@ -220,16 +218,6 @@ export class TaskService {
         this.setCurrentId(tasks[0].id);
       }
     });
-  }
-
-  async load() {
-    const lsTaskState = await this._persistenceService.task.loadState();
-    this.loadState(lsTaskState || initialTaskState);
-  }
-
-
-  loadState(state) {
-    this._store.dispatch(new LoadTaskState({state}));
   }
 
   pauseCurrent() {

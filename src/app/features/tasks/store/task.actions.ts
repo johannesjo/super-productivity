@@ -6,8 +6,6 @@ import {RoundTimeOption} from '../../project/project.model';
 import {WorkContextType} from '../../work-context/work-context.model';
 
 export enum TaskActionTypes {
-  LoadTaskState = '[Task] Load Task State',
-
   SetCurrentTask = '[Task] SetCurrentTask',
   SetSelectedTask = '[Task] SetSelectedTask',
   UnsetCurrentTask = '[Task] UnsetCurrentTask',
@@ -46,12 +44,6 @@ export enum TaskActionTypes {
 
 }
 
-export class LoadTaskState implements Action {
-  readonly type = TaskActionTypes.LoadTaskState;
-
-  constructor(public payload: { state: TaskState }) {
-  }
-}
 
 export class SetCurrentTask implements Action {
   readonly type = TaskActionTypes.SetCurrentTask;
@@ -246,8 +238,7 @@ export class RoundTimeSpentForDay implements Action {
 }
 
 export type TaskActions
-  = LoadTaskState
-  | SetCurrentTask
+  = SetCurrentTask
   | SetSelectedTask
   | UnsetCurrentTask
   | AddTask
