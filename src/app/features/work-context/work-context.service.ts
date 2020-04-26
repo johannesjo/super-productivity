@@ -57,6 +57,15 @@ import {isToday} from '../../util/is-today.util';
   providedIn: 'root',
 })
 export class WorkContextService {
+  // here because to avoid circular dependencies
+  // should be treated as private
+  _isAllDataLoaded$: Observable<boolean> = this._actions$.pipe(
+    ofType(allDataLoaded),
+    mapTo(true),
+    startWith(false),
+    shareReplay(1),
+  );
+
   // CONTEXT LEVEL
   // -------------
   activeWorkContextId$: Observable<string> = this._store$.pipe(
@@ -140,7 +149,8 @@ export class WorkContextService {
   );
 
   mainWorkContexts$: Observable<WorkContext[]> =
-    this._tagService.getTagById$(TODAY_TAG.id).pipe(
+    this._isAllDataLoaded$.pipe(
+      concatMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
       switchMap(myDayTag => of([
           ({
             ...myDayTag,
@@ -273,13 +283,6 @@ export class WorkContextService {
     map(tasks => flattenTasks(tasks)),
   );
 
-  // here because to avoid circular dependencies
-  private _isAllDataLoaded$: Observable<boolean> = this._actions$.pipe(
-    ofType(allDataLoaded),
-    mapTo(true),
-    startWith(false),
-    shareReplay(1),
-  );
 
   // TODO could be done better
   getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
