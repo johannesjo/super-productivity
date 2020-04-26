@@ -56,27 +56,6 @@ export function globalConfigReducer(
   }
 
   switch (action.type) {
-    case GlobalConfigActionTypes.LoadGlobalConfig: {
-      const {cfg, isOmitTokens} = action.payload;
-      if (isOmitTokens) {
-        const currentGoogleSession = state._googleSession
-          ? state._googleSession
-          : {};
-
-        return {
-          ...cfg,
-          _googleSession: {
-            ...cfg._googleSession,
-            ...currentGoogleSession
-          },
-        };
-      } else {
-        return {
-          ...cfg
-        };
-      }
-    }
-
     case GlobalConfigActionTypes.UpdateGlobalConfigSection:
       const {sectionKey, sectionCfg} = action.payload;
       return {

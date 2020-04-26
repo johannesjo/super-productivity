@@ -1,16 +1,9 @@
 import {Action} from '@ngrx/store';
-import {GlobalConfigSectionKey, GlobalConfigState, GlobalSectionConfig} from '../global-config.model';
+import {GlobalConfigSectionKey, GlobalSectionConfig} from '../global-config.model';
 
 export enum GlobalConfigActionTypes {
   LoadGlobalConfig = '[Global Config] Load Global Config',
   UpdateGlobalConfigSection = '[Global Config] Update Global Config Section',
-}
-
-export class LoadGlobalConfig implements Action {
-  readonly type = GlobalConfigActionTypes.LoadGlobalConfig;
-
-  constructor(public payload: { cfg: GlobalConfigState, isOmitTokens: boolean }) {
-  }
 }
 
 export class UpdateGlobalConfigSection implements Action {
@@ -24,6 +17,4 @@ export class UpdateGlobalConfigSection implements Action {
   }
 }
 
-export type GlobalConfigActions
-  = LoadGlobalConfig
-  | UpdateGlobalConfigSection;
+export type GlobalConfigActions = UpdateGlobalConfigSection;

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {filter, tap, withLatestFrom} from 'rxjs/operators';
-import {GlobalConfigActionTypes, LoadGlobalConfig, UpdateGlobalConfigSection} from './global-config.actions';
+import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from './global-config.actions';
 import {Store} from '@ngrx/store';
 import {CONFIG_FEATURE_NAME} from './global-config.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
@@ -12,6 +12,7 @@ import {T} from '../../../t.const';
 import {LanguageService} from '../../../core/language/language.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {ElectronService} from '../../../core/electron/electron.service';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -58,11 +59,12 @@ export class GlobalConfigEffects {
   @Effect({dispatch: false}) registerGlobalShortcutInitially$: any = this._actions$
     .pipe(
       ofType(
-        GlobalConfigActionTypes.LoadGlobalConfig,
+        loadDataComplete,
       ),
       filter(() => IS_ELECTRON),
-      tap((action: LoadGlobalConfig) => {
-        const keyboardCfg: KeyboardConfig = action.payload.cfg.keyboard;
+      tap((action) => {
+        const appDataComplete = action.appDataComplete;
+        const keyboardCfg: KeyboardConfig = appDataComplete.globalConfig.keyboard;
         this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
@@ -84,10 +86,11 @@ export class GlobalConfigEffects {
   @Effect({dispatch: false}) selectLanguageOnLoad: any = this._actions$
     .pipe(
       ofType(
-        GlobalConfigActionTypes.LoadGlobalConfig,
+        loadDataComplete,
       ),
-      tap((action: LoadGlobalConfig) => {
-        const lng = action.payload.cfg && action.payload.cfg.lang && action.payload.cfg.lang.lng;
+      tap((action) => {
+        const cfg = action.appDataComplete.globalConfig;
+        const lng = cfg && cfg.lang && cfg.lang.lng;
         this._languageService.setLng(lng);
       })
     );

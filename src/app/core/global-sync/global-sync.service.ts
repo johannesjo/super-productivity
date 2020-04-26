@@ -12,7 +12,7 @@ import {DataInitService} from '../data-init/data-init.service';
   providedIn: 'root',
 })
 export class GlobalSyncService {
-  private _isSyncActive$: Observable<boolean> = this._globalConfigService.onCfgLoaded$.pipe(
+  private _isSyncActive$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => this._globalConfigService.googleDriveSyncCfg$.pipe(
       map(cfg => cfg && cfg.isEnabled && cfg.isLoadRemoteDataOnStartup && cfg.isAutoLogin),
       distinctUntilChanged(),

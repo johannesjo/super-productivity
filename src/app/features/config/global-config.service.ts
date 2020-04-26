@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {GlobalConfigActionTypes} from './store/global-config.actions';
-import {merge, Observable, Subject} from 'rxjs';
+import {Observable} from 'rxjs';
 import {
   EvaluationConfig,
   GlobalConfigSectionKey,
@@ -23,7 +23,7 @@ import {
   selectTakeABreakConfig
 } from './store/global-config.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {Actions, ofType} from '@ngrx/effects';
+import {Actions} from '@ngrx/effects';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 
@@ -67,14 +67,6 @@ export class GlobalConfigService {
 
   cfg: GlobalConfigState;
 
-  private _onNoCfgLoaded$ = new Subject();
-
-  onCfgLoaded$: Observable<any> = merge(
-    this._actions$.pipe(ofType(GlobalConfigActionTypes.LoadGlobalConfig)),
-    this._onNoCfgLoaded$,
-  );
-
-
   constructor(
     private readonly _store: Store<any>,
     private readonly _actions$: Actions,
@@ -82,28 +74,6 @@ export class GlobalConfigService {
   ) {
     // this.cfg$.subscribe((val) => console.log(val));
     this.cfg$.subscribe((cfg) => this.cfg = cfg);
-  }
-
-  async load(isOmitTokens = false) {
-    const cfg = await this._persistenceService.globalConfig.loadState();
-    if (cfg && Object.keys(cfg).length > 0) {
-      this.loadState(cfg, isOmitTokens);
-    } else {
-      // NOTE: this happens if there never have been any changes to the default cfg
-      console.warn('ConfigService No config found in ls');
-      this._onNoCfgLoaded$.next();
-    }
-  }
-
-  loadState(state: GlobalConfigState, isOmitTokens = false) {
-    this._store.dispatch({
-      type: GlobalConfigActionTypes.LoadGlobalConfig,
-      // always extend default config
-      payload: {
-        cfg: state,
-        isOmitTokens
-      },
-    });
   }
 
   updateSection(sectionKey: GlobalConfigSectionKey, sectionCfg: Partial<GlobalSectionConfig>, isSkipLastActive = false) {
