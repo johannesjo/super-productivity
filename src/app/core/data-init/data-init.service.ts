@@ -55,8 +55,8 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(projectState: ProjectState = null, isOmitTokens = false): Promise<any> {
-    const completeData = await this._persistenceService.loadComplete();
-    this._store$.dispatch(loadDataComplete(completeData));
+    const appDataComplete = await this._persistenceService.loadComplete();
+    this._store$.dispatch(loadDataComplete({appDataComplete}));
 
     // return forkJoin([
     //   // LOAD GLOBAL MODELS
