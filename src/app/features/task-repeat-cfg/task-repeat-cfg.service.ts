@@ -1,15 +1,10 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {
-  initialTaskRepeatCfgState,
-  selectAllTaskRepeatCfgs,
-  selectTaskRepeatCfgById,
-} from './store/task-repeat-cfg.reducer';
+import {selectAllTaskRepeatCfgs, selectTaskRepeatCfgById,} from './store/task-repeat-cfg.reducer';
 import {
   AddTaskRepeatCfgToTask,
   DeleteTaskRepeatCfg,
   DeleteTaskRepeatCfgs,
-  LoadTaskRepeatCfgState,
   UpdateTaskRepeatCfg,
   UpdateTaskRepeatCfgs,
   UpsertTaskRepeatCfg,
@@ -33,11 +28,6 @@ export class TaskRepeatCfgService {
     private _persistenceService: PersistenceService,
     private _matDialog: MatDialog,
   ) {
-  }
-
-  async load() {
-    const lsTaskRepeatCfgState = await this._persistenceService.taskRepeatCfg.loadState();
-    this._loadState(lsTaskRepeatCfgState || initialTaskRepeatCfgState);
   }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
@@ -88,9 +78,5 @@ export class TaskRepeatCfgService {
           this.deleteTaskRepeatCfg(id);
         }
       });
-  }
-
-  private _loadState(state: TaskRepeatCfgState) {
-    this._store$.dispatch(new LoadTaskRepeatCfgState({state}));
   }
 }

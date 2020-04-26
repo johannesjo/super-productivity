@@ -1,22 +1,14 @@
 import {Action} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {TaskRepeatCfg, TaskRepeatCfgState} from '../task-repeat-cfg.model';
+import {TaskRepeatCfg} from '../task-repeat-cfg.model';
 
 export enum TaskRepeatCfgActionTypes {
-  LoadTaskRepeatCfgState = '[TaskRepeatCfg] Load TaskRepeatCfg State',
   AddTaskRepeatCfgToTask = '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
   UpdateTaskRepeatCfg = '[TaskRepeatCfg] Update TaskRepeatCfg',
   UpdateTaskRepeatCfgs = '[TaskRepeatCfg] Update multiple TaskRepeatCfgs',
   UpsertTaskRepeatCfg = '[TaskRepeatCfg] Upsert TaskRepeatCfg',
   DeleteTaskRepeatCfg = '[TaskRepeatCfg] Delete TaskRepeatCfg',
   DeleteTaskRepeatCfgs = '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
-}
-
-export class LoadTaskRepeatCfgState implements Action {
-  readonly type = TaskRepeatCfgActionTypes.LoadTaskRepeatCfgState;
-
-  constructor(public payload: { state: TaskRepeatCfgState }) {
-  }
 }
 
 export class AddTaskRepeatCfgToTask implements Action {
@@ -62,9 +54,8 @@ export class DeleteTaskRepeatCfgs implements Action {
 }
 
 
-export type TaskRepeatCfgActions =
-  LoadTaskRepeatCfgState
-  | AddTaskRepeatCfgToTask
+export type TaskRepeatCfgActions
+  = AddTaskRepeatCfgToTask
   | UpdateTaskRepeatCfg
   | UpdateTaskRepeatCfgs
   | UpsertTaskRepeatCfg

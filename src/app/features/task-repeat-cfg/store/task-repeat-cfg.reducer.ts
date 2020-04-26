@@ -64,9 +64,6 @@ export function taskRepeatCfgReducer(
       return adapter.removeMany(action.payload.ids, state);
     }
 
-    case TaskRepeatCfgActionTypes.LoadTaskRepeatCfgState:
-      return {...action.payload.state};
-
     default: {
       return state;
     }
