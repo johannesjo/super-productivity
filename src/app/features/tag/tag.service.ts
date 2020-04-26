@@ -1,19 +1,18 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {
-  initialTagState,
   selectAllTags,
   selectAllTagsWithoutMyDay,
   selectTagById,
   selectTagByName,
   selectTagsByIds
 } from './store/tag.reducer';
-import {addTag, deleteTag, deleteTags, loadTagState, updateTag, upsertTag} from './store/tag.actions';
-import {Observable, of} from 'rxjs';
+import {addTag, deleteTag, deleteTags, updateTag, upsertTag} from './store/tag.actions';
+import {Observable} from 'rxjs';
 import {Tag, TagState} from './tag.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {DEFAULT_TAG, TODAY_TAG} from './tag.const';
+import {DEFAULT_TAG} from './tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -38,17 +37,6 @@ export class TagService {
 
   getByName$(name: string): Observable<Tag> {
     return this._store$.pipe(select(selectTagByName, {name}));
-  }
-
-  async load() {
-    const lsTagState = await this._persistenceService.tag.loadState() || initialTagState;
-    const state = this._addMyDayTag(lsTagState);
-    this.loadState(state);
-  }
-
-
-  loadState(state: TagState) {
-    this._store$.dispatch(loadTagState({state}));
   }
 
   addTag(tag: Partial<Tag>): string {
@@ -91,20 +79,5 @@ export class TagService {
 
   upsertTag(tag: Tag) {
     this._store$.dispatch(upsertTag({tag}));
-  }
-
-  private _addMyDayTag(state: TagState): TagState {
-    const ids = state.ids as string[];
-    if (ids && !ids.includes(TODAY_TAG.id)) {
-      return {
-        ...state,
-        ids: ([TODAY_TAG.id, ...ids] as string[]),
-        entities: {
-          ...state.entities,
-          [TODAY_TAG.id]: TODAY_TAG,
-        }
-      };
-    }
-    return state;
   }
 }

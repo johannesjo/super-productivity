@@ -1,12 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 import {Update} from '@ngrx/entity';
-import {Tag, TagState} from '../tag.model';
+import {Tag} from '../tag.model';
 import {WorkContextAdvancedCfgKey} from '../../work-context/work-context.model';
-
-export const loadTagState = createAction(
-  '[Tag] Load Tag State',
-  props<{ state: TagState }>(),
-);
 
 export const addTag = createAction(
   '[Tag] Add Tag',
@@ -40,15 +35,15 @@ export const updateAdvancedConfigForTag = createAction(
 
 export const updateWorkStartForTag = createAction(
   '[Tag] Update Work Start for Tag',
-  props< { id: string; date: string; newVal: number; }>(),
+  props<{ id: string; date: string; newVal: number; }>(),
 );
 
 export const updateWorkEndForTag = createAction(
   '[Tag] Update Work End for Tag',
-  props< { id: string; date: string; newVal: number; }>(),
+  props<{ id: string; date: string; newVal: number; }>(),
 );
 
 export const addToBreakTimeForTag = createAction(
   '[Tag] Update Break Time for Tag',
-  props< { id: string; date: string; valToAdd: number; }>(),
+  props<{ id: string; date: string; valToAdd: number; }>(),
 );
