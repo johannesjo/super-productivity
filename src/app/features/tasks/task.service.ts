@@ -93,6 +93,7 @@ import {Router} from '@angular/router';
 import {unique} from '../../util/unique';
 import {SnackService} from '../../core/snack/snack.service';
 import {T} from '../../t.const';
+import {ImexMetaService} from '../../imex/imex-meta/imex-meta.service';
 
 
 @Injectable({
@@ -181,6 +182,7 @@ export class TaskService {
     private readonly _tagService: TagService,
     private readonly _projectService: ProjectService,
     private readonly _workContextService: WorkContextService,
+    private readonly _imexMetaService: ImexMetaService,
     private readonly _snackService: SnackService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
@@ -190,9 +192,9 @@ export class TaskService {
 
     // time tracking
     this._timeTrackingService.tick$
-      .pipe(withLatestFrom(this.currentTask$))
-      .subscribe(([tick, currentTask]) => {
-        if (currentTask) {
+      .pipe(withLatestFrom(this.currentTask$, this._imexMetaService.isDataImportInProgress$))
+      .subscribe(([tick, currentTask, isImportInProgress]) => {
+        if (currentTask && !isImportInProgress) {
           this.addTimeSpent(currentTask, tick.duration, tick.date);
         }
       });
