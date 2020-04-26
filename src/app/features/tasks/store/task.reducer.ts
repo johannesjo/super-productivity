@@ -48,7 +48,12 @@ export function taskReducer(
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadDataComplete.type) {
     const appDataComplete: AppDataComplete = action as any;
-    return {...appDataComplete.task};
+    return {
+      ...appDataComplete.task,
+      currentTaskId: null,
+      lastCurrentTaskId: appDataComplete.task.currentTaskId,
+      isDataLoaded: true,
+    };
   }
 
   switch (action.type) {
