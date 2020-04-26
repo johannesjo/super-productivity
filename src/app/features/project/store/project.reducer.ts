@@ -34,6 +34,7 @@ import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
+import {migrateProjectState} from '../migrate-projects-state.util';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -121,7 +122,7 @@ export function projectReducer(
   if ((action.type as string) === loadDataComplete.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
     return appDataComplete.project
-      ? {...appDataComplete.project}
+      ? migrateProjectState({...appDataComplete.project})
       : state;
   }
 
@@ -374,10 +375,6 @@ export function projectReducer(
 
     // Project Actions
     // ------------
-    case ProjectActionTypes.LoadProjectState: {
-      return {...action.payload.state};
-    }
-
     case ProjectActionTypes.LoadProjectRelatedDataSuccess: {
       return {
         ...state,

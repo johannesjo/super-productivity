@@ -6,8 +6,6 @@ import {select, Store} from '@ngrx/store';
 import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
 import shortid from 'shortid';
 import {
-  initialProjectState,
-  ProjectState,
   selectArchivedProjects,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
@@ -26,7 +24,6 @@ import {Actions} from '@ngrx/effects';
 import {shareReplay, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
-import {migrateProjectState} from './migrate-projects-state.util';
 import {T} from '../../t.const';
 import {BreakNr, BreakTime, WorkContextType} from '../work-context/work-context.model';
 import {WorkContextService} from '../work-context/work-context.service';
@@ -102,23 +99,6 @@ export class ProjectService {
     private readonly _store$: Store<any>,
     private readonly _actions$: Actions,
   ) {
-  }
-
-  async load(state?: ProjectState) {
-    const projectStateIN = state || await this._persistenceService.project.loadState() || initialProjectState;
-    // we need to do this to migrate to the latest model if new fields are added
-    const projectState = migrateProjectState({...projectStateIN});
-
-    if (projectState) {
-      this.loadState(projectState);
-    }
-  }
-
-  loadState(projectState: ProjectState) {
-    this._store$.dispatch({
-      type: ProjectActionTypes.LoadProjectState,
-      payload: {state: projectState}
-    });
   }
 
   archive(projectId: string) {

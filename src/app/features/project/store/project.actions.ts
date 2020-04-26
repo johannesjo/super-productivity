@@ -6,7 +6,6 @@ import {IssueIntegrationCfg, IssueProviderKey} from '../../issue/issue.model';
 import {WorkContextAdvancedCfgKey} from '../../work-context/work-context.model';
 
 export enum ProjectActionTypes {
-  LoadProjectState = '[Project] Load Project State',
   LoadProjectRelatedDataSuccess = '[Project] Load Project related Data Success',
   SetCurrentProject = '[Project] SetCurrentProject',
 
@@ -26,13 +25,6 @@ export enum ProjectActionTypes {
   ArchiveProject = '[Project] Archive Project',
   UnarchiveProject = '[Project] Unarchive Project',
   UpdateProjectOrder = '[Project] Update Project Order',
-}
-
-export class LoadProjectState implements Action {
-  readonly type = ProjectActionTypes.LoadProjectState;
-
-  constructor(public payload: { state: ProjectState }) {
-  }
 }
 
 export class LoadProjectRelatedDataSuccess implements Action {
@@ -162,7 +154,6 @@ export class UnarchiveProject implements Action {
 
 export type ProjectActions
   = LoadProjects
-  | LoadProjectState
   | LoadProjectRelatedDataSuccess
   | SetCurrentProject
   | AddProject
