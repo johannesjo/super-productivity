@@ -63,12 +63,31 @@ export const initialTagState: TagState = tagAdapter.getInitialState({
 });
 
 
+const _addMyDayTagIfNecessary = (state: TagState): TagState => {
+  const ids = state.ids as string[];
+  if (ids && !ids.includes(TODAY_TAG.id)) {
+    return {
+      ...state,
+      ids: ([TODAY_TAG.id, ...ids] as string[]),
+      entities: {
+        ...state.entities,
+        [TODAY_TAG.id]: TODAY_TAG,
+      }
+    };
+  }
+  return state;
+};
+
 const _reducer = createReducer<TagState>(
   initialTagState,
 
   // META ACTIONS
   // ------------
-  on(loadDataComplete, (oldState, {appDataComplete}) => (appDataComplete.tag ? {...appDataComplete.tag} : oldState)),
+  on(loadDataComplete, (oldState, {appDataComplete}) => _addMyDayTagIfNecessary(
+    appDataComplete.tag
+      ? {...appDataComplete.tag}
+      : oldState)
+  ),
 
   on(moveTaskInTodayList, (state, {
     taskId,
@@ -124,8 +143,6 @@ const _reducer = createReducer<TagState>(
   on(tagActions.deleteTag, (state, {id}) => tagAdapter.removeOne(id, state)),
 
   on(tagActions.deleteTags, (state, {ids}) => tagAdapter.removeMany(ids, state)),
-
-  on(tagActions.loadTagState, (oldState, {state}) => ({...oldState, ...state})),
 
   on(tagActions.updateWorkStartForTag, (state, {id, newVal, date}) => tagAdapter.updateOne({
     id, changes: {
@@ -187,7 +204,6 @@ export function tagReducer(
   state = initialTagState,
   action: Action,
 ): TagState {
-
   switch (action.type) {
     // TASK STUFF
     // ---------
