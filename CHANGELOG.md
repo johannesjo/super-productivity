@@ -1,3 +1,32 @@
+## [5.0.14](https://github.com/johannesjo/super-productivity/compare/v5.0.13...v5.0.14) (2020-04-26)
+
+
+### Bug Fixes
+
+* add missing migrate functions ([745cc56](https://github.com/johannesjo/super-productivity/commit/745cc5662a95833366b1c35414171c017a895a78))
+* jira effects crashing when there is no jira cfg at all [#341](https://github.com/johannesjo/super-productivity/issues/341) ([7111ef8](https://github.com/johannesjo/super-productivity/commit/7111ef8a15c773fa0572e2ba400956e18883633e))
+* lint ([0c9e791](https://github.com/johannesjo/super-productivity/commit/0c9e79165bbadedf798d3fd879d7399ba099c629))
+* load main tag error ([f761183](https://github.com/johannesjo/super-productivity/commit/f761183696ddccd179b1c25884bf7622b999b68b))
+* tag init ([f667ce6](https://github.com/johannesjo/super-productivity/commit/f667ce636fec1eef069f143b762c1cc5624266a5))
+* task state initialization ([2a277ec](https://github.com/johannesjo/super-productivity/commit/2a277ecef7798b80f58509ccae8582a8c55cd421))
+* **project:** drag & drop model not including archived projects ([82b7063](https://github.com/johannesjo/super-productivity/commit/82b7063b6816a83be2ff3900aa6d53fd85d01a25))
+
+
+### Features
+
+* add entity data consistency check on data save ([75fd7a2](https://github.com/johannesjo/super-productivity/commit/75fd7a2a735bb2dd0bb8e57d4516f8428af8c0dd))
+* add error handling for invalid task data in selectors ([ecd82c1](https://github.com/johannesjo/super-productivity/commit/ecd82c1fb2f20de58bae807f59a407c5af2ea0c3))
+* always show last active log if not in production ([8e3ab34](https://github.com/johannesjo/super-productivity/commit/8e3ab345d140f6235e80d246934e8a81bca53265))
+* don't add time spent while importing data ([d6f735a](https://github.com/johannesjo/super-productivity/commit/d6f735a4618c16fd378c70c7fc94d0c2c227b861))
+* don't import when there is no value ([6f033b5](https://github.com/johannesjo/super-productivity/commit/6f033b509054bce21a5e3caaa2e206e5f72bcc5b))
+* improve task selector error ([9b45439](https://github.com/johannesjo/super-productivity/commit/9b454396306f7737a2542abdb6708f6192ae998f))
+* make token loading work like before ([2ba0340](https://github.com/johannesjo/super-productivity/commit/2ba0340ad7b28ec0d4a60cc4a5ee0e5747fb5780))
+* update consistency check ([6b233d1](https://github.com/johannesjo/super-productivity/commit/6b233d1ff37616282a969d99420dbdfdbcb2f94d))
+* use single action for data import and data init ([1425a52](https://github.com/johannesjo/super-productivity/commit/1425a520eec2a61512ec85d7564a908ba66ecfdf))
+* **tag:** switch to manual tag persistence ([4ae7d8e](https://github.com/johannesjo/super-productivity/commit/4ae7d8eca0de58fb5b674a9133b13b919a847417))
+
+
+
 ## [5.0.13](https://github.com/johannesjo/super-productivity/compare/v5.0.12...v5.0.13) (2020-04-24)
 
 
