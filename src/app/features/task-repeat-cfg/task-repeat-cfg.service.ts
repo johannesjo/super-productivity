@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {selectAllTaskRepeatCfgs, selectTaskRepeatCfgById,} from './store/task-repeat-cfg.reducer';
+import {selectAllTaskRepeatCfgs, selectTaskRepeatCfgById} from './store/task-repeat-cfg.reducer';
 import {
   AddTaskRepeatCfgToTask,
   DeleteTaskRepeatCfg,
