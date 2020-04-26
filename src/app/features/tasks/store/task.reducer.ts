@@ -21,6 +21,7 @@ import {unique} from '../../../util/unique';
 import {roundDurationVanilla} from '../../../util/round-duration';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
+import {migrateTaskState} from '../migrate-task-state.util';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -49,12 +50,12 @@ export function taskReducer(
   if ((action.type as string) === loadDataComplete.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
     return appDataComplete.task
-      ? {
+      ? migrateTaskState({
         ...appDataComplete.task,
         currentTaskId: null,
         lastCurrentTaskId: appDataComplete.task.currentTaskId,
         isDataLoaded: true,
-      } :
+      }) :
       state;
   }
 

@@ -11,6 +11,7 @@ import {
 import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
+import {migrateGlobalConfigState} from '../migrate-global-config.util';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
@@ -33,7 +34,7 @@ export function globalConfigReducer(
   if ((action.type as string) === loadDataComplete.type) {
     const {appDataComplete, isOmitTokens}: { appDataComplete: AppDataComplete, isOmitTokens: boolean } = action as any;
     const cfg = appDataComplete.globalConfig
-      ? {...appDataComplete.globalConfig}
+      ? migrateGlobalConfigState({...appDataComplete.globalConfig})
       : state;
 
     if (isOmitTokens) {

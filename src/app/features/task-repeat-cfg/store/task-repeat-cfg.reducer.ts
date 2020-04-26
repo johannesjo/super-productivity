@@ -4,6 +4,7 @@ import {TaskRepeatCfg, TaskRepeatCfgState} from '../task-repeat-cfg.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
+import {migrateTaskRepeatCfgState} from '../migrate-task-repeat-cfg-state.util';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -31,7 +32,7 @@ export function taskRepeatCfgReducer(
   if ((action.type as string) === loadDataComplete.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
     return appDataComplete.taskRepeatCfg
-      ? {...appDataComplete.taskRepeatCfg}
+      ? migrateTaskRepeatCfgState({...appDataComplete.taskRepeatCfg})
       : state;
   }
 
