@@ -22,7 +22,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   isWorklogEnabled: true,
   isAutoWorklog: false,
   isAddWorklogOnSubTaskDone: true,
-
+  isAllowSelfSignedCertificate: false,
   isUpdateIssueFromLocal: false,
 
   isShowComponents: true,
@@ -104,6 +104,13 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
       label: T.F.JIRA.FORM_CRED.PASSWORD,
       type: 'password',
       description: '* https://confluence.atlassian.com/cloud/api-tokens-938839638.html'
+    },
+  },
+  {
+    key: 'isAllowSelfSignedCertificate',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.JIRA.FORM_CRED.ALLOW_SELF_SIGNED
     },
   },
 ];

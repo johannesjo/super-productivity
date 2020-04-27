@@ -5,15 +5,26 @@ import {JiraCfg} from '../src/app/features/issue/providers/jira/jira.model';
 // import rp from 'request-promise';
 // const rp = require('request-promise');
 import fetch from 'node-fetch';
+import {Agent} from 'https';
 
-
-export const sendJiraRequest = ({requestId, requestInit, url, cfg}: { requestId: string; requestInit: RequestInit; url: string, cfg: any }) => {
+export const sendJiraRequest = ({requestId, requestInit, url, jiraCfg}:
+                                  { requestId: string; requestInit: RequestInit; url: string, jiraCfg: JiraCfg }) => {
   const mainWin = getWin();
   // console.log('--------------------------------------------------------------------');
   // console.log(url);
   // console.log('--------------------------------------------------------------------');
 
-  fetch(url, requestInit)
+  fetch(url, {
+    ...requestInit,
+    // allow self signed certificates
+    ...(jiraCfg &&  jiraCfg.isAllowSelfSignedCertificate
+      ? {
+        agent: new Agent({
+          rejectUnauthorized: false,
+        })
+      }
+      : {})
+  })
     .then((response) => {
       // console.log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {

@@ -16,6 +16,7 @@ export interface JiraCfg {
   userName: string;
   password?: string;
   isAutoPollTickets: boolean;
+  isAllowSelfSignedCertificate: boolean;
   searchJqlQuery: string;
 
   isAutoAddToBacklog: boolean;

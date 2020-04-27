@@ -273,7 +273,8 @@
       "FORM_CRED": {
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username"
+        "USER_NAME": "Email / Username",
+        "ALLOW_SELF_SIGNED": "Allow self signed certificate"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Advanced Config",
