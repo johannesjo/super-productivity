@@ -7,7 +7,7 @@ export type ProjectDataLsKey
   // | 'TASK_REPEAT_CFG_STATE'
   // | 'TASK_ATTACHMENT_STATE'
   // | 'TASKS_ARCHIVE'
-  | 'TAG_STATE'
+  // | 'TAG_STATE'
   | 'ISSUE_STATE'
   | 'NOTE_STATE'
   | 'BOOKMARK_STATE'

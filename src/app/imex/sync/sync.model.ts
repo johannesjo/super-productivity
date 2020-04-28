@@ -13,6 +13,7 @@ import {WorkContextState} from '../../features/work-context/work-context.model';
 import {TagState} from '../../features/tag/tag.model';
 import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
 import {EntityState} from '@ngrx/entity';
+import {SimpleCounterState} from '../../features/simple-counter/simple-counter.model';
 
 /** @deprecated */
 export interface TaskAttachmentState extends EntityState<TaskAttachment> {
@@ -26,6 +27,7 @@ export interface AppBaseData {
 
   task: TaskState;
   tag: TagState;
+  simpleCounter: SimpleCounterState;
   taskArchive: TaskArchive;
   context: WorkContextState;
   taskRepeatCfg: TaskRepeatCfgState;

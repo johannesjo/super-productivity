@@ -17,7 +17,9 @@ export const LS_TASK_ATTACHMENT_STATE = 'TASK_ATTACHMENT_STATE';
 
 export const LS_PROJECT_META_LIST = LS_PREFIX + 'PROJECT_META_LIST';
 
-export const LS_TAG_STATE: ProjectDataLsKey = 'TAG_STATE';
+export const LS_TAG_STATE = 'TAG_STATE';
+export const LS_SIMPLE_COUNTER_STATE = 'SIMPLE_COUNTER_STATE';
+
 export const LS_NOTE_STATE: ProjectDataLsKey = 'NOTE_STATE';
 export const LS_BOOKMARK_STATE: ProjectDataLsKey = 'BOOKMARK_STATE';
 export const LS_METRIC_STATE: ProjectDataLsKey = 'METRIC_STATE';

@@ -1,4 +1,6 @@
-export interface SimpleCounter {
+import { EntityState } from '@ngrx/entity';
+
+export interface SimpleCounterCopy {
   id: string;
 
   // basic cfg
@@ -17,6 +19,13 @@ export interface SimpleCounter {
   isRunning: boolean;
 }
 
+export type SimpleCounter = Readonly<SimpleCounterCopy>;
+
 export type SimpleCounterConfig = Readonly<{
   counters: SimpleCounter[];
 }>;
+
+
+export interface SimpleCounterState extends EntityState<SimpleCounter> {
+  // additional entities state properties
+}

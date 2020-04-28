@@ -22,6 +22,7 @@ export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
 export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
   {
     ...EMPTY_SIMPLE_COUNTER,
+    id: 'STANDING_DESK_ID',
     title: 'Standing Desk Timer',
     iconPause: 'airline_seat_recline_normal',
     iconPlay: 'emoji_people',

@@ -14,6 +14,7 @@ import {
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
   LS_REMINDER,
+  LS_SIMPLE_COUNTER_STATE,
   LS_TAG_STATE,
   LS_TASK_ARCHIVE,
   LS_TASK_REPEAT_CFG_STATE,
@@ -60,6 +61,8 @@ import {tagReducer} from '../../features/tag/store/tag.reducer';
 import {migrateTaskRepeatCfgState} from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 import {environment} from '../../../environments/environment';
 import {checkFixEntityStateConsistency} from '../../util/check-fix-entity-state-consistency';
+import {SimpleCounter, SimpleCounterState} from '../../features/simple-counter/simple-counter.model';
+import {simpleCounterReducer} from '../../features/simple-counter/store/simple-counter.reducer';
 
 
 @Injectable({
@@ -86,6 +89,11 @@ export class PersistenceService {
     LS_TAG_STATE,
     'tag',
     tagReducer,
+  );
+  simpleCounter = this._cmBaseEntity<SimpleCounterState, SimpleCounter>(
+    LS_SIMPLE_COUNTER_STATE,
+    'simpleCounter',
+    simpleCounterReducer,
   );
 
   // MAIN TASK MODELS
