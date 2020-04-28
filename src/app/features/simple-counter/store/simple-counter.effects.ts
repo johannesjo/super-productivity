@@ -6,6 +6,8 @@ import {
   addSimpleCounter,
   deleteSimpleCounter,
   deleteSimpleCounters,
+  increaseSimpleCounterCounterToday,
+  setSimpleCounterCounterToday,
   updateAllSimpleCounters,
   updateSimpleCounter,
   upsertSimpleCounter
@@ -20,12 +22,16 @@ export class SimpleCounterEffects {
 
   updateSimpleCountersStorage$ = createEffect(() => this._actions$.pipe(
     ofType(
+      updateAllSimpleCounters,
+      setSimpleCounterCounterToday,
+      increaseSimpleCounterCounterToday,
+
+      // currently not used
       addSimpleCounter,
       updateSimpleCounter,
       upsertSimpleCounter,
       deleteSimpleCounter,
       deleteSimpleCounters,
-      updateAllSimpleCounters,
     ),
     withLatestFrom(
       this._store$.pipe(select(selectSimpleCounterFeatureState)),
