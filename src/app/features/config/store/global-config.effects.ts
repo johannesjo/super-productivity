@@ -13,6 +13,7 @@ import {LanguageService} from '../../../core/language/language.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {ElectronService} from '../../../core/electron/electron.service';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -64,7 +65,7 @@ export class GlobalConfigEffects {
       filter(() => IS_ELECTRON),
       tap((action) => {
         const appDataComplete = action.appDataComplete;
-        const keyboardCfg: KeyboardConfig = appDataComplete.globalConfig.keyboard;
+        const keyboardCfg: KeyboardConfig = (appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG).keyboard;
         this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
@@ -89,7 +90,7 @@ export class GlobalConfigEffects {
         loadDataComplete,
       ),
       tap((action) => {
-        const cfg = action.appDataComplete.globalConfig;
+        const cfg = action.appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
         const lng = cfg && cfg.lang && cfg.lang.lng;
         this._languageService.setLng(lng);
       })
