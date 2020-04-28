@@ -33,13 +33,9 @@ export class SimpleCounterEffects {
   private _saveToLs([action, currentProjectId, simpleCounterState]) {
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
-      // this._persistenceService.simpleCounter.save(currentProjectId, simpleCounterState);
+      this._persistenceService.simpleCounter.saveState(simpleCounterState);
     } else {
       throw new Error('No current project id');
     }
-  }
-
-  private _updateLastActive() {
-    this._persistenceService.saveLastActive();
   }
 }

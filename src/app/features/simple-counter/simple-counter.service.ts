@@ -5,6 +5,7 @@ import {
   addSimpleCounter,
   deleteSimpleCounter,
   deleteSimpleCounters,
+  updateAllSimpleCounters,
   updateSimpleCounter,
   upsertSimpleCounter,
 } from './store/simple-counter.actions';
@@ -31,6 +32,10 @@ export class SimpleCounterService {
 
   getSimpleCounterById$(id: string): Observable<SimpleCounter> {
     return this._store$.pipe(select(selectSimpleCounterById, {id}));
+  }
+
+  updateAll(items: SimpleCounter[]) {
+    this._store$.dispatch(updateAllSimpleCounters({items}));
   }
 
   addSimpleCounter(simpleCounter: SimpleCounter) {

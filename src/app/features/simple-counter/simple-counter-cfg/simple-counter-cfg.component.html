@@ -1,18 +1,22 @@
-<formly-form (modelChange)="onModelChange($event)"
-             [fields]="section.items"
-             [form]="form"
-             [model]="simpleCounterCfg$|async"
-             [options]="options">
-</formly-form>
+<form (ngSubmit)="submit()"
+      [formGroup]="form">
+
+  <formly-form (modelChange)="onModelChange($event)"
+               [fields]="section.items"
+               [form]="form"
+               [model]="simpleCounterCfg$|async"
+               [options]="options">
+  </formly-form>
 
 
-<div class="controls">
-  <button [disabled]="!form.valid"
-          class="btn btn-primary submit-button"
-          color="primary"
-          mat-raised-button
-          type="submit">
-    <mat-icon>save</mat-icon>
-    {{T.G.SAVE|translate}}
-  </button>
-</div>
+  <div class="controls">
+    <button [disabled]="!form.valid"
+            class="btn btn-primary submit-button"
+            color="primary"
+            mat-raised-button
+            type="submit">
+      <mat-icon>save</mat-icon>
+      {{T.G.SAVE|translate}}
+    </button>
+  </div>
+</form>

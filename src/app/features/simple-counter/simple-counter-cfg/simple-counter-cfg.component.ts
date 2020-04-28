@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {ConfigFormSection, GlobalConfigSectionKey} from '../../config/global-config.model';
 import {ProjectCfgFormKey} from '../../project/project.model';
-import {SimpleCounterConfig} from '../simple-counter.model';
+import {SimpleCounter, SimpleCounterConfig} from '../simple-counter.model';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
 import {T} from 'src/app/t.const';
@@ -31,13 +31,20 @@ export class SimpleCounterCfgComponent {
     }))
   );
 
+  changedItems: SimpleCounter[];
+
   constructor(
     public readonly simpleCounterService: SimpleCounterService,
   ) {
   }
 
-  onModelChange(changes) {
+  onModelChange(changes: SimpleCounterConfig) {
     console.log(changes);
+    this.changedItems = changes.counters;
   }
 
+
+  submit() {
+    this.simpleCounterService.updateAll(this.changedItems);
+  }
 }

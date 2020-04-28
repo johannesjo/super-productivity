@@ -26,3 +26,8 @@ export const deleteSimpleCounters = createAction(
   '[SimpleCounter] Delete multiple SimpleCounters',
   props<{ ids: string[] }>(),
 );
+
+export const updateAllSimpleCounters = createAction(
+  '[SimpleCounter] Update all SimpleCounters',
+  props<{ items: SimpleCounter[] }>(),
+);

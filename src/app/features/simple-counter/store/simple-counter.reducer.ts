@@ -32,6 +32,16 @@ const _reducer = createReducer<SimpleCounterState>(
       : oldState
   ),
 
+  on(simpleCounterActions.updateAllSimpleCounters, (state, {items}) => {
+    const allNewItemIds = items.map(item => item.id);
+    const itemIdsToRemove = state.ids.filter(id => !allNewItemIds.includes(id));
+
+    let newState = state;
+    newState = adapter.removeMany(itemIdsToRemove, newState);
+    newState = adapter.upsertMany(items, newState);
+    return newState;
+  }),
+
   on(simpleCounterActions.addSimpleCounter, (state, {simpleCounter}) => adapter.addOne(simpleCounter, state)),
 
   on(simpleCounterActions.updateSimpleCounter, (state, {simpleCounter}) => adapter.updateOne(simpleCounter, state)),

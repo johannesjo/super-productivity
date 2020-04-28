@@ -1,4 +1,5 @@
-import { EntityState } from '@ngrx/entity';
+import {EntityState} from '@ngrx/entity';
+
 export enum SimpleCounterType {
   StopWatch = 'StopWatch',
   ClickCounter = 'ClickCounter',
@@ -34,5 +35,6 @@ export type SimpleCounterConfig = Readonly<{
 
 
 export interface SimpleCounterState extends EntityState<SimpleCounter> {
+  ids: string[];
   // additional entities state properties
 }
