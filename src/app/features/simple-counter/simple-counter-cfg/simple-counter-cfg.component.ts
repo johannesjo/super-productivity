@@ -4,6 +4,7 @@ import {ProjectCfgFormKey} from '../../project/project.model';
 import {SimpleCounterConfig} from '../simple-counter.model';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
+import {T} from 'src/app/t.const';
 
 @Component({
   selector: 'simple-counter-cfg',
@@ -17,11 +18,16 @@ export class SimpleCounterCfgComponent {
   @Input() cfg: SimpleCounterConfig;
 
 
+  T = T;
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {};
 
   constructor() {
+  }
+
+  onModelChange(changes) {
+    console.log(changes);
   }
 
 }
