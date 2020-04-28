@@ -8,6 +8,7 @@ import {BookmarkModule} from '../../features/bookmark/bookmark.module';
 import {PomodoroModule} from '../../features/pomodoro/pomodoro.module';
 import {WorkContextMenuModule} from '../work-context-menu/work-context-menu.module';
 import {TagModule} from '../../features/tag/tag.module';
+import {SimpleCounterModule} from '../../features/simple-counter/simple-counter.module';
 
 @NgModule({
   imports: [
@@ -19,6 +20,7 @@ import {TagModule} from '../../features/tag/tag.module';
     PomodoroModule,
     WorkContextMenuModule,
     TagModule,
+    SimpleCounterModule,
   ],
   declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],

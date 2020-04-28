@@ -1,1 +1,29 @@
-<p>simple-counter-button works!</p>
+<div class="wrapper">
+  <button mat-mini-fab
+          class="main-btn"
+          (click)="toggle()"
+          [color]="isOn? 'accent': 'primary'">
+    <mat-icon *ngIf="isOn">directions_walk</mat-icon>
+    <mat-icon *ngIf="!isOn">airline_seat_recline_normal</mat-icon>
+  </button>
+
+  <!--  <ng-container *ngIf="true">-->
+  <div class="label">{{(simpleCounter|msToMinuteClockString)}}</div>
+  <div class="controls">
+    <button (click)="edit()"
+            class="btn"
+            color=""
+            title="Edit"
+            mat-mini-fab>
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button (click)="reset()"
+            class="btn"
+            color=""
+            title="Reset"
+            mat-mini-fab>
+      <mat-icon>undo</mat-icon>
+    </button>
+  </div>
+  <!--  </ng-container>-->
+</div>

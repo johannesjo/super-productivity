@@ -1,0 +1,95 @@
+@import '../../../../variables';
+
+.wrapper {
+  position: relative;
+  margin-left: $s*0.5;
+
+  @include mq(xs) {
+    margin-left: $s;
+  }
+}
+
+.main-btn {
+  $circleOverflow: 5px;
+  position: relative;
+  margin-left: 0;
+  // needs to be above the rest
+  z-index: 2;
+
+  .mat-icon {
+    position: relative;
+    z-index: 2;
+    transform: translateY(-2px);
+  }
+}
+
+.label {
+  margin-left: 0;
+  position: absolute;
+  line-height: 1;
+  padding: 2px 4px 1px;
+  background: #fff;
+  color: #000;
+  width: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: $whiteframe-shadow-2dp;
+  font-weight: bold;
+  border-radius: 8px;
+  z-index: 4;
+  pointer-events: none;
+  bottom: $s/-4;
+
+  @include darkTheme {
+    background: $dark-theme-bg-lighter;
+    color: #fff;
+  }
+
+  .wrapper:hover & {
+    opacity: 0;
+  }
+}
+
+
+.controls {
+  transition: $transition-standard;
+  position: absolute;
+  top: 100%;
+  display: flex;
+  flex-direction: column;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+
+  // add a little bit of extra hover area
+  &:after {
+    content: '';
+    position: absolute;
+    top: $s*-1.25;
+    left: $s*-1.25;
+    right: $s*-1.25;
+    bottom: $s*-1.25;
+  }
+}
+
+.wrapper:hover .controls {
+  pointer-events: all;
+  .btn {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.btn {
+  transition: $transition-standard;
+  transform: translateY(-100%);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  margin-top: $s/2;
+  margin-left: 0;
+
+  &:nth-child(2) {
+    transform: translateY(-200%);
+  }
+}

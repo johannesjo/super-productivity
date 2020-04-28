@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {SimpleCounter} from '../simple-counter.model';
 
 @Component({
   selector: 'simple-counter-button',
@@ -7,10 +8,22 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleCounterButtonComponent implements OnInit {
+  isOn: boolean;
+  simpleCounter: SimpleCounter;
 
-  constructor() { }
+  constructor() {
+  }
 
   ngOnInit() {
   }
 
+  toggle() {
+    this.isOn = !this.isOn;
+  }
+
+  reset() {
+
+  }
+
+  edit() {}
 }
