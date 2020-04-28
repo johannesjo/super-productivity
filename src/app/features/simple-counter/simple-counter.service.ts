@@ -12,12 +12,16 @@ import {Observable} from 'rxjs';
 import {SimpleCounter, SimpleCounterState} from './simple-counter.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SimpleCounterService {
   simpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters));
+  enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters)).pipe(
+    map(items => items && items.filter(item => item.isEnabled)),
+  );
 
   constructor(
     private _store$: Store<SimpleCounterState>,

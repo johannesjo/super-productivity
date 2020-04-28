@@ -125,7 +125,7 @@
       </ng-container>
     </div>
 
-    <simple-counter-button *ngFor="let simpleCounter of (simpleCounterService.simpleCounters$|async)"
+    <simple-counter-button *ngFor="let simpleCounter of (simpleCounterService.enabledSimpleCounters$|async)"
                            [simpleCounter]="simpleCounter"></simple-counter-button>
   </nav>
 </div>

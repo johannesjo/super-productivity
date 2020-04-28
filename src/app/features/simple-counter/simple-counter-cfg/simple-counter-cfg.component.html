@@ -1,7 +1,7 @@
 <formly-form (modelChange)="onModelChange($event)"
              [fields]="section.items"
              [form]="form"
-             [model]="cfg"
+             [model]="simpleCounterCfg$|async"
              [options]="options">
 </formly-form>
 

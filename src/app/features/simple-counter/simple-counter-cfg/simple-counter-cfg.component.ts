@@ -5,6 +5,9 @@ import {SimpleCounterConfig} from '../simple-counter.model';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
 import {T} from 'src/app/t.const';
+import {SimpleCounterService} from '../simple-counter.service';
+import {map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'simple-counter-cfg',
@@ -22,8 +25,15 @@ export class SimpleCounterCfgComponent {
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {};
+  simpleCounterCfg$: Observable<SimpleCounterConfig> = this.simpleCounterService.simpleCounters$.pipe(
+    map(items => ({
+      counters: items,
+    }))
+  );
 
-  constructor() {
+  constructor(
+    public readonly simpleCounterService: SimpleCounterService,
+  ) {
   }
 
   onModelChange(changes) {
