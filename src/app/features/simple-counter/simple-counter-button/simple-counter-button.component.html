@@ -7,7 +7,7 @@
       <mat-icon *ngIf="isOn">{{simpleCounter.icon}}</mat-icon>
       <mat-icon *ngIf="!isOn">{{simpleCounter.iconOn}}</mat-icon>
     </button>
-    <div class="label">{{(simpleCounter.time|msToMinuteClockString)}}</div>
+    <div class="label">{{simpleCounter.count|msToMinuteClockString}}</div>
   </ng-container>
 
   <ng-container *ngIf="simpleCounter.type===SimpleCounterType.ClickCounter">
@@ -17,7 +17,7 @@
             color="primary">
       <mat-icon>{{simpleCounter.icon}}</mat-icon>
     </button>
-    <div class="label">{{(simpleCounter.time)}}</div>
+    <div class="label">{{simpleCounter.count}}</div>
   </ng-container>
 
   <!--  <ng-container *ngIf="true">-->

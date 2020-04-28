@@ -1,1 +1,6 @@
-<p>simple-counter-cfg works!</p>
+<formly-form (modelChange)="cfg=$event"
+             [fields]="section.items"
+             [form]="form"
+             [model]="cfg"
+             [options]="options">
+</formly-form>

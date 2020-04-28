@@ -19,13 +19,15 @@ export interface SimpleCounterCopy {
   isPauseWhenTimeTrackingIsPaused: boolean;
 
   // dynamic
-  time: number;
-  totalTimeOnDay: { [key: string]: number };
+  count: number;
+  totalCountOnDay: { [key: string]: number };
   isRunning: boolean;
 }
 
 export type SimpleCounter = Readonly<SimpleCounterCopy>;
 
+// just an empty dummy actually
+// todo remove
 export type SimpleCounterConfig = Readonly<{
   counters: SimpleCounter[];
 }>;

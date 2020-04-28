@@ -26,7 +26,7 @@ export class SimpleCounterButtonComponent implements OnInit {
   toggleCounter() {
     this.simpleCounter = {
       ...this.simpleCounter,
-      time: this.simpleCounter.time + 1
+      count: this.simpleCounter.count + 1
     };
   }
 
