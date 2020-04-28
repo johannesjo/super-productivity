@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
-import {SimpleCounter} from '../simple-counter.model';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {SimpleCounter, SimpleCounterType} from '../simple-counter.model';
 
 @Component({
   selector: 'simple-counter-button',
@@ -9,7 +9,9 @@ import {SimpleCounter} from '../simple-counter.model';
 })
 export class SimpleCounterButtonComponent implements OnInit {
   isOn: boolean;
-  simpleCounter: SimpleCounter;
+  SimpleCounterType = SimpleCounterType;
+
+  @Input() simpleCounter: SimpleCounter;
 
   constructor() {
   }
@@ -17,13 +19,21 @@ export class SimpleCounterButtonComponent implements OnInit {
   ngOnInit() {
   }
 
-  toggle() {
+  toggleStopwatch() {
     this.isOn = !this.isOn;
+  }
+
+  toggleCounter() {
+    this.simpleCounter = {
+      ...this.simpleCounter,
+      time: this.simpleCounter.time + 1
+    };
   }
 
   reset() {
 
   }
 
-  edit() {}
+  edit() {
+  }
 }

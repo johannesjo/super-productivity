@@ -1,4 +1,8 @@
 import { EntityState } from '@ngrx/entity';
+export enum SimpleCounterType {
+  StopWatch = 'StopWatch',
+  ClickCounter = 'ClickCounter',
+}
 
 export interface SimpleCounterCopy {
   id: string;
@@ -6,8 +10,9 @@ export interface SimpleCounterCopy {
   // basic cfg
   title: string;
   isEnabled: boolean;
-  iconPlay: string;
-  iconPause: string;
+  icon: string;
+  iconOn?: string;
+  type: SimpleCounterType;
 
   // adv cfg
   isStartWhenTrackingTime: boolean;

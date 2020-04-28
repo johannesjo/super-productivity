@@ -45,7 +45,7 @@
     color: #fff;
   }
 
-  .wrapper:hover & {
+  .wrapper:hover .stopwatch & {
     opacity: 0;
   }
 }
@@ -74,6 +74,7 @@
 
 .wrapper:hover .controls {
   pointer-events: all;
+
   .btn {
     transform: translateY(0);
     opacity: 1;

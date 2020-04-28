@@ -23,6 +23,8 @@ import {TagService} from '../../features/tag/tag.service';
 import {Tag} from '../../features/tag/tag.model';
 import {Project} from '../../features/project/project.model';
 import {expandFadeHorizontalAnimation} from '../../ui/animations/expand.ani';
+import {SimpleCounter} from '../../features/simple-counter/simple-counter.model';
+import {SimpleCounterService} from '../../features/simple-counter/simple-counter.service';
 
 @Component({
   selector: 'main-header',
@@ -61,6 +63,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly taskService: TaskService,
     public readonly pomodoroService: PomodoroService,
     public readonly layoutService: LayoutService,
+    public readonly simpleCounterService: SimpleCounterService,
     private readonly _router: Router,
     private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,

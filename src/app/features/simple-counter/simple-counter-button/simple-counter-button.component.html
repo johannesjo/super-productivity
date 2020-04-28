@@ -1,14 +1,26 @@
 <div class="wrapper">
-  <button mat-mini-fab
-          class="main-btn"
-          (click)="toggle()"
-          [color]="isOn? 'accent': 'primary'">
-    <mat-icon *ngIf="isOn">directions_walk</mat-icon>
-    <mat-icon *ngIf="!isOn">airline_seat_recline_normal</mat-icon>
-  </button>
+  <ng-container *ngIf="simpleCounter.type===SimpleCounterType.StopWatch">
+    <button mat-mini-fab
+            class="main-btn stopwatch"
+            (click)="toggleStopwatch()"
+            [color]="isOn? 'accent': 'primary'">
+      <mat-icon *ngIf="isOn">{{simpleCounter.icon}}</mat-icon>
+      <mat-icon *ngIf="!isOn">{{simpleCounter.iconOn}}</mat-icon>
+    </button>
+    <div class="label">{{(simpleCounter.time|msToMinuteClockString)}}</div>
+  </ng-container>
+
+  <ng-container *ngIf="simpleCounter.type===SimpleCounterType.ClickCounter">
+    <button mat-mini-fab
+            class="main-btn"
+            (click)="toggleCounter()"
+            color="primary">
+      <mat-icon>{{simpleCounter.icon}}</mat-icon>
+    </button>
+    <div class="label">{{(simpleCounter.time)}}</div>
+  </ng-container>
 
   <!--  <ng-container *ngIf="true">-->
-  <div class="label">{{(simpleCounter|msToMinuteClockString)}}</div>
   <div class="controls">
     <button (click)="edit()"
             class="btn"
