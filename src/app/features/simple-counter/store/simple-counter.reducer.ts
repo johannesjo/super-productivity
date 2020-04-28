@@ -5,6 +5,7 @@ import {SimpleCounter, SimpleCounterState} from '../simple-counter.model';
 import {DEFAULT_SIMPLE_COUNTERS} from '../simple-counter.const';
 import {arrayToDictionary} from '../../../util/array-to-dictionary';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {getWorklogStr} from '../../../util/get-work-log-str';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -41,6 +42,35 @@ const _reducer = createReducer<SimpleCounterState>(
     newState = adapter.upsertMany(items, newState);
     return newState;
   }),
+
+  on(simpleCounterActions.setSimpleCounterCounterToday, (state, {id, newVal}) => adapter.updateOne({
+    id,
+    changes: {
+      count: newVal,
+      totalCountOnDay: {
+        ...state.entities[id].totalCountOnDay,
+        [getWorklogStr()]: newVal,
+      }
+    }
+  }, state)),
+
+  on(simpleCounterActions.increaseSimpleCounterCounterToday, (state, {id, increaseBy}) => {
+    const todayStr = getWorklogStr();
+    const oldEntity = state.entities[id];
+    const currentVal = oldEntity.totalCountOnDay[todayStr] || 0;
+    const newValForToday = currentVal + increaseBy;
+    return adapter.updateOne({
+      id,
+      changes: {
+        count: newValForToday,
+        totalCountOnDay: {
+          ...oldEntity.totalCountOnDay,
+          [todayStr]: newValForToday,
+        }
+      }
+    }, state);
+  }),
+
 
   on(simpleCounterActions.addSimpleCounter, (state, {simpleCounter}) => adapter.addOne(simpleCounter, state)),
 

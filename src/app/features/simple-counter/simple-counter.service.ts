@@ -5,6 +5,8 @@ import {
   addSimpleCounter,
   deleteSimpleCounter,
   deleteSimpleCounters,
+  increaseSimpleCounterCounterToday,
+  setSimpleCounterCounterToday,
   updateAllSimpleCounters,
   updateSimpleCounter,
   upsertSimpleCounter,
@@ -37,6 +39,15 @@ export class SimpleCounterService {
   updateAll(items: SimpleCounter[]) {
     this._store$.dispatch(updateAllSimpleCounters({items}));
   }
+
+  setCounterToday(id: string, newVal: number) {
+    this._store$.dispatch(setSimpleCounterCounterToday({id, newVal}));
+  }
+
+  increaseCounterToday(id: string, increaseBy: number) {
+    this._store$.dispatch(increaseSimpleCounterCounterToday({id, increaseBy}));
+  }
+
 
   addSimpleCounter(simpleCounter: SimpleCounter) {
     this._store$.dispatch(addSimpleCounter({
