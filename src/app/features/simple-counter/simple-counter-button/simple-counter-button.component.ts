@@ -23,7 +23,7 @@ export class SimpleCounterButtonComponent implements OnInit {
   }
 
   toggleStopwatch() {
-    this.isOn = !this.isOn;
+    this._simpleCounterService.toggleCounter(this.simpleCounter.id);
   }
 
   toggleCounter() {

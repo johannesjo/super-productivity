@@ -29,7 +29,10 @@ const _reducer = createReducer<SimpleCounterState>(
 
   on(loadDataComplete, (oldState, {appDataComplete}) =>
     appDataComplete.simpleCounter
-      ? {...appDataComplete.simpleCounter}
+      ? {
+        ...appDataComplete.simpleCounter,
+        // TODO set is running to false for all
+      }
       : oldState
   ),
 
@@ -71,6 +74,12 @@ const _reducer = createReducer<SimpleCounterState>(
       }
     }, state);
   }),
+
+
+  on(simpleCounterActions.toggleSimpleCounterCounter, (state, {id}) => adapter.updateOne({
+    id,
+    changes: {isRunning: !state.entities[id].isRunning}
+  }, state)),
 
 
   on(simpleCounterActions.addSimpleCounter, (state, {simpleCounter}) => adapter.addOne(simpleCounter, state)),
