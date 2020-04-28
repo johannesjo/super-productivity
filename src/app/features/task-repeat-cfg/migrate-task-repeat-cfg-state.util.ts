@@ -16,11 +16,11 @@ export const migrateTaskRepeatCfgState = (taskRepeatState: TaskRepeatCfgState): 
     taskRepeatEntities[key] = _addNewFieldsToTaskRepeatCfgs(taskRepeatEntities[key]);
   });
 
-  // Update model version after all migrations ran successfully
-  taskRepeatState[MODEL_VERSION_KEY] = MODEL_VERSION;
   return {
     ...taskRepeatState,
     entities: taskRepeatEntities,
+    // Update model version after all migrations ran successfully
+    [MODEL_VERSION_KEY]: MODEL_VERSION,
   };
 };
 

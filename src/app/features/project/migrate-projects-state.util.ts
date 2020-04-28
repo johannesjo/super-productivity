@@ -37,6 +37,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
   return {
     ...projectState,
     entities: projectEntities,
+    [MODEL_VERSION_KEY]: MODEL_VERSION,
   };
 };
 

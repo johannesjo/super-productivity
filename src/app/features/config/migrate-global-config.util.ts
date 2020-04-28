@@ -16,9 +16,11 @@ export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
   globalConfigState = _extendConfigDefaults(globalConfigState);
 
-  // Update model version after all migrations ran successfully
-  globalConfigState[MODEL_VERSION_KEY] = MODEL_VERSION;
-  return globalConfigState;
+  return {
+    ...globalConfigState,
+    // Update model version after all migrations ran successfully
+    [MODEL_VERSION_KEY]: MODEL_VERSION,
+  };
 };
 
 const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigState => {

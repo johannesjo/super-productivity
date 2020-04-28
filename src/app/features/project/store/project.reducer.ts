@@ -35,6 +35,7 @@ import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
 import {migrateProjectState} from '../migrate-projects-state.util';
+import {MODEL_VERSION_KEY} from '../../../app.constants';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -42,6 +43,8 @@ const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
 export interface ProjectState extends EntityState<Project> {
   // additional entities state properties
   projectIdForLoadedRelatedData: string;
+
+  [MODEL_VERSION_KEY]?: number;
 }
 
 export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();

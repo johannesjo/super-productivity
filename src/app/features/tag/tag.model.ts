@@ -1,6 +1,7 @@
 import {EntityState} from '@ngrx/entity';
 import {WorkContextAdvancedCfgKey, WorkContextCommon} from '../work-context/work-context.model';
 import {IssueProviderKey} from '../issue/issue.model';
+import {MODEL_VERSION_KEY} from '../../app.constants';
 
 
 export interface TagCopy extends WorkContextCommon {
@@ -17,6 +18,7 @@ export type Tag = Readonly<TagCopy>;
 
 export interface TagState extends EntityState<Tag> {
   // additional entities state properties
+  [MODEL_VERSION_KEY]?: number;
 }
 
 export type TagCfgFormKey = WorkContextAdvancedCfgKey | 'basic' | 'theme';

@@ -2,6 +2,7 @@ import {IssueProviderKey} from '../issue/issue.model';
 import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
 import {TaskAttachment} from './task-attachment/task-attachment.model';
+import {MODEL_VERSION_KEY} from '../../app.constants';
 
 export enum ShowSubTasksMode {
   HideAll = 0,
@@ -131,4 +132,6 @@ export interface TaskState extends EntityState<Task> {
   taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel;
   lastCurrentTaskId: string | null;
   isDataLoaded: boolean;
+
+  [MODEL_VERSION_KEY]?: number;
 }

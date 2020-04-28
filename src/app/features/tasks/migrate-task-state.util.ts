@@ -22,8 +22,7 @@ export const migrateTaskState = (taskState: TaskState): TaskState => {
     taskEntities[key] = _convertToWesternArabicDateKeys(taskEntities[key]);
   });
 
-  taskState[MODEL_VERSION_KEY] = MODEL_VERSION;
-  return {...taskState, entities: taskEntities};
+  return {...taskState, entities: taskEntities, [MODEL_VERSION_KEY]: MODEL_VERSION};
 };
 
 export const migrateTaskArchiveState = (

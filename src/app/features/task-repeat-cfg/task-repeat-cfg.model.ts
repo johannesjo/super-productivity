@@ -1,4 +1,5 @@
 import {EntityState} from '@ngrx/entity';
+import {MODEL_VERSION_KEY} from '../../app.constants';
 
 export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
   'sunday',
@@ -30,6 +31,7 @@ export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;
 
 export interface TaskRepeatCfgState extends EntityState<TaskRepeatCfg> {
   // additional entities state properties
+  [MODEL_VERSION_KEY]?: number;
 }
 
 export const DEFAULT_TASK_REPEAT_CFG: TaskRepeatCfgCopy = {
