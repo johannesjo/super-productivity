@@ -6,13 +6,16 @@ import {StoreModule} from '@ngrx/store';
 import {SIMPLE_COUNTER_FEATURE_NAME, simpleCounterReducer} from './store/simple-counter.reducer';
 import {EffectsModule} from '@ngrx/effects';
 import {SimpleCounterEffects} from './store/simple-counter.effects';
+import { SimpleCounterCfgComponent } from './simple-counter-cfg/simple-counter-cfg.component';
 
 @NgModule({
   declarations: [
     SimpleCounterButtonComponent,
+    SimpleCounterCfgComponent,
   ],
   exports: [
     SimpleCounterButtonComponent,
+    SimpleCounterCfgComponent,
   ],
   imports: [
     CommonModule,

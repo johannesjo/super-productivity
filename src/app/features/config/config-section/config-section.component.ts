@@ -13,7 +13,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
-import {ConfigFormSection, GlobalConfigSectionKey} from '../global-config.model';
+import {ConfigFormSection, CustomCfgSection, GlobalConfigSectionKey} from '../global-config.model';
 import {ProjectCfgFormKey} from '../../project/project.model';
 import {GoogleSyncCfgComponent} from '../../google/google-sync-cfg/google-sync-cfg.component';
 import {JiraCfgComponent} from '../../issue/providers/jira/jira-view-components/jira-cfg/jira-cfg.component';
@@ -22,6 +22,7 @@ import {Subscription} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {TagCfgFormKey} from '../../tag/tag.model';
+import {SimpleCounterCfgComponent} from '../../simple-counter/simple-counter-cfg/simple-counter-cfg.component';
 
 @Component({
   selector: 'config-section',
@@ -97,7 +98,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     this.save.emit($event);
   }
 
-  private _loadCustomSection(customSection) {
+  private _loadCustomSection(customSection: CustomCfgSection) {
     let componentToRender;
 
     switch (customSection) {
@@ -105,13 +106,16 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
         componentToRender = FileImexComponent;
         break;
 
-
       case 'GOOGLE_SYNC':
         componentToRender = GoogleSyncCfgComponent;
         break;
 
       case 'JIRA_CFG':
         componentToRender = JiraCfgComponent;
+        break;
+
+      case 'SIMPLE_COUNTER_CFG':
+        componentToRender = SimpleCounterCfgComponent;
         break;
     }
 

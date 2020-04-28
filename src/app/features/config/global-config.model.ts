@@ -1,7 +1,7 @@
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {ProjectCfgFormKey} from '../project/project.model';
 import {LanguageCode, MODEL_VERSION_KEY} from '../../app.constants';
-import {SimpleCounter, SimpleCounterConfig} from '../simple-counter/simple-counter.model';
+import {SimpleCounterConfig} from '../simple-counter/simple-counter.model';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
@@ -151,13 +151,15 @@ export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldCon
   key?: keyof FormModel;
 }
 
+export type CustomCfgSection = 'FILE_IMPORT_EXPORT' | 'GOOGLE_SYNC' | 'JIRA_CFG' | 'SIMPLE_COUNTER_CFG';
+
 // Intermediate model
 export interface ConfigFormSection<FormModel> {
   title: string;
   key: GlobalConfigSectionKey | ProjectCfgFormKey;
   help?: string;
   helpArr?: { h?: string; p: string; p2?: string; p3?: string; p4?: string; }[];
-  customSection?: string;
+  customSection?: CustomCfgSection;
   items?: LimitedFormlyFieldConfig<FormModel>[];
   isElectronOnly?: boolean;
 }
