@@ -1,4 +1,5 @@
 import {GlobalConfigState} from './global-config.model';
+import {DEFAULT_SIMPLE_COUNTERS} from '../simple-counter/simple-counter.const';
 
 const minute = 60 * 1000;
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
@@ -97,6 +98,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   localBackup: {
     isEnabled: true,
+  },
+  simpleCounter: {
+    counters: DEFAULT_SIMPLE_COUNTERS,
   },
   _googleSession: {
     accessToken: null,

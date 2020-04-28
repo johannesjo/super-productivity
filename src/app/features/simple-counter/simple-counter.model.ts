@@ -16,3 +16,7 @@ export interface SimpleCounter {
   totalTimeOnDay: { [key: string]: number };
   isRunning: boolean;
 }
+
+export type SimpleCounterConfig = Readonly<{
+  counters: SimpleCounter[];
+}>;

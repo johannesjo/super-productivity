@@ -9,6 +9,7 @@ import {IMEX_FORM} from './form-cfgs/imex-form.const';
 import {AUTOMATIC_BACKUPS_FORM} from './form-cfgs/automatic-backups-form.const';
 import {LANGUAGE_SELECTION_FORM_FORM} from './form-cfgs/language-selection-form.const';
 import {EVALUATION_SETTINGS_FORM_CFG} from './form-cfgs/evaluation-settings-form.const';
+import {SIMPLE_COUNTER_FORM} from './form-cfgs/simple-counter-form.const';
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   (LANGUAGE_SELECTION_FORM_FORM as GenericConfigFormSection),
@@ -24,4 +25,5 @@ export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [
   (TAKE_A_BREAK_FORM_CFG as GenericConfigFormSection),
   (POMODORO_FORM_CFG as GenericConfigFormSection),
   (EVALUATION_SETTINGS_FORM_CFG as GenericConfigFormSection),
+  (SIMPLE_COUNTER_FORM as GenericConfigFormSection),
 ];

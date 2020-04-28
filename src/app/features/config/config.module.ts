@@ -14,6 +14,7 @@ import {GoogleSyncCfgComponent} from '../google/google-sync-cfg/google-sync-cfg.
 import {FileImexModule} from '../../imex/file-imex/file-imex.module';
 import {IconInputComponent} from './icon-input/icon-input.component';
 import {SelectProjectComponent} from './select-project/select-project.component';
+import {RepeatSectionTypeComponent} from './repeat-section-type/repeat-section-type.component';
 
 @NgModule({
   imports: [
@@ -36,6 +37,9 @@ import {SelectProjectComponent} from './select-project/select-project.component'
         // technically no input, but as the properties get us what we need...
         extends: 'input',
         wrappers: ['form-field'],
+      }, {
+        name: 'repeat',
+        component: RepeatSectionTypeComponent,
       }]
     }),
     CommonModule,
@@ -51,6 +55,7 @@ import {SelectProjectComponent} from './select-project/select-project.component'
     KeyboardInputComponent,
     IconInputComponent,
     SelectProjectComponent,
+    RepeatSectionTypeComponent,
   ],
   entryComponents: [
     GoogleSyncCfgComponent,
