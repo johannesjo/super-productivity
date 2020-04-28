@@ -4,6 +4,7 @@ import {Action, createFeatureSelector, createReducer, createSelector, on} from '
 import {SimpleCounter, SimpleCounterState} from '../simple-counter.model';
 import {DEFAULT_SIMPLE_COUNTERS} from '../simple-counter.const';
 import {arrayToDictionary} from '../../../util/array-to-dictionary';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -22,9 +23,14 @@ export const initialSimpleCounterState: SimpleCounterState = adapter.getInitialS
   entities: arrayToDictionary<SimpleCounter>(DEFAULT_SIMPLE_COUNTERS),
 });
 
-
 const _reducer = createReducer<SimpleCounterState>(
   initialSimpleCounterState,
+
+  on(loadDataComplete, (oldState, {appDataComplete}) =>
+    appDataComplete.simpleCounter
+      ? {...appDataComplete.simpleCounter}
+      : oldState
+  ),
 
   on(simpleCounterActions.addSimpleCounter, (state, {simpleCounter}) => adapter.addOne(simpleCounter, state)),
 
