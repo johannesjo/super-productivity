@@ -57,14 +57,15 @@ const _reducer = createReducer<SimpleCounterState>(
   on(simpleCounterActions.increaseSimpleCounterCounterToday, (state, {id, increaseBy}) => {
     const todayStr = getWorklogStr();
     const oldEntity = state.entities[id];
-    const currentVal = oldEntity.totalCountOnDay[todayStr] || 0;
+    const currentTotalCount = oldEntity.totalCountOnDay || {};
+    const currentVal = currentTotalCount[todayStr] || 0;
     const newValForToday = currentVal + increaseBy;
     return adapter.updateOne({
       id,
       changes: {
         count: newValForToday,
         totalCountOnDay: {
-          ...oldEntity.totalCountOnDay,
+          ...currentTotalCount,
           [todayStr]: newValForToday,
         }
       }
