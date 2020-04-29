@@ -506,6 +506,10 @@ export const T = {
       'S_REMINDER_ERR': 'F.REMINDER.S_REMINDER_ERR'
     },
     'SIMPLE_COUNTER': {
+      'D_EDIT': {
+        'TITLE': 'F.SIMPLE_COUNTER.D_EDIT.TITLE',
+        'L_COUNTER': 'F.SIMPLE_COUNTER.D_EDIT.L_COUNTER'
+      },
       'FORM': {
         'TITLE': 'F.SIMPLE_COUNTER.FORM.TITLE',
         'HELP': 'F.SIMPLE_COUNTER.FORM.HELP',

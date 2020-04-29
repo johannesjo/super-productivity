@@ -506,6 +506,10 @@
       "S_REMINDER_ERR": "Error for reminder interface"
     },
     "SIMPLE_COUNTER": {
+      "D_EDIT": {
+        "TITLE": "Edit Simple Counter",
+        "L_COUNTER": "Count"
+      },
       "FORM": {
         "TITLE": "Simple Counters",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
