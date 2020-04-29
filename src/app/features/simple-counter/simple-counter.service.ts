@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {selectAllSimpleCounters, selectSimpleCounterById,} from './store/simple-counter.reducer';
+import {selectAllSimpleCounters, selectSimpleCounterById} from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
   deleteSimpleCounter,
