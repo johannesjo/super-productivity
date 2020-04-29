@@ -1,3 +1,18 @@
+## [5.0.15](https://github.com/johannesjo/super-productivity/compare/v5.0.14...v5.0.15) (2020-04-29)
+
+
+### Bug Fixes
+
+* crashing for empty project data [#349](https://github.com/johannesjo/super-productivity/issues/349) ([72fd7d0](https://github.com/johannesjo/super-productivity/commit/72fd7d0c977ec92062393830087940819332d9aa))
+
+
+### Features
+
+* add model version everywhere it is currently used ([6b3056d](https://github.com/johannesjo/super-productivity/commit/6b3056db4e4328e5b5594cfa291b054915d9ad57))
+* **jira:** provide the option to allow self signed certificates [#348](https://github.com/johannesjo/super-productivity/issues/348) ([abcc057](https://github.com/johannesjo/super-productivity/commit/abcc057de2529e770f2eb26dc068647174dc8722))
+
+
+
 ## [5.0.14](https://github.com/johannesjo/super-productivity/compare/v5.0.13...v5.0.14) (2020-04-26)
 
 
