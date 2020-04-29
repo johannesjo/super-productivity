@@ -1,6 +1,8 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {SimpleCounter, SimpleCounterType} from '../simple-counter.model';
 import {SimpleCounterService} from '../simple-counter.service';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogSimpleCounterEditComponent} from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 
 @Component({
   selector: 'simple-counter-button',
@@ -8,7 +10,7 @@ import {SimpleCounterService} from '../simple-counter.service';
   styleUrls: ['./simple-counter-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SimpleCounterButtonComponent implements OnInit {
+export class SimpleCounterButtonComponent {
   isOn: boolean;
   SimpleCounterType = SimpleCounterType;
 
@@ -16,10 +18,8 @@ export class SimpleCounterButtonComponent implements OnInit {
 
   constructor(
     private _simpleCounterService: SimpleCounterService,
+    private _matDialog: MatDialog,
   ) {
-  }
-
-  ngOnInit() {
   }
 
   toggleStopwatch() {
@@ -35,6 +35,11 @@ export class SimpleCounterButtonComponent implements OnInit {
   }
 
   edit() {
-    // TODO implement
+    this._matDialog.open(DialogSimpleCounterEditComponent, {
+      restoreFocus: true,
+      data: {
+        simpleCounter: this.simpleCounter
+      },
+    });
   }
 }

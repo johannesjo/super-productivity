@@ -1,0 +1,5 @@
+@import '../../../../variables';
+
+:host-context([dir=rtl]) {
+  direction: rtl;
+}
