@@ -1,5 +1,14 @@
+@import "src/variables";
+
 .row {
   display: flex;
+  margin-bottom: $s;
+  padding-bottom: $s;
+  //border-bottom: 1px dashed $light-theme-extra-border-color;
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
 }
 
 .field {

@@ -2,12 +2,16 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {FieldArrayType} from '@ngx-formly/core';
 import {T} from 'src/app/t.const';
 import {MatDialog} from '@angular/material/dialog';
+import {EMPTY_SIMPLE_COUNTER} from '../../simple-counter/simple-counter.const';
+import shortid from 'shortid';
+import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'repeat-section-type',
   templateUrl: './repeat-section-type.component.html',
   styleUrls: ['./repeat-section-type.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation],
 })
 export class RepeatSectionTypeComponent extends FieldArrayType {
   T = T;
@@ -16,21 +20,22 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
     super();
   }
 
-  // NOTE: we're doing that on save click instead
-  // removeItem(i: number) {
-  // super.remove(i);
-  // this._matDialog.open(DialogConfirmComponent, {
-  //   restoreFocus: true,
-  //   data: {
-  //     message: T.F.SIMPLE_COUNTER.D_CONFIRM_REMOVE.MSG,
-  //     okTxt: T.F.SIMPLE_COUNTER.D_CONFIRM_REMOVE.OK,
-  //   }
-  // }).afterClosed().subscribe((isConfirm: boolean) => {
-  //   if (isConfirm) {
-  //     console.log(this);
-  //     super.remove(i);
-  //   }
-  // });
-  // }
+  removeItem(i: number) {
+    super.remove(i);
+  }
 
+  addItem() {
+    // if we need this later we can use defaultOptions for configuring this
+    super.add(undefined, {
+      ...EMPTY_SIMPLE_COUNTER,
+      id: shortid(),
+      isEnabled: true,
+    });
+  }
+
+  trackByFn(i: number, item: any) {
+    return item
+      ? item.id
+      : i;
+  }
 }
