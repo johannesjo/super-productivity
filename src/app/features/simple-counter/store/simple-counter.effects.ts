@@ -12,7 +12,7 @@ import {
   updateSimpleCounter,
   upsertSimpleCounter
 } from './simple-counter.actions';
-import {switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {selectSimpleCounterFeatureState} from './simple-counter.reducer';
 import {SimpleCounterState} from '../simple-counter.model';
 import {TimeTrackingService} from '../../time-tracking/time-tracking.service';
@@ -46,18 +46,17 @@ export class SimpleCounterEffects {
   checkTimedCounters$ = createEffect(() => this._simpleCounterService.enabledAndToggledSimpleCounters$.pipe(
     switchMap((items) => (items && items.length)
       ? this._timeTrackingService.tick$.pipe(
-        // TODO make this work!!!
-        // mergeMap(() => items.map(
-        //   (item) => increaseSimpleCounterCounterToday({id: item.id, increaseBy: 1000})
-        // )),
-        tap((tick) => items.map(
-          (item) => this._simpleCounterService.increaseCounterToday(item.id, tick.duration)
-        )),
+        map(tick => ({tick, items}))
       )
       : EMPTY
     ),
-    // tap(console.log)
-  ), {dispatch: false});
+    mergeMap(({items, tick}) => {
+        return items.map(
+          (item) => increaseSimpleCounterCounterToday({id: item.id, increaseBy: tick.duration})
+        );
+      }
+    ),
+  ));
 
 
   constructor(
