@@ -6,7 +6,7 @@ import {T} from '../../../t.const';
 export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
   // title: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
   title: 'Simple Counters',
-  key: 'simpleCounter',
+  key: 'EMPTY',
   customSection: 'SIMPLE_COUNTER_CFG',
   // help: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
   items: [

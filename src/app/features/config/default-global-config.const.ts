@@ -99,9 +99,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   localBackup: {
     isEnabled: true,
   },
-  simpleCounter: {
-    counters: DEFAULT_SIMPLE_COUNTERS,
-  },
   _googleSession: {
     accessToken: null,
     refreshToken: null,

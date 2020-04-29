@@ -1,7 +1,6 @@
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {ProjectCfgFormKey} from '../project/project.model';
 import {LanguageCode, MODEL_VERSION_KEY} from '../../app.constants';
-import {SimpleCounterConfig} from '../simple-counter/simple-counter.model';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
@@ -130,7 +129,6 @@ export type GlobalConfigState = Readonly<{
   googleDriveSync: GoogleDriveSyncConfig;
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
-  simpleCounter: SimpleCounterConfig;
   _googleSession: GoogleSession;
 
   [MODEL_VERSION_KEY]?: number;
