@@ -4,17 +4,16 @@ import {SimpleCounterConfig, SimpleCounterType} from '../../simple-counter/simpl
 import {T} from '../../../t.const';
 
 export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
-  // title: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
-  title: 'Simple Counters',
+  title: T.F.SIMPLE_COUNTER.FORM.TITLE,
   key: 'EMPTY',
   customSection: 'SIMPLE_COUNTER_CFG',
-  // help: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
+  help: T.F.SIMPLE_COUNTER.FORM.HELP,
   items: [
     {
       key: 'counters',
       type: 'repeat',
       templateOptions: {
-        addText: 'Add another counter button',
+        addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
       },
       fieldArray: {
         fieldGroup: [
@@ -22,26 +21,25 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             type: 'checkbox',
             key: 'isEnabled',
             templateOptions: {
-              label: 'Enabled',
+              label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
             },
           },
           {
             type: 'input',
             key: 'title',
             templateOptions: {
-              label: 'Title',
-              required: true,
+              label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
             },
           },
           {
             key: 'type',
             type: 'select',
             templateOptions: {
-              label: T.GCF.LANG.LABEL,
+              label: T.F.SIMPLE_COUNTER.FORM.L_TYPE,
               required: true,
               options: [
-                {label: T.GCF.LANG.AR, value: SimpleCounterType.StopWatch},
-                {label: T.GCF.LANG.PT, value: SimpleCounterType.ClickCounter},
+                {label: T.F.SIMPLE_COUNTER.FORM.TYPE_STOPWATCH, value: SimpleCounterType.StopWatch},
+                {label: T.F.SIMPLE_COUNTER.FORM.TYPE_CLICK_COUNTER, value: SimpleCounterType.ClickCounter},
               ],
             },
           },
@@ -49,15 +47,15 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             type: 'icon',
             key: 'icon',
             templateOptions: {
-              label: 'Icon',
+              label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
             },
           },
           {
             type: 'icon',
             key: 'iconOn',
             templateOptions: {
-              label: 'Icon On',
-              hideExpression: 'model.type !== "StopWatch"',
+              label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
+              hideExpression: 'model.type!==\'StopWatch\'',
             },
           },
         ],

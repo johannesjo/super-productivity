@@ -505,6 +505,20 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Error for reminder interface"
     },
+    "SIMPLE_COUNTER": {
+      "FORM": {
+        "TITLE": "Simple Counters",
+        "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
+        "L_IS_ENABLED": "Enabled",
+        "L_TITLE": "Title",
+        "L_TYPE": "Type",
+        "L_ICON": "Icon",
+        "L_ICON_ON": "Icon when toggled",
+        "TYPE_STOPWATCH": "Stopwatch",
+        "TYPE_CLICK_COUNTER": "Click Counter",
+        "ADD_NEW": "Add simple counter"
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "Create Tag",
