@@ -506,6 +506,10 @@
       "S_REMINDER_ERR": "Error for reminder interface"
     },
     "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "Deleting, will also delete all past data tracked on this counter. Are you sure you want to proceed?",
+        "OK": "Do it!"
+      },
       "D_EDIT": {
         "TITLE": "Edit Simple Counter",
         "L_COUNTER": "Count"

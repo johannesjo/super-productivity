@@ -5,7 +5,8 @@ export enum SimpleCounterType {
   ClickCounter = 'ClickCounter',
 }
 
-export interface SimpleCounterCopy {
+
+export interface SimpleCounterCfgFields {
   id: string;
 
   // basic cfg
@@ -18,7 +19,9 @@ export interface SimpleCounterCopy {
   // adv cfg
   isStartWhenTrackingTime: boolean;
   isPauseWhenTimeTrackingIsPaused: boolean;
+}
 
+export interface SimpleCounterCopy extends SimpleCounterCfgFields {
   // dynamic
   count: number;
   totalCountOnDay: { [key: string]: number };
