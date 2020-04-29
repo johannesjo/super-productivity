@@ -12,9 +12,12 @@ import {
   updateSimpleCounter,
   upsertSimpleCounter
 } from './simple-counter.actions';
-import {tap, withLatestFrom} from 'rxjs/operators';
+import {switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {selectSimpleCounterFeatureState} from './simple-counter.reducer';
 import {SimpleCounterState} from '../simple-counter.model';
+import {TimeTrackingService} from '../../time-tracking/time-tracking.service';
+import {SimpleCounterService} from '../simple-counter.service';
+import {EMPTY} from 'rxjs';
 
 
 @Injectable()
@@ -25,6 +28,7 @@ export class SimpleCounterEffects {
       updateAllSimpleCounters,
       setSimpleCounterCounterToday,
       increaseSimpleCounterCounterToday,
+      // toggleSimpleCounterCounter,
 
       // currently not used
       addSimpleCounter,
@@ -39,11 +43,29 @@ export class SimpleCounterEffects {
     tap(([, featureState]) => this._saveToLs(featureState)),
   ), {dispatch: false});
 
+  checkTimedCounters$ = createEffect(() => this._simpleCounterService.enabledAndToggledSimpleCounters$.pipe(
+    switchMap((items) => (items && items.length)
+      ? this._timeTrackingService.tick$.pipe(
+        // TODO make this work!!!
+        // mergeMap(() => items.map(
+        //   (item) => increaseSimpleCounterCounterToday({id: item.id, increaseBy: 1000})
+        // )),
+        tap(() => items.map(
+          (item) => this._simpleCounterService.increaseCounterToday(item.id, 1000)
+        )),
+      )
+      : EMPTY
+    ),
+    // tap(console.log)
+  ), {dispatch: false});
+
 
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
+    private _timeTrackingService: TimeTrackingService,
     private _persistenceService: PersistenceService,
+    private _simpleCounterService: SimpleCounterService,
   ) {
   }
 
