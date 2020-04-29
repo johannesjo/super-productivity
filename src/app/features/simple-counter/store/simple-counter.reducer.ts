@@ -6,6 +6,7 @@ import {DEFAULT_SIMPLE_COUNTERS} from '../simple-counter.const';
 import {arrayToDictionary} from '../../../util/array-to-dictionary';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {getWorklogStr} from '../../../util/get-work-log-str';
+import {updateAllInDictionary} from '../../../util/update-all-in-dictionary';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -24,14 +25,22 @@ export const initialSimpleCounterState: SimpleCounterState = adapter.getInitialS
   entities: arrayToDictionary<SimpleCounter>(DEFAULT_SIMPLE_COUNTERS),
 });
 
+const disableIsOnForAll = (state: SimpleCounterState): SimpleCounterState => {
+  return {
+    ...state,
+    entities: updateAllInDictionary<SimpleCounter>(state.entities, {isOn: false})
+  };
+};
+
+
 const _reducer = createReducer<SimpleCounterState>(
   initialSimpleCounterState,
 
   on(loadDataComplete, (oldState, {appDataComplete}) =>
     appDataComplete.simpleCounter
       ? {
-        ...appDataComplete.simpleCounter,
-        // TODO set is running to false for all
+        // ...appDataComplete.simpleCounter,
+        ...(disableIsOnForAll(appDataComplete.simpleCounter)),
       }
       : oldState
   ),
