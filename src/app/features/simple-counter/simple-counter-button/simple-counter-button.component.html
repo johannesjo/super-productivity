@@ -4,8 +4,8 @@
             class="main-btn stopwatch"
             (click)="toggleStopwatch()"
             [color]="simpleCounter.isOn? 'accent': 'primary'">
-      <mat-icon *ngIf="simpleCounter.isOn">{{simpleCounter.icon}}</mat-icon>
-      <mat-icon *ngIf="!simpleCounter.isOn">{{simpleCounter.iconOn}}</mat-icon>
+      <mat-icon *ngIf="!simpleCounter.isOn">{{simpleCounter.icon}}</mat-icon>
+      <mat-icon *ngIf="simpleCounter.isOn">{{simpleCounter.iconOn}}</mat-icon>
     </button>
     <div class="label">{{simpleCounter.count|msToMinuteClockString}}</div>
   </ng-container>
