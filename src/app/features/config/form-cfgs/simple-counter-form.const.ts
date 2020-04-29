@@ -55,7 +55,9 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             key: 'iconOn',
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
-              hideExpression: 'model.type!==\'StopWatch\'',
+              hideExpression: ((model: any) => {
+                return model.type !== SimpleCounterType.StopWatch;
+              })
             },
           },
         ],
