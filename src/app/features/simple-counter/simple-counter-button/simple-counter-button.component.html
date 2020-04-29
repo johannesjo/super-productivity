@@ -20,22 +20,20 @@
     <div class="label">{{simpleCounter.count}}</div>
   </ng-container>
 
-  <!--  <ng-container *ngIf="true">-->
   <div class="controls">
     <button (click)="edit()"
             class="btn"
             color=""
-            title="Edit"
+            [title]="T.G.EDIT|translate"
             mat-mini-fab>
       <mat-icon>edit</mat-icon>
     </button>
-    <button (click)="reset()"
-            class="btn"
-            color=""
-            title="Reset"
-            mat-mini-fab>
-      <mat-icon>undo</mat-icon>
-    </button>
+    <!--    <button (click)="reset()"-->
+    <!--            class="btn"-->
+    <!--            color=""-->
+    <!--            [title]="T.G.RESET|translate"-->
+    <!--            mat-mini-fab>-->
+    <!--      <mat-icon>undo</mat-icon>-->
+    <!--    </button>-->
   </div>
-  <!--  </ng-container>-->
 </div>

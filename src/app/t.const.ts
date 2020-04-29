@@ -769,6 +769,7 @@ export const T = {
     'OK': 'G.OK',
     'PREVIOUS': 'G.PREVIOUS',
     'REMOVE': 'G.REMOVE',
+    'RESET': 'G.RESET',
     'SAVE': 'G.SAVE',
     'TITLE': 'G.TITLE',
     'UNDO': 'G.UNDO',

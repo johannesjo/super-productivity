@@ -3,6 +3,7 @@ import {SimpleCounter, SimpleCounterType} from '../simple-counter.model';
 import {SimpleCounterService} from '../simple-counter.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogSimpleCounterEditComponent} from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
+import {T} from 'src/app/t.const';
 
 @Component({
   selector: 'simple-counter-button',
@@ -11,7 +12,7 @@ import {DialogSimpleCounterEditComponent} from '../dialog-simple-counter-edit/di
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleCounterButtonComponent {
-  isOn: boolean;
+  T = T;
   SimpleCounterType = SimpleCounterType;
 
   @Input() simpleCounter: SimpleCounter;
