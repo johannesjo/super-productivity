@@ -50,8 +50,8 @@ export class SimpleCounterEffects {
         // mergeMap(() => items.map(
         //   (item) => increaseSimpleCounterCounterToday({id: item.id, increaseBy: 1000})
         // )),
-        tap(() => items.map(
-          (item) => this._simpleCounterService.increaseCounterToday(item.id, 1000)
+        tap((tick) => items.map(
+          (item) => this._simpleCounterService.increaseCounterToday(item.id, tick.duration)
         )),
       )
       : EMPTY
