@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Outp
 import {ConfigFormSection, GlobalConfigSectionKey} from '../../config/global-config.model';
 import {ProjectCfgFormKey} from '../../project/project.model';
 import {SimpleCounterCfgFields, SimpleCounterConfig} from '../simple-counter.model';
-import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
+import {FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
 import {T} from 'src/app/t.const';
 import {SimpleCounterService} from '../simple-counter.service';
@@ -50,9 +50,10 @@ export class SimpleCounterCfgComponent implements OnDestroy {
 
 
   T = T;
-  fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {};
+
+
   simpleCounterCfg$: Observable<SimpleCounterConfig> = this.simpleCounterService.simpleCounters$.pipe(
     distinctUntilChanged(isEqualSimpleCounterCfg),
     map(items => ({
@@ -69,9 +70,11 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   constructor(
     public readonly simpleCounterService: SimpleCounterService,
     private readonly _matDialog: MatDialog,
+    // private readonly _cd: ChangeDetectorRef,
   ) {
     this._subs.add(this.simpleCounterCfg$.subscribe(v => {
       this.editModel = v;
+      this._inModelCopy = v;
     }));
   }
 
@@ -80,11 +83,9 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   }
 
   onModelChange(changes: SimpleCounterConfig) {
-    console.log(changes);
-    this.editModel = changes;
-    this._inModelCopy = changes;
+    // NOTE: it's important to create a new object, otherwise only 1 update happens
+    this.editModel = {...changes};
   }
-
 
   submit() {
     const oldIds = this._inModelCopy.counters.map(item => item.id);

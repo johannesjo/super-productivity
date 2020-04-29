@@ -507,7 +507,7 @@
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "Deleting, will also delete all past data tracked on this counter. Are you sure you want to proceed?",
+        "MSG": "Deleting a simple counter, will also delete all past data tracked on it. Are you sure you want to proceed?",
         "OK": "Do it!"
       },
       "D_EDIT": {
