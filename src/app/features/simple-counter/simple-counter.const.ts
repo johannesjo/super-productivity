@@ -17,7 +17,7 @@ export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   // dynamic
   count: 0,
   totalCountOnDay: {},
-  isRunning: false,
+  isOn: false,
 };
 
 export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [

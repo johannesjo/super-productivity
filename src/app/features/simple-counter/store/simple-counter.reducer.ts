@@ -78,7 +78,7 @@ const _reducer = createReducer<SimpleCounterState>(
 
   on(simpleCounterActions.toggleSimpleCounterCounter, (state, {id}) => adapter.updateOne({
     id,
-    changes: {isRunning: !state.entities[id].isRunning}
+    changes: {isOn: !state.entities[id].isOn}
   }, state)),
 
 

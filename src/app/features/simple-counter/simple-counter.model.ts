@@ -25,7 +25,7 @@ export interface SimpleCounterCopy extends SimpleCounterCfgFields {
   // dynamic
   count: number;
   totalCountOnDay: { [key: string]: number };
-  isRunning: boolean;
+  isOn: boolean;
 }
 
 export type SimpleCounter = Readonly<SimpleCounterCopy>;

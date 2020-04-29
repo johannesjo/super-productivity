@@ -28,7 +28,7 @@ export class SimpleCounterService {
   );
 
   enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters)).pipe(
-    map(items => items && items.filter(item => item.isEnabled && item.isRunning)),
+    map(items => items && items.filter(item => item.isEnabled && item.isOn)),
   );
 
   constructor(
