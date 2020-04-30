@@ -3,6 +3,7 @@
     <button mat-mini-fab
             class="main-btn stopwatch"
             (contextmenu)="edit($event)"
+            (longPress)="edit()"
             (click)="toggleStopwatch()"
             [color]="simpleCounter.isOn? 'accent': ''">
       <mat-icon *ngIf="!simpleCounter.isOn">{{simpleCounter.icon}}</mat-icon>
@@ -15,6 +16,7 @@
   <ng-container *ngIf="simpleCounter.type===SimpleCounterType.ClickCounter">
     <button mat-mini-fab
             class="main-btn"
+            (longPress)="edit()"
             (contextmenu)="edit($event)"
             (click)="toggleCounter()"
             color="">

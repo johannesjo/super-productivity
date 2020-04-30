@@ -72,6 +72,7 @@ import {DialogFullscreenMarkdownComponent} from './dialog-fullscreen-markdown/di
 import {JiraToMarkdownPipe} from './pipes/jira-to-markdown.pipe';
 import {BetterDrawerModule} from './better-drawer/better-drawer.module';
 import {SortPipe} from './pipes/sort.pipe';
+import {LongPressDirective} from './longpress/longpress.component';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -98,6 +99,7 @@ const COMPONENT_AND_PIPES = [
   InputDurationSliderComponent,
   JiraToMarkdownPipe,
   KeysPipe,
+  LongPressDirective,
   MomentFormatPipe,
   MsToClockStringPipe,
   MsToMinuteClockStringPipe,
