@@ -77,6 +77,13 @@ $this-border-radius: 8px;
       margin-bottom: 0;
     }
   }
+
+  .icon-indicator-bar {
+  }
+
+  .center-box {
+    flex-grow: 1;
+  }
 }
 
 .task-summary-table {
@@ -140,5 +147,30 @@ $this-border-radius: 8px;
         }
       }
     }
+  }
+}
+
+.simple-counter-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  // NOTE: give them a bit of extra space
+  // MAGIC NUMBER ALERT!!!
+  margin-left: -4*$s;
+  margin-right: -4*$s;
+  //margin-top: $s;
+}
+
+.simple-counter-item {
+  margin: 0 $s/2;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 18px;
+    margin-right: 2px;
   }
 }

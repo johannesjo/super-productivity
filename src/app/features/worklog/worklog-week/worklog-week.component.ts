@@ -10,6 +10,7 @@ import {getWeekNumber} from '../../../util/get-week-number';
 import {Task} from '../../tasks/task.model';
 import {TaskService} from '../../tasks/task.service';
 import {T} from '../../../t.const';
+import {SimpleCounterService} from '../../simple-counter/simple-counter.service';
 
 @Component({
   selector: 'worklog-week',
@@ -25,6 +26,7 @@ export class WorklogWeekComponent {
 
   constructor(
     public readonly worklogService: WorklogService,
+    public readonly simpleCounterService: SimpleCounterService,
     private readonly _matDialog: MatDialog,
     private readonly _taskService: TaskService,
   ) {

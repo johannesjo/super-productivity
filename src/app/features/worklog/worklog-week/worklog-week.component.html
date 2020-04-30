@@ -10,10 +10,11 @@
              mat-ripple>
           <div><span *ngIf="visibility[i]"
                      [@fade]>{{T.F.WORKLOG.WEEK.TITLE|translate}}</span></div>
-          <div>
+          <div class="center-box">
             <div class="title">
               <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
               <div *ngIf="!visibility[i]"
+                   class="icon-indicator-bar"
                    [@expandFade]>
                 <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
                 &nbsp;
@@ -21,6 +22,17 @@
                 <strong>{{day.value.logEntries.length}}</strong>
                 <em *ngIf="day.value.workStart"><span class="spacer"></span>{{day.value.workStart|momentFormat:'HH:mm'}}
                   - {{day.value.workEnd|momentFormat:'HH:mm'}}</em>
+
+                <div class="simple-counter-items">
+                  <div *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"
+                       class="simple-counter-item">
+                    <mat-icon inline="true">{{sc.icon}}</mat-icon>
+                    <div class="count"
+                         *ngIf="sc.type==='ClickCounter'">{{sc.countOnDay[day.value.dateStr] || 0}}</div>
+                    <div class="count"
+                         *ngIf="sc.type==='StopWatch'">{{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -51,6 +63,18 @@
             </td>
           </tr>
         </table>
+
+
+        <!--        <div class="simple-counter-items">-->
+        <!--          <div *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"-->
+        <!--               class="simple-counter-item">-->
+        <!--            <mat-icon>{{sc.icon}}</mat-icon>-->
+        <!--            <div class="count"-->
+        <!--                 *ngIf="sc.type==='ClickCounter'">{{sc.countOnDay[day.value.dateStr]}}</div>-->
+        <!--            <div class="count"-->
+        <!--                 *ngIf="sc.type==='StopWatch'">{{sc.countOnDay[day.value.dateStr]|msToMinuteClockString}}</div>-->
+        <!--          </div>-->
+        <!--        </div>-->
       </div>
     </div>
   </div>
