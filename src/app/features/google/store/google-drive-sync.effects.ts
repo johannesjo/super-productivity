@@ -160,6 +160,7 @@ export class GoogleDriveSyncEffects {
                   ? of(this._updateConfig({
                     syncFileName: newFileName,
                     _backupDocId: fileToUpdate.id,
+                    _lastSync: null,
                   }))
                   : EMPTY;
               })
