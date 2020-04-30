@@ -1,17 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable, of, ReplaySubject} from 'rxjs';
-import {
-  concatMap,
-  distinctUntilChanged,
-  filter,
-  map,
-  shareReplay,
-  startWith,
-  switchMap,
-  take,
-  tap
-} from 'rxjs/operators';
+import {concatMap, distinctUntilChanged, filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {SyncProvider} from './sync-provider';
 import {DataInitService} from '../data-init/data-init.service';
@@ -48,7 +38,6 @@ export class GlobalSyncService {
     // should normally be already loaded, but if there is NO initial sync it makes sense to wait here
     concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
     shareReplay(1),
-    tap((v) => console.log('IMP afterInitialSyncDoneAndDataLoadedInitially$', v)),
   );
 
   constructor(

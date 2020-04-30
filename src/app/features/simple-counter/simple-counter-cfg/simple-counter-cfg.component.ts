@@ -6,7 +6,7 @@ import {FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
 import {T} from 'src/app/t.const';
 import {SimpleCounterService} from '../simple-counter.service';
-import {distinctUntilChanged, map, tap} from 'rxjs/operators';
+import {distinctUntilChanged, map} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -59,7 +59,6 @@ export class SimpleCounterCfgComponent implements OnDestroy {
     map(items => ({
       counters: items,
     })),
-    tap((v) => console.log('INP', v)),
   );
 
   editModel: SimpleCounterConfig;

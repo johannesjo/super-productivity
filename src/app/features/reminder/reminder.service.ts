@@ -15,7 +15,7 @@ import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
-import {first, map, tap} from 'rxjs/operators';
+import {first, map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
 import {environment} from '../../../environments/environment';
@@ -68,7 +68,6 @@ export class ReminderService {
         timer(MAX_WAIT_FOR_INITIAL_SYNC),
       ).pipe(
         first(),
-        tap((v) => console.log('IMP init Reminders', v)),
       ).subscribe(async () => {
         this._w.addEventListener('message', this._onReminderActivated.bind(this));
         this._w.addEventListener('error', this._handleError.bind(this));
