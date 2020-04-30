@@ -37,12 +37,22 @@
   ],
   "dataGroups": [
     {
+      "name": "googleDrive",
+      "urls": [
+        "https://apis.google.com/**",
+        "https://content.googleapis.com/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 0,
+        "maxAge": "0u",
+        "strategy": "freshness"
+      }
+    },
+    {
       "name": "issueProviderAndAssets",
       "urls": [
         "https://**",
-        "http://**",
-        "!https://apis.google.com/**",
-        "!https://content.googleapis.com/**"
+        "http://**"
       ],
       "cacheConfig": {
         "maxSize": 4000,
