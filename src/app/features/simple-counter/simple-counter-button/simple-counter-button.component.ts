@@ -37,7 +37,11 @@ export class SimpleCounterButtonComponent {
     this._simpleCounterService.setCounterToday(this.simpleCounter.id, 0);
   }
 
-  edit() {
+  edit(ev?) {
+    if (ev) {
+      ev.preventDefault();
+    }
+
     this._matDialog.open(DialogSimpleCounterEditComponent, {
       restoreFocus: true,
       data: {

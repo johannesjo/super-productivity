@@ -2,6 +2,7 @@
   <ng-container *ngIf="simpleCounter.type===SimpleCounterType.StopWatch">
     <button mat-mini-fab
             class="main-btn stopwatch"
+            (contextmenu)="edit($event)"
             (click)="toggleStopwatch()"
             [color]="simpleCounter.isOn? 'accent': ''">
       <mat-icon *ngIf="!simpleCounter.isOn">{{simpleCounter.icon}}</mat-icon>
@@ -14,6 +15,7 @@
   <ng-container *ngIf="simpleCounter.type===SimpleCounterType.ClickCounter">
     <button mat-mini-fab
             class="main-btn"
+            (contextmenu)="edit($event)"
             (click)="toggleCounter()"
             color="">
       <mat-icon>{{simpleCounter.icon}}</mat-icon>
@@ -22,20 +24,20 @@
          class="label">{{simpleCounter.countOnDay[todayStr]}}</div>
   </ng-container>
 
-  <div class="controls">
-    <button (click)="edit()"
-            class="btn"
-            color=""
-            [title]="T.G.EDIT|translate"
-            mat-mini-fab>
-      <mat-icon>edit</mat-icon>
-    </button>
-    <!--    <button (click)="reset()"-->
-    <!--            class="btn"-->
-    <!--            color=""-->
-    <!--            [title]="T.G.RESET|translate"-->
-    <!--            mat-mini-fab>-->
-    <!--      <mat-icon>undo</mat-icon>-->
-    <!--    </button>-->
-  </div>
+  <!--  <div class="controls">-->
+  <!--    <button (click)="edit()"-->
+  <!--            class="btn"-->
+  <!--            color=""-->
+  <!--            [title]="T.G.EDIT|translate"-->
+  <!--            mat-mini-fab>-->
+  <!--      <mat-icon>edit</mat-icon>-->
+  <!--    </button>-->
+  <!--    &lt;!&ndash;    <button (click)="reset()"&ndash;&gt;-->
+  <!--    &lt;!&ndash;            class="btn"&ndash;&gt;-->
+  <!--    &lt;!&ndash;            color=""&ndash;&gt;-->
+  <!--    &lt;!&ndash;            [title]="T.G.RESET|translate"&ndash;&gt;-->
+  <!--    &lt;!&ndash;            mat-mini-fab>&ndash;&gt;-->
+  <!--    &lt;!&ndash;      <mat-icon>undo</mat-icon>&ndash;&gt;-->
+  <!--    &lt;!&ndash;    </button>&ndash;&gt;-->
+  <!--  </div>-->
 </div>
