@@ -14,15 +14,15 @@ import {BannerService} from '../../../core/banner/banner.service';
 @Injectable()
 export class WorkContextEffects {
   // TODO improve
-  updateContextsStorage$ = createEffect(() => this._actions$.pipe(
-    ofType(
-      contextActions.setActiveWorkContext,
-    ),
-    withLatestFrom(
-      this._store$.pipe(select(selectContextFeatureState)),
-    ),
-    tap(this._saveToLs.bind(this)),
-  ), {dispatch: false});
+  // updateContextsStorage$ = createEffect(() => this._actions$.pipe(
+  //   ofType(
+  //     contextActions.setActiveWorkContext,
+  //   ),
+  //   withLatestFrom(
+  //     this._store$.pipe(select(selectContextFeatureState)),
+  //   ),
+  //   tap(this._saveToLs.bind(this)),
+  // ), {dispatch: false});
 
 
   dismissContextScopeBannersOnContextChange = createEffect(() => this._actions$
