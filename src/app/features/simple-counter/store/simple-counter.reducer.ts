@@ -38,12 +38,16 @@ const _reducer = createReducer<SimpleCounterState>(
   initialSimpleCounterState,
 
   on(loadDataComplete, (oldState, {appDataComplete}) =>
-    migrateSimpleCounterState(appDataComplete.simpleCounter
+    appDataComplete.simpleCounter
       ? {
         // ...appDataComplete.simpleCounter,
-        ...(disableIsOnForAll(appDataComplete.simpleCounter)),
+        ...migrateSimpleCounterState(
+          disableIsOnForAll(
+            appDataComplete.simpleCounter
+          )
+        ),
       }
-      : oldState)
+      : oldState
   ),
 
   on(simpleCounterActions.updateAllSimpleCounters, (state, {items}) => {
