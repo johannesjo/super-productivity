@@ -5,14 +5,14 @@
     <div class="form-wrapper">
       <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.ClickCounter">
         <input [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-               [ngModel]="data.simpleCounter.count"
+               [ngModel]="val"
                (ngModelChange)="onModelChange($event)"
                name="count"
                type="number"
                matInput>
       </mat-form-field>
       <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.StopWatch">
-        <input [ngModel]="data.simpleCounter.count"
+        <input [ngModel]="val"
                [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
                (ngModelChange)="onModelChange($event)"
                inputDuration="optional"

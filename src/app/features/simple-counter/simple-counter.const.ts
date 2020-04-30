@@ -15,8 +15,7 @@ export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   isPauseWhenTimeTrackingIsPaused: false,
 
   // dynamic
-  count: 0,
-  totalCountOnDay: {},
+  countOnDay: {},
   isOn: false,
 };
 

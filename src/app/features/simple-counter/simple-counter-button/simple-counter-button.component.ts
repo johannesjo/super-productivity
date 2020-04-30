@@ -4,6 +4,7 @@ import {SimpleCounterService} from '../simple-counter.service';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogSimpleCounterEditComponent} from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 import {T} from 'src/app/t.const';
+import {getWorklogStr} from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'simple-counter-button',
@@ -14,6 +15,7 @@ import {T} from 'src/app/t.const';
 export class SimpleCounterButtonComponent {
   T = T;
   SimpleCounterType = SimpleCounterType;
+  todayStr = getWorklogStr();
 
   @Input() simpleCounter: SimpleCounter;
 

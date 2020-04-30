@@ -3,6 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {T} from '../../../t.const';
 import {SimpleCounter, SimpleCounterType} from '../simple-counter.model';
 import {SimpleCounterService} from '../simple-counter.service';
+import {getWorklogStr} from '../../../util/get-work-log-str';
 
 
 @Component({
@@ -14,7 +15,10 @@ import {SimpleCounterService} from '../simple-counter.service';
 export class DialogSimpleCounterEditComponent {
   T = T;
   SimpleCounterType = SimpleCounterType;
-  val: number = this.data.simpleCounter.count;
+
+  todayStr = getWorklogStr();
+  val: number = this.data.simpleCounter.countOnDay[this.todayStr];
+
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogSimpleCounterEditComponent>,

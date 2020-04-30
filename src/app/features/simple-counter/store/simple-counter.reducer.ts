@@ -7,6 +7,7 @@ import {arrayToDictionary} from '../../../util/array-to-dictionary';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {updateAllInDictionary} from '../../../util/update-all-in-dictionary';
+import {migrateSimpleCounterState} from '../mgirate-simple-counter-state.util';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -37,12 +38,12 @@ const _reducer = createReducer<SimpleCounterState>(
   initialSimpleCounterState,
 
   on(loadDataComplete, (oldState, {appDataComplete}) =>
-    appDataComplete.simpleCounter
+    migrateSimpleCounterState(appDataComplete.simpleCounter
       ? {
         // ...appDataComplete.simpleCounter,
         ...(disableIsOnForAll(appDataComplete.simpleCounter)),
       }
-      : oldState
+      : oldState)
   ),
 
   on(simpleCounterActions.updateAllSimpleCounters, (state, {items}) => {
@@ -58,9 +59,8 @@ const _reducer = createReducer<SimpleCounterState>(
   on(simpleCounterActions.setSimpleCounterCounterToday, (state, {id, newVal}) => adapter.updateOne({
     id,
     changes: {
-      count: newVal,
-      totalCountOnDay: {
-        ...state.entities[id].totalCountOnDay,
+      countOnDay: {
+        ...state.entities[id].countOnDay,
         [getWorklogStr()]: newVal,
       }
     }
@@ -69,14 +69,13 @@ const _reducer = createReducer<SimpleCounterState>(
   on(simpleCounterActions.increaseSimpleCounterCounterToday, (state, {id, increaseBy}) => {
     const todayStr = getWorklogStr();
     const oldEntity = state.entities[id];
-    const currentTotalCount = oldEntity.totalCountOnDay || {};
+    const currentTotalCount = oldEntity.countOnDay || {};
     const currentVal = currentTotalCount[todayStr] || 0;
     const newValForToday = currentVal + increaseBy;
     return adapter.updateOne({
       id,
       changes: {
-        count: newValForToday,
-        totalCountOnDay: {
+        countOnDay: {
           ...currentTotalCount,
           [todayStr]: newValForToday,
         }

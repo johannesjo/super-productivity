@@ -1,4 +1,5 @@
 import {EntityState} from '@ngrx/entity';
+import {MODEL_VERSION_KEY} from '../../app.constants';
 
 export enum SimpleCounterType {
   StopWatch = 'StopWatch',
@@ -23,8 +24,7 @@ export interface SimpleCounterCfgFields {
 
 export interface SimpleCounterCopy extends SimpleCounterCfgFields {
   // dynamic
-  count: number;
-  totalCountOnDay: { [key: string]: number };
+  countOnDay: { [key: string]: number };
   isOn: boolean;
 }
 
@@ -40,4 +40,5 @@ export type SimpleCounterConfig = Readonly<{
 export interface SimpleCounterState extends EntityState<SimpleCounter> {
   ids: string[];
   // additional entities state properties
+  [MODEL_VERSION_KEY]?: number;
 }
