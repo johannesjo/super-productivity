@@ -408,7 +408,14 @@ export class GoogleApiService {
           const bodyArg = p.data ? [p.data] : [];
           const allArgs = [...bodyArg, {
             headers: new HttpHeaders(p.headers),
-            params: new HttpParams({fromObject: p.params}),
+            params: new HttpParams({
+              fromObject: {
+                ...p.params,
+                // needed because negative globs are not working as they should
+                // @see https://github.com/angular/angular/issues/21191
+                'ngsw-bypass': true
+              }
+            }),
             reportProgress: false,
             observe: 'response',
             responseType: paramsIN.responseType,
