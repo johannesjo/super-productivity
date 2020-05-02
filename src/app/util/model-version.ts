@@ -8,6 +8,7 @@ export const isMigrateModel = (modelData: any, localModelVersion: number): boole
     alert('Cannot load model. Version to load is newer than local. Please close the app and update your local productivity version first, before importing the data.');
     throw new Error('Cannot load model. Version to load is newer than local');
   } else {
+    console.log(`Migrating model to version from ${modelData[MODEL_VERSION_KEY]} to ${localModelVersion}`, modelData);
     return true;
   }
 };
