@@ -4,6 +4,37 @@ export const TRACKING_INTERVAL = 1000;
 
 export const MODEL_VERSION_KEY = '__modelVersion';
 
+import en from '@angular/common/locales/en';
+import es from '@angular/common/locales/es';
+import de from '@angular/common/locales/de';
+import ar from '@angular/common/locales/ar';
+import fa from '@angular/common/locales/fa';
+import fr from '@angular/common/locales/fr';
+import ja from '@angular/common/locales/ja';
+import ko from '@angular/common/locales/ko';
+import ru from '@angular/common/locales/ru';
+import tr from '@angular/common/locales/tr';
+import zh from '@angular/common/locales/zh';
+import it from '@angular/common/locales/it';
+import pt from '@angular/common/locales/pt';
+
+export const NG_LOCALES = {
+  en,
+  es,
+  de,
+  ar,
+  fa,
+  fr,
+  ja,
+  ko,
+  ru,
+  tr,
+  zh,
+  it,
+  pt,
+};
+
+
 export const ALL_THEMES = [
   'blue',
   'blue-grey',

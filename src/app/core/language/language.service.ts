@@ -3,8 +3,10 @@ import {TranslateService} from '@ngx-translate/core';
 import {DateTimeAdapter} from '@danielmoncada/angular-datetime-picker';
 import {DateAdapter} from '@angular/material/core';
 import * as moment from 'moment';
-import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap, RTL_LANGUAGES} from '../../app.constants';
+import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap, NG_LOCALES, RTL_LANGUAGES} from '../../app.constants';
 import {BehaviorSubject, Observable} from 'rxjs';
+import {registerLocaleData} from '@angular/common';
+
 
 @Injectable({
   providedIn: 'root'
@@ -45,10 +47,15 @@ export class LanguageService {
 
   private _setFn(lng: LanguageCode) {
     const momLng = LanguageCodeMomentMap[lng];
+    const ngLocale = NG_LOCALES[lng];
+    registerLocaleData(ngLocale);
+
     this.isRTL.next(this._isRTL(lng));
     this._translateService.use(lng);
+
     moment.locale(momLng);
-    this._dateAdapter.setLocale(momLng);
+
+    this._dateAdapter.setLocale(ngLocale);
     this._dateTimeAdapter.setLocale(momLng);
   }
 
