@@ -58,6 +58,30 @@ export class SimpleCounterEffects {
     ),
   ));
 
+  // actionListeners$ = createEffect(() => this._simpleCounterService.enabledSimpleCounters$.pipe(
+  //   // map(items=> items.filter(item => item. ...)),
+  //   tap(console.log),
+  //   switchMap((items) => (items && items.length)
+  //     ? this._actions$.pipe(
+  //       map(action => ({action, items}))
+  //     )
+  //     : EMPTY
+  //   ),
+  //   mergeMap(({items, action}) => {
+  //       const startItems = items.filter();
+  //       const stopItems = items.filter();
+  //       const simpleTriggerUp = items.filter();
+  //
+  //       return items
+  //         .filter()
+  //         .map(
+  //           (item) => increaseSimpleCounterCounterToday({id: item.id, increaseBy: tick.duration})
+  //         );
+  //     }
+  //   ),
+  //   tap(console.log),
+  // ), {dispatch: false});
+
 
   constructor(
     private _actions$: Actions,
