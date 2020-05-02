@@ -102,7 +102,7 @@
     "@angular/router": "^9.0.1",
     "@angular/service-worker": "^9.0.1",
     "@biesbjerg/ngx-translate-extract": "^2.3.4",
-    "@danielmoncada/angular-datetime-picker": "^9.2.0",
+    "@danielmoncada/angular-datetime-picker": "^9.3.0",
     "@ngrx/data": "^9.0.0",
     "@ngrx/effects": "^9.0.0",
     "@ngrx/entity": "^9.0.0",

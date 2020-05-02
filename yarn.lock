@@ -1004,7 +1004,7 @@
   resolved "https://registry.yarnpkg.com/@ctrl/tinycolor/-/tinycolor-2.6.1.tgz#0e78cc836a1fd997a9a22fa1c26c555411882160"
   integrity sha512-xKN3lAA+xbNhP+JX3sLhzA65IGiKqun/Yf9jBlZX7Og0SxlCrrqKxqTd6ccn20fv3Cgcvq6KnjPhnmS+v7uAwQ==
 
-"@danielmoncada/angular-datetime-picker@^9.2.0":
+"@danielmoncada/angular-datetime-picker@^9.3.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@danielmoncada/angular-datetime-picker/-/angular-datetime-picker-9.3.0.tgz#d12b265248f1682742f9d1b00b89171f879ee379"
   integrity sha512-8mdNgoaEUmElF1gDt+dXr+1wHCjH/A1IAlbysTn8KZZeceQ0Mf40z+3eb84E+jDEbrQezwq8IAFqBwZCUfySBw==
