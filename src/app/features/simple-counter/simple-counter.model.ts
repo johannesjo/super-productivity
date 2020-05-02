@@ -18,8 +18,8 @@ export interface SimpleCounterCfgFields {
   type: SimpleCounterType;
 
   // adv cfg
-  isStartWhenTrackingTime: boolean;
-  isPauseWhenTimeTrackingIsPaused: boolean;
+  triggerOnActions: string[];
+  triggerOffActions: string[];
 }
 
 export interface SimpleCounterCopy extends SimpleCounterCfgFields {

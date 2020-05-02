@@ -1,4 +1,7 @@
 import {SimpleCounter, SimpleCounterType} from './simple-counter.model';
+import {loadDataComplete} from '../../root-store/meta/load-data-complete.action';
+import {PomodoroActionTypes} from '../pomodoro/store/pomodoro.actions';
+import {TaskActionTypes} from '../tasks/store/task.actions';
 
 export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   id: undefined,
@@ -11,8 +14,8 @@ export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   type: SimpleCounterType.ClickCounter,
 
   // adv cfg
-  isStartWhenTrackingTime: false,
-  isPauseWhenTimeTrackingIsPaused: false,
+  triggerOnActions: [],
+  triggerOffActions: [],
 
   // dynamic
   countOnDay: {},
@@ -35,4 +38,16 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
     type: SimpleCounterType.ClickCounter,
     icon: 'free_breakfast',
   }
+];
+
+export const SIMPLE_COUNTER_TRIGGER_ACTIONS: string[] = [
+  loadDataComplete.type,
+  TaskActionTypes.SetCurrentTask,
+  TaskActionTypes.UnsetCurrentTask,
+  PomodoroActionTypes.StartPomodoro,
+  PomodoroActionTypes.PausePomodoro,
+  PomodoroActionTypes.StopPomodoro,
+  PomodoroActionTypes.FinishPomodoroSession,
+
+  // TaskActionTypes.
 ];

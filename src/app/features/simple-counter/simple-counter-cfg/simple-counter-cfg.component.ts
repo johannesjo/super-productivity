@@ -12,7 +12,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
 
 const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
-  'id', 'title', 'isEnabled', 'icon', 'iconOn', 'type', 'isStartWhenTrackingTime', 'isPauseWhenTimeTrackingIsPaused'
+  'id', 'title', 'isEnabled', 'icon', 'iconOn', 'type', 'triggerOnActions', 'triggerOffActions'
 ];
 
 const isEqualSimpleCounterCfg = (a, b): boolean => {

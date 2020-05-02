@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {SetCurrentTask, TaskActionTypes, UpdateTask} from './task.actions';
+import {SetCurrentTask, TaskActionTypes, UnsetCurrentTask, UpdateTask} from './task.actions';
 import {select, Store} from '@ngrx/store';
 import {filter, map, mergeMap, withLatestFrom} from 'rxjs/operators';
 import {selectTaskFeatureState} from './task.selectors';
@@ -109,7 +109,11 @@ export class TaskInternalEffects {
       if (nextId === 'NO_UPDATE') {
         return EMPTY;
       } else {
-        return of(new SetCurrentTask(nextId));
+        if (nextId) {
+          return of(new SetCurrentTask(nextId));
+        } else {
+          return of(new UnsetCurrentTask());
+        }
       }
     })
   );

@@ -2,6 +2,7 @@
 import {ConfigFormSection} from '../global-config.model';
 import {SimpleCounterConfig, SimpleCounterType} from '../../simple-counter/simple-counter.model';
 import {T} from '../../../t.const';
+import {SIMPLE_COUNTER_TRIGGER_ACTIONS} from '../../simple-counter/simple-counter.const';
 
 export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
   title: T.F.SIMPLE_COUNTER.FORM.TITLE,
@@ -60,6 +61,42 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
             },
           },
+          {
+            key: 'triggerOnActions',
+            type: 'select',
+            hideExpression: ((model: any) => {
+              return model.type !== SimpleCounterType.ClickCounter;
+            }),
+            templateOptions: {
+              label: 'Auto trigger count up for',
+              multiple: true,
+              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
+            }
+          },
+          {
+            key: 'triggerOnActions',
+            type: 'select',
+            hideExpression: ((model: any) => {
+              return model.type !== SimpleCounterType.StopWatch;
+            }),
+            templateOptions: {
+              label: 'Auto trigger switch on for',
+              multiple: true,
+              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
+            }
+          },
+          {
+            key: 'triggerOffActions',
+            type: 'select',
+            hideExpression: ((model: any) => {
+              return model.type !== SimpleCounterType.StopWatch;
+            }),
+            templateOptions: {
+              label: 'Auto trigger switch off for',
+              multiple: true,
+              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
+            }
+          }
         ],
       },
     },
