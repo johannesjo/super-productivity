@@ -31,7 +31,7 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
   {
     ...EMPTY_SIMPLE_COUNTER,
     id: 'COFFEE COUNTER',
-    title: 'Standing Desk Timer',
+    title: 'Coffee Counter',
     type: SimpleCounterType.ClickCounter,
     icon: 'free_breakfast',
   }
