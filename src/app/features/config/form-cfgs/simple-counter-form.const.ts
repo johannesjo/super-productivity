@@ -68,7 +68,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               return model.type !== SimpleCounterType.ClickCounter;
             }),
             templateOptions: {
-              label: 'Auto trigger count up for',
+              label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_COUNT_UP,
               multiple: true,
               options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
             }
@@ -80,7 +80,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               return model.type !== SimpleCounterType.StopWatch;
             }),
             templateOptions: {
-              label: 'Auto trigger switch on for',
+              label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_ON,
               multiple: true,
               options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
             }
@@ -92,7 +92,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               return model.type !== SimpleCounterType.StopWatch;
             }),
             templateOptions: {
-              label: 'Auto trigger switch off for',
+              label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_OFF,
               multiple: true,
               options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map(actionStr => ({label: actionStr, value: actionStr})),
             }

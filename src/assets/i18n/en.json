@@ -517,6 +517,9 @@
       "FORM": {
         "TITLE": "Simple Counters",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
+        "L_AUTO_COUNT_UP": "Auto trigger count up for",
+        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
+        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
         "L_IS_ENABLED": "Enabled",
         "L_TITLE": "Title",
         "L_TYPE": "Type",
