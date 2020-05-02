@@ -19,7 +19,7 @@ export interface SimpleCounterCfgFields {
 
   // adv cfg
   triggerOnActions: string[];
-  triggerOffActions: string[];
+  triggerOffActions?: string[];
 }
 
 export interface SimpleCounterCopy extends SimpleCounterCfgFields {

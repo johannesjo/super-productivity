@@ -1,41 +1,16 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import {ConfigFormSection, GlobalConfigSectionKey} from '../../config/global-config.model';
 import {ProjectCfgFormKey} from '../../project/project.model';
-import {SimpleCounterCfgFields, SimpleCounterConfig} from '../simple-counter.model';
+import {SimpleCounterConfig} from '../simple-counter.model';
 import {FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
 import {T} from 'src/app/t.const';
 import {SimpleCounterService} from '../simple-counter.service';
-import {distinctUntilChanged, map} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
 
-const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
-  'id', 'title', 'isEnabled', 'icon', 'iconOn', 'type', 'triggerOnActions', 'triggerOffActions'
-];
-
-const isEqualSimpleCounterCfg = (a, b): boolean => {
-  if ((Array.isArray(a) && Array.isArray(b))) {
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (let i = 0; i < a.length; ++i) {
-      if (a[i] !== b[i]) {
-        // tslint:disable-next-line:prefer-for-of
-        for (let j = 0; j < FIELDS_TO_COMPARE.length; j++) {
-          const field = FIELDS_TO_COMPARE[j];
-          if (a[field] !== b[field]) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  } else {
-    return a === b;
-  }
-};
 
 @Component({
   selector: 'simple-counter-cfg',
@@ -54,8 +29,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   options: FormlyFormOptions = {};
 
 
-  simpleCounterCfg$: Observable<SimpleCounterConfig> = this.simpleCounterService.simpleCounters$.pipe(
-    distinctUntilChanged(isEqualSimpleCounterCfg),
+  simpleCounterCfg$: Observable<SimpleCounterConfig> = this.simpleCounterService.simpleCountersUpdatedOnCfgChange$.pipe(
     map(items => ({
       counters: items,
     })),

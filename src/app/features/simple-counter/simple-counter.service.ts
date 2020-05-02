@@ -13,18 +13,52 @@ import {
   upsertSimpleCounter,
 } from './store/simple-counter.actions';
 import {Observable} from 'rxjs';
-import {SimpleCounter, SimpleCounterState} from './simple-counter.model';
+import {SimpleCounter, SimpleCounterCfgFields, SimpleCounterState} from './simple-counter.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {map} from 'rxjs/operators';
+import {distinctUntilChanged, map} from 'rxjs/operators';
+
+
+const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
+  'id', 'title', 'isEnabled', 'icon', 'iconOn', 'type', 'triggerOnActions', 'triggerOffActions'
+];
+
+const isEqualSimpleCounterCfg = (a, b): boolean => {
+  if ((Array.isArray(a) && Array.isArray(b))) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) {
+        // tslint:disable-next-line:prefer-for-of
+        for (let j = 0; j < FIELDS_TO_COMPARE.length; j++) {
+          const field = FIELDS_TO_COMPARE[j];
+          if (a[field] !== b[field]) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  } else {
+    return a === b;
+  }
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class SimpleCounterService {
   simpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters));
+  simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> = this.simpleCounters$.pipe(
+    distinctUntilChanged(isEqualSimpleCounterCfg),
+  );
+
   enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters)).pipe(
     map(items => items && items.filter(item => item.isEnabled)),
+  );
+  enabledSimpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> = this.enabledSimpleCounters$.pipe(
+    distinctUntilChanged(isEqualSimpleCounterCfg),
   );
 
   enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(select(selectAllSimpleCounters)).pipe(

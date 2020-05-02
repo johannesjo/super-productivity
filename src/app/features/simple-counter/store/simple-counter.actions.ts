@@ -49,3 +49,13 @@ export const toggleSimpleCounterCounter = createAction(
   props<{ id: string; }>(),
 );
 
+export const setSimpleCounterCounterOff = createAction(
+  '[SimpleCounter] Set SimpleCounter Counter Off',
+  props<{ id: string; }>(),
+);
+
+export const setSimpleCounterCounterOn = createAction(
+  '[SimpleCounter] Set SimpleCounter Counter On',
+  props<{ id: string; }>(),
+);
+

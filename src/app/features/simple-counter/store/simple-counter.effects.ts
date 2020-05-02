@@ -7,6 +7,8 @@ import {
   deleteSimpleCounter,
   deleteSimpleCounters,
   increaseSimpleCounterCounterToday,
+  setSimpleCounterCounterOff,
+  setSimpleCounterCounterOn,
   setSimpleCounterCounterToday,
   updateAllSimpleCounters,
   updateSimpleCounter,
@@ -14,10 +16,11 @@ import {
 } from './simple-counter.actions';
 import {map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {selectSimpleCounterFeatureState} from './simple-counter.reducer';
-import {SimpleCounterState} from '../simple-counter.model';
+import {SimpleCounterState, SimpleCounterType} from '../simple-counter.model';
 import {TimeTrackingService} from '../../time-tracking/time-tracking.service';
 import {SimpleCounterService} from '../simple-counter.service';
 import {EMPTY} from 'rxjs';
+import {SIMPLE_COUNTER_TRIGGER_ACTIONS} from '../simple-counter.const';
 
 
 @Injectable()
@@ -28,6 +31,8 @@ export class SimpleCounterEffects {
       updateAllSimpleCounters,
       setSimpleCounterCounterToday,
       increaseSimpleCounterCounterToday,
+      setSimpleCounterCounterOn,
+      setSimpleCounterCounterOff,
       // toggleSimpleCounterCounter,
 
       // currently not used
@@ -58,29 +63,41 @@ export class SimpleCounterEffects {
     ),
   ));
 
-  // actionListeners$ = createEffect(() => this._simpleCounterService.enabledSimpleCounters$.pipe(
-  //   // map(items=> items.filter(item => item. ...)),
-  //   tap(console.log),
-  //   switchMap((items) => (items && items.length)
-  //     ? this._actions$.pipe(
-  //       map(action => ({action, items}))
-  //     )
-  //     : EMPTY
-  //   ),
-  //   mergeMap(({items, action}) => {
-  //       const startItems = items.filter();
-  //       const stopItems = items.filter();
-  //       const simpleTriggerUp = items.filter();
-  //
-  //       return items
-  //         .filter()
-  //         .map(
-  //           (item) => increaseSimpleCounterCounterToday({id: item.id, increaseBy: tick.duration})
-  //         );
-  //     }
-  //   ),
-  //   tap(console.log),
-  // ), {dispatch: false});
+  actionListeners$ = createEffect(() => this._simpleCounterService.enabledSimpleCountersUpdatedOnCfgChange$.pipe(
+    map(items => items && items.filter(item =>
+      (item.triggerOnActions && item.triggerOnActions.length)
+      || (item.triggerOffActions && item.triggerOffActions.length)
+    )),
+    switchMap((items) => (items && items.length)
+      ? this._actions$.pipe(
+        ofType(...SIMPLE_COUNTER_TRIGGER_ACTIONS),
+        map(action => ({action, items}))
+      )
+      : EMPTY
+    ),
+    mergeMap(({items, action}) => {
+        const clickCounter = items.filter(item => item.type === SimpleCounterType.ClickCounter);
+        const stopWatch = items.filter(item => item.type === SimpleCounterType.StopWatch);
+
+
+        const startItems = stopWatch.filter(
+          item => item.triggerOnActions && item.triggerOnActions.includes(action.type)
+        );
+        const counterUpItems = clickCounter.filter(
+          item => item.triggerOnActions && item.triggerOnActions.includes(action.type)
+        );
+        const stopItems = stopWatch.filter(
+          item => item.triggerOffActions && item.triggerOffActions.includes(action.type)
+        );
+
+        return [
+          ...startItems.map(item => setSimpleCounterCounterOn({id: item.id})),
+          ...stopItems.map(item => setSimpleCounterCounterOff({id: item.id})),
+          ...counterUpItems.map(item => increaseSimpleCounterCounterToday({id: item.id, increaseBy: 1}))
+        ];
+      }
+    ),
+  ));
 
 
   constructor(
