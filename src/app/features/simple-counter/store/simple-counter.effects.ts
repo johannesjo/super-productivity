@@ -21,6 +21,8 @@ import {TimeTrackingService} from '../../time-tracking/time-tracking.service';
 import {SimpleCounterService} from '../simple-counter.service';
 import {EMPTY} from 'rxjs';
 import {SIMPLE_COUNTER_TRIGGER_ACTIONS} from '../simple-counter.const';
+import {T} from '../../../t.const';
+import {SnackService} from '../../../core/snack/snack.service';
 
 
 @Injectable()
@@ -99,6 +101,15 @@ export class SimpleCounterEffects {
     ),
   ));
 
+  successSnack$ = createEffect(() => this._actions$.pipe(
+    ofType(updateAllSimpleCounters),
+    tap(() => this._snackService.open({
+      type: 'SUCCESS',
+      msg: T.F.CONFIG.S.UPDATE_SECTION,
+      translateParams: {sectionKey: 'Simple Counters'}
+    }))
+  ), {dispatch: false});
+
 
   constructor(
     private _actions$: Actions,
@@ -106,6 +117,7 @@ export class SimpleCounterEffects {
     private _timeTrackingService: TimeTrackingService,
     private _persistenceService: PersistenceService,
     private _simpleCounterService: SimpleCounterService,
+    private _snackService: SnackService,
   ) {
   }
 
