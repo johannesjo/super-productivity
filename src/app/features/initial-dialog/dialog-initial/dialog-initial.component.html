@@ -1,1 +1,23 @@
-<div [innerHTML]="data.content"></div>
+<h2 mat-dialog-title>Welcome to {{version ? 'v' + version : 'Super Productivity'}}</h2>
+
+<mat-dialog-content>
+  <div [innerHTML]="data.content"
+       class="content"></div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <a mat-button
+     target="_blank"
+     [href]="data.btnUrl"
+     *ngIf="data.btnUrl">
+    <mat-icon>open_in_new</mat-icon>
+    {{(data.btnTxt)|translate}}
+  </a>
+
+  <button (click)="close()"
+          color="primary"
+          mat-stroked-button>
+    <mat-icon>check</mat-icon>
+    {{(T.G.CLOSE)|translate}}
+  </button>
+</mat-dialog-actions>

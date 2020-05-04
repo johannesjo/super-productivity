@@ -37,6 +37,7 @@ import {EntityDataModule} from '@ngrx/data';
 import {MaterialCssVarsModule} from 'angular-material-css-vars';
 import {WorkContextModule} from './features/work-context/work-context.module';
 import {undoTaskDeleteMetaReducer} from './root-store/meta/undo-task-delete.meta-reducer';
+import {InitialDialogModule} from './features/initial-dialog/initial-dialog.module';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -67,6 +68,7 @@ export function createTranslateLoader(http: HttpClient) {
     NoteModule,
     BookmarkModule,
     TasksModule,
+    InitialDialogModule,
     MaterialCssVarsModule.forRoot(),
 
     // External

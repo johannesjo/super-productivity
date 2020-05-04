@@ -1,7 +1,8 @@
 import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {AddTaskReminderInterface} from '../../tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import {InitialDialogResponse} from '../initial-dialog.model';
+import {T} from 'src/app/t.const';
+import {version} from '../../../../../package.json';
 
 @Component({
   selector: 'dialog-initial',
@@ -10,6 +11,8 @@ import {InitialDialogResponse} from '../initial-dialog.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogInitialComponent {
+  T = T;
+  version = version;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogInitialComponent>,

@@ -25,29 +25,28 @@ export class InitialDialogService {
   showDialogIfNecessary$(): Observable<any> {
     return this._dataInitService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._http.get(URL)),
-      tap(console.log),
       timeout(3000),
-      catchError((err) => {
-        console.error(err);
-        return of(null);
-      }),
       switchMap((res: InitialDialogResponse) => {
         const lastLocal = this._loadDialogNr();
         const isNewUser = !lastLocal;
-        console.log(lastLocal, res);
+
+        // this._openDialog$(res);
 
         if (isNewUser && !res.isShowToNewUsers) {
           return of(null);
         } else if (res.dialogNr <= lastLocal) {
           return of(null);
         } else {
-          console.log('OPEN');
           return this._openDialog$(res).pipe(
             tap(() => {
               this._saveDialogNr(res.dialogNr);
             }),
           );
         }
+      }),
+      catchError((err) => {
+        console.error(err);
+        return of(null);
       }),
     );
   }
