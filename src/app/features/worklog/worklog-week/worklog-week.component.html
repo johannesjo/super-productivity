@@ -26,7 +26,7 @@
                 <div class="simple-counter-items">
                   <div *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"
                        class="simple-counter-item">
-                    <mat-icon inline="true">{{sc.icon}}</mat-icon>
+                    <mat-icon inline="true">{{sc.iconOn || sc.icon}}</mat-icon>
                     <div class="count"
                          *ngIf="sc.type==='ClickCounter'">{{sc.countOnDay[day.value.dateStr] || 0}}</div>
                     <div class="count"
