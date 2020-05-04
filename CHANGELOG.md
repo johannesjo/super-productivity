@@ -1,3 +1,65 @@
+# [5.1.0](https://github.com/johannesjo/super-productivity/compare/v5.0.15...v5.1.0) (2020-05-04)
+
+
+### Bug Fixes
+
+* locales not working for datetimepicker [#354](https://github.com/johannesjo/super-productivity/issues/354) ([d1cadf7](https://github.com/johannesjo/super-productivity/commit/d1cadf7117550a2687e9fa804d3106e5f561fd13))
+* **simpleCounter:** coffee counter name ([f8cd62e](https://github.com/johannesjo/super-productivity/commit/f8cd62eb930e2335766a41bc55a6d4102ce4a72c))
+* **simpleCounter:** icon for stopwatch ([f726110](https://github.com/johannesjo/super-productivity/commit/f726110a93e9a5ee96000c9f18b5b3952d977152))
+* **simpleCounter:** initial import issue ([ecdea64](https://github.com/johannesjo/super-productivity/commit/ecdea6473a8b18d01dba859279d5fd0490a6de5f))
+* **simpleCounter:** lint & failing unit test ([f96be6f](https://github.com/johannesjo/super-productivity/commit/f96be6f20e556a7910a38d7091e0e1c9ca9ce88a))
+* **simpleCounter:** make hide expression work for iconOn ([010a13b](https://github.com/johannesjo/super-productivity/commit/010a13bf984dbe3c04a71532a98a7cc474ec273b))
+* google drive sync not working as planned due to service worker caching ([67aeccd](https://github.com/johannesjo/super-productivity/commit/67aeccd58f7459ba21a33cc4167005cafe9711e8))
+* service worker exclusion problem with workaround ([4f9fd08](https://github.com/johannesjo/super-productivity/commit/4f9fd08005be1df24f2418a14a1fd26bc0e65e62))
+* **simpleCounter:** weird update cfg issue ([416c363](https://github.com/johannesjo/super-productivity/commit/416c363419822ed829f9ed958c1eaa779aeb5ae2))
+
+
+### Features
+
+* **simpleCounter:** add success snack when updating ([8c57b2a](https://github.com/johannesjo/super-productivity/commit/8c57b2a1aad9087f9c6152f8d45b72dd79ec54ff))
+* add debug message when a model is updated ([a5d1990](https://github.com/johannesjo/super-productivity/commit/a5d1990f031154b6c6a3730d2ce12d6855c0ad6a))
+* **googleDriveSync:** reset last sync val when updating sync file ([31fc93f](https://github.com/johannesjo/super-productivity/commit/31fc93fa698b00dd4ccb79c6c0cfc1ad885a7c99))
+* **simpleCounter:** add boilerplate ([64848a3](https://github.com/johannesjo/super-productivity/commit/64848a354b86c0a4ac197dfbad5ee0f2bb839604))
+* **simpleCounter:** add boilerplate for custom cfg ([285cc0f](https://github.com/johannesjo/super-productivity/commit/285cc0ff28db7a357f8181f34e051507865ddb25))
+* **simpleCounter:** add confirm dialog for deletion ([3d64076](https://github.com/johannesjo/super-productivity/commit/3d64076b4c3b27abbbb94fa712d602f918258998))
+* **simpleCounter:** add list animation for cfg ([41b496b](https://github.com/johannesjo/super-productivity/commit/41b496bb98266fc8fda15890adfb6f37359da7f0))
+* **simpleCounter:** add new configuration model for simple counter ([6ffb8be](https://github.com/johannesjo/super-productivity/commit/6ffb8be97bc75fa216b6e7a186a0f98ffbc0feb3))
+* **simpleCounter:** add store boilerplate & persistence for simple counter ([e9d5ea9](https://github.com/johannesjo/super-productivity/commit/e9d5ea939881f4c7dd66cca983625e1837b4c145))
+* **simpleCounter:** add translations for button ([aefa5d8](https://github.com/johannesjo/super-productivity/commit/aefa5d8ac9383a02ab2420335083db2868eb534f))
+* **simpleCounter:** add translations for edit dialog ([2e1c6ab](https://github.com/johannesjo/super-productivity/commit/2e1c6ab2bdb7fc73423a17fa15c7a2e713ea3a7c))
+* **simpleCounter:** add translations for form ([3e218a0](https://github.com/johannesjo/super-productivity/commit/3e218a0bacd89a65724c21d8653acac4eec1086e))
+* **simpleCounter:** avoid potential error ([79c9fde](https://github.com/johannesjo/super-productivity/commit/79c9fdece57f3c221fc9749873a53e3f92c5312c))
+* **simpleCounter:** beautify form ([f45ad1d](https://github.com/johannesjo/super-productivity/commit/f45ad1df1ff3b94004e85168a67b940c06f76283))
+* **simpleCounter:** completely remove double today count model ([ed1ca84](https://github.com/johannesjo/super-productivity/commit/ed1ca849d1aedec567a5e8719d5a82cf968bee22))
+* **simpleCounter:** disable is running for all simple counters initially ([9c82e55](https://github.com/johannesjo/super-productivity/commit/9c82e55cd906455ad1b919855f6d13066df79fe0))
+* **simpleCounter:** get basic form going ([87f7181](https://github.com/johannesjo/super-productivity/commit/87f71812033b4c578a76054c1f6804e4bf5f6be2))
+* **simpleCounter:** introduce simple click counter ([21c791d](https://github.com/johannesjo/super-productivity/commit/21c791d88be1dbd98e08e83f39c527e698f218c8))
+* **simpleCounter:** load saved initially ([51c5777](https://github.com/johannesjo/super-productivity/commit/51c577702a74f1a3d015f2c85cb2c101030abae3))
+* **simpleCounter:** make basic increase counter work ([8ed7599](https://github.com/johannesjo/super-productivity/commit/8ed7599fc105ed821d1fdf0ad4761e1f1b9e56cb))
+* **simpleCounter:** make displaying real data work ([25bcad3](https://github.com/johannesjo/super-productivity/commit/25bcad326c9e7795e0da66cd67d5eb51338b2101))
+* **simpleCounter:** make edit value work ([de4982e](https://github.com/johannesjo/super-productivity/commit/de4982ea51672621b74675251e651be26320dd82))
+* **simpleCounter:** make persistence work ([c05ef32](https://github.com/johannesjo/super-productivity/commit/c05ef3257ae106c64d31cb1b119ec9e4c5b72337))
+* **simpleCounter:** make simple counter action triggers all work ([ff89da4](https://github.com/johannesjo/super-productivity/commit/ff89da4dc5463488efa3c3d8eb063c615c7d38e1))
+* **simpleCounter:** open edit on right click ([184ca4b](https://github.com/johannesjo/super-productivity/commit/184ca4b321812ce7749e7693d8955753c620d61e))
+* **simpleCounter:** open edit via longPress ([e0f1771](https://github.com/johannesjo/super-productivity/commit/e0f1771a797a3eec29549ac72c7cd0281b1d482d))
+* **simpleCounter:** prepare action effect for simple counters ([dbb7166](https://github.com/johannesjo/super-productivity/commit/dbb7166d7fed1b73e26ee9f39dee50549751a7cb))
+* **simpleCounter:** show simple counter on week view ([55f85d3](https://github.com/johannesjo/super-productivity/commit/55f85d3efccd960fcff68c97e593b4870320b3b3))
+* cleanup ([a935681](https://github.com/johannesjo/super-productivity/commit/a9356812284b43eb849b402466b8f3f0e9e6212c))
+* don't display remove from today button for done tasks ([b470675](https://github.com/johannesjo/super-productivity/commit/b470675ce9f85ebeb1b5afdfbe60e6c51eb90baf))
+* don't persist work context to database ([0744ac4](https://github.com/johannesjo/super-productivity/commit/0744ac44046e04e7f1bba6d8c5fd3801951fdca2))
+* **simpleCounter:** make most simple form work ([1f2b623](https://github.com/johannesjo/super-productivity/commit/1f2b6231d24dbbacb0e1e25f6805d74deefdde0a))
+* **simpleCounter:** make saving work ([f69a26d](https://github.com/johannesjo/super-productivity/commit/f69a26d96d775c28dc83ccf8e0b931fe5f48c5ba))
+* **simpleCounter:** make stopwatch work ([1b11fa6](https://github.com/johannesjo/super-productivity/commit/1b11fa63bed7e0ddd70ee41ae9f6c8cf79806303))
+* **simpleCounter:** make toggle work through store ([69dc822](https://github.com/johannesjo/super-productivity/commit/69dc8224e34ecd31a7de69c878f627ea8d12f6c5))
+* **simpleCounter:** outline model ([0b802ef](https://github.com/johannesjo/super-productivity/commit/0b802ef543e5908d22a101188e8b18fdd60875d6))
+* **simpleCounter:** outline ui for button ([91b2967](https://github.com/johannesjo/super-productivity/commit/91b296752892d3644c944fb9115bfe67dfece61b))
+* **simpleCounter:** prepare actions and service for increasing counter ([db95d6d](https://github.com/johannesjo/super-productivity/commit/db95d6dd1e1b8feb0bb507b3153b138c594462db))
+* **simpleCounter:** remove from global cfg ([0110733](https://github.com/johannesjo/super-productivity/commit/0110733eca9e937aedf1ab3a02f2d320e04d8489))
+* **simpleCounter:** test de colored buttons ([30ab548](https://github.com/johannesjo/super-productivity/commit/30ab548d1b75a3664e0277cd2b7a4a0050b1d016))
+* add debug logs for import issue ([a6cd852](https://github.com/johannesjo/super-productivity/commit/a6cd85294bbefd7fe1c6c2c6732491dd4f212be2))
+
+
+
 ## [5.0.15](https://github.com/johannesjo/super-productivity/compare/v5.0.14...v5.0.15) (2020-04-29)
 
 
