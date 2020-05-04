@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Welcome to {{version ? 'v' + version : 'Super Productivity'}}</h2>
+<h2 mat-dialog-title>{{T.APP.D_INITIAL.TITLE|translate:{nr: version} }}</h2>
 
 <mat-dialog-content>
   <div [innerHTML]="data.content"
@@ -17,7 +17,7 @@
   <button (click)="close()"
           color="primary"
           mat-stroked-button>
-    <mat-icon>check</mat-icon>
+    <mat-icon>close</mat-icon>
     {{(T.G.CLOSE)|translate}}
   </button>
 </mat-dialog-actions>

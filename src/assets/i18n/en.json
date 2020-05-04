@@ -7,7 +7,10 @@
     },
     "UPDATE_MAIN_MODEL": "Super Productivity has gotten a major update! Some migrations for your data are required. Please note that this renders your data incompatible with older versions of the app.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
-    "UPDATE_WEB_APP": "New version available. Load New Version?"
+    "UPDATE_WEB_APP": "New version available. Load New Version?",
+    "D_INITIAL": {
+      "TITLE": "Welcome to v{{nr}}"
+    }
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "From other Projects",
