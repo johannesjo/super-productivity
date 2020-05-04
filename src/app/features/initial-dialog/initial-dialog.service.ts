@@ -7,8 +7,11 @@ import {InitialDialogResponse} from './initial-dialog.model';
 import {Observable, of} from 'rxjs';
 import {DialogInitialComponent} from './dialog-initial/dialog-initial.component';
 import {DataInitService} from '../../core/data-init/data-init.service';
+import {version} from '../../../../package.json';
+import {lt} from 'semver';
 
 const URL = 'https://app.super-productivity.com/news.json';
+
 
 @Injectable({
   providedIn: 'root'
@@ -27,14 +30,14 @@ export class InitialDialogService {
       switchMap(() => this._http.get(URL)),
       timeout(3000),
       switchMap((res: InitialDialogResponse) => {
-        const lastLocal = this._loadDialogNr();
-        const isNewUser = !lastLocal;
-
-        // this._openDialog$(res);
+        const lastLocalDialogNr = this._loadDialogNr();
+        const isNewUser = !lastLocalDialogNr;
 
         if (isNewUser && !res.isShowToNewUsers) {
           return of(null);
-        } else if (res.dialogNr <= lastLocal) {
+        } else if (res.dialogNr <= lastLocalDialogNr) {
+          return of(null);
+        } else if (res.showStartingWithVersion && lt(version, res.showStartingWithVersion)) {
           return of(null);
         } else {
           return this._openDialog$(res).pipe(
