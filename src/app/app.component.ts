@@ -29,6 +29,7 @@ import {ImexMetaService} from './imex/imex-meta/imex-meta.service';
 import {AndroidService} from './core/android/android.service';
 import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
 import {isOnline} from './util/is-online';
+import {InitialDialogService} from './features/initial-dialog/initial-dialog.service';
 
 
 @Component({
@@ -67,6 +68,7 @@ export class AppComponent implements OnDestroy {
     private _store: Store<any>,
     private _languageService: LanguageService,
     private _androidService: AndroidService,
+    private _initialDialogService: InitialDialogService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
@@ -90,6 +92,9 @@ export class AppComponent implements OnDestroy {
         }
       });
     }
+
+    // check for dialog
+    this._initialDialogService.showDialogIfNecessary$().subscribe();
 
     // init theme and body class handlers
     this._globalThemeService.init();
