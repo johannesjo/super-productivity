@@ -5,6 +5,9 @@
       "INSTALL": "instalar",
       "MSG": "¿Desea instalar Super Productividad como PWA?"
     },
+    "D_INITIAL": {
+      "TITLE": "Bienvenido a v{{nr}}"
+    },
     "UPDATE_MAIN_MODEL": "¡Super Productivity ha recibido una actualización importante! Se requieren algunas migraciones para sus datos. Tenga en cuenta que esto hace que sus datos sean incompatibles con versiones anteriores de la aplicación.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No se eligió ninguna actualización del modelo. Tenga en cuenta que, si no desea realizar la actualización del modelo, debe bajar a la última versión.",
     "UPDATE_WEB_APP": "Nueva versión disponible. ¿Cargar nueva versión?"
@@ -271,6 +274,7 @@
         "SEARCH_JQL_QUERY": "Consulta JQL para limitar las tareas del buscador."
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Permitir certificado autofirmado",
         "HOST": "Host (por ejemplo, http://my-host.de:1234)",
         "PASSWORD": "Token / Contraseña",
         "USER_NAME": "Email / Nombre de usuario"
@@ -503,6 +507,31 @@
     },
     "REMINDER": {
       "S_REMINDER_ERR": "Error para la interfaz de recordatorio"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "Al eliminar un contador simple, también se eliminarán todos los datos pasados rastreados en él. ¿Estas seguro que deseas continuar?",
+        "OK": "¡Hazlo!"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "Contar",
+        "TITLE": "Editar contador simple"
+      },
+      "FORM": {
+        "ADD_NEW": "Añadir contador simple",
+        "HELP": "Aquí puede configurar botones simples que aparecerán en la esquina superior derecha. Pueden ser temporizadores o simplemente un contador simple, que se cuenta, haciendo clic en él.",
+        "L_AUTO_COUNT_UP": "El gatillo automático cuenta para",
+        "L_AUTO_SWITCH_OFF": "Disparador automático apagado para",
+        "L_AUTO_SWITCH_ON": "Encendido automático para",
+        "L_ICON": "Icono",
+        "L_ICON_ON": "Icono cuando se alterna",
+        "L_IS_ENABLED": "Habilitado",
+        "L_TITLE": "Título",
+        "L_TYPE": "Tipo",
+        "TITLE": "Contadores simples",
+        "TYPE_CLICK_COUNTER": "Contador de clics",
+        "TYPE_STOPWATCH": "Cronógrafo"
+      }
     },
     "TAG": {
       "D_CREATE": {
@@ -754,6 +783,7 @@
     "OK": "De acuerdo",
     "PREVIOUS": "Anterior",
     "REMOVE": "Retirar",
+    "RESET": "Reiniciar",
     "SAVE": "Guardar",
     "TITLE": "Título",
     "UNDO": "Deshacer",

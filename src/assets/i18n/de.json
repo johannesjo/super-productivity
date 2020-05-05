@@ -5,6 +5,9 @@
       "INSTALL": "Installieren",
       "MSG": "Möchten Sie Super Productivity als PWA installieren?"
     },
+    "D_INITIAL": {
+      "TITLE": "Willkommen bei v{{nr}}"
+    },
     "UPDATE_MAIN_MODEL": "Superproduktivität hat ein großes Update bekommen! Einige Migrationen für Ihre Daten sind erforderlich. Bitte beachten Sie, dass Ihre Daten dadurch nicht mit älteren Versionen der App kompatibel sind.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Kein Modellupdate ausgewählt. Bitte beachten Sie, dass Sie entweder ein Downgrade auf die letzte Version durchführen müssen, wenn Sie das Modell-Upgrade nicht durchführen möchten.",
     "UPDATE_WEB_APP": "Neue Version verfügbar. Neue Version laden?"
@@ -271,6 +274,7 @@
         "SEARCH_JQL_QUERY": "JQL-Abfrage für, um die Sucheraufgaben einzuschränken"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Selbstsigniertes Zertifikat zulassen",
         "HOST": "Host (z. B .: http://my-host.de:1234)",
         "PASSWORD": "Token / Passwort",
         "USER_NAME": "E-Mail / Benutzername"
@@ -503,6 +507,31 @@
     },
     "REMINDER": {
       "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "Durch Löschen eines einfachen Zählers werden auch alle darauf verfolgten Daten gelöscht. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "OK": "TU es!"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "Anzahl",
+        "TITLE": "Einfachen Zähler bearbeiten"
+      },
+      "FORM": {
+        "ADD_NEW": "Fügen Sie einen einfachen Zähler hinzu",
+        "HELP": "Hier können Sie einfache Schaltflächen konfigurieren, die oben rechts angezeigt werden. Sie können entweder Timer oder nur ein einfacher Zähler sein, der durch Klicken hochgezählt wird.",
+        "L_AUTO_COUNT_UP": "Auto Trigger Countup für",
+        "L_AUTO_SWITCH_OFF": "Auto Trigger ausschalten für",
+        "L_AUTO_SWITCH_ON": "Auto Trigger einschalten für",
+        "L_ICON": "Symbol",
+        "L_ICON_ON": "Symbol beim Umschalten",
+        "L_IS_ENABLED": "aktiviert",
+        "L_TITLE": "Titel",
+        "L_TYPE": "Art",
+        "TITLE": "Einfache Zähler",
+        "TYPE_CLICK_COUNTER": "Klicken Sie auf Zähler",
+        "TYPE_STOPWATCH": "Stoppuhr"
+      }
     },
     "TAG": {
       "D_CREATE": {
@@ -754,6 +783,7 @@
     "OK": "OK",
     "PREVIOUS": "Bisherige",
     "REMOVE": "Löschen",
+    "RESET": "Zurücksetzen",
     "SAVE": "Speichern",
     "TITLE": "Titel",
     "UNDO": "Rückgängig machen",

@@ -5,12 +5,12 @@
       "INSTALL": "Install",
       "MSG": "Do you want to install Super Productivity as a PWA?"
     },
-    "UPDATE_MAIN_MODEL": "Super Productivity has gotten a major update! Some migrations for your data are required. Please note that this renders your data incompatible with older versions of the app.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
-    "UPDATE_WEB_APP": "New version available. Load New Version?",
     "D_INITIAL": {
       "TITLE": "Welcome to v{{nr}}"
-    }
+    },
+    "UPDATE_MAIN_MODEL": "Super Productivity has gotten a major update! Some migrations for your data are required. Please note that this renders your data incompatible with older versions of the app.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
+    "UPDATE_WEB_APP": "New version available. Load New Version?"
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "From other Projects",
@@ -274,10 +274,10 @@
         "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Allow self signed certificate",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username",
-        "ALLOW_SELF_SIGNED": "Allow self signed certificate"
+        "USER_NAME": "Email / Username"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Advanced Config",
@@ -514,23 +514,23 @@
         "OK": "Do it!"
       },
       "D_EDIT": {
-        "TITLE": "Edit Simple Counter",
-        "L_COUNTER": "Count"
+        "L_COUNTER": "Count",
+        "TITLE": "Edit Simple Counter"
       },
       "FORM": {
-        "TITLE": "Simple Counters",
+        "ADD_NEW": "Add simple counter",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
         "L_AUTO_COUNT_UP": "Auto trigger count up for",
         "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
         "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
+        "L_ICON": "Icon",
+        "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
         "L_TITLE": "Title",
         "L_TYPE": "Type",
-        "L_ICON": "Icon",
-        "L_ICON_ON": "Icon when toggled",
-        "TYPE_STOPWATCH": "Stopwatch",
+        "TITLE": "Simple Counters",
         "TYPE_CLICK_COUNTER": "Click Counter",
-        "ADD_NEW": "Add simple counter"
+        "TYPE_STOPWATCH": "Stopwatch"
       }
     },
     "TAG": {

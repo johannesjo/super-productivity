@@ -5,6 +5,9 @@
       "INSTALL": "安装",
       "MSG": "您想将Super Productivity安装为PWA吗？"
     },
+    "D_INITIAL": {
+      "TITLE": "欢迎使用v{{nr}}"
+    },
     "UPDATE_MAIN_MODEL": "超级生产力有了重大更新！您的数据需要进行一些迁移。请注意，这会使您的数据与该应用的旧版本不兼容。",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "未选择模型更新。请注意，如果您不想执行模型升级，则必须降级到最新版本。",
     "UPDATE_WEB_APP": "新版本可用。加载新版本？"
@@ -271,6 +274,7 @@
         "SEARCH_JQL_QUERY": "JQL Query用于限制搜索器任务"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "允许自签名证书",
         "HOST": "主持人（例如：http：//my-host.de：1234）",
         "PASSWORD": "令牌/密码",
         "USER_NAME": "电子邮件/用户名"
@@ -503,6 +507,31 @@
     },
     "REMINDER": {
       "S_REMINDER_ERR": "提醒界面出错"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "删除一个简单的计数器，也会删除所有过去跟踪的数据。您确定要继续吗？",
+        "OK": "做吧！"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "计数",
+        "TITLE": "编辑简单计数器"
+      },
+      "FORM": {
+        "ADD_NEW": "添加简单的计数器",
+        "HELP": "您可以在此处配置简单的按钮，这些按钮将显示在右上方。通过单击它们，它们可以是计时器，也可以是简单的计数器。",
+        "L_AUTO_COUNT_UP": "自动触发计数",
+        "L_AUTO_SWITCH_OFF": "自动触发关闭",
+        "L_AUTO_SWITCH_ON": "自动触发开关打开",
+        "L_ICON": "图标",
+        "L_ICON_ON": "切换后的图标",
+        "L_IS_ENABLED": "启用",
+        "L_TITLE": "标题",
+        "L_TYPE": "类型",
+        "TITLE": "简单柜台",
+        "TYPE_CLICK_COUNTER": "点击计数器",
+        "TYPE_STOPWATCH": "跑表"
+      }
     },
     "TAG": {
       "D_CREATE": {
@@ -754,6 +783,7 @@
     "OK": "好",
     "PREVIOUS": "以前",
     "REMOVE": "去掉",
+    "RESET": "重启",
     "SAVE": "保存",
     "TITLE": "标题",
     "UNDO": "解开",

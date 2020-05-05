@@ -5,6 +5,9 @@
       "INSTALL": "kurmak",
       "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
     },
+    "D_INITIAL": {
+      "TITLE": "V{{nr}}'a hoş geldiniz"
+    },
     "UPDATE_MAIN_MODEL": "Süper Verimlilik büyük bir güncelleme aldı! Verileriniz için bazı taşıma işlemleri gerekiyor. Bunun verilerinizi uygulamanın eski sürümleriyle uyumsuz hale getirdiğini lütfen unutmayın.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Hiçbir model güncellemesi seçilmedi. Model yükseltmesini gerçekleştirmek istemiyorsanız, ya son sürüme geçmeniz gerektiğini lütfen unutmayın.",
     "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yükle?"
@@ -271,6 +274,7 @@
         "SEARCH_JQL_QUERY": "Arama görevlerini sınırlamak için JQL Sorgusu"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Kendinden imzalı sertifikaya izin ver",
         "HOST": "Ev sahibi (örneğin: http://my-host.de:1234)",
         "PASSWORD": "Jeton / Şifre",
         "USER_NAME": "Email / Kullanıcı Adı"
@@ -503,6 +507,31 @@
     },
     "REMINDER": {
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "Basit bir sayacı silmek, üzerinde izlenen tüm geçmiş verileri de siler. Devam etmek istediğinizden emin misiniz?",
+        "OK": "Yap!"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "saymak",
+        "TITLE": "Basit Sayacı Düzenle"
+      },
+      "FORM": {
+        "ADD_NEW": "Basit sayaç ekle",
+        "HELP": "Burada sağ üstte görünecek basit düğmeleri yapılandırabilirsiniz. Ya zamanlayıcılar ya da sadece sayılan basit bir sayaç olabilirler.",
+        "L_AUTO_COUNT_UP": "İçin otomatik tetikleme sayımı",
+        "L_AUTO_SWITCH_OFF": "İçin otomatik tetik kapatma",
+        "L_AUTO_SWITCH_ON": "İçin otomatik tetik anahtarı açık",
+        "L_ICON": "ikon",
+        "L_ICON_ON": "Değiştirildiğinde simge",
+        "L_IS_ENABLED": "Etkin",
+        "L_TITLE": "Başlık",
+        "L_TYPE": "tip",
+        "TITLE": "Basit Sayaçlar",
+        "TYPE_CLICK_COUNTER": "Tıklama Sayacı",
+        "TYPE_STOPWATCH": "Kronometre"
+      }
     },
     "TAG": {
       "D_CREATE": {
@@ -754,6 +783,7 @@
     "OK": "tamam",
     "PREVIOUS": "Önceki",
     "REMOVE": "Kaldır",
+    "RESET": "Reset",
     "SAVE": "Kayıt etmek",
     "TITLE": "Başlık",
     "UNDO": "Geri alma",

@@ -5,6 +5,9 @@
       "INSTALL": "Installer",
       "MSG": "Voulez-vous installer Super Productivity en tant que PWA ?"
     },
+    "D_INITIAL": {
+      "TITLE": "Bienvenue dans v{{nr}}"
+    },
     "UPDATE_MAIN_MODEL": "Super Productivity a obtenu une mise à jour majeure! Certaines migrations pour vos données sont nécessaires. Veuillez noter que cela rend vos données incompatibles avec les anciennes versions de l'application.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Aucune mise à jour de modèle choisie. Veuillez noter que vous devez soit rétrograder vers la dernière version, si vous ne souhaitez pas effectuer la mise à niveau du modèle.",
     "UPDATE_WEB_APP": "Une nouvelle version est disponible. Charger la nouvelle version ?"
@@ -271,6 +274,7 @@
         "SEARCH_JQL_QUERY": "Requête JQL pour limiter la recherche des tâches"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Autoriser le certificat auto-signé",
         "HOST": "Hôte (par exemple: http://my-host.de:1234)",
         "PASSWORD": "Jeton / mot de passe",
         "USER_NAME": "Email / Nom d'utilisateur"
@@ -503,6 +507,31 @@
     },
     "REMINDER": {
       "S_REMINDER_ERR": "Erreur pour l'interface de rappel"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "La suppression d'un simple compteur supprimera également toutes les données antérieures qui y sont suivies. Êtes-vous sur de vouloir continuer?",
+        "OK": "Fais le!"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "Compter",
+        "TITLE": "Modifier le compteur simple"
+      },
+      "FORM": {
+        "ADD_NEW": "Ajouter un compteur simple",
+        "HELP": "Ici, vous pouvez configurer des boutons simples qui apparaîtront en haut à droite. Il peut s'agir de minuteries ou simplement d'un simple compteur, qui est compté, en cliquant dessus.",
+        "L_AUTO_COUNT_UP": "Décompte de déclenchement automatique pour",
+        "L_AUTO_SWITCH_OFF": "Déclenchement automatique pour",
+        "L_AUTO_SWITCH_ON": "Interrupteur de déclenchement automatique sur",
+        "L_ICON": "Icône",
+        "L_ICON_ON": "Icône lorsque basculé",
+        "L_IS_ENABLED": "Activée",
+        "L_TITLE": "Titre",
+        "L_TYPE": "Type",
+        "TITLE": "Compteurs simples",
+        "TYPE_CLICK_COUNTER": "Cliquez sur Counter",
+        "TYPE_STOPWATCH": "Chronomètre"
+      }
     },
     "TAG": {
       "D_CREATE": {
@@ -754,6 +783,7 @@
     "OK": "Ok",
     "PREVIOUS": "précédent",
     "REMOVE": "Retirer",
+    "RESET": "Réinitialiser",
     "SAVE": "sauvegarder",
     "TITLE": "Titre",
     "UNDO": "annuler",
