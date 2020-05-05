@@ -1,3 +1,24 @@
+## [5.1.1](https://github.com/johannesjo/super-productivity/compare/v5.1.0...v5.1.1) (2020-05-05)
+
+
+### Bug Fixes
+
+* **i18n:** snooze btn text ([f713f3d](https://github.com/johannesjo/super-productivity/commit/f713f3d9511d39d6314a7677d379c4e7fad4c2af))
+
+
+### Features
+
+* **i18n:** add pre translations for simple counter feature ([380e728](https://github.com/johannesjo/super-productivity/commit/380e7280f2b47a6fdfbef722018ee9ed9a6be027))
+* **simpleCounter:** use is on for worklog week summary ([146b7f6](https://github.com/johannesjo/super-productivity/commit/146b7f6dd80dc654004c3f49a48ae92257eb4a19))
+* **task:** allow deleting repeatable tasks ([bde36bd](https://github.com/johannesjo/super-productivity/commit/bde36bd213e35b20f8d73a39510cc8719268d291))
+* **welcomeDialog:** add showStartingWithVersion option ([c15222d](https://github.com/johannesjo/super-productivity/commit/c15222d5249330a6e578cc16370a4011730cdc6d))
+* **welcomeDialog:** add showStartingWithVersion option ([dccc6bc](https://github.com/johannesjo/super-productivity/commit/dccc6bcae9fab136b4c47fdaa4fdd123782a1321))
+* **welcomeDialog:** add translation ([2824ccc](https://github.com/johannesjo/super-productivity/commit/2824ccc6281f350532e9072b3c76896c52f21ddb))
+* **welcomeDialog:** improve dialog ([1ce7fee](https://github.com/johannesjo/super-productivity/commit/1ce7fee219106a3388751d3f7b57243ca8a2e11f))
+* **welcomeDialog:** make most basic variant work ([d56e126](https://github.com/johannesjo/super-productivity/commit/d56e1264c35794a88e1311ad5de3595ca80a6b18))
+
+
+
 # [5.1.0](https://github.com/johannesjo/super-productivity/compare/v5.0.15...v5.1.0) (2020-05-04)
 
 
