@@ -390,7 +390,7 @@
         "TITLE_EDIT": "메모 알림 수정"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": " {{time}}에 대한 일시 중지",
+        "SNOOZE": "에 대한 일시 중지",
         "TITLE": "노트"
       },
       "EDIT_FULLSCREEN": "전체 화면으로 편집",
@@ -594,7 +594,7 @@
         "FOR_OTHER": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FROM_PROJECT": "프로젝트에서",
         "FROM_TAG": "태그에서 : \"{{title}}\"",
-        "SNOOZE": "다시 알림 {{time}}",
+        "SNOOZE": "다시 알림",
         "START": "작업 시작",
         "SWITCH_CONTEXT_START": "상황 전환 및 시작"
       },

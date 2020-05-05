@@ -390,7 +390,7 @@
         "TITLE_EDIT": "Editar recordatorio para nota"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": "Posponer para {{time}}",
+        "SNOOZE": "Posponer",
         "TITLE": "Nota"
       },
       "EDIT_FULLSCREEN": "Editar en pantalla completa",
@@ -594,7 +594,7 @@
         "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FROM_PROJECT": "Del proyecto",
         "FROM_TAG": "De la etiqueta: \"{{title}}\"",
-        "SNOOZE": "Posponer {{time}}",
+        "SNOOZE": "Posponer",
         "START": "Iniciar tarea",
         "SWITCH_CONTEXT_START": "Cambiar contexto e inicio"
       },

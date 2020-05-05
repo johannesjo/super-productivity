@@ -390,7 +390,7 @@
         "TITLE_EDIT": "Modifier le rappel pour la note"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": "Sommeil pour {{time}}",
+        "SNOOZE": "Sommeil",
         "TITLE": "Note"
       },
       "EDIT_FULLSCREEN": "Modifier en plein écran",
@@ -594,7 +594,7 @@
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FROM_PROJECT": "Depuis le projet",
         "FROM_TAG": "De la balise: \"{{title}}\"",
-        "SNOOZE": "Snooze {{time}}",
+        "SNOOZE": "Snooze",
         "START": "Démarrer la tâche",
         "SWITCH_CONTEXT_START": "Changer de contexte et démarrer"
       },

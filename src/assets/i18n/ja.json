@@ -390,7 +390,7 @@
         "TITLE_EDIT": "メモのメモを編集"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": " {{time}}のスヌーズ",
+        "SNOOZE": "のスヌーズ",
         "TITLE": "注意"
       },
       "EDIT_FULLSCREEN": "全画面で編集する",
@@ -594,7 +594,7 @@
         "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
         "FROM_PROJECT": "プロジェクトから",
         "FROM_TAG": "タグから：「{{title}}」",
-        "SNOOZE": "スヌーズ {{time}}",
+        "SNOOZE": "スヌーズ",
         "START": "開始タスク",
         "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
       },

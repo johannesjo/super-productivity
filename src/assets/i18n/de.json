@@ -390,7 +390,7 @@
         "TITLE_EDIT": "Erinnerung für Notiz bearbeiten"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": "Snooze für {{time}}",
+        "SNOOZE": "Snooze",
         "TITLE": "Hinweis"
       },
       "EDIT_FULLSCREEN": "Im Vollbildmodus bearbeiten",
@@ -594,7 +594,7 @@
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FROM_PROJECT": "Aus dem Projekt",
         "FROM_TAG": "Vom Tag: \"{{title}}\"",
-        "SNOOZE": "Snooze {{time}}",
+        "SNOOZE": "Snooze",
         "START": "Task starten",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
       },

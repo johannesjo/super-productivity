@@ -390,7 +390,7 @@
         "TITLE_EDIT": "编辑备注提醒"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": "暂停 {{time}}",
+        "SNOOZE": "暂停",
         "TITLE": "注意"
       },
       "EDIT_FULLSCREEN": "全屏编辑",
@@ -594,7 +594,7 @@
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
         "FROM_PROJECT": "来自项目",
         "FROM_TAG": "来自标签：“{{title}}”",
-        "SNOOZE": "暂停 {{time}}",
+        "SNOOZE": "暂停",
         "START": "开始任务",
         "SWITCH_CONTEXT_START": "切换上下文并开始"
       },

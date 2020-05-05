@@ -390,7 +390,7 @@
         "TITLE_EDIT": "Not için hatırlatıcıyı düzenle"
       },
       "D_VIEW_REMINDER": {
-        "SNOOZE": " {{time}}için erteleme",
+        "SNOOZE": "Erteleme",
         "TITLE": "not"
       },
       "EDIT_FULLSCREEN": "Tam ekranda düzenle",
@@ -594,7 +594,7 @@
         "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FROM_PROJECT": "Projeden",
         "FROM_TAG": "Etiketten: \"{{title}}\"",
-        "SNOOZE": "Erteleme {{time}}",
+        "SNOOZE": "Erteleme",
         "START": "Görevi Başlat",
         "SWITCH_CONTEXT_START": "Bağlam Değiştir ve Başlat"
       },
