@@ -77,7 +77,7 @@ Organize your daily tasks at one place while making time tracking a lot less ann
 And much more!
 
 
-<a href="https://www.youtube.com/watch?v=VoF2_RSdNXA"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
+<a href="https://youtu.be/_mvMXWLsL-8"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
 
 ## :question: How to use it
 I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app. There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
