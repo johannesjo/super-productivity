@@ -7,12 +7,11 @@ import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {first, map, shareReplay, switchMap} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
 import {WorkContextService} from '../work-context/work-context.service';
-import {WorkContext, WorkContextType} from '../work-context/work-context.model';
-import {Dictionary, EntityState} from '@ngrx/entity';
-import {Task} from '../tasks/task.model';
+import {WorkContext} from '../work-context/work-context.model';
 import {mapArchiveToWorklog} from './map-archive-to-worklog';
 import {TaskService} from '../tasks/task.service';
 import {createEmptyEntity} from '../../util/create-empty-entity';
+import {getCompleteStateForWorkContext} from './util/get-complete-state-for-work-context.util';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +21,7 @@ export class WorklogService {
   _archiveUpdateTrigger$ = new BehaviorSubject(true);
 
   // NOTE: task updates are not reflected
+  // TODO improve to reflect task updates or load when route is changed to worklog or daily summary
   worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest([
     this._workContextService.activeWorkContextOnceOnContextChange$,
     this._archiveUpdateTrigger$,
@@ -129,13 +129,15 @@ export class WorklogService {
     const taskState = await this._taskService.taskFeatureState$.pipe(first()).toPromise() || createEmptyEntity();
 
     // console.time('calcTime');
-    const {completeStateForWorkContext, unarchivedIds} = this._getCompleteStateForWorkContext(workContext, taskState, archive);
+    const {completeStateForWorkContext, unarchivedIds} = getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
     const startEnd = {
       workStart: workContext.workStart,
       workEnd: workContext.workEnd,
     };
+
+    console.log(JSON.stringify(startEnd));
 
 
     if (completeStateForWorkContext) {
@@ -151,52 +153,6 @@ export class WorklogService {
     };
   }
 
-  private _limitStateToIds(stateIn: EntityState<Task>, ids: string[]): Dictionary<Task> {
-    const newState = {};
-    ids.forEach(id => {
-      newState[id] = stateIn.entities[id];
-    });
-    return newState;
-    // might be prettier, but is much much much much slower
-    // return ids.reduce((acc, id) => ({
-    //   ...acc,
-    //   [id]: stateIn.entities[id]
-    // }), {});
-  }
-
-  private _getCompleteStateForWorkContext(workContext: WorkContext, taskState: EntityState<Task>, archive: EntityState<Task>): {
-    completeStateForWorkContext: EntityState<Task>,
-    unarchivedIds: string[]
-  } {
-    const filterIdsForProject = (state: EntityState<Task>): string[] => (state.ids as string[]).filter(
-      id => state.entities[id].projectId === workContext.id
-    );
-    const filterIdsForTag = (state: EntityState<Task>): string[] => (state.ids as string[]).filter(
-      id => state.entities[id].tagIds.includes(workContext.id)
-    );
-
-    const unarchivedIds: string[] = (workContext.type === WorkContextType.TAG)
-      ? filterIdsForTag(taskState)
-      : filterIdsForProject(taskState);
-    const archivedIdsForTag: string[] = (workContext.type === WorkContextType.TAG)
-      ? filterIdsForTag(archive)
-      : filterIdsForProject(archive);
-
-
-    const unarchivedEntities = this._limitStateToIds(taskState, unarchivedIds);
-    const archivedEntities = this._limitStateToIds(archive, archivedIdsForTag);
-
-    return {
-      completeStateForWorkContext: {
-        ids: [...unarchivedIds, ...archivedIdsForTag],
-        entities: {
-          ...unarchivedEntities,
-          ...archivedEntities,
-        },
-      },
-      unarchivedIds,
-    };
-  }
 
   private _createTasksForDay(data: WorklogDay): WorklogTask[] {
     const dayData = {...data};
