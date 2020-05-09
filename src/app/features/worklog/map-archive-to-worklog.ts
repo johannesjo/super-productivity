@@ -83,12 +83,29 @@ export const mapArchiveToWorklog = (
         totalTimeSpent += timeSpentForTask;
       }
 
-      worklog[year].ent[month].ent[day].logEntries.push({
+      const newItem = {
         task,
         parentId: task.parentId,
         isNoRestore: noRestoreIds.includes(task.id),
         timeSpent: timeSpentOnDay[dateStr]
-      });
+      };
+      if (task.parentId) {
+        let insertIndex;
+        insertIndex = worklog[year].ent[month].ent[day].logEntries.findIndex(
+          // sibling
+          t => t.task.parentId === task.parentId
+        );
+        if (insertIndex === -1) {
+          insertIndex = worklog[year].ent[month].ent[day].logEntries.findIndex(
+            // parent
+            t => t.task.id === task.parentId
+          );
+        }
+
+        worklog[year].ent[month].ent[day].logEntries.splice(insertIndex + 1, 0, newItem);
+      } else {
+        worklog[year].ent[month].ent[day].logEntries.push(newItem);
+      }
     });
   });
 
