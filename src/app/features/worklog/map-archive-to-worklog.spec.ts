@@ -1,5 +1,5 @@
 import {arrayToDictionary} from '../../util/array-to-dictionary';
-import {DEFAULT_TASK, Task, TaskCopy, TaskState} from '../tasks/task.model';
+import {DEFAULT_TASK, Task, TaskCopy} from '../tasks/task.model';
 import {mapArchiveToWorklog} from './map-archive-to-worklog';
 import {Dictionary, EntityState} from '@ngrx/entity';
 import {Worklog} from './worklog.model';
@@ -115,5 +115,65 @@ describe('mapArchiveToWorklog', () => {
     expect(w[2018].ent[2].ent[16].logEntries[0].task.id).toBe('A');
     expect(w[2018].ent[2].ent[16].logEntries[1].task.id).toBe('SUB_C');
     expect(w[2018].ent[2].ent[16].logEntries[1].parentId).toBe('A');
+  });
+
+
+  it('should sort sub tasks directly after their parent', () => {
+    const ts = fakeTaskStateFromArray([
+      {
+        ...DEFAULT_TASK,
+        title: 'PT1',
+        id: 'PT1',
+        subTaskIds: ['SUB_B', 'SUB_C'],
+        timeSpent: 10000,
+        timeSpentOnDay: {
+          '2015-01-15': 10000
+        }
+      },
+      {
+        ...DEFAULT_TASK,
+        title: 'MT1',
+        id: 'MT1',
+        subTaskIds: [],
+        timeSpent: 3333,
+        timeSpentOnDay: {
+          '2015-01-15': 3333,
+        }
+      },
+      {
+        ...DEFAULT_TASK,
+        title: 'SUB_A',
+        id: 'SUB_A',
+        parentId: 'PT1',
+        timeSpent: 4000,
+        timeSpentOnDay: {
+          '2015-01-15': 4000,
+        }
+      },
+      {
+        ...DEFAULT_TASK,
+        title: 'SUB_B',
+        id: 'SUB_B',
+        parentId: 'PT1',
+        timeSpent: 6000,
+        timeSpentOnDay: {
+          '2015-01-15': 6000,
+        }
+      },
+    ]);
+
+
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const w: Worklog = r.worklog;
+
+    expect(r.totalTimeSpent).toBe(13333);
+    expect(w[2015].timeSpent).toBe(13333);
+    expect(w[2015].ent[1].timeSpent).toBe(13333);
+    expect(w[2015].ent[1].ent[15].timeSpent).toBe(13333);
+
+    expect(w[2015].ent[1].ent[15].logEntries.length).toBe(4);
+    expect(w[2015].ent[1].ent[15].logEntries[0].task.id).toBe('PT1');
+    expect(w[2015].ent[1].ent[15].logEntries[1].task.id).toBe('SUB_A');
+    expect(w[2015].ent[1].ent[15].logEntries[2].task.id).toBe('SUB_B');
   });
 });
