@@ -1,3 +1,12 @@
+## [5.1.2](https://github.com/johannesjo/super-productivity/compare/v5.1.1...v5.1.2) (2020-05-09)
+
+
+### Bug Fixes
+
+* sub task not showing in worklog for tags [#360](https://github.com/johannesjo/super-productivity/issues/360) ([d9d8115](https://github.com/johannesjo/super-productivity/commit/d9d8115d5916e20deba42d0657d9c862257e1de6))
+
+
+
 ## [5.1.1](https://github.com/johannesjo/super-productivity/compare/v5.1.0...v5.1.1) (2020-05-05)
 
 
