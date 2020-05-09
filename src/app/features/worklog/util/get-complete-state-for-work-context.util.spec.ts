@@ -28,7 +28,7 @@ const fakeTaskStateFromArray = (tasks: TaskCopy[]): EntityState<Task> => {
 };
 
 describe('getCompleteStateForWorkContext', () => {
-  fit('should include sub tasks for tags', () => {
+  it('should include sub tasks for tags', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
