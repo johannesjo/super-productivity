@@ -34,7 +34,7 @@ import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
-import {migrateProjectState} from '../migrate-projects-state.util';
+import {migrateProjectState, PROJECT_MODEL_VERSION} from '../migrate-projects-state.util';
 import {MODEL_VERSION_KEY} from '../../../app.constants';
 
 export const PROJECT_FEATURE_NAME = 'projects';
@@ -109,6 +109,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
     [FIRST_PROJECT.id]: FIRST_PROJECT
   },
   projectIdForLoadedRelatedData: null,
+  [MODEL_VERSION_KEY]: PROJECT_MODEL_VERSION,
 });
 
 
