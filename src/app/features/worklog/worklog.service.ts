@@ -137,8 +137,6 @@ export class WorklogService {
       workEnd: workContext.workEnd,
     };
 
-    console.log(JSON.stringify(startEnd));
-
 
     if (completeStateForWorkContext) {
       const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeStateForWorkContext, unarchivedIds, startEnd);
