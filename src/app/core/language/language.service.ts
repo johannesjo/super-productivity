@@ -55,7 +55,7 @@ export class LanguageService {
 
     moment.locale(momLng);
 
-    this._dateAdapter.setLocale(ngLocale);
+    this._dateAdapter.setLocale(momLng);
     this._dateTimeAdapter.setLocale(momLng);
   }
 
