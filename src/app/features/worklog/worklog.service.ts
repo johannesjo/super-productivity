@@ -3,8 +3,8 @@ import {Worklog, WorklogDay, WorklogTask, WorklogWeek} from './worklog.model';
 import {dedupeByKey} from '../../util/de-dupe-by-key';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
-import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {first, map, shareReplay, switchMap} from 'rxjs/operators';
+import {BehaviorSubject, from, merge, Observable} from 'rxjs';
+import {concatMap, filter, first, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContext} from '../work-context/work-context.model';
@@ -12,24 +12,37 @@ import {mapArchiveToWorklog} from './map-archive-to-worklog';
 import {TaskService} from '../tasks/task.service';
 import {createEmptyEntity} from '../../util/create-empty-entity';
 import {getCompleteStateForWorkContext} from './util/get-complete-state-for-work-context.util';
+import {NavigationEnd, Router} from '@angular/router';
+import {DataInitService} from '../../core/data-init/data-init.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorklogService {
   // treated as private but needs to be assigned first
-  _archiveUpdateTrigger$ = new BehaviorSubject(true);
+  _archiveUpdateManualTrigger$ = new BehaviorSubject(true);
+  _archiveUpdateTrigger$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    concatMap(() => merge(
+      // this._workContextService.activeWorkContextOnceOnContextChange$,
+      this._archiveUpdateManualTrigger$,
+      this._router.events.pipe(
+        filter(event => event instanceof NavigationEnd),
+        filter(({urlAfterRedirects}: NavigationEnd) =>
+          urlAfterRedirects.includes('worklog')
+          || urlAfterRedirects.includes('daily-summary')
+        ),
+      ),
+    )),
+  );
 
   // NOTE: task updates are not reflected
   // TODO improve to reflect task updates or load when route is changed to worklog or daily summary
-  worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest([
-    this._workContextService.activeWorkContextOnceOnContextChange$,
-    this._archiveUpdateTrigger$,
-  ]).pipe(
-    switchMap(([curCtx, trigger]) => {
-      return this._loadForWorkContext(curCtx);
-    }),
-    shareReplay(1)
+  worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = this._archiveUpdateTrigger$.pipe(
+    switchMap(() => this._workContextService.activeWorkContext$.pipe(take(1))),
+    switchMap((curCtx) => from(this._loadForWorkContext(curCtx)).pipe(
+      startWith(null),
+    )),
+    shareReplay({bufferSize: 1, refCount: true}),
   );
 
   worklog$: Observable<Worklog> = this.worklogData$.pipe(map(data => data.worklog));
@@ -80,14 +93,15 @@ export class WorklogService {
   constructor(
     private readonly _persistenceService: PersistenceService,
     private readonly _workContextService: WorkContextService,
+    private readonly _dataInitService: DataInitService,
     private readonly _projectService: ProjectService,
     private readonly _taskService: TaskService,
+    private readonly _router: Router,
   ) {
   }
 
-
   refreshWorklog() {
-    this._archiveUpdateTrigger$.next(true);
+    this._archiveUpdateManualTrigger$.next(true);
   }
 
   // TODO this is not waiting for worklog data
