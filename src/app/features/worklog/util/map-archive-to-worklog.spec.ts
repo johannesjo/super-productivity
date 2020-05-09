@@ -1,8 +1,8 @@
-import {arrayToDictionary} from '../../util/array-to-dictionary';
-import {DEFAULT_TASK, Task, TaskCopy} from '../tasks/task.model';
+import {arrayToDictionary} from '../../../util/array-to-dictionary';
+import {DEFAULT_TASK, Task, TaskCopy} from '../../tasks/task.model';
 import {mapArchiveToWorklog} from './map-archive-to-worklog';
 import {Dictionary, EntityState} from '@ngrx/entity';
-import {Worklog} from './worklog.model';
+import {Worklog} from '../worklog.model';
 
 const START_END_ALL = {
   workStart: {

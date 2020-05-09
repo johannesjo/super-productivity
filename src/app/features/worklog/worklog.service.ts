@@ -8,7 +8,7 @@ import {concatMap, filter, first, map, shareReplay, startWith, switchMap, take} 
 import {getWeekNumber} from '../../util/get-week-number';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContext} from '../work-context/work-context.model';
-import {mapArchiveToWorklog} from './map-archive-to-worklog';
+import {mapArchiveToWorklog} from './util/map-archive-to-worklog';
 import {TaskService} from '../tasks/task.service';
 import {createEmptyEntity} from '../../util/create-empty-entity';
 import {getCompleteStateForWorkContext} from './util/get-complete-state-for-work-context.util';
