@@ -10,7 +10,7 @@ import {DataInitService} from '../../core/data-init/data-init.service';
 import {version} from '../../../../package.json';
 import {lt} from 'semver';
 
-const URL = 'https://app.super-productivity.com/news.json';
+const URL = 'https://app.super-productivity.com/news.json?ngsw-bypass=true';
 
 
 @Injectable({
