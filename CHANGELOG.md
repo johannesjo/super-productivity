@@ -1,3 +1,17 @@
+## [5.1.3](https://github.com/johannesjo/super-productivity/compare/v5.1.2...v5.1.3) (2020-05-11)
+
+
+### Bug Fixes
+
+* run all tests again ([70cd2a8](https://github.com/johannesjo/super-productivity/commit/70cd2a8ead1163e56e358e21caf854642acd54e0))
+* **project:** fresh install with a couple of tasks asking for migrate ([8445bc0](https://github.com/johannesjo/super-productivity/commit/8445bc0a0e647301848731e22d2d511b0fa83033))
+* prevent caching news.json ([511894f](https://github.com/johannesjo/super-productivity/commit/511894fb45b24d7cb153973e6cca95662b49df40))
+* worklog loading ([d000282](https://github.com/johannesjo/super-productivity/commit/d000282a8abc7dead6853d4f36e41e1252bc0919))
+* wrong locale for material dateAdapter ([ae2aa14](https://github.com/johannesjo/super-productivity/commit/ae2aa14198191005f917d8fbf1ff2bc9d4d5c765))
+* **worklog:** sub task order ([a25fb70](https://github.com/johannesjo/super-productivity/commit/a25fb70f127aaebacf106d38d987e6eaa4ec57db))
+
+
+
 ## [5.1.2](https://github.com/johannesjo/super-productivity/compare/v5.1.1...v5.1.2) (2020-05-09)
 
 
