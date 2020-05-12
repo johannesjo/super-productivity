@@ -19,6 +19,13 @@ exports.config = {
         "profile.default_content_setting_values.geolocation": 1,
         "profile.default_content_setting_values.notifications": 2,
       }
+    },
+    'goog:chromeOptions': {
+      w3c: false,
+      prefs: {
+        "profile.default_content_setting_values.geolocation": 1,
+        "profile.default_content_setting_values.notifications": 2,
+      }
     }
   },
   directConnect: true,
