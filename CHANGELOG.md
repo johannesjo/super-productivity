@@ -1,3 +1,12 @@
+## [5.1.4](https://github.com/johannesjo/super-productivity/compare/v5.1.3...v5.1.4) (2020-05-12)
+
+
+### Bug Fixes
+
+* handle null case for worklog service [#364](https://github.com/johannesjo/super-productivity/issues/364) ([09f1889](https://github.com/johannesjo/super-productivity/commit/09f18890fc556eab8f501f7fa29ed734e7f5ee6b))
+
+
+
 ## [5.1.3](https://github.com/johannesjo/super-productivity/compare/v5.1.2...v5.1.3) (2020-05-11)
 
 
