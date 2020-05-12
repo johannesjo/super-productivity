@@ -4,8 +4,17 @@
 
 const {SpecReporter} = require('jasmine-spec-reporter');
 
+const args = [
+  '--headless',
+  '--disable-gpu',
+  '--window-size=800,600',
+  '--no-sandbox',
+  '--disable-dev-shm-usage',
+  // `--binary=${process.env.CHROME_BIN}`
+]
+
 /**
- * @type { import("protractor").Config }
+ * @type { import('protractor').Config }
  */
 exports.config = {
   allScriptsTimeout: 11000,
@@ -15,15 +24,15 @@ exports.config = {
   capabilities: {
     browserName: 'chrome',
     chromeOptions: {
-      args: ["--headless", "--disable-gpu", "--window-size=800,600"],
+      args: args,
       w3c: false,
       prefs: {
         "profile.default_content_setting_values.geolocation": 1,
         "profile.default_content_setting_values.notifications": 2,
-      }
+      },
     },
     'goog:chromeOptions': {
-      args: ["--headless", "--disable-gpu", "--window-size=800,600"],
+      args: args,
       w3c: false,
       prefs: {
         "profile.default_content_setting_values.geolocation": 1,
