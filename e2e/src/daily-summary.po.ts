@@ -16,7 +16,7 @@ export class DailySummaryPage {
     return element(by.css(elStr));
   }
 
-  async getDoneTasks(): Promise<ElementFinder[]> {
+  async getTodaysTasks(): Promise<ElementFinder[]> {
     const elStr = '.summary-table tr';
     await browser.wait(ExpectedConditions.elementToBeClickable($(elStr)));
     return element.all(by.css(elStr));
