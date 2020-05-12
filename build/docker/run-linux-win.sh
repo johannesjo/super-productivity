@@ -7,6 +7,7 @@ PUB=$1
 cd "$(dirname "$0")"
 
 echo PUB $PUB
+google-chrome --version
 
 docker run $ENVS --rm \
         $(env | \
