@@ -15,12 +15,15 @@ exports.config = {
   capabilities: {
     browserName: 'chrome',
     chromeOptions: {
+      args: ["--headless", "--disable-gpu", "--window-size=800,600"],
+      w3c: false,
       prefs: {
         "profile.default_content_setting_values.geolocation": 1,
         "profile.default_content_setting_values.notifications": 2,
       }
     },
     'goog:chromeOptions': {
+      args: ["--headless", "--disable-gpu", "--window-size=800,600"],
       w3c: false,
       prefs: {
         "profile.default_content_setting_values.geolocation": 1,
