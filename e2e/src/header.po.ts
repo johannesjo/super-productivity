@@ -8,6 +8,8 @@ export class AppHeader {
     const addTaskBarEl = await this.getDynamicAddTaskBar();
     addTaskBarEl.sendKeys(taskTitle);
     addTaskBarEl.sendKeys(Key.ENTER);
+    await $('body').click();
+    await browser.wait(ExpectedConditions.invisibilityOf($('add-task-bar input')));
   }
 
   async getDynamicAddTaskBar(): Promise<ElementFinder> {

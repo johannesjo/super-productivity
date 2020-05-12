@@ -22,7 +22,7 @@ describe('work view', () => {
     await browser.restart();
   });
 
-  fit('should load the page without errors', async () => {
+  it('should load the page without errors', async () => {
     await header.dynamicAddTask('XXX 1h/1h');
   });
 });

@@ -1,11 +1,14 @@
 import {WorkViewPage} from './work-view.po';
 import {browser, Key, logging} from 'protractor';
+import {AppHeader} from './header.po';
 
 describe('work view', () => {
   let page: WorkViewPage;
+  let header: AppHeader;
 
   beforeEach(async () => {
     page = new WorkViewPage();
+    header = new AppHeader();
     browser.waitForAngularEnabled(false);
     await page.navigateTo();
   });
@@ -27,7 +30,6 @@ describe('work view', () => {
     await at.sendKeys(Key.ENTER);
 
     const tasks = await page.getTasks();
-
     expect(tasks.length).toBe(1);
   });
 
@@ -41,5 +43,19 @@ describe('work view', () => {
 
     const tasks = await page.getTasks();
     expect(tasks.length).toBe(2);
+  });
+
+  it('should add a task from header button', async () => {
+    await header.dynamicAddTask('XXX 1h/1h');
+    const tasks = await page.getTasks();
+    expect(tasks.length).toBe(1);
+  });
+
+  it('should add multiple tasks from header button', async () => {
+    await header.dynamicAddTask('XXX 1h/1h');
+    await header.dynamicAddTask('XXX 1h/1h');
+    await header.dynamicAddTask('XXX 1h/1h');
+    const tasks = await page.getTasks();
+    expect(tasks.length).toBe(3);
   });
 });
