@@ -45,8 +45,12 @@ export class WorklogService {
     shareReplay({bufferSize: 1, refCount: true}),
   );
 
-  worklog$: Observable<Worklog> = this.worklogData$.pipe(map(data => data.worklog));
-  totalTimeSpent$: Observable<number> = this.worklogData$.pipe(map(data => data.totalTimeSpent));
+  _worklogDataIfDefined$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = this.worklogData$.pipe(
+    filter(wd => !!wd),
+  );
+
+  worklog$: Observable<Worklog> = this._worklogDataIfDefined$.pipe(map(data => data.worklog));
+  totalTimeSpent$: Observable<number> = this._worklogDataIfDefined$.pipe(map(data => data.totalTimeSpent));
   currentWeek$: Observable<WorklogWeek> = this.worklog$.pipe(
     map(worklog => {
       const now = new Date();
