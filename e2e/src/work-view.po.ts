@@ -1,5 +1,4 @@
-import {$, browser, by, element, ElementFinder, ExpectedConditions} from 'protractor';
-import {ElementArrayFinder} from 'protractor/built/element';
+import {$, $$, browser, by, element, ElementFinder, ExpectedConditions} from 'protractor';
 import {promise as wdpromise} from 'selenium-webdriver';
 
 export class WorkViewPage {
@@ -8,12 +7,14 @@ export class WorkViewPage {
   }
 
   async getAddTaskBar(): Promise<ElementFinder> {
-    await browser.wait(ExpectedConditions.elementToBeClickable($('input')));
-    return element(by.css('input'));
+    const el = $('add-task-bar:not(.global) input');
+    await browser.wait(ExpectedConditions.elementToBeClickable(el));
+    return el;
   }
 
   async getTasks(): Promise<ElementFinder[]> {
-    await browser.wait(ExpectedConditions.elementToBeClickable($('task')));
-    return element.all(by.css('task'));
+    const tasks = $$('task');
+    await browser.wait(ExpectedConditions.elementToBeClickable(tasks.get(0)));
+    return tasks;
   }
 }

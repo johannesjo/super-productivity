@@ -1,4 +1,4 @@
-import {$, browser, by, element, ElementFinder, ExpectedConditions, Key} from 'protractor';
+import {$, browser, ElementFinder, ExpectedConditions, Key} from 'protractor';
 
 
 export class AppHeader {
@@ -9,19 +9,19 @@ export class AppHeader {
     addTaskBarEl.sendKeys(taskTitle);
     addTaskBarEl.sendKeys(Key.ENTER);
     await $('body').click();
-    await browser.wait(ExpectedConditions.invisibilityOf($('add-task-bar input')));
+    await browser.wait(ExpectedConditions.invisibilityOf($('add-task-bar.global input')));
   }
 
   async getDynamicAddTaskBar(): Promise<ElementFinder> {
-    const elStr = 'add-task-bar input';
-    await browser.wait(ExpectedConditions.elementToBeClickable($(elStr)));
-    return element(by.css(elStr));
+    const el = $('add-task-bar.global input');
+    await browser.wait(ExpectedConditions.elementToBeClickable(el));
+    return el;
   }
 
   async getAddTaskBtn(): Promise<ElementFinder> {
-    const elStr = '.action-nav button:first-child';
-    await browser.wait(ExpectedConditions.elementToBeClickable($(elStr)));
-    return element(by.css(elStr));
+    const el = $('.action-nav > button:first-child');
+    await browser.wait(ExpectedConditions.elementToBeClickable(el));
+    return el;
   }
 
 }

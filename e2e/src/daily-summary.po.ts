@@ -1,4 +1,4 @@
-import {$, browser, by, element, ElementFinder, ExpectedConditions} from 'protractor';
+import {$, $$, browser, ElementFinder, ExpectedConditions} from 'protractor';
 import {promise as wdpromise} from 'selenium-webdriver';
 
 export class DailySummaryPage {
@@ -7,18 +7,15 @@ export class DailySummaryPage {
     // return browser.get('https://app.super-productivity.com/#/tag/TODAY/daily-summary');
   }
 
-  async dynamicAddTask(): Promise<any> {
-  }
-
   async getDoneHeadline(): Promise<ElementFinder> {
-    const elStr = '.done-headline';
-    await browser.wait(ExpectedConditions.visibilityOf($(elStr)));
-    return element(by.css(elStr));
+    const el = $('.done-headline');
+    await browser.wait(ExpectedConditions.visibilityOf(el));
+    return el;
   }
 
   async getTodaysTasks(): Promise<ElementFinder[]> {
-    const elStr = '.summary-table tr';
-    await browser.wait(ExpectedConditions.elementToBeClickable($(elStr)));
-    return element.all(by.css(elStr));
+    const trs = $$('.summary-table tr');
+    await browser.wait(ExpectedConditions.elementToBeClickable(trs.get(0)));
+    return trs;
   }
 }
