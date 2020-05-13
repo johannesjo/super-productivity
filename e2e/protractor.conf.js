@@ -10,6 +10,7 @@ const args = [
   '--window-size=800,600',
   '--no-sandbox',
   '--disable-dev-shm-usage',
+  '--disable-browser-side-navigation',
   // `--binary=${process.env.CHROME_BIN}`
 ]
 
@@ -17,7 +18,7 @@ const args = [
  * @type { import('protractor').Config }
  */
 exports.config = {
-  allScriptsTimeout: 11000,
+  allScriptsTimeout: 60000,
   specs: [
     './src/**/*.e2e-spec.ts'
   ],
