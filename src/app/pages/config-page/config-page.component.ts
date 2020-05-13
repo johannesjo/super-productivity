@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {
   GLOBAL_CONFIG_FORM_CONFIG,
@@ -16,6 +16,8 @@ import {IS_ELECTRON} from '../../app.constants';
 import {environment} from '../../../environments/environment';
 import {T} from '../../t.const';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {RemoteStorageService} from '../../core/remote-storage/remote-storage.service';
+import * as Widget from 'remotestorage-widget';
 
 @Component({
   selector: 'config-page',
@@ -32,10 +34,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   appVersion: string = environment.version;
 
+  @ViewChild('rsWidget', {static: true}) rsWidget: ElementRef;
+
   private _subs = new Subscription();
 
   constructor(
     public readonly configService: GlobalConfigService,
+    public readonly remoteStorageService: RemoteStorageService,
   ) {
     // somehow they are only unproblematic if assigned here
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
@@ -46,6 +51,10 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.add(this.configService.cfg$.subscribe((cfg) => {
       this.globalCfg = cfg;
     }));
+
+    const w = new Widget(this.remoteStorageService.rs);
+    w.attach();
+    w.attach('rs-widget');
   }
 
   ngOnDestroy() {

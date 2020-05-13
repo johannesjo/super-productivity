@@ -155,6 +155,8 @@
     "node-sass": "^4.12.0",
     "protractor": "^5.4.2",
     "query-string": "^6.11.0",
+    "remotestorage-widget": "^1.5.1",
+    "remotestoragejs": "1.x",
     "rxjs": "^6.5.5",
     "rxjs-tslint": "0.1.5",
     "sass-loader": "^7.1.0",

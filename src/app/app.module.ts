@@ -38,6 +38,7 @@ import {MaterialCssVarsModule} from 'angular-material-css-vars';
 import {WorkContextModule} from './features/work-context/work-context.module';
 import {undoTaskDeleteMetaReducer} from './root-store/meta/undo-task-delete.meta-reducer';
 import {InitialDialogModule} from './features/initial-dialog/initial-dialog.module';
+import {RemoteStorageService} from './core/remote-storage/remote-storage.service';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -131,6 +132,7 @@ export function createTranslateLoader(http: HttpClient) {
 export class AppModule {
   constructor(
     private _languageService: LanguageService,
+    private _remoteStorageService: RemoteStorageService,
   ) {
     this._languageService.setDefault(LanguageCode.en);
     this._languageService.setFromBrowserLngIfAutoSwitchLng();
