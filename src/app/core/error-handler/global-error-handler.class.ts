@@ -65,7 +65,7 @@ async function getStacktrace(err): Promise<string> {
   const isErrorWithStack = err && err.stack;
 
   // Don't try to send stacktraces of HTTP errors as they are already logged on the server
-  if (!isHttpError && isErrorWithStack) {
+  if (!isHttpError && isErrorWithStack && !isHandledError(err)) {
     return StackTrace.fromError(err)
       .then((stackframes) => {
         return stackframes
