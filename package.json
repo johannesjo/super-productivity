@@ -154,6 +154,7 @@
     "ng2-dragula": "^2.1.1",
     "ngx-markdown": "^8.0.2",
     "node-sass": "^4.12.0",
+    "p-throttle": "^3.1.0",
     "protractor": "^5.4.2",
     "query-string": "^6.11.0",
     "rxjs": "^6.5.5",

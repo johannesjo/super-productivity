@@ -2,12 +2,11 @@ import {ElectronService} from '../electron/electron.service';
 import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
 import {environment} from '../../../environments/environment';
 import * as StackTrace from 'stacktrace-js';
-// import * as pThrottle from 'p-throttle';
+import * as pThrottle from 'p-throttle';
 
 let isWasErrorAlertCreated = false;
 
-
-export async function getStacktrace(err): Promise<string> {
+async function _getStacktrace(err): Promise<string> {
   const isHttpError = err && (err.url || err.headers);
   const isErrorWithStack = err && err.stack;
 
@@ -26,6 +25,20 @@ export async function getStacktrace(err): Promise<string> {
     return Promise.resolve('');
   }
 }
+
+const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
+
+export const logAdvancedStacktrace = (origErr, additionalLogFn?: (stack: string) => void) => _getStacktraceThrottled(origErr).then(stack => {
+  console.log(stack);
+
+  if (additionalLogFn) {
+    additionalLogFn(stack);
+  }
+  // append to dialog
+  document.getElementById('stack-trace').innerText = stack;
+
+// NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
+}).catch(console.error);
 
 
 const _cleanHtml = (str: string): string => {
@@ -67,17 +80,12 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
   errorAlert.append(btnReload);
   document.body.append(errorAlert);
   isWasErrorAlertCreated = true;
-  getStacktrace(origErr).then(stack => {
-    console.log(stack);
-    document.getElementById('stack-trace').innerText = stack;
-  })
-    // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
-    .catch(console.error);
 
   if (IS_ELECTRON) {
     eSvc.remote.getCurrentWindow().webContents.openDevTools();
   }
 };
+
 
 export const getSimpleMeta = (): string => {
   const n = window.navigator;

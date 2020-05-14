@@ -4,7 +4,7 @@ import {getJiraResponseErrorTxt} from '../../util/get-jira-response-error-text';
 import {IS_ELECTRON} from '../../app.constants';
 import {BannerService} from '../banner/banner.service';
 import {ElectronService} from '../electron/electron.service';
-import {createErrorAlert, getSimpleMeta, getStacktrace, isHandledError} from './global-error-handler.util';
+import {createErrorAlert, getSimpleMeta, isHandledError, logAdvancedStacktrace} from './global-error-handler.util';
 
 
 @Injectable()
@@ -42,12 +42,13 @@ export class GlobalErrorHandler implements ErrorHandler {
 
     if (IS_ELECTRON) {
       this._electronLogger.error('Frontend Error:', err, simpleStack);
-      getStacktrace(err).then(stack => {
-        this._electronLogger.error('Frontend Error Stack:', err, stack);
-      })
-        // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
-        .catch(console.error);
     }
+
+    const additionalLog = IS_ELECTRON
+      ? (stack) => this._electronLogger.error('Frontend Error Stack:', stack)
+      : () => null;
+
+    logAdvancedStacktrace(err, additionalLog).then();
 
     if (!isHandledError(err)) {
       // NOTE: rethrow the error otherwise it gets swallowed
