@@ -434,11 +434,12 @@ export class JiraApiService {
       // delete entry for promise afterwards
       delete this._requestsLog[res.requestId];
     } else {
-      console.warn('Jira: Response Request ID not existing');
+      console.warn('Jira: Response Request ID not existing', (res && res.requestId));
     }
   }
 
   private _blockAccess() {
+    // TODO also shut down all existing requests
     this._isBlockAccess = true;
     saveToSessionStorage(BLOCK_ACCESS_KEY, true);
   }
