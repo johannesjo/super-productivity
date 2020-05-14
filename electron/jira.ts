@@ -17,7 +17,7 @@ export const sendJiraRequest = ({requestId, requestInit, url, jiraCfg}:
   fetch(url, {
     ...requestInit,
     // allow self signed certificates
-    ...(jiraCfg &&  jiraCfg.isAllowSelfSignedCertificate
+    ...(jiraCfg && jiraCfg.isAllowSelfSignedCertificate
       ? {
         agent: new Agent({
           rejectUnauthorized: false,

@@ -8,9 +8,8 @@ import {SnackCustomComponent} from './snack-custom/snack-custom.component';
 import {TranslateService} from '@ngx-translate/core';
 import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
 import {Actions, ofType} from '@ngrx/effects';
-import {ProjectActionTypes} from '../../features/project/store/project.actions';
-import {WorkContextService} from '../../features/work-context/work-context.service';
 import {setActiveWorkContext} from '../../features/work-context/store/work-context.actions';
+import * as debounceFn from 'debounce-fn';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +17,10 @@ import {setActiveWorkContext} from '../../features/work-context/store/work-conte
 export class SnackService {
   private _ref: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
   private _onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
+
+  private readonly _debouncedOpenSnack
+    : (params: SnackParams) => void
+    = debounceFn(this._openSnack.bind(this), {wait: 100});
 
   constructor(
     private _store$: Store<any>,
@@ -34,7 +37,7 @@ export class SnackService {
     if (typeof params === 'string') {
       params = {msg: params};
     }
-    this._openSnack(params);
+    this._debouncedOpenSnack(params);
   }
 
   close() {
