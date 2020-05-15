@@ -35,7 +35,10 @@ export const logAdvancedStacktrace = (origErr, additionalLogFn?: (stack: string)
     additionalLogFn(stack);
   }
   // append to dialog
-  document.getElementById('stack-trace').innerText = stack;
+  const stacktraceEl = document.getElementById('stack-trace');
+  if (stacktraceEl) {
+    document.getElementById('stack-trace').innerText = stack;
+  }
 
 // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
 }).catch(console.error);
