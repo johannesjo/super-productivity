@@ -2,14 +2,11 @@ import {ProjectState} from './store/project.reducer';
 import {Dictionary} from '@ngrx/entity';
 import {Project} from './project.model';
 import {DEFAULT_PROJECT} from './project.const';
-import {DEFAULT_ISSUE_PROVIDER_CFGS, issueProviderKeys} from '../issue/issue.const';
+import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {MODEL_VERSION_KEY, THEME_COLOR_MAP, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import {isMigrateModel} from '../../util/model-version';
 import * as moment from 'moment';
 import {convertToWesternArabic} from '../../util/numeric-converter';
-import {LS_ISSUE_STATE, LS_PROJECT_PREFIX} from '../../core/persistence/ls-keys.const';
-import {IssueProviderKey} from '../issue/issue.model';
-import * as localForage from 'localforage';
 import {WORK_CONTEXT_DEFAULT_THEME} from '../work-context/work-context.const';
 import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
 
@@ -29,8 +26,6 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
     projectEntities[key] = _removeOutdatedData(projectEntities[key]);
-
-    _deleteIssueData(projectEntities[key]);
   });
 
   // Update model version after all migrations ran successfully
@@ -115,16 +110,3 @@ const _updateThemeModel = (project: Project): Project => {
   }
 ;
 
-const _deleteIssueData = (project: Project) => {
-  issueProviderKeys.forEach(key => {
-    __removeIssueDataForProject(project.id, key);
-  });
-};
-
-const __removeIssueDataForProject = (projectId, issueType: IssueProviderKey) => {
-  const _makeProjectKey = (projectIdIn, subKey, additional?) => {
-    return LS_PROJECT_PREFIX + projectIdIn + '_' + subKey + (additional ? '_' + additional : '');
-  };
-  const projectKey = _makeProjectKey(projectId, LS_ISSUE_STATE, issueType);
-  localForage.ready().then(() => localForage.removeItem(projectKey));
-};
