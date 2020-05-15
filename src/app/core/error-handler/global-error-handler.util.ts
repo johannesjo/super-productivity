@@ -20,10 +20,10 @@ async function _getStacktrace(err): Promise<string> {
             return sf.toString();
           }).join('\n');
       });
-  } else {
+  } else if (!isHandledError(err)) {
     console.warn('Error without stack', err);
-    return Promise.resolve('');
   }
+  return Promise.resolve('');
 }
 
 const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
