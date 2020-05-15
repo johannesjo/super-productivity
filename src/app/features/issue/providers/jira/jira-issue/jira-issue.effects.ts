@@ -6,6 +6,7 @@ import {
   filter,
   first,
   map,
+  mapTo,
   switchMap,
   take,
   takeUntil,
@@ -20,7 +21,7 @@ import {JiraIssue, JiraIssueReduced} from './jira-issue.model';
 import {SnackService} from '../../../../../core/snack/snack.service';
 import {Task, TaskWithSubTasks} from '../../../../tasks/task.model';
 import {TaskService} from '../../../../tasks/task.service';
-import {EMPTY, forkJoin, Observable, throwError, timer} from 'rxjs';
+import {BehaviorSubject, EMPTY, forkJoin, Observable, of, throwError, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogJiraTransitionComponent} from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import {IssueLocalState} from '../../../issue.model';
@@ -46,24 +47,38 @@ import {isJiraEnabled} from '../is-jira-enabled.util';
 
 @Injectable()
 export class JiraIssueEffects {
+  private _isInitialRequestForProjectDone$ = new BehaviorSubject(false);
+
   // CHECK CONNECTION
   // ----------------
+  // NOTE: we don't handle the case of a tag list with multiple and possibly different jira cfgs
+  // we only handle the case when we are in a project. This also makes sense because this might
+  // be the most likely scenario for us encountering lots of jira requests, which might get us
+  // locked out from the server
+  // NOTE2: this should work 99.9% of the time. It might however not always work when we switch
+  // from a project with a working jira cfg to one with a non working one, but on the other hand
+  // this is already complicated enough as is...
+  // I am sorry future me O:)
+
   @Effect({dispatch: false})
   checkConnection$: Observable<any> = this._actions$.pipe(
     ofType(setActiveWorkContext),
+    tap(() => this._isInitialRequestForProjectDone$.next(false)),
     filter(({activeType}) => (activeType === WorkContextType.PROJECT)),
     concatMap(({activeId}) => this._getCfgOnce$(activeId)),
     // NOTE: might not be loaded yet
     filter(jiraCfg => isJiraEnabled(jiraCfg)),
     // just fire any single request
     concatMap((jiraCfg) => this._jiraApiService.getCurrentUser$(jiraCfg)),
+    tap(() => this._isInitialRequestForProjectDone$.next(true)),
   );
 
   // POLLING & UPDATES
   // -----------------
   @Effect({dispatch: false})
   pollNewIssuesToBacklog$: any = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-    switchMap((pId) => this._getCfgOnce$(pId).pipe(
+    switchMap(this._afterInitialRequestCheckForProjectJiraSuccessfull$.bind(this)),
+    switchMap((pId: string) => this._getCfgOnce$(pId).pipe(
       filter(jiraCfg => isJiraEnabled(jiraCfg) && jiraCfg.isAutoAddToBacklog),
       // tap(() => console.log('POLL TIMER STARTED')),
       switchMap(jiraCfg => this._pollTimer$.pipe(
@@ -77,6 +92,13 @@ export class JiraIssueEffects {
 
   @Effect({dispatch: false})
   pollIssueChangesForCurrentContext$: any = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
+    switchMap((inVal) => this._workContextService.isActiveWorkContextProject$.pipe(
+      take(1),
+      switchMap(isProject => isProject
+        ? this._afterInitialRequestCheckForProjectJiraSuccessfull$(inVal)
+        : of(inVal)
+      ),
+    )),
     switchMap(() => this._pollTimer$),
     switchMap(() => this._workContextService.allTasksForCurrentContext$.pipe(
       first(),
@@ -269,6 +291,14 @@ export class JiraIssueEffects {
               private readonly _matDialog: MatDialog,
               private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {
+  }
+
+  private _afterInitialRequestCheckForProjectJiraSuccessfull$<TY>(args: TY): Observable<TY> {
+    return this._isInitialRequestForProjectDone$.pipe(
+      filter(isDone => isDone),
+      take(1),
+      mapTo(args),
+    );
   }
 
   private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, task: Task): Observable<any> {
