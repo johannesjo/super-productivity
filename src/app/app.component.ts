@@ -60,7 +60,7 @@ export class AppComponent implements OnDestroy {
     private _bannerService: BannerService,
     private _electronService: ElectronService,
     private _snackService: SnackService,
-    private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _swUpdate: SwUpdate,
     private _translateService: TranslateService,
     private _globalThemeService: GlobalThemeService,
@@ -124,7 +124,7 @@ export class AppComponent implements OnDestroy {
           }
         });
       }
-      this._chromeExtensionInterface.init();
+      this._chromeExtensionInterfaceService.init();
 
       window.addEventListener('beforeunload', (e) => {
         if (this._configService.cfg.misc.isConfirmBeforeExit) {

@@ -40,7 +40,7 @@ export class IdleService {
   private idlePollInterval: number;
 
   constructor(
-    private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _workContextService: WorkContextService,
     private _electronService: ElectronService,
     private _taskService: TaskService,
@@ -56,8 +56,8 @@ export class IdleService {
         this.handleIdle(idleTimeInMs);
       });
     }
-    this._chromeExtensionInterface.onReady$.subscribe(() => {
-      this._chromeExtensionInterface.addEventListener(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
+    this._chromeExtensionInterfaceService.onReady$.subscribe(() => {
+      this._chromeExtensionInterfaceService.addEventListener(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     });

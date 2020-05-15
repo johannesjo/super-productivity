@@ -28,7 +28,7 @@ export class GlobalThemeService {
     private _matIconRegistry: MatIconRegistry,
     private _domSanitizer: DomSanitizer,
     private _chartThemeService: NgChartThemeService,
-    private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
   }
 
@@ -138,7 +138,7 @@ export class GlobalThemeService {
       this.document.body.classList.remove(BodyClass.isNoAdvancedFeatures);
     } else {
       this.document.body.classList.add(BodyClass.isWeb);
-      this._chromeExtensionInterface.onReady$.pipe(take(1)).subscribe(() => {
+      this._chromeExtensionInterfaceService.onReady$.pipe(take(1)).subscribe(() => {
         this.document.body.classList.add(BodyClass.isExtension);
         this.document.body.classList.add(BodyClass.isAdvancedFeatures);
         this.document.body.classList.remove(BodyClass.isNoAdvancedFeatures);

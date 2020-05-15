@@ -70,13 +70,13 @@ export class JiraApiService {
   private _isExtension = false;
   private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
     ? of(true).pipe()
-    : this._chromeExtensionInterface.onReady$.pipe(
+    : this._chromeExtensionInterfaceService.onReady$.pipe(
       mapTo(true),
       shareReplay(1)
     );
 
   constructor(
-    private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _projectService: ProjectService,
     private _electronService: ElectronService,
     private _snackService: SnackService,
@@ -89,7 +89,7 @@ export class JiraApiService {
       });
     }
 
-    this._chromeExtensionInterface.onReady$
+    this._chromeExtensionInterfaceService.onReady$
       .subscribe(() => {
         this._isExtension = true;
         this._chromeExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
