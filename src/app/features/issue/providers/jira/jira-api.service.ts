@@ -92,7 +92,7 @@ export class JiraApiService {
     this._chromeExtensionInterfaceService.onReady$
       .subscribe(() => {
         this._isExtension = true;
-        this._chromeExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
+        this._chromeExtensionInterfaceService.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
           this._handleResponse(data);
         });
       });
@@ -336,7 +336,7 @@ export class JiraApiService {
     if (this._electronService.isElectronApp) {
       this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, {...requestToSend, jiraCfg});
     } else if (this._isExtension) {
-      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
+      this._chromeExtensionInterfaceService.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
     }
 
     return fromPromise(promise)
