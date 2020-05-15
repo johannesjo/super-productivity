@@ -36,7 +36,8 @@ export class DatabaseService {
 
   async load(key: string): Promise<any> {
     try {
-      return this._afterReady().then(() => this.db.get(DB_MAIN_NAME, key));
+      await this._afterReady();
+      return this.db.get(DB_MAIN_NAME, key);
     } catch (e) {
       this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_LOAD});
     }
@@ -44,7 +45,8 @@ export class DatabaseService {
 
   async save(key: string, data: any): Promise<any> {
     try {
-      return this._afterReady().then(() => this.db.put(DB_MAIN_NAME, key, data));
+      await this._afterReady();
+      return this.db.put(DB_MAIN_NAME, data, key);
     } catch (e) {
       this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_SAVE});
     }
@@ -52,7 +54,8 @@ export class DatabaseService {
 
   async remove(key: string): Promise<any> {
     try {
-      return this._afterReady().then(() => this.db.delete(DB_MAIN_NAME, key));
+      await this._afterReady();
+      return this.db.delete(DB_MAIN_NAME, key);
     } catch (e) {
       this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_DELETE});
     }
@@ -60,13 +63,15 @@ export class DatabaseService {
 
   async clearDatabase(): Promise<any> {
     try {
-      return this._afterReady().then(() => this.db.clear(DB_MAIN_NAME));
+      await this._afterReady();
+      return this.db.clear(DB_MAIN_NAME);
     } catch (e) {
       this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_CLEAR});
     }
   }
 
   private async _init() {
+    const that = this;
     this.db = await openDB<MyDb>(DB_NAME, VERSION, {
       upgrade(db, oldVersion, newVersion, transaction) {
         // …
@@ -74,15 +79,12 @@ export class DatabaseService {
         db.createObjectStore(DB_MAIN_NAME);
       },
       blocked() {
-        this.isReady$.next(false);
         alert('IDB BLOCKED');
       },
       blocking() {
-        this.isReady$.next(false);
         alert('IDB BLOCKING');
       },
       terminated() {
-        this.isReady$.next(false);
         alert('IDB TERMINATED');
       },
     });
