@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
 import {Observable, of} from 'rxjs';
 import {Task} from 'src/app/features/tasks/task.model';
 import {catchError, first, map, switchMap} from 'rxjs/operators';
@@ -22,7 +21,6 @@ import {JiraCfg} from './jira.model';
 export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   constructor(
-    private readonly _store: Store<any>,
     private readonly _jiraApiService: JiraApiService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
@@ -50,7 +48,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     isNotifySuccess = true,
     isNotifyNoUpdateRequired = false
   ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue }> {
-    const cfg = await  this._getCfgOnce$(task.projectId).toPromise();
+    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._jiraApiService.getIssueById$(task.issueId, cfg).toPromise() as JiraIssue;
 
     // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
