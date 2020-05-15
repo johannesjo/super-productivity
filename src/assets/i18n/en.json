@@ -324,6 +324,7 @@
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
+        "NO_AUTO_IMPORT_JQL": "Jira: No search query defined for auto import",
         "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",

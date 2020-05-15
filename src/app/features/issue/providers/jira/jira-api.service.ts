@@ -138,6 +138,10 @@ export class JiraApiService {
     const searchQuery = cfg.autoAddBacklogJqlQuery;
 
     if (!searchQuery) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.JIRA.S.NO_AUTO_IMPORT_JQL,
+      });
       return throwError({[HANDLED_ERROR_PROP_STR]: 'JiraApi: No search query for auto import'});
     }
 
