@@ -619,13 +619,14 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "Add to today",
         "DISMISS": "Dismiss Reminder",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project: \"{{title}}\"",
         "FROM_TAG": "From Tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
-        "START": "Start Task",
+        "START": "Start",
         "SWITCH_CONTEXT_START": "Switch Context & Start"
       },
       "D_TIME": {

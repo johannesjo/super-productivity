@@ -17,6 +17,7 @@ import {Tag} from '../../tag/tag.model';
 import {Project} from '../../project/project.model';
 import {WorkContextType} from '../../work-context/work-context.model';
 import {truncate} from '../../../util/truncate';
+import {TODAY_TAG} from '../../tag/tag.const';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -32,7 +33,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   isForCurrentContext = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
   isForTag = this.reminder.workContextType === WorkContextType.TAG;
   isForProject = this.reminder.workContextType === WorkContextType.PROJECT;
-
+  isShowAddToToday = false;
 
   targetContext$: Observable<Tag | Project> = (this.data.reminder.workContextType === WorkContextType.PROJECT)
     ? this._projectService.getByIdOnce$(this.reminder.workContextId)
@@ -57,6 +58,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     this._matDialogRef.disableClose = true;
     this._subs.add(this._task$.pipe(take(1)).subscribe(task => {
       this.task = task;
+      this.isShowAddToToday = !(this.task.tagIds.includes(TODAY_TAG.id));
       this.taskTitle = truncate(task.title);
     }));
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
@@ -66,6 +68,11 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+  }
+
+  addToToday() {
+    this._taskService.updateTags(this.task, [TODAY_TAG.id, ...this.task.tagIds], this.task.tagIds);
+    this.dismiss();
   }
 
   play() {

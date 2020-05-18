@@ -30,11 +30,22 @@
 
     <button (click)="dismiss()"
             [disabled]="isDisableControls"
+            *ngIf="!isShowAddToToday"
             color="primary"
             mat-stroked-button
             type="button">
       <mat-icon>clear</mat-icon>
       {{T.G.DISMISS|translate}}
+    </button>
+
+    <button (click)="addToToday()"
+            *ngIf="isShowAddToToday"
+            [disabled]="isDisableControls"
+            color="primary"
+            mat-stroked-button
+            type="button">
+      <mat-icon>wb_sunny</mat-icon>
+      {{(T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY|translate)}}
     </button>
 
     <button (click)="play()"
@@ -65,6 +76,12 @@
           mat-menu-item>
     <mat-icon>snooze</mat-icon>
     {{T.G.MINUTES|translate:{m: 60} }}
+  </button>
+  <button (click)="dismiss()"
+          *ngIf="isShowAddToToday"
+          mat-menu-item>
+    <mat-icon>clear</mat-icon>
+    {{T.G.DISMISS|translate}}
   </button>
   <button (click)="editReminder()"
           mat-menu-item>
