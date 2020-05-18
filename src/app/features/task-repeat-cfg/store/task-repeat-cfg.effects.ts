@@ -84,7 +84,7 @@ export class TaskRepeatCfgEffects {
                       workContextType: this._workContextService.activeWorkContextType,
                       workContextId: this._workContextService.activeWorkContextId,
                       isAddToBacklog: false,
-                      isAddToBottom: false,
+                      isAddToBottom: taskRepeatCfg.isAddToBottom || false,
                     }),
                     new UpdateTaskRepeatCfg({
                       taskRepeatCfg: {

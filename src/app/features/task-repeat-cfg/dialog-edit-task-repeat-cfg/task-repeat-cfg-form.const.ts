@@ -65,4 +65,11 @@ export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
       label: T.F.TASK_REPEAT.F.SUNDAY
     },
   },
+  {
+    key: 'isAddToBottom',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.IS_ADD_TO_BOTTOM
+    },
+  },
 ];

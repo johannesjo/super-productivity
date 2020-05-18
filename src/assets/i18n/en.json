@@ -689,7 +689,8 @@
         "THURSDAY": "Thursday",
         "TITLE": "Title for task",
         "TUESDAY": "Tuesday",
-        "WEDNESDAY": "Wednesday"
+        "WEDNESDAY": "Wednesday",
+        "IS_ADD_TO_BOTTOM": "Move task to bottom of list"
       }
     },
     "TIME_TRACKING": {
