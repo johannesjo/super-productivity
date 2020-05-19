@@ -11,7 +11,7 @@ import {
   UpdateTaskTags
 } from './task.actions';
 import {Store} from '@ngrx/store';
-import {concatMap, filter, first, map, switchMap, tap} from 'rxjs/operators';
+import {concatMap, filter, first, map, mapTo, switchMap, tap} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {Task, TaskArchive, TaskWithSubTasks} from '../task.model';
 import {ReminderService} from '../../reminder/reminder.service';
@@ -25,6 +25,7 @@ import {unique} from '../../../util/unique';
 import {TaskService} from '../task.service';
 import {of} from 'rxjs';
 import {createEmptyEntity} from '../../../util/create-empty-entity';
+import {ProjectService} from '../../project/project.service';
 
 
 @Injectable()
@@ -117,15 +118,27 @@ export class TaskRelatedModelEffects {
     ),
     concatMap((act: AddTask) => this._globalConfigService.misc$.pipe(
       first(),
+      // error handling
+      switchMap((miscConfig) => (miscConfig.defaultProjectId
+        ? this._projectService.getByIdOnce$(miscConfig.defaultProjectId).pipe(
+          tap((project) => {
+            if (!project) {
+              throw new Error('Default Project not found');
+            }
+          }),
+          mapTo(miscConfig),
+        )
+        : of(miscConfig))),
+      // error handling end
       map(miscCfg => ({
-        miscCfg,
+        defaultProjectId: miscCfg.defaultProjectId,
         task: act.payload.task,
       }))
     )),
-    filter(({miscCfg, task}) => miscCfg.defaultProjectId && !task.projectId && !task.parentId),
-    map(({task, miscCfg}) => new MoveToOtherProject({
+    filter(({defaultProjectId, task}) => defaultProjectId && !task.projectId && !task.parentId),
+    map(({task, defaultProjectId}) => new MoveToOtherProject({
       task,
-      targetProjectId: miscCfg.defaultProjectId,
+      targetProjectId: defaultProjectId,
     })),
   );
 
@@ -135,6 +148,7 @@ export class TaskRelatedModelEffects {
     private _store$: Store<any>,
     private _reminderService: ReminderService,
     private _taskService: TaskService,
+    private _projectService: ProjectService,
     private _globalConfigService: GlobalConfigService,
     private _router: Router,
     private _persistenceService: PersistenceService
