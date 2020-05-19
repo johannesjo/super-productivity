@@ -9,7 +9,6 @@ import {
   selectArchivedProjects,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
-  selectIsRelatedDataLoadedForProject,
   selectJiraCfgByProjectId,
   selectProjectBreakNrForProject,
   selectProjectBreakTimeForProject,
@@ -20,8 +19,8 @@ import {
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue.model';
 import {JiraCfg} from '../issue/providers/jira/jira.model';
 import {GithubCfg} from '../issue/providers/github/github.model';
-import {Actions} from '@ngrx/effects';
-import {shareReplay, switchMap, take} from 'rxjs/operators';
+import {Actions, ofType} from '@ngrx/effects';
+import {map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {T} from '../../t.const';
@@ -46,8 +45,16 @@ export class ProjectService {
     shareReplay(1),
   );
 
-  isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._workContextService.activeWorkContextIdIfProject$.pipe(
-    switchMap(id => this._store$.pipe(select(selectIsRelatedDataLoadedForProject, {id})))
+  isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._workContextService.isActiveWorkContextProject$.pipe(
+    switchMap(isProject => isProject
+      ? this._workContextService.activeWorkContextIdIfProject$.pipe(
+        switchMap((activeId) => this._actions$.pipe(
+          ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess),
+          map(({payload: {projectId}}) => projectId === activeId),
+        )),
+      )
+      : of(false)
+    )
   );
 
 
@@ -99,6 +106,8 @@ export class ProjectService {
     private readonly _store$: Store<any>,
     private readonly _actions$: Actions,
   ) {
+    this.isRelatedDataLoadedForCurrentProject$.subscribe((v) => console.log('isRelatedDataLoadedForCurrentProject$', v));
+
   }
 
   archive(projectId: string) {

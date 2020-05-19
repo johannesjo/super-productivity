@@ -68,7 +68,6 @@ import {
 } from './store/task.selectors';
 import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import {Actions} from '@ngrx/effects';
 import {ProjectService} from '../project/project.service';
 import {RoundTimeOption} from '../project/project.model';
 import {TagService} from '../tag/tag.service';
@@ -183,7 +182,6 @@ export class TaskService {
     private readonly _imexMetaService: ImexMetaService,
     private readonly _snackService: SnackService,
     private readonly _timeTrackingService: TimeTrackingService,
-    private readonly _actions$: Actions,
     private readonly _router: Router,
   ) {
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);

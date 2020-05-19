@@ -41,9 +41,6 @@ export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
 
 export interface ProjectState extends EntityState<Project> {
-  // additional entities state properties
-  projectIdForLoadedRelatedData: string;
-
   [MODEL_VERSION_KEY]?: number;
 }
 
@@ -89,12 +86,6 @@ export const selectUnarchivedProjectsWithoutCurrent = createSelector(
   },
 );
 
-export const selectIsRelatedDataLoadedForProject = createSelector(
-  selectProjectFeatureState,
-  (state, props: { id: string }): boolean => (props.id === state.projectIdForLoadedRelatedData)
-);
-
-
 export const selectProjectBreakTimeForProject = createSelector(selectProjectById, (project) => project.breakTime);
 export const selectProjectBreakNrForProject = createSelector(selectProjectById, (project) => project.breakNr);
 
@@ -108,7 +99,6 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   entities: {
     [FIRST_PROJECT.id]: FIRST_PROJECT
   },
-  projectIdForLoadedRelatedData: null,
   [MODEL_VERSION_KEY]: PROJECT_MODEL_VERSION,
 });
 
@@ -380,10 +370,7 @@ export function projectReducer(
     // Project Actions
     // ------------
     case ProjectActionTypes.LoadProjectRelatedDataSuccess: {
-      return {
-        ...state,
-        projectIdForLoadedRelatedData: action.payload.projectId,
-      };
+      return state;
     }
 
     case ProjectActionTypes.AddProject: {
