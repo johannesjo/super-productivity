@@ -50,6 +50,7 @@ import {GlobalSyncService} from '../../../core/global-sync/global-sync.service';
 import {SyncProvider} from '../../../core/global-sync/sync-provider';
 import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 import {DataInitService} from '../../../core/data-init/data-init.service';
+import {getGoogleLocalLastSync, saveGoogleLocalLastSync} from '../google-session';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -155,11 +156,11 @@ export class GoogleDriveSyncEffects {
             return this._confirmUsingExistingFileDialog$(newFileName).pipe(
               concatMap((isConfirmUseExisting) => {
                 const fileToUpdate = filesFound[0];
+                saveGoogleLocalLastSync(null);
                 return isConfirmUseExisting
                   ? of(this._updateConfig({
                     syncFileName: newFileName,
                     _backupDocId: fileToUpdate.id,
-                    _lastSync: null,
                   }))
                   : EMPTY;
               })
@@ -182,10 +183,10 @@ export class GoogleDriveSyncEffects {
       }),
     ),
     map((res: any) => {
+      saveGoogleLocalLastSync(res.modifiedDate);
       return this._updateConfig({
         syncFileName: res.title,
         _backupDocId: res.id,
-        _lastSync: res.modifiedDate,
       });
     }),
   );
@@ -219,7 +220,7 @@ export class GoogleDriveSyncEffects {
                 });
               }
               return of(new SaveToGoogleDriveCancel());
-            } else if (this._isNewerThan(lastModifiedRemote, cfg._lastSync)) {
+            } else if (this._isNewerThan(lastModifiedRemote, getGoogleLocalLastSync())) {
               // remote has an update so prompt what to do
               this._openConfirmSaveDialog(lastModifiedRemote);
               return of(new SaveToGoogleDriveCancel());
@@ -266,7 +267,7 @@ export class GoogleDriveSyncEffects {
     ),
   );
 
-  @Effect() saveSuccess$: any = this._actions$.pipe(
+  @Effect({dispatch: false}) saveSuccess$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
     ),
@@ -281,10 +282,7 @@ export class GoogleDriveSyncEffects {
     }),
     // NOTE: last active needs to be set to exactly the value we get back
     tap((p) => this._syncService.saveLastLocalSyncModelChange(p.response.modifiedDate)),
-    map((p) => this._updateConfig({
-        _lastSync: p.response.modifiedDate,
-      })
-    ),
+    tap((p) => saveGoogleLocalLastSync(p.response.modifiedDate))
   );
 
   @Effect() loadFromFlow$: any = this._actions$.pipe(
@@ -313,7 +311,10 @@ export class GoogleDriveSyncEffects {
                 }),
                 concatMap(([loadResponse, appData]: [any, AppDataComplete]): any => {
                   const lastLocalSyncModelChange = this._syncService.getLastLocalSyncModelChange();
-                  const lastLocalSyncModelChangeRemote = appData.lastLocalSyncModelChange;
+
+                  const lastLocalSyncModelChangeRemote = appData.lastLocalSyncModelChange
+                    // NOTE: needed to support previous property name
+                    || (appData as any).lastActiveTime;
 
                   // update but ask if remote data is not newer than the last local update
                   const isSkipConfirm = (
@@ -366,7 +367,7 @@ export class GoogleDriveSyncEffects {
     catchError(err => this._handleErrorForLoad$(err)),
   );
 
-  @Effect() loadSuccess$: any = this._actions$.pipe(
+  @Effect({dispatch: false}) loadSuccess$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess,
     ),
@@ -374,9 +375,7 @@ export class GoogleDriveSyncEffects {
     // NOTE: last active needs to be set to exactly the value we get back
     tap((modifiedDate) => this._syncService.saveLastLocalSyncModelChange(modifiedDate as any)),
     tap(() => this._setInitialSyncDone()),
-    map((modifiedDate) => this._updateConfig({
-      _lastSync: new Date(modifiedDate as string).getTime()
-    },)),
+    tap((modifiedDate) => saveGoogleLocalLastSync(modifiedDate as string)),
   );
 
   private _config: GoogleDriveSyncConfig;
@@ -410,9 +409,13 @@ export class GoogleDriveSyncEffects {
   }
 
   private _checkIfRemoteUpdate$(): Observable<boolean> {
-    const lastSync = this._config._lastSync;
+    const lastSync = getGoogleLocalLastSync();
+
     return this._googleApiService.getFileInfo$(this._config._backupDocId)
       .pipe(
+        tap(res => console.log(this._formatDate(res.modifiedDate))),
+        tap(res => console.log(this._formatDate(lastSync))),
+        tap(res => console.log(this._isNewerThan(res.modifiedDate, lastSync), res.modifiedDate, lastSync)),
         map((res: any) => this._isNewerThan(res.modifiedDate, lastSync)),
       );
   }
@@ -430,7 +433,7 @@ export class GoogleDriveSyncEffects {
           saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
           remoteModified: this._formatDate(remoteModified),
           lastLocalSyncModelChange: this._formatDate(lastLocalSyncModelChange),
-          lastSync: this._formatDate(this._config._lastSync),
+          lastSync: this._formatDate(getGoogleLocalLastSync()),
         }
       });
     }
@@ -452,7 +455,7 @@ export class GoogleDriveSyncEffects {
           },
           remoteModified: this._formatDate(remoteModified),
           lastLocalSyncModelChange: this._formatDate(lastLocalSyncModelChange),
-          lastSync: this._formatDate(this._config._lastSync),
+          lastSync: this._formatDate(getGoogleLocalLastSync()),
         }
       }).afterClosed().subscribe((isCanceled) => {
         if (isCanceled) {

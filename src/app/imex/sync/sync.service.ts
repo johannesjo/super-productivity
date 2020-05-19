@@ -85,7 +85,7 @@ export class SyncService {
     return typeof data === 'object'
       && typeof data.note === 'object'
       && typeof data.bookmark === 'object'
-      && typeof data.task === 'object'
+      // && typeof data.task === 'object'
 
       // NOTE this is not there yet for projects with old data
       // && typeof data.tag === 'object'

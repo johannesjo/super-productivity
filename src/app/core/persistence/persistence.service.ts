@@ -280,6 +280,9 @@ export class PersistenceService {
     const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
 
     return {
+      // TODO remove legacy field
+      ...({lastActiveTime: this.getLastLocalSyncModelChange()} as any),
+
       lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
       ...(await this._loadAppDataForProjects(pids)),
       ...(await this._loadAppBaseData()),

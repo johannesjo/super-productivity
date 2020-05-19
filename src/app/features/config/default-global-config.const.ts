@@ -93,7 +93,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isCompressData: true,
     syncInterval: minute * 5,
     syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
-    _lastSync: null,
     _backupDocId: null,
   },
   localBackup: {
