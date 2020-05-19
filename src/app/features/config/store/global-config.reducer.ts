@@ -20,7 +20,6 @@ export const selectEvaluationConfig = createSelector(selectConfigFeatureState, (
 export const selectGoogleDriveSyncConfig = createSelector(selectConfigFeatureState, (cfg): GoogleDriveSyncConfig => cfg.googleDriveSync);
 export const selectIdleConfig = createSelector(selectConfigFeatureState, (cfg): IdleConfig => cfg.idle);
 export const selectTakeABreakConfig = createSelector(selectConfigFeatureState, (cfg): TakeABreakConfig => cfg.takeABreak);
-export const selectGoogleSession = createSelector(selectConfigFeatureState, (cfg) => cfg._googleSession);
 
 export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;
 
@@ -33,27 +32,9 @@ export function globalConfigReducer(
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadDataComplete.type) {
     const {appDataComplete, isOmitTokens}: { appDataComplete: AppDataComplete, isOmitTokens: boolean } = action as any;
-    const cfg = appDataComplete.globalConfig
+    return appDataComplete.globalConfig
       ? migrateGlobalConfigState({...appDataComplete.globalConfig})
       : state;
-
-    if (isOmitTokens) {
-      const currentGoogleSession = state._googleSession
-        ? state._googleSession
-        : {};
-
-      return {
-        ...cfg,
-        _googleSession: {
-          ...cfg._googleSession,
-          ...currentGoogleSession
-        },
-      };
-    } else {
-      return {
-        ...cfg
-      };
-    }
   }
 
   switch (action.type) {

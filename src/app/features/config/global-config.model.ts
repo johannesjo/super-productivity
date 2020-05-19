@@ -102,14 +102,6 @@ export interface GoogleDriveSyncConfig {
   _backupDocId: string;
 }
 
-
-// SETTINGS (not configurable under config)
-export type GoogleSession = Readonly<{
-  accessToken: string,
-  refreshToken: string,
-  expiresAt: number,
-}>;
-
 export type LocalBackupConfig = Readonly<{
   isEnabled: boolean,
 }>;
@@ -129,7 +121,6 @@ export type GlobalConfigState = Readonly<{
   googleDriveSync: GoogleDriveSyncConfig;
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
-  _googleSession: GoogleSession;
 
   [MODEL_VERSION_KEY]?: number;
 }>;
@@ -141,7 +132,6 @@ export type GlobalSectionConfig
   = MiscConfig
   | PomodoroConfig
   | KeyboardConfig
-  | GoogleSession
   ;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 

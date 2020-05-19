@@ -99,9 +99,4 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   localBackup: {
     isEnabled: true,
   },
-  _googleSession: {
-    accessToken: null,
-    refreshToken: null,
-    expiresAt: null
-  },
 };

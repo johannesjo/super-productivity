@@ -7,9 +7,8 @@ import {HttpClient, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/
 import {SnackService} from '../../core/snack/snack.service';
 import {SnackType} from '../../core/snack/snack.model';
 import {GlobalConfigService} from '../config/global-config.service';
-import {GoogleSession} from '../config/global-config.model';
 import {catchError, concatMap, filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
-import {EMPTY, from, merge, Observable, of, throwError, timer} from 'rxjs';
+import {BehaviorSubject, EMPTY, from, merge, Observable, of, throwError, timer} from 'rxjs';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {BannerService} from '../../core/banner/banner.service';
 import {BannerId} from '../../core/banner/banner.model';
@@ -18,6 +17,7 @@ import {ElectronService} from '../../core/electron/electron.service';
 import {isOnline} from '../../util/is-online';
 import {IS_ANDROID_WEB_VIEW} from '../../util/is-android-web-view';
 import {androidInterface} from '../../core/android/android-interface';
+import {getGoogleSession, GoogleSession, updateGoogleSession} from './google-session';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -26,7 +26,7 @@ const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 })
 export class GoogleApiService {
   public isLoggedIn: boolean;
-  private _session$: Observable<GoogleSession> = this._configService.googleSession$;
+  private _session$ = new BehaviorSubject<GoogleSession>(getGoogleSession());
   private _onTokenExpire$: Observable<number> = this._session$.pipe(
     switchMap((session) => {
       if (!session.accessToken) {
@@ -70,7 +70,7 @@ export class GoogleApiService {
   }
 
   private get _session(): GoogleSession {
-    return this._configService.cfg && this._configService.cfg._googleSession;
+    return getGoogleSession();
   }
 
   login(isSkipSuccessMsg = false): Promise<any> {
@@ -272,7 +272,8 @@ export class GoogleApiService {
     if (!sessionData.accessToken) {
       console.warn('GoogleApiService: Logged out willingly???');
     }
-    this._configService.updateSection('_googleSession', sessionData, true);
+    updateGoogleSession(sessionData);
+    this._session$.next(getGoogleSession());
   }
 
   private initClient() {

@@ -8,7 +8,6 @@ import {
   GlobalConfigState,
   GlobalSectionConfig,
   GoogleDriveSyncConfig,
-  GoogleSession,
   IdleConfig,
   MiscConfig,
   TakeABreakConfig
@@ -17,7 +16,6 @@ import {
   selectConfigFeatureState,
   selectEvaluationConfig,
   selectGoogleDriveSyncConfig,
-  selectGoogleSession,
   selectIdleConfig,
   selectMiscConfig,
   selectTakeABreakConfig
@@ -59,10 +57,6 @@ export class GlobalConfigService {
   takeABreak$: Observable<TakeABreakConfig> = this._store.pipe(
     select(selectTakeABreakConfig),
     shareReplay(1),
-  );
-
-  googleSession$: Observable<GoogleSession> = this._store.pipe(
-    select(selectGoogleSession),
   );
 
   cfg: GlobalConfigState;
