@@ -102,7 +102,7 @@ export class SyncService {
     return await Promise.all([
       // reload view model from ls
       this._dataInitService.reInit(null, true),
-      this._reminderService.reloadFromLs(),
+      this._reminderService.reloadFromDatabase(),
     ]);
   }
 

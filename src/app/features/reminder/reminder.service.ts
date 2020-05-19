@@ -71,7 +71,7 @@ export class ReminderService {
       ).subscribe(async () => {
         this._w.addEventListener('message', this._onReminderActivated.bind(this));
         this._w.addEventListener('error', this._handleError.bind(this));
-        await this.reloadFromLs();
+        await this.reloadFromDatabase();
         this._isRemindersLoaded$.next(true);
       });
 
@@ -80,8 +80,12 @@ export class ReminderService {
     }
   }
 
-  async reloadFromLs() {
-    this._reminders = await this._loadFromLs() || [];
+  async reloadFromDatabase() {
+    const fromDb = await this._loadFromDatabase();
+    if (!fromDb || !Array.isArray(fromDb)) {
+      this._saveModel([]);
+    }
+    this._reminders = await this._loadFromDatabase();
     if (!Array.isArray(this._reminders)) {
       if (environment.production) {
         console.error('Something went wrong with the reminders', this._reminders);
@@ -93,7 +97,6 @@ export class ReminderService {
     }
 
     this._onReloadModel$.next(this._reminders);
-    this._saveModel(this._reminders, true);
   }
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
@@ -191,16 +194,14 @@ export class ReminderService {
     }).then();
   }
 
-  private async _loadFromLs(): Promise<Reminder[]> {
+  private async _loadFromDatabase(): Promise<Reminder[]> {
     return migrateReminders(
       await this._persistenceService.reminders.loadState() || []
     );
   }
 
-  private _saveModel(reminders: Reminder[], isSkipLastLocalSyncModelChange = false) {
-    if (!isSkipLastLocalSyncModelChange) {
-      this._persistenceService.updateLastLocalSyncModelChange();
-    }
+  private _saveModel(reminders: Reminder[]) {
+    this._persistenceService.updateLastLocalSyncModelChange();
     this._persistenceService.reminders.saveState(reminders);
     this._updateRemindersInWorker(this._reminders);
     this._reminders$.next(this._reminders);
