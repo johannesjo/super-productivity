@@ -12,7 +12,6 @@ export class UpdateGlobalConfigSection implements Action {
   constructor(public payload: {
     sectionKey: GlobalConfigSectionKey
     sectionCfg: Partial<GlobalSectionConfig>,
-    isSkipLastLocalSyncModelChange: boolean,
   }) {
   }
 }

@@ -70,13 +70,12 @@ export class GlobalConfigService {
     this.cfg$.subscribe((cfg) => this.cfg = cfg);
   }
 
-  updateSection(sectionKey: GlobalConfigSectionKey, sectionCfg: Partial<GlobalSectionConfig>, isSkipLastLocalSyncModelChange = false) {
+  updateSection(sectionKey: GlobalConfigSectionKey, sectionCfg: Partial<GlobalSectionConfig>) {
     this._store.dispatch({
       type: GlobalConfigActionTypes.UpdateGlobalConfigSection,
       payload: {
         sectionKey,
         sectionCfg,
-        isSkipLastLocalSyncModelChange,
       },
     });
   }

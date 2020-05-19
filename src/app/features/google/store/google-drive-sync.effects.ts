@@ -186,7 +186,7 @@ export class GoogleDriveSyncEffects {
         syncFileName: res.title,
         _backupDocId: res.id,
         _lastSync: res.modifiedDate,
-      }, false);
+      });
     }),
   );
 
@@ -283,7 +283,7 @@ export class GoogleDriveSyncEffects {
     tap((p) => this._syncService.saveLastLocalSyncModelChange(p.response.modifiedDate)),
     map((p) => this._updateConfig({
         _lastSync: p.response.modifiedDate,
-      }, true)
+      })
     ),
   );
 
@@ -376,7 +376,7 @@ export class GoogleDriveSyncEffects {
     tap(() => this._setInitialSyncDone()),
     map((modifiedDate) => this._updateConfig({
       _lastSync: new Date(modifiedDate as string).getTime()
-    }, true)),
+    },)),
   );
 
   private _config: GoogleDriveSyncConfig;
@@ -529,11 +529,10 @@ export class GoogleDriveSyncEffects {
     return backupData || (backupStr as AppDataComplete);
   }
 
-  private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastLocalSyncModelChange = false): UpdateGlobalConfigSection {
+  private _updateConfig(data: Partial<GoogleDriveSyncConfig>): UpdateGlobalConfigSection {
     return new UpdateGlobalConfigSection({
       sectionKey: 'googleDriveSync',
       sectionCfg: data,
-      isSkipLastLocalSyncModelChange,
     });
   }
 
