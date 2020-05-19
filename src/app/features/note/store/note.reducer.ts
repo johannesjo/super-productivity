@@ -16,16 +16,11 @@ import {
 import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 
 export interface NoteState extends EntityState<Note> {
-  // additional entities state properties
-  isShowNotes: boolean;
 }
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
-export const initialNoteState: NoteState = adapter.getInitialState({
-  // additional entity state properties
-  isShowNotes: false,
-});
+export const initialNoteState: NoteState = adapter.getInitialState({});
 
 export const {
   selectIds,
