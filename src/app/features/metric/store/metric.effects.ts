@@ -51,7 +51,7 @@ export class MetricEffects {
 
   private _saveToLs(currentProjectId, metricState) {
     if (currentProjectId) {
-      this._persistenceService.saveLastActive();
+      this._persistenceService.updateLastLocalSyncModelChange();
       this._persistenceService.metric.save(currentProjectId, metricState);
     } else {
       throw new Error('No current project id');

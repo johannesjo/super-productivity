@@ -89,7 +89,7 @@ export class ProjectEffects {
           ProjectActionTypes.UpdateProjectWorkStart,
           ProjectActionTypes.UpdateProjectWorkEnd,
         ].includes(a.type as any))) {
-          this._persistenceService.saveLastActive.bind(this);
+          this._persistenceService.updateLastLocalSyncModelChange.bind(this);
         }
       }),
       switchMap(() => this.saveToLs$),

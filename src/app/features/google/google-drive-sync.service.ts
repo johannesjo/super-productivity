@@ -34,8 +34,8 @@ export class GoogleDriveSyncService {
   // TODO think of something
   // isInSync$: Observable<boolean|'UNKNOWN'> = this._configService.cfg$.pipe(
   //   map(cfg => cfg.googleDriveSync),
-  //   tap(cfg => (console.log(new Date(cfg._lastSync), this._syncService.getLastActive()))),
-  //   map(cfg => (new Date(cfg._lastSync) === this._syncService.getLastActive())),
+  //   tap(cfg => (console.log(new Date(cfg._lastSync), this._syncService.getLastLocalSyncModelChange()))),
+  //   map(cfg => (new Date(cfg._lastSync) === this._syncService.getLastLocalSyncModelChange())),
   // );
 
   constructor(

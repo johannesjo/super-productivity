@@ -156,7 +156,7 @@ export class TaskRepeatCfgEffects {
   }
 
   private _saveToLs([action, taskRepeatCfgState]) {
-    this._persistenceService.saveLastActive();
+    this._persistenceService.updateLastLocalSyncModelChange();
     this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState);
   }
 

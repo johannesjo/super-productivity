@@ -122,7 +122,7 @@ export class SimpleCounterEffects {
   }
 
   private _saveToLs(simpleCounterState: SimpleCounterState) {
-    this._persistenceService.saveLastActive();
+    this._persistenceService.updateLastLocalSyncModelChange();
     this._persistenceService.simpleCounter.saveState(simpleCounterState);
   }
 }

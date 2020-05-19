@@ -31,15 +31,15 @@ export class SyncService {
   ) {
   }
 
-  saveLastActive(date: number | string | Date) {
+  saveLastLocalSyncModelChange(date: number | string | Date) {
     const d = (typeof date === 'number')
       ? date
       : new Date(date).getTime();
-    this._persistenceService.saveLastActive(d);
+    this._persistenceService.updateLastLocalSyncModelChange(d);
   }
 
-  getLastActive(): number {
-    return this._persistenceService.getLastActive();
+  getLastLocalSyncModelChange(): number {
+    return this._persistenceService.getLastLocalSyncModelChange();
   }
 
   async getCompleteSyncData(): Promise<AppDataComplete> {

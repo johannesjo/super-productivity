@@ -51,7 +51,7 @@ export class ObstructionEffects {
 
   private _saveToLs(currentProjectId: string, obstructionState: ObstructionState) {
     if (currentProjectId) {
-      this._persistenceService.saveLastActive();
+      this._persistenceService.updateLastLocalSyncModelChange();
       this._persistenceService.obstruction.save(currentProjectId, obstructionState);
     } else {
       throw new Error('No current project id');

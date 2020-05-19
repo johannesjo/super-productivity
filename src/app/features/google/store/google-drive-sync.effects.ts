@@ -11,7 +11,6 @@ import {
   map,
   mapTo,
   switchMap,
-  take,
   tap,
   withLatestFrom
 } from 'rxjs/operators';
@@ -209,10 +208,10 @@ export class GoogleDriveSyncEffects {
           catchError(err => this._handleErrorForSave$(err)),
           concatMap((res: any): Observable<any> => {
 
-            const lastActiveLocal: number = this._syncService.getLastActive();
+            const lastLocalSyncModelChange: number = this._syncService.getLastLocalSyncModelChange();
             const lastModifiedRemote: string = res.modifiedDate;
 
-            if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
+            if (this._isEqual(lastLocalSyncModelChange, lastModifiedRemote)) {
               if (!action.payload || !action.payload.isSkipSnack) {
                 this._snackService.open({
                   type: 'SUCCESS',
@@ -281,7 +280,7 @@ export class GoogleDriveSyncEffects {
       }
     }),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((p) => this._syncService.saveLastActive(p.response.modifiedDate)),
+    tap((p) => this._syncService.saveLastLocalSyncModelChange(p.response.modifiedDate)),
     map((p) => this._updateConfig({
         _lastSync: p.response.modifiedDate,
       }, true)
@@ -312,13 +311,15 @@ export class GoogleDriveSyncEffects {
                     this._decodeAppDataIfNeeded(loadRes.backup)
                   );
                 }),
-                concatMap(([loadResponse, appData]): any => {
-                  const lastActiveLocal = this._syncService.getLastActive();
-                  const lastActiveRemote = appData.lastActiveTime;
+                concatMap(([loadResponse, appData]: [any, AppDataComplete]): any => {
+                  const lastLocalSyncModelChange = this._syncService.getLastLocalSyncModelChange();
+                  const lastLocalSyncModelChangeRemote = appData.lastLocalSyncModelChange;
 
                   // update but ask if remote data is not newer than the last local update
-                  const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
-                  console.log(isSkipConfirm, lastActiveRemote, lastActiveLocal, appData);
+                  const isSkipConfirm = (
+                    lastLocalSyncModelChangeRemote && this._isNewerThan(lastLocalSyncModelChangeRemote, lastLocalSyncModelChange)
+                  );
+                  console.log(isSkipConfirm, lastLocalSyncModelChangeRemote, lastLocalSyncModelChange, appData);
 
                   if (isSkipConfirm) {
                     return of(new LoadFromGoogleDrive({
@@ -327,7 +328,7 @@ export class GoogleDriveSyncEffects {
                       backup: appData,
                     }));
                   } else {
-                    this._openConfirmLoadDialog(lastActiveRemote);
+                    this._openConfirmLoadDialog(lastLocalSyncModelChangeRemote);
                     return of(new LoadFromGoogleDriveCancel());
                   }
                 }),
@@ -371,7 +372,7 @@ export class GoogleDriveSyncEffects {
     ),
     map((action: LoadFromGoogleDriveSuccess) => action.payload.modifiedDate),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((modifiedDate) => this._syncService.saveLastActive(modifiedDate as any)),
+    tap((modifiedDate) => this._syncService.saveLastLocalSyncModelChange(modifiedDate as any)),
     tap(() => this._setInitialSyncDone()),
     map((modifiedDate) => this._updateConfig({
       _lastSync: new Date(modifiedDate as string).getTime()
@@ -421,14 +422,14 @@ export class GoogleDriveSyncEffects {
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncSaveComponent.name;
     })) {
-      const lastActiveLocal = this._syncService.getLastActive();
+      const lastLocalSyncModelChange = this._syncService.getLastLocalSyncModelChange();
       this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
         restoreFocus: true,
         data: {
           loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
           saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
           remoteModified: this._formatDate(remoteModified),
-          lastActiveLocal: this._formatDate(lastActiveLocal),
+          lastLocalSyncModelChange: this._formatDate(lastLocalSyncModelChange),
           lastSync: this._formatDate(this._config._lastSync),
         }
       });
@@ -440,7 +441,7 @@ export class GoogleDriveSyncEffects {
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
     })) {
-      const lastActiveLocal: number = this._syncService.getLastActive();
+      const lastLocalSyncModelChange: number = this._syncService.getLastLocalSyncModelChange();
       this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
         restoreFocus: true,
         data: {
@@ -450,7 +451,7 @@ export class GoogleDriveSyncEffects {
             this._store$.dispatch(new SaveToGoogleDrive());
           },
           remoteModified: this._formatDate(remoteModified),
-          lastActiveLocal: this._formatDate(lastActiveLocal),
+          lastLocalSyncModelChange: this._formatDate(lastLocalSyncModelChange),
           lastSync: this._formatDate(this._config._lastSync),
         }
       }).afterClosed().subscribe((isCanceled) => {
@@ -528,11 +529,11 @@ export class GoogleDriveSyncEffects {
     return backupData || (backupStr as AppDataComplete);
   }
 
-  private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false): UpdateGlobalConfigSection {
+  private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastLocalSyncModelChange = false): UpdateGlobalConfigSection {
     return new UpdateGlobalConfigSection({
       sectionKey: 'googleDriveSync',
       sectionCfg: data,
-      isSkipLastActive,
+      isSkipLastLocalSyncModelChange,
     });
   }
 

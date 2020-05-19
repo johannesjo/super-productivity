@@ -33,7 +33,7 @@ export class NoteEffects {
       this._store$.pipe(select(selectNoteFeatureState)),
     ]).pipe(first())),
     tap(([projectId, state]) => this._saveToLs(projectId, state)),
-    tap(this._updateLastActive.bind(this)),
+    tap(this._updateLastLocalSyncModelChange.bind(this)),
   ), {dispatch: false});
 
   deleteNote$: any = createEffect(() => this._actions$.pipe(
@@ -120,8 +120,8 @@ export class NoteEffects {
   ) {
   }
 
-  private _updateLastActive() {
-    this._persistenceService.saveLastActive();
+  private _updateLastLocalSyncModelChange() {
+    this._persistenceService.updateLastLocalSyncModelChange();
   }
 
   private async _saveToLs(currentProjectId: string, noteState: NoteState) {

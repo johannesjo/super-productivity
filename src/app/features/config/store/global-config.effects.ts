@@ -107,9 +107,9 @@ export class GlobalConfigEffects {
   }
 
   private async _saveToLs([action, state]) {
-    const isSkipLastActive = action.payload && action.payload.isSkipLastActive;
-    if (!isSkipLastActive) {
-      this._persistenceService.saveLastActive();
+    const isSkipLastLocalSyncModelChange = action.payload && action.payload.isSkipLastLocalSyncModelChange;
+    if (!isSkipLastLocalSyncModelChange) {
+      this._persistenceService.updateLastLocalSyncModelChange();
     }
 
     const globalConfig = state[CONFIG_FEATURE_NAME];

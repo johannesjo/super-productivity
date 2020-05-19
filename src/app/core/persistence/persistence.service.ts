@@ -6,7 +6,7 @@ import {
   LS_GLOBAL_CFG,
   LS_IMPROVEMENT_STATE,
   LS_ISSUE_STATE,
-  LS_LAST_ACTIVE,
+  LS_LAST_LOCAL_SYNC_MODEL_CHANGE,
   LS_METRIC_STATE,
   LS_NOTE_STATE,
   LS_OBSTRUCTION_STATE,
@@ -248,15 +248,15 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  saveLastActive(date: number = Date.now()) {
+  updateLastLocalSyncModelChange(date: number = Date.now()) {
     if (!environment || !environment.production) {
-      console.log('Save LastAct', date);
+      console.log('Save Last Local Sync Model Change', date);
     }
-    localStorage.setItem(LS_LAST_ACTIVE, date.toString());
+    localStorage.setItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE, date.toString());
   }
 
-  getLastActive(): number {
-    const la = localStorage.getItem(LS_LAST_ACTIVE);
+  getLastLocalSyncModelChange(): number {
+    const la = localStorage.getItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE);
     // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
     const laParsed = Number.isNaN(Number(la))
       ? la
@@ -280,7 +280,7 @@ export class PersistenceService {
     const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
 
     return {
-      lastActiveTime: this.getLastActive(),
+      lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
       ...(await this._loadAppDataForProjects(pids)),
       ...(await this._loadAppBaseData()),
     };

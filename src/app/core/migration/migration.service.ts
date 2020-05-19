@@ -76,7 +76,7 @@ export class MigrationService {
     console.log('projectIds', ids);
 
     const newAppData: AppDataComplete = {
-      lastActiveTime: legacyAppDataComplete.lastActiveTime,
+      lastLocalSyncModelChange: legacyAppDataComplete.lastActiveTime,
       archivedProjects: legacyAppDataComplete.archivedProjects,
       globalConfig: legacyAppDataComplete.globalConfig,
       reminders: legacyAppDataComplete.reminders,

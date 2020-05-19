@@ -4,7 +4,7 @@ import {
   LS_BOOKMARK_STATE,
   LS_GLOBAL_CFG,
   LS_IMPROVEMENT_STATE,
-  LS_LAST_ACTIVE,
+  LS_LAST_LOCAL_SYNC_MODEL_CHANGE,
   LS_METRIC_STATE,
   LS_NOTE_STATE,
   LS_OBSTRUCTION_STATE,
@@ -203,7 +203,7 @@ export class LegacyPersistenceService {
   // BACKUP AND SYNC RELATED
   // -----------------------
   getLastActive(): number {
-    const la = localStorage.getItem(LS_LAST_ACTIVE);
+    const la = localStorage.getItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE);
     // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
     const laParsed = Number.isNaN(Number(la))
       ? la

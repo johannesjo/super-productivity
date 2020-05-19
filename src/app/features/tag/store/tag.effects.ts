@@ -78,7 +78,7 @@ export class TagEffects {
     select(selectTagFeatureState),
     take(1),
     switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
-    tap(this._updateLastActive.bind(this)),
+    tap(this._updateLastLocalSyncModelChange.bind(this)),
   );
 
 
@@ -216,7 +216,7 @@ export class TagEffects {
   ) {
   }
 
-  private _updateLastActive() {
-    this._persistenceService.saveLastActive();
+  private _updateLastLocalSyncModelChange() {
+    this._persistenceService.updateLastLocalSyncModelChange();
   }
 }

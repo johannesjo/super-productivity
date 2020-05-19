@@ -56,6 +56,6 @@ export interface AppDataForProjects {
 }
 
 export interface AppDataComplete extends AppBaseData, AppDataForProjects {
-  lastActiveTime: number;
+  lastLocalSyncModelChange: number;
 }
 

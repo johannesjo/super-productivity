@@ -38,7 +38,7 @@ export class BookmarkEffects {
 
   private _saveToLs(currentProjectId: string, bookmarkState: BookmarkState) {
     if (currentProjectId) {
-      this._persistenceService.saveLastActive();
+      this._persistenceService.updateLastLocalSyncModelChange();
       this._persistenceService.bookmark.save(currentProjectId, bookmarkState);
     } else {
       throw new Error('No current project id');
