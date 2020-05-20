@@ -20,7 +20,16 @@ import {BookmarkService} from '../../bookmark/bookmark.service';
 import {NoteService} from '../../note/note.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import {AddTimeSpent, DeleteMainTasks, TaskActionTypes, UpdateTaskTags} from '../../tasks/store/task.actions';
+import {
+  AddTask,
+  AddTimeSpent,
+  DeleteMainTasks,
+  DeleteTask,
+  MoveToArchive,
+  MoveToOtherProject,
+  TaskActionTypes,
+  UpdateTaskTags
+} from '../../tasks/store/task.actions';
 import {ReminderService} from '../../reminder/reminder.service';
 import {MetricService} from '../../metric/metric.service';
 import {ObstructionService} from '../../metric/obstruction/obstruction.service';
@@ -51,6 +60,7 @@ import {TaskArchive, TaskState} from '../../tasks/task.model';
 import {unique} from '../../../util/unique';
 import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 import {TODAY_TAG} from '../../tag/tag.const';
+import {EMPTY, of} from 'rxjs';
 
 @Injectable()
 export class ProjectEffects {
@@ -69,11 +79,6 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProjectOrder,
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
-
-        TaskActionTypes.AddTask,
-        TaskActionTypes.DeleteTask,
-        TaskActionTypes.MoveToOtherProject,
-        TaskActionTypes.MoveToArchive,
 
         moveTaskInBacklogList.type,
         moveTaskToBacklogList.type,
@@ -95,6 +100,36 @@ export class ProjectEffects {
       switchMap(() => this.saveToLs$),
     );
 
+  @Effect({dispatch: false})
+  updateProjectStorageConditionalTask$ = this._actions$.pipe(
+    ofType(
+      TaskActionTypes.AddTask,
+      TaskActionTypes.DeleteTask,
+      TaskActionTypes.MoveToOtherProject,
+      TaskActionTypes.MoveToArchive,
+    ),
+    switchMap((a: AddTask | DeleteTask | MoveToOtherProject | MoveToArchive) => {
+      let isChange = false;
+      switch (a.type) {
+        case TaskActionTypes.AddTask:
+          isChange = !!(a as AddTask).payload.task.projectId;
+          break;
+        case TaskActionTypes.DeleteTask:
+          isChange = !!(a as DeleteTask).payload.task.projectId;
+          break;
+        case TaskActionTypes.MoveToOtherProject:
+          isChange = !!(a as MoveToOtherProject).payload.task.projectId;
+          break;
+        case TaskActionTypes.MoveToArchive:
+          isChange = !!(a as MoveToArchive).payload.tasks.find(task => task.projectId);
+          break;
+      }
+      return isChange
+        ? of(a)
+        : EMPTY;
+    }),
+    switchMap(() => this.saveToLs$),
+  );
 
   @Effect({dispatch: false})
   updateProjectStorageConditional$ = this._actions$.pipe(
