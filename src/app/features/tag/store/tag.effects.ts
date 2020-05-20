@@ -95,7 +95,7 @@ export class TagEffects {
         ? of(a)
         : EMPTY;
     }),
-    switchMap(() => this.saveToLs$),
+    switchMap(() => this._saveToLs$),
   ), {dispatch: false});
 
   updateTagsStorageConditional$ = createEffect(() => this._actions$.pipe(
@@ -105,16 +105,8 @@ export class TagEffects {
       moveTaskDownInTodayList,
     ),
     filter((p) => p.workContextType === WorkContextType.TAG),
-    switchMap(() => this.saveToLs$),
+    switchMap((a) => this._saveToLs$(a)),
   ), {dispatch: false});
-
-
-  saveToLs$ = this._store$.pipe(
-    select(selectTagFeatureState),
-    take(1),
-    switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
-    tap(this._updateLastLocalSyncModelChange.bind(this)),
-  );
 
 
   @Effect({dispatch: false})
@@ -250,6 +242,17 @@ export class TagEffects {
     private _router: Router,
   ) {
   }
+
+
+  private _saveToLs$(action) {
+    return this._store$.pipe(
+      select(selectTagFeatureState),
+      take(1),
+      switchMap((tagState) => this._persistenceService.tag.saveState(tagState, false, action.type)),
+      tap(this._updateLastLocalSyncModelChange.bind(this)),
+    );
+  }
+
 
   private _updateLastLocalSyncModelChange() {
     this._persistenceService.updateLastLocalSyncModelChange();

@@ -22,7 +22,7 @@ export interface PersistenceBaseModel<T> {
 
   loadState(isSkipMigration?: boolean): Promise<T>;
 
-  saveState(state: T, isForce?: boolean): Promise<any>;
+  saveState(state: T, isForce?: boolean, actionName?: string): Promise<any>;
 }
 
 export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S> {

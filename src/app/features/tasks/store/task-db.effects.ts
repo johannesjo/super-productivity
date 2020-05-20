@@ -55,7 +55,7 @@ export class TaskDbEffects {
       withLatestFrom(
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(([, taskState]) => this._saveToLs(taskState)),
+      tap(([a, taskState]) => this._saveToLs(a.type, taskState)),
       tap(this._updateLastLocalSyncModelChange.bind(this)),
     );
 
@@ -68,7 +68,7 @@ export class TaskDbEffects {
       withLatestFrom(
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(([, taskState]) => this._saveToLs(taskState)),
+      tap(([a, taskState]) => this._saveToLs(a && (a as any).type, taskState)),
     );
 
   constructor(private _actions$: Actions,
@@ -89,8 +89,8 @@ export class TaskDbEffects {
     this._persistenceService.updateLastLocalSyncModelChange();
   }
 
-  private _saveToLs(taskState: TaskState) {
-    this._persistenceService.task.saveState(taskState);
+  private _saveToLs(actionName, taskState: TaskState) {
+    this._persistenceService.task.saveState(taskState, false, actionName);
   }
 }
 

@@ -60,6 +60,8 @@ import {environment} from '../../../environments/environment';
 import {checkFixEntityStateConsistency} from '../../util/check-fix-entity-state-consistency';
 import {SimpleCounter, SimpleCounterState} from '../../features/simple-counter/simple-counter.model';
 import {simpleCounterReducer} from '../../features/simple-counter/store/simple-counter.reducer';
+import * as Automerge from 'automerge';
+import {IS_ELECTRON} from '../../app.constants';
 
 
 @Injectable({
@@ -136,6 +138,7 @@ export class PersistenceService {
     'obstruction',
   );
   private _isBlockSaving = false;
+  private _automergeCache: any = {};
 
   constructor(
     private _snackService: SnackService,
@@ -242,7 +245,7 @@ export class PersistenceService {
   // -----------------------
   updateLastLocalSyncModelChange(date: number = Date.now()) {
     if (!environment || !environment.production) {
-      console.log('Save Last Local Sync Model Change', date);
+      // console.log('Save Last Local Sync Model Change', date);
     }
     localStorage.setItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE, date.toString());
   }
@@ -353,11 +356,11 @@ export class PersistenceService {
       //   }
       //   return data;
       // },
-      saveState: (data, isForce) => {
+      saveState: (data, isForce, actionName) => {
         if (data && data.ids && data.entities) {
           data = checkFixEntityStateConsistency(data, appDataKey);
         }
-        return this._saveToDb(lsKey, data, isForce);
+        return this._saveToDb(lsKey, data, isForce, actionName);
       },
     };
     if (!isSkipPush) {
@@ -454,11 +457,42 @@ export class PersistenceService {
   }
 
 
+  private _getActor(): string {
+    const n = window.navigator;
+    return `SPAct_${IS_ELECTRON ? 'electron' : 'browser'}_${n.platform}`;
+  }
+
   // DATA STORAGE INTERFACE
   // ---------------------
-  private async _saveToDb(key: string, data: any, isForce = false): Promise<any> {
+  private async _saveToDb(key: string, data: any, isForce = false, actionName = 'NOOOONE'): Promise<any> {
     if (!this._isBlockSaving || isForce === true) {
-      return this._databaseService.save(key, data);
+
+      if (actionName === 'NOOOONE') {
+        return;
+      }
+      console.log('----------------------------------------------------------------');
+      console.log(key, actionName, this._automergeCache[key]);
+      if (!this._automergeCache[key]) {
+        this._automergeCache[key] = Automerge.from(
+          data,
+          this._getActor(),
+        );
+        console.log('INIT IN SAVE', this._automergeCache[key]);
+      }
+      console.log('AFTER', this._automergeCache[key]);
+
+      const automergeData = Automerge.change(this._automergeCache[key], actionName, (doc) => {
+        Object.keys(doc).forEach(k => {
+          console.log(k);
+          doc[k] = data[k];
+        });
+      });
+      console.log(automergeData);
+      // console.log(Automerge.save(automergeData));
+      console.log(Automerge.getHistory(automergeData).map(state => [state.change.message]));
+
+
+      return this._databaseService.save(key, Automerge.save(automergeData));
     } else {
       console.warn('BLOCKED SAVING for ', key);
       return Promise.reject('Data import currently in progress. Saving disabled');
@@ -475,6 +509,18 @@ export class PersistenceService {
   }
 
   private async _loadFromDb(key: string): Promise<any> {
+    if (!this._automergeCache[key]) {
+      const data = await this._databaseService.load(key);
+      if (data) {
+        console.log('INIT IN LOAD', Automerge.load(data, this._getActor()));
+      }
+
+      this._automergeCache[key] = data
+        ? Automerge.load(data, this._getActor())
+        : undefined;
+      return this._automergeCache[key];
+    }
+
     // NOTE: we use undefined as null does not trigger default function arguments
     return await this._databaseService.load(key) || undefined;
   }
