@@ -462,39 +462,46 @@ export class PersistenceService {
     return `SPAct_${IS_ELECTRON ? 'electron' : 'browser'}_${n.platform}`;
   }
 
+  c = 0;
   // DATA STORAGE INTERFACE
   // ---------------------
-  private async _saveToDb(key: string, data: any, isForce = false, actionName = 'NOOOONE'): Promise<any> {
+  private async _saveToDb(dbKey: string, data: any, isForce = false, actionName = 'NOOOONE'): Promise<any> {
     if (!this._isBlockSaving || isForce === true) {
 
       if (actionName === 'NOOOONE') {
         return;
       }
       console.log('----------------------------------------------------------------');
-      console.log(key, actionName, this._automergeCache[key]);
-      if (!this._automergeCache[key]) {
-        this._automergeCache[key] = Automerge.from(
+      console.log(dbKey, actionName, this._automergeCache[dbKey]);
+      if (!this._automergeCache[dbKey]) {
+        this._automergeCache[dbKey] = Automerge.from(
           data,
-          this._getActor(),
+          {actorId: this._getActor()},
         );
-        console.log('INIT IN SAVE', this._automergeCache[key]);
+        console.log('INIT IN SAVE', this._automergeCache[dbKey]);
       }
-      console.log('AFTER', this._automergeCache[key]);
 
-      const automergeData = Automerge.change(this._automergeCache[key], actionName, (doc) => {
+      this._automergeCache[dbKey] = Automerge.change(this._automergeCache[dbKey], actionName, (doc) => {
         Object.keys(doc).forEach(k => {
-          console.log(k);
-          doc[k] = data[k];
+          if (k === 'ids') {
+            doc[k] = data[k];
+          } else if (k === 'entities') {
+            console.log('xxxx');
+            console.log(doc[k], data[k]);
+            doc[k] = {...data[k]};
+          } else {
+            // console.log(k);
+          }
         });
       });
-      console.log(automergeData);
-      // console.log(Automerge.save(automergeData));
-      console.log(Automerge.getHistory(automergeData).map(state => [state.change.message]));
+      console.log(this._automergeCache[dbKey]);
+      // console.log(Automerge.save(this._automergeCache[dbKey]));
+      console.log(Automerge.getHistory(this._automergeCache[dbKey]).map(state => [state.change.message]));
 
 
-      return this._databaseService.save(key, Automerge.save(automergeData));
+      return this._databaseService.save(dbKey, Automerge.save(this._automergeCache[dbKey]));
     } else {
-      console.warn('BLOCKED SAVING for ', key);
+      console.warn('BLOCKED SAVING for ', dbKey);
       return Promise.reject('Data import currently in progress. Saving disabled');
     }
   }
@@ -511,14 +518,18 @@ export class PersistenceService {
   private async _loadFromDb(key: string): Promise<any> {
     if (!this._automergeCache[key]) {
       const data = await this._databaseService.load(key);
-      if (data) {
-        console.log('INIT IN LOAD', Automerge.load(data, this._getActor()));
-      }
+      console.log(key);
 
-      this._automergeCache[key] = data
-        ? Automerge.load(data, this._getActor())
-        : undefined;
-      return this._automergeCache[key];
+      if (key !== 'TAG_STATE' && key !== 'TASKS_STATE') {
+        return data || undefined;
+      }
+      if (data) {
+        this._automergeCache[key] = Automerge.load(data, this._getActor());
+        console.log('INIT_IN_LOAD--', key, this._automergeCache[key]);
+        console.log(Automerge.getHistory(this._automergeCache[key]).map(state => [state.change.message]));
+        return this._automergeCache[key];
+      }
+      return undefined;
     }
 
     // NOTE: we use undefined as null does not trigger default function arguments

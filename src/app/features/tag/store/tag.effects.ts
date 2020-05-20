@@ -65,7 +65,7 @@ export class TagEffects {
       TaskActionTypes.DeleteMainTasks,
       TaskActionTypes.UpdateTaskTags,
     ),
-    switchMap(() => this.saveToLs$),
+    switchMap(() => this._saveToLs$),
   ), {dispatch: false});
 
   updateProjectStorageConditionalTask$ = createEffect(() => this._actions$.pipe(
