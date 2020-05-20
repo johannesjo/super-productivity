@@ -22,14 +22,8 @@ export interface TimeSpentOnDayCopy {
 }
 
 export interface TaskArchive extends EntityState<ArchiveTask> {
-  // quick access all tasks for a tag for worklog
-  // tagMap: {
-  //   [key: string]: string[]
-  // };
-  // // quick access all tasks for a project for worklog
-  // projectMap: {
-  //   [key: string]: string[]
-  // };
+  // additional entities state properties
+  [MODEL_VERSION_KEY]?: number;
 }
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
