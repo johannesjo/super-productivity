@@ -25,8 +25,8 @@ import {IssueProviderKey} from '../../features/issue/issue.model';
 import {projectReducer, ProjectState} from '../../features/project/store/project.reducer';
 import {ArchiveTask, Task, TaskArchive, TaskState} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
-import {bookmarkReducer, BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {noteReducer, NoteState} from '../../features/note/store/note.reducer';
+import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
+import {NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from './database.service';
@@ -48,9 +48,6 @@ import {Bookmark} from '../../features/bookmark/bookmark.model';
 import {Note} from '../../features/note/note.model';
 import {Action} from '@ngrx/store';
 import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
-import {metricReducer} from '../../features/metric/store/metric.reducer';
-import {improvementReducer} from '../../features/metric/improvement/store/improvement.reducer';
-import {obstructionReducer} from '../../features/metric/obstruction/store/obstruction.reducer';
 import {Tag, TagState} from '../../features/tag/tag.model';
 import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
@@ -121,27 +118,22 @@ export class PersistenceService {
   bookmark = this._cmProject<BookmarkState, Bookmark>(
     LS_BOOKMARK_STATE,
     'bookmark',
-    bookmarkReducer,
   );
   note = this._cmProject<NoteState, Note>(
     LS_NOTE_STATE,
     'note',
-    noteReducer,
   );
   metric = this._cmProject<MetricState, Metric>(
     LS_METRIC_STATE,
     'metric',
-    metricReducer,
   );
   improvement = this._cmProject<ImprovementState, Improvement>(
     LS_IMPROVEMENT_STATE,
     'improvement',
-    improvementReducer,
   );
   obstruction = this._cmProject<ObstructionState, Obstruction>(
     LS_OBSTRUCTION_STATE,
     'obstruction',
-    obstructionReducer,
   );
   private _isBlockSaving = false;
 
@@ -387,37 +379,11 @@ export class PersistenceService {
         const state = await model.loadState() as any;
         return state && state.entities && state.entities[id] || null;
       },
-      getByIds: async (ids: string[]): Promise<M[]> => {
-        const state = await model.loadState() as any;
-        if (state && state.entities) {
-          return ids
-            .map(id => state.entities[id])
-            // filter out broken entries
-            .filter((modelIN: M) => !!modelIN);
-        }
-        return null;
-      },
 
       // NOTE: side effects are not executed!!!
       execAction: async (action: Action): Promise<S> => {
         const state = await model.loadState();
         const newState = reducerFn(state, action);
-        await model.saveState(newState, false);
-        return newState;
-      },
-      // NOTE: side effects are not executed!!!
-      bulkUpdate: async (adjustFn: (model: M) => M): Promise<S> => {
-        const state = await model.loadState() as any;
-        const ids = state.ids as string[];
-        const newState = {
-          ...state,
-          entities: ids.reduce((acc, key) => {
-            return {
-              ...acc,
-              [key]: adjustFn(state.entity[key]),
-            };
-          }, {})
-        };
         await model.saveState(newState, false);
         return newState;
       },
@@ -431,7 +397,6 @@ export class PersistenceService {
   private _cmProject<S, M>(
     lsKey: string,
     appDataKey: keyof AppDataForProjects,
-    reducerFn: (state: S, action: Action) => S,
     migrateFn: (state: S, projectId: string) => S = (v) => v,
   ): PersistenceForProjectModel<S, M> {
     const model = {
@@ -439,72 +404,16 @@ export class PersistenceService {
       load: (projectId): Promise<S> => this._loadFromDb(this._makeProjectKey(projectId, lsKey)).then(v => migrateFn(v, projectId)),
       save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
       remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
-
-      // NOTE: side effects are not executed!!!
-      update: async (projectId: string, adjustFn: (sate: S) => S): Promise<S> => {
-        const state = await model.load(projectId);
-        const newState = adjustFn(state);
-        await model.save(projectId, newState, false);
-        return newState;
-      },
       ent: {
         getById: async (projectId: string, id: string): Promise<M> => {
           const state = await model.load(projectId) as any;
           return state && state.entities && state.entities[id] || null;
         },
-        getByIds: async (projectId: string, ids: string[]): Promise<M[]> => {
-          const state = await model.load(projectId) as any;
-          if (state && state.entities) {
-            return ids
-              .map(id => state.entities[id])
-              // filter out broken entries
-              .filter((modelIN: M) => !!modelIN);
-          }
-          return null;
-        },
-
-        // NOTE: side effects are not executed!!!
-        execAction: async (projectId: string, action: Action): Promise<S> => {
-          const state = await model.load(projectId);
-          const newState = reducerFn(state, action);
-          await model.save(projectId, newState, false);
-          return newState;
-        },
-        // NOTE: side effects are not executed!!!
-        bulkUpdate: async (projectId: string, adjustFn: (model: M) => M): Promise<S> => {
-          const state = await model.load(projectId) as any;
-          const ids = state.ids as string[];
-          const newState = {
-            ...state,
-            entities: ids.reduce((acc, key) => {
-              return {
-                ...acc,
-                [key]: adjustFn(state.entity[key]),
-              };
-            }, {})
-          };
-          await model.save(projectId, newState, false);
-          return newState;
-        },
       },
-      entAllProjects: {
-        // NOTE: side effects are not executed!!!
-        bulkUpdate: async (adjustFn: (model: M) => M): Promise<any> => {
-          const projectIds = await this._getProjectIds();
-          return Promise.all(projectIds.map(async (projectId) => {
-            return model.ent.bulkUpdate(projectId, adjustFn);
-          }));
-        }
-      }
     };
 
     this._projectModels.push(model);
     return model;
-  }
-
-  private async _getProjectIds(): Promise<string[]> {
-    const projectState = await this.project.loadState();
-    return projectState.ids as string[];
   }
 
   private async _loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {

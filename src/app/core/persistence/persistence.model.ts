@@ -28,36 +28,12 @@ export interface PersistenceBaseModel<T> {
 export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S> {
   getById(id: string): Promise<M>;
 
-  // @deprecated TODO can be removed
-  getByIds(id: string[]): Promise<M[]>;
-
-  // NOTE: side effects are not executed!!!
-  // @deprecated TODO can be removed
-  bulkUpdate(adjustFn: (model: M) => M): Promise<S>;
-
   // NOTE: side effects are not executed!!!
   execAction(action: Action): Promise<S>;
 }
 
 export interface EntityModelHelpers<S, M> {
   getById(projectId: string, id: string): Promise<M>;
-
-  // @deprecated TODO can be removed
-  getByIds(projectId: string, id: string[]): Promise<M[]>;
-
-  // NOTE: side effects are not executed!!!
-  // @deprecated TODO can be removed
-  bulkUpdate(projectId: string, adjustFn: (model: M) => M): Promise<S>;
-
-  // NOTE: side effects are not executed!!!
-  // @deprecated TODO can be removed
-  execAction(projectId: string, action: Action): Promise<S>;
-}
-
-export interface EntityModelHelpersForAllProjects<S, M> {
-  // NOTE: side effects are not executed!!!
-  // @deprecated TODO can be removed
-  bulkUpdate(adjustFn: (model: M) => M): Promise<any>;
 }
 
 export interface PersistenceForProjectModel<S, M> {
@@ -65,17 +41,10 @@ export interface PersistenceForProjectModel<S, M> {
 
   ent: EntityModelHelpers<S, M>;
 
-  // @deprecated TODO can be removed
-  entAllProjects: EntityModelHelpersForAllProjects<S, M>;
-
   load(projectId: string): Promise<S>;
 
   save(projectId: string, state: S, isForce?: boolean): Promise<any>;
 
-  // NOTE: side effects are not executed!!!
-  // @deprecated TODO can be removed
-  update(projectId: string, adjustFn: (state: S) => S): Promise<S>;
-
-  // @deprecated TODO can be removed
+  /* @deprecated */
   remove(projectId: string): Promise<any>;
 }
