@@ -1,5 +1,5 @@
 'use strict';
-import {App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker} from 'electron';
+import {App, app, globalShortcut, ipcMain, powerMonitor} from 'electron';
 import * as electronDl from 'electron-dl';
 
 import {info} from 'electron-log';
@@ -68,9 +68,13 @@ appIN.on('second-instance', () => {
   }
 });
 
-// make it a single instance by closing other instances but allow for dev mode
-if (!IS_MAC && !appIN.requestSingleInstanceLock() && !IS_DEV) {
-  quitAppNow();
+if (!IS_MAC) {
+  // make it a single instance by closing other instances but allow for dev mode
+  // because of https://github.com/electron/electron/issues/14094
+  const isLockObtained = appIN.requestSingleInstanceLock();
+  if (isLockObtained && !IS_DEV) {
+    quitAppNow();
+  }
 }
 
 // Allow invalid certificates for jira requests
