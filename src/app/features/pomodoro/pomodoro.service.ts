@@ -145,8 +145,8 @@ export class PomodoroService {
     this._store$.dispatch(new StopPomodoro());
   }
 
-  finishPomodoroSession(isDontResume = false) {
-    this._store$.dispatch(new FinishPomodoroSession({isDontResume}));
+  finishPomodoroSession() {
+    this._store$.dispatch(new FinishPomodoroSession());
   }
 
   // NON STORE ACTIONS

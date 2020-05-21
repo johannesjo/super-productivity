@@ -66,7 +66,7 @@ export class PomodoroEffects {
     ),
     filter(isEnabled),
     filter(([action, cfg, isBreak, currentTaskId]: [FinishPomodoroSession, PomodoroConfig, boolean, string]) =>
-      (!isBreak && !currentTaskId && !action.payload.isDontResume)
+      (!isBreak && !currentTaskId)
     ),
     mapTo(new ToggleStart()),
   );

@@ -24,9 +24,6 @@ export class StopPomodoro implements Action {
 
 export class FinishPomodoroSession implements Action {
   readonly type = PomodoroActionTypes.FinishPomodoroSession;
-
-  constructor(public payload: { isDontResume: boolean; }) {
-  }
 }
 
 export type PomodoroActions

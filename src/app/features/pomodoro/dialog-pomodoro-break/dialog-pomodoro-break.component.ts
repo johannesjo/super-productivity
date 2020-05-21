@@ -47,9 +47,9 @@ export class DialogPomodoroBreakComponent {
     this._matDialogRef.close(null);
   }
 
-  nextSession(isDontResume = false) {
+  nextSession() {
     this.isStopCurrentTime$.next(true);
-    this.pomodoroService.finishPomodoroSession(isDontResume);
+    this.pomodoroService.finishPomodoroSession();
     this.close();
   }
 }
