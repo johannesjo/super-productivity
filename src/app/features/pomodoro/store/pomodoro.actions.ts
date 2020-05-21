@@ -5,6 +5,7 @@ export enum PomodoroActionTypes {
   PausePomodoro = '[Pomodoro] Pause Pomodoro',
   StopPomodoro = '[Pomodoro] Stop Pomodoro',
   FinishPomodoroSession = '[Pomodoro] Finish Pomodoro Session',
+  SkipPomodoroBreak = '[Pomodoro] Skip Break',
 }
 
 export class StartPomodoro implements Action {
@@ -26,8 +27,14 @@ export class FinishPomodoroSession implements Action {
   readonly type = PomodoroActionTypes.FinishPomodoroSession;
 }
 
+// currently only used to notify simple counters
+export class SkipPomodoroBreak implements Action {
+  readonly type = PomodoroActionTypes.SkipPomodoroBreak;
+}
+
 export type PomodoroActions
   = StartPomodoro
   | PausePomodoro
   | StopPomodoro
+  | SkipPomodoroBreak
   | FinishPomodoroSession;

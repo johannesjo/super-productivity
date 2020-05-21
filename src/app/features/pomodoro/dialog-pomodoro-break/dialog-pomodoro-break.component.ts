@@ -47,9 +47,13 @@ export class DialogPomodoroBreakComponent {
     this._matDialogRef.close(null);
   }
 
-  nextSession() {
+  nextSession(isSkipBreak = false) {
     this.isStopCurrentTime$.next(true);
-    this.pomodoroService.finishPomodoroSession();
+    if (isSkipBreak) {
+      this.pomodoroService.skipBreak();
+    } else {
+      this.pomodoroService.finishPomodoroSession();
+    }
     this.close();
   }
 }

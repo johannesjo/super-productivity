@@ -9,6 +9,7 @@ import {
   FinishPomodoroSession,
   PausePomodoro,
   PomodoroActionTypes,
+  SkipPomodoroBreak,
   StartPomodoro,
   StopPomodoro
 } from './store/pomodoro.actions';
@@ -68,7 +69,7 @@ export class PomodoroService {
       this.cfg$,
     ),
     map(([trigger, isLong, isShort, isBreak, cfg]) => {
-      // cfg = {...cfg};
+      cfg = {...cfg};
       // cfg.duration = 5000;
       // cfg.breakDuration = 15000;
       // cfg.longerBreakDuration = 20000;
@@ -147,6 +148,10 @@ export class PomodoroService {
 
   finishPomodoroSession() {
     this._store$.dispatch(new FinishPomodoroSession());
+  }
+
+  skipBreak() {
+    this._store$.dispatch(new SkipPomodoroBreak());
   }
 
   // NON STORE ACTIONS

@@ -20,7 +20,7 @@
     {{T.G.CLOSE|translate}}
   </button>
 
-  <button (click)="nextSession()"
+  <button (click)="nextSession(true)"
           *ngIf="!(isBreakDone$|async)"
           color="primary"
           mat-stroked-button>

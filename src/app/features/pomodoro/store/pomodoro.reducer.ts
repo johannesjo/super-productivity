@@ -47,6 +47,7 @@ export function pomodoroReducer(state = initialPomodoroState, action: PomodoroAc
       };
     }
 
+    case  PomodoroActionTypes.SkipPomodoroBreak:
     case  PomodoroActionTypes.FinishPomodoroSession: {
       return {
         ...state,

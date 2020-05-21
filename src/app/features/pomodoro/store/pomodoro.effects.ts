@@ -9,6 +9,7 @@ import {
   PausePomodoro,
   PomodoroActions,
   PomodoroActionTypes,
+  SkipPomodoroBreak,
   StartPomodoro
 } from './pomodoro.actions';
 import {MatDialog} from '@angular/material/dialog';
@@ -58,7 +59,10 @@ export class PomodoroEffects {
 
   @Effect()
   autoStartNextOnSessionStartIfNotAlready$ = this._actions$.pipe(
-    ofType(PomodoroActionTypes.FinishPomodoroSession),
+    ofType(
+      PomodoroActionTypes.FinishPomodoroSession,
+      PomodoroActionTypes.SkipPomodoroBreak,
+    ),
     withLatestFrom(
       this._pomodoroService.cfg$,
       this._pomodoroService.isBreak$,
@@ -95,14 +99,16 @@ export class PomodoroEffects {
     ofType(
       PomodoroActionTypes.PausePomodoro,
       PomodoroActionTypes.FinishPomodoroSession,
+      PomodoroActionTypes.SkipPomodoroBreak,
     ),
     withLatestFrom(
       this._pomodoroService.cfg$,
       this._pomodoroService.isBreak$,
     ),
     filter(isEnabled),
-    filter(([action, cfg, isBreak]: [FinishPomodoroSession | PausePomodoro, PomodoroConfig, boolean]) => {
-      return (action.type === PomodoroActionTypes.FinishPomodoroSession
+    filter(([action, cfg, isBreak]: [FinishPomodoroSession | PausePomodoro | SkipPomodoroBreak
+      , PomodoroConfig, boolean]) => {
+      return ((action.type === PomodoroActionTypes.FinishPomodoroSession || action.type === PomodoroActionTypes.SkipPomodoroBreak)
         && (cfg.isPlaySound && isBreak) || (cfg.isPlaySoundAfterBreak && !cfg.isManualContinue && !isBreak))
         || (action.type === PomodoroActionTypes.PausePomodoro && action.payload.isBreakEndPause);
     }),
@@ -136,7 +142,10 @@ export class PomodoroEffects {
 
   @Effect({dispatch: false})
   sessionStartSnack$ = this._actions$.pipe(
-    ofType(PomodoroActionTypes.FinishPomodoroSession),
+    ofType(
+      PomodoroActionTypes.FinishPomodoroSession,
+      PomodoroActionTypes.SkipPomodoroBreak,
+    ),
     withLatestFrom(
       this._pomodoroService.isBreak$,
       this._pomodoroService.isManualPause$,
