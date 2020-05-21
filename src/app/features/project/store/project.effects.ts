@@ -27,6 +27,7 @@ import {
   DeleteTask,
   MoveToArchive,
   MoveToOtherProject,
+  RestoreTask,
   TaskActionTypes,
   UpdateTaskTags
 } from '../../tasks/store/task.actions';
@@ -106,9 +107,10 @@ export class ProjectEffects {
       TaskActionTypes.AddTask,
       TaskActionTypes.DeleteTask,
       TaskActionTypes.MoveToOtherProject,
+      TaskActionTypes.RestoreTask,
       TaskActionTypes.MoveToArchive,
     ),
-    switchMap((a: AddTask | DeleteTask | MoveToOtherProject | MoveToArchive) => {
+    switchMap((a: AddTask | DeleteTask | MoveToOtherProject | MoveToArchive | RestoreTask) => {
       let isChange = false;
       switch (a.type) {
         case TaskActionTypes.AddTask:
@@ -122,6 +124,9 @@ export class ProjectEffects {
           break;
         case TaskActionTypes.MoveToArchive:
           isChange = !!(a as MoveToArchive).payload.tasks.find(task => task.projectId);
+          break;
+        case TaskActionTypes.RestoreTask:
+          isChange = !!(a as RestoreTask).payload.task.projectId;
           break;
       }
       return isChange
