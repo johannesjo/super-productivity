@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {SnackService} from '../snack/snack.service';
-import {T} from '../../t.const';
 import {DBSchema, openDB} from 'idb';
 import {IDBPDatabase} from 'idb/build/esm/entry';
 import {BehaviorSubject, Observable} from 'rxjs';
@@ -35,59 +34,48 @@ export class DatabaseService {
   }
 
   async load(key: string): Promise<any> {
-    try {
-      await this._afterReady();
-      return this.db.get(DB_MAIN_NAME, key);
-    } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_LOAD});
-    }
+    await this._afterReady();
+    return await this.db.get(DB_MAIN_NAME, key);
   }
 
   async save(key: string, data: any): Promise<any> {
-    try {
-      await this._afterReady();
-      return this.db.put(DB_MAIN_NAME, data, key);
-    } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_SAVE});
-    }
+    await this._afterReady();
+    return await this.db.put(DB_MAIN_NAME, data, key);
   }
 
   async remove(key: string): Promise<any> {
-    try {
-      await this._afterReady();
-      return this.db.delete(DB_MAIN_NAME, key);
-    } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_DELETE});
-    }
+    await this._afterReady();
+    return await this.db.delete(DB_MAIN_NAME, key);
   }
 
   async clearDatabase(): Promise<any> {
-    try {
-      await this._afterReady();
-      return this.db.clear(DB_MAIN_NAME);
-    } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_CLEAR});
-    }
+    await this._afterReady();
+    return await this.db.clear(DB_MAIN_NAME);
   }
 
   private async _init() {
-    const that = this;
-    this.db = await openDB<MyDb>(DB_NAME, VERSION, {
-      upgrade(db, oldVersion, newVersion, transaction) {
-        // …
-        console.log('IDB UPGRADE', oldVersion, newVersion);
-        db.createObjectStore(DB_MAIN_NAME);
-      },
-      blocked() {
-        alert('IDB BLOCKED');
-      },
-      blocking() {
-        alert('IDB BLOCKING');
-      },
-      terminated() {
-        alert('IDB TERMINATED');
-      },
-    });
+    try {
+      this.db = await openDB<MyDb>(DB_NAME, VERSION, {
+        upgrade(db, oldVersion, newVersion, transaction) {
+          // …
+          console.log('IDB UPGRADE', oldVersion, newVersion);
+          db.createObjectStore(DB_MAIN_NAME);
+        },
+        blocked() {
+          alert('IDB BLOCKED');
+        },
+        blocking() {
+          alert('IDB BLOCKING');
+        },
+        terminated() {
+          alert('IDB TERMINATED');
+        },
+      });
+    } catch (e) {
+      console.error('Database initialization failed');
+      throw new Error(e);
+    }
+
     this.isReady$.next(true);
     return this.db;
   }

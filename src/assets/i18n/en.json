@@ -916,10 +916,6 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
     "ERR_COMPRESSION": "Error for compression interface",
-    "ERR_DB_CLEAR": "Error while clearing the database",
-    "ERR_DB_DELETE": "Error while deleting data",
-    "ERR_DB_LOAD": "Error while loading data",
-    "ERR_DB_SAVE": "Error while saving data",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "RUNNING_X": "Running \"{{str}}\"."
   },
