@@ -106,8 +106,6 @@ export class ProjectService {
     private readonly _store$: Store<any>,
     private readonly _actions$: Actions,
   ) {
-    this.isRelatedDataLoadedForCurrentProject$.subscribe((v) => console.log('isRelatedDataLoadedForCurrentProject$', v));
-
   }
 
   archive(projectId: string) {
