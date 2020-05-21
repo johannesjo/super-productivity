@@ -17,10 +17,20 @@ import {
   updateWorkStartForTag,
   upsertTag
 } from './tag.actions';
-import {AddTimeSpent, DeleteMainTasks, RemoveTagsForAllTasks, TaskActionTypes} from '../../tasks/store/task.actions';
+import {
+  AddTask,
+  AddTimeSpent,
+  DeleteMainTasks,
+  DeleteTask,
+  MoveToArchive,
+  MoveToOtherProject,
+  RemoveTagsForAllTasks,
+  RestoreTask,
+  TaskActionTypes
+} from '../../tasks/store/task.actions';
 import {TagService} from '../tag.service';
 import {TaskService} from '../../tasks/task.service';
-import {of} from 'rxjs';
+import {EMPTY, of} from 'rxjs';
 import {Task, TaskArchive} from '../../tasks/task.model';
 import {Tag} from '../tag.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
@@ -52,14 +62,39 @@ export class TagEffects {
       updateWorkEndForTag,
       addToBreakTimeForTag,
 
-      TaskActionTypes.AddTask,
-      TaskActionTypes.DeleteTask,
-      TaskActionTypes.MoveToOtherProject,
-      TaskActionTypes.MoveToArchive,
       TaskActionTypes.DeleteMainTasks,
-      TaskActionTypes.RestoreTask,
       TaskActionTypes.UpdateTaskTags,
     ),
+    switchMap(() => this.saveToLs$),
+  ), {dispatch: false});
+
+  updateProjectStorageConditionalTask$ = createEffect(() => this._actions$.pipe(
+    ofType(
+      TaskActionTypes.AddTask,
+      TaskActionTypes.DeleteTask,
+      TaskActionTypes.RestoreTask,
+      TaskActionTypes.MoveToArchive,
+    ),
+    switchMap((a: AddTask | DeleteTask | MoveToOtherProject | MoveToArchive | RestoreTask) => {
+      let isChange = false;
+      switch (a.type) {
+        case TaskActionTypes.AddTask:
+          isChange = !!(a as AddTask).payload.task.tagIds.length;
+          break;
+        case TaskActionTypes.DeleteTask:
+          isChange = !!(a as DeleteTask).payload.task.tagIds.length;
+          break;
+        case TaskActionTypes.MoveToArchive:
+          isChange = !!(a as MoveToArchive).payload.tasks.find(task => task.tagIds.length);
+          break;
+        case TaskActionTypes.RestoreTask:
+          isChange = !!(a as RestoreTask).payload.task.tagIds.length;
+          break;
+      }
+      return isChange
+        ? of(a)
+        : EMPTY;
+    }),
     switchMap(() => this.saveToLs$),
   ), {dispatch: false});
 
