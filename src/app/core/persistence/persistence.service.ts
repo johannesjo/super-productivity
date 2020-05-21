@@ -344,6 +344,7 @@ export class PersistenceService {
     lsKey: string,
     appDataKey: keyof AppBaseData,
     migrateFn: (state: T) => T = (v) => v,
+    isSkipPush = false,
   ): PersistenceBaseModel<T> {
     const model = {
       appDataKey,
@@ -367,8 +368,9 @@ export class PersistenceService {
         return this._saveToDb(lsKey, data, isForce);
       },
     };
-
-    this._baseModels.push(model);
+    if (!isSkipPush) {
+      this._baseModels.push(model);
+    }
     return model;
   }
 
@@ -379,7 +381,7 @@ export class PersistenceService {
     migrateFn: (state: S) => S = (v) => v,
   ): PersistenceBaseEntityModel<S, M> {
     const model = {
-      ...this._cmBase(lsKey, appDataKey, migrateFn),
+      ...this._cmBase(lsKey, appDataKey, migrateFn, true),
 
       getById: async (id: string): Promise<M> => {
         const state = await model.loadState() as any;
