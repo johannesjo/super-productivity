@@ -31,7 +31,7 @@ import {Reminder} from '../../features/reminder/reminder.model';
 import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from './database.service';
 import {issueProviderKeys} from '../../features/issue/issue.const';
-import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
+import {DEFAULT_PROJECT, DEFAULT_PROJECT_ID, FIRST_PROJECT} from '../../features/project/project.const';
 import {
   ExportedProject,
   Project,
@@ -53,7 +53,7 @@ import {migrateProjectState} from '../../features/project/migrate-projects-state
 import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
 import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
 import {WorkContextState} from '../../features/work-context/work-context.model';
-import {taskReducer} from '../../features/tasks/store/task.reducer';
+import {initialTaskState, taskReducer} from '../../features/tasks/store/task.reducer';
 import {tagReducer} from '../../features/tag/store/tag.reducer';
 import {migrateTaskRepeatCfgState} from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
 import {environment} from '../../../environments/environment';
@@ -61,7 +61,11 @@ import {checkFixEntityStateConsistency} from '../../util/check-fix-entity-state-
 import {SimpleCounter, SimpleCounterState} from '../../features/simple-counter/simple-counter.model';
 import {simpleCounterReducer} from '../../features/simple-counter/store/simple-counter.reducer';
 import * as Automerge from 'automerge';
-import {IS_ELECTRON} from '../../app.constants';
+import {Doc} from 'automerge';
+import {IS_ELECTRON, MODEL_VERSION_KEY} from '../../app.constants';
+import {createEmptyEntity} from '../../util/create-empty-entity';
+import {DEFAULT_GLOBAL_CONFIG} from '../../features/config/default-global-config.const';
+import {TODAY_TAG} from '../../features/tag/tag.const';
 
 
 @Injectable({
@@ -139,6 +143,7 @@ export class PersistenceService {
   );
   private _isBlockSaving = false;
   private _automergeCache: any = {};
+  private _inMemory: Doc<AppDataComplete>;
 
   constructor(
     private _snackService: SnackService,
@@ -462,41 +467,55 @@ export class PersistenceService {
     return `SPAct_${IS_ELECTRON ? 'electron' : 'browser'}_${n.platform}`;
   }
 
-  c = 0;
+  private async _loadCompleteNew(): Promise<Doc<AppDataComplete>> {
+    const db = await this._databaseService.load('A');
+    console.log(db);
+    // const db = localStorage.getItem('A');
+
+
+    return db
+      ? Automerge.load(db)
+      : Automerge.from({
+        task: initialTaskState,
+        tag: {ids: [TODAY_TAG.id], entities: {[TODAY_TAG.id]: TODAY_TAG}},
+        taskArchive: createEmptyEntity(),
+        // project: {...createEmptyEntity(), [MODEL_VERSION_KEY]: 4},
+        project: {ids: [FIRST_PROJECT.id], entities: {[FIRST_PROJECT.id]: FIRST_PROJECT}, [MODEL_VERSION_KEY]: 4},
+        simpleCounter: createEmptyEntity(),
+        globalConfig: DEFAULT_GLOBAL_CONFIG,
+        archivedProjects: {},
+        reminders: [],
+      } as AppDataComplete);
+  }
+
+
+  private async _saveCompleteNew(prop: keyof AppDataComplete, newDataIn: any, actionName: string) {
+    const old = this._inMemory || await this._loadCompleteNew();
+    this._inMemory = Automerge.change(old, actionName, (doc) => {
+      console.log(prop, actionName, newDataIn);
+      doc[prop] = newDataIn;
+    });
+    console.log(Automerge.getHistory(this._inMemory).map(state => [state.change.message]));
+    return this._databaseService.save('A', Automerge.save(this._inMemory));
+    // localStorage.setItem('A', Automerge.save(this._inMemory));
+  }
+
   // DATA STORAGE INTERFACE
   // ---------------------
   private async _saveToDb(dbKey: string, data: any, isForce = false, actionName = 'NOOOONE'): Promise<any> {
     if (!this._isBlockSaving || isForce === true) {
+      const props: { [key: string]: keyof AppDataComplete } = {
+        [LS_REMINDER]: 'reminders',
+        [LS_TASK_ARCHIVE]: 'taskArchive',
+        [LS_TASK_STATE]: 'task',
+        [LS_TASK_REPEAT_CFG_STATE]: 'taskRepeatCfg',
+        [LS_PROJECT_META_LIST]: 'project',
+        [LS_TAG_STATE]: 'tag',
+        [LS_SIMPLE_COUNTER_STATE]: 'simpleCounter',
+      };
+      const prop = props[dbKey];
+      return this._saveCompleteNew(prop, data, actionName);
 
-      if (actionName === 'NOOOONE') {
-        return;
-      }
-      console.log('----------------------------------------------------------------');
-      console.log(dbKey, actionName, this._automergeCache[dbKey]);
-      if (!this._automergeCache[dbKey]) {
-        this._automergeCache[dbKey] = Automerge.from(data, this._getActor());
-        console.log('INIT IN SAVE', this._automergeCache[dbKey]);
-      }
-
-      this._automergeCache[dbKey] = Automerge.change(this._automergeCache[dbKey], actionName, (doc) => {
-        Object.keys(doc).forEach(k => {
-          if (k === 'ids') {
-            doc[k] = data[k];
-          } else if (k === 'entities') {
-            console.log('xxxx');
-            console.log(doc[k], data[k]);
-            doc[k] = {...data[k]};
-          } else {
-            // console.log(k);
-          }
-        });
-      });
-      console.log(this._automergeCache[dbKey]);
-      // console.log(Automerge.save(this._automergeCache[dbKey]));
-      console.log(Automerge.getHistory(this._automergeCache[dbKey]).map(state => [state.change.message]));
-
-
-      return this._databaseService.save(dbKey, Automerge.save(this._automergeCache[dbKey]));
     } else {
       console.warn('BLOCKED SAVING for ', dbKey);
       return Promise.reject('Data import currently in progress. Saving disabled');
@@ -513,28 +532,17 @@ export class PersistenceService {
   }
 
   private async _loadFromDb(key: string): Promise<any> {
-    if (!this._automergeCache[key]) {
-      const data = await this._databaseService.load(key);
-
-      if ((key !== 'TAG_STATE' && key !== 'TASKS_STATE')) {
-        return data || undefined;
-      }
-      console.log(key, data);
-
-      if (!data) {
-        return undefined;
-      } else if (typeof data === 'string') {
-        this._automergeCache[key] = Automerge.load(data, this._getActor());
-        console.log('INIT_IN_LOAD--', key, this._automergeCache[key]);
-        console.log(Automerge.getHistory(this._automergeCache[key]).map(state => [state.change.message]));
-        return this._automergeCache[key];
-      } else {
-        this._automergeCache[key] = Automerge.from(data, this._getActor());
-
-      }
-    }
-
-    // NOTE: we use undefined as null does not trigger default function arguments
-    return await this._databaseService.load(key) || undefined;
+    const props: { [key: string]: keyof AppDataComplete } = {
+      [LS_REMINDER]: 'reminders',
+      [LS_TASK_ARCHIVE]: 'taskArchive',
+      [LS_TASK_STATE]: 'task',
+      [LS_TASK_REPEAT_CFG_STATE]: 'taskRepeatCfg',
+      [LS_PROJECT_META_LIST]: 'project',
+      [LS_TAG_STATE]: 'tag',
+      [LS_SIMPLE_COUNTER_STATE]: 'simpleCounter',
+    };
+    const prop = props[key];
+    const all = await this._loadCompleteNew();
+    return all[prop];
   }
 }

@@ -248,7 +248,7 @@ export class TagEffects {
     return this._store$.pipe(
       select(selectTagFeatureState),
       take(1),
-      switchMap((tagState) => this._persistenceService.tag.saveState(tagState, false, action.type)),
+      switchMap((tagState) => this._persistenceService.tag.saveState(tagState, false, 'TAG' + action.type)),
       tap(this._updateLastLocalSyncModelChange.bind(this)),
     );
   }
