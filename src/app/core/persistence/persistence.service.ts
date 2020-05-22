@@ -474,10 +474,7 @@ export class PersistenceService {
       console.log('----------------------------------------------------------------');
       console.log(dbKey, actionName, this._automergeCache[dbKey]);
       if (!this._automergeCache[dbKey]) {
-        this._automergeCache[dbKey] = Automerge.from(
-          data,
-          {actorId: this._getActor()},
-        );
+        this._automergeCache[dbKey] = Automerge.from(data, this._getActor());
         console.log('INIT IN SAVE', this._automergeCache[dbKey]);
       }
 
@@ -518,18 +515,23 @@ export class PersistenceService {
   private async _loadFromDb(key: string): Promise<any> {
     if (!this._automergeCache[key]) {
       const data = await this._databaseService.load(key);
-      console.log(key);
 
-      if (key !== 'TAG_STATE' && key !== 'TASKS_STATE') {
+      if ((key !== 'TAG_STATE' && key !== 'TASKS_STATE')) {
         return data || undefined;
       }
-      if (data) {
+      console.log(key, data);
+
+      if (!data) {
+        return undefined;
+      } else if (typeof data === 'string') {
         this._automergeCache[key] = Automerge.load(data, this._getActor());
         console.log('INIT_IN_LOAD--', key, this._automergeCache[key]);
         console.log(Automerge.getHistory(this._automergeCache[key]).map(state => [state.change.message]));
         return this._automergeCache[key];
+      } else {
+        this._automergeCache[key] = Automerge.from(data, this._getActor());
+
       }
-      return undefined;
     }
 
     // NOTE: we use undefined as null does not trigger default function arguments

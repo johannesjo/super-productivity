@@ -121,6 +121,7 @@
     "all-contributors-cli": "^6.8.0",
     "angular-material-css-vars": "^0.3.7",
     "angular2-promise-buttons": "latest",
+    "automerge": "^0.14.0",
     "chart.js": "^2.8.0",
     "clipboard": "^2.0.1",
     "codelyzer": "^5.1.2",
