@@ -66,6 +66,7 @@ import {IS_ELECTRON, MODEL_VERSION_KEY} from '../../app.constants';
 import {createEmptyEntity} from '../../util/create-empty-entity';
 import {DEFAULT_GLOBAL_CONFIG} from '../../features/config/default-global-config.const';
 import {TODAY_TAG} from '../../features/tag/tag.const';
+import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
 
 
 @Injectable({
@@ -469,9 +470,8 @@ export class PersistenceService {
 
   private async _loadCompleteNew(): Promise<Doc<AppDataComplete>> {
     const db = await this._databaseService.load('A');
-    console.log(db);
+    // console.log(db);
     // const db = localStorage.getItem('A');
-
 
     return db
       ? Automerge.load(db)
@@ -492,8 +492,8 @@ export class PersistenceService {
   private async _saveCompleteNew(prop: keyof AppDataComplete, newDataIn: any, actionName: string) {
     const old = this._inMemory || await this._loadCompleteNew();
     this._inMemory = Automerge.change(old, actionName, (doc) => {
-      console.log(prop, actionName, newDataIn);
-      doc[prop] = newDataIn;
+      // console.log(prop, actionName, newDataIn);
+      doc[prop] = dirtyDeepCopy(newDataIn);
     });
     console.log(Automerge.getHistory(this._inMemory).map(state => [state.change.message]));
     return this._databaseService.save('A', Automerge.save(this._inMemory));
