@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -41,6 +43,16 @@ public class FullscreenActivity extends AppCompatActivity {
             // init web view
             wv = (WebView) findViewById(R.id.webview);
 
+            wv.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    // TODO check if url is blockstack redirect url
+                    //view.loadUrl(url);
+                    System.out.println("hello");
+                    return false;
+                }
+            });
+
             wv.setWebChromeClient(new WebChromeClient());
             wv.clearCache(true);
             wv.clearHistory();
@@ -52,6 +64,7 @@ public class FullscreenActivity extends AppCompatActivity {
             wSettings.setLoadsImagesAutomatically(true);
             wSettings.setLoadWithOverviewMode(true);
             wSettings.setDatabaseEnabled(true);
+
 
             // allow google login
             // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
@@ -68,8 +81,9 @@ public class FullscreenActivity extends AppCompatActivity {
 
             // needs to come last for some settings to take effect
             if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
-//            wv.loadUrl("http://10.0.2.2:4200");
-                wv.loadUrl("https://app.super-productivity.com");
+                wv.loadUrl("http://10.0.2.2:4200");
+//                wv.loadUrl("https://test-app.super-productivity.com");
+//                wv.loadUrl("https://app.super-productivity.com");
             } else {
                 wv.loadUrl("https://app.super-productivity.com");
             }
