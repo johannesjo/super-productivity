@@ -130,7 +130,7 @@
     "debounce-fn": "^4.0.0",
     "electron": "^8.3.0",
     "electron-builder": "^22.6.1",
-    "electron-notarize": "^0.2.1",
+    "electron-notarize": "^0.3.0",
     "electron-reload": "^1.2.5",
     "file-saver": "^2.0.2",
     "hammerjs": "^2.0.8",
