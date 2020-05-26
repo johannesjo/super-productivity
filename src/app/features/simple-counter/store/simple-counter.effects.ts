@@ -14,15 +14,17 @@ import {
   updateSimpleCounter,
   upsertSimpleCounter
 } from './simple-counter.actions';
-import {map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {delay, filter, map, mapTo, mergeMap, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {selectSimpleCounterFeatureState} from './simple-counter.reducer';
 import {SimpleCounterState, SimpleCounterType} from '../simple-counter.model';
 import {TimeTrackingService} from '../../time-tracking/time-tracking.service';
 import {SimpleCounterService} from '../simple-counter.service';
-import {EMPTY} from 'rxjs';
+import {EMPTY, of} from 'rxjs';
 import {SIMPLE_COUNTER_TRIGGER_ACTIONS} from '../simple-counter.const';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {ImexMetaService} from '../../../imex/imex-meta/imex-meta.service';
 
 
 @Injectable()
@@ -77,6 +79,16 @@ export class SimpleCounterEffects {
       )
       : EMPTY
     ),
+    switchMap(({items, action}) => action.type === loadDataComplete.type
+      // NOTE: we delay because otherwise we might write into db while importing data
+      ? this._imexMetaService.isDataImportInProgress$.pipe(
+        filter(isInProgress => !isInProgress),
+        take(1),
+        delay(3000),
+        mapTo(({items, action})),
+      )
+      : of({items, action})
+    ),
     mergeMap(({items, action}) => {
         const clickCounter = items.filter(item => item.type === SimpleCounterType.ClickCounter);
         const stopWatch = items.filter(item => item.type === SimpleCounterType.StopWatch);
@@ -117,6 +129,7 @@ export class SimpleCounterEffects {
     private _timeTrackingService: TimeTrackingService,
     private _persistenceService: PersistenceService,
     private _simpleCounterService: SimpleCounterService,
+    private _imexMetaService: ImexMetaService,
     private _snackService: SnackService,
   ) {
   }
