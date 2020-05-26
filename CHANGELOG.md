@@ -1,3 +1,36 @@
+# [5.2.0](https://github.com/johannesjo/super-productivity/compare/v5.1.4...v5.2.0) (2020-05-26)
+
+
+### Bug Fixes
+
+* **project:** not saving to db when restoring task ([25785bf](https://github.com/johannesjo/super-productivity/commit/25785bfe484209c9cc9cad80bf4c933a654f536d))
+* **simpleCounter:** possible conflict when importing data ([aa84814](https://github.com/johannesjo/super-productivity/commit/aa84814aaed162e7ae37297cbaba335809cacfc5))
+* add error handling for when default project id is defined but project is gone ([9f46f96](https://github.com/johannesjo/super-productivity/commit/9f46f96bc557bce5e16752059c0a51e245a80d04))
+* global error appending to dialog if there is none ([db53be9](https://github.com/johannesjo/super-productivity/commit/db53be92fec993c4c81acace0ff5d5b5eae82c9e))
+* left over localforage import ([c1dab5b](https://github.com/johannesjo/super-productivity/commit/c1dab5b5176f99ec4c158aaf7f9cc3a320d4af73))
+* model being loaded twice from database initially ([a377643](https://github.com/johannesjo/super-productivity/commit/a377643cde449101b6c5f802cb4fc6919fbff572))
+* saving data not working for new idb wrapper ([cf0930e](https://github.com/johannesjo/super-productivity/commit/cf0930ec82f4e95953e35e70c187e05dae989291))
+* **jira:** cfg label ([6fbd64e](https://github.com/johannesjo/super-productivity/commit/6fbd64e3e2ef4e0a844bae4e3fda1bc75dc1da92))
+* stacktrace.js leading to out of memory death on many errors [#369](https://github.com/johannesjo/super-productivity/issues/369) ([410112a](https://github.com/johannesjo/super-productivity/commit/410112a041bbd5c3e4cb856bb87d5e248590b634))
+
+
+### Features
+
+* **tag:** only save on task change if affected ([777ee84](https://github.com/johannesjo/super-productivity/commit/777ee84c2bc409c68bee8edfc072e92eea8f56b8))
+* make project state more picky when to trigger save ([282ca8b](https://github.com/johannesjo/super-productivity/commit/282ca8b955a4e816f73be32080ed3422a81ba153))
+* remove error snacks for database service ([30b8442](https://github.com/johannesjo/super-productivity/commit/30b84428836b7ae12b944fe1b6a7e1c94c3f79f7))
+* **jira:** add error for undefined auto import jql ([365fb46](https://github.com/johannesjo/super-productivity/commit/365fb465be7bfa8c35b2728f890cdf6f63eaa956))
+* **jira:** debounce snacks by a bit ([d36717a](https://github.com/johannesjo/super-productivity/commit/d36717a1731b666daa8e94cf8d42cda8d3cc2d47))
+* **jira:** improve logging ([172ad27](https://github.com/johannesjo/super-productivity/commit/172ad27d16eff89836c8e547e0d244ad6e30d3c5))
+* **reminder:** allowing adding task to today list instead of starting it ([55875ce](https://github.com/johannesjo/super-productivity/commit/55875ce83811f0e62fbff2a06720f67d2ab4cb66))
+* **taskRepeat:** add option to add them to the bottom ([2c52d94](https://github.com/johannesjo/super-productivity/commit/2c52d9499ea624e4f86f5ba74e91dfb53f54760a))
+* always throttle getStacktrace to a maximum amount [#369](https://github.com/johannesjo/super-productivity/issues/369) ([ba4d8ad](https://github.com/johannesjo/super-productivity/commit/ba4d8adab6549d350a3cd295c92557e17e9369aa))
+* improve error logging ([04f4a06](https://github.com/johannesjo/super-productivity/commit/04f4a061d5b961903b0346b15002df3f8ef77851))
+* replace localforage with idb [#236](https://github.com/johannesjo/super-productivity/issues/236) [#345](https://github.com/johannesjo/super-productivity/issues/345) [#367](https://github.com/johannesjo/super-productivity/issues/367) [#368](https://github.com/johannesjo/super-productivity/issues/368) ([9759af0](https://github.com/johannesjo/super-productivity/commit/9759af0570452ac0179925cc0e098d342b917d41))
+* **jira:** improve initial request handling [#369](https://github.com/johannesjo/super-productivity/issues/369) ([67322b9](https://github.com/johannesjo/super-productivity/commit/67322b9278fa94ee877385570f5fb62f1e6bb343))
+
+
+
 ## [5.1.4](https://github.com/johannesjo/super-productivity/compare/v5.1.3...v5.1.4) (2020-05-12)
 
 
