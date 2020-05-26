@@ -72,7 +72,7 @@ if (!IS_MAC) {
   // make it a single instance by closing other instances but allow for dev mode
   // because of https://github.com/electron/electron/issues/14094
   const isLockObtained = appIN.requestSingleInstanceLock();
-  if (isLockObtained && !IS_DEV) {
+  if (!isLockObtained && !IS_DEV) {
     quitAppNow();
   }
 }
