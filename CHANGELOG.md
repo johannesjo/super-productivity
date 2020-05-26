@@ -1,3 +1,12 @@
+## [5.2.1](https://github.com/johannesjo/super-productivity/compare/v5.2.0...v5.2.1) (2020-05-26)
+
+
+### Bug Fixes
+
+* **electron:** single instance issue ([25608ba](https://github.com/johannesjo/super-productivity/commit/25608bafbc5b2e97d6c9973f3b45ec68c24a71f6))
+
+
+
 # [5.2.0](https://github.com/johannesjo/super-productivity/compare/v5.1.4...v5.2.0) (2020-05-26)
 
 
