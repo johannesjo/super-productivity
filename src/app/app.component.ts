@@ -30,6 +30,7 @@ import {AndroidService} from './core/android/android.service';
 import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
 import {isOnline} from './util/is-online';
 import {InitialDialogService} from './features/initial-dialog/initial-dialog.service';
+import {GlobalSyncService} from './core/global-sync/global-sync.service';
 
 
 @Component({
@@ -69,6 +70,7 @@ export class AppComponent implements OnDestroy {
     private _languageService: LanguageService,
     private _androidService: AndroidService,
     private _initialDialogService: InitialDialogService,
+    public readonly  globalSyncService: GlobalSyncService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,

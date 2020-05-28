@@ -13,6 +13,8 @@ import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {MigrationService} from '../migration/migration.service';
 import {loadDataComplete} from '../../root-store/meta/load-data-complete.action';
+import {isValidAppData} from '../../imex/sync/is-valid-app-data.util';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -56,6 +58,10 @@ export class DataInitService {
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(projectState: ProjectState = null, isOmitTokens = false): Promise<any> {
     const appDataComplete = await this._persistenceService.loadComplete();
+    if (!environment.production) {
+      const isValid = isValidAppData(appDataComplete);
+      console.log('VALID_INITIAL_DATA', isValid);
+    }
     this._store$.dispatch(loadDataComplete({appDataComplete, isOmitTokens}));
 
     // return forkJoin([

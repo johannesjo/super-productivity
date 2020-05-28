@@ -31,3 +31,5 @@ export const FIRST_PROJECT: Project = {
   workStart: {},
   workEnd: {},
 };
+
+export const PROJECT_MODEL_VERSION = 5;

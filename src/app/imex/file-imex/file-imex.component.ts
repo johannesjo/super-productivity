@@ -39,7 +39,7 @@ export class FileImexComponent {
       if (oldData.config && Array.isArray(oldData.tasks)) {
         alert('V1 Data. Migration not imported any more.');
       } else {
-        await this._syncService.loadCompleteSyncData(data);
+        await this._syncService.importCompleteSyncData(data);
       }
 
       // clear input

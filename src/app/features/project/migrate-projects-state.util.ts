@@ -1,7 +1,7 @@
 import {ProjectState} from './store/project.reducer';
 import {Dictionary} from '@ngrx/entity';
 import {Project} from './project.model';
-import {DEFAULT_PROJECT} from './project.const';
+import {DEFAULT_PROJECT, PROJECT_MODEL_VERSION} from './project.const';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {MODEL_VERSION_KEY, THEME_COLOR_MAP, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
 import {isMigrateModel} from '../../util/model-version';
@@ -10,8 +10,7 @@ import {convertToWesternArabic} from '../../util/numeric-converter';
 import {WORK_CONTEXT_DEFAULT_THEME} from '../work-context/work-context.const';
 import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
 
-const MODEL_VERSION = 4;
-export const PROJECT_MODEL_VERSION = MODEL_VERSION;
+const MODEL_VERSION = PROJECT_MODEL_VERSION;
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   if (!isMigrateModel(projectState, MODEL_VERSION)) {
@@ -28,11 +27,10 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
     projectEntities[key] = _removeOutdatedData(projectEntities[key]);
   });
 
-  // Update model version after all migrations ran successfully
-  projectState[MODEL_VERSION_KEY] = MODEL_VERSION;
   return {
     ...projectState,
     entities: projectEntities,
+    // Update model version after all migrations ran successfully
     [MODEL_VERSION_KEY]: MODEL_VERSION,
   };
 };

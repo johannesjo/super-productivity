@@ -3,8 +3,8 @@ import {DEFAULT_TAG} from '../../tag/tag.const';
 import {WorkContext, WorkContextType} from '../../work-context/work-context.model';
 import {WORK_CONTEXT_DEFAULT_THEME} from '../../work-context/work-context.const';
 import {DEFAULT_TASK, Task, TaskCopy} from '../../tasks/task.model';
-import {Dictionary, EntityState} from '@ngrx/entity';
-import {arrayToDictionary} from '../../../util/array-to-dictionary';
+import {EntityState} from '@ngrx/entity';
+import {fakeEntityStateFromArray} from '../../../util/fake-entity-state-from-array';
 
 const TAG_ID = 'TAG_ID';
 
@@ -20,11 +20,7 @@ const TAG_CTX = {
 } as WorkContext;
 
 const fakeTaskStateFromArray = (tasks: TaskCopy[]): EntityState<Task> => {
-  const dict = arrayToDictionary(tasks) as Dictionary<TaskCopy>;
-  return {
-    entities: dict,
-    ids: Object.keys(dict),
-  } as EntityState<Task>;
+  return fakeEntityStateFromArray(tasks) as EntityState<Task>;
 };
 
 describe('getCompleteStateForWorkContext', () => {

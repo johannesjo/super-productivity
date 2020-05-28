@@ -507,7 +507,7 @@ export class GoogleDriveSyncEffects {
   private async _import(loadRes): Promise<string> {
     const backupData: AppDataComplete = await this._decodeAppDataIfNeeded(loadRes.backup);
 
-    return from(this._syncService.loadCompleteSyncData(backupData))
+    return from(this._syncService.importCompleteSyncData(backupData))
       .pipe(mapTo(loadRes.meta.modifiedDate))
       .toPromise();
   }

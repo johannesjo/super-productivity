@@ -10,6 +10,7 @@ import {T} from '../../t.const';
 import {TaskService} from '../../features/tasks/task.service';
 import {MigrationService} from '../../core/migration/migration.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
+import {isValidAppData} from './is-valid-app-data.util';
 
 // TODO some of this can be done in a background script
 
@@ -46,7 +47,7 @@ export class SyncService {
     return await this._persistenceService.loadComplete();
   }
 
-  async loadCompleteSyncData(data: AppDataComplete, isBackupReload = false) {
+  async importCompleteSyncData(data: AppDataComplete, isBackupReload = false) {
     this._snackService.open({msg: T.S.SYNC.IMPORTING, ico: 'cloud_download'});
     this._imexMetaService.setDataImportInProgress(true);
 
@@ -56,7 +57,7 @@ export class SyncService {
       await this._persistenceService.clearDatabaseExceptBackup();
     }
 
-    if (this._checkData(data)) {
+    if (isValidAppData(data)) {
       try {
         const migratedData = this._migrationService.migrateIfNecessary(data);
         // save data to database first then load to store from there
@@ -81,23 +82,6 @@ export class SyncService {
     }
   }
 
-  private _checkData(data: AppDataComplete) {
-    return typeof data === 'object'
-      && typeof data.note === 'object'
-      && typeof data.bookmark === 'object'
-      // && typeof data.task === 'object'
-
-      // NOTE this is not there yet for projects with old data
-      // && typeof data.tag === 'object'
-
-      // NOTE these might not yet have been created yet...
-      // && typeof data.globalConfig === 'object'
-      // && typeof data.taskArchive === 'object'
-      // && typeof data.taskAttachment === 'object'
-      // && typeof data.project === 'object'
-      ;
-  }
-
   private async _loadAllFromDatabaseToStore(): Promise<any> {
     return await Promise.all([
       // reload view model from ls
@@ -108,6 +92,6 @@ export class SyncService {
 
   private async _loadBackup(): Promise<any> {
     const data = await this._persistenceService.loadBackup();
-    return this.loadCompleteSyncData(data, true);
+    return this.importCompleteSyncData(data, true);
   }
 }
