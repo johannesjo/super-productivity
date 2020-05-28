@@ -123,7 +123,7 @@ export class ProjectEffects {
           isChange = !!(a as MoveToOtherProject).payload.task.projectId;
           break;
         case TaskActionTypes.MoveToArchive:
-          isChange = !!(a as MoveToArchive).payload.tasks.find(task => task.projectId);
+          isChange = !!(a as MoveToArchive).payload.tasks.find(task => !!task.projectId);
           break;
         case TaskActionTypes.RestoreTask:
           isChange = !!(a as RestoreTask).payload.task.projectId;

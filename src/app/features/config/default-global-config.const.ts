@@ -1,5 +1,4 @@
 import {GlobalConfigState} from './global-config.model';
-import {DEFAULT_SIMPLE_COUNTERS} from '../simple-counter/simple-counter.const';
 
 const minute = 60 * 1000;
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {

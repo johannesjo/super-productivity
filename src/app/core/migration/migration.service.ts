@@ -14,7 +14,6 @@ import {LegacyPersistenceService} from './legacy-persistence.sevice';
 import {AppDataComplete} from '../../imex/sync/sync.model';
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
 import {initialTagState} from '../../features/tag/store/tag.reducer';
-import {initialContextState} from '../../features/work-context/store/work-context.reducer';
 import {Project} from '../../features/project/project.model';
 import {concatMap, map} from 'rxjs/operators';
 import {migrateTaskState} from '../../features/tasks/migrate-task-state.util';
@@ -82,7 +81,6 @@ export class MigrationService {
       reminders: legacyAppDataComplete.reminders,
       // new
       tag: initialTagState,
-      context: initialContextState,
       simpleCounter: initialSimpleCounterState,
 
       // migrated

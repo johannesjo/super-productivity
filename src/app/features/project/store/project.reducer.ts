@@ -2,7 +2,7 @@ import {createEntityAdapter, EntityAdapter, EntityState, Update} from '@ngrx/ent
 import {Project} from '../project.model';
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {FIRST_PROJECT} from '../project.const';
+import {FIRST_PROJECT, PROJECT_MODEL_VERSION} from '../project.const';
 import {JiraCfg} from '../../issue/providers/jira/jira.model';
 import {GithubCfg} from '../../issue/providers/github/github.model';
 import {WorkContextType} from '../../work-context/work-context.model';
@@ -34,7 +34,7 @@ import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
-import {migrateProjectState, PROJECT_MODEL_VERSION} from '../migrate-projects-state.util';
+import {migrateProjectState} from '../migrate-projects-state.util';
 import {MODEL_VERSION_KEY} from '../../../app.constants';
 
 export const PROJECT_FEATURE_NAME = 'projects';

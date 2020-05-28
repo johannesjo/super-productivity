@@ -64,6 +64,6 @@ export class WorkContextEffects {
   }
 
   private _saveToLs([action, contextState]) {
-    this._persistenceService.context.saveState(contextState);
+    // this._persistenceService.context.saveState(contextState);
   }
 }
