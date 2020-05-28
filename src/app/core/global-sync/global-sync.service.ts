@@ -99,7 +99,7 @@ export class GlobalSyncService {
   ) {
   }
 
-  getSyncTrigger$(syncInterval: number = BS_AUDIT_TIME): Observable<void> {
+  getSyncTrigger$(syncInterval: number = BS_AUDIT_TIME): Observable<unknown> {
     return merge(
       this._checkRemoteUpdateTriggers$,
       this._saveToRemoteTrigger$,
@@ -107,7 +107,7 @@ export class GlobalSyncService {
       tap((ev) => console.log('__TRIGGER SYNC__', ev)),
       auditTime(syncInterval),
       tap((ev) => console.log('__TRIGGER SYNC AFTER AUDITTIME__', ev)),
-      switchMap(() => this._checkForRemoteUpdateAndSync()),
+      // switchMap(() => this._checkForRemoteUpdateAndSync()),
     );
   }
 

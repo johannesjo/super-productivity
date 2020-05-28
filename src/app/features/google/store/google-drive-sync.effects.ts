@@ -51,6 +51,7 @@ import {SyncProvider} from '../../../core/global-sync/sync-provider';
 import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 import {DataInitService} from '../../../core/data-init/data-init.service';
 import {getGoogleLocalLastSync, saveGoogleLocalLastSync} from '../google-session';
+import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -62,9 +63,11 @@ export class GoogleDriveSyncEffects {
 
   @Effect() triggerSync$: any = this._actions$.pipe(
     ofType(
+      loadDataComplete.type,
       GlobalConfigActionTypes.LoadGlobalConfig,
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
+    switchMap(() => this._dataInitService.isAllDataLoadedInitially$),
     switchMap(() => combineLatest([
       this._googleApiService.isLoggedIn$,
       this.isEnabled$,
