@@ -1,0 +1,37 @@
+@import '../../../variables';
+
+:host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: block;
+  box-shadow: $whiteframe-shadow-2dp;
+
+  .mat-progress-bar {
+    height: 3px;
+  }
+}
+
+.badge {
+  background: inherit;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+  padding: 0 8px 2px;
+  line-height: 1;
+  border-radius: $card-border-radius;
+
+  @include lightTheme() {
+    background: $light-theme-bg-darker;
+  }
+  @include darkTheme {
+    background: $light-theme-bg-darker;
+    color: $dark-theme-text-color-less-intense;
+  }
+}

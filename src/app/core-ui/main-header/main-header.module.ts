@@ -9,6 +9,7 @@ import {PomodoroModule} from '../../features/pomodoro/pomodoro.module';
 import {WorkContextMenuModule} from '../work-context-menu/work-context-menu.module';
 import {TagModule} from '../../features/tag/tag.module';
 import {SimpleCounterModule} from '../../features/simple-counter/simple-counter.module';
+import {GlobalProgressBarModule} from '../global-progress-bar/global-progress-bar.module';
 
 @NgModule({
   imports: [
@@ -21,6 +22,7 @@ import {SimpleCounterModule} from '../../features/simple-counter/simple-counter.
     WorkContextMenuModule,
     TagModule,
     SimpleCounterModule,
+    GlobalProgressBarModule,
   ],
   declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],

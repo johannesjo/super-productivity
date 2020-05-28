@@ -6,7 +6,6 @@ import {ShortcutModule} from './shortcut/shortcut.module';
 import {SideNavModule} from './side-nav/side-nav.module';
 
 @NgModule({
-  declarations: [],
   imports: [
     CommonModule,
     LayoutModule,
