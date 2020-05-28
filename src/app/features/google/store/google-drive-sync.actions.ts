@@ -39,7 +39,7 @@ export class LoadFromGoogleDriveCancel implements Action {
 export class SaveToGoogleDriveFlow implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow;
 
-  constructor(public payload?: { isSkipSnack?: boolean; }) {
+  constructor(public payload?: { isSkipSnack?: boolean; isSync?: boolean }) {
   }
 }
 

@@ -20,6 +20,7 @@ import {SyncProvider} from './sync-provider';
 import {DataInitService} from '../data-init/data-init.service';
 import {isOnline$} from '../../util/is-online';
 import {PersistenceService} from '../persistence/persistence.service';
+import {AppDataComplete} from '../../imex/sync/sync.model';
 
 
 const BS_AUDIT_TIME = 10000;
@@ -88,6 +89,8 @@ export class GlobalSyncService {
   );
 
 
+  inMemory$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$;
+
   constructor(
     private readonly _store: Store<any>,
     private readonly _globalConfigService: GlobalConfigService,
@@ -96,8 +99,8 @@ export class GlobalSyncService {
   ) {
   }
 
-  getSyncTrigger$(syncInterval: number = BS_AUDIT_TIME) {
-    merge(
+  getSyncTrigger$(syncInterval: number = BS_AUDIT_TIME): Observable<void> {
+    return merge(
       this._checkRemoteUpdateTriggers$,
       this._saveToRemoteTrigger$,
     ).pipe(

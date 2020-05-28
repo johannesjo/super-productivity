@@ -14,7 +14,7 @@ import {
   tap,
   withLatestFrom
 } from 'rxjs/operators';
-import {combineLatest, EMPTY, from, interval, Observable, of, throwError, zip} from 'rxjs';
+import {combineLatest, EMPTY, from, Observable, of, throwError, zip} from 'rxjs';
 import {GoogleDriveSyncService} from '../google-drive-sync.service';
 import {GoogleApiService} from '../google-api.service';
 import {GlobalConfigService} from '../../config/global-config.service';
@@ -73,9 +73,8 @@ export class GoogleDriveSyncEffects {
     ]).pipe(
       filter(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) =>
         isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000),
-      switchMap(([a, b, c, syncInterval]) =>
-        interval(syncInterval).pipe(
-          // filter(isOnline),
+      switchMap(([, , , syncInterval]) =>
+        this._globalSyncService.getSyncTrigger$(syncInterval).pipe(
           mapTo(new SaveForSync())
         )
       ),
