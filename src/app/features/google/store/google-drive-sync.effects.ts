@@ -210,6 +210,7 @@ export class GoogleDriveSyncEffects {
 
             const lastLocalSyncModelChange: number = this._syncService.getLastLocalSyncModelChange();
             const lastModifiedRemote: string = res.modifiedDate;
+            const lastSync = getGoogleLocalLastSync();
 
             if (this._isEqual(lastLocalSyncModelChange, lastModifiedRemote)) {
               if (!action.payload || !action.payload.isSkipSnack) {
@@ -219,10 +220,16 @@ export class GoogleDriveSyncEffects {
                 });
               }
               return of(new SaveToGoogleDriveCancel());
-            } else if (this._isNewerThan(lastModifiedRemote, getGoogleLocalLastSync())) {
-              // remote has an update so prompt what to do
-              this._openConfirmSaveDialog(lastModifiedRemote);
+
+            } else if (this._isNewerThan(lastModifiedRemote, lastSync)) {
+              if (this._isEqual(lastSync, lastLocalSyncModelChange)) {
+                return of(new SaveToGoogleDriveCancel(), new LoadFromGoogleDriveFlow());
+              } else {
+                // remote has an update so prompt what to do
+                this._openConfirmSaveDialog(lastModifiedRemote);
+              }
               return of(new SaveToGoogleDriveCancel());
+
             } else {
               // local is newer than remote so just save
               return of(new SaveToGoogleDrive({isSkipSnack: action.payload && action.payload.isSkipSnack}));
