@@ -1,1 +1,6 @@
-<p>dropbox-cfg works!</p>
+<mat-slide-toggle (ngModelChange)="toggleEnabled($event)"
+                  [ngModel]="(cfg$|async)?.isEnabled"
+                  name="isEnabled">
+<!--  {{T.F.GOOGLE.SYNC_CFG.ENABLE|translate}}-->
+  Enable Dropbox
+</mat-slide-toggle>
