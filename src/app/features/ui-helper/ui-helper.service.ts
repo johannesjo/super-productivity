@@ -7,6 +7,8 @@ import {UI_LOCAL_HELPER_DEFAULT} from './ui-helper.const';
 import {ElectronService} from '../../core/electron/electron.service';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../app.constants';
+import {fromEvent} from 'rxjs';
+import {throttleTime} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -63,13 +65,18 @@ export class UiHelperService {
 
 
   private _initMousewheelZoomForElectron() {
-    const ZOOM_DELTA = 0.05;
+    const ZOOM_DELTA = 0.025;
 
     // set initial zoom
     this.zoomTo(this._getLocalUiHelperSettings().zoomFactor);
 
-    this._document.addEventListener('mousewheel', (event: WheelEvent) => {
+    fromEvent(this._document, 'mousewheel').pipe(
+      throttleTime(20)
+    ).subscribe((event: WheelEvent) => {
       if (event && event.ctrlKey) {
+        // this does not prevent scrolling unfortunately
+        // event.preventDefault();
+
         let zoomFactor = this._webFrame.getZoomFactor();
         if (event.deltaY > 0) {
           zoomFactor -= ZOOM_DELTA;
@@ -79,7 +86,7 @@ export class UiHelperService {
         zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
         this.zoomTo(zoomFactor);
       }
-    }, false);
+    });
   }
 
   private _getLocalUiHelperSettings(): LocalUiHelperSettings {
