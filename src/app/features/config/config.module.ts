@@ -15,7 +15,6 @@ import {FileImexModule} from '../../imex/file-imex/file-imex.module';
 import {IconInputComponent} from './icon-input/icon-input.component';
 import {SelectProjectComponent} from './select-project/select-project.component';
 import {RepeatSectionTypeComponent} from './repeat-section-type/repeat-section-type.component';
-import {DropboxCfgComponent} from '../dropbox/dropbox-cfg/dropbox-cfg.component';
 
 @NgModule({
   imports: [

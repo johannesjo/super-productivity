@@ -103,6 +103,7 @@ export interface GoogleDriveSyncConfig {
 
 export interface DropboxSyncConfig {
   isEnabled: boolean;
+  accessToken: string;
   syncInterval: number;
   _backupDocId: string;
   // isCompressData: boolean;

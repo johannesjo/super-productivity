@@ -97,6 +97,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   dropboxSync: {
     isEnabled: false,
     syncInterval: minute * 5,
+    accessToken: null,
     _backupDocId: null,
     // isCompressData: true,
   },

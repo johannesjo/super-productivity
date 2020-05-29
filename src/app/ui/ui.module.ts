@@ -73,6 +73,7 @@ import {JiraToMarkdownPipe} from './pipes/jira-to-markdown.pipe';
 import {BetterDrawerModule} from './better-drawer/better-drawer.module';
 import {SortPipe} from './pipes/sort.pipe';
 import {LongPressDirective} from './longpress/longpress.component';
+import {FormlyMatToggleModule} from '@ngx-formly/material/toggle';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -173,6 +174,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
         immutable: true
       },
     }),
+    FormlyMatToggleModule,
     FormlyMaterialModule,
     Angular2PromiseButtonModule.forRoot({
       // handleCurrentBtnOnly: true,
