@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {SnackParams} from './snack.model';
 import {Observable, Subject} from 'rxjs';
@@ -26,7 +26,8 @@ export class SnackService {
     private _store$: Store<any>,
     private _translateService: TranslateService,
     private _actions$: Actions,
-    private _matSnackBar: MatSnackBar
+    private _matSnackBar: MatSnackBar,
+    private _ngZone: NgZone,
   ) {
     this._onWorkContextChange$.subscribe(() => {
       this.close();
@@ -87,7 +88,10 @@ export class SnackService {
       case 'CUSTOM':
       case 'SUCCESS':
       default: {
-        this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
+        // @see https://stackoverflow.com/questions/50101912/snackbar-position-wrong-when-use-errorhandler-in-angular-5-and-material
+        this._ngZone.run(() => {
+          this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
+        });
         break;
       }
     }
