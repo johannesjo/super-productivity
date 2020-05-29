@@ -94,6 +94,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
     _backupDocId: null,
   },
+  dropboxSync: {
+    isEnabled: false,
+    syncInterval: minute * 5,
+    _backupDocId: null,
+    // isCompressData: true,
+  },
   localBackup: {
     isEnabled: true,
   },

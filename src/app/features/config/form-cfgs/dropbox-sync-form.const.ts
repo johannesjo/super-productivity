@@ -2,9 +2,10 @@
 import {T} from '../../../t.const';
 import {ConfigFormSection, GoogleDriveSyncConfig} from '../global-config.model';
 
-export const GOOGLE_DRIVE_SYNC_FORM: ConfigFormSection<GoogleDriveSyncConfig> = {
-  title: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
-  key: 'googleDriveSync',
+export const DROPBOX_SYNC_FORM: ConfigFormSection<GoogleDriveSyncConfig> = {
+  // title: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
+  title: 'DROPBOX',
+  key: 'keyboard',
   help: T.GCF.GOOGLE_DRIVE_SYNC.HELP,
-  customSection: 'GOOGLE_SYNC',
+  customSection: 'DROPBOX_SYNC',
 };

@@ -101,6 +101,13 @@ export interface GoogleDriveSyncConfig {
   _backupDocId: string;
 }
 
+export interface DropboxSyncConfig {
+  isEnabled: boolean;
+  syncInterval: number;
+  _backupDocId: string;
+  // isCompressData: boolean;
+}
+
 export type LocalBackupConfig = Readonly<{
   isEnabled: boolean,
 }>;
@@ -118,6 +125,7 @@ export type GlobalConfigState = Readonly<{
   takeABreak: TakeABreakConfig;
   pomodoro: PomodoroConfig;
   googleDriveSync: GoogleDriveSyncConfig;
+  dropboxSync: DropboxSyncConfig;
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
 
@@ -138,7 +146,7 @@ export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldCon
   key?: keyof FormModel;
 }
 
-export type CustomCfgSection = 'FILE_IMPORT_EXPORT' | 'GOOGLE_SYNC' | 'JIRA_CFG' | 'SIMPLE_COUNTER_CFG';
+export type CustomCfgSection = 'FILE_IMPORT_EXPORT' | 'GOOGLE_SYNC' | 'JIRA_CFG' | 'SIMPLE_COUNTER_CFG' | 'DROPBOX_SYNC';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {
