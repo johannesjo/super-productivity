@@ -93,5 +93,84 @@ export class DropboxApiService {
     return o && o.access_token;
   }
 
-
+  // private async _execRequest(method = 'GET', apiPath: string = '', body = null, headers: any = {}, options: any = {}) {
+  //   await this.isReady$.toPromise();
+  //   const authToken = this._accessToken$.pipe(first()).toPromise();
+  //   if (!options.target) {
+  //     options.target = 'string';
+  //   }
+  //   headers = {
+  //     ...headers,
+  //     Authorization: `Bearer ${authToken}`
+  //   };
+  //
+  //   const endPointFormat = ['files/upload', 'files/download'].indexOf(apiPath) >= 0
+  //     ? 'content'
+  //     : 'api';
+  //
+  //   if (endPointFormat === 'api') {
+  //     headers['Content-Type'] = 'application/json';
+  //     if (body && typeof body === 'object') {
+  //       body = JSON.stringify(body);
+  //     }
+  //   } else {
+  //     headers['Content-Type'] = 'application/octet-stream';
+  //   }
+  //
+  //   const fetchOptions: RequestInit = {
+  //     headers,
+  //     method,
+  //   };
+  //
+  //   if (options.path) {
+  //     (fetchOptions as any).path = options.path;
+  //   }
+  //   if (body) {
+  //     fetchOptions.body = body;
+  //   }
+  //
+  //   const url = apiPath.indexOf('https://') === 0
+  //     ? apiPath
+  //     : `${this.baseUrl(endPointFormat)}/${apiPath}`;
+  //
+  //   let response = null;
+  //   // if (options.source === 'file' && (method === 'POST' || method === 'PUT')) {
+  //   //   response = await uploadBlob(url, fetchOptions);
+  //   // } else if (options.target === 'string') {
+  //   response = await fetch(url, fetchOptions);
+  //   // } else {
+  //   // file
+  //   // response = await fetchBlob(url, fetchOptions);
+  //   // }
+  //
+  //   const responseText = await response.text();
+  //
+  //   // console.info('Response: ' + responseText);
+  //
+  //   let responseJson = null;
+  //   const loadResponseJson = () => {
+  //     if (!responseText) {
+  //       return null;
+  //     }
+  //     if (responseJson) {
+  //       return responseJson;
+  //     }
+  //     try {
+  //       responseJson = JSON.parse(responseText);
+  //     } catch (error) {
+  //       return {error: responseText};
+  //     }
+  //     return responseJson;
+  //   };
+  //   // Creates an error object with as much data as possible as it will appear in the log, which will make debugging easier
+  //
+  //   return loadResponseJson();
+  // }
+  //
+  // private baseUrl(endPointFormat: 'content' | 'api') {
+  //   if (['content', 'api'].indexOf(endPointFormat) < 0) {
+  //     throw new Error(`Invalid end point format: ${endPointFormat}`);
+  //   }
+  //   return `https://${endPointFormat}.dropboxapi.com/2`;
+  // }
 }

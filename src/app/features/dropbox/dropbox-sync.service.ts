@@ -4,7 +4,7 @@ import {combineLatest, Observable} from 'rxjs';
 import {DropboxSyncConfig} from '../config/global-config.model';
 import {concatMap, first, map, mapTo, take, tap} from 'rxjs/operators';
 import {DropboxApiService} from './dropbox-api.service';
-import {DROPBOX_SYNC_FILE_NAME} from './dropbox.const';
+import {DROPBOX_APP_FOLDER, DROPBOX_SYNC_FILE_NAME} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
@@ -55,8 +55,12 @@ export class DropboxSyncService {
     await this._isReady$.toPromise();
     console.log('SYNC_AFTER_READY');
 
-    const r = await this._loadData();
-    console.log(r);
+    try {
+      const r = await this._loadData();
+      console.log(r);
+    } catch (e) {
+      console.error(e);
+    }
 
     const d = await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
     console.log(d);
@@ -68,14 +72,20 @@ export class DropboxSyncService {
 
   private _loadData(): Promise<DropboxTypes.files.FileMetadata> {
     return this._dropboxApiService.loadFile({
-      path: '/' + DROPBOX_SYNC_FILE_NAME,
+      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
     });
   }
 
   private _uploadData(data: AppDataComplete): Promise<DropboxTypes.files.FileMetadata> {
+    console.log(`/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`);
+
     return this._dropboxApiService.uploadFile({
-      path: '/' + DROPBOX_SYNC_FILE_NAME,
+      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
       contents: JSON.stringify(data),
+      // mode: {'.tag': 'update', update: true},
+      mode: {
+        '.tag': 'overwrite'
+      },
       // we need to use ISO 8601 "combined date and time representation" format:
       client_modified: toDropboxIsoString(data.lastLocalSyncModelChange),
     });
