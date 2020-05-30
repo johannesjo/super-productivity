@@ -7,9 +7,9 @@ import {delay, first, map, switchMap, tap} from 'rxjs/operators';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {Observable} from 'rxjs';
 import {LS_DROPBOX_LAST_LOCAL_REVISION} from '../../core/persistence/ls-keys.const';
-import {HttpClient, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
-import {getTextFromArrayBuffer} from '../../util/get-text-from-array-buffer';
-
+import {HttpClient} from '@angular/common/http';
+import axios, {AxiosResponse, Method} from 'axios';
+import qs from 'qs';
 
 @Injectable({
   providedIn: 'root'
@@ -116,18 +116,10 @@ export class DropboxApiService {
       headers: {
         'Dropbox-API-Arg': JSON.stringify({path}),
       },
-      responseType: 'arraybuffer'
-    }).then(async (resp: any) => {
-      const responseTxt = await getTextFromArrayBuffer(resp.body);
-      // const meta = resp.getResponseHeader('Dropbox-API-Result');
-      const meta = {};
-      let body;
-      try {
-        body = JSON.parse(responseTxt as string);
-      } catch (e) {
-        // Failed parsing Json, assume it is something else then
-      }
-      return {meta, body};
+    }).then(async (res) => {
+      console.log(res);
+      const meta = JSON.parse(res.headers['dropbox-api-result']);
+      return {meta, data: res.data};
       // TODO
       // if (status === 409) {
       // }
@@ -196,48 +188,34 @@ export class DropboxApiService {
   async _request({
                    url,
                    method = 'GET',
-                   body,
+                   data,
                    headers = {},
                    params = {},
-                   responseType = 'json',
                  }: {
     url: string;
-    method?: string;
+    method?: Method;
     headers?: { [key: string]: any },
-    body?: string | object
+    data?: string | object
     params?: { [key: string]: string },
-    responseType?: string,
-  }) {
+  }): Promise<AxiosResponse> {
     await this.isReady$.toPromise();
     const authToken = await this._accessToken$.pipe(first()).toPromise();
-    const h = {
-      ...headers,
-      Authorization: `Bearer ${authToken}`,
-    };
-    if (typeof body === 'object') {
-      body = JSON.stringify(body);
-      h ['Content-Type'] = 'application/json; charset=UTF-8';
-    }
 
-    const allArgs = [
-      ...(body ? [body] : []),
-      {
-        headers: new HttpHeaders(h),
-        params: new HttpParams({
-          fromObject: {
-            ...params,
-            // needed because negative globs are not working as they should
-            // @see https://github.com/angular/angular/issues/21191
-            // 'ngsw-bypass': true
-          } as any
-        }),
-        reportProgress: false,
-        observe: 'response',
-        responseType,
-      }];
-    const req = new HttpRequest(method as any, url, ...allArgs as any);
-    // TODO use fetch instead
-    return this._httpClient.request(req).toPromise();
+    return axios.request({
+      url: params
+        ? url + qs.stringify(params)
+        : url,
+      method,
+      data,
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+        ...(typeof data === 'object'
+          ? {'Content-Type': 'application/json; charset=UTF-8'}
+          : {}),
+        ...headers,
+      },
+    });
   }
 
 
