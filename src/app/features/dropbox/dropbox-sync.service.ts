@@ -47,7 +47,7 @@ export class DropboxSyncService {
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
   ) {
-    this.sync();
+    // TODO initial syncing (do with immediate triggers)
   }
 
   async sync() {
@@ -65,6 +65,8 @@ export class DropboxSyncService {
         return;
       }
     }
+    // if not defined yet
+    local = local || await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
 
     const r = (await this._downloadAppData());
 
@@ -165,7 +167,10 @@ export class DropboxSyncService {
   }
 
   private _getLocalLastSync(): number {
-    return +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC);
+    const it = +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC);
+    return isNaN(it)
+      ? 0
+      : it;
   }
 
   private _setLocalLastSync(localLastSync: number) {

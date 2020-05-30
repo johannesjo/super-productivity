@@ -27,8 +27,8 @@ export class DropboxEffects {
       this._dropboxSyncService.isEnabled$,
       this._dropboxSyncService.syncInterval$,
     ]).pipe(
-      filter(([isLoggedIn, isEnabled]) =>
-        isLoggedIn && isEnabled),
+      filter(([isTokenAvailable, isEnabled]) =>
+        isTokenAvailable && isEnabled),
       switchMap(([, , syncInterval]) =>
         this._globalSyncService.getSyncTrigger$(
           syncInterval >= DROPBOX_MIN_SYNC_INTERVAL
