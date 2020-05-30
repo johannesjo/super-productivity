@@ -35,8 +35,18 @@ export class DropboxApiService {
   ) {
   }
 
-  async getMeta() {
+  async getMetaData(path: string): Promise<DropboxFileMetadata> {
+    await this.isReady$.toPromise();
 
+    return this._request({
+      method: 'POST',
+      url: 'https://api.dropboxapi.com/2/files/get_metadata',
+      // headers: {
+      //   'Dropbox-API-Arg': JSON.stringify({path}),
+      // },
+      // data: qs.stringify({path}),
+      data: {path},
+    }).then((res) => res.data);
   }
 
   async download<T>({path, localRev, options}: { path: string; localRev?: string; options?: any }): Promise<{ meta: DropboxFileMetadata, data: T }> {

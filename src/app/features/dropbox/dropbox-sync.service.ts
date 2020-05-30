@@ -4,7 +4,7 @@ import {combineLatest, Observable} from 'rxjs';
 import {DropboxSyncConfig} from '../config/global-config.model';
 import {concatMap, first, map, mapTo, take, tap} from 'rxjs/operators';
 import {DropboxApiService} from './dropbox-api.service';
-import {DROPBOX_APP_FOLDER, DROPBOX_SYNC_FILE_NAME} from './dropbox.const';
+import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
@@ -59,7 +59,10 @@ export class DropboxSyncService {
     // } catch (e) {
     //   console.error(e);
     // }
+    console.log(await this._getRevAndLastClientUpdate());
 
+
+    return;
     const d = await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
     console.log(d);
 
@@ -72,16 +75,26 @@ export class DropboxSyncService {
     // TODO also update rev!
   }
 
+  // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
+  private async _getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number }> {
+    const r = await this._dropboxApiService.getMetaData(DROPBOX_SYNC_FILE_PATH);
+    const d = new Date(r.client_modified);
+    return {
+      clientUpdate: d.getTime(),
+      rev: r.rev,
+    };
+  }
+
   private _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
     return this._dropboxApiService.download<AppDataComplete>({
-      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
+      path: DROPBOX_SYNC_FILE_PATH,
       localRev: this._getLastLocalRev(),
     });
   }
 
   private async _uploadAppData(data: AppDataComplete): Promise<DropboxFileMetadata> {
     const r = await this._dropboxApiService.upload({
-      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
+      path: DROPBOX_SYNC_FILE_PATH,
       data,
       clientModified: data.lastLocalSyncModelChange,
     });
