@@ -9,6 +9,7 @@ import {AppDataComplete} from '../../imex/sync/sync.model';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {toDropboxIsoString} from './iso-date-without-ms.util.';
+import {LS_DROPBOX_LAST_LOCAL_REVISION} from '../../core/persistence/ls-keys.const';
 
 @Injectable({
   providedIn: 'root'
@@ -99,5 +100,10 @@ export class DropboxSyncService {
   }
 
   private _importData() {
+  }
+
+  // TODO move to sync
+  private _getLastLocalRev(): string {
+    return localStorage.getItem(LS_DROPBOX_LAST_LOCAL_REVISION);
   }
 }
