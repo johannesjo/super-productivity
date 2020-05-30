@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {Dropbox} from 'dropbox';
 import {DROPBOX_APP_KEY, DROPBOX_APP_SECRET} from './dropbox.const';
 import {GlobalConfigService} from '../config/global-config.service';
-import {map} from 'rxjs/operators';
+import {delay, first, map, switchMap, tap} from 'rxjs/operators';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {Observable} from 'rxjs';
 
@@ -11,41 +11,55 @@ import {Observable} from 'rxjs';
   providedIn: 'root'
 })
 export class DropboxApiService {
-  public accessCode$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
+  accessCode$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
 
   private _accessToken$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.accessToken));
 
-  isLoggedIn$ = this._accessToken$.pipe(
-    map((token) => !!token)
+  isTokenAvailable$ = this._accessToken$.pipe(
+    map((token) => !!token),
+    // delay so setAccessToken is definitely called
+    delay(10),
+  );
+
+  isReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    switchMap(() => this.isTokenAvailable$),
+    tap((isTokenAvailable) => !isTokenAvailable && new Error('Dropbox API not ready')),
+    first(),
   );
 
   private _dbx: Dropbox = new Dropbox({
     clientId: DROPBOX_APP_KEY,
   });
 
-  private _init$ = this._dataInitService.isAllDataLoadedInitially$;
 
   constructor(
     private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
   ) {
-    this._accessToken$.subscribe((v) => console.log('_accessToken$', v));
     this._accessToken$.subscribe((accessToken) => {
-      console.log(accessToken);
+      console.log('_accessToken$', accessToken);
       if (accessToken) {
         this._dbx.setAccessToken(accessToken);
-        console.log(this._dbx);
-
-        this._dbx.usersGetCurrentAccount().then((response) => {
-          console.log(response);
-        }).catch((e) => {
-          console.error(e);
-          // warn
-        });
       }
     });
   }
 
+  async loadFile(args: DropboxTypes.files.DownloadArg): Promise<DropboxTypes.files.FileMetadata> {
+    await this.isReady$.toPromise();
+    return this._dbx.filesDownload(args);
+  }
+
+  async uploadFile(args: DropboxTypes.files.CommitInfo): Promise<DropboxTypes.files.FileMetadata> {
+    await this.isReady$.toPromise();
+    return this._dbx.filesUpload(args);
+  }
+
+  async getUser(): Promise<DropboxTypes.users.FullAccount> {
+    await this.isReady$.toPromise();
+    return this._dbx.usersGetCurrentAccount();
+  }
+
+  // TODO use this as the standard approach for making requests instead of using the bloated api
   async getAccessTokenFromAuthCode(authCode: string): Promise<string> {
     const postData = {
       code: authCode,
@@ -79,13 +93,5 @@ export class DropboxApiService {
     return o && o.access_token;
   }
 
-  async loadFile(args: DropboxTypes.files.DownloadArg): Promise<DropboxTypes.files.FileMetadata> {
-    await this._init$.toPromise();
-    return this._dbx.filesDownload(args);
-  }
 
-  async uploadFile(args: DropboxTypes.files.CommitInfo): Promise<DropboxTypes.files.FileMetadata> {
-    await this._init$.toPromise();
-    return this._dbx.filesUpload(args);
-  }
 }

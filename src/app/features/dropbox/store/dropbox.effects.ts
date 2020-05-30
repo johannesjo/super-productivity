@@ -23,7 +23,7 @@ export class DropboxEffects {
     // TODO filter UpdateGlobalConfigSection for updating dropbox
     switchMap(() => this._dataInitService.isAllDataLoadedInitially$),
     switchMap(() => combineLatest([
-      this._dropboxApiService.isLoggedIn$,
+      this._dropboxApiService.isTokenAvailable$,
       this._dropboxSyncService.isEnabled$,
       this._dropboxSyncService.syncInterval$,
     ]).pipe(
