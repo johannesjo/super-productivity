@@ -11,6 +11,7 @@ import {DataInitService} from '../../core/data-init/data-init.service';
 import {LS_DROPBOX_LAST_LOCAL_REVISION, LS_DROPBOX_LOCAL_LAST_SYNC} from '../../core/persistence/ls-keys.const';
 import {DropboxFileMetadata} from './dropbox.model';
 import {SyncService} from '../../imex/sync/sync.service';
+import {checkForUpdate, UpdateCheckResult} from '../../core/global-sync/check-for-update.util';
 
 @Injectable({
   providedIn: 'root'
@@ -27,8 +28,6 @@ export class DropboxSyncService {
     // TODO remove
     mapTo(10000),
   );
-
-  F: any;
 
   private _isReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => combineLatest([
@@ -48,21 +47,63 @@ export class DropboxSyncService {
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
   ) {
-    this.F = 'YYYY-MM-DDTHH:mm:SSZ';
-
     this.sync();
   }
 
   async sync() {
     await this._isReady$.toPromise();
     const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
+    console.log(rev, clientUpdate);
+    const lastSync = this._getLocalLastSync();
 
-    const d = await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
-    console.log(d);
+    let local;
+    if (rev === this._getLocalRev()) {
+      console.log('DBX: SAME REV');
+      local = await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
+      if (lastSync === local.lastLocalSyncModelChange) {
+        console.log('DBX: NO LOCAL CHANGES');
+        return;
+      }
+    }
 
-    const r2 = await this._uploadAppData(d);
-    console.log(r2);
+    const r = (await this._downloadAppData());
 
+    const remote = r.data;
+
+    switch (checkForUpdate({
+      local: local.lastLocalSyncModelChange,
+      lastSync,
+      remote: remote.lastLocalSyncModelChange
+    })) {
+      case UpdateCheckResult.InSync: {
+        console.log('DBX: In Sync => No Update');
+        break;
+      }
+
+      case UpdateCheckResult.LocalUpdateRequired: {
+        console.log('DBX: Update Local');
+        return await this._importData(remote, r.meta.rev);
+      }
+
+      case UpdateCheckResult.RemoteUpdateRequired: {
+        console.log('DBX: Remote Update Required => Update directly');
+        return await this._uploadAppData(local);
+      }
+
+      case UpdateCheckResult.DataDiverged: {
+        console.log('^--------^-------^');
+        console.log('DBX: X Diverged Data');
+        alert('NO HANDLING YET => Dialog needed');
+        if (confirm('Import?')) {
+          return await this._importData(remote, r.meta.rev);
+        }
+        break;
+      }
+
+      case UpdateCheckResult.LastSyncNotUpToDate: {
+        this._setLocalLastSync(local.lastLocalSyncModelChange);
+      }
+    }
   }
 
   private async _importData(data: AppDataComplete, rev: string) {
@@ -76,7 +117,8 @@ export class DropboxSyncService {
     }
 
     await this._syncService.importCompleteSyncData(data);
-    this._updateLocalRev(rev);
+    this._setLocalRev(rev);
+    this._setLocalLastSync(data.lastLocalSyncModelChange);
   }
 
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
@@ -102,7 +144,8 @@ export class DropboxSyncService {
       data,
       clientModified: data.lastLocalSyncModelChange,
     });
-    this._updateLocalRev(r.rev);
+    this._setLocalRev(r.rev);
+    this._setLocalLastSync(data.lastLocalSyncModelChange);
     return r;
   }
 
@@ -113,7 +156,7 @@ export class DropboxSyncService {
     return localStorage.getItem(LS_DROPBOX_LAST_LOCAL_REVISION);
   }
 
-  private _updateLocalRev(rev: string) {
+  private _setLocalRev(rev: string) {
     if (!rev) {
       throw new Error('No rev given');
     }
@@ -125,7 +168,7 @@ export class DropboxSyncService {
     return +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC);
   }
 
-  private _updateLocalLastSync(localLastSync: number) {
+  private _setLocalLastSync(localLastSync: number) {
     if (typeof localLastSync !== 'number') {
       throw new Error('No correct localLastSync given');
     }
