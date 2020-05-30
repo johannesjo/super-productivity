@@ -8,8 +8,9 @@ import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
-import {LS_DROPBOX_LAST_LOCAL_REVISION} from '../../core/persistence/ls-keys.const';
+import {LS_DROPBOX_LAST_LOCAL_REVISION, LS_DROPBOX_LOCAL_LAST_SYNC} from '../../core/persistence/ls-keys.const';
 import {DropboxFileMetadata} from './dropbox.model';
+import {SyncService} from '../../imex/sync/sync.service';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +43,7 @@ export class DropboxSyncService {
 
   constructor(
     private _globalConfigService: GlobalConfigService,
+    private _syncService: SyncService,
     private _globalSyncService: GlobalSyncService,
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
@@ -53,16 +55,8 @@ export class DropboxSyncService {
 
   async sync() {
     await this._isReady$.toPromise();
-    // try {
-    //   const r = await this._loadData();
-    //   console.log(r);
-    // } catch (e) {
-    //   console.error(e);
-    // }
-    console.log(await this._getRevAndLastClientUpdate());
+    const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
 
-
-    return;
     const d = await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
     console.log(d);
 
@@ -71,8 +65,18 @@ export class DropboxSyncService {
 
   }
 
-  private _importData() {
-    // TODO also update rev!
+  private async _importData(data: AppDataComplete, rev: string) {
+    if (!data) {
+      const r = (await this._downloadAppData());
+      data = r.data;
+      rev = r.meta.rev;
+    }
+    if (!rev) {
+      throw new Error('No rev given');
+    }
+
+    await this._syncService.importCompleteSyncData(data);
+    this._updateLocalRev(rev);
   }
 
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
@@ -88,7 +92,7 @@ export class DropboxSyncService {
   private _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
     return this._dropboxApiService.download<AppDataComplete>({
       path: DROPBOX_SYNC_FILE_PATH,
-      localRev: this._getLastLocalRev(),
+      localRev: this._getLocalRev(),
     });
   }
 
@@ -98,15 +102,34 @@ export class DropboxSyncService {
       data,
       clientModified: data.lastLocalSyncModelChange,
     });
-    this._updateRev(r.rev);
+    this._updateLocalRev(r.rev);
     return r;
   }
 
-  private _getLastLocalRev(): string {
+
+  // LS HELPER
+  // ---------
+  private _getLocalRev(): string {
     return localStorage.getItem(LS_DROPBOX_LAST_LOCAL_REVISION);
   }
 
-  private _updateRev(rev: string) {
+  private _updateLocalRev(rev: string) {
+    if (!rev) {
+      throw new Error('No rev given');
+    }
+
     return localStorage.setItem(LS_DROPBOX_LAST_LOCAL_REVISION, rev);
   }
+
+  private _getLocalLastSync(): number {
+    return +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC);
+  }
+
+  private _updateLocalLastSync(localLastSync: number) {
+    if (typeof localLastSync !== 'number') {
+      throw new Error('No correct localLastSync given');
+    }
+    return localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC, localLastSync.toString());
+  }
+
 }
