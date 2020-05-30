@@ -1,14 +1,14 @@
 import {Injectable} from '@angular/core';
-
-import {Dropbox} from 'dropbox';
 import {DROPBOX_APP_KEY, DROPBOX_APP_SECRET} from './dropbox.const';
 import {GlobalConfigService} from '../config/global-config.service';
-import {delay, first, map, switchMap, tap} from 'rxjs/operators';
+import {first, map, switchMap, tap} from 'rxjs/operators';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {Observable} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import axios, {AxiosResponse, Method} from 'axios';
 import qs from 'qs';
+import {DropboxFileMetadata} from './dropbox.model';
+import {toDropboxIsoString} from './iso-date-without-ms.util.';
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +20,6 @@ export class DropboxApiService {
 
   isTokenAvailable$ = this._accessToken$.pipe(
     map((token) => !!token),
-    // delay so setAccessToken is definitely called
-    delay(10),
   );
 
   isReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
@@ -30,28 +28,18 @@ export class DropboxApiService {
     first(),
   );
 
-  private _dbx: Dropbox = new Dropbox({
-    clientId: DROPBOX_APP_KEY,
-  });
-
-
   constructor(
     private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
     private  _httpClient: HttpClient,
   ) {
-    this._accessToken$.subscribe((accessToken) => {
-      console.log('_accessToken$', accessToken);
-      if (accessToken) {
-        this._dbx.setAccessToken(accessToken);
-      }
-    });
   }
 
   async getMeta() {
+
   }
 
-  async get({path, localRev, options}: { path: string; localRev?: string; options?: any }) {
+  async download<T>({path, localRev, options}: { path: string; localRev?: string; options?: any }): Promise<{ meta: DropboxFileMetadata, data: T }> {
     await this.isReady$.toPromise();
 
     // TODO implement
@@ -81,12 +69,24 @@ export class DropboxApiService {
   }
 
 
-  async upload({path, localRev, data, options}: { path: string; options?: any; localRev?: string, data: any }) {
+  async upload({path, localRev, data, clientModified}: {
+    path: string;
+    clientModified?: number;
+    localRev?: string;
+    data: any;
+  }): Promise<DropboxFileMetadata> {
     await this.isReady$.toPromise();
+
     const args = {
       mode: {'.tag': 'overwrite'},
-      mute: true
+      path,
+      mute: true,
+      ...((typeof clientModified === 'number')
+        // we need to use ISO 8601 "combined date and time representation" format:
+        ? {client_modified: toDropboxIsoString(clientModified)}
+        : {}),
     };
+
     if (localRev) {
       args.mode = {'.tag': 'update', update: localRev} as any;
     }
@@ -99,10 +99,7 @@ export class DropboxApiService {
         'Content-Type': 'application/octet-stream',
         'Dropbox-API-Arg': JSON.stringify({path, ...args}),
       },
-    }).then((res) => {
-      console.log(res);
-      return res;
-    });
+    }).then((res) => res.data);
   }
 
 

@@ -8,8 +8,8 @@ import {DROPBOX_APP_FOLDER, DROPBOX_SYNC_FILE_NAME} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
-import {toDropboxIsoString} from './iso-date-without-ms.util.';
 import {LS_DROPBOX_LAST_LOCAL_REVISION} from '../../core/persistence/ls-keys.const';
+import {DropboxFileMetadata} from './dropbox.model';
 
 @Injectable({
   providedIn: 'root'
@@ -52,58 +52,48 @@ export class DropboxSyncService {
   }
 
   async sync() {
-    console.log('SYNC');
     await this._isReady$.toPromise();
-    console.log('SYNC_AFTER_READY');
-
-    const rr = await this._dropboxApiService.get({
-      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
-    });
-    console.log(rr);
-
-    return;
-
-    try {
-      const r = await this._loadData();
-      console.log(r);
-    } catch (e) {
-      console.error(e);
-    }
+    // try {
+    //   const r = await this._loadData();
+    //   console.log(r);
+    // } catch (e) {
+    //   console.error(e);
+    // }
 
     const d = await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
     console.log(d);
 
-    const r2 = this._uploadData(d);
+    const r2 = await this._uploadAppData(d);
     console.log(r2);
 
   }
 
-  private _loadData(): Promise<DropboxTypes.files.FileMetadata> {
-    return this._dropboxApiService.loadFile({
-      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
-    });
-  }
-
-  private _uploadData(data: AppDataComplete): Promise<DropboxTypes.files.FileMetadata> {
-    console.log(`/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`);
-
-    return this._dropboxApiService.uploadFile({
-      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
-      contents: JSON.stringify(data),
-      // mode: {'.tag': 'update', update: true},
-      mode: {
-        '.tag': 'overwrite'
-      },
-      // we need to use ISO 8601 "combined date and time representation" format:
-      client_modified: toDropboxIsoString(data.lastLocalSyncModelChange),
-    });
-  }
-
   private _importData() {
+    // TODO also update rev!
   }
 
-  // TODO move to sync
+  private _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
+    return this._dropboxApiService.download<AppDataComplete>({
+      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
+      localRev: this._getLastLocalRev(),
+    });
+  }
+
+  private async _uploadAppData(data: AppDataComplete): Promise<DropboxFileMetadata> {
+    const r = await this._dropboxApiService.upload({
+      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
+      data,
+      clientModified: data.lastLocalSyncModelChange,
+    });
+    this._updateRev(r.rev);
+    return r;
+  }
+
   private _getLastLocalRev(): string {
     return localStorage.getItem(LS_DROPBOX_LAST_LOCAL_REVISION);
+  }
+
+  private _updateRev(rev: string) {
+    return localStorage.setItem(LS_DROPBOX_LAST_LOCAL_REVISION, rev);
   }
 }
