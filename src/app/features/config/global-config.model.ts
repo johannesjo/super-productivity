@@ -103,6 +103,7 @@ export interface GoogleDriveSyncConfig {
 
 export interface DropboxSyncConfig {
   isEnabled: boolean;
+  authCode: string;
   accessToken: string;
   syncInterval: number;
   _backupDocId: string;
@@ -139,6 +140,7 @@ export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
 export type GlobalSectionConfig
   = MiscConfig
   | PomodoroConfig
+  | DropboxSyncConfig
   | KeyboardConfig
   ;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;

@@ -1167,14 +1167,14 @@
     rxjs "6.5.4"
     webpack-sources "1.4.3"
 
-"@ngx-formly/core@^5.6.0":
+"@ngx-formly/core@^5.6.2":
   version "5.6.2"
   resolved "https://registry.yarnpkg.com/@ngx-formly/core/-/core-5.6.2.tgz#f3f5d24c9087f0bb32e33fe1266e511ecc1599ab"
   integrity sha512-DgOHw06H2w98ilKBPGde83mwHIqbFCtRnxjDoB2gVB5fYAfzZ8WsWGxtd9RUW9cjw+F1EpON9Lq9e7wi84CF2Q==
   dependencies:
     tslib "^1.7.1"
 
-"@ngx-formly/material@^5.6.0":
+"@ngx-formly/material@^5.6.2":
   version "5.6.2"
   resolved "https://registry.yarnpkg.com/@ngx-formly/material/-/material-5.6.2.tgz#b2027ae947d407b9002a519955773ac91e79c373"
   integrity sha512-oYxRkHySPUU0CZ1cV9U9CPU+/iPjfWTKsFRVzppS/Ltj2Lo1BGzEhySN+ycRa81rUl+THi2O3DsIh9FlAgdIEw==

@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
-import {GlobalConfigActionTypes} from '../../config/store/global-config.actions';
-import {filter, switchMap, tap} from 'rxjs/operators';
+import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
+import {distinctUntilChanged, filter, map, pairwise, shareReplay, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {DropboxApiService} from '../dropbox-api.service';
 import {DropboxSyncService} from '../dropbox-sync.service';
 import {GlobalConfigService} from '../../config/global-config.service';
@@ -20,6 +20,7 @@ export class DropboxEffects {
       GlobalConfigActionTypes.LoadGlobalConfig,
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
+    // TODO filter UpdateGlobalConfigSection for updating dropbox
     switchMap(() => this._dataInitService.isAllDataLoadedInitially$),
     switchMap(() => combineLatest([
       this._dropboxApiService.isLoggedIn$,
@@ -38,6 +39,31 @@ export class DropboxEffects {
         )
       ),
     )),
+  );
+
+  private _isChangedAccessCode$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    switchMap(() => this._dropboxApiService.accessCode$),
+    distinctUntilChanged(),
+    pairwise(),
+    map(([a, b]) => a !== b),
+    shareReplay(),
+  );
+
+  @Effect() generateAccessCode$: any = this._actions$.pipe(
+    ofType(
+      GlobalConfigActionTypes.UpdateGlobalConfigSection,
+    ),
+    filter(({payload}: UpdateGlobalConfigSection) =>
+      payload.sectionKey === 'dropboxSync'
+      && (payload.sectionCfg as any).authCode),
+    withLatestFrom(this._isChangedAccessCode$),
+    filter(([, isChanged]: [UpdateGlobalConfigSection, boolean]) => isChanged),
+    switchMap(([{payload}, isChanged]: [UpdateGlobalConfigSection, boolean]) =>
+      this._dropboxApiService.getAccessTokenFromAuthCode((payload.sectionCfg as any).authCode)),
+    map((_accessToken: string) => new UpdateGlobalConfigSection({
+      sectionKey: 'dropboxSync',
+      sectionCfg: {accessToken: _accessToken}
+    })),
   );
 
   constructor(
