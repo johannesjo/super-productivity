@@ -6,6 +6,10 @@ import {GlobalConfigService} from '../config/global-config.service';
 import {delay, first, map, switchMap, tap} from 'rxjs/operators';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {Observable} from 'rxjs';
+import {LS_DROPBOX_LAST_LOCAL_REVISION} from '../../core/persistence/ls-keys.const';
+import {HttpClient, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
+import {getTextFromArrayBuffer} from '../../util/get-text-from-array-buffer';
+
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +39,7 @@ export class DropboxApiService {
   constructor(
     private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
+    private  _httpClient: HttpClient,
   ) {
     this._accessToken$.subscribe((accessToken) => {
       console.log('_accessToken$', accessToken);
@@ -92,6 +97,149 @@ export class DropboxApiService {
     const o = JSON.parse(responseText);
     return o && o.access_token;
   }
+
+  async getMeta() {
+
+  }
+
+  async get({path, options}: { path: string; options?: any }) {
+    await this.isReady$.toPromise();
+
+    // TODO implement
+    // if (options && options.ifNoneMatch) {
+    //   params.headers['If-None-Match'] = options.ifNoneMatch;
+    // }
+
+    return this._request({
+      method: 'GET',
+      url: 'https://content.dropboxapi.com/2/files/download',
+      headers: {
+        'Dropbox-API-Arg': JSON.stringify({path}),
+      },
+      responseType: 'arraybuffer'
+    }).then(async (resp: any) => {
+      const responseTxt = await getTextFromArrayBuffer(resp.body);
+      // const meta = resp.getResponseHeader('Dropbox-API-Result');
+      const meta = {};
+      let body;
+      try {
+        body = JSON.parse(responseTxt as string);
+      } catch (e) {
+        // Failed parsing Json, assume it is something else then
+      }
+      return {meta, body};
+      // TODO
+      // if (status === 409) {
+      // }
+      // try {
+      //   meta = JSON.parse(meta);
+      // } catch (e) {
+      //   return Promise.reject(e);
+      // }
+    });
+  }
+
+  private _getLastLocalRev(): string {
+    return localStorage.getItem(LS_DROPBOX_LAST_LOCAL_REVISION);
+  }
+
+  // async _uploadSimple(params: any, localRev = this._getLastLocalRev()) {
+  //   await this.isReady$.toPromise();
+  //   const url = 'https://content.dropboxapi.com/2/files/upload';
+  //   const args = {
+  //     // path: getDropboxPath(params.path),
+  //     mode: {'.tag': 'overwrite'},
+  //     mute: true
+  //   };
+  //
+  //   if (localRev) {
+  //     args.mode = {'.tag': 'update', update: localRev} as any;
+  //   }
+  //
+  //   return this._request('POST', url, {
+  //     body: params.body,
+  //     headers: {
+  //       'Content-Type': 'application/octet-stream',
+  //       'Dropbox-API-Arg': JSON.stringify(args)
+  //     }
+  //   }).then((response: any) => {
+  //     if (response.status !== 200 && response.status !== 409) {
+  //       return Promise.resolve({statusCode: response.status});
+  //     }
+  //
+  //     let body = response.responseText;
+  //     try {
+  //       body = JSON.parse(body);
+  //     } catch (e) {
+  //       return Promise.reject(new Error('Invalid API result: ' + body));
+  //     }
+  //
+  //     if (response.status === 409) {
+  //       if (compareApiError(body, ['path', 'conflict'])) {
+  //         return this._getMetadata(params.path).then(function(metadata) {
+  //           return Promise.resolve({
+  //             statusCode: 412,
+  //             revision: metadata.rev
+  //           });
+  //         });
+  //       }
+  //       return Promise.reject(new Error('API error: ' + body.error_summary));
+  //     }
+  //
+  //     this._revCache.set(params.path, body.rev);
+  //
+  //     return Promise.resolve({statusCode: response.status, revision: body.rev});
+  //   });
+  // }
+
+
+  async _request({
+                   url,
+                   method = 'GET',
+                   body,
+                   headers = {},
+                   params = {},
+                   responseType = 'json',
+                 }: {
+    url: string;
+    method?: string;
+    headers?: { [key: string]: any },
+    body?: string | object
+    params?: { [key: string]: string },
+    responseType?: string,
+  }) {
+    await this.isReady$.toPromise();
+    const authToken = await this._accessToken$.pipe(first()).toPromise();
+    const h = {
+      ...headers,
+      Authorization: `Bearer ${authToken}`,
+    };
+    if (typeof body === 'object') {
+      body = JSON.stringify(body);
+      h ['Content-Type'] = 'application/json; charset=UTF-8';
+    }
+
+    const allArgs = [
+      ...(body ? [body] : []),
+      {
+        headers: new HttpHeaders(h),
+        params: new HttpParams({
+          fromObject: {
+            ...params,
+            // needed because negative globs are not working as they should
+            // @see https://github.com/angular/angular/issues/21191
+            // 'ngsw-bypass': true
+          } as any
+        }),
+        reportProgress: false,
+        observe: 'response',
+        responseType,
+      }];
+    const req = new HttpRequest(method as any, url, ...allArgs as any);
+    // TODO use fetch instead
+    return this._httpClient.request(req).toPromise();
+  }
+
 
   // private async _execRequest(method = 'GET', apiPath: string = '', body = null, headers: any = {}, options: any = {}) {
   //   await this.isReady$.toPromise();

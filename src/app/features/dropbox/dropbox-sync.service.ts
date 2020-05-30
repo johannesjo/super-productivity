@@ -55,6 +55,13 @@ export class DropboxSyncService {
     await this._isReady$.toPromise();
     console.log('SYNC_AFTER_READY');
 
+    const rr = await this._dropboxApiService.get({
+      path: `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`,
+    });
+    console.log(rr);
+
+    return;
+
     try {
       const r = await this._loadData();
       console.log(r);
