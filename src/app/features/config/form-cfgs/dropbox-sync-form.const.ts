@@ -2,14 +2,13 @@
 import {T} from '../../../t.const';
 import {ConfigFormSection, DropboxSyncConfig} from '../global-config.model';
 import {DROPBOX_APP_KEY} from '../../dropbox/dropbox.const';
-import {SimpleCounterType} from '../../simple-counter/simple-counter.model';
 
 const DROPBOX_URL = `https://www.dropbox.com/oauth2/authorize?response_type=code&client_id=${DROPBOX_APP_KEY}`;
 
 export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
   // title: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
   title: 'DROPBOX',
-  key: 'keyboard',
+  key: 'dropboxSync',
   help: T.GCF.GOOGLE_DRIVE_SYNC.HELP,
   items: [
     {

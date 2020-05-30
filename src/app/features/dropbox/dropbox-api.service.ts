@@ -1,94 +1,55 @@
 import {Injectable} from '@angular/core';
 
 import {Dropbox} from 'dropbox';
-import {ReplaySubject} from 'rxjs';
 import {DROPBOX_APP_KEY} from './dropbox.const';
-import {LS_DROPBOX_ACCESS_TOKEN} from '../../core/persistence/ls-keys.const';
+import {GlobalConfigService} from '../config/global-config.service';
+import {map} from 'rxjs/operators';
+import {DataInitService} from '../../core/data-init/data-init.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DropboxApiService {
-  accessToken = this._getAccessToken();
-  dbx: Dropbox = new Dropbox({
+  private _accessToken$ = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.accessToken));
+
+  isLoggedIn$ = this._accessToken$.pipe(
+    map((token) => !!token)
+  );
+
+  private _dbx: Dropbox = new Dropbox({
     clientId: DROPBOX_APP_KEY,
-    accessToken: this.accessToken
   });
-  // isLoggedIn$ = new BehaviorSubject(!!this.accessToken);
-  isLoggedIn$ = new ReplaySubject();
 
-  constructor() {
-    // this._clearToken();
-    console.log(this.dbx);
-    this.dbx.usersGetCurrentAccount().then((response) => {
-      console.log(response);
-      this.isLoggedIn$.next(true);
-    }).catch(() => {
-      this.signOut();
+  private _init$ = this._dataInitService.isAllDataLoadedInitially$;
+
+  constructor(
+    private _globalConfigService: GlobalConfigService,
+    private _dataInitService: DataInitService,
+  ) {
+    this._accessToken$.subscribe((v) => console.log('_accessToken$', v));
+    this._globalConfigService.cfg$.subscribe((v) => console.log('this._globalConfigService.cfg$', v));
+
+    this._accessToken$.subscribe((accessToken) => {
+      console.log(accessToken);
+      if (accessToken) {
+        this._dbx.setAccessToken(accessToken.trim());
+        this._dbx.usersGetCurrentAccount().then((response) => {
+          console.log(response);
+        }).catch((e) => {
+          console.error(e);
+          // warn
+        });
+      }
     });
-    // this.dbx.filesListFolder({path: ''}).then((response) => {
-    //   console.log(response);
-    // });
-    this.signIn();
   }
 
-  signIn() {
-    if (!this.accessToken && confirm('Login')) {
-      const authUrl = this.dbx.getAuthenticationUrl(window.location.origin);
-      console.log('authUrl', authUrl);
-      window.location.href = authUrl;
-    }
-    // TODO electron & android
+  async loadFile(args: DropboxTypes.files.DownloadArg): Promise<DropboxTypes.files.FileMetadata> {
+    await this._init$.toPromise();
+    return this._dbx.filesDownload(args);
   }
 
-  signOut() {
-    this._clearToken();
-  }
-
-  private _getAccessToken(): string {
-    const qst = this._getAccessTokenFromQueryString();
-    if (qst) {
-      this._saveAccessToken(qst);
-      return qst;
-    }
-    return this._getAccessTokenFromLocalStorage();
-  }
-
-  private _getAccessTokenFromQueryString(): string {
-    const hm = this._getParsedHash();
-    console.log(hm);
-    return hm && hm.access_token;
-  }
-
-  private _getParsedHash(): { [key: string]: string } {
-    const hash = window.location.hash.substring(1);
-    const params = {};
-    hash.split('&').map(hk => {
-      const temp = hk.split('=');
-      params[temp[0]] = temp[1];
-    });
-    return params;
-  }
-
-  private _getAccessTokenFromLocalStorage(): string {
-    return localStorage.getItem(LS_DROPBOX_ACCESS_TOKEN);
-  }
-
-  private _saveAccessToken(token: string) {
-    localStorage.setItem(LS_DROPBOX_ACCESS_TOKEN, token);
-  }
-
-  private _clearToken() {
-    localStorage.removeItem(LS_DROPBOX_ACCESS_TOKEN);
-    this.accessToken = undefined;
-    this.isLoggedIn$.next(false);
-  }
-
-
-  private _downloadFile() {
-
-  }
-
-  private _uploadFile() {
+  async uploadFile(args: DropboxTypes.files.CommitInfo): Promise<DropboxTypes.files.FileMetadata> {
+    await this._init$.toPromise();
+    return this._dbx.filesUpload(args);
   }
 }
