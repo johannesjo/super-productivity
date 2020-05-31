@@ -14,7 +14,7 @@ import {Note} from '../note/note.model';
 import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
-import {GlobalSyncService} from '../../imex/global-sync/global-sync.service';
+import {GlobalSyncService} from '../../imex/sync/global-sync.service';
 import {first, map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';

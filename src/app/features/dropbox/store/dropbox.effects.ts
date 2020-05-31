@@ -7,10 +7,11 @@ import {DropboxApiService} from '../dropbox-api.service';
 import {DropboxSyncService} from '../dropbox-sync.service';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {DataInitService} from '../../../core/data-init/data-init.service';
-import {GlobalSyncService, INITIAL_SYNC_TRIGGER} from '../../../imex/global-sync/global-sync.service';
+import {GlobalSyncService} from '../../../imex/sync/global-sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
-import {SyncProvider} from '../../../imex/global-sync/sync-provider';
+import {SyncProvider} from '../../../imex/sync/sync-provider';
 import {isOnline$} from '../../../util/is-online';
+import {SYNC_INITIAL_SYNC_TRIGGER} from '../../../imex/sync/sync.const';
 
 
 @Injectable()
@@ -37,7 +38,7 @@ export class DropboxEffects {
     ),
     tap((x) => console.log('sync.....', x)),
     switchMap((trigger: any) => this._dropboxSyncService.sync().then(() => {
-      if (trigger === INITIAL_SYNC_TRIGGER) {
+      if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
         this._globalSyncService.setInitialSyncDone(true, SyncProvider.Dropbox);
       }
     })),

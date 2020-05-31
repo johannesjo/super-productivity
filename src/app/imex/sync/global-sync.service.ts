@@ -22,15 +22,14 @@ import {SyncProvider} from './sync-provider';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {isOnline$} from '../../util/is-online';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {AppDataComplete} from '../sync/sync.model';
+import {AppDataComplete} from './sync.model';
 import {LS_DROPBOX_LOCAL_LAST_SYNC_CHECK} from '../../core/persistence/ls-keys.const';
-
-
-export const INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
-const DEFAULT_AUDIT_TIME = 10000;
-const TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION = DEFAULT_AUDIT_TIME + 3000;
-const LONG_INACTIVITY = 1000 * 60 * 5;
-const LONG_INACTIVITY_THROTTLE_TIME = 1000 * 45;
+import {
+  SYNC_DEFAULT_AUDIT_TIME,
+  SYNC_INITIAL_SYNC_TRIGGER,
+  SYNC_LONG_INACTIVITY, SYNC_LONG_INACTIVITY_THROTTLE_TIME,
+  SYNC_TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION
+} from './sync.const';
 
 // TODO naming
 @Injectable({
@@ -41,7 +40,7 @@ export class GlobalSyncService {
   // ------------
   private _checkRemoteUpdateTriggers$: Observable<string> = merge(
     fromEvent(window, 'focus').pipe(
-      switchMap(() => timer(TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION)),
+      switchMap(() => timer(SYNC_TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION)),
       mapTo('FOCUS DELAYED'),
     )
   );
@@ -58,10 +57,10 @@ export class GlobalSyncService {
     filter(() => (
         Date.now() - +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK)
       // TODO comment in
-      ) > 10000 // LONG_INACTIVITY
+      ) >  SYNC_LONG_INACTIVITY
     ),
     // TODO comment in
-    // throttleTime(LONG_INACTIVITY_THROTTLE_TIME),
+    throttleTime(SYNC_LONG_INACTIVITY_THROTTLE_TIME),
     mapTo('FOCUS_AFTER_LONG_INACTIVITY'),
   );
   private _isOnlineTrigger$ = isOnline$.pipe(
@@ -78,7 +77,7 @@ export class GlobalSyncService {
     tap((v) => console.log('T', v)),
   );
 
-  private _initialTrigger$ = of(INITIAL_SYNC_TRIGGER);
+  private _initialTrigger$ = of(SYNC_INITIAL_SYNC_TRIGGER);
   private _immediateSyncTriggerAll$ = merge(
     this._initialTrigger$,
     this._immediateSyncTrigger$,
@@ -139,7 +138,7 @@ export class GlobalSyncService {
   ) {
   }
 
-  getSyncTrigger$(syncInterval: number = DEFAULT_AUDIT_TIME): Observable<unknown> {
+  getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME): Observable<unknown> {
     return merge(
       this._immediateSyncTriggerAll$,
 

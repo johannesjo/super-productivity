@@ -19,7 +19,7 @@ import {from} from 'rxjs';
 import {isToday} from '../../../util/is-today.util';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
-import {GlobalSyncService} from '../../../imex/global-sync/global-sync.service';
+import {GlobalSyncService} from '../../../imex/sync/global-sync.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {

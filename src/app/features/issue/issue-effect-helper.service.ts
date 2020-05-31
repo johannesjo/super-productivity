@@ -6,7 +6,7 @@ import {ProjectActionTypes} from '../project/store/project.actions';
 import {concatMap, filter, first, switchMap} from 'rxjs/operators';
 import {WorkContextService} from '../work-context/work-context.service';
 import {Observable} from 'rxjs';
-import {GlobalSyncService} from '../../imex/global-sync/global-sync.service';
+import {GlobalSyncService} from '../../imex/sync/global-sync.service';
 
 @Injectable({
   providedIn: 'root',

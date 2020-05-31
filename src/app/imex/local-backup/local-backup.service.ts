@@ -22,7 +22,7 @@ export class LocalBackupService {
 
   constructor(
     private _configService: GlobalConfigService,
-    private _syncService: DataImportService,
+    private _dataImportService: DataImportService,
     private _electronService: ElectronService,
   ) {
   }
@@ -32,7 +32,7 @@ export class LocalBackupService {
   }
 
   private async _backup() {
-    const data = await this._syncService.getCompleteSyncData();
+    const data = await this._dataImportService.getCompleteSyncData();
     this._electronService.ipcRenderer.send(IPC.BACKUP, data);
   }
 }

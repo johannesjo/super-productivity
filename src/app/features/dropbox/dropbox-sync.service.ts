@@ -6,7 +6,7 @@ import {concatMap, distinctUntilChanged, first, map, mapTo, take, tap} from 'rxj
 import {DropboxApiService} from './dropbox-api.service';
 import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
-import {GlobalSyncService} from '../../imex/global-sync/global-sync.service';
+import {GlobalSyncService} from '../../imex/sync/global-sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {
   LS_DROPBOX_LAST_LOCAL_REVISION,
@@ -15,7 +15,7 @@ import {
 } from '../../core/persistence/ls-keys.const';
 import {DropboxFileMetadata} from './dropbox.model';
 import {DataImportService} from '../../imex/sync/data-import.service';
-import {checkForUpdate, UpdateCheckResult} from '../../imex/global-sync/check-for-update.util';
+import {checkForUpdate, UpdateCheckResult} from '../../imex/sync/check-for-update.util';
 
 @Injectable({
   providedIn: 'root'
