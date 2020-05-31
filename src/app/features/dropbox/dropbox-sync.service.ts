@@ -29,6 +29,7 @@ export class DropboxSyncService {
   );
   syncInterval$: Observable<number> = this.dropboxCfg$.pipe(
     map(cfg => cfg && cfg.syncInterval),
+    distinctUntilChanged(),
   );
 
   isEnabledAndReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
@@ -65,13 +66,12 @@ export class DropboxSyncService {
 
     let local: AppDataComplete;
     const localRev = this._getLocalRev();
-    console.log('rev', rev, localRev);
 
     if (rev === localRev) {
-      console.log('DBX: SAME REV');
+      console.log('DBX PRE1: ↔ Same Rev');
       local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
-        console.log('DBX: NO LOCAL CHANGES');
+        console.log('DBX PRE1: No local changes to sync');
         return;
       }
     }
@@ -88,7 +88,7 @@ export class DropboxSyncService {
       && remoteClientUpdate === Math.floor(lastSync / 1000)
       && lastSync < local.lastLocalSyncModelChange
     ) {
-      console.log('DBX PRE: Pre Check => Remote Update Required');
+      console.log('DBX PRE2: ↑ Remote Update Required');
       return await this._uploadAppData(local);
     }
 
@@ -101,23 +101,23 @@ export class DropboxSyncService {
       remote: remote.lastLocalSyncModelChange
     })) {
       case UpdateCheckResult.InSync: {
-        console.log('DBX: In Sync => No Update');
+        console.log('DBX: ↔ In Sync => No Update');
         break;
       }
 
       case UpdateCheckResult.LocalUpdateRequired: {
-        console.log('DBX: Update Local');
+        console.log('DBX: ↓ Update Local');
         return await this._importData(remote, r.meta.rev);
       }
 
       case UpdateCheckResult.RemoteUpdateRequired: {
-        console.log('DBX: Remote Update Required => Update directly');
+        console.log('DBX: ↑ Remote Update Required => Update directly');
         return await this._uploadAppData(local);
       }
 
       case UpdateCheckResult.DataDiverged: {
         console.log('^--------^-------^');
-        console.log('DBX: X Diverged Data');
+        console.log('DBX: ⇎ X Diverged Data');
         alert('NO HANDLING YET => Dialog needed');
         if (confirm('Import?')) {
           return await this._importData(remote, r.meta.rev);
@@ -144,6 +144,7 @@ export class DropboxSyncService {
     await this._dataImportService.importCompleteSyncData(data);
     this._setLocalRev(rev);
     this._setLocalLastSync(data.lastLocalSyncModelChange);
+    console.log('DBX: ↓ Imported Data ↓ ✓');
   }
 
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
@@ -171,6 +172,7 @@ export class DropboxSyncService {
     });
     this._setLocalRev(r.rev);
     this._setLocalLastSync(data.lastLocalSyncModelChange);
+    console.log('DBX: ↑ Uploaded Data ↑ ✓');
     return r;
   }
 
