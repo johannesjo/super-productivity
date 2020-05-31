@@ -41,40 +41,24 @@ export class DropboxApiService {
     return this._request({
       method: 'POST',
       url: 'https://api.dropboxapi.com/2/files/get_metadata',
-      // headers: {
-      //   'Dropbox-API-Arg': JSON.stringify({path}),
-      // },
-      // data: qs.stringify({path}),
       data: {path},
     }).then((res) => res.data);
   }
 
-  async download<T>({path, localRev, options}: { path: string; localRev?: string; options?: any }): Promise<{ meta: DropboxFileMetadata, data: T }> {
+  async download<T>({path, localRev}: { path: string; localRev?: string; }): Promise<{ meta: DropboxFileMetadata, data: T }> {
     await this._isReady$.toPromise();
-
-    // TODO implement
-    // if (options && options.ifNoneMatch) {
-    //   params.headers['If-None-Match'] = options.ifNoneMatch;
-    // }
 
     return this._request({
       method: 'GET',
       url: 'https://content.dropboxapi.com/2/files/download',
       headers: {
         'Dropbox-API-Arg': JSON.stringify({path}),
+        // NOTE: doesn't do much, because we really get to the cas where it would be useful
+        ...(localRev ? {'If-None-Match': localRev} : {})
       },
     }).then((res) => {
-      console.log(res);
       const meta = JSON.parse(res.headers['dropbox-api-result']);
       return {meta, data: res.data};
-      // TODO
-      // if (status === 409) {
-      // }
-      // try {
-      //   meta = JSON.parse(meta);
-      // } catch (e) {
-      //   return Promise.reject(e);
-      // }
     });
   }
 

@@ -29,8 +29,6 @@ export class DropboxSyncService {
   );
   syncInterval$: Observable<number> = this.dropboxCfg$.pipe(
     map(cfg => cfg && cfg.syncInterval),
-    // TODO remove
-    mapTo(10000),
   );
 
   isEnabledAndReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
