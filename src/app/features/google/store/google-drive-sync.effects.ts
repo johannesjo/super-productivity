@@ -36,7 +36,7 @@ import {
 import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {GoogleDriveSyncConfig} from '../../config/global-config.model';
-import {SyncService} from '../../../imex/sync/sync.service';
+import {DataImportService} from '../../../imex/sync/data-import.service';
 import {DEFAULT_SYNC_FILE_NAME} from '../google.const';
 import {DialogConfirmDriveSyncSaveComponent} from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import * as moment from 'moment';
@@ -210,7 +210,7 @@ export class GoogleDriveSyncEffects {
           catchError(err => this._handleErrorForSave$(err)),
           concatMap((res: any): Observable<any> => {
 
-            const lastLocalSyncModelChange: number = this._syncService.getLastLocalSyncModelChange();
+            const lastLocalSyncModelChange: number = this._dataImportService.getLastLocalSyncModelChange();
             const lastModifiedRemote: string = res.modifiedDate;
             const lastSync = getGoogleLocalLastSync();
 
@@ -289,7 +289,7 @@ export class GoogleDriveSyncEffects {
       }
     }),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((p) => this._syncService.saveLastLocalSyncModelChange(p.response.modifiedDate)),
+    tap((p) => this._dataImportService.saveLastLocalSyncModelChange(p.response.modifiedDate)),
     tap((p) => saveGoogleLocalLastSync(p.response.modifiedDate))
   );
 
@@ -318,7 +318,7 @@ export class GoogleDriveSyncEffects {
                   );
                 }),
                 concatMap(([loadResponse, appData]: [any, AppDataComplete]): any => {
-                  const lastLocalSyncModelChange = this._syncService.getLastLocalSyncModelChange();
+                  const lastLocalSyncModelChange = this._dataImportService.getLastLocalSyncModelChange();
 
                   const lastLocalSyncModelChangeRemote = appData.lastLocalSyncModelChange
                     // NOTE: needed to support previous property name
@@ -381,7 +381,7 @@ export class GoogleDriveSyncEffects {
     ),
     map((action: LoadFromGoogleDriveSuccess) => action.payload.modifiedDate),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((modifiedDate) => this._syncService.saveLastLocalSyncModelChange(modifiedDate as any)),
+    tap((modifiedDate) => this._dataImportService.saveLastLocalSyncModelChange(modifiedDate as any)),
     tap(() => this._setInitialSyncDone()),
     tap((modifiedDate) => saveGoogleLocalLastSync(modifiedDate as string)),
   );
@@ -400,7 +400,7 @@ export class GoogleDriveSyncEffects {
     private _compressionService: CompressionService,
     private _matDialog: MatDialog,
     private _dataInitService: DataInitService,
-    private _syncService: SyncService,
+    private _dataImportService: DataImportService,
   ) {
     this._configService.cfg$.subscribe((cfg) => {
       this._config = cfg.googleDriveSync;
@@ -433,7 +433,7 @@ export class GoogleDriveSyncEffects {
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncSaveComponent.name;
     })) {
-      const lastLocalSyncModelChange = this._syncService.getLastLocalSyncModelChange();
+      const lastLocalSyncModelChange = this._dataImportService.getLastLocalSyncModelChange();
       this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
         restoreFocus: true,
         data: {
@@ -452,7 +452,7 @@ export class GoogleDriveSyncEffects {
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
     })) {
-      const lastLocalSyncModelChange: number = this._syncService.getLastLocalSyncModelChange();
+      const lastLocalSyncModelChange: number = this._dataImportService.getLastLocalSyncModelChange();
       this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
         restoreFocus: true,
         data: {
@@ -515,7 +515,7 @@ export class GoogleDriveSyncEffects {
   private async _import(loadRes): Promise<string> {
     const backupData: AppDataComplete = await this._decodeAppDataIfNeeded(loadRes.backup);
 
-    return from(this._syncService.importCompleteSyncData(backupData))
+    return from(this._dataImportService.importCompleteSyncData(backupData))
       .pipe(mapTo(loadRes.meta.modifiedDate))
       .toPromise();
   }
@@ -548,7 +548,7 @@ export class GoogleDriveSyncEffects {
   }
 
   private _getLocalAppData(): Promise<AppDataComplete> {
-    return this._syncService.getCompleteSyncData();
+    return this._dataImportService.getCompleteSyncData();
   }
 
   // SIMPLE HELPER

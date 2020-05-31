@@ -14,7 +14,7 @@ import {
   LS_DROPBOX_LOCAL_LAST_SYNC_CHECK
 } from '../../core/persistence/ls-keys.const';
 import {DropboxFileMetadata} from './dropbox.model';
-import {SyncService} from '../../imex/sync/sync.service';
+import {DataImportService} from '../../imex/sync/data-import.service';
 import {checkForUpdate, UpdateCheckResult} from '../../imex/global-sync/check-for-update.util';
 
 @Injectable({
@@ -49,7 +49,7 @@ export class DropboxSyncService {
 
   constructor(
     private _globalConfigService: GlobalConfigService,
-    private _syncService: SyncService,
+    private _dataImportService: DataImportService,
     private _globalSyncService: GlobalSyncService,
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
@@ -128,7 +128,7 @@ export class DropboxSyncService {
       throw new Error('No rev given');
     }
 
-    await this._syncService.importCompleteSyncData(data);
+    await this._dataImportService.importCompleteSyncData(data);
     this._setLocalRev(rev);
     this._setLocalLastSync(data.lastLocalSyncModelChange);
   }

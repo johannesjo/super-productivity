@@ -17,7 +17,7 @@ import {isValidAppData} from './is-valid-app-data.util';
 @Injectable({
   providedIn: 'root',
 })
-export class SyncService {
+export class DataImportService {
 
   constructor(
     private _persistenceService: PersistenceService,

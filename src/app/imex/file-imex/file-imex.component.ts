@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, ElementRef, ViewChild} from '@angular/core';
-import {SyncService} from '../sync/sync.service';
+import {DataImportService} from '../sync/data-import.service';
 import {SnackService} from '../../core/snack/snack.service';
 import {AppDataComplete} from '../sync/sync.model';
 import {download} from '../../util/download';
@@ -16,7 +16,7 @@ export class FileImexComponent {
   T = T;
 
   constructor(
-    private _syncService: SyncService,
+    private _dataImportService: DataImportService,
     private _snackService: SnackService,
   ) {
   }
@@ -39,7 +39,7 @@ export class FileImexComponent {
       if (oldData.config && Array.isArray(oldData.tasks)) {
         alert('V1 Data. Migration not imported any more.');
       } else {
-        await this._syncService.importCompleteSyncData(data);
+        await this._dataImportService.importCompleteSyncData(data);
       }
 
       // clear input
@@ -51,7 +51,7 @@ export class FileImexComponent {
   }
 
   async downloadBackup() {
-    const data = await this._syncService.getCompleteSyncData();
+    const data = await this._dataImportService.getCompleteSyncData();
     download('super-productivity-backup.json', JSON.stringify(data));
   }
 }

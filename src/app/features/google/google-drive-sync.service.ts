@@ -11,7 +11,7 @@ import {
 import {selectIsGoogleDriveLoadInProgress, selectIsGoogleDriveSaveInProgress} from './store/google-drive-sync.reducer';
 import {distinctUntilChanged, map} from 'rxjs/operators';
 import {GlobalConfigService} from '../config/global-config.service';
-import {SyncService} from '../../imex/sync/sync.service';
+import {DataImportService} from '../../imex/sync/data-import.service';
 import {Actions, ofType} from '@ngrx/effects';
 import {GoogleDriveSyncConfig} from '../config/global-config.model';
 
@@ -41,7 +41,7 @@ export class GoogleDriveSyncService {
   constructor(
     private _store$: Store<any>,
     private _configService: GlobalConfigService,
-    private _syncService: SyncService,
+    private _dataImportService: DataImportService,
     private _actions$: Actions,
   ) {
   }

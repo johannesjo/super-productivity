@@ -3,7 +3,7 @@ import {GlobalConfigService} from '../../features/config/global-config.service';
 import {interval, Observable} from 'rxjs';
 import {LocalBackupConfig} from '../../features/config/global-config.model';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
-import {SyncService} from '../sync/sync.service';
+import {DataImportService} from '../sync/data-import.service';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {ElectronService} from '../../core/electron/electron.service';
 
@@ -22,7 +22,7 @@ export class LocalBackupService {
 
   constructor(
     private _configService: GlobalConfigService,
-    private _syncService: SyncService,
+    private _syncService: DataImportService,
     private _electronService: ElectronService,
   ) {
   }
