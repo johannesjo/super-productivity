@@ -10,6 +10,7 @@ import {DataInitService} from '../../../core/data-init/data-init.service';
 import {GlobalSyncService, INITIAL_SYNC_TRIGGER} from '../../../core/global-sync/global-sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
 import {SyncProvider} from '../../../core/global-sync/sync-provider';
+import {isOnline$} from '../../../util/is-online';
 
 
 @Injectable()
@@ -22,6 +23,9 @@ export class DropboxEffects {
     filter((a: UpdateGlobalConfigSection) => !(a.type === GlobalConfigActionTypes.UpdateGlobalConfigSection)
       || a.payload.sectionKey === 'dropboxSync'),
     switchMap(() => this._dataInitService.isAllDataLoadedInitially$),
+    switchMap((ev) => isOnline$.pipe(
+      filter(isOnline => isOnline),
+    )),
     switchMap(() => this._dropboxSyncService.isEnabledAndReady$),
     filter((isEnabledAndReady) => isEnabledAndReady),
     switchMap(() => this._dropboxSyncService.syncInterval$),

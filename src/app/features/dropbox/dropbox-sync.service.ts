@@ -8,7 +8,11 @@ import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
 import {GlobalSyncService} from '../../core/global-sync/global-sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
-import {LS_DROPBOX_LAST_LOCAL_REVISION, LS_DROPBOX_LOCAL_LAST_SYNC} from '../../core/persistence/ls-keys.const';
+import {
+  LS_DROPBOX_LAST_LOCAL_REVISION,
+  LS_DROPBOX_LOCAL_LAST_SYNC,
+  LS_DROPBOX_LOCAL_LAST_SYNC_CHECK
+} from '../../core/persistence/ls-keys.const';
 import {DropboxFileMetadata} from './dropbox.model';
 import {SyncService} from '../../imex/sync/sync.service';
 import {checkForUpdate, UpdateCheckResult} from '../../core/global-sync/check-for-update.util';
@@ -55,6 +59,8 @@ export class DropboxSyncService {
 
   async sync() {
     await this._isReadyForRequests$.toPromise();
+
+    this._updateLocalLastSyncCheck();
 
     const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
     console.log(rev, clientUpdate);
@@ -182,6 +188,10 @@ export class DropboxSyncService {
       throw new Error('No correct localLastSync given');
     }
     return localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC, localLastSync.toString());
+  }
+
+  private _updateLocalLastSyncCheck() {
+    localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
   }
 
 }

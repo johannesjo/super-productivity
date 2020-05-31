@@ -4,6 +4,7 @@ import {combineLatest, fromEvent, merge, Observable, of, ReplaySubject, timer} f
 import {
   auditTime,
   concatMap,
+  debounceTime,
   distinctUntilChanged,
   filter,
   map,
@@ -21,11 +22,13 @@ import {DataInitService} from '../data-init/data-init.service';
 import {isOnline$} from '../../util/is-online';
 import {PersistenceService} from '../persistence/persistence.service';
 import {AppDataComplete} from '../../imex/sync/sync.model';
+import {LS_DROPBOX_LOCAL_LAST_SYNC_CHECK} from '../persistence/ls-keys.const';
 
 
 export const INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 const DEFAULT_AUDIT_TIME = 10000;
 const TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION = DEFAULT_AUDIT_TIME + 3000;
+const LONG_INACTIVITY = 1000 * 60 * 5;
 
 // TODO naming
 @Injectable({
@@ -36,20 +39,9 @@ export class GlobalSyncService {
   // ------------
   private _checkRemoteUpdateTriggers$: Observable<string> = merge(
     fromEvent(window, 'focus').pipe(
-      switchMap((ev) => isOnline$.pipe(
-        filter(isOnline => isOnline),
-      )),
-      switchMap(() => timer(TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION).pipe(
-        mapTo('FOCUS DELAYED'),
-        startWith('FOCUS') // until the timer fires, you'll have this value
-      ))
-    ),
-    isOnline$.pipe(
-      // skip initial online which always fires on page load
-      skip(1),
-      filter(isOnline => isOnline),
-      mapTo('IS_ONLINE'),
-    ),
+      switchMap(() => timer(TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION)),
+      mapTo('FOCUS DELAYED'),
+    )
   );
 
   // SAVE TO REMOTE
@@ -58,6 +50,39 @@ export class GlobalSyncService {
     filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
   );
 
+  // IMMEDIATE TRIGGERS
+  // ------------------
+  private _focusAfterLongInactivity$ = fromEvent(window, 'focus').pipe(
+    filter(() => (
+        Date.now() - +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK)
+      ) > 10000 // LONG_INACTIVITY
+    ),
+    mapTo('FOCUS_AFTER_LONG_INACTIVITY'),
+  );
+  private _isOnlineTrigger$ = isOnline$.pipe(
+    // skip initial online which always fires on page load
+    skip(1),
+    filter(isOnline => isOnline),
+    mapTo('IS_ONLINE'),
+  );
+
+  private _immediateSyncTrigger$ = merge(
+    this._focusAfterLongInactivity$,
+    this._isOnlineTrigger$,
+  ).pipe(
+    tap((v) => console.log('T', v)),
+  );
+
+  private _initialTrigger$ = of(INITIAL_SYNC_TRIGGER);
+  private _immediateSyncTriggerAll$ = merge(
+    this._initialTrigger$,
+    this._immediateSyncTrigger$,
+  ).pipe(
+    tap((v) => console.log('______TRIG_SYNC__', v)),
+  );
+
+  // OTHER INITIAL SYNC STUFF
+  // ------------------------
   private _isInitialSyncEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => combineLatest([
         // GoogleDrive
@@ -74,19 +99,6 @@ export class GlobalSyncService {
       )
     ),
     distinctUntilChanged(),
-  );
-
-
-  // IMMEDIATE TRIGGERS
-  // ------------------
-  _initialTrigger$ = of(INITIAL_SYNC_TRIGGER);
-  _immediateSyncTrigger$ = merge(
-    this._initialTrigger$,
-    merge([]).pipe(
-      mapTo('IMMEDIATE_TRIGGER'),
-    ),
-  ).pipe(
-    tap(() => console.log('______IMMEDIATE_TRIGGER_SYNC__')),
   );
 
 
@@ -124,7 +136,8 @@ export class GlobalSyncService {
 
   getSyncTrigger$(syncInterval: number = DEFAULT_AUDIT_TIME): Observable<unknown> {
     return merge(
-      this._immediateSyncTrigger$,
+      this._immediateSyncTriggerAll$,
+
       merge(
         this._checkRemoteUpdateTriggers$,
         this._saveToRemoteTrigger$,
@@ -133,6 +146,8 @@ export class GlobalSyncService {
         auditTime(syncInterval),
         tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
       )
+    ).pipe(
+      debounceTime(50)
     );
   }
 
