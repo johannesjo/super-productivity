@@ -4,7 +4,7 @@ import {Action, createFeatureSelector, createReducer, createSelector, on} from '
 import {SimpleCounter, SimpleCounterState} from '../simple-counter.model';
 import {DEFAULT_SIMPLE_COUNTERS} from '../simple-counter.const';
 import {arrayToDictionary} from '../../../util/array-to-dictionary';
-import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../../root-store/meta/load-all-data.action';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {updateAllInDictionary} from '../../../util/update-all-in-dictionary';
 import {migrateSimpleCounterState} from '../mgirate-simple-counter-state.util';
@@ -37,7 +37,7 @@ const disableIsOnForAll = (state: SimpleCounterState): SimpleCounterState => {
 const _reducer = createReducer<SimpleCounterState>(
   initialSimpleCounterState,
 
-  on(loadDataComplete, (oldState, {appDataComplete}) =>
+  on(loadAllData, (oldState, {appDataComplete}) =>
     appDataComplete.simpleCounter
       ? {
         // ...appDataComplete.simpleCounter,

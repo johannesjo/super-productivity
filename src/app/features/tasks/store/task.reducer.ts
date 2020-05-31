@@ -19,7 +19,7 @@ import {TaskAttachmentActions, TaskAttachmentActionTypes} from '../task-attachme
 import {Update} from '@ngrx/entity';
 import {unique} from '../../../util/unique';
 import {roundDurationVanilla} from '../../../util/round-duration';
-import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../../root-store/meta/load-all-data.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
 import {migrateTaskState} from '../migrate-task-state.util';
 
@@ -48,7 +48,7 @@ export function taskReducer(
 ): TaskState {
 
   // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadDataComplete.type) {
+  if ((action.type as string) === loadAllData.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
     return appDataComplete.task
       ? migrateTaskState({

@@ -12,7 +12,7 @@ import {T} from '../../../t.const';
 import {LanguageService} from '../../../core/language/language.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {ElectronService} from '../../../core/electron/electron.service';
-import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../../root-store/meta/load-all-data.action';
 import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
 
 @Injectable()
@@ -60,7 +60,7 @@ export class GlobalConfigEffects {
   @Effect({dispatch: false}) registerGlobalShortcutInitially$: any = this._actions$
     .pipe(
       ofType(
-        loadDataComplete,
+        loadAllData,
       ),
       filter(() => IS_ELECTRON),
       tap((action) => {
@@ -87,7 +87,7 @@ export class GlobalConfigEffects {
   @Effect({dispatch: false}) selectLanguageOnLoad: any = this._actions$
     .pipe(
       ofType(
-        loadDataComplete,
+        loadAllData,
       ),
       tap((action) => {
         const cfg = action.appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;

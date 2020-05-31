@@ -8,11 +8,11 @@ import {TaskService} from '../../features/tasks/task.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 import {Store} from '@ngrx/store';
-import {allDataLoaded} from './data-init.actions';
+import {allDataWasLoaded} from '../../root-store/meta/all-data-was-loaded.actions';
 import {PersistenceService} from '../persistence/persistence.service';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {MigrationService} from '../migration/migration.service';
-import {loadDataComplete} from '../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../root-store/meta/load-all-data.action';
 import {isValidAppData} from '../../imex/sync/is-valid-app-data.util';
 import {environment} from '../../../environments/environment';
 
@@ -50,7 +50,7 @@ export class DataInitService {
       take(1)
     ).subscribe(() => {
       // here because to avoid circular dependencies
-      this._store$.dispatch(allDataLoaded());
+      this._store$.dispatch(allDataWasLoaded());
     });
   }
 
@@ -62,6 +62,6 @@ export class DataInitService {
       const isValid = isValidAppData(appDataComplete);
       console.log('VALID_INITIAL_DATA', isValid);
     }
-    this._store$.dispatch(loadDataComplete({appDataComplete, isOmitTokens}));
+    this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
   }
 }

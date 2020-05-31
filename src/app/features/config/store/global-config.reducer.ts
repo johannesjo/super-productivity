@@ -9,7 +9,7 @@ import {
   TakeABreakConfig
 } from '../global-config.model';
 import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
-import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../../root-store/meta/load-all-data.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
 import {migrateGlobalConfigState} from '../migrate-global-config.util';
 
@@ -30,7 +30,7 @@ export function globalConfigReducer(
   // console.log(action, state);
 
   // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadDataComplete.type) {
+  if ((action.type as string) === loadAllData.type) {
     const {appDataComplete, isOmitTokens}: { appDataComplete: AppDataComplete, isOmitTokens: boolean } = action as any;
     return appDataComplete.globalConfig
       ? migrateGlobalConfigState({...appDataComplete.globalConfig})

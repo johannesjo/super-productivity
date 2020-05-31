@@ -50,7 +50,7 @@ import {
   updateWorkEndForTag,
   updateWorkStartForTag
 } from '../tag/store/tag.actions';
-import {allDataLoaded} from '../../core/data-init/data-init.actions';
+import {allDataWasLoaded} from '../../root-store/meta/all-data-was-loaded.actions';
 import {isToday} from '../../util/is-today.util';
 
 @Injectable({
@@ -60,7 +60,7 @@ export class WorkContextService {
   // here because to avoid circular dependencies
   // should be treated as private
   _isAllDataLoaded$: Observable<boolean> = this._actions$.pipe(
-    ofType(allDataLoaded),
+    ofType(allDataWasLoaded),
     mapTo(true),
     startWith(false),
     shareReplay(1),

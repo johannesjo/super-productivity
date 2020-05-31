@@ -23,7 +23,7 @@ import {EMPTY, of} from 'rxjs';
 import {SIMPLE_COUNTER_TRIGGER_ACTIONS} from '../simple-counter.const';
 import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
-import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../../root-store/meta/load-all-data.action';
 import {ImexMetaService} from '../../../imex/imex-meta/imex-meta.service';
 
 
@@ -79,7 +79,7 @@ export class SimpleCounterEffects {
       )
       : EMPTY
     ),
-    switchMap(({items, action}) => action.type === loadDataComplete.type
+    switchMap(({items, action}) => action.type === loadAllData.type
       // NOTE: we delay because otherwise we might write into db while importing data
       ? this._imexMetaService.isDataImportInProgress$.pipe(
         filter(isInProgress => !isInProgress),

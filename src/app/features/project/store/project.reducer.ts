@@ -32,7 +32,7 @@ import {filterOutId} from '../../../util/filter-out-id';
 import {unique} from '../../../util/unique';
 import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
-import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../../root-store/meta/load-all-data.action';
 import {AppDataComplete} from '../../../imex/sync/sync.model';
 import {migrateProjectState} from '../migrate-projects-state.util';
 import {MODEL_VERSION_KEY} from '../../../app.constants';
@@ -113,7 +113,7 @@ export function projectReducer(
   const payload = action['payload'];
 
   // TODO fix this hackyness once we use the new syntax everywhere
-  if ((action.type as string) === loadDataComplete.type) {
+  if ((action.type as string) === loadAllData.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
     return appDataComplete.project
       ? migrateProjectState({...appDataComplete.project})

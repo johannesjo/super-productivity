@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {loadDataComplete} from '../../../root-store/meta/load-data-complete.action';
+import {loadAllData} from '../../../root-store/meta/load-all-data.action';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
 import {distinctUntilChanged, filter, map, pairwise, shareReplay, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {DropboxApiService} from '../dropbox-api.service';
@@ -17,7 +17,7 @@ import {isOnline$} from '../../../util/is-online';
 export class DropboxEffects {
   @Effect({dispatch: false}) triggerSync$: any = this._actions$.pipe(
     ofType(
-      loadDataComplete.type,
+      loadAllData.type,
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
     filter((a: UpdateGlobalConfigSection) => !(a.type === GlobalConfigActionTypes.UpdateGlobalConfigSection)
