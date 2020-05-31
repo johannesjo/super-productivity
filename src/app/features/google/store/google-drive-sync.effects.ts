@@ -52,6 +52,7 @@ import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 import {DataInitService} from '../../../core/data-init/data-init.service';
 import {getGoogleLocalLastSync, saveGoogleLocalLastSync} from '../google-session';
 import {loadAllData} from '../../../root-store/meta/load-all-data.action';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -210,7 +211,7 @@ export class GoogleDriveSyncEffects {
           catchError(err => this._handleErrorForSave$(err)),
           concatMap((res: any): Observable<any> => {
 
-            const lastLocalSyncModelChange: number = this._dataImportService.getLastLocalSyncModelChange();
+            const lastLocalSyncModelChange: number = this._persistenceService.getLastLocalSyncModelChange();
             const lastModifiedRemote: string = res.modifiedDate;
             const lastSync = getGoogleLocalLastSync();
 
@@ -289,7 +290,7 @@ export class GoogleDriveSyncEffects {
       }
     }),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((p) => this._dataImportService.saveLastLocalSyncModelChange(p.response.modifiedDate)),
+    tap((p) => this.saveLastLocalSyncModelChange(p.response.modifiedDate)),
     tap((p) => saveGoogleLocalLastSync(p.response.modifiedDate))
   );
 
@@ -318,7 +319,7 @@ export class GoogleDriveSyncEffects {
                   );
                 }),
                 concatMap(([loadResponse, appData]: [any, AppDataComplete]): any => {
-                  const lastLocalSyncModelChange = this._dataImportService.getLastLocalSyncModelChange();
+                  const lastLocalSyncModelChange = this._persistenceService.getLastLocalSyncModelChange();
 
                   const lastLocalSyncModelChangeRemote = appData.lastLocalSyncModelChange
                     // NOTE: needed to support previous property name
@@ -381,7 +382,7 @@ export class GoogleDriveSyncEffects {
     ),
     map((action: LoadFromGoogleDriveSuccess) => action.payload.modifiedDate),
     // NOTE: last active needs to be set to exactly the value we get back
-    tap((modifiedDate) => this._dataImportService.saveLastLocalSyncModelChange(modifiedDate as any)),
+    tap((modifiedDate) => this.saveLastLocalSyncModelChange(modifiedDate as any)),
     tap(() => this._setInitialSyncDone()),
     tap((modifiedDate) => saveGoogleLocalLastSync(modifiedDate as string)),
   );
@@ -401,6 +402,7 @@ export class GoogleDriveSyncEffects {
     private _matDialog: MatDialog,
     private _dataInitService: DataInitService,
     private _dataImportService: DataImportService,
+    private _persistenceService: PersistenceService,
   ) {
     this._configService.cfg$.subscribe((cfg) => {
       this._config = cfg.googleDriveSync;
@@ -433,7 +435,7 @@ export class GoogleDriveSyncEffects {
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncSaveComponent.name;
     })) {
-      const lastLocalSyncModelChange = this._dataImportService.getLastLocalSyncModelChange();
+      const lastLocalSyncModelChange = this._persistenceService.getLastLocalSyncModelChange();
       this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
         restoreFocus: true,
         data: {
@@ -452,7 +454,7 @@ export class GoogleDriveSyncEffects {
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
     })) {
-      const lastLocalSyncModelChange: number = this._dataImportService.getLastLocalSyncModelChange();
+      const lastLocalSyncModelChange: number = this._persistenceService.getLastLocalSyncModelChange();
       this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
         restoreFocus: true,
         data: {
@@ -573,5 +575,13 @@ export class GoogleDriveSyncEffects {
       this._globalSyncService.setInitialSyncDone(true, SyncProvider.GoogleDrive);
       this.isInitialSyncDone = true;
     }
+  }
+
+  // wrapper to handle string dates as well
+  private saveLastLocalSyncModelChange(date: number | string | Date) {
+    const d = (typeof date === 'number')
+      ? date
+      : new Date(date).getTime();
+    this._persistenceService.updateLastLocalSyncModelChange(d);
   }
 }

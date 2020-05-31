@@ -2,12 +2,9 @@ import {Injectable} from '@angular/core';
 import {AppDataComplete} from './sync.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {SnackService} from '../../core/snack/snack.service';
-import {ProjectService} from '../../features/project/project.service';
-import {GlobalConfigService} from '../../features/config/global-config.service';
 import {ReminderService} from '../../features/reminder/reminder.service';
 import {ImexMetaService} from '../imex-meta/imex-meta.service';
 import {T} from '../../t.const';
-import {TaskService} from '../../features/tasks/task.service';
 import {MigrationService} from '../../core/migration/migration.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {isValidAppData} from './is-valid-app-data.util';
@@ -27,17 +24,6 @@ export class DataImportService {
     private _migrationService: MigrationService,
     private _dataInitService: DataInitService,
   ) {
-  }
-
-  saveLastLocalSyncModelChange(date: number | string | Date) {
-    const d = (typeof date === 'number')
-      ? date
-      : new Date(date).getTime();
-    this._persistenceService.updateLastLocalSyncModelChange(d);
-  }
-
-  getLastLocalSyncModelChange(): number {
-    return this._persistenceService.getLastLocalSyncModelChange();
   }
 
   async getCompleteSyncData(): Promise<AppDataComplete> {
@@ -82,7 +68,7 @@ export class DataImportService {
   private async _loadAllFromDatabaseToStore(): Promise<any> {
     return await Promise.all([
       // reload view model from ls
-      this._dataInitService.reInit( true),
+      this._dataInitService.reInit(true),
       this._reminderService.reloadFromDatabase(),
     ]);
   }
