@@ -121,6 +121,7 @@ export class DropboxSyncService {
         return await this._uploadAppData(local);
       }
 
+      case UpdateCheckResult.RemoteNotUpToDateDespiteSync:
       case UpdateCheckResult.DataDiverged: {
         dbxLog('^--------^-------^');
         dbxLog('DBX: ⇎ X Diverged Data');
