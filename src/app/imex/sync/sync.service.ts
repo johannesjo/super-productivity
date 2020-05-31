@@ -9,7 +9,6 @@ import {
   filter,
   map,
   mapTo,
-  share,
   shareReplay,
   skip,
   startWith,
@@ -24,7 +23,7 @@ import {DataInitService} from '../../core/data-init/data-init.service';
 import {isOnline$} from '../../util/is-online';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {AppDataComplete} from './sync.model';
-import {SYNC_DEFAULT_AUDIT_TIME, SYNC_FOCUS_CHECK_THROTTLE_TIME, SYNC_INITIAL_SYNC_TRIGGER} from './sync.const';
+import {SYNC_DEFAULT_AUDIT_TIME, SYNC_FOCUS_CHECK_THROTTLE_TIME} from './sync.const';
 
 // TODO naming
 @Injectable({
@@ -33,13 +32,13 @@ import {SYNC_DEFAULT_AUDIT_TIME, SYNC_FOCUS_CHECK_THROTTLE_TIME, SYNC_INITIAL_SY
 export class SyncService {
   // SAVE TO REMOTE TRIGGER
   // ----------------------
-  private _saveToRemoteTrigger$: Observable<unknown> = this._persistenceService.onAfterSave$.pipe(
+  private _updateLocalData$: Observable<unknown> = this._persistenceService.onAfterSave$.pipe(
     filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
   );
 
   // IMMEDIATE TRIGGERS
   // ------------------
-  private _focusAfterLongInactivity$ = fromEvent(window, 'focus').pipe(
+  private _focusAppTrigger$ = fromEvent(window, 'focus').pipe(
     throttleTime(SYNC_FOCUS_CHECK_THROTTLE_TIME),
     mapTo('FOCUS_THROTTLED'),
   );
@@ -51,22 +50,12 @@ export class SyncService {
   );
 
   private _immediateSyncTrigger$ = merge(
-    this._focusAfterLongInactivity$,
+    this._focusAppTrigger$,
     this._isOnlineTrigger$,
   ).pipe(
     tap((v) => console.log('T', v)),
   );
 
-  private _initialTrigger$ = of(SYNC_INITIAL_SYNC_TRIGGER).pipe(
-    // needs to be shared, to only ever emit once
-    share(),
-  );
-  private _immediateSyncTriggerAll$ = merge(
-    this._initialTrigger$,
-    this._immediateSyncTrigger$,
-  ).pipe(
-    tap((v) => console.log('______TRIG_SYNC__', v)),
-  );
 
   // OTHER INITIAL SYNC STUFF
   // ------------------------
@@ -123,14 +112,11 @@ export class SyncService {
 
   getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME, minSyncInterval: number = 5000): Observable<unknown> {
     return merge(
-      this._immediateSyncTriggerAll$,
-
-      merge(
-        this._saveToRemoteTrigger$,
-      ).pipe(
-        tap((ev) => console.log('__TRIGGER_SYNC__', ev)),
+      this._immediateSyncTrigger$,
+      this._updateLocalData$.pipe(
+        tap((ev) => console.log('__trigger_sync__', ev)),
         auditTime(Math.max(syncInterval, minSyncInterval)),
-        tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
+        tap((ev) => console.log('__trigger_sync after auditTime__', ev)),
       )
     ).pipe(
       debounceTime(100)

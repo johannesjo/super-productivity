@@ -7,7 +7,7 @@ import {
   filter,
   map,
   pairwise,
-  shareReplay,
+  shareReplay, startWith,
   switchMap,
   tap,
   withLatestFrom
@@ -37,6 +37,7 @@ export class DropboxEffects {
       ? this._syncService.getSyncTrigger$(syncInterval, DROPBOX_MIN_SYNC_INTERVAL)
       : EMPTY
     ),
+    startWith(SYNC_INITIAL_SYNC_TRIGGER),
     tap((x) => dbxLog('sync(effect).....', x)),
     withLatestFrom(isOnline$),
     // don't run multiple after each other when dialog is open
