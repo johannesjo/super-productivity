@@ -83,6 +83,15 @@
         "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
         "TITLE": "Dropbox: Conflicting Data"
       },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Generate Token",
+        "TITLE": "Sync via Dropbox (recommneded)",
+        "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
+        "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
+        "L_AUTH_CODE": "Auth Code",
+        "L_ENABLE_SYNCING": "Enable Dropbox Syncing",
+        "L_SYNC_INTERVAL": "Sync Interval"
+      },
       "S": {
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
         "ACCESS_TOKEN_ERROR": "Dropbox: Unable to generate Access Token from Auth Code",

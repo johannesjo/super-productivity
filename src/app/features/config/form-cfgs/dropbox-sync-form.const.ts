@@ -5,31 +5,36 @@ import {DROPBOX_AUTH_CODE_URL} from '../../dropbox/dropbox.const';
 
 
 export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
-  // title: T.GCF.GOOGLE_DRIVE_SYNC.TITLE,
-  title: 'DROPBOX',
+  title: T.F.DROPBOX.FORM.TITLE,
   key: 'dropboxSync',
-  help: T.GCF.GOOGLE_DRIVE_SYNC.HELP,
   items: [
     {
       type: 'tpl',
       templateOptions: {
         tag: 'p',
-        text: `<p>Please open the following link <a href="${DROPBOX_AUTH_CODE_URL}" target="_blank">https://www.dropbox.com/oauth2/authorize?response_type=code</a> and copy the auth code provided there</p>`,
+        // text: `<p>Please open the following link and copy the auth code provided there</p>`,
+        text: T.F.DROPBOX.FORM.FOLLOW_LINK,
+      },
+    }, {
+      type: 'tpl',
+      templateOptions: {
+        tag: 'p',
+        text: `<a href="${DROPBOX_AUTH_CODE_URL}" target="_blank">https://www.dropbox.com/oauth2/authorize?response_type=code</a>`,
       },
     },
     {
       key: 'authCode',
       type: 'input',
       templateOptions: {
-        label: 'Auth Code',
+        label: T.F.DROPBOX.FORM.L_AUTH_CODE,
       },
     },
     {
       type: 'tpl',
       hideExpression: ((model: DropboxSyncConfig) => !!model.accessToken || !model.authCode),
       templateOptions: {
-        tag: 'p',
-        text: `<button type="submit" class="mat-button mat-button-base mat-stroked-button">Generate Token</button>`,
+        tag: 'button',
+        text: T.F.DROPBOX.FORM.B_GENERATE_TOKEN,
       },
     },
     {
@@ -37,7 +42,7 @@ export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
       type: 'input',
       hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
       templateOptions: {
-        label: 'Access Token (generated from Auth Code)',
+        label: T.F.DROPBOX.FORM.L_ACCESS_TOKEN,
       },
     },
     {
@@ -47,7 +52,7 @@ export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
       // NOTE: we don't hide because model updates don't seem to work properly for this
       // hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
       templateOptions: {
-        label: 'Enable Dropbox Syncing ',
+        label: T.F.DROPBOX.FORM.L_ENABLE_SYNCING,
       },
     },
     {
@@ -57,7 +62,7 @@ export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
       // hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
       templateOptions: {
         isAllowSeconds: true,
-        label: 'Sync Interval',
+        label: T.F.DROPBOX.FORM.L_SYNC_INTERVAL,
       },
     },
   ]
