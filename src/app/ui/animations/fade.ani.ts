@@ -13,3 +13,17 @@ export const fadeAnimation = [
     ])
   ])
 ];
+
+
+export const fadeInOutTopAnimation = [
+  trigger('fadeInOutTop', [
+    transition(':enter', [
+      style({opacity: 0, transform: 'translateY(-100%)'}),
+      animate(ANI_ENTER_TIMING, style({opacity: '*', transform: 'translateY(0)'}))
+    ]), // void => *
+    transition(':leave', [
+      style({opacity: '*', transform: 'translateY(0)'}),
+      animate(ANI_LEAVE_TIMING, style({opacity: 0, transform: 'translateY(-100%)'}))
+    ])
+  ])
+];

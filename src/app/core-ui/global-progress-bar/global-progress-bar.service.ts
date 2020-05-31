@@ -12,7 +12,7 @@ export class GlobalProgressBarService {
     distinctUntilChanged(),
     switchMap((isShow) => isShow
       ? of(isShow)
-      : of(isShow).pipe(delay(1000))
+      : of(isShow).pipe(delay(100))
     ),
   );
 
