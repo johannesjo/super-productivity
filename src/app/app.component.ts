@@ -30,7 +30,7 @@ import {AndroidService} from './core/android/android.service';
 import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
 import {isOnline} from './util/is-online';
 import {InitialDialogService} from './features/initial-dialog/initial-dialog.service';
-import {GlobalSyncService} from './core/global-sync/global-sync.service';
+import {GlobalSyncService} from './imex/global-sync/global-sync.service';
 
 
 @Component({

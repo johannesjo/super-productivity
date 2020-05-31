@@ -19,11 +19,11 @@ import {
 } from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {SyncProvider} from './sync-provider';
-import {DataInitService} from '../data-init/data-init.service';
+import {DataInitService} from '../../core/data-init/data-init.service';
 import {isOnline$} from '../../util/is-online';
-import {PersistenceService} from '../persistence/persistence.service';
-import {AppDataComplete} from '../../imex/sync/sync.model';
-import {LS_DROPBOX_LOCAL_LAST_SYNC_CHECK} from '../persistence/ls-keys.const';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {AppDataComplete} from '../sync/sync.model';
+import {LS_DROPBOX_LOCAL_LAST_SYNC_CHECK} from '../../core/persistence/ls-keys.const';
 
 
 export const INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';

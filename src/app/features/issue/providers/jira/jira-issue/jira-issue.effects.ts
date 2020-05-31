@@ -42,7 +42,7 @@ import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 import {WorkContextType} from '../../../../work-context/work-context.model';
-import {GlobalSyncService} from '../../../../../core/global-sync/global-sync.service';
+import {GlobalSyncService} from '../../../../../imex/global-sync/global-sync.service';
 import {isJiraEnabled} from '../is-jira-enabled.util';
 
 @Injectable()

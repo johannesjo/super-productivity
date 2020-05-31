@@ -22,7 +22,7 @@ import {environment} from '../../../environments/environment';
 export class DataInitService {
   isAllDataLoadedInitially$: Observable<boolean> = from(this._persistenceService.project.loadState(true)).pipe(
     concatMap((projectState: ProjectState) => this._migrationService.migrateIfNecessaryToProjectState$(projectState)),
-    concatMap((projectState: ProjectState) => from(this.reInit(projectState))),
+    concatMap(() => from(this.reInit())),
     switchMap(() => this._workContextService.isActiveWorkContextProject$),
     switchMap(isProject => isProject
       ? this._projectService.isRelatedDataLoadedForCurrentProject$
@@ -56,23 +56,12 @@ export class DataInitService {
 
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
-  async reInit(projectState: ProjectState = null, isOmitTokens = false): Promise<any> {
+  async reInit(isOmitTokens = false): Promise<any> {
     const appDataComplete = await this._persistenceService.loadComplete();
     if (!environment.production) {
       const isValid = isValidAppData(appDataComplete);
       console.log('VALID_INITIAL_DATA', isValid);
     }
     this._store$.dispatch(loadDataComplete({appDataComplete, isOmitTokens}));
-
-    // return forkJoin([
-    //   // LOAD GLOBAL MODELS
-    //   this._configService.load(isOmitTokens),
-    //   this._tagService.load(),
-    //   this._workContextService.load(),
-    //   this._taskService.load(),
-    //   this._taskRepeatCfgService.load(),
-    //   // NOTE: loading the project state should deal with reloading the for project states via effect
-    //   this._projectService.load(projectState),
-    // ]);
   }
 }

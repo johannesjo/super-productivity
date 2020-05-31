@@ -22,9 +22,6 @@ export class SyncService {
   constructor(
     private _persistenceService: PersistenceService,
     private _snackService: SnackService,
-    private _projectService: ProjectService,
-    private _taskService: TaskService,
-    private _configService: GlobalConfigService,
     private _reminderService: ReminderService,
     private _imexMetaService: ImexMetaService,
     private _migrationService: MigrationService,
@@ -85,7 +82,7 @@ export class SyncService {
   private async _loadAllFromDatabaseToStore(): Promise<any> {
     return await Promise.all([
       // reload view model from ls
-      this._dataInitService.reInit(null, true),
+      this._dataInitService.reInit( true),
       this._reminderService.reloadFromDatabase(),
     ]);
   }

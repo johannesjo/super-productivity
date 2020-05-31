@@ -7,9 +7,9 @@ import {DropboxApiService} from '../dropbox-api.service';
 import {DropboxSyncService} from '../dropbox-sync.service';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {DataInitService} from '../../../core/data-init/data-init.service';
-import {GlobalSyncService, INITIAL_SYNC_TRIGGER} from '../../../core/global-sync/global-sync.service';
+import {GlobalSyncService, INITIAL_SYNC_TRIGGER} from '../../../imex/global-sync/global-sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
-import {SyncProvider} from '../../../core/global-sync/sync-provider';
+import {SyncProvider} from '../../../imex/global-sync/sync-provider';
 import {isOnline$} from '../../../util/is-online';
 
 
