@@ -71,6 +71,19 @@
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
       }
     },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "last change:",
+        "LAST_SYNC": "last sync:",
+        "LOCAL": "local",
+        "LOCAL_REMOTE": "local -> remote",
+        "USE_REMOTE": "Use remote",
+        "USE_LOCAL": "Use local",
+        "REMOTE": "remote",
+        "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
+        "TITLE": "Dropbox: Conflicting Data"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup Github for Project"

@@ -1,0 +1,48 @@
+<h1 mat-dialog-title>{{T.F.DROPBOX.D_CONFLICT.TITLE|translate}}</h1>
+
+<mat-dialog-content>
+  <div [innerHTML]="T.F.DROPBOX.D_CONFLICT.TEXT|translate"></div>
+
+  <table>
+    <tr>
+      <td>{{T.F.DROPBOX.D_CONFLICT.REMOTE|translate}}</td>
+      <td>{{T.F.DROPBOX.D_CONFLICT.LAST_CHANGE|translate}}</td>
+      <td>{{remote}}</td>
+    </tr>
+    <tr>
+      <td>{{T.F.DROPBOX.D_CONFLICT.LOCAL|translate}}</td>
+      <td>{{T.F.DROPBOX.D_CONFLICT.LAST_CHANGE|translate}}</td>
+      <td>{{local}}</td>
+    </tr>
+    <tr>
+      <td>{{T.F.DROPBOX.D_CONFLICT.LOCAL_REMOTE|translate}}</td>
+      <td>{{T.F.DROPBOX.D_CONFLICT.LAST_SYNC|translate}}</td>
+      <td>{{lastSync}}</td>
+    </tr>
+  </table>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button (click)="close()"
+            color="primary"
+            mat-button>
+      {{T.G.CANCEL|translate}}
+    </button>
+    <button (click)="close('REMOTE')"
+            color="primary"
+            mat-stroked-button>
+      <mat-icon>file_upload</mat-icon>
+      {{T.F.DROPBOX.D_CONFLICT.USE_REMOTE|translate}}
+    </button>
+    <button (click)="close('LOCAL')"
+            color="primary"
+            mat-stroked-button>
+      <mat-icon>file_download</mat-icon>
+      {{T.F.DROPBOX.D_CONFLICT.USE_LOCAL|translate}}
+    </button>
+  </div>
+</mat-dialog-actions>
+
+
+

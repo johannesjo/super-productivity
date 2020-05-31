@@ -13,10 +13,12 @@ import {
   LS_DROPBOX_LOCAL_LAST_SYNC,
   LS_DROPBOX_LOCAL_LAST_SYNC_CHECK
 } from '../../core/persistence/ls-keys.const';
-import {DropboxFileMetadata} from './dropbox.model';
+import {DropboxConflictResolution, DropboxFileMetadata} from './dropbox.model';
 import {DataImportService} from '../../imex/sync/data-import.service';
 import {checkForUpdate, UpdateCheckResult} from '../../imex/sync/check-for-update.util';
 import {dbxLog} from './dropbox-log.util';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogDbxSyncConflictComponent} from './dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
 
 
 @Injectable({
@@ -54,6 +56,7 @@ export class DropboxSyncService {
     private _syncService: SyncService,
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
+    private _matDialog: MatDialog,
   ) {
     // TODO initial syncing (do with immediate triggers)
   }
@@ -90,18 +93,19 @@ export class DropboxSyncService {
       && remoteClientUpdate === Math.floor(lastSync / 1000)
       && lastSync < local.lastLocalSyncModelChange
     ) {
-      dbxLog('DBX PRE2: ↑ Remote Update Required');
+      dbxLog('DBX PRE2: ↑ Update Remote');
       return await this._uploadAppData(local);
     }
 
     const r = (await this._downloadAppData());
     const remote = r.data;
-
-    switch (checkForUpdate({
+    const p = {
       local: local.lastLocalSyncModelChange,
       lastSync,
       remote: remote.lastLocalSyncModelChange
-    })) {
+    };
+
+    switch (checkForUpdate(p)) {
       case UpdateCheckResult.InSync: {
         dbxLog('DBX: ↔ In Sync => No Update');
         break;
@@ -113,15 +117,19 @@ export class DropboxSyncService {
       }
 
       case UpdateCheckResult.RemoteUpdateRequired: {
-        dbxLog('DBX: ↑ Remote Update Required => Update directly');
+        dbxLog('DBX: ↑ Update Remote');
         return await this._uploadAppData(local);
       }
 
       case UpdateCheckResult.DataDiverged: {
         dbxLog('^--------^-------^');
         dbxLog('DBX: ⇎ X Diverged Data');
-        alert('NO HANDLING YET => Dialog needed');
-        if (confirm('Import?')) {
+        const dr = await this._openConflictDialog(p).toPromise();
+        if (dr === 'REMOTE') {
+          dbxLog('DBX: Dialog => ↑ Remote Update');
+          return await this._uploadAppData(local);
+        } else if (dr === 'LOCAL') {
+          dbxLog('DBX: Dialog => ↓ Update Local');
           return await this._importData(remote, r.meta.rev);
         }
         break;
@@ -209,6 +217,17 @@ export class DropboxSyncService {
 
   private _updateLocalLastSyncCheck() {
     localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
+  }
+
+  private _openConflictDialog({remote, local, lastSync}: { remote: number, local: number, lastSync: number }): Observable<DropboxConflictResolution> {
+    return this._matDialog.open(DialogDbxSyncConflictComponent, {
+      restoreFocus: true,
+      data: {
+        remote,
+        local,
+        lastSync,
+      }
+    }).afterClosed();
   }
 
 }
