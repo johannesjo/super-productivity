@@ -61,11 +61,13 @@ export class DropboxSyncService {
     this._updateLocalLastSyncCheck();
 
     const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
-    console.log(rev, clientUpdate);
     const lastSync = this._getLocalLastSync();
 
     let local: AppDataComplete;
-    if (rev === this._getLocalRev()) {
+    const localRev = this._getLocalRev();
+    console.log('rev', rev, localRev);
+
+    if (rev === localRev) {
       console.log('DBX: SAME REV');
       local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
@@ -78,25 +80,14 @@ export class DropboxSyncService {
 
     // NOTE: missing milliseconds :(
     const remoteClientUpdate = clientUpdate / 1000;
-    console.log('____ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ____', local.lastLocalSyncModelChange, remoteClientUpdate);
-    // console.log(clientUpdate, lastSync);
-    console.log(remoteClientUpdate, Math.floor(lastSync / 1000), remoteClientUpdate === Math.floor(lastSync / 1000));
-
-    console.log(local.lastLocalSyncModelChange, clientUpdate);
-    console.log(Math.floor(local.lastLocalSyncModelChange / 1000), remoteClientUpdate);
-
-    console.log(Math.floor(local.lastLocalSyncModelChange / 1000) > remoteClientUpdate
-      , remoteClientUpdate === Math.floor(lastSync / 1000)
-      , lastSync < local.lastLocalSyncModelChange);
-
-
+    // NOTE: not 100% an exact science, but changes occurring at the same time
+    // getting lost, might be unlikely and ok after all
     // local > remote && lastSync >= remote &&  lastSync < local
     if (
       Math.floor(local.lastLocalSyncModelChange / 1000) > remoteClientUpdate
       && remoteClientUpdate === Math.floor(lastSync / 1000)
       && lastSync < local.lastLocalSyncModelChange
     ) {
-      console.log('------------------------------------');
       console.log('DBX PRE: Pre Check => Remote Update Required');
       return await this._uploadAppData(local);
     }
