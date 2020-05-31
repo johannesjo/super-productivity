@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {GlobalConfigService} from '../config/global-config.service';
 import {combineLatest, Observable} from 'rxjs';
 import {DropboxSyncConfig} from '../config/global-config.model';
-import {concatMap, distinctUntilChanged, first, map, mapTo, take, tap} from 'rxjs/operators';
+import {concatMap, distinctUntilChanged, first, map, take, tap} from 'rxjs/operators';
 import {DropboxApiService} from './dropbox-api.service';
 import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
@@ -64,7 +64,7 @@ export class DropboxSyncService {
     console.log(rev, clientUpdate);
     const lastSync = this._getLocalLastSync();
 
-    let local;
+    let local: AppDataComplete;
     if (rev === this._getLocalRev()) {
       console.log('DBX: SAME REV');
       local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
@@ -76,8 +76,32 @@ export class DropboxSyncService {
     // if not defined yet
     local = local || await this._syncService.inMemory$.pipe(take(1)).toPromise();
 
-    const r = (await this._downloadAppData());
+    // NOTE: missing milliseconds :(
+    const remoteClientUpdate = clientUpdate / 1000;
+    console.log('____ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ____', local.lastLocalSyncModelChange, remoteClientUpdate);
+    // console.log(clientUpdate, lastSync);
+    console.log(remoteClientUpdate, Math.floor(lastSync / 1000), remoteClientUpdate === Math.floor(lastSync / 1000));
 
+    console.log(local.lastLocalSyncModelChange, clientUpdate);
+    console.log(Math.floor(local.lastLocalSyncModelChange / 1000), remoteClientUpdate);
+
+    console.log(Math.floor(local.lastLocalSyncModelChange / 1000) > remoteClientUpdate
+      , remoteClientUpdate === Math.floor(lastSync / 1000)
+      , lastSync < local.lastLocalSyncModelChange);
+
+
+    // local > remote && lastSync >= remote &&  lastSync < local
+    if (
+      Math.floor(local.lastLocalSyncModelChange / 1000) > remoteClientUpdate
+      && remoteClientUpdate === Math.floor(lastSync / 1000)
+      && lastSync < local.lastLocalSyncModelChange
+    ) {
+      console.log('------------------------------------');
+      console.log('DBX PRE: Pre Check => Remote Update Required');
+      return await this._uploadAppData(local);
+    }
+
+    const r = (await this._downloadAppData());
     const remote = r.data;
 
     switch (checkForUpdate({

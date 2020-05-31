@@ -74,7 +74,7 @@ export class SyncService {
     this._focusAfterLongInactivity$,
     this._isOnlineTrigger$,
   ).pipe(
-    tap((v) => console.log('T', v)),
+    // tap((v) => console.log('T', v)),
   );
 
   private _initialTrigger$ = of(SYNC_INITIAL_SYNC_TRIGGER);
@@ -82,7 +82,7 @@ export class SyncService {
     this._initialTrigger$,
     this._immediateSyncTrigger$,
   ).pipe(
-    tap((v) => console.log('______TRIG_SYNC__', v)),
+    // tap((v) => console.log('______TRIG_SYNC__', v)),
   );
 
   // OTHER INITIAL SYNC STUFF
@@ -146,9 +146,9 @@ export class SyncService {
         this._checkRemoteUpdateTriggers$,
         this._saveToRemoteTrigger$,
       ).pipe(
-        tap((ev) => console.log('__TRIGGER_SYNC__', ev)),
+        // tap((ev) => console.log('__TRIGGER_SYNC__', ev)),
         auditTime(syncInterval),
-        tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
+        // tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
       )
     ).pipe(
       debounceTime(50)
