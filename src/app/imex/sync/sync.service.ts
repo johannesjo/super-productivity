@@ -121,7 +121,7 @@ export class SyncService {
   ) {
   }
 
-  getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME): Observable<unknown> {
+  getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME, minSyncInterval: number = 5000): Observable<unknown> {
     return merge(
       this._immediateSyncTriggerAll$,
 
@@ -129,7 +129,7 @@ export class SyncService {
         this._saveToRemoteTrigger$,
       ).pipe(
         tap((ev) => console.log('__TRIGGER_SYNC__', ev)),
-        auditTime(syncInterval),
+        auditTime(Math.max(syncInterval, minSyncInterval)),
         tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
       )
     ).pipe(

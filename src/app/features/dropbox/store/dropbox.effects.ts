@@ -34,11 +34,7 @@ export class DropboxEffects {
       this._dropboxSyncService.syncInterval$,
     ])),
     switchMap(([isEnabledAndReady, syncInterval]) => isEnabledAndReady
-      ? this._syncService.getSyncTrigger$(
-        (syncInterval >= DROPBOX_MIN_SYNC_INTERVAL)
-          ? syncInterval
-          : DROPBOX_MIN_SYNC_INTERVAL
-      )
+      ? this._syncService.getSyncTrigger$(syncInterval, DROPBOX_MIN_SYNC_INTERVAL)
       : EMPTY
     ),
     tap((x) => dbxLog('sync(effect).....', x)),
