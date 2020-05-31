@@ -82,6 +82,12 @@
         "REMOTE": "remote",
         "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
         "TITLE": "Dropbox: Conflicting Data"
+      },
+      "S": {
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
+        "ACCESS_TOKEN_ERROR": "Dropbox: Unable to generate Access Token from Auth Code",
+        "OFFLINE": "Dropbox: Unable to sync, because offline",
+        "SYNC_ERROR": "Dropbox: Error while syncing"
       }
     },
     "GITHUB": {
