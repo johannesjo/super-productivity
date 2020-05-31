@@ -98,6 +98,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnabled: false,
     syncInterval: minute * 5,
     authCode: null,
+    accessToken: null,
     _backupDocId: null,
     // isCompressData: true,
   },

@@ -447,7 +447,7 @@ export function projectReducer(
     }
 
     case ProjectActionTypes.LoadProjects: {
-      return projectAdapter.addAll(payload.projects, state);
+      return projectAdapter.setAll(payload.projects, state);
     }
 
     case ProjectActionTypes.UpdateProjectAdvancedCfg: {

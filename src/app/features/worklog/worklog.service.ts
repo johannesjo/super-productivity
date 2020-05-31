@@ -40,7 +40,7 @@ export class WorklogService {
   worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = this._archiveUpdateTrigger$.pipe(
     switchMap(() => this._workContextService.activeWorkContext$.pipe(take(1))),
     switchMap((curCtx) => from(this._loadForWorkContext(curCtx)).pipe(
-      startWith(null),
+      startWith<any, any>(null),
     )),
     shareReplay({bufferSize: 1, refCount: true}),
   );

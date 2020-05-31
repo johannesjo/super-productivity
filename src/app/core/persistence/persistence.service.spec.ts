@@ -42,7 +42,7 @@ describe('PersistenceService', () => {
   });
 
   it('database update should trigger onAfterSave$', (done) => {
-    const service: PersistenceService = TestBed.get(PersistenceService);
+    const service: PersistenceService = TestBed.inject(PersistenceService);
     service.onAfterSave$.subscribe(({data}) => {
       expect(data).toEqual(createEmptyEntity());
       done();
@@ -56,13 +56,13 @@ describe('PersistenceService', () => {
         const FAKE_VAL: any = 'VVV';
         const a$ = of(FAKE_VAL);
         spyOn(PersistenceService.prototype, 'loadComplete').and.callFake(() => a$ as any);
-        const service: PersistenceService = TestBed.get(PersistenceService);
+        const service: PersistenceService = TestBed.inject(PersistenceService);
         expectObservable(service.inMemoryComplete$).toBe('a', {a: FAKE_VAL});
       });
     });
 
     it('should refresh onAfterSave$', (done) => {
-      const service: PersistenceService = TestBed.get(PersistenceService);
+      const service: PersistenceService = TestBed.inject(PersistenceService);
       let ll;
       let i = 0;
       service.inMemoryComplete$.subscribe((data) => {
@@ -102,7 +102,7 @@ describe('PersistenceService', () => {
     //       return b$ as any;
     //     });
     //
-    //     const service: PersistenceService = TestBed.get(PersistenceService);
+    //     const service: PersistenceService = TestBed.inject(PersistenceService);
     //     service.onAfterSave$.next('B' as any);
     //     setTimeout(() => {
     //       service.onAfterSave$.next('B' as any);
