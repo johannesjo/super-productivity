@@ -21,9 +21,7 @@ export class SnackCustomComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (this.data.promise) {
-      this.data.promise.then(() => {
-        this.snackBarRef.dismiss();
-      }).catch(() => {
+      this.data.promise.finally(() => {
         this.snackBarRef.dismiss();
       });
     }

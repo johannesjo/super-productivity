@@ -303,9 +303,8 @@ export class PersistenceService {
     ])
       .then(() => {
         this.updateLastLocalSyncModelChange(data.lastLocalSyncModelChange);
-        this._isBlockSaving = false;
       })
-      .catch(() => {
+      .finally(() => {
         this._isBlockSaving = false;
       });
   }
