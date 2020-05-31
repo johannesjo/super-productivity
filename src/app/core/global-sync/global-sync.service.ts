@@ -14,7 +14,8 @@ import {
   startWith,
   switchMap,
   take,
-  tap
+  tap,
+  throttleTime
 } from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {SyncProvider} from './sync-provider';
@@ -29,6 +30,7 @@ export const INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 const DEFAULT_AUDIT_TIME = 10000;
 const TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION = DEFAULT_AUDIT_TIME + 3000;
 const LONG_INACTIVITY = 1000 * 60 * 5;
+const LONG_INACTIVITY_THROTTLE_TIME = 1000 * 45;
 
 // TODO naming
 @Injectable({
@@ -55,8 +57,11 @@ export class GlobalSyncService {
   private _focusAfterLongInactivity$ = fromEvent(window, 'focus').pipe(
     filter(() => (
         Date.now() - +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK)
+      // TODO comment in
       ) > 10000 // LONG_INACTIVITY
     ),
+    // TODO comment in
+    // throttleTime(LONG_INACTIVITY_THROTTLE_TIME),
     mapTo('FOCUS_AFTER_LONG_INACTIVITY'),
   );
   private _isOnlineTrigger$ = isOnline$.pipe(
