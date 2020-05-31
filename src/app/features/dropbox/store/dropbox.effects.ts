@@ -1,7 +1,17 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
-import {distinctUntilChanged, filter, map, pairwise, shareReplay, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {
+  concatMap,
+  distinctUntilChanged, exhaustMap,
+  filter,
+  map,
+  pairwise,
+  shareReplay,
+  switchMap,
+  tap,
+  withLatestFrom
+} from 'rxjs/operators';
 import {DropboxApiService} from '../dropbox-api.service';
 import {DropboxSyncService} from '../dropbox-sync.service';
 import {GlobalConfigService} from '../../config/global-config.service';
@@ -33,7 +43,8 @@ export class DropboxEffects {
     ),
     tap((x) => dbxLog('sync(effect).....', x)),
     withLatestFrom(isOnline$),
-    switchMap(([trigger, isOnline]) => {
+    // don't run multiple after each other when dialog is open
+    exhaustMap(([trigger, isOnline]) => {
       if (!isOnline) {
         this._snackService.open({msg: 'Unable to sync, because offline', type: 'ERROR'});
         if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
