@@ -3,7 +3,6 @@ import {DEFAULT_GLOBAL_CONFIG} from './default-global-config.const';
 import {MODEL_VERSION_KEY} from '../../app.constants';
 import {isMigrateModel} from '../../util/model-version';
 
-// TODO change
 const MODEL_VERSION = 1;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {

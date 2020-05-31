@@ -1,14 +1,23 @@
 import {MODEL_VERSION_KEY} from '../app.constants';
 
-export const isMigrateModel = (modelData: any, localModelVersion: number): boolean => {
+export const isMigrateModel = (modelData: any, localVersion: number): boolean => {
+  const importVersion = modelData && modelData[MODEL_VERSION_KEY];
+
   if (!modelData) {
     return false;
-  } else if (modelData && modelData[MODEL_VERSION_KEY] === localModelVersion) {
-  } else if (modelData && modelData[MODEL_VERSION_KEY] > localModelVersion) {
-    alert('Cannot load model. Version to load is newer than local. Please close the app and update your local productivity version first, before importing the data.');
-    throw new Error('Cannot load model. Version to load is newer than local');
+  } else if (importVersion === localVersion) {
+    return false;
+  } else if (importVersion > localVersion) {
+    const isNewMajor = ((Math.floor(importVersion) - Math.floor(localVersion)) >= 1);
+    if (isNewMajor) {
+      alert('Cannot load model. Version to load is newer than local. Please close the app and update your local productivity version first, before importing the data.');
+      throw new Error('Cannot load model. Version to load is newer than local');
+    } else {
+      console.warn('Imported model newer than local version', 'importVersion', importVersion, 'localVersion', localVersion, 'modelData', modelData);
+      return false;
+    }
   } else {
-    console.log(`Migrating model to version from ${modelData[MODEL_VERSION_KEY]} to ${localModelVersion}`, modelData);
+    console.log(`Migrating model to version from ${importVersion} to ${localVersion}`, modelData);
     return true;
   }
 };

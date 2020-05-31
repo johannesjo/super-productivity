@@ -1,9 +1,9 @@
 import {Project} from './project.model';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {
-  WORK_CONTEXT_DEFAULT_THEME,
+  DEFAULT_PROJECT_COLOR,
   WORK_CONTEXT_DEFAULT_COMMON,
-  DEFAULT_PROJECT_COLOR
+  WORK_CONTEXT_DEFAULT_THEME
 } from '../work-context/work-context.const';
 
 
