@@ -32,6 +32,8 @@ import {isOnline} from './util/is-online';
 import {InitialDialogService} from './features/initial-dialog/initial-dialog.service';
 import {SyncService} from './imex/sync/sync.service';
 
+const w = window as any;
+const productivityTip = w.productivityTips && w.productivityTips[w.randomIndex];
 
 @Component({
   selector: 'app-root',
@@ -46,7 +48,8 @@ import {SyncService} from './imex/sync/sync.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {
-
+  productivityTipTitle = productivityTip && productivityTip[0];
+  productivityTipText = productivityTip && productivityTip[1];
 
   @ViewChild('notesElRef', {read: ViewContainerRef}) notesElRef: ViewContainerRef;
   @ViewChild('sideNavElRef', {read: ViewContainerRef}) sideNavElRef: ViewContainerRef;

@@ -41,3 +41,25 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 </ng-container>
+
+<div *ngIf="!(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) || (imexMetaService.isDataImportInProgress$|async)"
+     class="loading-full-page-wrapper">
+  <div class="app-loading">
+    <div class="productivity-tip">
+      <h2 id="heading">{{productivityTipTitle}}</h2>
+      <p id="text">{{productivityTipText}}</p>
+    </div>
+
+    <div class="spinner">
+      <div class="double-bounce1"></div>
+      <div class="double-bounce2"></div>
+    </div>
+
+    <svg class="logo"
+         viewBox="0 0 64 64">
+      <path d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+            id="path3395"
+            style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1" />
+    </svg>
+  </div>
+</div>
