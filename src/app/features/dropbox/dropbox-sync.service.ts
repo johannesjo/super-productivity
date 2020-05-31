@@ -124,11 +124,11 @@ export class DropboxSyncService {
       case UpdateCheckResult.DataDiverged: {
         dbxLog('^--------^-------^');
         dbxLog('DBX: ⇎ X Diverged Data');
-        const dr = await this._openConflictDialog(p).toPromise();
-        if (dr === 'REMOTE') {
+        const dr = await this._openConflictDialog$(p).toPromise();
+        if (dr === 'USE_LOCAL') {
           dbxLog('DBX: Dialog => ↑ Remote Update');
           return await this._uploadAppData(local);
-        } else if (dr === 'LOCAL') {
+        } else if (dr === 'USE_REMOTE') {
           dbxLog('DBX: Dialog => ↓ Update Local');
           return await this._importData(remote, r.meta.rev);
         }
@@ -219,7 +219,7 @@ export class DropboxSyncService {
     localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
   }
 
-  private _openConflictDialog({remote, local, lastSync}: { remote: number, local: number, lastSync: number }): Observable<DropboxConflictResolution> {
+  private _openConflictDialog$({remote, local, lastSync}: { remote: number, local: number, lastSync: number }): Observable<DropboxConflictResolution> {
     return this._matDialog.open(DialogDbxSyncConflictComponent, {
       restoreFocus: true,
       data: {
