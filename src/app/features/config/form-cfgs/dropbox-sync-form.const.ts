@@ -12,12 +12,9 @@ export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
   items: [
     {
       type: 'tpl',
-      // hideExpression: ((model: any) => {
-      //   return model.accessToken;
-      // }),
       templateOptions: {
         tag: 'p',
-        text: `Please open the following link <a href="${DROPBOX_AUTH_CODE_URL}" target="_blank">https://www.dropbox.com/oauth2/authorize?response_type=code</a> and copy the auth code provided there`,
+        text: `<p>Please open the following link <a href="${DROPBOX_AUTH_CODE_URL}" target="_blank">https://www.dropbox.com/oauth2/authorize?response_type=code</a> and copy the auth code provided there</p>`,
       },
     },
     {
@@ -25,6 +22,14 @@ export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
       type: 'input',
       templateOptions: {
         label: 'Auth Code',
+      },
+    },
+    {
+      type: 'tpl',
+      hideExpression: ((model: DropboxSyncConfig) => !!model.accessToken || !model.authCode),
+      templateOptions: {
+        tag: 'p',
+        text: `<button type="submit" class="mat-button mat-button-base mat-stroked-button">Generate Token</button>`,
       },
     },
     {

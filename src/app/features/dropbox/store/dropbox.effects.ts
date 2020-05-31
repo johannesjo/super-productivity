@@ -2,8 +2,8 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
 import {
-  concatMap,
-  distinctUntilChanged, exhaustMap,
+  distinctUntilChanged,
+  exhaustMap,
   filter,
   map,
   pairwise,
@@ -79,6 +79,7 @@ export class DropboxEffects {
     filter(([, isChanged]: [UpdateGlobalConfigSection, boolean]) => isChanged),
     switchMap(([{payload}, isChanged]: [UpdateGlobalConfigSection, boolean]) =>
       this._dropboxApiService.getAccessTokenFromAuthCode((payload.sectionCfg as any).authCode)),
+    tap(() => this._snackService.open({type: 'SUCCESS', msg: 'Access Token successfully generated'})),
     map((_accessToken: string) => new UpdateGlobalConfigSection({
       sectionKey: 'dropboxSync',
       sectionCfg: {accessToken: _accessToken}

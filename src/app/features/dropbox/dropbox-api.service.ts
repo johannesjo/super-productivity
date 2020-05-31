@@ -96,16 +96,25 @@ export class DropboxApiService {
     }).then((res) => res.data);
   }
 
+  async checkUser(accessToken: string): Promise<unknown> {
+    await this._isReady$.toPromise();
+    return this._request({
+      accessToken,
+      method: 'POST',
+      url: 'https://api.dropboxapi.com/2/check/user',
+    }).then((res) => res.data);
+  }
 
-  async _request({url, method = 'GET', data, headers = {}, params = {}}: {
+  async _request({url, method = 'GET', data, headers = {}, params = {}, accessToken}: {
     url: string;
     method?: Method;
     headers?: { [key: string]: any },
     data?: string | object
     params?: { [key: string]: string },
+    accessToken?: string
   }): Promise<AxiosResponse> {
     await this._isReady$.toPromise();
-    const authToken = await this._accessToken$.pipe(first()).toPromise();
+    accessToken = accessToken || await this._accessToken$.pipe(first()).toPromise();
 
     return axios.request({
       url: params
@@ -114,7 +123,7 @@ export class DropboxApiService {
       method,
       data,
       headers: {
-        authorization: `Bearer ${authToken}`,
+        authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
         ...(typeof data === 'object'
           ? {'Content-Type': 'application/json; charset=UTF-8'}
@@ -123,7 +132,6 @@ export class DropboxApiService {
       },
     });
   }
-
 
   async getAccessTokenFromAuthCode(authCode: string): Promise<string> {
     return axios.request({
@@ -138,6 +146,11 @@ export class DropboxApiService {
         client_id: DROPBOX_APP_KEY,
         client_secret: DROPBOX_APP_SECRET,
       }),
-    }).then(res => res.data.access_token);
+    }).then(res => {
+      return res.data.access_token;
+      // Not necessary as it is highly unlikely that we get a wrong on
+      // const accessToken = res.data.access_token;
+      // return this.checkUser(accessToken).then(() => accessToken);
+    });
   }
 }
