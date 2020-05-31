@@ -13,6 +13,7 @@ import {SYNC_INITIAL_SYNC_TRIGGER} from '../../../imex/sync/sync.const';
 import {combineLatest, EMPTY} from 'rxjs';
 import {isOnline$} from '../../../util/is-online';
 import {SnackService} from '../../../core/snack/snack.service';
+import {dbxLog} from '../dropbox-log.util';
 
 
 @Injectable()
@@ -30,7 +31,7 @@ export class DropboxEffects {
       )
       : EMPTY
     ),
-    tap((x) => console.log('sync.....', x)),
+    tap((x) => dbxLog('sync(effect).....', x)),
     withLatestFrom(isOnline$),
     switchMap(([trigger, isOnline]) => {
       if (!isOnline) {
