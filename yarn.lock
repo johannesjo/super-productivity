@@ -2446,14 +2446,6 @@ buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
-buffer@^5.0.8:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/buffer/-/buffer-5.6.0.tgz#a31749dc7d81d84db08abf937b6b8c4033f62786"
-  integrity sha512-/gDYp/UtU0eA1ys8bOs9J6a+E/KWIY+DZ+Q2WESNUA0jFRsJOc0SNUO6xJ5SGA1xueg3NL65W6s+NY5l9cunuw==
-  dependencies:
-    base64-js "^1.0.2"
-    ieee754 "^1.1.4"
-
 builder-util-runtime@8.7.1:
   version "8.7.1"
   resolved "https://registry.yarnpkg.com/builder-util-runtime/-/builder-util-runtime-8.7.1.tgz#23c808cddd650d4376a7a1518ec1e80e85c10f00"
@@ -4202,14 +4194,6 @@ dragula@^3.7.2:
   dependencies:
     contra "1.9.4"
     crossvent "1.5.4"
-
-dropbox@^4.0.30:
-  version "4.0.30"
-  resolved "https://registry.yarnpkg.com/dropbox/-/dropbox-4.0.30.tgz#747247b5088e26ab143db39afed8c66f0887d670"
-  integrity sha512-qmSeT8rhjARDHj3vxOTKQjc6IQ46AlRwJS8dqE26R323fikkjC4EXzocV12PsO7DOrjaqbOH3FjEdEEnrFraJw==
-  dependencies:
-    buffer "^5.0.8"
-    moment "^2.19.3"
 
 duplexer3@^0.1.4:
   version "0.1.4"
@@ -7680,7 +7664,7 @@ moment@2.24.0:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
 
-moment@>=2.14.0, moment@^2.10.2, moment@^2.19.3:
+moment@>=2.14.0, moment@^2.10.2:
   version "2.26.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.26.0.tgz#5e1f82c6bafca6e83e808b30c8705eed0dcbd39a"
   integrity sha512-oIixUO+OamkUkwjhAVE18rAMfRJNsNe/Stid/gwHSOfHrOtw9EhAY2AHvdKZ/k/MggcYELFCJz/Sn2pL8b8JMw==
