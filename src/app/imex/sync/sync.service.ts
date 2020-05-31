@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {combineLatest, fromEvent, merge, Observable, of, ReplaySubject, timer} from 'rxjs';
+import {combineLatest, fromEvent, merge, Observable, of, ReplaySubject} from 'rxjs';
 import {
   auditTime,
   concatMap,
@@ -15,6 +15,7 @@ import {
   startWith,
   switchMap,
   take,
+  tap,
   throttleTime
 } from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
@@ -23,31 +24,15 @@ import {DataInitService} from '../../core/data-init/data-init.service';
 import {isOnline$} from '../../util/is-online';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {AppDataComplete} from './sync.model';
-import {LS_DROPBOX_LOCAL_LAST_SYNC_CHECK} from '../../core/persistence/ls-keys.const';
-import {
-  SYNC_DEFAULT_AUDIT_TIME,
-  SYNC_INITIAL_SYNC_TRIGGER,
-  SYNC_LONG_INACTIVITY,
-  SYNC_LONG_INACTIVITY_THROTTLE_TIME,
-  SYNC_TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION
-} from './sync.const';
+import {SYNC_DEFAULT_AUDIT_TIME, SYNC_FOCUS_CHECK_THROTTLE_TIME, SYNC_INITIAL_SYNC_TRIGGER} from './sync.const';
 
 // TODO naming
 @Injectable({
   providedIn: 'root',
 })
 export class SyncService {
-  // UPDATE LOCAL
-  // ------------
-  private _checkRemoteUpdateTriggers$: Observable<string> = merge(
-    fromEvent(window, 'focus').pipe(
-      switchMap(() => timer(SYNC_TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION)),
-      mapTo('FOCUS DELAYED'),
-    )
-  );
-
-  // SAVE TO REMOTE
-  // --------------
+  // SAVE TO REMOTE TRIGGER
+  // ----------------------
   private _saveToRemoteTrigger$: Observable<unknown> = this._persistenceService.onAfterSave$.pipe(
     filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
   );
@@ -55,14 +40,8 @@ export class SyncService {
   // IMMEDIATE TRIGGERS
   // ------------------
   private _focusAfterLongInactivity$ = fromEvent(window, 'focus').pipe(
-    filter(() => (
-        Date.now() - +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK)
-        // TODO comment in
-      ) > SYNC_LONG_INACTIVITY
-    ),
-    // TODO comment in
-    throttleTime(SYNC_LONG_INACTIVITY_THROTTLE_TIME),
-    mapTo('FOCUS_AFTER_LONG_INACTIVITY'),
+    throttleTime(SYNC_FOCUS_CHECK_THROTTLE_TIME),
+    mapTo('FOCUS_THROTTLED'),
   );
   private _isOnlineTrigger$ = isOnline$.pipe(
     // skip initial online which always fires on page load
@@ -75,7 +54,7 @@ export class SyncService {
     this._focusAfterLongInactivity$,
     this._isOnlineTrigger$,
   ).pipe(
-    // tap((v) => console.log('T', v)),
+    tap((v) => console.log('T', v)),
   );
 
   private _initialTrigger$ = of(SYNC_INITIAL_SYNC_TRIGGER).pipe(
@@ -86,7 +65,7 @@ export class SyncService {
     this._initialTrigger$,
     this._immediateSyncTrigger$,
   ).pipe(
-    // tap((v) => console.log('______TRIG_SYNC__', v)),
+    tap((v) => console.log('______TRIG_SYNC__', v)),
   );
 
   // OTHER INITIAL SYNC STUFF
@@ -147,68 +126,19 @@ export class SyncService {
       this._immediateSyncTriggerAll$,
 
       merge(
-        this._checkRemoteUpdateTriggers$,
         this._saveToRemoteTrigger$,
       ).pipe(
-        // tap((ev) => console.log('__TRIGGER_SYNC__', ev)),
+        tap((ev) => console.log('__TRIGGER_SYNC__', ev)),
         auditTime(syncInterval),
-        // tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
+        tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
       )
     ).pipe(
-      debounceTime(50)
+      debounceTime(100)
     );
   }
 
   // tslint:disable-next-line
   setInitialSyncDone(val: boolean, syncProvider: SyncProvider) {
     this._isInitialSyncDoneManual$.next(val);
-  }
-
-  private async _checkForRemoteUpdateAndSync() {
-    // const remote = await this._read(COMPLETE_KEY);
-    // const local = await this._persistenceService.inMemoryComplete$.pipe(take(1)).toPromise();
-    // const lastSync = this._getLasSync();
-    //
-    // if (!remote || !local) {
-    //   throw new Error('No data available');
-    // }
-    // // console.log('isImport', local.lastLocalSyncModelChange < remote.lastLocalSyncModelChange,
-    // //   (local.lastLocalSyncModelChange - remote.lastLocalSyncModelChange) / 1000,
-    // //   local.lastLocalSyncModelChange, remote.lastLocalSyncModelChange);
-    //
-    // switch (checkForUpdate({
-    //   local: local.lastLocalSyncModelChange,
-    //   lastSync,
-    //   remote: remote.lastLocalSyncModelChange
-    // })) {
-    //   case UpdateCheckResult.InSync: {
-    //     console.log('BS: In Sync => No Update');
-    //     break;
-    //   }
-    //
-    //   case UpdateCheckResult.LocalUpdateRequired: {
-    //     console.log('BS: Update Local');
-    //     return await this._importRemote(remote);
-    //   }
-    //
-    //   case UpdateCheckResult.RemoteUpdateRequired: {
-    //     console.log('BS: Remote Update Required => Update directly');
-    //     return await this._updateRemote(local);
-    //   }
-    //
-    //   case UpdateCheckResult.DataDiverged: {
-    //     console.log('^--------^-------^');
-    //     console.log('BS: X Diverged Data');
-    //     alert('NO HANDLING YET');
-    //     if (confirm('Import?')) {
-    //       return await this._importRemote(remote);
-    //     }
-    //     break;
-    //   }
-    //
-    //   case UpdateCheckResult.LastSyncNotUpToDate: {
-    //     this._setLasSync(local.lastLocalSyncModelChange);
-    //   }
-    // }
   }
 }
