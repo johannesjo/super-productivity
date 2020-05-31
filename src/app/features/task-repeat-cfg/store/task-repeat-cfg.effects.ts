@@ -19,7 +19,7 @@ import {from} from 'rxjs';
 import {isToday} from '../../../util/is-today.util';
 import {WorkContextService} from '../../work-context/work-context.service';
 import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
-import {GlobalSyncService} from '../../../imex/sync/global-sync.service';
+import {SyncService} from '../../../imex/sync/sync.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -40,7 +40,7 @@ export class TaskRepeatCfgEffects {
 
   @Effect() createRepeatableTasks: any = this._actions$.pipe(
     ofType(setActiveWorkContext),
-    concatMap((() => this._globalSyncService.afterInitialSyncDoneAndDataLoadedInitially$)),
+    concatMap((() => this._syncService.afterInitialSyncDoneAndDataLoadedInitially$)),
     concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(
       take(1),
     )),
@@ -151,7 +151,7 @@ export class TaskRepeatCfgEffects {
     private _persistenceService: PersistenceService,
     private _workContextService: WorkContextService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _globalSyncService: GlobalSyncService,
+    private _syncService: SyncService,
   ) {
   }
 

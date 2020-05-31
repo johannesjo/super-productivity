@@ -42,7 +42,7 @@ import {HANDLED_ERROR_PROP_STR} from '../../../../../app.constants';
 import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import {setActiveWorkContext} from '../../../../work-context/store/work-context.actions';
 import {WorkContextType} from '../../../../work-context/work-context.model';
-import {GlobalSyncService} from '../../../../../imex/sync/global-sync.service';
+import {SyncService} from '../../../../../imex/sync/sync.service';
 import {isJiraEnabled} from '../is-jira-enabled.util';
 
 @Injectable()
@@ -282,7 +282,7 @@ export class JiraIssueEffects {
               private readonly _configService: GlobalConfigService,
               private readonly _snackService: SnackService,
               private readonly _projectService: ProjectService,
-              private readonly _globalSyncService: GlobalSyncService,
+              private readonly _syncService: SyncService,
               private readonly _taskService: TaskService,
               private readonly _workContextService: WorkContextService,
               private readonly _jiraApiService: JiraApiService,

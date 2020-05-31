@@ -35,7 +35,7 @@ import {
 @Injectable({
   providedIn: 'root',
 })
-export class GlobalSyncService {
+export class SyncService {
   // UPDATE LOCAL
   // ------------
   private _checkRemoteUpdateTriggers$: Observable<string> = merge(

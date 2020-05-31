@@ -1,4 +1,4 @@
-<ng-container *ngIf="(globalSyncService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)">
+<ng-container *ngIf="(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)">
 
   <!--TODO move inside page container somehow -->
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"

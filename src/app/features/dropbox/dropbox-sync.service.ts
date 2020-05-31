@@ -6,7 +6,7 @@ import {concatMap, distinctUntilChanged, first, map, mapTo, take, tap} from 'rxj
 import {DropboxApiService} from './dropbox-api.service';
 import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
-import {GlobalSyncService} from '../../imex/sync/global-sync.service';
+import {SyncService} from '../../imex/sync/sync.service';
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {
   LS_DROPBOX_LAST_LOCAL_REVISION,
@@ -50,7 +50,7 @@ export class DropboxSyncService {
   constructor(
     private _globalConfigService: GlobalConfigService,
     private _dataImportService: DataImportService,
-    private _globalSyncService: GlobalSyncService,
+    private _syncService: SyncService,
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
   ) {
@@ -69,14 +69,14 @@ export class DropboxSyncService {
     let local;
     if (rev === this._getLocalRev()) {
       console.log('DBX: SAME REV');
-      local = await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
+      local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
         console.log('DBX: NO LOCAL CHANGES');
         return;
       }
     }
     // if not defined yet
-    local = local || await this._globalSyncService.inMemory$.pipe(take(1)).toPromise();
+    local = local || await this._syncService.inMemory$.pipe(take(1)).toPromise();
 
     const r = (await this._downloadAppData());
 

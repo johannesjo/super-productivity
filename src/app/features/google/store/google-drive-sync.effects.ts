@@ -46,7 +46,7 @@ import {selectIsGoogleDriveSaveInProgress} from './google-drive-sync.reducer';
 import {CompressionService} from '../../../core/compression/compression.service';
 import {TranslateService} from '@ngx-translate/core';
 import {T} from '../../../t.const';
-import {GlobalSyncService} from '../../../imex/sync/global-sync.service';
+import {SyncService} from '../../../imex/sync/sync.service';
 import {SyncProvider} from '../../../imex/sync/sync-provider';
 import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
 import {DataInitService} from '../../../core/data-init/data-init.service';
@@ -77,7 +77,7 @@ export class GoogleDriveSyncEffects {
       filter(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) =>
         isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000),
       switchMap(([, , , syncInterval]) =>
-        this._globalSyncService.getSyncTrigger$(syncInterval).pipe(
+        this._syncService.getSyncTrigger$(syncInterval).pipe(
           mapTo(new SaveForSync())
         )
       ),
@@ -395,7 +395,7 @@ export class GoogleDriveSyncEffects {
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _googleApiService: GoogleApiService,
     private _configService: GlobalConfigService,
-    private _globalSyncService: GlobalSyncService,
+    private _syncService: SyncService,
     private _snackService: SnackService,
     private _translateService: TranslateService,
     private _compressionService: CompressionService,
@@ -572,7 +572,7 @@ export class GoogleDriveSyncEffects {
 
   private _setInitialSyncDone() {
     if (!this.isInitialSyncDone) {
-      this._globalSyncService.setInitialSyncDone(true, SyncProvider.GoogleDrive);
+      this._syncService.setInitialSyncDone(true, SyncProvider.GoogleDrive);
       this.isInitialSyncDone = true;
     }
   }

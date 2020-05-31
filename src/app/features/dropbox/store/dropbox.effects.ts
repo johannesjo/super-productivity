@@ -7,7 +7,7 @@ import {DropboxApiService} from '../dropbox-api.service';
 import {DropboxSyncService} from '../dropbox-sync.service';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {DataInitService} from '../../../core/data-init/data-init.service';
-import {GlobalSyncService} from '../../../imex/sync/global-sync.service';
+import {SyncService} from '../../../imex/sync/sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
 import {SyncProvider} from '../../../imex/sync/sync-provider';
 import {isOnline$} from '../../../util/is-online';
@@ -31,7 +31,7 @@ export class DropboxEffects {
     filter((isEnabledAndReady) => isEnabledAndReady),
     switchMap(() => this._dropboxSyncService.syncInterval$),
     switchMap((syncInterval) =>
-      this._globalSyncService.getSyncTrigger$(
+      this._syncService.getSyncTrigger$(
         syncInterval >= DROPBOX_MIN_SYNC_INTERVAL
           ? syncInterval
           : DROPBOX_MIN_SYNC_INTERVAL),
@@ -39,7 +39,7 @@ export class DropboxEffects {
     tap((x) => console.log('sync.....', x)),
     switchMap((trigger: any) => this._dropboxSyncService.sync().then(() => {
       if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
-        this._globalSyncService.setInitialSyncDone(true, SyncProvider.Dropbox);
+        this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
       }
     })),
   );
@@ -74,7 +74,7 @@ export class DropboxEffects {
     private _dropboxApiService: DropboxApiService,
     private _dropboxSyncService: DropboxSyncService,
     private _globalConfigService: GlobalConfigService,
-    private _globalSyncService: GlobalSyncService,
+    private _syncService: SyncService,
     private _dataInitService: DataInitService,
   ) {
   }

@@ -14,7 +14,7 @@ import {Note} from '../note/note.model';
 import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
-import {GlobalSyncService} from '../../imex/sync/global-sync.service';
+import {SyncService} from '../../imex/sync/sync.service';
 import {first, map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
@@ -44,7 +44,7 @@ export class ReminderService {
   constructor(
     private readonly _projectService: ProjectService,
     private readonly _workContextService: WorkContextService,
-    private readonly _globalSyncService: GlobalSyncService,
+    private readonly _syncService: SyncService,
     private readonly _persistenceService: PersistenceService,
     private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
@@ -64,7 +64,7 @@ export class ReminderService {
       // TODO we need a better solution for this
       // we do this to wait for syncing and the like
       merge(
-        this._globalSyncService.afterInitialSyncDoneAndDataLoadedInitially$,
+        this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
         timer(MAX_WAIT_FOR_INITIAL_SYNC),
       ).pipe(
         first(),
