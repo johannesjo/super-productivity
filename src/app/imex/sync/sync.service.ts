@@ -9,12 +9,12 @@ import {
   filter,
   map,
   mapTo,
+  share,
   shareReplay,
   skip,
   startWith,
   switchMap,
   take,
-  tap,
   throttleTime
 } from 'rxjs/operators';
 import {GlobalConfigService} from '../../features/config/global-config.service';
@@ -27,7 +27,8 @@ import {LS_DROPBOX_LOCAL_LAST_SYNC_CHECK} from '../../core/persistence/ls-keys.c
 import {
   SYNC_DEFAULT_AUDIT_TIME,
   SYNC_INITIAL_SYNC_TRIGGER,
-  SYNC_LONG_INACTIVITY, SYNC_LONG_INACTIVITY_THROTTLE_TIME,
+  SYNC_LONG_INACTIVITY,
+  SYNC_LONG_INACTIVITY_THROTTLE_TIME,
   SYNC_TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION
 } from './sync.const';
 
@@ -56,8 +57,8 @@ export class SyncService {
   private _focusAfterLongInactivity$ = fromEvent(window, 'focus').pipe(
     filter(() => (
         Date.now() - +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK)
-      // TODO comment in
-      ) >  SYNC_LONG_INACTIVITY
+        // TODO comment in
+      ) > SYNC_LONG_INACTIVITY
     ),
     // TODO comment in
     throttleTime(SYNC_LONG_INACTIVITY_THROTTLE_TIME),
@@ -77,7 +78,10 @@ export class SyncService {
     // tap((v) => console.log('T', v)),
   );
 
-  private _initialTrigger$ = of(SYNC_INITIAL_SYNC_TRIGGER);
+  private _initialTrigger$ = of(SYNC_INITIAL_SYNC_TRIGGER).pipe(
+    // needs to be shared, to only ever emit once
+    share(),
+  );
   private _immediateSyncTriggerAll$ = merge(
     this._initialTrigger$,
     this._immediateSyncTrigger$,
