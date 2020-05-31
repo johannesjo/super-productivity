@@ -2,7 +2,6 @@ import {Action} from '@ngrx/store';
 import {GlobalConfigSectionKey, GlobalSectionConfig} from '../global-config.model';
 
 export enum GlobalConfigActionTypes {
-  LoadGlobalConfig = '[Global Config] Load Global Config',
   UpdateGlobalConfigSection = '[Global Config] Update Global Config Section',
 }
 

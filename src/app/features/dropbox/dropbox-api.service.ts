@@ -22,7 +22,7 @@ export class DropboxApiService {
     map((token) => !!token),
   );
 
-  isReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+  private _isReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => this.isTokenAvailable$),
     tap((isTokenAvailable) => !isTokenAvailable && new Error('Dropbox API not ready')),
     first(),
@@ -36,7 +36,7 @@ export class DropboxApiService {
   }
 
   async getMetaData(path: string): Promise<DropboxFileMetadata> {
-    await this.isReady$.toPromise();
+    await this._isReady$.toPromise();
 
     return this._request({
       method: 'POST',
@@ -50,7 +50,7 @@ export class DropboxApiService {
   }
 
   async download<T>({path, localRev, options}: { path: string; localRev?: string; options?: any }): Promise<{ meta: DropboxFileMetadata, data: T }> {
-    await this.isReady$.toPromise();
+    await this._isReady$.toPromise();
 
     // TODO implement
     // if (options && options.ifNoneMatch) {
@@ -85,7 +85,7 @@ export class DropboxApiService {
     localRev?: string;
     data: any;
   }): Promise<DropboxFileMetadata> {
-    await this.isReady$.toPromise();
+    await this._isReady$.toPromise();
 
     const args = {
       mode: {'.tag': 'overwrite'},
@@ -120,7 +120,7 @@ export class DropboxApiService {
     data?: string | object
     params?: { [key: string]: string },
   }): Promise<AxiosResponse> {
-    await this.isReady$.toPromise();
+    await this._isReady$.toPromise();
     const authToken = await this._accessToken$.pipe(first()).toPromise();
 
     return axios.request({

@@ -64,7 +64,6 @@ export class GoogleDriveSyncEffects {
   @Effect() triggerSync$: any = this._actions$.pipe(
     ofType(
       loadDataComplete.type,
-      GlobalConfigActionTypes.LoadGlobalConfig,
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
     switchMap(() => this._dataInitService.isAllDataLoadedInitially$),

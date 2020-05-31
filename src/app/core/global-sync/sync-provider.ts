@@ -1,3 +1,4 @@
 export enum SyncProvider {
-  'GoogleDrive' = 'GoogleDrive'
+  'GoogleDrive' = 'GoogleDrive',
+  'Dropbox' = 'Dropbox'
 }

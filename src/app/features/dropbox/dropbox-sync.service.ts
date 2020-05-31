@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {GlobalConfigService} from '../config/global-config.service';
 import {combineLatest, Observable} from 'rxjs';
 import {DropboxSyncConfig} from '../config/global-config.model';
-import {concatMap, first, map, mapTo, take, tap} from 'rxjs/operators';
+import {concatMap, distinctUntilChanged, first, map, mapTo, take, tap} from 'rxjs/operators';
 import {DropboxApiService} from './dropbox-api.service';
 import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
 import {AppDataComplete} from '../../imex/sync/sync.model';
@@ -29,15 +29,18 @@ export class DropboxSyncService {
     mapTo(10000),
   );
 
-  private _isReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+  isEnabledAndReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => combineLatest([
+      this._dropboxApiService.isTokenAvailable$,
       this.isEnabled$,
-      this._dropboxApiService.isReady$,
-    ]).pipe(
-      map((isEnabled, isReady) => isEnabled && isReady),
-      tap((isReady) => !isReady && new Error('Dropbox Sync not ready')),
-      first(),
-    )),
+    ])),
+    map(([isTokenAvailable, isEnabled]) => isTokenAvailable && isEnabled),
+    distinctUntilChanged(),
+  );
+
+  private _isReadyForRequests$ = this.isEnabledAndReady$.pipe(
+    tap((isReady) => !isReady && new Error('Dropbox Sync not ready')),
+    first(),
   );
 
   constructor(
@@ -51,7 +54,8 @@ export class DropboxSyncService {
   }
 
   async sync() {
-    await this._isReady$.toPromise();
+    await this._isReadyForRequests$.toPromise();
+
     const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
     console.log(rev, clientUpdate);
     const lastSync = this._getLocalLastSync();

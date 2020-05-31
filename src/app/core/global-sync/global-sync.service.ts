@@ -23,9 +23,11 @@ import {PersistenceService} from '../persistence/persistence.service';
 import {AppDataComplete} from '../../imex/sync/sync.model';
 
 
-const BS_AUDIT_TIME = 10000;
-const TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION = BS_AUDIT_TIME + 3000;
+export const INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
+const DEFAULT_AUDIT_TIME = 10000;
+const TRIGGER_FOCUS_AGAIN_TIMEOUT_DURATION = DEFAULT_AUDIT_TIME + 3000;
 
+// TODO naming
 @Injectable({
   providedIn: 'root',
 })
@@ -58,8 +60,14 @@ export class GlobalSyncService {
 
   private _isInitialSyncEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => combineLatest([
+        // GoogleDrive
         this._globalConfigService.googleDriveSyncCfg$.pipe(
           map(cfg => cfg && cfg.isEnabled && cfg.isLoadRemoteDataOnStartup && cfg.isAutoLogin),
+        ),
+        // Dropbox
+        this._globalConfigService.cfg$.pipe(
+          map(cfg => cfg.dropboxSync),
+          map(cfg => cfg && cfg.isEnabled && !!cfg.accessToken),
         ),
       ]).pipe(
       map(all => all.includes(true)),
@@ -67,6 +75,20 @@ export class GlobalSyncService {
     ),
     distinctUntilChanged(),
   );
+
+
+  // IMMEDIATE TRIGGERS
+  // ------------------
+  _initialTrigger$ = of(INITIAL_SYNC_TRIGGER);
+  _immediateSyncTrigger$ = merge(
+    this._initialTrigger$,
+    merge([]).pipe(
+      mapTo('IMMEDIATE_TRIGGER'),
+    ),
+  ).pipe(
+    tap(() => console.log('______IMMEDIATE_TRIGGER_SYNC__')),
+  );
+
 
   // keep it super simple for now
   private _isInitialSyncDoneManual$ = new ReplaySubject<boolean>(1);
@@ -91,6 +113,7 @@ export class GlobalSyncService {
 
   inMemory$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$;
 
+
   constructor(
     private readonly _store: Store<any>,
     private readonly _globalConfigService: GlobalConfigService,
@@ -99,15 +122,17 @@ export class GlobalSyncService {
   ) {
   }
 
-  getSyncTrigger$(syncInterval: number = BS_AUDIT_TIME): Observable<unknown> {
+  getSyncTrigger$(syncInterval: number = DEFAULT_AUDIT_TIME): Observable<unknown> {
     return merge(
-      this._checkRemoteUpdateTriggers$,
-      this._saveToRemoteTrigger$,
-    ).pipe(
-      tap((ev) => console.log('__TRIGGER SYNC__', ev)),
-      auditTime(syncInterval),
-      tap((ev) => console.log('__TRIGGER SYNC AFTER AUDITTIME__', ev)),
-      // switchMap(() => this._checkForRemoteUpdateAndSync()),
+      this._immediateSyncTrigger$,
+      merge(
+        this._checkRemoteUpdateTriggers$,
+        this._saveToRemoteTrigger$,
+      ).pipe(
+        tap((ev) => console.log('__TRIGGER_SYNC__', ev)),
+        auditTime(syncInterval),
+        tap((ev) => console.log('__TRIGGER_SYNC AFTER AUDITTIME__', ev)),
+      )
     );
   }
 

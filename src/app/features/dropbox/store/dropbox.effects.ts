@@ -7,9 +7,9 @@ import {DropboxApiService} from '../dropbox-api.service';
 import {DropboxSyncService} from '../dropbox-sync.service';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {DataInitService} from '../../../core/data-init/data-init.service';
-import {GlobalSyncService} from '../../../core/global-sync/global-sync.service';
-import {combineLatest} from 'rxjs';
+import {GlobalSyncService, INITIAL_SYNC_TRIGGER} from '../../../core/global-sync/global-sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
+import {SyncProvider} from '../../../core/global-sync/sync-provider';
 
 
 @Injectable()
@@ -17,28 +17,26 @@ export class DropboxEffects {
   @Effect({dispatch: false}) triggerSync$: any = this._actions$.pipe(
     ofType(
       loadDataComplete.type,
-      GlobalConfigActionTypes.LoadGlobalConfig,
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
-    // TODO filter UpdateGlobalConfigSection for updating dropbox
+    filter((a: UpdateGlobalConfigSection) => !(a.type === GlobalConfigActionTypes.UpdateGlobalConfigSection)
+      || a.payload.sectionKey === 'dropboxSync'),
     switchMap(() => this._dataInitService.isAllDataLoadedInitially$),
-    switchMap(() => combineLatest([
-      this._dropboxApiService.isTokenAvailable$,
-      this._dropboxSyncService.isEnabled$,
-      this._dropboxSyncService.syncInterval$,
-    ]).pipe(
-      filter(([isTokenAvailable, isEnabled]) =>
-        isTokenAvailable && isEnabled),
-      switchMap(([, , syncInterval]) =>
-        this._globalSyncService.getSyncTrigger$(
-          syncInterval >= DROPBOX_MIN_SYNC_INTERVAL
-            ? syncInterval
-            : DROPBOX_MIN_SYNC_INTERVAL
-        ).pipe(
-          tap(() => this._dropboxSyncService.sync())
-        )
-      ),
-    )),
+    switchMap(() => this._dropboxSyncService.isEnabledAndReady$),
+    filter((isEnabledAndReady) => isEnabledAndReady),
+    switchMap(() => this._dropboxSyncService.syncInterval$),
+    switchMap((syncInterval) =>
+      this._globalSyncService.getSyncTrigger$(
+        syncInterval >= DROPBOX_MIN_SYNC_INTERVAL
+          ? syncInterval
+          : DROPBOX_MIN_SYNC_INTERVAL),
+    ),
+    tap((x) => console.log('sync.....', x)),
+    switchMap((trigger: any) => this._dropboxSyncService.sync().then(() => {
+      if (trigger === INITIAL_SYNC_TRIGGER) {
+        this._globalSyncService.setInitialSyncDone(true, SyncProvider.Dropbox);
+      }
+    })),
   );
 
   private _isChangedAccessCode$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
