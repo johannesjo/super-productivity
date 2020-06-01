@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {combineLatest, fromEvent, merge, Observable, of, ReplaySubject} from 'rxjs';
+import {combineLatest, EMPTY, fromEvent, merge, Observable, of, ReplaySubject} from 'rxjs';
 import {
   auditTime,
   concatMap,
@@ -23,7 +23,8 @@ import {DataInitService} from '../../core/data-init/data-init.service';
 import {isOnline$} from '../../util/is-online';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {AppDataComplete} from './sync.model';
-import {SYNC_DEFAULT_AUDIT_TIME, SYNC_FOCUS_CHECK_THROTTLE_TIME} from './sync.const';
+import {SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME} from './sync.const';
+import {isTouch} from '../../util/is-touch';
 
 // TODO naming
 @Injectable({
@@ -39,9 +40,20 @@ export class SyncService {
   // IMMEDIATE TRIGGERS
   // ------------------
   private _focusAppTrigger$ = fromEvent(window, 'focus').pipe(
-    throttleTime(SYNC_FOCUS_CHECK_THROTTLE_TIME),
+    throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
     mapTo('FOCUS_THROTTLED'),
   );
+
+  private _someActivityTrigger$ = of(isTouch()).pipe(
+    switchMap((isTouchIn) => isTouchIn
+      ? fromEvent(window, 'touchstart').pipe(
+        throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
+        mapTo('MOUSE_TOUCH_MOVE'),
+      )
+      : EMPTY
+    )
+  );
+
   private _isOnlineTrigger$ = isOnline$.pipe(
     // skip initial online which always fires on page load
     skip(1),
@@ -51,6 +63,7 @@ export class SyncService {
 
   private _immediateSyncTrigger$ = merge(
     this._focusAppTrigger$,
+    this._someActivityTrigger$,
     this._isOnlineTrigger$,
   ).pipe(
     tap((v) => console.log('T', v)),
