@@ -97,6 +97,9 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         )
       : of(null)),
     shareReplay(1),
+    // NOTE: this seems to fix the issue loading bug, when we end up with the
+    // expandable closed when the data is loaded
+    delay(0),
   );
   issueData: IssueData;
   issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
