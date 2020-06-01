@@ -7,10 +7,11 @@ import {
   exhaustMap,
   filter,
   map,
+  mapTo,
   pairwise,
   shareReplay,
-  startWith,
   switchMap,
+  take,
   tap,
   withLatestFrom
 } from 'rxjs/operators';
@@ -22,7 +23,7 @@ import {SyncService} from '../../../imex/sync/sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
 import {SyncProvider} from '../../../imex/sync/sync-provider';
 import {SYNC_INITIAL_SYNC_TRIGGER} from '../../../imex/sync/sync.const';
-import {combineLatest, EMPTY, from} from 'rxjs';
+import {combineLatest, EMPTY, from, merge} from 'rxjs';
 import {isOnline$} from '../../../util/is-online';
 import {SnackService} from '../../../core/snack/snack.service';
 import {dbxLog} from '../dropbox-log.util';
@@ -32,15 +33,24 @@ import {T} from '../../../t.const';
 @Injectable()
 export class DropboxEffects {
   @Effect({dispatch: false}) triggerSync$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => combineLatest([
-      this._dropboxSyncService.isEnabledAndReady$,
-      this._dropboxSyncService.syncInterval$,
-    ])),
-    switchMap(([isEnabledAndReady, syncInterval]) => isEnabledAndReady
-      ? this._syncService.getSyncTrigger$(syncInterval, DROPBOX_MIN_SYNC_INTERVAL)
-      : EMPTY
-    ),
-    startWith(SYNC_INITIAL_SYNC_TRIGGER),
+    switchMap(() => merge(
+      // dynamic
+      combineLatest([
+        this._dropboxSyncService.isEnabledAndReady$,
+        this._dropboxSyncService.syncInterval$,
+      ]).pipe(
+        switchMap(([isEnabledAndReady, syncInterval]) => isEnabledAndReady
+          ? this._syncService.getSyncTrigger$(syncInterval, DROPBOX_MIN_SYNC_INTERVAL)
+          : EMPTY
+        ),
+      ),
+      // initial
+      this._dropboxSyncService.isEnabledAndReady$.pipe(
+        take(1),
+        filter(isEnabledAndReady => isEnabledAndReady),
+        mapTo(SYNC_INITIAL_SYNC_TRIGGER),
+      )
+    )),
     tap((x) => dbxLog('sync(effect).....', x)),
     withLatestFrom(isOnline$),
     // don't run multiple after each other when dialog is open
