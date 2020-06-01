@@ -1,9 +1,9 @@
+<div *ngIf="(globalProgressBarService.label$|async) as label"
+     [@fadeOut]
+     class="badge">{{label|translate}}</div>
+
 <div [@fadeInOutBottom]
      *ngIf="(globalProgressBarService.isShowGlobalProgressBar$|async)">
-  <div *ngIf="(globalProgressBarService.label$|async) as label"
-       [@fadeInOutBottom]
-       class="badge">{{label|translate}}</div>
-
   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
 </div>
 

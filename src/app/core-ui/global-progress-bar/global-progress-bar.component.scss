@@ -35,7 +35,7 @@
     background: $light-theme-bg-darker;
   }
   @include darkTheme {
-    background: $dark-theme-bg-lightest;
+    background: $dark-theme-bg-lighter;
     color: $dark-theme-text-color-less-intense;
   }
 }
