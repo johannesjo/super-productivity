@@ -4,6 +4,7 @@ import {LayoutModule} from './layout/layout.module';
 import {MainHeaderModule} from './main-header/main-header.module';
 import {ShortcutModule} from './shortcut/shortcut.module';
 import {SideNavModule} from './side-nav/side-nav.module';
+import {GlobalProgressBarModule} from './global-progress-bar/global-progress-bar.module';
 
 @NgModule({
   imports: [
@@ -12,12 +13,14 @@ import {SideNavModule} from './side-nav/side-nav.module';
     MainHeaderModule,
     ShortcutModule,
     SideNavModule,
+    GlobalProgressBarModule,
   ],
   exports: [
     LayoutModule,
     MainHeaderModule,
     ShortcutModule,
     SideNavModule,
+    GlobalProgressBarModule,
   ],
 })
 export class CoreUiModule {
