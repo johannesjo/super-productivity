@@ -1,14 +1,18 @@
+import {T} from '../../t.const';
+
+
+const a = T;
 export const PROGRESS_BAR_LABEL_MAP = {
-  'asset/': 'Loading assets',
+  'asset/': T.GPB.ASSETS,
 
-  'https://api.dropboxapi.com/2/files/get_metadata': 'Dropbox: Get file meta',
-  'https://content.dropboxapi.com/2/files/download': 'Dropbox: Download file',
-  'https://content.dropboxapi.com/2/files/upload': 'Dropbox: Upload file',
-  'https://api.dropboxapi.com/oauth2/token': 'Dropbox: Generate token',
+  'https://api.dropboxapi.com/2/files/get_metadata': T.GPB.DBX_META,
+  'https://content.dropboxapi.com/2/files/download': T.GPB.DBX_DOWNLOAD,
+  'https://content.dropboxapi.com/2/files/upload': T.GPB.DBX_UPLOAD,
+  'https://api.dropboxapi.com/oauth2/token': T.GPB.DBX_GEN_TOKEN,
 
-  'https://content.googleapis.com/upload/drive/': 'Google Drive: Upload file',
-  'https://content.googleapis.com/drive/v2/files/': 'Google Drive: Download file',
+  'https://content.googleapis.com/upload/drive/': T.GPB.GDRIVE_UPLOAD,
+  'https://content.googleapis.com/drive/v2/files/': T.GPB.GDRIVE_DOWNLOAD,
 
-  '/issues/': 'Github: Load issue data', // could also be Gitlab
-  '/issue/': 'Jira: Load issue data',
+  '/issues/': T.GPB.GITHUB_LOAD_ISSUE,
+  '/issue/': T.GPB.JIRA_LOAD_ISSUE,
 };
