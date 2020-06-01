@@ -44,14 +44,16 @@ export class SyncService {
     mapTo('FOCUS_THROTTLED'),
   );
 
-  private _someActivityTrigger$ = of(isTouch()).pipe(
+  // we might need this for mobile, as we can't rely on focus as much
+  private _someMobileActivityTrigger$ = of(isTouch()).pipe(
     switchMap((isTouchIn) => isTouchIn
       ? fromEvent(window, 'touchstart').pipe(
         throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
         mapTo('MOUSE_TOUCH_MOVE'),
       )
       : EMPTY
-    )
+    ),
+    tap(() => console.log('TOUCHSTART'))
   );
 
   private _isOnlineTrigger$ = isOnline$.pipe(
@@ -63,7 +65,7 @@ export class SyncService {
 
   private _immediateSyncTrigger$ = merge(
     this._focusAppTrigger$,
-    this._someActivityTrigger$,
+    this._someMobileActivityTrigger$,
     this._isOnlineTrigger$,
   ).pipe(
     tap((v) => console.log('T', v)),
