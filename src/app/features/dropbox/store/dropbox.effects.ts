@@ -3,7 +3,6 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
 import {
   catchError,
-  distinctUntilChanged,
   exhaustMap,
   filter,
   map,
@@ -76,8 +75,8 @@ export class DropboxEffects {
   );
 
   private _isChangedAuthCode$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    // NOTE: it is important that we don't use distinct until changed here
     switchMap(() => this._dropboxApiService.authCode$),
-    distinctUntilChanged(),
     pairwise(),
     map(([a, b]) => a !== b),
     shareReplay(),
