@@ -39,10 +39,10 @@
     {
       "name": "issueProviderAndAssets",
       "urls": [
-        "https://**",
-        "http://**",
         "!//apis.google.com/**",
-        "!//content.googleapis.com/**"
+        "!//content.googleapis.com/**",
+        "!//content.dropboxapi.com/**",
+        "!//api.dropboxapi.com/**"
       ],
       "cacheConfig": {
         "maxSize": 4000,
