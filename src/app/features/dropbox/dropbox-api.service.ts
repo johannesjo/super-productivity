@@ -45,7 +45,7 @@ export class DropboxApiService {
     }).then((res) => res.data);
   }
 
-  async download<T>({path, localRev}: { path: string; localRev?: string; }): Promise<{ meta: DropboxFileMetadata, data: T }> {
+  async download<T>({path}: { path: string; }): Promise<{ meta: DropboxFileMetadata, data: T }> {
     await this._isReady$.toPromise();
 
     return this._request({
@@ -53,8 +53,11 @@ export class DropboxApiService {
       url: 'https://content.dropboxapi.com/2/files/download',
       headers: {
         'Dropbox-API-Arg': JSON.stringify({path}),
-        // NOTE: doesn't do much, because we really get to the cas where it would be useful
-        ...(localRev ? {'If-None-Match': localRev} : {})
+        // NOTE: doesn't do much, because we rarely get to the case where it would be
+        // useful due to our pre meta checks and because data often changes after
+        // we're checking it.
+        // Also: it seems to mess up
+        // ...(localRev ? {'If-None-Match': localRev} : {})
       },
     }).then((res) => {
       const meta = JSON.parse(res.headers['dropbox-api-result']);

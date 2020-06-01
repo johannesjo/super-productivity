@@ -134,7 +134,14 @@ export class DropboxSyncService {
         return await this._uploadAppData(local);
       }
 
-      case UpdateCheckResult.RemoteNotUpToDateDespiteSync:
+      case UpdateCheckResult.RemoteNotUpToDateDespiteSync: {
+        dbxLog('DBX: X Remote not up to date despite sync');
+        if (confirm('Try to re-load data from remote?')) {
+          this.sync();
+        }
+        return;
+      }
+
       case UpdateCheckResult.DataDiverged: {
         dbxLog('^--------^-------^');
         dbxLog('DBX: ⇎ X Diverged Data');
@@ -150,6 +157,7 @@ export class DropboxSyncService {
       }
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
+        dbxLog('DBX: X Last Sync not up to date');
         this._setLocalLastSync(local.lastLocalSyncModelChange);
         return;
       }
@@ -185,7 +193,6 @@ export class DropboxSyncService {
   private _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
     return this._dropboxApiService.download<AppDataComplete>({
       path: DROPBOX_SYNC_FILE_PATH,
-      localRev: this._getLocalRev(),
     });
   }
 
@@ -194,6 +201,7 @@ export class DropboxSyncService {
       path: DROPBOX_SYNC_FILE_PATH,
       data,
       clientModified: data.lastLocalSyncModelChange,
+      localRev: this._getLocalRev(),
     });
     this._setLocalRev(r.rev);
     this._setLocalLastSync(data.lastLocalSyncModelChange);
