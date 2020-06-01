@@ -193,6 +193,7 @@ export class DropboxSyncService {
   private _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
     return this._dropboxApiService.download<AppDataComplete>({
       path: DROPBOX_SYNC_FILE_PATH,
+      localRev: this._getLocalRev(),
     });
   }
 
