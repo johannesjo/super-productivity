@@ -62,14 +62,27 @@ export class DropboxSyncService {
   }
 
   async sync() {
+    let local: AppDataComplete;
     await this._isReadyForRequests$.toPromise();
 
     this._updateLocalLastSyncCheck();
 
-    const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
-    const lastSync = this._getLocalLastSync();
+    // check if file exists and get meta
+    let checkRes: { rev: string; clientUpdate: number };
+    try {
+      checkRes = await this._getRevAndLastClientUpdate().catch();
+    } catch (e) {
+      if (e.response.data.error_summary === 'path/not_found/..') {
+        dbxLog('DBX: File not found => ↑↑↑ Initial Upload ↑↑↑');
+        local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
+        return await this._uploadAppData(local);
+      } else {
+        throw new Error('DBX: Unknown error');
+      }
+    }
 
-    let local: AppDataComplete;
+    const {rev, clientUpdate} = checkRes;
+    const lastSync = this._getLocalLastSync();
     const localRev = this._getLocalRev();
 
     if (rev === localRev) {
@@ -108,7 +121,7 @@ export class DropboxSyncService {
     switch (checkForUpdate(p)) {
       case UpdateCheckResult.InSync: {
         dbxLog('DBX: ↔ In Sync => No Update');
-        break;
+        return;
       }
 
       case UpdateCheckResult.LocalUpdateRequired: {
@@ -133,11 +146,12 @@ export class DropboxSyncService {
           dbxLog('DBX: Dialog => ↓ Update Local');
           return await this._importData(remote, r.meta.rev);
         }
-        break;
+        return;
       }
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
         this._setLocalLastSync(local.lastLocalSyncModelChange);
+        return;
       }
     }
   }
@@ -220,7 +234,11 @@ export class DropboxSyncService {
     localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
   }
 
-  private _openConflictDialog$({remote, local, lastSync}: { remote: number, local: number, lastSync: number }): Observable<DropboxConflictResolution> {
+  private _openConflictDialog$({remote, local, lastSync}: {
+    remote: number;
+    local: number;
+    lastSync: number
+  }): Observable<DropboxConflictResolution> {
     return this._matDialog.open(DialogDbxSyncConflictComponent, {
       restoreFocus: true,
       data: {
