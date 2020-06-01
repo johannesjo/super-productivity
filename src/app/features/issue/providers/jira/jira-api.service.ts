@@ -23,7 +23,7 @@ import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../../app.constants';
 import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
 import {Observable, of, throwError} from 'rxjs';
 import {SearchResultItem} from '../../issue.model';
-import {catchError, concatMap, first, mapTo, shareReplay, take} from 'rxjs/operators';
+import {catchError, concatMap, finalize, first, mapTo, shareReplay, take} from 'rxjs/operators';
 import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
 import * as moment from 'moment';
 import {BannerService} from '../../../../core/banner/banner.service';
@@ -34,6 +34,7 @@ import {stringify} from 'query-string';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {getJiraResponseErrorTxt} from '../../../../util/get-jira-response-error-text';
 import {isOnline} from '../../../../util/is-online';
+import {GlobalProgressBarService} from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -79,6 +80,7 @@ export class JiraApiService {
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _projectService: ProjectService,
     private _electronService: ElectronService,
+    private _globalProgressBarService: GlobalProgressBarService,
     private _snackService: SnackService,
     private _bannerService: BannerService,
   ) {
@@ -343,6 +345,7 @@ export class JiraApiService {
       this._chromeExtensionInterfaceService.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
     }
 
+    this._globalProgressBarService.countUp(url);
     return fromPromise(promise)
       .pipe(
         catchError((err) => {
@@ -353,6 +356,7 @@ export class JiraApiService {
           return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
         }),
         first(),
+        finalize(() => this._globalProgressBarService.countDown())
       );
   }
 

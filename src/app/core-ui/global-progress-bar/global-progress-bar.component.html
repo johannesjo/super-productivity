@@ -1,7 +1,11 @@
-<!--<div class="badge">-->
-<!--  uploading...-->
-<!--</div>-->
-<mat-progress-bar mode="indeterminate"
-                  [@fadeInOutBottom]
-                  *ngIf="globalProgressBarService.isShowGlobalProgressBar$|async"></mat-progress-bar>
+<div [@fadeInOutBottom]
+     *ngIf="(globalProgressBarService.isShowGlobalProgressBar$|async)">
+  <div *ngIf="(globalProgressBarService.label$|async) as label"
+       [@fadeInOutBottom]
+       class="badge">{{label}}</div>
+
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+
+<!--<div class="badge">Some test text</div>-->
 <!--<mat-progress-bar mode="indeterminate"></mat-progress-bar>-->

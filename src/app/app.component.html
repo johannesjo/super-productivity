@@ -46,6 +46,9 @@
 
 <div *ngIf="!(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) || (imexMetaService.isDataImportInProgress$|async)"
      class="loading-full-page-wrapper">
+  <global-progress-bar></global-progress-bar>
+
+
   <div class="app-loading">
     <div class="productivity-tip">
       <h2 id="heading">{{productivityTipTitle}}</h2>

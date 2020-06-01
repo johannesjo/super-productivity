@@ -15,7 +15,7 @@ export class GlobalProgressBarInterceptorService implements HttpInterceptor {
   ) {
 
     axios.interceptors.request.use((config) => {
-      this.globalProgressBarService.countUp();
+      this.globalProgressBarService.countUp(config.url);
       return config;
     }, (error) => {
       this.globalProgressBarService.countDown();
@@ -32,7 +32,7 @@ export class GlobalProgressBarInterceptorService implements HttpInterceptor {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    this.globalProgressBarService.countUp();
+    this.globalProgressBarService.countUp(req.url);
     return next.handle(req).pipe(
       finalize(() => {
         this.globalProgressBarService.countDown();
