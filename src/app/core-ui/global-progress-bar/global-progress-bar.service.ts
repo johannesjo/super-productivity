@@ -35,7 +35,6 @@ export class GlobalProgressBarService {
 
 
   constructor() {
-    this.label$.subscribe((v) => console.log('label$', v));
   }
 
   countUp(url: string) {
