@@ -85,7 +85,7 @@
       },
       "FORM": {
         "B_GENERATE_TOKEN": "Generate Token",
-        "TITLE": "Sync via Dropbox (recommneded)",
+        "TITLE": "Sync via Dropbox (recommended)",
         "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
         "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
         "L_AUTH_CODE": "Auth Code",
@@ -1050,6 +1050,7 @@
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Productivity Helper",
     "PROJECT_SETTINGS": "Project Specific Settings",
+    "SYNC_EXPORT": "Sync & Export",
     "TAG_SETTINGS": "Tag Specific Settings",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },

@@ -29,6 +29,16 @@
                         [cfg]="globalCfg[section.key]"
                         [section]="section"></config-section>
       </section>
+
+
+      <h2 class="mat-h2"
+          style="margin-top: 32px;">{{T.PS.SYNC_EXPORT|translate}}</h2>
+      <section *ngFor="let section of globalSyncProviderFormCfg; trackBy:trackBySectionKey;"
+               class="config-section ">
+        <config-section (save)="saveGlobalCfg($event)"
+                        [cfg]="globalCfg[section.key]"
+                        [section]="section"></config-section>
+      </section>
     </div>
   </div>
 </div>

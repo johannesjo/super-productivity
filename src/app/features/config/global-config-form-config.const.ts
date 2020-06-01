@@ -17,8 +17,11 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   (MISC_SETTINGS_FORM_CFG as GenericConfigFormSection),
   (IDLE_FORM_CFG as GenericConfigFormSection),
   (KEYBOARD_SETTINGS_FORM_CFG as GenericConfigFormSection),
-  (GOOGLE_DRIVE_SYNC_FORM as GenericConfigFormSection),
+];
+
+export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [
   (DROPBOX_SYNC_FORM as GenericConfigFormSection),
+  (GOOGLE_DRIVE_SYNC_FORM as GenericConfigFormSection),
   (IMEX_FORM as GenericConfigFormSection),
   (AUTOMATIC_BACKUPS_FORM as GenericConfigFormSection),
 ];
