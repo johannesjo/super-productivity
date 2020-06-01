@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,11 +46,18 @@ public class FullscreenActivity extends AppCompatActivity {
 
             wv.setWebViewClient(new WebViewClient() {
                 @Override
-                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                    // TODO check if url is blockstack redirect url
-                    //view.loadUrl(url);
-                    System.out.println("hello");
-                    return false;
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+                        if (url.contains("super-productivity.com") || url.contains("localhost")) {
+                            return false;
+                        } else {
+                            view.getContext().startActivity(
+                                    new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                            return true;
+                        }
+                    } else {
+                        return false;
+                    }
                 }
             });
 
@@ -81,8 +89,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
             // needs to come last for some settings to take effect
             if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
-                wv.loadUrl("http://10.0.2.2:4200");
-//                wv.loadUrl("https://test-app.super-productivity.com");
+//                wv.loadUrl("http://10.0.2.2:4200");
+                wv.loadUrl("https://test-app.super-productivity.com");
 //                wv.loadUrl("https://app.super-productivity.com");
             } else {
                 wv.loadUrl("https://app.super-productivity.com");
