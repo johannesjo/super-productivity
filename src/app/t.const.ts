@@ -898,6 +898,7 @@ export const T = {
       'JA': 'GCF.LANG.JA',
       'KO': 'GCF.LANG.KO',
       'LABEL': 'GCF.LANG.LABEL',
+      'NL': 'GCF.LANG.NL',
       'PT': 'GCF.LANG.PT',
       'RU': 'GCF.LANG.RU',
       'TITLE': 'GCF.LANG.TITLE',
