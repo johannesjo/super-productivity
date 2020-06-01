@@ -37,7 +37,7 @@
     "electron:watch": "tsc -p tsconfig-electron.json --watch",
     "electronBuilderOnly": "electron-builder",
     "pack": "electron-builder --dir",
-    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron && electron-builder --linux && sudo dpkg -i app-builds/superProductivity*.deb",
+    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:mac": "sudo echo 'Starting local install. Don`t forget APPLEID & APPLEIDPASS !!' && yarn buildAllElectron && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/superProductivity.app/ /Applications/superProductivity.app",
     "dist": "yarn buildAllElectron && electron-builder",
     "dist:only": "electron-builder",
