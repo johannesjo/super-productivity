@@ -108,7 +108,6 @@ export function createTranslateLoader(http: HttpClient) {
         immutable: true
       },
       validationMessages: [
-        {name: 'required', message: 'This field is required'},
         {name: 'pattern', message: 'Invalid input'},
       ],
     }),
