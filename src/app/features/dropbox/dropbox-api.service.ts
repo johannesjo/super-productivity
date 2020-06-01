@@ -14,7 +14,7 @@ import {toDropboxIsoString} from './iso-date-without-ms.util.';
   providedIn: 'root'
 })
 export class DropboxApiService {
-  accessCode$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
+  authCode$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
 
   private _accessToken$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.accessToken));
 
@@ -124,10 +124,7 @@ export class DropboxApiService {
       data,
       headers: {
         authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        ...(typeof data === 'object'
-          ? {'Content-Type': 'application/json; charset=UTF-8'}
-          : {}),
+        'Content-Type': 'application/json;charset=UTF-8',
         ...headers,
       },
     });

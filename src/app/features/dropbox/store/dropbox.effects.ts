@@ -65,8 +65,8 @@ export class DropboxEffects {
     }),
   );
 
-  private _isChangedAccessCode$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => this._dropboxApiService.accessCode$),
+  private _isChangedAuthCode$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    switchMap(() => this._dropboxApiService.authCode$),
     distinctUntilChanged(),
     pairwise(),
     map(([a, b]) => a !== b),
@@ -80,7 +80,7 @@ export class DropboxEffects {
     filter(({payload}: UpdateGlobalConfigSection) =>
       payload.sectionKey === 'dropboxSync'
       && (payload.sectionCfg as any).authCode),
-    withLatestFrom(this._isChangedAccessCode$),
+    withLatestFrom(this._isChangedAuthCode$),
     filter(([, isChanged]: [UpdateGlobalConfigSection, boolean]) => isChanged),
     switchMap(([{payload}, isChanged]: [UpdateGlobalConfigSection, boolean]) =>
       from(this._dropboxApiService.getAccessTokenFromAuthCode((payload.sectionCfg as any).authCode)).pipe(
