@@ -943,15 +943,15 @@
     }
   },
   "GPB": {
-    "ASSETS": "Loading assets",
-    "DBX_META": "Dropbox: Get file meta",
-    "DBX_DOWNLOAD": "Dropbox: Download file",
-    "DBX_UPLOAD": "Dropbox: Upload file",
-    "DBX_GEN_TOKEN": "Dropbox: Generate token",
-    "GDRIVE_UPLOAD": "Google Drive: Upload file",
-    "GDRIVE_DOWNLOAD": "Google Drive: Download file",
-    "GITHUB_LOAD_ISSUE": "Github: Load issue data",
-    "JIRA_LOAD_ISSUE": "Jira: Load issue data"
+    "ASSETS": "Loading assets...",
+    "DBX_META": "Dropbox: Get file meta...",
+    "DBX_DOWNLOAD": "Dropbox: Download file...",
+    "DBX_UPLOAD": "Dropbox: Upload file...",
+    "DBX_GEN_TOKEN": "Dropbox: Generate token...",
+    "GDRIVE_UPLOAD": "Google Drive: Upload file...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
+    "GITHUB_LOAD_ISSUE": "Github: Load issue data...",
+    "JIRA_LOAD_ISSUE": "Jira: Load issue data..."
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
