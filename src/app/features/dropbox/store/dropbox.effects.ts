@@ -3,6 +3,7 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
 import {
   catchError,
+  concatMap,
   exhaustMap,
   filter,
   map,
@@ -22,11 +23,13 @@ import {SyncService} from '../../../imex/sync/sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
 import {SyncProvider} from '../../../imex/sync/sync-provider';
 import {SYNC_INITIAL_SYNC_TRIGGER} from '../../../imex/sync/sync.const';
-import {combineLatest, EMPTY, from, merge, of} from 'rxjs';
+import {combineLatest, EMPTY, from, fromEvent, merge, of} from 'rxjs';
 import {isOnline$} from '../../../util/is-online';
 import {SnackService} from '../../../core/snack/snack.service';
 import {dbxLog} from '../dropbox-log.util';
 import {T} from '../../../t.const';
+import {IS_ELECTRON} from '../../../app.constants';
+import {ElectronService} from '../../../core/electron/electron.service';
 
 
 @Injectable()
@@ -75,6 +78,24 @@ export class DropboxEffects {
     }),
   );
 
+  // @Effect({dispatch: false}) syncBeforeOnload$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
+  //   concatMap(() => this._dropboxSyncService.isEnabledAndReady$),
+  //   switchMap((isEnabledAndReady) => isEnabledAndReady
+  //     ? fromEvent(window, 'beforeunload')
+  //     : EMPTY
+  //   ),
+  //   tap((e) => {
+  //     e.preventDefault();
+  //     alert('1');
+  //     setTimeout(() => {
+  //       if (IS_ELECTRON) {
+  //         // this._electronService.remote.getCurrentWindow().destroy(); // 'remote' being electron.remote here
+  //       }
+  //     }, 1100);
+  //     e.returnValue = true;
+  //   })
+  // );
+
   private _isChangedAuthCode$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
     // NOTE: it is important that we don't use distinct until changed here
     switchMap(() => this._dropboxApiService.authCode$),
@@ -121,6 +142,7 @@ export class DropboxEffects {
     private _globalConfigService: GlobalConfigService,
     private _syncService: SyncService,
     private _snackService: SnackService,
+    private _electronService: ElectronService,
     private _dataInitService: DataInitService,
   ) {
   }
