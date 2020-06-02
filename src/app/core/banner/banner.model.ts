@@ -3,6 +3,7 @@ export enum BannerId {
   GoogleLogin = 'GoogleLogin',
   JiraUnblock = 'JiraUnblock',
   InstallWebApp = 'InstallWebApp',
+  Offline = 'Offline',
   TimeEstimateExceeded = 'TimeEstimateExceeded',
 }
 

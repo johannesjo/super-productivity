@@ -5,6 +5,7 @@ export const T = {
       'INSTALL': 'APP.B_INSTALL.INSTALL',
       'MSG': 'APP.B_INSTALL.MSG'
     },
+    'B_OFFLINE': 'APP.B_OFFLINE',
     'D_INITIAL': {
       'TITLE': 'APP.D_INITIAL.TITLE'
     },

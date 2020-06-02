@@ -5,6 +5,7 @@
       "INSTALL": "Install",
       "MSG": "Do you want to install Super Productivity as a PWA?"
     },
+    "B_OFFLINE": "You are disconnected from the internet. Syncing and requesting issue provider data will not work.",
     "D_INITIAL": {
       "TITLE": "Welcome to v{{nr}}"
     },

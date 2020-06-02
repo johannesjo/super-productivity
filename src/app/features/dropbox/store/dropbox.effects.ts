@@ -55,7 +55,7 @@ export class DropboxEffects {
     // don't run multiple after each other when dialog is open
     exhaustMap(([trigger, isOnline]) => {
       if (!isOnline) {
-        this._snackService.open({msg: T.F.DROPBOX.S.OFFLINE, type: 'ERROR'});
+        // this._snackService.open({msg: T.F.DROPBOX.S.OFFLINE, type: 'ERROR'});
         if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
           this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
         }

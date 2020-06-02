@@ -26,7 +26,7 @@ import {WorkContextService} from './features/work-context/work-context.service';
 import {ImexMetaService} from './imex/imex-meta/imex-meta.service';
 import {AndroidService} from './core/android/android.service';
 import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
-import {isOnline} from './util/is-online';
+import {isOnline, isOnline$} from './util/is-online';
 import {InitialDialogService} from './features/initial-dialog/initial-dialog.service';
 import {SyncService} from './imex/sync/sync.service';
 
@@ -99,6 +99,9 @@ export class AppComponent implements OnDestroy {
 
     // init theme and body class handlers
     this._globalThemeService.init();
+
+    // init offline banner in lack of a better place for it
+    this._initOfflineBanner();
 
     if (IS_ANDROID_WEB_VIEW) {
       this._androidService.init();
@@ -211,6 +214,20 @@ export class AppComponent implements OnDestroy {
         type: 'ERROR'
       });
       console.error(data);
+    });
+  }
+
+  private _initOfflineBanner() {
+    isOnline$.subscribe((isOnlineIn) => {
+      if (!isOnlineIn) {
+        this._bannerService.open({
+          id: BannerId.Offline,
+          ico: 'cloud_off',
+          msg: T.APP.B_OFFLINE,
+        });
+      } else {
+        this._bannerService.dismiss(BannerId.Offline);
+      }
     });
   }
 }
