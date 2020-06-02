@@ -279,10 +279,6 @@ export class PersistenceService {
       const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
 
       r = {
-        // TODO remove legacy field
-        ...({lastActiveTime: this.getLastLocalSyncModelChange()} as any),
-
-        lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
         ...(await this._loadAppDataForProjects(pids)),
         ...(await this._loadAppBaseData()),
       };
@@ -290,7 +286,14 @@ export class PersistenceService {
     } else {
       r = this._inMemoryComplete;
     }
-    return r;
+
+    return {
+      ...r,
+      // TODO remove legacy field
+      ...({lastActiveTime: this.getLastLocalSyncModelChange()} as any),
+
+      lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
+    };
   }
 
   async importComplete(data: AppDataComplete) {
