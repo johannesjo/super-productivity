@@ -67,6 +67,7 @@ import {MyHammerConfig} from '../../hammer-config.class';
 import {registerTranslateExtension} from './formly-translate-extension/formly-translate-extension';
 import {FormlyTranslatedTemplateComponent} from './formly-translated-template/formly-translated-template.component';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
+import {FormlyValidationService} from './formly-translate-extension/formly-validation.service';
 import {DialogFullscreenMarkdownComponent} from './dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import {JiraToMarkdownPipe} from './pipes/jira-to-markdown.pipe';
 import {BetterDrawerModule} from './better-drawer/better-drawer.module';
@@ -216,7 +217,10 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
 export class UiModule {
   constructor(
     private _markdownService: MarkdownService,
+    private _formlyValidationService: FormlyValidationService,
   ) {
+    this._formlyValidationService.init();
+
     const linkRenderer = _markdownService.renderer.link;
     _markdownService.renderer.link = (href, title, text) => {
       const html = linkRenderer.call(_markdownService.renderer, href, title, text);
