@@ -66,11 +66,12 @@ export class DropboxApiService {
   }
 
 
-  async upload({path, localRev, data, clientModified}: {
+  async upload({path, localRev, data, clientModified, isForceOverwrite = false}: {
     path: string;
     clientModified?: number;
     localRev?: string;
     data: any;
+    isForceOverwrite?: boolean;
   }): Promise<DropboxFileMetadata> {
     await this._isReady$.toPromise();
 
@@ -84,7 +85,7 @@ export class DropboxApiService {
         : {}),
     };
 
-    if (localRev) {
+    if (localRev && !isForceOverwrite) {
       args.mode = {'.tag': 'update', update: localRev} as any;
     }
 

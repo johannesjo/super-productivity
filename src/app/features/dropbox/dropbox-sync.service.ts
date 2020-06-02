@@ -148,7 +148,7 @@ export class DropboxSyncService {
         const dr = await this._openConflictDialog$(p).toPromise();
         if (dr === 'USE_LOCAL') {
           dbxLog('DBX: Dialog => ↑ Remote Update');
-          return await this._uploadAppData(local);
+          return await this._uploadAppData(local, true);
         } else if (dr === 'USE_REMOTE') {
           dbxLog('DBX: Dialog => ↓ Update Local');
           return await this._importData(remote, r.meta.rev);
@@ -197,12 +197,13 @@ export class DropboxSyncService {
     });
   }
 
-  private async _uploadAppData(data: AppDataComplete): Promise<DropboxFileMetadata> {
+  private async _uploadAppData(data: AppDataComplete, isForceOverwrite = false): Promise<DropboxFileMetadata> {
     const r = await this._dropboxApiService.upload({
       path: DROPBOX_SYNC_FILE_PATH,
       data,
       clientModified: data.lastLocalSyncModelChange,
       localRev: this._getLocalRev(),
+      isForceOverwrite
     });
     this._setLocalRev(r.rev);
     this._setLocalLastSync(data.lastLocalSyncModelChange);
