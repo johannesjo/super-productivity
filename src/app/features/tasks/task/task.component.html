@@ -274,8 +274,7 @@
 
           <button (click)="editReminder()"
                   *ngIf="!task.repeatCfgId"
-                  mat-menu-item
-                  class="hide-xs">
+                  mat-menu-item>
             <ng-container *ngIf="!task.reminderId">
               <mat-icon>alarm_add</mat-icon>
               {{T.F.TASK.CMP.SCHEDULE|translate}}
