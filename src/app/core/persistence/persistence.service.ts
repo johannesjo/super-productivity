@@ -57,7 +57,7 @@ import {checkFixEntityStateConsistency} from '../../util/check-fix-entity-state-
 import {SimpleCounter, SimpleCounterState} from '../../features/simple-counter/simple-counter.model';
 import {simpleCounterReducer} from '../../features/simple-counter/store/simple-counter.reducer';
 import {from, merge, Observable, Subject} from 'rxjs';
-import {shareReplay, switchMap} from 'rxjs/operators';
+import {concatMap, shareReplay} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -137,7 +137,7 @@ export class PersistenceService {
   inMemoryComplete$: Observable<AppDataComplete> = merge(
     from(this.loadComplete()),
     this.onAfterSave$.pipe(
-      switchMap(() => this.loadComplete()),
+      concatMap(() => this.loadComplete()),
       // TODO maybe not necessary
       // skipWhile(complete => !isValidAppData(complete)),
     ),
@@ -145,6 +145,7 @@ export class PersistenceService {
     shareReplay(1),
   );
 
+  private _inMemoryComplete: AppDataComplete;
   private _isBlockSaving = false;
 
   constructor(
@@ -152,8 +153,7 @@ export class PersistenceService {
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {
-    // this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
-    // this.onAfterSave$.subscribe((v) => console.log('onAfterSave$', v));
+    this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
   }
 
 
@@ -273,17 +273,24 @@ export class PersistenceService {
 
   // NOTE: not including backup
   async loadComplete(): Promise<AppDataComplete> {
-    const projectState = await this.project.loadState();
-    const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
+    let r;
+    if (!this._inMemoryComplete) {
+      const projectState = await this.project.loadState();
+      const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
 
-    return {
-      // TODO remove legacy field
-      ...({lastActiveTime: this.getLastLocalSyncModelChange()} as any),
+      r = {
+        // TODO remove legacy field
+        ...({lastActiveTime: this.getLastLocalSyncModelChange()} as any),
 
-      lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
-      ...(await this._loadAppDataForProjects(pids)),
-      ...(await this._loadAppBaseData()),
-    };
+        lastLocalSyncModelChange: this.getLastLocalSyncModelChange(),
+        ...(await this._loadAppDataForProjects(pids)),
+        ...(await this._loadAppBaseData()),
+      };
+      this._inMemoryComplete = r;
+    } else {
+      r = this._inMemoryComplete;
+    }
+    return r;
   }
 
   async importComplete(data: AppDataComplete) {
@@ -485,7 +492,15 @@ export class PersistenceService {
     if (!this._isBlockSaving || isDataImport === true) {
       const idbKey = this._getIDBKey(dbKey, projectId);
       const r = await this._databaseService.save(idbKey, data);
+
+      this._updateInMemory({
+        projectId,
+        appDataKey: dbKey,
+        data
+      });
+
       this.onAfterSave$.next({appDataKey: dbKey, data, isDataImport, projectId});
+
       return r;
     } else {
       console.warn('BLOCKED SAVING for ', dbKey);
@@ -517,6 +532,18 @@ export class PersistenceService {
     return await this._databaseService.load(idbKey) || await this._databaseService.load(legacyDBKey) || undefined;
   }
 
+  private _updateInMemory({appDataKey, projectId, data}: {
+    appDataKey: AllowedDBKeys,
+    projectId?: string,
+    data: any
+  }) {
+    this._inMemoryComplete = this._extendAppDataComplete({
+      complete: this._inMemoryComplete,
+      projectId,
+      appDataKey,
+      data
+    });
+  }
 
   private _extendAppDataComplete({complete, appDataKey, projectId, data}: {
     complete: AppDataComplete,
