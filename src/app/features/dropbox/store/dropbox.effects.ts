@@ -22,7 +22,7 @@ import {SyncService} from '../../../imex/sync/sync.service';
 import {DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
 import {SyncProvider} from '../../../imex/sync/sync-provider';
 import {SYNC_INITIAL_SYNC_TRIGGER} from '../../../imex/sync/sync.const';
-import {combineLatest, EMPTY, from, merge} from 'rxjs';
+import {combineLatest, EMPTY, from, merge, of} from 'rxjs';
 import {isOnline$} from '../../../util/is-online';
 import {SnackService} from '../../../core/snack/snack.service';
 import {dbxLog} from '../dropbox-log.util';
@@ -59,7 +59,8 @@ export class DropboxEffects {
         if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
           this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
         }
-        return;
+        // we need to return something
+        return of(null);
       }
       return this._dropboxSyncService.sync()
         .then(() => {
