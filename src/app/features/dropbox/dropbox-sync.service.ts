@@ -19,6 +19,9 @@ import {checkForUpdate, UpdateCheckResult} from '../../imex/sync/check-for-updat
 import {dbxLog} from './dropbox-log.util';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogDbxSyncConflictComponent} from './dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
+import {SnackService} from '../../core/snack/snack.service';
+import {environment} from '../../../environments/environment';
+import {T} from '../../t.const';
 
 
 @Injectable({
@@ -56,6 +59,7 @@ export class DropboxSyncService {
     private _syncService: SyncService,
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
+    private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {
     // TODO initial syncing (do with immediate triggers)
@@ -70,14 +74,27 @@ export class DropboxSyncService {
     // check if file exists and get meta
     let checkRes: { rev: string; clientUpdate: number };
     try {
-      checkRes = await this._getRevAndLastClientUpdate().catch();
+      checkRes = await this._getRevAndLastClientUpdate();
     } catch (e) {
       if (e.response.data.error_summary === 'path/not_found/..') {
         dbxLog('DBX: File not found => ↑↑↑ Initial Upload ↑↑↑');
         local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
         return await this._uploadAppData(local);
+      } else if (e && e.response && e.response.status === 401) {
+        this._snackService.open({msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR'});
+        return;
       } else {
-        throw new Error('DBX: Unknown error');
+        console.error(e);
+        if (environment.production) {
+          this._snackService.open({
+            msg: T.F.DROPBOX.S.UNKNOWN_ERROR,
+            translateParams: {errorStr: e && e.toString && e.toString()},
+            type: 'ERROR'
+          });
+        } else {
+          throw new Error('DBX: Unknown error');
+        }
+        return;
       }
     }
 
