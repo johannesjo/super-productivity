@@ -12,7 +12,6 @@ import {BookmarkService} from './features/bookmark/bookmark.service';
 import {expandAnimation} from './ui/animations/expand.ani';
 import {warpRouteAnimation} from './ui/animations/warp-route';
 import {Subscription} from 'rxjs';
-import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
 import {BannerService} from './core/banner/banner.service';
 import {SS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
@@ -24,7 +23,6 @@ import {UiHelperService} from './features/ui-helper/ui-helper.service';
 import {LanguageService} from './core/language/language.service';
 import {ElectronService} from './core/electron/electron.service';
 import {WorkContextService} from './features/work-context/work-context.service';
-import {DataInitService} from './core/data-init/data-init.service';
 import {ImexMetaService} from './imex/imex-meta/imex-meta.service';
 import {AndroidService} from './core/android/android.service';
 import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
@@ -69,16 +67,14 @@ export class AppComponent implements OnDestroy {
     private _translateService: TranslateService,
     private _globalThemeService: GlobalThemeService,
     private _uiHelperService: UiHelperService,
-    private _store: Store<any>,
     private _languageService: LanguageService,
     private _androidService: AndroidService,
     private _initialDialogService: InitialDialogService,
-    public readonly  syncService: SyncService,
+    private _bookmarkService: BookmarkService,
+    public readonly syncService: SyncService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
     public readonly layoutService: LayoutService,
-    public readonly bookmarkService: BookmarkService,
-    public readonly dataInitService: DataInitService,
   ) {
     this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;
@@ -154,7 +150,7 @@ export class AppComponent implements OnDestroy {
   }
 
   @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
-    this.bookmarkService.createFromPaste(ev);
+    this._bookmarkService.createFromPaste(ev);
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(e: any) {
