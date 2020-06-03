@@ -71,7 +71,9 @@ export class DropboxSyncService {
 
     this._updateLocalLastSyncCheck();
 
-    // check if file exists and get meta
+    // PRE CHECK 1
+    // check if file exists, auth works & able to connect
+    // --------------------------------------------------
     let checkRes: { rev: string; clientUpdate: number };
     try {
       checkRes = await this._getRevAndLastClientUpdate();
@@ -100,6 +102,9 @@ export class DropboxSyncService {
       }
     }
 
+    // PRE CHECK 2
+    // check if file revision changed
+    // ------------------------------
     const {rev, clientUpdate} = checkRes;
     const lastSync = this._getLocalLastSync();
     const localRev = this._getLocalRev();
@@ -112,6 +117,10 @@ export class DropboxSyncService {
         return;
       }
     }
+
+    // PRE CHECK 3
+    // simple check based on file meta data
+    // ------------------------------------
     // if not defined yet
     local = local || await this._syncService.inMemory$.pipe(take(1)).toPromise();
 
@@ -129,6 +138,9 @@ export class DropboxSyncService {
       return await this._uploadAppData(local);
     }
 
+
+    // COMPLEX SYNC HANDLING
+    // ---------------------
     const r = (await this._downloadAppData());
     const remote = r.data;
     const p = {
