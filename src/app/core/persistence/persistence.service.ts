@@ -153,7 +153,7 @@ export class PersistenceService {
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {
-    this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
+    // this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
   }
 
 
