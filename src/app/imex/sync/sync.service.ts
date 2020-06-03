@@ -123,15 +123,21 @@ export class SyncService {
     private readonly _dataInitService: DataInitService,
     private readonly _persistenceService: PersistenceService,
   ) {
+    // this.getSyncTrigger$(5000).subscribe((v) => console.log('.getSyncTrigger$(5000)', v));
   }
 
   getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME, minSyncInterval: number = 5000): Observable<unknown> {
     return merge(
       this._immediateSyncTrigger$,
-      this._updateLocalData$.pipe(
-        tap((ev) => console.log('__trigger_sync__', ev)),
-        auditTime(Math.max(syncInterval, minSyncInterval)),
-        tap((ev) => console.log('__trigger_sync after auditTime__', ev)),
+
+      // we do this to reset the audit time to avoid sync checks in short succession
+      this._immediateSyncTrigger$.pipe(
+        switchMap(() => this._updateLocalData$.pipe(
+          tap((ev) => console.log('__trigger_sync__', ev)),
+          auditTime(Math.max(syncInterval, minSyncInterval)),
+          tap((ev) => console.log('__trigger_sync after auditTime__', ev)),
+        )),
+        startWith(false),
       )
     ).pipe(
       debounceTime(100)
