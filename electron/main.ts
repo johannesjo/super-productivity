@@ -143,7 +143,7 @@ appIN.on('ready', () => {
 });
 
 
-appIN.on('before-quit', () => {
+appIN.on('before-quit', (ev) => {
   // handle darwin
   if (IS_MAC) {
     nestedWinParams.isDarwinForceQuit = true;

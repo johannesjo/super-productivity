@@ -1,10 +1,19 @@
 import * as windowStateKeeper from 'electron-window-state';
-import {BrowserWindow, dialog, ipcMain, Menu, MenuItemConstructorOptions, MessageBoxReturnValue, shell} from 'electron';
+import {
+  App,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  Menu,
+  MenuItemConstructorOptions,
+  MessageBoxReturnValue,
+  shell
+} from 'electron';
 import {errorHandler} from './error-handler';
 import {join, normalize} from 'path';
 import {format} from 'url';
-import {getSettings} from './get-settings';
 import {IPC} from './ipc-events.const';
+import {getSettings} from './get-settings';
 
 let mainWin;
 let indicatorMod;
@@ -114,41 +123,7 @@ function initWinEventListeners(app: any) {
   });
 
   // TODO refactor quiting mess
-
-  const quitApp = () => {
-    app.isQuiting = true;
-    app.quit();
-  };
-
-  mainWin.on('close', (event) => {
-      if (app.isQuiting) {
-        app.quit();
-      } else {
-        event.preventDefault();
-
-        getSettings(mainWin, (appCfg) => {
-          if (appCfg && appCfg.misc.isConfirmBeforeExit && !app.isQuiting) {
-            dialog.showMessageBox(mainWin,
-              {
-                type: 'question',
-                buttons: ['Yes', 'No'],
-                title: 'Confirm',
-                message: 'Are you sure you want to quit?'
-              }).then((choice: MessageBoxReturnValue) => {
-              if (choice.response === 1) {
-                return;
-              } else if (choice.response === 0) {
-                quitApp();
-                return;
-              }
-            });
-          } else {
-            quitApp();
-          }
-        });
-      }
-    }
-  );
+  appCloseHandler(app);
 }
 
 function createMenu(quitApp) {
@@ -181,3 +156,70 @@ function createMenu(quitApp) {
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTplOUT));
 }
 
+
+// TODO this is ugly as f+ck
+const appCloseHandler = (
+  app: App,
+) => {
+  let ids = [];
+
+  const _quitApp = () => {
+    (app as any).isQuiting = true;
+    app.quit();
+  };
+
+  // ipcMain.on(IPC.APP_READY, () => isMainWinError = false);
+  // ipcMain.on(IPC.ERROR, (ev, error) => {
+  // HANDLED_ERROR_PROP_STR causes issues
+  //   if (!error || !error[HANDLED_ERROR_PROP_STR]) {
+  //     isMainWinError = true;
+  //   }
+  // });
+  ipcMain.on(IPC.REGISTER_BEFORE_CLOSE, (ev, {id}) => {
+    ids.push(id);
+  });
+  ipcMain.on(IPC.UNREGISTER_BEFORE_CLOSE, (ev, {id}) => {
+    ids = ids.filter(idIn => idIn !== id);
+  });
+  ipcMain.on(IPC.BEFORE_CLOSE_DONE, (ev, {id}) => {
+    ids = ids.filter(idIn => idIn !== id);
+    if (ids.length === 0) {
+      app.quit();
+    }
+  });
+
+
+  mainWin.on('close', (event) => {
+      if ((app as any).isQuiting) {
+        app.quit();
+      } else {
+        event.preventDefault();
+        if (ids.length > 0) {
+          console.log('Actions to wait for ', ids);
+          mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
+        } else {
+          getSettings(mainWin, (appCfg) => {
+            if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
+              dialog.showMessageBox(mainWin,
+                {
+                  type: 'question',
+                  buttons: ['Yes', 'No'],
+                  title: 'Confirm',
+                  message: 'Are you sure you want to quit?'
+                }).then((choice: MessageBoxReturnValue) => {
+                if (choice.response === 1) {
+                  return;
+                } else if (choice.response === 0) {
+                  _quitApp();
+                  return;
+                }
+              });
+            } else {
+              _quitApp();
+            }
+          });
+        }
+      }
+    }
+  );
+};
