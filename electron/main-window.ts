@@ -113,12 +113,15 @@ function initWinEventListeners(app: any) {
     }
   });
 
-  let isQuiting = false;
-
   // TODO refactor quiting mess
 
+  const quitApp = () => {
+    app.isQuiting = true;
+    app.quit();
+  };
+
   mainWin.on('close', (event) => {
-      if (isQuiting) {
+      if (app.isQuiting) {
         app.quit();
       } else {
         event.preventDefault();
@@ -133,19 +136,14 @@ function initWinEventListeners(app: any) {
                 message: 'Are you sure you want to quit?'
               }).then((choice: MessageBoxReturnValue) => {
               if (choice.response === 1) {
-                event.preventDefault();
                 return;
               } else if (choice.response === 0) {
-                app.isQuiting = true;
-                isQuiting = true;
-                app.quit();
+                quitApp();
                 return;
               }
             });
           } else {
-            app.isQuiting = true;
-            isQuiting = true;
-            app.quit();
+            quitApp();
           }
         });
       }
