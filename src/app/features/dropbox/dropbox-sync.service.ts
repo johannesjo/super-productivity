@@ -76,11 +76,13 @@ export class DropboxSyncService {
     try {
       checkRes = await this._getRevAndLastClientUpdate();
     } catch (e) {
-      if (e.response.data.error_summary === 'path/not_found/..') {
+      const isAxiosError = !!(e && e.response && e.response.status);
+
+      if (isAxiosError && e.response.data && e.response.data.error_summary === 'path/not_found/..') {
         dbxLog('DBX: File not found => ↑↑↑ Initial Upload ↑↑↑');
         local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
         return await this._uploadAppData(local);
-      } else if (e && e.response && e.response.status === 401) {
+      } else if (isAxiosError && e.response.status === 401) {
         this._snackService.open({msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR'});
         return;
       } else {
