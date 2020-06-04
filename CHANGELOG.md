@@ -1,3 +1,13 @@
+## [5.3.1](https://github.com/johannesjo/super-productivity/compare/v5.3.0...v5.3.1) (2020-06-04)
+
+
+### Features
+
+* improve github open issue ([248a6ed](https://github.com/johannesjo/super-productivity/commit/248a6ed88bf3bbb538d9e680448b5c245fa1805a))
+* wait a bit before displaying error to increase the chance of the source maps being send as well ([508149b](https://github.com/johannesjo/super-productivity/commit/508149be98b08c1462976a2e7db24fc63a1d569d))
+
+
+
 # [5.3.0](https://github.com/johannesjo/super-productivity/compare/v5.2.1...v5.3.0) (2020-06-04)
 
 
