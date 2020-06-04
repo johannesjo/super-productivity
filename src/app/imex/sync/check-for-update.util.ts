@@ -5,7 +5,7 @@ export enum UpdateCheckResult {
   DataDiverged = 'DataDiverged',
   RemoteNotUpToDateDespiteSync = 'RemoteNotUpToDateDespiteSync',
   LastSyncNotUpToDate = 'LastSyncNotUpToDate',
-  Error = 'Error',
+  ErrorLastSyncNewerThanLocal = 'ErrorLastSyncNewerThanLocal',
 }
 
 export const checkForUpdate = (params: { remote: number, local: number, lastSync: number }) => {
@@ -14,7 +14,7 @@ export const checkForUpdate = (params: { remote: number, local: number, lastSync
 
   if (lastSync > local) {
     console.error('This should not happen. lastSyncTo > local');
-    return UpdateCheckResult.Error;
+    return UpdateCheckResult.ErrorLastSyncNewerThanLocal;
   }
 
   if (local === remote) {
