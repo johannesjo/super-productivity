@@ -116,7 +116,7 @@ function initWinEventListeners(app: any) {
     urlObj.pathname = urlObj.pathname
       .replace('//', '/');
     const wellFormedUrl = urlObj.toString();
-    const wasOpened = shell.openPath(wellFormedUrl);
+    const wasOpened = shell.openItem(wellFormedUrl);
     if (!wasOpened) {
       shell.openExternal(wellFormedUrl);
     }
