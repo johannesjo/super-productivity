@@ -38,8 +38,10 @@ describe('checkForUpdate', () => {
 
 
   it('l < s -> error', () => {
-    expect(() => {
-      checkForUpdate({local: 0, lastSync: 3, remote: 4});
-    }).toThrowError('This should not happen. lastSyncTo > local');
+    const r = checkForUpdate({local: 0, lastSync: 3, remote: 4});
+    expect(r).toBe(UpdateCheckResult.ErrorLastSyncNewerThanLocal);
+    // expect(() => {
+    //   checkForUpdate({local: 0, lastSync: 3, remote: 4});
+    // }).toThrowError('This should not happen. lastSyncTo > local');
   });
 });

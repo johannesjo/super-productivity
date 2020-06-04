@@ -3,7 +3,8 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
 import {
   catchError,
-  concatMap, distinctUntilChanged,
+  concatMap,
+  distinctUntilChanged,
   exhaustMap,
   filter,
   map,
@@ -31,8 +32,6 @@ import {T} from '../../../t.const';
 import {ElectronService} from '../../../core/electron/electron.service';
 import {ExecBeforeCloseService} from '../../../core/electron/exec-before-close.service';
 import {IS_ELECTRON} from '../../../app.constants';
-import set = Reflect.set;
-import {LS_LAST_LOCAL_SYNC_MODEL_CHANGE} from '../../../core/persistence/ls-keys.const';
 
 
 @Injectable()
@@ -137,7 +136,6 @@ export class DropboxEffects {
       // TODO find out why localStorage isn't persisted
       switchMap(() => this._dropboxSyncService.sync()
         .then(() => {
-          console.log(localStorage.getItem(LS_LAST_LOCAL_SYNC_MODEL_CHANGE));
           this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
         })
         .catch((e) => {
