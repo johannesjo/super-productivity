@@ -97,6 +97,8 @@ export class ReminderService {
     }
 
     this._onReloadModel$.next(this._reminders);
+    this._reminders$.next(this._reminders);
+    this._updateRemindersInWorker(this._reminders);
   }
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
