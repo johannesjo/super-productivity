@@ -46,11 +46,7 @@ cache:
 
 script:
   - |
-    if [ -n "$TRAVIS_TAG" ]; then
-      PUB=always
-    else
-      PUB=never
-    fi
+    PUB=always
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       echo '____RUNNING DOCKER____'
       bash ${TRAVIS_BUILD_DIR}/build/docker/run-linux-win.sh ${PUB}
@@ -81,7 +77,6 @@ deploy:
   - on:
       condition: $TRAVIS_OS_NAME = linux
       tags: true
-      branch: master
     provider: snap
     snap: ./app-builds/*.snap
     channel: candidate
@@ -92,7 +87,6 @@ deploy:
   - on:
       condition: $TRAVIS_OS_NAME = linux
       tags: true
-      branch: master
     provider: script
     script: sshpass -p "$DEPLOY_PASS" rsync -avz ./dist $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
     skip_cleanup: true
