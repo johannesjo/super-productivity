@@ -1,10 +1,9 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {TaskService} from '../../features/tasks/task.service';
-import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {IPC} from '../../../../electron/ipc-events.const';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
 import {NoteService} from '../../features/note/note.service';
@@ -22,6 +21,7 @@ import {WorklogService} from '../../features/worklog/worklog.service';
 import {DialogWorklogExportComponent} from '../../features/worklog/dialog-worklog-export/dialog-worklog-export.component';
 import {ElectronService} from '../../core/electron/electron.service';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {DropboxSyncService} from '../../features/dropbox/dropbox-sync.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -94,6 +94,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     public readonly workContextService: WorkContextService,
     private readonly _taskService: TaskService,
     private readonly _googleDriveSync: GoogleDriveSyncService,
+    private readonly _dropboxSync: DropboxSyncService,
     private readonly _router: Router,
     private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
@@ -211,17 +212,21 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._worklogService.refreshWorklog();
   }
 
-  private _finishDayForGood(cb?) {
+  private async _finishDayForGood(cb?) {
     if (this.configService.cfg
       && this.configService.cfg.googleDriveSync.isEnabled
       && this.configService.cfg.googleDriveSync.isAutoSyncToRemote) {
       // login in again, will hopefully prevent google errors
       // this._googleApiService.login().then(() => {
       this._googleDriveSync.saveForSync();
-      this._subs.add(this._googleDriveSync.onSaveEnd$.pipe(take(1)).subscribe(() => {
-        this._initSuccessAnimation(cb);
-      }));
+      await this._googleDriveSync.onSaveEnd$.pipe(take(1)).toPromise();
+      this._initSuccessAnimation(cb);
       // });
+    } else if (this.configService.cfg
+      && this.configService.cfg.dropboxSync
+      && this.configService.cfg.dropboxSync.isEnabled && this.configService.cfg.dropboxSync.accessToken) {
+      await this._dropboxSync.sync();
+      this._initSuccessAnimation(cb);
     } else {
       this._initSuccessAnimation(cb);
     }
