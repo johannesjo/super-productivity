@@ -123,6 +123,11 @@ export class DropboxSyncService {
     // ------------------------------------
     // if not defined yet
     local = local || await this._syncService.inMemory$.pipe(take(1)).toPromise();
+    if (local.lastLocalSyncModelChange === 0) {
+      if (!confirm('lastLocalSyncModelChange is 0. Which means data has been deleted or something is wrong. Proceed with Dropbox sync?')) {
+        return;
+      }
+    }
 
     // NOTE: missing milliseconds :(
     const remoteClientUpdate = clientUpdate / 1000;
