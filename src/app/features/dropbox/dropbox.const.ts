@@ -9,3 +9,4 @@ export const DROPBOX_SYNC_FILE_NAME = environment.production
   : 'sp-dev.json';
 export const DROPBOX_SYNC_FILE_PATH = `/${DROPBOX_APP_FOLDER}/${DROPBOX_SYNC_FILE_NAME}`;
 export const DROPBOX_AUTH_CODE_URL = `https://www.dropbox.com/oauth2/authorize?response_type=code&client_id=${DROPBOX_APP_KEY}`;
+export const DROPBOX_BEFORE_CLOSE_ID = 'DROPBOX';
