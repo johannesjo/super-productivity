@@ -73,6 +73,7 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
   errorAlert.style.color = 'black';
   errorAlert.style.maxHeight = '100vh';
   errorAlert.innerHTML = `
+    <div id="error-alert-inner-wrapper">
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
     <p><a href="${githubUrl}" id="github-issue-url" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
@@ -81,6 +82,7 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
     <pre id="stack-trace"
          style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
     <pre style="line-height: 1.3; font-size: 12px;">${getSimpleMeta()}</pre>
+    </div>
   `;
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
@@ -91,9 +93,16 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
       window.location.reload();
     }
   });
-  errorAlert.append(btnReload);
   document.body.append(errorAlert);
+  const innerWrapper = document.getElementById('error-alert-inner-wrapper');
+  innerWrapper.append(btnReload);
   isWasErrorAlertCreated = true;
+
+  innerWrapper.style.visibility = 'hidden';
+  // let's wait a bit to ensure, that the sourcemaps have been parsed
+  setTimeout(() => {
+    innerWrapper.style.visibility = 'visible';
+  }, 1500);
 
   if (IS_ELECTRON) {
     eSvc.remote.getCurrentWindow().webContents.openDevTools();
