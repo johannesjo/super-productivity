@@ -16,15 +16,15 @@ import {
   selectProductivityHappinessLineChartData,
   selectProductivityHappinessLineChartDataComplete
 } from './store/metric.selectors';
-import {filter, map, skipUntil, switchMap, take} from 'rxjs/operators';
+import {filter, map, switchMap, take} from 'rxjs/operators';
 import {TaskService} from '../tasks/task.service';
 import {WorklogService} from '../worklog/worklog.service';
 import {ProjectService} from '../project/project.service';
 import {mapSimpleMetrics} from './metric.util';
 import {DEFAULT_METRIC_FOR_DAY} from './metric.const';
-import {selectCheckedImprovementIdsForDay, selectRepeatedImprovementIds} from './improvement/store/improvement.reducer';
 import {WorkContextService} from '../work-context/work-context.service';
 import {WorkContextType} from '../work-context/work-context.model';
+import {selectCheckedImprovementIdsForDay, selectRepeatedImprovementIds} from './improvement/store/improvement.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -87,28 +87,29 @@ export class MetricService {
   }
 
   getMetricForDayOrDefaultWithCheckedImprovements$(day = getWorklogStr()): Observable<Metric> {
-    return this._store$.pipe(select(selectMetricById, {id: day})).pipe(
+    return this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
       // required because otherwise there might be trouble
-      skipUntil(this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
-        filter((isLoaded): boolean => isLoaded))
-      ),
-      switchMap((metric) => {
-        return metric
-          ? of(metric)
-          : combineLatest([
-            this._store$.pipe(select(selectCheckedImprovementIdsForDay, {day})),
-            this._store$.pipe(select(selectRepeatedImprovementIds)),
-          ]).pipe(
-            map(([checkedImprovementIds, repeatedImprovementIds]) => {
-              return {
-                id: day,
-                ...DEFAULT_METRIC_FOR_DAY,
-                improvements: checkedImprovementIds || [],
-                improvementsTomorrow: repeatedImprovementIds || [],
-              };
-            })
-          );
-      }),
+      filter((isLoaded): boolean => isLoaded),
+      take(1),
+      switchMap(() => this._store$.pipe(select(selectMetricById, {id: day})).pipe(
+        switchMap((metric) => {
+          return metric
+            ? of(metric)
+            : combineLatest([
+              this._store$.pipe(select(selectCheckedImprovementIdsForDay, {day})),
+              this._store$.pipe(select(selectRepeatedImprovementIds)),
+            ]).pipe(
+              map(([checkedImprovementIds, repeatedImprovementIds]) => {
+                return {
+                  id: day,
+                  ...DEFAULT_METRIC_FOR_DAY,
+                  improvements: checkedImprovementIds || [],
+                  improvementsTomorrow: repeatedImprovementIds || [],
+                };
+              })
+            );
+        }),
+      ))
     );
   }
 
