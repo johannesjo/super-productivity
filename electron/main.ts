@@ -54,7 +54,6 @@ if (!IS_MAC) {
   electronDl({openFolderWhenDone: true});
 }
 let mainWin: BrowserWindow;
-const nestedWinParams = {isDarwinForceQuit: false};
 // keep app active to keep time tracking running
 // powerSaveBlocker.start('prevent-app-suspension');
 
@@ -142,13 +141,6 @@ appIN.on('ready', () => {
   });
 });
 
-
-appIN.on('before-quit', (ev) => {
-  // handle darwin
-  if (IS_MAC) {
-    nestedWinParams.isDarwinForceQuit = true;
-  }
-});
 
 appIN.on('will-quit', () => {
   // un-register all shortcuts.
@@ -244,7 +236,6 @@ function createMainWin() {
     ICONS_FOLDER,
     IS_MAC,
     quitApp,
-    nestedWinParams,
     // TODO fix
     // indicatorMod,
   });

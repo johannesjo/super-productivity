@@ -15,7 +15,7 @@ import {format} from 'url';
 import {IPC} from './ipc-events.const';
 import {getSettings} from './get-settings';
 
-let mainWin;
+let mainWin: BrowserWindow;
 let indicatorMod;
 
 const mainWinModule = {
@@ -165,7 +165,7 @@ const appCloseHandler = (
 
   const _quitApp = () => {
     (app as any).isQuiting = true;
-    app.quit();
+    mainWin.close();
   };
 
   // ipcMain.on(IPC.APP_READY, () => isMainWinError = false);
@@ -183,16 +183,16 @@ const appCloseHandler = (
   });
   ipcMain.on(IPC.BEFORE_CLOSE_DONE, (ev, {id}) => {
     ids = ids.filter(idIn => idIn !== id);
+    console.log(IPC.BEFORE_CLOSE_DONE, id, ids);
     if (ids.length === 0) {
-      app.quit();
+      _quitApp();
     }
   });
 
-
   mainWin.on('close', (event) => {
-      if ((app as any).isQuiting) {
-        app.quit();
-      } else {
+      // NOTE: this might not work if we run a second instance of the app
+      console.log('close, isQuiting:', (app as any).isQuiting);
+      if (!(app as any).isQuiting) {
         event.preventDefault();
         if (ids.length > 0) {
           console.log('Actions to wait for ', ids);
