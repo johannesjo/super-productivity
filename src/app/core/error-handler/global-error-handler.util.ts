@@ -3,6 +3,7 @@ import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
 import {environment} from '../../../environments/environment';
 import * as StackTrace from 'stacktrace-js';
 import * as pThrottle from 'p-throttle';
+import * as newGithubIssueUrl from 'new-github-issue-url';
 
 let isWasErrorAlertCreated = false;
 
@@ -37,8 +38,17 @@ export const logAdvancedStacktrace = (origErr, additionalLogFn?: (stack: string)
   // append to dialog
   const stacktraceEl = document.getElementById('stack-trace');
   if (stacktraceEl) {
-    document.getElementById('stack-trace').innerText = stack;
+    stacktraceEl.innerText = stack;
   }
+
+  const githubIssueLink = document.getElementById('github-issue-url');
+  console.log(githubIssueLink);
+
+  if (githubIssueLink) {
+    const errEscaped = _cleanHtml(origErr);
+    githubIssueLink.setAttribute('href', getGithubUrl(errEscaped, stack));
+  }
+
 
 // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
 }).catch(console.error);
@@ -56,6 +66,7 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
   }
   // it seems for whatever reasons, sometimes we get tags in our error which break the html
   const errEscaped = _cleanHtml(err);
+  const githubUrl = getGithubUrl(errEscaped, stackTrace);
 
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
@@ -63,7 +74,7 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
   errorAlert.style.maxHeight = '100vh';
   errorAlert.innerHTML = `
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
-    <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">! Please copy & report !</a></p>
+    <p><a href="${githubUrl}" id="github-issue-url" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
     <pre style="line-height: 1.3;">${errEscaped}</pre>
 
@@ -100,4 +111,49 @@ export const isHandledError = (err): boolean => {
   // NOTE: for some unknown reason sometimes err is undefined while err.toString is not...
   // this is why we also check the string value
   return (err && err.hasOwnProperty(HANDLED_ERROR_PROP_STR)) || (errStr.match(HANDLED_ERROR_PROP_STR));
+};
+
+const getGithubUrl = (errEscaped: string, stackTrace: string): string => {
+  return newGithubIssueUrl({
+    user: 'johannesjo',
+    repo: 'super-productivity',
+    body: getGithubIssueErrorMarkdown(stackTrace),
+    title: errEscaped,
+  });
+};
+
+const getGithubIssueErrorMarkdown = (stacktrace: string): string => {
+  const code = '```';
+  return `
+${getSimpleMeta()}
+
+### Steps to Reproduce
+<!--- Provide a link to a live example or an unambiguous set of steps to -->
+<!--- reproduce this bug. Include code to reproduce, if relevant -->
+1.
+2.
+3.
+4.
+
+### Console Output
+<!--- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
+
+### Error Log (Desktop only)
+<!--- For the desktop versions, there is also an error log file in case there is no console output.
+Usually, you can find it here:
+on Linux:
+~/.config/superProductivity/log.log
+--or--
+~/snap/superproductivity/current/.config/superProductivity/log.log
+
+on macOS: ~/Library/Logs/superProductivity/log.log
+
+on Windows: %USERPROFILE%\\AppData\\Roaming\\superProductivity\\log.log
+. -->
+
+### Stacktrace
+${code}
+${stacktrace}
+${code}
+`;
 };

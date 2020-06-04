@@ -81,6 +81,10 @@ export class AppComponent implements OnDestroy {
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });
 
+    setTimeout(() => {
+      throw new Error('This is an error');
+    }, 1000);
+
     // try to avoid data-loss
     if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().then(granted => {

@@ -150,6 +150,7 @@
     "karma-jasmine-html-reporter": "^1.4.2",
     "lz-string": "^1.4.4",
     "moment-duration-format": "^2.2.2",
+    "new-github-issue-url": "^0.2.1",
     "ng2-charts": "^2.3.0",
     "ng2-charts-schematics": "^0.1.7",
     "ng2-dragula": "^2.1.1",
