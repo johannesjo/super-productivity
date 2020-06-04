@@ -5,6 +5,7 @@
       "INSTALL": "インストール",
       "MSG": "あなたはPWAとしてSuper Productivityをインストールしますか？"
     },
+    "B_OFFLINE": "インターネットに接続していません。課題プロバイダーデータの同期と要求は機能しません。",
     "D_INITIAL": {
       "TITLE": "v{{nr}}へようこそ"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>の設定を更新しました"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "最終変更：",
+        "LAST_SYNC": "最終同期：",
+        "LOCAL": "地元",
+        "LOCAL_REMOTE": "ローカル->リモート",
+        "REMOTE": "遠い",
+        "TEXT": "<p>Dropboxから更新します。ローカルデータとリモートデータの両方が変更されているようです。</p>",
+        "TITLE": "Dropbox：矛盾するデータ",
+        "USE_LOCAL": "ローカルを使用",
+        "USE_REMOTE": "リモコンを使用"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "トークンを生成",
+        "FOLLOW_LINK": "次のリンクを開き、そこに提供されている認証コードを入力フィールドにコピーしてください。",
+        "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）",
+        "L_AUTH_CODE": "認証コード",
+        "L_ENABLE_SYNCING": "Dropboxの同期を有効にする",
+        "L_SYNC_INTERVAL": "同期間隔",
+        "TITLE": "Dropbox経由の同期（推奨）"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox：認証コードからアクセストークンを生成できません",
+        "ACCESS_TOKEN_GENERATED": "Dropbox：認証コードから生成されたアクセストークン",
+        "AUTH_ERROR": "Dropbox：提供された無効なアクセストークン",
+        "OFFLINE": "Dropbox：オフラインのため、同期できません",
+        "SYNC_ERROR": "Dropbox：同期中のエラー",
+        "UNKNOWN_ERROR": "Dropbox：不明なエラー： {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "ジラ： \"{{issueText}}\"のデータを更新しました",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "ジラ： \"{{issueText}}\"のデータを更新しました",
         "MISSING_ISSUE_DATA": "Jira：課題データが欠けているタスクが見つかりました。再読み込みしています。",
+        "NO_AUTO_IMPORT_JQL": "Jira：自動インポート用に定義された検索クエリはありません",
         "NO_VALID_TRANSITION": "Jira：有効な遷移が設定されていません",
         "POLLING": "Jira：問題に対する投票の変更",
         "TIMED_OUT": "ジラ：リクエストがタイムアウトしました",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "予定外"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "今日に追加",
         "DISMISS": "リマインダーを却下",
         "FOR_CURRENT": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
         "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "デフォルト見積もり",
         "FRIDAY": "金曜日",
+        "IS_ADD_TO_BOTTOM": "タスクをリストの一番下に移動",
         "MONDAY": "月曜",
         "SATURDAY": "土曜日",
         "SUNDAY": "日曜日",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "クリップボードにコピー",
     "ERR_COMPRESSION": "圧縮インターフェースのエラー",
-    "ERR_DB_CLEAR": "データベースの消去中にエラーが発生しました",
-    "ERR_DB_DELETE": "データ削除中のエラー",
-    "ERR_DB_LOAD": "データロード中のエラー",
-    "ERR_DB_SAVE": "データ保存中のエラー",
     "PERSISTENCE_DISALLOWED": "データは永続的に保持されません。これはデータの損失につながる可能性があることに注意してください!!",
     "RUNNING_X": "\"{{str}}\"を実行しています。"
+  },
+  "GPB": {
+    "ASSETS": "アセットを読み込んでいます...",
+    "DBX_DOWNLOAD": "Dropbox：ファイルをダウンロード...",
+    "DBX_GEN_TOKEN": "Dropbox：トークンを生成...",
+    "DBX_META": "Dropbox：ファイルメタを取得...",
+    "DBX_UPLOAD": "Dropbox：ファイルをアップロード...",
+    "GDRIVE_DOWNLOAD": "Googleドライブ：ファイルをダウンロード...",
+    "GDRIVE_UPLOAD": "Googleドライブ：ファイルをアップロード...",
+    "GITHUB_LOAD_ISSUE": "Github：問題データをロード...",
+    "JIRA_LOAD_ISSUE": "Jira：問題データをロード..."
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "プライベートポリシー",
     "PRODUCTIVITY_HELPER": "生産性ヘルパー",
     "PROJECT_SETTINGS": "プロジェクト固有の設定",
+    "SYNC_EXPORT": "同期とエクスポート",
     "TAG_SETTINGS": "タグ固有の設定",
     "TOGGLE_DARK_MODE": "ダークモードの切り替え"
   },

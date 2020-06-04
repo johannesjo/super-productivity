@@ -78,24 +78,24 @@
         "LAST_SYNC": "last sync:",
         "LOCAL": "local",
         "LOCAL_REMOTE": "local -> remote",
-        "USE_REMOTE": "Use remote",
-        "USE_LOCAL": "Use local",
         "REMOTE": "remote",
         "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
-        "TITLE": "Dropbox: Conflicting Data"
+        "TITLE": "Dropbox: Conflicting Data",
+        "USE_LOCAL": "Use local",
+        "USE_REMOTE": "Use remote"
       },
       "FORM": {
         "B_GENERATE_TOKEN": "Generate Token",
-        "TITLE": "Sync via Dropbox (recommended)",
         "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
         "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
         "L_AUTH_CODE": "Auth Code",
         "L_ENABLE_SYNCING": "Enable Dropbox Syncing",
-        "L_SYNC_INTERVAL": "Sync Interval"
+        "L_SYNC_INTERVAL": "Sync Interval",
+        "TITLE": "Sync via Dropbox (recommended)"
       },
       "S": {
-        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
         "ACCESS_TOKEN_ERROR": "Dropbox: Unable to generate Access Token from Auth Code",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
         "AUTH_ERROR": "Dropbox: Invalid access token provided",
         "OFFLINE": "Dropbox: Unable to sync, because offline",
         "SYNC_ERROR": "Dropbox: Error while syncing",
@@ -354,8 +354,8 @@
         "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
-        "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "NO_AUTO_IMPORT_JQL": "Jira: No search query defined for auto import",
+        "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
@@ -715,14 +715,14 @@
       "F": {
         "DEFAULT_ESTIMATE": "Default Estimate",
         "FRIDAY": "Friday",
+        "IS_ADD_TO_BOTTOM": "Move task to bottom of list",
         "MONDAY": "Monday",
         "SATURDAY": "Saturday",
         "SUNDAY": "Sunday",
         "THURSDAY": "Thursday",
         "TITLE": "Title for task",
         "TUESDAY": "Tuesday",
-        "WEDNESDAY": "Wednesday",
-        "IS_ADD_TO_BOTTOM": "Move task to bottom of list"
+        "WEDNESDAY": "Wednesday"
       }
     },
     "TIME_TRACKING": {
@@ -945,22 +945,22 @@
       "TITLE": "Break Reminder"
     }
   },
-  "GPB": {
-    "ASSETS": "Loading assets...",
-    "DBX_META": "Dropbox: Get file meta...",
-    "DBX_DOWNLOAD": "Dropbox: Download file...",
-    "DBX_UPLOAD": "Dropbox: Upload file...",
-    "DBX_GEN_TOKEN": "Dropbox: Generate token...",
-    "GDRIVE_UPLOAD": "Google Drive: Upload file...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
-    "GITHUB_LOAD_ISSUE": "Github: Load issue data...",
-    "JIRA_LOAD_ISSUE": "Jira: Load issue data..."
-  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
     "ERR_COMPRESSION": "Error for compression interface",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "RUNNING_X": "Running \"{{str}}\"."
+  },
+  "GPB": {
+    "ASSETS": "Loading assets...",
+    "DBX_DOWNLOAD": "Dropbox: Download file...",
+    "DBX_GEN_TOKEN": "Dropbox: Generate token...",
+    "DBX_META": "Dropbox: Get file meta...",
+    "DBX_UPLOAD": "Dropbox: Upload file...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
+    "GDRIVE_UPLOAD": "Google Drive: Upload file...",
+    "GITHUB_LOAD_ISSUE": "Github: Load issue data...",
+    "JIRA_LOAD_ISSUE": "Jira: Load issue data..."
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",

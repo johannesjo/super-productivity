@@ -5,6 +5,7 @@
       "INSTALL": "kurmak",
       "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
     },
+    "B_OFFLINE": "İnternet bağlantınız kesildi. Sorun sağlayıcı verilerini senkronize etmek ve istemek işe yaramaz.",
     "D_INITIAL": {
       "TITLE": "V{{nr}}'a hoş geldiniz"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "son değişiklik:",
+        "LAST_SYNC": "son senkronizasyon:",
+        "LOCAL": "yerel",
+        "LOCAL_REMOTE": "yerel -> uzaktan",
+        "REMOTE": "uzak",
+        "TEXT": "<p>Dropbox'tan güncelleme. Hem yerel hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
+        "TITLE": "Dropbox: Çakışan Veriler",
+        "USE_LOCAL": "Yerel kullan",
+        "USE_REMOTE": "Uzaktan kumandayı kullan"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Jeton Oluştur",
+        "FOLLOW_LINK": "Lütfen aşağıdaki bağlantıyı açın ve orada verilen kimlik doğrulama kodunu giriş alanına kopyalayın.",
+        "L_ACCESS_TOKEN": "Erişim Simgesi (Kimlik Doğrulama Kodundan üretilir)",
+        "L_AUTH_CODE": "Doğrulama kodu",
+        "L_ENABLE_SYNCING": "Dropbox Senkronizasyonunu Etkinleştir",
+        "L_SYNC_INTERVAL": "Senkron aralığı",
+        "TITLE": "Dropbox ile senkronize et (önerilir)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: Yetkilendirme Kodundan Erişim Simgesi oluşturulamıyor",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Yetkilendirme Kodundan oluşturulan Erişim Simgesi",
+        "AUTH_ERROR": "Dropbox: Geçersiz erişim belirteci sağlandı",
+        "OFFLINE": "Dropbox: Senkronize edilemiyor, çünkü çevrimdışı",
+        "SYNC_ERROR": "Dropbox: Senkronizasyon sırasında hata",
+        "UNKNOWN_ERROR": "Dropbox: Bilinmeyen hata: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "Jira: \"{{issueText}}\" için güncellenmiş veriler",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: \"{{issueText}}\" için güncellenmiş veriler",
         "MISSING_ISSUE_DATA": "Jira: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
+        "NO_AUTO_IMPORT_JQL": "Jira: Otomatik içe aktarma için tanımlanmış arama sorgusu yok",
         "NO_VALID_TRANSITION": "Jira: Geçerli bir geçiş yapılandırılmadı",
         "POLLING": "Jira: Sorunları Sorgulama Değişiklikleri",
         "TIMED_OUT": "Jira: İstek zaman aşımına uğradı",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "Bugüne ekle",
         "DISMISS": "Hatırlatmayı Sil",
         "FOR_CURRENT": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "Varsayılan Tahmini",
         "FRIDAY": "Cuma",
+        "IS_ADD_TO_BOTTOM": "Görevi listenin altına taşı",
         "MONDAY": "Pazartesi",
         "SATURDAY": "Cumartesi",
         "SUNDAY": "Pazar",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Panoya kopyalandı",
     "ERR_COMPRESSION": "Sıkıştırma arayüzü için hata",
-    "ERR_DB_CLEAR": "Veritabanını temizlerken hata oluştu",
-    "ERR_DB_DELETE": "Veri silinirken hata oluştu",
-    "ERR_DB_LOAD": "Veri yüklenirken hata oluştu",
-    "ERR_DB_SAVE": "Veri kaydederken hata",
     "PERSISTENCE_DISALLOWED": "Veri kalıcı olarak sürdürülmeyecek. Bunun veri kaybına neden olabileceğini unutmayın!",
     "RUNNING_X": "\"{{str}}\" çalıştırılıyor."
+  },
+  "GPB": {
+    "ASSETS": "Varlıklar yükleniyor ...",
+    "DBX_DOWNLOAD": "Dropbox: Dosya indir ...",
+    "DBX_GEN_TOKEN": "Dropbox: Jeton oluştur ...",
+    "DBX_META": "Dropbox: Dosya meta al ...",
+    "DBX_UPLOAD": "Dropbox: Dosya yükle ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Dosya indir ...",
+    "GDRIVE_UPLOAD": "Google Drive: Dosya yükle ...",
+    "GITHUB_LOAD_ISSUE": "Github: Sorun verilerini yükle ...",
+    "JIRA_LOAD_ISSUE": "Jira: Sorun verilerini yükle ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "Özel politika",
     "PRODUCTIVITY_HELPER": "Verimlilik Yardımcısı",
     "PROJECT_SETTINGS": "Projeye Özel Ayarlar",
+    "SYNC_EXPORT": "Senkronize Et ve Dışa Aktar",
     "TAG_SETTINGS": "Etikete Özgü Ayarlar",
     "TOGGLE_DARK_MODE": "Koyu Modu Değiştir"
   },

@@ -5,6 +5,7 @@
       "INSTALL": "التثبت",
       "MSG": "هل تريد تثبيت Super Productivity كـ PWA؟"
     },
+    "B_OFFLINE": "أنت غير متصل بالإنترنت. لن تعمل مزامنة بيانات موفر المشكلة وطلبها.",
     "D_INITIAL": {
       "TITLE": "مرحبًا في v{{nr}}"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "الإعدادات المحدثة لـ <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "اخر تغير:",
+        "LAST_SYNC": "المزامنة الأخيرة:",
+        "LOCAL": "محلي",
+        "LOCAL_REMOTE": "محلي -> بعيد",
+        "REMOTE": "التحكم عن بعد",
+        "TEXT": "<p>التحديث من Dropbox. يبدو أن البيانات المحلية والبعيدة يتم تعديلها.</p>",
+        "TITLE": "Dropbox: تضارب البيانات",
+        "USE_LOCAL": "استخدم المحلي",
+        "USE_REMOTE": "استخدم جهاز التحكم عن بعد"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "إنشاء رمز",
+        "FOLLOW_LINK": "يرجى فتح الرابط التالي ونسخ كود المصادقة المقدم هناك في حقل الإدخال.",
+        "L_ACCESS_TOKEN": "رمز الوصول (تم إنشاؤه من كود المصادقة)",
+        "L_AUTH_CODE": "رمز المصادقة",
+        "L_ENABLE_SYNCING": "تمكين مزامنة Dropbox",
+        "L_SYNC_INTERVAL": "فترة المزامنة",
+        "TITLE": "المزامنة عبر Dropbox (مستحسن)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: تعذر إنشاء رمز الدخول من كود المصادقة",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: رمز الدخول الذي تم إنشاؤه من كود المصادقة",
+        "AUTH_ERROR": "Dropbox: تم توفير رمز دخول غير صالح",
+        "OFFLINE": "Dropbox: غير قادر على المزامنة ، لأنك غير متصل بالإنترنت",
+        "SYNC_ERROR": "Dropbox: حدث خطأ أثناء المزامنة",
+        "UNKNOWN_ERROR": "Dropbox: خطأ غير معروف: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "جيرا: بيانات محدثة لـ \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "جيرا: بيانات محدثة لـ \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "جيرا: المهام مع المفقودين قضية البيانات وجدت. إعادة شحن.",
+        "NO_AUTO_IMPORT_JQL": "جيرا: لم يتم تحديد استعلام بحث للاستيراد التلقائي",
         "NO_VALID_TRANSITION": "جيرا: لا يوجد انتقال صالح تكوين",
         "POLLING": "جيرا: الاقتراع التغييرات للقضايا",
         "TIMED_OUT": "جيرا: انتهت مهلة الطلب",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "أضف إلى اليوم",
         "DISMISS": "تجاهل تذكير",
         "FOR_CURRENT": "المهمة مستحقة. هل تريد أن تبدأ العمل على ذلك؟",
         "FOR_OTHER": "المهمة مستحقة. هل تريد أن تبدأ العمل على ذلك؟",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "التقدير الافتراضي",
         "FRIDAY": "يوم الجمعة",
+        "IS_ADD_TO_BOTTOM": "انقل المهمة إلى أسفل القائمة",
         "MONDAY": "الإثنين",
         "SATURDAY": "يوم السبت",
         "SUNDAY": "الأحد",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "نسخ إلى الحافظة",
     "ERR_COMPRESSION": "خطأ لواجهة الضغط",
-    "ERR_DB_CLEAR": "خطأ أثناء مسح قاعدة البيانات",
-    "ERR_DB_DELETE": "خطأ أثناء حذف البيانات",
-    "ERR_DB_LOAD": "خطأ أثناء تحميل البيانات",
-    "ERR_DB_SAVE": "خطأ أثناء حفظ البيانات",
     "PERSISTENCE_DISALLOWED": "لن يتم استمرار البيانات بشكل دائم. أن تدرك أن هذا يمكن أن يؤدي إلى فقدان البيانات!",
     "RUNNING_X": "تشغيل \"{{str}}\"."
+  },
+  "GPB": {
+    "ASSETS": "جارٍ تحميل الأصول ...",
+    "DBX_DOWNLOAD": "Dropbox: تنزيل الملف ...",
+    "DBX_GEN_TOKEN": "Dropbox: إنشاء رمز مميز ...",
+    "DBX_META": "Dropbox: احصل على ملف تعريف ...",
+    "DBX_UPLOAD": "Dropbox: تحميل ملف ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: تنزيل الملف ...",
+    "GDRIVE_UPLOAD": "Google Drive: تحميل ملف ...",
+    "GITHUB_LOAD_ISSUE": "Github: تحميل بيانات العدد ...",
+    "JIRA_LOAD_ISSUE": "Jira: تحميل بيانات العدد ..."
   },
   "MH": {
     "ADD_NEW_TASK": "إضافة مهمة جديدة",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "سياسة خاصة",
     "PRODUCTIVITY_HELPER": "مساعد الإنتاجية",
     "PROJECT_SETTINGS": "إعدادات المشروع",
+    "SYNC_EXPORT": "المزامنة والتصدير",
     "TAG_SETTINGS": "الإعدادات الخاصة بالعلامة",
     "TOGGLE_DARK_MODE": "تبديل الوضع الداكن"
   },

@@ -5,6 +5,7 @@
       "INSTALL": "安装",
       "MSG": "您想将Super Productivity安装为PWA吗？"
     },
+    "B_OFFLINE": "您已断开与互联网的连接。同步和请求问题提供者数据将不起作用。",
     "D_INITIAL": {
       "TITLE": "欢迎使用v{{nr}}"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong>的设置"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "最后一次变更：",
+        "LAST_SYNC": "上次同步：",
+        "LOCAL": "本地",
+        "LOCAL_REMOTE": "本地->远程",
+        "REMOTE": "远程",
+        "TEXT": "<p>从Dropbox更新。本地和远程数据似乎都被修改。</p>",
+        "TITLE": "Dropbox：冲突数据",
+        "USE_LOCAL": "使用本地",
+        "USE_REMOTE": "使用遥控器"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "生成令牌",
+        "FOLLOW_LINK": "请打开以下链接，并将提供的身份验证代码复制到输入字段中。",
+        "L_ACCESS_TOKEN": "访问令牌（从身份验证代码生成）",
+        "L_AUTH_CODE": "授权码",
+        "L_ENABLE_SYNCING": "启用Dropbox同步",
+        "L_SYNC_INTERVAL": "同步间隔",
+        "TITLE": "通过Dropbox同步（推荐）"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox：无法从身份验证代码生成访问令牌",
+        "ACCESS_TOKEN_GENERATED": "Dropbox：根据验证码生成的访问令牌",
+        "AUTH_ERROR": "Dropbox：提供了无效的访问令牌",
+        "OFFLINE": "投寄箱：无法同步，因为离线",
+        "SYNC_ERROR": "Dropbox：同步时出错",
+        "UNKNOWN_ERROR": "投寄箱：未知错误： {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "Jira：更新了“{{issueText}}”的数据",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira：更新了“{{issueText}}”的数据",
         "MISSING_ISSUE_DATA": "Jira：发现缺少问题数据的任务。重装。",
+        "NO_AUTO_IMPORT_JQL": "Jira：没有为自动导入定义搜索查询",
         "NO_VALID_TRANSITION": "Jira：未配置有效转换",
         "POLLING": "Jira：轮询问题的变化",
         "TIMED_OUT": "Jira：请求超时",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "取消调度"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "今天添加",
         "DISMISS": "解雇提醒",
         "FOR_CURRENT": "任务到期了。你想开始工作吗？",
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "默认估计",
         "FRIDAY": "星期️五",
+        "IS_ADD_TO_BOTTOM": "将任务移到列表底部",
         "MONDAY": "星期一",
         "SATURDAY": "星期️六",
         "SUNDAY": "星期️日",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "复制到剪贴板",
     "ERR_COMPRESSION": "压缩接口出错",
-    "ERR_DB_CLEAR": "清除数据库时出错",
-    "ERR_DB_DELETE": "删除数据时出错",
-    "ERR_DB_LOAD": "加载数据时出错",
-    "ERR_DB_SAVE": "保存数据时出错",
     "PERSISTENCE_DISALLOWED": "数据将不会永久保存。请注意，这可能会导致数据丢失！！",
     "RUNNING_X": "运行“{{str}}”。"
+  },
+  "GPB": {
+    "ASSETS": "正在加载资产...",
+    "DBX_DOWNLOAD": "Dropbox：下载文件...",
+    "DBX_GEN_TOKEN": "Dropbox：生成令牌...",
+    "DBX_META": "Dropbox：获取文件元数据...",
+    "DBX_UPLOAD": "Dropbox：上传文件...",
+    "GDRIVE_DOWNLOAD": "Google云端硬盘：下载文件...",
+    "GDRIVE_UPLOAD": "Google云端硬盘：上传文件...",
+    "GITHUB_LOAD_ISSUE": "Github：加载问题数据...",
+    "JIRA_LOAD_ISSUE": "Jira：加载问题数据..."
   },
   "MH": {
     "ADD_NEW_TASK": "添加新任务",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "私人政策",
     "PRODUCTIVITY_HELPER": "生产力助手",
     "PROJECT_SETTINGS": "项目特定设置",
+    "SYNC_EXPORT": "同步导出",
     "TAG_SETTINGS": "标签特定设置",
     "TOGGLE_DARK_MODE": "切换暗模式"
   },

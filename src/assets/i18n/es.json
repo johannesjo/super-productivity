@@ -5,6 +5,7 @@
       "INSTALL": "instalar",
       "MSG": "¿Desea instalar Super Productividad como PWA?"
     },
+    "B_OFFLINE": "Estás desconectado de internet. Sincronizar y solicitar datos del proveedor de problemas no funcionará.",
     "D_INITIAL": {
       "TITLE": "Bienvenido a v{{nr}}"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Ajustes actualizados para <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "ultimo cambio:",
+        "LAST_SYNC": "Última sincronización:",
+        "LOCAL": "Local",
+        "LOCAL_REMOTE": "local -> remoto",
+        "REMOTE": "remoto",
+        "TEXT": "<p>Actualización desde Dropbox. Los datos locales y remotos parecen estar modificados.</p>",
+        "TITLE": "Dropbox: datos en conflicto",
+        "USE_LOCAL": "Usar local",
+        "USE_REMOTE": "Usar control remoto"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Generar token",
+        "FOLLOW_LINK": "Abra el siguiente enlace y copie el código de autenticación proporcionado allí en el campo de entrada.",
+        "L_ACCESS_TOKEN": "Token de acceso (generado a partir del código de autenticación)",
+        "L_AUTH_CODE": "código de autenticación",
+        "L_ENABLE_SYNCING": "Habilitar sincronización de Dropbox",
+        "L_SYNC_INTERVAL": "Intervalo de sincronización",
+        "TITLE": "Sincronización a través de Dropbox (recomendado)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: no se puede generar el token de acceso desde el código de autenticación",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Token de acceso generado a partir del código de autenticación",
+        "AUTH_ERROR": "Dropbox: token de acceso no válido proporcionado",
+        "OFFLINE": "Dropbox: no se puede sincronizar porque está desconectado",
+        "SYNC_ERROR": "Dropbox: error al sincronizar",
+        "UNKNOWN_ERROR": "Dropbox: error desconocido: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "Jira: Datos actualizados para \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Datos actualizados para \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tareas con datos del problema faltantes encontrados. Recargando.",
+        "NO_AUTO_IMPORT_JQL": "Jira: ninguna consulta de búsqueda definida para la importación automática",
         "NO_VALID_TRANSITION": "Jira: No hay una transición válida configurada",
         "POLLING": "Jira: obteniendo cambios en problemas",
         "TIMED_OUT": "Jira: Tiempo de espera agotado",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "Desprogramar"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "Añadir a hoy",
         "DISMISS": "Descartar recordatorio",
         "FOR_CURRENT": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "Estimación por defecto",
         "FRIDAY": "Viernes",
+        "IS_ADD_TO_BOTTOM": "Mover tarea al final de la lista",
         "MONDAY": "Lunes",
         "SATURDAY": "Sábado",
         "SUNDAY": "Domingo",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiado al portapapeles",
     "ERR_COMPRESSION": "Error para la interfaz de compresión",
-    "ERR_DB_CLEAR": "Error al borrar la base de datos",
-    "ERR_DB_DELETE": "Error al eliminar datos",
-    "ERR_DB_LOAD": "Error al cargar datos",
-    "ERR_DB_SAVE": "Error al guardar datos",
     "PERSISTENCE_DISALLOWED": "Los datos no se conservarán de forma permanente. ¡Tenga en cuenta que esto puede conducir a la pérdida de datos!",
     "RUNNING_X": "Ejecutando \"{{str}}\"."
+  },
+  "GPB": {
+    "ASSETS": "Cargando activos ...",
+    "DBX_DOWNLOAD": "Dropbox: Descargar archivo ...",
+    "DBX_GEN_TOKEN": "Dropbox: Generar token ...",
+    "DBX_META": "Dropbox: Obtener meta del archivo ...",
+    "DBX_UPLOAD": "Dropbox: Subir archivo ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Descargar archivo ...",
+    "GDRIVE_UPLOAD": "Google Drive: Subir archivo ...",
+    "GITHUB_LOAD_ISSUE": "Github: cargar datos de problemas ...",
+    "JIRA_LOAD_ISSUE": "Jira: cargar datos de problemas ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "Política privada",
     "PRODUCTIVITY_HELPER": "Ayudante de productividad",
     "PROJECT_SETTINGS": "Ajustes Específicos del Proyecto",
+    "SYNC_EXPORT": "Sincronizar y Exportar",
     "TAG_SETTINGS": "Configuraciones específicas de etiqueta",
     "TOGGLE_DARK_MODE": "Cambiar modo oscuro"
   },

@@ -5,6 +5,7 @@
       "INSTALL": "설치",
       "MSG": "PWA로 Super Productivity를 설치 하시겠습니까?"
     },
+    "B_OFFLINE": "인터넷 연결이 끊어졌습니다. 문제 제공자 데이터 동기화 및 요청이 작동하지 않습니다.",
     "D_INITIAL": {
       "TITLE": "v{{nr}}에 오신 것을 환영합니다"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}의 업데이트 된 설정</strong>"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "마지막 변경:",
+        "LAST_SYNC": "마지막 동기화 :",
+        "LOCAL": "노동 조합 지부",
+        "LOCAL_REMOTE": "로컬-> 원격",
+        "REMOTE": "먼",
+        "TEXT": "<p>Dropbox에서 업데이트. 로컬 및 원격 데이터가 모두 수정 된 것 같습니다.</p>",
+        "TITLE": "보관 용 계정 : 데이터 충돌",
+        "USE_LOCAL": "현지 사용",
+        "USE_REMOTE": "리모컨 사용"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "토큰 생성",
+        "FOLLOW_LINK": "다음 링크를 열고 제공된 인증 코드를 입력 필드에 복사하십시오.",
+        "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)",
+        "L_AUTH_CODE": "인증 코드",
+        "L_ENABLE_SYNCING": "Dropbox 동기화 사용",
+        "L_SYNC_INTERVAL": "동기화 간격",
+        "TITLE": "Dropbox를 통한 동기화 (권장)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox : 인증 코드에서 액세스 토큰을 생성 할 수 없습니다",
+        "ACCESS_TOKEN_GENERATED": "Dropbox : 인증 코드에서 생성 된 액세스 토큰",
+        "AUTH_ERROR": "보관 용 계정 : 잘못된 액세스 토큰 제공",
+        "OFFLINE": "보관 용 계정 : 오프라인 상태이므로 동기화 할 수 없습니다",
+        "SYNC_ERROR": "보관 용 계정 : 동기화 중 오류",
+        "UNKNOWN_ERROR": "보관함 : 알 수없는 오류 : {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "Jira : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
         "MISSING_ISSUE_DATA": "Jira : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
+        "NO_AUTO_IMPORT_JQL": "Jira : 자동 가져 오기에 대해 정의 된 검색어가 없습니다.",
         "NO_VALID_TRANSITION": "Jira : 유효한 전환이 설정되지 않았습니다.",
         "POLLING": "Jira : 문제에 대한 폴링 변경 사항",
         "TIMED_OUT": "Jira : 요청 시간이 초과되었습니다.",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "일정 잡기"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "오늘 추가",
         "DISMISS": "알림 일시 중지",
         "FOR_CURRENT": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FOR_OTHER": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "기본 견적",
         "FRIDAY": "금요일",
+        "IS_ADD_TO_BOTTOM": "작업을 목록의 맨 아래로 이동",
         "MONDAY": "월요일",
         "SATURDAY": "토요일",
         "SUNDAY": "일요일",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "클립 보드에 복사 됨",
     "ERR_COMPRESSION": "압축 인터페이스 오류",
-    "ERR_DB_CLEAR": "데이터베이스를 지우는 중 오류가 발생했습니다.",
-    "ERR_DB_DELETE": "데이터를 삭제하는 중 오류가 발생했습니다.",
-    "ERR_DB_LOAD": "데이터를로드하는 중 오류가 발생했습니다.",
-    "ERR_DB_SAVE": "데이터를 저장하는 중 오류가 발생했습니다.",
     "PERSISTENCE_DISALLOWED": "데이터는 영구적으로 유지되지 않습니다. 이로 인해 데이터가 손실 될 수 있습니다 !!",
     "RUNNING_X": "\"{{str}}\"실행 중."
+  },
+  "GPB": {
+    "ASSETS": "자산로드 중 ...",
+    "DBX_DOWNLOAD": "Dropbox : 파일 다운로드 ...",
+    "DBX_GEN_TOKEN": "보관 용 계정 : 토큰 생성 ...",
+    "DBX_META": "Dropbox : 파일 메타 가져 오기 ...",
+    "DBX_UPLOAD": "보관 용 계정 : 파일 업로드 ...",
+    "GDRIVE_DOWNLOAD": "Google 드라이브 : 파일 다운로드 ...",
+    "GDRIVE_UPLOAD": "Google 드라이브 : 파일 업로드 ...",
+    "GITHUB_LOAD_ISSUE": "Github : 이슈 데이터로드 ...",
+    "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ..."
   },
   "MH": {
     "ADD_NEW_TASK": "새 작업 추가",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "개인 정책",
     "PRODUCTIVITY_HELPER": "생산성 도우미",
     "PROJECT_SETTINGS": "프로젝트 별 설정",
+    "SYNC_EXPORT": "동기화 및 내보내기",
     "TAG_SETTINGS": "태그 별 설정",
     "TOGGLE_DARK_MODE": "어두운 모드 전환"
   },

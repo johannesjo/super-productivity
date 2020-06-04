@@ -5,6 +5,7 @@
       "INSTALL": "Installieren",
       "MSG": "Möchten Sie Super Productivity als PWA installieren?"
     },
+    "B_OFFLINE": "Sie sind vom Internet getrennt. Das Synchronisieren und Anfordern von Daten des Problemanbieters funktioniert nicht.",
     "D_INITIAL": {
       "TITLE": "Willkommen bei v{{nr}}"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Aktualisierte Einstellungen für <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "Letzte Änderung:",
+        "LAST_SYNC": "letzte Synchronisierung:",
+        "LOCAL": "Lokal",
+        "LOCAL_REMOTE": "lokal -> fern",
+        "REMOTE": "Remote",
+        "TEXT": "<p>Update von Dropbox. Sowohl lokale als auch entfernte Daten scheinen geändert zu sein.</p>",
+        "TITLE": "Dropbox: Datenkonflikte",
+        "USE_LOCAL": "Verwenden Sie local",
+        "USE_REMOTE": "Verwenden Sie die Fernbedienung"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Token generieren",
+        "FOLLOW_LINK": "Bitte öffnen Sie den folgenden Link und kopieren Sie den dort angegebenen Authentifizierungscode in das Eingabefeld.",
+        "L_ACCESS_TOKEN": "Zugriffstoken (generiert aus Auth-Code)",
+        "L_AUTH_CODE": "Auth-Code",
+        "L_ENABLE_SYNCING": "Aktivieren Sie die Dropbox-Synchronisierung",
+        "L_SYNC_INTERVAL": "Synchronisierungsintervall",
+        "TITLE": "Synchronisierung über Dropbox (empfohlen)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: Zugriffstoken aus Authentifizierungscode kann nicht generiert werden",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Aus Authentifizierungscode generiertes Zugriffstoken",
+        "AUTH_ERROR": "Dropbox: Ungültiges Zugriffstoken bereitgestellt",
+        "OFFLINE": "Dropbox: Synchronisierung nicht möglich, da offline",
+        "SYNC_ERROR": "Dropbox: Fehler beim Synchronisieren",
+        "UNKNOWN_ERROR": "Dropbox: Unbekannter Fehler: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "Jira: Aktualisierte Daten für \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Aktualisierte Daten für \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
+        "NO_AUTO_IMPORT_JQL": "Jira: Keine Suchabfrage für den automatischen Import definiert",
         "NO_VALID_TRANSITION": "Jira: Kein gültiger Übergang konfiguriert",
         "POLLING": "Jira: Änderungen für Issues abrufen",
         "TIMED_OUT": "Jira: Zeitüberschreitung bei der Anforderung",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "Erinnerung entfernen"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "Heute hinzufügen",
         "DISMISS": "Erinnerung verwerfen",
         "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "Standardschätzung",
         "FRIDAY": "Freitag",
+        "IS_ADD_TO_BOTTOM": "Verschieben Sie die Aufgabe an das Ende der Liste",
         "MONDAY": "Montag",
         "SATURDAY": "Samstag",
         "SUNDAY": "Sonntag",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
     "ERR_COMPRESSION": "Fehler bei der Komprimierung",
-    "ERR_DB_CLEAR": "Fehler beim Löschen der Datenbank",
-    "ERR_DB_DELETE": "Fehler beim Löschen der Daten",
-    "ERR_DB_LOAD": "Fehler beim Laden der Daten",
-    "ERR_DB_SAVE": "Fehler beim Speichern der Daten",
     "PERSISTENCE_DISALLOWED": "Daten werden nicht dauerhaft gespeichert. Beachten Sie, dass dies zu Datenverlust führen kann !!",
     "RUNNING_X": "Wird gestartet: \"{{str}}\"."
+  },
+  "GPB": {
+    "ASSETS": "Laden von Assets ...",
+    "DBX_DOWNLOAD": "Dropbox: Datei herunterladen ...",
+    "DBX_GEN_TOKEN": "Dropbox: Token generieren ...",
+    "DBX_META": "Dropbox: Holen Sie sich Datei Meta ...",
+    "DBX_UPLOAD": "Dropbox: Datei hochladen ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Datei herunterladen ...",
+    "GDRIVE_UPLOAD": "Google Drive: Datei hochladen ...",
+    "GITHUB_LOAD_ISSUE": "Github: Problemdaten laden ...",
+    "JIRA_LOAD_ISSUE": "Jira: Problemdaten laden ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Produktivitäts-Helfer",
     "PROJECT_SETTINGS": "Projektspezifische Einstellungen",
+    "SYNC_EXPORT": "Synchronisieren und exportieren",
     "TAG_SETTINGS": "Tag-spezifische Einstellungen",
     "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"
   },

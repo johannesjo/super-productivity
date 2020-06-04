@@ -5,6 +5,7 @@
       "INSTALL": "Installer",
       "MSG": "Voulez-vous installer Super Productivity en tant que PWA ?"
     },
+    "B_OFFLINE": "Vous êtes déconnecté d'Internet. La synchronisation et la demande des données du fournisseur de problèmes ne fonctionneront pas.",
     "D_INITIAL": {
       "TITLE": "Bienvenue dans v{{nr}}"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Paramètres mis à jour pour <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "dernier changement:",
+        "LAST_SYNC": "Dernière synchronisation:",
+        "LOCAL": "Local",
+        "LOCAL_REMOTE": "local -> distant",
+        "REMOTE": "éloigné",
+        "TEXT": "<p>Mise à jour depuis Dropbox. Les données locales et distantes semblent avoir été modifiées.</p>",
+        "TITLE": "Dropbox: données en conflit",
+        "USE_LOCAL": "Utiliser local",
+        "USE_REMOTE": "Utiliser la télécommande"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Générer un jeton",
+        "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification fourni dans le champ de saisie.",
+        "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)",
+        "L_AUTH_CODE": "Code d'autorisation",
+        "L_ENABLE_SYNCING": "Activer la synchronisation Dropbox",
+        "L_SYNC_INTERVAL": "Intervalle de synchronisation",
+        "TITLE": "Synchronisation via Dropbox (recommandé)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: impossible de générer un jeton d'accès à partir du code d'authentification",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: jeton d'accès généré à partir du code d'authentification",
+        "AUTH_ERROR": "Dropbox: jeton d'accès non valide fourni",
+        "OFFLINE": "Dropbox: impossible de synchroniser, car hors ligne",
+        "SYNC_ERROR": "Dropbox: erreur lors de la synchronisation",
+        "UNKNOWN_ERROR": "Dropbox: erreur inconnue: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,6 +354,7 @@
         "ISSUE_UPDATE": "Jira: données mises à jour pour \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: données mises à jour pour \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tâches avec données du ticket manquantes trouvées. Rechargement.",
+        "NO_AUTO_IMPORT_JQL": "Jira: aucune requête de recherche définie pour l'importation automatique",
         "NO_VALID_TRANSITION": "Jira: Aucune transition valide n'est configurée",
         "POLLING": "Jira: Recherche de changements sur les tickets",
         "TIMED_OUT": "Jira: la demande a expiré",
@@ -618,6 +650,7 @@
         "UNSCHEDULE": "Dé-planifier"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "Ajouter à aujourd'hui",
         "DISMISS": "Fermer le rappel",
         "FOR_CURRENT": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
@@ -682,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "Estimation par défaut",
         "FRIDAY": "vendredi",
+        "IS_ADD_TO_BOTTOM": "Déplacer la tâche en bas de la liste",
         "MONDAY": "lundi",
         "SATURDAY": "samedi",
         "SUNDAY": "dimanche",
@@ -914,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copié dans le presse-papier",
     "ERR_COMPRESSION": "Erreur pour l'interface de compression",
-    "ERR_DB_CLEAR": "Erreur lors de l'effacement de la base de données",
-    "ERR_DB_DELETE": "Erreur lors de la suppression des données",
-    "ERR_DB_LOAD": "Erreur lors du chargement des données",
-    "ERR_DB_SAVE": "Erreur lors de la sauvegarde des données",
     "PERSISTENCE_DISALLOWED": "Les données ne seront pas conservées de manière permanente. Sachez que cela peut entraîner une perte de données!",
     "RUNNING_X": "\"{{str}}\" en cours."
+  },
+  "GPB": {
+    "ASSETS": "Chargement des éléments ...",
+    "DBX_DOWNLOAD": "Dropbox: Télécharger le fichier ...",
+    "DBX_GEN_TOKEN": "Dropbox: générer un jeton ...",
+    "DBX_META": "Dropbox: Obtenir la méta du fichier ...",
+    "DBX_UPLOAD": "Dropbox: Importer un fichier ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: Télécharger le fichier ...",
+    "GDRIVE_UPLOAD": "Google Drive: importer un fichier ...",
+    "GITHUB_LOAD_ISSUE": "Github: Charger les données de problème ...",
+    "JIRA_LOAD_ISSUE": "Jira: Charger les données du problème ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
@@ -1013,6 +1054,7 @@
     "PRIVATE_POLICY": "Politique privée",
     "PRODUCTIVITY_HELPER": "Aide à la productivité",
     "PROJECT_SETTINGS": "Paramètres spécifiques au projet",
+    "SYNC_EXPORT": "Synchroniser et exporter",
     "TAG_SETTINGS": "Paramètres spécifiques aux balises",
     "TOGGLE_DARK_MODE": "Basculer en mode sombre"
   },
