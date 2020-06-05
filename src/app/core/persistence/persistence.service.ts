@@ -133,9 +133,11 @@ export class PersistenceService {
   );
 
   onAfterSave$: Subject<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> = new Subject();
+  onAfterImport$: Subject<AppDataComplete> = new Subject();
 
   inMemoryComplete$: Observable<AppDataComplete> = merge(
     from(this.loadComplete()),
+    this.onAfterImport$,
     this.onAfterSave$.pipe(
       concatMap(() => this.loadComplete()),
       // TODO maybe not necessary
@@ -313,6 +315,8 @@ export class PersistenceService {
     ])
       .then(() => {
         this.updateLastLocalSyncModelChange(data.lastLocalSyncModelChange);
+        this._inMemoryComplete = data;
+        this.onAfterImport$.next(data);
       })
       .finally(() => {
         this._isBlockSaving = false;
