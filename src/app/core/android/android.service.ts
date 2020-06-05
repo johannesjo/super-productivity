@@ -8,9 +8,12 @@ import {map, switchMap} from 'rxjs/operators';
 import {androidInterface} from './android-interface';
 import {DataInitService} from '../data-init/data-init.service';
 import {ProjectService} from '../../features/project/project.service';
+import {Project} from '../../features/project/project.model';
+import {Tag} from '../../features/tag/tag.model';
 
 interface TaskWithCategoryText extends Task {
   category: string;
+  categoryHtml: string;
 }
 
 @Injectable({
@@ -41,7 +44,17 @@ export class AndroidService {
                   .filter(tag => tag.id !== TODAY_TAG.id && task.tagIds.includes(tag.id))
                   .map(tag => tag.title)
                 : [])
-            ].join(', ')
+            ].join(', '),
+            categoryHtml: [
+              ...(task.projectId
+                ? [this._getCategoryHtml(projects.find(p => p.id === task.projectId))]
+                : []),
+              ...(task.tagIds.length
+                ? tags
+                  .filter(tag => tag.id !== TODAY_TAG.id && task.tagIds.includes(tag.id))
+                  .map(tag => this._getCategoryHtml(tag))
+                : [])
+            ].join(' ')
           }));
       }))
     ),
@@ -61,5 +74,10 @@ export class AndroidService {
     this._todayTagTasksFlat$.subscribe(tasks => {
       androidInterface.updateTaskData(JSON.stringify(tasks));
     });
+  }
+
+  private _getCategoryHtml(projectOrTag: Project | Tag): string {
+    const color = projectOrTag.theme.primary;
+    return `<font color="${color}" style="font-size: 99px">⬤</font> ${projectOrTag.title} `;
   }
 }
