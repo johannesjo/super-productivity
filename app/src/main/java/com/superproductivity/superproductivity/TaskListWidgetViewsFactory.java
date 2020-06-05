@@ -3,6 +3,7 @@ package com.superproductivity.superproductivity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -65,7 +66,11 @@ public class TaskListWidgetViewsFactory implements RemoteViewsService.RemoteView
 
         if (task.category != null && task.category.length() > 0) {
             view.setViewVisibility(R.id.secondLine, View.VISIBLE);
-            view.setTextViewText(R.id.secondLine, task.category);
+            if (task.categoryHtml != null && task.categoryHtml.length() > 0) {
+                view.setTextViewText(R.id.secondLine, Html.fromHtml(task.categoryHtml));
+            } else {
+                view.setTextViewText(R.id.secondLine, task.category);
+            }
         } else {
             view.setViewVisibility(R.id.secondLine, View.GONE);
             view.setTextViewText(R.id.secondLine, "");
