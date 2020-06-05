@@ -41,7 +41,7 @@ export class SyncService {
   // ------------------
   private _focusAppTrigger$ = fromEvent(window, 'focus').pipe(
     throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
-    mapTo('FOCUS_THROTTLED'),
+    mapTo('I_FOCUS_THROTTLED'),
   );
 
   // we might need this for mobile, as we can't rely on focus as much
@@ -49,11 +49,10 @@ export class SyncService {
     switchMap((isTouchIn) => isTouchIn
       ? fromEvent(window, 'touchstart').pipe(
         throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
-        mapTo('MOUSE_TOUCH_MOVE'),
+        mapTo('I_MOUSE_TOUCH_MOVE'),
       )
       : EMPTY
     ),
-    tap(() => console.log('TOUCHSTART'))
   );
 
   private _isOnlineTrigger$ = isOnline$.pipe(
@@ -67,8 +66,6 @@ export class SyncService {
     this._focusAppTrigger$,
     this._someMobileActivityTrigger$,
     this._isOnlineTrigger$,
-  ).pipe(
-    tap((v) => console.log('T', v)),
   );
 
 
@@ -132,12 +129,13 @@ export class SyncService {
 
       // we do this to reset the audit time to avoid sync checks in short succession
       this._immediateSyncTrigger$.pipe(
+        // NOTE: startWith needs to come before switchMap!
+        startWith(false),
         switchMap(() => this._updateLocalData$.pipe(
           tap((ev) => console.log('__trigger_sync__', ev)),
           auditTime(Math.max(syncInterval, minSyncInterval)),
           tap((ev) => console.log('__trigger_sync after auditTime__', ev)),
         )),
-        startWith(false),
       )
     ).pipe(
       debounceTime(100)
