@@ -6,14 +6,22 @@ export enum UpdateCheckResult {
   RemoteNotUpToDateDespiteSync = 'RemoteNotUpToDateDespiteSync',
   LastSyncNotUpToDate = 'LastSyncNotUpToDate',
   ErrorLastSyncNewerThanLocal = 'ErrorLastSyncNewerThanLocal',
+  ErrorInvalidTimeValues = 'ErrorInvalidTimeValues',
 }
 
 export const checkForUpdate = (params: { remote: number, local: number, lastSync: number }) => {
   _logHelper(params);
   const {remote, local, lastSync} = params;
+  const n = Date.now();
+
+  if (remote > n || local > n || lastSync > n) {
+    alert('Sync Error: One of the dates provided is from the future...');
+    return UpdateCheckResult.ErrorInvalidTimeValues;
+  }
 
   if (lastSync > local) {
     console.error('This should not happen. lastSyncTo > local');
+    alert('Sync Error: last sync value is newer than local, which should never happen if you weren`t manually manipulating the data!');
     return UpdateCheckResult.ErrorLastSyncNewerThanLocal;
   }
 
@@ -30,7 +38,7 @@ export const checkForUpdate = (params: { remote: number, local: number, lastSync
     } else if (lastSync < local) {
       return UpdateCheckResult.RemoteUpdateRequired;
     } else if (lastSync === local) {
-      alert('Warning: Dropbox date not up to date despite seemingly successful sync');
+      alert('Sync Warning: Dropbox date not up to date despite seemingly successful sync');
       return UpdateCheckResult.RemoteNotUpToDateDespiteSync;
     }
   } else if (local < remote) {
@@ -48,13 +56,13 @@ export const checkForUpdate = (params: { remote: number, local: number, lastSync
 
 const _logHelper = (params: { remote: number, local: number, lastSync: number }) => {
   console.log(params);
-  const lowestFirst = Object.keys(params).sort((k1, k2) => params[k1] - params[k2]);
-  const lowestKey = lowestFirst[0];
-  const zeroed = lowestFirst.reduce((acc, key) =>
+  const oldestFirst = Object.keys(params).sort((k1, k2) => params[k1] - params[k2]);
+  const keyOfOldest = oldestFirst[0];
+  const zeroed = oldestFirst.reduce((acc, key) =>
       ({
         ...acc,
-        [key]: (params[key] - params[lowestKey]) / 1000,
+        [key]: (params[key] - params[keyOfOldest]) / 1000,
       }),
     {});
-  console.log(zeroed, (Date.now() - params[lowestKey]) / 1000);
+  console.log(zeroed, (Date.now() - params[keyOfOldest]) / 1000);
 };

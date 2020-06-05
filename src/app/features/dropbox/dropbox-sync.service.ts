@@ -198,9 +198,9 @@ export class DropboxSyncService {
         return;
       }
 
+      case UpdateCheckResult.ErrorInvalidTimeValues:
       case UpdateCheckResult.ErrorLastSyncNewerThanLocal: {
         dbxLog('DBX: XXX Wrong Data');
-        alert('Sync Error: Dropbox last sync is newer than local, which should never happen if you weren`t manually manipulating the data!');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
           if (confirm('Upload local data anyway?')) {
             return await this._uploadAppData(local, true);
