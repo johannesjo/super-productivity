@@ -114,6 +114,9 @@ Install via [homebrew cask](https://github.com/caskroom/homebrew-cask):
 brew cask install superproductivity
 ```
 
+### Android
+There is a [very early(!) Android version available](https://play.google.com/store/apps/details?id=com.superproductivity.superproductivity&hl=gsw). The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
+
 ## Setup WebDAV Syncing
 When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
 
