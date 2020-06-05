@@ -6,8 +6,8 @@ android {
         applicationId "com.superproductivity.superproductivity"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 3
-        versionName "3.0"
+        versionCode 4
+        versionName "4.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 hostName       : "app.super-productivity.com",
