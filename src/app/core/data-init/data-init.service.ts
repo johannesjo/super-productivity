@@ -60,7 +60,6 @@ export class DataInitService {
     const appDataComplete = await this._persistenceService.loadComplete();
     if (!environment.production) {
       const isValid = isValidAppData(appDataComplete);
-      console.log('VALID_INITIAL_DATA', isValid);
     }
     this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
   }

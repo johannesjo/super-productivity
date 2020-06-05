@@ -51,9 +51,6 @@ export class GlobalProgressBarService {
 
   private _urlToLabel(url: string): string {
     const [urlWithoutParams] = url.split('?');
-    // TODO i18n
-    console.log(url, urlWithoutParams);
-
 
     if (PROGRESS_BAR_LABEL_MAP[url]) {
       return PROGRESS_BAR_LABEL_MAP[url];

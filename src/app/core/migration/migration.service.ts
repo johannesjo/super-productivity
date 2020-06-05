@@ -39,7 +39,6 @@ export class MigrationService {
 
   migrateIfNecessaryToProjectState$(projectState: ProjectState): Observable<ProjectState | never> {
     const isNeedsMigration = this._isNeedsMigration(projectState);
-    console.log('IS NEEDS GLOBAL MODEL MIGRATION', isNeedsMigration);
 
     if (isNeedsMigration && this._isConfirmMigrateDialog()) {
       return from(this._legacyPersistenceService.loadCompleteLegacy()).pipe(
