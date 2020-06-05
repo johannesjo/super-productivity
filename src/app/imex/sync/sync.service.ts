@@ -25,6 +25,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {AppDataComplete} from './sync.model';
 import {SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME} from './sync.const';
 import {isTouch} from '../../util/is-touch';
+import {AllowedDBKeys} from '../../core/persistence/ls-keys.const';
 
 // TODO naming
 @Injectable({
@@ -33,9 +34,10 @@ import {isTouch} from '../../util/is-touch';
 export class SyncService {
   // SAVE TO REMOTE TRIGGER
   // ----------------------
-  private _updateLocalData$: Observable<unknown> = this._persistenceService.onAfterSave$.pipe(
-    filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
-  );
+  private _updateLocalData$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
+    this._persistenceService.onAfterSave$.pipe(
+      filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
+    );
 
   // IMMEDIATE TRIGGERS
   // ------------------
@@ -132,9 +134,9 @@ export class SyncService {
         // NOTE: startWith needs to come before switchMap!
         startWith(false),
         switchMap(() => this._updateLocalData$.pipe(
-          tap((ev) => console.log('__trigger_sync__', ev)),
+          tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
           auditTime(Math.max(syncInterval, minSyncInterval)),
-          tap((ev) => console.log('__trigger_sync after auditTime__', ev)),
+          tap((ev) => console.log('__trigger_sync after auditTime__', ev.appDataKey, ev)),
         )),
       )
     ).pipe(
