@@ -34,7 +34,7 @@ import {AllowedDBKeys} from '../../core/persistence/ls-keys.const';
 export class SyncService {
   // SAVE TO REMOTE TRIGGER
   // ----------------------
-  private _updateLocalData$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
+  private _onUpdateLocalDataTrigger$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
     this._persistenceService.onAfterSave$.pipe(
       filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
     );
@@ -133,7 +133,7 @@ export class SyncService {
       this._immediateSyncTrigger$.pipe(
         // NOTE: startWith needs to come before switchMap!
         startWith(false),
-        switchMap(() => this._updateLocalData$.pipe(
+        switchMap(() => this._onUpdateLocalDataTrigger$.pipe(
           tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
           auditTime(Math.max(syncInterval, minSyncInterval)),
           tap((ev) => console.log('__trigger_sync after auditTime__', ev.appDataKey, ev)),

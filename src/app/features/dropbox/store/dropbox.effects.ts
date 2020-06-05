@@ -133,7 +133,6 @@ export class DropboxEffects {
         : EMPTY
       ),
       filter(ids => ids.includes(DROPBOX_BEFORE_CLOSE_ID)),
-      // TODO find out why localStorage isn't persisted
       switchMap(() => this._dropboxSyncService.sync()
         .then(() => {
           this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
