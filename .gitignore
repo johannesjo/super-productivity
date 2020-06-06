@@ -34,6 +34,8 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+chromedriver.log
+e2e-test-results
 
 # System Files
 .DS_Store
@@ -53,3 +55,4 @@ electron/**/*.js.map
 all-certs.p12
 mac-cert.tar
 build/electron-builder.appx.yaml
+
