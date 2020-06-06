@@ -1,3 +1,21 @@
+## [5.3.2](https://github.com/johannesjo/super-productivity/compare/v5.3.1...v5.3.2) (2020-06-06)
+
+
+### Bug Fixes
+
+* **dbx:** in memory copy not being refreshed after import ([bb51375](https://github.com/johannesjo/super-productivity/commit/bb513752a1c8cd6aa998e460342374ba2c1dacf0))
+* **dbx:** sync triggering twice initially ([3af2c1e](https://github.com/johannesjo/super-productivity/commit/3af2c1e1619610396aaa2fbcd766413f5ac21468))
+* scheduled tasks not showing up ([c638fdf](https://github.com/johannesjo/super-productivity/commit/c638fdfb56a45e6f256d645d401a2144d77c2cd7))
+
+
+### Features
+
+* add color for widget ([4cdba67](https://github.com/johannesjo/super-productivity/commit/4cdba67f5a7e3cdb0b5b40185dedbebc3b16c3f6))
+* **dbx:** improve error handling ([e30ddf9](https://github.com/johannesjo/super-productivity/commit/e30ddf901fb5c0d885d0e1eab56141b4425ba1ee))
+* improve logging ([c29ccf0](https://github.com/johannesjo/super-productivity/commit/c29ccf0c79ecab31135aed068831888ad5dd1701))
+
+
+
 ## [5.3.1](https://github.com/johannesjo/super-productivity/compare/v5.3.0...v5.3.1) (2020-06-04)
 
 
