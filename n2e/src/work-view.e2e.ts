@@ -1,6 +1,6 @@
 import {NightwatchBrowser} from 'nightwatch';
 import {Key} from 'protractor';
-import {BASE} from './e2e.const';
+import {BASE} from '../e2e.const';
 
 
 const ADD_TASK_INITIAL_SEL = 'add-task-bar:not(.global) input';
