@@ -1,12 +1,13 @@
 import {NightwatchBrowser} from 'nightwatch';
 import {Key} from 'protractor';
+import {BASE} from './e2e.const';
 
 
 const ADD_TASK_INITIAL_SEL = 'add-task-bar:not(.global) input';
 const ADD_TASK_GLOBAL_SEL = 'add-task-bar.global input';
 const TASK_SEL = 'task';
 const ADD_TASK_BTN_SEL = '.action-nav > button:first-child';
-const WORK_VIEW_URL = 'http://localhost:4200/';
+const WORK_VIEW_URL = `${BASE}/`;
 
 module.exports = {
   'should add a task': (browser: NightwatchBrowser) => browser
