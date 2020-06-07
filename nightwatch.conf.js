@@ -44,7 +44,9 @@ module.exports = {
         path: './n2e/screenshots' // save screenshots here
       },
       globals: {
-        waitForConditionTimeout: 60000
+        waitForConditionPollInterval: 500,
+        waitForConditionTimeout: 10000,
+        retryAssertionTimeout: 1000,
       }
     }
   }
