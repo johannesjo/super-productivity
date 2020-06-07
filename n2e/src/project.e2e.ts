@@ -2,6 +2,9 @@ import {NightwatchBrowser} from 'nightwatch';
 import {BASE} from '../e2e.const';
 
 const BASE_URL = `${BASE}`;
+const DEFAULT_PROJECT_TASKS_URL = `${BASE}/project/DEFAULT/tasks`;
+const DEFAULT_PROJECT_SETTINGS_URL = `${BASE}/project/DEFAULT/settings`;
+
 const SIDENAV = `side-nav`;
 const EXPAND_PROJECT_BTN = `${SIDENAV} .expand-btn:first-of-type`;
 const CREATE_PROJECT_BTN = `${SIDENAV} section.projects .mat-menu-item:last-of-type`;
@@ -14,12 +17,15 @@ const SECOND_PROJECT = `${PROJECT}:nth-child(2)`;
 const WORK_CONTEXT_TITLE = `.current-work-context-title`;
 const BACKLOG = `.backlog`;
 const SPLIT = `split`;
+const FINISH_DAY_BTN = '.finish-day-button-wrapper button';
+const DONE_HEADLINE = '.done-headline';
+const GLOBAL_ERROR_ALERT = '.global-error-alert';
 
 module.exports = {
   '@tags': ['project'],
+
   'create project': (browser: NightwatchBrowser) => browser
     .url(BASE_URL)
-    .waitForElementVisible(SIDENAV)
     .waitForElementVisible(EXPAND_PROJECT_BTN)
     .click(EXPAND_PROJECT_BTN)
     .waitForElementVisible(CREATE_PROJECT_BTN)
@@ -38,7 +44,6 @@ module.exports = {
 
   'navigate to default': (browser: NightwatchBrowser) => browser
     .url(BASE_URL)
-    .waitForElementVisible(SIDENAV)
     .waitForElementVisible(EXPAND_PROJECT_BTN)
     .click(EXPAND_PROJECT_BTN)
     .waitForElementVisible(DEFAULT_PROJECT_BTN)
@@ -46,4 +51,17 @@ module.exports = {
     .waitForElementVisible(BACKLOG)
     .assert.containsText(WORK_CONTEXT_TITLE, 'Super Productivity')
     .end(),
+
+  'navigate to daily summary from project without error': (browser: NightwatchBrowser) => browser
+    // Go to project page
+    .url(BASE_URL)
+    .waitForElementVisible(EXPAND_PROJECT_BTN)
+    .click(EXPAND_PROJECT_BTN)
+    .waitForElementVisible(DEFAULT_PROJECT_BTN)
+    .click(DEFAULT_PROJECT_BTN)
+    .waitForElementVisible(BACKLOG)
+
+    .click(FINISH_DAY_BTN)
+    .waitForElementVisible(DONE_HEADLINE)
+    .assert.elementNotPresent(GLOBAL_ERROR_ALERT)
 };
