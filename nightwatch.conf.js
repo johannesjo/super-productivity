@@ -2,9 +2,10 @@ module.exports = {
   // An array of folders (excluding subfolders) where your tests are located;
   // if this is not specified, the test source must be passed as the second argument to the test runner.
   src_folders: [
-    'out-tsc/n2e'
+    'out-tsc/n2e/src'
   ],
   output_folder: "n2e/e2e-test-results",
+  custom_commands_path:"out-tsc/n2e/commands",
   live_output: true,
   webdriver: {
     start_process: true,
