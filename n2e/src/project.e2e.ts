@@ -21,8 +21,8 @@ const WORK_CONTEXT_TITLE = `.current-work-context-title`;
 const BACKLOG = `.backlog`;
 const SPLIT = `split`;
 const FINISH_DAY_BTN = '.finish-day-button-wrapper button';
-const READY_TO_WORK_BTN = '.read-to-work-btn';
-const DONE_HEADLINE = '.done-headline';
+const READY_TO_WORK_BTN = '.ready-to-work-btn';
+const DAILY_SUMMARY = 'daily-summary';
 const GLOBAL_ERROR_ALERT = '.global-error-alert';
 
 module.exports = {
@@ -84,6 +84,9 @@ module.exports = {
     .click(READY_TO_WORK_BTN)
     .waitForElementVisible(FINISH_DAY_BTN)
     .click(FINISH_DAY_BTN)
-    .waitForElementVisible(DONE_HEADLINE)
+
+    // this fails often for some reason...
+    .waitForElementPresent(DAILY_SUMMARY)
     .assert.elementNotPresent(GLOBAL_ERROR_ALERT)
+    .end(),
 };

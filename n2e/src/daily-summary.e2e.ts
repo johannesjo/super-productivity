@@ -7,10 +7,8 @@ const ADD_TASK_BTN_SEL = '.action-nav > button:first-child';
 const ADD_TASK_GLOBAL_SEL = 'add-task-bar.global input';
 
 module.exports = {
-  after: (browser: NightwatchBrowser) => {
-    browser
-      .end();
-  },
+  '@tags': ['daily-summary'],
+
   'Daily summary message': (browser: NightwatchBrowser) => browser
     .url(URL)
     .waitForElementVisible('.done-headline')
@@ -25,5 +23,5 @@ module.exports = {
 
     .setValue(ADD_TASK_GLOBAL_SEL, 'test task hohoho')
     .setValue(ADD_TASK_GLOBAL_SEL, Key.ENTER)
-
+    .end(),
 };

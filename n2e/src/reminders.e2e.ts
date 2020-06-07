@@ -1,11 +1,12 @@
 import {BASE} from '../e2e.const';
 import {NBrowser} from '../n-browser-interface';
+import {NightwatchBrowser} from 'nightwatch';
 
 const WORK_VIEW_URL = `${BASE}/`;
 
 const TASK = 'task';
 const TASK_2 = `${TASK}:nth-of-type(1)`;
-const READY_TO_WORK_BTN = '.read-to-work-btn';
+const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const TASK_SCHEDULE_BTN = '.mat-icon-button.schedule-btn';
 const TASK_SCHEDULE_BTN_2 = TASK_2 + ' ' + TASK_SCHEDULE_BTN;
 
@@ -52,5 +53,4 @@ module.exports = {
     .assert.containsText(SCHEDULE_PAGE_TASK_1, '0 test task koko')
     .assert.containsText(SCHEDULE_PAGE_TASK_2, '2 hihihi')
     .end(),
-
 };

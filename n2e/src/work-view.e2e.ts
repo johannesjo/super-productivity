@@ -9,7 +9,7 @@ const ADD_TASK_GLOBAL = 'add-task-bar.global input';
 const TASK = 'task';
 const ADD_TASK_BTN = '.action-nav > button:first-child';
 const WORK_VIEW_URL = `${BASE}/`;
-const READY_TO_WORK_BTN = '.read-to-work-btn';
+const READY_TO_WORK_BTN = '.ready-to-work-btn';
 
 module.exports = {
   '@tags': ['work-view', 'task'],
@@ -68,4 +68,5 @@ module.exports = {
     .assert.containsText(TASK + ':nth-child(1)', '5 some other task xoxo')
     .assert.containsText(TASK + ':nth-child(2)', '4 test task hohoho')
     .end(),
+
 };

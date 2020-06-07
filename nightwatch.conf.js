@@ -5,8 +5,11 @@ module.exports = {
     'out-tsc/n2e/src'
   ],
   output_folder: "n2e/e2e-test-results",
-  custom_commands_path:"out-tsc/n2e/commands",
-  live_output: true,
+  custom_commands_path: "out-tsc/n2e/commands",
+  test_workers: {
+    enabled: true,
+    workers: "auto"
+  },
   webdriver: {
     start_process: true,
     port: 9515,
@@ -36,8 +39,12 @@ module.exports = {
           },
         },
       },
+      screenshots: {
+        enabled: true, // if you want to keep screenshots
+        path: './n2e/screenshots' // save screenshots here
+      },
       globals: {
-        waitForConditionTimeout: 30000
+        waitForConditionTimeout: 60000
       }
     }
   }
