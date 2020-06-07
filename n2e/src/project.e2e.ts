@@ -12,17 +12,37 @@ const PROJECT_NAME_INPUT = `dialog-create-project input:first-of-type`;
 const SUBMIT_BTN = `dialog-create-project button[type=submit]`;
 const PROJECT = `${SIDENAV} section.projects .project`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-child(1)`;
-const DEFAULT_PROJECT_BTN = `${PROJECT}:nth-child(1) .mat-menu-item`;
+const DEFAULT_PROJECT_BTN = `${DEFAULT_PROJECT} .mat-menu-item`;
+const DEFAULT_PROJECT_ADV_BTN = `${DEFAULT_PROJECT} .project-settings-btn`;
+const WORK_CTX_MENU = `work-context-menu`;
+const PROJECT_SETTINGS_BTN = `${WORK_CTX_MENU} button:last-of-type`;
 const SECOND_PROJECT = `${PROJECT}:nth-child(2)`;
 const WORK_CONTEXT_TITLE = `.current-work-context-title`;
 const BACKLOG = `.backlog`;
 const SPLIT = `split`;
 const FINISH_DAY_BTN = '.finish-day-button-wrapper button';
+const READY_TO_WORK_BTN = '.read-to-work-btn';
 const DONE_HEADLINE = '.done-headline';
 const GLOBAL_ERROR_ALERT = '.global-error-alert';
 
 module.exports = {
   '@tags': ['project'],
+
+  'navigate to project settings': (browser: NightwatchBrowser) => browser
+    .url(BASE_URL)
+    .waitForElementVisible(EXPAND_PROJECT_BTN)
+    .click(EXPAND_PROJECT_BTN)
+    .waitForElementVisible(DEFAULT_PROJECT_BTN)
+    .moveToElement(DEFAULT_PROJECT_BTN, 20, 20)
+    .waitForElementVisible(DEFAULT_PROJECT_ADV_BTN)
+    .click(DEFAULT_PROJECT_ADV_BTN)
+    .waitForElementVisible(WORK_CTX_MENU)
+    .waitForElementVisible(PROJECT_SETTINGS_BTN)
+    .click(PROJECT_SETTINGS_BTN)
+    .waitForElementVisible('.component-wrapper .mat-h1')
+    .waitForElementVisible('.component-wrapper .mat-h1')
+    .assert.containsText('.component-wrapper .mat-h1', 'Project Specific Settings')
+    .end(),
 
   'create project': (browser: NightwatchBrowser) => browser
     .url(BASE_URL)
@@ -59,8 +79,10 @@ module.exports = {
     .click(EXPAND_PROJECT_BTN)
     .waitForElementVisible(DEFAULT_PROJECT_BTN)
     .click(DEFAULT_PROJECT_BTN)
-    .waitForElementVisible(BACKLOG)
+    .waitForElementVisible(SPLIT)
 
+    .click(READY_TO_WORK_BTN)
+    .waitForElementVisible(FINISH_DAY_BTN)
     .click(FINISH_DAY_BTN)
     .waitForElementVisible(DONE_HEADLINE)
     .assert.elementNotPresent(GLOBAL_ERROR_ALERT)
