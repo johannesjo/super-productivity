@@ -22,7 +22,7 @@ module.exports = {
           args: [
             '--headless',
             '--disable-gpu',
-            '--window-size=800,600',
+            '--window-size=1280,800',
             '--no-sandbox',
             '--disable-dev-shm-usage',
             '--disable-browser-side-navigation',
