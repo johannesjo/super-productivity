@@ -10,6 +10,9 @@ module.exports = {
       .setValue('body', 'A')
       .waitForElementVisible(ADD_TASK_GLOBAL_SEL)
       .setValue(ADD_TASK_GLOBAL_SEL, taskName)
-      .setValue(ADD_TASK_GLOBAL_SEL, this.Keys.ENTER);
+      .setValue(ADD_TASK_GLOBAL_SEL, this.Keys.ENTER)
+      .setValue(ADD_TASK_GLOBAL_SEL, this.Keys.ESCAPE)
+      // .waitForElementNotPresent(ADD_TASK_GLOBAL_SEL)
+      ;
   }
 };
