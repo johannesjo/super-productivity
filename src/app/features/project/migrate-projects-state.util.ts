@@ -28,7 +28,7 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
   });
 
   return {
-    ...projectState,
+    ..._fixIds(projectState),
     entities: projectEntities,
     // Update model version after all migrations ran successfully
     [MODEL_VERSION_KEY]: MODEL_VERSION,
@@ -108,3 +108,30 @@ const _updateThemeModel = (project: Project): Project => {
   }
 ;
 
+const _fixIds = (projectState: ProjectState): ProjectState => {
+  const currentIds = projectState.ids as string[];
+  const allIds = Object.keys(projectState.entities);
+  let newIds;
+
+  if (allIds.length !== currentIds.length) {
+    const allP = allIds.map(id => projectState.entities[id]);
+    console.log(allP);
+
+    const archivedIds = allP.filter(p => p.isArchived).map(p => p.id);
+    const unarchivedIds = allP.filter(p => !p.isArchived).map(p => p.id);
+    if (currentIds.length === unarchivedIds.length) {
+      newIds = [...currentIds, ...archivedIds];
+    } else if (currentIds.length === unarchivedIds.length) {
+      newIds = [...currentIds, ...unarchivedIds];
+    } else {
+      throw new Error('Invalid param given to UpdateProjectOrder');
+    }
+
+    return {
+      ...projectState,
+      ids: newIds,
+    };
+  }
+
+  return projectState;
+};

@@ -486,7 +486,22 @@ export function projectReducer(
     }
 
     case ProjectActionTypes.UpdateProjectOrder: {
-      return {...state, ids: action.payload.ids};
+      const {ids} = action.payload;
+      const currentIds = state.ids as string[];
+      let newIds: string[];
+      if (ids.length !== currentIds.length) {
+        const allP = currentIds.map(id => state.entities[id]);
+        const archivedIds = allP.filter(p => p.isArchived).map(p => p.id);
+        const unarchivedIds = allP.filter(p => !p.isArchived).map(p => p.id);
+        if (ids.length === unarchivedIds.length) {
+          newIds = [...ids, ...archivedIds];
+        } else if (ids.length === unarchivedIds.length) {
+          newIds = [...ids, ...unarchivedIds];
+        } else {
+          throw new Error('Invalid param given to UpdateProjectOrder');
+        }
+      }
+      return {...state, ids: newIds};
     }
 
     case ProjectActionTypes.ArchiveProject: {
