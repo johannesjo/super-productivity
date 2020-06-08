@@ -51,6 +51,8 @@ public class TaskListWidget extends AppWidgetProvider {
                 clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         rvs.setPendingIntentTemplate(WIDGET_LIST, clickPI);
 
+        // Also attach click handler to empty view
+        rvs.setOnClickPendingIntent(R.id.empty_view, clickPI);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, rvs);
