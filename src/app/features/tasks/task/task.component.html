@@ -91,10 +91,14 @@
              (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
              [isResetAfterEdit]="true"
              [value]="task.title"
-             class="task-title"
+             class="task-title hide-xs"
              contentEditableOnClick
              contenteditable="true"
              tabindex="2"></div>
+
+        <div class="task-title show-xs-only"
+             (click)="toggleShowAdditionalInfoOpen()">{{task.title}}</div>
+
         <tag-list *ngIf="!task.parentId || isDev"
                   [task]="task"></tag-list>
         <div class="spacer"

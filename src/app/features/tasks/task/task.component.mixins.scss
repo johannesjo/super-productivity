@@ -116,7 +116,7 @@ $task-c-selected-bg-dark: $dark-theme-bg-slightly-lighter;
   z-index: $z-task-title;
 
   // needs to be block for it not to mess up
-  display: block !important;
+  display: block;
 
   @include darkTheme() {
     caret-color: #ffffff;
