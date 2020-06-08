@@ -41,6 +41,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       // setTimeout(() => {
       //   document.execCommand('selectAll', false, null);
       // });
+      this._moveCursorToEnd();
 
       window.clearTimeout(this._redrawTimeout);
       // this fixes the bug where the text is not visible for some time
@@ -158,5 +159,11 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       .replace(/&nbsp;/gmi, '') // replace line breaks
       .replace('&nbsp;', '') // replace line breaks again because sometimes it doesn't work
       .trim();
+  }
+
+  private _moveCursorToEnd() {
+    // NOTE: keep in mind that we're in a contenteditable
+    document.execCommand('selectAll', false, null);
+    document.getSelection().collapseToEnd();
   }
 }
