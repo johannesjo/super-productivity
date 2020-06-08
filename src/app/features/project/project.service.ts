@@ -45,6 +45,7 @@ export class ProjectService {
     shareReplay(1),
   );
 
+  /* @deprecated  todo fix */
   isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._workContextService.isActiveWorkContextProject$.pipe(
     switchMap(isProject => isProject
       ? this._workContextService.activeWorkContextIdIfProject$.pipe(

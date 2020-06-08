@@ -25,6 +25,7 @@ export class DataInitService {
     concatMap(() => from(this.reInit())),
     switchMap(() => this._workContextService.isActiveWorkContextProject$),
     switchMap(isProject => isProject
+      // NOTE: this probably won't work some of the time
       ? this._projectService.isRelatedDataLoadedForCurrentProject$
       : of(true)
     ),

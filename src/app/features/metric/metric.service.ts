@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {initialMetricState} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
-import {combineLatest, EMPTY, from, Observable, of} from 'rxjs';
+import {combineLatest, EMPTY, from, merge, Observable, of, timer} from 'rxjs';
 import {LineChartData, Metric, MetricState, PieChartData, SimpleMetrics} from './metric.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -87,9 +87,16 @@ export class MetricService {
   }
 
   getMetricForDayOrDefaultWithCheckedImprovements$(day = getWorklogStr()): Observable<Metric> {
-    return this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
-      // required because otherwise there might be trouble
-      filter((isLoaded): boolean => isLoaded),
+    return this._workContextService.activeWorkContextIdIfProject$.pipe(
+      switchMap(() => merge(
+        this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
+          // required because otherwise there might be trouble
+          filter((isLoaded): boolean => isLoaded),
+        ),
+        // TODO fix this dirty hack
+        timer(500).pipe(take(1)),
+      )),
+
       take(1),
       switchMap(() => this._store$.pipe(select(selectMetricById, {id: day})).pipe(
         switchMap((metric) => {
