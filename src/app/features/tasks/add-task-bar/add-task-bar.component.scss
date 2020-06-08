@@ -7,15 +7,25 @@
 
   &.global {
     position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    height: 0;
-    top: $s*6;
+    top: $s;
+    left: $s;
+    right: $s;
     overflow: visible;
-    margin-top: 20px;
-    max-width: 632px;
     transform-origin: left top;
+
+    @include mq(xs, max) {
+      transform: translateX(0) !important;
+    }
+
+    @include mq(xs) {
+      margin-top: 20px;
+      max-width: 632px;
+      width: 80%;
+      top: $s*6;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+    }
   }
 }
 
@@ -39,8 +49,8 @@
     outline: 0;
     border-color: $c-primary;
 
-    padding-right: 40px !important;
-    padding-left: 40px !important;
+    padding-right: 48px !important;
+    padding-left: 48px !important;
     line-height: 42px;
 
     color: #000000;
@@ -80,5 +90,21 @@
 
   &:hover {
     opacity: 1;
+  }
+}
+
+.close-btn {
+  position: absolute;
+  right: $s/2;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0.4;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  @include mq(xs) {
   }
 }

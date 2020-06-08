@@ -129,6 +129,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  closeBtnClose(ev) {
+    this.blurred.emit(ev);
+  }
+
   onBlur(ev) {
     if (ev.relatedTarget && ev.relatedTarget.className.includes('switch-add-to-btn')) {
       this.inputEl.nativeElement.focus();
