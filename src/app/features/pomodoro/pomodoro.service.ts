@@ -1,9 +1,17 @@
 import {Injectable} from '@angular/core';
-import {combineLatest, merge, Observable} from 'rxjs';
+import {combineLatest, interval, merge, Observable, of} from 'rxjs';
 import {GlobalConfigService} from '../config/global-config.service';
-import {distinctUntilChanged, filter, map, mapTo, scan, shareReplay, withLatestFrom} from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  pairwise,
+  scan,
+  shareReplay,
+  switchMap,
+  withLatestFrom
+} from 'rxjs/operators';
 import {PomodoroConfig} from '../config/global-config.model';
-import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {select, Store} from '@ngrx/store';
 import {
   FinishPomodoroSession,
@@ -19,7 +27,6 @@ import {Actions, ofType} from '@ngrx/effects';
 import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
 
 // Tick Duration
-const TD = -1000;
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';
 const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
 
@@ -49,11 +56,16 @@ export class PomodoroService {
     this.isLongBreak$,
   ]).pipe(map(([isBreak, isLongBreak]) => isBreak && !isLongBreak));
 
-  timer$: Observable<number> = this._timeTrackingService.globalInterval$;
-  tick$: Observable<number> = this.timer$.pipe(
+  _timer$: Observable<number> = interval(200).pipe(
+    switchMap(() => of(Date.now())),
+    pairwise(),
+    map(([a, b]) => b - a),
+  );
+
+  tick$: Observable<number> = this._timer$.pipe(
     withLatestFrom(this.isManualPause$, this.isEnabled$),
     filter(([v, isManualPause, isEnabled]) => !isManualPause && isEnabled),
-    mapTo(TD),
+    map(([tick]) => tick * -1),
   );
 
   // isManualPause$
@@ -89,7 +101,7 @@ export class PomodoroService {
     this.nextSession$
   ).pipe(
     scan((acc, value) => {
-      return (value === TD)
+      return (value < 0)
         ? acc + value
         : value;
     }),
@@ -108,8 +120,8 @@ export class PomodoroService {
     private _configService: GlobalConfigService,
     private _store$: Store<any>,
     private _actions$: Actions,
-    private _timeTrackingService: TimeTrackingService,
   ) {
+
     // NOTE: idle handling is not required, as unsetting the task auto triggers pause
     this.currentSessionTime$
       .pipe(
