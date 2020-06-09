@@ -39,7 +39,9 @@ export class PomodoroEffects {
     withLatestFrom(
       this._pomodoroService.cfg$,
       this._pomodoroService.isBreak$,
+      // this._pomodoroService.tick$,
     ),
+    // tap((v) => console.log(v)),
     filter(isEnabled),
     // don't update when on break and stop time tracking is active
     filter(([action, cfg, isBreak]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean]) =>
