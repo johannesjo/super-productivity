@@ -12,27 +12,23 @@ import {PomodoroService} from '../pomodoro.service';
 import {SetCurrentTask} from '../../tasks/store/task.actions';
 import {PomodoroConfig} from '../../config/global-config.model';
 import {PomodoroActionTypes} from './pomodoro.actions';
+import {DEFAULT_GLOBAL_CONFIG} from '../../config/default-global-config.const';
 
 describe('PomodoroEffects', () => {
   let actions$: Observable<any>;
   let effects: PomodoroEffects;
-
-  const cfg$ = new BehaviorSubject<PomodoroConfig>({
-    isEnabled: true,
-    duration: 25 * 1000,
-    breakDuration: 5 * 1000,
-    longerBreakDuration: 15 * 1000,
-    cyclesBeforeLongerBreak: 4,
-    isStopTrackingOnBreak: true,
-    isStopTrackingOnLongBreak: true,
-    isManualContinue: false,
-    isPlaySound: true,
-    isPlaySoundAfterBreak: false,
-    isPlayTick: false,
-  });
-  const isBreak$ = new BehaviorSubject<boolean>(false);
+  let cfg$;
+  let currentSessionTime$;
+  let isBreak$;
 
   beforeEach(() => {
+    cfg$ = new BehaviorSubject<PomodoroConfig>({
+      ...DEFAULT_GLOBAL_CONFIG.pomodoro,
+      isEnabled: true,
+    });
+    currentSessionTime$ = new BehaviorSubject<number>(5000);
+    isBreak$ = new BehaviorSubject<boolean>(false);
+
     TestBed.configureTestingModule({
       providers: [
         PomodoroEffects,
@@ -43,6 +39,7 @@ describe('PomodoroEffects', () => {
             sessionProgress$: EMPTY,
             cfg$,
             isBreak$,
+            currentSessionTime$,
           },
         },
         {provide: MatDialog, useValue: {}},
@@ -66,6 +63,17 @@ describe('PomodoroEffects', () => {
     actions$ = of(new SetCurrentTask(null));
     effects.playPauseOnCurrentUpdate$.subscribe(effectAction => {
       expect(effectAction.type).toBe(PomodoroActionTypes.PausePomodoro);
+      done();
+    });
+  });
+
+  it('should start pomodoro if starting a task on break', (done) => {
+    isBreak$.next(true);
+    currentSessionTime$.next(0);
+    actions$ = of(new SetCurrentTask('null'));
+
+    effects.playPauseOnCurrentUpdate$.subscribe(effectAction => {
+      expect(effectAction.type).toBe(PomodoroActionTypes.StartPomodoro);
       done();
     });
   });
