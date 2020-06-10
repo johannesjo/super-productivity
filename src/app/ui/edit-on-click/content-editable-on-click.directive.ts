@@ -163,7 +163,11 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
 
   private _moveCursorToEnd() {
     // NOTE: keep in mind that we're in a contenteditable
-    document.execCommand('selectAll', false, null);
-    document.getSelection().collapseToEnd();
+    try {
+      document.execCommand('selectAll', false, null);
+      document.getSelection().collapseToEnd();
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
