@@ -1,3 +1,22 @@
+## [5.3.4](https://github.com/johannesjo/super-productivity/compare/v5.3.3...v5.3.4) (2020-06-10)
+
+
+### Bug Fixes
+
+* avoid "Failed to execute 'collapseToEnd'" ([4739aaa](https://github.com/johannesjo/super-productivity/commit/4739aaa58f4c5699f0ed679f77b2dcdc4a3e3ee6))
+* error when focusing via tab for inline input [#390](https://github.com/johannesjo/super-productivity/issues/390) ([0c98bf1](https://github.com/johannesjo/super-productivity/commit/0c98bf15e0cf86cd592ee6cc4b11464b09970b0b))
+* styling for tablet size ([7af4429](https://github.com/johannesjo/super-productivity/commit/7af44294f05a684a02b94e29d9fb25bc3f6659f4))
+
+
+### Features
+
+* improve drawer performance by not showing backdrop ([2699140](https://github.com/johannesjo/super-productivity/commit/26991402693c4a25aac85e40d20d08fffa7ff371))
+* make backdrop dark for dark theme ([151ec88](https://github.com/johannesjo/super-productivity/commit/151ec887824fb09870a63d33bf02552198fdd548))
+* restore focus for fullscreen markdown edit ([1035cd6](https://github.com/johannesjo/super-productivity/commit/1035cd6f65e20ba8d9374bfddf02afdf9a752f02))
+* save per default for fullscreen markdown dialog ([786e016](https://github.com/johannesjo/super-productivity/commit/786e0164b1ef8922ee20c0dcdfa11872febdde94))
+
+
+
 ## [5.3.3](https://github.com/johannesjo/super-productivity/compare/v5.3.2...v5.3.3) (2020-06-10)
 
 
