@@ -1,3 +1,23 @@
+## [5.3.3](https://github.com/johannesjo/super-productivity/compare/v5.3.2...v5.3.3) (2020-06-10)
+
+
+### Bug Fixes
+
+* **pomodoro:** start task after break without session end [#389](https://github.com/johannesjo/super-productivity/issues/389) ([f0e19e7](https://github.com/johannesjo/super-productivity/commit/f0e19e7ea0e2939a304ac47baa3b42e1c1e85778))
+* **pomodoro:** timer slowing down in background [#363](https://github.com/johannesjo/super-productivity/issues/363) ([dbe9c8b](https://github.com/johannesjo/super-productivity/commit/dbe9c8b256df938d9b39700ed1d88a5f087f8940))
+* dirty fix evaluation sheet not showing up ([0a0e17a](https://github.com/johannesjo/super-productivity/commit/0a0e17a9b3fb334716aeb7adc21a92e115471370))
+* project sort not saving ([6813e2c](https://github.com/johannesjo/super-productivity/commit/6813e2c91a94cd52b7a3bbffeb394a4bef5f19cc))
+
+
+### Features
+
+* **task:** improve add task bar for mobile ([4666d78](https://github.com/johannesjo/super-productivity/commit/4666d78870cd5a7636ac4d1f10481f7ab4eb9e3d))
+* **task:** move cursor to end on enter press to edit task ([2054563](https://github.com/johannesjo/super-productivity/commit/205456341afe7358a15ff3b7a43013d973ea8c4f))
+* improve drawer performance for mobile ([feaf4f8](https://github.com/johannesjo/super-productivity/commit/feaf4f8f085ae6bd4f0a89b782df73fcc9d56053))
+* **task:** show side panel for tapping task title on mobile ([552e9ab](https://github.com/johannesjo/super-productivity/commit/552e9abde1e383e0505ed49b864a8a2455029c07))
+
+
+
 ## [5.3.2](https://github.com/johannesjo/super-productivity/compare/v5.3.1...v5.3.2) (2020-06-06)
 
 
