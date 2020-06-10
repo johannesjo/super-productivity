@@ -85,6 +85,10 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 .backdrop {
   // global styles in backdrop.scss
   z-index: $z-this-backdrop;
+
+  @include mq(xs, max) {
+    display: none;
+  }
 }
 
 .close-btn {
