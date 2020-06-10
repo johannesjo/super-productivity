@@ -113,8 +113,11 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
   private _updateStyle() {
     const style = (this.isOverGet)
       ? (this.isOpenGet)
-          ? 'right: -100%; transform: translateX(-100%);'
-          : `right: -100%; transform: translateX(0);`
+        ? 'right: 0;'
+        : `right: -100%;`
+      // NOTE: this would break appearance for tablets
+      // ? 'right: -100%; transform: translateX(-100%);'
+      // : `right: -100%; transform: translateX(0);`
       : (this.isOpenGet)
         ? 'margin-right: 0;'
         : `margin-right: ${-1 * this.sideWidth}%;`
