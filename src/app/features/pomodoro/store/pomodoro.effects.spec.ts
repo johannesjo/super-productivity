@@ -70,11 +70,18 @@ describe('PomodoroEffects', () => {
   it('should start pomodoro if starting a task on break', (done) => {
     isBreak$.next(true);
     currentSessionTime$.next(0);
-    actions$ = of(new SetCurrentTask('null'));
+    actions$ = of(new SetCurrentTask('something'));
 
+    const as = [];
     effects.playPauseOnCurrentUpdate$.subscribe(effectAction => {
-      expect(effectAction.type).toBe(PomodoroActionTypes.StartPomodoro);
-      done();
+      as.push(effectAction);
+      if (as.length === 2) {
+        expect(as.map(a => a.type)).toEqual([
+          PomodoroActionTypes.FinishPomodoroSession,
+          PomodoroActionTypes.StartPomodoro,
+        ]);
+        done();
+      }
     });
   });
 });

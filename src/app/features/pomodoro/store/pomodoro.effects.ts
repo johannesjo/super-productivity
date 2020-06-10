@@ -1,13 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask} from '../../tasks/store/task.actions';
-import {filter, map, mapTo, tap, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, mapTo, tap, withLatestFrom} from 'rxjs/operators';
 import {PomodoroService} from '../pomodoro.service';
 import {PomodoroConfig} from '../../config/global-config.model';
 import {
   FinishPomodoroSession,
   PausePomodoro,
-  PomodoroActions,
   PomodoroActionTypes,
   SkipPomodoroBreak,
   StartPomodoro
@@ -16,7 +15,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {DialogPomodoroBreakComponent} from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import {select, Store} from '@ngrx/store';
 import {selectCurrentTaskId} from '../../tasks/store/task.selectors';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {IS_ELECTRON} from '../../../app.constants';
 import {IPC} from '../../../../../electron/ipc-events.const';
@@ -39,21 +38,28 @@ export class PomodoroEffects {
     withLatestFrom(
       this._pomodoroService.cfg$,
       this._pomodoroService.isBreak$,
-      // this._pomodoroService.tick$,
+      this._pomodoroService.currentSessionTime$,
     ),
-    // tap((v) => console.log(v)),
     filter(isEnabled),
     // don't update when on break and stop time tracking is active
-    filter(([action, cfg, isBreak]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean]) =>
-      !(isBreak && cfg.isStopTrackingOnBreak)),
-    map(([action]): PomodoroActions => {
+    filter(([action, cfg, isBreak, currentSessionTime]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean, number]) =>
+      !isBreak
+      || !cfg.isStopTrackingOnBreak
+      || (isBreak && currentSessionTime <= 0 && action.type === TaskActionTypes.SetCurrentTask)),
+    concatMap(([action, , isBreak, currentSessionTime]) => {
       // tslint:disable-next-line
       const payload = action['payload'];
 
       if (payload && action.type !== TaskActionTypes.UnsetCurrentTask) {
-        return new StartPomodoro();
+        if (isBreak && currentSessionTime <= 0) {
+          return of(
+            new FinishPomodoroSession(),
+            new StartPomodoro()
+          );
+        }
+        return of(new StartPomodoro());
       } else {
-        return new PausePomodoro({isBreakEndPause: false});
+        return of(new PausePomodoro({isBreakEndPause: false}));
       }
     }),
   );
