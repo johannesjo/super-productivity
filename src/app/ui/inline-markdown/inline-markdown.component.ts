@@ -153,6 +153,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this._matDialog.open(DialogFullscreenMarkdownComponent, {
       minWidth: '100vw',
       height: '100vh',
+      restoreFocus: true,
       data: {
         content: this.modelCopy
       }
