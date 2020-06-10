@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -15,7 +16,7 @@ import {
   styleUrls: ['./inline-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InlineInputComponent {
+export class InlineInputComponent implements AfterViewInit {
   @Input() type = 'text';
   @Input() value: string | number;
   @Input() displayValue: string;
@@ -30,6 +31,12 @@ export class InlineInputComponent {
   activeInputEl: HTMLInputElement;
 
   constructor() {
+  }
+
+  ngAfterViewInit() {
+    this.activeInputEl = (this.type === 'duration')
+      ? this.inputElDuration.nativeElement
+      : this.inputEl.nativeElement;
   }
 
   focusInput() {
