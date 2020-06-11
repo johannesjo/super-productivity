@@ -58,6 +58,7 @@ import {SimpleCounter, SimpleCounterState} from '../../features/simple-counter/s
 import {simpleCounterReducer} from '../../features/simple-counter/store/simple-counter.reducer';
 import {from, merge, Observable, Subject} from 'rxjs';
 import {concatMap, shareReplay} from 'rxjs/operators';
+import {devError} from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -279,6 +280,9 @@ export class PersistenceService {
     if (!this._inMemoryComplete) {
       const projectState = await this.project.loadState();
       const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
+      if (!pids) {
+        throw new Error('Project State is broken');
+      }
 
       r = {
         ...(await this._loadAppDataForProjects(pids)),
@@ -306,6 +310,10 @@ export class PersistenceService {
       return await modelCfg.saveState(data[modelCfg.appDataKey], true);
     }));
     const forProject = Promise.all(this._projectModels.map(async (modelCfg: PersistenceForProjectModel<any, any>) => {
+      if (!data[modelCfg.appDataKey]) {
+        devError('No data for ' + modelCfg.appDataKey + ' - ' + data[modelCfg.appDataKey]);
+        return;
+      }
       return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg.save, true);
     }));
 

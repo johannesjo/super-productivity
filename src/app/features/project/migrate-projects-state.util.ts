@@ -127,6 +127,10 @@ const _fixIds = (projectState: ProjectState): ProjectState => {
       throw new Error('Invalid param given to UpdateProjectOrder');
     }
 
+    if (!Array.isArray(newIds)) {
+      throw new Error('This should not happen. Error during project migration.');
+    }
+
     return {
       ...projectState,
       ids: newIds,
