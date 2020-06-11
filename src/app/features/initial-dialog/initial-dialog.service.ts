@@ -10,8 +10,7 @@ import {DataInitService} from '../../core/data-init/data-init.service';
 import {version} from '../../../../package.json';
 import {lt} from 'semver';
 
-const URL = 'https://app.super-productivity.com/news.json?ngsw-bypass=true';
-
+const URL = 'https://app.super-productivity.com/news.json?ngsw-bypass=true&no-cache=' + Date.now();
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +33,10 @@ export class InitialDialogService {
         const isNewUser = !lastLocalDialogNr;
 
         if (isNewUser && !res.isShowToNewUsers) {
+          // we need to get started somehow
+          if (lastLocalDialogNr === 0) {
+            this._saveDialogNr(1);
+          }
           return of(null);
         } else if (res.dialogNr <= lastLocalDialogNr) {
           return of(null);
