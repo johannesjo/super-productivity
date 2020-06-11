@@ -5,6 +5,12 @@
       "INSTALL": "Instalar",
       "MSG": "Deseja instalar Super Productivity como PWA?"
     },
+    "B_OFFLINE": "Você está desconectado da internet. Sincronizar e solicitar dados do provedor de problemas não funcionará.",
+    "D_INITIAL": {
+      "TITLE": "Bem-vindo à v{{nr}}"
+    },
+    "UPDATE_MAIN_MODEL": "Super Produtividade recebeu uma grande atualização! Algumas migrações para seus dados são necessárias. Observe que isso torna seus dados incompatíveis com versões mais antigas do aplicativo.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Nenhuma atualização de modelo escolhida. Observe que você deve fazer o downgrade para a última versão, se não desejar executar a atualização do modelo.",
     "UPDATE_WEB_APP": "Nova versão disponível. Carregar nova versão?"
   },
   "BL": {
@@ -37,7 +43,9 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "Adicionar marcador",
         "DROP": "Solte aqui para adicionar um marcador",
+        "EDIT": "Editar marcadores",
         "NO_BOOKMARKS": "Você não tem marcadores de projeto. Adicione uma via arrastar e soltar ou clicando no botão 'mais'."
       },
       "DIALOG_EDIT": {
@@ -62,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Configurações atualizadas para <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "última mudança:",
+        "LAST_SYNC": "última sincronização:",
+        "LOCAL": "Local",
+        "LOCAL_REMOTE": "local -> remoto",
+        "REMOTE": "Controlo remoto",
+        "TEXT": "<p>Atualização do Dropbox. Os dados locais e remotos parecem ter sido modificados.</p>",
+        "TITLE": "Dropbox: dados conflitantes",
+        "USE_LOCAL": "Use local",
+        "USE_REMOTE": "Usar controle remoto"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Gerar token",
+        "FOLLOW_LINK": "Abra o link a seguir e copie o código de autenticação fornecido no campo de entrada.",
+        "L_ACCESS_TOKEN": "Token de acesso (gerado a partir do código de autenticação)",
+        "L_AUTH_CODE": "Código de autenticação",
+        "L_ENABLE_SYNCING": "Ativar sincronização do Dropbox",
+        "L_SYNC_INTERVAL": "Intervalo de sincronização",
+        "TITLE": "Sincronizar via Dropbox (recomendado)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: Não é possível gerar o token de acesso a partir do código de autenticação",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: token de acesso gerado a partir do código de autenticação",
+        "AUTH_ERROR": "Dropbox: token de acesso inválido fornecido",
+        "OFFLINE": "Dropbox: não é possível sincronizar, porque off-line",
+        "SYNC_ERROR": "Dropbox: erro ao sincronizar",
+        "UNKNOWN_ERROR": "Dropbox: erro desconhecido: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -93,10 +131,11 @@
       "S": {
         "ERR_NETWORK": "Github: A solicitação falhou devido a um erro de rede do lado do cliente.",
         "ERR_NOT_CONFIGURED": "Github: Não está configurado corretamente",
-        "ERR_REQUEST": "Github: A API retornou {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "Github: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Importado {{issuesLength}} novas issues do git para o backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Importado issue \"{{issueText}}\" do git para o backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: Nenhuma atualização necessária",
         "ISSUE_UPDATE": "Github: Dados atualizados para \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Dados atualizados para \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github:  Encontrado tarefa sem dados da issue. Recarregando.",
@@ -134,10 +173,11 @@
       "S": {
         "ERR_NETWORK": "Gitlab: A solicitação falhou devido a um erro de rede do lado do cliente.",
         "ERR_NOT_CONFIGURED": "Gitlab: Não está configurado corretamente",
-        "ERR_REQUEST": "Gitlab: A API retornou {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "Gitlab: Erro desconhecido {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importado {{issuesLength}} novas issues do git para o backlog",
         "IMPORTED_SINGLE_ISSUE": "Gitlab: Importado issue \"{{issueText}}\" do git para o backlog",
         "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Nenhuma atualização necessária",
         "ISSUE_UPDATE": "Gitlab: Dados atualizados para \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Dados atualizados para \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Gitlab:  Encontrado tarefa sem dados da issue. Recarregando.",
@@ -265,6 +305,7 @@
         "SEARCH_JQL_QUERY": "Consulta JQL para limitar as tarefas do pesquisador"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Permitir certificado autoassinado",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Senha",
         "USER_NAME": "Email / Usuário"
@@ -313,6 +354,7 @@
         "ISSUE_UPDATE": "Jira: dados atualizados para \"{{issueText}}\" ",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: dados atualizados para \"{{issueText}}\" ",
         "MISSING_ISSUE_DATA": "Jira: Foram encontradas tarefas com dados de problemas ausentes. Recarregando.",
+        "NO_AUTO_IMPORT_JQL": "Jira: Nenhuma consulta de pesquisa definida para importação automática",
         "NO_VALID_TRANSITION": "Jira: nenhuma transição válida configurada",
         "POLLING": "Jira: Mudanças na pesquisa de problemas",
         "TIMED_OUT": "Jira: solicitação expirada",
@@ -387,6 +429,7 @@
         "SNOOZE": "Soneca",
         "TITLE": "Observação"
       },
+      "EDIT_FULLSCREEN": "Editar em tela cheia",
       "EDIT_REMINDER": "Editar lembrete",
       "NOTES_CMP": {
         "ADD_BTN": "Adicionar nova nota",
@@ -456,12 +499,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "Encerrar o dia",
-          "MSG": "Você esqueceu de terminar o seu dia em {{dayStr}}"
-        }
-      },
       "D_CREATE": {
         "CREATE": "Criar Projeto",
         "EDIT": "Editar Projeto",
@@ -483,6 +520,7 @@
         "L_HUE_PRIMARY": "Limite para texto escuro em fundo de cor primária",
         "L_HUE_WARN": "Limite para texto escuro em aviso de cor de fundo",
         "L_IS_AUTO_CONTRAST": "Definir cores de texto automaticamente para melhor legibilidade",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Desativar gradiente de fundo colorido",
         "L_IS_REDUCED_THEME": "Usar UI reduzida (sem caixas nas tarefas)",
         "L_THEME_COLOR": "Cor do tema",
         "L_TITLE": "Título",
@@ -502,12 +540,68 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Erro na interface do lembrete"
     },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "A exclusão de um contador simples também excluirá todos os dados antigos rastreados nele. Tem certeza de que deseja continuar?",
+        "OK": "Faça!"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "Contagem",
+        "TITLE": "Editar contador simples"
+      },
+      "FORM": {
+        "ADD_NEW": "Adicionar contador simples",
+        "HELP": "Aqui você pode configurar botões simples que aparecerão no canto superior direito. Eles podem ser temporizadores ou apenas um contador simples, que é contado, clicando nele.",
+        "L_AUTO_COUNT_UP": "Contagem automática de disparos para",
+        "L_AUTO_SWITCH_OFF": "Desligamento automático do gatilho por",
+        "L_AUTO_SWITCH_ON": "O gatilho automático é ativado por",
+        "L_ICON": "Ícone",
+        "L_ICON_ON": "Ícone quando alternado",
+        "L_IS_ENABLED": "ativado",
+        "L_TITLE": "Título",
+        "L_TYPE": "Tipo",
+        "TITLE": "Contadores simples",
+        "TYPE_CLICK_COUNTER": "Contador de cliques",
+        "TYPE_STOPWATCH": "Cronômetro"
+      }
+    },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "Criar tag",
+        "EDIT": "Editar etiqueta"
+      },
+      "D_DELETE": {
+        "CONFIRM_MSG": "Deseja realmente excluir a tag \"{{tagName}}\"? Será removido de todas as tarefas. Isto não pode ser desfeito."
+      },
+      "D_EDIT": {
+        "ADD": "Adicione tags para \"{{title}}\"",
+        "EDIT": "Editar tags para \"{{title}}\"",
+        "LABEL": "Tag"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "Cor (se a cor principal indefinida do tema for usada)",
+        "L_ICON": "Ícone",
+        "L_TITLE": "Nome da tag",
+        "TITLE": "Configurações básicas"
+      },
+      "S": {
+        "UPDATED": "As configurações de tag foram atualizadas"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Juntar anexo",
+        "ADD_SUB_TASK": "Adicionar subtarefa",
         "ATTACHMENTS": "Anexos {{nr}}",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Anexos",
+        "FROM_PARENT": "(do pai)",
         "LOCAL_ATTACHMENTS": "Anexos locais",
-        "NOTES": "Notas"
+        "NOTES": "Notas",
+        "PARENT": "Pai",
+        "REMINDER": "Lembrete",
+        "REPEAT": "Repetir",
+        "SCHEDULE_TASK": "Agendar Tarefa",
+        "SUB_TASKS": "Subtarefas ({{nr}})",
+        "TIME": "tempo"
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "Adicionar tarefa",
@@ -520,11 +614,13 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Adicionar subtarefa",
-        "ADVANCED": "Avançado",
+        "ADD_TO_MY_DAY": "Adicionar ao meu dia",
+        "ADD_TO_PROJECT": "Adicionar a um projeto",
         "CONVERT_TO_PARENT_TASK": "Converter em tarefa pai",
         "DELETE": "Excluir tarefa",
         "DROP_ATTACHMENT": "Solte aqui para anexar a \"{{title}}\"",
         "EDIT_REMINDER": "Editar lembrete",
+        "EDIT_TAGS": "Editar etiquetas",
         "MARK_DONE": "Marcar como concluído",
         "MARK_UNDONE": "Marcar como desfeita",
         "MOVE_TO_BACKLOG": "Mover para backlog",
@@ -532,10 +628,9 @@
         "MOVE_TO_TODAY": "Mover para a lista de hoje",
         "OPEN_ATTACH": "Anexar arquivo ou link",
         "OPEN_ISSUE": "Abrir issue em uma nova guia do navegador",
-        "OPEN_TASK_MENU": "Abrir menu de tarefas",
         "OPEN_TIME": "Tempo estimado / adicionar tempo gasto",
+        "REMOVE_FROM_MY_DAY": "Remover do meu dia",
         "REPEAT_EDIT": "Editar configuração da tarefa de repetição",
-        "REPEAT_TASK": "Repetir tarefa",
         "SCHEDULE": "Agendar tarefa",
         "SHOW_UPDATES": "Mostrar atualizações",
         "TOGGLE_ADDITIONAL": "Mostrar/ocultar informações adicionais",
@@ -555,15 +650,15 @@
         "UNSCHEDULE": "Cancelar agendamento"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "Adicione hoje",
         "DISMISS": "Dispensar lembrete",
-        "ERR_LOST": "Havia um lembrete agendado para a tarefa {{title}}, mas parece estar perdido.",
         "FOR_CURRENT": "A tarefa está vencida. Deseja começar a trabalhar nela?",
         "FOR_OTHER": "A tarefa está vencida. Deseja começar a trabalhar nela?",
         "FROM_PROJECT": "Do projeto",
+        "FROM_TAG": "Da tag: \"{{title}}\"",
         "SNOOZE": "Soneca",
         "START": "Iniciar tarefa",
-        "SWITCH_PROJECT_START": "Alternar projeto e iniciar tarefa",
-        "TITLE": "Tarefa agendada"
+        "SWITCH_CONTEXT_START": "Alternar contexto e iniciar"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Adicione tempo gasto para outro dia",
@@ -587,7 +682,9 @@
       "S": {
         "DELETED": "Tarefa excluída \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Tarefa <strong>{{title}}</strong> movida do backlog para a lista de tarefas de hoje",
+        "FOUND_MOVE_FROM_OTHER_LIST": "Tarefa adicionada <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> para a lista atual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarefa <strong>{{title}}</strong> relacionada ao problema restaurada do arquivo",
+        "LAST_TAG_DELETION_WARNING": "Você está tentando remover a última tag de uma tarefa que não é do projeto. Isso não é permitido!",
         "REMINDER_ADDED": "Tarefa agendada \"{{title}}\"",
         "REMINDER_DELETED": "Lembrete excluído da tarefa",
         "REMINDER_UPDATED": "Lembrete atualizado para a tarefa \"{{title}}\"",
@@ -612,11 +709,13 @@
         "EDIT": "Editr configuração de repetição de tarefas",
         "HELP1": "Tarefas repetidas são destinadas a tarefas diárias, por exemplo: \"Organização\", \"Reunião Diária\", \"Revisão de Código\", \"Verificando e-mails\" ou tarefas semelhantes que provavelmente ocorrerão novamente e de novo.",
         "HELP2": "Uma vez configurada, uma tarefa repetida será recriada todos os dias selecionados abaixo assim que você abrir o seu projeto e será automaticamente marcada como concluída no final do dia. Elas serão tratadas como instâncias diferentes. Assim, você pode adicione livremente subtarefas etc.",
-        "HELP3": "As tarefas importadas do Jira ou Issues do Git não podem ser repetidas. Todos os lembretes também serão excluídos em uma tarefa repetida."
+        "HELP3": "As tarefas importadas do Jira ou Issues do Git não podem ser repetidas. Todos os lembretes também serão excluídos em uma tarefa repetida.",
+        "TAG_LABEL": "Tags para adicionar"
       },
       "F": {
         "DEFAULT_ESTIMATE": "Estimativa padrão",
         "FRIDAY": "Sexta-feira",
+        "IS_ADD_TO_BOTTOM": "Mover a tarefa para o final da lista",
         "MONDAY": "Segunda-feira",
         "SATURDAY": "Sábado",
         "SUNDAY": "Domingo",
@@ -649,7 +748,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "Restaurar tarefa do arquivo",
         "TASKS": "Tarefas",
         "TOTAL_TIME": "Tempo gasto total:",
-        "TOTAL_TIME_PROJECT": "Tempo total gasto no projeto",
         "WEEK_NR": "Semana {{nr}}",
         "WORKED": "Trabalhado"
       },
@@ -714,9 +812,12 @@
     "LOGOUT": "Sair",
     "MINUTES": "{{m}} minutos",
     "NEXT": "Próximo",
+    "NONE": "Nenhum",
+    "NO_CON": "Você está atualmente offline. Reconecte-se à Internet.",
     "OK": "Ok",
     "PREVIOUS": "Anterior",
     "REMOVE": "Remover",
+    "RESET": "Restabelecer",
     "SAVE": "Salvar",
     "TITLE": "Título",
     "UNDO": "Desfazer",
@@ -727,6 +828,10 @@
       "HELP": "Salve automaticamente todos os dados na pasta do aplicativo para prepará-los, caso algo dê errado.",
       "LABEL_IS_ENABLED": "Ativar backups automáticos",
       "TITLE": "Backups automáticos"
+    },
+    "EVALUATION": {
+      "IS_HIDE_EVALUATION_SHEET": "Ocultar folha de avaliação no resumo diário",
+      "TITLE": "Avaliação e Métricas"
     },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "Aqui você pode configurar seu aplicativo para sincronizar automaticamente de/e para um único arquivo do Google Drive. Todos os dados serão salvos sem criptografia, portanto, não compartilhe acidentalmente este arquivo com alguém.",
@@ -770,6 +875,7 @@
       "TASK_ADD_SUB_TASK": "Adicionar subtarefa",
       "TASK_DELETE": "Excluir tarefa",
       "TASK_EDIT_TITLE": "Editar título",
+      "TASK_MOVE_TO_PROJECT": "Abrir tarefa de mover para o menu do projeto",
       "TASK_OPEN_ESTIMATION_DIALOG": "Editar estimativa / tempo gasto",
       "TASK_SCHEDULE": "Agendar tarefa",
       "TASK_SHORTCUTS": "Tarefas",
@@ -791,24 +897,28 @@
       "ES": "Spanish",
       "FA": "Persa",
       "FR": "French",
+      "IT": "italiano",
       "JA": "Japanese",
       "KO": "Korean",
       "LABEL": "Please select a language",
       "NL": "Holandês",
+      "PT": "português",
       "RU": "Russian",
       "TITLE": "Language",
       "TR": "Turkish",
       "ZH": "Chinese"
     },
     "MISC": {
+      "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",
       "HELP": "<p><strong>Não está vendo as notificações da área de trabalho?</strong> Para janelas, convém verificar Sistema> Notificações e ações, e verificar se as notificações necessárias foram ativadas.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Adicionar automaticamente a tag hoje às tarefas trabalhadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque a tarefa pai como concluída, quando todas as subtarefas estiverem concluídas",
+      "IS_AUTO_START_NEXT_TASK": "Comece a rastrear a próxima tarefa ao marcar atual como concluído",
       "IS_CONFIRM_BEFORE_EXIT": "Confirme antes de sair do aplicativo",
       "IS_DARK_MODE": "Modo escuro",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Desativar lembrete sobre o dia de término esquecido",
-      "IS_HIDE_EVALUATION_SHEET": "Ocultar folha de avaliação no resumo diário",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida",
+      "IS_TURN_OFF_MARKDOWN": "Desativar a análise de markdown para anotações",
       "TITLE": "Configurações diversas"
     },
     "POMODORO": {
@@ -838,25 +948,36 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiado para a área de transferência",
     "ERR_COMPRESSION": "Erro para interface de compactação",
-    "ERR_DB_CLEAR": "Erro ao limpar o banco de dados",
-    "ERR_DB_DELETE": "Erro ao excluir dados",
-    "ERR_DB_LOAD": "Erro ao carregar dados",
-    "ERR_DB_SAVE": "Erro ao salvar dados",
     "PERSISTENCE_DISALLOWED": "Os dados não serão mantidos permanentemente. Esteja ciente de que isso pode levar à perda de dados!",
     "RUNNING_X": "Rodando \"{{str}}\"."
+  },
+  "GPB": {
+    "ASSETS": "Carregando recursos...",
+    "DBX_DOWNLOAD": "Dropbox: Baixar arquivo ...",
+    "DBX_GEN_TOKEN": "Dropbox: gerar token ...",
+    "DBX_META": "Dropbox: Obter meta ...",
+    "DBX_UPLOAD": "Dropbox: Carregar arquivo ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: baixar arquivo ...",
+    "GDRIVE_UPLOAD": "Google Drive: Carregar arquivo ...",
+    "GITHUB_LOAD_ISSUE": "Github: Carregar dados do problema ...",
+    "JIRA_LOAD_ISSUE": "Jira: Carregar dados do problema ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Adicionar nova tarefa",
     "CREATE_PROJECT": "Criar Projeto",
+    "CREATE_TAG": "Criar tag",
+    "DELETE_TAG": "Excluir tag",
     "GO_TO_TASK_LIST": "Ir para a lista de tarefas",
     "MANAGE_PROJECTS": "Gerenciar projetos",
     "METRICS": "Métricas",
+    "NOTES": "notas",
     "PROCRASTINATE": "Procrastinar",
     "PROJECTS": "Projetos",
     "PROJECT_MENU": "Menu Projeto",
     "PROJECT_SETTINGS": "Configurações do projeto",
     "SCHEDULED": "Programado",
     "SETTINGS": "Configurações",
+    "TAGS": "Tag",
     "TASKS": "Tarefas",
     "TASK_LIST": "Lista de tarefas",
     "TOGGLE_SHOW_BOOKMARKS": "Mostrar/ocultar favoritos",
@@ -929,7 +1050,12 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Configurações globais",
+    "ISSUE_INTEGRATION": "Integração de problemas",
+    "PRIVATE_POLICY": "Política Privada",
+    "PRODUCTIVITY_HELPER": "Auxiliar de produtividade",
     "PROJECT_SETTINGS": "Configurações específicas do projeto",
+    "SYNC_EXPORT": "Sincronizar e exportar",
+    "TAG_SETTINGS": "Configurações específicas de tags",
     "TOGGLE_DARK_MODE": "Alternar modo escuro"
   },
   "S": {

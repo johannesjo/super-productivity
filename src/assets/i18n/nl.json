@@ -5,6 +5,7 @@
       "INSTALL": "Installeren",
       "MSG": "Wilt u Super Productivity als PWA installeren?"
     },
+    "B_OFFLINE": "Je hebt geen verbinding met internet. Het synchroniseren en opvragen van probleemprovidergegevens werkt niet.",
     "D_INITIAL": {
       "TITLE": "Welkom bij v {{nr}}"
     },
@@ -69,6 +70,36 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Bijgewerkte instellingen voor <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "laatste wijziging:",
+        "LAST_SYNC": "laatste synchronisatie:",
+        "LOCAL": "Lokaal",
+        "LOCAL_REMOTE": "lokaal -> op afstand",
+        "REMOTE": "afgelegen",
+        "TEXT": "<p>Update vanuit Dropbox. Zowel lokale als externe gegevens lijken te zijn gewijzigd.</p>",
+        "TITLE": "Dropbox: tegenstrijdige gegevens",
+        "USE_LOCAL": "Gebruik lokaal",
+        "USE_REMOTE": "Gebruik afstandsbediening"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Genereer token",
+        "FOLLOW_LINK": "Open de volgende link en kopieer de daar verstrekte auth-code naar het invoerveld.",
+        "L_ACCESS_TOKEN": "Toegangstoken (gegenereerd op basis van Auth Code)",
+        "L_AUTH_CODE": "Autorisatie code",
+        "L_ENABLE_SYNCING": "Schakel Dropbox-synchronisatie in",
+        "L_SYNC_INTERVAL": "Synchronisatie-interval",
+        "TITLE": "Synchroniseren via Dropbox (aanbevolen)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: kan geen toegangstoken genereren via verificatiecode",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: toegangstoken gegenereerd op basis van verificatiecode",
+        "AUTH_ERROR": "Dropbox: Ongeldig toegangstoken opgegeven",
+        "OFFLINE": "Dropbox: kan niet synchroniseren, omdat offline",
+        "SYNC_ERROR": "Dropbox: fout bij het synchroniseren",
+        "UNKNOWN_ERROR": "Dropbox: onbekende fout: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -323,8 +354,8 @@
         "ISSUE_UPDATE": "Jira: bijgewerkte gegevens voor \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: bijgewerkte gegevens voor \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Taken met ontbrekende probleemgegevens gevonden. Herladen.",
-        "NO_VALID_TRANSITION": "Jira: Geen geldige overgang geconfigureerd",
         "NO_AUTO_IMPORT_JQL": "Jira: Geen zoekopdracht gedefinieerd voor automatisch importeren",
+        "NO_VALID_TRANSITION": "Jira: Geen geldige overgang geconfigureerd",
         "POLLING": "Jira: Polling-wijzigingen voor problemen",
         "TIMED_OUT": "Jira: Time-out voor verzoek",
         "TRANSITION": "Jira: Stel probleem \"{{issueKey}}\" in op \"{{name}}\"",
@@ -684,14 +715,14 @@
       "F": {
         "DEFAULT_ESTIMATE": "Standaardschatting",
         "FRIDAY": "vrijdag",
+        "IS_ADD_TO_BOTTOM": "Verplaats taak naar de onderkant van de lijst",
         "MONDAY": "maandag",
         "SATURDAY": "zaterdag",
         "SUNDAY": "zondag",
         "THURSDAY": "donderdag",
         "TITLE": "Titel voor taak",
         "TUESDAY": "dinsdag",
-        "WEDNESDAY": "woensdag",
-        "IS_ADD_TO_BOTTOM": "Verplaats taak naar de onderkant van de lijst"
+        "WEDNESDAY": "woensdag"
       }
     },
     "TIME_TRACKING": {
@@ -920,6 +951,17 @@
     "PERSISTENCE_DISALLOWED": "Gegevens worden niet permanent bewaard. Houd er rekening mee dat dit kan leiden tot gegevensverlies !!",
     "RUNNING_X": "\"{{Str}}\" wordt uitgevoerd."
   },
+  "GPB": {
+    "ASSETS": "Activa laden ...",
+    "DBX_DOWNLOAD": "Dropbox: bestand downloaden ...",
+    "DBX_GEN_TOKEN": "Dropbox: Genereer token ...",
+    "DBX_META": "Dropbox: haal bestandsmeta op ...",
+    "DBX_UPLOAD": "Dropbox: Upload bestand ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: bestand downloaden ...",
+    "GDRIVE_UPLOAD": "Google Drive: bestand uploaden ...",
+    "GITHUB_LOAD_ISSUE": "Github: Probleemgegevens laden ...",
+    "JIRA_LOAD_ISSUE": "Jira: Probleemgegevens laden ..."
+  },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
     "CREATE_PROJECT": "Project maken",
@@ -1012,6 +1054,7 @@
     "PRIVATE_POLICY": "Privébeleid",
     "PRODUCTIVITY_HELPER": "Productiviteitshulp",
     "PROJECT_SETTINGS": "Projectspecifieke instellingen",
+    "SYNC_EXPORT": "Synchroniseren en exporteren",
     "TAG_SETTINGS": "Label specifieke instellingen",
     "TOGGLE_DARK_MODE": "Schakel de donkere modus in"
   },

@@ -5,6 +5,12 @@
       "INSTALL": "نصب",
       "MSG": "آیا میخواهید سوپر پروداکتیویتی به عنوان PWA نصب بشود؟"
     },
+    "B_OFFLINE": "شما از اینترنت جدا هستید. همگام سازی و درخواست داده های ارائه دهنده مشکل کار نمی کند.",
+    "D_INITIAL": {
+      "TITLE": ""
+    },
+    "UPDATE_MAIN_MODEL": "سوپر بهره وری به روزرسانی اساسی را بدست آورده است! برخی از مهاجرت ها برای داده های شما مورد نیاز است. لطفا توجه داشته باشید که این داده های شما را با نسخه های قدیمی تر برنامه ناسازگار می کند.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "هیچ به روزرسانی مدل انتخاب نشده است. لطفاً توجه داشته باشید که اگر نمی خواهید به روزرسانی مدل را انجام دهید ، به آخرین نسخه پایین بروید.",
     "UPDATE_WEB_APP": "نسخه جدید موجود است، نسخه جدید بارگیری شود?"
   },
   "BL": {
@@ -66,6 +72,36 @@
         "UPDATE_SECTION": "تنظیمات برای <strong>{{sectionKey}}</strong> بروز رسانی شد"
       }
     },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "آخرین تغییر:",
+        "LAST_SYNC": "آخرین همگام سازی:",
+        "LOCAL": "محلی",
+        "LOCAL_REMOTE": "محلی -> از راه دور",
+        "REMOTE": "از راه دور",
+        "TEXT": "<p>از Dropbox به روز کنید. به نظر می رسد که هر دو داده محلی و از راه دور اصلاح شده اند.</p>",
+        "TITLE": "Dropbox: داده های متضاد",
+        "USE_LOCAL": "از محلی استفاده کنید",
+        "USE_REMOTE": "از راه دور استفاده کنید"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "تولید توکن",
+        "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد Auth ارائه شده در قسمت ورودی را کپی کنید.",
+        "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)",
+        "L_AUTH_CODE": "کد تایید",
+        "L_ENABLE_SYNCING": "همگام سازی Dropbox را فعال کنید",
+        "L_SYNC_INTERVAL": "فاصله همگام سازی",
+        "TITLE": "همگام سازی از طریق Dropbox (توصیه می شود)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: تولید توکن دسترسی از Auth Code امکان پذیر نیست",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token تولید شده از Auth Code",
+        "AUTH_ERROR": "Dropbox: نشانه دسترسی نامعتبر ارائه شده است",
+        "OFFLINE": "Dropbox: همگام سازی امکان پذیر نیست ، زیرا آفلاین است",
+        "SYNC_ERROR": "Dropbox: خطا هنگام همگام سازی",
+        "UNKNOWN_ERROR": ""
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "راه اندازی گیت هاب برای پروژه"
@@ -75,7 +111,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "PROJECT": "\"username%2FProjectName\" for the git repository you want to track",
+        "REPO": "\"نام کاربری / مخزن نام\" برای مخزن git مورد نظر برای پیگیری",
         "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
@@ -95,10 +131,11 @@
       "S": {
         "ERR_NETWORK": "گیت هاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
         "ERR_NOT_CONFIGURED": "گیت هاب: به درستی پیکربندی نشده است",
-        "ERR_REQUEST": "Github: API returned {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Github: به روزرسانی لازم نیست",
         "ISSUE_UPDATE": "گیت هاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
@@ -116,7 +153,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track",
+        "PROJECT": "\"نام کاربری٪ 2FProjectName\" برای پروژه gitlab که می خواهید ردیابی کنید",
         "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
@@ -136,10 +173,11 @@
       "S": {
         "ERR_NETWORK": "گیت لاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
         "ERR_NOT_CONFIGURED": "گیت لاب: به درستی پیکربندی نشده است",
-        "ERR_REQUEST": "Gitlab: API returned {{statusCode}}. {{errorMsg}}",
+        "ERR_UNKNOWN": "",
         "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Gitlab: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: به روزرسانی لازم نیست",
         "ISSUE_UPDATE": "گیت لاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Gitlab: Tasks with missing issue data found. Reloading.",
@@ -267,6 +305,7 @@
         "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "اجازه گواهی خود امضا شده",
         "HOST": "آدرس جیرای شما (مثلا: http://my-jira.ir:1234)",
         "PASSWORD": "توکن / کلمه عبور",
         "USER_NAME": "ایمیل / نام کاربری"
@@ -315,6 +354,7 @@
         "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
+        "NO_AUTO_IMPORT_JQL": "جیرا: هیچگونه جستجوی جستجو برای واردات خودکار تعریف نشده است",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
@@ -459,12 +499,6 @@
       }
     },
     "PROJECT": {
-      "BANNER": {
-        "FINISH_DAY": {
-          "FINISH_DAY": "Finish Day",
-          "MSG": "You forgot to finish your day on {{dayStr}}"
-        }
-      },
       "D_CREATE": {
         "CREATE": "ایجاد پروژه",
         "EDIT": "ویرایش پروژه",
@@ -506,9 +540,58 @@
     "REMINDER": {
       "S_REMINDER_ERR": "خطا در رابط یادآوری"
     },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "با حذف یک پیشخوان ساده ، تمام داده های گذشته ردیابی شده بر روی آن نیز حذف می شود. آیا مطمئن هستید که می خواهید ادامه دهید؟",
+        "OK": "انجام دهید!"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "شمردن",
+        "TITLE": "شمارنده ساده را ویرایش کنید"
+      },
+      "FORM": {
+        "ADD_NEW": "پیشخوان ساده اضافه کنید",
+        "HELP": "در اینجا می توانید دکمه های ساده ای را تنظیم کنید که در بالا سمت راست ظاهر می شود. با کلیک بر روی آن ، آنها می توانند تایمر باشند یا فقط یک پیشخوان ساده ، که شمارش شده است.",
+        "L_AUTO_COUNT_UP": "ماشه خودکار حساب برای",
+        "L_AUTO_SWITCH_OFF": "ماشه خودکار را خاموش کنید",
+        "L_AUTO_SWITCH_ON": "روشن کردن ماشه خودکار برای",
+        "L_ICON": "آیکون",
+        "L_ICON_ON": "نماد هنگام ضامن",
+        "L_IS_ENABLED": "فعال شده است",
+        "L_TITLE": "عنوان",
+        "L_TYPE": "تایپ کنید",
+        "TITLE": "پیشخوان های ساده",
+        "TYPE_CLICK_COUNTER": "پیشخوان کلیک کنید",
+        "TYPE_STOPWATCH": "کرنومتر"
+      }
+    },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "ایجاد برچسب",
+        "EDIT": "برچسب را ویرایش کنید"
+      },
+      "D_DELETE": {
+        "CONFIRM_MSG": "آیا واقعاً می خواهید برچسب \"{{tagName}}\" را حذف کنید؟ از تمام کارها حذف می شود. این قابل بازگشت نیست."
+      },
+      "D_EDIT": {
+        "ADD": "افزودن برچسب ها برای \"{{title}}\"",
+        "EDIT": "ویرایش برچسب ها برای \"{{title}}\"",
+        "LABEL": "برچسب ها"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "رنگ (اگر از رنگ اصلی تعریف نشده تعریف شده استفاده می شود)",
+        "L_ICON": "آیکون",
+        "L_TITLE": "نام برچسب",
+        "TITLE": "تنظیمات پایه"
+      },
+      "S": {
+        "UPDATED": "تنظیمات برچسب به روز شد"
+      }
+    },
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "اضافه کردن پیوست",
+        "ADD_SUB_TASK": "اضافه کردن زیر کار",
         "ATTACHMENTS": "پیوست ها ({{nr}})",
         "FROM_PARENT": "(از کار اصلی)",
         "LOCAL_ATTACHMENTS": "پیوست های محلی",
@@ -517,6 +600,7 @@
         "REMINDER": "یادآور",
         "REPEAT": "تکرار",
         "SCHEDULE_TASK": "برنامه ریزی کار",
+        "SUB_TASKS": "وظایف فرعی ({{nr}})",
         "TIME": "زمان"
       },
       "ADD_TASK_BAR": {
@@ -530,11 +614,13 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "اضافه کردن کار فرعی",
-        "ADVANCED": "پیشرفته",
+        "ADD_TO_MY_DAY": "به روز من اضافه کن",
+        "ADD_TO_PROJECT": "اضافه کردن به یک پروژه",
         "CONVERT_TO_PARENT_TASK": "تبدیل به کار اصلی",
         "DELETE": "Delete Task",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
         "EDIT_REMINDER": "ویرایش یادآوری",
+        "EDIT_TAGS": "برچسب ها را ویرایش کنید",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
@@ -542,10 +628,9 @@
         "MOVE_TO_TODAY": "Move to today's list",
         "OPEN_ATTACH": "Attach file or link",
         "OPEN_ISSUE": "Open in browser",
-        "OPEN_TASK_MENU": "Open task menu",
         "OPEN_TIME": "Time Tracking",
+        "REMOVE_FROM_MY_DAY": "حذف از روز من",
         "REPEAT_EDIT": "Edit repeat task config",
-        "REPEAT_TASK": "Repeat task",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
         "TOGGLE_ADDITIONAL": "Show/Hide additional info",
@@ -565,15 +650,15 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "به امروز اضافه کنید",
         "DISMISS": "Dismiss Reminder",
-        "ERR_LOST": "There was a reminder scheduled for the task {{title}}, but it seems to be lost.",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project",
+        "FROM_TAG": "از برچسب: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "START": "Start Task",
-        "SWITCH_PROJECT_START": "Switch Project & Start Task",
-        "TITLE": "Scheduled Task"
+        "SWITCH_CONTEXT_START": "تغییر متن و شروع"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Add time spent for other day",
@@ -597,7 +682,9 @@
       "S": {
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
+        "FOUND_MOVE_FROM_OTHER_LIST": "",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
+        "LAST_TAG_DELETION_WARNING": "شما در حال تلاش برای حذف آخرین برچسب یک کار غیر پروژه هستید. این مجاز نیست!",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -622,11 +709,13 @@
         "EDIT": "Edit Repeat Task Config",
         "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
         "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
-        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
+        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task.",
+        "TAG_LABEL": "برچسب ها برای اضافه کردن"
       },
       "F": {
         "DEFAULT_ESTIMATE": "تخمین پیش فرض",
         "FRIDAY": "جمعه",
+        "IS_ADD_TO_BOTTOM": "کار را به پایین لیست منتقل کنید",
         "MONDAY": "دوشنبه",
         "SATURDAY": "شنبه",
         "SUNDAY": "یک شنبه",
@@ -659,7 +748,6 @@
         "RESTORE_TASK_FROM_ARCHIVE": "بازیابی کار از بایگانی",
         "TASKS": "کارها",
         "TOTAL_TIME": "زمان صرف شده در کل:",
-        "TOTAL_TIME_PROJECT": "کل زمان صرف شده در پروژه",
         "WEEK_NR": "هفته {{nr}}",
         "WORKED": "کار کرد"
       },
@@ -724,9 +812,12 @@
     "LOGOUT": "خارج شدن",
     "MINUTES": "{{m}} دقیقه",
     "NEXT": "بعدی",
+    "NONE": "هیچ یک",
+    "NO_CON": "شما در حال حاضر آفلاین هستید. لطفا دوباره به اینترنت وصل شوید.",
     "OK": "اوکی",
     "PREVIOUS": "قبلی",
     "REMOVE": "حذف",
+    "RESET": "تنظیم مجدد",
     "SAVE": "ذخیره",
     "TITLE": "عنوان",
     "UNDO": "Undo",
@@ -740,7 +831,6 @@
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
-      "IS_HIDE_METRIC_FROM_MENU": "معیارها را از فهرست مخفی کن",
       "TITLE": "ارزیابی ها و معیارها"
     },
     "GOOGLE_DRIVE_SYNC": {
@@ -785,6 +875,7 @@
       "TASK_ADD_SUB_TASK": "اضافه کردن کار فرعی",
       "TASK_DELETE": "حذف کار",
       "TASK_EDIT_TITLE": "ویرایش عنوان",
+      "TASK_MOVE_TO_PROJECT": "وظیفه حرکت را به منوی پروژه باز کنید",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
       "TASK_SCHEDULE": "کار برنامه ریزی شده",
       "TASK_SHORTCUTS": "کارها",
@@ -818,11 +909,13 @@
       "ZH": "چینی"
     },
     "MISC": {
+      "DEFAULT_PROJECT": "پروژه پیش فرض برای استفاده در کارها در صورت مشخص نبودن هیچ کدام",
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "برچسب امروز به صورت خودکار به کار بر روی وظایف اضافه کنید",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
+      "IS_AUTO_START_NEXT_TASK": "هنگام علامت گذاری جریان ، به عنوان انجام کار ، ردیابی کار بعدی را شروع کنید",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
@@ -855,16 +948,25 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "در کلیپ برد کپی شد",
     "ERR_COMPRESSION": "خطایی برای رابط فشرده سازی",
-    "ERR_DB_CLEAR": "خطایی هنگام پاک کردن دیتابیس رخ داد",
-    "ERR_DB_DELETE": "هنگام حذف اطلاعات خطایی رخ داد",
-    "ERR_DB_LOAD": "هنگام بارگیری اطلاعات خطایی رخ داد",
-    "ERR_DB_SAVE": "هنگام ذخیره اطلاعات خطایی رخ داد",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "RUNNING_X": "Running \"{{str}}\"."
+  },
+  "GPB": {
+    "ASSETS": "در حال بارگیری دارایی ...",
+    "DBX_DOWNLOAD": "Dropbox: بارگیری پرونده ...",
+    "DBX_GEN_TOKEN": "Dropbox: ایجاد نشانه ...",
+    "DBX_META": "Dropbox: دریافت متا پرونده ...",
+    "DBX_UPLOAD": "Dropbox: بارگذاری پرونده ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: بارگیری فایل ...",
+    "GDRIVE_UPLOAD": "Google Drive: بارگذاری پرونده ...",
+    "GITHUB_LOAD_ISSUE": "Github: بارگیری داده های شماره ...",
+    "JIRA_LOAD_ISSUE": "جیرا: بارگیری داده های شماره ..."
   },
   "MH": {
     "ADD_NEW_TASK": "اضافه کردن کار جدید",
     "CREATE_PROJECT": "ایجاد پروژه",
+    "CREATE_TAG": "ایجاد برچسب",
+    "DELETE_TAG": "برچسب را حذف کنید",
     "GO_TO_TASK_LIST": "به لیست کارها برو",
     "MANAGE_PROJECTS": "مدیریت پروژه ها",
     "METRICS": "معیارها",
@@ -875,6 +977,7 @@
     "PROJECT_SETTINGS": "تنظیمات پروژه",
     "SCHEDULED": "برنامه ریزی شده",
     "SETTINGS": "تنظیمات",
+    "TAGS": "برچسب ها",
     "TASKS": "کارها",
     "TASK_LIST": "لیست کار",
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
@@ -947,9 +1050,12 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
+    "ISSUE_INTEGRATION": "ادغام شماره",
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Productivity Helper",
     "PROJECT_SETTINGS": "Project Specific Settings",
+    "SYNC_EXPORT": "همگام سازی و صادرات",
+    "TAG_SETTINGS": "تنظیمات خاص را برچسب گذاری کنید",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },
   "S": {

@@ -5,6 +5,10 @@
       "INSTALL": "Installa",
       "MSG": "Vuoi installare Super Productivity come PWA?"
     },
+    "B_OFFLINE": "Sei disconnesso da Internet. La sincronizzazione e la richiesta dei dati del provider di problemi non funzioneranno.",
+    "D_INITIAL": {
+      "TITLE": "Benvenuto in v{{nr}}"
+    },
     "UPDATE_MAIN_MODEL": "Super Productivity ha ricevuto un importante aggiornamento! Sarà necessario migrare i tuoi dati. Nota che questo renderà i tuoi dati incompatibili con versioni precedenti dell'app.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Hai scelto di non aggiornare i dati. Nota che dovrai usare una versione precedente dell'app, se davvero non vuoi aggiornare.",
     "UPDATE_WEB_APP": "Una nuova versione è disponibile. Vuoi caricare la nuova versione?"
@@ -68,6 +72,36 @@
         "UPDATE_SECTION": "Aggiornate impostazioni per <strong>{{sectionKey}}</strong>"
       }
     },
+    "DROPBOX": {
+      "D_CONFLICT": {
+        "LAST_CHANGE": "Ultima modifica:",
+        "LAST_SYNC": "ultima sincronizzazione:",
+        "LOCAL": "Locale",
+        "LOCAL_REMOTE": "local -> remote",
+        "REMOTE": "a distanza",
+        "TEXT": "<p>Aggiornamento da Dropbox. I dati sia locali che remoti sembrano essere modificati.</p>",
+        "TITLE": "Dropbox: dati in conflitto",
+        "USE_LOCAL": "Usa locale",
+        "USE_REMOTE": "Usa il telecomando"
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "Genera token",
+        "FOLLOW_LINK": "Si prega di aprire il seguente link e copiare il codice di autenticazione fornito nel campo di input.",
+        "L_ACCESS_TOKEN": "Token di accesso (generato dal codice di autenticazione)",
+        "L_AUTH_CODE": "Codice di Autenticazione",
+        "L_ENABLE_SYNCING": "Abilita sincronizzazione Dropbox",
+        "L_SYNC_INTERVAL": "Intervallo di sincronizzazione",
+        "TITLE": "Sincronizzazione tramite Dropbox (consigliato)"
+      },
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox: impossibile generare il token di accesso dal codice di autenticazione",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: token di accesso generato dal codice di autenticazione",
+        "AUTH_ERROR": "Dropbox: token di accesso non valido fornito",
+        "OFFLINE": "Dropbox: impossibile sincronizzare, perché offline",
+        "SYNC_ERROR": "Dropbox: errore durante la sincronizzazione",
+        "UNKNOWN_ERROR": "Dropbox: errore sconosciuto: {{errorStr}}"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Configura Github per il progetto"
@@ -120,7 +154,6 @@
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "PROJECT": "\"username%2FProjectName\" per il progetto su Gitlab che vuoi tracciare",
-        "REPO": "",
         "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
@@ -272,6 +305,7 @@
         "SEARCH_JQL_QUERY": "JQL Query per limitare i task della ricerca"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Consenti certificato autofirmato",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
         "USER_NAME": "Email / Username"
@@ -320,6 +354,7 @@
         "ISSUE_UPDATE": "Jira: Aggiornati dati per \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Aggiornati dati per \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Trovati task con dati mancanti. Ricaricando.",
+        "NO_AUTO_IMPORT_JQL": "Jira: nessuna query di ricerca definita per l'importazione automatica",
         "NO_VALID_TRANSITION": "Jira: Non è stata configurata una transizione valida",
         "POLLING": "Jira: Eseguendo il polling per i cambiamenti sugli issue",
         "TIMED_OUT": "Jira: La richiesta è andata in timeout",
@@ -505,6 +540,31 @@
     "REMINDER": {
       "S_REMINDER_ERR": "Errore per interfaccia promemoria"
     },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "L'eliminazione di un semplice contatore eliminerà anche tutti i dati passati rilevati su di esso. Sei sicuro di voler procedere?",
+        "OK": "Fallo!"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "Contare",
+        "TITLE": "Modifica contatore semplice"
+      },
+      "FORM": {
+        "ADD_NEW": "Aggiungi un semplice contatore",
+        "HELP": "Qui puoi configurare semplici pulsanti che appariranno in alto a destra. Possono essere timer o solo un semplice contatore, che viene contato, facendo clic su di esso.",
+        "L_AUTO_COUNT_UP": "Conto alla rovescia del trigger automatico per",
+        "L_AUTO_SWITCH_OFF": "Spegnimento automatico disattivato per",
+        "L_AUTO_SWITCH_ON": "Accensione automatica attivata per",
+        "L_ICON": "Icona",
+        "L_ICON_ON": "Icona quando attivato",
+        "L_IS_ENABLED": "Abilitato",
+        "L_TITLE": "Titolo",
+        "L_TYPE": "genere",
+        "TITLE": "Contatori semplici",
+        "TYPE_CLICK_COUNTER": "Fai clic su Contatore",
+        "TYPE_STOPWATCH": "Cronometro"
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "Crea etichetta",
@@ -531,6 +591,7 @@
     "TASK": {
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Aggiungi allegato",
+        "ADD_SUB_TASK": "Aggiungi attività secondaria",
         "ATTACHMENTS": "Allegati ({{nr}})",
         "FROM_PARENT": "(da genitore)",
         "LOCAL_ATTACHMENTS": "Allegato locale",
@@ -539,6 +600,7 @@
         "REMINDER": "Promemoria",
         "REPEAT": "Ripeti",
         "SCHEDULE_TASK": "Pianifica Task",
+        "SUB_TASKS": "Attività secondarie ({{nr}})",
         "TIME": "Tempo"
       },
       "ADD_TASK_BAR": {
@@ -554,7 +616,6 @@
         "ADD_SUB_TASK": "Aggiungi sotto-task",
         "ADD_TO_MY_DAY": "Aggiungi a La mia giornata",
         "ADD_TO_PROJECT": "Aggiungi ad un progetto",
-        "ADVANCED": "Avanzate",
         "CONVERT_TO_PARENT_TASK": "Converti a task padre",
         "DELETE": "Cancella task",
         "DROP_ATTACHMENT": "Trascina qui per allegare a \"{{title}}\"",
@@ -570,7 +631,6 @@
         "OPEN_TIME": "Stima il tempo/Aggiungi il tempo impiegato",
         "REMOVE_FROM_MY_DAY": "Rimuovi da La mia giornata",
         "REPEAT_EDIT": "Modifica ripetizione configurazione task",
-        "REPEAT_TASK": "Ripeti task",
         "SCHEDULE": "Pianifica task",
         "SHOW_UPDATES": "Mostra aggiornamenti",
         "TOGGLE_ADDITIONAL": "Mostra/nascondi informazioni aggiuntive",
@@ -590,6 +650,7 @@
         "UNSCHEDULE": "Rimuovi pianificazione"
       },
       "D_REMINDER_VIEW": {
+        "ADD_TO_TODAY": "Aggiungi a oggi",
         "DISMISS": "Rimuovi promemoria",
         "FOR_CURRENT": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
         "FOR_OTHER": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
@@ -623,6 +684,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "Spostato task <strong>{{title}}</strong> dal backlog alla lista dei task di oggi",
         "FOUND_MOVE_FROM_OTHER_LIST": "Aggiunto task <strong>{{title}}</strong> da <strong>{{contextTitle}}</strong> alla lista attuale",
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinato task <strong>{{title}}</strong> relativo ad issue dall'archivio",
+        "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultimo tag di un'attività non di progetto. Questo non è permesso!",
         "REMINDER_ADDED": "Pianificato task \"{{title}}\"",
         "REMINDER_DELETED": "Cancellato promemoria per task",
         "REMINDER_UPDATED": "Aggiornato promemoria per task \"{{title}}\"",
@@ -653,6 +715,7 @@
       "F": {
         "DEFAULT_ESTIMATE": "Stima di default",
         "FRIDAY": "Venerdì",
+        "IS_ADD_TO_BOTTOM": "Sposta l'attività in fondo all'elenco",
         "MONDAY": "Lunedì",
         "SATURDAY": "Sabato",
         "SUNDAY": "Domenica",
@@ -749,10 +812,12 @@
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minuti",
     "NEXT": "Prossimo",
-    "OK": "Ok",
+    "NONE": "Nessuna",
     "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
+    "OK": "Ok",
     "PREVIOUS": "Precedente",
     "REMOVE": "Rimuovi",
+    "RESET": "Reset",
     "SAVE": "Salva",
     "TITLE": "Titolo",
     "UNDO": "Annulla",
@@ -810,6 +875,7 @@
       "TASK_ADD_SUB_TASK": "Aggiungi sotto-task",
       "TASK_DELETE": "Cancella task",
       "TASK_EDIT_TITLE": "Modifica titolo",
+      "TASK_MOVE_TO_PROJECT": "Apri sposta attività nel menu progetto",
       "TASK_OPEN_ESTIMATION_DIALOG": "Modifica stima / tempo impiegato",
       "TASK_SCHEDULE": "Pianifica task",
       "TASK_SHORTCUTS": "Task",
@@ -843,12 +909,13 @@
       "ZH": "Cinese"
     },
     "MISC": {
+      "DEFAULT_PROJECT": "Progetto predefinito da utilizzare per le attività se non ne viene specificato nessuno",
       "HELP": "<p><strong>Non vedi le notifiche desktop?</strong>Per Windows controlla Sistema > Notifiche & azioni e controlla se le notifiche richieste sono abilitate.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Aggiungi automaticamente il tag oggi alle attività lavorate",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Segna il task padre come completato, quando tutti i sotto-task sono completati",
+      "IS_AUTO_START_NEXT_TASK": "Inizia a tracciare l'attività successiva quando si contrassegna corrente come fatto",
       "IS_CONFIRM_BEFORE_EXIT": "Conferma prima di uscire dall'applicazione",
       "IS_DARK_MODE": "Tema scuro",
-      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disabilita promemoria per giorno non terminato",
-      "IS_HIDE_EVALUATION_SHEET": "Nascondi il foglio di valutazione sul riepilogo giornagliero",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
@@ -881,12 +948,19 @@
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiato negli appunti",
     "ERR_COMPRESSION": "Errore per l'interfaccia di compressione",
-    "ERR_DB_CLEAR": "Errore durante la pulizia del database",
-    "ERR_DB_DELETE": "Errore durante la cancellazione dei dati",
-    "ERR_DB_LOAD": "Errore durante il caricamento dei dati",
-    "ERR_DB_SAVE": "Errore durante il salvataggio dei dati",
     "PERSISTENCE_DISALLOWED": "I dati non saranno salvati permanentemente. Fai attenzione che questo può portare a perdita dei dati!!",
     "RUNNING_X": "Eseguendo \"{{str}}\"."
+  },
+  "GPB": {
+    "ASSETS": "Caricamento risorse in corso ...",
+    "DBX_DOWNLOAD": "Dropbox: scarica il file ...",
+    "DBX_GEN_TOKEN": "Dropbox: genera token ...",
+    "DBX_META": "Dropbox: ottieni meta file ...",
+    "DBX_UPLOAD": "Dropbox: carica file ...",
+    "GDRIVE_DOWNLOAD": "Google Drive: scarica il file ...",
+    "GDRIVE_UPLOAD": "Google Drive: carica il file ...",
+    "GITHUB_LOAD_ISSUE": "Github: caricamento dati problema ...",
+    "JIRA_LOAD_ISSUE": "Jira: caricamento dati problema ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuovo task",
@@ -980,6 +1054,7 @@
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Aiuto produttività",
     "PROJECT_SETTINGS": "Impostazioni specifiche del progetto",
+    "SYNC_EXPORT": "Sincronizza ed esporta",
     "TAG_SETTINGS": "Impostazioni specifiche dell'etichetta",
     "TOGGLE_DARK_MODE": "Abilita/disabilita tema scuro"
   },
