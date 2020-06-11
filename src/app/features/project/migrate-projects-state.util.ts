@@ -111,11 +111,20 @@ const _updateThemeModel = (project: Project): Project => {
 const _fixIds = (projectState: ProjectState): ProjectState => {
   const currentIds = projectState.ids as string[];
   const allIds = Object.keys(projectState.entities);
-  let newIds;
+
+  if (!currentIds) {
+    console.error('Project Ids not defined');
+    console.log('Attempting to fix...');
+    return {
+      ...projectState,
+      ids: allIds,
+    };
+  }
+
 
   if (allIds.length !== currentIds.length) {
+    let newIds;
     const allP = allIds.map(id => projectState.entities[id]);
-    console.log(allP);
 
     const archivedIds = allP.filter(p => p.isArchived).map(p => p.id);
     const unarchivedIds = allP.filter(p => !p.isArchived).map(p => p.id);
@@ -133,7 +142,7 @@ const _fixIds = (projectState: ProjectState): ProjectState => {
 
     return {
       ...projectState,
-      ids: newIds,
+      ids: newIds || allIds,
     };
   }
 
