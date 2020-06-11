@@ -488,7 +488,7 @@ export function projectReducer(
     case ProjectActionTypes.UpdateProjectOrder: {
       const {ids} = action.payload;
       const currentIds = state.ids as string[];
-      let newIds: string[];
+      let newIds: string[] = ids;
       if (ids.length !== currentIds.length) {
         const allP = currentIds.map(id => state.entities[id]);
         const archivedIds = allP.filter(p => p.isArchived).map(p => p.id);
@@ -501,6 +501,11 @@ export function projectReducer(
           throw new Error('Invalid param given to UpdateProjectOrder');
         }
       }
+
+      if (!newIds) {
+        throw new Error('Project ids are undefined');
+      }
+
       return {...state, ids: newIds};
     }
 
