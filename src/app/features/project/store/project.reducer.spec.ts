@@ -17,5 +17,29 @@ describe('projectReducer', () => {
       const r = projectReducer(s as any, new UpdateProjectOrder({ids}));
       expect(r.ids).toEqual(['B', 'A', 'C']);
     });
+
+    it('Should throw an error for inconsistent data', () => {
+      const s = fakeEntityStateFromArray([
+        {id: 'A', isArchived: false},
+        {id: 'B', isArchived: false},
+        {id: 'C', isArchived: false},
+      ] as Partial<Project>[]);
+      const ids = ['B', 'A'];
+      expect(() => {
+        const r = projectReducer(s as any, new UpdateProjectOrder({ids}));
+      }).toThrowError('Invalid param given to UpdateProjectOrder');
+    });
+
+    it('Should work with all unarchived projects', () => {
+      const s = fakeEntityStateFromArray([
+        {id: 'A', isArchived: false},
+        {id: 'B', isArchived: false},
+        {id: 'C', isArchived: false},
+      ] as Partial<Project>[]);
+
+      const ids = ['B', 'A', 'C'];
+      const r = projectReducer(s as any, new UpdateProjectOrder({ids}));
+      expect(r.ids).toEqual(['B', 'A', 'C']);
+    });
   });
 });
