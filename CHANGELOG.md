@@ -1,3 +1,23 @@
+## [5.3.5](https://github.com/johannesjo/super-productivity/compare/v5.3.4...v5.3.5) (2020-06-11)
+
+
+### Bug Fixes
+
+* avoid edge case error [#391](https://github.com/johannesjo/super-productivity/issues/391) ([29891d7](https://github.com/johannesjo/super-productivity/commit/29891d74560a0c26c0fd27ccddd12dcbbf786c1d))
+* broken data after falling victim to [#391](https://github.com/johannesjo/super-productivity/issues/391) ([4105925](https://github.com/johannesjo/super-productivity/commit/4105925a830e0fd4fd6e56909bb33f04b224dcaf))
+* font size for textarea on mac ([2327da8](https://github.com/johannesjo/super-productivity/commit/2327da83d0d2de86ae09493aaf4db44db87b5132))
+* project sort leading to deleting project ids [#391](https://github.com/johannesjo/super-productivity/issues/391) ([fc00553](https://github.com/johannesjo/super-productivity/commit/fc005531c40c1573f0e48ee216308c3eb336ffa1))
+
+
+### Features
+
+* **i18n:** add missing translations ([f97a208](https://github.com/johannesjo/super-productivity/commit/f97a208b31a8893fba115586a5b0cf0cdd7db493))
+* don't cache news.json and show to new users on second load ([af8267c](https://github.com/johannesjo/super-productivity/commit/af8267c0fb845603417222d149ba387097492656))
+* improve error handling for persistence [#391](https://github.com/johannesjo/super-productivity/issues/391) ([b2a8875](https://github.com/johannesjo/super-productivity/commit/b2a8875376d9cc3ccf40fc0a231c9a28e3d2f3a4))
+* improve github error reporting ([2468a0b](https://github.com/johannesjo/super-productivity/commit/2468a0b8d95ad98da53e03de932ef5f91e9e5e7f))
+
+
+
 ## [5.3.4](https://github.com/johannesjo/super-productivity/compare/v5.3.3...v5.3.4) (2020-06-10)
 
 
