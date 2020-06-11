@@ -30,6 +30,17 @@ describe('projectReducer', () => {
       }).toThrowError('Invalid param given to UpdateProjectOrder');
     });
 
+    it('Should work with correct params', () => {
+      const s = fakeEntityStateFromArray([
+        {id: 'A', isArchived: false},
+        {id: 'B', isArchived: false},
+        {id: 'C', isArchived: true},
+      ] as Partial<Project>[]);
+      const ids = ['B', 'A', 'C'];
+      const r = projectReducer(s as any, new UpdateProjectOrder({ids}));
+      expect(r.ids).toEqual(['B', 'A', 'C']);
+    });
+
     it('Should work with all unarchived projects', () => {
       const s = fakeEntityStateFromArray([
         {id: 'A', isArchived: false},
@@ -40,6 +51,19 @@ describe('projectReducer', () => {
       const ids = ['B', 'A', 'C'];
       const r = projectReducer(s as any, new UpdateProjectOrder({ids}));
       expect(r.ids).toEqual(['B', 'A', 'C']);
+    });
+
+    it('Should allow sorting of archived ids as well', () => {
+      const s = fakeEntityStateFromArray([
+        {id: 'A', isArchived: false},
+        {id: 'B', isArchived: false},
+        {id: 'C', isArchived: true},
+        {id: 'D', isArchived: true},
+      ] as Partial<Project>[]);
+
+      const ids = ['D', 'C'];
+      const r = projectReducer(s as any, new UpdateProjectOrder({ids}));
+      expect(r.ids).toEqual(['A', 'B', 'D', 'C']);
     });
   });
 });

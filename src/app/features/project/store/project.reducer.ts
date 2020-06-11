@@ -493,10 +493,10 @@ export function projectReducer(
         const allP = currentIds.map(id => state.entities[id]);
         const archivedIds = allP.filter(p => p.isArchived).map(p => p.id);
         const unarchivedIds = allP.filter(p => !p.isArchived).map(p => p.id);
-        if (ids.length === unarchivedIds.length) {
+        if (ids.length === unarchivedIds.length && ids.length > 0 && unarchivedIds.includes(ids[0])) {
           newIds = [...ids, ...archivedIds];
-        } else if (ids.length === unarchivedIds.length) {
-          newIds = [...ids, ...unarchivedIds];
+        } else if (ids.length === archivedIds.length && ids.length > 0 && archivedIds.includes(ids[0])) {
+          newIds = [...unarchivedIds, ...ids];
         } else {
           throw new Error('Invalid param given to UpdateProjectOrder');
         }
