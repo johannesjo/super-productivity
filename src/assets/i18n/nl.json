@@ -72,34 +72,34 @@
         "UPDATE_SECTION": "Bijgewerkte instellingen voor <strong>{{sectionKey}}</strong>"
       }
     },
-    "DROPBOX": {
+     "DROPBOX": {
       "D_CONFLICT": {
         "LAST_CHANGE": "laatste wijziging:",
-        "LAST_SYNC": "laatste synchronisatie:",
-        "LOCAL": "Lokaal",
-        "LOCAL_REMOTE": "lokaal -> op afstand",
-        "REMOTE": "afgelegen",
-        "TEXT": "<p>Update vanuit Dropbox. Zowel lokale als externe gegevens lijken te zijn gewijzigd.</p>",
-        "TITLE": "Dropbox: tegenstrijdige gegevens",
+        "LAST_SYNC": "laatste gesynchroniseerd:",
+        "LOCAL": "lokaal",
+        "LOCAL_REMOTE": "lokaal -> extern",
+        "REMOTE": "extern",
+        "TEXT": "<p>Bijwerken van Dropbox. Zowel de lokala als externe gegevens lijken te zijn gewijzigd.</p>",
+        "TITLE": "Dropbox: Conflicterende gegevens",
         "USE_LOCAL": "Gebruik lokaal",
-        "USE_REMOTE": "Gebruik afstandsbediening"
+        "USE_REMOTE": "Gebruik extern"
       },
       "FORM": {
-        "B_GENERATE_TOKEN": "Genereer token",
-        "FOLLOW_LINK": "Open de volgende link en kopieer de daar verstrekte auth-code naar het invoerveld.",
-        "L_ACCESS_TOKEN": "Toegangstoken (gegenereerd op basis van Auth Code)",
-        "L_AUTH_CODE": "Autorisatie code",
-        "L_ENABLE_SYNCING": "Schakel Dropbox-synchronisatie in",
-        "L_SYNC_INTERVAL": "Synchronisatie-interval",
-        "TITLE": "Synchroniseren via Dropbox (aanbevolen)"
+        "B_GENERATE_TOKEN": "Genereer Token",
+        "FOLLOW_LINK": "Open de volgende link en kopieer de daar aanwezige auth code in het invoerveld.",
+        "L_ACCESS_TOKEN": "Access Token (gegenereerd van Auth Code)",
+        "L_AUTH_CODE": "Auth Code",
+        "L_ENABLE_SYNCING": "Activeer Dropbox Synchroniseren",
+        "L_SYNC_INTERVAL": "Synchronisatie tussenpoze",
+        "TITLE": "Synchronisatie via Dropbox (aanbevolen)"
       },
       "S": {
-        "ACCESS_TOKEN_ERROR": "Dropbox: kan geen toegangstoken genereren via verificatiecode",
-        "ACCESS_TOKEN_GENERATED": "Dropbox: toegangstoken gegenereerd op basis van verificatiecode",
-        "AUTH_ERROR": "Dropbox: Ongeldig toegangstoken opgegeven",
-        "OFFLINE": "Dropbox: kan niet synchroniseren, omdat offline",
-        "SYNC_ERROR": "Dropbox: fout bij het synchroniseren",
-        "UNKNOWN_ERROR": "Dropbox: onbekende fout: {{errorStr}}"
+        "ACCESS_TOKEN_ERROR": "Dropbox: Onmogelijk om een Access Token van Auth Code te genereren",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
+        "AUTH_ERROR": "Dropbox: Ongeldige access token opgegeven",
+        "OFFLINE": "Dropbox: Kan niet worden gesynchroniseerd, vanwege offline",
+        "SYNC_ERROR": "Dropbox: Fout tijdens her synchroniseren",
+        "UNKNOWN_ERROR": "Dropbox: Onbekende fout: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -614,7 +614,7 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Subtaak toevoegen",
-        "ADD_TO_MY_DAY": "Voeg toe aan My Day",
+        "ADD_TO_MY_DAY": "Voeg toe aan Mijn Day",
         "ADD_TO_PROJECT": "Voeg toe aan een project",
         "CONVERT_TO_PARENT_TASK": "Converteren naar bovenliggende taak",
         "DELETE": "Taak verwijderen",
