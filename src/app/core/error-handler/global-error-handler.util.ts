@@ -133,36 +133,36 @@ const getGithubUrl = (errEscaped: string, stackTrace: string): string => {
 
 const getGithubIssueErrorMarkdown = (stacktrace: string): string => {
   const code = '```';
-  return `
-${getSimpleMeta()}
-
-### Steps to Reproduce
-<!--- Provide a link to a live example or an unambiguous set of steps to -->
-<!--- reproduce this bug. Include code to reproduce, if relevant -->
+  return `### Steps to Reproduce
+<!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
+<!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
 1.
 2.
 3.
 4.
 
-### Console Output
-<!--- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
+
 
 ### Error Log (Desktop only)
-<!--- For the desktop versions, there is also an error log file in case there is no console output.
+<!-- For the desktop versions, there is also an error log file in case there is no console output.
 Usually, you can find it here:
 on Linux:
 ~/.config/superProductivity/log.log
 --or--
 ~/snap/superproductivity/current/.config/superProductivity/log.log
-
 on macOS: ~/Library/Logs/superProductivity/log.log
-
 on Windows: %USERPROFILE%\\AppData\\Roaming\\superProductivity\\log.log
 . -->
+
+### Console Output
+<!-- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
 
 ### Stacktrace
 ${code}
 ${stacktrace}
 ${code}
+
+### Meta Info
+${getSimpleMeta()}
 `;
 };
