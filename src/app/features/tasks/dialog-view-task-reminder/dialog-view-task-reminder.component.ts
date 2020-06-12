@@ -71,6 +71,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   }
 
   addToToday() {
+    // TODO we need to account for the parent task as well
     this._taskService.updateTags(this.task, [TODAY_TAG.id, ...this.task.tagIds], this.task.tagIds);
     this.dismiss();
   }

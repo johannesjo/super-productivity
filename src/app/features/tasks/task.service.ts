@@ -258,6 +258,10 @@ export class TaskService {
   }
 
   updateTags(task: Task, newTagIds: string[], oldTagIds: string[]) {
+    if (task.parentId) {
+      throw new Error('Editing sub task tags should not be possible.');
+    }
+
     if (!task.projectId && newTagIds.length === 0) {
       this._snackService.open({type: 'ERROR', msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING});
     } else {
