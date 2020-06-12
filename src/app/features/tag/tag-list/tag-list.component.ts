@@ -21,6 +21,8 @@ import {expandFadeAnimation} from '../../../ui/animations/expand.ani';
   animations: [standardListAnimation, expandFadeAnimation]
 })
 export class TagListComponent implements OnDestroy {
+  @Input() isDisableEdit = false;
+
   @Input() set task(task: Task) {
     this._task = task;
     this._tagIds$.next(task.tagIds);

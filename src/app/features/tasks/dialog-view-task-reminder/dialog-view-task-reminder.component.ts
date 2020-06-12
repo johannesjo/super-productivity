@@ -110,12 +110,6 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     this._close();
   }
 
-  dismissReminderOnly() {
-    this.isDisableControls = true;
-    this._reminderService.removeReminder(this.reminder.id);
-    this._close();
-  }
-
   snooze(snoozeInMinutes) {
     this.isDisableControls = true;
     this._reminderService.updateReminder(this.reminder.id, {

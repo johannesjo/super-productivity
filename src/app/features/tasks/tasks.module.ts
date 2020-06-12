@@ -32,6 +32,7 @@ import {TaskAdditionalInfoWrapperComponent} from './task-additional-info/task-ad
 import {BetterDrawerModule} from '../../ui/better-drawer/better-drawer.module';
 import {TagModule} from '../tag/tag.module';
 import {TagService} from '../tag/tag.service';
+import {DialogViewTaskRemindersComponent} from './dialog-view-task-reminders/dialog-view-task-reminders.component';
 
 @NgModule({
   imports: [
@@ -60,6 +61,7 @@ import {TagService} from '../tag/tag.service';
     AddTaskBarComponent,
     DialogTimeEstimateComponent,
     DialogViewTaskReminderComponent,
+    DialogViewTaskRemindersComponent,
     DialogAddTaskReminderComponent,
     DialogAddTimeEstimateForOtherDayComponent,
     TaskAdditionalInfoComponent,
@@ -83,6 +85,7 @@ import {TagService} from '../tag/tag.service';
   entryComponents: [
     DialogTimeEstimateComponent,
     DialogViewTaskReminderComponent,
+    DialogViewTaskRemindersComponent,
     DialogAddTaskReminderComponent,
     DialogAddTimeEstimateForOtherDayComponent,
   ],

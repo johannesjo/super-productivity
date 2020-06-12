@@ -13,6 +13,8 @@ import {NotifyService} from '../../core/notify/notify.service';
 import {throttle} from 'throttle-debounce';
 import {DialogViewNoteReminderComponent} from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
 import {DialogViewTaskReminderComponent} from '../tasks/dialog-view-task-reminder/dialog-view-task-reminder.component';
+import {DialogViewTaskRemindersComponent} from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
+import {DataInitService} from '../../core/data-init/data-init.service';
 
 @NgModule({
   declarations: [],
@@ -31,8 +33,11 @@ export class ReminderModule {
     private readonly _electronService: ElectronService,
     private readonly _uiHelperService: UiHelperService,
     private readonly _notifyService: NotifyService,
+    private readonly _dataInitService: DataInitService,
   ) {
-    _reminderService.init();
+    this._dataInitService.isAllDataLoadedInitially$.subscribe(() => {
+      _reminderService.init();
+    });
     this._reminderService.onRemindersActive$.pipe(
       // NOTE: we simply filter for open dialogs, as reminders are re-queried quite often
       filter((reminder) => this._matDialog.openDialogs.length === 0 && !!reminder && reminder.length > 0),
@@ -54,14 +59,23 @@ export class ReminderModule {
           }
         });
       } else if (oldest.type === 'TASK') {
-
-        this._matDialog.open(DialogViewTaskReminderComponent, {
-          autoFocus: false,
-          restoreFocus: true,
-          data: {
-            reminder: oldest,
-          }
-        }).afterClosed();
+        if (reminders.length === 1) {
+          this._matDialog.open(DialogViewTaskReminderComponent, {
+            autoFocus: false,
+            restoreFocus: true,
+            data: {
+              reminder: oldest,
+            }
+          }).afterClosed();
+        } else {
+          this._matDialog.open(DialogViewTaskRemindersComponent, {
+            autoFocus: false,
+            restoreFocus: true,
+            data: {
+              reminders,
+            }
+          }).afterClosed();
+        }
       }
     });
   }

@@ -1,0 +1,46 @@
+@import 'src/variables';
+
+:host {
+  //text-align: center;
+}
+
+.tasks {
+  margin-bottom: $s*2;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid $dark-theme-extra-border-color;
+  padding: $s;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  .title-wrapper {
+    flex: 1;
+    margin-right: $s;
+  }
+
+  .title {
+    margin-left: $s;
+  }
+
+  .tags {
+    margin-top: $s*.5;
+  }
+
+  .actions {
+    @include mq(sm) {
+      margin: $s;
+    }
+
+    button {
+      &:last-of-type {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
