@@ -9,6 +9,7 @@ import {DialogInitialComponent} from './dialog-initial/dialog-initial.component'
 import {DataInitService} from '../../core/data-init/data-init.service';
 import {version} from '../../../../package.json';
 import {lt} from 'semver';
+import {environment} from '../../../environments/environment';
 
 const URL = 'https://app.super-productivity.com/news.json?ngsw-bypass=true&no-cache=' + Date.now();
 
@@ -25,6 +26,10 @@ export class InitialDialogService {
   }
 
   showDialogIfNecessary$(): Observable<any> {
+    if (!environment.production) {
+      return of(null);
+    }
+
     return this._dataInitService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._http.get(URL)),
       timeout(3000),
