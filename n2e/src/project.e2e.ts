@@ -1,4 +1,3 @@
-import {NightwatchBrowser} from 'nightwatch';
 import {BASE} from '../e2e.const';
 import {NBrowser} from '../n-browser-interface';
 

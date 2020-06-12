@@ -1,6 +1,5 @@
 import {BASE} from '../e2e.const';
 import {NBrowser} from '../n-browser-interface';
-import {NightwatchBrowser} from 'nightwatch';
 
 const WORK_VIEW_URL = `${BASE}/`;
 

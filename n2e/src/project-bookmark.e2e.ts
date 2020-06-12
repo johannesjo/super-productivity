@@ -1,4 +1,3 @@
-import {BASE} from '../e2e.const';
 import {NBrowser} from '../n-browser-interface';
 
 const TOGGLE_BOOKMARK_BAR_BTN = '.action-nav button:nth-child(2)';
