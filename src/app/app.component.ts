@@ -29,6 +29,7 @@ import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
 import {isOnline, isOnline$} from './util/is-online';
 import {InitialDialogService} from './features/initial-dialog/initial-dialog.service';
 import {SyncService} from './imex/sync/sync.service';
+import {environment} from '../environments/environment';
 
 const w = window as any;
 const productivityTip = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -102,6 +103,8 @@ export class AppComponent implements OnDestroy {
 
     // init offline banner in lack of a better place for it
     this._initOfflineBanner();
+
+    this._checkAvailableStorage();
 
     if (IS_ANDROID_WEB_VIEW) {
       this._androidService.init();
@@ -229,5 +232,22 @@ export class AppComponent implements OnDestroy {
         this._bannerService.dismiss(BannerId.Offline);
       }
     });
+  }
+
+  private _checkAvailableStorage() {
+    if (environment.production) {
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        navigator.storage.estimate().then(({usage, quota}) => {
+          const percentUsed = Math.round(usage / quota * 100);
+          const usageInMib = Math.round(usage / (1024 * 1024));
+          const quotaInMib = Math.round(quota / (1024 * 1024));
+          const details = `${usageInMib} out of ${quotaInMib} MiB used (${percentUsed}%)`;
+          console.log(details);
+          if ((quotaInMib - usageInMib) <= 333) {
+            alert(`There is only very little disk space available (${quotaInMib - usageInMib}mb). This might affect how the app is running.`);
+          }
+        });
+      }
+    }
   }
 }
