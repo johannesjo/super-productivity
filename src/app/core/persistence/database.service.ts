@@ -27,6 +27,8 @@ export class DatabaseService {
     shareReplay(1),
   );
 
+  private _lastParams: any;
+
   constructor(
     private _snackService: SnackService,
   ) {
@@ -34,21 +36,25 @@ export class DatabaseService {
   }
 
   async load(key: string): Promise<any> {
+    this._lastParams = {a: 'load', key};
     await this._afterReady();
     return await this.db.get(DB_MAIN_NAME, key);
   }
 
   async save(key: string, data: any): Promise<any> {
+    this._lastParams = {a: 'save', key, data};
     await this._afterReady();
     return await this.db.put(DB_MAIN_NAME, data, key);
   }
 
   async remove(key: string): Promise<any> {
+    this._lastParams = {a: 'remove', key};
     await this._afterReady();
     return await this.db.delete(DB_MAIN_NAME, key);
   }
 
   async clearDatabase(): Promise<any> {
+    this._lastParams = {a: 'clearDatabase'};
     await this._afterReady();
     return await this.db.clear(DB_MAIN_NAME);
   }
@@ -73,6 +79,7 @@ export class DatabaseService {
       });
     } catch (e) {
       console.error('Database initialization failed');
+      console.error('_lastParams', this._lastParams);
       throw new Error(e);
     }
 
