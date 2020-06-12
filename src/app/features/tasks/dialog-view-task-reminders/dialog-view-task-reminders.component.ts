@@ -127,6 +127,19 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._close();
   }
 
+  snoozeAllUntilTomorrow() {
+    this.isDisableControls = true;
+    const date = new Date();
+    date.setHours(9, 0, 0, 0);
+    date.setDate(date.getDate() + 1);
+    this.reminders$.getValue().forEach((reminder) => {
+      this._reminderService.updateReminder(reminder.id, {
+        remindAt: date.getTime()
+      });
+    });
+    this._close();
+  }
+
   async addAllToToday() {
     this.isDisableControls = true;
     const tasksToDismiss = await this.tasks$.pipe(first()).toPromise();

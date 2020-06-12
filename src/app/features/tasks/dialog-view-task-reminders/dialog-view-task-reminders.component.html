@@ -118,6 +118,12 @@
     <mat-icon>snooze</mat-icon>
     {{T.G.MINUTES|translate:{m: 60} }}
   </button>
+  <button (click)="snoozeAllUntilTomorrow()"
+          [disabled]="isDisableControls"
+          mat-menu-item>
+    <mat-icon>snooze</mat-icon>
+    {{T.F.TASK.D_REMINDER_VIEW.SNOOZE_UNTIL_TOMORROW|translate}}
+  </button>
   <button (click)="dismissAll()"
           [disabled]="isDisableControls"
           mat-menu-item>
