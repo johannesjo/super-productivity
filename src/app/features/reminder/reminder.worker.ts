@@ -10,7 +10,7 @@ addEventListener('message', ({data}) => {
 });
 
 
-const reInitCheckInterval = (reminders) => {
+const reInitCheckInterval = (reminders: any[]) => {
   if (checkInterval) {
     clearInterval(checkInterval);
   }
@@ -19,22 +19,22 @@ const reInitCheckInterval = (reminders) => {
   }
 
   checkInterval = setInterval(() => {
-    const oldestDueReminder = reminders.reduce(
-      (minReminder, reminder) => (reminder.remindAt < minReminder.remindAt)
-        ? reminder
-        : minReminder, reminders[0]
-    );
-
-    // console.log('oldestDueReminder in:', (oldestDueReminder.remindAt - Date.now()) / 1000, oldestDueReminder);
-
-    if (oldestDueReminder && oldestDueReminder.remindAt < Date.now()) {
+    const dueReminders = getDueReminders(reminders);
+    if (dueReminders.length) {
       if (currentMessageTimerVal <= 0) {
-        postMessage(oldestDueReminder);
-        console.log('Worker postMessage', oldestDueReminder);
+        postMessage(dueReminders);
+        console.log('Worker postMessage', dueReminders);
         currentMessageTimerVal = MESSAGE_INTERVAL_DURATION;
       } else {
         currentMessageTimerVal -= CHECK_INTERVAL_DURATION;
       }
     }
   }, CHECK_INTERVAL_DURATION);
+};
+
+const getDueReminders = (reminders: any[]): any[] => {
+  const now = Date.now();
+  return reminders
+    .filter(reminder => (reminder.remindAt < now))
+    .sort((a, b) => a.remindAt - b.remindAt);
 };

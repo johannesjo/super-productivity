@@ -5,6 +5,7 @@ export type RecurringConfig = Readonly<{}>;
 
 export type ReminderType = 'NOTE' | 'TASK';
 
+// make sure to keep in sync with with model used in reminder.worker.ts
 export interface ReminderCopy {
   id: string;
   // projectId: string;

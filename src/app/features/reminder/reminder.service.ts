@@ -4,9 +4,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {RecurringConfig, Reminder, ReminderCopy, ReminderType} from './reminder.model';
 import {SnackService} from '../../core/snack/snack.service';
 import shortid from 'shortid';
-import {NotifyService} from '../../core/notify/notify.service';
 import {BehaviorSubject, merge, Observable, ReplaySubject, Subject, timer} from 'rxjs';
-import {throttle} from 'throttle-debounce';
 import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
 import {ImexMetaService} from '../../imex/imex-meta/imex-meta.service';
 import {TaskService} from '../tasks/task.service';
@@ -19,6 +17,7 @@ import {first, map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
 import {environment} from '../../../environments/environment';
+import {devError} from '../../util/dev-error';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 20000;
 
@@ -26,7 +25,7 @@ const MAX_WAIT_FOR_INITIAL_SYNC = 20000;
   providedIn: 'root',
 })
 export class ReminderService {
-  onReminderActive$ = new Subject<Reminder>();
+  onRemindersActive$ = new Subject<Reminder[]>();
 
   private _reminders$ = new ReplaySubject<Reminder[]>(1);
   reminders$ = this._reminders$.asObservable();
@@ -39,14 +38,12 @@ export class ReminderService {
 
   private _w: Worker;
   private _reminders: Reminder[];
-  private _throttledShowNotification = throttle(60000, this._showNotification.bind(this));
 
   constructor(
     private readonly _projectService: ProjectService,
     private readonly _workContextService: WorkContextService,
     private readonly _syncService: SyncService,
     private readonly _persistenceService: PersistenceService,
-    private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
     private readonly _noteService: NoteService,
@@ -170,31 +167,29 @@ export class ReminderService {
   }
 
   private async _onReminderActivated(msg: MessageEvent) {
-    const reminder = msg.data as Reminder;
+    const reminders = msg.data as Reminder[];
+    const remindersWithData: Reminder[] = await Promise.all(reminders.map(async (reminder) => {
+      const relatedModel = await this._getRelatedDataForReminder(reminder.relatedId, reminder.workContextId, reminder.type);
+      // console.log('RelatedModel for Reminder', relatedModel);
+      // only show when not currently syncing and related model still exists
+      if (!relatedModel) {
+        devError('No Reminder Related Data found, removing reminder...');
+        this.removeReminder(reminder.id);
+        return null;
+      } else {
+        return reminder;
+      }
+    }));
+    const finalReminders = remindersWithData.filter(reminder => !!reminder);
 
-    const relatedModel = await this._getRelatedDataForReminder(reminder.relatedId, reminder.workContextId, reminder.type);
-    console.log('RelatedModel for Reminder', relatedModel);
-
-    // only show when not currently syncing and related model still exists
-    if (!relatedModel) {
-      console.warn('No Reminder Related Data found, removing reminder...');
-      this.removeReminder(reminder.id);
-    } else if (this._imexMetaService.isDataImportInProgress) {
+    if (this._imexMetaService.isDataImportInProgress) {
       console.log('Reminder blocked because sync is in progress');
-    } else {
-      this.onReminderActive$.next(reminder);
-      this._throttledShowNotification(reminder);
+    } else if (finalReminders.length > 0) {
+      this.onRemindersActive$.next(finalReminders);
     }
   }
 
-  private _showNotification(reminder: Reminder) {
-    this._notifyService.notify({
-      title: reminder.title,
-      // prevents multiple notifications on mobile
-      tag: reminder.id,
-      requireInteraction: true,
-    }).then();
-  }
+
 
   private async _loadFromDatabase(): Promise<Reminder[]> {
     return migrateReminders(
