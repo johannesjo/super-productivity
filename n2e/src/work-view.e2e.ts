@@ -69,4 +69,16 @@ module.exports = {
     .assert.containsText(TASK + ':nth-child(2)', '4 test task hohoho')
     .end(),
 
+
+  'should still show created task after reload': (browser: NBrowser) => browser
+    .url(WORK_VIEW_URL)
+    .waitForElementVisible(READY_TO_WORK_BTN)
+    .addTask('0 test task lolo')
+    .waitForElementVisible(TASK)
+    .execute('window.location.reload()')
+
+    .waitForElementVisible(TASK)
+    .assert.visible(TASK)
+    .assert.containsText(TASK, '0 test task lolo')
+    .end(),
 };
