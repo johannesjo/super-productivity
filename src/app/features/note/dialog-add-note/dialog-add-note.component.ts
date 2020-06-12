@@ -4,6 +4,10 @@ import {NoteService} from '../note.service';
 import {Reminder} from '../../reminder/reminder.model';
 import {SS_NOTE_TMP} from '../../../core/persistence/ls-keys.const';
 import {T} from '../../../t.const';
+import {WorkContextService} from '../../work-context/work-context.service';
+import {Observable, Subscription} from 'rxjs';
+import {WorkContextType} from '../../work-context/work-context.model';
+import {map} from 'rxjs/operators';
 
 
 @Component({
@@ -17,11 +21,16 @@ export class DialogAddNoteComponent {
   noteContent: string;
   reminderDate: number;
   isSubmitted = false;
+  isInProjectContext$: Observable<boolean> = this._workContextService.activeWorkContextTypeAndId$.pipe(
+    map(({activeType}) => activeType === WorkContextType.PROJECT)
+  );
 
+  private _subs = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
     private _noteService: NoteService,
+    private _workContextService: WorkContextService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this.noteContent = sessionStorage.getItem(SS_NOTE_TMP) || '';
