@@ -11,6 +11,8 @@ import {ElectronService} from '../../core/electron/electron.service';
 import {UiHelperService} from '../ui-helper/ui-helper.service';
 import {NotifyService} from '../../core/notify/notify.service';
 import {throttle} from 'throttle-debounce';
+import {DialogViewNoteReminderComponent} from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
+import {DialogViewTaskReminderComponent} from '../tasks/dialog-view-task-reminder/dialog-view-task-reminder.component';
 
 @NgModule({
   declarations: [],
@@ -40,28 +42,27 @@ export class ReminderModule {
         this._uiHelperService.focusApp();
       }
 
-      console.log(reminders);
-      console.log('Open reminders ' + reminders.length);
       this._throttledShowNotification(reminders);
 
-      //
-      // if (reminder.type === 'NOTE') {
-      //   this._matDialog.open(DialogViewNoteReminderComponent, {
-      //     autoFocus: false,
-      //     restoreFocus: true,
-      //     data: {
-      //       reminder,
-      //     }
-      //   });
-      // } else if (reminder.type === 'TASK') {
-      //   this._matDialog.open(DialogViewTaskReminderComponent, {
-      //     autoFocus: false,
-      //     restoreFocus: true,
-      //     data: {
-      //       reminder,
-      //     }
-      //   }).afterClosed();
-      // }
+      const oldest = reminders[0];
+      if (oldest.type === 'NOTE') {
+        this._matDialog.open(DialogViewNoteReminderComponent, {
+          autoFocus: false,
+          restoreFocus: true,
+          data: {
+            reminder: oldest,
+          }
+        });
+      } else if (oldest.type === 'TASK') {
+
+        this._matDialog.open(DialogViewTaskReminderComponent, {
+          autoFocus: false,
+          restoreFocus: true,
+          data: {
+            reminder: oldest,
+          }
+        }).afterClosed();
+      }
     });
   }
 
