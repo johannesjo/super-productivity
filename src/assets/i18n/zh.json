@@ -650,13 +650,16 @@
         "UNSCHEDULE": "取消调度"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "全部添加到今天",
         "ADD_TO_TODAY": "今天添加",
         "DISMISS": "解雇提醒",
+        "DUE_TASKS": "到期任务",
         "FOR_CURRENT": "任务到期了。你想开始工作吗？",
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
         "FROM_PROJECT": "来自项目",
         "FROM_TAG": "来自标签：“{{title}}”",
         "SNOOZE": "暂停",
+        "SNOOZE_ALL": "全部暂停",
         "START": "开始任务",
         "SWITCH_CONTEXT_START": "切换上下文并开始"
       },

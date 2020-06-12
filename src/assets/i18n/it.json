@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Rimuovi pianificazione"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "Aggiungi tutto a oggi",
         "ADD_TO_TODAY": "Aggiungi a oggi",
         "DISMISS": "Rimuovi promemoria",
+        "DUE_TASKS": "Compiti dovuti",
         "FOR_CURRENT": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
         "FOR_OTHER": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
         "FROM_PROJECT": "Da progetto: \"{{title}}\"",
         "FROM_TAG": "Da etichetta: \"{{title}}\"",
         "SNOOZE": "Silenzia",
+        "SNOOZE_ALL": "Posticipa tutto",
         "START": "Inizia task",
         "SWITCH_CONTEXT_START": "Cambia progetto & inizia task"
       },

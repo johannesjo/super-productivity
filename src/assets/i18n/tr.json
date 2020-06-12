@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "Tümünü bugüne ekle",
         "ADD_TO_TODAY": "Bugüne ekle",
         "DISMISS": "Hatırlatmayı Sil",
+        "DUE_TASKS": "Teslim edilecek görevler",
         "FOR_CURRENT": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FROM_PROJECT": "Projeden",
         "FROM_TAG": "Etiketten: \"{{title}}\"",
         "SNOOZE": "Erteleme",
+        "SNOOZE_ALL": "Tümünü ertele",
         "START": "Görevi Başlat",
         "SWITCH_CONTEXT_START": "Bağlam Değiştir ve Başlat"
       },

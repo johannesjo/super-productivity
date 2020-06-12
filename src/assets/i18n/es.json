@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Desprogramar"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "Agrega todo a hoy",
         "ADD_TO_TODAY": "Añadir a hoy",
         "DISMISS": "Descartar recordatorio",
+        "DUE_TASKS": "Tareas debidas",
         "FOR_CURRENT": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FROM_PROJECT": "Del proyecto",
         "FROM_TAG": "De la etiqueta: \"{{title}}\"",
         "SNOOZE": "Posponer",
+        "SNOOZE_ALL": "Posponer todo",
         "START": "Iniciar tarea",
         "SWITCH_CONTEXT_START": "Cambiar contexto e inicio"
       },

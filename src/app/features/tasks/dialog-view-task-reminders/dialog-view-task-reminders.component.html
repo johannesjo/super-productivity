@@ -1,7 +1,6 @@
-<h1 mat-dialog-title
-    tabindex="1">
+<h1 mat-dialog-title>
   <mat-icon class="dialog-header-icon">alarm</mat-icon>
-  <span>{{T.F.TASK.D_REMINDER_VIEW.DUE_TASKS}}</span>
+  <span>{{T.F.TASK.D_REMINDER_VIEW.DUE_TASKS|translate}}</span>
 </h1>
 
 <mat-dialog-content *ngIf="(tasks$|async) as tasks">

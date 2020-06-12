@@ -72,7 +72,7 @@
         "UPDATE_SECTION": "Bijgewerkte instellingen voor <strong>{{sectionKey}}</strong>"
       }
     },
-     "DROPBOX": {
+    "DROPBOX": {
       "D_CONFLICT": {
         "LAST_CHANGE": "laatste wijziging:",
         "LAST_SYNC": "laatste gesynchroniseerd:",
@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Ongepland"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
         "DISMISS": "Herinnering afwijzen",
+        "DUE_TASKS": "Geplande taken",
         "FOR_CURRENT": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
         "FOR_OTHER": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
         "FROM_PROJECT": "Van project: \"{{title}}\"",
         "FROM_TAG": "Van tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
+        "SNOOZE_ALL": "Snooze All",
         "START": "Begin",
         "SWITCH_CONTEXT_START": "Wissel van context en start"
       },

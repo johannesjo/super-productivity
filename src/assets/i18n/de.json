@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Erinnerung entfernen"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
         "ADD_TO_TODAY": "Heute hinzufügen",
         "DISMISS": "Erinnerung verwerfen",
+        "DUE_TASKS": "Fällige Aufgaben",
         "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FROM_PROJECT": "Aus dem Projekt",
         "FROM_TAG": "Vom Tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
+        "SNOOZE_ALL": "Schlummer alle",
         "START": "Task starten",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
       },

@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "همه را به امروز اضافه کنید",
         "ADD_TO_TODAY": "به امروز اضافه کنید",
         "DISMISS": "Dismiss Reminder",
+        "DUE_TASKS": "وظایف مقرر",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project",
         "FROM_TAG": "از برچسب: \"{{title}}\"",
         "SNOOZE": "Snooze",
+        "SNOOZE_ALL": "تعویق همه",
         "START": "Start Task",
         "SWITCH_CONTEXT_START": "تغییر متن و شروع"
       },

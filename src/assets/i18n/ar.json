@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "أضف الكل إلى اليوم",
         "ADD_TO_TODAY": "أضف إلى اليوم",
         "DISMISS": "تجاهل تذكير",
+        "DUE_TASKS": "المهام المستحقة",
         "FOR_CURRENT": "المهمة مستحقة. هل تريد أن تبدأ العمل على ذلك؟",
         "FOR_OTHER": "المهمة مستحقة. هل تريد أن تبدأ العمل على ذلك؟",
         "FROM_PROJECT": "من المشروع",
         "FROM_TAG": "من العلامة: \"{{title}}\"",
         "SNOOZE": "قيلولة بعد الظهر",
+        "SNOOZE_ALL": "تأجيل الكل",
         "START": "بدء المهمة",
         "SWITCH_CONTEXT_START": "تبديل السياق والبدء"
       },

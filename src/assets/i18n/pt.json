@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Cancelar agendamento"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "Adicionar tudo hoje",
         "ADD_TO_TODAY": "Adicione hoje",
         "DISMISS": "Dispensar lembrete",
+        "DUE_TASKS": "Tarefas devidas",
         "FOR_CURRENT": "A tarefa está vencida. Deseja começar a trabalhar nela?",
         "FOR_OTHER": "A tarefa está vencida. Deseja começar a trabalhar nela?",
         "FROM_PROJECT": "Do projeto",
         "FROM_TAG": "Da tag: \"{{title}}\"",
         "SNOOZE": "Soneca",
+        "SNOOZE_ALL": "Suspender tudo",
         "START": "Iniciar tarefa",
         "SWITCH_CONTEXT_START": "Alternar contexto e iniciar"
       },

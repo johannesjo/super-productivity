@@ -650,13 +650,16 @@
         "UNSCHEDULE": "Dé-planifier"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "Ajouter tout à aujourd'hui",
         "ADD_TO_TODAY": "Ajouter à aujourd'hui",
         "DISMISS": "Fermer le rappel",
+        "DUE_TASKS": "Tâches dues",
         "FOR_CURRENT": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FROM_PROJECT": "Depuis le projet",
         "FROM_TAG": "De la balise: \"{{title}}\"",
         "SNOOZE": "Snooze",
+        "SNOOZE_ALL": "Répéter tout",
         "START": "Démarrer la tâche",
         "SWITCH_CONTEXT_START": "Changer de contexte et démarrer"
       },

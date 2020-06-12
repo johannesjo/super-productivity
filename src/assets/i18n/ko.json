@@ -650,13 +650,16 @@
         "UNSCHEDULE": "일정 잡기"
       },
       "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "오늘 모두 추가",
         "ADD_TO_TODAY": "오늘 추가",
         "DISMISS": "알림 일시 중지",
+        "DUE_TASKS": "마감일",
         "FOR_CURRENT": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FOR_OTHER": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FROM_PROJECT": "프로젝트에서",
         "FROM_TAG": "태그에서 : \"{{title}}\"",
         "SNOOZE": "다시 알림",
+        "SNOOZE_ALL": "모두 다시 알림",
         "START": "작업 시작",
         "SWITCH_CONTEXT_START": "상황 전환 및 시작"
       },
