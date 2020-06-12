@@ -4,7 +4,8 @@
 </h1>
 
 <mat-dialog-content *ngIf="(tasks$|async) as tasks">
-  <div class="tasks">
+  <div class="tasks"
+       [@standardList]="tasks.length">
     <div class="task"
          *ngFor="let task of tasks; trackBy:trackById ">
       <div class="title-wrapper">
@@ -100,23 +101,27 @@
 
 <mat-menu #snoozeAllMenu="matMenu">
   <button (click)="snoozeAll(10)"
+          [disabled]="isDisableControls"
           mat-menu-item>
     <mat-icon>snooze</mat-icon>
     {{T.G.MINUTES|translate:{m: 10} }}
   </button>
   <button (click)="snoozeAll(30)"
+          [disabled]="isDisableControls"
           mat-menu-item>
     <mat-icon>snooze</mat-icon>
     {{T.G.MINUTES|translate:{m: 30} }}
   </button>
   <button (click)="snoozeAll(60)"
+          [disabled]="isDisableControls"
           mat-menu-item>
     <mat-icon>snooze</mat-icon>
     {{T.G.MINUTES|translate:{m: 60} }}
   </button>
   <button (click)="dismissAll()"
+          [disabled]="isDisableControls"
           mat-menu-item>
     <mat-icon>alarm_off</mat-icon>
-    {{T.G.DISMISS|translate}}
+    {{T.F.TASK.D_REMINDER_VIEW.DISMISS_ALL|translate}}
   </button>
 </mat-menu>

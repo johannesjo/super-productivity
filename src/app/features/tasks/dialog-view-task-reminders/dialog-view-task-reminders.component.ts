@@ -3,9 +3,9 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {Reminder} from '../../reminder/reminder.model';
 import {Task, TaskWithReminderData} from '../task.model';
 import {TaskService} from '../task.service';
-import {Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {ReminderService} from '../../reminder/reminder.service';
-import {first, map, take, tap} from 'rxjs/operators';
+import {first, map, switchMap} from 'rxjs/operators';
 import {ProjectService} from '../../project/project.service';
 import {Router} from '@angular/router';
 import {T} from '../../../t.const';
@@ -18,6 +18,8 @@ import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {DataInitService} from '../../../core/data-init/data-init.service';
 import {unique} from '../../../util/unique';
 
+const M = 100 * 60;
+
 @Component({
   selector: 'dialog-view-task-reminder',
   templateUrl: './dialog-view-task-reminders.component.html',
@@ -27,18 +29,19 @@ import {unique} from '../../../util/unique';
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
   T = T;
-  reminders: Reminder[] = this.data.reminders;
-  taskIds: string[] = this.reminders.map(r => r.relatedId);
-
   isDisableControls = false;
-  tasks$: Observable<TaskWithReminderData[]> = this._taskService.getByIdsLive$(this.taskIds).pipe(
-    take(2),
-    map((tasks: Task[]) => tasks
-      .filter(task => !!task)
-      .map((task) => ({
-        ...task,
-        reminderData: this.reminders.find(r => r.relatedId === task.id)
-      })))
+  reminders$ = new BehaviorSubject<Reminder[]>(this.data.reminders);
+  tasks$: Observable<TaskWithReminderData[]> = this.reminders$.pipe(
+    switchMap((reminders) => this._taskService.getByIdsLive$(reminders.map(r => r.relatedId)).pipe(
+      first(),
+      map((tasks: Task[]) => tasks
+        .filter(task => !!task)
+        .map((task) => ({
+          ...task,
+          reminderData: reminders.find(r => r.relatedId === task.id)
+        }))
+      )
+    )),
   );
   private _subs = new Subscription();
 
@@ -81,16 +84,18 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       reminderId: null,
     });
     this._reminderService.removeReminder(task.reminderData.id);
+    this._removeFromList(task.reminderId);
   }
 
   snooze(task: TaskWithReminderData, snoozeInMinutes: number) {
     this._reminderService.updateReminder(task.reminderData.id, {
-      remindAt: Date.now() + (snoozeInMinutes * 60 * 1000)
+      remindAt: Date.now() + (snoozeInMinutes * M)
     });
+    this._removeFromList(task.reminderId);
   }
 
   editReminder(task: TaskWithReminderData) {
-    this._matDialog.open(DialogAddTaskReminderComponent, {
+    this._subs.add(this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {
         title: task.title,
@@ -98,7 +103,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         reminderId: task.reminderData.id,
         isMoveToBacklogPossible: false,
       } as AddTaskReminderInterface
-    });
+    }).afterClosed().subscribe(() => {
+      this._removeFromList(task.reminderId);
+    }));
   }
 
   trackById(i: number, task: Task) {
@@ -108,15 +115,17 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   // ALL ACTIONS
   // ------------
   snoozeAll(snoozeInMinutes: number) {
-    this.reminders.forEach((reminder) => {
+    this.isDisableControls = true;
+    this.reminders$.getValue().forEach((reminder) => {
       this._reminderService.updateReminder(reminder.id, {
-        remindAt: Date.now() + (snoozeInMinutes * 60 * 100)
+        remindAt: Date.now() + (snoozeInMinutes * M)
       });
     });
     this._close();
   }
 
   async addAllToToday() {
+    this.isDisableControls = true;
     const tasksToDismiss = await this.tasks$.pipe(first()).toPromise();
     const mainTasks = tasksToDismiss.filter(t => !t.parentId);
     const parentIds: string[] = unique(tasksToDismiss.map(t => t.parentId).filter(pid => pid));
@@ -134,6 +143,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   async dismissAll() {
+    this.isDisableControls = true;
     const tasks = await this.tasks$.pipe(first()).toPromise();
     tasks.forEach((task) => {
       this.dismiss(task);
@@ -145,4 +155,12 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._matDialogRef.close();
   }
 
+  private _removeFromList(reminderId: string) {
+    const newReminders = this.reminders$.getValue().filter(reminder => reminder.id !== reminderId);
+    if (newReminders.length <= 0) {
+      this._close();
+    } else {
+      this.reminders$.next(newReminders);
+    }
+  }
 }
