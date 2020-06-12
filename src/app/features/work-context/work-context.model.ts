@@ -1,5 +1,22 @@
 import {WorklogExportSettings} from '../worklog/worklog.model';
-import {HueValue} from 'angular-material-css-vars';
+
+// normally imported from here, but this includes non type files as well..
+// import {HueValue} from 'angular-material-css-vars';
+type HueValue =
+  '50'
+  | '100'
+  | '200'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900'
+  | 'A100'
+  | 'A200'
+  | 'A400'
+  | 'A700';
 
 export interface BreakTimeCopy {
   [key: string]: number;
