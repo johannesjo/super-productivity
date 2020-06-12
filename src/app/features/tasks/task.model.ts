@@ -129,3 +129,7 @@ export interface TaskState extends EntityState<Task> {
 
   [MODEL_VERSION_KEY]?: number;
 }
+
+export interface WorklogTask  extends Task{
+  dateStr?: string;
+}

@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Worklog, WorklogDay, WorklogTask, WorklogWeek} from './worklog.model';
+import {Worklog, WorklogDay, WorklogWeek} from './worklog.model';
 import {dedupeByKey} from '../../util/de-dupe-by-key';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
@@ -14,6 +14,7 @@ import {createEmptyEntity} from '../../util/create-empty-entity';
 import {getCompleteStateForWorkContext} from './util/get-complete-state-for-work-context.util';
 import {NavigationEnd, Router} from '@angular/router';
 import {DataInitService} from '../../core/data-init/data-init.service';
+import {WorklogTask} from '../tasks/task.model';
 
 @Injectable({
   providedIn: 'root'

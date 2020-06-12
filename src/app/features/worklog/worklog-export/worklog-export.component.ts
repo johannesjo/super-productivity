@@ -8,7 +8,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {TaskCopy} from '../../tasks/task.model';
+import {TaskCopy, WorklogTask} from '../../tasks/task.model';
 import {combineLatest, Subscription} from 'rxjs';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment';
@@ -21,7 +21,7 @@ import {roundDuration} from '../../../util/round-duration';
 import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
-import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
+import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping} from '../worklog.model';
 import {T} from '../../../t.const';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';

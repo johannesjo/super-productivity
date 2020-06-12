@@ -1,10 +1,6 @@
-import {Task} from '../tasks/task.model';
+import {WorklogTask} from '../tasks/task.model';
 import {RoundTimeOption} from '../project/project.model';
 import {WeeksInMonth} from '../../util/get-week-in-month-model';
-
-export interface WorklogTask extends Task {
-  dateStr?: string;
-}
 
 export interface WorklogDataForDay {
   timeSpent: number;
