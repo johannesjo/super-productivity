@@ -7,7 +7,7 @@ import {
   JiraOriginalComment
 } from '../jira-api-responses';
 import {JiraCfg} from '../jira.model';
-import {DropPasteIcons, DropPasteInputType} from '../../../../../core/drop-paste-input/drop-paste-input';
+import {DropPasteIcons, DropPasteInputType} from '../../../../../core/drop-paste-input/drop-paste.model';
 import {IssueProviderKey, SearchResultItem} from '../../../issue.model';
 import {TaskAttachment} from '../../../../tasks/task-attachment/task-attachment.model';
 import {dedupeByKey} from '../../../../../util/de-dupe-by-key';

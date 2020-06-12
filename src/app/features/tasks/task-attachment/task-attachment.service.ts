@@ -4,10 +4,11 @@ import {TaskAttachment} from './task-attachment.model';
 import shortid from 'shortid';
 import {DialogEditTaskAttachmentComponent} from './dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {MatDialog} from '@angular/material/dialog';
-import {createFromDrop, DropPasteInput} from '../../../core/drop-paste-input/drop-paste-input';
+import {DropPasteInput} from '../../../core/drop-paste-input/drop-paste.model';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {AddTaskAttachment, DeleteTaskAttachment, UpdateTaskAttachment} from './task-attachment.actions';
 import {TaskState} from '../task.model';
+import {createFromDrop} from 'src/app/core/drop-paste-input/drop-paste-input';
 
 @Injectable({
   providedIn: 'root',

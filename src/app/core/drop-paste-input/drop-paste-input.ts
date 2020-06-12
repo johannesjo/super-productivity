@@ -1,21 +1,5 @@
 import {isImageUrlSimple} from '../../util/is-image-url';
-
-export type DropPasteInputType = 'FILE' | 'LINK' | 'IMG' | 'COMMAND' | 'NOTE';
-
-export interface DropPasteInput {
-  title: string;
-  type: DropPasteInputType;
-  path: string;
-  icon: string;
-}
-
-export enum DropPasteIcons {
-  FILE = 'insert_drive_file',
-  LINK = 'bookmark',
-  IMG = 'image',
-  COMMAND = 'laptop_windows',
-  NOTE = 'note',
-}
+import {DropPasteIcons, DropPasteInput} from './drop-paste.model';
 
 
 export const createFromDrop = (ev): null | DropPasteInput => {

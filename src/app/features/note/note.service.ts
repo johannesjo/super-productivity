@@ -16,8 +16,9 @@ import shortid from 'shortid';
 import {initialNoteState, NoteState, selectAllNotes, selectNoteById} from './store/note.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {take} from 'rxjs/operators';
-import {createFromDrop, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
+import {createFromDrop} from '../../core/drop-paste-input/drop-paste-input';
 import {isImageUrl, isImageUrlSimple} from '../../util/is-image-url';
+import {DropPasteInput} from '../../core/drop-paste-input/drop-paste.model';
 
 @Injectable({
   providedIn: 'root',

@@ -22,7 +22,9 @@ import shortid from 'shortid';
 import {DialogEditBookmarkComponent} from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import {MatDialog} from '@angular/material/dialog';
 import {PersistenceService} from '../../core/persistence/persistence.service';
-import {createFromDrop, createFromPaste, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
+import {createFromDrop, createFromPaste} from '../../core/drop-paste-input/drop-paste-input';
+import {DropPasteInput} from '../../core/drop-paste-input/drop-paste.model';
+
 
 @Injectable({
   providedIn: 'root',
