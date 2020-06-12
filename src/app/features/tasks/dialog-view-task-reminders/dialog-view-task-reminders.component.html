@@ -1,7 +1,7 @@
 <h1 mat-dialog-title
     tabindex="1">
   <mat-icon class="dialog-header-icon">alarm</mat-icon>
-  <span>Due tasks</span>
+  <span>{{T.F.TASK.D_REMINDER_VIEW.DUE_TASKS}}</span>
 </h1>
 
 <mat-dialog-content *ngIf="(tasks$|async) as tasks">
@@ -84,8 +84,7 @@
             mat-button
             type="button">
       <mat-icon>snooze</mat-icon>
-      <!--          {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate }}-->
-      Snooze all
+      {{T.F.TASK.D_REMINDER_VIEW.SNOOZE_ALL|translate }}
     </button>
 
     <button (click)="addAllToToday()"
@@ -94,8 +93,7 @@
             mat-stroked-button
             type="button">
       <mat-icon>wb_sunny</mat-icon>
-      Add all to today
-      <!--          {{(T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY|translate)}}-->
+      {{(T.F.TASK.D_REMINDER_VIEW.ADD_ALL_TO_TODAY|translate)}}
     </button>
 
   </div>
