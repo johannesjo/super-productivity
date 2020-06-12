@@ -44,7 +44,7 @@ import {Obstruction, ObstructionState} from '../../features/metric/obstruction/o
 import {SnackService} from '../snack/snack.service';
 import {DatabaseService} from '../persistence/database.service';
 import {CompressionService} from '../compression/compression.service';
-import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
+import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project-archive.model';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {Action} from '@ngrx/store';
 import {Injectable} from '@angular/core';

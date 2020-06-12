@@ -6,7 +6,7 @@ import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.com
 import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 import {Subscription} from 'rxjs';
 import {DragulaService} from 'ng2-dragula';
-import {ExportedProject, Project} from '../../features/project/project.model';
+import {Project} from '../../features/project/project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {download} from '../../util/download';
 import {SnackService} from '../../core/snack/snack.service';
@@ -14,6 +14,7 @@ import {T} from '../../t.const';
 import {THEME_COLOR_MAP} from '../../app.constants';
 import {WorkContextService} from '../../features/work-context/work-context.service';
 import {withLatestFrom} from 'rxjs/operators';
+import {ExportedProject} from '../../features/project/project-archive.model';
 
 @Component({
   selector: 'project-page',

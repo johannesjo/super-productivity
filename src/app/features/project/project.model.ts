@@ -1,13 +1,4 @@
 import {IssueIntegrationCfgs, IssueProviderKey} from '../issue/issue.model';
-import {NoteState} from '../note/store/note.reducer';
-import {BookmarkState} from '../bookmark/store/bookmark.reducer';
-import {EntityState} from '@ngrx/entity';
-import {Task, TaskState} from '../tasks/task.model';
-import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
-import {MetricState} from '../metric/metric.model';
-import {ImprovementState} from '../metric/improvement/improvement.model';
-import {ObstructionState} from '../metric/obstruction/obstruction.model';
-import {Tag} from '../tag/tag.model';
 import {WorkContextAdvancedCfgKey, WorkContextCommon} from '../work-context/work-context.model';
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -34,26 +25,6 @@ export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
 }
 
 export type Project = Readonly<ProjectCopy>;
-
-export interface ProjectArchivedRelatedData {
-  note?: NoteState;
-  bookmark?: BookmarkState;
-  task?: TaskState;
-  taskArchive?: EntityState<Task>;
-  taskAttachment?: EntityState<TaskAttachment>;
-  taskTag?: EntityState<Tag>;
-  metric?: MetricState;
-  improvement?: ImprovementState;
-  obstruction?: ObstructionState;
-}
-
-export interface ExportedProject extends Project {
-  relatedModels: ProjectArchivedRelatedData;
-}
-
-export interface ProjectArchive {
-  [key: string]: string;
-}
 
 export type ProjectCfgFormKey = WorkContextAdvancedCfgKey | IssueProviderKey | 'basic' | 'theme';
 

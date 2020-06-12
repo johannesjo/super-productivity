@@ -31,10 +31,10 @@ import {DatabaseService} from './database.service';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {
   ExportedProject,
-  Project,
   ProjectArchive,
   ProjectArchivedRelatedData
-} from '../../features/project/project.model';
+} from '../../features/project/project-archive.model';
+import {Project} from '../../features/project/project.model';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseEntityModel, PersistenceBaseModel, PersistenceForProjectModel} from './persistence.model';
 import {Metric, MetricState} from '../../features/metric/metric.model';

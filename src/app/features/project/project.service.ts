@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
-import {ExportedProject, Project} from './project.model';
+import {Project} from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
 import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
@@ -28,6 +28,7 @@ import {BreakNr, BreakTime, WorkContextType} from '../work-context/work-context.
 import {WorkContextService} from '../work-context/work-context.service';
 import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../issue/issue.const';
 import {GitlabCfg} from '../issue/providers/gitlab/gitlab';
+import {ExportedProject} from './project-archive.model';
 
 @Injectable({
   providedIn: 'root',
