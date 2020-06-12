@@ -12,7 +12,6 @@ import {UiHelperService} from '../ui-helper/ui-helper.service';
 import {NotifyService} from '../../core/notify/notify.service';
 import {throttle} from 'throttle-debounce';
 import {DialogViewNoteReminderComponent} from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
-import {DialogViewTaskReminderComponent} from '../tasks/dialog-view-task-reminder/dialog-view-task-reminder.component';
 import {DialogViewTaskRemindersComponent} from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
 import {DataInitService} from '../../core/data-init/data-init.service';
 
@@ -59,23 +58,13 @@ export class ReminderModule {
           }
         });
       } else if (oldest.type === 'TASK') {
-        if (reminders.length === 1) {
-          this._matDialog.open(DialogViewTaskReminderComponent, {
-            autoFocus: false,
-            restoreFocus: true,
-            data: {
-              reminder: oldest,
-            }
-          }).afterClosed();
-        } else {
-          this._matDialog.open(DialogViewTaskRemindersComponent, {
-            autoFocus: false,
-            restoreFocus: true,
-            data: {
-              reminders,
-            }
-          }).afterClosed();
-        }
+        this._matDialog.open(DialogViewTaskRemindersComponent, {
+          autoFocus: false,
+          restoreFocus: true,
+          data: {
+            reminders,
+          }
+        }).afterClosed();
       }
     });
   }

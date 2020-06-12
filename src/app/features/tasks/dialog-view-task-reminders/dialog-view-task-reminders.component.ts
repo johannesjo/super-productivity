@@ -18,7 +18,7 @@ import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {DataInitService} from '../../../core/data-init/data-init.service';
 import {unique} from '../../../util/unique';
 
-const M = 100 * 60;
+const M = 1000 * 60;
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -97,7 +97,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId);
   }
 
-  editReminder(task: TaskWithReminderData) {
+  editReminder(task: TaskWithReminderData, isCloseAfter = false) {
     this._subs.add(this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {
@@ -108,6 +108,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       } as AddTaskReminderInterface
     }).afterClosed().subscribe(() => {
       this._removeFromList(task.reminderId);
+      if (isCloseAfter) {
+        this._close();
+      }
     }));
   }
 
@@ -165,6 +168,23 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       this.dismiss(task);
     });
     this._close();
+  }
+
+  async play() {
+    const tasks = await this.tasks$.pipe(first()).toPromise();
+    if (tasks.length !== 1) {
+      throw new Error('More or less than one task');
+    }
+    this.isDisableControls = true;
+
+    const task = tasks[0];
+    if (task.parentId) {
+      this._taskService.moveToToday(task.parentId, true);
+    } else {
+      this._taskService.moveToToday(task.id, true);
+    }
+    this._taskService.setCurrentId(task.id);
+    this.dismiss(task);
   }
 
   private _close() {
