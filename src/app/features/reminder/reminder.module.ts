@@ -42,9 +42,9 @@ export class ReminderModule {
 
       console.log(reminders);
       console.log('Open reminders ' + reminders.length);
+      this._throttledShowNotification(reminders);
 
-      // this._throttledShowNotification(reminders);
-
+      //
       // if (reminder.type === 'NOTE') {
       //   this._matDialog.open(DialogViewNoteReminderComponent, {
       //     autoFocus: false,
@@ -65,11 +65,17 @@ export class ReminderModule {
     });
   }
 
-  private _showNotification(reminder: Reminder) {
+  private _showNotification(reminders: Reminder[]) {
+    const isMultiple = reminders.length > 1;
+    const title = isMultiple
+      ? '"' + reminders[0].title + '" and ' + (reminders.length - 1) + ' other tasks are due.'
+      : reminders[0].title;
+    const tag = reminders.reduce((acc, reminder) => acc + '_' + reminder.id, '');
+
     this._notifyService.notify({
-      title: reminder.title,
+      title,
       // prevents multiple notifications on mobile
-      tag: reminder.id,
+      tag,
       requireInteraction: true,
     }).then();
   }
