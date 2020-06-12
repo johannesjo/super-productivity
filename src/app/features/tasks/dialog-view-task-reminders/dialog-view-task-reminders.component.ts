@@ -61,6 +61,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this._close();
     }));
+    this._subs.add(this._reminderService.onRemindersActive$.subscribe(reminders => {
+      this.reminders$.next(reminders);
+    }));
   }
 
   ngOnDestroy(): void {
