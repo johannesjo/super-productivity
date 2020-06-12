@@ -13,6 +13,7 @@
   align-items: center;
   border-bottom: 1px solid $dark-theme-extra-border-color;
   padding: $s;
+  padding-left: 0;
 
   &:last-child {
     border-bottom: 0;
@@ -27,7 +28,7 @@
     margin-left: $s;
   }
 
-  .tags {
+  tag-list {
     margin-top: $s*.5;
   }
 

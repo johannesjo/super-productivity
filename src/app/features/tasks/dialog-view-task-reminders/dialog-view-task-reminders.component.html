@@ -15,14 +15,15 @@
                   [task]="task"></tag-list>
       </div>
       <div class="actions">
-        <!--        <button (click)="dismiss(task)"-->
-        <!--                [disabled]="isDisableControls"-->
-        <!--                [title]="T.G.DISMISS|translate"-->
-        <!--                color=""-->
-        <!--                mat-mini-fab-->
-        <!--                type="button">-->
-        <!--          <mat-icon>clear</mat-icon>-->
-        <!--        </button>-->
+        <button (click)="dismiss(task)"
+                [disabled]="isDisableControls"
+                [title]="T.G.DISMISS|translate"
+                color=""
+                class="hide-xs"
+                mat-icon-button
+                type="button">
+          <mat-icon>alarm_off</mat-icon>
+        </button>
 
         <button (dblclick)="snooze(task,10)"
                 [disabled]="isDisableControls"
@@ -62,7 +63,7 @@
           </button>
           <button (click)="dismiss(task)"
                   mat-menu-item>
-            <mat-icon>clear</mat-icon>
+            <mat-icon>alarm_off</mat-icon>
             {{T.G.DISMISS|translate}}
           </button>
           <button (click)="editReminder(task)"
@@ -121,7 +122,7 @@
   </button>
   <button (click)="dismissAll()"
           mat-menu-item>
-    <mat-icon>clear</mat-icon>
+    <mat-icon>alarm_off</mat-icon>
     {{T.G.DISMISS|translate}}
   </button>
 </mat-menu>
