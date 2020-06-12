@@ -653,6 +653,7 @@
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
         "ADD_TO_TODAY": "Heute hinzufügen",
         "DISMISS": "Erinnerung verwerfen",
+        "DISMISS_ALL": "Alle schließen",
         "DUE_TASKS": "Fällige Aufgaben",
         "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
@@ -660,6 +661,7 @@
         "FROM_TAG": "Vom Tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Schlummer alle",
+        "SNOOZE_UNTIL_TOMORROW": "Bis morgen",
         "START": "Task starten",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
       },

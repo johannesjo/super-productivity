@@ -653,6 +653,7 @@
         "ADD_ALL_TO_TODAY": "Agrega todo a hoy",
         "ADD_TO_TODAY": "Añadir a hoy",
         "DISMISS": "Descartar recordatorio",
+        "DISMISS_ALL": "Descartar todo",
         "DUE_TASKS": "Tareas debidas",
         "FOR_CURRENT": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
@@ -660,6 +661,7 @@
         "FROM_TAG": "De la etiqueta: \"{{title}}\"",
         "SNOOZE": "Posponer",
         "SNOOZE_ALL": "Posponer todo",
+        "SNOOZE_UNTIL_TOMORROW": "Hasta mañana",
         "START": "Iniciar tarea",
         "SWITCH_CONTEXT_START": "Cambiar contexto e inicio"
       },

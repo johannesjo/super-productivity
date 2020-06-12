@@ -653,6 +653,7 @@
         "ADD_ALL_TO_TODAY": "全部添加到今天",
         "ADD_TO_TODAY": "今天添加",
         "DISMISS": "解雇提醒",
+        "DISMISS_ALL": "关闭所有",
         "DUE_TASKS": "到期任务",
         "FOR_CURRENT": "任务到期了。你想开始工作吗？",
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
@@ -660,6 +661,7 @@
         "FROM_TAG": "来自标签：“{{title}}”",
         "SNOOZE": "暂停",
         "SNOOZE_ALL": "全部暂停",
+        "SNOOZE_UNTIL_TOMORROW": "直到明天",
         "START": "开始任务",
         "SWITCH_CONTEXT_START": "切换上下文并开始"
       },

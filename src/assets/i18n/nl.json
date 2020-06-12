@@ -653,6 +653,7 @@
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
         "DISMISS": "Herinnering afwijzen",
+        "DISMISS_ALL": "Alles afkeuren",
         "DUE_TASKS": "Geplande taken",
         "FOR_CURRENT": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
         "FOR_OTHER": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
@@ -660,6 +661,7 @@
         "FROM_TAG": "Van tag: \"{{title}}\"",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze All",
+        "SNOOZE_UNTIL_TOMORROW": "Tot morgen",
         "START": "Begin",
         "SWITCH_CONTEXT_START": "Wissel van context en start"
       },

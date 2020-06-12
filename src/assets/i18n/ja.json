@@ -653,6 +653,7 @@
         "ADD_ALL_TO_TODAY": "今日にすべて追加",
         "ADD_TO_TODAY": "今日に追加",
         "DISMISS": "リマインダーを却下",
+        "DISMISS_ALL": "すべて却下する",
         "DUE_TASKS": "期限付きタスク",
         "FOR_CURRENT": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
         "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
@@ -660,6 +661,7 @@
         "FROM_TAG": "タグから：「{{title}}」",
         "SNOOZE": "スヌーズ",
         "SNOOZE_ALL": "すべてスヌーズ",
+        "SNOOZE_UNTIL_TOMORROW": "明日まで",
         "START": "開始タスク",
         "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
       },
