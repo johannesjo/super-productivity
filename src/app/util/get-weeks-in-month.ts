@@ -1,9 +1,6 @@
-export interface WeeksInMonth {
-  start: number;
-  end: number;
-}
-
 // starting on monday
+import {WeeksInMonth} from './get-week-in-month-model';
+
 export const getWeeksInMonth = (month: number, year: number): WeeksInMonth[] => {
   const weeks = [];
   const firstDate = new Date(year, month, 1);
