@@ -1,5 +1,6 @@
 import {NightwatchBrowser} from 'nightwatch';
 import {BASE} from '../e2e.const';
+import {NBrowser} from '../n-browser-interface';
 
 const BASE_URL = `${BASE}`;
 
@@ -33,7 +34,7 @@ module.exports = {
   '@tags': ['project'],
 
 
-  'navigate to project settings': (browser: NightwatchBrowser) => browser
+  'navigate to project settings': (browser: NBrowser) => browser
     .url(BASE_URL)
     .waitForElementVisible(EXPAND_PROJECT_BTN)
     .click(EXPAND_PROJECT_BTN)
@@ -52,7 +53,7 @@ module.exports = {
     .end(),
 
 
-  'create project': (browser: NightwatchBrowser) => browser
+  'create project': (browser: NBrowser) => browser
     .url(BASE_URL)
     .waitForElementVisible(EXPAND_PROJECT_BTN)
     .click(EXPAND_PROJECT_BTN)
@@ -76,30 +77,18 @@ module.exports = {
     .end(),
 
 
-  'navigate to default': (browser: NightwatchBrowser) => browser
-    .url(BASE_URL)
-    .waitForElementVisible(EXPAND_PROJECT_BTN)
-    .click(EXPAND_PROJECT_BTN)
-    .waitForElementVisible(DEFAULT_PROJECT_BTN)
-    .click(DEFAULT_PROJECT_BTN)
+  'navigate to default': (browser: NBrowser) => browser
+    .goToDefaultProject()
 
-    .waitForElementPresent(SPLIT)
-    .waitForElementPresent(BACKLOG)
     .assert.urlEquals(`${BASE}/#/project/DEFAULT/tasks`)
     .assert.containsText(WORK_CTX_TITLE, 'Super Productivity')
     .end(),
 
 
-  'navigate to daily summary from project without error': (browser: NightwatchBrowser) => browser
+  'navigate to daily summary from project without error': (browser: NBrowser) => browser
     // Go to project page
-    .url(BASE_URL)
-    .waitForElementVisible(EXPAND_PROJECT_BTN)
-    .click(EXPAND_PROJECT_BTN)
+    .goToDefaultProject()
 
-    .waitForElementVisible(DEFAULT_PROJECT_BTN)
-    .click(DEFAULT_PROJECT_BTN)
-
-    .waitForElementVisible(SPLIT)
     .click(READY_TO_WORK_BTN)
 
     // navigate to
