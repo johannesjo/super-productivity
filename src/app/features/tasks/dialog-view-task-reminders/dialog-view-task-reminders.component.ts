@@ -5,7 +5,7 @@ import {Task, TaskWithReminderData} from '../task.model';
 import {TaskService} from '../task.service';
 import {Observable, Subscription} from 'rxjs';
 import {ReminderService} from '../../reminder/reminder.service';
-import {map, take, tap} from 'rxjs/operators';
+import {first, map, take, tap} from 'rxjs/operators';
 import {ProjectService} from '../../project/project.service';
 import {Router} from '@angular/router';
 import {T} from '../../../t.const';
@@ -16,6 +16,7 @@ import {TagService} from '../../tag/tag.service';
 import {TODAY_TAG} from '../../tag/tag.const';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {DataInitService} from '../../../core/data-init/data-init.service';
+import {unique} from '../../../util/unique';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -31,7 +32,6 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   isDisableControls = false;
   tasks$: Observable<TaskWithReminderData[]> = this._taskService.getByIdsLive$(this.taskIds).pipe(
-    tap((b) => console.log(b)),
     take(2),
     map((tasks: Task[]) => tasks
       .filter(task => !!task)
@@ -58,21 +58,18 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this._close();
     }));
-    this.tasks$.subscribe((v) => console.log('tasks$', v));
-
   }
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 
-  addToToday(task: TaskWithReminderData) {
+  async addToToday(task: TaskWithReminderData) {
     // NOTE: we need to account for the parent task as well
     if (task.parentId) {
-      this._subs.add(this._taskService.getByIdOnce$(task.parentId).subscribe(parentTask => {
-        this._taskService.updateTags(parentTask, [TODAY_TAG.id, ...parentTask.tagIds], parentTask.tagIds);
-        this.dismiss(task);
-      }));
+      const parent = await this._taskService.getByIdOnce$(task.parentId).pipe(first()).toPromise();
+      this._taskService.updateTags(parent, [TODAY_TAG.id, ...parent.tagIds], parent.tagIds);
+      this.dismiss(task);
     } else {
       this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
       this.dismiss(task);
@@ -80,7 +77,6 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   dismiss(task: TaskWithReminderData) {
-    this.isDisableControls = true;
     this._taskService.update(task.id, {
       reminderId: null,
     });
@@ -88,14 +84,12 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   snooze(task: TaskWithReminderData, snoozeInMinutes: number) {
-    this.isDisableControls = true;
     this._reminderService.updateReminder(task.reminderData.id, {
       remindAt: Date.now() + (snoozeInMinutes * 60 * 1000)
     });
   }
 
   editReminder(task: TaskWithReminderData) {
-    this.isDisableControls = true;
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {
@@ -114,13 +108,37 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   // ALL ACTIONS
   // ------------
   snoozeAll(snoozeInMinutes: number) {
+    this.reminders.forEach((reminder) => {
+      this._reminderService.updateReminder(reminder.id, {
+        remindAt: Date.now() + (snoozeInMinutes * 60 * 100)
+      });
+    });
+    this._close();
   }
 
-  addAllToToday() {
+  async addAllToToday() {
+    const tasksToDismiss = await this.tasks$.pipe(first()).toPromise();
+    const mainTasks = tasksToDismiss.filter(t => !t.parentId);
+    const parentIds: string[] = unique(tasksToDismiss.map(t => t.parentId).filter(pid => pid));
+    const parents = await Promise.all(parentIds.map(parentId => this._taskService.getByIdOnce$(parentId).pipe(first()).toPromise()));
+    const updateTagTasks = [...parents, ...mainTasks];
+
+    updateTagTasks.forEach(task => {
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+    });
+    tasksToDismiss.forEach((task) => {
+      this.dismiss(task);
+    });
+
+    this._close();
   }
 
-  dismissAll() {
-
+  async dismissAll() {
+    const tasks = await this.tasks$.pipe(first()).toPromise();
+    tasks.forEach((task) => {
+      this.dismiss(task);
+    });
+    this._close();
   }
 
   private _close() {

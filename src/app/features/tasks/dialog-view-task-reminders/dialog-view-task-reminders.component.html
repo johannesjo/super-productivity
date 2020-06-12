@@ -16,7 +16,6 @@
       </div>
       <div class="actions">
         <button (click)="dismiss(task)"
-                [disabled]="isDisableControls"
                 [title]="T.G.DISMISS|translate"
                 color=""
                 class="hide-xs"
@@ -26,7 +25,6 @@
         </button>
 
         <button (dblclick)="snooze(task,10)"
-                [disabled]="isDisableControls"
                 [matMenuTriggerFor]="snoozeMenu"
                 [title]="T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate"
                 color=""
@@ -36,7 +34,6 @@
         </button>
 
         <button (click)="addToToday(task)"
-                [disabled]="isDisableControls"
                 [title]="T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY|translate"
                 color=""
                 mat-icon-button
@@ -80,26 +77,26 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-        <button (dblclick)="snoozeAll(10)"
-                [disabled]="isDisableControls"
-                [matMenuTriggerFor]="snoozeAllMenu"
-                color="primary"
-                mat-button
-                type="button">
-          <mat-icon>snooze</mat-icon>
-<!--          {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate }}-->
-          Snooze all
-        </button>
+    <button (dblclick)="snoozeAll(10)"
+            [disabled]="isDisableControls"
+            [matMenuTriggerFor]="snoozeAllMenu"
+            color="primary"
+            mat-button
+            type="button">
+      <mat-icon>snooze</mat-icon>
+      <!--          {{T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate }}-->
+      Snooze all
+    </button>
 
-        <button (click)="addAllToToday()"
-                [disabled]="isDisableControls"
-                color="primary"
-                mat-stroked-button
-                type="button">
-          <mat-icon>wb_sunny</mat-icon>
-          Add all to today
-<!--          {{(T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY|translate)}}-->
-        </button>
+    <button (click)="addAllToToday()"
+            [disabled]="isDisableControls"
+            color="primary"
+            mat-stroked-button
+            type="button">
+      <mat-icon>wb_sunny</mat-icon>
+      Add all to today
+      <!--          {{(T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY|translate)}}-->
+    </button>
 
   </div>
 </mat-dialog-actions>
