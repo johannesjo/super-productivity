@@ -21,9 +21,16 @@ const reInitCheckInterval = (reminders: any[]) => {
   checkInterval = setInterval(() => {
     const dueReminders = getDueReminders(reminders);
     if (dueReminders.length) {
+      const oldest = dueReminders[0];
+
+      const remindersToSend = (oldest.type === 'TASK')
+        ? dueReminders.filter(r => r.type === 'TASK')
+        // NOTE: for notes we just send the oldest due reminder
+        : [oldest];
+
       if (currentMessageTimerVal <= 0) {
-        postMessage(dueReminders);
-        console.log('Worker postMessage', dueReminders);
+        postMessage(remindersToSend);
+        console.log('Worker postMessage', remindersToSend);
         currentMessageTimerVal = MESSAGE_INTERVAL_DURATION;
       } else {
         currentMessageTimerVal -= CHECK_INTERVAL_DURATION;
