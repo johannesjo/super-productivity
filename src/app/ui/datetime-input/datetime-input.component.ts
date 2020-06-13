@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {T} from '../../t.const';
 import {LS_LAST_REMINDER_DATE} from '../../core/persistence/ls-keys.const';
+import {timestampToDatetimeInputString} from '../../util/timestamp-to-datetime-input-string';
 
 @Component({
   selector: 'datetime-input',
@@ -91,12 +92,7 @@ export class DatetimeInputComponent {
     if (!dateTime || dateTime < 10000) {
       return null;
     }
-    const date = new Date((dateTime + this._getTimeZoneOffsetInMs()));
-    const isoStr = date.toISOString();
-    return isoStr.substring(0, isoStr.length - 1);
+    return timestampToDatetimeInputString(dateTime);
   }
 
-  private _getTimeZoneOffsetInMs(): number {
-    return new Date().getTimezoneOffset() * -60 * 1000;
-  }
 }
