@@ -1,25 +1,50 @@
 import {NBrowser} from '../n-browser-interface';
-
+import {Key} from 'protractor';
 
 const TASK = 'task';
 const SCHEDULE_TASK_ITEM = 'task-additional-info-item:nth-child(2)';
 const DIALOG = 'mat-dialog-container';
-const IN15CHIP = '.mat-standard-chip';
+const INP = `${DIALOG} input[type=datetime-local]`;
 const DIALOG_SUBMIT = `${DIALOG} button[type=submit]`;
+const M = 60 * 1000;
 
-// NOTE: needs to be executed from work view
+
+// NOTE: needs to
+// be executed from work view
 module.exports = {
-  async command(this: NBrowser, taskName: string, taskSel = TASK) {
+  async command(this: NBrowser, taskName: string, taskSel = TASK, scheduleTime: number = Date.now() + (60 * M)) {
     return this
       .addTask(taskName)
       .openPanelForTask(taskSel)
       .waitForElementVisible(SCHEDULE_TASK_ITEM)
       .click(SCHEDULE_TASK_ITEM)
       .waitForElementVisible(DIALOG)
-      .waitForElementVisible(IN15CHIP)
-      .click(IN15CHIP)
+      .waitForElementVisible(INP)
+      .execute(getDateScriptStr(scheduleTime))
+      .pause(2000)
+      .setValue(INP, Key.UP)
+      .setValue(INP, Key.DOWN)
       .click(DIALOG_SUBMIT)
       ;
   }
 };
+
+
+const getDateScriptStr = (scheduleTime: number) => {
+  const dateStr = timestampToDatetimeInputString(scheduleTime);
+  return `
+    var dp = '${dateStr}';
+    document.querySelector('${INP}').value=dp;
+    `;
+};
+
+// copy from timestamp-to-datetime-input-string.ts because of compilation issue here
+function timestampToDatetimeInputString(timestamp: number): string {
+  const date = new Date((timestamp + _getTimeZoneOffsetInMs()));
+  return date.toISOString().slice(0, 19);
+}
+
+function _getTimeZoneOffsetInMs(): number {
+  return new Date().getTimezoneOffset() * -60 * 1000;
+}
 
