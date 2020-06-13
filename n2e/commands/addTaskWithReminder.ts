@@ -1,4 +1,4 @@
-import {NBrowser} from '../n-browser-interface';
+import {AddTaskWithReminderParams, NBrowser} from '../n-browser-interface';
 import {Key} from 'protractor';
 
 const TASK = 'task';
@@ -12,9 +12,13 @@ const M = 60 * 1000;
 // NOTE: needs to
 // be executed from work view
 module.exports = {
-  async command(this: NBrowser, taskName: string, taskSel = TASK, scheduleTime: number = Date.now() + (60 * M)) {
+  async command(this: NBrowser, {
+    title,
+    taskSel = TASK,
+    scheduleTime = Date.now() + (60 * M)
+  }: AddTaskWithReminderParams) {
     return this
-      .addTask(taskName)
+      .addTask(title)
       .openPanelForTask(taskSel)
       .waitForElementVisible(SCHEDULE_TASK_ITEM)
       .click(SCHEDULE_TASK_ITEM)

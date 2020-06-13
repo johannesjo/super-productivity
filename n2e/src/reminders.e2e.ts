@@ -22,7 +22,7 @@ module.exports = {
   'should add a scheduled tasks': (browser: NBrowser) => browser
     .url(WORK_VIEW_URL)
     .waitForElementVisible(READY_TO_WORK_BTN)
-    .addTaskWithReminder('0 test task koko')
+    .addTaskWithReminder({title: '0 test task koko'})
     .waitForElementVisible(TASK)
     .waitForElementVisible(TASK_SCHEDULE_BTN)
     .assert.elementPresent(TASK_SCHEDULE_BTN)
@@ -38,8 +38,8 @@ module.exports = {
   'should add multiple scheduled tasks': (browser: NBrowser) => browser
     .url(WORK_VIEW_URL)
     .waitForElementVisible(READY_TO_WORK_BTN)
-    .addTaskWithReminder('0 test task koko', TASK)
-    .addTaskWithReminder('2 hihihi', TASK_2)
+    .addTaskWithReminder({title: '0 test task koko', taskSel: TASK})
+    .addTaskWithReminder({title: '2 hihihi', taskSel: TASK_2})
     .waitForElementVisible(TASK)
     .waitForElementVisible(TASK_SCHEDULE_BTN)
     .assert.elementPresent(TASK_SCHEDULE_BTN)
