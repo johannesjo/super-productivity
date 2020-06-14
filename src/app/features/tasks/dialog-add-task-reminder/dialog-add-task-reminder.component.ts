@@ -73,7 +73,7 @@ export class DialogAddTaskReminderComponent {
     this._matDialogRef.close();
   }
 
-  updateFromCal(date) {
+  updateDateFromCal(date) {
     this.dateTime = new Date(date).getTime();
   }
 }

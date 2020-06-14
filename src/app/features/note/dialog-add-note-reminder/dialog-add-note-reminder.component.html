@@ -1,12 +1,28 @@
-<form (submit)="save()">
-  <h1 mat-dialog-title>{{isEdit
-    ? (T.F.NOTE.D_ADD_REMINDER.TITLE_EDIT|translate)
-    : (T.F.NOTE.D_ADD_REMINDER.TITLE_ADD|translate)}}</h1>
+<!--<form (submit)="save()">-->
+<!--  <h1 mat-dialog-title>{{isEdit-->
+<!--    ? (T.F.NOTE.D_ADD_REMINDER.TITLE_EDIT|translate)-->
+<!--    : (T.F.NOTE.D_ADD_REMINDER.TITLE_ADD|translate)}}</h1>-->
 
-  <mat-dialog-content>
-    <div class="form-wrapper">
+<mat-dialog-content>
+  <owl-date-time-inline [ngModel]="date"
+                        name="owlDate"
+                        ngDefaultControl
+                        [isNoMonthSquares]="true"
+                        [min]="now"
+                        [ngModelOptions]="{standalone:true}"
+                        (ngModelChange)="updateDateFromCal($event)"></owl-date-time-inline>
+
+  <div class="form-wrapper">
+    <!-- TODO remove translations -->
+    <!--      <datetime-input (modelChange)="dateTime=$event"-->
+    <!--                      [model]="dateTime"-->
+    <!--                      [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_DATETIME|translate"-->
+    <!--                      [required]="true"-->
+    <!--                      name="reminderDate"></datetime-input>-->
+
+
+    <div class="additional-fields-wrapper">
       <mat-form-field>
-        <!--[matDatepicker]="myDatepicker"-->
         <input
           [(ngModel)]="title"
           [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_TITLE|translate"
@@ -16,48 +32,44 @@
           type="text">
         <mat-error>{{T.F.NOTE.D_ADD_REMINDER.E_ENTER_TITLE|translate}}</mat-error>
       </mat-form-field>
-
-      <datetime-input (modelChange)="dateTime=$event"
-                      [model]="dateTime"
-                      [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_DATETIME|translate"
-                      [required]="true"
-                      name="reminderDate"></datetime-input>
     </div>
-  </mat-dialog-content>
+  </div>
+</mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <div class="wrap-buttons">
-      <button (click)="close()"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-button
-              type="button">
-        {{T.G.CANCEL|translate}}
-      </button>
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button (click)="close()"
+            class="btn btn-primary submit-button"
+            color="primary"
+            mat-button
+            type="button">
+      {{T.G.CANCEL|translate}}
+    </button>
 
-      <button (click)="remove()"
-              *ngIf="isEdit"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-stroked-button
-              type="button">
-        <mat-icon>alarm_off</mat-icon>
-        {{T.F.NOTE.REMOVE_REMINDER|translate}}
-      </button>
+    <button (click)="remove()"
+            *ngIf="isEdit"
+            class="btn btn-primary submit-button"
+            color="primary"
+            mat-stroked-button
+            type="button">
+      <mat-icon>alarm_off</mat-icon>
+      {{T.F.NOTE.REMOVE_REMINDER|translate}}
+    </button>
 
-      <button class="btn btn-primary submit-button"
-              color="primary"
-              mat-stroked-button
-              type="submit">
-        <ng-container *ngIf="!note.reminderId">
-          <mat-icon>alarm_add</mat-icon>
-          {{T.F.NOTE.ADD_REMINDER|translate}}
-        </ng-container>
-        <ng-container *ngIf="note.reminderId">
-          <mat-icon>alarm</mat-icon>
-          {{T.F.NOTE.UPDATE_REMINDER|translate}}
-        </ng-container>
-      </button>
-    </div>
-  </mat-dialog-actions>
-</form>
+    <button class="btn btn-primary submit-button"
+            color="primary"
+            mat-stroked-button
+            (click)="save()"
+            type="submit">
+      <ng-container *ngIf="!note.reminderId">
+        <mat-icon>alarm_add</mat-icon>
+        {{T.F.NOTE.ADD_REMINDER|translate}}
+      </ng-container>
+      <ng-container *ngIf="note.reminderId">
+        <mat-icon>alarm</mat-icon>
+        {{T.F.NOTE.UPDATE_REMINDER|translate}}
+      </ng-container>
+    </button>
+  </div>
+</mat-dialog-actions>
+<!--</form>-->
