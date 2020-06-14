@@ -10,6 +10,7 @@
     <owl-date-time-inline [ngModel]="date"
                           name="owlDate"
                           ngDefaultControl
+                          [isNoMonthSquares]="true"
                           [min]="now"
                           [ngModelOptions]="{standalone:true}"
                           (ngModelChange)="updateFromCal($event)"></owl-date-time-inline>
