@@ -17,10 +17,13 @@ import {WorkContextService} from '../../work-context/work-context.service';
 })
 export class DialogAddTaskReminderComponent {
   T = T;
+  now: Date = new Date();
   title: string = this.data.title;
   reminder: ReminderCopy = this.data.reminderId && this._reminderService.getById(this.data.reminderId);
   isEdit: boolean = !!(this.reminder && this.reminder.id);
   dateTime: number = this.reminder && this.reminder.remindAt;
+  date: Date = this.dateTime && new Date(this.dateTime);
+
   isForProject = this._workContextService.activeWorkContextType === WorkContextType.PROJECT;
   isMoveToBacklogPossible: boolean = (!this.isEdit && this.data.isMoveToBacklogPossible && this.isForProject);
   isMoveToBacklog: boolean = (this.isMoveToBacklogPossible);
@@ -69,4 +72,9 @@ export class DialogAddTaskReminderComponent {
   close() {
     this._matDialogRef.close();
   }
+
+  updateFromCal(date) {
+    this.dateTime = new Date(date).getTime();
+  }
 }
+

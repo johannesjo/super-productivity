@@ -15,3 +15,40 @@
   justify-content: stretch;
   align-items: stretch;
 }
+
+:host {
+  owl-date-time-container {
+    box-shadow: none !important;
+  }
+
+  .owl-dt-weekday {
+    padding-bottom: 0;
+  }
+
+  owl-date-time-inline {
+    overflow: hidden;
+  }
+
+  .mat-dialog-content {
+    margin: -24px;
+    margin-bottom: 0;
+    padding: 0;
+    //min-height: 82vh;
+    max-height: 82vh;
+  }
+
+  .mat-dialog-actions {
+    min-height: 42px;
+    padding: 4px;
+    margin: -24px;
+    margin-top: 0;
+  }
+
+  ::ng-deep {
+    .owl-top-input input {
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 36px;
+    }
+  }
+}
