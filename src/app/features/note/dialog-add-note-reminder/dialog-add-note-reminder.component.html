@@ -8,6 +8,10 @@
                         name="owlDate"
                         ngDefaultControl
                         [isNoMonthSquares]="true"
+                        [sPlaceholder]="T.DATETIME_SCHEDULE.PLACEHOLDER|translate"
+                        [sToday]="T.DATETIME_SCHEDULE.TODAY|translate"
+                        [sTomorrow]="T.DATETIME_SCHEDULE.TOMORROW|translate"
+                        [sNextWeek]="T.DATETIME_SCHEDULE.NEXT_WEEK|translate"
                         [min]="now"
                         [ngModelOptions]="{standalone:true}"
                         (ngModelChange)="updateDateFromCal($event)"></owl-date-time-inline>

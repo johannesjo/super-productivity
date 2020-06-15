@@ -23,6 +23,12 @@
     "IN": "in {{time}}",
     "TOMORROW": "tomorrow {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "NEXT_WEEK": "Next Week",
+    "PLACEHOLDER": "Please select a date",
+    "TODAY": "Today",
+    "TOMORROW": "Tomorrow"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
