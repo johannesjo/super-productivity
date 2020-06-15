@@ -168,6 +168,7 @@ $owl-missing: yellowgreen !default;
 
   .owl-dt-calendar-header {
     color: $owl-text-color-less-intense;
+    border: 0;
 
     @include darkTheme(true) {
       color: $owl-dark-text-color-less-intense;
@@ -197,7 +198,7 @@ $owl-missing: yellowgreen !default;
         background: $owl-divider-color;
 
         @include darkTheme(true) {
-          color: $owl-dark-divider-color;
+          background: $owl-dark-divider-color;
         }
       }
     }
