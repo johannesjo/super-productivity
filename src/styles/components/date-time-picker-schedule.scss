@@ -732,6 +732,11 @@ $owl-missing: yellowgreen !default;
   min-height: 2em;
   color: $owl-text-color-strong;
 
+  &:focus {
+    outline: 1px solid $c-accent;
+    outline-offset: -1px;
+  }
+
   @include darkTheme(true) {
     color: $owl-dark-text-color-strong;
   }
