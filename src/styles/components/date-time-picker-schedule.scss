@@ -655,6 +655,10 @@ $owl-missing: yellowgreen !default;
 
 .owl-dt-inline {
   display: block;
+
+  @include mq(xxs, max) {
+    width: 100vw;
+  }
 }
 
 .owl-dt-control {
