@@ -10,7 +10,8 @@ module.exports = {
   async command(this: NBrowser, taskSel: string) {
     return this
       .waitForElementVisible(taskSel)
-      .moveToElement(taskSel, 100, 30)
+      .pause(50)
+      .moveToElement(taskSel, 100, 15)
       .waitForElementVisible(HOVER_BTNS)
       .waitForElementVisible(EXPAND_BTN)
       .click(EXPAND_BTN)
