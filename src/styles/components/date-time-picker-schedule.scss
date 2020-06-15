@@ -211,7 +211,8 @@ $owl-missing: yellowgreen !default;
     outline: 0;
     color: $owl-text-color;
     -webkit-appearance: none;
-    padding-top: 12px;
+    padding-top: 1em;
+    padding-bottom: 1em;
     -webkit-tap-highlight-color: transparent;
 
     @include darkTheme(true) {
