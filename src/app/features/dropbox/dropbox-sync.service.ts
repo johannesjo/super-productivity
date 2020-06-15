@@ -149,13 +149,13 @@ export class DropboxSyncService {
     // ---------------------
     const r = (await this._downloadAppData());
     const remote = r.data;
-    const p = {
+    const timestamps = {
       local: local.lastLocalSyncModelChange,
       lastSync,
       remote: remote.lastLocalSyncModelChange
     };
 
-    switch (checkForUpdate(p)) {
+    switch (checkForUpdate(timestamps)) {
       case UpdateCheckResult.InSync: {
         dbxLog('DBX: ↔ In Sync => No Update');
         return;
@@ -173,24 +173,17 @@ export class DropboxSyncService {
 
       case UpdateCheckResult.RemoteNotUpToDateDespiteSync: {
         dbxLog('DBX: X Remote not up to date despite sync');
-        if (confirm('Try to re-load data from remote?')) {
-          this.sync();
+        if (confirm('Try to re-load data from remote once again?')) {
+          return this.sync();
+        } else {
+          return this._handleConflict({remote, local, lastSync, downloadMeta: r.meta});
         }
-        return;
       }
 
       case UpdateCheckResult.DataDiverged: {
         dbxLog('^--------^-------^');
         dbxLog('DBX: ⇎ X Diverged Data');
-        const dr = await this._openConflictDialog$(p).toPromise();
-        if (dr === 'USE_LOCAL') {
-          dbxLog('DBX: Dialog => ↑ Remote Update');
-          return await this._uploadAppData(local, true);
-        } else if (dr === 'USE_REMOTE') {
-          dbxLog('DBX: Dialog => ↓ Update Local');
-          return await this._importData(remote, r.meta.rev);
-        }
-        return;
+        return this._handleConflict({remote, local, lastSync, downloadMeta: r.meta});
       }
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
@@ -250,17 +243,25 @@ export class DropboxSyncService {
   }
 
   private async _uploadAppData(data: AppDataComplete, isForceOverwrite = false): Promise<DropboxFileMetadata> {
-    const r = await this._dropboxApiService.upload({
-      path: DROPBOX_SYNC_FILE_PATH,
-      data,
-      clientModified: data.lastLocalSyncModelChange,
-      localRev: this._getLocalRev(),
-      isForceOverwrite
-    });
-    this._setLocalRev(r.rev);
-    this._setLocalLastSync(data.lastLocalSyncModelChange);
-    dbxLog('DBX: ↑ Uploaded Data ↑ ✓');
-    return r;
+    try {
+      const r = await this._dropboxApiService.upload({
+        path: DROPBOX_SYNC_FILE_PATH,
+        data,
+        clientModified: data.lastLocalSyncModelChange,
+        localRev: this._getLocalRev(),
+        isForceOverwrite
+      });
+      this._setLocalRev(r.rev);
+      this._setLocalLastSync(data.lastLocalSyncModelChange);
+      dbxLog('DBX: ↑ Uploaded Data ↑ ✓');
+      return r;
+    } catch (e) {
+      console.error(e);
+      dbxLog('DBX: X Upload Request Error');
+      if (confirm('An Error occurred while uploading your local data. Try to force the update?')) {
+        return this._uploadAppData(data, true);
+      }
+    }
   }
 
 
@@ -296,6 +297,28 @@ export class DropboxSyncService {
     localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
   }
 
+  private async _handleConflict({remote, local, lastSync, downloadMeta}: {
+    remote: AppDataComplete;
+    local: AppDataComplete;
+    lastSync: number;
+    downloadMeta: DropboxFileMetadata;
+  }) {
+    const dr = await this._openConflictDialog$({
+      local: local.lastLocalSyncModelChange,
+      lastSync,
+      remote: remote.lastLocalSyncModelChange
+    }).toPromise();
+
+    if (dr === 'USE_LOCAL') {
+      dbxLog('DBX: Dialog => ↑ Remote Update');
+      return await this._uploadAppData(local, true);
+    } else if (dr === 'USE_REMOTE') {
+      dbxLog('DBX: Dialog => ↓ Update Local');
+      return await this._importData(remote, downloadMeta.rev);
+    }
+    return;
+  }
+
   private _openConflictDialog$({remote, local, lastSync}: {
     remote: number;
     local: number;
@@ -310,5 +333,4 @@ export class DropboxSyncService {
       }
     }).afterClosed();
   }
-
 }

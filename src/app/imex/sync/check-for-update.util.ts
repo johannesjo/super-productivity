@@ -38,7 +38,7 @@ export const checkForUpdate = (params: { remote: number, local: number, lastSync
     } else if (lastSync < local) {
       return UpdateCheckResult.RemoteUpdateRequired;
     } else if (lastSync === local) {
-      alert('Sync Warning: Dropbox date not up to date despite seemingly successful sync');
+      alert('Sync Warning: Dropbox date not up to date despite seemingly successful sync. (This might happen when: 1. You have conflict changes and decide to take the local version. 2. You open the other instance and also decide to use the local version.)');
       return UpdateCheckResult.RemoteNotUpToDateDespiteSync;
     }
   } else if (local < remote) {
