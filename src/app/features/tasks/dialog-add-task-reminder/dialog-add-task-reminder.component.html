@@ -7,18 +7,8 @@
   <!--    <h3 class="mat-h3">"{{title}}"</h3>-->
 
   <div class="form-wrapper">
-    <owl-date-time-inline [ngModel]="date"
-                          name="owlDate"
-                          ngDefaultControl
-                          [sPlaceholder]="T.DATETIME_SCHEDULE.PLACEHOLDER|translate"
-                          [sToday]="T.DATETIME_SCHEDULE.TODAY|translate"
-                          [sTomorrow]="T.DATETIME_SCHEDULE.TOMORROW|translate"
-                          [sNextWeek]="T.DATETIME_SCHEDULE.NEXT_WEEK|translate"
-                          [isNoMonthSquares]="true"
-                          [min]="now"
-                          [ngModelOptions]="{standalone:true}"
-                          (ngModelChange)="updateDateFromCal($event)"></owl-date-time-inline>
-
+    <owl-wrapper [dateTime]="dateTime"
+                 (dateTimeChange)="dateTime=$event"></owl-wrapper>
 
     <!-- TODO remove translations -->
     <!--      <datetime-input (modelChange)="dateTime=$event"-->

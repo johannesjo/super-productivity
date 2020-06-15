@@ -73,6 +73,7 @@ import {BetterDrawerModule} from './better-drawer/better-drawer.module';
 import {SortPipe} from './pipes/sort.pipe';
 import {LongPressDirective} from './longpress/longpress.component';
 import {FormlyMatToggleModule} from '@ngx-formly/material/toggle';
+import { OwlWrapperComponent } from './owl-wrapper/owl-wrapper.component';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -186,6 +187,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
   ],
   declarations: [
     ...COMPONENT_AND_PIPES,
+    OwlWrapperComponent,
   ],
   entryComponents: [
     ...DIALOG_COMPONENTS
@@ -201,6 +203,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     MarkdownModule,
     ReactiveFormsModule,
     ValidationModule,
+    OwlWrapperComponent,
   ],
   providers: [
     {provide: ErrorHandler, useClass: GlobalErrorHandler},
