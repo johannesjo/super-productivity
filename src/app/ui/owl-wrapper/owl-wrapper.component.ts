@@ -14,7 +14,6 @@ export class OwlWrapperComponent {
   @Input()
   model: number;
 
-
   @Input()
   dateTime: number;
 
@@ -29,7 +28,15 @@ export class OwlWrapperComponent {
 
 
   updateDateFromCal(date) {
+    console.log(date);
+
     this.dateTime = new Date(date).getTime();
     this.dateTimeChange.emit(this.dateTime);
+
+    // NOTE: won't work as we only ever get real changes
+    // if (this._lastDateTime === this.dateTime) {
+    //   this.triggerSubmit.emit(this.dateTime);
+    // }
+    // this._lastDateTime = this.dateTime;
   }
 }

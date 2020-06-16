@@ -52,3 +52,14 @@
     }
   }
 }
+
+.wrap-buttons {
+  display: flex;
+  max-width: 100%;
+  justify-content: stretch;
+  flex: 1;
+
+  button {
+    flex: 1;
+  }
+}

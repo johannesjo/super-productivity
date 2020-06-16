@@ -21,7 +21,10 @@
          style="margin: 16px">
       <mat-checkbox [(ngModel)]="isMoveToBacklog"
                     name="isListSubTasks">
-        {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
+        <div class="text-wrap"
+             style="max-width: 300px">
+          {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
+        </div>
       </mat-checkbox>
     </div>
   </div>
@@ -30,35 +33,32 @@
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
     <button (click)="close()"
+            [title]="T.G.CANCEL|translate"
             color="primary"
             mat-button
             type="button">
       <mat-icon>close</mat-icon>
-      {{T.G.CANCEL|translate}}
     </button>
 
     <button (click)="remove()"
+            [title]="T.F.TASK.D_REMINDER_ADD.UNSCHEDULE|translate"
             *ngIf="isEdit"
             color="primary"
             mat-stroked-button
             type="button">
       <mat-icon>alarm_off</mat-icon>
-      {{T.F.TASK.D_REMINDER_ADD.UNSCHEDULE|translate}}
     </button>
 
     <button [disabled]="!dateTime"
+            [title]="(reminder
+            ?T.F.TASK.D_REMINDER_ADD.SCHEDULE
+            :T.G.UPDATE)|translate"
             color="primary"
             (click)="save()"
             mat-stroked-button
             type="submit">
-      <ng-container *ngIf="!reminder">
-        <mat-icon>alarm_add</mat-icon>
-        {{T.F.TASK.D_REMINDER_ADD.SCHEDULE|translate}}
-      </ng-container>
-      <ng-container *ngIf="reminder">
-        <mat-icon>alarm</mat-icon>
-        {{T.G.UPDATE|translate}}
-      </ng-container>
+      <mat-icon *ngIf="!reminder">alarm_add</mat-icon>
+      <mat-icon *ngIf="reminder">alarm</mat-icon>
     </button>
   </div>
 </mat-dialog-actions>
