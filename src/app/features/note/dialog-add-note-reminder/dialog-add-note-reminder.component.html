@@ -1,21 +1,8 @@
-<!--<form (submit)="save()">-->
-<!--  <h1 mat-dialog-title>{{isEdit-->
-<!--    ? (T.F.NOTE.D_ADD_REMINDER.TITLE_EDIT|translate)-->
-<!--    : (T.F.NOTE.D_ADD_REMINDER.TITLE_ADD|translate)}}</h1>-->
-
 <mat-dialog-content>
   <owl-wrapper [(dateTime)]="dateTime"
                (triggerSubmit)="save()"></owl-wrapper>
 
   <div class="form-wrapper">
-    <!-- TODO remove translations -->
-    <!--      <datetime-input (modelChange)="dateTime=$event"-->
-    <!--                      [model]="dateTime"-->
-    <!--                      [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_DATETIME|translate"-->
-    <!--                      [required]="true"-->
-    <!--                      name="reminderDate"></datetime-input>-->
-
-
     <div class="additional-fields-wrapper">
       <mat-form-field>
         <input
@@ -65,4 +52,3 @@
     </button>
   </div>
 </mat-dialog-actions>
-<!--</form>-->

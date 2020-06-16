@@ -428,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "You need to enter a title",
         "L_DATETIME": "Datetime for reminder",
-        "L_TITLE": "Title for notification",
-        "TITLE_ADD": "Add reminder for note",
-        "TITLE_EDIT": "Edit reminder for note"
+        "L_TITLE": "Title for notification"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Snooze",
