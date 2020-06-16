@@ -1,6 +1,6 @@
 @import "../../variables";
 
-$owl-accent-color: $c-accent;
+$owl-accent-color: $c-primary;
 $owl-accent-contrast-color: $c-contrast;
 $owl-bg: transparent;
 $owl-shadow: none;
@@ -12,7 +12,7 @@ $owl-dark-text-color: rgba(255, 255, 255, .75);
 $owl-dark-text-color-less-intense: rgba(255, 255, 255, .5);
 $owl-dark-text-color-muted: rgba(255, 255, 255, .15);
 
-$owl-dark-light-selected-bg: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));;
+$owl-dark-light-selected-bg: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
 
 $owl-dark-divider-color: rgba(255, 255, 255, .12);
 
@@ -731,20 +731,19 @@ $owl-missing: $owl-light-selected-bg !default;
   align-items: center;
   opacity: 0.7;
   min-height: 36px;
-  color: $owl-text-color-strong;
   border-left: 4px solid transparent;
-
-  &:focus {
-    border-left: 4px solid $c-primary;
-    outline: none;
-  }
-
+  color: $owl-text-color-strong;
   @include darkTheme(true) {
     color: $owl-dark-text-color-strong;
   }
 
+  &.isActive {
+    border-color: $c-primary;
+  }
+
   &:focus,
   &:hover {
+    outline: none;
     background: $owl-light-selected-bg;
     opacity: 1;
 
