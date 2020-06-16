@@ -6,7 +6,8 @@ import {
   RemoveTaskReminder,
   TaskActionTypes,
   UpdateTask,
-  UpdateTaskReminder
+  UpdateTaskReminder,
+  UpdateTaskTags
 } from './task.actions';
 import {Store} from '@ngrx/store';
 import {map, mergeMap, tap} from 'rxjs/operators';
@@ -16,6 +17,7 @@ import {T} from '../../../t.const';
 import {SnackService} from '../../../core/snack/snack.service';
 import {moveTaskToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {TODAY_TAG} from '../../tag/tag.const';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -34,18 +36,30 @@ export class TaskReminderEffects {
       ico: 'schedule',
     })),
     mergeMap((a: AddTaskReminder) => {
-      const {id, title, remindAt, isMoveToBacklog} = a.payload;
-      const reminderId = this._reminderService.addReminder('TASK', id, title, remindAt);
+      const {task, title, remindAt, isMoveToBacklog} = a.payload;
+      if (isMoveToBacklog && !task.projectId) {
+        throw new Error('Move to backlog not possible for non project tasks');
+      }
 
+      const reminderId = this._reminderService.addReminder('TASK', task.id, title, remindAt);
+      const isRemoveFromToday = task.tagIds.includes(TODAY_TAG.id);
 
       return [
         new UpdateTask({
-          task: {id, changes: {reminderId}}
+          task: {id: task.id, changes: {reminderId}}
         }),
         ...(isMoveToBacklog
             ? [moveTaskToBacklogListAuto({
-              taskId: id,
-              workContextId: this._workContextService.activeWorkContextId
+              taskId: task.id,
+              workContextId: task.projectId
+            })]
+            : []
+        ),
+        ...(isRemoveFromToday
+            ? [new UpdateTaskTags({
+              task,
+              newTagIds: task.tagIds.filter(tagId => tagId !== TODAY_TAG.id),
+              oldTagIds: task.tagIds,
             })]
             : []
         ),

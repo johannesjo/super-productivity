@@ -100,12 +100,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   editReminder(task: TaskWithReminderData, isCloseAfter = false) {
     this._subs.add(this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
-      data: {
-        title: task.title,
-        taskId: task.id,
-        reminderId: task.reminderData.id,
-        isMoveToBacklogPossible: false,
-      } as AddTaskReminderInterface
+      data: {task} as AddTaskReminderInterface
     }).afterClosed().subscribe(() => {
       this._removeFromList(task.reminderId);
       if (isCloseAfter) {

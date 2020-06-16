@@ -220,12 +220,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
-      data: {
-        title: this.task.title,
-        taskId: this.task.id,
-        reminderId: this.task.reminderId,
-        isMoveToBacklogPossible: !this.task.parentId,
-      } as AddTaskReminderInterface
+      data: {task: this.task} as AddTaskReminderInterface
     });
   }
 

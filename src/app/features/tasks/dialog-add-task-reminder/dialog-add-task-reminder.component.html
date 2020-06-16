@@ -17,12 +17,12 @@
     <!--                      [required]="true"-->
     <!--                      name="reminderDate"></datetime-input>-->
 
-    <div *ngIf="isMoveToBacklogPossible"
+    <div *ngIf="isShowMoveToBacklog"
          style="margin: 16px">
       <mat-checkbox [(ngModel)]="isMoveToBacklog"
                     name="isListSubTasks">
         <div class="text-wrap"
-             style="max-width: 300px">
+             style="max-width: 280px">
           {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
         </div>
       </mat-checkbox>

@@ -47,11 +47,7 @@ export class SchedulePageComponent {
   editReminder(task: TaskWithReminderData) {
     this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
-      data: {
-        reminderId: task.reminderId,
-        taskId: task.id,
-        title: task.title,
-      } as AddTaskReminderInterface
+      data: {task} as AddTaskReminderInterface
     });
   }
 
