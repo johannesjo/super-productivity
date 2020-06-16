@@ -180,7 +180,7 @@ export class RemoveTimeSpent implements Action {
 export class AddTaskReminder implements Action {
   readonly type = TaskActionTypes.AddTaskReminder;
 
-  constructor(public payload: { task: Task, title: string, remindAt: number, isMoveToBacklog: boolean }) {
+  constructor(public payload: { task: Task, remindAt: number, isMoveToBacklog: boolean }) {
   }
 }
 

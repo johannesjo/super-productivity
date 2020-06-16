@@ -30,18 +30,18 @@ export class TaskReminderEffects {
     tap((a: AddTaskReminder) => this._snackService.open({
       type: 'SUCCESS',
       translateParams: {
-        title: truncate(a.payload.title)
+        title: truncate(a.payload.task.title)
       },
       msg: T.F.TASK.S.REMINDER_ADDED,
       ico: 'schedule',
     })),
     mergeMap((a: AddTaskReminder) => {
-      const {task, title, remindAt, isMoveToBacklog} = a.payload;
+      const {task, remindAt, isMoveToBacklog} = a.payload;
       if (isMoveToBacklog && !task.projectId) {
         throw new Error('Move to backlog not possible for non project tasks');
       }
 
-      const reminderId = this._reminderService.addReminder('TASK', task.id, title, remindAt);
+      const reminderId = this._reminderService.addReminder('TASK', task.id, truncate(task.title), remindAt);
       const isRemoveFromToday = task.tagIds.includes(TODAY_TAG.id);
 
       return [

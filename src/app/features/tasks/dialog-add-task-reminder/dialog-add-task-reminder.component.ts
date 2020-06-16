@@ -17,7 +17,6 @@ import {WorkContextService} from '../../work-context/work-context.service';
 export class DialogAddTaskReminderComponent {
   T = T;
   task = this.data.task;
-  title: string = this.task.title;
   reminder: ReminderCopy = this.task.reminderId && this._reminderService.getById(this.task.reminderId);
   isEdit: boolean = !!(this.reminder && this.reminder.id);
 
@@ -38,7 +37,7 @@ export class DialogAddTaskReminderComponent {
   save() {
     const timestamp = this.dateTime;
 
-    if (!timestamp || !this.title) {
+    if (!timestamp ) {
       return;
     }
 
@@ -47,14 +46,13 @@ export class DialogAddTaskReminderComponent {
         this.task.id,
         this.reminder.id,
         timestamp,
-        this.title,
+        this.task.title,
       );
       this.close();
     } else {
       this._taskService.addReminder(
         this.task,
         timestamp,
-        this.title,
         this.isMoveToBacklog,
       );
       this.close();

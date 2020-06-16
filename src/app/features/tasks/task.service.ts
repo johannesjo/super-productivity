@@ -478,8 +478,8 @@ export class TaskService {
 
   // REMINDER
   // --------
-  addReminder(task: Task | TaskWithSubTasks, remindAt: number, title: string, isMoveToBacklog = false) {
-    this._store.dispatch(new AddTaskReminder({task, remindAt, title, isMoveToBacklog}));
+  addReminder(task: Task | TaskWithSubTasks, remindAt: number,  isMoveToBacklog = false) {
+    this._store.dispatch(new AddTaskReminder({task, remindAt, isMoveToBacklog}));
   }
 
   updateReminder(taskId: string, reminderId: string, remindAt: number, title: string) {

@@ -1,21 +1,7 @@
-<!--<form (submit)="save()">-->
-<!-- TODO remove translations -->
-<!--  <h1 mat-dialog-title>{{isEdit-->
-<!--    ? (T.F.TASK.D_REMINDER_ADD.EDIT|translate)-->
-<!--    : (T.F.TASK.D_REMINDER_ADD.ADD|translate)}}</h1>-->
 <mat-dialog-content>
-  <!--    <h3 class="mat-h3">"{{title}}"</h3>-->
-
   <div class="form-wrapper">
     <owl-wrapper [(dateTime)]="dateTime"
                  (triggerSubmit)="save()"></owl-wrapper>
-
-    <!-- TODO remove translations -->
-    <!--      <datetime-input (modelChange)="dateTime=$event"-->
-    <!--                      [model]="dateTime"-->
-    <!--                      [placeholder]="T.F.TASK.D_REMINDER_ADD.DATETIME_FOR|translate"-->
-    <!--                      [required]="true"-->
-    <!--                      name="reminderDate"></datetime-input>-->
 
     <div *ngIf="isShowMoveToBacklog"
          style="margin: 16px">

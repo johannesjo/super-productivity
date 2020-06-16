@@ -649,7 +649,6 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Schedule Task",
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
