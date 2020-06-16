@@ -42,7 +42,7 @@ export class TaskReminderEffects {
       }
 
       const reminderId = this._reminderService.addReminder('TASK', task.id, truncate(task.title), remindAt);
-      const isRemoveFromToday = task.tagIds.includes(TODAY_TAG.id);
+      const isRemoveFromToday = isMoveToBacklog && task.tagIds.includes(TODAY_TAG.id);
 
       return [
         new UpdateTask({
