@@ -4,7 +4,8 @@
 <!--    : (T.F.NOTE.D_ADD_REMINDER.TITLE_ADD|translate)}}</h1>-->
 
 <mat-dialog-content>
-  <owl-wrapper [(dateTime)]="dateTime"></owl-wrapper>
+  <owl-wrapper [(dateTime)]="dateTime"
+               (triggerSubmit)="save()"></owl-wrapper>
 
   <div class="form-wrapper">
     <!-- TODO remove translations -->

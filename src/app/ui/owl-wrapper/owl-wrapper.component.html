@@ -1,11 +1,13 @@
 <owl-date-time-inline [ngModel]="date"
                       name="owlDate"
                       ngDefaultControl
+                      [sPressEnterToSubmit]="T.DATETIME_SCHEDULE.PRESS_ENTER_AGAIN|translate"
                       [sPlaceholder]="T.DATETIME_SCHEDULE.PLACEHOLDER|translate"
-                      [sToday]="T.DATETIME_SCHEDULE.TODAY|translate"
+                      [sLaterToday]="T.DATETIME_SCHEDULE.TODAY|translate"
                       [sTomorrow]="T.DATETIME_SCHEDULE.TOMORROW|translate"
                       [sNextWeek]="T.DATETIME_SCHEDULE.NEXT_WEEK|translate"
                       [isNoMonthSquares]="true"
                       [min]="now"
                       [ngModelOptions]="{standalone:true}"
+                      (doubleEnter)="triggerSubmit.emit(dateTime)"
                       (ngModelChange)="updateDateFromCal($event)"></owl-date-time-inline>

@@ -12,7 +12,7 @@ $owl-dark-text-color: rgba(255, 255, 255, .75);
 $owl-dark-text-color-less-intense: rgba(255, 255, 255, .5);
 $owl-dark-text-color-muted: rgba(255, 255, 255, .15);
 
-$owl-dark-light-selected-bg: rgba(255, 255, 255, .1);
+$owl-dark-light-selected-bg: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));;
 
 $owl-dark-divider-color: rgba(255, 255, 255, .12);
 
@@ -26,7 +26,7 @@ $owl-text-color: rgba(0, 0, 0, .75);
 $owl-text-color-less-intense: rgba(0, 0, 0, .5);
 $owl-text-color-muted: rgba(0, 0, 0, .15);
 
-$owl-light-selected-bg: rgba(0, 0, 0, .1);
+$owl-light-selected-bg: rgba(240, 240, 240, 1);
 
 $owl-divider-color: rgba(0, 0, 0, .12);
 
@@ -36,7 +36,7 @@ $owl-inp-fg-color: $owl-text-color-strong;
 $owl-arrow-color: $owl-text-color-strong;
 
 
-$owl-missing: yellowgreen !default;
+$owl-missing: $owl-light-selected-bg !default;
 
 
 .owl-dialog-container {
@@ -730,12 +730,13 @@ $owl-missing: yellowgreen !default;
   display: flex;
   align-items: center;
   opacity: 0.7;
-  min-height: 2em;
+  min-height: 36px;
   color: $owl-text-color-strong;
+  border-left: 4px solid transparent;
 
   &:focus {
-    outline: 1px solid $c-accent;
-    outline-offset: -1px;
+    border-left: 4px solid $c-primary;
+    outline: none;
   }
 
   @include darkTheme(true) {
@@ -780,4 +781,28 @@ $owl-missing: yellowgreen !default;
       background: $owl-dark-inp-bg-color;
     }
   }
+}
+
+.owl-enter-message {
+  position: absolute;
+  top: $s/2;
+  left: 50%;
+  max-width: 96%;
+  width: 280px;
+  font-size: 1em;
+  padding: 0.25em 1em;
+  transform: translate(-50%, 0);
+  border-radius: 4px;
+  z-index: 999;
+  text-align: center;
+  color: $owl-text-color-strong;
+  background: $owl-light-selected-bg;
+  @include darkTheme(true) {
+    color: $owl-dark-text-color-strong;
+    background: $owl-dark-light-selected-bg;
+  }
+}
+
+.owl-wrap-cal {
+  position: relative;
 }
