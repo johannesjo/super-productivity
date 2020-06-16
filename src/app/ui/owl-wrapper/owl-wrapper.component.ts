@@ -14,7 +14,12 @@ export class OwlWrapperComponent {
   @Input()
   model: number;
 
-  @Input()
+  @Input('dateTime')
+  set dateTimeSet(v: number) {
+    this.dateTime = v;
+    this.date = new Date(v);
+  }
+
   dateTime: number;
 
   @Output()
