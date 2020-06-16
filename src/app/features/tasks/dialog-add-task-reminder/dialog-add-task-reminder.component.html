@@ -7,8 +7,7 @@
   <!--    <h3 class="mat-h3">"{{title}}"</h3>-->
 
   <div class="form-wrapper">
-    <owl-wrapper [dateTime]="dateTime"
-                 (dateTimeChange)="dateTime=$event"></owl-wrapper>
+    <owl-wrapper [(dateTime)]="dateTime"></owl-wrapper>
 
     <!-- TODO remove translations -->
     <!--      <datetime-input (modelChange)="dateTime=$event"-->

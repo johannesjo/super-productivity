@@ -1,7 +1,8 @@
 @import "../../../variables";
 
 :host {
-  min-width: 300px;
+  display: block;
+  min-width: 280px;
 
   //@include mq(xs) {
   //  min-width: 300px;

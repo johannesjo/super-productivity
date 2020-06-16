@@ -19,9 +19,6 @@ export class DialogAddNoteReminderComponent {
   isEdit: boolean;
   reminder: ReminderCopy;
   note: Note;
-  now: Date = new Date();
-  date: Date;
-
 
   constructor(
     private _noteService: NoteService,
@@ -37,7 +34,6 @@ export class DialogAddNoteReminderComponent {
     if (this.isEdit) {
       this.dateTime = this.reminder.remindAt;
       this.title = this.reminder.title;
-      this.date = this.dateTime && new Date(this.dateTime);
     } else {
       this.title = this.note.content.substr(0, 40);
     }
@@ -75,9 +71,5 @@ export class DialogAddNoteReminderComponent {
 
   close() {
     this._matDialogRef.close();
-  }
-
-  updateDateFromCal(date) {
-    this.dateTime = new Date(date).getTime();
   }
 }

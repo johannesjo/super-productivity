@@ -4,17 +4,7 @@
 <!--    : (T.F.NOTE.D_ADD_REMINDER.TITLE_ADD|translate)}}</h1>-->
 
 <mat-dialog-content>
-  <owl-date-time-inline [ngModel]="date"
-                        name="owlDate"
-                        ngDefaultControl
-                        [isNoMonthSquares]="true"
-                        [sPlaceholder]="T.DATETIME_SCHEDULE.PLACEHOLDER|translate"
-                        [sToday]="T.DATETIME_SCHEDULE.TODAY|translate"
-                        [sTomorrow]="T.DATETIME_SCHEDULE.TOMORROW|translate"
-                        [sNextWeek]="T.DATETIME_SCHEDULE.NEXT_WEEK|translate"
-                        [min]="now"
-                        [ngModelOptions]="{standalone:true}"
-                        (ngModelChange)="updateDateFromCal($event)"></owl-date-time-inline>
+  <owl-wrapper [(dateTime)]="dateTime"></owl-wrapper>
 
   <div class="form-wrapper">
     <!-- TODO remove translations -->
@@ -43,36 +33,34 @@
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
     <button (click)="close()"
+            [title]="T.G.CANCEL|translate"
             class="btn btn-primary submit-button"
             color="primary"
             mat-button
             type="button">
-      {{T.G.CANCEL|translate}}
+      <mat-icon>close</mat-icon>
     </button>
 
     <button (click)="remove()"
             *ngIf="isEdit"
+            [title]="T.F.NOTE.REMOVE_REMINDER|translate"
             class="btn btn-primary submit-button"
             color="primary"
             mat-stroked-button
             type="button">
       <mat-icon>alarm_off</mat-icon>
-      {{T.F.NOTE.REMOVE_REMINDER|translate}}
     </button>
 
     <button class="btn btn-primary submit-button"
+            (click)="save()"
+            [title]="(reminder
+            ?T.F.NOTE.UPDATE_REMINDER
+            :T.F.NOTE.ADD_REMINDER)|translate"
             color="primary"
             mat-stroked-button
-            (click)="save()"
             type="submit">
-      <ng-container *ngIf="!note.reminderId">
-        <mat-icon>alarm_add</mat-icon>
-        {{T.F.NOTE.ADD_REMINDER|translate}}
-      </ng-container>
-      <ng-container *ngIf="note.reminderId">
-        <mat-icon>alarm</mat-icon>
-        {{T.F.NOTE.UPDATE_REMINDER|translate}}
-      </ng-container>
+      <mat-icon *ngIf="!note.reminderId">alarm_add</mat-icon>
+      <mat-icon *ngIf="note.reminderId">alarm</mat-icon>
     </button>
   </div>
 </mat-dialog-actions>
