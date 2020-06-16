@@ -24,10 +24,10 @@
     "TOMORROW": "tomorrow {{time}}"
   },
   "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Later Today",
     "NEXT_WEEK": "Next Week",
     "PRESS_ENTER_AGAIN": "Press enter again to save",
     "PLACEHOLDER": "Please select a date",
-    "TODAY": "Today",
     "TOMORROW": "Tomorrow"
   },
   "F": {

@@ -12,7 +12,7 @@ $owl-dark-text-color: rgba(255, 255, 255, .75);
 $owl-dark-text-color-less-intense: rgba(255, 255, 255, .5);
 $owl-dark-text-color-muted: rgba(255, 255, 255, .15);
 
-$owl-dark-light-selected-bg: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+$owl-dark-light-selected-bg: rgba(49, 49, 49, 1);
 
 $owl-dark-divider-color: rgba(255, 255, 255, .12);
 
@@ -26,7 +26,7 @@ $owl-text-color: rgba(0, 0, 0, .75);
 $owl-text-color-less-intense: rgba(0, 0, 0, .5);
 $owl-text-color-muted: rgba(0, 0, 0, .15);
 
-$owl-light-selected-bg: rgba(240, 240, 240, 1);
+$owl-light-selected-bg: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
 
 $owl-divider-color: rgba(0, 0, 0, .12);
 
@@ -729,7 +729,6 @@ $owl-missing: $owl-light-selected-bg !default;
   width: auto;
   display: flex;
   align-items: center;
-  opacity: 0.7;
   min-height: 36px;
   border-left: 4px solid transparent;
   color: $owl-text-color-strong;
