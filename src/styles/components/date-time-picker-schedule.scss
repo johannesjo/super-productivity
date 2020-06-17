@@ -833,3 +833,32 @@ $ico-size-real: 20px;
 .owl-wrap-cal {
   position: relative;
 }
+
+
+.owl-mobile-time-inp {
+  border: none;
+  text-align: center;
+  height: 100%;
+  font-size: 1.3em;
+  font-family: inherit;
+  color: $owl-text-color-strong;
+  background: transparent;
+  -webkit-appearance: none;
+  background: none;
+
+  @include darkTheme(true) {
+    color: $owl-dark-text-color-strong;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &::-webkit-clear-button {
+    display: none;
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}
