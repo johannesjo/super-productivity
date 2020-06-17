@@ -15,7 +15,6 @@ const D_PLAY = `${D_ACTIONS} button:last-of-type`;
 
 const TODAY_TASKS = 'task-list task';
 const TODAY_TASK_1 = `${TODAY_TASKS}:first-of-type`;
-const ADDITIONAL_WAIT_PER_REMINDER = 5000;
 
 const SCHEDULE_WAIT_TIME = 60000;
 const SCHEDULE_MAX_WAIT_TIME = SCHEDULE_WAIT_TIME + 20000;
@@ -35,12 +34,11 @@ module.exports = {
 
 
   'should display a modal with 2 scheduled task if due': (browser: NBrowser) => {
-    const start = Date.now();
     return browser
       .url(WORK_VIEW_URL)
       // NOTE: tasks are sorted by due time
-      .addTaskWithReminder({title: '0 xyz task koko', scheduleTime: start})
-      .addTaskWithReminder({title: '1 xyz task lolo', scheduleTime: start})
+      .addTaskWithReminder({title: '0 xyz task koko'})
+      .addTaskWithReminder({title: '1 xyz task lolo'})
       .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
       .assert.elementPresent(DIALOG)
       .waitForElementVisible(DIALOG_TASK1)
@@ -63,15 +61,14 @@ module.exports = {
 
 
   'should manually empty list via add to today': (browser: NBrowser) => {
-    const REMINDER_DUE_FROM_NOW = (ADDITIONAL_WAIT_PER_REMINDER * 4);
-    const start = Date.now() + REMINDER_DUE_FROM_NOW;
+    const start = Date.now() + 120000;
     return browser
       .url(WORK_VIEW_URL)
       // NOTE: tasks are sorted by due time
       .addTaskWithReminder({title: '0 xyz task 1234', scheduleTime: start})
       .addTaskWithReminder({title: '1 xyz task 2345', scheduleTime: start})
       .addTaskWithReminder({title: '2 xyz task 2345', scheduleTime: start})
-      .waitForElementVisible(DIALOG, REMINDER_DUE_FROM_NOW + 60000)
+      .waitForElementVisible(DIALOG, start + 60000)
       // wait for all tasks to be present
       .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME)
       .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME)
