@@ -26,7 +26,7 @@ $owl-text-color: rgba(0, 0, 0, .75);
 $owl-text-color-less-intense: rgba(0, 0, 0, .5);
 $owl-text-color-muted: rgba(0, 0, 0, .15);
 
-$owl-light-selected-bg: $light-theme-bg-darker;
+$owl-light-selected-bg: rgb(238, 238, 238);
 
 $owl-divider-color: rgba(0, 0, 0, .12);
 
@@ -732,6 +732,8 @@ $owl-missing: $owl-light-selected-bg !default;
   min-height: 36px;
   border-left: 4px solid transparent;
   color: $owl-text-color-strong;
+  opacity: .9;
+
   @include darkTheme(true) {
     color: $owl-dark-text-color-strong;
   }
@@ -752,10 +754,37 @@ $owl-missing: $owl-light-selected-bg !default;
   }
 }
 
+$ico-size: 24px;
+$ico-size-real: 20px;
 .owl-dt-schedule-item--icon {
-  margin-right: 0.5em;
-  opacity: 0.7;
-  width: 1em;
+  margin-right: $s*0.5;
+  opacity: 0.85;
+  width: $ico-size;
+  height: $ico-size;
+  line-height: $ico-size;
+  text-align: center;
+  position: relative;
+  font-size: 0;
+
+  &:after {
+    font-size: $ico-size-real;
+    font-family: 'Material Icons';
+    content: "link";
+    -webkit-font-feature-settings: 'liga';
+
+    .owl-dt-schedule-item:first-of-type & {
+      content: 'wb_sunny';
+    }
+
+    .owl-dt-schedule-item:nth-of-type(2) & {
+      content: 'event';
+    }
+
+    .owl-dt-schedule-item:last-of-type & {
+      content: 'event';
+    }
+  }
+
 }
 
 .owl-top-input {
