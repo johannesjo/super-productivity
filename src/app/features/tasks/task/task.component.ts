@@ -434,14 +434,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (ev.deltaX > 0) {
       this.isLockPanRight = true;
     } else {
-      const isRemoveOrAddTodayPossible = (
-        !this.task.tagIds.includes(this.TODAY_TAG_ID)
-        || this.task.tagIds.includes(this.TODAY_TAG_ID) && (this.task.projectId || this.task.tagIds?.length > 1)
-      );
-
-      if (isRemoveOrAddTodayPossible) {
-        this.isLockPanLeft = true;
-      }
+      this.isLockPanLeft = true;
     }
   }
 
@@ -462,13 +455,17 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(this.blockRightElRef.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
-          if (this.task.parentId) {
-            // NOTHING
+          if (this.workContextService.isToday) {
+            this.editReminder();
           } else {
-            if (this.task.tagIds.includes(TODAY_TAG.id)) {
-              this.removeFromMyDay();
+            if (this.task.parentId) {
+              // NOTHING
             } else {
-              this.addToMyDay();
+              if (this.task.tagIds.includes(TODAY_TAG.id)) {
+                this.removeFromMyDay();
+              } else {
+                this.addToMyDay();
+              }
             }
           }
           this._resetAfterPan();

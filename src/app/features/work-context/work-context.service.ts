@@ -283,6 +283,12 @@ export class WorkContextService {
     map(tasks => flattenTasks(tasks)),
   );
 
+  isToday: boolean;
+  isToday$: Observable<boolean> = this.activeWorkContextId$.pipe(
+    map(id => id === TODAY_TAG.id),
+    shareReplay(1),
+  );
+
 
   // TODO could be done better
   getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
@@ -368,6 +374,8 @@ export class WorkContextService {
     private _tagService: TagService,
     private _router: Router,
   ) {
+    this.isToday$.subscribe((v) => this.isToday = v);
+
     this.activeWorkContextTypeAndId$.subscribe(v => {
       this.activeWorkContextId = v.activeId;
       this.activeWorkContextType = v.activeType;
