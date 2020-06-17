@@ -7,6 +7,7 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {T} from '../../../t.const';
 import {AddTaskReminderInterface} from './add-task-reminder-interface';
 import {WorkContextService} from '../../work-context/work-context.service';
+import {throttle} from 'helpful-decorators';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -34,10 +35,12 @@ export class DialogAddTaskReminderComponent {
   ) {
   }
 
+  // NOTE: throttle is used as quick way to prevent multiple submits
+  @throttle(2000, {leading: true, trailing: false})
   save() {
     const timestamp = this.dateTime;
 
-    if (!timestamp ) {
+    if (!timestamp) {
       return;
     }
 
@@ -59,6 +62,8 @@ export class DialogAddTaskReminderComponent {
     }
   }
 
+  // NOTE: throttle is used as quick way to prevent multiple submits
+  @throttle(2000, {leading: true, trailing: false})
   remove() {
     this._taskService.removeReminder(this.task.id, this.reminder.id);
     this.close();

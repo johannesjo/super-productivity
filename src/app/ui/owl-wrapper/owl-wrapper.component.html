@@ -9,5 +9,5 @@
                       [isNoMonthSquares]="true"
                       [min]="now"
                       [ngModelOptions]="{standalone:true}"
-                      (doubleEnter)="triggerSubmit.emit(dateTime)"
+                      (doubleEnter)="submit()"
                       (ngModelChange)="updateDateFromCal($event)"></owl-date-time-inline>

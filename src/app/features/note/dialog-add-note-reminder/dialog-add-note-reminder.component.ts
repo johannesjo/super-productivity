@@ -5,6 +5,7 @@ import {NoteService} from '../note.service';
 import {ReminderCopy} from '../../reminder/reminder.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {T} from '../../../t.const';
+import {throttle} from 'helpful-decorators';
 
 @Component({
   selector: 'dialog-add-note-reminder',
@@ -39,6 +40,8 @@ export class DialogAddNoteReminderComponent {
     }
   }
 
+  // NOTE: throttle is used as quick way to prevent multiple submits
+  @throttle(2000, {leading: true, trailing: false})
   save() {
     const timestamp = this.dateTime;
 
@@ -64,6 +67,8 @@ export class DialogAddNoteReminderComponent {
     }
   }
 
+  // NOTE: throttle is used as quick way to prevent multiple submits
+  @throttle(2000, {leading: true, trailing: false})
   remove() {
     this._noteService.removeReminder(this.note.id, this.reminder.id);
     this.close();

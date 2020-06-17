@@ -34,6 +34,9 @@ export class OwlWrapperComponent {
   constructor() {
   }
 
+  submit() {
+    this.triggerSubmit.emit(this.dateTime);
+  }
 
   updateDateFromCal(date) {
     this.dateTime = new Date(date).getTime();
