@@ -26,7 +26,7 @@ $owl-text-color: rgba(0, 0, 0, .75);
 $owl-text-color-less-intense: rgba(0, 0, 0, .5);
 $owl-text-color-muted: rgba(0, 0, 0, .15);
 
-$owl-light-selected-bg: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+$owl-light-selected-bg: $light-theme-bg-darker;
 
 $owl-divider-color: rgba(0, 0, 0, .12);
 
