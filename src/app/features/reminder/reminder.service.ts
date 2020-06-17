@@ -110,8 +110,17 @@ export class ReminderService {
     );
   }
 
+  getByRelatedId(relatedId: string): ReminderCopy {
+    const _foundReminder = this._reminders && this._reminders.find(reminder => reminder.relatedId === relatedId);
+    return _foundReminder && dirtyDeepCopy(_foundReminder);
+  }
+
   addReminder(type: ReminderType, relatedId: string, title: string, remindAt: number, recurringConfig?: RecurringConfig): string {
     const id = shortid();
+    if (this.getByRelatedId(relatedId)) {
+      throw new Error('A reminder for this ' + type + ' already exists');
+    }
+
     this._reminders.push({
       id,
       workContextId: this._workContextService.activeWorkContextId,
@@ -188,7 +197,6 @@ export class ReminderService {
       this.onRemindersActive$.next(finalReminders);
     }
   }
-
 
 
   private async _loadFromDatabase(): Promise<Reminder[]> {
