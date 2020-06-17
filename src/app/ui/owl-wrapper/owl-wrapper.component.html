@@ -8,6 +8,7 @@
                       [sNextWeek]="T.DATETIME_SCHEDULE.NEXT_WEEK|translate"
                       [isNoMonthSquares]="true"
                       [min]="now"
+                      [laterTodaySlots]="laterTodaySlots"
                       [ngModelOptions]="{standalone:true}"
                       (doubleEnter)="submit()"
                       (ngModelChange)="updateDateFromCal($event)"></owl-date-time-inline>

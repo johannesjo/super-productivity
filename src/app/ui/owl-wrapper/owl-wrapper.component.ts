@@ -30,6 +30,13 @@ export class OwlWrapperComponent {
 
   T = T;
   date = new Date();
+  laterTodaySlots = [
+    '9:00',
+    '15:00',
+    '17:00',
+    '19:00',
+    '21:00'
+  ];
 
   constructor() {
   }
