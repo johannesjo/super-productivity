@@ -219,9 +219,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this._matDialog.open(DialogAddTaskReminderComponent, {
-      restoreFocus: true,
       data: {task: this.task} as AddTaskReminderInterface
-    });
+    })
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => this.focusSelf());
   }
 
   updateIssueData() {
@@ -230,11 +232,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   editTaskRepeatCfg() {
     this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
-      restoreFocus: false,
       data: {
         task: this.task,
       }
-    });
+    })
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => this.focusSelf());
   }
 
   handleUpdateBtnClick() {
@@ -264,23 +268,21 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   estimateTime() {
-    this._matDialog
-      .open(DialogTimeEstimateComponent, {
-        data: {task: this.task},
-        autoFocus: !isTouch(),
-      })
+    this._matDialog.open(DialogTimeEstimateComponent, {
+      data: {task: this.task},
+      autoFocus: !isTouch(),
+    })
       .afterClosed()
-      .subscribe(result => {
-        this.focusSelf();
-      });
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => this.focusSelf());
   }
 
   addAttachment() {
-    this._matDialog
-      .open(DialogEditTaskAttachmentComponent, {
-        data: {},
-      })
+    this._matDialog.open(DialogEditTaskAttachmentComponent, {
+      data: {},
+    })
       .afterClosed()
+      .pipe(takeUntil(this._destroy$))
       .subscribe(result => {
         this.focusSelf();
         if (result) {
@@ -333,11 +335,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   editTags() {
     this._matDialog.open(DialogEditTagsForTaskComponent, {
-      restoreFocus: true,
       data: {
         task: this.task
       }
-    });
+    })
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => this.focusSelf());
   }
 
   addToMyDay() {
