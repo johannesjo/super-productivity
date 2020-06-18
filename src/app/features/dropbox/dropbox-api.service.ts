@@ -135,7 +135,6 @@ export class DropboxApiService {
   }
 
   async getAccessTokenFromAuthCode(authCode: string): Promise<string> {
-    // this._codeVerifier = codeVerifier;
     return axios.request({
       url: 'https://api.dropboxapi.com/oauth2/token',
       method: 'POST',
