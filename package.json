@@ -86,6 +86,7 @@
     "tslib": "^1.10.0"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^9.1.0",
     "@angular-devkit/build-angular": "~0.901.4",
     "@angular/animations": "^9.1.4",
     "@angular/cdk": "^9.2.2",
