@@ -2,7 +2,7 @@ import {NightwatchBrowser} from 'nightwatch';
 
 const ADD_NOTE_BTN = '#add-note-btn';
 const TEXTAREA = 'dialog-add-note textarea';
-const ADD_NOTE_SUBMIT_BTN = 'dialog-add-note button[type=submit]';
+const ADD_NOTE_SUBMIT_BTN = 'dialog-add-note button[type=submit]:enabled';
 const NOTES_WRAPPER = 'notes';
 
 module.exports = {

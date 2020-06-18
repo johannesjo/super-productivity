@@ -16,8 +16,7 @@ const D_PLAY = `${D_ACTIONS} button:last-of-type`;
 const TODAY_TASKS = 'task-list task';
 const TODAY_TASK_1 = `${TODAY_TASKS}:first-of-type`;
 
-const SCHEDULE_WAIT_TIME = 60000;
-const SCHEDULE_MAX_WAIT_TIME = SCHEDULE_WAIT_TIME + 20000;
+const SCHEDULE_MAX_WAIT_TIME = 180000;
 
 module.exports = {
   '@tags': ['task', 'reminder', 'schedule'],
@@ -68,7 +67,7 @@ module.exports = {
       .addTaskWithReminder({title: '0 xyz task 1234', scheduleTime: start})
       .addTaskWithReminder({title: '1 xyz task 2345', scheduleTime: start})
       .addTaskWithReminder({title: '2 xyz task 2345', scheduleTime: start})
-      .waitForElementVisible(DIALOG, start + 60000)
+      .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
       // wait for all tasks to be present
       .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME)
       .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME)

@@ -8,7 +8,7 @@ const EXPAND_PROJECT_BTN = `${SIDENAV} .expand-btn:first-of-type`;
 const CREATE_PROJECT_BTN = `${SIDENAV} section.projects .mat-menu-item:last-of-type`;
 
 const PROJECT_NAME_INPUT = `dialog-create-project input:first-of-type`;
-const SUBMIT_BTN = `dialog-create-project button[type=submit]`;
+const SUBMIT_BTN = `dialog-create-project button[type=submit]:enabled`;
 
 const PROJECT = `${SIDENAV} section.projects .project`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-of-type(1)`;

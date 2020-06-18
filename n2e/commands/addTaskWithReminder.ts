@@ -4,8 +4,7 @@ import {Key} from 'protractor';
 const TASK = 'task';
 const SCHEDULE_TASK_ITEM = 'task-additional-info-item:nth-child(2)';
 const DIALOG = 'mat-dialog-container';
-const INP = `${DIALOG} input[type=datetime-local]`;
-const DIALOG_SUBMIT = `${DIALOG} button[type=submit]`;
+const DIALOG_SUBMIT = `${DIALOG} button[type=submit]:enabled`;
 
 const TODAY_BTN = '.owl-dt-schedule-item:first-of-type';
 const TIME_INP_H = 'owl-date-time-timer-box:first-of-type input';
@@ -15,7 +14,7 @@ const M = 60 * 1000;
 
 // being slightly longer than a minute prevents the edge case
 // of the wrong minute if the rest before takes to long
-const DEFAULT_DELTA = (1.25 * M);
+const DEFAULT_DELTA = (1.5 * M);
 
 // NOTE: needs to
 // be executed from work view
@@ -26,7 +25,7 @@ module.exports = {
     scheduleTime = Date.now() + DEFAULT_DELTA
   }: AddTaskWithReminderParams) {
     const d = new Date(scheduleTime);
-    // const h = d.getHours();
+    const h = d.getHours();
     const m = d.getMinutes();
 
     return this
@@ -36,34 +35,15 @@ module.exports = {
       .click(SCHEDULE_TASK_ITEM)
       .waitForElementVisible(DIALOG)
       .waitForElementVisible(TODAY_BTN)
-      .setValue(TIME_INP_H, Key.ARROW_DOWN)
-      .pause(500)
+      .pause(50)
+      .setValue(TIME_INP_H, h.toString())
+      .pause(50)
       .setValue(TIME_INP_H, Key.ARROW_RIGHT)
-      .pause(500)
+      .pause(50)
       .setValue(TIME_INP_M, m.toString())
-      .pause(500)
-      .setValue(TIME_INP_M, Key.ENTER)
-      .setValue(TIME_INP_M, Key.ENTER)
-      ;
+      .waitForElementVisible(DIALOG_SUBMIT)
+      .click(DIALOG_SUBMIT)
+      .waitForElementNotPresent(DIALOG);
   }
 };
-
-
-// const getDateScriptStr = (scheduleTime: number) => {
-//   const dateStr = timestampToDatetimeInputString(scheduleTime);
-//   return `
-//     var dp = '${dateStr}';
-//     document.querySelector('${INP}').value=dp;
-//     `;
-// };
-//
-// // copy from timestamp-to-datetime-input-string.ts because of compilation issue here
-// function timestampToDatetimeInputString(timestamp: number): string {
-//   const date = new Date((timestamp + _getTimeZoneOffsetInMs()));
-//   return date.toISOString().slice(0, 19);
-// }
-//
-// function _getTimeZoneOffsetInMs(): number {
-//   return new Date().getTimezoneOffset() * -60 * 1000;
-// }
 

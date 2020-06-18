@@ -7,7 +7,7 @@ const ADD_BOOKMARK_BTN = '.mat-menu-panel .mat-menu-item:first-of-type';
 const ADD_BOOKMARK_DIALOG = 'dialog-edit-bookmark';
 const BOOKMARK_TITLE_INP = `${ADD_BOOKMARK_DIALOG} input[name=title]`;
 const BOOKMARK_URL_INP = `${ADD_BOOKMARK_DIALOG} input[name=path]`;
-const BOOKMARK_SUBMIT_BTN = `${ADD_BOOKMARK_DIALOG} button[type=submit]`;
+const BOOKMARK_SUBMIT_BTN = `${ADD_BOOKMARK_DIALOG} button[type=submit]:enabled`;
 
 const BOOKMARK = '.global-bookmark-list-inner .global-bookmark';
 const FIRST_BOOKMARK = `${BOOKMARK}:first-of-type`;
