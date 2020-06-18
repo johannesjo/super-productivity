@@ -12,8 +12,8 @@ mac:
   appId: com.super-productivity.app
   type: development
   category: public.app-category.productivity
-  entitlements: build/entitlements.mac.plist
-  entitlementsInherit: build/entitlements.mac.plist
+#  entitlements: build/entitlements.mac.plist
+#  entitlementsInherit: build/entitlements.mac.plist
   icon: build/icon.icns
   hardenedRuntime: false
   gatekeeperAssess: false
@@ -21,7 +21,6 @@ mac:
 #  darkModeSupport: true
   target:
     - mas-dev
-    - mas
 
 mas:
   category: public.app-category.productivity
