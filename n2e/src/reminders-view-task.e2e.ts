@@ -60,7 +60,7 @@ module.exports = {
 
 
   'should manually empty list via add to today': (browser: NBrowser) => {
-    const start = Date.now() + 120000;
+    const start = Date.now() + 100000;
     return browser
       .url(WORK_VIEW_URL)
       // NOTE: tasks are sorted by due time
