@@ -9,9 +9,10 @@ const TASK_PANEL = '.additional-info-panel';
 module.exports = {
   async command(this: NBrowser, taskSel: string) {
     return this
-      .waitForElementVisible(taskSel)
+      .waitForElementPresent(taskSel)
       .pause(50)
       .moveToElement(taskSel, 100, 15)
+      .pause(50)
       .waitForElementVisible(HOVER_BTNS)
       .waitForElementVisible(EXPAND_BTN)
       .click(EXPAND_BTN)
