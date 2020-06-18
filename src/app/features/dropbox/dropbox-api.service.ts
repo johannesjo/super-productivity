@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {DROPBOX_APP_KEY, DROPBOX_APP_SECRET} from './dropbox.const';
+import {DROPBOX_APP_KEY, DROPBOX_CODE_VERIFIER} from './dropbox.const';
 import {GlobalConfigService} from '../config/global-config.service';
 import {first, map, switchMap, tap} from 'rxjs/operators';
 import {DataInitService} from '../../core/data-init/data-init.service';
@@ -135,6 +135,7 @@ export class DropboxApiService {
   }
 
   async getAccessTokenFromAuthCode(authCode: string): Promise<string> {
+    // this._codeVerifier = codeVerifier;
     return axios.request({
       url: 'https://api.dropboxapi.com/oauth2/token',
       method: 'POST',
@@ -145,7 +146,7 @@ export class DropboxApiService {
         code: authCode,
         grant_type: 'authorization_code',
         client_id: DROPBOX_APP_KEY,
-        client_secret: DROPBOX_APP_SECRET,
+        code_verifier: DROPBOX_CODE_VERIFIER,
       }),
     }).then(res => {
       return res.data.access_token;
