@@ -23,6 +23,13 @@
     "IN": "در {{time}}",
     "TOMORROW": "فردا {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "امروز بعد",
+    "NEXT_WEEK": "هفته بعد",
+    "PLACEHOLDER": "لطفاً تاریخ را انتخاب کنید",
+    "PRESS_ENTER_AGAIN": "برای ذخیره دوباره وارد کنید",
+    "TOMORROW": "فردا"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "شما باید یک عنوان وارد کنید",
         "L_DATETIME": "تاریخ و زمان برای یادآوری",
-        "L_TITLE": "عنوان برای اطلاع رسانی",
-        "TITLE_ADD": "اضافه کردن یادآوری برای یک یاد داشت",
-        "TITLE_EDIT": "ویرایش یادآوری برای یک یاد داشت"
+        "L_TITLE": "عنوان برای اطلاع رسانی"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "تعویق",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Schedule Task",
         "DATETIME_FOR": "تاریخ و زمان برای یادآوری",
         "EDIT": "ویرایش یادآوری",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "به امروز اضافه کنید",
         "DISMISS": "Dismiss Reminder",
         "DISMISS_ALL": "اخراج همه",
+        "DUE_TASK": "وظیفه مقرر",
         "DUE_TASKS": "وظایف مقرر",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "به امروز اضافه کنید و یادآوری را حذف کنید",
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
     "START_TASK": "Start task now and remove reminder"
   },

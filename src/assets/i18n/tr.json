@@ -23,6 +23,13 @@
     "IN": " {{time}}içinde",
     "TOMORROW": "yarın {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Bugün Daha Sonra",
+    "NEXT_WEEK": "Gelecek hafta",
+    "PLACEHOLDER": "Lütfen bir tarih seçin",
+    "PRESS_ENTER_AGAIN": "Kaydetmek için tekrar enter tuşuna basın",
+    "TOMORROW": "Yarın"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "Bir başlık girmeniz gerekiyor",
         "L_DATETIME": "Hatırlatıcı için Datetime",
-        "L_TITLE": "Bildirimin başlığı",
-        "TITLE_ADD": "Not için hatırlatıcı ekle",
-        "TITLE_EDIT": "Not için hatırlatıcıyı düzenle"
+        "L_TITLE": "Bildirimin başlığı"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Erteleme",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Görev Takvimi",
         "DATETIME_FOR": "Hatırlatıcı için Datetime",
         "EDIT": "Hatırlatıcıyı düzenle",
         "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi günlüğe kaydetme",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "Bugüne ekle",
         "DISMISS": "Hatırlatmayı Sil",
         "DISMISS_ALL": "Hepsini reddet",
+        "DUE_TASK": "Son görev",
         "DUE_TASKS": "Teslim edilecek görevler",
         "FOR_CURRENT": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
         "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "Bugüne ekle ve hatırlatıcıyı kaldır",
     "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
     "START_TASK": "Görevi şimdi başlat ve anımsatıcıyı kaldır"
   },

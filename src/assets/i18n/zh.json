@@ -23,6 +23,13 @@
     "IN": "在 {{time}}",
     "TOMORROW": "明天 {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "今天晚些时候",
+    "NEXT_WEEK": "下周",
+    "PLACEHOLDER": "请选择一个日期",
+    "PRESS_ENTER_AGAIN": "再次按Enter保存",
+    "TOMORROW": "明天"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "你需要输入一个标题",
         "L_DATETIME": "提醒的日期时间",
-        "L_TITLE": "通知标题",
-        "TITLE_ADD": "添加提醒以备注",
-        "TITLE_EDIT": "编辑备注提醒"
+        "L_TITLE": "通知标题"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "暂停",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "更新问题数据"
       },
       "D_REMINDER_ADD": {
-        "ADD": "安排任务",
         "DATETIME_FOR": "提醒的日期时间",
         "EDIT": "编辑提醒",
         "MOVE_TO_BACKLOG": "将任务移至待办事项直到计划",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "今天添加",
         "DISMISS": "解雇提醒",
         "DISMISS_ALL": "关闭所有",
+        "DUE_TASK": "适当的任务",
         "DUE_TASKS": "到期任务",
         "FOR_CURRENT": "任务到期了。你想开始工作吗？",
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "添加到今天并删除提醒",
     "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",
     "START_TASK": "立即开始任务并删除提醒"
   },

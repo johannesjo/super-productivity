@@ -23,6 +23,13 @@
     "IN": "op {{time}}",
     "TOMORROW": "morgen {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Later vandaag",
+    "NEXT_WEEK": "Volgende week",
+    "PLACEHOLDER": "Selecteer een datum",
+    "PRESS_ENTER_AGAIN": "Druk nogmaals op enter om op te slaan",
+    "TOMORROW": "morgen"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "Je moet een titel invoeren",
         "L_DATETIME": "Datetime voor herinnering",
-        "L_TITLE": "Titel voor kennisgeving",
-        "TITLE_ADD": "Herinnering toevoegen voor notitie",
-        "TITLE_EDIT": "Herinnering voor notitie bewerken"
+        "L_TITLE": "Titel voor kennisgeving"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Snooze",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Update probleemgegevens"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Taak plannen",
         "DATETIME_FOR": "Datetime voor herinnering",
         "EDIT": "Herinnering bewerken",
         "MOVE_TO_BACKLOG": "Verplaats taak naar achterstand tot gepland",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
         "DISMISS": "Herinnering afwijzen",
         "DISMISS_ALL": "Alles afkeuren",
+        "DUE_TASK": "Gepaste taak",
         "DUE_TASKS": "Geplande taken",
         "FOR_CURRENT": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
         "FOR_OTHER": "Taak is verschuldigd. Wil je eraan beginnen te werken?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "Voeg toe aan vandaag en verwijder de herinnering",
     "NO_SCHEDULED": "Er zijn momenteel geen geplande taken. U kunt een taak plannen door \"Taak plannen\" te kiezen in het taakcontextmenu. Klik op de 3 kleine puntjes rechts van een taak om deze te openen.",
     "START_TASK": "Start de taak nu en verwijder de herinnering"
   },

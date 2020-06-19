@@ -23,6 +23,13 @@
     "IN": "in {{time}}",
     "TOMORROW": "domani {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Più tardi oggi",
+    "NEXT_WEEK": "La prossima settimana",
+    "PLACEHOLDER": "Seleziona una data",
+    "PRESS_ENTER_AGAIN": "Premere di nuovo Invio per salvare",
+    "TOMORROW": "domani"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "Devi inserire un titolo",
         "L_DATETIME": "Data e ora per promemoria",
-        "L_TITLE": "Titolo per la notifica",
-        "TITLE_ADD": "Aggiungi promemoria per nota",
-        "TITLE_EDIT": "Modifica promemoria per nota"
+        "L_TITLE": "Titolo per la notifica"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Silenzia",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Pianifica Task",
         "DATETIME_FOR": "Data e ora per promemoria",
         "EDIT": "Modifica promemoria",
         "MOVE_TO_BACKLOG": "Sposta il task nel backlog fino alla pianificazione",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "Aggiungi a oggi",
         "DISMISS": "Rimuovi promemoria",
         "DISMISS_ALL": "Ignora tutto",
+        "DUE_TASK": "Compito dovuto",
         "DUE_TASKS": "Compiti dovuti",
         "FOR_CURRENT": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
         "FOR_OTHER": "Hai un task pianificato. Vuoi iniziare a lavorarci?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "Aggiungi a oggi e rimuovi promemoria",
     "NO_SCHEDULED": "Non ci sono task pianificati al momento. Puoi pianificare un task scegliendo \"Pianifica task\" nel menu di contesto. Per aprirlo clicca i tre puntini sulla destra dei task.",
     "START_TASK": "Inizia il task ora e rimuovi promemoria"
   },

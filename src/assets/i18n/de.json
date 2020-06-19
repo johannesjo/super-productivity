@@ -23,6 +23,13 @@
     "IN": "in {{time}}",
     "TOMORROW": "morgen {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Im Laufe des Tages",
+    "NEXT_WEEK": "Nächste Woche",
+    "PLACEHOLDER": "Bitte wählen Sie ein Datum",
+    "PRESS_ENTER_AGAIN": "Drücken Sie zum Speichern erneut die Eingabetaste",
+    "TOMORROW": "Morgen"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "Sie müssen einen Titel eingeben",
         "L_DATETIME": "Datum und Uhrzeit zur Erinnerung",
-        "L_TITLE": "Titel zur Benachrichtigung",
-        "TITLE_ADD": "Erinnerung für Notiz hinzufügen",
-        "TITLE_EDIT": "Erinnerung für Notiz bearbeiten"
+        "L_TITLE": "Titel zur Benachrichtigung"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Snooze",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Issuedaten aktualisieren"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Task planen",
         "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
         "EDIT": "Erinnerung bearbeiten",
         "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "Heute hinzufügen",
         "DISMISS": "Erinnerung verwerfen",
         "DISMISS_ALL": "Alle schließen",
+        "DUE_TASK": "Due Aufgabe",
         "DUE_TASKS": "Fällige Aufgaben",
         "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "Zum heutigen Tag hinzufügen und Erinnerung entfernen",
     "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
     "START_TASK": "Aufgabe jetzt starten und Erinnerung entfernen"
   },

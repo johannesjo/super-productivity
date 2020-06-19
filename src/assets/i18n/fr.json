@@ -23,6 +23,13 @@
     "IN": "dans {{time}}",
     "TOMORROW": "demain {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Plus tard aujourd'hui",
+    "NEXT_WEEK": "Prochaine semaine",
+    "PLACEHOLDER": "Veuillez choisir une date",
+    "PRESS_ENTER_AGAIN": "Appuyez à nouveau sur Entrée pour enregistrer",
+    "TOMORROW": "demain"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "Vous devez entrer un titre",
         "L_DATETIME": "Date et heure du rappel",
-        "L_TITLE": "Titre de la notification",
-        "TITLE_ADD": "Ajouter un rappel pour la note",
-        "TITLE_EDIT": "Modifier le rappel pour la note"
+        "L_TITLE": "Titre de la notification"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Sommeil",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Mettre à jour les données du ticket"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Planifier une tâche",
         "DATETIME_FOR": "Date et heure du rappel",
         "EDIT": "Modifier le rappel",
         "MOVE_TO_BACKLOG": "Déplacer la tâche dans le backlog en atendant la planification",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "Ajouter à aujourd'hui",
         "DISMISS": "Fermer le rappel",
         "DISMISS_ALL": "Rejeter la totalité",
+        "DUE_TASK": "Tâche due",
         "DUE_TASKS": "Tâches dues",
         "FOR_CURRENT": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "Ajouter à aujourd'hui et supprimer le rappel",
     "NO_SCHEDULED": "Il n'y a actuellement aucune tâche planifiée. Vous pouvez planifier une tâche en choisissant \"Planifier une tâche\" dans le menu contextuel de la tâche. Pour l'ouvrir, cliquez sur les 3 petits points à droite d'une tâche.",
     "START_TASK": "Démarrer la tâche maintenant et supprimer le rappel"
   },

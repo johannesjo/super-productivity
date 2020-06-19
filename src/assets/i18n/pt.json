@@ -23,6 +23,13 @@
     "IN": "em {{time}}",
     "TOMORROW": "amanhã {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Hoje mais tarde",
+    "NEXT_WEEK": "Semana que vem",
+    "PLACEHOLDER": "Por favor selecione uma data",
+    "PRESS_ENTER_AGAIN": "Pressione enter novamente para salvar",
+    "TOMORROW": "amanhã"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "Você precisa inserir um título",
         "L_DATETIME": "Data e hora para lembrete",
-        "L_TITLE": "Título para notificação",
-        "TITLE_ADD": "Adicionar lembrete à nota",
-        "TITLE_EDIT": "Editar lembrete para a nota"
+        "L_TITLE": "Título para notificação"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Soneca",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Atualizar dados da issue"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Agendar tarefa",
         "DATETIME_FOR": "Data e hora para lembrete",
         "EDIT": "Editar lembrete",
         "MOVE_TO_BACKLOG": "Mova a tarefa para backlog até que seja agendada",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "Adicione hoje",
         "DISMISS": "Dispensar lembrete",
         "DISMISS_ALL": "Recusar tudo",
+        "DUE_TASK": "Tarefa devida",
         "DUE_TASKS": "Tarefas devidas",
         "FOR_CURRENT": "A tarefa está vencida. Deseja começar a trabalhar nela?",
         "FOR_OTHER": "A tarefa está vencida. Deseja começar a trabalhar nela?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "Adicione hoje e remova o lembrete",
     "NO_SCHEDULED": "No momento, não há tarefas agendadas. Você pode agendar uma tarefa escolhendo \"Agendar tarefa\" no menu de contexto da tarefa. Para abri-lo, clique nos 3 pontinhos à direita de uma tarefa.",
     "START_TASK": "Iniciar tarefa agora e remover lembrete"
   },

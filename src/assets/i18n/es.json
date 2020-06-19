@@ -23,6 +23,13 @@
     "IN": "en {{time}}",
     "TOMORROW": "mañana {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Mas tarde, hoy",
+    "NEXT_WEEK": "La próxima semana",
+    "PLACEHOLDER": "Por favor seleccione una fecha",
+    "PRESS_ENTER_AGAIN": "Presione enter nuevamente para guardar",
+    "TOMORROW": "mañana"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "Necesitas ingresar un título",
         "L_DATETIME": "Fecha y hora para recordatorio",
-        "L_TITLE": "Título para la notificación",
-        "TITLE_ADD": "Añadir recordatorio para la nota",
-        "TITLE_EDIT": "Editar recordatorio para nota"
+        "L_TITLE": "Título para la notificación"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "Posponer",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "Actualizar datos de problemas"
       },
       "D_REMINDER_ADD": {
-        "ADD": "Programar una tarea",
         "DATETIME_FOR": "Fecha y hora para recordatorio",
         "EDIT": "Editar recordatorio",
         "MOVE_TO_BACKLOG": "Mover la tarea al registro de trabajos hasta que sea programado",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "Añadir a hoy",
         "DISMISS": "Descartar recordatorio",
         "DISMISS_ALL": "Descartar todo",
+        "DUE_TASK": "Tarea debida",
         "DUE_TASKS": "Tareas debidas",
         "FOR_CURRENT": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
         "FOR_OTHER": "Tarea programada. ¿Quieres empezar a trabajar en ello?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "Agregar a hoy y eliminar recordatorio",
     "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
     "START_TASK": "Inicie la tarea ahora y elimine el recordatorio"
   },

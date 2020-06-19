@@ -23,6 +23,13 @@
     "IN": " {{time}}に",
     "TOMORROW": "明日 {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "今日あとで",
+    "NEXT_WEEK": "来週",
+    "PLACEHOLDER": "日付を選択してください",
+    "PRESS_ENTER_AGAIN": "保存するにはもう一度Enterキーを押してください",
+    "TOMORROW": "明日"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "タイトルを入力してください",
         "L_DATETIME": "リマインダーの日時",
-        "L_TITLE": "通知のタイトル",
-        "TITLE_ADD": "メモのメモを追加",
-        "TITLE_EDIT": "メモのメモを編集"
+        "L_TITLE": "通知のタイトル"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "のスヌーズ",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "課題データを更新する"
       },
       "D_REMINDER_ADD": {
-        "ADD": "スケジュールタスク",
         "DATETIME_FOR": "リマインダーの日時",
         "EDIT": "リマインダーを編集",
         "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "今日に追加",
         "DISMISS": "リマインダーを却下",
         "DISMISS_ALL": "すべて却下する",
+        "DUE_TASK": "期限付きタスク",
         "DUE_TASKS": "期限付きタスク",
         "FOR_CURRENT": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
         "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "今日に追加してリマインダーを削除",
     "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
     "START_TASK": "今すぐタスクを開始してリマインダーを削除"
   },

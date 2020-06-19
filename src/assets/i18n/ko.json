@@ -23,6 +23,13 @@
     "IN": " {{time}}에",
     "TOMORROW": "내일 {{time}}"
   },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "나중에 오늘",
+    "NEXT_WEEK": "다음주",
+    "PLACEHOLDER": "날짜를 선택하십시오",
+    "PRESS_ENTER_AGAIN": "Enter를 다시 눌러 저장하십시오.",
+    "TOMORROW": "내일"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -421,9 +428,7 @@
       "D_ADD_REMINDER": {
         "E_ENTER_TITLE": "제목을 입력해야합니다.",
         "L_DATETIME": "알림 시간",
-        "L_TITLE": "알림 제목",
-        "TITLE_ADD": "메모에 알림 추가",
-        "TITLE_EDIT": "메모 알림 수정"
+        "L_TITLE": "알림 제목"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "에 대한 일시 중지",
@@ -642,7 +647,6 @@
         "UPDATE_ISSUE_DATA": "문제 데이터 업데이트"
       },
       "D_REMINDER_ADD": {
-        "ADD": "작업 예약",
         "DATETIME_FOR": "알림 시간",
         "EDIT": "알림 수정",
         "MOVE_TO_BACKLOG": "예약 될 때까지 작업을 백 로그로 이동하십시오.",
@@ -654,6 +658,7 @@
         "ADD_TO_TODAY": "오늘 추가",
         "DISMISS": "알림 일시 중지",
         "DISMISS_ALL": "모두 해제",
+        "DUE_TASK": "마감일",
         "DUE_TASKS": "마감일",
         "FOR_CURRENT": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
         "FOR_OTHER": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
@@ -1072,6 +1077,7 @@
     }
   },
   "SCHEDULE": {
+    "ADD_TO_TODAY": "오늘 추가하고 알림 제거",
     "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",
     "START_TASK": "지금 작업을 시작하고 알림 제거"
   },
