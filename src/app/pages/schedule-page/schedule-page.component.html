@@ -17,14 +17,14 @@
       class="scheduled-task">
       <mat-card-content>
         <div class="content">
-          <button (click)="startTask(task)"
-                  [matTooltip]="T.SCHEDULE.START_TASK|translate"
-                  class="mat-elevation-z1 start-task-btn"
-                  color=""
-                  mat-mini-fab
-                  matTooltipPosition="right">
-            <mat-icon>play_arrow</mat-icon>
-          </button>
+          <!--          <button (click)="startTask(task)"-->
+          <!--                  [matTooltip]="T.SCHEDULE.START_TASK|translate"-->
+          <!--                  class="mat-elevation-z1 start-task-btn"-->
+          <!--                  color=""-->
+          <!--                  mat-mini-fab-->
+          <!--                  matTooltipPosition="right">-->
+          <!--            <mat-icon>play_arrow</mat-icon>-->
+          <!--          </button>-->
 
           <div class="task-info">
             <div class="title">
@@ -38,17 +38,26 @@
 
             <div (click)="editReminder(task)"
                  class="due-date"
-                 mat-ripple
-                 matTooltipPosition="left">
-              <div>
-                <div class="time-left"
-                     style="margin-right: 10px;">{{task.reminderData.remindAt|date:'EE, d MMM, h:mm'}}</div>
-                <div class="date" style="text-align: right; opacity: 0.8;">
+                 mat-ripple>
+              <div class="date-and-time-left">
+                <div class="date">{{task.reminderData.remindAt|date:'EE, d MMM, h:mm'}}</div>
+                <div class="time-left">
                   ({{task.reminderData.remindAt|humanizeTimestamp}})
                 </div>
               </div>
               <mat-icon>alarm</mat-icon>
             </div>
+
+            <button mat-icon-button
+                    class="action-btn"
+                    [matTooltip]="T.SCHEDULE.START_TASK|translate">
+              <mat-icon svgIcon="play"></mat-icon>
+            </button>
+            <button mat-icon-button
+                    class="action-btn"
+                    [matTooltip]="T.SCHEDULE.START_TASK|translate">
+              <mat-icon>wb_sunny</mat-icon>
+            </button>
           </div>
         </div>
 

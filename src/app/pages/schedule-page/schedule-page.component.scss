@@ -68,16 +68,38 @@
     padding-left: $s;
     padding-right: $s;
     min-height: $mat-mini-fab-size;
+    text-align: right;
+    opacity: 0.9;
 
-    .date {
+    @include mq(xs) {
+      margin: 0 $s*2;
+      flex-direction: row;
+    }
+
+    .time-left {
+      opacity: 0.9;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .date-and-time-left {
       @include mq(xs) {
         margin-right: $s;
       }
     }
 
-    @include mq(xs) {
-      margin: 0 $s*2;
-      flex-direction: row;
+    mat-icon {
+      display: none;
+      @include mq(xs) {
+        display: block;
+        opacity: .8;
+      }
+    }
+
+    &:hover mat-icon {
+      opacity: 1;
     }
   }
 }
@@ -99,8 +121,21 @@
 
 
 .task-title {
-  margin-left: -4px;
   @include taskTitle;
   // to account for the task titles inner padding
   margin-top: -8px;
+  margin-left: -8px;
+}
+
+.action-btn {
+  display: none;
+
+  @include mq(xs) {
+    display: block;
+    opacity: .7;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
