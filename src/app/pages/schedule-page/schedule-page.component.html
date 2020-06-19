@@ -50,11 +50,16 @@
             </button>
             <button mat-icon-button
                     class="action-btn"
-                    (click)="addToToday(task)"
-                    [disabled]="task.tagIds.includes(TODAY_TAG.id)"
-                    [matTooltip]="T.SCHEDULE.ADD_TO_TODAY|translate">
-              <mat-icon>wb_sunny</mat-icon>
+                    [matTooltip]="(task.tagIds.includes(TODAY_TAG.id)
+                    ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
+                    :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
+                    (click)="toggleToday(task)">
+              <mat-icon>
+                <ng-container *ngIf="task.tagIds.includes(TODAY_TAG.id)">remove_circle</ng-container>
+                <ng-container *ngIf="!task.tagIds.includes(TODAY_TAG.id)">wb_sunny</ng-container>
+              </mat-icon>
             </button>
+
           </div>
         </div>
 

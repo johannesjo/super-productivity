@@ -42,8 +42,13 @@ export class SchedulePageComponent {
     }
   }
 
-  addToToday(task: TaskWithReminderData) {
-    this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+  toggleToday(task: TaskWithReminderData) {
+    if (task.tagIds.includes(TODAY_TAG.id)) {
+      this._taskService.updateTags(task, task.tagIds.filter(id => id !== TODAY_TAG.id), task.tagIds);
+    } else {
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+
+    }
   }
 
   removeReminder(task: TaskWithReminderData) {
