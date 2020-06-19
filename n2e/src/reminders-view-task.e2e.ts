@@ -4,6 +4,8 @@ import {NBrowser} from '../n-browser-interface';
 const WORK_VIEW_URL = `${BASE}/`;
 
 const DIALOG = 'dialog-view-task-reminder';
+const DIALOG_TASKS_WRAPPER = `${DIALOG} .tasks`;
+
 const DIALOG_TASK = `${DIALOG} .task`;
 const DIALOG_TASK1 = `${DIALOG_TASK}:first-of-type`;
 const DIALOG_TASK2 = `${DIALOG_TASK}:nth-of-type(2)`;
@@ -42,8 +44,8 @@ module.exports = {
       .assert.elementPresent(DIALOG)
       .waitForElementVisible(DIALOG_TASK1)
       .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME)
-      .assert.containsText(DIALOG_TASK1, '0 B task')
-      .assert.containsText(DIALOG_TASK2, '1 B task')
+      .assert.containsText(DIALOG_TASKS_WRAPPER, '0 B task')
+      .assert.containsText(DIALOG_TASKS_WRAPPER, '1 B task')
       .end();
   },
 
@@ -60,25 +62,26 @@ module.exports = {
 
 
   'should manually empty list via add to today': (browser: NBrowser) => {
-    const start = Date.now() + 100000;
+    const start = Date.now() + 120000;
     return browser
       .url(WORK_VIEW_URL)
       // NOTE: tasks are sorted by due time
-      .addTaskWithReminder({title: '0 D task', scheduleTime: start})
-      .addTaskWithReminder({title: '1 D task', scheduleTime: start})
-      .addTaskWithReminder({title: '2 D task', scheduleTime: start})
-      .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
+      .addTaskWithReminder({title: '0 D task xyz', scheduleTime: start})
+      .addTaskWithReminder({title: '1 D task xyz', scheduleTime: start})
+      .addTaskWithReminder({title: '2 D task xyz', scheduleTime: start})
+      .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME + 120000)
       // wait for all tasks to be present
-      .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME)
-      .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME)
-      .waitForElementVisible(DIALOG_TASK3, SCHEDULE_MAX_WAIT_TIME)
+      .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME + 120000)
+      .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME + 120000)
+      .waitForElementVisible(DIALOG_TASK3, SCHEDULE_MAX_WAIT_TIME + 120000)
       .pause(100)
-      .assert.containsText(DIALOG_TASK1, '0 D task')
-      .assert.containsText(DIALOG_TASK2, '1 D task')
-      .assert.containsText(DIALOG_TASK3, '2 D task')
+      .assert.containsText(DIALOG_TASKS_WRAPPER, '0 D task xyz')
+      .assert.containsText(DIALOG_TASKS_WRAPPER, '1 D task xyz')
+      .assert.containsText(DIALOG_TASKS_WRAPPER, '2 D task xyz')
       .click(DIALOG_TASK1 + TO_TODAY_SUF)
       .click(DIALOG_TASK2 + TO_TODAY_SUF)
-      .assert.containsText(DIALOG_TASK1, '2 D task')
+      .pause(50)
+      .assert.containsText(DIALOG_TASK1, 'D task xyz')
       .end();
   }
 };
