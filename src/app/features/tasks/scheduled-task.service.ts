@@ -4,6 +4,7 @@ import {map, shareReplay, switchMap} from 'rxjs/operators';
 import {TaskService} from './task.service';
 import {ReminderService} from '../reminder/reminder.service';
 import {TaskWithReminderData} from './task.model';
+import {devError} from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +17,19 @@ export class ScheduledTaskService {
     switchMap((reminders) => {
       const ids = reminders.map(r => r.relatedId);
       return this._taskService.getByIdsLive$(ids).pipe(
-        map((tasks) => tasks.map(
-          task => ({
-            ...task,
-            reminderData: reminders.find(reminder => reminder.relatedId === task.id)
-          })),
+        map((tasks) => tasks
+          .filter((task) => {
+            if (!task) {
+              console.log(reminders, tasks);
+              devError('Reminder without task data');
+            }
+            return !!task;
+          })
+          .map(
+            task => ({
+              ...task,
+              reminderData: reminders.find(reminder => reminder.relatedId === task.id)
+            })),
         ),
       );
     }),
