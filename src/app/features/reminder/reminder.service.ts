@@ -69,6 +69,7 @@ export class ReminderService {
         this._w.addEventListener('message', this._onReminderActivated.bind(this));
         this._w.addEventListener('error', this._handleError.bind(this));
         await this.reloadFromDatabase();
+        await this._checkForMissingRelatedData();
         this._isRemindersLoaded$.next(true);
       });
 
@@ -178,7 +179,7 @@ export class ReminderService {
   private async _onReminderActivated(msg: MessageEvent) {
     const reminders = msg.data as Reminder[];
     const remindersWithData: Reminder[] = await Promise.all(reminders.map(async (reminder) => {
-      const relatedModel = await this._getRelatedDataForReminder(reminder.relatedId, reminder.workContextId, reminder.type);
+      const relatedModel = await this._getRelatedDataForReminder(reminder);
       // console.log('RelatedModel for Reminder', relatedModel);
       // only show when not currently syncing and related model still exists
       if (!relatedModel) {
@@ -221,12 +222,25 @@ export class ReminderService {
     this._snackService.open({type: 'ERROR', msg: T.F.REMINDER.S_REMINDER_ERR});
   }
 
-  private async _getRelatedDataForReminder(id: string, workContextId: string, type: ReminderType): Promise<Task | Note> {
-    switch (type) {
+  private async _getRelatedDataForReminder(reminder: Reminder): Promise<Task | Note> {
+    switch (reminder.type) {
       case 'NOTE':
-        return await this._noteService.getByIdFromEverywhere(id, workContextId);
+        return await this._noteService.getByIdFromEverywhere(reminder.relatedId, reminder.workContextId);
       case 'TASK':
-        return await this._taskService.getByIdFromEverywhere(id);
+        return await this._taskService.getByIdFromEverywhere(reminder.relatedId);
+    }
+  }
+
+  private async _checkForMissingRelatedData() {
+    if (this._reminders) {
+      await Promise.all(this._reminders.map(reminder => {
+        const related = this._getRelatedDataForReminder(reminder);
+        if (!related) {
+          console.log(reminder);
+          devError('Reminder related data missing for reminder ' + reminder.title);
+          this.removeReminder(reminder.id);
+        }
+      }));
     }
   }
 }
