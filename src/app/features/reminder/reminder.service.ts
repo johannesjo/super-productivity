@@ -16,7 +16,6 @@ import {SyncService} from '../../imex/sync/sync.service';
 import {first, map} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
-import {environment} from '../../../environments/environment';
 import {devError} from '../../util/dev-error';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 20000;
@@ -69,7 +68,6 @@ export class ReminderService {
         this._w.addEventListener('message', this._onReminderActivated.bind(this));
         this._w.addEventListener('error', this._handleError.bind(this));
         await this.reloadFromDatabase();
-        await this._checkForMissingRelatedData();
         this._isRemindersLoaded$.next(true);
       });
 
@@ -85,13 +83,9 @@ export class ReminderService {
     }
     this._reminders = await this._loadFromDatabase();
     if (!Array.isArray(this._reminders)) {
-      if (environment.production) {
-        console.error('Something went wrong with the reminders', this._reminders);
-        this._reminders = [];
-      } else {
-        console.log('this._reminders', this._reminders);
-        throw new Error('Reminders are wrong');
-      }
+      console.log(this._reminders);
+      devError('Something went wrong with the reminders');
+      this._reminders = [];
     }
 
     this._onReloadModel$.next(this._reminders);
@@ -179,6 +173,7 @@ export class ReminderService {
   private async _onReminderActivated(msg: MessageEvent) {
     const reminders = msg.data as Reminder[];
     const remindersWithData: Reminder[] = await Promise.all(reminders.map(async (reminder) => {
+
       const relatedModel = await this._getRelatedDataForReminder(reminder);
       // console.log('RelatedModel for Reminder', relatedModel);
       // only show when not currently syncing and related model still exists
@@ -190,7 +185,7 @@ export class ReminderService {
         return reminder;
       }
     }));
-    const finalReminders = remindersWithData.filter(reminder => !!reminder);
+    const finalReminders = remindersWithData.filter(reminder => !!reminder && reminder !== null);
 
     if (this._imexMetaService.isDataImportInProgress) {
       console.log('Reminder blocked because sync is in progress');
@@ -227,20 +222,8 @@ export class ReminderService {
       case 'NOTE':
         return await this._noteService.getByIdFromEverywhere(reminder.relatedId, reminder.workContextId);
       case 'TASK':
-        return await this._taskService.getByIdFromEverywhere(reminder.relatedId);
-    }
-  }
-
-  private async _checkForMissingRelatedData() {
-    if (this._reminders) {
-      await Promise.all(this._reminders.map(reminder => {
-        const related = this._getRelatedDataForReminder(reminder);
-        if (!related) {
-          console.log(reminder);
-          devError('Reminder related data missing for reminder ' + reminder.title);
-          this.removeReminder(reminder.id);
-        }
-      }));
+        // NOTE: remember we don't want archive tasks to pop up here
+        return await this._taskService.getByIdOnce$(reminder.relatedId).toPromise();
     }
   }
 }
