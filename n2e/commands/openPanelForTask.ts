@@ -1,9 +1,7 @@
 import {NBrowser} from '../n-browser-interface';
+import {Key} from 'protractor';
 
-const HOVER_CTRLS = '.hover-controls';
-const HOVER_BTNS = `${HOVER_CTRLS} button`;
-const EXPAND_BTN = `${HOVER_BTNS}:last-of-type`;
-const TASK_PANEL = '.additional-info-panel';
+const SIDE_INNER = '.additional-info-panel';
 
 // NOTE: needs to be executed from work view
 module.exports = {
@@ -12,11 +10,10 @@ module.exports = {
       .waitForElementPresent(taskSel)
       .pause(50)
       .moveToElement(taskSel, 100, 15)
+      .click(taskSel)
+      .sendKeys(taskSel, Key.ARROW_RIGHT)
+      .waitForElementVisible(SIDE_INNER)
       .pause(50)
-      .waitForElementVisible(HOVER_BTNS)
-      .waitForElementVisible(EXPAND_BTN)
-      .click(EXPAND_BTN)
-      .waitForElementVisible(TASK_PANEL)
       ;
   }
 };
