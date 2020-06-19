@@ -17,14 +17,6 @@
       class="scheduled-task">
       <mat-card-content>
         <div class="content">
-          <!--          <button (click)="startTask(task)"-->
-          <!--                  [matTooltip]="T.SCHEDULE.START_TASK|translate"-->
-          <!--                  class="mat-elevation-z1 start-task-btn"-->
-          <!--                  color=""-->
-          <!--                  mat-mini-fab-->
-          <!--                  matTooltipPosition="right">-->
-          <!--            <mat-icon>play_arrow</mat-icon>-->
-          <!--          </button>-->
 
           <div class="task-info">
             <div class="title">
@@ -50,12 +42,15 @@
 
             <button mat-icon-button
                     class="action-btn"
+                    (click)="startTask(task)"
                     [matTooltip]="T.SCHEDULE.START_TASK|translate">
               <mat-icon svgIcon="play"></mat-icon>
             </button>
             <button mat-icon-button
                     class="action-btn"
-                    [matTooltip]="T.SCHEDULE.START_TASK|translate">
+                    (click)="addToToday(task)"
+                    [disabled]="task.tagIds.includes(TODAY_TAG.id)"
+                    [matTooltip]="T.SCHEDULE.ADD_TO_TODAY|translate">
               <mat-icon>wb_sunny</mat-icon>
             </button>
           </div>

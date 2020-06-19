@@ -11,6 +11,7 @@ import {Router} from '@angular/router';
 import {take} from 'rxjs/operators';
 import {AddTaskReminderInterface} from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import {WorkContextService} from '../../features/work-context/work-context.service';
+import {TODAY_TAG} from '../../features/tag/tag.const';
 
 @Component({
   selector: 'schedule-page',
@@ -21,6 +22,7 @@ import {WorkContextService} from '../../features/work-context/work-context.servi
 })
 export class SchedulePageComponent {
   T = T;
+  TODAY_TAG = TODAY_TAG;
 
   constructor(
     public scheduledTaskService: ScheduledTaskService,
@@ -38,6 +40,10 @@ export class SchedulePageComponent {
     } else {
       this._startTaskFromOtherProject(task);
     }
+  }
+
+  addToToday(task: TaskWithReminderData) {
+    this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
   }
 
   removeReminder(task: TaskWithReminderData) {

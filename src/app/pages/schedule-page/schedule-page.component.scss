@@ -73,6 +73,7 @@
 
     @include mq(xs) {
       margin: 0 $s*2;
+      margin-right: $s;
       flex-direction: row;
     }
 
@@ -124,7 +125,7 @@
   @include taskTitle;
   // to account for the task titles inner padding
   margin-top: -8px;
-  margin-left: -8px;
+  margin-left: -2px;
 }
 
 .action-btn {
@@ -137,5 +138,8 @@
     &:hover {
       opacity: 1;
     }
+  }
+
+  &:last-of-type {
   }
 }
