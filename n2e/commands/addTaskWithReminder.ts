@@ -6,7 +6,6 @@ const SCHEDULE_TASK_ITEM = 'task-additional-info-item:nth-child(2)';
 const DIALOG = 'mat-dialog-container';
 const DIALOG_SUBMIT = `${DIALOG} button[type=submit]:enabled`;
 
-const TODAY_BTN = '.owl-dt-schedule-item:first-of-type';
 const TIME_INP_H = 'owl-date-time-timer-box:first-of-type input';
 const TIME_INP_M = 'owl-date-time-timer-box:last-of-type input';
 
@@ -34,7 +33,8 @@ module.exports = {
       .waitForElementVisible(SCHEDULE_TASK_ITEM)
       .click(SCHEDULE_TASK_ITEM)
       .waitForElementVisible(DIALOG)
-      .waitForElementVisible(TODAY_BTN)
+      .pause(30)
+      .waitForElementVisible(TIME_INP_H)
       .pause(50)
       .setValue(TIME_INP_H, h.toString())
       .pause(50)
