@@ -35,13 +35,17 @@
               <tag-list [task]="task"
                         [isShowProjectTagAlways]="true"></tag-list>
             </div>
+
             <div (click)="editReminder(task)"
-                 [matTooltip]="task.reminderData.remindAt|date:'short'"
                  class="due-date"
                  mat-ripple
                  matTooltipPosition="left">
-              <div class="date">
-                {{task.reminderData.remindAt|humanizeTimestamp}}
+              <div>
+                <div class="time-left"
+                     style="margin-right: 10px;">{{task.reminderData.remindAt|date:'EE, d MMM, h:mm'}}</div>
+                <div class="date" style="text-align: right; opacity: 0.8;">
+                  ({{task.reminderData.remindAt|humanizeTimestamp}})
+                </div>
               </div>
               <mat-icon>alarm</mat-icon>
             </div>
