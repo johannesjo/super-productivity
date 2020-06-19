@@ -31,7 +31,7 @@ export class BookmarkLinkDirective {
       if (!this.type || this.type === 'LINK') {
         this._openExternalUrl(this.href);
       } else if (this.type === 'FILE') {
-        this._electronService.shell.openItem(this.href);
+        this._electronService.shell.openPath(this.href);
       } else if (this.type === 'COMMAND') {
         this._snackService.open({
           msg: T.GLOBAL_SNACK.RUNNING_X,
