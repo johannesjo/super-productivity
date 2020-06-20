@@ -837,6 +837,7 @@
     "AUTO_BACKUPS": {
       "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
       "LABEL_IS_ENABLED": "Enable automatic backups",
+      "LOCATION_INFO": "Backups are saved to:",
       "TITLE": "Automatic Backups"
     },
     "EVALUATION": {
