@@ -15,7 +15,7 @@ if (environment.production) {
 platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
   // TODO make asset caching work for electron
   if ('serviceWorker' in navigator && environment.production && !IS_ELECTRON) {
-    navigator.serviceWorker.register('ngsw-worker.js');
+    return navigator.serviceWorker.register('ngsw-worker.js');
   }
 }).catch(err => console.log(err));
 
