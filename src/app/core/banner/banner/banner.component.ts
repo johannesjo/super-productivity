@@ -40,6 +40,7 @@ export class BannerComponent {
 
   constructor(
     public bannerService: BannerService,
+    private _elementRef: ElementRef,
   ) {
   }
 
@@ -50,11 +51,17 @@ export class BannerComponent {
   }
 
   dismiss(bannerId) {
+    this._updateHeight();
     this.bannerService.dismiss(bannerId);
   }
 
   action(bannerId: string, bannerAction: BannerAction) {
+    this._updateHeight();
     this.dismiss(bannerId);
     bannerAction.fn();
+  }
+
+  private _updateHeight() {
+    this.height = this._elementRef.nativeElement.offsetHeight;
   }
 }
