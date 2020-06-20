@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "Scherm vergrendelen wanneer er een pauze nodig is (alleen desktop)",
       "MESSAGE": "Neem een pauze-bericht",
       "MIN_WORKING_TIME": "Trigger neemt een pauze-melding nadat X zonder een heeft gewerkt",
+      "MOTIVATIONAL_IMG": "Motiverende afbeelding (web-URL)",
       "TITLE": "Pauzeherinnering"
     }
   },

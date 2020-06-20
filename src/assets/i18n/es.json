@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "Bloquear la pantalla cuando se debe tomar un descanso (solo para escritorio)",
       "MESSAGE": "Tomar un mensaje de descanso",
       "MIN_WORKING_TIME": "Mostrar una notificación de descanso después de X tiempo trabajando sin una",
+      "MOTIVATIONAL_IMG": "Imagen motivacional (url web)",
       "TITLE": "Recordatorio de descanso"
     }
   },

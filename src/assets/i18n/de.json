@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "Bildschirm sperren, wenn eine Pause fällig ist (nur Desktop)",
       "MESSAGE": "Mach eine Pause Nachricht",
       "MIN_WORKING_TIME": "Trigger mach eine Pausenbenachrichtigung, nachdem X ohne eine gearbeitet hat",
+      "MOTIVATIONAL_IMG": "Motivationsbild (Web-URL)",
       "TITLE": "Pausenerinnerung"
     }
   },

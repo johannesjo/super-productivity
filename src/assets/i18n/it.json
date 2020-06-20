@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "Blocca lo schermo quando è l'ora di una pausa (solo Desktop)",
       "MESSAGE": "Messaggio per prenderti una pausa",
       "MIN_WORKING_TIME": "Innesca la notifica di prendersi una pausa dopo X tempo lavorato senza fare pausa",
+      "MOTIVATIONAL_IMG": "Immagine motivazionale (URL web)",
       "TITLE": "Promemoria pausa"
     }
   },

@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "Bloquear a tela quando iniciar um intervalo (somente desktop)",
       "MESSAGE": "Mensagem de pausa",
       "MIN_WORKING_TIME": "Acionar notificação de pausa após trabalhar X sem uma",
+      "MOTIVATIONAL_IMG": "Imagem motivacional (URL da Web)",
       "TITLE": "Lembrete de Pausa"
     }
   },

@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
+      "MOTIVATIONAL_IMG": "تصویر انگیزشی (آدرس اینترنتی)",
       "TITLE": "یادآوری استراحت"
     }
   },

@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "休息时锁定屏幕（仅限桌面）",
       "MESSAGE": "休息一下",
       "MIN_WORKING_TIME": "X工作后没有一个触发器会触发中断通知",
+      "MOTIVATIONAL_IMG": "励志图片（网址）",
       "TITLE": "打破提醒"
     }
   },

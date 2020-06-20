@@ -952,6 +952,7 @@
       "IS_LOCK_SCREEN": "Verrouiller l'écran lorsqu'une pause est due (bureau uniquement)",
       "MESSAGE": "Message invitant à prendre une pause",
       "MIN_WORKING_TIME": "Déclencher l'invitation à prendre une pause après avoir travaillé X sans pause",
+      "MOTIVATIONAL_IMG": "Image de motivation (URL Web)",
       "TITLE": "Rappel de pause"
     }
   },
