@@ -81,9 +81,7 @@
     "googleapis": "^40.0.0",
     "moment": "2.24.0",
     "node-fetch": "^2.6.0",
-    "source-map-support": "^0.5.16",
-    "stacktrace-js": "^2.0.1",
-    "tslib": "^1.10.0"
+    "stacktrace-js": "^2.0.1"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "^9.1.0",
@@ -172,9 +170,11 @@
     "sass-loader": "^7.1.0",
     "semver": "^7.3.2",
     "shortid": "^2.2.14",
+    "source-map-support": "^0.5.16",
     "start-server-and-test": "^1.11.0",
     "style-loader": "^0.23.1",
     "throttle-debounce": "^2.0.1",
+    "tslib": "^1.10.0",
     "ts-node": "~8.2.0",
     "tslint": "^5.16.0",
     "typescript": "~3.7.5",

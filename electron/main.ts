@@ -1,5 +1,5 @@
 'use strict';
-import {App, app, globalShortcut, ipcMain, powerMonitor} from 'electron';
+import {App, app, globalShortcut, ipcMain, powerMonitor, BrowserWindow} from 'electron';
 import * as electronDl from 'electron-dl';
 
 import {info} from 'electron-log';
@@ -18,7 +18,6 @@ import {backupData} from './backup';
 import {JiraCfg} from '../src/app/features/issue/providers/jira/jira.model';
 import {KeyboardConfig} from '../src/app/features/config/global-config.model';
 import lockscreen from './lockscreen';
-import BrowserWindow = Electron.BrowserWindow;
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -319,7 +318,7 @@ function quitAppNow() {
 }
 
 function showOrFocus(passedWin) {
-  // default to main win
+  // default to main winpc
   const win = passedWin || mainWin;
 
   // sometimes when starting a second instance we get here although we don't want to
