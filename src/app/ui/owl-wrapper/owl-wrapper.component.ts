@@ -35,7 +35,9 @@ export class OwlWrapperComponent {
     '15:00',
     '17:00',
     '19:00',
-    '21:00'
+    '21:00',
+    '22:00',
+    '23:30',
   ];
 
   constructor() {
