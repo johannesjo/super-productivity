@@ -67,3 +67,13 @@ $vertical-button-margin: $s;
     }
   }
 }
+
+.motivational-img-wrapper {
+  img {
+    width: 100%;
+    height: auto;
+    max-height: 30vh;
+    margin: auto auto 8px;
+    object-fit: cover
+  }
+}

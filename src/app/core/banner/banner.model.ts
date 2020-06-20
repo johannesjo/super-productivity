@@ -24,4 +24,5 @@ export interface Banner {
   action?: BannerAction;
   action2?: BannerAction;
   action3?: BannerAction;
+  img?: string;
 }

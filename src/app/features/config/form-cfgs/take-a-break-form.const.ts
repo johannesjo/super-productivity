@@ -35,12 +35,21 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MIN_WORKING_TIME
       },
-    }, {
+    },
+    {
       key: 'takeABreakMessage',
       type: 'textarea',
       hideExpression: '!model.isTakeABreakEnabled',
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MESSAGE
+      },
+    },
+    {
+      key: 'motivationalImg',
+      type: 'input',
+      hideExpression: '!model.isTakeABreakEnabled',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.MOTIVATIONAL_IMG
       },
     },
   ]

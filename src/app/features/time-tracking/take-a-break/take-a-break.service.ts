@@ -22,7 +22,6 @@ import {IdleService} from '../idle.service';
 import {IS_ELECTRON} from '../../../app.constants';
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
-import {ProjectService} from '../../project/project.service';
 import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
 import {T} from '../../../t.const';
 import {IPC} from '../../../../../electron/ipc-events.const';
@@ -218,6 +217,7 @@ export class TakeABreakService {
           label: T.F.TIME_TRACKING.B.SNOOZE,
           fn: () => this.snooze()
         },
+        img: cfg.takeABreak.motivationalImg
       });
 
     });
@@ -234,7 +234,7 @@ export class TakeABreakService {
 
   resetTimerAndCountAsBreak() {
     const min5 = 1000 * 60 * 5;
-    this._workContextService.addToBreakTimeForActiveContext( undefined, min5);
+    this._workContextService.addToBreakTimeForActiveContext(undefined, min5);
     this.resetTimer();
 
     this._triggerLockScreenCounter$.next(false);
