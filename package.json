@@ -79,7 +79,6 @@
     "electron-log": "^3.0.1",
     "electron-window-state": "^5.0.3",
     "googleapis": "^40.0.0",
-    "moment": "2.24.0",
     "node-fetch": "^2.6.0",
     "stacktrace-js": "^2.0.1"
   },
@@ -152,6 +151,7 @@
     "karma-jasmine": "^2.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
     "lz-string": "^1.4.4",
+    "moment": "2.24.0",
     "moment-duration-format": "^2.2.2",
     "new-github-issue-url": "^0.2.1",
     "ng2-charts": "^2.3.0",

@@ -1,7 +1,6 @@
 import {ipcMain, Menu, Tray} from 'electron';
 import {existsSync, readFileSync} from 'fs';
 // const dbus = require('./dbus');
-import * as moment from 'moment';
 import {errorHandler} from './error-handler';
 import {IPC} from './ipc-events.const';
 
@@ -148,12 +147,12 @@ function createIndicatorStr(task) {
     }
 
     // TODO replace with our format helpers once we have ts support
-    if (task.timeSpent && task.timeSpent) {
-      task.timeSpent = moment.duration({milliseconds: task.timeSpent});
-      timeStr += parseInt(task.timeSpent.asMinutes(), 10).toString();
+    if (task.timeSpent) {
+      const timeSpentAsMinutes = Math.round(task.timeSpent / 60 / 1000);
+      timeStr += timeSpentAsMinutes.toString();
     }
-    task.timeEstimate = task.timeEstimate && moment.duration({milliseconds: task.timeEstimate});
-    const timeEstimateAsMin = moment.duration(task.timeEstimate).asMinutes();
+    const timeEstimateAsMin = Math.round(task.timeEstimate / 60 / 1000);
+
     if (task.timeEstimate && timeEstimateAsMin > 0) {
       timeStr += '/' + timeEstimateAsMin;
     }
