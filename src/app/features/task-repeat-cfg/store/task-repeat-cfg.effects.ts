@@ -75,11 +75,14 @@ export class TaskRepeatCfgEffects {
               ...(isCreateNew
                   ? [
                     new AddTask({
-                      task: this._taskService.createNewTaskWithDefaults(taskRepeatCfg.title, {
-                        repeatCfgId: taskRepeatCfg.id,
-                        timeEstimate: taskRepeatCfg.defaultEstimate,
-                        tagIds: taskRepeatCfg.tagIds || [],
-                        projectId: taskRepeatCfg.projectId,
+                      task: this._taskService.createNewTaskWithDefaults({
+                        title: taskRepeatCfg.title,
+                        additional: {
+                          repeatCfgId: taskRepeatCfg.id,
+                          timeEstimate: taskRepeatCfg.defaultEstimate,
+                          tagIds: taskRepeatCfg.tagIds || [],
+                          projectId: taskRepeatCfg.projectId,
+                        }
                       }),
                       workContextType: this._workContextService.activeWorkContextType,
                       workContextId: this._workContextService.activeWorkContextId,

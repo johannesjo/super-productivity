@@ -226,12 +226,12 @@ export class TaskService {
   // -----
   add(title: string,
       isAddToBacklog = false,
-      additionalFields: Partial<Task> = {},
+      additional: Partial<Task> = {},
       isAddToBottom = false,
   ): string {
     const workContextId = this._workContextService.activeWorkContextId;
     const workContextType = this._workContextService.activeWorkContextType;
-    const task = this.createNewTaskWithDefaults(title, additionalFields, workContextType, workContextId);
+    const task = this.createNewTaskWithDefaults({title, additional, workContextType, workContextId});
 
     this._store.dispatch(new AddTask({
       task,
@@ -365,7 +365,7 @@ export class TaskService {
 
   addSubTaskTo(parentId) {
     this._store.dispatch(new AddSubTask({
-      task: this.createNewTaskWithDefaults(''),
+      task: this.createNewTaskWithDefaults({title: ''}),
       parentId
     }));
   }
@@ -478,7 +478,7 @@ export class TaskService {
 
   // REMINDER
   // --------
-  addReminder(task: Task | TaskWithSubTasks, remindAt: number,  isMoveToBacklog = false) {
+  addReminder(task: Task | TaskWithSubTasks, remindAt: number, isMoveToBacklog = false) {
     this._store.dispatch(new AddTaskReminder({task, remindAt, isMoveToBacklog}));
   }
 
@@ -618,12 +618,17 @@ export class TaskService {
     }
   }
 
-  createNewTaskWithDefaults(
-    title: string,
-    additional: Partial<Task> = {},
-    workContextType: WorkContextType = this._workContextService.activeWorkContextType,
-    workContextId: string = this._workContextService.activeWorkContextId
-  ): Task {
+  createNewTaskWithDefaults({
+                              title,
+                              additional = {},
+                              workContextType = this._workContextService.activeWorkContextType,
+                              workContextId = this._workContextService.activeWorkContextId
+                            }: {
+    title: string;
+    additional?: Partial<Task>;
+    workContextType?: WorkContextType;
+    workContextId?: string;
+  }): Task {
     return this._shortSyntax({
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
