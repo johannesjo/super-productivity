@@ -6,7 +6,6 @@
   </div>
 
   <div #blockRightEl
-       [style.visibility]="task.parentId && 'hidden'"
        class="block-right bg-400">
     <mat-icon *ngIf="(workContextService.isToday$|async)">alarm</mat-icon>
     <ng-container *ngIf="!(workContextService.isToday$|async)">
