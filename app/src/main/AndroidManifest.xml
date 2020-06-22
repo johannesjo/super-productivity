@@ -50,7 +50,6 @@
         <activity
                 android:launchMode="singleTask"
                 android:taskAffinity=""
-                android:excludeFromRecents="true"
                 android:name=".FullscreenActivity"
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
                 android:label="@string/title_activity_fullscreen"
