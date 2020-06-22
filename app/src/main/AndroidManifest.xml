@@ -49,8 +49,8 @@
         <!-- App in WebFrame -->
         <activity
                 android:launchMode="singleTask"
-                android:taskAffinity=""
                 android:name=".FullscreenActivity"
+                android:hardwareAccelerated="true"
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
                 android:label="@string/title_activity_fullscreen"
                 android:theme="@style/FullscreenTheme">
