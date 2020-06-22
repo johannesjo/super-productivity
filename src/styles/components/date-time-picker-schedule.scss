@@ -845,6 +845,8 @@ $ico-size-real: 20px;
   background: transparent;
   -webkit-appearance: none;
   background: none;
+  // NOTE: center for android
+  width: auto;
 
   @include darkTheme(true) {
     color: $owl-dark-text-color-strong;
