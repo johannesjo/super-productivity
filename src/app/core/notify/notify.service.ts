@@ -33,17 +33,23 @@ export class NotifyService {
     const svcReg = this._isServiceWorkerAvailable() && await navigator.serviceWorker.getRegistration('ngsw-worker.js');
 
     if (svcReg && svcReg.showNotification) {
-      await svcReg.showNotification(title, {
-        icon: 'assets/icons/icon-128x128.png',
-        vibrate: [100, 50, 100],
-        silent: false,
-        data: {
-          dateOfArrival: Date.now(),
-          primaryKey: 1
-        },
-        ...options,
-        body,
-      });
+      // service worker also seems to need to request permission...
+      // @see: https://github.com/johannesjo/super-productivity/issues/408
+      const per = await Notification.requestPermission();
+      // not supported for basic notifications so we delete them
+      if (per === 'granted') {
+        await svcReg.showNotification(title, {
+          icon: 'assets/icons/icon-128x128.png',
+          vibrate: [100, 50, 100],
+          silent: false,
+          data: {
+            dateOfArrival: Date.now(),
+            primaryKey: 1
+          },
+          ...options,
+          body,
+        });
+      }
     } else if (IS_ANDROID_WEB_VIEW) {
       androidInterface.showNotification(title || 'NO_TITLE', body);
     } else if (this._isBasicNotificationSupport()) {
