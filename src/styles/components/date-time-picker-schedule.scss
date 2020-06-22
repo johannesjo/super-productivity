@@ -734,6 +734,11 @@ $owl-missing: $owl-light-selected-bg !default;
   color: $owl-text-color-strong;
   opacity: .9;
 
+  @include mq(xs, max) {
+    padding: 0;
+    min-height: 44px;
+  }
+
   @include darkTheme(true) {
     color: $owl-dark-text-color-strong;
   }
@@ -765,6 +770,11 @@ $ico-size-real: 20px;
   text-align: center;
   position: relative;
   font-size: 0;
+
+  @include mq(xs, max) {
+    margin-left: $s;
+    margin-right: $s;
+  }
 
   &:after {
     font-size: $ico-size-real;
