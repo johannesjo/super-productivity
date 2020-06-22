@@ -97,11 +97,11 @@ public class FullscreenActivity extends AppCompatActivity {
 
             // needs to come last for some settings to take effect
             if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
-//                wv.loadUrl("http://10.0.2.2:4200");
                 wv.loadUrl("https://test-app.super-productivity.com");
-//                wv.loadUrl("https://app.super-productivity.com");
+//                wv.loadUrl("http://10.0.2.2:4200");
             } else {
                 wv.loadUrl("https://app.super-productivity.com");
+//                wv.loadUrl("https://test-app.super-productivity.com");
             }
         }
     }
