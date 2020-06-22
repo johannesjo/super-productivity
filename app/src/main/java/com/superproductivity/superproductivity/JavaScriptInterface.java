@@ -85,9 +85,10 @@ public class JavaScriptInterface {
         NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
         bigText.setBigContentTitle(title);
 
-        if (body != null && !body.isEmpty()) {
+        if ((body != null) && !body.isEmpty() && !(body.trim().equals("undefined"))) {
             bigText.bigText(body);
         }
+
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setSmallIcon(R.mipmap.ic_launcher);
         mBuilder.setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(),
