@@ -16,6 +16,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import static android.webkit.WebSettings.FORCE_DARK_ON;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -66,12 +68,18 @@ public class FullscreenActivity extends AppCompatActivity {
             wv.clearHistory();
 
             WebSettings wSettings = wv.getSettings();
+
             wSettings.setJavaScriptEnabled(true);
             wSettings.setDomStorageEnabled(true);
             wSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
             wSettings.setLoadsImagesAutomatically(true);
             wSettings.setLoadWithOverviewMode(true);
             wSettings.setDatabaseEnabled(true);
+            wSettings.setGeolocationEnabled(true);
+            wSettings.setAppCacheEnabled(true);
+            wSettings.setMediaPlaybackRequiresUserGesture(false);
+            wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+//            wSettings.setForceDark(FORCE_DARK_ON);
 
 
             // allow google login
