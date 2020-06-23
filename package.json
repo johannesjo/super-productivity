@@ -119,7 +119,6 @@
     "@types/moment-duration-format": "^2.2.2",
     "@types/nightwatch": "^1.1.4",
     "@types/node": "^12.11.1",
-    "all-contributors-cli": "^6.8.0",
     "angular-material-css-vars": "^0.3.7",
     "angular2-promise-buttons": "latest",
     "axios": "^0.19.2",

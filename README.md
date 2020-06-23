@@ -155,30 +155,4 @@ npm start
 ### Packaging the app
 Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `yarn dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also use the [command line interface of electron builder](https://www.electron.build/cli).
 
-## :sparkling_heart: Contributors ✨
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/johannesjo"><img src="https://avatars1.githubusercontent.com/u/1456265?v=4" width="100px;" alt="Johannes Millan"/><br />
-    </a></td>
-    <td align="center"><a href="https://github.com/theCalcaholic"><img src="https://avatars1.githubusercontent.com/u/6317548?v=4" width="100px;" alt="Tobias K"/>
-    </a></td>
-    <td align="center"><a href="https://github.com/KonTy"><img src="https://avatars0.githubusercontent.com/u/9524513?v=4" width="100px;" alt="KonTy"/>
-    </a><a href="#ideas-KonTy" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://github.com/aitboudad"><img src="https://avatars2.githubusercontent.com/u/1753742?v=4" width="100px;" alt="Abdellatif Ait boudad"/>
-    </a></td>
-    <td align="center"><a href="https://github.com/Morganamilo"><img src="https://avatars2.githubusercontent.com/u/16593899?v=4" width="100px;" alt="Anna"/>
-    </a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-enable -->
-<!-- prettier-ignore-end -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
