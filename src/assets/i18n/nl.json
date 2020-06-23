@@ -741,10 +741,10 @@
         "SNOOZE": "{{Time}} snoozen"
       },
       "D_IDLE": {
-        "BREAK": "Breken",
-        "CREATE_AND_TRACK": "<em>Maak</em> en volg naar:",
+        "BREAK": "Pauze",
+        "CREATE_AND_TRACK": "<em>Maak</em> en ga naar:",
         "IDLE_FOR": "Je hebt niets gedaan voor:",
-        "SKIP": "Overspringen",
+        "SKIP": "Overslaan",
         "TASK": "Taak",
         "TASK_BREAK": "Taak + pauze",
         "TRACK_TO": "Track naar:"
