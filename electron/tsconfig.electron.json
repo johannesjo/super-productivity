@@ -17,11 +17,11 @@
     ]
   },
   "include": [
-    "electron/main.ts",
-    "electron/**/*.ts"
+    "main.ts",
+    "**/*.ts"
   ],
   "exclude": [
-    "node_modules",
+    "../node_modules",
     "**/*.spec.ts"
   ]
 }
