@@ -2,9 +2,9 @@ module.exports = {
   // An array of folders (excluding subfolders) where your tests are located;
   // if this is not specified, the test source must be passed as the second argument to the test runner.
   src_folders: [
-    'out-tsc/n2e/src'
+    '../out-tsc/n2e/src'
   ],
-  output_folder: "n2e/e2e-test-results",
+  output_folder: "./e2e-test-results",
   custom_commands_path: "out-tsc/n2e/commands",
   test_workers: {
     enabled: true,
@@ -43,7 +43,7 @@ module.exports = {
         enabled: true, // if you want to keep screenshots
         on_failure: true,
         on_error: true,
-        path: 'n2e/screenshots' // save screenshots here
+        path: './screenshots' // save screenshots here
       },
       globals: {
         waitForConditionPollInterval: 500,
