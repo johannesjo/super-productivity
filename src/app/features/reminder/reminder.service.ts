@@ -13,18 +13,27 @@ import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
 import {T} from '../../t.const';
 import {SyncService} from '../../imex/sync/sync.service';
-import {first, map} from 'rxjs/operators';
+import {delay, filter, first, map, mapTo, switchMap, take} from 'rxjs/operators';
 import {migrateReminders} from './migrate-reminder.util';
 import {WorkContextService} from '../work-context/work-context.service';
 import {devError} from '../../util/dev-error';
 
-const MAX_WAIT_FOR_INITIAL_SYNC = 20000;
+const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
+const INITIAL_DELAY = 5000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReminderService {
-  onRemindersActive$ = new Subject<Reminder[]>();
+  private _onRemindersActive$ = new Subject<Reminder[]>();
+  onRemindersActive$ = this._onRemindersActive$.pipe(
+    switchMap((reminders) => this._imexMetaService.isDataImportInProgress$.pipe(
+      filter(isInProgress => !isInProgress),
+      take(1),
+      mapTo(reminders),
+      delay(1000),
+    ))
+  );
 
   private _reminders$ = new ReplaySubject<Reminder[]>(1);
   reminders$ = this._reminders$.asObservable();
@@ -51,16 +60,17 @@ export class ReminderService {
   }
 
   init() {
+    console.log('INIT START');
+
     if (typeof Worker !== 'undefined') {
       this._w = new Worker('./reminder.worker', {
         name: 'reminder',
         type: 'module'
       });
 
-      // TODO we need a better solution for this
       // we do this to wait for syncing and the like
       merge(
-        this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
+        this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(delay(INITIAL_DELAY)),
         timer(MAX_WAIT_FOR_INITIAL_SYNC),
       ).pipe(
         first(),
@@ -187,10 +197,8 @@ export class ReminderService {
     }));
     const finalReminders = remindersWithData.filter(reminder => !!reminder && reminder !== null);
 
-    if (this._imexMetaService.isDataImportInProgress) {
-      console.log('Reminder blocked because sync is in progress');
-    } else if (finalReminders.length > 0) {
-      this.onRemindersActive$.next(finalReminders);
+    if (finalReminders.length > 0) {
+      this._onRemindersActive$.next(finalReminders);
     }
   }
 
