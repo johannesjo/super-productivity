@@ -738,7 +738,7 @@
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "heb ik al gedaan",
-        "SNOOZE": "{{Time}} snoozen"
+        "SNOOZE": "{{time}} snoozen"
       },
       "D_IDLE": {
         "BREAK": "Pauze",
