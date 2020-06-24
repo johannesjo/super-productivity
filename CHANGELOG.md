@@ -1,3 +1,24 @@
+## [5.4.1](https://github.com/johannesjo/super-productivity/compare/v5.4.0...v5.4.1) (2020-06-24)
+
+
+### Bug Fixes
+
+* center time picker for android ([897e57b](https://github.com/johannesjo/super-productivity/commit/897e57be29beaede3d30265934421b755fe4ac06))
+* deps ([383dbbf](https://github.com/johannesjo/super-productivity/commit/383dbbfe0889b085ee4036f37ad0a4bbb239616b))
+* service worker notification not having permission [#408](https://github.com/johannesjo/super-productivity/issues/408) ([328b3a4](https://github.com/johannesjo/super-productivity/commit/328b3a4968ee98e8b8ebcf824fe03ae9a929f735))
+* **task:** cleanup el ([699ba2d](https://github.com/johannesjo/super-productivity/commit/699ba2daa0180243f612867055f0e0e98a7ddb5c))
+* **task:** don't hide schedule swipe for sub tasks ([ec64917](https://github.com/johannesjo/super-productivity/commit/ec649172e4fc3f0f4ad1fec69bcf6acff56e2855))
+
+
+### Features
+
+* **schedule:** improve styling for mobile ([fffc5bd](https://github.com/johannesjo/super-productivity/commit/fffc5bd6b1fe592823f442f98ab7b847cdfeca99))
+* display automatic backup path ([081612c](https://github.com/johannesjo/super-productivity/commit/081612c753012d5ce041e9b63ecccca61c10481b))
+* remove moment completely from electron layer ([deef291](https://github.com/johannesjo/super-productivity/commit/deef2911b9ca4b6581bcc232fc42e20a6bde3034))
+* **schedule:** add more later today times ([77a5448](https://github.com/johannesjo/super-productivity/commit/77a5448c525473aa7a3a5475788a52dfdb5aff10))
+
+
+
 # [5.4.0](https://github.com/johannesjo/super-productivity/compare/v5.3.5...v5.4.0) (2020-06-20)
 
 
