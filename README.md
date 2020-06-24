@@ -1,9 +1,6 @@
-<p align="center" style="text-align: center; max-width: 100%;">
-  <a href="https://super-productivity.com/">
-    <img align="center" alt="Logo" src="screens/banner.png" width="128px"/>
-  </a>
-  <h1 align="center">Super Productivity</h1>
-</p>
+<a href="https://super-productivity.com/">
+  <img align="center" alt="Logo" src="screens/banner.png" />
+</a>
 
 <p align="center" style="text-align: center;">
 <a href="https://lbesson.mit-license.org">
