@@ -118,9 +118,20 @@ There is a [very early(!) Android version available](https://play.google.com/sto
 When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
 
 ## :hearts: Contributing
-There are several ways to help. Publishing a bug or a feature request is a good first step. Also making it more popular by posting it on social media etc. is great, because it means more users, which in turn leads to more people testing the app and also more people contributing code.
+There are several ways to help. 
 
-**Pull requests** are of course also very welcome. Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
+1. **Spread the word:** More users means more possible people testing and contributing to the app which in turn means better stability and possibly more and better features. You can vote for Super Productivity on [product hunt](https://www.producthunt.com/posts/super-productivity) or on [AlternativeTo](https://alternativeto.net/software/super-productivity/), you can [tweet about it](https://twitter.com/intent/tweet?text=I%20like%20Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com), share it on [linkedin](http://www.linkedin.com/shareArticle?mini=true&url=https://super-productivity.com&title=I%20like%20Super%20Productivity&) or [reddit](http://www.reddit.com/submit?url=https%3A%2F%2Fsuper-productivity.com&title=I%20like%20Super%20Productivity). Every little bit helps !
+
+2. **[Make a feature or improvement request](https://github.com/johannesjo/super-productivity/issues/new)**: Something can be be done better? Something essential missing? Let us know! 
+
+3. **[Report bugs](https://github.com/johannesjo/super-productivity/issues/new)**
+
+4. **Contribute**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love. 
+
+
+### Pull Requests 
+**Pull requests** are of course very welcome! Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
+
 
 ### Running the development server
 To run the development server you need to have node installed at least in the version 10. Go to https://nodejs.org for installation instructions.
