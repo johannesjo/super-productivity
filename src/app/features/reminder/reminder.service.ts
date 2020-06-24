@@ -19,7 +19,7 @@ import {WorkContextService} from '../work-context/work-context.service';
 import {devError} from '../../util/dev-error';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
-const INITIAL_DELAY = 5000;
+const DELAY = 5000;
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +31,7 @@ export class ReminderService {
       filter(isInProgress => !isInProgress),
       take(1),
       mapTo(reminders),
-      delay(1000),
+      delay(DELAY),
     ))
   );
 
@@ -45,7 +45,7 @@ export class ReminderService {
   isRemindersLoaded$: Observable<boolean> = this._isRemindersLoaded$.asObservable();
 
   private _w: Worker;
-  private _reminders: Reminder[];
+  private _reminders: Reminder[] = [];
 
   constructor(
     private readonly _projectService: ProjectService,
@@ -70,7 +70,7 @@ export class ReminderService {
 
       // we do this to wait for syncing and the like
       merge(
-        this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(delay(INITIAL_DELAY)),
+        this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
         timer(MAX_WAIT_FOR_INITIAL_SYNC),
       ).pipe(
         first(),
