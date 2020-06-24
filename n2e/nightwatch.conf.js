@@ -43,7 +43,7 @@ module.exports = {
         enabled: true, // if you want to keep screenshots
         on_failure: true,
         on_error: true,
-        path: './screenshots' // save screenshots here
+        path: './n2e/screenshots' // save screenshots here
       },
       globals: {
         waitForConditionPollInterval: 500,
