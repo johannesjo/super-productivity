@@ -738,13 +738,13 @@
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "heb ik al gedaan",
-        "SNOOZE": "{{Time}} snoozen"
+        "SNOOZE": "{{time}} snoozen"
       },
       "D_IDLE": {
-        "BREAK": "Breken",
-        "CREATE_AND_TRACK": "<em>Maak</em> en volg naar:",
+        "BREAK": "Pauze",
+        "CREATE_AND_TRACK": "<em>Maak</em> en ga naar:",
         "IDLE_FOR": "Je hebt niets gedaan voor:",
-        "SKIP": "Overspringen",
+        "SKIP": "Overslaan",
         "TASK": "Taak",
         "TASK_BREAK": "Taak + pauze",
         "TRACK_TO": "Track naar:"
@@ -1019,7 +1019,7 @@
     "ROUND_UP_15M": "Rond alle taken af naar 15 minuten",
     "ROUND_UP_30M": "Rond alle taken af op 30 minuten",
     "ROUND_UP_5M": "Rond alle taken af op 5 minuten",
-    "SAVE_AND_GO_HOME": "Bespaar en ga naar huis",
+    "SAVE_AND_GO_HOME": "Opslaan en naar huis gaan",
     "START_END": "Begin het einde",
     "SUMMARY_FOR": "Dagelijks overzicht voor {{dayStr}}",
     "TASKS_COMPLETED": "Taken voltooid",
