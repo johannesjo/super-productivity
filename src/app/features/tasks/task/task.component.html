@@ -222,7 +222,7 @@
           <button (click)="toggleShowAdditionalInfoOpen()"
                   *ngIf="task.notes||task.issueId||isSelected"
                   [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
-                  class="ico-btn show-additional-info-btn hide-xs"
+                  class="ico-btn show-additional-info-btn"
                   color=""
                   mat-icon-button
                   tabindex="2">
@@ -234,20 +234,6 @@
             </mat-icon>
           </button>
         </div>
-
-        <button (click)="toggleShowAdditionalInfoOpen()"
-                [title]="T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate"
-                class="ico-btn show-additional-info-btn show-touch-only"
-                color=""
-                mat-icon-button
-                tabindex="2"
-                *ngIf="!task.notes && !task.issueId">
-          <mat-icon *ngIf="!task.issueWasUpdated">chat_bubble_outline</mat-icon>
-          <mat-icon *ngIf="task.issueWasUpdated"
-                    class="updated-icon"
-                    color="accent">update
-          </mat-icon>
-        </button>
 
         <mat-menu #contextMenu="matMenu">
           <button (click)="startTask()"
