@@ -9,7 +9,8 @@
        class="block-right bg-400">
     <ng-container *ngIf="(workContextService.isToday$|async)">
       <mat-icon *ngIf="!(task.repeatCfgId)">alarm</mat-icon>
-      <mat-icon *ngIf="(task.repeatCfgId)">repeat</mat-icon>
+      <mat-icon *ngIf="(task.repeatCfgId)"
+                svgIcon="repeat"></mat-icon>
     </ng-container>
     <ng-container *ngIf="!(workContextService.isToday$|async)">
       <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
@@ -77,8 +78,9 @@
 
         <div class="type-ico-wrapper">
           <mat-icon *ngIf="task.repeatCfgId"
-                    [style.transform]="isCurrent ? 'scale(1.4) rotate(45deg)': 'rotate(45deg)'"
-                    class="task-type-ico">repeat
+                    [style.transform]="isCurrent ? 'scale(1.4)': ''"
+                    class="task-type-ico"
+                    svgIcon="repeat">
           </mat-icon>
 
           <div *ngIf="task.issueId"

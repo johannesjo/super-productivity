@@ -79,6 +79,7 @@ export class GlobalThemeService {
       ['remove_today', 'assets/icons/remove-today-48px.svg'],
       ['estimate_remaining', 'assets/icons/estimate-remaining.svg'],
       ['working_today', 'assets/icons/working-today.svg'],
+      ['repeat', 'assets/icons/repeat.svg'],
     ];
 
     icons.forEach(([name, path]) => {
