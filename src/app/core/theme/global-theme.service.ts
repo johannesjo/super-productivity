@@ -93,6 +93,10 @@ export class GlobalThemeService {
       `drag_handle`,
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/drag-handle.svg`)
     );
+    this._matIconRegistry.addSvgIcon(
+      `remove_today`,
+      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/remove-today-48px.svg`)
+    );
   }
 
   private _initThemeWatchers() {

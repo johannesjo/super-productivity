@@ -13,9 +13,8 @@
     </ng-container>
     <ng-container *ngIf="!(workContextService.isToday$|async)">
       <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
-      <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)">
-        remove_circle_outline
-      </mat-icon>
+      <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)"
+                svgIcon="remove_today"></mat-icon>
     </ng-container>
   </div>
 </ng-container>
@@ -174,7 +173,7 @@
                   color=""
                   mat-icon-button
                   tabindex="2">
-            <mat-icon>remove_circle_outline</mat-icon>
+            <mat-icon svgIcon="remove_today"></mat-icon>
           </button>
 
           <button (click)="toggleTaskDone()"
