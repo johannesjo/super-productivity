@@ -152,6 +152,7 @@ $task-c-selected-bg-dark: $dark-theme-bg-slightly-lighter;
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
     transition: $transition-standard;
+    outline: none;
 
     // NOTE: needed to overwrite color for current task
     color: $light-theme-text-color;

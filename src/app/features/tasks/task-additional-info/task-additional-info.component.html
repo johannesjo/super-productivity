@@ -2,9 +2,10 @@
      [@taskAdditionalInfoTaskChange]="task.id"
      class="wrapper">
 
-  <header *ngIf="(layoutService.isScreenXs$|async)"
+  <header *ngIf="(layoutService.isNotesOver$|async)"
           class="task-title-wrapper">
     <button mat-icon-button
+            *ngIf="layoutService.isScreenXs$|async"
             (click)="close()">
       <mat-icon>arrow_back</mat-icon>
     </button>
@@ -24,7 +25,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     [type]="'panel'"
-    *ngIf="!task.parentId && (layoutService.isScreenXs$|async)">
+    *ngIf="!task.parentId && (layoutService.isNotesOver$|async)">
     <ng-container panel-header>
       <mat-icon class="panel-header-icon">list</mat-icon>
       <span>{{T.F.TASK.ADDITIONAL_INFO.SUB_TASKS|translate:{nr: task.subTasks?.length} }}</span>

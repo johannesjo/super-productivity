@@ -1,5 +1,5 @@
 <better-drawer-container (wasClosed)="taskService.setSelectedId(null)"
-                         [isOpen]="taskService.selectedTask$|async"
+                         [isOpen]="!!(taskService.selectedTask$|async)"
                          [isOver]="isAlwaysOver || (layoutService.isNotesOver$|async)"
                          [sideWidth]="40">
   <ng-container better-drawer-content>
