@@ -57,13 +57,14 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     top: 0;
     bottom: 0;
     z-index: $z-task-side-bar-over;
-    right: -100%;
+    right: -80vw;
 
     @include mq(sm, max) {
       max-width: 600px;
     }
 
     @include mq(xs, max) {
+      right: -100%;
       width: 100% !important;
     }
   }
@@ -125,10 +126,8 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     border-color: $dark-theme-extra-border-color;
   }
 
-
-  :host.isOver & {
+  :host.isOver.isOpen & {
     display: block;
-
   }
 
   @include mq(xs) {
