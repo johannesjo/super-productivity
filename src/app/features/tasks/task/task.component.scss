@@ -346,6 +346,12 @@
 // -----------------
 .title-and-tags-wrapper {
   flex-grow: 1;
+
+  > * {
+    @include touchOnlyDevice {
+      pointer-events: none;
+    }
+  }
 }
 
 // TASK TITLE

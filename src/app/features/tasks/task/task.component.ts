@@ -26,7 +26,7 @@ import {TaskAttachmentService} from '../task-attachment/task-attachment.service'
 import {IssueService} from '../../issue/issue.service';
 import {DialogEditTaskAttachmentComponent} from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
-import {IS_TOUCH, isTouch} from '../../../util/is-touch';
+import {IS_TOUCH, IS_TOUCH_ONLY, isTouch} from '../../../util/is-touch';
 import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import {ProjectService} from '../../project/project.service';
@@ -62,13 +62,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   T = T;
   isDragOver: boolean;
-  isTouch: boolean = IS_TOUCH;
+  isTouchOnly: boolean = IS_TOUCH_ONLY;
 
   isLockPanLeft = false;
   isLockPanRight = false;
   isPreventPointerEventsWhilePanning = false;
   isActionTriggered = false;
-  isContextMenuDisabled = false;
   ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition = {x: '0px', y: '0px'};
   progress: number;

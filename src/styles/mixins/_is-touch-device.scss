@@ -17,3 +17,15 @@
     }
   }
 }
+
+@mixin touchOnlyDevice {
+  :host-context(.isTouchOnlyDevice) & {
+    @content;
+  }
+}
+
+@mixin noTouchOnlyDevice {
+  :host-context(.isNoTouchOnlyDevice) & {
+    @content;
+  }
+}

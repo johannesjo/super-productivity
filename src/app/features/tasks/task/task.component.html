@@ -1,4 +1,4 @@
-<ng-container *ngIf="isTouch">
+<ng-container *ngIf="isTouchOnly">
   <div #blockLeftEl
        class="block-left bg-400">
     <mat-icon *ngIf="!task.isDone">check</mat-icon>
@@ -88,7 +88,8 @@
         </div>
       </div>
 
-      <div class="title-and-tags-wrapper">
+      <div class="title-and-tags-wrapper"
+           (click)="isTouchOnly && toggleShowAdditionalInfoOpen()">
         <div #contentEditableOnClickEl
              (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
              [isResetAfterEdit]="true"
@@ -98,8 +99,7 @@
              contenteditable="true"
              tabindex="2"></div>
 
-        <div class="task-title show-xs-only"
-             (click)="toggleShowAdditionalInfoOpen()">{{task.title}}</div>
+        <div class="task-title show-xs-only">{{task.title}}</div>
 
         <tag-list *ngIf="!task.parentId || isDev"
                   [task]="task"></tag-list>
