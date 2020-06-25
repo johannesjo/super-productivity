@@ -24,8 +24,6 @@ progress-bar {
 }
 
 .wrapper {
-  // 1px for the border
-  //margin: 0 1px 0;
   transition: $transition-standard;
 
   @media (max-width: $layout-xs) {
@@ -42,23 +40,17 @@ progress-bar {
   position: sticky;
   background: inherit;
   top: 0;
-  //margin-top: -4px;
-  //margin-right: -4px;
-  //margin-left: -4px;
-  //margin-bottom: $s+4;
-  //margin-bottom: $s;
   padding: 0 $s;
   z-index: 44;
 
   @include lightTheme() {
     background: #fff;
-    //box-shadow: $whiteframe-shadow-1dp;
-    //border-bottom: 0px solid $light-theme-extra-border-color;
+    //border-bottom: 1px solid $c-primary;
   }
-  //@include darkTheme() {
-  //  //background: $dark-theme-bg-lighter;
-  //  //border-bottom: 1px solid $dark-theme-extra-border-color;
-  //}
+  @include darkTheme() {
+    //background: $dark-theme-bg-lighter;
+    //border-bottom: 1px solid $c-primary;
+  }
 }
 
 .task-title {
@@ -77,11 +69,6 @@ progress-bar {
 
   &:focus {
     transform: scale(1);
-  }
-
-  &:after {
-    //display: none !important;
-
   }
 }
 

@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskService} from '../../task.service';
-import {ProjectService} from '../../../project/project.service';
 import {LayoutService} from '../../../../core-ui/layout/layout.service';
 import {delay, switchMap} from 'rxjs/operators';
 import {of} from 'rxjs';
@@ -12,6 +11,7 @@ import {of} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskAdditionalInfoWrapperComponent {
+  // NOTE: used for debugging
   @Input() isAlwaysOver = false;
 
   // to still display its data when panel is closing
@@ -24,7 +24,6 @@ export class TaskAdditionalInfoWrapperComponent {
 
   constructor(
     public taskService: TaskService,
-    public projectService: ProjectService,
     public layoutService: LayoutService,
   ) {
   }
