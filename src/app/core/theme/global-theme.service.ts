@@ -77,6 +77,8 @@ export class GlobalThemeService {
       ['jira', 'assets/icons/jira.svg'],
       ['drag_handle', 'assets/icons/drag-handle.svg'],
       ['remove_today', 'assets/icons/remove-today-48px.svg'],
+      ['estimate_remaining', 'assets/icons/estimate-remaining.svg'],
+      ['working_today', 'assets/icons/working-today.svg'],
     ];
 
     icons.forEach(([name, path]) => {

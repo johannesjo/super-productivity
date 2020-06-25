@@ -14,14 +14,14 @@
             <span class="label">{{T.WW.ESTIMATE_REMAINING|translate}}</span>
             <span class="no-wrap">
       ~<strong class="time-val">{{workContextService.estimateRemainingToday$|async|msToString}}</strong>
-      <mat-icon>timer</mat-icon>
+      <mat-icon svgIcon="estimate_remaining" style="margin-left: 2px;"></mat-icon>
       </span>
           </div>
 
           <div class="item"><span class="label">{{T.WW.WORKING_TODAY|translate}}</span>
             <span class="no-wrap">
       <strong class="time-val">{{workContextService.workingToday$|async|msToString}}</strong>
-      <mat-icon>timer</mat-icon>
+      <mat-icon svgIcon="working_today"></mat-icon>
       </span>
           </div>
 
