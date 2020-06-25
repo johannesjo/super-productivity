@@ -69,34 +69,22 @@ export class GlobalThemeService {
   }
 
   private _initIcons() {
-    this._matIconRegistry.addSvgIcon(
-      `sp`,
-      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/sp.svg`)
-    );
-    this._matIconRegistry.addSvgIcon(
-      `play`,
-      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/play.svg`)
-    );
-    this._matIconRegistry.addSvgIcon(
-      `github`,
-      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/github.svg`)
-    );
-    this._matIconRegistry.addSvgIcon(
-      `gitlab`,
-      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/gitlab.svg`)
-    );
-    this._matIconRegistry.addSvgIcon(
-      `jira`,
-      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/jira.svg`)
-    );
-    this._matIconRegistry.addSvgIcon(
-      `drag_handle`,
-      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/drag-handle.svg`)
-    );
-    this._matIconRegistry.addSvgIcon(
-      `remove_today`,
-      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/remove-today-48px.svg`)
-    );
+    const icons = [
+      ['sp', 'assets/icons/sp.svg'],
+      ['play', 'assets/icons/play.svg'],
+      ['github', 'assets/icons/github.svg'],
+      ['gitlab', 'assets/icons/gitlab.svg'],
+      ['jira', 'assets/icons/jira.svg'],
+      ['drag_handle', 'assets/icons/drag-handle.svg'],
+      ['remove_today', 'assets/icons/remove-today-48px.svg'],
+    ];
+
+    icons.forEach(([name, path]) => {
+      this._matIconRegistry.addSvgIcon(
+        name,
+        this._domSanitizer.bypassSecurityTrustResourceUrl(path)
+      );
+    });
   }
 
   private _initThemeWatchers() {
