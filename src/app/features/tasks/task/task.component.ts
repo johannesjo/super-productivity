@@ -432,7 +432,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (ev.deltaX > 0) {
       this.isLockPanRight = true;
-    } else {
+    } else if (ev.deltaX < 0) {
       this.isLockPanLeft = true;
     }
   }
@@ -454,8 +454,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(this.blockRightElRef.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
+
           if (this.workContextService.isToday) {
-            this.editReminder();
+            if (this.task.repeatCfgId) {
+              this.editTaskRepeatCfg();
+            } else {
+              this.editReminder();
+            }
           } else {
             if (this.task.parentId) {
               // NOTHING

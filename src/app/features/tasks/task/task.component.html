@@ -7,7 +7,10 @@
 
   <div #blockRightEl
        class="block-right bg-400">
-    <mat-icon *ngIf="(workContextService.isToday$|async)">alarm</mat-icon>
+    <ng-container *ngIf="(workContextService.isToday$|async)">
+      <mat-icon *ngIf="!(task.repeatCfgId)">alarm</mat-icon>
+      <mat-icon *ngIf="(task.repeatCfgId)">repeat</mat-icon>
+    </ng-container>
     <ng-container *ngIf="!(workContextService.isToday$|async)">
       <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG_ID)">wb_sunny</mat-icon>
       <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG_ID) && (task.projectId || task.tagIds?.length > 1)">
