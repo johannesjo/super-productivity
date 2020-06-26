@@ -54,10 +54,9 @@
                     ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
                     :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
                     (click)="toggleToday(task)">
-              <mat-icon>
-                <ng-container *ngIf="task.tagIds.includes(TODAY_TAG.id)">remove_circle</ng-container>
-                <ng-container *ngIf="!task.tagIds.includes(TODAY_TAG.id)">wb_sunny</ng-container>
-              </mat-icon>
+              <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG.id)"
+                        svgIcon="remove_today"></mat-icon>
+              <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>
             </button>
 
           </div>
