@@ -17,7 +17,10 @@ export class OwlWrapperComponent {
   @Input('dateTime')
   set dateTimeSet(v: number) {
     this.dateTime = v;
-    this.date = new Date(v);
+    // NOTE: owl doesn't with undefined...
+    if (v) {
+      this.date = new Date(v);
+    }
   }
 
   dateTime: number;
