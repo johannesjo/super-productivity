@@ -1,3 +1,30 @@
+## [5.4.2](https://github.com/johannesjo/super-productivity/compare/v5.4.1...v5.4.2) (2020-06-27)
+
+
+### Bug Fixes
+
+* **dbx:** wrong app key [#414](https://github.com/johannesjo/super-productivity/issues/414) ([13cd764](https://github.com/johannesjo/super-productivity/commit/13cd7642581b1f6b6afb0d30989f8284b263037b))
+* cannot compare invalid dates error ([d768e0e](https://github.com/johannesjo/super-productivity/commit/d768e0e340c437e5c9811812cc1b2bd00bb94675))
+* remove from today for dark theme ([640af86](https://github.com/johannesjo/super-productivity/commit/640af865c0c6934495a7fc4c905eceef2575d1f5))
+* **reminder:** don't delay initially ([0cfcde9](https://github.com/johannesjo/super-productivity/commit/0cfcde9a42ed9093456858ba93ba42e741ed7bdc))
+
+
+### Features
+
+* add custom remove from today icon ([9112fd8](https://github.com/johannesjo/super-productivity/commit/9112fd8ae7ee8d9cad2fd8a941a2e862a155f914))
+* always open side bar on mobile task tap ([bbda176](https://github.com/johannesjo/super-productivity/commit/bbda1769432a3ee23917e60faf8080abad90635d))
+* improve remove from today icon ([1350a63](https://github.com/johannesjo/super-productivity/commit/1350a631a0ab1930ccdfda7094ae9353eccf0dad))
+* improve work view icons ([0b02e8a](https://github.com/johannesjo/super-productivity/commit/0b02e8adc4646256a04b673b4ce4524382b9d840))
+* replace repeat with dedicated icon ([a73bbee](https://github.com/johannesjo/super-productivity/commit/a73bbee70de121e5fe0b91787ffcee8b685d1efc))
+* update remove from my day icon for schedule ([fef689f](https://github.com/johannesjo/super-productivity/commit/fef689f837267015d934529f971a873f02f69982))
+* **reminder:** improve experience for initial ([40c3e5e](https://github.com/johannesjo/super-productivity/commit/40c3e5edc209ff1908bfaf8e6437067a35d5d35f))
+* **task:** always show title and sub tasks when over for side panel ([118ec76](https://github.com/johannesjo/super-productivity/commit/118ec76ad67e7cac8cd66fb558edaccef7d77936))
+* **task:** edit task repeat cfg on swipe right for repeatable tasks ([b57702f](https://github.com/johannesjo/super-productivity/commit/b57702fa5ec10f60571e698353bb1accc05b62c5))
+* **task:** improve animation performance for drawer ([72b0722](https://github.com/johannesjo/super-productivity/commit/72b0722714694ed9b78e71d1f1218d2302a38d70))
+* **task:** remove empty notes icon for mobile ([3e0474d](https://github.com/johannesjo/super-productivity/commit/3e0474d5789a79f2a1cac65ba3d9e36d1ff51539))
+
+
+
 ## [5.4.1](https://github.com/johannesjo/super-productivity/compare/v5.4.0...v5.4.1) (2020-06-24)
 
 
