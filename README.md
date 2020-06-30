@@ -163,3 +163,9 @@ Packaging the app is done via [electron-builder](https://github.com/electron-use
 
 ## Setup WebDAV Syncing
 When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
+
+## Using a custom folder to save user data
+You can specify a custom folder for saving your data by starting the application with the `--user-data-dir` parameter like so:
+```
+superproductivity --user-data-dir=/path/to/my/data
+```
