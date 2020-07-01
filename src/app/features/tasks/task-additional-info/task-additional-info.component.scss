@@ -48,7 +48,7 @@ progress-bar {
     //border-bottom: 1px solid $c-primary;
   }
   @include darkTheme() {
-    //background: $dark-theme-bg-lighter;
+    background: $dark-theme-bg-slightly-lighter;
     //border-bottom: 1px solid $c-primary;
   }
 }
