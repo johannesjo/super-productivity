@@ -30,6 +30,12 @@
   }
 }
 
+.show-only-on-no-touch-only {
+  .isTouchOnly & {
+    display: none !important;
+  }
+}
+
 .show-xs-only {
   @include mq(xs) {
     display: none !important;
