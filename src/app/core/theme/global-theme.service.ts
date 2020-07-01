@@ -141,9 +141,9 @@ export class GlobalThemeService {
     }
 
     if (isTouchOnly()) {
-      this.document.body.classList.add(BodyClass.isTouchOnlyDevice);
+      this.document.body.classList.add(BodyClass.isTouchOnly);
     } else {
-      this.document.body.classList.add(BodyClass.isNoTouchOnlyDevice);
+      this.document.body.classList.add(BodyClass.isNoTouchOnly);
     }
   }
 

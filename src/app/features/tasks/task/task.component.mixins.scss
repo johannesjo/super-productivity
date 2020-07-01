@@ -56,11 +56,11 @@ $task-c-selected-bg-dark: $dark-theme-bg-slightly-lighter;
 
 @mixin isHostFocus($direct-parent-only-sel: false) {
   @if $direct-parent-only-sel {
-    :host-context(.isNoTouchOnlyDevice):focus > #{$direct-parent-only-sel} > & {
+    :host-context(.isNoTouchOnly):focus > #{$direct-parent-only-sel} > & {
       @content;
     }
   } @else {
-    :host-context(.isNoTouchOnlyDevice):focus & {
+    :host-context(.isNoTouchOnly):focus & {
       @content;
     }
   }

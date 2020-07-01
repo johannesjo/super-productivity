@@ -40,8 +40,7 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [
-            ],
+            "scripts": [],
             "webWorkerTsConfig": "src/tsconfig.worker.json"
           },
           "configurations": {
@@ -100,8 +99,7 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [
-            ],
+            "scripts": [],
             "assets": [
               "src/favicon.ico",
               "src/assets",
@@ -156,7 +154,8 @@
   },
   "defaultProject": "sp2",
   "cli": {
-    "defaultCollection": "@ngrx/schematics"
+    "defaultCollection": "@ngrx/schematics",
+    "analytics": false
   },
   "schematics": {
     "@schematics/angular:component": {
