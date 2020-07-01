@@ -2,7 +2,7 @@ import {Inject, Injectable} from '@angular/core';
 import {BodyClass, IS_ELECTRON} from '../../app.constants';
 import {IS_MAC} from '../../util/is-mac';
 import {take} from 'rxjs/operators';
-import {isTouch, isTouchOnly} from '../../util/is-touch';
+import {isTouchOnly} from '../../util/is-touch';
 import {MaterialCssVarsService} from 'angular-material-css-vars';
 import {DOCUMENT} from '@angular/common';
 import {MatIconRegistry} from '@angular/material/icon';
@@ -49,7 +49,7 @@ export class GlobalThemeService {
     this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
     this._setBackgroundGradient(theme.isDisableBackgroundGradient);
 
-    if (!theme.isAutoContrast) {
+    if(!theme.isAutoContrast) {
       this._materialCssVarsService.setContrastColorThresholdPrimary(theme.huePrimary);
       this._materialCssVarsService.setContrastColorThresholdAccent(theme.hueAccent);
       this._materialCssVarsService.setContrastColorThresholdWarn(theme.hueWarn);
@@ -61,7 +61,7 @@ export class GlobalThemeService {
   }
 
   private _setBackgroundGradient(isOn: boolean) {
-    if (isOn) {
+    if(isOn) {
       this.document.body.classList.add(BodyClass.isDisableBackgroundGradient);
     } else {
       this.document.body.classList.remove(BodyClass.isDisableBackgroundGradient);
@@ -96,7 +96,7 @@ export class GlobalThemeService {
 
 
     // TODO beautify code here
-    if (IS_ELECTRON && this._electronService.isMacOS) {
+    if(IS_ELECTRON && this._electronService.isMacOS) {
       this._setDarkTheme(this._electronService.remote.nativeTheme.shouldUseDarkColors);
       this._electronService.remote.systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
         this._globalConfigService.misc$.pipe(take(1)).subscribe((misc: MiscConfig) => {
@@ -121,13 +121,13 @@ export class GlobalThemeService {
   private _initHandlersForInitialBodyClasses() {
     this.document.body.classList.add(BodyClass.isNoAdvancedFeatures);
 
-    if (IS_MAC) {
+    if(IS_MAC) {
       this.document.body.classList.add(BodyClass.isMac);
     } else {
       this.document.body.classList.add(BodyClass.isNoMac);
     }
 
-    if (IS_ELECTRON) {
+    if(IS_ELECTRON) {
       this.document.body.classList.add(BodyClass.isElectron);
       this.document.body.classList.add(BodyClass.isAdvancedFeatures);
       this.document.body.classList.remove(BodyClass.isNoAdvancedFeatures);
@@ -140,7 +140,7 @@ export class GlobalThemeService {
       });
     }
 
-    if (isTouchOnly()) {
+    if(isTouchOnly()) {
       this.document.body.classList.add(BodyClass.isTouchOnlyDevice);
     } else {
       this.document.body.classList.add(BodyClass.isNoTouchOnlyDevice);

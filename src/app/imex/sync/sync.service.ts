@@ -24,7 +24,7 @@ import {isOnline$} from '../../util/is-online';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {AppDataComplete} from './sync.model';
 import {SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME} from './sync.const';
-import {isTouch} from '../../util/is-touch';
+import {isTouchOnly} from '../../util/is-touch';
 import {AllowedDBKeys} from '../../core/persistence/ls-keys.const';
 
 // TODO naming
@@ -47,7 +47,7 @@ export class SyncService {
   );
 
   // we might need this for mobile, as we can't rely on focus as much
-  private _someMobileActivityTrigger$ = of(isTouch()).pipe(
+  private _someMobileActivityTrigger$ = of(isTouchOnly()).pipe(
     switchMap((isTouchIn) => isTouchIn
       ? fromEvent(window, 'touchstart').pipe(
         throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),

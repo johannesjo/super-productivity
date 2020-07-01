@@ -26,7 +26,7 @@ import {TaskAttachmentService} from '../task-attachment/task-attachment.service'
 import {IssueService} from '../../issue/issue.service';
 import {DialogEditTaskAttachmentComponent} from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
-import {IS_TOUCH, IS_TOUCH_ONLY, isTouch} from '../../../util/is-touch';
+import {IS_TOUCH_ONLY, isTouchOnly} from '../../../util/is-touch';
 import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import {ProjectService} from '../../project/project.service';
@@ -269,7 +269,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   estimateTime() {
     this._matDialog.open(DialogTimeEstimateComponent, {
       data: {task: this.task},
-      autoFocus: !isTouch(),
+      autoFocus: !isTouchOnly(),
     })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
@@ -417,7 +417,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanStart(ev) {
-    if (!IS_TOUCH) {
+    if (!IS_TOUCH_ONLY) {
       return;
     }
 
@@ -438,7 +438,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanEnd() {
-    if (!IS_TOUCH || !this.isLockPanLeft && !this.isLockPanRight) {
+    if (!IS_TOUCH_ONLY || !this.isLockPanLeft && !this.isLockPanRight) {
       return;
     }
 
@@ -511,7 +511,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _handlePan(ev) {
-    if (!IS_TOUCH
+    if (!IS_TOUCH_ONLY
       || !this.isLockPanLeft && !this.isLockPanRight
       || ev.eventType === 8) {
       return;

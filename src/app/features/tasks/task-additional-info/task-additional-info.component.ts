@@ -24,7 +24,7 @@ import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
 import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
 import {MatDialog} from '@angular/material/dialog';
-import {isTouch} from '../../../util/is-touch';
+import {isTouchOnly} from '../../../util/is-touch';
 import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
 import {ReminderCopy} from '../../reminder/reminder.model';
@@ -250,7 +250,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     this._matDialog
       .open(DialogTimeEstimateComponent, {
         data: {task: this.task},
-        autoFocus: !isTouch(),
+        autoFocus: !isTouchOnly(),
       });
   }
 
