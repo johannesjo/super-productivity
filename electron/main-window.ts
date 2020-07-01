@@ -108,19 +108,22 @@ export const createWindow = (params) => {
 };
 
 function initWinEventListeners(app: any) {
-  // open new window links in browser
-  mainWin.webContents.on('new-window', (event, url) => {
+  const handleRedirect = (event, url) => {
     event.preventDefault();
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
     urlObj.pathname = urlObj.pathname
       .replace('//', '/');
     const wellFormedUrl = urlObj.toString();
-    const wasOpened = shell.openPath(wellFormedUrl);
+    const wasOpened = shell.openExternal(wellFormedUrl);
     if (!wasOpened) {
       shell.openExternal(wellFormedUrl);
     }
-  });
+  };
+
+  // open new window links in browser
+  mainWin.webContents.on('new-window', handleRedirect);
+  mainWin.webContents.on('will-navigate', handleRedirect);
 
   // TODO refactor quiting mess
   appCloseHandler(app);
