@@ -1,3 +1,23 @@
+## [5.4.3](https://github.com/johannesjo/super-productivity/compare/v5.4.2...v5.4.3) (2020-07-01)
+
+
+### Bug Fixes
+
+* lint ([a839e2e](https://github.com/johannesjo/super-productivity/commit/a839e2e820d9fdb46bbb04d75baddc44eed0788b))
+* opening external links in browser not working [#422](https://github.com/johannesjo/super-productivity/issues/422) ([ab269a7](https://github.com/johannesjo/super-productivity/commit/ab269a7369b73a473070e5df9aa56ee7419f1c3b))
+* show focus styles for hybrid device ([974129f](https://github.com/johannesjo/super-productivity/commit/974129ff65ea0a21773c309c32cd4cdc28ac83bc))
+* touchOnly not working as expected ([823f2e1](https://github.com/johannesjo/super-productivity/commit/823f2e1fc3875d904c72b681560a2653b4aca244))
+
+
+### Features
+
+* further simplify mobile handling ([53c4786](https://github.com/johannesjo/super-productivity/commit/53c478601cde2ceda5d8d1bdfece617b6a0e01cb))
+* improve full screen side panel styling for title ([30ecf4d](https://github.com/johannesjo/super-productivity/commit/30ecf4d9bb6a0f323f38019723f702218699a113))
+* improve very small view for desktop ([389c6ba](https://github.com/johannesjo/super-productivity/commit/389c6ba1ccfee5320ac02792b34ea11fd5d1c8cb))
+* simplify mobile handling ([bb94377](https://github.com/johannesjo/super-productivity/commit/bb94377e4a975b966f579185b5a8d8ff15d42a92))
+
+
+
 ## [5.4.2](https://github.com/johannesjo/super-productivity/compare/v5.4.1...v5.4.2) (2020-06-27)
 
 
