@@ -24,8 +24,8 @@
 
 }
 
-.show-touch-only {
-  .isNoTouchDevice & {
+.show-only-on-touch-only {
+  .isNoTouchOnly & {
     display: none !important;
   }
 }

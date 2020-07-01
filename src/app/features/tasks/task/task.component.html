@@ -242,7 +242,7 @@
         <mat-menu #contextMenu="matMenu">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks?.length"
-                  class="show-touch-only"
+                  class="show-only-on-touch-only"
                   mat-menu-item
                   tabindex="2">
             <mat-icon class="play-icon"
@@ -251,7 +251,7 @@
           </button>
           <button (click)="pauseTask()"
                   *ngIf="!task.isDone && isCurrent && !task.subTasks?.length"
-                  class="show-touch-only"
+                  class="show-only-on-touch-only"
                   mat-menu-item
                   tabindex="2">
             <mat-icon>pause</mat-icon>

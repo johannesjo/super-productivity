@@ -98,8 +98,6 @@ export enum BodyClass {
   isExtension = 'isExtension',
   isAdvancedFeatures = 'isAdvancedFeatures',
   isNoAdvancedFeatures = 'isNoAdvancedFeatures',
-  isTouchDevice = 'isTouchDevice',
-  isNoTouchDevice = 'isNoTouchDevice',
   isTouchOnlyDevice = 'isTouchOnlyDevice',
   isNoTouchOnlyDevice = 'isNoTouchOnlyDevice',
   isLightTheme = 'isLightTheme',

@@ -140,12 +140,6 @@ export class GlobalThemeService {
       });
     }
 
-    if (isTouch()) {
-      this.document.body.classList.add(BodyClass.isTouchDevice);
-    } else {
-      this.document.body.classList.add(BodyClass.isNoTouchDevice);
-    }
-
     if (isTouchOnly()) {
       this.document.body.classList.add(BodyClass.isTouchOnlyDevice);
     } else {
