@@ -272,7 +272,7 @@
   }
 
   @include mq(xs, max) {
-    :host-context(.isTouchDevice) & {
+    :host-context(.isTouchOnlyDevice) & {
       display: none !important;
     }
   }
@@ -767,7 +767,7 @@ $this-play-size: 22px;
   transform-origin: left top;
   transition-property: all;
 
-  :host-context(.isNoTouchDevice) & {
+  :host-context(.isNoTouchOnlyDevice) & {
     opacity: 0;
   }
 
