@@ -1,11 +1,10 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import * as contextActions from './work-context.actions';
-import {selectContextFeatureState} from './work-context.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {SetSelectedTask, UnsetCurrentTask} from '../../tasks/store/task.actions';
+import {SetSelectedTask} from '../../tasks/store/task.actions';
 import {TaskService} from '../../tasks/task.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {BannerService} from '../../../core/banner/banner.service';
@@ -61,9 +60,5 @@ export class WorkContextEffects {
     private _taskService: TaskService,
     private _bannerService: BannerService,
   ) {
-  }
-
-  private _saveToLs([action, contextState]) {
-    // this._persistenceService.context.saveState(contextState);
   }
 }
