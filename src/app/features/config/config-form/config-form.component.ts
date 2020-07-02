@@ -15,7 +15,7 @@ export class ConfigFormComponent {
 
   T: any = T;
   config: any;
-  @Input() sectionKey: string;
+  @Input() sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
   fields: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});

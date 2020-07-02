@@ -80,7 +80,7 @@ export class TaskInternalEffects {
           nextId = (isDone && isCurrent)
 
             ? ((isAutoStartNextTask)
-              ? this._findNextTask(state, todaysTaskIds, oldId)
+              ? this._findNextTask(state, todaysTaskIds, oldId as string)
               : null)
 
             : 'NO_UPDATE';

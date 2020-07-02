@@ -7,7 +7,7 @@ import * as newGithubIssueUrl from 'new-github-issue-url';
 
 let isWasErrorAlertCreated = false;
 
-async function _getStacktrace(err: Error): Promise<string> {
+async function _getStacktrace(err: Error | any): Promise<string> {
   const isHttpError = err && (err.url || err.headers);
   const isErrorWithStack = err && err.stack;
 

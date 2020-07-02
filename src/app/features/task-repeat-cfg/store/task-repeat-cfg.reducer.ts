@@ -1,5 +1,14 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import { TaskRepeatCfgActions, TaskRepeatCfgActionTypes } from './task-repeat-cfg.actions';
+import {
+  AddTaskRepeatCfgToTask,
+  DeleteTaskRepeatCfg,
+  DeleteTaskRepeatCfgs,
+  TaskRepeatCfgActions,
+  TaskRepeatCfgActionTypes,
+  UpdateTaskRepeatCfg,
+  UpdateTaskRepeatCfgs,
+  UpsertTaskRepeatCfg
+} from './task-repeat-cfg.actions';
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
@@ -36,15 +45,15 @@ export function taskRepeatCfgReducer(
 
   switch (action.type) {
     case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
-      return adapter.addOne(action.payload.taskRepeatCfg, state);
+      return adapter.addOne((action as AddTaskRepeatCfgToTask).payload.taskRepeatCfg, state);
     }
 
     case TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg: {
-      return adapter.updateOne(action.payload.taskRepeatCfg, state);
+      return adapter.updateOne((action as UpdateTaskRepeatCfg).payload.taskRepeatCfg, state);
     }
 
     case TaskRepeatCfgActionTypes.UpdateTaskRepeatCfgs: {
-      const {ids, changes} = action.payload;
+      const {ids, changes} = (action as UpdateTaskRepeatCfgs).payload;
       return adapter.updateMany(ids.map(id => ({
         id,
         changes,
@@ -52,15 +61,15 @@ export function taskRepeatCfgReducer(
     }
 
     case TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg: {
-      return adapter.upsertOne(action.payload.taskRepeatCfg, state);
+      return adapter.upsertOne((action as UpsertTaskRepeatCfg).payload.taskRepeatCfg, state);
     }
 
     case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg: {
-      return adapter.removeOne(action.payload.id, state);
+      return adapter.removeOne((action as DeleteTaskRepeatCfg).payload.id, state);
     }
 
     case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs: {
-      return adapter.removeMany(action.payload.ids, state);
+      return adapter.removeMany((action as DeleteTaskRepeatCfgs).payload.ids, state);
     }
 
     default: {

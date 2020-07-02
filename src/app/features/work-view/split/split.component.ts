@@ -89,7 +89,7 @@ export class SplitComponent implements AfterViewInit {
     this.eventSubs.add(mousemove$);
   }
 
-  onMoveEnd(ev: TouchEvent): void {
+  onMoveEnd(ev: TouchEvent | MouseEvent): void {
     if (this.eventSubs) {
       this.eventSubs.unsubscribe();
       this.eventSubs = undefined;

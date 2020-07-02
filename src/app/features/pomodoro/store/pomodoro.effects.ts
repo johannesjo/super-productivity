@@ -113,11 +113,10 @@ export class PomodoroEffects {
       this._pomodoroService.isBreak$,
     ),
     filter(isEnabled),
-    filter(([action, cfg, isBreak]: [FinishPomodoroSession | PausePomodoro | SkipPomodoroBreak
-      , PomodoroConfig, boolean]) => {
+    filter(([action, cfg, isBreak]: [FinishPomodoroSession | PausePomodoro | SkipPomodoroBreak, PomodoroConfig, boolean]) => {
       return ((action.type === PomodoroActionTypes.FinishPomodoroSession || action.type === PomodoroActionTypes.SkipPomodoroBreak)
         && (cfg.isPlaySound && isBreak) || (cfg.isPlaySoundAfterBreak && !cfg.isManualContinue && !isBreak))
-        || (action.type === PomodoroActionTypes.PausePomodoro && action.payload.isBreakEndPause);
+        || (action.type === PomodoroActionTypes.PausePomodoro && (action as PausePomodoro).payload.isBreakEndPause);
     }),
     tap(() => this._pomodoroService.playSessionDoneSound()),
   );
