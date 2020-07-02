@@ -108,6 +108,13 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     switchMap((id) => id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))
   );
   localAttachments: TaskAttachment[];
+  issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
+    withLatestFrom(this.issueIdAndTypeShared$),
+    map(([data, {type}]) => (data && type)
+      ? this._issueService.getMappedAttachments(type, data)
+      : [])
+  );
+  private _taskData: TaskWithSubTasks;
   issueData$: Observable<IssueData> = this.issueDataTrigger$.pipe(
     switchMap((args) => (args && args.id && args.type)
       ? this._issueService.getById$(args.type, args.id, this._taskData.projectId)
@@ -125,14 +132,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     // expandable closed when the data is loaded
     delay(0),
   );
-  issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
-    withLatestFrom(this.issueIdAndTypeShared$),
-    map(([data, {type}]) => (data && type)
-      ? this._issueService.getMappedAttachments(type, data)
-      : [])
-  );
-  private _taskData: TaskWithSubTasks;
-
   private _focusTimeout: number;
   private _subs: Subscription = new Subscription();
 

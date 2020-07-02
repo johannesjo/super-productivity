@@ -5,7 +5,7 @@ import * as moment from 'moment';
   name: 'durationFromString'
 })
 export class DurationFromStringPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) = durationFromString;
+  transform: (value: any, ...args: any[]) => any = durationFromString;
 }
 
 export const durationFromString = (strValue: any, args?: any): any => {

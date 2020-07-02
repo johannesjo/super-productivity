@@ -24,6 +24,7 @@ import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
+import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 
 @Component({
   selector: 'main-header',
@@ -83,5 +84,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
       const dashOffset = this.circumference * -1 * progress;
       this._renderer.setStyle(this.circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
     });
+  }
+
+  trackById(i: number, item: SimpleCounter) {
+    return item.id;
   }
 }

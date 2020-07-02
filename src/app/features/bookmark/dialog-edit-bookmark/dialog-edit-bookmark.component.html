@@ -32,7 +32,7 @@
                     name="type"
                     required="true"
                     tabindex="1">
-          <mat-option *ngFor="let type of types"
+          <mat-option *ngFor="let type of types; trackBy: trackByIndex"
                       [innerHtml]="(type.title|translate)"
                       [value]="type.type">
           </mat-option>
@@ -50,7 +50,7 @@
           <mat-icon matPrefix="">{{bookmarkCopy.icon}}</mat-icon>
           <mat-autocomplete #auto="matAutocomplete"
                             [autoActiveFirstOption]="true">
-            <mat-option *ngFor="let icon of (filteredIcons$|async)"
+            <mat-option *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
                         [value]="icon">
               <mat-icon>{{icon}}</mat-icon>
               <span>{{icon}}</span>

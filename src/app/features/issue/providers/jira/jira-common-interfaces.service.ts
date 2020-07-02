@@ -29,7 +29,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   getById$(issueId: string | number, projectId: string) {
     return this._getCfgOnce$(projectId).pipe(
-      switchMap(jiraCfg => this._jiraApiService.getIssueById$(issueId, jiraCfg))
+      switchMap(jiraCfg => this._jiraApiService.getIssueById$(issueId as string, jiraCfg))
     );
   }
 

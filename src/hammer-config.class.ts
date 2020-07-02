@@ -4,7 +4,9 @@ import { Injectable } from '@angular/core';
 
 @Injectable({providedIn: 'root'})
 export class MyHammerConfig extends HammerGestureConfig {
-  overrides = {
+  overrides: {
+    [key: string]: {};
+  } = {
     swipe: {direction: Hammer.DIRECTION_HORIZONTAL},
     pan: {direction: 6},
     pinch: {enable: false},

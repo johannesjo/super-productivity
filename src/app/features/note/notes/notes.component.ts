@@ -45,20 +45,20 @@ export class NotesComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
     this.dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     this.isDragOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
     if (this.dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       this.isDragOver = false;
     }
   }
 
-  @HostListener('drop', ['$event']) onDrop(ev: Event) {
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
     this.isDragOver = false;
     this.noteService.createFromDrop(ev);
   }

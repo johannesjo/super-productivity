@@ -1,7 +1,7 @@
 <div class="circle bg-primary">
   <div class="inner-circle"></div>
   <div class="dots">
-    <div *ngFor="let hour of dots"
+    <div *ngFor="let hour of dots; trackBy: trackByIndex"
          @dot
          class="dot bg-100"></div>
   </div>

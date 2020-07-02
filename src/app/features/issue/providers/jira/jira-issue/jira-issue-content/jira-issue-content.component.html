@@ -51,7 +51,7 @@
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMPONENTS|translate}}</th>
       <td>
         <mat-chip-list>
-          <mat-chip *ngFor="let component of issue.components"
+          <mat-chip *ngFor="let component of issue.components; trackBy: trackByIndex"
                     [title]="component.description">{{component.name}}
           </mat-chip>
         </mat-chip-list>
@@ -80,7 +80,7 @@
     <tr *ngIf="issue.comments">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMMENTS|translate}}</th>
       <td>
-        <div *ngFor="let comment of (issue.comments|sort:'created')"
+        <div *ngFor="let comment of (issue.comments|sort:'created'); trackBy: trackByIndex"
              class="comment">
 
           <img [src]="comment.author.avatarUrl"

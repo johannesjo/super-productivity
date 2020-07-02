@@ -86,4 +86,8 @@ export class DialogEditBookmarkComponent implements OnInit {
         return T.F.BOOKMARK.DIALOG_EDIT.LABELS.LINK;
     }
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

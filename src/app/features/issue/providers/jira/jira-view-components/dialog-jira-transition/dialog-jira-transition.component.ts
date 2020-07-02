@@ -65,4 +65,8 @@ export class DialogJiraTransitionComponent {
       });
     }
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

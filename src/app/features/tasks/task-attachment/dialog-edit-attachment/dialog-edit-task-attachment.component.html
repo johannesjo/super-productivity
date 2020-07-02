@@ -32,7 +32,7 @@
                     name="type"
                     required="true"
                     tabindex="1">
-          <mat-option *ngFor="let type of types"
+          <mat-option *ngFor="let type of types; trackBy:trackByIndex"
                       [innerHtml]="(type.title|translate)"
                       [value]="type.type">
           </mat-option>

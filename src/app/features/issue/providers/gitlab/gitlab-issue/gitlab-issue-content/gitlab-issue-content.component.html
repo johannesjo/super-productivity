@@ -46,7 +46,7 @@
     </table>
 
     <div *ngIf="issue?.comments">
-      <div *ngFor="let comment of (issue?.comments|sort:'created_at')"
+      <div *ngFor="let comment of (issue?.comments|sort:'created_at'); trackBy: trackByIndex"
            class="comment">
         <div class="name-and-comment-content">
           <div><span class="author-name">{{comment.author?.username}}</span>

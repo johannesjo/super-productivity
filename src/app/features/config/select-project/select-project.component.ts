@@ -26,7 +26,7 @@ export class SelectProjectComponent extends FieldType {
     return this.to.type || 'text';
   }
 
-  trackByFn(i: number, item: Project) {
+  trackById(i: number, item: Project) {
     return item.id;
   }
 }

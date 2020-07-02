@@ -62,4 +62,8 @@ export class DialogTimeEstimateComponent {
   deleteValue(strDate: string) {
     delete this.timeSpentOnDayCopy[strDate];
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

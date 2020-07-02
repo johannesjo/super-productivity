@@ -11,5 +11,5 @@ export const filterDoneTasks = (tasks: TaskWithSubTasks[], currentTaskId: string
   name: 'filterDoneTasks'
 })
 export class FilterDoneTasksPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) = filterDoneTasks;
+  transform: (value: any, ...args: any[]) => any = filterDoneTasks;
 }

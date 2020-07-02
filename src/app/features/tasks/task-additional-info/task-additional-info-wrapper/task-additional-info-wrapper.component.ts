@@ -3,7 +3,7 @@ import { TaskService } from '../../task.service';
 import { LayoutService } from '../../../../core-ui/layout/layout.service';
 import { delay, switchMap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { Task, TaskWithSubTasks } from '../../task.model';
+import { TaskWithSubTasks } from '../../task.model';
 
 @Component({
   selector: 'task-additional-info-wrapper',

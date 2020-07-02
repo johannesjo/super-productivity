@@ -71,4 +71,8 @@ export class DialogEditTaskAttachmentComponent implements OnInit {
         return T.F.ATTACHMENT.DIALOG_EDIT.LABELS.LINK;
     }
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

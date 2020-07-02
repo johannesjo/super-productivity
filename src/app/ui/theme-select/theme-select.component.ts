@@ -11,4 +11,8 @@ import { T } from '../../t.const';
 export class ThemeSelectComponent {
   T: any = T;
   themes: string[] = ALL_THEMES;
+
+  trackBy(i: number, theme: string) {
+    return i;
+  }
 }

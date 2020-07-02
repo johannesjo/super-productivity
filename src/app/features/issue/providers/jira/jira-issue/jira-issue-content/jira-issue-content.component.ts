@@ -47,4 +47,8 @@ export class JiraIssueContentComponent {
   hideUpdates() {
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

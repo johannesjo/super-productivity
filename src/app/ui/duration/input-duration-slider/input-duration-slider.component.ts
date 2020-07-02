@@ -216,4 +216,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.setCircleRotation(degrees);
     this._cd.detectChanges();
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

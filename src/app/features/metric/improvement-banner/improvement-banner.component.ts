@@ -37,4 +37,9 @@ export class ImprovementBannerComponent implements OnDestroy {
     this.improvementService.addCheckedDay(improvement.id, getWorklogStr());
     this.improvementService.hideImprovement(improvement.id);
   }
+
+  trackById(i: number, improvement: Improvement): string {
+    return improvement.id;
+  }
+
 }

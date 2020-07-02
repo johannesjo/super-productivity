@@ -210,6 +210,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this.options.cols.push(colOpt);
   }
 
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
+
   private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: WorklogGrouping): RowItem[] {
 
     const _mapToGroups = (task: WorklogTask) => {

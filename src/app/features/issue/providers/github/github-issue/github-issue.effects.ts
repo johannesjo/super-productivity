@@ -24,7 +24,26 @@ import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 export class GithubIssueEffects {
 
   private _pollTimer$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
-
+  @Effect({dispatch: false})
+  pollNewIssuesToBacklog$: Observable<any> = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
+    switchMap((pId) => this._projectService.getGithubCfgForProject$(pId).pipe(
+      first(),
+      filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
+      switchMap(githubCfg => this._pollTimer$.pipe(
+        // NOTE: required otherwise timer stays alive for filtered actions
+        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
+        tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
+        withLatestFrom(
+          this._githubApiService.getLast100IssuesForRepo$(githubCfg),
+          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE)
+        ),
+        tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
+          const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
+          this._importNewIssuesToBacklog(pId, issuesToAdd);
+        })
+      )),
+    )),
+  );
   private _updateIssuesForCurrentContext$: Observable<any> = this._workContextService.allTasksForCurrentContext$.pipe(
     first(),
     switchMap((tasks) => {
@@ -45,27 +64,6 @@ export class GithubIssueEffects {
       .map(({task}: { cfg: GithubCfg, task: TaskWithSubTasks }) => task)
     ),
     tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
-  );
-
-  @Effect({dispatch: false})
-  pollNewIssuesToBacklog$: Observable<any> = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-    switchMap((pId) => this._projectService.getGithubCfgForProject$(pId).pipe(
-      first(),
-      filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
-      switchMap(githubCfg => this._pollTimer$.pipe(
-        // NOTE: required otherwise timer stays alive for filtered actions
-        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-        tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
-        withLatestFrom(
-          this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE)
-        ),
-        tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
-          const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
-          this._importNewIssuesToBacklog(pId, issuesToAdd);
-        })
-      )),
-    )),
   );
   @Effect({dispatch: false})
   pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$

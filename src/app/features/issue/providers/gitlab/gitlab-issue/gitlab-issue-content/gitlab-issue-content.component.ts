@@ -26,4 +26,8 @@ export class GitlabIssueContentComponent {
   hideUpdates() {
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

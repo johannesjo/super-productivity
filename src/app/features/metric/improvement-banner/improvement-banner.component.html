@@ -1,6 +1,6 @@
 <div [@improvementBanner]="improvements.length"
      class="improvements">
-  <div *ngFor="let improvement of improvements;"
+  <div *ngFor="let improvement of improvements; trackBy: trackById"
        class="improvement"
        mat-ripple>
     <button (click)="dismiss(improvement)"

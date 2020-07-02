@@ -23,7 +23,7 @@
     </button>
     <mat-menu #addColMenu="matMenu">
       <button (click)="addCol(colOpt.id)"
-              *ngFor="let colOpt of colOpts"
+              *ngFor="let colOpt of colOpts; trackBy: trackByIndex"
               mat-menu-item>
         {{colOpt.title|translate}}
       </button>
@@ -33,7 +33,7 @@
     <div class="table-wrapper material-table _no-elevation">
       <table>
         <tr class="control-row">
-          <td *ngFor="let col of options.cols;let i = index;">
+          <td *ngFor="let col of options.cols;let i = index; trackBy: trackByIndex">
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.cols[i]"
                         [matTooltip]="T.F.WORKLOG.EXPORT.EDIT_COL|translate"
@@ -47,7 +47,7 @@
           </td>
         </tr>
         <tr>
-          <th *ngFor="let headlineCol of headlineCols; let i = index;"
+          <th *ngFor="let headlineCol of headlineCols; let i = index; trackBy: trackByIndex"
               [ngClass]="options.cols[i]">{{headlineCol}}</th>
         </tr>
         <tr *ngFor="let row of formattedRows;">
@@ -91,7 +91,7 @@
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.roundWorkTimeTo">
               <mat-option><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option>
-              <mat-option *ngFor="let roundOption of roundTimeOptions"
+              <mat-option *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
                           [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
@@ -104,7 +104,7 @@
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.roundStartTimeTo">
               <mat-option><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option>
-              <mat-option *ngFor="let roundOption of roundTimeOptions"
+              <mat-option *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
                           [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
@@ -117,7 +117,7 @@
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.roundEndTimeTo">
               <mat-option><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option>
-              <mat-option *ngFor="let roundOption of roundTimeOptions"
+              <mat-option *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
                           [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
@@ -129,7 +129,7 @@
             <label>{{T.F.WORKLOG.EXPORT.GROUP_BY|translate}}</label>
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.groupBy">
-              <mat-option *ngFor="let groupByOption of groupByOptions"
+              <mat-option *ngFor="let groupByOption of groupByOptions; trackBy: trackByIndex"
                           [value]="groupByOption.id">
                 {{groupByOption.title|translate}}
               </mat-option>

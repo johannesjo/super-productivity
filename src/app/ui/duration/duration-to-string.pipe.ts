@@ -4,7 +4,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'durationToString'
 })
 export class DurationToStringPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) = durationToString;
+  transform: (value: any, ...args: any[]) => any = durationToString;
 }
 
 export const durationToString = (momentDuration: any, args?: any): any => {

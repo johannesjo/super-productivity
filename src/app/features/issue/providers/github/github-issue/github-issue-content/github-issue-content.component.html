@@ -29,7 +29,7 @@
         <th>{{T.F.GITHUB.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
           <mat-chip-list>
-            <mat-chip *ngFor="let label of issue?.labels"
+            <mat-chip *ngFor="let label of issue?.labels; trackBy: trackByIndex"
                       [title]="label.description">{{label.name}}
             </mat-chip>
           </mat-chip-list>
@@ -46,7 +46,7 @@
     </table>
 
     <div *ngIf="issue?.comments">
-      <div *ngFor="let comment of (issue?.comments|sort:'created_at')"
+      <div *ngFor="let comment of (issue?.comments|sort:'created_at'); trackBy: trackByIndex"
            class="comment">
         <!--<img [src]="comment.author.avatarUrl"-->
         <!--class="author-avatar">-->

@@ -16,8 +16,10 @@ export class KeyboardInputComponent extends FieldType {
   }
 
   onKeyDown(ev: KeyboardEvent) {
+    const keyCode = ev.keyCode;
+
     // the tab key should continue to behave normally
-    if (ev.keyCode === 9 || ev.key === 'Tab') {
+    if (keyCode === 9 || ev.key === 'Tab') {
       return;
     }
 
@@ -25,11 +27,11 @@ export class KeyboardInputComponent extends FieldType {
     ev.stopPropagation();
 
     // focus out on escape
-    if (ev.keyCode === 27 || ev.key === 'Escape') {
+    if (keyCode === 27 || ev.key === 'Escape') {
       // element.blur();
-    } else if (ev.keyCode === 13 || ev.key === 'Enter') {
+    } else if (keyCode === 13 || ev.key === 'Enter') {
       // element.blur();
-    } else if (ev.keyCode === 16 || ev.keyCode === 17 || ev.keyCode === 18) {
+    } else if (keyCode === 16 || keyCode === 17 || keyCode === 18) {
       // don't update if event is for ctrl alt or shift down itself
       return;
     } else {
@@ -49,7 +51,7 @@ export class KeyboardInputComponent extends FieldType {
 
       // custom key handling
       let keyName = ev.key;
-      if (ev.keyCode === 32) {
+      if (keyCode === 32) {
         keyName = 'Space';
       }
 

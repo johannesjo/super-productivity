@@ -23,7 +23,7 @@
       </div>
 
       <div class="other-days">
-        <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr"
+        <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr;trackBy:trackByIndex"
              class="other-day">
           <mat-form-field class="mat-icon-float mat-block">
             <input [(ngModel)]="timeSpentOnDayCopy[strDate]"
