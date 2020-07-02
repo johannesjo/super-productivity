@@ -66,44 +66,45 @@ import { devError } from '../../util/dev-error';
 export class PersistenceService {
 
   // handled as private but needs to be assigned before the creations
-  _baseModels = [];
-  _projectModels = [];
+  _baseModels: PersistenceBaseModel<any>[] = [];
+  _projectModels: PersistenceForProjectModel<any, any>[] = [];
 
   // TODO auto generate ls keys from appDataKey where possible
-  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
-  reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+  globalConfig: PersistenceBaseModel<GlobalConfigState> = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
+  reminders: PersistenceBaseModel<Reminder[]> = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
-  project = this._cmBaseEntity<ProjectState, Project>(
+  project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<ProjectState, Project>(
     LS_PROJECT_META_LIST,
     'project',
     projectReducer,
     migrateProjectState,
   );
-  tag = this._cmBaseEntity<TagState, Tag>(
+
+  tag: PersistenceBaseEntityModel<TagState, Tag> = this._cmBaseEntity<TagState, Tag>(
     LS_TAG_STATE,
     'tag',
     tagReducer,
   );
-  simpleCounter = this._cmBaseEntity<SimpleCounterState, SimpleCounter>(
+  simpleCounter: PersistenceBaseEntityModel<SimpleCounterState, SimpleCounter> = this._cmBaseEntity<SimpleCounterState, SimpleCounter>(
     LS_SIMPLE_COUNTER_STATE,
     'simpleCounter',
     simpleCounterReducer,
   );
 
   // MAIN TASK MODELS
-  task = this._cmBaseEntity<TaskState, Task>(
+  task: PersistenceBaseEntityModel<TaskState, Task> = this._cmBaseEntity<TaskState, Task>(
     LS_TASK_STATE,
     'task',
     taskReducer,
     migrateTaskState,
   );
-  taskArchive = this._cmBaseEntity<TaskArchive, ArchiveTask>(
+  taskArchive: PersistenceBaseEntityModel<TaskArchive, ArchiveTask> = this._cmBaseEntity<TaskArchive, ArchiveTask>(
     LS_TASK_ARCHIVE,
     'taskArchive',
     taskReducer,
     migrateTaskArchiveState,
   );
-  taskRepeatCfg = this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
+  taskRepeatCfg: PersistenceBaseEntityModel<TaskRepeatCfgState, TaskRepeatCfg> = this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
     taskRepeatCfgReducer,
@@ -111,23 +112,23 @@ export class PersistenceService {
   );
 
   // PROJECT MODELS
-  bookmark = this._cmProject<BookmarkState, Bookmark>(
+  bookmark: PersistenceForProjectModel<BookmarkState, Bookmark> = this._cmProject<BookmarkState, Bookmark>(
     LS_BOOKMARK_STATE,
     'bookmark',
   );
-  note = this._cmProject<NoteState, Note>(
+  note: PersistenceForProjectModel<NoteState, Note> = this._cmProject<NoteState, Note>(
     LS_NOTE_STATE,
     'note',
   );
-  metric = this._cmProject<MetricState, Metric>(
+  metric: PersistenceForProjectModel<MetricState, Metric> = this._cmProject<MetricState, Metric>(
     LS_METRIC_STATE,
     'metric',
   );
-  improvement = this._cmProject<ImprovementState, Improvement>(
+  improvement: PersistenceForProjectModel<ImprovementState, Improvement> = this._cmProject<ImprovementState, Improvement>(
     LS_IMPROVEMENT_STATE,
     'improvement',
   );
-  obstruction = this._cmProject<ObstructionState, Obstruction>(
+  obstruction: PersistenceForProjectModel<ObstructionState, Obstruction> = this._cmProject<ObstructionState, Obstruction>(
     LS_OBSTRUCTION_STATE,
     'obstruction',
   );
@@ -148,7 +149,7 @@ export class PersistenceService {
   );
 
   private _inMemoryComplete: AppDataComplete;
-  private _isBlockSaving = false;
+  private _isBlockSaving: boolean = false;
 
   constructor(
     private _snackService: SnackService,
@@ -167,11 +168,11 @@ export class PersistenceService {
     });
   }
 
-  async saveProjectArchive(data: ProjectArchive, isDataImport = false): Promise<any> {
+  async saveProjectArchive(data: ProjectArchive, isDataImport: boolean = false): Promise<any> {
     return await this._saveToDb({dbKey: 'archivedProjects', data, isDataImport});
   }
 
-  async loadArchivedProject(projectId): Promise<ProjectArchivedRelatedData> {
+  async loadArchivedProject(projectId: string): Promise<ProjectArchivedRelatedData> {
     const archive = await this._loadFromDb({dbKey: 'project', legacyDBKey: LS_PROJECT_ARCHIVE, projectId});
     const projectDataCompressed = archive[projectId];
     const decompressed = await this._compressionService.decompress(projectDataCompressed);
@@ -180,7 +181,7 @@ export class PersistenceService {
     return parsed;
   }
 
-  async removeArchivedProject(projectId): Promise<any> {
+  async removeArchivedProject(projectId: string): Promise<any> {
     const archive = await this._loadFromDb({
       dbKey: 'archivedProjects',
       legacyDBKey: LS_PROJECT_ARCHIVE
@@ -189,7 +190,7 @@ export class PersistenceService {
     await this.saveProjectArchive(archive);
   }
 
-  async saveArchivedProject(projectId, archivedProject: ProjectArchivedRelatedData) {
+  async saveArchivedProject(projectId: string, archivedProject: ProjectArchivedRelatedData) {
     const current = await this.loadProjectArchive() || {};
     const jsonStr = JSON.stringify(archivedProject);
     const compressedData = await this._compressionService.compress(jsonStr);
@@ -361,7 +362,7 @@ export class PersistenceService {
     lsKey: string,
     appDataKey: keyof AppBaseData,
     migrateFn: (state: T) => T = (v) => v,
-    isSkipPush = false,
+    isSkipPush: boolean = false,
   ): PersistenceBaseModel<T> {
     const model = {
       appDataKey,
@@ -483,7 +484,7 @@ export class PersistenceService {
     return await Promise.all(promises);
   }
 
-  private _makeProjectKey(projectId, subKey, additional?) {
+  private _makeProjectKey(projectId: string, subKey: string, additional?: string) {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
   }
 
