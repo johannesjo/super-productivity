@@ -54,17 +54,17 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
 
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
-  @HostBinding('@noop') alwaysTrue = true;
+  @HostBinding('@noop') alwaysTrue: boolean = true;
 
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
   @ViewChild('attachmentPanelElRef') attachmentPanelElRef: TaskAdditionalInfoItemComponent;
 
-  ShowSubTasksMode = ShowSubTasksMode;
-  selectedItemIndex = 0;
-  isFocusNotes = false;
+  ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
+  selectedItemIndex: number = 0;
+  isFocusNotes: boolean = false;
   T: any = T;
   issueAttachments: TaskAttachment[];
-  reminderId$ = new BehaviorSubject(null);
+  reminderId$: BehaviorSubject<string | null> = new BehaviorSubject(null);
   reminderData$: Observable<ReminderCopy> = this.reminderId$.pipe(
     switchMap(id => id
       ? this._reminderService.getById$(id)
@@ -72,19 +72,19 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     ),
   );
 
-  issueIdAndType$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
-  issueIdAndTypeShared$ = this.issueIdAndType$.pipe(
+  issueIdAndType$: Subject<{ id: string | number; type: IssueProviderKey }> = new Subject();
+  issueIdAndTypeShared$: Observable<{ id: string | number; type: IssueProviderKey }> = this.issueIdAndType$.pipe(
     shareReplay(1),
   );
 
-  issueDataNullTrigger$ = new Subject<{ id: string | number; type: IssueProviderKey }>();
+  issueDataNullTrigger$: Subject<{ id: string | number; type: IssueProviderKey }> = new Subject();
 
   issueDataTrigger$: Observable<{ id: string | number; type: IssueProviderKey }> = merge(
     this.issueIdAndTypeShared$,
     this.issueDataNullTrigger$
   );
   issueData: IssueData;
-  repeatCfgId$ = new BehaviorSubject(null);
+  repeatCfgId$: BehaviorSubject<string | null> = new BehaviorSubject(null);
   repeatCfgDays$: Observable<string> = this.repeatCfgId$.pipe(
     switchMap(id => (id)
       ? this._taskRepeatCfgService.getTaskRepeatCfgById$(id).pipe(
@@ -108,13 +108,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     switchMap((id) => id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))
   );
   localAttachments: TaskAttachment[];
-  issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
-    withLatestFrom(this.issueIdAndTypeShared$),
-    map(([data, {type}]) => (data && type)
-      ? this._issueService.getMappedAttachments(type, data)
-      : [])
-  );
-  private _taskData: TaskWithSubTasks;
   issueData$: Observable<IssueData> = this.issueDataTrigger$.pipe(
     switchMap((args) => (args && args.id && args.type)
       ? this._issueService.getById$(args.type, args.id, this._taskData.projectId)
@@ -132,6 +125,14 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     // expandable closed when the data is loaded
     delay(0),
   );
+  issueAttachments$: Observable<TaskAttachmentCopy[]> = this.issueData$.pipe(
+    withLatestFrom(this.issueIdAndTypeShared$),
+    map(([data, {type}]) => (data && type)
+      ? this._issueService.getMappedAttachments(type, data)
+      : [])
+  );
+  private _taskData: TaskWithSubTasks;
+
   private _focusTimeout: number;
   private _subs: Subscription = new Subscription();
 
@@ -303,7 +304,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration = 150) {
+  focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration: number = 150) {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
       const i = this.itemEls.toArray().findIndex(el => el === cmpInstance);

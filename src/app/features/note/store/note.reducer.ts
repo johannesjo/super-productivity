@@ -78,7 +78,7 @@ const _reducer = createReducer<NoteState>(
 );
 
 export function noteReducer(
-  state = initialNoteState,
+  state: NoteState = initialNoteState,
   action: Action
 ): NoteState {
   return _reducer(state, action);

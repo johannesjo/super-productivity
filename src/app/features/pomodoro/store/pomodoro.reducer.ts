@@ -21,7 +21,7 @@ export const selectIsManualPause = createSelector(selectPomodoroFeatureState, st
 export const selectIsBreak = createSelector(selectPomodoroFeatureState, state => state.isBreak);
 export const selectCurrentCycle = createSelector(selectPomodoroFeatureState, state => state.currentCycle);
 
-export function pomodoroReducer(state = initialPomodoroState, action: PomodoroActions): PomodoroState {
+export function pomodoroReducer(state: PomodoroState = initialPomodoroState, action: PomodoroActions): PomodoroState {
   switch (action.type) {
 
     case  PomodoroActionTypes.StartPomodoro: {

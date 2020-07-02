@@ -61,18 +61,18 @@ import { TaskArchive, TaskState } from '../../tasks/task.model';
 import { unique } from '../../../util/unique';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { TODAY_TAG } from '../../tag/tag.const';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 
 @Injectable()
 export class ProjectEffects {
-  saveToLs$ = this._store$.pipe(
+  saveToLs$: Observable<unknown> = this._store$.pipe(
     // tap(() => console.log('SAVE')),
     select(selectProjectFeatureState),
     take(1),
     switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
   );
   @Effect({dispatch: false})
-  syncProjectToLs$: any = this._actions$
+  syncProjectToLs$: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.AddProject,
@@ -107,7 +107,7 @@ export class ProjectEffects {
       switchMap(() => this.saveToLs$),
     );
   @Effect({dispatch: false})
-  updateProjectStorageConditionalTask$ = this._actions$.pipe(
+  updateProjectStorageConditionalTask$: Observable<unknown> = this._actions$.pipe(
     ofType(
       TaskActionTypes.AddTask,
       TaskActionTypes.DeleteTask,
@@ -141,7 +141,7 @@ export class ProjectEffects {
     switchMap(() => this.saveToLs$),
   );
   @Effect({dispatch: false})
-  updateProjectStorageConditional$ = this._actions$.pipe(
+  updateProjectStorageConditional$: Observable<unknown> = this._actions$.pipe(
     ofType(
       moveTaskInTodayList,
       moveTaskUpInTodayList,
@@ -167,7 +167,7 @@ export class ProjectEffects {
     );
 
   @Effect()
-  updateWorkEnd$: any = this._actions$
+  updateWorkEnd$: Observable<unknown> = this._actions$
     .pipe(
       ofType(TaskActionTypes.AddTimeSpent),
       filter((action: AddTimeSpent) => !!action.payload.task.projectId),
@@ -181,7 +181,7 @@ export class ProjectEffects {
     );
 
   @Effect()
-  onProjectIdChange$: any = this._actions$
+  onProjectIdChange$: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         setActiveWorkContext
@@ -204,7 +204,7 @@ export class ProjectEffects {
 
   // TODO a solution for orphaned tasks might be needed
   @Effect({dispatch: false})
-  deleteProjectRelatedData: any = this._actions$
+  deleteProjectRelatedData: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.DeleteProject,
@@ -225,7 +225,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  archiveProject: any = this._actions$
+  archiveProject: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.ArchiveProject,
@@ -241,7 +241,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  unarchiveProject: any = this._actions$
+  unarchiveProject: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UnarchiveProject,
@@ -259,7 +259,7 @@ export class ProjectEffects {
   // PURE SNACKS
   // -----------
   @Effect({dispatch: false})
-  snackUpdateIssueProvider$: any = this._actions$
+  snackUpdateIssueProvider$: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
@@ -276,7 +276,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  snackUpdateBaseSettings$: any = this._actions$
+  snackUpdateBaseSettings$: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UpdateProject,
@@ -290,7 +290,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  onProjectCreatedSnack: any = this._actions$
+  onProjectCreatedSnack: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.AddProject,
@@ -306,7 +306,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  showDeletionSnack: any = this._actions$
+  showDeletionSnack: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.DeleteProject,
@@ -320,7 +320,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  cleanupTaskListOfNonProjectTasks: any = this._workContextService.activeWorkContextTypeAndId$
+  cleanupTaskListOfNonProjectTasks: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
     .pipe(
       filter(({activeType}) => activeType === WorkContextType.PROJECT),
       delay(100),
@@ -349,7 +349,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  cleanupBacklogOfNonProjectTasks: any = this._workContextService.activeWorkContextTypeAndId$
+  cleanupBacklogOfNonProjectTasks: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
     .pipe(
       filter(({activeType}) => activeType === WorkContextType.PROJECT),
       delay(100),
@@ -378,7 +378,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  cleanupNullTasksForTaskList: any = this._workContextService.activeWorkContextTypeAndId$
+  cleanupNullTasksForTaskList: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
     .pipe(
       // only run in prod, because we want to debug this
       // filter(() => environment.production),
@@ -407,7 +407,7 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
-  cleanupNullTasksForBacklog: any = this._workContextService.activeWorkContextTypeAndId$
+  cleanupNullTasksForBacklog: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
     .pipe(
       // only run in prod, because we want to debug this
       // filter(() => environment.production),
@@ -436,7 +436,7 @@ export class ProjectEffects {
     );
 
   @Effect()
-  moveToTodayListOnAddTodayTag: any = this._actions$.pipe(
+  moveToTodayListOnAddTodayTag: Observable<unknown> = this._actions$.pipe(
     ofType(TaskActionTypes.UpdateTaskTags),
     filter((action: UpdateTaskTags) =>
       action.payload.task.projectId &&
@@ -457,7 +457,7 @@ export class ProjectEffects {
   );
 
   // @Effect()
-  // moveToBacklogOnRemoveTodayTag: any = this._actions$.pipe(
+  // moveToBacklogOnRemoveTodayTag: Observable<unknown> = this._actions$.pipe(
   //   ofType(TaskActionTypes.UpdateTaskTags),
   //   filter((action: UpdateTaskTags) =>
   //     action.payload.task.projectId &&

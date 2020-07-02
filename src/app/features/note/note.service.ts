@@ -40,7 +40,7 @@ export class NoteService {
     return await this._persistenceService.note.ent.getById(projectId, id);
   }
 
-  public async loadStateForProject(projectId) {
+  public async loadStateForProject(projectId: string) {
     const notes = await this._persistenceService.note.load(projectId) || initialNoteState;
     this.loadState(notes);
   }
@@ -49,7 +49,7 @@ export class NoteService {
     this._store$.dispatch(loadNoteState({state}));
   }
 
-  public add(note: Partial<Note> = {}, remindAt: number = null, isPreventFocus = false) {
+  public add(note: Partial<Note> = {}, remindAt: number = null, isPreventFocus: boolean = false) {
     const id = shortid();
 
     this._store$.dispatch(addNote({
@@ -69,7 +69,7 @@ export class NoteService {
     this._store$.dispatch(deleteNote({id}));
   }
 
-  public update(id, note: Partial<Note>) {
+  public update(id: string, note: Partial<Note>) {
     this._store$.dispatch(updateNote({
       note: {
         id,
@@ -78,7 +78,7 @@ export class NoteService {
     }));
   }
 
-  public async updateFromDifferentWorkContext(workContextId, id, updates: Partial<Note>) {
+  public async updateFromDifferentWorkContext(workContextId: string, id: string, updates: Partial<Note>) {
     const noteState = await this._persistenceService.note.load(workContextId);
     const noteToUpdate = noteState.entities[id];
     if (noteToUpdate) {
@@ -107,18 +107,19 @@ export class NoteService {
     this._store$.dispatch(removeNoteReminder({id: noteId, reminderId}));
   }
 
-  createFromDrop(ev) {
+  createFromDrop(ev: DragEvent) {
     this._handleInput(createFromDrop(ev), ev);
   }
 
-  private async _handleInput(drop: DropPasteInput, ev) {
+  private async _handleInput(drop: DropPasteInput, ev: Event) {
     // properly not intentional so we leave
     if (!drop || !drop.path || drop.type === 'FILE') {
       return;
     }
 
     // don't intervene with text inputs
-    if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
+    const target = ev.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
       return;
     }
 

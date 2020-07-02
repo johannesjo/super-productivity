@@ -17,16 +17,16 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InlineInputComponent implements AfterViewInit {
-  @Input() type = 'text';
+  @Input() type: 'text' | 'duration' = 'text';
   @Input() value: string | number;
   @Input() displayValue: string;
   @Input() newValue: string | number;
 
-  @Output() changed = new EventEmitter<string | number>();
+  @Output() changed: EventEmitter<string | number> = new EventEmitter();
   @ViewChild('inputEl') inputEl: ElementRef;
   @ViewChild('inputElDuration') inputElDuration: ElementRef;
 
-  @HostBinding('class.isFocused') isFocused = false;
+  @HostBinding('class.isFocused') isFocused: boolean = false;
 
   activeInputEl: HTMLInputElement;
 
@@ -60,11 +60,11 @@ export class InlineInputComponent implements AfterViewInit {
     }
   }
 
-  onChange(v) {
+  onChange(v: string | number) {
     this.newValue = v;
   }
 
-  keypressHandler(ev) {
+  keypressHandler(ev: KeyboardEvent) {
     if (ev.key === 'Escape') {
       this.newValue = null;
       this.activeInputEl.blur();

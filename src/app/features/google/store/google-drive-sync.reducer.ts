@@ -25,7 +25,7 @@ export const selectIsGoogleDriveSaveInProgress = createSelector(
   (state) => state.isSaveInProgress,
 );
 
-export function reducer(state = initialGoogleDriveState, action: Action): GoogleDriveState {
+export function reducer(state: GoogleDriveState = initialGoogleDriveState, action: Action): GoogleDriveState {
   switch (action.type) {
     // case GoogleDriveSyncActionTypes.SaveForSync:
     //   return {...state, isSaveInProgress: true};

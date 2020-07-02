@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { concatMap, filter, flatMap, map, take, tap, withLatestFrom } from 'rxjs/operators';
-import { select, Store } from '@ngrx/store';
+import { Action, select, Store } from '@ngrx/store';
 import {
   AddTaskRepeatCfgToTask,
   DeleteTaskRepeatCfg,
@@ -14,7 +14,7 @@ import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
 import { AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg } from '../task-repeat-cfg.model';
+import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { from } from 'rxjs';
 import { isToday } from '../../../util/is-today.util';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -156,7 +156,7 @@ export class TaskRepeatCfgEffects {
   ) {
   }
 
-  private _saveToLs([action, taskRepeatCfgState]) {
+  private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]) {
     this._persistenceService.updateLastLocalSyncModelChange();
     this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState);
   }

@@ -1,5 +1,16 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import { ImprovementActions, ImprovementActionTypes } from './improvement.actions';
+import {
+  AddImprovement,
+  AddImprovementCheckedDay,
+  DeleteImprovement,
+  DisableImprovementRepeat,
+  HideImprovement,
+  ImprovementActions,
+  ImprovementActionTypes,
+  LoadImprovementState,
+  ToggleImprovementRepeat,
+  UpdateImprovement
+} from './improvement.actions';
 import { Improvement, ImprovementState } from '../improvement.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
@@ -34,41 +45,41 @@ export const initialImprovementState: ImprovementState = adapter.getInitialState
 });
 
 export function improvementReducer(
-  state = initialImprovementState,
+  state: ImprovementState = initialImprovementState,
   action: ImprovementActions
 ): ImprovementState {
   switch (action.type) {
     case ImprovementActionTypes.AddImprovement: {
-      return adapter.addOne(action.payload.improvement, state);
+      return adapter.addOne((action as AddImprovement).payload.improvement, state);
     }
 
     case ImprovementActionTypes.UpdateImprovement: {
-      return adapter.updateOne(action.payload.improvement, state);
+      return adapter.updateOne((action as UpdateImprovement).payload.improvement, state);
     }
 
     case ImprovementActionTypes.DeleteImprovement: {
-      return adapter.removeOne(action.payload.id, state);
+      return adapter.removeOne((action as DeleteImprovement).payload.id, state);
     }
 
     // case ImprovementActionTypes.DeleteImprovements: {
-    //   return adapter.removeMany(action.payload.ids, state);
+    //   return adapter.removeMany((action as AddImprovement).payload.ids, state);
     // }
 
     case ImprovementActionTypes.LoadImprovementState:
-      return {...action.payload.state};
+      return {...(action as LoadImprovementState).payload.state};
 
     case ImprovementActionTypes.HideImprovement:
       const items = state.hiddenImprovementBannerItems || [];
       return {
         ...state,
         hideDay: getWorklogStr(),
-        hiddenImprovementBannerItems: [...items, action.payload.id]
+        hiddenImprovementBannerItems: [...items, (action as HideImprovement).payload.id]
       };
 
     case ImprovementActionTypes.ToggleImprovementRepeat:
-      const itemI = state.entities[action.payload.id];
+      const itemI = state.entities[(action as ToggleImprovementRepeat).payload.id];
       return adapter.updateOne({
-        id: action.payload.id,
+        id: (action as ToggleImprovementRepeat).payload.id,
         changes: {
           isRepeat: !itemI.isRepeat
         },
@@ -76,7 +87,7 @@ export function improvementReducer(
 
     case ImprovementActionTypes.DisableImprovementRepeat:
       return adapter.updateOne({
-        id: action.payload.id,
+        id: (action as DisableImprovementRepeat).payload.id,
         changes: {
           isRepeat: false
         },
@@ -89,7 +100,7 @@ export function improvementReducer(
       };
 
     case ImprovementActionTypes.AddImprovementCheckedDay: {
-      const {id, checkedDay} = action.payload;
+      const {id, checkedDay} = (action as AddImprovementCheckedDay).payload;
       const allCheckedDays = state.entities[id].checkedDays || [];
 
       return (allCheckedDays.includes(checkedDay) && checkedDay)

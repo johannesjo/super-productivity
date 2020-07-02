@@ -30,7 +30,7 @@ const _reducer = createReducer<WorkContextState>(
 );
 
 export function workContextReducer(
-  state = initialContextState,
+  state: WorkContextState = initialContextState,
   action: Action,
 ): WorkContextState {
 

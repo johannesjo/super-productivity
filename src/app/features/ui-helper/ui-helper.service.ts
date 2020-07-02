@@ -9,10 +9,11 @@ import { IPC } from '../../../../electron/ipc-events.const';
 import { IS_ELECTRON } from '../../app.constants';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
+import { webFrame } from 'electron';
 
 @Injectable({providedIn: 'root'})
 export class UiHelperService {
-  private _webFrame = this._electronService.webFrame;
+  private _webFrame: typeof webFrame = this._electronService.webFrame;
 
   constructor(
     @Inject(DOCUMENT) private _document: Document,

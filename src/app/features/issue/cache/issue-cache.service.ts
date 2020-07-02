@@ -13,7 +13,7 @@ export interface CacheItem {
   providedIn: 'root',
 })
 export class IssueCacheService {
-  cache(url: string, requestInit: RequestInit, orgMethod: any, orgArguments: any[], minAlive = 25000): Observable<any> {
+  cache(url: string, requestInit: RequestInit, orgMethod: any, orgArguments: any[], minAlive: number = 25000): Observable<any> {
     const cacheId = getCacheId(requestInit, url);
 
     if (this._isUseCache(cacheId) && requestInit.method === 'GET') {

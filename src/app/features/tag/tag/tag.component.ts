@@ -16,7 +16,7 @@ export interface TagComponentTag {
 export class TagComponent {
   tag: TagComponentTag;
   // @HostBinding('style.background')
-  color;
+  color: string;
 
   constructor() {
   }

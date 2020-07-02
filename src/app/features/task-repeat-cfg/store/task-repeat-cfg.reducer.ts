@@ -22,7 +22,7 @@ export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialS
 });
 
 export function taskRepeatCfgReducer(
-  state = initialTaskRepeatCfgState,
+  state: TaskRepeatCfgState = initialTaskRepeatCfgState,
   action: TaskRepeatCfgActions
 ): TaskRepeatCfgState {
 

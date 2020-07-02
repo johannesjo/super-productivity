@@ -30,12 +30,12 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<JiraCfg>;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
   T: any = T;
-  HelperClasses = HelperClasses;
+  HelperClasses: typeof HelperClasses = HelperClasses;
   issueSuggestionsCtrl: FormControl = new FormControl();
   customFieldSuggestionsCtrl: FormControl = new FormControl();
   customFields: any [] = [];
   customFieldsPromise: Promise<any>;
-  isLoading$ = new BehaviorSubject(false);
+  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   fields: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
@@ -115,7 +115,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  toggleEnabled(isEnabled) {
+  toggleEnabled(isEnabled: boolean) {
     if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
       throw new Error('Should only be called when in project context');
     }

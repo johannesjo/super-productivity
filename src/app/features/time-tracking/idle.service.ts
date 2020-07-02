@@ -21,7 +21,7 @@ const IDLE_POLL_INTERVAL = 1000;
   providedIn: 'root',
 })
 export class IdleService {
-  isIdle = false;
+  isIdle: boolean = false;
   private _isIdle$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(
     distinctUntilChanged(),
@@ -30,11 +30,11 @@ export class IdleService {
 
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
   idleTime$: Observable<number> = this._idleTime$.asObservable();
-  private _triggerResetBreakTimer$ = new Subject<boolean>();
+  private _triggerResetBreakTimer$: Subject<boolean> = new Subject();
   triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
 
   private lastCurrentTaskId: string;
-  private isIdleDialogOpen = false;
+  private isIdleDialogOpen: boolean = false;
   private idlePollInterval: number;
 
   constructor(
@@ -65,7 +65,7 @@ export class IdleService {
     // }, 700);
   }
 
-  handleIdle(idleTime) {
+  handleIdle(idleTime: number) {
     console.log('IDLE_TIME', idleTime, new Date());
     const cfg = this._configService.cfg.idle;
     const minIdleTime = cfg.minIdleTime || DEFAULT_MIN_IDLE_TIME;
@@ -137,7 +137,7 @@ export class IdleService {
     }
   }
 
-  initIdlePoll(initialIdleTime) {
+  initIdlePoll(initialIdleTime: number) {
     const idleStart = Date.now();
     this._idleTime$.next(initialIdleTime);
     this.idlePollInterval = window.setInterval(() => {

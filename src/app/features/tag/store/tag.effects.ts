@@ -30,7 +30,7 @@ import {
 } from '../../tasks/store/task.actions';
 import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { Task, TaskArchive } from '../../tasks/task.model';
 import { Tag } from '../tag.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -48,13 +48,13 @@ import {
 
 @Injectable()
 export class TagEffects {
-  saveToLs$ = this._store$.pipe(
+  saveToLs$: Observable<unknown> = this._store$.pipe(
     select(selectTagFeatureState),
     take(1),
     switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
     tap(this._updateLastLocalSyncModelChange.bind(this)),
   );
-  updateTagsStorage$ = createEffect(() => this._actions$.pipe(
+  updateTagsStorage$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(
       addTag,
       updateTag,
@@ -72,7 +72,7 @@ export class TagEffects {
     ),
     switchMap(() => this.saveToLs$),
   ), {dispatch: false});
-  updateProjectStorageConditionalTask$ = createEffect(() => this._actions$.pipe(
+  updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(
       TaskActionTypes.AddTask,
       TaskActionTypes.DeleteTask,
@@ -101,7 +101,7 @@ export class TagEffects {
     }),
     switchMap(() => this.saveToLs$),
   ), {dispatch: false});
-  updateTagsStorageConditional$ = createEffect(() => this._actions$.pipe(
+  updateTagsStorageConditional$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(
       moveTaskInTodayList,
       moveTaskUpInTodayList,
@@ -141,7 +141,7 @@ export class TagEffects {
   );
 
   @Effect()
-  updateWorkEnd$: any = this._actions$.pipe(
+  updateWorkEnd$: Observable<unknown> = this._actions$.pipe(
     ofType(TaskActionTypes.AddTimeSpent),
     concatMap(({payload}: AddTimeSpent) => payload.task.parentId
       ? this._taskService.getByIdOnce$(payload.task.parentId).pipe(first())
@@ -160,7 +160,7 @@ export class TagEffects {
   );
 
   @Effect({dispatch: false})
-  deleteTagRelatedData: any = this._actions$.pipe(
+  deleteTagRelatedData: Observable<unknown> = this._actions$.pipe(
     ofType(
       deleteTag,
       deleteTags,
@@ -190,7 +190,7 @@ export class TagEffects {
   );
 
   @Effect({dispatch: false})
-  redirectIfCurrentTagIsDeleted: any = this._actions$.pipe(
+  redirectIfCurrentTagIsDeleted: Observable<unknown> = this._actions$.pipe(
     ofType(
       deleteTag,
       deleteTags,
@@ -204,7 +204,7 @@ export class TagEffects {
   );
 
   @Effect({dispatch: false})
-  cleanupNullTasksForTaskList: any = this._workContextService.activeWorkContextTypeAndId$.pipe(
+  cleanupNullTasksForTaskList: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$.pipe(
     filter(({activeType}) => activeType === WorkContextType.TAG),
     switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
       take(1),

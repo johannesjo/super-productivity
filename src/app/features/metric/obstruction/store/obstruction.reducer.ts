@@ -1,5 +1,13 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import { ObstructionActions, ObstructionActionTypes } from './obstruction.actions';
+import {
+  AddObstruction,
+  DeleteObstruction,
+  DeleteObstructions,
+  LoadObstructionState,
+  ObstructionActions,
+  ObstructionActionTypes,
+  UpdateObstruction
+} from './obstruction.actions';
 import { Obstruction, ObstructionState } from '../obstruction.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
@@ -16,28 +24,28 @@ export const initialObstructionState: ObstructionState = adapter.getInitialState
 });
 
 export function obstructionReducer(
-  state = initialObstructionState,
+  state: ObstructionState = initialObstructionState,
   action: ObstructionActions
 ): ObstructionState {
   switch (action.type) {
     case ObstructionActionTypes.AddObstruction: {
-      return adapter.addOne(action.payload.obstruction, state);
+      return adapter.addOne((action as AddObstruction).payload.obstruction, state);
     }
 
     case ObstructionActionTypes.UpdateObstruction: {
-      return adapter.updateOne(action.payload.obstruction, state);
+      return adapter.updateOne((action as UpdateObstruction).payload.obstruction, state);
     }
 
     case ObstructionActionTypes.DeleteObstruction: {
-      return adapter.removeOne(action.payload.id, state);
+      return adapter.removeOne((action as DeleteObstruction).payload.id, state);
     }
 
     case ObstructionActionTypes.DeleteObstructions: {
-      return adapter.removeMany(action.payload.ids, state);
+      return adapter.removeMany((action as DeleteObstructions).payload.ids, state);
     }
 
     case ObstructionActionTypes.LoadObstructionState:
-      return {...action.payload.state};
+      return {...(action as LoadObstructionState).payload.state};
 
     default: {
       return state;

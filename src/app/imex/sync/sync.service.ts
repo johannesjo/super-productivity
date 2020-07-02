@@ -42,12 +42,12 @@ export class SyncService {
       filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
     );
   // ------------------
-  private _focusAppTrigger$ = fromEvent(window, 'focus').pipe(
+  private _focusAppTrigger$: Observable<string> = fromEvent(window, 'focus').pipe(
     throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
     mapTo('I_FOCUS_THROTTLED'),
   );
   // we might need this for mobile, as we can't rely on focus as much
-  private _someMobileActivityTrigger$ = of(isTouchOnly()).pipe(
+  private _someMobileActivityTrigger$: Observable<string> = of(isTouchOnly()).pipe(
     switchMap((isTouchIn) => isTouchIn
       ? fromEvent(window, 'touchstart').pipe(
         throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
@@ -56,7 +56,7 @@ export class SyncService {
       : EMPTY
     ),
   );
-  private _isOnlineTrigger$ = isOnline$.pipe(
+  private _isOnlineTrigger$: Observable<string> = isOnline$.pipe(
     // skip initial online which always fires on page load
     skip(1),
     filter(isOnline => isOnline),
@@ -64,7 +64,7 @@ export class SyncService {
   );
 
   // OTHER INITIAL SYNC STUFF
-  private _immediateSyncTrigger$ = merge(
+  private _immediateSyncTrigger$: Observable<string> = merge(
     this._focusAppTrigger$,
     this._someMobileActivityTrigger$,
     this._isOnlineTrigger$,
@@ -88,7 +88,7 @@ export class SyncService {
     distinctUntilChanged(),
   );
   // keep it super simple for now
-  private _isInitialSyncDoneManual$ = new ReplaySubject<boolean>(1);
+  private _isInitialSyncDoneManual$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
   private _isInitialSyncDone$: Observable<boolean> = this._isInitialSyncEnabled$.pipe(
     switchMap((isActive) => {
       return isActive

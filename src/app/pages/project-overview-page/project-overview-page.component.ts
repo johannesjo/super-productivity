@@ -87,7 +87,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     reader.readAsText(file);
   }
 
-  edit(project) {
+  edit(project: Project) {
     this._matDialog.open(DialogCreateProjectComponent, {
       restoreFocus: true,
       data: Object.assign({}, project),
@@ -124,7 +124,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  remove(projectId) {
+  remove(projectId: string) {
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {

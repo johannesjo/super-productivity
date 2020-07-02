@@ -84,8 +84,8 @@ export class IssueService {
 
   async refreshIssue(
     task: Task,
-    isNotifySuccess = true,
-    isNotifyNoUpdateRequired = false
+    isNotifySuccess: boolean = true,
+    isNotifyNoUpdateRequired: boolean = false
   ): Promise<void> {
     if (typeof this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue === 'function') {
       const update = await this.ISSUE_SERVICE_MAP[task.issueType].refreshIssue(task, isNotifySuccess, isNotifyNoUpdateRequired);
@@ -103,7 +103,7 @@ export class IssueService {
     issueType: IssueProviderKey,
     issueIdOrData: string | number | IssueDataReduced,
     projectId: string,
-    isAddToBacklog = false,
+    isAddToBacklog: boolean = false,
   ): Promise<string> {
     if (this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
       const {issueId, issueData} = (typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string')

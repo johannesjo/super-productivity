@@ -15,7 +15,7 @@ export class KeyboardInputComponent extends FieldType {
     return this.to.type || 'text';
   }
 
-  onKeyDown(ev) {
+  onKeyDown(ev: KeyboardEvent) {
     // the tab key should continue to behave normally
     if (ev.keyCode === 9 || ev.key === 'Tab') {
       return;

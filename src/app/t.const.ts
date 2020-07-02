@@ -1,5 +1,5 @@
 export const T = {
-  'APP': {
+  APP: {
     'B_INSTALL': {
       'IGNORE': 'APP.B_INSTALL.IGNORE',
       'INSTALL': 'APP.B_INSTALL.INSTALL',

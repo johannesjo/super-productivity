@@ -52,61 +52,61 @@ import { Injectable } from '@angular/core';
 export class LegacyPersistenceService {
 
   // handled as private but needs to be assigned before the creations
-  _baseModels = [];
-  _projectModels = [];
+  _baseModels: any [] = [];
+  _projectModels: any [] = [];
 
   // TODO auto generate ls keys from appDataKey where possible
-  project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
-  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
-  reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
-  task = this._cmProject<TaskState, Task>(
+  project: any = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project', migrateProjectState);
+  globalConfig: any = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
+  reminders: any = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+  task: any = this._cmProject<TaskState, Task>(
     LS_TASK_STATE,
     'task',
     taskReducer,
   );
-  taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
+  taskRepeatCfg: any = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
     taskRepeatCfgReducer,
   );
-  taskArchive = this._cmProject<TaskArchive, TaskWithSubTasks>(
+  taskArchive: any = this._cmProject<TaskArchive, TaskWithSubTasks>(
     LS_TASK_ARCHIVE,
     'taskArchive',
     // NOTE: this might be problematic, as we don't really have reducer logic for the archive
     // TODO add a working reducer for task archive
     taskReducer,
   );
-  taskAttachment = this._cmProject<EntityState<TaskAttachment>, TaskAttachment>(
+  taskAttachment: any = this._cmProject<EntityState<TaskAttachment>, TaskAttachment>(
     LS_TASK_ATTACHMENT_STATE,
     'taskAttachment',
     (state) => state
   );
-  bookmark = this._cmProject<BookmarkState, Bookmark>(
+  bookmark: any = this._cmProject<BookmarkState, Bookmark>(
     LS_BOOKMARK_STATE,
     'bookmark',
     (state) => state,
   );
-  note = this._cmProject<NoteState, Note>(
+  note: any = this._cmProject<NoteState, Note>(
     LS_NOTE_STATE,
     'note',
     (state) => state,
   );
-  metric = this._cmProject<MetricState, Metric>(
+  metric: any = this._cmProject<MetricState, Metric>(
     LS_METRIC_STATE,
     'metric',
     (state) => state,
   );
-  improvement = this._cmProject<ImprovementState, Improvement>(
+  improvement: any = this._cmProject<ImprovementState, Improvement>(
     LS_IMPROVEMENT_STATE,
     'improvement',
     (state) => state,
   );
-  obstruction = this._cmProject<ObstructionState, Obstruction>(
+  obstruction: any = this._cmProject<ObstructionState, Obstruction>(
     LS_OBSTRUCTION_STATE,
     'obstruction',
     (state) => state,
   );
-  private _isBlockSaving = false;
+  private _isBlockSaving: boolean = false;
 
   constructor(
     private _snackService: SnackService,
@@ -305,13 +305,13 @@ export class LegacyPersistenceService {
     return await Promise.all(promises);
   }
 
-  private _makeProjectKey(projectId, subKey, additional?) {
+  private _makeProjectKey(projectId: string, subKey: string, additional?: string) {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
   }
 
   // DATA STORAGE INTERFACE
   // ---------------------
-  private async _saveToDb(key: string, data: any, isForce = false): Promise<any> {
+  private async _saveToDb(key: string, data: any, isForce: boolean = false): Promise<any> {
     if (!this._isBlockSaving || isForce === true) {
       return this._databaseService.save(key, data);
     } else {
@@ -320,7 +320,7 @@ export class LegacyPersistenceService {
     }
   }
 
-  private async _removeFromDb(key: string, isForce = false): Promise<any> {
+  private async _removeFromDb(key: string, isForce: boolean = false): Promise<any> {
     if (!this._isBlockSaving || isForce === true) {
       return this._databaseService.remove(key);
     } else {

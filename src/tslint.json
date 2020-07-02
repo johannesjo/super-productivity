@@ -32,6 +32,10 @@
     "no-inferrable-types": false,
     "strict-type-predicates": true,
     "template-use-track-by-function": true,
-    "align": false
+    "align": false,
+    "max-line-length": [
+      true,
+      180
+    ]
   }
 }

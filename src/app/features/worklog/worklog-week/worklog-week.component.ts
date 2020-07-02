@@ -22,7 +22,7 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
 export class WorklogWeekComponent {
   visibility: boolean[] = [];
   T: any = T;
-  keys = Object.keys;
+  keys: (o: object) => string[] = Object.keys;
 
   constructor(
     public readonly worklogService: WorklogService,
@@ -32,7 +32,7 @@ export class WorklogWeekComponent {
   ) {
   }
 
-  sortDays(a, b) {
+  sortDays(a: any, b: any) {
     return a.key - b.key;
   }
 
@@ -64,11 +64,11 @@ export class WorklogWeekComponent {
     this.worklogService.refreshWorklog();
   }
 
-  trackByDay(i, day) {
+  trackByDay(i: number, day: any) {
     return day.key;
   }
 
-  trackByLogEntry(i, logEntry: WorklogDataForDay) {
+  trackByLogEntry(i: number, logEntry: WorklogDataForDay) {
     return logEntry.task.id;
   }
 }

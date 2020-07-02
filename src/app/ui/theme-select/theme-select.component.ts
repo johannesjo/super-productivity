@@ -10,5 +10,5 @@ import { T } from '../../t.const';
 })
 export class ThemeSelectComponent {
   T: any = T;
-  themes = ALL_THEMES;
+  themes: string[] = ALL_THEMES;
 }

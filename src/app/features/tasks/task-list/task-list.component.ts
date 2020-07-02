@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Input,
   OnDestroy,
   OnInit,
@@ -40,11 +41,11 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() noTasksMsg: string;
   @Input() isBacklog: boolean;
   listId: string;
-  @ViewChild('listEl', {static: true}) listEl;
-  isBlockAni = false;
-  doneTasksLength = 0;
-  undoneTasksLength = 0;
-  allTasksLength = 0;
+  @ViewChild('listEl', {static: true}) listEl: ElementRef;
+  isBlockAni: boolean = false;
+  doneTasksLength: number = 0;
+  undoneTasksLength: number = 0;
+  allTasksLength: number = 0;
   currentTaskId: string;
   private _subs: Subscription = new Subscription();
   private _blockAnimationTimeout: number;

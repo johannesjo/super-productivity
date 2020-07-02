@@ -16,8 +16,8 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   T: any = T;
   taskSelectCtrl: FormControl = new FormControl();
   filteredTasks: Task[];
-  isCreate = false;
-  @Output() taskChange = new EventEmitter<Task | string>();
+  isCreate: boolean = false;
+  @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(

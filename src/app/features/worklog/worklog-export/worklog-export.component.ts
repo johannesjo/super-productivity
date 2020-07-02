@@ -59,10 +59,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   @Input() isWorklogExport: boolean;
   @Input() isShowClose: boolean;
 
-  @Output() cancel = new EventEmitter();
+  @Output() cancel: EventEmitter<void> = new EventEmitter();
 
   T: any = T;
-  isShowAsText = false;
+  isShowAsText: boolean = false;
   headlineCols: string[] = [];
   formattedRows: (string | number)[][];
   options: WorklogExportSettingsCopy = {
@@ -70,14 +70,14 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     cols: [...WORKLOG_EXPORT_DEFAULTS.cols],
   };
   txt: string;
-  fileName = 'tasks.csv';
-  roundTimeOptions = [
+  fileName: string = 'tasks.csv';
+  roundTimeOptions: { id: string; title: string }[] = [
     {id: 'QUARTER', title: T.F.WORKLOG.EXPORT.O.FULL_QUARTERS},
     {id: 'HALF', title: T.F.WORKLOG.EXPORT.O.FULL_HALF_HOURS},
     {id: 'HOUR', title: T.F.WORKLOG.EXPORT.O.FULL_HOURS},
   ];
 
-  colOpts = [
+  colOpts: { id: string; title: string }[] = [
     {id: 'DATE', title: T.F.WORKLOG.EXPORT.O.DATE},
     {id: 'START', title: T.F.WORKLOG.EXPORT.O.STARTED_WORKING},
     {id: 'END', title: T.F.WORKLOG.EXPORT.O.ENDED_WORKING},
@@ -91,7 +91,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     {id: 'ESTIMATE_CLOCK', title: T.F.WORKLOG.EXPORT.O.ESTIMATE_AS_CLOCK},
   ];
 
-  groupByOptions = [
+  groupByOptions: { id: string; title: string }[] = [
     {id: WorklogGrouping.DATE, title: T.F.WORKLOG.EXPORT.O.DATE},
     {id: WorklogGrouping.TASK, title: T.F.WORKLOG.EXPORT.O.TASK_SUBTASK},
     {id: WorklogGrouping.PARENT, title: T.F.WORKLOG.EXPORT.O.PARENT_TASK},

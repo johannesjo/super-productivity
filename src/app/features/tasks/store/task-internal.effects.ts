@@ -125,7 +125,7 @@ export class TaskInternalEffects {
   ) {
   }
 
-  private _findNextTask(state: TaskState, todaysTaskIds: string[], oldCurrentId?): string {
+  private _findNextTask(state: TaskState, todaysTaskIds: string[], oldCurrentId?: string): string {
     let nextId = null;
     const {entities} = state;
 

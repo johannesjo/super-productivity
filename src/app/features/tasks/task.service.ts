@@ -54,7 +54,6 @@ import {
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
-  selectScheduledTasks,
   selectSelectedTask,
   selectSelectedTaskId,
   selectTaskAdditionalInfoTargetPanel,
@@ -141,10 +140,6 @@ export class TaskService {
     select(selectAllRepeatableTaskWithSubTasksFlat),
   );
 
-  scheduledTasksWOData$ = this._store.pipe(
-    select(selectScheduledTasks),
-  );
-
   isTaskDataLoaded$: Observable<boolean> = this._store.pipe(
     select(selectIsTaskDataLoaded),
   );
@@ -203,7 +198,7 @@ export class TaskService {
     }
   }
 
-  setSelectedId(id: string, taskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default) {
+  setSelectedId(id: string, taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default) {
     this._store.dispatch(new SetSelectedTask({id, taskAdditionalInfoTargetPanel}));
   }
 
@@ -222,9 +217,9 @@ export class TaskService {
   // Tasks
   // -----
   add(title: string,
-    isAddToBacklog = false,
+    isAddToBacklog: boolean = false,
     additional: Partial<Task> = {},
-    isAddToBottom = false,
+    isAddToBottom: boolean = false,
   ): string {
     const workContextId = this._workContextService.activeWorkContextId;
     const workContextType = this._workContextService.activeWorkContextType;
@@ -360,7 +355,7 @@ export class TaskService {
     }
   }
 
-  addSubTaskTo(parentId) {
+  addSubTaskTo(parentId: string) {
     this._store.dispatch(new AddSubTask({
       task: this.createNewTaskWithDefaults({title: ''}),
       parentId
@@ -391,7 +386,7 @@ export class TaskService {
     }
   }
 
-  moveToToday(id, isMoveToTop = false) {
+  moveToToday(id: string, isMoveToTop: boolean = false) {
     const workContextId = this._workContextService.activeWorkContextId;
     const workContextType = this._workContextService.activeWorkContextType;
     if (workContextType === WorkContextType.PROJECT) {
@@ -399,7 +394,7 @@ export class TaskService {
     }
   }
 
-  moveToBacklog(id) {
+  moveToBacklog(id: string) {
     const workContextId = this._workContextService.activeWorkContextId;
     const workContextType = this._workContextService.activeWorkContextType;
     if (workContextType === WorkContextType.PROJECT) {
@@ -429,7 +424,7 @@ export class TaskService {
     this._store.dispatch(new RestoreTask({task, subTasks}));
   }
 
-  roundTimeSpentForDay(day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp = false) {
+  roundTimeSpentForDay(day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean = false) {
     this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp}));
   }
 
@@ -475,7 +470,7 @@ export class TaskService {
 
   // REMINDER
   // --------
-  addReminder(task: Task | TaskWithSubTasks, remindAt: number, isMoveToBacklog = false) {
+  addReminder(task: Task | TaskWithSubTasks, remindAt: number, isMoveToBacklog: boolean = false) {
     this._store.dispatch(new AddTaskReminder({task, remindAt, isMoveToBacklog}));
   }
 
@@ -533,7 +528,7 @@ export class TaskService {
     this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.Show});
   }
 
-  toggleSubTaskMode(taskId: string, isShowLess = true, isEndless = false) {
+  toggleSubTaskMode(taskId: string, isShowLess: boolean = true, isEndless: boolean = false) {
     this._store.dispatch(new ToggleTaskShowSubTasks({taskId, isShowLess, isEndless}));
   }
 

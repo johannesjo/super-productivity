@@ -26,7 +26,7 @@ const XS_MAX = 599;
   providedIn: 'root',
 })
 export class LayoutService {
-  isScreenXs$ = this._breakPointObserver.observe([
+  isScreenXs$: Observable<boolean> = this._breakPointObserver.observe([
     `(max-width: ${XS_MAX}px)`,
   ]).pipe(map(result => result.matches));
 

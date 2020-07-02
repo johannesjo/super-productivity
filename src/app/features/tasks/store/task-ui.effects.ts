@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { AddTask, DeleteTask, TaskActionTypes } from './task.actions';
-import { select, Store } from '@ngrx/store';
+import { Action, select, Store } from '@ngrx/store';
 import { tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from './task.selectors';
 import { NotifyService } from '../../../core/notify/notify.service';
@@ -13,6 +13,7 @@ import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { Router } from '@angular/router';
+import { GlobalConfigState } from '../../config/global-config.model';
 
 @Injectable()
 export class TaskUiEffects {
@@ -75,7 +76,7 @@ export class TaskUiEffects {
   ) {
   }
 
-  private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]) {
+  private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]: [Action, any, GlobalConfigState]) {
     if (globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
       && ct && ct.timeEstimate > 0
       && ct.timeSpent > ct.timeEstimate) {

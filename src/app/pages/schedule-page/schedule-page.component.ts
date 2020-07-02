@@ -12,6 +12,7 @@ import { take } from 'rxjs/operators';
 import { AddTaskReminderInterface } from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TODAY_TAG } from '../../features/tag/tag.const';
+import { Tag } from '../../features/tag/tag.model';
 
 @Component({
   selector: 'schedule-page',
@@ -22,7 +23,7 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
 })
 export class SchedulePageComponent {
   T: any = T;
-  TODAY_TAG = TODAY_TAG;
+  TODAY_TAG: Tag = TODAY_TAG;
 
   constructor(
     public scheduledTaskService: ScheduledTaskService,

@@ -5,7 +5,7 @@ import { Task } from '../task.model';
   name: 'subTaskTotalTimeSpent'
 })
 export class SubTaskTotalTimeSpentPipe implements PipeTransform {
-  transform = getSubTasksTotalTimeSpent;
+  transform: (value: any, ...args: any[]) => any = getSubTasksTotalTimeSpent;
 }
 
 export const getSubTasksTotalTimeSpent = (subTasks: Task[]): number => {

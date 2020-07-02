@@ -11,9 +11,9 @@ import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue.const';
 export class IssueHeaderComponent implements OnInit {
   @Input() task: TaskWithSubTasks;
 
-  GITLAB_TYPE = GITLAB_TYPE;
-  GITHUB_TYPE = GITHUB_TYPE;
-  JIRA_TYPE = JIRA_TYPE;
+  readonly GITLAB_TYPE: string = GITLAB_TYPE;
+  readonly GITHUB_TYPE: string = GITHUB_TYPE;
+  readonly JIRA_TYPE: string = JIRA_TYPE;
 
   constructor() {
   }

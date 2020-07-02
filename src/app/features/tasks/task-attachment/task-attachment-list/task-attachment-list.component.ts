@@ -16,7 +16,7 @@ import { T } from '../../../../t.const';
 export class TaskAttachmentListComponent implements OnInit {
   @Input() taskId: string;
   @Input() attachments: TaskAttachment[];
-  @Input() isDisableControls = false;
+  @Input() isDisableControls: boolean = false;
 
   T: any = T;
   isError: boolean[] = [];
@@ -52,7 +52,7 @@ export class TaskAttachmentListComponent implements OnInit {
       });
   }
 
-  remove(id) {
+  remove(id: string) {
     this.attachmentService.deleteAttachment(this.taskId, id);
   }
 

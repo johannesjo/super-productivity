@@ -27,6 +27,6 @@ export const msToMinuteClockString = (value: any): string => {
   name: 'msToMinuteClockString'
 })
 export class MsToMinuteClockStringPipe implements PipeTransform {
-  transform = msToMinuteClockString;
+  transform: (value: any, ...args: any[]) => any = msToMinuteClockString;
 }
 

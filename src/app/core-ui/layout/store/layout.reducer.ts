@@ -52,7 +52,7 @@ const _reducer = createReducer<LayoutState>(
 );
 
 export function reducer(
-  state = _initialLayoutState,
+  state: LayoutState = _initialLayoutState,
   action: Action
 ): LayoutState {
   return _reducer(state, action);

@@ -24,7 +24,7 @@ import { DataInitService } from '../../core/data-init/data-init.service';
   ],
 })
 export class ReminderModule {
-  private _throttledShowNotification = throttle(60000, this._showNotification.bind(this));
+  private _throttledShowNotification: any = throttle(60000, this._showNotification.bind(this));
 
   constructor(
     private readonly _reminderService: ReminderService,

@@ -52,14 +52,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   T: any = T;
   isDragOver: boolean;
   isTouchOnly: boolean = IS_TOUCH_ONLY;
-  isLockPanLeft = false;
-  isLockPanRight = false;
-  isPreventPointerEventsWhilePanning = false;
-  isActionTriggered = false;
-  ShowSubTasksMode = ShowSubTasksMode;
-  contextMenuPosition = {x: '0px', y: '0px'};
+  isLockPanLeft: boolean = false;
+  isLockPanRight: boolean = false;
+  isPreventPointerEventsWhilePanning: boolean = false;
+  isActionTriggered: boolean = false;
+  ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
+  contextMenuPosition: { x: string; y: string } = {x: '0px', y: '0px'};
   progress: number;
-  isDev = !environment.production;
+  isDev: boolean = !environment.production;
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef: ElementRef;
   @ViewChild('blockRightEl') blockRightElRef: ElementRef;
@@ -67,14 +67,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // only works because item comes first in dom
   @ViewChild('contextMenuTriggerEl', {static: true, read: MatMenuTrigger}) contextMenu: MatMenuTrigger;
   @ViewChild('projectMenuTriggerEl', {static: false, read: MatMenuTrigger}) projectMenuTrigger: MatMenuTrigger;
-  @HostBinding('tabindex') tabIndex = 1;
+  @HostBinding('tabindex') tabIndex: number = 1;
   @HostBinding('class.isDone') isDone: boolean;
   @HostBinding('id') taskIdWithPrefix: string;
   // @see ngOnInit
   @HostBinding('class.isCurrent') isCurrent: boolean;
   @HostBinding('class.isSelected') isSelected: boolean;
-  TODAY_TAG_ID = TODAY_TAG.id;
-  private _task$ = new ReplaySubject<TaskWithSubTasks>(1);
+  TODAY_TAG_ID: string = TODAY_TAG.id;
+  private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
   issueUrl$: Observable<string> = this._task$.pipe(
     switchMap((v) => {
       return (v.issueType && v.issueId && v.projectId)
@@ -139,14 +139,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   //   });
   // }
 
-  @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
     this._dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     ev.stopPropagation();
     this.isDragOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
     if (this._dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       ev.stopPropagation();
@@ -154,7 +154,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  @HostListener('drop', ['$event']) onDrop(ev: Event) {
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
     this._attachmentService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
@@ -339,7 +339,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onTagsUpdated(this.task.tagIds.filter(tagId => tagId !== TODAY_TAG.id));
   }
 
-  focusPrevious(isFocusReverseIfNotPossible = false) {
+  focusPrevious(isFocusReverseIfNotPossible: boolean = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const prevEl = taskEls[currentIndex - 1] as HTMLElement;
@@ -358,7 +358,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   }
 
-  focusNext(isFocusReverseIfNotPossible = false) {
+  focusNext(isFocusReverseIfNotPossible: boolean = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const nextEl = taskEls[currentIndex + 1] as HTMLElement;
@@ -403,14 +403,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.updateTags(this.task, tagIds, this.task.tagIds);
   }
 
-  onPanStart(ev) {
+  onPanStart(ev: any) {
     if (!IS_TOUCH_ONLY) {
       return;
     }
 
     this._resetAfterPan();
+    const targetEl: HTMLElement = ev.target as HTMLElement;
     if (
-      (ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1)
+      (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1)
       || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)
       || document.activeElement === this.contentEditableOnClickEl.nativeElement
       || ev.isFinal
@@ -473,11 +474,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onPanLeft(ev) {
+  onPanLeft(ev: any) {
     this._handlePan(ev);
   }
 
-  onPanRight(ev) {
+  onPanRight(ev: any) {
     this._handlePan(ev);
   }
 
@@ -497,7 +498,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     return project.id;
   }
 
-  private _handlePan(ev) {
+  private _handlePan(ev: any) {
     if (!IS_TOUCH_ONLY
       || !this.isLockPanLeft && !this.isLockPanRight
       || ev.eventType === 8) {

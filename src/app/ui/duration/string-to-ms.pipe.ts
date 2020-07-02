@@ -48,5 +48,5 @@ export const stringToMs = (strValue: any, args?: any): any => {
   name: 'stringToMs'
 })
 export class StringToMsPipe implements PipeTransform {
-  transform = stringToMs;
+  transform: (value: any, ...args: any[]) => any = stringToMs;
 }

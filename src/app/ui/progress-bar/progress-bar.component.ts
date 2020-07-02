@@ -7,12 +7,12 @@ import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input } fr
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProgressBarComponent {
-  @HostBinding('class') @Input() cssClass = 'bg-primary';
+  @HostBinding('class') @Input() cssClass: string = 'bg-primary';
 
   constructor(private _elRef: ElementRef) {
   }
 
-  @Input() set progress(_value) {
+  @Input() set progress(_value: number) {
     let val;
     if (_value > 100) {
       val = 100;

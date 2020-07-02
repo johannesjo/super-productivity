@@ -28,11 +28,11 @@ import { T } from '../../../t.const';
 
 })
 export class NotesComponent implements OnInit, OnDestroy {
-  @Output() scrollToSidenav = new EventEmitter<void>();
+  @Output() scrollToSidenav: EventEmitter<void> = new EventEmitter();
 
   T: any = T;
-  isElementWasAdded = false;
-  isDragOver = false;
+  isElementWasAdded: boolean = false;
+  isDragOver: boolean = false;
   dragEnterTarget: HTMLElement;
 
   @ViewChild('buttonEl', {static: true}) buttonEl: MatButton;

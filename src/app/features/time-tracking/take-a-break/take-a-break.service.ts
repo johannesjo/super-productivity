@@ -79,7 +79,7 @@ export class TakeABreakService {
     map(tick => tick.duration),
   );
 
-  private _triggerSnooze$ = new Subject<number>();
+  private _triggerSnooze$: Subject<number> = new Subject();
   private _snoozeActive$: Observable<boolean> = this._triggerSnooze$.pipe(
     startWith(false),
     switchMap((val: boolean | number) => {
@@ -102,7 +102,7 @@ export class TakeABreakService {
     }),
   );
 
-  private _triggerManualReset$ = new Subject<number>();
+  private _triggerManualReset$: Subject<number> = new Subject<number>();
 
   private _triggerReset$: Observable<number> = merge(
     this._triggerProgrammaticReset$,
@@ -125,8 +125,8 @@ export class TakeABreakService {
     shareReplay(1),
   );
 
-  private _triggerLockScreenCounter$ = new Subject<boolean>();
-  private _triggerLockScreenThrottledAndDelayed$ = this._triggerLockScreenCounter$.pipe(
+  private _triggerLockScreenCounter$: Subject<boolean> = new Subject();
+  private _triggerLockScreenThrottledAndDelayed$: Observable<unknown | never> = this._triggerLockScreenCounter$.pipe(
     filter(() => IS_ELECTRON),
     distinctUntilChanged(),
     switchMap((v) => !!(v)
@@ -222,7 +222,7 @@ export class TakeABreakService {
     });
   }
 
-  snooze(snoozeTime = 15 * 60 * 1000) {
+  snooze(snoozeTime: number = 15 * 60 * 1000) {
     this._triggerSnooze$.next(snoozeTime);
     this._triggerLockScreenCounter$.next(false);
   }

@@ -56,11 +56,11 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 
 @Injectable()
 export class GoogleDriveSyncEffects {
-  config$ = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
-  isEnabled$ = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
-  isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
-  syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
-  isInitialSyncDone = false;
+  config$: Observable<GoogleDriveSyncConfig> = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
+  isEnabled$: Observable<boolean> = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
+  isAutoSyncToRemote$: Observable<boolean> = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
+  syncInterval$: Observable<number> = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
+  isInitialSyncDone: boolean = false;
 
   @Effect() triggerSync$: any = this._actions$.pipe(
     ofType(
@@ -409,11 +409,11 @@ export class GoogleDriveSyncEffects {
     });
   }
 
-  private _handleErrorForSave$(err): Observable<any> {
+  private _handleErrorForSave$(err: any): Observable<any> {
     return of(new SaveToGoogleDriveCancel());
   }
 
-  private _handleErrorForLoad$(err): Observable<any> {
+  private _handleErrorForLoad$(err: any): Observable<any> {
     this._setInitialSyncDone();
     return of(new LoadFromGoogleDriveCancel());
   }
@@ -475,7 +475,7 @@ export class GoogleDriveSyncEffects {
     }
   }
 
-  private _showAsyncToast(showWhile$: Observable<any> = EMPTY, msg) {
+  private _showAsyncToast(showWhile$: Observable<any> = EMPTY, msg: string) {
     this._snackService.open({
       type: 'CUSTOM',
       ico: 'file_upload',
@@ -485,7 +485,7 @@ export class GoogleDriveSyncEffects {
     });
   }
 
-  private _confirmSaveNewFile$(fileName): Observable<boolean> {
+  private _confirmSaveNewFile$(fileName: string): Observable<boolean> {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
@@ -495,7 +495,7 @@ export class GoogleDriveSyncEffects {
     }).afterClosed();
   }
 
-  private _confirmUsingExistingFileDialog$(fileName): Observable<boolean> {
+  private _confirmUsingExistingFileDialog$(fileName: string): Observable<boolean> {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
@@ -513,7 +513,7 @@ export class GoogleDriveSyncEffects {
     return this._googleApiService.loadFile$(this._config._backupDocId);
   }
 
-  private async _import(loadRes): Promise<string> {
+  private async _import(loadRes: any): Promise<string> {
     const backupData: AppDataComplete = await this._decodeAppDataIfNeeded(loadRes.backup);
 
     return from(this._dataImportService.importCompleteSyncData(backupData))
@@ -559,7 +559,7 @@ export class GoogleDriveSyncEffects {
     return (d1.getTime() > d2.getTime());
   }
 
-  private _isEqual(strDate1, strDate2): boolean {
+  private _isEqual(strDate1: string | number, strDate2: string | number): boolean {
     const d1 = new Date(strDate1);
     const d2 = new Date(strDate2);
     return (d1.getTime() === d2.getTime());

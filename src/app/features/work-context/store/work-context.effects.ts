@@ -8,6 +8,7 @@ import { SetSelectedTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { BannerService } from '../../../core/banner/banner.service';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class WorkContextEffects {
@@ -22,7 +23,7 @@ export class WorkContextEffects {
   //   tap(this._saveToLs.bind(this)),
   // ), {dispatch: false});
 
-  dismissContextScopeBannersOnContextChange = createEffect(() => this._actions$
+  dismissContextScopeBannersOnContextChange: Observable<unknown> = createEffect(() => this._actions$
     .pipe(
       ofType(
         contextActions.setActiveWorkContext,
@@ -42,7 +43,7 @@ export class WorkContextEffects {
   //   map(() => new UnsetCurrentTask()),
   // ));
 
-  unselectSelectedTask$ = createEffect(() => this._actions$.pipe(
+  unselectSelectedTask$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(contextActions.setActiveWorkContext),
     withLatestFrom(this._taskService.isTaskDataLoaded$),
     filter(([, isDataLoaded]) => isDataLoaded),

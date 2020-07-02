@@ -66,8 +66,8 @@ interface JiraRequestCfg {
 })
 export class JiraApiService {
   private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
-  private _isBlockAccess = loadFromSessionStorage(BLOCK_ACCESS_KEY);
-  private _isExtension = false;
+  private _isBlockAccess: boolean = loadFromSessionStorage(BLOCK_ACCESS_KEY);
+  private _isExtension: boolean = false;
   private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
     ? of(true).pipe()
     : this._chromeExtensionInterfaceService.onReady$.pipe(
@@ -157,15 +157,15 @@ export class JiraApiService {
     }, cfg);
   }
 
-  getIssueById$(issueId, cfg: JiraCfg): Observable<JiraIssue> {
+  getIssueById$(issueId: string, cfg: JiraCfg): Observable<JiraIssue> {
     return this._getIssueById$(issueId, cfg, true);
   }
 
-  getReducedIssueById$(issueId, cfg: JiraCfg): Observable<JiraIssueReduced> {
+  getReducedIssueById$(issueId: string, cfg: JiraCfg): Observable<JiraIssueReduced> {
     return this._getIssueById$(issueId, cfg, false);
   }
 
-  getCurrentUser$(cfg: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
+  getCurrentUser$(cfg: JiraCfg, isForce: boolean = false): Observable<JiraOriginalUser> {
     return this._sendRequest$({
       pathname: `myself`,
       transform: mapResponse,
@@ -239,7 +239,7 @@ export class JiraApiService {
     }, cfg);
   }
 
-  private _getIssueById$(issueId, cfg: JiraCfg, isGetChangelog = false): Observable<JiraIssue> {
+  private _getIssueById$(issueId: string, cfg: JiraCfg, isGetChangelog: boolean = false): Observable<JiraIssue> {
     return this._sendRequest$({
       transform: mapIssueResponse,
       pathname: `issue/${issueId}`,
@@ -257,7 +257,7 @@ export class JiraApiService {
       && (IS_ELECTRON || this._isExtension);
   }
 
-  private _sendRequest$(jiraReqCfg: JiraRequestCfg, cfg: JiraCfg, isForce = false): Observable<any> {
+  private _sendRequest$(jiraReqCfg: JiraRequestCfg, cfg: JiraCfg, isForce: boolean = false): Observable<any> {
     return this._isInterfacesReadyIfNeeded$.pipe(
       take(1),
       concatMap(() => {
@@ -314,7 +314,7 @@ export class JiraApiService {
       }));
   }
 
-  private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform, jiraCfg: JiraCfg): Observable<any> {
+  private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform: any, jiraCfg: JiraCfg): Observable<any> {
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
@@ -377,8 +377,8 @@ export class JiraApiService {
     transform,
     jiraCfg
   }: {
-    promiseResolve,
-    promiseReject,
+    promiseResolve: any,
+    promiseReject: any,
     requestId: string,
     requestInit: RequestInit,
     transform: any,
@@ -406,7 +406,7 @@ export class JiraApiService {
     };
   }
 
-  private _handleResponse(res) {
+  private _handleResponse(res: any) {
     // check if proper id is given in callback and if exists in requestLog
     if (res.requestId && this._requestsLog[res.requestId]) {
       const currentRequest = this._requestsLog[res.requestId];
@@ -446,7 +446,7 @@ export class JiraApiService {
     saveToSessionStorage(BLOCK_ACCESS_KEY, true);
   }
 
-  private _b64EncodeUnicode(str) {
+  private _b64EncodeUnicode(str: string) {
     if (typeof btoa === 'function') {
       return btoa(str);
     }

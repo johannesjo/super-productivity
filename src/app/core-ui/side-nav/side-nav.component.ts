@@ -55,10 +55,10 @@ export class SideNavComponent implements OnDestroy {
   );
 
   T: any = T;
-  PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
-  TAG_SIDE_NAV = 'TAG_SIDE_NAV';
+  readonly PROJECTS_SIDE_NAV: string = 'PROJECTS_SIDE_NAV';
+  readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
   activeWorkContextId: string;
-  WorkContextType = WorkContextType;
+  WorkContextType: typeof WorkContextType = WorkContextType;
 
   private _subs: Subscription = new Subscription();
 
@@ -125,10 +125,10 @@ export class SideNavComponent implements OnDestroy {
     this.isTagsExpanded$.next(this.isTagsExpanded);
   }
 
-  addTag() {
-  }
-
-  switchTag(a, b) {
-
-  }
+  // addTag() {
+  // }
+  //
+  // switchTag(a, b) {
+  //
+  // }
 }

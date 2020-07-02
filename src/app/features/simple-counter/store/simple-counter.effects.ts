@@ -19,7 +19,7 @@ import { selectSimpleCounterFeatureState } from './simple-counter.reducer';
 import { SimpleCounterState, SimpleCounterType } from '../simple-counter.model';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 import { SimpleCounterService } from '../simple-counter.service';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { SIMPLE_COUNTER_TRIGGER_ACTIONS } from '../simple-counter.const';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -29,7 +29,7 @@ import { ImexMetaService } from '../../../imex/imex-meta/imex-meta.service';
 @Injectable()
 export class SimpleCounterEffects {
 
-  updateSimpleCountersStorage$ = createEffect(() => this._actions$.pipe(
+  updateSimpleCountersStorage$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(
       updateAllSimpleCounters,
       setSimpleCounterCounterToday,
@@ -51,7 +51,7 @@ export class SimpleCounterEffects {
     tap(([, featureState]) => this._saveToLs(featureState)),
   ), {dispatch: false});
 
-  checkTimedCounters$ = createEffect(() => this._simpleCounterService.enabledAndToggledSimpleCounters$.pipe(
+  checkTimedCounters$: Observable<unknown> = createEffect(() => this._simpleCounterService.enabledAndToggledSimpleCounters$.pipe(
     switchMap((items) => (items && items.length)
       ? this._timeTrackingService.tick$.pipe(
         map(tick => ({tick, items}))
@@ -66,7 +66,7 @@ export class SimpleCounterEffects {
     ),
   ));
 
-  actionListeners$ = createEffect(() => this._simpleCounterService.enabledSimpleCountersUpdatedOnCfgChange$.pipe(
+  actionListeners$: Observable<unknown> = createEffect(() => this._simpleCounterService.enabledSimpleCountersUpdatedOnCfgChange$.pipe(
     map(items => items && items.filter(item =>
       (item.triggerOnActions && item.triggerOnActions.length)
       || (item.triggerOffActions && item.triggerOffActions.length)
@@ -111,7 +111,7 @@ export class SimpleCounterEffects {
     ),
   ));
 
-  successSnack$ = createEffect(() => this._actions$.pipe(
+  successSnack$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(updateAllSimpleCounters),
     tap(() => this._snackService.open({
       type: 'SUCCESS',

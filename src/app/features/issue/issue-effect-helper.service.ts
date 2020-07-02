@@ -12,13 +12,13 @@ import { SyncService } from '../../imex/sync/sync.service';
   providedIn: 'root',
 })
 export class IssueEffectHelperService {
-  pollIssueTaskUpdatesActions$ = this._actions$.pipe(
+  pollIssueTaskUpdatesActions$: Observable<unknown> = this._actions$.pipe(
     ofType(
       setActiveWorkContext,
       ProjectActionTypes.UpdateProjectIssueProviderCfg,
     )
   );
-  pollToBacklogActions$ = this._actions$.pipe(
+  pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
     ofType(
       setActiveWorkContext,
       ProjectActionTypes.UpdateProjectIssueProviderCfg,

@@ -153,7 +153,7 @@ export class ProjectService {
     });
   }
 
-  remove(projectId) {
+  remove(projectId: string) {
     this._store$.dispatch({
       type: ProjectActionTypes.DeleteProject,
       payload: {id: projectId}
@@ -176,7 +176,7 @@ export class ProjectService {
     projectId: string,
     issueProviderKey: IssueProviderKey,
     providerCfg: Partial<IssueIntegrationCfg>,
-    isOverwrite = false
+    isOverwrite: boolean = false
   ) {
     this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectIssueProviderCfg,

@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskService } from '../../task.service';
 import { LayoutService } from '../../../../core-ui/layout/layout.service';
 import { delay, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { Task, TaskWithSubTasks } from '../../task.model';
 
 @Component({
   selector: 'task-additional-info-wrapper',
@@ -12,10 +13,10 @@ import { of } from 'rxjs';
 })
 export class TaskAdditionalInfoWrapperComponent {
   // NOTE: used for debugging
-  @Input() isAlwaysOver = false;
+  @Input() isAlwaysOver: boolean = false;
 
   // to still display its data when panel is closing
-  selectedTaskWithDelayForNone$ = this.taskService.selectedTask$.pipe(
+  selectedTaskWithDelayForNone$: Observable<TaskWithSubTasks> = this.taskService.selectedTask$.pipe(
     switchMap((task) => task
       ? of(task)
       : of(null).pipe(delay(200))

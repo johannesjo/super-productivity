@@ -164,7 +164,7 @@ export class GoogleApiService {
     }
   }
 
-  getFileInfo$(fileId): Observable<any> {
+  getFileInfo$(fileId: string): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});

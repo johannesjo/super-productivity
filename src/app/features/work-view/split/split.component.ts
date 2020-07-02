@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   Output,
@@ -20,18 +21,18 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SplitComponent implements AfterViewInit {
-  @Input() splitTopEl;
-  @Input() splitBottomEl;
-  @Input() containerEl;
-  @Input() counter;
-  @Input() isAnimateBtn;
+  @Input() splitTopEl: ElementRef;
+  @Input() splitBottomEl: ElementRef;
+  @Input() containerEl: HTMLElement;
+  @Input() counter: ElementRef;
+  @Input() isAnimateBtn: boolean;
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
   pos: number;
   eventSubs: Subscription;
-  @ViewChild('buttonEl', {static: true}) buttonEl;
-  private _isDrag = false;
-  private _isViewInitialized = false;
+  @ViewChild('buttonEl', {static: true}) buttonEl: ElementRef;
+  private _isDrag: boolean = false;
+  private _isViewInitialized: boolean = false;
 
   constructor(private _renderer: Renderer2) {
   }
@@ -64,7 +65,7 @@ export class SplitComponent implements AfterViewInit {
     this._updatePos(newPos);
   }
 
-  onTouchStart(ev) {
+  onTouchStart() {
     this._isDrag = false;
     const touchend$ = fromEvent(document, 'touchend');
     this.eventSubs = touchend$.subscribe((e: TouchEvent) => this.onMoveEnd(e));
@@ -88,7 +89,7 @@ export class SplitComponent implements AfterViewInit {
     this.eventSubs.add(mousemove$);
   }
 
-  onMoveEnd(ev): void {
+  onMoveEnd(ev: TouchEvent): void {
     if (this.eventSubs) {
       this.eventSubs.unsubscribe();
       this.eventSubs = undefined;
@@ -99,10 +100,10 @@ export class SplitComponent implements AfterViewInit {
     }
   }
 
-  onMove(ev) {
-    const clientY = (typeof ev.clientY === 'number')
-      ? ev.clientY
-      : ev.touches[0].clientY;
+  onMove(ev: TouchEvent | MouseEvent) {
+    const clientY = (typeof (ev as MouseEvent).clientY === 'number')
+      ? (ev as MouseEvent).clientY
+      : (ev as TouchEvent).touches[0].clientY;
     this._renderer.removeClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.removeClass(this.splitBottomEl, ANIMATABLE_CLASS);
     this._isDrag = true;
@@ -120,7 +121,7 @@ export class SplitComponent implements AfterViewInit {
     this._updatePos(percentage);
   }
 
-  private _updatePos(pos: number, isWasOutsideChange = false) {
+  private _updatePos(pos: number, isWasOutsideChange: boolean = false) {
     this.pos = pos;
     if (this.splitTopEl && this.splitBottomEl) {
       this._renderer.setStyle(

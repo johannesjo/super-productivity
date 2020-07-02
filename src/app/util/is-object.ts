@@ -1,3 +1,3 @@
-export function isObject(obj) {
+export function isObject(obj: any): boolean {
   return obj === Object(obj);
 }

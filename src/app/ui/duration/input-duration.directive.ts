@@ -50,7 +50,7 @@ export const INPUT_DURATION_VALIDATORS: any = {
 })
 
 export class InputDurationDirective<D> implements ControlValueAccessor, Validator, AfterViewChecked {
-  @Input() isAllowSeconds = false;
+  @Input() isAllowSeconds: boolean = false;
 
   // by the Control Value Accessor
   private _onTouchedCallback: () => void = noop;
@@ -61,23 +61,24 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   // -----------
   private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
   private _validator: ValidatorFn | null;
-  private _msValue;
+  private _msValue: number;
 
-  constructor(@Attribute('inputDuration') public inputDuration,
+  constructor(
+    @Attribute('inputDuration') public inputDuration: Attribute,
     private _elementRef: ElementRef,
     private _stringToMs: StringToMsPipe,
     private _msToString: MsToStringPipe,
     private _renderer: Renderer2) {
   }
 
-  private _value;
+  private _value: string;
 
   // Validations
-  get value() {
+  get value(): string {
     return this._value;
   }
 
-  set value(value) {
+  set value(value: string) {
     if (value !== this._value) {
       this._value = value;
       this._onChangeCallback(this._msValue);
@@ -85,10 +86,10 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   }
 
   // TODO all around dirty
-  @Input() set ngModel(msVal) {
+  @Input() set ngModel(msVal: number) {
     if (msVal && msVal !== this._msValue) {
       this._msValue = msVal;
-      this.writeValue(msVal);
+      this.writeValue(msVal.toString());
     }
   }
 
@@ -125,7 +126,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   }
 
   // ControlValueAccessor: Formatter
-  writeValue(value): void {
+  writeValue(value: string): void {
     if (!value) {
       value = '';
     }

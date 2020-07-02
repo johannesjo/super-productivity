@@ -30,7 +30,7 @@ export class PomodoroEffects {
   currentTaskId$: Observable<string> = this._store$.pipe(select(selectCurrentTaskId));
 
   @Effect()
-  playPauseOnCurrentUpdate$ = this._actions$.pipe(
+  playPauseOnCurrentUpdate$: Observable<unknown> = this._actions$.pipe(
     ofType(
       TaskActionTypes.SetCurrentTask,
       TaskActionTypes.UnsetCurrentTask,
@@ -65,7 +65,7 @@ export class PomodoroEffects {
   );
 
   @Effect()
-  autoStartNextOnSessionStartIfNotAlready$ = this._actions$.pipe(
+  autoStartNextOnSessionStartIfNotAlready$: Observable<unknown> = this._actions$.pipe(
     ofType(
       PomodoroActionTypes.FinishPomodoroSession,
       PomodoroActionTypes.SkipPomodoroBreak,
@@ -83,13 +83,13 @@ export class PomodoroEffects {
   );
 
   @Effect()
-  stopPomodoro$ = this._actions$.pipe(
+  stopPomodoro$: Observable<unknown> = this._actions$.pipe(
     ofType(PomodoroActionTypes.StopPomodoro),
     mapTo(new UnsetCurrentTask()),
   );
 
   @Effect()
-  pauseTimeTrackingIfOptionEnabled$ = this._actions$.pipe(
+  pauseTimeTrackingIfOptionEnabled$: Observable<unknown> = this._actions$.pipe(
     ofType(PomodoroActionTypes.FinishPomodoroSession),
     withLatestFrom(
       this._pomodoroService.cfg$,
@@ -102,7 +102,7 @@ export class PomodoroEffects {
   );
 
   @Effect({dispatch: false})
-  playSessionDoneSoundIfEnabled$ = this._actions$.pipe(
+  playSessionDoneSoundIfEnabled$: Observable<unknown> = this._actions$.pipe(
     ofType(
       PomodoroActionTypes.PausePomodoro,
       PomodoroActionTypes.FinishPomodoroSession,
@@ -123,7 +123,7 @@ export class PomodoroEffects {
   );
 
   @Effect()
-  pauseTimeTrackingForPause$ = this._actions$.pipe(
+  pauseTimeTrackingForPause$: Observable<unknown> = this._actions$.pipe(
     ofType(PomodoroActionTypes.PausePomodoro),
     withLatestFrom(
       this._pomodoroService.cfg$,
@@ -135,7 +135,7 @@ export class PomodoroEffects {
   );
 
   @Effect({dispatch: false})
-  openBreakDialog = this._actions$.pipe(
+  openBreakDialog: Observable<unknown> = this._actions$.pipe(
     ofType(PomodoroActionTypes.FinishPomodoroSession),
     withLatestFrom(
       this._pomodoroService.isBreak$,
@@ -148,7 +148,7 @@ export class PomodoroEffects {
   );
 
   @Effect({dispatch: false})
-  sessionStartSnack$ = this._actions$.pipe(
+  sessionStartSnack$: Observable<unknown> = this._actions$.pipe(
     ofType(
       PomodoroActionTypes.FinishPomodoroSession,
       PomodoroActionTypes.SkipPomodoroBreak,
@@ -179,7 +179,7 @@ export class PomodoroEffects {
   );
 
   @Effect({dispatch: false})
-  setTaskBarIconProgress$: any = this._pomodoroService.sessionProgress$.pipe(
+  setTaskBarIconProgress$: Observable<unknown> = this._pomodoroService.sessionProgress$.pipe(
     filter(() => IS_ELECTRON),
     withLatestFrom(this._pomodoroService.cfg$),
     // we display pomodoro progress for pomodoro

@@ -14,8 +14,8 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 })
 export class SimpleCounterButtonComponent {
   T: any = T;
-  SimpleCounterType = SimpleCounterType;
-  todayStr = getWorklogStr();
+  SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
+  todayStr: string = getWorklogStr();
 
   @Input() simpleCounter: SimpleCounter;
 
@@ -37,7 +37,7 @@ export class SimpleCounterButtonComponent {
     this._simpleCounterService.setCounterToday(this.simpleCounter.id, 0);
   }
 
-  edit(ev?) {
+  edit(ev?: Event) {
     if (ev) {
       ev.preventDefault();
     }

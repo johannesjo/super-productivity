@@ -44,8 +44,8 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   async refreshIssue(
     task: Task,
-    isNotifySuccess = true,
-    isNotifyNoUpdateRequired = false
+    isNotifySuccess: boolean = true,
+    isNotifyNoUpdateRequired: boolean = false
   ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue }> {
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._jiraApiService.getIssueById$(task.issueId, cfg).toPromise() as JiraIssue;

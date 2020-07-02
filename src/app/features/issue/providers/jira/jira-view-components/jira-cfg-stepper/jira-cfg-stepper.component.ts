@@ -28,14 +28,14 @@ import { HANDLED_ERROR_PROP_STR, HelperClasses } from '../../../../../../app.con
 })
 export class JiraCfgStepperComponent implements OnDestroy {
   T: any = T;
-  HelperClasses = HelperClasses;
+  HelperClasses: typeof HelperClasses = HelperClasses;
   credentialsFormGroup: FormGroup = new FormGroup({});
   credentialsFormConfig: FormlyFieldConfig[] = [];
 
   advancedSettingsFormGroup: FormGroup = new FormGroup({});
   advancedSettingsFormConfig: FormlyFieldConfig[] = [];
 
-  isTestCredentialsSuccess = false;
+  isTestCredentialsSuccess: boolean = false;
   user: JiraOriginalUser;
   jiraCfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
   @Output() saveCfg: EventEmitter<JiraCfg> = new EventEmitter();

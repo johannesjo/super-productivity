@@ -9,7 +9,7 @@ import { T } from 'src/app/t.const';
 })
 export class OwlWrapperComponent {
   @Input()
-  now = new Date();
+  now: Date = new Date();
 
   @Input()
   model: number;
@@ -19,8 +19,8 @@ export class OwlWrapperComponent {
   @Output()
   triggerSubmit: EventEmitter<number> = new EventEmitter();
   T: any = T;
-  date = new Date();
-  laterTodaySlots = [
+  date: Date = new Date();
+  laterTodaySlots: string[] = [
     '9:00',
     '15:00',
     '17:00',
@@ -46,7 +46,7 @@ export class OwlWrapperComponent {
     this.triggerSubmit.emit(this.dateTime);
   }
 
-  updateDateFromCal(date) {
+  updateDateFromCal(date: any) {
     this.dateTime = new Date(date).getTime();
     this.dateTimeChange.emit(this.dateTime);
   }

@@ -49,7 +49,7 @@ export class GoogleDriveSyncService {
   ) {
   }
 
-  changeSyncFileName(newFileName): void {
+  changeSyncFileName(newFileName: string): void {
     this._store$.dispatch(new ChangeSyncFileName({newFileName}));
   }
 

@@ -7,7 +7,7 @@ import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
 import * as j2m from 'jira2md';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
-import { ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 @Component({
@@ -23,8 +23,8 @@ export class JiraIssueContentComponent {
   T: any = T;
   issue: JiraIssue;
   task: TaskWithSubTasks;
-  private _task$ = new ReplaySubject<TaskWithSubTasks>(1);
-  issueUrl$ = this._task$.pipe(
+  private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
+  issueUrl$: Observable<string> = this._task$.pipe(
     switchMap((task) => this._jiraCommonInterfacesService.issueLink$(task.issueId, task.projectId))
   );
 

@@ -13,7 +13,7 @@ import { T } from '../../../t.const';
 export class TaskSummaryTableComponent {
   @Input() flatTasks: Task[];
   @Input() day: string = getWorklogStr();
-  @Output() updated = new EventEmitter<void>();
+  @Output() updated: EventEmitter<void> = new EventEmitter();
 
   T: any = T;
 

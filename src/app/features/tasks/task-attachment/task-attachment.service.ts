@@ -47,7 +47,7 @@ export class TaskAttachmentService {
 
   // HANDLE INPUT
   // ------------
-  createFromDrop(ev, taskId: string) {
+  createFromDrop(ev: DragEvent, taskId: string) {
     this._handleInput(createFromDrop(ev), ev, taskId);
   }
 
@@ -55,14 +55,15 @@ export class TaskAttachmentService {
   //   this._handleInput(createFromPaste(ev), ev, taskId);
   // }
 
-  private _handleInput(attachment: DropPasteInput, ev, taskId) {
+  private _handleInput(attachment: DropPasteInput, ev: Event, taskId: string) {
     // properly not intentional so we leave
     if (!attachment || !attachment.path) {
       return;
     }
 
     // don't intervene with text inputs
-    if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
+    const targetEl = ev.target as HTMLElement;
+    if (targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA') {
       return;
     }
 

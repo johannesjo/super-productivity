@@ -61,7 +61,7 @@ export class ImprovementService {
     return id;
   }
 
-  addCheckedDay(id: string, checkedDay = getWorklogStr()) {
+  addCheckedDay(id: string, checkedDay: string = getWorklogStr()) {
     this._store$.dispatch(new AddImprovementCheckedDay({
       id,
       checkedDay,

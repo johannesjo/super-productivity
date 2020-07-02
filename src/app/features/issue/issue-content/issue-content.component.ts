@@ -12,9 +12,9 @@ import { IssueData } from '../issue.model';
 export class IssueContentComponent implements OnInit {
   @Input() task: TaskWithSubTasks;
   @Input() issueData: IssueData;
-  GITLAB_TYPE = GITLAB_TYPE;
-  GITHUB_TYPE = GITHUB_TYPE;
-  JIRA_TYPE = JIRA_TYPE;
+  readonly GITLAB_TYPE: string = GITLAB_TYPE;
+  readonly GITHUB_TYPE: string = GITHUB_TYPE;
+  readonly JIRA_TYPE: string = JIRA_TYPE;
 
   constructor() {
   }

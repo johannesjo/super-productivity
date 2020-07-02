@@ -14,7 +14,7 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../../features/time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
-import { from, fromEvent, ReplaySubject, Subscription, timer, zip } from 'rxjs';
+import { from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip } from 'rxjs';
 import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
@@ -39,15 +39,15 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   @Input() undoneTasks: TaskWithSubTasks[];
   @Input() doneTasks: TaskWithSubTasks[];
   @Input() backlogTasks: TaskWithSubTasks[];
-  @Input() isShowBacklog = false;
+  @Input() isShowBacklog: boolean = false;
 
-  isShowTimeWorkedWithoutBreak = true;
-  splitInputPos = 100;
-  isPreloadBacklog = false;
+  isShowTimeWorkedWithoutBreak: boolean = true;
+  splitInputPos: number = 100;
+  isPreloadBacklog: boolean = false;
   T: any = T;
 
   // NOTE: not perfect but good enough for now
-  isTriggerBacklogIconAni$ = this.workContextService.onMoveToBacklog$.pipe(
+  isTriggerBacklogIconAni$: Observable<boolean> = this.workContextService.onMoveToBacklog$.pipe(
     switchMap(() =>
       zip(
         from([true, false]),
@@ -56,10 +56,10 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     ),
     map(v => v[0]),
   );
-  splitTopEl$ = new ReplaySubject<HTMLElement>(1);
+  splitTopEl$: ReplaySubject<HTMLElement> = new ReplaySubject(1);
 
   // TODO make this work for tag page without backlog
-  upperContainerScroll$ = this.workContextService.isContextChanging$.pipe(
+  upperContainerScroll$: Observable<Event> = this.workContextService.isContextChanging$.pipe(
     filter(isChanging => !isChanging),
     delay(50),
     switchMap(() => this.splitTopEl$),

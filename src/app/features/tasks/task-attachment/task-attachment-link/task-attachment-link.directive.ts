@@ -44,7 +44,7 @@ export class TaskAttachmentLinkDirective {
     }
   }
 
-  private _openExternalUrl(rawUrl) {
+  private _openExternalUrl(rawUrl: string) {
     if (!rawUrl) {
       return;
     }
@@ -62,7 +62,7 @@ export class TaskAttachmentLinkDirective {
     }
   }
 
-  private _exec(command) {
+  private _exec(command: string) {
     this._electronService.ipcRenderer.send(IPC.EXEC, command);
   }
 }

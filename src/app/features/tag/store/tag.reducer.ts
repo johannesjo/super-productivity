@@ -43,7 +43,7 @@ export const selectTagById = createSelector(
 );
 export const selectTagsByIds = createSelector(
   selectTagFeatureState,
-  (state, props: { ids }) => props.ids ? props.ids.map(
+  (state: TagState, props: { ids: string[] }) => props.ids ? props.ids.map(
     id => state.entities[id]) : []
 );
 export const selectTagByName = createSelector(
@@ -196,7 +196,7 @@ const _reducer = createReducer<TagState>(
 );
 
 export function tagReducer(
-  state = initialTagState,
+  state: TagState = initialTagState,
   action: Action,
 ): TagState {
   switch (action.type) {

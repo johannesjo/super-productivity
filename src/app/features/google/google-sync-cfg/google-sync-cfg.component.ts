@@ -33,7 +33,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   @ViewChild('formRef', {static: true}) formRef: FormGroup;
 
-  @Output() save = new EventEmitter<any>();
+  @Output() save: EventEmitter<any> = new EventEmitter();
 
   private _subs: Subscription = new Subscription();
 
@@ -88,7 +88,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     this.googleApiService.logout();
   }
 
-  changeSyncFileName(newSyncFile) {
+  changeSyncFileName(newSyncFile: string) {
     this.googleDriveSyncService.changeSyncFileName(newSyncFile);
   }
 

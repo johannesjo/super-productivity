@@ -31,8 +31,8 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   animations: [fadeAnimation]
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
-  @Input() isLock = false;
-  @Input() isShowControls = false;
+  @Input() isLock: boolean = false;
+  @Input() isShowControls: boolean = false;
 
   @Output() changed: EventEmitter<string> = new EventEmitter();
   @Output() focused: EventEmitter<Event> = new EventEmitter();
@@ -42,8 +42,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @ViewChild('textareaEl') textareaEl: ElementRef;
   @ViewChild('previewEl') previewEl: MarkdownComponent;
 
-  isHideOverflow = false;
-  isShowEdit = false;
+  isHideOverflow: boolean = false;
+  isShowEdit: boolean = false;
   modelCopy: string;
 
   isTurnOffMarkdownParsing$: Observable<boolean> = this._globalConfigService.misc$.pipe(
@@ -114,9 +114,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleShowEdit($event?) {
+  toggleShowEdit($event?: MouseEvent) {
     // check if anchor link was clicked
-    if (!$event || $event.target.tagName !== 'A') {
+    if (!$event || ($event.target as HTMLElement).tagName !== 'A') {
       this.isShowEdit = true;
       this.modelCopy = this.model || '';
 

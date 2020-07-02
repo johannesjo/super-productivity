@@ -150,7 +150,7 @@ export class PomodoroService {
     this._store$.dispatch(new StartPomodoro());
   }
 
-  pause(isBreakEndPause = false) {
+  pause(isBreakEndPause: boolean = false) {
     this._store$.dispatch(new PausePomodoro({isBreakEndPause}));
   }
 

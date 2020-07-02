@@ -1,8 +1,8 @@
-export function isImageUrlSimple(url) {
+export function isImageUrlSimple(url: string): boolean {
   return (url.match(/\.(jpeg|jpg|gif|png)$/i) != null);
 }
 
-export function isImageUrl(url): Promise<boolean> {
+export function isImageUrl(url: string): Promise<boolean> {
   return new Promise(resolve => {
     const timeout = 5000;
     const img = new Image();
