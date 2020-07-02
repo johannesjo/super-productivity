@@ -38,19 +38,19 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Output() focused: EventEmitter<Event> = new EventEmitter();
   @Output() blurred: EventEmitter<Event> = new EventEmitter();
   @Output() keyboardUnToggle: EventEmitter<Event> = new EventEmitter();
-  @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef;
-  @ViewChild('textareaEl') textareaEl: ElementRef;
-  @ViewChild('previewEl') previewEl: MarkdownComponent;
+  @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef | undefined;
+  @ViewChild('textareaEl') textareaEl: ElementRef | undefined;
+  @ViewChild('previewEl') previewEl: MarkdownComponent | undefined;
 
   isHideOverflow: boolean = false;
   isShowEdit: boolean = false;
-  modelCopy: string;
+  modelCopy: string | undefined;
 
   isTurnOffMarkdownParsing$: Observable<boolean> = this._globalConfigService.misc$.pipe(
-    map(cfg => cfg && cfg.isTurnOffMarkdown),
+    map(cfg => cfg.isTurnOffMarkdown),
     startWith(false),
   );
-  private _hideOverFlowTimeout: number;
+  private _hideOverFlowTimeout: number | undefined;
 
   constructor(
     private _electronService: ElectronService,
@@ -65,13 +65,13 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     return this.isShowEdit;
   }
 
-  private _model: string;
+  private _model: string | undefined;
 
   get model() {
     return this._model;
   }
 
-  @Input() set model(v: string) {
+  @Input() set model(v: string | undefined) {
     this._model = v;
     this.modelCopy = v;
 
@@ -121,6 +121,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       this.modelCopy = this.model || '';
 
       setTimeout(() => {
+        if (!this.textareaEl) {
+          throw new Error('Textarea not visible');
+        }
         this.textareaEl.nativeElement.value = this.modelCopy;
         this.textareaEl.nativeElement.focus();
         this.resizeTextareaToFit();
@@ -133,6 +136,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       this.resizeParsedToFit();
       this.isShowEdit = false;
     }
+    if (!this.textareaEl) {
+      throw new Error('Textarea not visible');
+    }
     this.modelCopy = this.textareaEl.nativeElement.value;
 
     if (this.modelCopy !== this.model) {
@@ -143,6 +149,12 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   resizeTextareaToFit() {
     this._hideOverflow();
+    if (!this.textareaEl) {
+      throw new Error('Textarea not visible');
+    }
+    if (!this.wrapperEl) {
+      throw new Error('Wrapper el not visible');
+    }
     this.textareaEl.nativeElement.style.height = 'auto';
     this.textareaEl.nativeElement.style.height = this.textareaEl.nativeElement.scrollHeight + 'px';
     this.wrapperEl.nativeElement.style.height = this.textareaEl.nativeElement.offsetHeight + 'px';
@@ -174,7 +186,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         }
         return;
       }
-
+      if (!this.wrapperEl) {
+        throw new Error('Wrapper el not visible');
+      }
       this.previewEl.element.nativeElement.style.height = 'auto';
       // NOTE: somehow this pixel seem to help
       this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 'px';
@@ -204,11 +218,14 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   private _makeLinksWorkForElectron() {
     const shell = this._electronService.shell;
-    this.wrapperEl.nativeElement.addEventListener('click', (ev) => {
+    if (!this.wrapperEl) {
+      throw new Error('Wrapper el not visible');
+    }
+    this.wrapperEl.nativeElement.addEventListener('click', (ev: MouseEvent) => {
       const target = ev.target as HTMLElement;
       if (target.tagName && target.tagName.toLowerCase() === 'a') {
         const href = target.getAttribute('href');
-        if (href) {
+        if (href !== null) {
           ev.preventDefault();
           shell.openExternal(href);
         }

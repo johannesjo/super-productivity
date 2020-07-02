@@ -1,5 +1,5 @@
 export function isImageUrlSimple(url: string): boolean {
-  return (url.match(/\.(jpeg|jpg|gif|png)$/i) != null);
+  return (url.match(/\.(jpeg|jpg|gif|png)$/i) !== null);
 }
 
 export function isImageUrl(url: string): Promise<boolean> {

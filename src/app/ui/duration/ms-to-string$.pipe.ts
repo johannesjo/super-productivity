@@ -8,7 +8,7 @@ import { msToString } from './ms-to-string.pipe';
 })
 export class MsToStringPipe$ implements PipeTransform {
 
-  transform(value$: Observable<any>, showSeconds?: boolean): any {
+  transform(value$: Observable<any> | undefined, showSeconds?: boolean): any {
     if (value$) {
       value$.pipe(map(value => {
         return msToString(value, showSeconds);

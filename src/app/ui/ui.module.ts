@@ -230,7 +230,7 @@ export class UiModule {
       const split = text.split('\n');
       return split.reduce((acc, p) => {
         const result = /h(\d)\./.exec(p);
-        if (result) {
+        if (result !== null) {
           const h = `h${result[1]}`;
           return acc + `<${h}>${p.replace(result[0], '')}</${h}>`;
         }

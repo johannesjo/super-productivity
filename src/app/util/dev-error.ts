@@ -3,7 +3,7 @@ import { environment } from '../../environments/environment';
 let isShowAlert = true;
 
 export function devError(errStr: any) {
-  if (environment && environment.production) {
+  if (environment.production) {
     console.error(errStr);
   } else {
     if (isShowAlert) {

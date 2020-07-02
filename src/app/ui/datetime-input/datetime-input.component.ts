@@ -10,25 +10,24 @@ import { timestampToDatetimeInputString } from '../../util/timestamp-to-datetime
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DatetimeInputComponent {
-  @Input() name: string;
-  @Input() placeholder: string;
-  @Input() required: boolean;
+  @Input() name: string | undefined;
+  @Input() placeholder: string | undefined;
+  @Input() required: boolean | undefined;
   @Output() modelChange: EventEmitter<number> = new EventEmitter();
-  nrValue: number;
-  strValue: string;
+  nrValue: number | undefined;
+  strValue: string | undefined | null;
+  lastVal: number | undefined;
   T: any = T;
-  lastVal: number;
 
   constructor() {
     const lastVal = localStorage.getItem(LS_LAST_REMINDER_DATE);
-    console.log(lastVal, Date.now(), +lastVal > Date.now());
     if (lastVal && +lastVal > Date.now()) {
       this.lastVal = +lastVal;
     }
   }
 
   get model() {
-    return this.nrValue;
+    return this.nrValue || 0;
   }
 
   @Input()
@@ -67,13 +66,12 @@ export class DatetimeInputComponent {
   }
 
   setLastVal() {
-    this._updateValues(this.lastVal, false);
+    if (this.lastVal) {
+      this._updateValues(this.lastVal, false);
+    }
   }
 
   private _updateValues(v: number | Date, isFromInput: boolean = false) {
-    if (typeof v === 'string') {
-      v = new Date(v);
-    }
     if (v instanceof Date) {
       v = v.getTime();
     }
@@ -88,7 +86,7 @@ export class DatetimeInputComponent {
     }
   }
 
-  private _convertToIsoString(dateTime: number): string {
+  private _convertToIsoString(dateTime: number | undefined): string | null {
     if (!dateTime || dateTime < 10000) {
       return null;
     }

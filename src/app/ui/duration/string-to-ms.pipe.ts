@@ -5,40 +5,43 @@ export const stringToMs = (strValue: any, args?: any): any => {
     return;
   }
 
-  let days;
-  let hours;
-  let minutes;
-  let seconds;
-  let isValid;
+  let d: number | undefined;
+  let h: number | undefined;
+  let m: number | undefined;
+  let s: number | undefined;
 
-  const arrValue = strValue ? strValue.split(' ') : [];
+  const arrValue = strValue.split(' ');
 
-  arrValue.forEach((val) => {
+  arrValue.forEach((val: string) => {
     if (val.length > 0) {
       const lastChar = val.slice(-1);
       const amount = parseInt(val.slice(0, val.length - 1), 10);
 
       if (lastChar === 's') {
-        seconds = amount;
+        s = amount;
       }
       if (lastChar === 'm') {
-        minutes = amount;
+        m = amount;
       }
       if (lastChar === 'h') {
-        hours = amount;
+        h = amount;
       }
       if (lastChar === 'd') {
-        days = amount;
+        d = amount;
       }
     }
   });
-  isValid = seconds || minutes || hours || days || false;
 
-  if (isValid) {
-    return +((seconds * 1000) || 0)
-      + ((minutes * 1000 * 60) || 0)
-      + ((hours * 1000 * 60 * 60) || 0)
-      + ((days * 1000 * 60 * 60 * 24) || 0);
+  if (typeof s === 'number' || typeof m === 'number' || typeof h === 'number' || typeof d === 'number') {
+    s = typeof s === 'number' ? s : 0;
+    m = typeof m === 'number' ? m : 0;
+    h = typeof h === 'number' ? h : 0;
+    d = typeof d === 'number' ? d : 0;
+
+    return +(s * 1000)
+      + (m * 1000 * 60)
+      + (h * 1000 * 60 * 60)
+      + (d * 1000 * 60 * 60 * 24);
   } else {
     return null;
   }

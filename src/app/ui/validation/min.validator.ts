@@ -1,7 +1,7 @@
 import { AbstractControl, ValidatorFn, Validators } from '@angular/forms';
 
 export const minValidator = (min: number): ValidatorFn => {
-  return (control: AbstractControl): { [key: string]: any } => {
+  return (control: AbstractControl): { [key: string]: any } | null => {
     if (!min || Validators.required(control)) {
       return null;
     }

@@ -14,31 +14,36 @@ const MIN_VALIDATOR: any = {
   providers: [MIN_VALIDATOR]
 })
 export class MinDirective implements Validator, OnInit, OnChanges {
-  @Input() min: number;
+  @Input() min: number | undefined;
 
-  private validator: ValidatorFn;
-  private onChange: () => void;
+  private _validator: ValidatorFn | undefined;
+  private _onChange: (() => void) | undefined;
 
   ngOnInit() {
-    this.validator = minValidator(this.min);
+    if (typeof this.min === 'number') {
+      this._validator = minValidator(this.min);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
     for (const key in changes) {
       if (key === 'min') {
-        this.validator = minValidator(changes[key].currentValue);
-        if (this.onChange) {
-          this.onChange();
+        this._validator = minValidator(changes[key].currentValue);
+        if (this._onChange) {
+          this._onChange();
         }
       }
     }
   }
 
-  validate(c: AbstractControl): { [key: string]: any } {
-    return this.validator(c);
+  validate(c: AbstractControl): ({ [key: string]: any }) | null {
+    if (this._validator) {
+      return this._validator(c) as { [key: string]: any };
+    }
+    return null;
   }
 
   registerOnValidatorChange(fn: () => void): void {
-    this.onChange = fn;
+    this._onChange = fn;
   }
 }

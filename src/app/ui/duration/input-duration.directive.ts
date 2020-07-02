@@ -60,8 +60,8 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   private _onChangeCallback: (_: any) => void = noop;
   // -----------
   private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
-  private _validator: ValidatorFn | null;
-  private _msValue: number;
+  private _validator: ValidatorFn | undefined | null;
+  private _msValue: number | undefined;
 
   constructor(
     @Attribute('inputDuration') public inputDuration: Attribute,
@@ -71,11 +71,11 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     private _renderer: Renderer2) {
   }
 
-  private _value: string;
+  private _value: string | undefined;
 
   // Validations
   get value(): string {
-    return this._value;
+    return this._value || '';
   }
 
   set value(value: string) {
@@ -122,7 +122,9 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
   // ControlValueAccessor: Validator
   validate(c: AbstractControl): ValidationErrors | null {
-    return this._validator ? this._validator(c) : null;
+    return (this._validator !== null && this._validator !== undefined)
+      ? this._validator(c)
+      : null;
   }
 
   // ControlValueAccessor: Formatter

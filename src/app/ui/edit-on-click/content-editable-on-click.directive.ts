@@ -9,16 +9,16 @@ import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output }
 export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   @Input() isResetAfterEdit: boolean = false;
   @Output() editFinished: EventEmitter<any> = new EventEmitter();
-  private _lastDomValue: string;
-  private _lastOutsideVal: string;
+  private _lastDomValue: string | undefined;
+  private _lastOutsideVal: string | undefined;
   private readonly _el: HTMLElement;
-  private _redrawTimeout: number;
+  private _redrawTimeout: number | undefined;
 
   constructor(el: ElementRef) {
     this._el = el.nativeElement;
   }
 
-  private _value: string;
+  private _value: string | undefined;
 
   @Input() set value(_val: string) {
     this._value = this._lastOutsideVal = _val;
@@ -30,7 +30,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   ngOnInit() {
     const el = this._el;
 
-    if (!(el.getAttribute('contenteditable'))) {
+    if ((el.getAttribute('contenteditable')) === null) {
       el.setAttribute('contenteditable', 'true');
     }
 
@@ -84,13 +84,15 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
       }
     });
 
-    el.onpaste = (ev) => {
-      ev.stopPropagation();
-      ev.preventDefault();
-      const text = ev.clipboardData.getData('text/plain')
-        .trim();
-      this._insertAtCursor(el, text);
-      this._setValueFromElement();
+    el.onpaste = (ev: ClipboardEvent) => {
+      const data = (ev.clipboardData !== null) && ev.clipboardData.getData('text/plain');
+      if (data && data.length) {
+        ev.stopPropagation();
+        ev.preventDefault();
+        const text = data.trim();
+        this._insertAtCursor(el, text);
+        this._setValueFromElement();
+      }
     };
   }
 
@@ -99,13 +101,14 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   }
 
   private _refreshView() {
-    this._el.innerText = this._value;
+    this._el.innerText = this._value || '';
   }
 
   private _onEditDone(event: Event) {
     // deselect all text
-    if (window.getSelection) {
-      window.getSelection().removeAllRanges();
+    const sel = window.getSelection();
+    if (sel !== null) {
+      sel.removeAllRanges();
     }
 
     const curVal = this._el.innerText;
@@ -131,6 +134,9 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
 
   private _insertAtCursor(el: HTMLElement, newText: string) {
     const sel = window.getSelection();
+    if (sel === null) {
+      return;
+    }
 
     const start = sel.anchorOffset;
     const end = sel.focusOffset;
@@ -145,10 +151,12 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     const range = document.createRange();
     range.setStart(el.childNodes[0], start + newText.length);
     range.collapse(true);
-    const sel2 = window.getSelection();
 
-    sel2.removeAllRanges();
-    sel2.addRange(range);
+    const sel2 = window.getSelection();
+    if (sel2 !== null) {
+      sel2.removeAllRanges();
+      sel2.addRange(range);
+    }
   }
 
   private _removeTags(str: string) {
@@ -162,8 +170,11 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   private _moveCursorToEnd() {
     // NOTE: keep in mind that we're in a contenteditable
     try {
-      document.execCommand('selectAll', false, null);
-      document.getSelection().collapseToEnd();
+      document.execCommand('selectAll', false, undefined);
+      const sel = document.getSelection();
+      if (sel !== null) {
+        sel.collapseToEnd();
+      }
     } catch (e) {
       console.error(e);
     }
