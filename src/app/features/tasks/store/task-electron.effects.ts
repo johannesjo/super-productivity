@@ -1,17 +1,17 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {AddTimeSpent, SetCurrentTask, TaskActionTypes} from './task.actions';
-import {select, Store} from '@ngrx/store';
-import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
-import {selectCurrentTask} from './task.selectors';
-import {TaskService} from '../task.service';
-import {Task} from '../task.model';
-import {Observable} from 'rxjs';
-import {IPC} from '../../../../../electron/ipc-events.const';
-import {IS_ELECTRON} from '../../../app.constants';
-import {GlobalConfigState} from '../../config/global-config.model';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {ElectronService} from '../../../core/electron/electron.service';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { AddTimeSpent, SetCurrentTask, TaskActionTypes } from './task.actions';
+import { select, Store } from '@ngrx/store';
+import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
+import { selectCurrentTask } from './task.selectors';
+import { TaskService } from '../task.service';
+import { Task } from '../task.model';
+import { Observable } from 'rxjs';
+import { IPC } from '../../../../../electron/ipc-events.const';
+import { IS_ELECTRON } from '../../../app.constants';
+import { GlobalConfigState } from '../../config/global-config.model';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { ElectronService } from '../../../core/electron/electron.service';
 
 // TODO send message to electron when current task changes here
 

@@ -181,7 +181,6 @@ export type GithubOriginalComment = Readonly<{
   user: GithubOriginalUser;
 }>;
 
-
 export type GithubIssueSearchResult = Readonly<{
   total_count: number;
   incomplete_results: boolean;

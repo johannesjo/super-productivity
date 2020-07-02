@@ -7,15 +7,15 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {Task, TaskWithSubTasks} from '../task.model';
-import {TaskService} from '../task.service';
-import {DragulaService} from 'ng2-dragula';
-import {BehaviorSubject, combineLatest, Observable, ReplaySubject, Subscription} from 'rxjs';
-import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
-import {expandFadeFastAnimation} from '../../../ui/animations/expand.ani';
-import {map} from 'rxjs/operators';
-import {filterDoneTasks} from '../filter-done-tasks.pipe';
-import {T} from '../../../t.const';
+import { Task, TaskWithSubTasks } from '../task.model';
+import { TaskService } from '../task.service';
+import { DragulaService } from 'ng2-dragula';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
+import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
+import { map } from 'rxjs/operators';
+import { filterDoneTasks } from '../filter-done-tasks.pipe';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'task-list',
@@ -26,7 +26,7 @@ import {T} from '../../../t.const';
 
 })
 export class TaskListComponent implements OnDestroy, OnInit {
-  T = T;
+  T: any = T;
   tasksIN: TaskWithSubTasks[] = [];
   tasks$: ReplaySubject<TaskWithSubTasks[]> = new ReplaySubject(1);
   isHideDoneIN: boolean;
@@ -39,27 +39,14 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() listModelId: string;
   @Input() noTasksMsg: string;
   @Input() isBacklog: boolean;
-
-  @Input('listId') set listIdIn(v: string) {
-    this.listId = v;
-
-    // Disable filtering for non sub task tasks
-    if (v !== 'SUB') {
-      this._filteredTasks$ = this.tasks$;
-    }
-  }
-
   listId: string;
-
-
   @ViewChild('listEl', {static: true}) listEl;
   isBlockAni = false;
   doneTasksLength = 0;
   undoneTasksLength = 0;
   allTasksLength = 0;
   currentTaskId: string;
-
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
   private _blockAnimationTimeout: number;
   private _filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
     this.tasks$,
@@ -77,6 +64,15 @@ export class TaskListComponent implements OnDestroy, OnInit {
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
   ) {
+  }
+
+  @Input('listId') set listIdIn(v: string) {
+    this.listId = v;
+
+    // Disable filtering for non sub task tasks
+    if (v !== 'SUB') {
+      this._filteredTasks$ = this.tasks$;
+    }
   }
 
   @Input() set tasks(tasks: TaskWithSubTasks[]) {

@@ -24,8 +24,8 @@
                    class="task-title"
                    contentEditableOnClick
                    contenteditable="true">{{task.title}}</div>
-              <tag-list [task]="task"
-                        [isShowProjectTagAlways]="true"></tag-list>
+              <tag-list [isShowProjectTagAlways]="true"
+                        [task]="task"></tag-list>
             </div>
 
             <div (click)="editReminder(task)"
@@ -42,18 +42,18 @@
               <mat-icon>alarm</mat-icon>
             </div>
 
-            <button mat-icon-button
+            <button (click)="startTask(task)"
+                    [matTooltip]="T.SCHEDULE.START_TASK|translate"
                     class="action-btn"
-                    (click)="startTask(task)"
-                    [matTooltip]="T.SCHEDULE.START_TASK|translate">
+                    mat-icon-button>
               <mat-icon svgIcon="play"></mat-icon>
             </button>
-            <button mat-icon-button
-                    class="action-btn"
+            <button (click)="toggleToday(task)"
                     [matTooltip]="(task.tagIds.includes(TODAY_TAG.id)
                     ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
                     :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
-                    (click)="toggleToday(task)">
+                    class="action-btn"
+                    mat-icon-button>
               <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG.id)"
                         svgIcon="remove_today"></mat-icon>
               <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>

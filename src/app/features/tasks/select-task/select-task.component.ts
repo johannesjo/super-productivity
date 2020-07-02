@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {Task} from '../task.model';
-import {map, startWith, takeUntil, withLatestFrom} from 'rxjs/operators';
-import {Subject} from 'rxjs';
-import {T} from '../../../t.const';
-import {WorkContextService} from '../../work-context/work-context.service';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { Task } from '../task.model';
+import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { T } from '../../../t.const';
+import { WorkContextService } from '../../work-context/work-context.service';
 
 @Component({
   selector: 'select-task',
@@ -13,7 +13,7 @@ import {WorkContextService} from '../../work-context/work-context.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
   taskSelectCtrl: FormControl = new FormControl();
   filteredTasks: Task[];
   isCreate = false;

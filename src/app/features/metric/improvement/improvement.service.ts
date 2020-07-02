@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
 import {
   initialImprovementState,
   selectAllImprovements,
@@ -17,12 +17,12 @@ import {
   ToggleImprovementRepeat,
   UpdateImprovement
 } from './store/improvement.actions';
-import {Observable} from 'rxjs';
-import {Improvement, ImprovementState} from './improvement.model';
+import { Observable } from 'rxjs';
+import { Improvement, ImprovementState } from './improvement.model';
 import shortid from 'shortid';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectHasLastTrackedImprovements, selectImprovementBannerImprovements} from '../store/metric.selectors';
-import {getWorklogStr} from '../../../util/get-work-log-str';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { selectHasLastTrackedImprovements, selectImprovementBannerImprovements } from '../store/metric.selectors';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',

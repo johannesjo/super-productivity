@@ -1,6 +1,6 @@
 // SETTINGS (not configurable under config)
-import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
-import {LS_GOOGLE_LOCAL_LAST_SYNC, LS_GOOGLE_SESSION} from '../../core/persistence/ls-keys.const';
+import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
+import { LS_GOOGLE_LOCAL_LAST_SYNC, LS_GOOGLE_SESSION } from '../../core/persistence/ls-keys.const';
 
 export type GoogleSession = Readonly<{
   accessToken: string,
@@ -18,7 +18,6 @@ export const getGoogleSession = (): GoogleSession => {
   return loadFromLs(LS_GOOGLE_SESSION) || DEFAULT_GOOGLE_SESSION;
 };
 
-
 export const updateGoogleSession = (googleSession: Partial<GoogleSession>) => {
   const current = getGoogleSession();
 
@@ -35,7 +34,6 @@ export const getGoogleLocalLastSync = (): number => {
     ? null
     : +la;
 };
-
 
 export const saveGoogleLocalLastSync = (lastSyncStamp: number | string) => {
   if (typeof lastSyncStamp === 'string') {

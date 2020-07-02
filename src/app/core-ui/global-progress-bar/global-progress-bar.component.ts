@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {GlobalProgressBarService} from './global-progress-bar.service';
-import {fadeAnimation, fadeInOutBottomAnimation, fadeOutAnimation} from '../../ui/animations/fade.ani';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { GlobalProgressBarService } from './global-progress-bar.service';
+import { fadeAnimation, fadeInOutBottomAnimation, fadeOutAnimation } from '../../ui/animations/fade.ani';
 
 @Component({
   selector: 'global-progress-bar',

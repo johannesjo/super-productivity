@@ -1,7 +1,7 @@
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {UiModule} from '../../../../../ui/ui.module';
-import {DialogGithubInitialSetupComponent} from './dialog-github-initial-setup/dialog-github-initial-setup.component';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { UiModule } from '../../../../../ui/ui.module';
+import { DialogGithubInitialSetupComponent } from './dialog-github-initial-setup/dialog-github-initial-setup.component';
 
 @NgModule({
   imports: [

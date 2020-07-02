@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {Note} from './note.model';
-import {select, Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Note } from './note.model';
+import { select, Store } from '@ngrx/store';
 import {
   addNote,
   addNoteReminder,
@@ -13,12 +13,12 @@ import {
   updateNoteReminder
 } from './store/note.actions';
 import shortid from 'shortid';
-import {initialNoteState, NoteState, selectAllNotes, selectNoteById} from './store/note.reducer';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {take} from 'rxjs/operators';
-import {createFromDrop} from '../../core/drop-paste-input/drop-paste-input';
-import {isImageUrl, isImageUrlSimple} from '../../util/is-image-url';
-import {DropPasteInput} from '../../core/drop-paste-input/drop-paste.model';
+import { initialNoteState, NoteState, selectAllNotes, selectNoteById } from './store/note.reducer';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { take } from 'rxjs/operators';
+import { createFromDrop } from '../../core/drop-paste-input/drop-paste-input';
+import { isImageUrl, isImageUrlSimple } from '../../util/is-image-url';
+import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
 
 @Injectable({
   providedIn: 'root',
@@ -39,7 +39,6 @@ export class NoteService {
   async getByIdFromEverywhere(id: string, projectId: string): Promise<Note> {
     return await this._persistenceService.note.ent.getById(projectId, id);
   }
-
 
   public async loadStateForProject(projectId) {
     const notes = await this._persistenceService.note.load(projectId) || initialNoteState;

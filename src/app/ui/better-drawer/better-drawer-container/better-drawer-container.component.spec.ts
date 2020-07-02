@@ -1,6 +1,6 @@
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {BetterDrawerContainerComponent} from './better-drawer-container.component';
+import { BetterDrawerContainerComponent } from './better-drawer-container.component';
 
 describe('BetterDrawerContainerComponent', () => {
   let component: BetterDrawerContainerComponent;

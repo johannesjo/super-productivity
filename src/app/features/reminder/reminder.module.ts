@@ -1,19 +1,19 @@
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {ReminderService} from './reminder.service';
-import {NoteModule} from '../note/note.module';
-import {MatDialog} from '@angular/material/dialog';
-import {IS_ELECTRON} from '../../app.constants';
-import {TasksModule} from '../tasks/tasks.module';
-import {filter} from 'rxjs/operators';
-import {Reminder} from './reminder.model';
-import {ElectronService} from '../../core/electron/electron.service';
-import {UiHelperService} from '../ui-helper/ui-helper.service';
-import {NotifyService} from '../../core/notify/notify.service';
-import {throttle} from 'throttle-debounce';
-import {DialogViewNoteReminderComponent} from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
-import {DialogViewTaskRemindersComponent} from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
-import {DataInitService} from '../../core/data-init/data-init.service';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReminderService } from './reminder.service';
+import { NoteModule } from '../note/note.module';
+import { MatDialog } from '@angular/material/dialog';
+import { IS_ELECTRON } from '../../app.constants';
+import { TasksModule } from '../tasks/tasks.module';
+import { filter } from 'rxjs/operators';
+import { Reminder } from './reminder.model';
+import { ElectronService } from '../../core/electron/electron.service';
+import { UiHelperService } from '../ui-helper/ui-helper.service';
+import { NotifyService } from '../../core/notify/notify.service';
+import { throttle } from 'throttle-debounce';
+import { DialogViewNoteReminderComponent } from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
+import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
+import { DataInitService } from '../../core/data-init/data-init.service';
 
 @NgModule({
   declarations: [],

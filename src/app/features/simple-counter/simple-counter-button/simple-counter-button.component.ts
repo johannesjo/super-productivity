@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {SimpleCounter, SimpleCounterType} from '../simple-counter.model';
-import {SimpleCounterService} from '../simple-counter.service';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogSimpleCounterEditComponent} from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
-import {T} from 'src/app/t.const';
-import {getWorklogStr} from '../../../util/get-work-log-str';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
+import { SimpleCounterService } from '../simple-counter.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
+import { T } from 'src/app/t.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'simple-counter-button',
@@ -13,7 +13,7 @@ import {getWorklogStr} from '../../../util/get-work-log-str';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleCounterButtonComponent {
-  T = T;
+  T: any = T;
   SimpleCounterType = SimpleCounterType;
   todayStr = getWorklogStr();
 

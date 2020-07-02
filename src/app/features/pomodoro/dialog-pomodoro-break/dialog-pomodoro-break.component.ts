@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {PomodoroService} from '../pomodoro.service';
-import {filter, mapTo, takeUntil, withLatestFrom} from 'rxjs/operators';
-import {Observable, Subject, Subscription} from 'rxjs';
-import {T} from '../../../t.const';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { PomodoroService } from '../pomodoro.service';
+import { filter, mapTo, takeUntil, withLatestFrom } from 'rxjs/operators';
+import { Observable, Subject, Subscription } from 'rxjs';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'dialog-pomodoro-break',
@@ -12,15 +12,15 @@ import {T} from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogPomodoroBreakComponent {
-  T = T;
-  isStopCurrentTime$ = new Subject();
+  T: any = T;
+  isStopCurrentTime$: Subject<boolean> = new Subject();
   currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(
     takeUntil(this.isStopCurrentTime$),
   );
-  isBreakDone$ = this.pomodoroService.isManualPause$;
-  currentCycle$ = this.pomodoroService.currentCycle$;
+  isBreakDone$: Observable<boolean> = this.pomodoroService.isManualPause$;
+  currentCycle$: Observable<number> = this.pomodoroService.currentCycle$;
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
   private _isCloseDialog$: Observable<boolean> = this.pomodoroService.isBreak$.pipe(
     withLatestFrom(this.pomodoroService.cfg$),
     filter(([isBreak, cfg]) => !cfg.isManualContinue && !isBreak),
@@ -47,7 +47,7 @@ export class DialogPomodoroBreakComponent {
     this._matDialogRef.close(null);
   }
 
-  nextSession(isSkipBreak = false) {
+  nextSession(isSkipBreak: boolean = false) {
     this.isStopCurrentTime$.next(true);
     if (isSkipBreak) {
       this.pomodoroService.skipBreak();

@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {WorkContextService} from '../../features/work-context/work-context.service';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { WorkContextService } from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'tag-task-page',

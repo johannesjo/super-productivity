@@ -1,20 +1,20 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, Output} from '@angular/core';
-import {ProjectService} from '../../features/project/project.service';
-import {T} from '../../t.const';
-import {DialogCreateProjectComponent} from '../../features/project/dialogs/create-project/dialog-create-project.component';
-import {Project} from '../../features/project/project.model';
-import {MatDialog} from '@angular/material/dialog';
-import {THEME_COLOR_MAP} from '../../app.constants';
-import {Router} from '@angular/router';
-import {DragulaService} from 'ng2-dragula';
-import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
-import {WorkContextService} from '../../features/work-context/work-context.service';
-import {standardListAnimation} from '../../ui/animations/standard-list.ani';
-import {map, switchMap} from 'rxjs/operators';
-import {TagService} from '../../features/tag/tag.service';
-import {Tag} from '../../features/tag/tag.model';
-import {WorkContextType} from '../../features/work-context/work-context.model';
-import {expandFadeAnimation} from '../../ui/animations/expand.ani';
+import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { ProjectService } from '../../features/project/project.service';
+import { T } from '../../t.const';
+import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
+import { Project } from '../../features/project/project.model';
+import { MatDialog } from '@angular/material/dialog';
+import { THEME_COLOR_MAP } from '../../app.constants';
+import { Router } from '@angular/router';
+import { DragulaService } from 'ng2-dragula';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
+import { map, switchMap } from 'rxjs/operators';
+import { TagService } from '../../features/tag/tag.service';
+import { Tag } from '../../features/tag/tag.model';
+import { WorkContextType } from '../../features/work-context/work-context.model';
+import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 
 @Component({
   selector: 'side-nav',
@@ -24,10 +24,10 @@ import {expandFadeAnimation} from '../../ui/animations/expand.ani';
   animations: [standardListAnimation, expandFadeAnimation],
 })
 export class SideNavComponent implements OnDestroy {
-  @Output() scrollToNotes = new EventEmitter<void>();
+  @Output() scrollToNotes: EventEmitter<void> = new EventEmitter();
 
-  isProjectsExpanded$ = new BehaviorSubject<boolean>(false);
-  isProjectsExpanded = false;
+  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isProjectsExpanded: boolean = false;
   projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.projectService.list$
@@ -40,8 +40,8 @@ export class SideNavComponent implements OnDestroy {
     )
   );
 
-  isTagsExpanded$ = new BehaviorSubject<boolean>(false);
-  isTagsExpanded = false;
+  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isTagsExpanded: boolean = false;
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.tagService.tagsNoMyDay$
@@ -54,13 +54,13 @@ export class SideNavComponent implements OnDestroy {
     )
   );
 
-  T = T;
+  T: any = T;
   PROJECTS_SIDE_NAV = 'PROJECTS_SIDE_NAV';
   TAG_SIDE_NAV = 'TAG_SIDE_NAV';
   activeWorkContextId: string;
   WorkContextType = WorkContextType;
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly tagService: TagService,

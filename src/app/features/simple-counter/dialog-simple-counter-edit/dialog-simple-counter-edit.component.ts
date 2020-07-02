@@ -1,10 +1,9 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {T} from '../../../t.const';
-import {SimpleCounter, SimpleCounterType} from '../simple-counter.model';
-import {SimpleCounterService} from '../simple-counter.service';
-import {getWorklogStr} from '../../../util/get-work-log-str';
-
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { T } from '../../../t.const';
+import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
+import { SimpleCounterService } from '../simple-counter.service';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -13,12 +12,11 @@ import {getWorklogStr} from '../../../util/get-work-log-str';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogSimpleCounterEditComponent {
-  T = T;
-  SimpleCounterType = SimpleCounterType;
+  T: any = T;
+  SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
 
-  todayStr = getWorklogStr();
+  todayStr: string = getWorklogStr();
   val: number = this.data.simpleCounter.countOnDay[this.todayStr];
-
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogSimpleCounterEditComponent>,

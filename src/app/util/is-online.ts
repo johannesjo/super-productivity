@@ -1,5 +1,5 @@
-import {fromEvent, merge, of} from 'rxjs';
-import {mapTo, shareReplay} from 'rxjs/operators';
+import { fromEvent, merge, of } from 'rxjs';
+import { mapTo, shareReplay } from 'rxjs/operators';
 
 export const isOnline = () => navigator.onLine !== false;
 

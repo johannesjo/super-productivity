@@ -1,5 +1,5 @@
-import {Reminder} from './reminder.model';
-import {WorkContextType} from '../work-context/work-context.model';
+import { Reminder } from './reminder.model';
+import { WorkContextType } from '../work-context/work-context.model';
 
 export const migrateReminders = (reminders: Reminder[]): Reminder[] => {
   return reminders.map(reminder => {

@@ -47,7 +47,6 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 /** IE10 and IE11 requires the following for the Reflect API. */
 // import 'core-js/es/reflect';
 
-
 /*
  * Web Animations `@angular/platform-browser/animations`
  * Only required if AnimationBuilder is used within the application and using IE/Edge or Safari.
@@ -75,7 +74,6 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 (window as any).global = window;
 
 // import 'zone.js/dist/zone-mix';
-
 
 /***************************************************************************************************
  * APPLICATION IMPORTS

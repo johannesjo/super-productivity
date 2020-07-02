@@ -1,11 +1,11 @@
-import {EntityState} from '@ngrx/entity';
-import {Task} from '../../tasks/task.model';
-import {getWeeksInMonth} from '../../../util/get-weeks-in-month';
-import {getWeekNumber} from '../../../util/get-week-number';
+import { EntityState } from '@ngrx/entity';
+import { Task } from '../../tasks/task.model';
+import { getWeeksInMonth } from '../../../util/get-weeks-in-month';
+import { getWeekNumber } from '../../../util/get-week-number';
 import * as moment from 'moment';
-import {Worklog, WorklogDay, WorklogMonth, WorklogWeek, WorklogYear} from '../worklog.model';
-import {getWorklogStr} from '../../../util/get-work-log-str';
-import {WorkStartEnd} from '../../work-context/work-context.model';
+import { Worklog, WorklogDay, WorklogMonth, WorklogWeek, WorklogYear } from '../worklog.model';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { WorkStartEnd } from '../../work-context/work-context.model';
 
 // Provides defaults to display tasks without time spent on them
 const _getTimeSpentOnDay = (entities, task): { [key: string]: number } => {
@@ -26,10 +26,7 @@ const _getTimeSpentOnDay = (entities, task): { [key: string]: number } => {
 export const mapArchiveToWorklog = (
   taskState: EntityState<Task>,
   noRestoreIds = [],
-  startEnd: { workStart: WorkStartEnd, workEnd: WorkStartEnd }):
-  {
-    worklog: Worklog, totalTimeSpent
-  } => {
+  startEnd: { workStart: WorkStartEnd, workEnd: WorkStartEnd }): { worklog: Worklog, totalTimeSpent: number } => {
   const entities = taskState.entities;
   const worklog: Worklog = {};
   let totalTimeSpent = 0;

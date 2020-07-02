@@ -1,6 +1,6 @@
 // Mapped Data Types
 // -----------------
-import {JiraOriginalComponent, JiraOriginalStatus} from '../jira-api-responses';
+import { JiraOriginalComponent, JiraOriginalStatus } from '../jira-api-responses';
 
 export type JiraAuthor = Readonly<{
   id: string;

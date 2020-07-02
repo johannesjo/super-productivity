@@ -1,4 +1,4 @@
-import {moveItemInList} from './work-context-meta.helper';
+import { moveItemInList } from './work-context-meta.helper';
 
 describe('moveItemInList()', () => {
   it('should work for moving INSIDE an unfiltered list', () => {
@@ -30,7 +30,6 @@ describe('moveItemInList()', () => {
     const result = moveItemInList('x', ['A', 'B', 'C'], ['x', 'C']);
     expect(result).toEqual(['A', 'B', 'x', 'C']);
   });
-
 
   it('should work for moving INTO an empty filtered list with hidden items', () => {
     const result = moveItemInList('x', ['A', 'B', 'C'], ['x'], 0);

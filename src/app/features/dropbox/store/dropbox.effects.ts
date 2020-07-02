@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../config/store/global-config.actions';
 import {
   catchError,
   concatMap,
@@ -16,23 +16,22 @@ import {
   tap,
   withLatestFrom
 } from 'rxjs/operators';
-import {DropboxApiService} from '../dropbox-api.service';
-import {DropboxSyncService} from '../dropbox-sync.service';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {DataInitService} from '../../../core/data-init/data-init.service';
-import {SyncService} from '../../../imex/sync/sync.service';
-import {DROPBOX_BEFORE_CLOSE_ID, DROPBOX_MIN_SYNC_INTERVAL} from '../dropbox.const';
-import {SyncProvider} from '../../../imex/sync/sync-provider';
-import {SYNC_INITIAL_SYNC_TRIGGER} from '../../../imex/sync/sync.const';
-import {combineLatest, EMPTY, from, merge, of} from 'rxjs';
-import {isOnline$} from '../../../util/is-online';
-import {SnackService} from '../../../core/snack/snack.service';
-import {dbxLog} from '../dropbox-log.util';
-import {T} from '../../../t.const';
-import {ElectronService} from '../../../core/electron/electron.service';
-import {ExecBeforeCloseService} from '../../../core/electron/exec-before-close.service';
-import {IS_ELECTRON} from '../../../app.constants';
-
+import { DropboxApiService } from '../dropbox-api.service';
+import { DropboxSyncService } from '../dropbox-sync.service';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { DataInitService } from '../../../core/data-init/data-init.service';
+import { SyncService } from '../../../imex/sync/sync.service';
+import { DROPBOX_BEFORE_CLOSE_ID, DROPBOX_MIN_SYNC_INTERVAL } from '../dropbox.const';
+import { SyncProvider } from '../../../imex/sync/sync-provider';
+import { SYNC_INITIAL_SYNC_TRIGGER } from '../../../imex/sync/sync.const';
+import { combineLatest, EMPTY, from, merge, Observable, of } from 'rxjs';
+import { isOnline$ } from '../../../util/is-online';
+import { SnackService } from '../../../core/snack/snack.service';
+import { dbxLog } from '../dropbox-log.util';
+import { T } from '../../../t.const';
+import { ElectronService } from '../../../core/electron/electron.service';
+import { ExecBeforeCloseService } from '../../../core/electron/exec-before-close.service';
+import { IS_ELECTRON } from '../../../app.constants';
 
 @Injectable()
 export class DropboxEffects {
@@ -79,15 +78,42 @@ export class DropboxEffects {
         });
     }),
   );
+  @Effect({dispatch: false}) syncBeforeQuit$: any = IS_ELECTRON
+    ? this._dataInitService.isAllDataLoadedInitially$.pipe(
+      concatMap(() => this._dropboxSyncService.isEnabledAndReady$),
+      distinctUntilChanged(),
+      // TODO find out why this get's called many times
+      tap((isEnabled) => isEnabled
+        ? this._execBeforeCloseService.schedule(DROPBOX_BEFORE_CLOSE_ID)
+        : this._execBeforeCloseService.unschedule(DROPBOX_BEFORE_CLOSE_ID)
+      ),
+      switchMap((isEnabled) => isEnabled
+        ? this._execBeforeCloseService.onBeforeClose$
+        : EMPTY
+      ),
+      filter(ids => ids.includes(DROPBOX_BEFORE_CLOSE_ID)),
+      switchMap(() => this._dropboxSyncService.sync()
+        .then(() => {
+          this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
+        })
+        .catch((e) => {
+          console.error(e);
+          this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
+          if (confirm('Sync failed. Close App anyway?')) {
+            this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
+          }
+        })
+      )
+    )
+    : EMPTY;
 
-  private _isChangedAuthCode$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+  private _isChangedAuthCode$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     // NOTE: it is important that we don't use distinct until changed here
     switchMap(() => this._dropboxApiService.authCode$),
     pairwise(),
     map(([a, b]) => a !== b),
     shareReplay(),
   );
-
   @Effect() generateAccessCode$: any = this._actions$.pipe(
     ofType(
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
@@ -119,35 +145,6 @@ export class DropboxEffects {
     })),
   );
 
-  @Effect({dispatch: false}) syncBeforeQuit$: any = IS_ELECTRON
-    ? this._dataInitService.isAllDataLoadedInitially$.pipe(
-      concatMap(() => this._dropboxSyncService.isEnabledAndReady$),
-      distinctUntilChanged(),
-      // TODO find out why this get's called many times
-      tap((isEnabled) => isEnabled
-        ? this._execBeforeCloseService.schedule(DROPBOX_BEFORE_CLOSE_ID)
-        : this._execBeforeCloseService.unschedule(DROPBOX_BEFORE_CLOSE_ID)
-      ),
-      switchMap((isEnabled) => isEnabled
-        ? this._execBeforeCloseService.onBeforeClose$
-        : EMPTY
-      ),
-      filter(ids => ids.includes(DROPBOX_BEFORE_CLOSE_ID)),
-      switchMap(() => this._dropboxSyncService.sync()
-        .then(() => {
-          this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
-        })
-        .catch((e) => {
-          console.error(e);
-          this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
-          if (confirm('Sync failed. Close App anyway?')) {
-            this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
-          }
-        })
-      )
-    )
-    : EMPTY;
-
   constructor(
     private _actions$: Actions,
     private _dropboxApiService: DropboxApiService,
@@ -160,6 +157,5 @@ export class DropboxEffects {
     private _execBeforeCloseService: ExecBeforeCloseService,
   ) {
   }
-
 
 }

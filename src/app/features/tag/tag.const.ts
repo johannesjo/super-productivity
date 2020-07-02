@@ -1,4 +1,4 @@
-import {Tag} from './tag.model';
+import { Tag } from './tag.model';
 import {
   DEFAULT_TAG_COLOR,
   DEFAULT_TODAY_TAG_COLOR,

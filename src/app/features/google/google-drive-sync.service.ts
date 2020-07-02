@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
 import {
   ChangeSyncFileName,
   GoogleDriveSyncActionTypes,
@@ -8,12 +8,15 @@ import {
   SaveForSync,
   SaveToGoogleDriveFlow
 } from './store/google-drive-sync.actions';
-import {selectIsGoogleDriveLoadInProgress, selectIsGoogleDriveSaveInProgress} from './store/google-drive-sync.reducer';
-import {distinctUntilChanged, map} from 'rxjs/operators';
-import {GlobalConfigService} from '../config/global-config.service';
-import {DataImportService} from '../../imex/sync/data-import.service';
-import {Actions, ofType} from '@ngrx/effects';
-import {GoogleDriveSyncConfig} from '../config/global-config.model';
+import {
+  selectIsGoogleDriveLoadInProgress,
+  selectIsGoogleDriveSaveInProgress
+} from './store/google-drive-sync.reducer';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+import { GlobalConfigService } from '../config/global-config.service';
+import { DataImportService } from '../../imex/sync/data-import.service';
+import { Actions, ofType } from '@ngrx/effects';
+import { GoogleDriveSyncConfig } from '../config/global-config.model';
 
 @Injectable({
   providedIn: 'root',

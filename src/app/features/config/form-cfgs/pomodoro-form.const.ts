@@ -1,6 +1,6 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection, PomodoroConfig} from '../global-config.model';
-import {T} from '../../../t.const';
+import { ConfigFormSection, PomodoroConfig } from '../global-config.model';
+import { T } from '../../../t.const';
 
 export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
   title: T.GCF.POMODORO.TITLE,

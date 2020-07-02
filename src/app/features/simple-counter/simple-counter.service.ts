@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {selectAllSimpleCounters, selectSimpleCounterById} from './store/simple-counter.reducer';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { selectAllSimpleCounters, selectSimpleCounterById } from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
   deleteSimpleCounter,
@@ -12,12 +12,11 @@ import {
   updateSimpleCounter,
   upsertSimpleCounter,
 } from './store/simple-counter.actions';
-import {Observable} from 'rxjs';
-import {SimpleCounter, SimpleCounterCfgFields, SimpleCounterState} from './simple-counter.model';
+import { Observable } from 'rxjs';
+import { SimpleCounter, SimpleCounterCfgFields, SimpleCounterState } from './simple-counter.model';
 import shortid from 'shortid';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {distinctUntilChanged, map} from 'rxjs/operators';
-
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
   'id', 'title', 'isEnabled', 'icon', 'iconOn', 'type', 'triggerOnActions', 'triggerOffActions'
@@ -90,7 +89,6 @@ export class SimpleCounterService {
   toggleCounter(id: string) {
     this._store$.dispatch(toggleSimpleCounterCounter({id}));
   }
-
 
   addSimpleCounter(simpleCounter: SimpleCounter) {
     this._store$.dispatch(addSimpleCounter({

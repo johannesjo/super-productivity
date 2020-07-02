@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {combineLatest, interval, merge, Observable, of} from 'rxjs';
-import {GlobalConfigService} from '../config/global-config.service';
+import { Injectable } from '@angular/core';
+import { combineLatest, interval, merge, Observable, of } from 'rxjs';
+import { GlobalConfigService } from '../config/global-config.service';
 import {
   distinctUntilChanged,
   filter,
@@ -11,8 +11,8 @@ import {
   switchMap,
   withLatestFrom
 } from 'rxjs/operators';
-import {PomodoroConfig} from '../config/global-config.model';
-import {select, Store} from '@ngrx/store';
+import { PomodoroConfig } from '../config/global-config.model';
+import { select, Store } from '@ngrx/store';
 import {
   FinishPomodoroSession,
   PausePomodoro,
@@ -21,10 +21,10 @@ import {
   StartPomodoro,
   StopPomodoro
 } from './store/pomodoro.actions';
-import {selectCurrentCycle, selectIsBreak, selectIsManualPause} from './store/pomodoro.reducer';
-import {DEFAULT_GLOBAL_CONFIG} from '../config/default-global-config.const';
-import {Actions, ofType} from '@ngrx/effects';
-import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
+import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
+import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { Actions, ofType } from '@ngrx/effects';
+import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
 // Tick Duration
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';

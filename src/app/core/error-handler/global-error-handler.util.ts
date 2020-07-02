@@ -1,13 +1,13 @@
-import {ElectronService} from '../electron/electron.service';
-import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../app.constants';
-import {environment} from '../../../environments/environment';
+import { ElectronService } from '../electron/electron.service';
+import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../app.constants';
+import { environment } from '../../../environments/environment';
 import * as StackTrace from 'stacktrace-js';
 import * as pThrottle from 'p-throttle';
 import * as newGithubIssueUrl from 'new-github-issue-url';
 
 let isWasErrorAlertCreated = false;
 
-async function _getStacktrace(err): Promise<string> {
+async function _getStacktrace(err: Error): Promise<string> {
   const isHttpError = err && (err.url || err.headers);
   const isErrorWithStack = err && err.stack;
 
@@ -49,10 +49,8 @@ export const logAdvancedStacktrace = (origErr, additionalLogFn?: (stack: string)
     githubIssueLink.setAttribute('href', getGithubUrl(errEscaped, stack));
   }
 
-
 // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
 }).catch(console.error);
-
 
 const _cleanHtml = (str: string): string => {
   const div = document.createElement('div');
@@ -108,7 +106,6 @@ export const createErrorAlert = (eSvc: ElectronService, err: string = '', stackT
     eSvc.remote.getCurrentWindow().webContents.openDevTools();
   }
 };
-
 
 export const getSimpleMeta = (): string => {
   const n = window.navigator;

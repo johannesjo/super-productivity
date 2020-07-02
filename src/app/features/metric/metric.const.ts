@@ -1,4 +1,4 @@
-import {Metric} from './metric.model';
+import { Metric } from './metric.model';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 

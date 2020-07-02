@@ -1,4 +1,4 @@
-import {WorklogExportSettings} from '../worklog/worklog.model';
+import { WorklogExportSettings } from '../worklog/worklog.model';
 
 // normally imported from here, but this includes non type files as well..
 // import {HueValue} from 'angular-material-css-vars';
@@ -66,7 +66,6 @@ export interface WorkContextCommon {
 }
 
 export type WorkContextAdvancedCfgKey = keyof WorkContextAdvancedCfg;
-
 
 export interface WorkContextCopy extends WorkContextCommon {
   id: string;

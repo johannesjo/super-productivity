@@ -1,18 +1,17 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {IssueFieldsForTask, Task} from 'src/app/features/tasks/task.model';
-import {catchError, concatMap, first, switchMap} from 'rxjs/operators';
-import {IssueServiceInterface} from '../../issue-service-interface';
-import {GitlabApiService} from './gitlab-api/gitlab-api.service';
-import {ProjectService} from '../../../project/project.service';
-import {SearchResultItem} from '../../issue.model';
-import {GitlabCfg} from './gitlab';
-import {SnackService} from '../../../../core/snack/snack.service';
-import {GitlabIssue} from './gitlab-issue/gitlab-issue.model';
-import {truncate} from '../../../../util/truncate';
-import {T} from '../../../../t.const';
-import {GITLAB_API_BASE_URL} from './gitlab.const';
-
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { IssueFieldsForTask, Task } from 'src/app/features/tasks/task.model';
+import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
+import { IssueServiceInterface } from '../../issue-service-interface';
+import { GitlabApiService } from './gitlab-api/gitlab-api.service';
+import { ProjectService } from '../../../project/project.service';
+import { SearchResultItem } from '../../issue.model';
+import { GitlabCfg } from './gitlab';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
+import { truncate } from '../../../../util/truncate';
+import { T } from '../../../../t.const';
+import { GITLAB_API_BASE_URL } from './gitlab.const';
 
 @Injectable({
   providedIn: 'root',
@@ -46,8 +45,8 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   async refreshIssue(
     task: Task,
-    isNotifySuccess = true,
-    isNotifyNoUpdateRequired = false
+    isNotifySuccess: boolean = true,
+    isNotifyNoUpdateRequired: boolean = false
   ): Promise<{ taskChanges: Partial<Task>, issue: GitlabIssue }> {
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();

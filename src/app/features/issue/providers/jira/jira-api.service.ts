@@ -1,13 +1,13 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import shortid from 'shortid';
-import {ChromeExtensionInterfaceService} from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
+import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
   JIRA_ADDITIONAL_ISSUE_FIELDS,
   JIRA_DATETIME_FORMAT,
   JIRA_MAX_RESULTS,
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
-import {ProjectService} from '../../../project/project.service';
+import { ProjectService } from '../../../project/project.service';
 import {
   mapIssueResponse,
   mapIssuesResponse,
@@ -15,26 +15,26 @@ import {
   mapToSearchResults,
   mapTransitionResponse
 } from './jira-issue/jira-issue-map.util';
-import {JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser} from './jira-api-responses';
-import {JiraCfg} from './jira.model';
-import {IPC} from '../../../../../../electron/ipc-events.const';
-import {SnackService} from '../../../../core/snack/snack.service';
-import {HANDLED_ERROR_PROP_STR, IS_ELECTRON} from '../../../../app.constants';
-import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
-import {Observable, of, throwError} from 'rxjs';
-import {SearchResultItem} from '../../issue.model';
-import {catchError, concatMap, finalize, first, mapTo, shareReplay, take} from 'rxjs/operators';
-import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
+import { JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser } from './jira-api-responses';
+import { JiraCfg } from './jira.model';
+import { IPC } from '../../../../../../electron/ipc-events.const';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../../../app.constants';
+import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
+import { Observable, of, throwError } from 'rxjs';
+import { SearchResultItem } from '../../issue.model';
+import { catchError, concatMap, finalize, first, mapTo, shareReplay, take } from 'rxjs/operators';
+import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
 import * as moment from 'moment';
-import {BannerService} from '../../../../core/banner/banner.service';
-import {BannerId} from '../../../../core/banner/banner.model';
-import {T} from '../../../../t.const';
-import {ElectronService} from '../../../../core/electron/electron.service';
-import {stringify} from 'query-string';
-import {fromPromise} from 'rxjs/internal-compatibility';
-import {getJiraResponseErrorTxt} from '../../../../util/get-jira-response-error-text';
-import {isOnline} from '../../../../util/is-online';
-import {GlobalProgressBarService} from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
+import { BannerService } from '../../../../core/banner/banner.service';
+import { BannerId } from '../../../../core/banner/banner.model';
+import { T } from '../../../../t.const';
+import { ElectronService } from '../../../../core/electron/electron.service';
+import { stringify } from 'query-string';
+import { fromPromise } from 'rxjs/internal-compatibility';
+import { getJiraResponseErrorTxt } from '../../../../util/get-jira-response-error-text';
+import { isOnline } from '../../../../util/is-online';
+import { GlobalProgressBarService } from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -60,7 +60,6 @@ interface JiraRequestCfg {
   transform?: (res: any, jiraCfg?: JiraCfg) => any;
   body?: {};
 }
-
 
 @Injectable({
   providedIn: 'root',
@@ -180,7 +179,6 @@ export class JiraApiService {
     }, cfg);
   }
 
-
   getTransitionsForIssue$(issueId: string, cfg: JiraCfg): Observable<JiraOriginalTransition[]> {
     return this._sendRequest$({
       pathname: `issue/${issueId}/transitions`,
@@ -216,12 +214,12 @@ export class JiraApiService {
   }
 
   addWorklog$({
-                issueId,
-                started,
-                timeSpent,
-                comment,
-                cfg
-              }: {
+    issueId,
+    started,
+    timeSpent,
+    comment,
+    cfg
+  }: {
     issueId: string,
     started: string,
     timeSpent: number,
@@ -253,7 +251,6 @@ export class JiraApiService {
 
   // Complex Functions
 
-
   // --------
   private _isMinimalSettings(settings: JiraCfg) {
     return settings && settings.host && settings.userName && settings.password
@@ -266,7 +263,6 @@ export class JiraApiService {
       concatMap(() => {
         // assign uuid to request to know which responsive belongs to which promise
         const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
-
 
         if (!isOnline()) {
           this._snackService.open({
@@ -310,7 +306,6 @@ export class JiraApiService {
           : '';
         const base = `${cfg.host}/rest/api/${API_VERSION}`;
         const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
-
 
         return this._sendRequestToExecutor$(requestId, url, requestInit, jiraReqCfg.transform, cfg);
         // NOTE: offline is sexier & easier than cache, but in case we change our mind...
@@ -375,13 +370,13 @@ export class JiraApiService {
   }
 
   private _makeJiraRequestLogItem({
-                                    promiseResolve,
-                                    promiseReject,
-                                    requestId,
-                                    requestInit,
-                                    transform,
-                                    jiraCfg
-                                  }: {
+    promiseResolve,
+    promiseReject,
+    requestId,
+    requestInit,
+    transform,
+    jiraCfg
+  }: {
     promiseResolve,
     promiseReject,
     requestId: string,
@@ -410,7 +405,6 @@ export class JiraApiService {
       }, JIRA_REQUEST_TIMEOUT_DURATION)
     };
   }
-
 
   private _handleResponse(res) {
     // check if proper id is given in callback and if exists in requestLog

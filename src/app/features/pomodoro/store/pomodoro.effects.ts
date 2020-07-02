@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask} from '../../tasks/store/task.actions';
-import {concatMap, filter, mapTo, tap, withLatestFrom} from 'rxjs/operators';
-import {PomodoroService} from '../pomodoro.service';
-import {PomodoroConfig} from '../../config/global-config.model';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask } from '../../tasks/store/task.actions';
+import { concatMap, filter, mapTo, tap, withLatestFrom } from 'rxjs/operators';
+import { PomodoroService } from '../pomodoro.service';
+import { PomodoroConfig } from '../../config/global-config.model';
 import {
   FinishPomodoroSession,
   PausePomodoro,
@@ -11,17 +11,17 @@ import {
   SkipPomodoroBreak,
   StartPomodoro
 } from './pomodoro.actions';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogPomodoroBreakComponent} from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
-import {select, Store} from '@ngrx/store';
-import {selectCurrentTaskId} from '../../tasks/store/task.selectors';
-import {Observable, of} from 'rxjs';
-import {NotifyService} from '../../../core/notify/notify.service';
-import {IS_ELECTRON} from '../../../app.constants';
-import {IPC} from '../../../../../electron/ipc-events.const';
-import {T} from '../../../t.const';
-import {SnackService} from '../../../core/snack/snack.service';
-import {ElectronService} from '../../../core/electron/electron.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
+import { select, Store } from '@ngrx/store';
+import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
+import { Observable, of } from 'rxjs';
+import { NotifyService } from '../../../core/notify/notify.service';
+import { IS_ELECTRON } from '../../../app.constants';
+import { IPC } from '../../../../../electron/ipc-events.const';
+import { T } from '../../../t.const';
+import { SnackService } from '../../../core/snack/snack.service';
+import { ElectronService } from '../../../core/electron/electron.service';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 
@@ -63,7 +63,6 @@ export class PomodoroEffects {
       }
     }),
   );
-
 
   @Effect()
   autoStartNextOnSessionStartIfNotAlready$ = this._actions$.pipe(
@@ -189,7 +188,6 @@ export class PomodoroEffects {
       this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress});
     }),
   );
-
 
   constructor(
     private _pomodoroService: PomodoroService,

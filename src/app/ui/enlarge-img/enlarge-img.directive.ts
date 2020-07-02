@@ -1,5 +1,5 @@
-import {Directive, ElementRef, HostListener, Input, Renderer2} from '@angular/core';
-import {getCoords} from './get-coords';
+import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/core';
+import { getCoords } from './get-coords';
 
 const LARGE_IMG_ID = 'enlarged-img';
 
@@ -9,10 +9,10 @@ const LARGE_IMG_ID = 'enlarged-img';
 export class EnlargeImgDirective {
   imageEl: HTMLElement;
   newImageEl: HTMLElement;
-  lightboxParentEl = document.body;
+  lightboxParentEl: HTMLElement = document.body;
   enlargedImgWrapperEl: HTMLElement;
   isImg: boolean;
-  zoomMode = 0;
+  zoomMode: number = 0;
   zoomMoveHandler: () => void;
 
   @Input() enlargeImg: string;
@@ -24,7 +24,7 @@ export class EnlargeImgDirective {
     this.imageEl = _el.nativeElement;
   }
 
-  @HostListener('click', ['$event']) onClick(ev) {
+  @HostListener('click', ['$event']) onClick(ev: MouseEvent) {
     this.isImg = (this.imageEl.tagName.toLowerCase() === 'img');
 
     if (this.isImg || this.enlargeImg) {
@@ -115,14 +115,14 @@ export class EnlargeImgDirective {
     this._renderer.setStyle(this.newImageEl, 'transform', `scale(1) translate3d(0, 0, 0)`);
   }
 
-  private _htmlToElement(html): HTMLElement {
+  private _htmlToElement(html: string): HTMLElement {
     const template = document.createElement('template');
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
     return template.content.firstChild as HTMLElement;
   }
 
-  private _zoom(e) {
+  private _zoom(e: MouseEvent) {
     const offsetX = e.clientX;
     const offsetY = e.clientY;
     const zoomer = this.enlargedImgWrapperEl;
@@ -140,7 +140,7 @@ export class EnlargeImgDirective {
       });
     }
 
-    function checkElement(id) {
+    function checkElement(id: string) {
       const el = document.getElementById(id);
       if (el === null || !(el.offsetHeight > 1)) {
         return rafAsync().then(() => checkElement(id));

@@ -1,11 +1,11 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {ChartOptions, ChartType} from 'chart.js';
-import {MetricService} from './metric.service';
-import {Color} from 'ng2-charts';
-import {Observable} from 'rxjs';
-import {LineChartData} from './metric.model';
-import {fadeAnimation} from '../../ui/animations/fade.ani';
-import {T} from '../../t.const';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChartOptions, ChartType } from 'chart.js';
+import { MetricService } from './metric.service';
+import { Color } from 'ng2-charts';
+import { Observable } from 'rxjs';
+import { LineChartData } from './metric.model';
+import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { T } from '../../t.const';
 
 @Component({
   selector: 'metric',
@@ -15,7 +15,7 @@ import {T} from '../../t.const';
   animations: [fadeAnimation],
 })
 export class MetricComponent {
-  T = T;
+  T: any = T;
 
   productivityHappiness$: Observable<LineChartData> = this.metricService.getProductivityHappinessChartData$();
 
@@ -26,15 +26,15 @@ export class MetricComponent {
     },
   };
   pieChartType: ChartType = 'pie';
-  pieChartPlugins = [];
+  pieChartPlugins: any[] = [];
 
   lineChartOptions: ChartOptions = {
     responsive: true,
   };
   lineChartColors: Color[] = [];
-  lineChartLegend = true;
+  lineChartLegend: boolean = true;
   lineChartType: ChartType = 'line';
-  lineChartPlugins = [];
+  lineChartPlugins: any[] = [];
 
   constructor(
     public metricService: MetricService,

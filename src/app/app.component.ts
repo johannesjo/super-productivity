@@ -1,38 +1,46 @@
-import {ChangeDetectionStrategy, Component, HostListener, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
-import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
-import {ShortcutService} from './core-ui/shortcut/shortcut.service';
-import {GlobalConfigService} from './features/config/global-config.service';
-import {blendInOutAnimation} from './ui/animations/blend-in-out.ani';
-import {LayoutService} from './core-ui/layout/layout.service';
-import {IPC} from '../../electron/ipc-events.const';
-import {SnackService} from './core/snack/snack.service';
-import {IS_ELECTRON} from './app.constants';
-import {SwUpdate} from '@angular/service-worker';
-import {BookmarkService} from './features/bookmark/bookmark.service';
-import {expandAnimation} from './ui/animations/expand.ani';
-import {warpRouteAnimation} from './ui/animations/warp-route';
-import {Subscription} from 'rxjs';
-import {fadeAnimation} from './ui/animations/fade.ani';
-import {BannerService} from './core/banner/banner.service';
-import {SS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
-import {BannerId} from './core/banner/banner.model';
-import {T} from './t.const';
-import {TranslateService} from '@ngx-translate/core';
-import {GlobalThemeService} from './core/theme/global-theme.service';
-import {UiHelperService} from './features/ui-helper/ui-helper.service';
-import {LanguageService} from './core/language/language.service';
-import {ElectronService} from './core/electron/electron.service';
-import {WorkContextService} from './features/work-context/work-context.service';
-import {ImexMetaService} from './imex/imex-meta/imex-meta.service';
-import {AndroidService} from './core/android/android.service';
-import {IS_ANDROID_WEB_VIEW} from './util/is-android-web-view';
-import {isOnline, isOnline$} from './util/is-online';
-import {InitialDialogService} from './features/initial-dialog/initial-dialog.service';
-import {SyncService} from './imex/sync/sync.service';
-import {environment} from '../environments/environment';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  OnDestroy,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
+import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
+import { ShortcutService } from './core-ui/shortcut/shortcut.service';
+import { GlobalConfigService } from './features/config/global-config.service';
+import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
+import { LayoutService } from './core-ui/layout/layout.service';
+import { IPC } from '../../electron/ipc-events.const';
+import { SnackService } from './core/snack/snack.service';
+import { IS_ELECTRON } from './app.constants';
+import { SwUpdate } from '@angular/service-worker';
+import { BookmarkService } from './features/bookmark/bookmark.service';
+import { expandAnimation } from './ui/animations/expand.ani';
+import { warpRouteAnimation } from './ui/animations/warp-route';
+import { Subscription } from 'rxjs';
+import { fadeAnimation } from './ui/animations/fade.ani';
+import { BannerService } from './core/banner/banner.service';
+import { SS_WEB_APP_INSTALL } from './core/persistence/ls-keys.const';
+import { BannerId } from './core/banner/banner.model';
+import { T } from './t.const';
+import { TranslateService } from '@ngx-translate/core';
+import { GlobalThemeService } from './core/theme/global-theme.service';
+import { UiHelperService } from './features/ui-helper/ui-helper.service';
+import { LanguageService } from './core/language/language.service';
+import { ElectronService } from './core/electron/electron.service';
+import { WorkContextService } from './features/work-context/work-context.service';
+import { ImexMetaService } from './imex/imex-meta/imex-meta.service';
+import { AndroidService } from './core/android/android.service';
+import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
+import { isOnline, isOnline$ } from './util/is-online';
+import { InitialDialogService } from './features/initial-dialog/initial-dialog.service';
+import { SyncService } from './imex/sync/sync.service';
+import { environment } from '../environments/environment';
+import { RouterOutlet } from '@angular/router';
 
 const w = window as any;
-const productivityTip = w.productivityTips && w.productivityTips[w.randomIndex];
+const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
 
 @Component({
   selector: 'app-root',
@@ -47,8 +55,8 @@ const productivityTip = w.productivityTips && w.productivityTips[w.randomIndex];
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {
-  productivityTipTitle = productivityTip && productivityTip[0];
-  productivityTipText = productivityTip && productivityTip[1];
+  productivityTipTitle: string = productivityTip && productivityTip[0];
+  productivityTipText: string = productivityTip && productivityTip[1];
 
   @ViewChild('notesElRef', {read: ViewContainerRef}) notesElRef: ViewContainerRef;
   @ViewChild('sideNavElRef', {read: ViewContainerRef}) sideNavElRef: ViewContainerRef;
@@ -114,7 +122,6 @@ export class AppComponent implements OnDestroy {
       this._electronService.ipcRenderer.send(IPC.APP_READY);
       this._initElectronErrorHandler();
       this._uiHelperService.initElectron();
-
 
       this._electronService.ipcRenderer.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
         this._electronService.ipcRenderer.send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
@@ -185,8 +192,7 @@ export class AppComponent implements OnDestroy {
     });
   }
 
-
-  getPage(outlet) {
+  getPage(outlet: RouterOutlet) {
     return outlet.activatedRouteData.page || 'one';
   }
 

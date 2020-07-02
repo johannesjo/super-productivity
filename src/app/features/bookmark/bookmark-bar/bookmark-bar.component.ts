@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild} from '@angular/core';
-import {BookmarkService} from '../bookmark.service';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogEditBookmarkComponent} from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
-import {Bookmark} from '../bookmark.model';
-import {fadeAnimation} from '../../../ui/animations/fade.ani';
-import {DragulaService} from 'ng2-dragula';
-import {Subscription} from 'rxjs';
-import {slideAnimation} from '../../../ui/animations/slide.ani';
-import {T} from '../../../t.const';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { BookmarkService } from '../bookmark.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
+import { Bookmark } from '../bookmark.model';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { DragulaService } from 'ng2-dragula';
+import { Subscription } from 'rxjs';
+import { slideAnimation } from '../../../ui/animations/slide.ani';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'bookmark-bar',
@@ -20,14 +20,14 @@ import {T} from '../../../t.const';
   ],
 })
 export class BookmarkBarComponent implements OnDestroy {
-  isDragOver = false;
-  isEditMode = false;
+  isDragOver: boolean = false;
+  isEditMode: boolean = false;
   dragEnterTarget: HTMLElement;
-  LIST_ID = 'BOOKMARKS';
-  T = T;
-  isContextMenuDisabled = false;
-  bookmarkBarHeight = 50;
-  private _subs = new Subscription();
+  LIST_ID: string = 'BOOKMARKS';
+  T: any = T;
+  isContextMenuDisabled: boolean = false;
+  bookmarkBarHeight: number = 50;
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly bookmarkService: BookmarkService,
@@ -50,7 +50,7 @@ export class BookmarkBarComponent implements OnDestroy {
     );
   }
 
-  @ViewChild('bookmarkBar', { read: ElementRef }) set bookmarkBarEl(content: ElementRef) {
+  @ViewChild('bookmarkBar', {read: ElementRef}) set bookmarkBarEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.bookmarkBarHeight = content.nativeElement.offsetHeight;
     }
@@ -96,7 +96,7 @@ export class BookmarkBarComponent implements OnDestroy {
       });
   }
 
-  remove(id) {
+  remove(id: string) {
     this.bookmarkService.deleteBookmark(id);
   }
 

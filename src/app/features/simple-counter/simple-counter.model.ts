@@ -1,11 +1,10 @@
-import {EntityState} from '@ngrx/entity';
-import {MODEL_VERSION_KEY} from '../../app.constants';
+import { EntityState } from '@ngrx/entity';
+import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export enum SimpleCounterType {
   StopWatch = 'StopWatch',
   ClickCounter = 'ClickCounter',
 }
-
 
 export interface SimpleCounterCfgFields {
   id: string;
@@ -35,7 +34,6 @@ export type SimpleCounter = Readonly<SimpleCounterCopy>;
 export type SimpleCounterConfig = Readonly<{
   counters: SimpleCounter[];
 }>;
-
 
 export interface SimpleCounterState extends EntityState<SimpleCounter> {
   ids: string[];

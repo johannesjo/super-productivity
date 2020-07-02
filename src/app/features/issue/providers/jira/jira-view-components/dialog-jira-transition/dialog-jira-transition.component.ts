@@ -1,17 +1,17 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {IssueLocalState} from '../../../../issue.model';
-import {JiraIssueReduced} from '../../jira-issue/jira-issue.model';
-import {Observable} from 'rxjs';
-import {JiraApiService} from '../../jira-api.service';
-import {JiraOriginalTransition} from '../../jira-api-responses';
-import {SnackService} from '../../../../../../core/snack/snack.service';
-import {concatMap, first, switchMap} from 'rxjs/operators';
-import {T} from '../../../../../../t.const';
-import {Task} from '../../../../../tasks/task.model';
-import {JiraCommonInterfacesService} from '../../jira-common-interfaces.service';
-import {ProjectService} from '../../../../../project/project.service';
-import {JiraCfg} from '../../jira.model';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { IssueLocalState } from '../../../../issue.model';
+import { JiraIssueReduced } from '../../jira-issue/jira-issue.model';
+import { Observable } from 'rxjs';
+import { JiraApiService } from '../../jira-api.service';
+import { JiraOriginalTransition } from '../../jira-api-responses';
+import { SnackService } from '../../../../../../core/snack/snack.service';
+import { concatMap, first, switchMap } from 'rxjs/operators';
+import { T } from '../../../../../../t.const';
+import { Task } from '../../../../../tasks/task.model';
+import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
+import { ProjectService } from '../../../../../project/project.service';
+import { JiraCfg } from '../../jira.model';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -20,7 +20,7 @@ import {JiraCfg} from '../../jira.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraTransitionComponent {
-  T = T;
+  T: any = T;
 
   _jiraCfg$: Observable<JiraCfg> = this._projectService.getJiraCfgForProject$(this.data.task.projectId);
 

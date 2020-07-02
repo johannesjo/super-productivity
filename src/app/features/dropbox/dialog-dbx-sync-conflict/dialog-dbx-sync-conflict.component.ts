@@ -1,8 +1,8 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {T} from 'src/app/t.const';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { T } from 'src/app/t.const';
 import * as moment from 'moment';
-import {DropboxConflictResolution} from '../dropbox.model';
+import { DropboxConflictResolution } from '../dropbox.model';
 
 @Component({
   selector: 'dialog-dbx-sync-conflict',
@@ -11,11 +11,11 @@ import {DropboxConflictResolution} from '../dropbox.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogDbxSyncConflictComponent {
-  T = T;
+  T: any = T;
 
-  remote = this._formatDate(this.data.remote);
-  local = this._formatDate(this.data.local);
-  lastSync = this._formatDate(this.data.lastSync);
+  remote: string = this._formatDate(this.data.remote);
+  local: string = this._formatDate(this.data.local);
+  lastSync: string = this._formatDate(this.data.lastSync);
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogDbxSyncConflictComponent>,

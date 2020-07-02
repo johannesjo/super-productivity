@@ -1,12 +1,10 @@
-import {Injectable} from '@angular/core';
-import {ElectronService} from './electron.service';
-import {IPC} from '../../../../electron/ipc-events.const';
-import {fromEvent, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { ElectronService } from './electron.service';
+import { IPC } from '../../../../electron/ipc-events.const';
+import { fromEvent, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class ExecBeforeCloseService {
 
   onBeforeClose$: Observable<string[]> = fromEvent(this._electronService.ipcRenderer, IPC.NOTIFY_ON_CLOSE).pipe(

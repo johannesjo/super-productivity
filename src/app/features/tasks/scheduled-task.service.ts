@@ -1,14 +1,12 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {map, shareReplay, switchMap} from 'rxjs/operators';
-import {TaskService} from './task.service';
-import {ReminderService} from '../reminder/reminder.service';
-import {TaskWithReminderData} from './task.model';
-import {devError} from '../../util/dev-error';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { TaskService } from './task.service';
+import { ReminderService } from '../reminder/reminder.service';
+import { TaskWithReminderData } from './task.model';
+import { devError } from '../../util/dev-error';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class ScheduledTaskService {
   allScheduledTasks$: Observable<TaskWithReminderData[]> = this._reminderService.reminders$.pipe(
     map((reminders) => reminders.filter(
@@ -37,7 +35,6 @@ export class ScheduledTaskService {
       .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)),
     shareReplay(1),
   );
-
 
   constructor(
     private _taskService: TaskService,

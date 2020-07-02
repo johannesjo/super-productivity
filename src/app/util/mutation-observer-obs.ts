@@ -1,4 +1,4 @@
-import {Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 
 export const observeMutation = (target: HTMLElement, config): Observable<MutationRecord[]> => {
   return new Observable((observer) => {

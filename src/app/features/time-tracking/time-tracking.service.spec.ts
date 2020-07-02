@@ -1,7 +1,7 @@
-import {TestBed} from '@angular/core/testing';
-import {TimeTrackingService} from './time-tracking.service';
-import {map} from 'rxjs/operators';
-import {cold} from 'jasmine-marbles';
+import { TestBed } from '@angular/core/testing';
+import { TimeTrackingService } from './time-tracking.service';
+import { map } from 'rxjs/operators';
+import { cold } from 'jasmine-marbles';
 
 describe('TimeTrackingService', () => {
   let service: TimeTrackingService;

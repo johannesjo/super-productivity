@@ -1,14 +1,13 @@
-import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {filter, map, tap, withLatestFrom} from 'rxjs/operators';
-import {Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 import * as contextActions from './work-context.actions';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {SetSelectedTask} from '../../tasks/store/task.actions';
-import {TaskService} from '../../tasks/task.service';
-import {BannerId} from '../../../core/banner/banner.model';
-import {BannerService} from '../../../core/banner/banner.service';
-
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { SetSelectedTask } from '../../tasks/store/task.actions';
+import { TaskService } from '../../tasks/task.service';
+import { BannerId } from '../../../core/banner/banner.model';
+import { BannerService } from '../../../core/banner/banner.service';
 
 @Injectable()
 export class WorkContextEffects {
@@ -23,7 +22,6 @@ export class WorkContextEffects {
   //   tap(this._saveToLs.bind(this)),
   // ), {dispatch: false});
 
-
   dismissContextScopeBannersOnContextChange = createEffect(() => this._actions$
     .pipe(
       ofType(
@@ -34,7 +32,6 @@ export class WorkContextEffects {
         this._bannerService.dismissIfExisting(BannerId.JiraUnblock);
       }),
     ), {dispatch: false});
-
 
   // EXTERNAL
   // --------
@@ -51,7 +48,6 @@ export class WorkContextEffects {
     filter(([, isDataLoaded]) => isDataLoaded),
     map(() => new SetSelectedTask({id: null})),
   ));
-
 
   constructor(
     private _actions$: Actions,

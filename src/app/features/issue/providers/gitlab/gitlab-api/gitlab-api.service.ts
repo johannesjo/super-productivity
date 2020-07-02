@@ -1,19 +1,19 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
-import {EMPTY, forkJoin, Observable, ObservableInput, throwError, of} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
 
-import {ProjectService} from 'src/app/features/project/project.service';
-import {SnackService} from 'src/app/core/snack/snack.service';
+import { ProjectService } from 'src/app/features/project/project.service';
+import { SnackService } from 'src/app/core/snack/snack.service';
 
-import {GitlabCfg} from '../gitlab';
-import {GitlabOriginalComment, GitlabOriginalIssue} from './gitlab-api-responses';
-import {HANDLED_ERROR_PROP_STR} from 'src/app/app.constants';
-import {GITLAB_API_BASE_URL} from '../gitlab.const';
-import {T} from 'src/app/t.const';
-import {catchError, filter, flatMap, map, share, switchMap, take} from 'rxjs/operators';
-import {GitlabIssue} from '../gitlab-issue/gitlab-issue.model';
-import {mapGitlabIssue, mapGitlabIssueToSearchResult} from '../gitlab-issue/gitlab-issue-map.util';
-import {SearchResultItem} from '../../../issue.model';
+import { GitlabCfg } from '../gitlab';
+import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
+import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
+import { GITLAB_API_BASE_URL } from '../gitlab.const';
+import { T } from 'src/app/t.const';
+import { catchError, filter, flatMap, map, share, switchMap, take } from 'rxjs/operators';
+import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
+import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
+import { SearchResultItem } from '../../../issue.model';
 
 const BASE = GITLAB_API_BASE_URL;
 
@@ -126,7 +126,6 @@ export class GitlabApiService {
     });
     return false;
   }
-
 
   private _sendRequest$(params: HttpRequest<string> | any, cfg: GitlabCfg): Observable<any> {
     this._isValidSettings(cfg);

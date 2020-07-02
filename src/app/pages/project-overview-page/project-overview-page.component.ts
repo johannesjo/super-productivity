@@ -1,20 +1,20 @@
-import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
-import {ProjectService} from '../../features/project/project.service';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogCreateProjectComponent} from '../../features/project/dialogs/create-project/dialog-create-project.component';
-import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
-import {standardListAnimation} from '../../ui/animations/standard-list.ani';
-import {Subscription} from 'rxjs';
-import {DragulaService} from 'ng2-dragula';
-import {Project} from '../../features/project/project.model';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {download} from '../../util/download';
-import {SnackService} from '../../core/snack/snack.service';
-import {T} from '../../t.const';
-import {THEME_COLOR_MAP} from '../../app.constants';
-import {WorkContextService} from '../../features/work-context/work-context.service';
-import {withLatestFrom} from 'rxjs/operators';
-import {ExportedProject} from '../../features/project/project-archive.model';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ProjectService } from '../../features/project/project.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
+import { Subscription } from 'rxjs';
+import { DragulaService } from 'ng2-dragula';
+import { Project } from '../../features/project/project.model';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { download } from '../../util/download';
+import { SnackService } from '../../core/snack/snack.service';
+import { T } from '../../t.const';
+import { THEME_COLOR_MAP } from '../../app.constants';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { withLatestFrom } from 'rxjs/operators';
+import { ExportedProject } from '../../features/project/project-archive.model';
 
 @Component({
   selector: 'project-page',
@@ -24,8 +24,8 @@ import {ExportedProject} from '../../features/project/project-archive.model';
   animations: [standardListAnimation],
 })
 export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
-  T = T;
-  private _subs = new Subscription();
+  T: any = T;
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly projectService: ProjectService,

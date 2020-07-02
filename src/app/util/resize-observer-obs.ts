@@ -1,4 +1,4 @@
-import {Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 
 // type should be ResizeObserverEntry
 export const observeResize = (target: HTMLElement): Observable<any[]> => {

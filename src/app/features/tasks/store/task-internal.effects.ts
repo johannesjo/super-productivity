@@ -1,15 +1,15 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {SetCurrentTask, TaskActionTypes, UnsetCurrentTask, UpdateTask} from './task.actions';
-import {select, Store} from '@ngrx/store';
-import {filter, map, mergeMap, withLatestFrom} from 'rxjs/operators';
-import {selectTaskFeatureState} from './task.selectors';
-import {selectMiscConfig} from '../../config/store/global-config.reducer';
-import {TaskState} from '../task.model';
-import {EMPTY, of} from 'rxjs';
-import {MiscConfig} from '../../config/global-config.model';
-import {moveTaskToBacklogList, moveTaskToBacklogListAuto} from '../../work-context/store/work-context-meta.actions';
-import {WorkContextService} from '../../work-context/work-context.service';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { SetCurrentTask, TaskActionTypes, UnsetCurrentTask, UpdateTask } from './task.actions';
+import { select, Store } from '@ngrx/store';
+import { filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { selectTaskFeatureState } from './task.selectors';
+import { selectMiscConfig } from '../../config/store/global-config.reducer';
+import { TaskState } from '../task.model';
+import { EMPTY, of } from 'rxjs';
+import { MiscConfig } from '../../config/global-config.model';
+import { moveTaskToBacklogList, moveTaskToBacklogListAuto } from '../../work-context/store/work-context-meta.actions';
+import { WorkContextService } from '../../work-context/work-context.service';
 
 @Injectable()
 export class TaskInternalEffects {

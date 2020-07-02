@@ -1,10 +1,10 @@
-import {getCompleteStateForWorkContext} from './get-complete-state-for-work-context.util';
-import {DEFAULT_TAG} from '../../tag/tag.const';
-import {WorkContext, WorkContextType} from '../../work-context/work-context.model';
-import {WORK_CONTEXT_DEFAULT_THEME} from '../../work-context/work-context.const';
-import {DEFAULT_TASK, Task, TaskCopy} from '../../tasks/task.model';
-import {EntityState} from '@ngrx/entity';
-import {fakeEntityStateFromArray} from '../../../util/fake-entity-state-from-array';
+import { getCompleteStateForWorkContext } from './get-complete-state-for-work-context.util';
+import { DEFAULT_TAG } from '../../tag/tag.const';
+import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
+import { WORK_CONTEXT_DEFAULT_THEME } from '../../work-context/work-context.const';
+import { DEFAULT_TASK, Task, TaskCopy } from '../../tasks/task.model';
+import { EntityState } from '@ngrx/entity';
+import { fakeEntityStateFromArray } from '../../../util/fake-entity-state-from-array';
 
 const TAG_ID = 'TAG_ID';
 
@@ -51,7 +51,6 @@ describe('getCompleteStateForWorkContext', () => {
     const r = getCompleteStateForWorkContext(TAG_CTX, ts, archiveS);
     expect(r.completeStateForWorkContext.ids).toEqual(['PT', 'SUB_B', 'SUB_C']);
   });
-
 
   it('should include sub tasks for tags for the archive', () => {
     const ts = fakeTaskStateFromArray([

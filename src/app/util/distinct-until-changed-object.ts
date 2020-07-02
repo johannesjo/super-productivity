@@ -1,4 +1,4 @@
-import {isObject} from './is-object';
+import { isObject } from './is-object';
 
 export const distinctUntilChangedObject = (a, b): boolean => {
   if ((isObject(a) && isObject(b)) || (Array.isArray(a) && Array.isArray(b))) {

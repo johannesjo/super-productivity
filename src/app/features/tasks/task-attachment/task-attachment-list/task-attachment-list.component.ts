@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
-import {TaskAttachment} from '../task-attachment.model';
-import {TaskAttachmentService} from '../task-attachment.service';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogEditTaskAttachmentComponent} from '../dialog-edit-attachment/dialog-edit-task-attachment.component';
-import {standardListAnimation} from '../../../../ui/animations/standard-list.ani';
-import {T} from '../../../../t.const';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { TaskAttachment } from '../task-attachment.model';
+import { TaskAttachmentService } from '../task-attachment.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogEditTaskAttachmentComponent } from '../dialog-edit-attachment/dialog-edit-task-attachment.component';
+import { standardListAnimation } from '../../../../ui/animations/standard-list.ani';
+import { T } from '../../../../t.const';
 
 @Component({
   selector: 'task-attachment-list',
@@ -18,7 +18,7 @@ export class TaskAttachmentListComponent implements OnInit {
   @Input() attachments: TaskAttachment[];
   @Input() isDisableControls = false;
 
-  T = T;
+  T: any = T;
   isError: boolean[] = [];
 
   constructor(

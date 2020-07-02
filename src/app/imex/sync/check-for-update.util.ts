@@ -53,7 +53,6 @@ export const checkForUpdate = (params: { remote: number, local: number, lastSync
   throw new Error('Inconclusive state. This should not happen');
 };
 
-
 const _logHelper = (params: { remote: number, local: number, lastSync: number }) => {
   console.log(params);
   const oldestFirst = Object.keys(params).sort((k1, k2) => params[k1] - params[k2]);

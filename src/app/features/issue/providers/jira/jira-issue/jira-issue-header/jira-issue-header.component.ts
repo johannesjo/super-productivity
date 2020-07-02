@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {TaskWithSubTasks} from '../../../../../tasks/task.model';
-import {isOnline$} from 'src/app/util/is-online';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { TaskWithSubTasks } from '../../../../../tasks/task.model';
+import { isOnline$ } from 'src/app/util/is-online';
 
 @Component({
   selector: 'jira-issue-header',

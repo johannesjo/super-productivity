@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {TaskService} from '../../tasks/task.service';
-import {TimeTrackingService} from '../time-tracking.service';
-import {EMPTY, from, merge, Observable, of, Subject, timer} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { TaskService } from '../../tasks/task.service';
+import { TimeTrackingService } from '../time-tracking.service';
+import { EMPTY, from, merge, Observable, of, Subject, timer } from 'rxjs';
 import {
   delay,
   distinctUntilChanged,
@@ -15,20 +15,20 @@ import {
   throttleTime,
   withLatestFrom
 } from 'rxjs/operators';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {msToString} from '../../../ui/duration/ms-to-string.pipe';
-import {ChromeExtensionInterfaceService} from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
-import {IdleService} from '../idle.service';
-import {IS_ELECTRON} from '../../../app.constants';
-import {BannerService} from '../../../core/banner/banner.service';
-import {BannerId} from '../../../core/banner/banner.model';
-import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
-import {T} from '../../../t.const';
-import {IPC} from '../../../../../electron/ipc-events.const';
-import {NotifyService} from '../../../core/notify/notify.service';
-import {ElectronService} from '../../../core/electron/electron.service';
-import {UiHelperService} from '../../ui-helper/ui-helper.service';
-import {WorkContextService} from '../../work-context/work-context.service';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { msToString } from '../../../ui/duration/ms-to-string.pipe';
+import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
+import { IdleService } from '../idle.service';
+import { IS_ELECTRON } from '../../../app.constants';
+import { BannerService } from '../../../core/banner/banner.service';
+import { BannerId } from '../../../core/banner/banner.model';
+import { GlobalConfigState, TakeABreakConfig } from '../../config/global-config.model';
+import { T } from '../../../t.const';
+import { IPC } from '../../../../../electron/ipc-events.const';
+import { NotifyService } from '../../../core/notify/notify.service';
+import { ElectronService } from '../../../core/electron/electron.service';
+import { UiHelperService } from '../../ui-helper/ui-helper.service';
+import { WorkContextService } from '../../work-context/work-context.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -145,7 +145,7 @@ export class TakeABreakService {
       this._snoozeActive$,
     ),
     filter(([timeWithoutBreak, cfg, isIdle, isSnoozeActive]:
-              [number, GlobalConfigState, boolean, boolean]): boolean =>
+      [number, GlobalConfigState, boolean, boolean]): boolean =>
       cfg && cfg.takeABreak && cfg.takeABreak.isTakeABreakEnabled
       && !isSnoozeActive
       && (timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime)
@@ -159,7 +159,6 @@ export class TakeABreakService {
   private _triggerDesktopNotification$: Observable<[number, GlobalConfigState, boolean, boolean]> = this._triggerBanner$.pipe(
     throttleTime(DESKTOP_NOTIFICATION_THROTTLE)
   );
-
 
   constructor(
     private _taskService: TaskService,

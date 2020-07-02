@@ -1,12 +1,12 @@
-import {Injectable} from '@angular/core';
-import {ProjectService} from '../project/project.service';
-import {Actions, ofType} from '@ngrx/effects';
-import {setActiveWorkContext} from '../work-context/store/work-context.actions';
-import {ProjectActionTypes} from '../project/store/project.actions';
-import {concatMap, filter, first, switchMap} from 'rxjs/operators';
-import {WorkContextService} from '../work-context/work-context.service';
-import {Observable} from 'rxjs';
-import {SyncService} from '../../imex/sync/sync.service';
+import { Injectable } from '@angular/core';
+import { ProjectService } from '../project/project.service';
+import { Actions, ofType } from '@ngrx/effects';
+import { setActiveWorkContext } from '../work-context/store/work-context.actions';
+import { ProjectActionTypes } from '../project/store/project.actions';
+import { concatMap, filter, first, switchMap } from 'rxjs/operators';
+import { WorkContextService } from '../work-context/work-context.service';
+import { Observable } from 'rxjs';
+import { SyncService } from '../../imex/sync/sync.service';
 
 @Injectable({
   providedIn: 'root',

@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {getCacheId} from './get-cache-id';
-import {tap} from 'rxjs/operators';
-import {loadFromLs, saveToLs} from '../../../core/persistence/local-storage';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { getCacheId } from './get-cache-id';
+import { tap } from 'rxjs/operators';
+import { loadFromLs, saveToLs } from '../../../core/persistence/local-storage';
 
 export interface CacheItem {
   r: any;

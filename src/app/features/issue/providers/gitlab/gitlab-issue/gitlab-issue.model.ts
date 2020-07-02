@@ -9,7 +9,6 @@ export type GitlabState = GitlabOriginalIssueState;
 export type GitlabUser = GitlabOriginalUser;
 export type GitlabComment = GitlabOriginalComment;
 
-
 export type GitlabIssue = Readonly<{
   // repository_url: string;
   // labels_url: string;

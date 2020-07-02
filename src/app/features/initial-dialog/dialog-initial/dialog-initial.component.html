@@ -6,10 +6,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <a mat-button
-     target="_blank"
+  <a *ngIf="data.btnUrl"
      [href]="data.btnUrl"
-     *ngIf="data.btnUrl">
+     mat-button
+     target="_blank">
     <mat-icon>open_in_new</mat-icon>
     {{(data.btnTxt)|translate}}
   </a>

@@ -7,22 +7,22 @@
   </h1>
 
   <mat-dialog-content>
-    <div class="tasks"
-         [@standardList]="tasks.length">
-      <div class="task"
-           *ngFor="let task of tasks; trackBy:trackById ">
+    <div [@standardList]="tasks.length"
+         class="tasks">
+      <div *ngFor="let task of tasks; trackBy:trackById "
+           class="task">
         <div class="title-wrapper">
           <div class="title">{{task.title}}</div>
-          <tag-list [isShowProjectTagAlways]="true"
-                    [isDisableEdit]="true"
+          <tag-list [isDisableEdit]="true"
+                    [isShowProjectTagAlways]="true"
                     [task]="task"></tag-list>
         </div>
         <div *ngIf="tasks.length > 1"
              class="actions">
           <button (click)="dismiss(task)"
                   [title]="T.G.DISMISS|translate"
-                  color=""
                   class="hide-xs"
+                  color=""
                   mat-icon-button
                   type="button">
             <mat-icon>alarm_off</mat-icon>
@@ -104,8 +104,8 @@
         : T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY)|translate }}
       </button>
 
-      <button *ngIf="tasks.length === 1"
-              (click)="play()"
+      <button (click)="play()"
+              *ngIf="tasks.length === 1"
               [disabled]="isDisableControls"
               color="primary"
               mat-stroked-button
@@ -142,8 +142,8 @@
       <mat-icon>snooze</mat-icon>
       {{T.F.TASK.D_REMINDER_VIEW.SNOOZE_UNTIL_TOMORROW|translate}}
     </button>
-    <button *ngIf="tasks.length === 1"
-            (click)="editReminder(tasks[0], true)"
+    <button (click)="editReminder(tasks[0], true)"
+            *ngIf="tasks.length === 1"
             mat-menu-item>
       <mat-icon>edit</mat-icon>
       {{T.G.EDIT|translate}}

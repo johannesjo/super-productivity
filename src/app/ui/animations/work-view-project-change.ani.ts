@@ -1,5 +1,5 @@
-import {animate, animateChild, style, transition, trigger} from '@angular/animations';
-import {ANI_ENTER_TIMING} from './animation.const';
+import { animate, animateChild, style, transition, trigger } from '@angular/animations';
+import { ANI_ENTER_TIMING } from './animation.const';
 
 export const workViewProjectChangeAnimation = [
   trigger('projectChange', [

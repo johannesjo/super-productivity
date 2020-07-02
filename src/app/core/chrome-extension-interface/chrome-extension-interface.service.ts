@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {ExtensionInterfaceEventName} from './chrome-extension-interface';
-import {ReplaySubject} from 'rxjs';
-import {first, startWith} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { ExtensionInterfaceEventName } from './chrome-extension-interface';
+import { Observable, ReplaySubject } from 'rxjs';
+import { first, startWith } from 'rxjs/operators';
 
 const interfaceEl = window;
 
@@ -11,10 +11,10 @@ const interfaceEl = window;
 export class ChromeExtensionInterfaceService {
   // handled as private but needs to assigned first
   _onReady$: ReplaySubject<boolean> = new ReplaySubject(1);
-  onReady$ = this._onReady$.pipe(first());
-  isReady$ = this.onReady$.pipe(startWith(false));
+  onReady$: Observable<boolean> = this._onReady$.pipe(first());
+  isReady$: Observable<boolean> = this.onReady$.pipe(startWith(false));
   // we only every one to catch a single event
-  private _isInterfaceReady = false;
+  private _isInterfaceReady: boolean = false;
 
   init() {
     interfaceEl.addEventListener('SP_EXTENSION_READY', () => {
@@ -27,13 +27,13 @@ export class ChromeExtensionInterfaceService {
     });
   }
 
-  addEventListener(evName: ExtensionInterfaceEventName, cb) {
+  addEventListener(evName: ExtensionInterfaceEventName, cb: any) {
     interfaceEl.addEventListener(evName, (ev: CustomEvent) => {
       cb(ev, ev.detail);
     });
   }
 
-  dispatchEvent(evName: ExtensionInterfaceEventName, data) {
+  dispatchEvent(evName: ExtensionInterfaceEventName, data: any) {
     const ev = new CustomEvent(evName, {
       detail: data,
     });

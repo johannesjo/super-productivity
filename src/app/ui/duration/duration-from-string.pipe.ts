@@ -1,12 +1,11 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import * as moment from 'moment';
-
 
 @Pipe({
   name: 'durationFromString'
 })
 export class DurationFromStringPipe implements PipeTransform {
-  transform = durationFromString;
+  transform: (value: any, ...args: any[]) = durationFromString;
 }
 
 export const durationFromString = (strValue: any, args?: any): any => {

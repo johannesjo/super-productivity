@@ -1,7 +1,7 @@
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {UiModule} from '../../../../../ui/ui.module';
-import {DialogGitlabInitialSetupComponent} from './dialog-gitlab-initial-setup.component';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { UiModule } from '../../../../../ui/ui.module';
+import { DialogGitlabInitialSetupComponent } from './dialog-gitlab-initial-setup.component';
 
 @NgModule({
   imports: [

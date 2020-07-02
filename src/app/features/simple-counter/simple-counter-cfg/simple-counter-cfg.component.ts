@@ -1,16 +1,15 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
-import {ConfigFormSection, GlobalConfigSectionKey} from '../../config/global-config.model';
-import {ProjectCfgFormKey} from '../../project/project.model';
-import {SimpleCounterConfig} from '../simple-counter.model';
-import {FormlyFormOptions} from '@ngx-formly/core';
-import {FormGroup} from '@angular/forms';
-import {T} from 'src/app/t.const';
-import {SimpleCounterService} from '../simple-counter.service';
-import {map} from 'rxjs/operators';
-import {Observable, Subscription} from 'rxjs';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
-
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { ConfigFormSection, GlobalConfigSectionKey } from '../../config/global-config.model';
+import { ProjectCfgFormKey } from '../../project/project.model';
+import { SimpleCounterConfig } from '../simple-counter.model';
+import { FormlyFormOptions } from '@ngx-formly/core';
+import { FormGroup } from '@angular/forms';
+import { T } from 'src/app/t.const';
+import { SimpleCounterService } from '../simple-counter.service';
+import { map } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
 @Component({
   selector: 'simple-counter-cfg',
@@ -23,11 +22,9 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
   @Input() cfg: SimpleCounterConfig;
 
-
-  T = T;
-  form = new FormGroup({});
+  T: any = T;
+  form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
-
 
   simpleCounterCfg$: Observable<SimpleCounterConfig> = this.simpleCounterService.simpleCountersUpdatedOnCfgChange$.pipe(
     map(items => ({
@@ -38,7 +35,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   editModel: SimpleCounterConfig;
 
   private _inModelCopy: SimpleCounterConfig;
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly simpleCounterService: SimpleCounterService,

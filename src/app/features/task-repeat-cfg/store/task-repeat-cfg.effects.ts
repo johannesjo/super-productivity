@@ -1,25 +1,25 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {concatMap, filter, flatMap, map, take, tap, withLatestFrom} from 'rxjs/operators';
-import {select, Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { concatMap, filter, flatMap, map, take, tap, withLatestFrom } from 'rxjs/operators';
+import { select, Store } from '@ngrx/store';
 import {
   AddTaskRepeatCfgToTask,
   DeleteTaskRepeatCfg,
   TaskRepeatCfgActionTypes,
   UpdateTaskRepeatCfg
 } from './task-repeat-cfg.actions';
-import {selectTaskRepeatCfgFeatureState} from './task-repeat-cfg.reducer';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {Task, TaskArchive, TaskWithSubTasks} from '../../tasks/task.model';
-import {AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask} from '../../tasks/store/task.actions';
-import {TaskService} from '../../tasks/task.service';
-import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
-import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
-import {from} from 'rxjs';
-import {isToday} from '../../../util/is-today.util';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
-import {SyncService} from '../../../imex/sync/sync.service';
+import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
+import { AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask } from '../../tasks/store/task.actions';
+import { TaskService } from '../../tasks/task.service';
+import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
+import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg } from '../task-repeat-cfg.model';
+import { from } from 'rxjs';
+import { isToday } from '../../../util/is-today.util';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
+import { SyncService } from '../../../imex/sync/sync.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -108,7 +108,6 @@ export class TaskRepeatCfgEffects {
     tap((v) => console.log('IMP Create Repeatable Tasks', v)),
   );
 
-
   @Effect() removeConfigIdFromTaskStateTasks$: any = this._actions$.pipe(
     ofType(
       TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
@@ -145,7 +144,6 @@ export class TaskRepeatCfgEffects {
       reminderId: task.reminderId
     })),
   );
-
 
   constructor(
     private _actions$: Actions,

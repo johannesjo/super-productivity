@@ -1,11 +1,11 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Note} from '../note.model';
-import {NoteService} from '../note.service';
-import {ReminderCopy} from '../../reminder/reminder.model';
-import {ReminderService} from '../../reminder/reminder.service';
-import {T} from '../../../t.const';
-import {throttle} from 'helpful-decorators';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Note } from '../note.model';
+import { NoteService } from '../note.service';
+import { ReminderCopy } from '../../reminder/reminder.model';
+import { ReminderService } from '../../reminder/reminder.service';
+import { T } from '../../../t.const';
+import { throttle } from 'helpful-decorators';
 
 @Component({
   selector: 'dialog-add-note-reminder',
@@ -14,7 +14,7 @@ import {throttle} from 'helpful-decorators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddNoteReminderComponent {
-  T = T;
+  T: any = T;
   dateTime: number;
   title: string;
   isEdit: boolean;

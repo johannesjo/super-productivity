@@ -1,7 +1,7 @@
 // Shared actions for tags and projects
-import {createAction, props} from '@ngrx/store';
-import {DropListModelSource} from '../../tasks/task.model';
-import {WorkContextType} from '../work-context.model';
+import { createAction, props } from '@ngrx/store';
+import { DropListModelSource } from '../../tasks/task.model';
+import { WorkContextType } from '../work-context.model';
 
 export const moveTaskInTodayList = createAction(
   '[WorkContextMeta] Move Task in Today',

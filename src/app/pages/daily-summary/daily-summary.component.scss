@@ -21,7 +21,7 @@ $summary-point-inner-margin: $s;
   margin: auto;
   max-width: $component-max-width;
 
-  @include mq(xs){
+  @include mq(xs) {
     padding: $s;
   }
 

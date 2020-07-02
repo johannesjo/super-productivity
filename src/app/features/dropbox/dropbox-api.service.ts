@@ -1,28 +1,26 @@
-import {Injectable} from '@angular/core';
-import {DROPBOX_APP_KEY, DROPBOX_CODE_VERIFIER} from './dropbox.const';
-import {GlobalConfigService} from '../config/global-config.service';
-import {first, map, switchMap, tap} from 'rxjs/operators';
-import {DataInitService} from '../../core/data-init/data-init.service';
-import {Observable} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
-import axios, {AxiosResponse, Method} from 'axios';
+import { Injectable } from '@angular/core';
+import { DROPBOX_APP_KEY, DROPBOX_CODE_VERIFIER } from './dropbox.const';
+import { GlobalConfigService } from '../config/global-config.service';
+import { first, map, switchMap, tap } from 'rxjs/operators';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import axios, { AxiosResponse, Method } from 'axios';
 import qs from 'qs';
-import {DropboxFileMetadata} from './dropbox.model';
-import {toDropboxIsoString} from './iso-date-without-ms.util.';
+import { DropboxFileMetadata } from './dropbox.model';
+import { toDropboxIsoString } from './iso-date-without-ms.util.';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class DropboxApiService {
   authCode$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
 
   private _accessToken$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.accessToken));
 
-  isTokenAvailable$ = this._accessToken$.pipe(
+  isTokenAvailable$: Observable<boolean> = this._accessToken$.pipe(
     map((token) => !!token),
   );
 
-  private _isReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+  private _isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => this.isTokenAvailable$),
     tap((isTokenAvailable) => !isTokenAvailable && new Error('Dropbox API not ready')),
     first(),
@@ -64,7 +62,6 @@ export class DropboxApiService {
       return {meta, data: res.data};
     });
   }
-
 
   async upload({path, localRev, data, clientModified, isForceOverwrite = false}: {
     path: string;

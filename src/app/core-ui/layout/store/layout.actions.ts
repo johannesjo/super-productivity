@@ -1,5 +1,4 @@
-import {createAction} from '@ngrx/store';
-
+import { createAction } from '@ngrx/store';
 
 export const showAddTaskBar = createAction(
   '[Layout] Show AddTaskBar',
@@ -20,7 +19,6 @@ export const hideSideNav = createAction(
 export const toggleSideNav = createAction(
   '[Layout] Toggle SideBar',
 );
-
 
 export const toggleShowNotes = createAction(
   '[Layout] ToggleShow Notes',

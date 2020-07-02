@@ -1,16 +1,16 @@
-import {Injectable} from '@angular/core';
-import {IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem} from './issue.model';
-import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
-import {from, merge, Observable, of, Subject, zip} from 'rxjs';
-import {ProjectService} from '../project/project.service';
-import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from './issue.const';
-import {TaskService} from '../tasks/task.service';
-import {Task} from '../tasks/task.model';
-import {IssueServiceInterface} from './issue-service-interface';
-import {JiraCommonInterfacesService} from './providers/jira/jira-common-interfaces.service';
-import {GithubCommonInterfacesService} from './providers/github/github-common-interfaces.service';
-import {switchMap} from 'rxjs/operators';
-import {GitlabCommonInterfacesService} from './providers/gitlab/gitlab-common-interfaces.service';
+import { Injectable } from '@angular/core';
+import { IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem } from './issue.model';
+import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
+import { from, merge, Observable, of, Subject, zip } from 'rxjs';
+import { ProjectService } from '../project/project.service';
+import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from './issue.const';
+import { TaskService } from '../tasks/task.service';
+import { Task } from '../tasks/task.model';
+import { IssueServiceInterface } from './issue-service-interface';
+import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
+import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
+import { switchMap } from 'rxjs/operators';
+import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 
 @Injectable({
   providedIn: 'root',

@@ -1,5 +1,5 @@
-import {Directive, ElementRef, HostListener, Input} from '@angular/core';
-import {download} from '../../util/download';
+import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { download } from '../../util/download';
 
 @Directive({
   selector: '[simpleDownload]'

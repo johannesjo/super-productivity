@@ -1,19 +1,19 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {filter, tap, withLatestFrom} from 'rxjs/operators';
-import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from './global-config.actions';
-import {Store} from '@ngrx/store';
-import {CONFIG_FEATURE_NAME} from './global-config.reducer';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {KeyboardConfig} from '../global-config.model';
-import {IPC} from '../../../../../electron/ipc-events.const';
-import {IS_ELECTRON} from '../../../app.constants';
-import {T} from '../../../t.const';
-import {LanguageService} from '../../../core/language/language.service';
-import {SnackService} from '../../../core/snack/snack.service';
-import {ElectronService} from '../../../core/electron/electron.service';
-import {loadAllData} from '../../../root-store/meta/load-all-data.action';
-import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { filter, tap, withLatestFrom } from 'rxjs/operators';
+import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from './global-config.actions';
+import { Store } from '@ngrx/store';
+import { CONFIG_FEATURE_NAME } from './global-config.reducer';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { GlobalConfigState, KeyboardConfig } from '../global-config.model';
+import { IPC } from '../../../../../electron/ipc-events.const';
+import { IS_ELECTRON } from '../../../app.constants';
+import { T } from '../../../t.const';
+import { LanguageService } from '../../../core/language/language.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { ElectronService } from '../../../core/electron/electron.service';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -106,7 +106,7 @@ export class GlobalConfigEffects {
   ) {
   }
 
-  private async _saveToLs([action, state]) {
+  private async _saveToLs([action, state]: [any, GlobalConfigState]) {
     this._persistenceService.updateLastLocalSyncModelChange();
     const globalConfig = state[CONFIG_FEATURE_NAME];
     await this._persistenceService.globalConfig.saveState(globalConfig);

@@ -9,9 +9,9 @@
     <chip-list-input (addItem)="addTag($event)"
                      (addNewItem)="addNewTag($event)"
                      (removeItem)="removeTag($event)"
+                     [isAutoFocus]="true"
                      [label]="T.F.TAG.D_EDIT.LABEL|translate"
                      [model]="tagIds"
-                     [isAutoFocus]="true"
                      [suggestions]="(tagSuggestions$|async)"></chip-list-input>
   </div>
 </mat-dialog-content>

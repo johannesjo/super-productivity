@@ -1,18 +1,18 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {AddTask, DeleteTask, TaskActionTypes} from './task.actions';
-import {select, Store} from '@ngrx/store';
-import {filter, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
-import {selectCurrentTask} from './task.selectors';
-import {NotifyService} from '../../../core/notify/notify.service';
-import {TaskService} from '../task.service';
-import {selectConfigFeatureState} from '../../config/store/global-config.reducer';
-import {truncate} from '../../../util/truncate';
-import {BannerService} from '../../../core/banner/banner.service';
-import {BannerId} from '../../../core/banner/banner.model';
-import {T} from '../../../t.const';
-import {SnackService} from '../../../core/snack/snack.service';
-import {Router} from '@angular/router';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { AddTask, DeleteTask, TaskActionTypes } from './task.actions';
+import { select, Store } from '@ngrx/store';
+import { tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { selectCurrentTask } from './task.selectors';
+import { NotifyService } from '../../../core/notify/notify.service';
+import { TaskService } from '../task.service';
+import { selectConfigFeatureState } from '../../config/store/global-config.reducer';
+import { truncate } from '../../../util/truncate';
+import { BannerService } from '../../../core/banner/banner.service';
+import { BannerId } from '../../../core/banner/banner.model';
+import { T } from '../../../t.const';
+import { SnackService } from '../../../core/snack/snack.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class TaskUiEffects {
@@ -30,7 +30,6 @@ export class TaskUiEffects {
       ico: 'add',
     })),
   );
-
 
   @Effect({dispatch: false})
   snackDelete$: any = this._actions$.pipe(
@@ -64,7 +63,6 @@ export class TaskUiEffects {
     ),
     tap(this._notifyAboutTimeEstimateExceeded.bind(this))
   );
-
 
   constructor(
     private _actions$: Actions,

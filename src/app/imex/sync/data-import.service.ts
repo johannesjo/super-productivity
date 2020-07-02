@@ -1,13 +1,13 @@
-import {Injectable} from '@angular/core';
-import {AppDataComplete} from './sync.model';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {SnackService} from '../../core/snack/snack.service';
-import {ReminderService} from '../../features/reminder/reminder.service';
-import {ImexMetaService} from '../imex-meta/imex-meta.service';
-import {T} from '../../t.const';
-import {MigrationService} from '../../core/migration/migration.service';
-import {DataInitService} from '../../core/data-init/data-init.service';
-import {isValidAppData} from './is-valid-app-data.util';
+import { Injectable } from '@angular/core';
+import { AppDataComplete } from './sync.model';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { ReminderService } from '../../features/reminder/reminder.service';
+import { ImexMetaService } from '../imex-meta/imex-meta.service';
+import { T } from '../../t.const';
+import { MigrationService } from '../../core/migration/migration.service';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { isValidAppData } from './is-valid-app-data.util';
 
 // TODO some of this can be done in a background script
 
@@ -30,7 +30,7 @@ export class DataImportService {
     return await this._persistenceService.loadComplete();
   }
 
-  async importCompleteSyncData(data: AppDataComplete, isBackupReload = false) {
+  async importCompleteSyncData(data: AppDataComplete, isBackupReload: boolean = false) {
     this._snackService.open({msg: T.S.SYNC.IMPORTING, ico: 'cloud_download'});
     this._imexMetaService.setDataImportInProgress(true);
 

@@ -1,57 +1,31 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {PersistenceService} from '../../../../../core/persistence/persistence.service';
-import {GithubApiService} from '../github-api.service';
-import {GlobalConfigService} from '../../../../config/global-config.service';
-import {SnackService} from '../../../../../core/snack/snack.service';
-import {TaskService} from '../../../../tasks/task.service';
-import {ProjectService} from '../../../../project/project.service';
-import {filter, first, map, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
-import {IssueService} from '../../../issue.service';
-import {forkJoin, Observable, timer} from 'rxjs';
-import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../github.const';
-import {TaskWithSubTasks} from 'src/app/features/tasks/task.model';
-import {T} from '../../../../../t.const';
-import {WorkContextService} from '../../../../work-context/work-context.service';
-import {GITHUB_TYPE} from '../../../issue.const';
-import {GithubCfg} from '../github.model';
-import {isGithubEnabled} from '../is-github-enabled.util';
-import {GithubIssueReduced} from './github-issue.model';
-import {IssueEffectHelperService} from '../../../issue-effect-helper.service';
+import { Injectable } from '@angular/core';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { PersistenceService } from '../../../../../core/persistence/persistence.service';
+import { GithubApiService } from '../github-api.service';
+import { GlobalConfigService } from '../../../../config/global-config.service';
+import { SnackService } from '../../../../../core/snack/snack.service';
+import { TaskService } from '../../../../tasks/task.service';
+import { ProjectService } from '../../../../project/project.service';
+import { filter, first, map, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { IssueService } from '../../../issue.service';
+import { forkJoin, Observable, timer } from 'rxjs';
+import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from '../github.const';
+import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
+import { T } from '../../../../../t.const';
+import { WorkContextService } from '../../../../work-context/work-context.service';
+import { GITHUB_TYPE } from '../../../issue.const';
+import { GithubCfg } from '../github.model';
+import { isGithubEnabled } from '../is-github-enabled.util';
+import { GithubIssueReduced } from './github-issue.model';
+import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 
 @Injectable()
 export class GithubIssueEffects {
 
-  @Effect({dispatch: false})
-  pollNewIssuesToBacklog$: any = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
-    switchMap((pId) => this._projectService.getGithubCfgForProject$(pId).pipe(
-      first(),
-      filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
-      switchMap(githubCfg => this._pollTimer$.pipe(
-        // NOTE: required otherwise timer stays alive for filtered actions
-        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
-        tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
-        withLatestFrom(
-          this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE)
-        ),
-        tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
-          const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
-          this._importNewIssuesToBacklog(pId, issuesToAdd);
-        })
-      )),
-    )),
-  );
+  private _pollTimer$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
 
-  @Effect({dispatch: false})
-  pollIssueChangesForCurrentContext$: any = this._issueEffectHelperService.pollIssueTaskUpdatesActions$
-    .pipe(
-      switchMap(() => this._pollTimer$),
-      switchMap(() => this._updateIssuesForCurrentContext$),
-    );
-
-  private _updateIssuesForCurrentContext$ = this._workContextService.allTasksForCurrentContext$.pipe(
+  private _updateIssuesForCurrentContext$: Observable<any> = this._workContextService.allTasksForCurrentContext$.pipe(
     first(),
     switchMap((tasks) => {
       const gitIssueTasks = tasks.filter(task => task.issueType === GITHUB_TYPE);
@@ -73,7 +47,32 @@ export class GithubIssueEffects {
     tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
   );
 
-  private _pollTimer$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
+  @Effect({dispatch: false})
+  pollNewIssuesToBacklog$: Observable<any> = this._issueEffectHelperService.pollToBacklogTriggerToProjectId$.pipe(
+    switchMap((pId) => this._projectService.getGithubCfgForProject$(pId).pipe(
+      first(),
+      filter(githubCfg => isGithubEnabled(githubCfg) && githubCfg.isAutoAddToBacklog),
+      switchMap(githubCfg => this._pollTimer$.pipe(
+        // NOTE: required otherwise timer stays alive for filtered actions
+        takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
+        tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
+        withLatestFrom(
+          this._githubApiService.getLast100IssuesForRepo$(githubCfg),
+          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE)
+        ),
+        tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
+          const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
+          this._importNewIssuesToBacklog(pId, issuesToAdd);
+        })
+      )),
+    )),
+  );
+  @Effect({dispatch: false})
+  pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$
+    .pipe(
+      switchMap(() => this._pollTimer$),
+      switchMap(() => this._updateIssuesForCurrentContext$),
+    );
 
   constructor(
     private readonly _actions$: Actions,

@@ -1,4 +1,4 @@
-import {MODEL_VERSION_KEY} from '../app.constants';
+import { MODEL_VERSION_KEY } from '../app.constants';
 
 export const isMigrateModel = (modelData: any, localVersion: number): boolean => {
   const importVersion = modelData && modelData[MODEL_VERSION_KEY];

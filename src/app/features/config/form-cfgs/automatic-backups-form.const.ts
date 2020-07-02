@@ -1,8 +1,8 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection, LocalBackupConfig} from '../global-config.model';
-import {T} from '../../../t.const';
-import {getElectron} from '../../../util/get-electron';
-import {IS_ELECTRON} from '../../../app.constants';
+import { ConfigFormSection, LocalBackupConfig } from '../global-config.model';
+import { T } from '../../../t.const';
+import { getElectron } from '../../../util/get-electron';
+import { IS_ELECTRON } from '../../../app.constants';
 
 const backupPath = IS_ELECTRON && `${getElectron().remote.app.getPath('userData')}/backups`;
 

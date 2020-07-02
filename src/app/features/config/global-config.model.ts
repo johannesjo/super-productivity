@@ -1,6 +1,6 @@
-import {FormlyFieldConfig} from '@ngx-formly/core';
-import {ProjectCfgFormKey} from '../project/project.model';
-import {LanguageCode, MODEL_VERSION_KEY} from '../../app.constants';
+import { FormlyFieldConfig } from '@ngx-formly/core';
+import { ProjectCfgFormKey } from '../project/project.model';
+import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
@@ -40,7 +40,6 @@ export type KeyboardConfig = Readonly<{
   togglePlay: string,
 }>;
 
-
 export type MiscConfig = Readonly<{
   isDarkMode: boolean;
   isAutMarkParentAsDone: boolean;
@@ -71,7 +70,6 @@ export type TakeABreakConfig = Readonly<{
   takeABreakMinWorkingTime: number;
   motivationalImg: string;
 }>;
-
 
 export type PomodoroConfig = Readonly<{
   isEnabled: boolean;
@@ -119,7 +117,6 @@ export type LanguageConfig = Readonly<{
   lng: LanguageCode,
 }>;
 
-
 export type GlobalConfigState = Readonly<{
   lang: LanguageConfig;
   misc: MiscConfig;
@@ -135,7 +132,6 @@ export type GlobalConfigState = Readonly<{
   [MODEL_VERSION_KEY]?: number;
 }>;
 
-
 export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
 
 export type GlobalSectionConfig
@@ -150,7 +146,12 @@ export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldCon
   key?: keyof FormModel;
 }
 
-export type CustomCfgSection = 'FILE_IMPORT_EXPORT' | 'GOOGLE_SYNC' | 'JIRA_CFG' | 'SIMPLE_COUNTER_CFG' | 'DROPBOX_SYNC';
+export type CustomCfgSection =
+  'FILE_IMPORT_EXPORT'
+  | 'GOOGLE_SYNC'
+  | 'JIRA_CFG'
+  | 'SIMPLE_COUNTER_CFG'
+  | 'DROPBOX_SYNC';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {

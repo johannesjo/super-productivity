@@ -1,24 +1,24 @@
-import {Injectable} from '@angular/core';
-import {PersistenceService} from '../persistence/persistence.service';
-import {ProjectState} from '../../features/project/store/project.reducer';
-import {EMPTY, from, Observable, of} from 'rxjs';
-import {TaskArchive, TaskState} from 'src/app/features/tasks/task.model';
-import {Dictionary, EntityState} from '@ngrx/entity';
-import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
-import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import {initialTaskRepeatCfgState} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
-import {T} from '../../t.const';
-import {TranslateService} from '@ngx-translate/core';
-import {LegacyAppDataComplete} from './legacy-models';
-import {LegacyPersistenceService} from './legacy-persistence.sevice';
-import {AppDataComplete} from '../../imex/sync/sync.model';
-import {initialTaskState} from '../../features/tasks/store/task.reducer';
-import {initialTagState} from '../../features/tag/store/tag.reducer';
-import {Project} from '../../features/project/project.model';
-import {concatMap, map} from 'rxjs/operators';
-import {migrateTaskState} from '../../features/tasks/migrate-task-state.util';
+import { Injectable } from '@angular/core';
+import { PersistenceService } from '../persistence/persistence.service';
+import { ProjectState } from '../../features/project/store/project.reducer';
+import { EMPTY, from, Observable, of } from 'rxjs';
+import { TaskArchive, TaskState } from 'src/app/features/tasks/task.model';
+import { Dictionary, EntityState } from '@ngrx/entity';
+import { TaskAttachment } from '../../features/tasks/task-attachment/task-attachment.model';
+import { TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { initialTaskRepeatCfgState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { T } from '../../t.const';
+import { TranslateService } from '@ngx-translate/core';
+import { LegacyAppDataComplete } from './legacy-models';
+import { LegacyPersistenceService } from './legacy-persistence.sevice';
+import { AppDataComplete } from '../../imex/sync/sync.model';
+import { initialTaskState } from '../../features/tasks/store/task.reducer';
+import { initialTagState } from '../../features/tag/store/tag.reducer';
+import { Project } from '../../features/project/project.model';
+import { concatMap, map } from 'rxjs/operators';
+import { migrateTaskState } from '../../features/tasks/migrate-task-state.util';
 import shortid from 'shortid';
-import {initialSimpleCounterState} from '../../features/simple-counter/store/simple-counter.reducer';
+import { initialSimpleCounterState } from '../../features/simple-counter/store/simple-counter.reducer';
 
 interface ReplaceIdMap {
   [key: string]: string;
@@ -26,9 +26,7 @@ interface ReplaceIdMap {
 
 const EMTPY_ENTITY = () => ({ids: [], entities: {}});
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class MigrationService {
   constructor(
     private _persistenceService: PersistenceService,
@@ -53,7 +51,6 @@ export class MigrationService {
       ? EMPTY
       : of(projectState);
   }
-
 
   migrateIfNecessary(appDataComplete: LegacyAppDataComplete | AppDataComplete): AppDataComplete {
     const projectState = appDataComplete.project;
@@ -116,7 +113,6 @@ export class MigrationService {
     };
   }
 
-
   private _mTaskState(legacyAppDataComplete: LegacyAppDataComplete): TaskState {
     const singleState = this._mTaskFromProjectToSingle(legacyAppDataComplete);
     const standardMigration = migrateTaskState(singleState as TaskState);
@@ -129,7 +125,6 @@ export class MigrationService {
     return this._mTaskAttachmentsToTaskStates(legacyAppDataComplete, standardMigration) as TaskArchive;
   }
 
-
   private _mTaskRepeatCfg(legacyAppDataComplete: LegacyAppDataComplete): TaskRepeatCfgState {
     const pids = legacyAppDataComplete.project.ids as string[];
     const repeatStates = this._addProjectIdToEntity(pids, legacyAppDataComplete.taskRepeatCfg, {tagIds: []});
@@ -139,7 +134,7 @@ export class MigrationService {
   private _addProjectIdToEntity(
     pids: string[],
     entityProjectStates: { [key: string]: EntityState<any> },
-    additionalChanges = {}
+    additionalChanges: {} = {}
   ): EntityState<any>[] {
     return pids.map((projectId) => {
       const state = entityProjectStates[projectId];
@@ -276,7 +271,6 @@ export class MigrationService {
       replaceIdMap,
     };
   }
-
 
   private _isNeedsMigration(projectState: ProjectState): boolean {
     return (projectState && (!(projectState as any).__modelVersion || (projectState as any).__modelVersion <= 3));

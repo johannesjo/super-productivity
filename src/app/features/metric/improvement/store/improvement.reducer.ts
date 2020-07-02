@@ -1,11 +1,10 @@
-import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
-import {ImprovementActions, ImprovementActionTypes} from './improvement.actions';
-import {Improvement, ImprovementState} from '../improvement.model';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {getWorklogStr} from '../../../../util/get-work-log-str';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
+import { ImprovementActions, ImprovementActionTypes } from './improvement.actions';
+import { Improvement, ImprovementState } from '../improvement.model';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { getWorklogStr } from '../../../../util/get-work-log-str';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
-
 
 export const adapter: EntityAdapter<Improvement> = createEntityAdapter<Improvement>();
 export const selectImprovementFeatureState = createFeatureSelector<ImprovementState>(IMPROVEMENT_FEATURE_NAME);
@@ -21,14 +20,12 @@ export const selectRepeatedImprovementIds = createSelector(
   }
 );
 
-
 export const selectCheckedImprovementIdsForDay = createSelector(
   selectAllImprovements,
   (improvements: Improvement[], props: { day: string }): string[] => {
     return improvements.filter(improvement => improvement.checkedDays && improvement.checkedDays.includes(props.day))
       .map(improvement => improvement.id);
   });
-
 
 export const initialImprovementState: ImprovementState = adapter.getInitialState({
   // additional entity state properties
@@ -105,7 +102,6 @@ export function improvementReducer(
         }, state);
 
     }
-
 
     default: {
       return state;

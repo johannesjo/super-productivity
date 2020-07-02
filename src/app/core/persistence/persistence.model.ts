@@ -1,5 +1,5 @@
-import {AppBaseData, AppDataForProjects} from '../../imex/sync/sync.model';
-import {Action} from '@ngrx/store';
+import { AppBaseData, AppDataForProjects } from '../../imex/sync/sync.model';
+import { Action } from '@ngrx/store';
 
 export type ProjectDataLsKey
   = 'CFG'
@@ -15,7 +15,6 @@ export type ProjectDataLsKey
   | 'IMPROVEMENT_STATE'
   | 'OBSTRUCTION_STATE'
   ;
-
 
 export interface PersistenceBaseModel<T> {
   appDataKey: keyof AppBaseData;

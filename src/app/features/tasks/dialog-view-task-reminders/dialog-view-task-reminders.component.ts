@@ -1,22 +1,22 @@
-import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Reminder} from '../../reminder/reminder.model';
-import {Task, TaskWithReminderData} from '../task.model';
-import {TaskService} from '../task.service';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {ReminderService} from '../../reminder/reminder.service';
-import {first, map, switchMap} from 'rxjs/operators';
-import {ProjectService} from '../../project/project.service';
-import {Router} from '@angular/router';
-import {T} from '../../../t.const';
-import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
-import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {TagService} from '../../tag/tag.service';
-import {TODAY_TAG} from '../../tag/tag.const';
-import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
-import {DataInitService} from '../../../core/data-init/data-init.service';
-import {unique} from '../../../util/unique';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Reminder } from '../../reminder/reminder.model';
+import { Task, TaskWithReminderData } from '../task.model';
+import { TaskService } from '../task.service';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { ReminderService } from '../../reminder/reminder.service';
+import { first, map, switchMap } from 'rxjs/operators';
+import { ProjectService } from '../../project/project.service';
+import { Router } from '@angular/router';
+import { T } from '../../../t.const';
+import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { TagService } from '../../tag/tag.service';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
+import { DataInitService } from '../../../core/data-init/data-init.service';
+import { unique } from '../../../util/unique';
 
 const M = 1000 * 60;
 
@@ -28,9 +28,9 @@ const M = 1000 * 60;
   animations: [standardListAnimation],
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
-  T = T;
-  isDisableControls = false;
-  reminders$ = new BehaviorSubject<Reminder[]>(this.data.reminders);
+  T: any = T;
+  isDisableControls: boolean = false;
+  reminders$: BehaviorSubject<Reminder[]> = new BehaviorSubject(this.data.reminders);
   tasks$: Observable<TaskWithReminderData[]> = this.reminders$.pipe(
     switchMap((reminders) => this._taskService.getByIdsLive$(reminders.map(r => r.relatedId)).pipe(
       first(),
@@ -43,7 +43,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       )
     )),
   );
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewTaskRemindersComponent>,
@@ -97,7 +97,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId);
   }
 
-  editReminder(task: TaskWithReminderData, isCloseAfter = false) {
+  editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false) {
     this._subs.add(this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
       data: {task} as AddTaskReminderInterface

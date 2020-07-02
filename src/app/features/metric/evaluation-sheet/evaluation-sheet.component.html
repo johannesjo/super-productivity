@@ -8,9 +8,9 @@
   </help-section>
 
   <form #f="ngForm"
+        *ngIf="metricForDay"
         name="form"
-        novalidate
-        *ngIf="metricForDay">
+        novalidate>
     <div class="row">
       <mat-form-field>
         <input #mood="ngModel"

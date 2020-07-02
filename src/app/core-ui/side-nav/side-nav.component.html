@@ -2,11 +2,11 @@
   <div *ngFor="let context of (workContextService.mainWorkContexts$|async); trackBy: trackById; "
        [class.isActiveContext]="context.id===activeWorkContextId"
        class="tag">
-    <div class="tag-color"
-         [style.background]="context.theme.primary"></div>
+    <div [style.background]="context.theme.primary"
+         class="tag-color"></div>
     <button [routerLink]="['tag', context.id, 'tasks']"
-            routerLinkActive="isActiveRoute"
-            mat-menu-item>
+            mat-menu-item
+            routerLinkActive="isActiveRoute">
       <mat-icon>{{context.icon}}</mat-icon>
       {{context.title}}
     </button>
@@ -19,8 +19,8 @@
     </button>
 
     <mat-menu #tagMenu="matMenu">
-      <work-context-menu [contextType]="context.type"
-                         [contextId]="context.id"></work-context-menu>
+      <work-context-menu [contextId]="context.id"
+                         [contextType]="context.type"></work-context-menu>
     </mat-menu>
   </div>
 
@@ -33,18 +33,18 @@
   </button>
 </section>
 
-<section class="projects"
-         *ngIf="projectList$|async as projectList">
-  <button mat-menu-item
-          class="expand-btn"
+<section *ngIf="projectList$|async as projectList"
+         class="projects">
+  <button (click)="toggleExpandProjects()"
           [class.isExpanded]="isProjectsExpanded"
-          (click)="toggleExpandProjects()">
+          class="expand-btn"
+          mat-menu-item>
     <span class="title">{{T.MH.PROJECTS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
 
-  <div [dragulaModel]="projectList"
-       [@standardList]="projectList?.length"
+  <div [@standardList]="projectList?.length"
+       [dragulaModel]="projectList"
        [dragula]="PROJECTS_SIDE_NAV">
     <div *ngFor="let project of projectList; trackBy: trackById;"
          [class.isActiveContext]="project.id===activeWorkContextId"
@@ -66,14 +66,14 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #projectMenu="matMenu">
-        <work-context-menu [contextType]="WorkContextType.PROJECT"
-                           [contextId]="project.id"></work-context-menu>
+        <work-context-menu [contextId]="project.id"
+                           [contextType]="WorkContextType.PROJECT"></work-context-menu>
       </mat-menu>
     </div>
   </div>
 
-  <button mat-menu-item
-          *ngIf="isProjectsExpanded"
+  <button *ngIf="isProjectsExpanded"
+          mat-menu-item
           routerLink="project-overview"
           routerLinkActive="isActiveRoute">
     <mat-icon>format_list_numbered_rtl</mat-icon>
@@ -89,18 +89,18 @@
 </section>
 
 
-<section class="tags"
-         *ngIf="(tagList$|async) as tagList">
-  <button mat-menu-item
-          class="expand-btn"
+<section *ngIf="(tagList$|async) as tagList"
+         class="tags">
+  <button (click)="toggleExpandTags()"
           [class.isExpanded]="isTagsExpanded"
-          (click)="toggleExpandTags()">
+          class="expand-btn"
+          mat-menu-item>
     <span class="title">{{T.MH.TAGS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
 
-  <div [dragulaModel]="tagList"
-       [@standardList]="tagList?.length"
+  <div [@standardList]="tagList?.length"
+       [dragulaModel]="tagList"
        [dragula]="TAG_SIDE_NAV">
     <div *ngFor="let tag of tagList; trackBy: trackById;"
          [class.isActiveContext]="tag.id===activeWorkContextId"
@@ -123,17 +123,17 @@
       </button>
 
       <mat-menu #tagMenu="matMenu">
-        <work-context-menu [contextType]="WorkContextType.TAG"
-                           [contextId]="tag.id"></work-context-menu>
+        <work-context-menu [contextId]="tag.id"
+                           [contextType]="WorkContextType.TAG"></work-context-menu>
       </mat-menu>
     </div>
   </div>
-<!--  <button (click)="addTag()"-->
-<!--          *ngIf="isTagsExpanded"-->
-<!--          mat-menu-item>-->
-<!--    <mat-icon>add</mat-icon>-->
-<!--    {{T.MH.CREATE_TAG|translate}}-->
-<!--  </button>-->
+  <!--  <button (click)="addTag()"-->
+  <!--          *ngIf="isTagsExpanded"-->
+  <!--          mat-menu-item>-->
+  <!--    <mat-icon>add</mat-icon>-->
+  <!--    {{T.MH.CREATE_TAG|translate}}-->
+  <!--  </button>-->
 </section>
 
 
@@ -146,9 +146,9 @@
     <span class="text">{{T.MH.SETTINGS|translate}}</span>
   </button>
 
-  <button *ngIf="workContextService.isActiveWorkContextProject$|async"
+  <button (click)="onScrollToNotesClick()"
+          *ngIf="workContextService.isActiveWorkContextProject$|async"
           [@expandFade]
-          (click)="onScrollToNotesClick()"
           class="route-link scroll-down-btn"
           mat-menu-item>
     <mat-icon>notes</mat-icon>

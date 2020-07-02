@@ -1,7 +1,7 @@
-import {Observable} from 'rxjs';
-import {IssueData, IssueDataReduced, SearchResultItem} from './issue.model';
-import {Task} from '../tasks/task.model';
-import {TaskAttachment} from '../tasks/task-attachment/task-attachment.model';
+import { Observable } from 'rxjs';
+import { IssueData, IssueDataReduced, SearchResultItem } from './issue.model';
+import { Task } from '../tasks/task.model';
+import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
   issueLink$?(issueId: string | number, projectId: string): Observable<string>;
@@ -11,8 +11,8 @@ export interface IssueServiceInterface {
   searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
   refreshIssue?(task: Task,
-                isNotifySuccess: boolean,
-                isNotifyNoUpdateRequired: boolean): Promise<{
+    isNotifySuccess: boolean,
+    isNotifyNoUpdateRequired: boolean): Promise<{
     taskChanges: Partial<Task>,
     issue: IssueData
   }>;

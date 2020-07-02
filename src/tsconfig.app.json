@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../out-tsc/app",
     "types": [],
-    "strict": true
+    "strict": false
   },
   "files": [
     "main.ts",

@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, HostBinding} from '@angular/core';
-import {fadeAnimation} from '../animations/fade.ani';
+import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { fadeAnimation } from '../animations/fade.ani';
 
 @Component({
   selector: 'full-page-spinner',
@@ -9,5 +9,5 @@ import {fadeAnimation} from '../animations/fade.ani';
   animations: [fadeAnimation],
 })
 export class FullPageSpinnerComponent {
-  @HostBinding('@fade') show = true;
+  @HostBinding('@fade') show: boolean = true;
 }

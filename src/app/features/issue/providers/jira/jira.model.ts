@@ -1,4 +1,4 @@
-import {JiraOriginalTransition} from './jira-api-responses';
+import { JiraOriginalTransition } from './jira-api-responses';
 
 export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | JiraOriginalTransition;
 

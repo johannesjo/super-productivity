@@ -1,4 +1,4 @@
-import {TimeSpentOnDay} from '../task.model';
+import { TimeSpentOnDay } from '../task.model';
 
 export const calcTotalTimeSpent = (timeSpentOnDay: TimeSpentOnDay) => {
   let totalTimeSpent = 0;

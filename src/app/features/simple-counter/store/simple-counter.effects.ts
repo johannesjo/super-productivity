@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {select, Store} from '@ngrx/store';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { select, Store } from '@ngrx/store';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
 import {
   addSimpleCounter,
   deleteSimpleCounter,
@@ -14,18 +14,17 @@ import {
   updateSimpleCounter,
   upsertSimpleCounter
 } from './simple-counter.actions';
-import {delay, filter, map, mapTo, mergeMap, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
-import {selectSimpleCounterFeatureState} from './simple-counter.reducer';
-import {SimpleCounterState, SimpleCounterType} from '../simple-counter.model';
-import {TimeTrackingService} from '../../time-tracking/time-tracking.service';
-import {SimpleCounterService} from '../simple-counter.service';
-import {EMPTY, of} from 'rxjs';
-import {SIMPLE_COUNTER_TRIGGER_ACTIONS} from '../simple-counter.const';
-import {T} from '../../../t.const';
-import {SnackService} from '../../../core/snack/snack.service';
-import {loadAllData} from '../../../root-store/meta/load-all-data.action';
-import {ImexMetaService} from '../../../imex/imex-meta/imex-meta.service';
-
+import { delay, filter, map, mapTo, mergeMap, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { selectSimpleCounterFeatureState } from './simple-counter.reducer';
+import { SimpleCounterState, SimpleCounterType } from '../simple-counter.model';
+import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
+import { SimpleCounterService } from '../simple-counter.service';
+import { EMPTY, of } from 'rxjs';
+import { SIMPLE_COUNTER_TRIGGER_ACTIONS } from '../simple-counter.const';
+import { T } from '../../../t.const';
+import { SnackService } from '../../../core/snack/snack.service';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { ImexMetaService } from '../../../imex/imex-meta/imex-meta.service';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -93,7 +92,6 @@ export class SimpleCounterEffects {
         const clickCounter = items.filter(item => item.type === SimpleCounterType.ClickCounter);
         const stopWatch = items.filter(item => item.type === SimpleCounterType.StopWatch);
 
-
         const startItems = stopWatch.filter(
           item => item.triggerOnActions && item.triggerOnActions.includes(action.type)
         );
@@ -121,7 +119,6 @@ export class SimpleCounterEffects {
       translateParams: {sectionKey: 'Simple Counters'}
     }))
   ), {dispatch: false});
-
 
   constructor(
     private _actions$: Actions,

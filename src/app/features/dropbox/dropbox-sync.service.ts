@@ -1,32 +1,29 @@
-import {Injectable} from '@angular/core';
-import {GlobalConfigService} from '../config/global-config.service';
-import {combineLatest, Observable} from 'rxjs';
-import {DropboxSyncConfig} from '../config/global-config.model';
-import {concatMap, distinctUntilChanged, first, map, take, tap} from 'rxjs/operators';
-import {DropboxApiService} from './dropbox-api.service';
-import {DROPBOX_SYNC_FILE_PATH} from './dropbox.const';
-import {AppDataComplete} from '../../imex/sync/sync.model';
-import {SyncService} from '../../imex/sync/sync.service';
-import {DataInitService} from '../../core/data-init/data-init.service';
+import { Injectable } from '@angular/core';
+import { GlobalConfigService } from '../config/global-config.service';
+import { combineLatest, Observable } from 'rxjs';
+import { DropboxSyncConfig } from '../config/global-config.model';
+import { concatMap, distinctUntilChanged, first, map, take, tap } from 'rxjs/operators';
+import { DropboxApiService } from './dropbox-api.service';
+import { DROPBOX_SYNC_FILE_PATH } from './dropbox.const';
+import { AppDataComplete } from '../../imex/sync/sync.model';
+import { SyncService } from '../../imex/sync/sync.service';
+import { DataInitService } from '../../core/data-init/data-init.service';
 import {
   LS_DROPBOX_LAST_LOCAL_REVISION,
   LS_DROPBOX_LOCAL_LAST_SYNC,
   LS_DROPBOX_LOCAL_LAST_SYNC_CHECK
 } from '../../core/persistence/ls-keys.const';
-import {DropboxConflictResolution, DropboxFileMetadata} from './dropbox.model';
-import {DataImportService} from '../../imex/sync/data-import.service';
-import {checkForUpdate, UpdateCheckResult} from '../../imex/sync/check-for-update.util';
-import {dbxLog} from './dropbox-log.util';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogDbxSyncConflictComponent} from './dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
-import {SnackService} from '../../core/snack/snack.service';
-import {environment} from '../../../environments/environment';
-import {T} from '../../t.const';
+import { DropboxConflictResolution, DropboxFileMetadata } from './dropbox.model';
+import { DataImportService } from '../../imex/sync/data-import.service';
+import { checkForUpdate, UpdateCheckResult } from '../../imex/sync/check-for-update.util';
+import { dbxLog } from './dropbox-log.util';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogDbxSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
+import { SnackService } from '../../core/snack/snack.service';
+import { environment } from '../../../environments/environment';
+import { T } from '../../t.const';
 
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class DropboxSyncService {
   dropboxCfg$: Observable<DropboxSyncConfig> = this._globalConfigService.cfg$.pipe(
     map(cfg => cfg.dropboxSync)
@@ -39,7 +36,7 @@ export class DropboxSyncService {
     distinctUntilChanged(),
   );
 
-  isEnabledAndReady$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+  isEnabledAndReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => combineLatest([
       this._dropboxApiService.isTokenAvailable$,
       this.isEnabled$,
@@ -48,7 +45,7 @@ export class DropboxSyncService {
     distinctUntilChanged(),
   );
 
-  private _isReadyForRequests$ = this.isEnabledAndReady$.pipe(
+  private _isReadyForRequests$: Observable<boolean> = this.isEnabledAndReady$.pipe(
     tap((isReady) => !isReady && new Error('Dropbox Sync not ready')),
     first(),
   );
@@ -143,7 +140,6 @@ export class DropboxSyncService {
       dbxLog('DBX PRE2: ↑ Update Remote');
       return await this._uploadAppData(local);
     }
-
 
     // COMPLEX SYNC HANDLING
     // ---------------------
@@ -242,7 +238,7 @@ export class DropboxSyncService {
     });
   }
 
-  private async _uploadAppData(data: AppDataComplete, isForceOverwrite = false): Promise<DropboxFileMetadata> {
+  private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata> {
     try {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,
@@ -263,7 +259,6 @@ export class DropboxSyncService {
       }
     }
   }
-
 
   // LS HELPER
   // ---------

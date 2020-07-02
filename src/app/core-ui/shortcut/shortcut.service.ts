@@ -1,18 +1,17 @@
-import {Injectable, NgZone} from '@angular/core';
-import {IS_ELECTRON} from '../../app.constants';
-import {checkKeyCombo} from '../../util/check-key-combo';
-import {GlobalConfigService} from '../../features/config/global-config.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {LayoutService} from '../layout/layout.service';
-import {NoteService} from '../../features/note/note.service';
-import {TaskService} from '../../features/tasks/task.service';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogAddNoteComponent} from '../../features/note/dialog-add-note/dialog-add-note.component';
-import {BookmarkService} from '../../features/bookmark/bookmark.service';
-import {IPC} from '../../../../electron/ipc-events.const';
-import {UiHelperService} from '../../features/ui-helper/ui-helper.service';
-import {ElectronService} from '../../core/electron/electron.service';
-
+import { Injectable, NgZone } from '@angular/core';
+import { IS_ELECTRON } from '../../app.constants';
+import { checkKeyCombo } from '../../util/check-key-combo';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { LayoutService } from '../layout/layout.service';
+import { NoteService } from '../../features/note/note.service';
+import { TaskService } from '../../features/tasks/task.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
+import { BookmarkService } from '../../features/bookmark/bookmark.service';
+import { IPC } from '../../../../electron/ipc-events.const';
+import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
+import { ElectronService } from '../../core/electron/electron.service';
 
 @Injectable({
   providedIn: 'root',

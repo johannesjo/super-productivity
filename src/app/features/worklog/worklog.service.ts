@@ -1,28 +1,26 @@
-import {Injectable} from '@angular/core';
-import {Worklog, WorklogDay, WorklogWeek} from './worklog.model';
-import {dedupeByKey} from '../../util/de-dupe-by-key';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {ProjectService} from '../project/project.service';
-import {BehaviorSubject, from, merge, Observable} from 'rxjs';
-import {concatMap, filter, first, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
-import {getWeekNumber} from '../../util/get-week-number';
-import {WorkContextService} from '../work-context/work-context.service';
-import {WorkContext} from '../work-context/work-context.model';
-import {mapArchiveToWorklog} from './util/map-archive-to-worklog';
-import {TaskService} from '../tasks/task.service';
-import {createEmptyEntity} from '../../util/create-empty-entity';
-import {getCompleteStateForWorkContext} from './util/get-complete-state-for-work-context.util';
-import {NavigationEnd, Router} from '@angular/router';
-import {DataInitService} from '../../core/data-init/data-init.service';
-import {WorklogTask} from '../tasks/task.model';
+import { Injectable } from '@angular/core';
+import { Worklog, WorklogDay, WorklogWeek } from './worklog.model';
+import { dedupeByKey } from '../../util/de-dupe-by-key';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { ProjectService } from '../project/project.service';
+import { BehaviorSubject, from, merge, Observable } from 'rxjs';
+import { concatMap, filter, first, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
+import { getWeekNumber } from '../../util/get-week-number';
+import { WorkContextService } from '../work-context/work-context.service';
+import { WorkContext } from '../work-context/work-context.model';
+import { mapArchiveToWorklog } from './util/map-archive-to-worklog';
+import { TaskService } from '../tasks/task.service';
+import { createEmptyEntity } from '../../util/create-empty-entity';
+import { getCompleteStateForWorkContext } from './util/get-complete-state-for-work-context.util';
+import { NavigationEnd, Router } from '@angular/router';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { WorklogTask } from '../tasks/task.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class WorklogService {
   // treated as private but needs to be assigned first
-  _archiveUpdateManualTrigger$ = new BehaviorSubject(true);
-  _archiveUpdateTrigger$ = this._dataInitService.isAllDataLoadedInitially$.pipe(
+  _archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject(true);
+  _archiveUpdateTrigger$: Observable<any> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => merge(
       // this._workContextService.activeWorkContextOnceOnContextChange$,
       this._archiveUpdateManualTrigger$,
@@ -110,7 +108,7 @@ export class WorklogService {
   }
 
   // TODO this is not waiting for worklog data
-  getTaskListForRange$(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays = false): Observable<WorklogTask[]> {
+  getTaskListForRange$(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays: boolean = false): Observable<WorklogTask[]> {
     return this.worklogTasks$.pipe(
       map(tasks => {
         tasks = tasks.filter((task) => {
@@ -142,7 +140,6 @@ export class WorklogService {
     );
   }
 
-
   private async _loadForWorkContext(workContext: WorkContext): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
     const archive = await this._persistenceService.taskArchive.loadState() || createEmptyEntity();
     const taskState = await this._taskService.taskFeatureState$.pipe(first()).toPromise() || createEmptyEntity();
@@ -156,7 +153,6 @@ export class WorklogService {
       workEnd: workContext.workEnd,
     };
 
-
     if (completeStateForWorkContext) {
       const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeStateForWorkContext, unarchivedIds, startEnd);
       return {
@@ -169,7 +165,6 @@ export class WorklogService {
       totalTimeSpent: null
     };
   }
-
 
   private _createTasksForDay(data: WorklogDay): WorklogTask[] {
     const dayData = {...data};

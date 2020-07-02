@@ -18,8 +18,8 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import {StringToMsPipe} from './string-to-ms.pipe';
-import {MsToStringPipe} from './ms-to-string.pipe';
+import { StringToMsPipe } from './string-to-ms.pipe';
+import { MsToStringPipe } from './ms-to-string.pipe';
 
 const noop = () => {
 };
@@ -49,7 +49,6 @@ export const INPUT_DURATION_VALIDATORS: any = {
   ],
 })
 
-
 export class InputDurationDirective<D> implements ControlValueAccessor, Validator, AfterViewChecked {
   @Input() isAllowSeconds = false;
 
@@ -65,10 +64,10 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   private _msValue;
 
   constructor(@Attribute('inputDuration') public inputDuration,
-              private _elementRef: ElementRef,
-              private _stringToMs: StringToMsPipe,
-              private _msToString: MsToStringPipe,
-              private _renderer: Renderer2) {
+    private _elementRef: ElementRef,
+    private _stringToMs: StringToMsPipe,
+    private _msToString: MsToStringPipe,
+    private _renderer: Renderer2) {
   }
 
   private _value;
@@ -84,7 +83,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
       this._onChangeCallback(this._msValue);
     }
   }
-
 
   // TODO all around dirty
   @Input() set ngModel(msVal) {
@@ -134,7 +132,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     const toStr = this._msToString.transform(value, this.isAllowSeconds, true);
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', toStr);
   }
-
 
   private _parseValidatorFn(): ValidationErrors | null {
     // TODO maximum dirty hackyness, but works for now :(

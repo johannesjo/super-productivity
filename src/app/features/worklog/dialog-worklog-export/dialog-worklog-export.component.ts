@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {WorklogExportSettingsCopy} from '../worklog.model';
-import {T} from '../../../t.const';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { WorklogExportSettingsCopy } from '../worklog.model';
+import { T } from '../../../t.const';
 import * as moment from 'moment';
-import {WORKLOG_EXPORT_DEFAULTS} from '../../work-context/work-context.const';
+import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 
 @Component({
   selector: 'dialog-worklog-export',
@@ -12,11 +12,11 @@ import {WORKLOG_EXPORT_DEFAULTS} from '../../work-context/work-context.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogWorklogExportComponent {
-  T = T;
+  T: any = T;
   options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
   strStart: string;
   strEnd: string;
-  isSingleDay = false;
+  isSingleDay: boolean = false;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogWorklogExportComponent>,

@@ -44,7 +44,6 @@ export class InlineInputComponent implements AfterViewInit {
       ? this.inputElDuration.nativeElement
       : this.inputEl.nativeElement;
 
-
     this.isFocused = true;
     this.activeInputEl.focus();
 

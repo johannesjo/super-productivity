@@ -1,14 +1,12 @@
-import {Injectable} from '@angular/core';
-import {Banner, BannerId} from './banner.model';
-import {Observable, ReplaySubject} from 'rxjs';
-import {map} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Banner, BannerId } from './banner.model';
+import { Observable, ReplaySubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class BannerService {
   private _banners: Banner[] = [];
-  private _banners$ = new ReplaySubject<Banner[]>(1);
+  private _banners$: ReplaySubject<Banner[]> = new ReplaySubject(1);
   activeBanner$: Observable<Banner> = this._banners$.pipe(
     map((banners) => banners && banners.length && banners[0])
   );

@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {select, Store} from '@ngrx/store';
-import {concatMap, delay, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { select, Store } from '@ngrx/store';
+import { concatMap, delay, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -14,12 +14,12 @@ import {
   UpdateProjectWorkEnd,
   UpdateProjectWorkStart
 } from './project.actions';
-import {selectProjectFeatureState} from './project.reducer';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {BookmarkService} from '../../bookmark/bookmark.service';
-import {NoteService} from '../../note/note.service';
-import {SnackService} from '../../../core/snack/snack.service';
-import {getWorklogStr} from '../../../util/get-work-log-str';
+import { selectProjectFeatureState } from './project.reducer';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { BookmarkService } from '../../bookmark/bookmark.service';
+import { NoteService } from '../../note/note.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
   AddTask,
   AddTimeSpent,
@@ -31,15 +31,15 @@ import {
   TaskActionTypes,
   UpdateTaskTags
 } from '../../tasks/store/task.actions';
-import {ReminderService} from '../../reminder/reminder.service';
-import {MetricService} from '../../metric/metric.service';
-import {ObstructionService} from '../../metric/obstruction/obstruction.service';
-import {ImprovementService} from '../../metric/improvement/improvement.service';
-import {ProjectService} from '../project.service';
-import {BannerService} from '../../../core/banner/banner.service';
-import {Router} from '@angular/router';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {T} from '../../../t.const';
+import { ReminderService } from '../../reminder/reminder.service';
+import { MetricService } from '../../metric/metric.service';
+import { ObstructionService } from '../../metric/obstruction/obstruction.service';
+import { ImprovementService } from '../../metric/improvement/improvement.service';
+import { ProjectService } from '../project.service';
+import { BannerService } from '../../../core/banner/banner.service';
+import { Router } from '@angular/router';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { T } from '../../../t.const';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
@@ -52,19 +52,25 @@ import {
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
-import {WorkContextType} from '../../work-context/work-context.model';
-import {setActiveWorkContext} from '../../work-context/store/work-context.actions';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {Project} from '../project.model';
-import {TaskService} from '../../tasks/task.service';
-import {TaskArchive, TaskState} from '../../tasks/task.model';
-import {unique} from '../../../util/unique';
-import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
-import {TODAY_TAG} from '../../tag/tag.const';
-import {EMPTY, of} from 'rxjs';
+import { WorkContextType } from '../../work-context/work-context.model';
+import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { Project } from '../project.model';
+import { TaskService } from '../../tasks/task.service';
+import { TaskArchive, TaskState } from '../../tasks/task.model';
+import { unique } from '../../../util/unique';
+import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { EMPTY, of } from 'rxjs';
 
 @Injectable()
 export class ProjectEffects {
+  saveToLs$ = this._store$.pipe(
+    // tap(() => console.log('SAVE')),
+    select(selectProjectFeatureState),
+    take(1),
+    switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
+  );
   @Effect({dispatch: false})
   syncProjectToLs$: any = this._actions$
     .pipe(
@@ -100,7 +106,6 @@ export class ProjectEffects {
       }),
       switchMap(() => this.saveToLs$),
     );
-
   @Effect({dispatch: false})
   updateProjectStorageConditionalTask$ = this._actions$.pipe(
     ofType(
@@ -135,7 +140,6 @@ export class ProjectEffects {
     }),
     switchMap(() => this.saveToLs$),
   );
-
   @Effect({dispatch: false})
   updateProjectStorageConditional$ = this._actions$.pipe(
     ofType(
@@ -146,15 +150,6 @@ export class ProjectEffects {
     filter((p) => p.workContextType === WorkContextType.PROJECT),
     switchMap(() => this.saveToLs$),
   );
-
-  saveToLs$ = this._store$.pipe(
-    // tap(() => console.log('SAVE')),
-    select(selectProjectFeatureState),
-    take(1),
-    switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
-  );
-
-
   @Effect()
   updateWorkStart$: any = this._actions$
     .pipe(
@@ -185,7 +180,6 @@ export class ProjectEffects {
       })
     );
 
-
   @Effect()
   onProjectIdChange$: any = this._actions$
     .pipe(
@@ -208,7 +202,6 @@ export class ProjectEffects {
       })
     );
 
-
   // TODO a solution for orphaned tasks might be needed
   @Effect({dispatch: false})
   deleteProjectRelatedData: any = this._actions$
@@ -230,7 +223,6 @@ export class ProjectEffects {
         }
       }),
     );
-
 
   @Effect({dispatch: false})
   archiveProject: any = this._actions$
@@ -297,7 +289,6 @@ export class ProjectEffects {
       })
     );
 
-
   @Effect({dispatch: false})
   onProjectCreatedSnack: any = this._actions$
     .pipe(
@@ -357,7 +348,6 @@ export class ProjectEffects {
       }),
     );
 
-
   @Effect({dispatch: false})
   cleanupBacklogOfNonProjectTasks: any = this._workContextService.activeWorkContextTypeAndId$
     .pipe(
@@ -386,7 +376,6 @@ export class ProjectEffects {
         }
       }),
     );
-
 
   @Effect({dispatch: false})
   cleanupNullTasksForTaskList: any = this._workContextService.activeWorkContextTypeAndId$
@@ -510,7 +499,6 @@ export class ProjectEffects {
     private _router: Router,
   ) {
   }
-
 
   private async _removeAllTasksForProject(projectIdToDelete: string): Promise<any> {
     const taskState: TaskState = await this._taskService.taskFeatureState$.pipe(

@@ -1,10 +1,9 @@
-import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
-import {ObstructionActions, ObstructionActionTypes} from './obstruction.actions';
-import {Obstruction, ObstructionState} from '../obstruction.model';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
+import { ObstructionActions, ObstructionActionTypes } from './obstruction.actions';
+import { Obstruction, ObstructionState } from '../obstruction.model';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const OBSTRUCTION_FEATURE_NAME = 'obstruction';
-
 
 export const adapter: EntityAdapter<Obstruction> = createEntityAdapter<Obstruction>();
 export const selectObstructionFeatureState = createFeatureSelector<ObstructionState>(OBSTRUCTION_FEATURE_NAME);

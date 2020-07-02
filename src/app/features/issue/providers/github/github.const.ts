@@ -1,7 +1,7 @@
 // TODO use as a checklist
-import {GithubCfg} from './github.model';
-import {T} from '../../../../t.const';
-import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../../config/global-config.model';
+import { GithubCfg } from './github.model';
+import { T } from '../../../../t.const';
+import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/global-config.model';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   repo: null,

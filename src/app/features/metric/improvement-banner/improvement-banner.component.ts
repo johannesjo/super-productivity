@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
-import {Improvement} from '../improvement/improvement.model';
-import {ImprovementService} from '../improvement/improvement.service';
-import {getWorklogStr} from '../../../util/get-work-log-str';
-import {improvementBannerAnimation} from './improvement-banner.ani';
-import {Subscription} from 'rxjs';
-import {T} from '../../../t.const';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { Improvement } from '../improvement/improvement.model';
+import { ImprovementService } from '../improvement/improvement.service';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { improvementBannerAnimation } from './improvement-banner.ani';
+import { Subscription } from 'rxjs';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'improvement-banner',
@@ -14,10 +14,10 @@ import {T} from '../../../t.const';
   animations: [improvementBannerAnimation]
 })
 export class ImprovementBannerComponent implements OnDestroy {
-  T = T;
+  T: any = T;
   improvements: Improvement[];
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public improvementService: ImprovementService,

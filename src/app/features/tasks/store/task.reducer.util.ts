@@ -1,10 +1,10 @@
 // HELPER
 // ------
-import {Task, TaskState, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
-import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
-import {taskAdapter} from './task.adapter';
-import {filterOutId} from '../../../util/filter-out-id';
-import {Update} from '@ngrx/entity';
+import { Task, TaskState, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
+import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
+import { taskAdapter } from './task.adapter';
+import { filterOutId } from '../../../util/filter-out-id';
+import { Update } from '@ngrx/entity';
 
 export const getTaskById = (taskId: string, state: TaskState) => {
   if (!state.entities[taskId]) {
@@ -64,7 +64,6 @@ export const reCalcTimeEstimateForParentIfParent = (parentId, state: TaskState):
     return state;
   }
 };
-
 
 export const updateDoneOnForTask = (
   upd: Update<Task>,
@@ -136,7 +135,7 @@ export const updateTimeEstimateForTask = (
 };
 
 export const deleteTask = (state: TaskState,
-                           taskToDelete: TaskWithSubTasks | Task): TaskState => {
+  taskToDelete: TaskWithSubTasks | Task): TaskState => {
   let stateCopy: TaskState = taskAdapter.removeOne(taskToDelete.id, state);
 
   let currentTaskId = (state.currentTaskId === taskToDelete.id) ? null : state.currentTaskId;

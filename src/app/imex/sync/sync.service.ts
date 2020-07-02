@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {combineLatest, EMPTY, fromEvent, merge, Observable, of, ReplaySubject} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { combineLatest, EMPTY, fromEvent, merge, Observable, of, ReplaySubject } from 'rxjs';
 import {
   auditTime,
   concatMap,
@@ -17,15 +17,15 @@ import {
   tap,
   throttleTime
 } from 'rxjs/operators';
-import {GlobalConfigService} from '../../features/config/global-config.service';
-import {SyncProvider} from './sync-provider';
-import {DataInitService} from '../../core/data-init/data-init.service';
-import {isOnline$} from '../../util/is-online';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {AppDataComplete} from './sync.model';
-import {SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME} from './sync.const';
-import {isTouchOnly} from '../../util/is-touch';
-import {AllowedDBKeys} from '../../core/persistence/ls-keys.const';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { SyncProvider } from './sync-provider';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { isOnline$ } from '../../util/is-online';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { AppDataComplete } from './sync.model';
+import { SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME } from './sync.const';
+import { isTouchOnly } from '../../util/is-touch';
+import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
 
 // TODO naming
 @Injectable({
@@ -33,19 +33,19 @@ import {AllowedDBKeys} from '../../core/persistence/ls-keys.const';
 })
 export class SyncService {
   // SAVE TO REMOTE TRIGGER
+  inMemory$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$;
+
+  // IMMEDIATE TRIGGERS
   // ----------------------
   private _onUpdateLocalDataTrigger$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
     this._persistenceService.onAfterSave$.pipe(
       filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
     );
-
-  // IMMEDIATE TRIGGERS
   // ------------------
   private _focusAppTrigger$ = fromEvent(window, 'focus').pipe(
     throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
     mapTo('I_FOCUS_THROTTLED'),
   );
-
   // we might need this for mobile, as we can't rely on focus as much
   private _someMobileActivityTrigger$ = of(isTouchOnly()).pipe(
     switchMap((isTouchIn) => isTouchIn
@@ -56,7 +56,6 @@ export class SyncService {
       : EMPTY
     ),
   );
-
   private _isOnlineTrigger$ = isOnline$.pipe(
     // skip initial online which always fires on page load
     skip(1),
@@ -64,14 +63,12 @@ export class SyncService {
     mapTo('IS_ONLINE'),
   );
 
+  // OTHER INITIAL SYNC STUFF
   private _immediateSyncTrigger$ = merge(
     this._focusAppTrigger$,
     this._someMobileActivityTrigger$,
     this._isOnlineTrigger$,
   );
-
-
-  // OTHER INITIAL SYNC STUFF
   // ------------------------
   private _isInitialSyncEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => combineLatest([
@@ -90,11 +87,8 @@ export class SyncService {
     ),
     distinctUntilChanged(),
   );
-
-
   // keep it super simple for now
   private _isInitialSyncDoneManual$ = new ReplaySubject<boolean>(1);
-
   private _isInitialSyncDone$: Observable<boolean> = this._isInitialSyncEnabled$.pipe(
     switchMap((isActive) => {
       return isActive
@@ -103,7 +97,6 @@ export class SyncService {
     }),
     startWith(false),
   );
-
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
     filter(isDone => isDone),
     take(1),
@@ -111,10 +104,6 @@ export class SyncService {
     concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
     shareReplay(1),
   );
-
-
-  inMemory$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$;
-
 
   constructor(
     private readonly _store: Store<any>,

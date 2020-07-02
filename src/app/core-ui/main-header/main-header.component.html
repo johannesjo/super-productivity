@@ -14,16 +14,16 @@
          mat-ripple
          routerLink="/active/tasks">{{activeWorkContext?.title}}</div>
 
-    <button [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
-            [mat-menu-trigger-for]="activeWorkContextMenu"
+    <button [mat-menu-trigger-for]="activeWorkContextMenu"
+            [matTooltip]="T.MH.PROJECT_SETTINGS|translate"
             class="project-settings-btn"
             mat-icon-button>
       <mat-icon>more_vert</mat-icon>
     </button>
 
     <mat-menu #activeWorkContextMenu="matMenu">
-      <work-context-menu [contextType]="activeWorkContext?.type"
-                         [contextId]="activeWorkContext?.id"></work-context-menu>
+      <work-context-menu [contextId]="activeWorkContext?.id"
+                         [contextType]="activeWorkContext?.type"></work-context-menu>
     </mat-menu>
   </ng-container>
 
@@ -31,13 +31,13 @@
   <nav class="action-nav">
     <button (click)="layoutService.showAddTaskBar()"
             [matTooltip]="T.MH.ADD_NEW_TASK|translate"
-            mat-icon-button
-            class="hide-xs">
+            class="hide-xs"
+            mat-icon-button>
       <mat-icon>add</mat-icon>
     </button>
 
-    <button *ngIf="(workContextService.isActiveWorkContextProject$|async)"
-            (click)="bookmarkService.toggleBookmarks()"
+    <button (click)="bookmarkService.toggleBookmarks()"
+            *ngIf="(workContextService.isActiveWorkContextProject$|async)"
             [class.isOpen]="bookmarkService.isShowBookmarks$|async"
             [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate"
             class="bookmark-btn"
@@ -66,10 +66,10 @@
            @fade
            class="current-task-title">
         <div class="title">{{currentTask.title}}</div>
-        <tag class="project"
-             *ngIf="(currentTaskContext$|async) as currentTaskContext"
+        <tag *ngIf="(currentTaskContext$|async) as currentTaskContext"
              @expandFadeHorizontal
-             [tag]="currentTaskContext"></tag>
+             [tag]="currentTaskContext"
+             class="project"></tag>
       </div>
       <button (click)="taskService.toggleStartTask()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"

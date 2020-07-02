@@ -1,19 +1,18 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {Task} from 'src/app/features/tasks/task.model';
-import {catchError, first, map, switchMap} from 'rxjs/operators';
-import {IssueServiceInterface} from '../../issue-service-interface';
-import {JiraApiService} from './jira-api.service';
-import {SnackService} from '../../../../core/snack/snack.service';
-import {TaskService} from '../../../tasks/task.service';
-import {ProjectService} from '../../../project/project.service';
-import {SearchResultItem} from '../../issue.model';
-import {JiraIssue, JiraIssueReduced} from './jira-issue/jira-issue.model';
-import {TaskAttachment} from '../../../tasks/task-attachment/task-attachment.model';
-import {mapJiraAttachmentToAttachment} from './jira-issue/jira-issue-map.util';
-import {T} from '../../../../t.const';
-import {JiraCfg} from './jira.model';
-
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { Task } from 'src/app/features/tasks/task.model';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { IssueServiceInterface } from '../../issue-service-interface';
+import { JiraApiService } from './jira-api.service';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { TaskService } from '../../../tasks/task.service';
+import { ProjectService } from '../../../project/project.service';
+import { SearchResultItem } from '../../issue.model';
+import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
+import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
+import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util';
+import { T } from '../../../../t.const';
+import { JiraCfg } from './jira.model';
 
 @Injectable({
   providedIn: 'root',

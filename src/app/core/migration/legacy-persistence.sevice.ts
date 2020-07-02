@@ -1,6 +1,5 @@
-import {ProjectState} from '../../features/project/store/project.reducer';
+import { ProjectState } from '../../features/project/store/project.reducer';
 import {
-  LS_BACKUP,
   LS_BOOKMARK_STATE,
   LS_GLOBAL_CFG,
   LS_IMPROVEMENT_STATE,
@@ -8,7 +7,6 @@ import {
   LS_METRIC_STATE,
   LS_NOTE_STATE,
   LS_OBSTRUCTION_STATE,
-  LS_PROJECT_ARCHIVE,
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
   LS_REMINDER,
@@ -17,16 +15,16 @@ import {
   LS_TASK_REPEAT_CFG_STATE,
   LS_TASK_STATE
 } from '../persistence/ls-keys.const';
-import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
-import {GlobalConfigState} from '../../features/config/global-config.model';
-import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
-import {Task, TaskArchive, TaskState, TaskWithSubTasks} from 'src/app/features/tasks/task.model';
-import {Reminder} from '../../features/reminder/reminder.model';
-import {taskReducer} from '../../features/tasks/store/task.reducer';
-import {TaskRepeatCfg, TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
-import {EntityState} from '@ngrx/entity';
-import {TaskAttachment} from '../../features/tasks/task-attachment/task-attachment.model';
+import { migrateProjectState } from '../../features/project/migrate-projects-state.util';
+import { GlobalConfigState } from '../../features/config/global-config.model';
+import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
+import { Task, TaskArchive, TaskState, TaskWithSubTasks } from 'src/app/features/tasks/task.model';
+import { Reminder } from '../../features/reminder/reminder.model';
+import { taskReducer } from '../../features/tasks/store/task.reducer';
+import { TaskRepeatCfg, TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { EntityState } from '@ngrx/entity';
+import { TaskAttachment } from '../../features/tasks/task-attachment/task-attachment.model';
 import {
   LegacyAppBaseData,
   LegacyAppDataComplete,
@@ -34,20 +32,19 @@ import {
   LegacyPersistenceBaseModel,
   LegacyPersistenceForProjectModel
 } from './legacy-models';
-import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {Bookmark} from '../../features/bookmark/bookmark.model';
-import {NoteState} from '../../features/note/store/note.reducer';
-import {Note} from '../../features/note/note.model';
-import {Metric, MetricState} from '../../features/metric/metric.model';
-import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
-import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
-import {SnackService} from '../snack/snack.service';
-import {DatabaseService} from '../persistence/database.service';
-import {CompressionService} from '../compression/compression.service';
-import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project-archive.model';
-import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
-import {Action} from '@ngrx/store';
-import {Injectable} from '@angular/core';
+import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
+import { Bookmark } from '../../features/bookmark/bookmark.model';
+import { NoteState } from '../../features/note/store/note.reducer';
+import { Note } from '../../features/note/note.model';
+import { Metric, MetricState } from '../../features/metric/metric.model';
+import { Improvement, ImprovementState } from '../../features/metric/improvement/improvement.model';
+import { Obstruction, ObstructionState } from '../../features/metric/obstruction/obstruction.model';
+import { SnackService } from '../snack/snack.service';
+import { DatabaseService } from '../persistence/database.service';
+import { CompressionService } from '../compression/compression.service';
+import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
+import { Action } from '@ngrx/store';
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
@@ -212,7 +209,6 @@ export class LegacyPersistenceService {
     return new Date(laParsed).getTime();
   }
 
-
   // NOTE: not including backup
   async loadCompleteLegacy(): Promise<LegacyAppDataComplete> {
     const projectState = await this.project.load();
@@ -224,7 +220,6 @@ export class LegacyPersistenceService {
       ...(await this._loadLegacyAppBaseData()),
     };
   }
-
 
   async _loadLegacyAppBaseData(): Promise<LegacyAppBaseData> {
     const promises = this._baseModels.map(async (modelCfg) => {
@@ -313,7 +308,6 @@ export class LegacyPersistenceService {
   private _makeProjectKey(projectId, subKey, additional?) {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
   }
-
 
   // DATA STORAGE INTERFACE
   // ---------------------

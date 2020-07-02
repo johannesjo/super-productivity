@@ -1,18 +1,18 @@
-import {Injectable} from '@angular/core';
-import {SnackService} from '../snack/snack.service';
-import {DBSchema, openDB} from 'idb';
-import {IDBPDatabase} from 'idb/build/esm/entry';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {filter, shareReplay, take} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { SnackService } from '../snack/snack.service';
+import { DBSchema, IDBPTransaction, openDB } from 'idb';
+import { IDBPDatabase } from 'idb/build/esm/entry';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter, shareReplay, take } from 'rxjs/operators';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
 const VERSION = 2;
 
 interface MyDb extends DBSchema {
-  [key: string]: any;
-
   [DB_MAIN_NAME]: any;
+
+  [key: string]: any;
 }
 
 @Injectable({
@@ -20,7 +20,7 @@ interface MyDb extends DBSchema {
 })
 export class DatabaseService {
   db: IDBPDatabase<MyDb>;
-  isReady$ = new BehaviorSubject<boolean>(false);
+  isReady$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private _afterReady$: Observable<boolean> = this.isReady$.pipe(
     filter(isReady => isReady),
@@ -62,7 +62,7 @@ export class DatabaseService {
   private async _init() {
     try {
       this.db = await openDB<MyDb>(DB_NAME, VERSION, {
-        upgrade(db, oldVersion, newVersion, transaction) {
+        upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
           // …
           console.log('IDB UPGRADE', oldVersion, newVersion);
           db.createObjectStore(DB_MAIN_NAME);

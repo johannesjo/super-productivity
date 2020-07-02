@@ -1,4 +1,4 @@
-import {AbstractControl, ValidatorFn, Validators} from '@angular/forms';
+import { AbstractControl, ValidatorFn, Validators } from '@angular/forms';
 
 export const minValidator = (min: number): ValidatorFn => {
   return (control: AbstractControl): { [key: string]: any } => {

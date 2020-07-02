@@ -1,7 +1,7 @@
-import {TaskActions, TaskActionTypes} from './task.actions';
-import {ShowSubTasksMode, Task, TaskAdditionalInfoTargetPanel, TaskState} from '../task.model';
-import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
-import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
+import { TaskActions, TaskActionTypes } from './task.actions';
+import { ShowSubTasksMode, Task, TaskAdditionalInfoTargetPanel, TaskState } from '../task.model';
+import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
+import { AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
   deleteTask,
   getTaskById,
@@ -11,20 +11,19 @@ import {
   updateTimeEstimateForTask,
   updateTimeSpentForTask
 } from './task.reducer.util';
-import {taskAdapter} from './task.adapter';
-import {moveItemInList} from '../../work-context/store/work-context-meta.helper';
-import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
-import {filterOutId} from '../../../util/filter-out-id';
-import {TaskAttachmentActions, TaskAttachmentActionTypes} from '../task-attachment/task-attachment.actions';
-import {Update} from '@ngrx/entity';
-import {unique} from '../../../util/unique';
-import {roundDurationVanilla} from '../../../util/round-duration';
-import {loadAllData} from '../../../root-store/meta/load-all-data.action';
-import {AppDataComplete} from '../../../imex/sync/sync.model';
-import {migrateTaskState} from '../migrate-task-state.util';
+import { taskAdapter } from './task.adapter';
+import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
+import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
+import { filterOutId } from '../../../util/filter-out-id';
+import { TaskAttachmentActions, TaskAttachmentActionTypes } from '../task-attachment/task-attachment.actions';
+import { Update } from '@ngrx/entity';
+import { unique } from '../../../util/unique';
+import { roundDurationVanilla } from '../../../util/round-duration';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { AppDataComplete } from '../../../imex/sync/sync.model';
+import { migrateTaskState } from '../migrate-task-state.util';
 
 export const TASK_FEATURE_NAME = 'tasks';
-
 
 // REDUCER
 // -------
@@ -39,7 +38,6 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   lastCurrentTaskId: null,
   isDataLoaded: false,
 }) as TaskState;
-
 
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
@@ -246,7 +244,6 @@ export function taskReducer(
         }
       }, newState);
 
-
       return newState;
     }
 
@@ -298,7 +295,6 @@ export function taskReducer(
         state
       );
     }
-
 
     case TaskActionTypes.AddSubTask: {
       const {task, parentId} = action.payload;
@@ -368,7 +364,6 @@ export function taskReducer(
       }));
       return taskAdapter.updateMany(updates, state);
     }
-
 
     case TaskActionTypes.RoundTimeSpentForDay: {
       const {day, taskIds, isRoundUp, roundTo} = action.payload;

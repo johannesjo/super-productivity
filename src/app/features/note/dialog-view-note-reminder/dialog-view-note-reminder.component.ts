@@ -1,17 +1,17 @@
-import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Reminder} from '../../reminder/reminder.model';
-import {Note} from '../note.model';
-import {NoteService} from '../note.service';
-import {Observable, Subscription} from 'rxjs';
-import {ReminderService} from '../../reminder/reminder.service';
-import {ProjectService} from '../../project/project.service';
-import {Project} from '../../project/project.model';
-import {T} from '../../../t.const';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {Tag} from '../../tag/tag.model';
-import {WorkContextType} from '../../work-context/work-context.model';
-import {TagService} from '../../tag/tag.service';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Reminder } from '../../reminder/reminder.model';
+import { Note } from '../note.model';
+import { NoteService } from '../note.service';
+import { Observable, Subscription } from 'rxjs';
+import { ReminderService } from '../../reminder/reminder.service';
+import { ProjectService } from '../../project/project.service';
+import { Project } from '../../project/project.model';
+import { T } from '../../../t.const';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { Tag } from '../../tag/tag.model';
+import { WorkContextType } from '../../work-context/work-context.model';
+import { TagService } from '../../tag/tag.service';
 
 @Component({
   selector: 'dialog-view-note-reminder',
@@ -20,15 +20,15 @@ import {TagService} from '../../tag/tag.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogViewNoteReminderComponent implements OnDestroy {
-  T = T;
+  T: any = T;
   note$: Observable<Note> = this._noteService.getById$(this.data.reminder.relatedId);
   reminder: Reminder = this.data.reminder;
-  isForCurrentContext = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
+  isForCurrentContext: boolean = (this.reminder.workContextId === this._workContextService.activeWorkContextId);
   targetContext$: Observable<Tag | Project> = (this.data.reminder.workContextType === WorkContextType.PROJECT)
     ? this._projectService.getByIdOnce$(this.reminder.workContextId)
     : this._tagService.getTagById$(this.reminder.workContextId);
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewNoteReminderComponent>,
@@ -74,7 +74,7 @@ export class DialogViewNoteReminderComponent implements OnDestroy {
     }
   }
 
-  snooze(snoozeInMinutes) {
+  snooze(snoozeInMinutes: number) {
     this._reminderService.updateReminder(this.reminder.id, {
       remindAt: Date.now() + (snoozeInMinutes * 60 * 1000)
     });

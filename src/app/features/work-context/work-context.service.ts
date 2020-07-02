@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {combineLatest, EMPTY, interval, Observable, of, timer} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { combineLatest, EMPTY, interval, Observable, of, timer } from 'rxjs';
 import {
   WorkContext,
   WorkContextAdvancedCfg,
@@ -9,10 +9,10 @@ import {
   WorkContextThemeCfg,
   WorkContextType
 } from './work-context.model';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {setActiveWorkContext} from './store/work-context.actions';
-import {selectActiveContextId, selectActiveContextTypeAndId} from './store/work-context.reducer';
-import {NavigationEnd, Router} from '@angular/router';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { setActiveWorkContext } from './store/work-context.actions';
+import { selectActiveContextId, selectActiveContextTypeAndId } from './store/work-context.reducer';
+import { NavigationEnd, Router } from '@angular/router';
 import {
   concatMap,
   delayWhen,
@@ -27,17 +27,17 @@ import {
   take,
   withLatestFrom
 } from 'rxjs/operators';
-import {TODAY_TAG} from '../tag/tag.const';
-import {TagService} from '../tag/tag.service';
-import {Task, TaskWithSubTasks} from '../tasks/task.model';
-import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {hasTasksToWorkOn, mapEstimateRemainingFromTasks} from './work-context.util';
-import {flattenTasks, selectTaskEntities, selectTasksWithSubTasksByIds} from '../tasks/store/task.selectors';
-import {Actions, ofType} from '@ngrx/effects';
-import {moveTaskToBacklogList} from './store/work-context-meta.actions';
-import {selectProjectById} from '../project/store/project.reducer';
-import {WorklogExportSettings} from '../worklog/worklog.model';
+import { TODAY_TAG } from '../tag/tag.const';
+import { TagService } from '../tag/tag.service';
+import { Task, TaskWithSubTasks } from '../tasks/task.model';
+import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
+import { flattenTasks, selectTaskEntities, selectTasksWithSubTasksByIds } from '../tasks/store/task.selectors';
+import { Actions, ofType } from '@ngrx/effects';
+import { moveTaskToBacklogList } from './store/work-context-meta.actions';
+import { selectProjectById } from '../project/store/project.reducer';
+import { WorklogExportSettings } from '../worklog/worklog.model';
 import {
   AddToProjectBreakTime,
   UpdateProjectAdvancedCfg,
@@ -50,8 +50,8 @@ import {
   updateWorkEndForTag,
   updateWorkStartForTag
 } from '../tag/store/tag.actions';
-import {allDataWasLoaded} from '../../root-store/meta/all-data-was-loaded.actions';
-import {isToday} from '../../util/is-today.util';
+import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
+import { isToday } from '../../util/is-today.util';
 
 @Injectable({
   providedIn: 'root',
@@ -74,7 +74,6 @@ export class WorkContextService {
     shareReplay(1),
   );
   // activeWorkContextType$: Observable<WorkContextType> = this._store$.pipe(select(selectActiveContextType));
-
 
   activeWorkContextTypeAndId$: Observable<{
     activeId: string;
@@ -102,7 +101,6 @@ export class WorkContextService {
       return activeId;
     })
   );
-
 
   // for convenience...
   activeWorkContextId: string;
@@ -289,84 +287,6 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-
-  // TODO could be done better
-  getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
-    return this.todaysTasks$.pipe(
-      map((tasks) => {
-        return tasks && tasks.length && tasks.reduce((acc, task) => {
-            return acc + (
-              (task.timeSpentOnDay && +task.timeSpentOnDay[day])
-                ? +task.timeSpentOnDay[day]
-                : 0
-            );
-          }, 0
-        );
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
-  // TODO could be done better
-  getTimeEstimateForDay$(day: string = getWorklogStr()): Observable<number> {
-    return this.todaysTasks$.pipe(
-      map((tasks) => {
-        return tasks && tasks.length && tasks.reduce((acc, task) => {
-            if (!task.timeSpentOnDay && !(task.timeSpentOnDay[day] > 0)) {
-              return acc;
-            }
-            const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[day]) - task.timeSpent;
-            return (remainingEstimate > 0)
-              ? acc + remainingEstimate
-              : acc;
-          }, 0
-        );
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
-
-  getDailySummaryTasksFlat$(dayStr: string) {
-    return combineLatest([
-      this.allRepeatableTasksFlat$,
-      this._getDailySummaryTasksFlatWithoutRepeatable$(dayStr)
-    ]).pipe(
-      map(([repeatableTasks, workedOnOrDoneTasks]) => [
-        ...repeatableTasks,
-        // NOTE: remove double tasks
-        ...workedOnOrDoneTasks.filter(
-          (task => !task.repeatCfgId || task.repeatCfgId === null)
-        ),
-      ]),
-    );
-  }
-
-  getWorkStart$(day: string = getWorklogStr()): Observable<number> {
-    return this.activeWorkContext$.pipe(
-      map(ctx => ctx.workStart[day]),
-    );
-  }
-
-  getWorkEnd$(day: string = getWorklogStr()): Observable<number> {
-    return this.activeWorkContext$.pipe(
-      map(ctx => ctx.workEnd[day]),
-    );
-  }
-
-  getBreakTime$(day: string = getWorklogStr()): Observable<number> {
-    return this.activeWorkContext$.pipe(
-      map(ctx => ctx.breakTime[day]),
-    );
-  }
-
-  getBreakNr$(day: string = getWorklogStr()): Observable<number> {
-    return this.activeWorkContext$.pipe(
-      map(ctx => ctx.breakNr[day]),
-    );
-  }
-
-
   constructor(
     private _store$: Store<WorkContextState>,
     private _persistenceService: PersistenceService,
@@ -410,6 +330,81 @@ export class WorkContextService {
           this._setActiveContext(id, WorkContextType.PROJECT);
         }
       }
+    );
+  }
+
+  // TODO could be done better
+  getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
+    return this.todaysTasks$.pipe(
+      map((tasks) => {
+        return tasks && tasks.length && tasks.reduce((acc, task) => {
+            return acc + (
+              (task.timeSpentOnDay && +task.timeSpentOnDay[day])
+                ? +task.timeSpentOnDay[day]
+                : 0
+            );
+          }, 0
+        );
+      }),
+      distinctUntilChanged(),
+    );
+  }
+
+  // TODO could be done better
+  getTimeEstimateForDay$(day: string = getWorklogStr()): Observable<number> {
+    return this.todaysTasks$.pipe(
+      map((tasks) => {
+        return tasks && tasks.length && tasks.reduce((acc, task) => {
+            if (!task.timeSpentOnDay && !(task.timeSpentOnDay[day] > 0)) {
+              return acc;
+            }
+            const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[day]) - task.timeSpent;
+            return (remainingEstimate > 0)
+              ? acc + remainingEstimate
+              : acc;
+          }, 0
+        );
+      }),
+      distinctUntilChanged(),
+    );
+  }
+
+  getDailySummaryTasksFlat$(dayStr: string): Observable<Task[]> {
+    return combineLatest([
+      this.allRepeatableTasksFlat$,
+      this._getDailySummaryTasksFlatWithoutRepeatable$(dayStr)
+    ]).pipe(
+      map(([repeatableTasks, workedOnOrDoneTasks]) => [
+        ...repeatableTasks,
+        // NOTE: remove double tasks
+        ...workedOnOrDoneTasks.filter(
+          (task => !task.repeatCfgId || task.repeatCfgId === null)
+        ),
+      ]),
+    );
+  }
+
+  getWorkStart$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.workStart[day]),
+    );
+  }
+
+  getWorkEnd$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.workEnd[day]),
+    );
+  }
+
+  getBreakTime$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.breakTime[day]),
+    );
+  }
+
+  getBreakNr$(day: string = getWorklogStr()): Observable<number> {
+    return this.activeWorkContext$.pipe(
+      map(ctx => ctx.breakNr[day]),
     );
   }
 

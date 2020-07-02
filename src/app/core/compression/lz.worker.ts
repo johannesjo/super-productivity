@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import * as LZString from 'lz-string/libs/lz-string';
 
-function handleData(msgData) {
+function handleData(msgData: any) {
   switch (msgData.type) {
     case 'COMPRESS':
       return LZString.compress(msgData.strToHandle);

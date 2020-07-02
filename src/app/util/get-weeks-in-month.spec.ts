@@ -1,4 +1,4 @@
-import {getWeeksInMonth} from './get-weeks-in-month';
+import { getWeeksInMonth } from './get-weeks-in-month';
 
 describe('getWeeksInMonth', () => {
   it('should work for february 2019', () => {

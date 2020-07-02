@@ -1,15 +1,13 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, of} from 'rxjs';
-import {delay, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
-import {PROGRESS_BAR_LABEL_MAP} from './global-progress-bar.const';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { delay, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { PROGRESS_BAR_LABEL_MAP } from './global-progress-bar.const';
 
 const DELAY = 100;
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class GlobalProgressBarService {
-  nrOfRequests$ = new BehaviorSubject(0);
+  nrOfRequests$: BehaviorSubject<number> = new BehaviorSubject(0);
   isShowGlobalProgressBar$: Observable<boolean> = this.nrOfRequests$.pipe(
     map(nr => nr > 0),
     distinctUntilChanged(),
@@ -22,7 +20,7 @@ export class GlobalProgressBarService {
     delay(0),
   );
 
-  private _label$ = new BehaviorSubject(null);
+  private _label$: BehaviorSubject<string | null> = new BehaviorSubject(null);
   label$ = this._label$.pipe(
     distinctUntilChanged(),
     switchMap((label) => !!label
@@ -32,7 +30,6 @@ export class GlobalProgressBarService {
     // @see https://blog.angular-university.io/angular-debugging/
     delay(0),
   );
-
 
   constructor() {
   }
@@ -50,7 +47,7 @@ export class GlobalProgressBarService {
   }
 
   private _urlToLabel(url: string): string {
-    const [urlWithoutParams] = url.split('?');
+    const [urlWithoutParams]: string[] = url.split('?');
 
     if (PROGRESS_BAR_LABEL_MAP[url]) {
       return PROGRESS_BAR_LABEL_MAP[url];

@@ -1,11 +1,11 @@
-import {createEntityAdapter, EntityAdapter, EntityState, Update} from '@ngrx/entity';
-import {Project} from '../project.model';
-import {ProjectActions, ProjectActionTypes} from './project.actions';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {FIRST_PROJECT, PROJECT_MODEL_VERSION} from '../project.const';
-import {JiraCfg} from '../../issue/providers/jira/jira.model';
-import {GithubCfg} from '../../issue/providers/github/github.model';
-import {WorkContextType} from '../../work-context/work-context.model';
+import { createEntityAdapter, EntityAdapter, EntityState, Update } from '@ngrx/entity';
+import { Project } from '../project.model';
+import { ProjectActions, ProjectActionTypes } from './project.actions';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { FIRST_PROJECT, PROJECT_MODEL_VERSION } from '../project.const';
+import { JiraCfg } from '../../issue/providers/jira/jira.model';
+import { GithubCfg } from '../../issue/providers/github/github.model';
+import { WorkContextType } from '../../work-context/work-context.model';
 import {
   AddTask,
   DeleteTask,
@@ -26,16 +26,16 @@ import {
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
-import {moveItemInList, moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
-import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
-import {filterOutId} from '../../../util/filter-out-id';
-import {unique} from '../../../util/unique';
-import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
-import {GitlabCfg} from '../../issue/providers/gitlab/gitlab';
-import {loadAllData} from '../../../root-store/meta/load-all-data.action';
-import {AppDataComplete} from '../../../imex/sync/sync.model';
-import {migrateProjectState} from '../migrate-projects-state.util';
-import {MODEL_VERSION_KEY} from '../../../app.constants';
+import { moveItemInList, moveTaskForWorkContextLikeState } from '../../work-context/store/work-context-meta.helper';
+import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
+import { filterOutId } from '../../../util/filter-out-id';
+import { unique } from '../../../util/unique';
+import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../../issue/issue.const';
+import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { AppDataComplete } from '../../../imex/sync/sync.model';
+import { migrateProjectState } from '../migrate-projects-state.util';
+import { MODEL_VERSION_KEY } from '../../../app.constants';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -54,7 +54,6 @@ export const selectAllProjects = createSelector(selectProjectFeatureState, selec
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => !p.isArchived));
 
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => p.isArchived));
-
 
 // DYNAMIC SELECTORS
 // -----------------
@@ -89,7 +88,6 @@ export const selectUnarchivedProjectsWithoutCurrent = createSelector(
 export const selectProjectBreakTimeForProject = createSelector(selectProjectById, (project) => project.breakTime);
 export const selectProjectBreakNrForProject = createSelector(selectProjectById, (project) => project.breakNr);
 
-
 // DEFAULT
 // -------
 export const initialProjectState: ProjectState = projectAdapter.getInitialState({
@@ -101,7 +99,6 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   },
   [MODEL_VERSION_KEY]: PROJECT_MODEL_VERSION,
 });
-
 
 // REDUCER
 // -------
@@ -265,7 +262,6 @@ export function projectReducer(
       }, state);
   }
 
-
   switch (action.type) {
     // Meta Actions
     // ------------
@@ -306,7 +302,6 @@ export function projectReducer(
         : state;
     }
 
-
     case TaskActionTypes.MoveToArchive: {
       const {tasks} = action.payload;
       const taskIdsToMoveToArchive = tasks.map(t => t.id);
@@ -338,7 +333,6 @@ export function projectReducer(
         }
       }, state);
     }
-
 
     case TaskActionTypes.MoveToOtherProject: {
       const {task, targetProjectId} = action.payload;

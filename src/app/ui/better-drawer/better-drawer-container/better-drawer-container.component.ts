@@ -11,13 +11,12 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {fadeAnimation} from '../../animations/fade.ani';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
-import {Observable, ReplaySubject, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter, map, share, switchMap} from 'rxjs/operators';
-import {observeWidth} from '../../../util/resize-observer-obs';
-import {MainContainerClass} from '../../../app.constants';
-
+import { fadeAnimation } from '../../animations/fade.ani';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
+import { Observable, ReplaySubject, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map, share, switchMap } from 'rxjs/operators';
+import { observeWidth } from '../../../util/resize-observer-obs';
+import { MainContainerClass } from '../../../app.constants';
 
 const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;
@@ -31,8 +30,8 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
 })
 export class BetterDrawerContainerComponent implements OnInit, AfterContentInit, OnDestroy {
   @Input() sideWidth: number;
-  @Output() wasClosed = new EventEmitter<void>();
-  contentEl$ = new ReplaySubject<HTMLElement>(1);
+  @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
+  contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
   containerWidth$: Observable<number> = this.contentEl$.pipe(
     filter(el => !!el),
     switchMap((el) => observeWidth(el)),
@@ -48,7 +47,7 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
     distinctUntilChanged(),
   );
   sideStyle: SafeStyle;
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _elementRef: ElementRef,

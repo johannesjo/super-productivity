@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {GlobalConfigActionTypes} from './store/global-config.actions';
-import {Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { GlobalConfigActionTypes } from './store/global-config.actions';
+import { Observable } from 'rxjs';
 import {
   EvaluationConfig,
   GlobalConfigSectionKey,
@@ -20,9 +20,9 @@ import {
   selectMiscConfig,
   selectTakeABreakConfig
 } from './store/global-config.reducer';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
-import {distinctUntilChangedObject} from '../../util/distinct-until-changed-object';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
 @Injectable({
   providedIn: 'root',

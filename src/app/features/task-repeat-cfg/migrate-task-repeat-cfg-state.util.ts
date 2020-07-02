@@ -1,7 +1,7 @@
-import {Dictionary} from '@ngrx/entity';
-import {MODEL_VERSION_KEY} from '../../app.constants';
-import {isMigrateModel} from '../../util/model-version';
-import {TaskRepeatCfg, TaskRepeatCfgState} from './task-repeat-cfg.model';
+import { Dictionary } from '@ngrx/entity';
+import { MODEL_VERSION_KEY } from '../../app.constants';
+import { isMigrateModel } from '../../util/model-version';
+import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
 
 const MODEL_VERSION = 1;
 

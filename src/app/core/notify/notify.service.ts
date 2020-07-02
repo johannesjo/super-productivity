@@ -1,13 +1,13 @@
-import {Injectable} from '@angular/core';
-import {NotifyModel} from './notify.model';
-import {environment} from '../../../environments/environment';
-import {IS_ELECTRON} from '../../app.constants';
-import {IS_MOBILE} from '../../util/is-mobile';
-import {TranslateService} from '@ngx-translate/core';
-import {ElectronService} from '../electron/electron.service';
-import {UiHelperService} from '../../features/ui-helper/ui-helper.service';
-import {IS_ANDROID_WEB_VIEW} from '../../util/is-android-web-view';
-import {androidInterface} from '../android/android-interface';
+import { Injectable } from '@angular/core';
+import { NotifyModel } from './notify.model';
+import { environment } from '../../../environments/environment';
+import { IS_ELECTRON } from '../../app.constants';
+import { IS_MOBILE } from '../../util/is-mobile';
+import { TranslateService } from '@ngx-translate/core';
+import { ElectronService } from '../electron/electron.service';
+import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { androidInterface } from '../android/android-interface';
 
 @Injectable({
   providedIn: 'root',

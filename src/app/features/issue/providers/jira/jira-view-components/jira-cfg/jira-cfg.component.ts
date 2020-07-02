@@ -1,23 +1,23 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {ConfigFormSection, GlobalConfigSectionKey} from '../../../../../config/global-config.model';
-import {ProjectCfgFormKey} from '../../../../../project/project.model';
-import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
-import {FormControl, FormGroup} from '@angular/forms';
-import {JiraCfg, JiraTransitionConfig, JiraTransitionOption} from '../../jira.model';
-import {expandAnimation} from '../../../../../../ui/animations/expand.ani';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {SearchResultItem} from '../../../../issue.model';
-import {catchError, concatMap, debounceTime, first, map, switchMap, tap} from 'rxjs/operators';
-import {JiraApiService} from '../../jira-api.service';
-import {DEFAULT_JIRA_CFG} from '../../jira.const';
-import {JiraIssue} from '../../jira-issue/jira-issue.model';
-import {SnackService} from '../../../../../../core/snack/snack.service';
-import {T} from '../../../../../../t.const';
-import {HelperClasses} from '../../../../../../app.constants';
-import {ProjectService} from '../../../../../project/project.service';
-import {WorkContextService} from '../../../../../work-context/work-context.service';
-import {WorkContextType} from '../../../../../work-context/work-context.model';
-import {JIRA_TYPE} from '../../../../issue.const';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ConfigFormSection, GlobalConfigSectionKey } from '../../../../../config/global-config.model';
+import { ProjectCfgFormKey } from '../../../../../project/project.model';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { JiraCfg, JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
+import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { SearchResultItem } from '../../../../issue.model';
+import { catchError, concatMap, debounceTime, first, map, switchMap, tap } from 'rxjs/operators';
+import { JiraApiService } from '../../jira-api.service';
+import { DEFAULT_JIRA_CFG } from '../../jira.const';
+import { JiraIssue } from '../../jira-issue/jira-issue.model';
+import { SnackService } from '../../../../../../core/snack/snack.service';
+import { T } from '../../../../../../t.const';
+import { HelperClasses } from '../../../../../../app.constants';
+import { ProjectService } from '../../../../../project/project.service';
+import { WorkContextService } from '../../../../../work-context/work-context.service';
+import { WorkContextType } from '../../../../../work-context/work-context.model';
+import { JIRA_TYPE } from '../../../../issue.const';
 
 @Component({
   selector: 'jira-cfg',
@@ -29,7 +29,7 @@ import {JIRA_TYPE} from '../../../../issue.const';
 export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<JiraCfg>;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
-  T = T;
+  T: any = T;
   HelperClasses = HelperClasses;
   issueSuggestionsCtrl: FormControl = new FormControl();
   customFieldSuggestionsCtrl: FormControl = new FormControl();
@@ -37,7 +37,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   customFieldsPromise: Promise<any>;
   isLoading$ = new BehaviorSubject(false);
   fields: FormlyFieldConfig[];
-  form = new FormGroup({});
+  form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
   filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.issueSuggestionsCtrl.valueChanges.pipe(
     debounceTime(300),
@@ -64,7 +64,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   );
   transitionConfigOpts: { key: keyof JiraTransitionConfig; val: JiraTransitionOption }[];
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _jiraApiService: JiraApiService,

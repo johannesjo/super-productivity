@@ -1,4 +1,4 @@
-import {sortWorklogDates} from './sortWorklogDates';
+import { sortWorklogDates } from './sortWorklogDates';
 
 describe('sortWorklogDates', () => {
   it('should sort a list of unsorted dates', () => {

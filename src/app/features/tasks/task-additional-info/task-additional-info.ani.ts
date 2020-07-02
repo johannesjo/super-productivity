@@ -1,5 +1,5 @@
-import {animate, style, transition, trigger} from '@angular/animations';
-import {ANI_ENTER_TIMING} from '../../../ui/animations/animation.const';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { ANI_ENTER_TIMING } from '../../../ui/animations/animation.const';
 
 const ANI = [
   style({opacity: 0, transform: 'scale(0.9)'}),

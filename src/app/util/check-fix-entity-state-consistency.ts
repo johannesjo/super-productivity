@@ -1,4 +1,4 @@
-import {devError} from './dev-error';
+import { devError } from './dev-error';
 
 export const checkFixEntityStateConsistency = (data: any, additionalStr = ''): any => {
   if (!isEntityStateConsistent(data, additionalStr)) {

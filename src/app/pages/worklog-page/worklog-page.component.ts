@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {T} from '../../t.const';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { T } from '../../t.const';
 
 @Component({
   selector: 'worklog-page',
@@ -8,7 +8,7 @@ import {T} from '../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WorklogPageComponent {
-  T = T;
+  T: any = T;
 
   constructor() {
   }

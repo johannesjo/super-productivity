@@ -1,16 +1,16 @@
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {LineChartData, Metric, MetricState, PieChartData} from '../metric.model';
-import {sortWorklogDates} from '../../../util/sortWorklogDates';
-import {METRIC_FEATURE_NAME, metricAdapter} from './metric.reducer';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { LineChartData, Metric, MetricState, PieChartData } from '../metric.model';
+import { sortWorklogDates } from '../../../util/sortWorklogDates';
+import { METRIC_FEATURE_NAME, metricAdapter } from './metric.reducer';
 import {
   selectAllImprovementIds,
   selectImprovementFeatureState,
   selectRepeatedImprovementIds
 } from '../improvement/store/improvement.reducer';
-import {Improvement, ImprovementState} from '../improvement/improvement.model';
-import {selectAllObstructionIds, selectObstructionFeatureState} from '../obstruction/store/obstruction.reducer';
-import {ObstructionState} from '../obstruction/obstruction.model';
-import {unique} from '../../../util/unique';
+import { Improvement, ImprovementState } from '../improvement/improvement.model';
+import { selectAllObstructionIds, selectObstructionFeatureState } from '../obstruction/store/obstruction.reducer';
+import { ObstructionState } from '../obstruction/obstruction.model';
+import { unique } from '../../../util/unique';
 
 export const selectMetricFeatureState = createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = metricAdapter.getSelectors();
@@ -86,14 +86,12 @@ export const selectUnusedObstructionIds = createSelector(
   }
 );
 
-
 // DYNAMIC
 // -------
 export const selectMetricById = createSelector(
   selectMetricFeatureState,
   (state, props: { id: string }) => state.entities[props.id]
 );
-
 
 // STATISTICS
 // ...

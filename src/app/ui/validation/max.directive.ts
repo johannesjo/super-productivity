@@ -1,7 +1,7 @@
-import {Directive, forwardRef, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import {AbstractControl, NG_VALIDATORS, Validator, ValidatorFn} from '@angular/forms';
+import { Directive, forwardRef, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { AbstractControl, NG_VALIDATORS, Validator, ValidatorFn } from '@angular/forms';
 
-import {maxValidator} from './max.validator';
+import { maxValidator } from './max.validator';
 
 const MAX_VALIDATOR: any = {
   provide: NG_VALIDATORS,

@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {TaskWithSubTasks} from '../../../../../tasks/task.model';
-import {GitlabIssue} from '../gitlab-issue.model';
-import {expandAnimation} from '../../../../../../ui/animations/expand.ani';
-import {T} from '../../../../../../t.const';
-import {TaskService} from '../../../../../tasks/task.service';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { TaskWithSubTasks } from '../../../../../tasks/task.model';
+import { GitlabIssue } from '../gitlab-issue.model';
+import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
+import { T } from '../../../../../../t.const';
+import { TaskService } from '../../../../../tasks/task.service';
 
 @Component({
   selector: 'gitlab-issue-content',
@@ -16,7 +16,7 @@ export class GitlabIssueContentComponent {
   @Input() public issue: GitlabIssue;
   @Input() public task: TaskWithSubTasks;
 
-  T = T;
+  T: any = T;
 
   constructor(
     private readonly  _taskService: TaskService,

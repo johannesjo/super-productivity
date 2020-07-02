@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
 import {
   BookmarkState,
   initialBookmarkState,
@@ -16,15 +16,14 @@ import {
   ToggleBookmarks,
   UpdateBookmark
 } from './store/bookmark.actions';
-import {Observable} from 'rxjs';
-import {Bookmark} from './bookmark.model';
+import { Observable } from 'rxjs';
+import { Bookmark } from './bookmark.model';
 import shortid from 'shortid';
-import {DialogEditBookmarkComponent} from './dialog-edit-bookmark/dialog-edit-bookmark.component';
-import {MatDialog} from '@angular/material/dialog';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {createFromDrop, createFromPaste} from '../../core/drop-paste-input/drop-paste-input';
-import {DropPasteInput} from '../../core/drop-paste-input/drop-paste.model';
-
+import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
+import { MatDialog } from '@angular/material/dialog';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { createFromDrop, createFromPaste } from '../../core/drop-paste-input/drop-paste-input';
+import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
 
 @Injectable({
   providedIn: 'root',
@@ -82,27 +81,25 @@ export class BookmarkService {
     this._store$.dispatch(new ReorderBookmarks({ids}));
   }
 
-
   // HANDLE INPUT
   // ------------
-  createFromDrop(ev) {
+  createFromDrop(ev: Event) {
     this._handleInput(createFromDrop(ev), ev);
   }
 
-
-  createFromPaste(ev) {
+  createFromPaste(ev: Event) {
     this._handleInput(createFromPaste(ev), ev);
   }
 
-
-  private _handleInput(bookmark: DropPasteInput, ev) {
+  private _handleInput(bookmark: DropPasteInput, ev: Event) {
     // properly not intentional so we leave
     if (!bookmark || !bookmark.path) {
       return;
     }
 
     // don't intervene with text inputs
-    if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
+    const targetEl: HTMLElement = ev.target as HTMLElement;
+    if (targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA') {
       return;
     }
 

@@ -1,15 +1,13 @@
-import {Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-
+import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 
 // HELPER
 // -----------------------------------
-
 
 @Directive({
   selector: '[contentEditableOnClick]',
 })
 export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
-  @Input() isResetAfterEdit = false;
+  @Input() isResetAfterEdit: boolean = false;
   @Output() editFinished: EventEmitter<any> = new EventEmitter();
   private _lastDomValue: string;
   private _lastOutsideVal: string;
@@ -22,7 +20,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
 
   private _value: string;
 
-  @Input() set value(_val) {
+  @Input() set value(_val: string) {
     this._value = this._lastOutsideVal = _val;
     // also update last dom value because that's how check for changes
     this._lastDomValue = _val;
@@ -104,7 +102,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     this._el.innerText = this._value;
   }
 
-  private _onEditDone(event) {
+  private _onEditDone(event: Event) {
     // deselect all text
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
@@ -131,7 +129,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     this._value = this._removeTags(this._el.innerText);
   }
 
-  private _insertAtCursor(el, newText) {
+  private _insertAtCursor(el: HTMLElement, newText: string) {
     const sel = window.getSelection();
 
     const start = sel.anchorOffset;
@@ -153,7 +151,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
     sel2.addRange(range);
   }
 
-  private _removeTags(str) {
+  private _removeTags(str: string) {
     return str.replace(/<\/?[^`]+?\/?>/gmi, '\n') // replace all tags
       .replace(/\n/gmi, '') // replace line breaks
       .replace(/&nbsp;/gmi, '') // replace line breaks

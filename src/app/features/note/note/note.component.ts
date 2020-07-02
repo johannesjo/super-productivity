@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, Input, ViewChild} from '@angular/core';
-import {Note} from '../note.model';
-import {NoteService} from '../note.service';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogAddNoteReminderComponent} from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
-import {T} from '../../../t.const';
-import {DialogFullscreenMarkdownComponent} from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import { ChangeDetectionStrategy, Component, Input, ViewChild } from '@angular/core';
+import { Note } from '../note.model';
+import { NoteService } from '../note.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogAddNoteReminderComponent } from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
+import { T } from '../../../t.const';
+import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 
 @Component({
   selector: 'note',
@@ -18,7 +18,7 @@ export class NoteComponent {
 
   @ViewChild('markdownEl') markdownEl: HTMLElement;
 
-  T = T;
+  T: any = T;
 
   constructor(
     private readonly _matDialog: MatDialog,
@@ -30,7 +30,7 @@ export class NoteComponent {
     this._noteService.update(this.note.id, {isLock: !this.note.isLock});
   }
 
-  updateContent(newVal) {
+  updateContent(newVal: any) {
     this._noteService.update(this.note.id, {content: newVal});
   }
 

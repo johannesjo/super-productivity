@@ -1,7 +1,7 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection, LanguageConfig} from '../global-config.model';
-import {LanguageCode} from '../../../app.constants';
-import {T} from '../../../t.const';
+import { ConfigFormSection, LanguageConfig } from '../global-config.model';
+import { LanguageCode } from '../../../app.constants';
+import { T } from '../../../t.const';
 
 export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
   title: T.GCF.LANG.TITLE,

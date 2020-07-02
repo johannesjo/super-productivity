@@ -1,11 +1,11 @@
-import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {TaskService} from '../../tasks/task.service';
-import {Observable} from 'rxjs';
-import {Task} from '../../tasks/task.model';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {MetricService} from '../../metric/metric.service';
-import {T} from '../../../t.const';
+import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TaskService } from '../../tasks/task.service';
+import { Observable } from 'rxjs';
+import { Task } from '../../tasks/task.model';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { MetricService } from '../../metric/metric.service';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'dialog-idle',
@@ -14,7 +14,7 @@ import {T} from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogIdleComponent implements OnInit {
-  T = T;
+  T: any = T;
   lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(this.data.lastCurrentTaskId);
   selectedTask: Task;
   newTaskTitle: string;
@@ -63,7 +63,7 @@ export class DialogIdleComponent implements OnInit {
     });
   }
 
-  track(isTrackAsBreak = false) {
+  track(isTrackAsBreak: boolean = false) {
     this._matDialogRef.close({
       task: this.selectedTask || this.newTaskTitle,
       isTrackAsBreak,

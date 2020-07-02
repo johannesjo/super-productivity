@@ -1,27 +1,28 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {TaskService} from '../../features/tasks/task.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {IS_ELECTRON} from '../../app.constants';
-import {MatDialog} from '@angular/material/dialog';
-import {Observable, Subscription} from 'rxjs';
-import {IPC} from '../../../../electron/ipc-events.const';
-import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
-import {NoteService} from '../../features/note/note.service';
-import {GlobalConfigService} from '../../features/config/global-config.service';
-import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
-import {SnackService} from '../../core/snack/snack.service';
-import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
-import {GoogleApiService} from '../../features/google/google-api.service';
-import {ProjectService} from '../../features/project/project.service';
-import {getWorklogStr} from '../../util/get-work-log-str';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { TaskService } from '../../features/tasks/task.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IS_ELECTRON } from '../../app.constants';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable, Subscription } from 'rxjs';
+import { IPC } from '../../../../electron/ipc-events.const';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { NoteService } from '../../features/note/note.service';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { filter, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
+import { GoogleApiService } from '../../features/google/google-api.service';
+import { ProjectService } from '../../features/project/project.service';
+import { getWorklogStr } from '../../util/get-work-log-str';
 import * as moment from 'moment';
-import {RoundTimeOption} from '../../features/project/project.model';
-import {T} from '../../t.const';
-import {WorklogService} from '../../features/worklog/worklog.service';
-import {DialogWorklogExportComponent} from '../../features/worklog/dialog-worklog-export/dialog-worklog-export.component';
-import {ElectronService} from '../../core/electron/electron.service';
-import {WorkContextService} from '../../features/work-context/work-context.service';
-import {DropboxSyncService} from '../../features/dropbox/dropbox-sync.service';
+import { RoundTimeOption } from '../../features/project/project.model';
+import { T } from '../../t.const';
+import { WorklogService } from '../../features/worklog/worklog.service';
+import { DialogWorklogExportComponent } from '../../features/worklog/dialog-worklog-export/dialog-worklog-export.component';
+import { ElectronService } from '../../core/electron/electron.service';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { DropboxSyncService } from '../../features/dropbox/dropbox-sync.service';
+import { Task } from '../../features/tasks/task.model';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -32,20 +33,20 @@ const SUCCESS_ANIMATION_DURATION = 500;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
 
-  cfg = {
+  cfg: any = {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
 
-  isTimeSheetExported = true;
-  showSuccessAnimation;
-  selectedTabIndex = 0;
-  isForToday = true;
+  isTimeSheetExported: boolean = true;
+  showSuccessAnimation: boolean;
+  selectedTabIndex: number = 0;
+  isForToday: boolean = true;
 
-  dayStr = getWorklogStr();
+  dayStr: string = getWorklogStr();
 
-  dayStr$ = this._activatedRoute.paramMap.pipe(
+  dayStr$: Observable<string> = this._activatedRoute.paramMap.pipe(
     startWith({params: {dayStr: getWorklogStr()}}),
     map((s: any) => {
       if (s && s.params.dayStr) {
@@ -57,7 +58,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     shareReplay(1)
   );
 
-  tasksWorkedOnOrDoneOrRepeatableFlat$ = this.dayStr$.pipe(
+  tasksWorkedOnOrDoneOrRepeatableFlat$: Observable<Task[]> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getDailySummaryTasksFlat$(dayStr)),
     shareReplay(1),
   );
@@ -72,19 +73,19 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     map(tasks => tasks && tasks.length),
   );
 
-  estimatedOnTasksWorkedOn$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeEstimateForDay$(dayStr)));
+  estimatedOnTasksWorkedOn$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeEstimateForDay$(dayStr)));
 
-  timeWorked$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeWorkedForDay$(dayStr)));
+  timeWorked$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeWorkedForDay$(dayStr)));
 
-  started$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkStart$(dayStr)));
-  end$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkEnd$(dayStr)));
+  started$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkStart$(dayStr)));
+  end$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkEnd$(dayStr)));
 
-  breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getBreakTime$(dayStr)));
-  breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getBreakNr$(dayStr)));
+  breakTime$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getBreakTime$(dayStr)));
+  breakNr$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getBreakNr$(dayStr)));
 
   isBreakTrackingSupport$: Observable<boolean> = this.configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 
-  private _successAnimationTimeout;
+  private _successAnimationTimeout: number;
 
   // calc time spent on todays tasks today
   private _subs: Subscription = new Subscription();
@@ -182,21 +183,21 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateWorkStart(ev) {
+  updateWorkStart(ev: string) {
     const startTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (startTime) {
       this.workContextService.updateWorkStartForActiveContext(this.dayStr, startTime);
     }
   }
 
-  updateWorkEnd(ev) {
+  updateWorkEnd(ev: string) {
     const endTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (endTime) {
       this.workContextService.updateWorkEndForActiveContext(this.dayStr, endTime);
     }
   }
 
-  async roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp = false) {
+  async roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp: boolean = false) {
     const taskIds = await this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
       map(tasks => tasks.map(task => task.id)),
       take(1),
@@ -204,7 +205,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._taskService.roundTimeSpentForDay(this.dayStr, taskIds, roundTo, isRoundUp);
   }
 
-  onTabIndexChange(i) {
+  onTabIndexChange(i: number) {
     this.selectedTabIndex = i;
   }
 
@@ -212,7 +213,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._worklogService.refreshWorklog();
   }
 
-  private async _finishDayForGood(cb?) {
+  private async _finishDayForGood(cb?: any) {
     if (this.configService.cfg
       && this.configService.cfg.googleDriveSync.isEnabled
       && this.configService.cfg.googleDriveSync.isAutoSyncToRemote) {
@@ -232,7 +233,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _initSuccessAnimation(cb?) {
+  private _initSuccessAnimation(cb?: any) {
     this.showSuccessAnimation = true;
     this._cd.detectChanges();
     this._successAnimationTimeout = window.setTimeout(() => {

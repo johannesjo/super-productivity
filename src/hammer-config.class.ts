@@ -1,10 +1,8 @@
-import {HammerGestureConfig} from '@angular/platform-browser';
+import { HammerGestureConfig } from '@angular/platform-browser';
 import * as Hammer from 'hammerjs';
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = {
     swipe: {direction: Hammer.DIRECTION_HORIZONTAL},

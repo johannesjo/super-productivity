@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {IS_ELECTRON} from '../../../app.constants';
-import {MATERIAL_ICONS} from '../../../ui/material-icons.const';
-import {BookmarkCopy, BookmarkType} from '../bookmark.model';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/operators';
-import {T} from '../../../t.const';
-import {TranslateService} from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { IS_ELECTRON } from '../../../app.constants';
+import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
+import { Bookmark, BookmarkCopy, BookmarkType } from '../bookmark.model';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { T } from '../../../t.const';
+import { TranslateService } from '@ngx-translate/core';
 
 interface BookmarkSelectType {
   type: BookmarkType;
@@ -21,11 +21,11 @@ interface BookmarkSelectType {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditBookmarkComponent implements OnInit {
-  T = T;
+  T: any = T;
   types: BookmarkSelectType[];
   bookmarkCopy: BookmarkCopy;
   customIcons: string[] = MATERIAL_ICONS;
-  iconControl = new FormControl();
+  iconControl: FormControl = new FormControl();
   filteredIcons$: Observable<string[]> = this.iconControl.valueChanges.pipe(
     startWith(''),
     map((searchTerm) => {
@@ -58,7 +58,7 @@ export class DialogEditBookmarkComponent implements OnInit {
     }
   }
 
-  close(bookmark?) {
+  close(bookmark?: Bookmark) {
     this._matDialogRef.close(bookmark);
   }
 

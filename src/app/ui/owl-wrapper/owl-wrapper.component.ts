@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {T} from 'src/app/t.const';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'owl-wrapper',
@@ -13,25 +13,12 @@ export class OwlWrapperComponent {
 
   @Input()
   model: number;
-
-  @Input('dateTime')
-  set dateTimeSet(v: number) {
-    this.dateTime = v;
-    // NOTE: owl doesn't with undefined...
-    if (v) {
-      this.date = new Date(v);
-    }
-  }
-
   dateTime: number;
-
   @Output()
-  dateTimeChange = new EventEmitter<number>();
-
+  dateTimeChange: EventEmitter<number> = new EventEmitter();
   @Output()
-  triggerSubmit = new EventEmitter<number>();
-
-  T = T;
+  triggerSubmit: EventEmitter<number> = new EventEmitter();
+  T: any = T;
   date = new Date();
   laterTodaySlots = [
     '9:00',
@@ -44,6 +31,15 @@ export class OwlWrapperComponent {
   ];
 
   constructor() {
+  }
+
+  @Input('dateTime')
+  set dateTimeSet(v: number) {
+    this.dateTime = v;
+    // NOTE: owl doesn't with undefined...
+    if (v) {
+      this.date = new Date(v);
+    }
   }
 
   submit() {

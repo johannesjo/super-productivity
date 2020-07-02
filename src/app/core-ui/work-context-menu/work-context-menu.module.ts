@@ -1,9 +1,8 @@
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {WorkContextMenuComponent} from './work-context-menu.component';
-import {UiModule} from '../../ui/ui.module';
-import {RouterModule} from '@angular/router';
-
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { WorkContextMenuComponent } from './work-context-menu.component';
+import { UiModule } from '../../ui/ui.module';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [

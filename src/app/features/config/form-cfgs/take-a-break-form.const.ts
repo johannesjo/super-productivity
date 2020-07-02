@@ -1,6 +1,6 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection, TakeABreakConfig} from '../global-config.model';
-import {T} from '../../../t.const';
+import { ConfigFormSection, TakeABreakConfig } from '../global-config.model';
+import { T } from '../../../t.const';
 
 export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
   title: T.GCF.TAKE_A_BREAK.TITLE,

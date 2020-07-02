@@ -1,7 +1,7 @@
-import {SimpleCounter, SimpleCounterType} from './simple-counter.model';
-import {loadAllData} from '../../root-store/meta/load-all-data.action';
-import {PomodoroActionTypes} from '../pomodoro/store/pomodoro.actions';
-import {TaskActionTypes} from '../tasks/store/task.actions';
+import { SimpleCounter, SimpleCounterType } from './simple-counter.model';
+import { loadAllData } from '../../root-store/meta/load-all-data.action';
+import { PomodoroActionTypes } from '../pomodoro/store/pomodoro.actions';
+import { TaskActionTypes } from '../tasks/store/task.actions';
 
 export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   id: undefined,

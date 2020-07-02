@@ -1,11 +1,10 @@
-import {Project} from './project.model';
-import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
+import { Project } from './project.model';
+import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 import {
   DEFAULT_PROJECT_COLOR,
   WORK_CONTEXT_DEFAULT_COMMON,
   WORK_CONTEXT_DEFAULT_THEME
 } from '../work-context/work-context.const';
-
 
 export const DEFAULT_PROJECT: Project = {
   id: null,
@@ -20,7 +19,6 @@ export const DEFAULT_PROJECT: Project = {
     primary: DEFAULT_PROJECT_COLOR,
   }
 };
-
 
 export const DEFAULT_PROJECT_ID = 'DEFAULT';
 

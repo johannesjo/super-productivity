@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output} from '@angular/core';
-import {expandAnimation} from '../animations/expand.ani';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import { expandAnimation } from '../animations/expand.ani';
 
 @Component({
   selector: 'collapsible',

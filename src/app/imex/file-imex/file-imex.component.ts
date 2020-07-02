@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, Component, ElementRef, ViewChild} from '@angular/core';
-import {DataImportService} from '../sync/data-import.service';
-import {SnackService} from '../../core/snack/snack.service';
-import {AppDataComplete} from '../sync/sync.model';
-import {download} from '../../util/download';
-import {T} from '../../t.const';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
+import { DataImportService } from '../sync/data-import.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { AppDataComplete } from '../sync/sync.model';
+import { download } from '../../util/download';
+import { T } from '../../t.const';
 
 @Component({
   selector: 'file-imex',
@@ -13,7 +13,7 @@ import {T} from '../../t.const';
 })
 export class FileImexComponent {
   @ViewChild('fileInput', {static: true}) fileInputRef: ElementRef;
-  T = T;
+  T: any = T;
 
   constructor(
     private _dataImportService: DataImportService,

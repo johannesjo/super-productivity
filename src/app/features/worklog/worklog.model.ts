@@ -1,6 +1,6 @@
-import {WorklogTask} from '../tasks/task.model';
-import {RoundTimeOption} from '../project/project.model';
-import {WeeksInMonth} from '../../util/get-week-in-month-model';
+import { WorklogTask } from '../tasks/task.model';
+import { RoundTimeOption } from '../project/project.model';
+import { WeeksInMonth } from '../../util/get-week-in-month-model';
 
 export interface WorklogDataForDay {
   timeSpent: number;
@@ -49,7 +49,6 @@ export interface WorklogYear {
 export interface Worklog {
   [key: number]: WorklogYear;
 }
-
 
 export type WorklogColTypes =
   'EMPTY'

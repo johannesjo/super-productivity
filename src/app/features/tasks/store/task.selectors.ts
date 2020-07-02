@@ -1,9 +1,9 @@
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {TASK_FEATURE_NAME} from './task.reducer';
-import {Task, TaskState, TaskWithSubTasks} from '../task.model';
-import {taskAdapter} from './task.adapter';
-import {GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
-import {devError} from '../../../util/dev-error';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { TASK_FEATURE_NAME } from './task.reducer';
+import { Task, TaskState, TaskWithSubTasks } from '../task.model';
+import { taskAdapter } from './task.adapter';
+import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../../issue/issue.const';
+import { devError } from '../../../util/dev-error';
 
 const mapSubTasksToTasks = (tasksIN): TaskWithSubTasks[] => {
   return tasksIN.filter((task) => !task.parentId)
@@ -34,7 +34,6 @@ const mapSubTasksToTask = (task: Task, s: TaskState): TaskWithSubTasks => {
     })
   };
 };
-
 
 export const flattenTasks = (tasksIN): TaskWithSubTasks[] => {
   let flatTasks = [];
@@ -104,12 +103,10 @@ export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeature
   || s.entities[s.currentTaskId]
 );
 
-
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) => tasks.filter(task => task.reminderId));
 
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasks, mapSubTasksToTasks);
-
 
 // DYNAMIC SELECTORS
 // -----------------
@@ -164,7 +161,6 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(selectAllTasks, (tas
     (t: Task) => t.isDone || (t.timeSpentOnDay && t.timeSpentOnDay[todayStr] && t.timeSpentOnDay[todayStr] > 0)
   );
 });
-
 
 // REPEATABLE TASKS
 // ----------------

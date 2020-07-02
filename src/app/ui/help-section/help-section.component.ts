@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
-import {expandFadeAnimation} from '../animations/expand.ani';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { expandFadeAnimation } from '../animations/expand.ani';
 
 @Component({
   selector: 'help-section',

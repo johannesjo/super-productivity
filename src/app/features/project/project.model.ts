@@ -1,8 +1,7 @@
-import {IssueIntegrationCfgs, IssueProviderKey} from '../issue/issue.model';
-import {WorkContextAdvancedCfgKey, WorkContextCommon} from '../work-context/work-context.model';
+import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue.model';
+import { WorkContextAdvancedCfgKey, WorkContextCommon } from '../work-context/work-context.model';
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
-
 
 export interface ProjectBasicCfg {
   title: string;
@@ -17,7 +16,6 @@ export interface ProjectBasicCfg {
   taskIds: string[];
   backlogTaskIds: string[];
 }
-
 
 export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
   id: string;

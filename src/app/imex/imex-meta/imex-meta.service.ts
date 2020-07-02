@@ -1,13 +1,11 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class ImexMetaService {
   // TODO check if this is needed
-  isDataImportInProgress = false;
-  private _isDataImportInProgress$ = new BehaviorSubject<boolean>(false);
+  isDataImportInProgress: boolean = false;
+  private _isDataImportInProgress$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isDataImportInProgress$: Observable<boolean> = this._isDataImportInProgress$.asObservable();
 
   constructor() {

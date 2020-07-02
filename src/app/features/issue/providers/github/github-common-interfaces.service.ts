@@ -1,17 +1,16 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {Task} from 'src/app/features/tasks/task.model';
-import {catchError, concatMap, first, map, switchMap} from 'rxjs/operators';
-import {IssueServiceInterface} from '../../issue-service-interface';
-import {GithubApiService} from './github-api.service';
-import {ProjectService} from '../../../project/project.service';
-import {SearchResultItem} from '../../issue.model';
-import {GithubCfg} from './github.model';
-import {SnackService} from '../../../../core/snack/snack.service';
-import {GithubIssue, GithubIssueReduced} from './github-issue/github-issue.model';
-import {truncate} from '../../../../util/truncate';
-import {T} from '../../../../t.const';
-
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { Task } from 'src/app/features/tasks/task.model';
+import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
+import { IssueServiceInterface } from '../../issue-service-interface';
+import { GithubApiService } from './github-api.service';
+import { ProjectService } from '../../../project/project.service';
+import { SearchResultItem } from '../../issue.model';
+import { GithubCfg } from './github.model';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
+import { truncate } from '../../../../util/truncate';
+import { T } from '../../../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -47,8 +46,8 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
   async refreshIssue(
     task: Task,
-    isNotifySuccess = true,
-    isNotifyNoUpdateRequired = false,
+    isNotifySuccess: boolean = true,
+    isNotifyNoUpdateRequired: boolean = false,
   ): Promise<{ taskChanges: Partial<Task>, issue: GithubIssue }> {
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();

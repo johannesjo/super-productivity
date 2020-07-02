@@ -1,4 +1,4 @@
-import {GlobalConfigState} from './global-config.model';
+import { GlobalConfigState } from './global-config.model';
 
 const minute = 60 * 1000;
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {

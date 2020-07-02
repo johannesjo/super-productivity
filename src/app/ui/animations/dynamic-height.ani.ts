@@ -1,5 +1,5 @@
-import {animate, style, transition, trigger} from '@angular/animations';
-import {ANI_STANDARD_TIMING} from './animation.const';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { ANI_STANDARD_TIMING } from './animation.const';
 
 export const dynamicHeightAnimation = [
   trigger('dynamicHeight', [

@@ -1,17 +1,17 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {T} from '../../t.const';
-import {TaskService} from '../../features/tasks/task.service';
-import {ScheduledTaskService} from '../../features/tasks/scheduled-task.service';
-import {ReminderService} from '../../features/reminder/reminder.service';
-import {MatDialog} from '@angular/material/dialog';
-import {Task, TaskWithReminderData} from '../../features/tasks/task.model';
-import {DialogAddTaskReminderComponent} from '../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import {standardListAnimation} from '../../ui/animations/standard-list.ani';
-import {Router} from '@angular/router';
-import {take} from 'rxjs/operators';
-import {AddTaskReminderInterface} from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
-import {WorkContextService} from '../../features/work-context/work-context.service';
-import {TODAY_TAG} from '../../features/tag/tag.const';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { T } from '../../t.const';
+import { TaskService } from '../../features/tasks/task.service';
+import { ScheduledTaskService } from '../../features/tasks/scheduled-task.service';
+import { ReminderService } from '../../features/reminder/reminder.service';
+import { MatDialog } from '@angular/material/dialog';
+import { Task, TaskWithReminderData } from '../../features/tasks/task.model';
+import { DialogAddTaskReminderComponent } from '../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
+import { Router } from '@angular/router';
+import { take } from 'rxjs/operators';
+import { AddTaskReminderInterface } from '../../features/tasks/dialog-add-task-reminder/add-task-reminder-interface';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 @Component({
   selector: 'schedule-page',
@@ -21,7 +21,7 @@ import {TODAY_TAG} from '../../features/tag/tag.const';
   animations: [standardListAnimation]
 })
 export class SchedulePageComponent {
-  T = T;
+  T: any = T;
   TODAY_TAG = TODAY_TAG;
 
   constructor(
@@ -68,7 +68,6 @@ export class SchedulePageComponent {
     }
     // this.focusSelf();
   }
-
 
   trackByFn(i: number, task: TaskWithReminderData) {
     return task.id;

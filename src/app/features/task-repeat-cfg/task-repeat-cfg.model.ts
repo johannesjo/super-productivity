@@ -1,5 +1,5 @@
-import {EntityState} from '@ngrx/entity';
-import {MODEL_VERSION_KEY} from '../../app.constants';
+import { EntityState } from '@ngrx/entity';
+import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
   'sunday',

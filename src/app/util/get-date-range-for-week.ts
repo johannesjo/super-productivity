@@ -23,7 +23,6 @@ export const getDateRangeForWeek = (year: number, weekNr: number, month?: number
       : rangeEnd;
   }
 
-
   rangeStart.setHours(0, 0, 0, 0);
   rangeEnd.setHours(23, 59, 59);
 

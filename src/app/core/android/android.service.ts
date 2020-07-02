@@ -1,24 +1,22 @@
-import {Injectable} from '@angular/core';
-import {Task} from '../../features/tasks/task.model';
-import {combineLatest, Observable} from 'rxjs';
-import {TagService} from '../../features/tag/tag.service';
-import {TaskService} from '../../features/tasks/task.service';
-import {TODAY_TAG} from '../../features/tag/tag.const';
-import {map, switchMap} from 'rxjs/operators';
-import {androidInterface} from './android-interface';
-import {DataInitService} from '../data-init/data-init.service';
-import {ProjectService} from '../../features/project/project.service';
-import {Project} from '../../features/project/project.model';
-import {Tag} from '../../features/tag/tag.model';
+import { Injectable } from '@angular/core';
+import { Task } from '../../features/tasks/task.model';
+import { combineLatest, Observable } from 'rxjs';
+import { TagService } from '../../features/tag/tag.service';
+import { TaskService } from '../../features/tasks/task.service';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { map, switchMap } from 'rxjs/operators';
+import { androidInterface } from './android-interface';
+import { DataInitService } from '../data-init/data-init.service';
+import { ProjectService } from '../../features/project/project.service';
+import { Project } from '../../features/project/project.model';
+import { Tag } from '../../features/tag/tag.model';
 
 interface TaskWithCategoryText extends Task {
   category: string;
   categoryHtml: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class AndroidService {
   private _todayTagTasksFlat$: Observable<TaskWithCategoryText[]> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => this._tagService.getTagById$(TODAY_TAG.id)),

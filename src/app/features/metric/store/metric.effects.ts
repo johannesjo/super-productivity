@@ -1,13 +1,14 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {first, switchMap, tap} from 'rxjs/operators';
-import {select, Store} from '@ngrx/store';
-import {MetricActionTypes} from './metric.actions';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectMetricFeatureState} from './metric.selectors';
-import {SnackService} from '../../../core/snack/snack.service';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {combineLatest} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { first, switchMap, tap } from 'rxjs/operators';
+import { select, Store } from '@ngrx/store';
+import { MetricActionTypes } from './metric.actions';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { selectMetricFeatureState } from './metric.selectors';
+import { SnackService } from '../../../core/snack/snack.service';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { combineLatest } from 'rxjs';
+import { MetricState } from '../metric.model';
 
 @Injectable()
 export class MetricEffects {
@@ -49,7 +50,7 @@ export class MetricEffects {
   ) {
   }
 
-  private _saveToLs(currentProjectId, metricState) {
+  private _saveToLs(currentProjectId: string, metricState: MetricState) {
     if (currentProjectId) {
       this._persistenceService.updateLastLocalSyncModelChange();
       this._persistenceService.metric.save(currentProjectId, metricState);

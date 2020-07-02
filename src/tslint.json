@@ -12,6 +12,26 @@
       "element",
       false,
       "kebab-case"
-    ]
+    ],
+    "strict-boolean-expressions": [
+      true,
+      "allow-enum",
+      "allow-mix",
+      "allow-number",
+      "allow-string",
+      "allow-undefined-union",
+      "ignore-rhs"
+    ],
+    "typedef": [
+      true,
+      "array-destructuring",
+      "member-variable-declaration",
+      "parameter",
+      "property-declaration"
+    ],
+    "no-inferrable-types": false,
+    "strict-type-predicates": true,
+    "template-use-track-by-function": true,
+    "align": false
   }
 }

@@ -1,19 +1,18 @@
-import {Injectable} from '@angular/core';
-import {IS_ELECTRON} from '../../app.constants';
-import {ChromeExtensionInterfaceService} from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import {ProjectService} from '../project/project.service';
-import {TaskService} from '../tasks/task.service';
-import {IPC} from '../../../../electron/ipc-events.const';
-import {MatDialog} from '@angular/material/dialog';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
-import {DialogIdleComponent} from './dialog-idle/dialog-idle.component';
-import {GlobalConfigService} from '../config/global-config.service';
-import {Task} from '../tasks/task.model';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
-import {ElectronService} from '../../core/electron/electron.service';
-import {UiHelperService} from '../ui-helper/ui-helper.service';
-import {WorkContextService} from '../work-context/work-context.service';
+import { Injectable } from '@angular/core';
+import { IS_ELECTRON } from '../../app.constants';
+import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
+import { TaskService } from '../tasks/task.service';
+import { IPC } from '../../../../electron/ipc-events.const';
+import { MatDialog } from '@angular/material/dialog';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
+import { GlobalConfigService } from '../config/global-config.service';
+import { Task } from '../tasks/task.model';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { ElectronService } from '../../core/electron/electron.service';
+import { UiHelperService } from '../ui-helper/ui-helper.service';
+import { WorkContextService } from '../work-context/work-context.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -33,7 +32,6 @@ export class IdleService {
   idleTime$: Observable<number> = this._idleTime$.asObservable();
   private _triggerResetBreakTimer$ = new Subject<boolean>();
   triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
-
 
   private lastCurrentTaskId: string;
   private isIdleDialogOpen = false;
@@ -114,7 +112,7 @@ export class IdleService {
             }
 
             if (isTrackAsBreak) {
-              this._workContextService.addToBreakTimeForActiveContext( undefined, timeSpent);
+              this._workContextService.addToBreakTimeForActiveContext(undefined, timeSpent);
             }
 
             if (task) {
@@ -138,7 +136,6 @@ export class IdleService {
       }
     }
   }
-
 
   initIdlePoll(initialIdleTime) {
     const idleStart = Date.now();

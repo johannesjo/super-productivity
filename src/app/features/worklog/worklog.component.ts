@@ -1,21 +1,20 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {ProjectService} from '../project/project.service';
-import {expandFadeAnimation} from '../../ui/animations/expand.ani';
-import {WorklogDataForDay, WorklogMonth, WorklogWeek} from './worklog.model';
-import {MatDialog} from '@angular/material/dialog';
-import {Task, TaskCopy} from '../tasks/task.model';
-import {TaskService} from '../tasks/task.service';
-import {DialogWorklogExportComponent} from './dialog-worklog-export/dialog-worklog-export.component';
-import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
-import {Router} from '@angular/router';
-import {standardListAnimation} from '../../ui/animations/standard-list.ani';
-import {WorklogService} from './worklog.service';
-import {getDateRangeForMonth} from '../../util/get-date-range-for-month';
-import {getDateRangeForWeek} from '../../util/get-date-range-for-week';
-import {fadeAnimation} from '../../ui/animations/fade.ani';
-import {T} from '../../t.const';
-import {WorkContextService} from '../work-context/work-context.service';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { expandFadeAnimation } from '../../ui/animations/expand.ani';
+import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './worklog.model';
+import { MatDialog } from '@angular/material/dialog';
+import { Task, TaskCopy } from '../tasks/task.model';
+import { TaskService } from '../tasks/task.service';
+import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { Router } from '@angular/router';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
+import { WorklogService } from './worklog.service';
+import { getDateRangeForMonth } from '../../util/get-date-range-for-month';
+import { getDateRangeForWeek } from '../../util/get-date-range-for-week';
+import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { T } from '../../t.const';
+import { WorkContextService } from '../work-context/work-context.service';
 
 @Component({
   selector: 'worklog',
@@ -25,7 +24,7 @@ import {WorkContextService} from '../work-context/work-context.service';
   animations: [expandFadeAnimation, standardListAnimation, fadeAnimation]
 })
 export class WorklogComponent {
-  T = T;
+  T: any = T;
   expanded: { [key: string]: boolean } = {};
 
   constructor(
@@ -81,23 +80,23 @@ export class WorklogComponent {
       );
   }
 
-  sortWorklogItems(a, b) {
+  sortWorklogItems(a: any, b: any) {
     return b.key - a.key;
   }
 
-  sortWorklogItemsReverse(a, b) {
+  sortWorklogItemsReverse(a: any, b: any) {
     return a.key - b.key;
   }
 
-  trackByKey(i, val: { key: any; val: any }) {
+  trackByKey(i: number, val: { key: any; val: any }) {
     return val.key;
   }
 
-  trackByForLogEntry(i, val: WorklogDataForDay) {
+  trackByForLogEntry(i: number, val: WorklogDataForDay) {
     return val.task.id;
   }
 
-  trackByForWeek(i, val: WorklogWeek) {
+  trackByForWeek(i: number, val: WorklogWeek) {
     return val.weekNr;
   }
 

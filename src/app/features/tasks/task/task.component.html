@@ -20,19 +20,19 @@
   </div>
 </ng-container>
 
-<div [class.isSelected]="isSelected"
-     #innerWrapperEl
+<div #innerWrapperEl
+     [class.isSelected]="isSelected"
      class="inner-wrapper">
 
-  <div [matMenuTriggerFor]="contextMenu"
-       #contextMenuTriggerEl
+  <div #contextMenuTriggerEl
+       [matMenuTriggerFor]="contextMenu"
        [style.left]="contextMenuPosition.x"
        [style.top]="contextMenuPosition.y"
        style="visibility: hidden; position: fixed">
   </div>
 
-  <div [matMenuTriggerFor]="projectMenu"
-       #projectMenuTriggerEl
+  <div #projectMenuTriggerEl
+       [matMenuTriggerFor]="projectMenu"
        style="visibility: hidden;">
   </div>
 
@@ -92,8 +92,8 @@
         </div>
       </div>
 
-      <div class="title-and-tags-wrapper"
-           (click)="isTouchOnly && toggleShowAdditionalInfoOpen()">
+      <div (click)="isTouchOnly && toggleShowAdditionalInfoOpen()"
+           class="title-and-tags-wrapper">
         <div #contentEditableOnClickEl
              (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
              [isResetAfterEdit]="true"
@@ -260,8 +260,8 @@
 
           <button (click)="estimateTime()"
                   *ngIf="!task.subTasks?.length"
-                  mat-menu-item
-                  class="hide-xs">
+                  class="hide-xs"
+                  mat-menu-item>
             <mat-icon>timer</mat-icon>
             {{T.F.TASK.CMP.OPEN_TIME|translate}}
           </button>
@@ -288,9 +288,9 @@
           </button>
 
           <button (click)="addAttachment();"
+                  class="hide-xs"
                   mat-menu-item
-                  tabindex="2"
-                  class="hide-xs">
+                  tabindex="2">
             <mat-icon>attachment</mat-icon>
             {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
           </button>
@@ -298,8 +298,8 @@
           <!--TODO maybe handle dynamically -->
           <a *ngIf="task.issueId"
              [href]="issueUrl$|async"
-             style="color: inherit"
              mat-menu-item
+             style="color: inherit"
              tabindex="2"
              target="_blank">
             <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
@@ -346,8 +346,8 @@
           </button>
 
           <button (click)="deleteTask()"
-                  mat-menu-item
                   class="color-warn"
+                  mat-menu-item
                   tabindex="2">
 
             <mat-icon class="color-warn-i">delete_forever</mat-icon>

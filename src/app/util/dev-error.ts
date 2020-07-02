@@ -1,8 +1,8 @@
-import {environment} from '../../environments/environment';
+import { environment } from '../../environments/environment';
 
 let isShowAlert = true;
 
-export function devError(errStr) {
+export function devError(errStr: any) {
   if (environment && environment.production) {
     console.error(errStr);
   } else {

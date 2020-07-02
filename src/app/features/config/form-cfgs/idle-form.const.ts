@@ -1,7 +1,7 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection, IdleConfig} from '../global-config.model';
-import {T} from '../../../t.const';
-import {HelperClasses} from '../../../app.constants';
+import { ConfigFormSection, IdleConfig } from '../global-config.model';
+import { T } from '../../../t.const';
+import { HelperClasses } from '../../../app.constants';
 
 export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
   title: T.GCF.IDLE.TITLE,

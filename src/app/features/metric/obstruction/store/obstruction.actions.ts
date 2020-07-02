@@ -1,6 +1,6 @@
-import {Action} from '@ngrx/store';
-import {Update} from '@ngrx/entity';
-import {Obstruction, ObstructionState} from '../obstruction.model';
+import { Action } from '@ngrx/store';
+import { Update } from '@ngrx/entity';
+import { Obstruction, ObstructionState } from '../obstruction.model';
 
 export enum ObstructionActionTypes {
   LoadObstructionState = '[Obstruction] Load Obstruction State',
@@ -11,40 +11,39 @@ export enum ObstructionActionTypes {
 }
 
 export class LoadObstructionState implements Action {
-  readonly type = ObstructionActionTypes.LoadObstructionState;
+  readonly type: string = ObstructionActionTypes.LoadObstructionState;
 
   constructor(public payload: { state: ObstructionState }) {
   }
 }
 
 export class AddObstruction implements Action {
-  readonly type = ObstructionActionTypes.AddObstruction;
+  readonly type: string = ObstructionActionTypes.AddObstruction;
 
   constructor(public payload: { obstruction: Obstruction }) {
   }
 }
 
 export class UpdateObstruction implements Action {
-  readonly type = ObstructionActionTypes.UpdateObstruction;
+  readonly type: string = ObstructionActionTypes.UpdateObstruction;
 
   constructor(public payload: { obstruction: Update<Obstruction> }) {
   }
 }
 
 export class DeleteObstruction implements Action {
-  readonly type = ObstructionActionTypes.DeleteObstruction;
+  readonly type: string = ObstructionActionTypes.DeleteObstruction;
 
   constructor(public payload: { id: string }) {
   }
 }
 
 export class DeleteObstructions implements Action {
-  readonly type = ObstructionActionTypes.DeleteObstructions;
+  readonly type: string = ObstructionActionTypes.DeleteObstructions;
 
   constructor(public payload: { ids: string[] }) {
   }
 }
-
 
 export type ObstructionActions =
   LoadObstructionState

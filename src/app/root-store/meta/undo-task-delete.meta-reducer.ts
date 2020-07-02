@@ -1,12 +1,11 @@
-import {RootState} from '../root-state';
-import {Dictionary} from '@ngrx/entity';
-import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
-import {TaskActionTypes} from '../../features/tasks/store/task.actions';
-import {PROJECT_FEATURE_NAME, projectAdapter} from '../../features/project/store/project.reducer';
-import {TASK_FEATURE_NAME} from '../../features/tasks/store/task.reducer';
-import {TAG_FEATURE_NAME, tagAdapter} from '../../features/tag/store/tag.reducer';
-import {taskAdapter} from '../../features/tasks/store/task.adapter';
-
+import { RootState } from '../root-state';
+import { Dictionary } from '@ngrx/entity';
+import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
+import { TaskActionTypes } from '../../features/tasks/store/task.actions';
+import { PROJECT_FEATURE_NAME, projectAdapter } from '../../features/project/store/project.reducer';
+import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
+import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reducer';
+import { taskAdapter } from '../../features/tasks/store/task.adapter';
 
 export interface UndoTaskDeleteState {
   projectId: string;
@@ -32,7 +31,6 @@ export const undoTaskDeleteMetaReducer = (reducer: any): any => {
       case TaskActionTypes.DeleteTask:
         U_STORE = _createTaskDeleteState(state, action.payload.task);
         return reducer(state, action);
-
 
       case TaskActionTypes.UndoDeleteTask:
         let updatedState = state;
@@ -151,7 +149,6 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
     if (!taskIdsForProject) {
       throw new Error('Task Restore Error: Missing taskIdsForProject');
     }
-
 
     const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
       const tag = tagState.entities[id];

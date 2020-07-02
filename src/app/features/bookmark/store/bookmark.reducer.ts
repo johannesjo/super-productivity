@@ -1,7 +1,15 @@
-import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
-import {BookmarkActions, BookmarkActionTypes} from './bookmark.actions';
-import {Bookmark} from '../bookmark.model';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
+import {
+  AddBookmark,
+  BookmarkActions,
+  BookmarkActionTypes,
+  DeleteBookmark,
+  LoadBookmarkState,
+  ReorderBookmarks,
+  UpdateBookmark
+} from './bookmark.actions';
+import { Bookmark } from '../bookmark.model';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const BOOKMARK_FEATURE_NAME = 'bookmark';
 
@@ -22,24 +30,24 @@ export const initialBookmarkState: BookmarkState = adapter.getInitialState({
 });
 
 export function bookmarkReducer(
-  state = initialBookmarkState,
+  state: BookmarkState = initialBookmarkState,
   action: BookmarkActions
 ): BookmarkState {
   switch (action.type) {
     case BookmarkActionTypes.AddBookmark: {
-      return adapter.addOne(action.payload.bookmark, state);
+      return adapter.addOne((action as AddBookmark).payload.bookmark, state);
     }
 
     case BookmarkActionTypes.UpdateBookmark: {
-      return adapter.updateOne(action.payload.bookmark, state);
+      return adapter.updateOne((action as UpdateBookmark).payload.bookmark, state);
     }
 
     case BookmarkActionTypes.DeleteBookmark: {
-      return adapter.removeOne(action.payload.id, state);
+      return adapter.removeOne((action as DeleteBookmark).payload.id, state);
     }
 
     case BookmarkActionTypes.LoadBookmarkState:
-      return {...action.payload.state};
+      return {...(action as LoadBookmarkState).payload.state};
 
     case BookmarkActionTypes.ShowBookmarks:
       return {...state, isShowBookmarks: true};
@@ -50,10 +58,9 @@ export function bookmarkReducer(
     case BookmarkActionTypes.ToggleBookmarks:
       return {...state, isShowBookmarks: !state.isShowBookmarks};
 
-
     case BookmarkActionTypes.ReorderBookmarks: {
       const oldIds = state.ids as string[];
-      const newIds = action.payload.ids as string[];
+      const newIds = (action as ReorderBookmarks).payload.ids as string[];
       if (!oldIds || !newIds) {
         return state;
       }

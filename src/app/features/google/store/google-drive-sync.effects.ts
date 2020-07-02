@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../config/store/global-config.actions';
 import {
   catchError,
   concatMap,
@@ -14,11 +14,11 @@ import {
   tap,
   withLatestFrom
 } from 'rxjs/operators';
-import {combineLatest, EMPTY, from, Observable, of, throwError, zip} from 'rxjs';
-import {GoogleDriveSyncService} from '../google-drive-sync.service';
-import {GoogleApiService} from '../google-api.service';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {SnackService} from '../../../core/snack/snack.service';
+import { combineLatest, EMPTY, from, Observable, of, throwError, zip } from 'rxjs';
+import { GoogleDriveSyncService } from '../google-drive-sync.service';
+import { GoogleApiService } from '../google-api.service';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { SnackService } from '../../../core/snack/snack.service';
 import {
   ChangeSyncFileName,
   CreateSyncFile,
@@ -33,26 +33,26 @@ import {
   SaveToGoogleDriveFlow,
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
-import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {GoogleDriveSyncConfig} from '../../config/global-config.model';
-import {DataImportService} from '../../../imex/sync/data-import.service';
-import {DEFAULT_SYNC_FILE_NAME} from '../google.const';
-import {DialogConfirmDriveSyncSaveComponent} from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { GoogleDriveSyncConfig } from '../../config/global-config.model';
+import { DataImportService } from '../../../imex/sync/data-import.service';
+import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
+import { DialogConfirmDriveSyncSaveComponent } from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import * as moment from 'moment';
-import {DialogConfirmDriveSyncLoadComponent} from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
-import {AppDataComplete} from '../../../imex/sync/sync.model';
-import {selectIsGoogleDriveSaveInProgress} from './google-drive-sync.reducer';
-import {CompressionService} from '../../../core/compression/compression.service';
-import {TranslateService} from '@ngx-translate/core';
-import {T} from '../../../t.const';
-import {SyncService} from '../../../imex/sync/sync.service';
-import {SyncProvider} from '../../../imex/sync/sync-provider';
-import {HANDLED_ERROR_PROP_STR} from '../../../app.constants';
-import {DataInitService} from '../../../core/data-init/data-init.service';
-import {getGoogleLocalLastSync, saveGoogleLocalLastSync} from '../google-session';
-import {loadAllData} from '../../../root-store/meta/load-all-data.action';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
+import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
+import { AppDataComplete } from '../../../imex/sync/sync.model';
+import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';
+import { CompressionService } from '../../../core/compression/compression.service';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../../t.const';
+import { SyncService } from '../../../imex/sync/sync.service';
+import { SyncProvider } from '../../../imex/sync/sync-provider';
+import { HANDLED_ERROR_PROP_STR } from '../../../app.constants';
+import { DataInitService } from '../../../core/data-init/data-init.service';
+import { getGoogleLocalLastSync, saveGoogleLocalLastSync } from '../google-session';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -484,7 +484,6 @@ export class GoogleDriveSyncEffects {
       showWhile$,
     });
   }
-
 
   private _confirmSaveNewFile$(fileName): Observable<boolean> {
     return this._matDialog.open(DialogConfirmComponent, {

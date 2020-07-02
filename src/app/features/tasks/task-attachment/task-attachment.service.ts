@@ -1,14 +1,14 @@
-import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {TaskAttachment} from './task-attachment.model';
+import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { TaskAttachment } from './task-attachment.model';
 import shortid from 'shortid';
-import {DialogEditTaskAttachmentComponent} from './dialog-edit-attachment/dialog-edit-task-attachment.component';
-import {MatDialog} from '@angular/material/dialog';
-import {DropPasteInput} from '../../../core/drop-paste-input/drop-paste.model';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {AddTaskAttachment, DeleteTaskAttachment, UpdateTaskAttachment} from './task-attachment.actions';
-import {TaskState} from '../task.model';
-import {createFromDrop} from 'src/app/core/drop-paste-input/drop-paste-input';
+import { DialogEditTaskAttachmentComponent } from './dialog-edit-attachment/dialog-edit-task-attachment.component';
+import { MatDialog } from '@angular/material/dialog';
+import { DropPasteInput } from '../../../core/drop-paste-input/drop-paste.model';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { AddTaskAttachment, DeleteTaskAttachment, UpdateTaskAttachment } from './task-attachment.actions';
+import { TaskState } from '../task.model';
+import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +41,6 @@ export class TaskAttachmentService {
     this._store$.dispatch(new DeleteTaskAttachment({taskId, id}));
   }
 
-
   updateAttachment(taskId: string, id: string, changes: Partial<TaskAttachment>) {
     this._store$.dispatch(new UpdateTaskAttachment({taskId, taskAttachment: {id, changes}}));
   }
@@ -52,11 +51,9 @@ export class TaskAttachmentService {
     this._handleInput(createFromDrop(ev), ev, taskId);
   }
 
-
   // createFromPaste(ev, taskId: string) {
   //   this._handleInput(createFromPaste(ev), ev, taskId);
   // }
-
 
   private _handleInput(attachment: DropPasteInput, ev, taskId) {
     // properly not intentional so we leave

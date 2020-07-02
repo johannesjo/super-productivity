@@ -1,5 +1,5 @@
-import {animate, style, transition, trigger} from '@angular/animations';
-import {ANI_ENTER_TIMING, ANI_FAST_TIMING, ANI_LEAVE_TIMING} from './animation.const';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { ANI_ENTER_TIMING, ANI_FAST_TIMING, ANI_LEAVE_TIMING } from './animation.const';
 
 export const expandAnimation = [
   trigger('expand', [
@@ -27,7 +27,6 @@ export const expandFastAnimation = [
   ])
 ];
 
-
 export const expandAnimationAllowOverflow = [
   trigger('expandAllowOverflow', [
     transition(':enter', [
@@ -39,7 +38,6 @@ export const expandAnimationAllowOverflow = [
     ])
   ])
 ];
-
 
 export const expandFadeAnimation = [
   trigger('expandFade', [
@@ -79,7 +77,6 @@ export const expandFadeFastAnimation = [
     ])
   ])
 ];
-
 
 export const expandFadeHorizontalAnimation = [
   trigger('expandFadeHorizontal', [

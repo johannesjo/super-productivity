@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import {ReminderCopy} from './reminder.model';
+import { ReminderCopy } from './reminder.model';
 
 const CHECK_INTERVAL_DURATION = 1000;
 const MESSAGE_INTERVAL_DURATION = 10000;
@@ -11,7 +11,6 @@ addEventListener('message', ({data}) => {
   // console.log('REMINDER WORKER', data);
   reInitCheckInterval(data);
 });
-
 
 const reInitCheckInterval = (reminders: ReminderCopy[]) => {
   if (checkInterval) {
@@ -41,7 +40,6 @@ const reInitCheckInterval = (reminders: ReminderCopy[]) => {
     }
   }, CHECK_INTERVAL_DURATION);
 };
-
 
 const getDueReminders = (reminders: ReminderCopy[]): ReminderCopy[] => {
   const now = Date.now();

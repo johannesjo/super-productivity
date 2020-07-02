@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   AllowedDBKeys,
   LS_BACKUP,
@@ -19,46 +19,46 @@ import {
   LS_TASK_REPEAT_CFG_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import {GlobalConfigState} from '../../features/config/global-config.model';
-import {projectReducer, ProjectState} from '../../features/project/store/project.reducer';
-import {ArchiveTask, Task, TaskArchive, TaskState} from '../../features/tasks/task.model';
-import {AppBaseData, AppDataComplete, AppDataForProjects, DEFAULT_APP_BASE_DATA} from '../../imex/sync/sync.model';
-import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {NoteState} from '../../features/note/store/note.reducer';
-import {Reminder} from '../../features/reminder/reminder.model';
-import {SnackService} from '../snack/snack.service';
-import {DatabaseService} from './database.service';
-import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
+import { GlobalConfigState } from '../../features/config/global-config.model';
+import { projectReducer, ProjectState } from '../../features/project/store/project.reducer';
+import { ArchiveTask, Task, TaskArchive, TaskState } from '../../features/tasks/task.model';
+import { AppBaseData, AppDataComplete, AppDataForProjects, DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.model';
+import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
+import { NoteState } from '../../features/note/store/note.reducer';
+import { Reminder } from '../../features/reminder/reminder.model';
+import { SnackService } from '../snack/snack.service';
+import { DatabaseService } from './database.service';
+import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 import {
   ExportedProject,
   ProjectArchive,
   ProjectArchivedRelatedData
 } from '../../features/project/project-archive.model';
-import {Project} from '../../features/project/project.model';
-import {CompressionService} from '../compression/compression.service';
-import {PersistenceBaseEntityModel, PersistenceBaseModel, PersistenceForProjectModel} from './persistence.model';
-import {Metric, MetricState} from '../../features/metric/metric.model';
-import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
-import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
-import {TaskRepeatCfg, TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import {Bookmark} from '../../features/bookmark/bookmark.model';
-import {Note} from '../../features/note/note.model';
-import {Action} from '@ngrx/store';
-import {taskRepeatCfgReducer} from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
-import {Tag, TagState} from '../../features/tag/tag.model';
-import {migrateProjectState} from '../../features/project/migrate-projects-state.util';
-import {migrateTaskArchiveState, migrateTaskState} from '../../features/tasks/migrate-task-state.util';
-import {migrateGlobalConfigState} from '../../features/config/migrate-global-config.util';
-import {taskReducer} from '../../features/tasks/store/task.reducer';
-import {tagReducer} from '../../features/tag/store/tag.reducer';
-import {migrateTaskRepeatCfgState} from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
-import {environment} from '../../../environments/environment';
-import {checkFixEntityStateConsistency} from '../../util/check-fix-entity-state-consistency';
-import {SimpleCounter, SimpleCounterState} from '../../features/simple-counter/simple-counter.model';
-import {simpleCounterReducer} from '../../features/simple-counter/store/simple-counter.reducer';
-import {from, merge, Observable, Subject} from 'rxjs';
-import {concatMap, shareReplay} from 'rxjs/operators';
-import {devError} from '../../util/dev-error';
+import { Project } from '../../features/project/project.model';
+import { CompressionService } from '../compression/compression.service';
+import { PersistenceBaseEntityModel, PersistenceBaseModel, PersistenceForProjectModel } from './persistence.model';
+import { Metric, MetricState } from '../../features/metric/metric.model';
+import { Improvement, ImprovementState } from '../../features/metric/improvement/improvement.model';
+import { Obstruction, ObstructionState } from '../../features/metric/obstruction/obstruction.model';
+import { TaskRepeatCfg, TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { Bookmark } from '../../features/bookmark/bookmark.model';
+import { Note } from '../../features/note/note.model';
+import { Action } from '@ngrx/store';
+import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { Tag, TagState } from '../../features/tag/tag.model';
+import { migrateProjectState } from '../../features/project/migrate-projects-state.util';
+import { migrateTaskArchiveState, migrateTaskState } from '../../features/tasks/migrate-task-state.util';
+import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
+import { taskReducer } from '../../features/tasks/store/task.reducer';
+import { tagReducer } from '../../features/tag/store/tag.reducer';
+import { migrateTaskRepeatCfgState } from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
+import { environment } from '../../../environments/environment';
+import { checkFixEntityStateConsistency } from '../../util/check-fix-entity-state-consistency';
+import { SimpleCounter, SimpleCounterState } from '../../features/simple-counter/simple-counter.model';
+import { simpleCounterReducer } from '../../features/simple-counter/store/simple-counter.reducer';
+import { from, merge, Observable, Subject } from 'rxjs';
+import { concatMap, shareReplay } from 'rxjs/operators';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -110,7 +110,6 @@ export class PersistenceService {
     migrateTaskRepeatCfgState,
   );
 
-
   // PROJECT MODELS
   bookmark = this._cmProject<BookmarkState, Bookmark>(
     LS_BOOKMARK_STATE,
@@ -158,7 +157,6 @@ export class PersistenceService {
   ) {
     // this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
   }
-
 
   // PROJECT ARCHIVING
   // -----------------
@@ -488,7 +486,6 @@ export class PersistenceService {
   private _makeProjectKey(projectId, subKey, additional?) {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
   }
-
 
   // DATA STORAGE INTERFACE
   // ---------------------

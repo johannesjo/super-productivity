@@ -1,6 +1,6 @@
-import {NgModule} from '@angular/core';
-import {LocalBackupService} from './local-backup.service';
-import {IS_ELECTRON} from '../../app.constants';
+import { NgModule } from '@angular/core';
+import { LocalBackupService } from './local-backup.service';
+import { IS_ELECTRON } from '../../app.constants';
 
 @NgModule({
   providers: [LocalBackupService],

@@ -8,23 +8,22 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {ProjectService} from '../../features/project/project.service';
-import {LayoutService} from '../layout/layout.service';
-import {BookmarkService} from '../../features/bookmark/bookmark.service';
-import {TaskService} from '../../features/tasks/task.service';
-import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
-import {T} from '../../t.const';
-import {fadeAnimation} from '../../ui/animations/fade.ani';
-import {Router} from '@angular/router';
-import {filter, first, switchMap} from 'rxjs/operators';
-import {Observable, of, Subscription} from 'rxjs';
-import {WorkContextService} from '../../features/work-context/work-context.service';
-import {TagService} from '../../features/tag/tag.service';
-import {Tag} from '../../features/tag/tag.model';
-import {Project} from '../../features/project/project.model';
-import {expandFadeHorizontalAnimation} from '../../ui/animations/expand.ani';
-import {SimpleCounter} from '../../features/simple-counter/simple-counter.model';
-import {SimpleCounterService} from '../../features/simple-counter/simple-counter.service';
+import { ProjectService } from '../../features/project/project.service';
+import { LayoutService } from '../layout/layout.service';
+import { BookmarkService } from '../../features/bookmark/bookmark.service';
+import { TaskService } from '../../features/tasks/task.service';
+import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
+import { T } from '../../t.const';
+import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { Router } from '@angular/router';
+import { filter, first, switchMap } from 'rxjs/operators';
+import { Observable, of, Subscription } from 'rxjs';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { TagService } from '../../features/tag/tag.service';
+import { Tag } from '../../features/tag/tag.model';
+import { Project } from '../../features/project/project.model';
+import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
+import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 
 @Component({
   selector: 'main-header',
@@ -34,9 +33,9 @@ import {SimpleCounterService} from '../../features/simple-counter/simple-counter
   animations: [fadeAnimation, expandFadeHorizontalAnimation]
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
-  T = T;
-  progressCircleRadius = 10;
-  circumference = this.progressCircleRadius * Math.PI * 2;
+  T: any = T;
+  progressCircleRadius: number = 10;
+  circumference: number = this.progressCircleRadius * Math.PI * 2;
 
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
 
@@ -54,7 +53,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     )),
   );
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly projectService: ProjectService,

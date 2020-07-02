@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {IS_ELECTRON} from '../../../../app.constants';
-import {TaskAttachmentCopy, TaskAttachmentType} from '../task-attachment.model';
-import {T} from '../../../../t.const';
-import {TranslateService} from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { IS_ELECTRON } from '../../../../app.constants';
+import { TaskAttachment, TaskAttachmentCopy, TaskAttachmentType } from '../task-attachment.model';
+import { T } from '../../../../t.const';
+import { TranslateService } from '@ngx-translate/core';
 
 interface TaskAttachmentSelectType {
   type: TaskAttachmentType;
@@ -19,7 +19,7 @@ interface TaskAttachmentSelectType {
 export class DialogEditTaskAttachmentComponent implements OnInit {
   types: TaskAttachmentSelectType[];
   attachmentCopy: TaskAttachmentCopy;
-  T = T;
+  T: any = T;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditTaskAttachmentComponent>,
@@ -43,7 +43,7 @@ export class DialogEditTaskAttachmentComponent implements OnInit {
     }
   }
 
-  close(attachment?) {
+  close(attachment?: TaskAttachment) {
     this._matDialogRef.close(attachment);
   }
 

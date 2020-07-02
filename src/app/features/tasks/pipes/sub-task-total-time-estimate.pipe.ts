@@ -1,6 +1,5 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {Task} from '../task.model';
-
+import { Pipe, PipeTransform } from '@angular/core';
+import { Task } from '../task.model';
 
 @Pipe({
   name: 'subTaskTotalTimeEstimate'

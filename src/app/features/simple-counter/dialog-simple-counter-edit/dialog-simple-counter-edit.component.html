@@ -4,20 +4,20 @@
   <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.ClickCounter">
-        <input [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
+        <input (ngModelChange)="onModelChange($event)"
                [ngModel]="val"
-               (ngModelChange)="onModelChange($event)"
+               [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
+               matInput
                name="count"
-               type="number"
-               matInput>
+               type="number">
       </mat-form-field>
       <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.StopWatch">
-        <input [ngModel]="val"
+        <input (ngModelChange)="onModelChange($event)"
+               [ngModel]="val"
                [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-               (ngModelChange)="onModelChange($event)"
                inputDuration="optional"
-               name="count"
                matInput
+               name="count"
                type="text">
         <mat-icon matPrefix>timer</mat-icon>
       </mat-form-field>

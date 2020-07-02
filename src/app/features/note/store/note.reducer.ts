@@ -1,5 +1,5 @@
-import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
-import {Note} from '../note.model';
+import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
+import { Note } from '../note.model';
 import {
   addNote,
   addNotes,
@@ -13,7 +13,7 @@ import {
   upsertNote,
   upsertNotes
 } from './note.actions';
-import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
+import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 
 export interface NoteState extends EntityState<Note> {
 }

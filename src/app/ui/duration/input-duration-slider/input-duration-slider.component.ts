@@ -12,8 +12,8 @@ import {
 } from '@angular/core';
 import shortid from 'shortid';
 import * as moment from 'moment';
-import {dotAnimation} from './dot.ani';
-import {T} from '../../../t.const';
+import { dotAnimation } from './dot.ani';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'input-duration-slider',
@@ -23,7 +23,7 @@ import {T} from '../../../t.const';
   animations: [dotAnimation],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
   minutesBefore = 0;
   dots: any[];
   uid: string = 'duration-input-slider' + shortid();
@@ -178,7 +178,6 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     } else if ((-1 * minuteDelta) > THRESHOLD) {
       hours++;
     }
-
 
     if (hours < 0) {
       hours = 0;

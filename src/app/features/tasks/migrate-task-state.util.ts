@@ -1,9 +1,9 @@
-import {Dictionary} from '@ngrx/entity';
-import {ArchiveTask, Task, TaskArchive, TaskState} from './task.model';
-import {GITHUB_TYPE} from '../issue/issue.const';
-import {MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT} from '../../app.constants';
+import { Dictionary } from '@ngrx/entity';
+import { ArchiveTask, Task, TaskArchive, TaskState } from './task.model';
+import { GITHUB_TYPE } from '../issue/issue.const';
+import { MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT } from '../../app.constants';
 import * as moment from 'moment';
-import {convertToWesternArabic} from '../../util/numeric-converter';
+import { convertToWesternArabic } from '../../util/numeric-converter';
 
 const MODEL_VERSION = 3.1313;
 export const LEGACY_GITHUB_TYPE = 'GIT';
@@ -117,7 +117,6 @@ const _deleteUnusedFields = (task: Task) => {
   }: any | Task = task;
   return cleanTask;
 };
-
 
 const _addProjectIdForSubTasksAndRemoveTags = (entities: Dictionary<Task>): Dictionary<Task> => {
   const copy = {...entities};

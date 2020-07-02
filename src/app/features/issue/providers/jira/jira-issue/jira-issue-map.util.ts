@@ -1,4 +1,4 @@
-import {JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue} from './jira-issue.model';
+import { JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue } from './jira-issue.model';
 import {
   JiraIssueOriginal,
   JiraOriginalAttachment,
@@ -6,12 +6,12 @@ import {
   JiraOriginalChangelog,
   JiraOriginalComment
 } from '../jira-api-responses';
-import {JiraCfg} from '../jira.model';
-import {DropPasteIcons, DropPasteInputType} from '../../../../../core/drop-paste-input/drop-paste.model';
-import {IssueProviderKey, SearchResultItem} from '../../../issue.model';
-import {TaskAttachment} from '../../../../tasks/task-attachment/task-attachment.model';
-import {dedupeByKey} from '../../../../../util/de-dupe-by-key';
-import {JIRA_TYPE} from '../../../issue.const';
+import { JiraCfg } from '../jira.model';
+import { DropPasteIcons, DropPasteInputType } from '../../../../../core/drop-paste-input/drop-paste.model';
+import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
+import { TaskAttachment } from '../../../../tasks/task-attachment/task-attachment.model';
+import { dedupeByKey } from '../../../../../util/de-dupe-by-key';
+import { JIRA_TYPE } from '../../../issue.const';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
@@ -65,7 +65,6 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   };
 };
 
-
 export const makeIssueUrl = (host: string, issueKey: string): string => {
   let fullLink = host + '/browse/' + issueKey;
   if (!fullLink.match(matchProtocolRegEx)) {
@@ -73,7 +72,6 @@ export const makeIssueUrl = (host: string, issueKey: string): string => {
   }
   return fullLink;
 };
-
 
 export const mapAuthor = (author: JiraOriginalAuthor): JiraAuthor => {
   if (author) {

@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
-import {TRACKING_INTERVAL} from '../../app.constants';
-import {interval, Observable} from 'rxjs';
-import {map, share} from 'rxjs/operators';
-import {Tick} from './time-tracking';
-import {getWorklogStr} from '../../util/get-work-log-str';
+import { Injectable } from '@angular/core';
+import { TRACKING_INTERVAL } from '../../app.constants';
+import { interval, Observable } from 'rxjs';
+import { map, share } from 'rxjs/operators';
+import { Tick } from './time-tracking';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +24,6 @@ export class TimeTrackingService {
     // important because we want the same interval for everyone
     share()
   );
-
 
   constructor() {
     this._currentTrackingStart = Date.now();

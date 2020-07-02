@@ -1,5 +1,5 @@
 // TODO implement recurring reminders
-import {WorkContextType} from '../work-context/work-context.model';
+import { WorkContextType } from '../work-context/work-context.model';
 
 export type RecurringConfig = Readonly<{}>;
 

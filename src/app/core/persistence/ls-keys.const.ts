@@ -1,8 +1,7 @@
-import {ProjectDataLsKey} from './persistence.model';
-import {AppDataComplete} from '../../imex/sync/sync.model';
+import { ProjectDataLsKey } from './persistence.model';
+import { AppDataComplete } from '../../imex/sync/sync.model';
 
 export type AllowedDBKeys = keyof AppDataComplete | 'SUP_COMPLETE_BACKUP';
-
 
 export const LS_PREFIX = 'SUP_';
 export const LS_PROJECT_PREFIX = LS_PREFIX + 'P_';
@@ -41,7 +40,6 @@ export const LS_GOOGLE_LOCAL_LAST_SYNC = LS_PREFIX + 'GOOGLE_LOCAL_LAST_SYNC';
 export const LS_DROPBOX_LOCAL_LAST_SYNC = LS_PREFIX + 'DROPBOX_LOCAL_LAST_SYNC';
 export const LS_DROPBOX_LAST_LOCAL_REVISION = LS_PREFIX + 'DROPBOX_LAST_REVISION';
 export const LS_DROPBOX_LOCAL_LAST_SYNC_CHECK = LS_PREFIX + 'DROPBOX_LOCAL_LAST_SYNC_CHECK';
-
 
 // SESSION STORAGE
 const SS_PREFIX = 'SUP_SS_';

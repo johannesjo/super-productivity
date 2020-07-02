@@ -1,8 +1,8 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {TaskService} from '../../task.service';
-import {LayoutService} from '../../../../core-ui/layout/layout.service';
-import {delay, switchMap} from 'rxjs/operators';
-import {of} from 'rxjs';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { TaskService } from '../../task.service';
+import { LayoutService } from '../../../../core-ui/layout/layout.service';
+import { delay, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'task-additional-info-wrapper',

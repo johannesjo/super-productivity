@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {FieldType} from '@ngx-formly/core';
-import {Subscription} from 'rxjs';
-import {TranslateService} from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FieldType } from '@ngx-formly/core';
+import { Subscription } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'formly-translated-template',
@@ -14,7 +14,7 @@ export class FormlyTranslatedTemplateComponent extends FieldType implements OnIn
   @ViewChild('tplWrapper', {static: true}) tplWrapper: ElementRef;
 
   private _el: HTMLElement;
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _translateService: TranslateService,

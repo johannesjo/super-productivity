@@ -1,4 +1,4 @@
-import {Action} from '@ngrx/store';
+import { Action } from '@ngrx/store';
 
 export enum GoogleDriveSyncActionTypes {
   LoadFromGoogleDrive = '[GoogleDriveSync] Load From',
@@ -15,70 +15,69 @@ export enum GoogleDriveSyncActionTypes {
 }
 
 export class LoadFromGoogleDrive implements Action {
-  readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDrive;
+  readonly type: string = GoogleDriveSyncActionTypes.LoadFromGoogleDrive;
 
   constructor(public payload?: { loadResponse?: any }) {
   }
 }
 
 export class LoadFromGoogleDriveFlow implements Action {
-  readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow;
+  readonly type: string = GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow;
 }
 
 export class LoadFromGoogleDriveSuccess implements Action {
-  readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess;
+  readonly type: string = GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess;
 
   constructor(public payload: { modifiedDate: any }) {
   }
 }
 
 export class LoadFromGoogleDriveCancel implements Action {
-  readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDriveCancel;
+  readonly type: string = GoogleDriveSyncActionTypes.LoadFromGoogleDriveCancel;
 }
 
 export class SaveToGoogleDriveFlow implements Action {
-  readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow;
+  readonly type: string = GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow;
 
   constructor(public payload?: { isSkipSnack?: boolean; isSync?: boolean }) {
   }
 }
 
 export class SaveToGoogleDrive implements Action {
-  readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDrive;
+  readonly type: string = GoogleDriveSyncActionTypes.SaveToGoogleDrive;
 
   constructor(public payload?: { isSkipSnack?: boolean; }) {
   }
 }
 
 export class SaveToGoogleDriveSuccess implements Action {
-  readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess;
+  readonly type: string = GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess;
 
   constructor(public payload: { response: any; isSkipSnack?: boolean; }) {
   }
 }
 
 export class SaveToGoogleDriveCancel implements Action {
-  readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveCancel;
+  readonly type: string = GoogleDriveSyncActionTypes.SaveToGoogleDriveCancel;
 }
 
 export class ChangeSyncFileName implements Action {
-  readonly type = GoogleDriveSyncActionTypes.ChangeSyncFileName;
+  readonly type: string = GoogleDriveSyncActionTypes.ChangeSyncFileName;
 
   constructor(public payload: { newFileName: string }) {
   }
 }
 
 export class SaveForSync implements Action {
-  readonly type = GoogleDriveSyncActionTypes.SaveForSync;
+  readonly type: string = GoogleDriveSyncActionTypes.SaveForSync;
 }
 
 export class CreateSyncFile implements Action {
-  readonly type = GoogleDriveSyncActionTypes.CreateSyncFile;
+  readonly type: string = GoogleDriveSyncActionTypes.CreateSyncFile;
 
   constructor(public payload: { newFileName: string }) {
   }
 }
-
 
 export type GoogleDriveSyncActions
   = LoadFromGoogleDrive

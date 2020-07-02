@@ -1,4 +1,4 @@
-import {checkForUpdate, UpdateCheckResult} from './check-for-update.util';
+import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
 
 describe('checkForUpdate', () => {
   it('l > s >= r -> update remote', () => {
@@ -35,7 +35,6 @@ describe('checkForUpdate', () => {
     const r = checkForUpdate({local: 4, lastSync: 0, remote: 4});
     expect(r).toBe(UpdateCheckResult.LastSyncNotUpToDate);
   });
-
 
   it('l < s -> error', () => {
     const r = checkForUpdate({local: 0, lastSync: 3, remote: 4});

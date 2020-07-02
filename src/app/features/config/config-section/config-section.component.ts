@@ -12,14 +12,14 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {expandAnimation} from '../../../ui/animations/expand.ani';
-import {ConfigFormSection, CustomCfgSection, GlobalConfigSectionKey} from '../global-config.model';
-import {ProjectCfgFormKey} from '../../project/project.model';
-import {Subscription} from 'rxjs';
-import {TranslateService} from '@ngx-translate/core';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {TagCfgFormKey} from '../../tag/tag.model';
-import {customConfigFormSectionComponent} from '../custom-config-form-section-component';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
+import { ConfigFormSection, CustomCfgSection, GlobalConfigSectionKey } from '../global-config.model';
+import { ProjectCfgFormKey } from '../../project/project.model';
+import { Subscription } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { TagCfgFormKey } from '../../tag/tag.model';
+import { customConfigFormSectionComponent } from '../custom-config-form-section-component';
 
 @Component({
   selector: 'config-section',
@@ -32,9 +32,9 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection<{ [key: string]: any }>;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: any }> = new EventEmitter();
   @ViewChild('customForm', {read: ViewContainerRef, static: true}) customFormRef: ViewContainerRef;
-  isExpanded = false;
-  private _subs = new Subscription();
-  private _instance;
+  isExpanded: boolean = false;
+  private _subs: Subscription = new Subscription();
+  private _instance: Component;
   private _viewDestroyTimeout: number;
 
   constructor(
@@ -90,7 +90,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSave($event) {
+  onSave($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: any }) {
     this.isExpanded = false;
     this.save.emit($event);
   }

@@ -8,16 +8,16 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {NoteService} from '../note.service';
-import {DragulaService} from 'ng2-dragula';
-import {Subscription} from 'rxjs';
-import {MatButton} from '@angular/material/button';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogAddNoteComponent} from '../dialog-add-note/dialog-add-note.component';
-import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
-import {fadeAnimation} from '../../../ui/animations/fade.ani';
-import {Note} from '../note.model';
-import {T} from '../../../t.const';
+import { NoteService } from '../note.service';
+import { DragulaService } from 'ng2-dragula';
+import { Subscription } from 'rxjs';
+import { MatButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogAddNoteComponent } from '../dialog-add-note/dialog-add-note.component';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { Note } from '../note.model';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'notes',
@@ -30,13 +30,13 @@ import {T} from '../../../t.const';
 export class NotesComponent implements OnInit, OnDestroy {
   @Output() scrollToSidenav = new EventEmitter<void>();
 
-  T = T;
+  T: any = T;
   isElementWasAdded = false;
   isDragOver = false;
   dragEnterTarget: HTMLElement;
 
   @ViewChild('buttonEl', {static: true}) buttonEl: MatButton;
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public noteService: NoteService,

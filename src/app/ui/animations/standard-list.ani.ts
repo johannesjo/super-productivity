@@ -1,5 +1,5 @@
-import {animate, keyframes, query, stagger, style, transition, trigger} from '@angular/animations';
-import {ANI_FAST_TIMING} from './animation.const';
+import { animate, keyframes, query, stagger, style, transition, trigger } from '@angular/animations';
+import { ANI_FAST_TIMING } from './animation.const';
 
 const ANI = [
   query(':enter', style({opacity: 0, height: 0}), {optional: true}),

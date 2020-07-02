@@ -1,6 +1,6 @@
-import {Action} from '@ngrx/store';
-import {Update} from '@ngrx/entity';
-import {Improvement, ImprovementState} from '../improvement.model';
+import { Action } from '@ngrx/store';
+import { Update } from '@ngrx/entity';
+import { Improvement, ImprovementState } from '../improvement.model';
 
 export enum ImprovementActionTypes {
   LoadImprovementState = '[Improvement] Load Improvement State',
@@ -16,72 +16,71 @@ export enum ImprovementActionTypes {
 }
 
 export class LoadImprovementState implements Action {
-  readonly type = ImprovementActionTypes.LoadImprovementState;
+  readonly type: string = ImprovementActionTypes.LoadImprovementState;
 
   constructor(public payload: { state: ImprovementState }) {
   }
 }
 
 export class AddImprovement implements Action {
-  readonly type = ImprovementActionTypes.AddImprovement;
+  readonly type: string = ImprovementActionTypes.AddImprovement;
 
   constructor(public payload: { improvement: Improvement }) {
   }
 }
 
 export class UpdateImprovement implements Action {
-  readonly type = ImprovementActionTypes.UpdateImprovement;
+  readonly type: string = ImprovementActionTypes.UpdateImprovement;
 
   constructor(public payload: { improvement: Update<Improvement> }) {
   }
 }
 
 export class DeleteImprovement implements Action {
-  readonly type = ImprovementActionTypes.DeleteImprovement;
+  readonly type: string = ImprovementActionTypes.DeleteImprovement;
 
   constructor(public payload: { id: string }) {
   }
 }
 
 export class DeleteImprovements implements Action {
-  readonly type = ImprovementActionTypes.DeleteImprovements;
+  readonly type: string = ImprovementActionTypes.DeleteImprovements;
 
   constructor(public payload: { ids: string[] }) {
   }
 }
 
 export class HideImprovement implements Action {
-  readonly type = ImprovementActionTypes.HideImprovement;
+  readonly type: string = ImprovementActionTypes.HideImprovement;
 
   constructor(public payload: { id: string }) {
   }
 }
 
 export class AddImprovementCheckedDay implements Action {
-  readonly type = ImprovementActionTypes.AddImprovementCheckedDay;
+  readonly type: string = ImprovementActionTypes.AddImprovementCheckedDay;
 
   constructor(public payload: { id: string; checkedDay: string }) {
   }
 }
 
 export class ToggleImprovementRepeat implements Action {
-  readonly type = ImprovementActionTypes.ToggleImprovementRepeat;
+  readonly type: string = ImprovementActionTypes.ToggleImprovementRepeat;
 
   constructor(public payload: { id: string }) {
   }
 }
 
 export class DisableImprovementRepeat implements Action {
-  readonly type = ImprovementActionTypes.DisableImprovementRepeat;
+  readonly type: string = ImprovementActionTypes.DisableImprovementRepeat;
 
   constructor(public payload: { id: string }) {
   }
 }
 
 export class ClearHiddenImprovements implements Action {
-  readonly type = ImprovementActionTypes.ClearHiddenImprovements;
+  readonly type: string = ImprovementActionTypes.ClearHiddenImprovements;
 }
-
 
 export type ImprovementActions =
   LoadImprovementState

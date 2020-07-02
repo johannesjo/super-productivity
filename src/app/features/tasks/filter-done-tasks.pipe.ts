@@ -1,5 +1,5 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {TaskWithSubTasks} from './task.model';
+import { Pipe, PipeTransform } from '@angular/core';
+import { TaskWithSubTasks } from './task.model';
 
 export const filterDoneTasks = (tasks: TaskWithSubTasks[], currentTaskId: string, isFilterDone: boolean, isFilterAll: boolean): any => {
   return isFilterDone
@@ -11,5 +11,5 @@ export const filterDoneTasks = (tasks: TaskWithSubTasks[], currentTaskId: string
   name: 'filterDoneTasks'
 })
 export class FilterDoneTasksPipe implements PipeTransform {
-  transform = filterDoneTasks;
+  transform: (value: any, ...args: any[]) = filterDoneTasks;
 }

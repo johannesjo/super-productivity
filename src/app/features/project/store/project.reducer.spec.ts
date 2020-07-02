@@ -1,7 +1,7 @@
-import {projectReducer} from './project.reducer';
-import {fakeEntityStateFromArray} from '../../../util/fake-entity-state-from-array';
-import {Project} from '../project.model';
-import {UpdateProjectOrder} from './project.actions';
+import { projectReducer } from './project.reducer';
+import { fakeEntityStateFromArray } from '../../../util/fake-entity-state-from-array';
+import { Project } from '../project.model';
+import { UpdateProjectOrder } from './project.actions';
 
 describe('projectReducer', () => {
 

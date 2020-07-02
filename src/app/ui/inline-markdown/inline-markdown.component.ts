@@ -11,15 +11,15 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {fadeAnimation} from '../animations/fade.ani';
-import {MarkdownComponent} from 'ngx-markdown';
-import {IS_ELECTRON} from '../../app.constants';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/operators';
-import {GlobalConfigService} from '../../features/config/global-config.service';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogFullscreenMarkdownComponent} from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
-import {ElectronService} from '../../core/electron/electron.service';
+import { fadeAnimation } from '../animations/fade.ani';
+import { MarkdownComponent } from 'ngx-markdown';
+import { IS_ELECTRON } from '../../app.constants';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import { ElectronService } from '../../core/electron/electron.service';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -141,7 +141,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-
   resizeTextareaToFit() {
     this._hideOverflow();
     this.textareaEl.nativeElement.style.height = 'auto';
@@ -165,7 +164,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     });
   }
 
-
   resizeParsedToFit() {
     this._hideOverflow();
 
@@ -187,7 +185,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   setFocus(ev: Event) {
     this.focused.emit(ev);
   }
-
 
   setBlur(ev: Event) {
     this.blurred.emit(ev);

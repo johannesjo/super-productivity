@@ -1,4 +1,4 @@
-import {Dictionary} from '@ngrx/entity';
+import { Dictionary } from '@ngrx/entity';
 
 export const updateAllInDictionary = <T>(oldD: Dictionary<T>, changes: Partial<T>): Dictionary<T> => {
   const newD = {};

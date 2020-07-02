@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {T} from '../../t.const';
-import {LS_LAST_REMINDER_DATE} from '../../core/persistence/ls-keys.const';
-import {timestampToDatetimeInputString} from '../../util/timestamp-to-datetime-input-string';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { T } from '../../t.const';
+import { LS_LAST_REMINDER_DATE } from '../../core/persistence/ls-keys.const';
+import { timestampToDatetimeInputString } from '../../util/timestamp-to-datetime-input-string';
 
 @Component({
   selector: 'datetime-input',
@@ -13,10 +13,10 @@ export class DatetimeInputComponent {
   @Input() name: string;
   @Input() placeholder: string;
   @Input() required: boolean;
-  @Output() modelChange = new EventEmitter<number>();
+  @Output() modelChange: EventEmitter<number> = new EventEmitter();
   nrValue: number;
   strValue: string;
-  T = T;
+  T: any = T;
   lastVal: number;
 
   constructor() {
@@ -70,7 +70,7 @@ export class DatetimeInputComponent {
     this._updateValues(this.lastVal, false);
   }
 
-  private _updateValues(v: number | Date, isFromInput = false) {
+  private _updateValues(v: number | Date, isFromInput: boolean = false) {
     if (typeof v === 'string') {
       v = new Date(v);
     }

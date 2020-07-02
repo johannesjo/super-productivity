@@ -1,7 +1,7 @@
-import {createAction, props} from '@ngrx/store';
-import {Update} from '@ngrx/entity';
-import {Tag} from '../tag.model';
-import {WorkContextAdvancedCfgKey} from '../../work-context/work-context.model';
+import { createAction, props } from '@ngrx/store';
+import { Update } from '@ngrx/entity';
+import { Tag } from '../tag.model';
+import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 
 export const addTag = createAction(
   '[Tag] Add Tag',

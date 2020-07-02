@@ -1,5 +1,5 @@
-import {Action, createFeatureSelector, createSelector} from '@ngrx/store';
-import {GoogleDriveSyncActionTypes} from './google-drive-sync.actions';
+import { Action, createFeatureSelector, createSelector } from '@ngrx/store';
+import { GoogleDriveSyncActionTypes } from './google-drive-sync.actions';
 
 export const GOOGLE_DRIVE_FEATURE_NAME = 'googleDrive';
 
@@ -25,7 +25,6 @@ export const selectIsGoogleDriveSaveInProgress = createSelector(
   (state) => state.isSaveInProgress,
 );
 
-
 export function reducer(state = initialGoogleDriveState, action: Action): GoogleDriveState {
   switch (action.type) {
     // case GoogleDriveSyncActionTypes.SaveForSync:
@@ -48,7 +47,6 @@ export function reducer(state = initialGoogleDriveState, action: Action): Google
 
     case GoogleDriveSyncActionTypes.ChangeSyncFileName:
       return {...state, isSaveInProgress: false, isLoadInProgress: false};
-
 
     default:
       return state;

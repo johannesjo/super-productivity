@@ -51,7 +51,6 @@ export type GithubIssueReduced = Readonly<{
   // repository: GithubOriginalRepository;
 }>;
 
-
 export type GithubIssue = GithubIssueReduced & Readonly<{
   comments: GithubComment[];
 }>;

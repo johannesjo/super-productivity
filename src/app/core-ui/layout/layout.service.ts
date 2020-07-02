@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
   hideNotes,
@@ -8,14 +8,14 @@ import {
   toggleShowNotes,
   toggleSideNav
 } from './store/layout.actions';
-import {BehaviorSubject, EMPTY, merge, Observable, of} from 'rxjs';
-import {select, Store} from '@ngrx/store';
-import {LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideNav} from './store/layout.reducer';
-import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
-import {BreakpointObserver} from '@angular/cdk/layout';
-import {NoteService} from '../../features/note/note.service';
-import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
-import {WorkContextService} from '../../features/work-context/work-context.service';
+import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
+import { select, Store } from '@ngrx/store';
+import { LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideNav } from './store/layout.reducer';
+import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { NoteService } from '../../features/note/note.service';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { WorkContextService } from '../../features/work-context/work-context.service';
 
 const NAV_ALWAYS_VISIBLE = 1250;
 const NAV_OVER_NOTES_NEXT = 800;
@@ -41,7 +41,7 @@ export class LayoutService {
     `(min-width: ${BOTH_OVER}px)`,
   ]).pipe(map(result => !result.matches));
   isNavOver$: Observable<boolean> = this.isNotesNextNavOver$.pipe(map(v => !v));
-  isScrolled$ = new BehaviorSubject<boolean>(false);
+  isScrolled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   private _isShowSideNav$: Observable<boolean> = this._store$.pipe(select(selectIsShowSideNav));
   isShowSideNav$: Observable<boolean> = this._isShowSideNav$.pipe(
     switchMap((isShow) => {
@@ -50,7 +50,6 @@ export class LayoutService {
         : this.isNavAlwaysVisible$;
     }),
   );
-
 
   // isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe(
   //   switchMap((isShow) => {

@@ -1,5 +1,5 @@
-import {FormlyFieldConfig} from '@ngx-formly/core';
-import {T} from '../../../t.const';
+import { FormlyFieldConfig } from '@ngx-formly/core';
+import { T } from '../../../t.const';
 
 export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {

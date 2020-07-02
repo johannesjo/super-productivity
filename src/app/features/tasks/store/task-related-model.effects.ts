@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import {
   AddTask,
   AddTimeSpent,
@@ -10,23 +10,22 @@ import {
   UpdateTask,
   UpdateTaskTags
 } from './task.actions';
-import {Store} from '@ngrx/store';
-import {concatMap, filter, first, map, mapTo, switchMap, tap} from 'rxjs/operators';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {Task, TaskArchive, TaskWithSubTasks} from '../task.model';
-import {ReminderService} from '../../reminder/reminder.service';
-import {Router} from '@angular/router';
-import {moveTaskInTodayList, moveTaskToTodayList} from '../../work-context/store/work-context-meta.actions';
-import {taskAdapter} from './task.adapter';
-import {flattenTasks} from './task.selectors';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {TODAY_TAG} from '../../tag/tag.const';
-import {unique} from '../../../util/unique';
-import {TaskService} from '../task.service';
-import {of} from 'rxjs';
-import {createEmptyEntity} from '../../../util/create-empty-entity';
-import {ProjectService} from '../../project/project.service';
-
+import { Store } from '@ngrx/store';
+import { concatMap, filter, first, map, mapTo, switchMap, tap } from 'rxjs/operators';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { Task, TaskArchive, TaskWithSubTasks } from '../task.model';
+import { ReminderService } from '../../reminder/reminder.service';
+import { Router } from '@angular/router';
+import { moveTaskInTodayList, moveTaskToTodayList } from '../../work-context/store/work-context-meta.actions';
+import { taskAdapter } from './task.adapter';
+import { flattenTasks } from './task.selectors';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { unique } from '../../../util/unique';
+import { TaskService } from '../task.service';
+import { of } from 'rxjs';
+import { createEmptyEntity } from '../../../util/create-empty-entity';
+import { ProjectService } from '../../project/project.service';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -141,7 +140,6 @@ export class TaskRelatedModelEffects {
       targetProjectId: defaultProjectId,
     })),
   );
-
 
   constructor(
     private _actions$: Actions,

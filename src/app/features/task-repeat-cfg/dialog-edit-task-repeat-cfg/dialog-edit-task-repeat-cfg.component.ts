@@ -1,17 +1,18 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {Task} from '../../tasks/task.model';
-import {TaskService} from '../../tasks/task.service';
-import {SnackService} from '../../../core/snack/snack.service';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
-import {DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy} from '../task-repeat-cfg.model';
-import {Subscription} from 'rxjs';
-import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
-import {FormGroup} from '@angular/forms';
-import {TASK_REPEAT_CFG_FORM_CFG} from './task-repeat-cfg-form.const';
-import {T} from '../../../t.const';
-import {TagService} from '../../tag/tag.service';
-import {unique} from '../../../util/unique';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Task } from '../../tasks/task.model';
+import { TaskService } from '../../tasks/task.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
+import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
+import { Observable, Subscription } from 'rxjs';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { FormGroup } from '@angular/forms';
+import { TASK_REPEAT_CFG_FORM_CFG } from './task-repeat-cfg-form.const';
+import { T } from '../../../t.const';
+import { TagService } from '../../tag/tag.service';
+import { unique } from '../../../util/unique';
+import { Tag } from '../../tag/tag.model';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -21,7 +22,7 @@ import {unique} from '../../../util/unique';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
   task: Task = this.data.task;
 
   taskRepeatCfg: TaskRepeatCfgCopy = {
@@ -34,11 +35,11 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   isEdit: boolean = !!this.taskRepeatCfgId;
 
   fields: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG;
-  form = new FormGroup({});
+  form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
-  tagSuggestions$ = this._tagService.tags$;
+  tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _taskService: TaskService,
@@ -83,7 +84,6 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     this._matDialogRef.close();
   }
 
-
   addTag(id: string) {
     this._updateTags(unique([...this.taskRepeatCfg.tagIds, id]));
   }
@@ -97,7 +97,6 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     const updatedTagIds = this.taskRepeatCfg.tagIds.filter(tagId => tagId !== id);
     this._updateTags(updatedTagIds);
   }
-
 
   private _updateTags(newTagIds: string[]) {
     this.taskRepeatCfg = {

@@ -1,8 +1,8 @@
 // TODO use as a checklist
-import {JiraCfg} from './jira.model';
-import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
-import {T} from '../../../../t.const';
-import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../../config/global-config.model';
+import { JiraCfg } from './jira.model';
+import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
+import { T } from '../../../../t.const';
+import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/global-config.model';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -114,7 +114,6 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     },
   },
 ];
-
 
 export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
   {

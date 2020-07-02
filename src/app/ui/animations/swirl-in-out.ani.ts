@@ -1,5 +1,5 @@
-import {animate, keyframes, style, transition, trigger} from '@angular/animations';
-import {TRANSITION_DURATION_M} from './animation.const';
+import { animate, keyframes, style, transition, trigger } from '@angular/animations';
+import { TRANSITION_DURATION_M } from './animation.const';
 
 const TIMING = `${TRANSITION_DURATION_M} linear`;
 

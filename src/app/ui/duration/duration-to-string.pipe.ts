@@ -1,10 +1,10 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'durationToString'
 })
 export class DurationToStringPipe implements PipeTransform {
-  transform = durationToString;
+  transform: (value: any, ...args: any[]) = durationToString;
 }
 
 export const durationToString = (momentDuration: any, args?: any): any => {

@@ -1,5 +1,5 @@
-import {animate, style, transition, trigger} from '@angular/animations';
-import {ANI_ENTER_TIMING, ANI_LEAVE_TIMING} from '../../animations/animation.const';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { ANI_ENTER_TIMING, ANI_LEAVE_TIMING } from '../../animations/animation.const';
 
 export const dotAnimation = [
   trigger('dot', [

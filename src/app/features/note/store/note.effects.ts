@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {select, Store} from '@ngrx/store';
-import {filter, first, map, switchMap, tap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { select, Store } from '@ngrx/store';
+import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 import {
   addNote,
   addNoteReminder,
@@ -12,16 +12,16 @@ import {
   updateNoteOrder,
   updateNoteReminder
 } from './note.actions';
-import {NoteState, selectNoteFeatureState} from './note.reducer';
-import {ReminderService} from '../../reminder/reminder.service';
-import {T} from '../../../t.const';
-import {SnackService} from '../../../core/snack/snack.service';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {combineLatest} from 'rxjs';
+import { NoteState, selectNoteFeatureState } from './note.reducer';
+import { ReminderService } from '../../reminder/reminder.service';
+import { T } from '../../../t.const';
+import { SnackService } from '../../../core/snack/snack.service';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { combineLatest, Observable } from 'rxjs';
 
 @Injectable()
 export class NoteEffects {
-  updateNote$: any = createEffect(() => this._actions$.pipe(
+  updateNote$: Observable<any> = createEffect(() => this._actions$.pipe(
     ofType(
       addNote,
       deleteNote,
@@ -43,7 +43,7 @@ export class NoteEffects {
     tap((p) => this._reminderService.removeReminderByRelatedIdIfSet(p.id))
   ), {dispatch: false});
 
-  addReminderForNewNote$ = createEffect(() => this._actions$.pipe(
+  addReminderForNewNote$: any = createEffect(() => this._actions$.pipe(
     ofType(
       addNote
     ),
@@ -108,7 +108,6 @@ export class NoteEffects {
       ico: 'schedule',
     })),
   ));
-
 
   constructor(
     private _actions$: Actions,

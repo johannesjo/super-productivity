@@ -1,6 +1,6 @@
-import {WorkContext, WorkContextType} from '../../work-context/work-context.model';
-import {Dictionary, EntityState} from '@ngrx/entity';
-import {Task} from '../../tasks/task.model';
+import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
+import { Dictionary, EntityState } from '@ngrx/entity';
+import { Task } from '../../tasks/task.model';
 
 export const getCompleteStateForWorkContext = (workContext: WorkContext, taskState: EntityState<Task>, archive: EntityState<Task>): {
   completeStateForWorkContext: EntityState<Task>,

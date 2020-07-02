@@ -1,7 +1,6 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection, EvaluationConfig} from '../global-config.model';
-import {T} from '../../../t.const';
-
+import { ConfigFormSection, EvaluationConfig } from '../global-config.model';
+import { T } from '../../../t.const';
 
 export const EVALUATION_SETTINGS_FORM_CFG: ConfigFormSection<EvaluationConfig> = {
   title: T.GCF.EVALUATION.TITLE,

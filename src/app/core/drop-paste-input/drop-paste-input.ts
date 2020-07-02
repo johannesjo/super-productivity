@@ -1,6 +1,5 @@
-import {isImageUrlSimple} from '../../util/is-image-url';
-import {DropPasteIcons, DropPasteInput} from './drop-paste.model';
-
+import { isImageUrlSimple } from '../../util/is-image-url';
+import { DropPasteIcons, DropPasteInput } from './drop-paste.model';
 
 export const createFromDrop = (ev): null | DropPasteInput => {
   const text = ev.dataTransfer.getData('text');
@@ -8,7 +7,6 @@ export const createFromDrop = (ev): null | DropPasteInput => {
     ? (_createTextBookmark(text))
     : (_createFileBookmark(ev.dataTransfer));
 };
-
 
 export const createFromPaste = (ev): null | DropPasteInput => {
   if (ev.target.getAttribute('contenteditable')) {
@@ -21,8 +19,7 @@ export const createFromPaste = (ev): null | DropPasteInput => {
   return null;
 };
 
-
-function _createTextBookmark(text): null | DropPasteInput {
+function _createTextBookmark(text: string): null | DropPasteInput {
   if (text) {
     if (text.match(/\n/)) {
       // addItem({
@@ -47,7 +44,7 @@ function _createTextBookmark(text): null | DropPasteInput {
   return null;
 }
 
-function _createFileBookmark(dataTransfer): null | DropPasteInput {
+function _createFileBookmark(dataTransfer: DataTransfer): null | DropPasteInput {
   const path = dataTransfer.files[0] && dataTransfer.files[0].path;
   if (path) {
     return {
@@ -60,7 +57,7 @@ function _createFileBookmark(dataTransfer): null | DropPasteInput {
   return null;
 }
 
-function _baseName(passedStr) {
+function _baseName(passedStr: string) {
   const str = passedStr.trim();
   let base;
   if (str[str.length - 1] === '/') {

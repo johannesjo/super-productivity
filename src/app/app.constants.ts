@@ -36,7 +36,6 @@ export const NG_LOCALES = {
   nl,
 };
 
-
 export const ALL_THEMES = [
   'blue',
   'blue-grey',
@@ -54,7 +53,6 @@ export const ALL_THEMES = [
   'amber',
   'deep-orange',
 ];
-
 
 export enum LanguageCode {
   en = 'en',

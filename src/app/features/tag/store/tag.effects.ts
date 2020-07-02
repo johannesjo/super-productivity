@@ -1,11 +1,11 @@
-import {Injectable} from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {concatMap, filter, first, map, switchMap, take, tap} from 'rxjs/operators';
-import {select, Store} from '@ngrx/store';
-import {selectTagFeatureState} from './tag.reducer';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {T} from '../../../t.const';
-import {SnackService} from '../../../core/snack/snack.service';
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, Effect, ofType } from '@ngrx/effects';
+import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { select, Store } from '@ngrx/store';
+import { selectTagFeatureState } from './tag.reducer';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { T } from '../../../t.const';
+import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTag,
   addToBreakTimeForTag,
@@ -28,27 +28,32 @@ import {
   RestoreTask,
   TaskActionTypes
 } from '../../tasks/store/task.actions';
-import {TagService} from '../tag.service';
-import {TaskService} from '../../tasks/task.service';
-import {EMPTY, of} from 'rxjs';
-import {Task, TaskArchive} from '../../tasks/task.model';
-import {Tag} from '../tag.model';
-import {getWorklogStr} from '../../../util/get-work-log-str';
-import {WorkContextType} from '../../work-context/work-context.model';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {Router} from '@angular/router';
-import {TODAY_TAG} from '../tag.const';
-import {createEmptyEntity} from '../../../util/create-empty-entity';
-import {DataInitService} from '../../../core/data-init/data-init.service';
+import { TagService } from '../tag.service';
+import { TaskService } from '../../tasks/task.service';
+import { EMPTY, of } from 'rxjs';
+import { Task, TaskArchive } from '../../tasks/task.model';
+import { Tag } from '../tag.model';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { WorkContextType } from '../../work-context/work-context.model';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { Router } from '@angular/router';
+import { TODAY_TAG } from '../tag.const';
+import { createEmptyEntity } from '../../../util/create-empty-entity';
+import { DataInitService } from '../../../core/data-init/data-init.service';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
 
-
 @Injectable()
 export class TagEffects {
+  saveToLs$ = this._store$.pipe(
+    select(selectTagFeatureState),
+    take(1),
+    switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
+    tap(this._updateLastLocalSyncModelChange.bind(this)),
+  );
   updateTagsStorage$ = createEffect(() => this._actions$.pipe(
     ofType(
       addTag,
@@ -67,7 +72,6 @@ export class TagEffects {
     ),
     switchMap(() => this.saveToLs$),
   ), {dispatch: false});
-
   updateProjectStorageConditionalTask$ = createEffect(() => this._actions$.pipe(
     ofType(
       TaskActionTypes.AddTask,
@@ -97,7 +101,6 @@ export class TagEffects {
     }),
     switchMap(() => this.saveToLs$),
   ), {dispatch: false});
-
   updateTagsStorageConditional$ = createEffect(() => this._actions$.pipe(
     ofType(
       moveTaskInTodayList,
@@ -107,16 +110,6 @@ export class TagEffects {
     filter((p) => p.workContextType === WorkContextType.TAG),
     switchMap(() => this.saveToLs$),
   ), {dispatch: false});
-
-
-  saveToLs$ = this._store$.pipe(
-    select(selectTagFeatureState),
-    take(1),
-    switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
-    tap(this._updateLastLocalSyncModelChange.bind(this)),
-  );
-
-
   @Effect({dispatch: false})
   snackUpdateBaseSettings$: any = this._actions$.pipe(
     ofType(updateTag),
@@ -125,7 +118,6 @@ export class TagEffects {
       msg: T.F.TAG.S.UPDATED,
     }))
   );
-
 
   @Effect()
   updateWorkStart$: any = this._actions$.pipe(
@@ -236,7 +228,6 @@ export class TagEffects {
       }
     }),
   );
-
 
   constructor(
     private _actions$: Actions,

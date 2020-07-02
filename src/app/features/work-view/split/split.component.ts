@@ -8,8 +8,8 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {fromEvent, Subscription} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import { fromEvent, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 const ANIMATABLE_CLASS = 'isAnimatable';
 
@@ -36,13 +36,6 @@ export class SplitComponent implements AfterViewInit {
   constructor(private _renderer: Renderer2) {
   }
 
-  ngAfterViewInit(): void {
-    this._isViewInitialized = true;
-    this._updatePos(this.pos, false);
-    this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
-    this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
-  }
-
   @Input() set splitPos(pos: number) {
     if (pos !== this.pos) {
       this._updatePos(pos, true);
@@ -52,6 +45,13 @@ export class SplitComponent implements AfterViewInit {
         this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
       }
     }
+  }
+
+  ngAfterViewInit(): void {
+    this._isViewInitialized = true;
+    this._updatePos(this.pos, false);
+    this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
+    this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
   }
 
   toggle() {

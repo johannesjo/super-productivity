@@ -1,8 +1,8 @@
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MetricPageComponent} from './metric-page.component';
-import {UiModule} from '../../ui/ui.module';
-import {MetricModule} from '../../features/metric/metric.module';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MetricPageComponent } from './metric-page.component';
+import { UiModule } from '../../ui/ui.module';
+import { MetricModule } from '../../features/metric/metric.module';
 
 @NgModule({
   declarations: [MetricPageComponent],

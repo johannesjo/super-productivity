@@ -1,20 +1,20 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {T} from '../../t.const';
-import {ConfigFormConfig, ConfigFormSection, GlobalConfigSectionKey} from '../../features/config/global-config.model';
-import {Project, ProjectCfgFormKey} from '../../features/project/project.model';
-import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue.model';
-import {Subscription} from 'rxjs';
-import {ProjectService} from '../../features/project/project.service';
-import {BASIC_PROJECT_CONFIG_FORM_CONFIG} from '../../features/project/project-form-cfg.const';
-import {ISSUE_PROVIDER_FORM_CFGS} from '../../features/issue/issue.const';
-import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
-import {IS_ELECTRON} from '../../app.constants';
-import {DEFAULT_JIRA_CFG} from '../../features/issue/providers/jira/jira.const';
-import {DEFAULT_GITHUB_CFG} from '../../features/issue/providers/github/github.const';
-import {WorkContextAdvancedCfg, WorkContextThemeCfg} from '../../features/work-context/work-context.model';
-import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../features/work-context/work-context.const';
-import {WorkContextService} from '../../features/work-context/work-context.service';
-import {DEFAULT_GITLAB_CFG} from 'src/app/features/issue/providers/gitlab/gitlab.const';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { T } from '../../t.const';
+import { ConfigFormConfig, ConfigFormSection, GlobalConfigSectionKey } from '../../features/config/global-config.model';
+import { Project, ProjectCfgFormKey } from '../../features/project/project.model';
+import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../features/issue/issue.model';
+import { Subscription } from 'rxjs';
+import { ProjectService } from '../../features/project/project.service';
+import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../features/project/project-form-cfg.const';
+import { ISSUE_PROVIDER_FORM_CFGS } from '../../features/issue/issue.const';
+import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/global-config-form-config.const';
+import { IS_ELECTRON } from '../../app.constants';
+import { DEFAULT_JIRA_CFG } from '../../features/issue/providers/jira/jira.const';
+import { DEFAULT_GITHUB_CFG } from '../../features/issue/providers/github/github.const';
+import { WorkContextAdvancedCfg, WorkContextThemeCfg } from '../../features/work-context/work-context.model';
+import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../features/work-context/work-context.const';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitlab.const';
 
 @Component({
   selector: 'project-settings',
@@ -23,7 +23,7 @@ import {DEFAULT_GITLAB_CFG} from 'src/app/features/issue/providers/gitlab/gitlab
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
   projectThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;
   globalConfigFormCfg: ConfigFormConfig;
@@ -34,7 +34,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   projectCfg: WorkContextAdvancedCfg;
   issueIntegrationCfgs: IssueIntegrationCfgs;
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly workContextService: WorkContextService,
@@ -56,7 +56,6 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
 
       // in case there are new ones...
       this.issueIntegrationCfgs = {...project.issueIntegrationCfgs};
-
 
       // Unfortunately needed, to make sure we have no empty configs
       // TODO maybe think of a better solution for the defaults

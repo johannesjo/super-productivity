@@ -1,14 +1,14 @@
-import {Injectable, NgZone} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {SnackParams} from './snack.model';
-import {Observable, Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
-import {DEFAULT_SNACK_CFG} from './snack.const';
-import {SnackCustomComponent} from './snack-custom/snack-custom.component';
-import {TranslateService} from '@ngx-translate/core';
-import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
-import {Actions, ofType} from '@ngrx/effects';
-import {setActiveWorkContext} from '../../features/work-context/store/work-context.actions';
+import { Injectable, NgZone } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { SnackParams } from './snack.model';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { DEFAULT_SNACK_CFG } from './snack.const';
+import { SnackCustomComponent } from './snack-custom/snack-custom.component';
+import { TranslateService } from '@ngx-translate/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { Actions, ofType } from '@ngrx/effects';
+import { setActiveWorkContext } from '../../features/work-context/store/work-context.actions';
 import * as debounceFn from 'debounce-fn';
 
 @Injectable({
@@ -46,7 +46,6 @@ export class SnackService {
       this._ref.dismiss();
     }
   }
-
 
   private _openSnack(params: SnackParams) {
     const _destroy$: Subject<boolean> = new Subject<boolean>();

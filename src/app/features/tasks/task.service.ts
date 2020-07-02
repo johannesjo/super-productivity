@@ -1,7 +1,7 @@
 import shortid from 'shortid';
-import {delay, filter, first, map, switchMap, take, withLatestFrom} from 'rxjs/operators';
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import { delay, filter, first, map, switchMap, take, withLatestFrom } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -13,7 +13,7 @@ import {
   TaskState,
   TaskWithSubTasks
 } from './task.model';
-import {select, Store} from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
   AddTask,
@@ -41,9 +41,9 @@ import {
   UpdateTaskTags,
   UpdateTaskUi
 } from './store/task.actions';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {IssueProviderKey} from '../issue/issue.model';
-import {TimeTrackingService} from '../time-tracking/time-tracking.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { IssueProviderKey } from '../issue/issue.model';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllRepeatableTaskWithSubTasks,
   selectAllRepeatableTaskWithSubTasksFlat,
@@ -66,14 +66,14 @@ import {
   selectTasksByTag,
   selectTaskWithSubTasksByRepeatConfigId
 } from './store/task.selectors';
-import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {ProjectService} from '../project/project.service';
-import {RoundTimeOption} from '../project/project.model';
-import {TagService} from '../tag/tag.service';
-import {TODAY_TAG} from '../tag/tag.const';
-import {WorkContextService} from '../work-context/work-context.service';
-import {WorkContextType} from '../work-context/work-context.model';
+import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { ProjectService } from '../project/project.service';
+import { RoundTimeOption } from '../project/project.model';
+import { TagService } from '../tag/tag.service';
+import { TODAY_TAG } from '../tag/tag.const';
+import { WorkContextService } from '../work-context/work-context.service';
+import { WorkContextType } from '../work-context/work-context.model';
 import {
   moveTaskDownInBacklogList,
   moveTaskDownInTodayList,
@@ -86,12 +86,11 @@ import {
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../work-context/store/work-context-meta.actions';
-import {Router} from '@angular/router';
-import {unique} from '../../util/unique';
-import {SnackService} from '../../core/snack/snack.service';
-import {T} from '../../t.const';
-import {ImexMetaService} from '../../imex/imex-meta/imex-meta.service';
-
+import { Router } from '@angular/router';
+import { unique } from '../../util/unique';
+import { SnackService } from '../../core/snack/snack.service';
+import { T } from '../../t.const';
+import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 
 @Injectable({
   providedIn: 'root',
@@ -134,7 +133,6 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-
   allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectAllRepeatableTaskWithSubTasks),
   );
@@ -159,7 +157,6 @@ export class TaskService {
     select(selectAllTasks),
   );
 
-
   // META FIELDS
   // -----------
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
@@ -167,11 +164,6 @@ export class TaskService {
   );
 
   private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasks));
-
-
-  getAllParentWithoutTag$(tagId: string) {
-    return this._store.pipe(select(selectMainTasksWithoutTag, {tagId}));
-  }
 
   constructor(
     private readonly _store: Store<any>,
@@ -196,7 +188,12 @@ export class TaskService {
       });
   }
 
+  getAllParentWithoutTag$(tagId: string) {
+    return this._store.pipe(select(selectMainTasksWithoutTag, {tagId}));
+  }
+
   // META
+
   // ----
   setCurrentId(id: string) {
     if (id) {
@@ -225,9 +222,9 @@ export class TaskService {
   // Tasks
   // -----
   add(title: string,
-      isAddToBacklog = false,
-      additional: Partial<Task> = {},
-      isAddToBottom = false,
+    isAddToBacklog = false,
+    additional: Partial<Task> = {},
+    isAddToBottom = false,
   ): string {
     const workContextId = this._workContextService.activeWorkContextId;
     const workContextType = this._workContextService.activeWorkContextType;
@@ -301,9 +298,9 @@ export class TaskService {
   }
 
   move(taskId: string,
-       src: DropListModelSource,
-       target: DropListModelSource,
-       newOrderedIds: string[]) {
+    src: DropListModelSource,
+    target: DropListModelSource,
+    newOrderedIds: string[]) {
     const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');
     const isTargetTodayList = (target === 'DONE' || target === 'UNDONE');
     const workContextId = this._workContextService.activeWorkContextId;
@@ -371,14 +368,14 @@ export class TaskService {
   }
 
   addTimeSpent(task: Task,
-               duration: number,
-               date: string = getWorklogStr()) {
+    duration: number,
+    date: string = getWorklogStr()) {
     this._store.dispatch(new AddTimeSpent({task, date, duration}));
   }
 
   removeTimeSpent(id: string,
-                  duration: number,
-                  date: string = getWorklogStr()) {
+    duration: number,
+    date: string = getWorklogStr()) {
     this._store.dispatch(new RemoveTimeSpent({id, date, duration}));
   }
 
@@ -561,7 +558,10 @@ export class TaskService {
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<any> {
     return await this._persistenceService.taskArchive.execAction(new UpdateTask({
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+      task: {
+        id,
+        changes: this._shortSyntax(changedFields) as Partial<Task>
+      }
     }));
   }
 
@@ -619,11 +619,11 @@ export class TaskService {
   }
 
   createNewTaskWithDefaults({
-                              title,
-                              additional = {},
-                              workContextType = this._workContextService.activeWorkContextType,
-                              workContextId = this._workContextService.activeWorkContextId
-                            }: {
+    title,
+    additional = {},
+    workContextType = this._workContextService.activeWorkContextType,
+    workContextId = this._workContextService.activeWorkContextId
+  }: {
     title: string;
     additional?: Partial<Task>;
     workContextType?: WorkContextType;

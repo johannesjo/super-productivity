@@ -1,13 +1,14 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {TaskService} from '../task.service';
-import {ReminderCopy} from '../../reminder/reminder.model';
-import {ReminderService} from '../../reminder/reminder.service';
-import {SnackService} from '../../../core/snack/snack.service';
-import {T} from '../../../t.const';
-import {AddTaskReminderInterface} from './add-task-reminder-interface';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {throttle} from 'helpful-decorators';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TaskService } from '../task.service';
+import { ReminderCopy } from '../../reminder/reminder.model';
+import { ReminderService } from '../../reminder/reminder.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { T } from '../../../t.const';
+import { AddTaskReminderInterface } from './add-task-reminder-interface';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { throttle } from 'helpful-decorators';
+import { Task } from '../task.model';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -16,8 +17,8 @@ import {throttle} from 'helpful-decorators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddTaskReminderComponent {
-  T = T;
-  task = this.data.task;
+  T: any = T;
+  task: Task = this.data.task;
   reminder: ReminderCopy = this.task.reminderId && this._reminderService.getById(this.task.reminderId);
   isEdit: boolean = !!(this.reminder && this.reminder.id);
 

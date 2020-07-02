@@ -1,5 +1,4 @@
-import {T} from '../../t.const';
-
+import { T } from '../../t.const';
 
 const a = T;
 export const PROGRESS_BAR_LABEL_MAP = {

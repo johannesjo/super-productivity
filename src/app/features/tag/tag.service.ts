@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
 import {
   selectAllTags,
   selectAllTagsWithoutMyDay,
@@ -7,12 +7,12 @@ import {
   selectTagByName,
   selectTagsByIds
 } from './store/tag.reducer';
-import {addTag, deleteTag, deleteTags, updateTag, upsertTag} from './store/tag.actions';
-import {Observable} from 'rxjs';
-import {Tag, TagState} from './tag.model';
+import { addTag, deleteTag, deleteTags, updateTag, upsertTag } from './store/tag.actions';
+import { Observable } from 'rxjs';
+import { Tag, TagState } from './tag.model';
 import shortid from 'shortid';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {DEFAULT_TAG} from './tag.const';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { DEFAULT_TAG } from './tag.const';
 
 @Injectable({
   providedIn: 'root',

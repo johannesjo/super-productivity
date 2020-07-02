@@ -1,7 +1,7 @@
-import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import * as tagActions from './tag.actions';
-import {Tag, TagState} from '../tag.model';
-import {Action, createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
+import { Tag, TagState } from '../tag.model';
+import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
   AddTask,
   DeleteMainTasks,
@@ -11,23 +11,22 @@ import {
   TaskActionTypes,
   UpdateTaskTags
 } from '../../tasks/store/task.actions';
-import {TODAY_TAG} from '../tag.const';
-import {WorkContextType} from '../../work-context/work-context.model';
+import { TODAY_TAG } from '../tag.const';
+import { WorkContextType } from '../../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
-import {moveTaskForWorkContextLikeState} from '../../work-context/store/work-context-meta.helper';
-import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
-import {Update} from '@ngrx/entity/src/models';
-import {unique} from '../../../util/unique';
-import {Project} from '../../project/project.model';
-import {loadAllData} from '../../../root-store/meta/load-all-data.action';
+import { moveTaskForWorkContextLikeState } from '../../work-context/store/work-context-meta.helper';
+import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
+import { Update } from '@ngrx/entity/src/models';
+import { unique } from '../../../util/unique';
+import { Project } from '../../project/project.model';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
-
 
 export const tagAdapter: EntityAdapter<Tag> = createEntityAdapter<Tag>();
 export const selectTagFeatureState = createFeatureSelector<TagState>(TAG_FEATURE_NAME);
@@ -57,11 +56,9 @@ export const selectTagByName = createSelector(
   }
 );
 
-
 export const initialTagState: TagState = tagAdapter.getInitialState({
   // additional entity state properties
 });
-
 
 const _addMyDayTagIfNecessary = (state: TagState): TagState => {
   const ids = state.ids as string[];
@@ -131,7 +128,6 @@ const _reducer = createReducer<TagState>(
     : state
   ),
 
-
   // INTERNAL
   // --------
   on(tagActions.addTag, (state, {tag}) => tagAdapter.addOne(tag, state)),
@@ -198,7 +194,6 @@ const _reducer = createReducer<TagState>(
     }, state);
   }),
 );
-
 
 export function tagReducer(
   state = initialTagState,

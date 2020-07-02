@@ -1,6 +1,6 @@
-import {IssueData, IssueProviderKey} from '../../issue/issue.model';
-import {Tag} from '../../tag/tag.model';
-import {Project} from '../../project/project.model';
+import { IssueData, IssueProviderKey } from '../../issue/issue.model';
+import { Tag } from '../../tag/tag.model';
+import { Project } from '../../project/project.model';
 
 export interface AddTaskSuggestion {
   title: string;

@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {T} from '../../../t.const';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'dialog-confirm-drive-sync-load',
@@ -9,7 +9,7 @@ import {T} from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogConfirmDriveSyncLoadComponent {
-  T = T;
+  T: any = T;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogConfirmDriveSyncLoadComponent>,

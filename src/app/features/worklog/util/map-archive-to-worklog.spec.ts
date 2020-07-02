@@ -1,8 +1,8 @@
-import {arrayToDictionary} from '../../../util/array-to-dictionary';
-import {DEFAULT_TASK, Task, TaskCopy} from '../../tasks/task.model';
-import {mapArchiveToWorklog} from './map-archive-to-worklog';
-import {Dictionary, EntityState} from '@ngrx/entity';
-import {Worklog} from '../worklog.model';
+import { arrayToDictionary } from '../../../util/array-to-dictionary';
+import { DEFAULT_TASK, Task, TaskCopy } from '../../tasks/task.model';
+import { mapArchiveToWorklog } from './map-archive-to-worklog';
+import { Dictionary, EntityState } from '@ngrx/entity';
+import { Worklog } from '../worklog.model';
 
 const START_END_ALL = {
   workStart: {
@@ -58,7 +58,6 @@ describe('mapArchiveToWorklog', () => {
     expect(w[2018].ent[2].ent[16].logEntries.length).toBe(1);
   });
 
-
   it('should work for parent task with sub tasks on separate days', () => {
     const ts = fakeTaskStateFromArray([
       {
@@ -92,7 +91,6 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-
     const r = mapArchiveToWorklog(ts, [], START_END_ALL);
     const w: Worklog = r.worklog;
 
@@ -116,7 +114,6 @@ describe('mapArchiveToWorklog', () => {
     expect(w[2018].ent[2].ent[16].logEntries[1].task.id).toBe('SUB_C');
     expect(w[2018].ent[2].ent[16].logEntries[1].parentId).toBe('A');
   });
-
 
   it('should sort sub tasks directly after their parent', () => {
     const ts = fakeTaskStateFromArray([
@@ -161,7 +158,6 @@ describe('mapArchiveToWorklog', () => {
         }
       },
     ]);
-
 
     const r = mapArchiveToWorklog(ts, [], START_END_ALL);
     const w: Worklog = r.worklog;

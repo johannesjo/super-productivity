@@ -1,7 +1,7 @@
-import {ConfigFormConfig, GenericConfigFormSection} from '../config/global-config.model';
-import {DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION} from './providers/jira/jira.const';
-import {IssueProviderKey} from './issue.model';
-import {DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM_SECTION} from './providers/github/github.const';
+import { ConfigFormConfig, GenericConfigFormSection } from '../config/global-config.model';
+import { DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION } from './providers/jira/jira.const';
+import { IssueProviderKey } from './issue.model';
+import { DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM_SECTION } from './providers/github/github.const';
 import { DEFAULT_GITLAB_CFG, GITLAB_CONFIG_FORM_SECTION } from './providers/gitlab/gitlab.const';
 
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';

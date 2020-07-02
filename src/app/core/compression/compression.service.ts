@@ -1,14 +1,12 @@
-import {Injectable} from '@angular/core';
-import {SnackService} from '../snack/snack.service';
+import { Injectable } from '@angular/core';
+import { SnackService } from '../snack/snack.service';
 import shortid from 'shortid';
-import {T} from '../../t.const';
+import { T } from '../../t.const';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class CompressionService {
   private _w: Worker;
-  private _activeInstances = {};
+  private _activeInstances: any = {};
 
   constructor(
     private readonly _snackService: SnackService,

@@ -1,5 +1,5 @@
-import {createAction, props} from '@ngrx/store';
-import {WorkContextState, WorkContextType} from '../work-context.model';
+import { createAction, props } from '@ngrx/store';
+import { WorkContextState, WorkContextType } from '../work-context.model';
 
 export const loadWorkContextState = createAction(
   '[WorkContext] Load Work Context State',

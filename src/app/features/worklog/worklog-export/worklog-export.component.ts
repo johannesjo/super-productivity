@@ -8,26 +8,26 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {TaskCopy, WorklogTask} from '../../tasks/task.model';
-import {combineLatest, Subscription} from 'rxjs';
-import {getWorklogStr} from '../../../util/get-work-log-str';
+import { TaskCopy, WorklogTask } from '../../tasks/task.model';
+import { combineLatest, Subscription } from 'rxjs';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 import * as moment from 'moment';
 import 'moment-duration-format';
-import {unique} from '../../../util/unique';
-import {msToString} from '../../../ui/duration/ms-to-string.pipe';
-import {msToClockString} from '../../../ui/duration/ms-to-clock-string.pipe';
-import {roundTime} from '../../../util/round-time';
-import {roundDuration} from '../../../util/round-duration';
+import { unique } from '../../../util/unique';
+import { msToString } from '../../../ui/duration/ms-to-string.pipe';
+import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
+import { roundTime } from '../../../util/round-time';
+import { roundDuration } from '../../../util/round-duration';
 import Clipboard from 'clipboard';
-import {SnackService} from '../../../core/snack/snack.service';
-import {WorklogService} from '../worklog.service';
-import {WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping} from '../worklog.model';
-import {T} from '../../../t.const';
-import {distinctUntilChanged} from 'rxjs/operators';
-import {distinctUntilChangedObject} from '../../../util/distinct-until-changed-object';
-import {WorkStartEnd} from '../../work-context/work-context.model';
-import {WORKLOG_EXPORT_DEFAULTS} from '../../work-context/work-context.const';
-import {WorkContextService} from '../../work-context/work-context.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { WorklogService } from '../worklog.service';
+import { WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping } from '../worklog.model';
+import { T } from '../../../t.const';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
+import { WorkStartEnd } from '../../work-context/work-context.model';
+import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
+import { WorkContextService } from '../../work-context/work-context.service';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -61,7 +61,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   @Output() cancel = new EventEmitter();
 
-  T = T;
+  T: any = T;
   isShowAsText = false;
   headlineCols: string[] = [];
   formattedRows: (string | number)[][];
@@ -349,7 +349,6 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           console.log(`${row.timeSpent} / ${timeSpentTotal} = ${timeSpentPart}`);
           timeEstimate = timeEstimate * timeSpentPart;
         }
-
 
         switch (col) {
           case 'DATE':

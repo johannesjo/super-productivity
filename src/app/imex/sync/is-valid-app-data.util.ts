@@ -1,7 +1,7 @@
-import {AppDataComplete} from './sync.model';
-import {MODEL_VERSION_KEY} from '../../app.constants';
-import {isEntityStateConsistent} from '../../util/check-fix-entity-state-consistency';
-import {devError} from '../../util/dev-error';
+import { AppDataComplete } from './sync.model';
+import { MODEL_VERSION_KEY } from '../../app.constants';
+import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
+import { devError } from '../../util/dev-error';
 
 // TODO unit test this
 export const isValidAppData = (data: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {

@@ -8,15 +8,15 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {GoogleApiService} from '../google-api.service';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {GoogleDriveSyncService} from '../google-drive-sync.service';
-import {SnackService} from '../../../core/snack/snack.service';
-import {GoogleDriveSyncConfig} from '../../config/global-config.model';
-import {Subscription} from 'rxjs';
-import {expandFadeAnimation} from '../../../ui/animations/expand.ani';
-import {FormGroup} from '@angular/forms';
-import {T} from '../../../t.const';
+import { GoogleApiService } from '../google-api.service';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { GoogleDriveSyncService } from '../google-drive-sync.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { GoogleDriveSyncConfig } from '../../config/global-config.model';
+import { Subscription } from 'rxjs';
+import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
+import { FormGroup } from '@angular/forms';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -26,7 +26,7 @@ import {T} from '../../../t.const';
   animations: [expandFadeAnimation]
 })
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
   tmpSyncFile: any;
   cfg: GoogleDriveSyncConfig;
   loginPromise: Promise<any>;
@@ -35,7 +35,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   @Output() save = new EventEmitter<any>();
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly googleApiService: GoogleApiService,

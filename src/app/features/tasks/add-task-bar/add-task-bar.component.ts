@@ -3,31 +3,32 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnDestroy,
   Output,
   ViewChild
 } from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {TaskService} from '../task.service';
-import {debounceTime, first, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
-import {JiraIssue} from '../../issue/providers/jira/jira-issue/jira-issue.model';
-import {BehaviorSubject, forkJoin, from, Observable, of, zip} from 'rxjs';
-import {IssueService} from '../../issue/issue.service';
-import {SnackService} from '../../../core/snack/snack.service';
-import {JiraApiService} from '../../issue/providers/jira/jira-api.service';
-import {T} from '../../../t.const';
-import {Task} from '../task.model';
-import {AddTaskSuggestion} from './add-task-suggestions.model';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {WorkContextType} from '../../work-context/work-context.model';
-import {SearchResultItem} from '../../issue/issue.model';
-import {truncate} from '../../../util/truncate';
-import {TagService} from '../../tag/tag.service';
-import {ProjectService} from '../../project/project.service';
-import {Tag} from '../../tag/tag.model';
-import {Project} from '../../project/project.model';
+import { FormControl } from '@angular/forms';
+import { TaskService } from '../task.service';
+import { debounceTime, first, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
+import { BehaviorSubject, forkJoin, from, Observable, of, zip } from 'rxjs';
+import { IssueService } from '../../issue/issue.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { JiraApiService } from '../../issue/providers/jira/jira-api.service';
+import { T } from '../../../t.const';
+import { Task } from '../task.model';
+import { AddTaskSuggestion } from './add-task-suggestions.model';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { WorkContextType } from '../../work-context/work-context.model';
+import { SearchResultItem } from '../../issue/issue.model';
+import { truncate } from '../../../util/truncate';
+import { TagService } from '../../tag/tag.service';
+import { ProjectService } from '../../project/project.service';
+import { Tag } from '../../tag/tag.model';
+import { Project } from '../../project/project.model';
 
 @Component({
   selector: 'add-task-bar',
@@ -36,19 +37,19 @@ import {Project} from '../../project/project.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
-  @Input() isAddToBacklog = false;
-  @Input() isAddToBottom;
-  @Input() isDoubleEnterMode = false;
+  @Input() isAddToBacklog: boolean = false;
+  @Input() isAddToBottom: boolean;
+  @Input() isDoubleEnterMode: boolean = false;
   @Input() isElevated: boolean;
   @Input() isDisableAutoFocus: boolean;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('inputEl', {static: true}) inputEl;
+  @ViewChild('inputEl', {static: true}) inputEl: ElementRef;
 
-  T = T;
-  isLoading$ = new BehaviorSubject(false);
-  doubleEnterCount = 0;
+  T: any = T;
+  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  doubleEnterCount: number = 0;
 
   taskSuggestionsCtrl: FormControl = new FormControl();
 
@@ -129,14 +130,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  closeBtnClose(ev) {
+  closeBtnClose(ev: Event) {
     this.blurred.emit(ev);
   }
 
-  onBlur(ev) {
-    if (ev.relatedTarget && ev.relatedTarget.className.includes('switch-add-to-btn')) {
+  onBlur(ev: FocusEvent) {
+    const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
+    if (relatedTarget && relatedTarget.className.includes('switch-add-to-btn')) {
       this.inputEl.nativeElement.focus();
-    } else if (ev.relatedTarget && ev.relatedTarget.className.includes('mat-option')) {
+    } else if (relatedTarget && relatedTarget.className.includes('mat-option')) {
       this._blurTimeout = window.setTimeout(() => {
         if (!this._isAddInProgress) {
           this.blurred.emit(ev);
@@ -251,7 +253,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   // TODO improve typing
-  private _searchForProject$(searchTerm): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
+  private _searchForProject$(searchTerm: string): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
     if (searchTerm && searchTerm.length > 0) {
       const backlog$ = this._workContextService.backlogTasks$.pipe(
         map(tasks => tasks

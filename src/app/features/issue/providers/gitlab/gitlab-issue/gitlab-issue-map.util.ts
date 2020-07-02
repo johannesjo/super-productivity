@@ -1,6 +1,6 @@
-import {GitlabIssue} from './gitlab-issue.model';
-import {GitlabOriginalIssue} from '../gitlab-api/gitlab-api-responses';
-import {IssueProviderKey, SearchResultItem} from '../../../issue.model';
+import { GitlabIssue } from './gitlab-issue.model';
+import { GitlabOriginalIssue } from '../gitlab-api/gitlab-api-responses';
+import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
 
 export const mapGitlabIssue = (issue: GitlabOriginalIssue): GitlabIssue => {
   return {

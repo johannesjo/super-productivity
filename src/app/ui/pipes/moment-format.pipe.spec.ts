@@ -1,4 +1,4 @@
-import {MomentFormatPipe} from './moment-format.pipe';
+import { MomentFormatPipe } from './moment-format.pipe';
 
 describe('MomentFormatPipe', () => {
   it('create an instance', () => {

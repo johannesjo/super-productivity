@@ -1,6 +1,6 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {IssueProviderKey} from '../issue.model';
-import {issueProviderIconMap} from '../issue.const';
+import { Pipe, PipeTransform } from '@angular/core';
+import { IssueProviderKey } from '../issue.model';
+import { issueProviderIconMap } from '../issue.const';
 
 @Pipe({
   name: 'issueIcon'

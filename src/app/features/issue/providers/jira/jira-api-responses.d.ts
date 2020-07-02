@@ -14,7 +14,6 @@ export type JiraOriginalAvatarUrls = Readonly<{
   '48x48': string;
 }>;
 
-
 export type JiraOriginalAuthor = Readonly<{
   self: string;
   id: string;
@@ -27,7 +26,6 @@ export type JiraOriginalAuthor = Readonly<{
   active: boolean;
   timeZone: string;
 }>;
-
 
 export interface JiraOriginalUser extends JiraOriginalAuthor {
   expand: string;
@@ -100,7 +98,6 @@ export type JiraOriginalFields = Readonly<{
   status: JiraOriginalStatus;
 }>;
 
-
 // export type JiraIssueOriginalReduced = Readonly<{
 //   key: string;
 //   id: string;
@@ -109,7 +106,6 @@ export type JiraOriginalFields = Readonly<{
 //   fields: JiraOriginalFields;
 //   changelog?: JiraOriginalChangelog;
 // }>;
-
 
 export type JiraOriginalChangelog = Readonly<{
   histories: {
@@ -130,7 +126,6 @@ export type JiraOriginalChangelog = Readonly<{
   startAt: number;
   total: number;
 }>;
-
 
 export type JiraOriginalTransition = Readonly<{
   id: string;

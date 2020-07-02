@@ -1,8 +1,9 @@
-import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
-import {GlobalConfigService} from '../../features/config/global-config.service';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
   GLOBAL_CONFIG_FORM_CONFIG,
-  GLOBAL_PRODUCTIVITY_FORM_CONFIG, GLOBAL_SYNC_FORM_CONFIG
+  GLOBAL_PRODUCTIVITY_FORM_CONFIG,
+  GLOBAL_SYNC_FORM_CONFIG
 } from '../../features/config/global-config-form-config.const';
 import {
   ConfigFormConfig,
@@ -10,12 +11,12 @@ import {
   GlobalConfigSectionKey,
   GlobalConfigState
 } from '../../features/config/global-config.model';
-import {Subscription} from 'rxjs';
-import {ProjectCfgFormKey} from '../../features/project/project.model';
-import {IS_ELECTRON} from '../../app.constants';
-import {environment} from '../../../environments/environment';
-import {T} from '../../t.const';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import { Subscription } from 'rxjs';
+import { ProjectCfgFormKey } from '../../features/project/project.model';
+import { IS_ELECTRON } from '../../app.constants';
+import { environment } from '../../../environments/environment';
+import { T } from '../../t.const';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'config-page',
@@ -24,7 +25,7 @@ import {MatSlideToggleChange} from '@angular/material/slide-toggle';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
   globalConfigFormCfg: ConfigFormConfig;
   globalSyncProviderFormCfg: ConfigFormConfig;
   globalProductivityConfigFormCfg: ConfigFormConfig;
@@ -33,7 +34,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   appVersion: string = environment.version;
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly configService: GlobalConfigService,

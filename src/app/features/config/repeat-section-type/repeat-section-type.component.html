@@ -1,23 +1,23 @@
-<div class="list-wrapper"
-     [@standardList]="field.fieldGroup?.length">
+<div [@standardList]="field.fieldGroup?.length"
+     class="list-wrapper">
   <div *ngFor="let innerField of field.fieldGroup; let i = index; trackBy: trackByFn;"
        class="row">
-    <formly-field class="field"
-                  [field]="innerField"></formly-field>
+    <formly-field [field]="innerField"
+                  class="field"></formly-field>
 
-    <button mat-mini-fab
-            type="button"
+    <button (click)="removeItem(i)"
             color="warn"
-            (click)="removeItem(i)">
+            mat-mini-fab
+            type="button">
       <mat-icon>delete_forever</mat-icon>
     </button>
   </div>
 </div>
 
 <div class="footer">
-  <button mat-button
-          type="button"
-          (click)="addItem()">
+  <button (click)="addItem()"
+          mat-button
+          type="button">
     <mat-icon>add</mat-icon>
     {{ to.addText | translate}}</button>
 </div>

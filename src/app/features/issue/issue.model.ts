@@ -1,7 +1,7 @@
-import {JiraIssue, JiraIssueReduced} from './providers/jira/jira-issue/jira-issue.model';
-import {JiraCfg} from './providers/jira/jira.model';
-import {GithubCfg} from './providers/github/github.model';
-import {GithubIssue, GithubIssueReduced} from './providers/github/github-issue/github-issue.model';
+import { JiraIssue, JiraIssueReduced } from './providers/jira/jira-issue/jira-issue.model';
+import { JiraCfg } from './providers/jira/jira.model';
+import { GithubCfg } from './providers/github/github.model';
+import { GithubIssue, GithubIssueReduced } from './providers/github/github-issue/github-issue.model';
 import { GitlabCfg } from './providers/gitlab/gitlab';
 import { GitlabIssue } from './providers/gitlab/gitlab-issue/gitlab-issue.model';
 

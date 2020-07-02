@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {initialObstructionState, selectAllObstructions} from './store/obstruction.reducer';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { initialObstructionState, selectAllObstructions } from './store/obstruction.reducer';
 import {
   AddObstruction,
   DeleteObstruction,
@@ -8,10 +8,10 @@ import {
   LoadObstructionState,
   UpdateObstruction
 } from './store/obstruction.actions';
-import {Observable} from 'rxjs';
-import {Obstruction, ObstructionState} from './obstruction.model';
+import { Observable } from 'rxjs';
+import { Obstruction, ObstructionState } from './obstruction.model';
 import shortid from 'shortid';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root',

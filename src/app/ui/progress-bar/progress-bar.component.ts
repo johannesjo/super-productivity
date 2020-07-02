@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input } from '@angular/core';
 
 @Component({
   selector: 'progress-bar',

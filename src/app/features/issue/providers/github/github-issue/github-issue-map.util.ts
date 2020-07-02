@@ -1,6 +1,6 @@
-import {GithubIssue} from './github-issue.model';
-import {GithubOriginalIssue} from '../github-api-responses';
-import {IssueProviderKey, SearchResultItem} from '../../../issue.model';
+import { GithubIssue } from './github-issue.model';
+import { GithubOriginalIssue } from '../github-api-responses';
+import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
 
 export const mapGithubIssue = (issue: GithubOriginalIssue): GithubIssue => {
   return {

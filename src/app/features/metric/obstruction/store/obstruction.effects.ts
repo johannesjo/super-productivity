@@ -1,15 +1,15 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {first, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
-import {select, Store} from '@ngrx/store';
-import {DeleteObstructions, ObstructionActionTypes} from './obstruction.actions';
-import {selectObstructionFeatureState} from './obstruction.reducer';
-import {PersistenceService} from '../../../../core/persistence/persistence.service';
-import {MetricActionTypes} from '../../store/metric.actions';
-import {selectUnusedObstructionIds} from '../../store/metric.selectors';
-import {WorkContextService} from '../../../work-context/work-context.service';
-import {combineLatest} from 'rxjs';
-import {ObstructionState} from '../obstruction.model';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { select, Store } from '@ngrx/store';
+import { DeleteObstructions, ObstructionActionTypes } from './obstruction.actions';
+import { selectObstructionFeatureState } from './obstruction.reducer';
+import { PersistenceService } from '../../../../core/persistence/persistence.service';
+import { MetricActionTypes } from '../../store/metric.actions';
+import { selectUnusedObstructionIds } from '../../store/metric.selectors';
+import { WorkContextService } from '../../../work-context/work-context.service';
+import { combineLatest } from 'rxjs';
+import { ObstructionState } from '../obstruction.model';
 
 @Injectable()
 export class ObstructionEffects {

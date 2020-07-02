@@ -1,6 +1,6 @@
 import * as moment from 'moment';
-import {Duration} from 'moment';
-import {RoundTimeOption} from '../features/project/project.model';
+import { Duration } from 'moment';
+import { RoundTimeOption } from '../features/project/project.model';
 
 export const roundDuration = (val: Duration | number, roundTo: RoundTimeOption, isRoundUp = false): Duration => {
   const value = (typeof val === 'number')

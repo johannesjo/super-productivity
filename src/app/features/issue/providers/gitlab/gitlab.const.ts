@@ -1,8 +1,8 @@
 // TODO use as a checklist
-import {GitlabCfg} from './gitlab';
-import {T} from '../../../../t.const';
-import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../../config/global-config.model';
-import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
+import { GitlabCfg } from './gitlab';
+import { T } from '../../../../t.const';
+import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/global-config.model';
+import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   project: null,

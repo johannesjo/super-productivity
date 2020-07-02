@@ -12,32 +12,32 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {TaskService} from '../task.service';
-import {Observable, of, ReplaySubject, Subject} from 'rxjs';
-import {ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskWithSubTasks} from '../task.model';
-import {MatDialog} from '@angular/material/dialog';
-import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
-import {expandAnimation} from '../../../ui/animations/expand.ani';
-import {GlobalConfigService} from '../../config/global-config.service';
-import {checkKeyCombo} from '../../../util/check-key-combo';
-import {distinctUntilChanged, map, switchMap, take, takeUntil} from 'rxjs/operators';
-import {fadeAnimation} from '../../../ui/animations/fade.ani';
-import {TaskAttachmentService} from '../task-attachment/task-attachment.service';
-import {IssueService} from '../../issue/issue.service';
-import {DialogEditTaskAttachmentComponent} from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
-import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
-import {IS_TOUCH_ONLY, isTouchOnly} from '../../../util/is-touch';
-import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
-import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
-import {ProjectService} from '../../project/project.service';
-import {Project} from '../../project/project.model';
-import {T} from '../../../t.const';
-import {MatMenuTrigger} from '@angular/material/menu';
-import {AddTaskReminderInterface} from '../dialog-add-task-reminder/add-task-reminder-interface';
-import {TODAY_TAG} from '../../tag/tag.const';
-import {DialogEditTagsForTaskComponent} from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {environment} from '../../../../environments/environment';
+import { TaskService } from '../task.service';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { ShowSubTasksMode, TaskAdditionalInfoTargetPanel, TaskWithSubTasks } from '../task.model';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { checkKeyCombo } from '../../../util/check-key-combo';
+import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
+import { IssueService } from '../../issue/issue.service';
+import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
+import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
+import { IS_TOUCH_ONLY, isTouchOnly } from '../../../util/is-touch';
+import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
+import { ProjectService } from '../../project/project.service';
+import { Project } from '../../project/project.model';
+import { T } from '../../../t.const';
+import { MatMenuTrigger } from '@angular/material/menu';
+import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'task',
@@ -48,22 +48,10 @@ import {environment} from '../../../../environments/environment';
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   task: TaskWithSubTasks;
-
-  @Input('task') set taskSet(v: TaskWithSubTasks) {
-    this.task = v;
-
-    this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
-    this.taskIdWithPrefix = 't-' + this.task.id;
-    this.isDone = v.isDone;
-    this._task$.next(v);
-  }
-
   @Input() isBacklog: boolean;
-
-  T = T;
+  T: any = T;
   isDragOver: boolean;
   isTouchOnly: boolean = IS_TOUCH_ONLY;
-
   isLockPanLeft = false;
   isLockPanRight = false;
   isPreventPointerEventsWhilePanning = false;
@@ -72,7 +60,20 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   contextMenuPosition = {x: '0px', y: '0px'};
   progress: number;
   isDev = !environment.production;
-
+  @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
+  @ViewChild('blockLeftEl') blockLeftElRef: ElementRef;
+  @ViewChild('blockRightEl') blockRightElRef: ElementRef;
+  @ViewChild('innerWrapperEl', {static: true}) innerWrapperElRef: ElementRef;
+  // only works because item comes first in dom
+  @ViewChild('contextMenuTriggerEl', {static: true, read: MatMenuTrigger}) contextMenu: MatMenuTrigger;
+  @ViewChild('projectMenuTriggerEl', {static: false, read: MatMenuTrigger}) projectMenuTrigger: MatMenuTrigger;
+  @HostBinding('tabindex') tabIndex = 1;
+  @HostBinding('class.isDone') isDone: boolean;
+  @HostBinding('id') taskIdWithPrefix: string;
+  // @see ngOnInit
+  @HostBinding('class.isCurrent') isCurrent: boolean;
+  @HostBinding('class.isSelected') isSelected: boolean;
+  TODAY_TAG_ID = TODAY_TAG.id;
   private _task$ = new ReplaySubject<TaskWithSubTasks>(1);
   issueUrl$: Observable<string> = this._task$.pipe(
     switchMap((v) => {
@@ -87,25 +88,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
-
-  @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
-  @ViewChild('blockLeftEl') blockLeftElRef: ElementRef;
-  @ViewChild('blockRightEl') blockRightElRef: ElementRef;
-  @ViewChild('innerWrapperEl', {static: true}) innerWrapperElRef: ElementRef;
-
-  // only works because item comes first in dom
-  @ViewChild('contextMenuTriggerEl', {static: true, read: MatMenuTrigger}) contextMenu: MatMenuTrigger;
-  @ViewChild('projectMenuTriggerEl', {static: false, read: MatMenuTrigger}) projectMenuTrigger: MatMenuTrigger;
-
-  @HostBinding('tabindex') tabIndex = 1;
-  @HostBinding('class.isDone') isDone: boolean;
-  @HostBinding('id') taskIdWithPrefix: string;
-  // @see ngOnInit
-  @HostBinding('class.isCurrent') isCurrent: boolean;
-  @HostBinding('class.isSelected') isSelected: boolean;
-
-  TODAY_TAG_ID = TODAY_TAG.id;
-
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout: number;
@@ -122,6 +104,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
   ) {
+  }
+
+  @Input('task') set taskSet(v: TaskWithSubTasks) {
+    this.task = v;
+
+    this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
+    this.taskIdWithPrefix = 't-' + this.task.id;
+    this.isDone = v.isDone;
+    this._task$.next(v);
   }
 
   // methods come last
@@ -249,7 +240,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusNext(true);
   }
 
-
   startTask() {
     this._taskService.setCurrentId(this.task.id);
     this.focusSelf();
@@ -303,7 +293,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       : this._taskService.setDone(this.task.id);
   }
 
-
   showAdditionalInfos() {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
@@ -313,7 +302,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
   }
-
 
   toggleShowAdditionalInfoOpen() {
     this.isSelected
@@ -410,7 +398,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.contextMenuPosition.y = event.clientY + 'px';
     this.contextMenu.openMenu();
   }
-
 
   onTagsUpdated(tagIds: string[]) {
     this._taskService.updateTags(this.task, tagIds, this.task.tagIds);
@@ -554,7 +541,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._renderer.removeClass(this.blockRightElRef.nativeElement, 'isActive');
     this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
   }
-
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {
     if (ev.target !== this._elementRef.nativeElement) {

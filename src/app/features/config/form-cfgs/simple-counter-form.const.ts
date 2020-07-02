@@ -1,8 +1,8 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection} from '../global-config.model';
-import {SimpleCounterConfig, SimpleCounterType} from '../../simple-counter/simple-counter.model';
-import {T} from '../../../t.const';
-import {SIMPLE_COUNTER_TRIGGER_ACTIONS} from '../../simple-counter/simple-counter.const';
+import { ConfigFormSection } from '../global-config.model';
+import { SimpleCounterConfig, SimpleCounterType } from '../../simple-counter/simple-counter.model';
+import { T } from '../../../t.const';
+import { SIMPLE_COUNTER_TRIGGER_ACTIONS } from '../../simple-counter/simple-counter.const';
 
 export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
   title: T.F.SIMPLE_COUNTER.FORM.TITLE,

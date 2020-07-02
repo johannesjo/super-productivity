@@ -1,8 +1,8 @@
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FileImexComponent} from './file-imex.component';
-import {UiModule} from '../../ui/ui.module';
-import {FormsModule} from '@angular/forms';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FileImexComponent } from './file-imex.component';
+import { UiModule } from '../../ui/ui.module';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [

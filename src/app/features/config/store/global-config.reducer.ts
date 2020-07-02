@@ -1,5 +1,5 @@
-import {GlobalConfigActions, GlobalConfigActionTypes} from './global-config.actions';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import { GlobalConfigActions, GlobalConfigActionTypes } from './global-config.actions';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import {
   EvaluationConfig,
   GlobalConfigState,
@@ -8,10 +8,10 @@ import {
   MiscConfig,
   TakeABreakConfig
 } from '../global-config.model';
-import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
-import {loadAllData} from '../../../root-store/meta/load-all-data.action';
-import {AppDataComplete} from '../../../imex/sync/sync.model';
-import {migrateGlobalConfigState} from '../migrate-global-config.util';
+import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { AppDataComplete } from '../../../imex/sync/sync.model';
+import { migrateGlobalConfigState } from '../migrate-global-config.util';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
@@ -24,7 +24,7 @@ export const selectTakeABreakConfig = createSelector(selectConfigFeatureState, (
 export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;
 
 export function globalConfigReducer(
-  state = initialState,
+  state: GlobalConfigState = initialState,
   action: GlobalConfigActions
 ): GlobalConfigState {
   // console.log(action, state);

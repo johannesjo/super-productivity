@@ -1,14 +1,13 @@
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {NoteService} from '../note.service';
-import {Reminder} from '../../reminder/reminder.model';
-import {SS_NOTE_TMP} from '../../../core/persistence/ls-keys.const';
-import {T} from '../../../t.const';
-import {WorkContextService} from '../../work-context/work-context.service';
-import {Observable, Subscription} from 'rxjs';
-import {WorkContextType} from '../../work-context/work-context.model';
-import {map} from 'rxjs/operators';
-
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { NoteService } from '../note.service';
+import { Reminder } from '../../reminder/reminder.model';
+import { SS_NOTE_TMP } from '../../../core/persistence/ls-keys.const';
+import { T } from '../../../t.const';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { Observable, Subscription } from 'rxjs';
+import { WorkContextType } from '../../work-context/work-context.model';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-add-note',
@@ -17,15 +16,15 @@ import {map} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddNoteComponent {
-  T = T;
+  T: any = T;
   noteContent: string;
   reminderDate: number;
-  isSubmitted = false;
+  isSubmitted: boolean = false;
   isInProjectContext$: Observable<boolean> = this._workContextService.activeWorkContextTypeAndId$.pipe(
     map(({activeType}) => activeType === WorkContextType.PROJECT)
   );
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
@@ -60,12 +59,11 @@ export class DialogAddNoteComponent {
     }
   }
 
-
   close() {
     this._matDialogRef.close();
   }
 
-  saveTmp(val = this.noteContent || '') {
+  saveTmp(val: string = this.noteContent || '') {
     sessionStorage.setItem(SS_NOTE_TMP, val);
   }
 

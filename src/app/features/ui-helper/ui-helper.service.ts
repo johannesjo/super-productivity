@@ -1,18 +1,16 @@
-import {Inject, Injectable} from '@angular/core';
-import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
-import {LS_LOCAL_UI_HELPER} from '../../core/persistence/ls-keys.const';
-import {DOCUMENT} from '@angular/common';
-import {LocalUiHelperSettings} from './ui-helper.model';
-import {UI_LOCAL_HELPER_DEFAULT} from './ui-helper.const';
-import {ElectronService} from '../../core/electron/electron.service';
-import {IPC} from '../../../../electron/ipc-events.const';
-import {IS_ELECTRON} from '../../app.constants';
-import {fromEvent} from 'rxjs';
-import {throttleTime} from 'rxjs/operators';
+import { Inject, Injectable } from '@angular/core';
+import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
+import { LS_LOCAL_UI_HELPER } from '../../core/persistence/ls-keys.const';
+import { DOCUMENT } from '@angular/common';
+import { LocalUiHelperSettings } from './ui-helper.model';
+import { UI_LOCAL_HELPER_DEFAULT } from './ui-helper.const';
+import { ElectronService } from '../../core/electron/electron.service';
+import { IPC } from '../../../../electron/ipc-events.const';
+import { IS_ELECTRON } from '../../app.constants';
+import { fromEvent } from 'rxjs';
+import { throttleTime } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class UiHelperService {
   private _webFrame = this._electronService.webFrame;
 
@@ -48,7 +46,6 @@ export class UiHelperService {
     this._updateLocalUiHelperSettings({zoomFactor});
   }
 
-
   focusApp() {
     if (IS_ELECTRON) {
 
@@ -62,7 +59,6 @@ export class UiHelperService {
       console.error('Cannot execute focus app window in browser');
     }
   }
-
 
   private _initMousewheelZoomForElectron() {
     const ZOOM_DELTA = 0.025;

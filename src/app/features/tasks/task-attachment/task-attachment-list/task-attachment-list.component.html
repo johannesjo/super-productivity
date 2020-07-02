@@ -6,11 +6,11 @@
     <a [class.isImage]="attachment?.type==='IMG' && !isError[i]"
        [href]="attachment?.path"
        [type]="isError[i] ? 'LINK': attachment?.type"
-       taskAttachmentLink
        class="attachment-link mat-elevation-z3 "
        draggable="false"
        tabindex="1"
-       target="_blank">
+       target="_blank"
+       taskAttachmentLink>
       <ng-container *ngIf="attachment?.type!=='IMG' || isError[i]">
         <mat-icon *ngIf="attachment?.icon">{{attachment?.icon}}
         </mat-icon>

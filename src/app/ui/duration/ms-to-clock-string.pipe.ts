@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import * as moment from 'moment';
 
 export const msToClockString = (value: any, showSeconds?: boolean, isHideEmptyPlaceholder?: boolean): string => {
@@ -25,6 +25,6 @@ export const msToClockString = (value: any, showSeconds?: boolean, isHideEmptyPl
   name: 'msToClockString'
 })
 export class MsToClockStringPipe implements PipeTransform {
-  transform = msToClockString;
+  transform: (value: any, ...args: any[]) => any = msToClockString;
 }
 

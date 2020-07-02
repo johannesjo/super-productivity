@@ -1,5 +1,5 @@
-import {PomodoroActions, PomodoroActionTypes} from './pomodoro.actions';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import { PomodoroActions, PomodoroActionTypes } from './pomodoro.actions';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const POMODORO_FEATURE_NAME = 'pomodoro';
 
@@ -20,7 +20,6 @@ export const selectPomodoroFeatureState = createFeatureSelector<PomodoroState>(P
 export const selectIsManualPause = createSelector(selectPomodoroFeatureState, state => state.isManualPause);
 export const selectIsBreak = createSelector(selectPomodoroFeatureState, state => state.isBreak);
 export const selectCurrentCycle = createSelector(selectPomodoroFeatureState, state => state.currentCycle);
-
 
 export function pomodoroReducer(state = initialPomodoroState, action: PomodoroActions): PomodoroState {
   switch (action.type) {

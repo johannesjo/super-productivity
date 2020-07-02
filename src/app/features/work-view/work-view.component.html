@@ -14,7 +14,8 @@
             <span class="label">{{T.WW.ESTIMATE_REMAINING|translate}}</span>
             <span class="no-wrap">
       ~<strong class="time-val">{{workContextService.estimateRemainingToday$|async|msToString}}</strong>
-      <mat-icon svgIcon="estimate_remaining" style="margin-left: 2px;"></mat-icon>
+      <mat-icon style="margin-left: 2px;"
+                svgIcon="estimate_remaining"></mat-icon>
       </span>
           </div>
 
@@ -147,10 +148,10 @@
 </task-additional-info-wrapper>
 
 <button (click)="layoutService.showAddTaskBar()"
-        [matTooltip]="T.MH.ADD_NEW_TASK|translate"
         [class.isRight]="isShowBacklog"
+        [matTooltip]="T.MH.ADD_NEW_TASK|translate"
+        class="show-xs-only add-task-btn"
         color="lighter"
-        mat-fab
-        class="show-xs-only add-task-btn">
+        mat-fab>
   <mat-icon>add</mat-icon>
 </button>

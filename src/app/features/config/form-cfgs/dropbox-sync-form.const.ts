@@ -1,8 +1,7 @@
 // tslint:disable:max-line-length
-import {T} from '../../../t.const';
-import {ConfigFormSection, DropboxSyncConfig} from '../global-config.model';
-import {DROPBOX_AUTH_CODE_URL} from '../../dropbox/dropbox.const';
-
+import { T } from '../../../t.const';
+import { ConfigFormSection, DropboxSyncConfig } from '../global-config.model';
+import { DROPBOX_AUTH_CODE_URL } from '../../dropbox/dropbox.const';
 
 export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
   title: T.F.DROPBOX.FORM.TITLE,

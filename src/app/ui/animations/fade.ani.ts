@@ -1,5 +1,5 @@
-import {animate, style, transition, trigger} from '@angular/animations';
-import {ANI_ENTER_TIMING, ANI_LEAVE_TIMING} from './animation.const';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { ANI_ENTER_TIMING, ANI_LEAVE_TIMING } from './animation.const';
 
 export const fadeAnimation = [
   trigger('fade', [
@@ -14,7 +14,6 @@ export const fadeAnimation = [
   ])
 ];
 
-
 export const fadeInOutBottomAnimation = [
   trigger('fadeInOutBottom', [
     transition(':enter', [
@@ -28,12 +27,11 @@ export const fadeInOutBottomAnimation = [
   ])
 ];
 
-
 export const fadeOutAnimation = [
   trigger('fadeOut', [
     // transition(':enter', [
-      // style({opacity: 0, transform: 'translateY(100%)'}),
-      // animate(ANI_ENTER_TIMING, style({opacity: '*', transform: 'translateY(0)'}))
+    // style({opacity: 0, transform: 'translateY(100%)'}),
+    // animate(ANI_ENTER_TIMING, style({opacity: '*', transform: 'translateY(0)'}))
     // ]), // void => *
     transition(':leave', [
       style({opacity: '*'}),

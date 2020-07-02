@@ -1,22 +1,22 @@
-import {Injectable} from '@angular/core';
-import {ProjectService} from '../project/project.service';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {RecurringConfig, Reminder, ReminderCopy, ReminderType} from './reminder.model';
-import {SnackService} from '../../core/snack/snack.service';
+import { Injectable } from '@angular/core';
+import { ProjectService } from '../project/project.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
+import { SnackService } from '../../core/snack/snack.service';
 import shortid from 'shortid';
-import {BehaviorSubject, merge, Observable, ReplaySubject, Subject, timer} from 'rxjs';
-import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
-import {ImexMetaService} from '../../imex/imex-meta/imex-meta.service';
-import {TaskService} from '../tasks/task.service';
-import {Note} from '../note/note.model';
-import {Task} from '../tasks/task.model';
-import {NoteService} from '../note/note.service';
-import {T} from '../../t.const';
-import {SyncService} from '../../imex/sync/sync.service';
-import {delay, filter, first, map, mapTo, switchMap, take} from 'rxjs/operators';
-import {migrateReminders} from './migrate-reminder.util';
-import {WorkContextService} from '../work-context/work-context.service';
-import {devError} from '../../util/dev-error';
+import { BehaviorSubject, merge, Observable, ReplaySubject, Subject, timer } from 'rxjs';
+import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
+import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { TaskService } from '../tasks/task.service';
+import { Note } from '../note/note.model';
+import { Task } from '../tasks/task.model';
+import { NoteService } from '../note/note.service';
+import { T } from '../../t.const';
+import { SyncService } from '../../imex/sync/sync.service';
+import { delay, filter, first, map, mapTo, switchMap, take } from 'rxjs/operators';
+import { migrateReminders } from './migrate-reminder.util';
+import { WorkContextService } from '../work-context/work-context.service';
+import { devError } from '../../util/dev-error';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const DELAY = 5000;
@@ -25,8 +25,8 @@ const DELAY = 5000;
   providedIn: 'root',
 })
 export class ReminderService {
-  private _onRemindersActive$ = new Subject<Reminder[]>();
-  onRemindersActive$ = this._onRemindersActive$.pipe(
+  private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
+  onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(
     switchMap((reminders) => this._imexMetaService.isDataImportInProgress$.pipe(
       filter(isInProgress => !isInProgress),
       take(1),
@@ -35,13 +35,13 @@ export class ReminderService {
     ))
   );
 
-  private _reminders$ = new ReplaySubject<Reminder[]>(1);
-  reminders$ = this._reminders$.asObservable();
+  private _reminders$: ReplaySubject<Reminder[]> = new ReplaySubject(1);
+  reminders$: Observable<Reminder[]> = this._reminders$.asObservable();
 
-  private _onReloadModel$ = new Subject<Reminder[]>();
-  onReloadModel$ = this._onReloadModel$.asObservable();
+  private _onReloadModel$: Subject<Reminder[]> = new Subject();
+  onReloadModel$: Observable<Reminder[]> = this._onReloadModel$.asObservable();
 
-  private _isRemindersLoaded$ = new BehaviorSubject<boolean>(false);
+  private _isRemindersLoaded$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isRemindersLoaded$: Observable<boolean> = this._isRemindersLoaded$.asObservable();
 
   private _w: Worker;
@@ -201,7 +201,6 @@ export class ReminderService {
       this._onRemindersActive$.next(finalReminders);
     }
   }
-
 
   private async _loadFromDatabase(): Promise<Reminder[]> {
     return migrateReminders(

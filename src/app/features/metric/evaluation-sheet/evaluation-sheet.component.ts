@@ -12,7 +12,7 @@ import {MetricCopy} from '../metric.model';
 import {MetricService} from '../metric.service';
 import {ObstructionService} from '../obstruction/obstruction.service';
 import {ImprovementService} from '../improvement/improvement.service';
-import {BehaviorSubject, Subscription} from 'rxjs';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {NoteService} from '../../note/note.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {switchMap} from 'rxjs/operators';
@@ -29,15 +29,15 @@ import {MatDialog} from '@angular/material/dialog';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
-  @Output() save = new EventEmitter<any>();
-  T = T;
+  @Output() save: EventEmitter<any> = new EventEmitter();
+  T: any = T;
   metricForDay: MetricCopy;
-  day$ = new BehaviorSubject<string>(getWorklogStr());
-  private _metricForDay$ = this.day$.pipe(
+  day$: BehaviorSubject<string> = new BehaviorSubject(getWorklogStr());
+  private _metricForDay$: Observable<MetricCopy> = this.day$.pipe(
     switchMap((day) => this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(day)),
   );
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
 
   constructor(
     public obstructionService: ObstructionService,

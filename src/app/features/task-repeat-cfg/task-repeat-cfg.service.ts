@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {selectAllTaskRepeatCfgs, selectTaskRepeatCfgById} from './store/task-repeat-cfg.reducer';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { selectAllTaskRepeatCfgs, selectTaskRepeatCfgById } from './store/task-repeat-cfg.reducer';
 import {
   AddTaskRepeatCfgToTask,
   DeleteTaskRepeatCfg,
@@ -9,13 +9,13 @@ import {
   UpdateTaskRepeatCfgs,
   UpsertTaskRepeatCfg,
 } from './store/task-repeat-cfg.actions';
-import {Observable} from 'rxjs';
-import {TaskRepeatCfg, TaskRepeatCfgState} from './task-repeat-cfg.model';
+import { Observable } from 'rxjs';
+import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
 import shortid from 'shortid';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
-import {MatDialog} from '@angular/material/dialog';
-import {T} from '../../t.const';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { MatDialog } from '@angular/material/dialog';
+import { T } from '../../t.const';
 
 @Injectable({
   providedIn: 'root',

@@ -1,21 +1,19 @@
-import {Injectable} from '@angular/core';
-import {LS_INITIAL_DIALOG_NR} from '../../core/persistence/ls-keys.const';
-import {HttpClient} from '@angular/common/http';
-import {MatDialog} from '@angular/material/dialog';
-import {catchError, switchMap, tap, timeout} from 'rxjs/operators';
-import {InitialDialogResponse} from './initial-dialog.model';
-import {Observable, of} from 'rxjs';
-import {DialogInitialComponent} from './dialog-initial/dialog-initial.component';
-import {DataInitService} from '../../core/data-init/data-init.service';
-import {version} from '../../../../package.json';
-import {lt} from 'semver';
-import {environment} from '../../../environments/environment';
+import { Injectable } from '@angular/core';
+import { LS_INITIAL_DIALOG_NR } from '../../core/persistence/ls-keys.const';
+import { HttpClient } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { catchError, switchMap, tap, timeout } from 'rxjs/operators';
+import { InitialDialogResponse } from './initial-dialog.model';
+import { Observable, of } from 'rxjs';
+import { DialogInitialComponent } from './dialog-initial/dialog-initial.component';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { version } from '../../../../package.json';
+import { lt } from 'semver';
+import { environment } from '../../../environments/environment';
 
 const URL = 'https://app.super-productivity.com/news.json?ngsw-bypass=true&no-cache=' + Date.now();
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class InitialDialogService {
 
   constructor(

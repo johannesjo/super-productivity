@@ -1,5 +1,5 @@
 // starting on monday
-import {WeeksInMonth} from './get-week-in-month-model';
+import { WeeksInMonth } from './get-week-in-month-model';
 
 export const getWeeksInMonth = (month: number, year: number): WeeksInMonth[] => {
   const weeks = [];

@@ -1,23 +1,21 @@
-import {Inject, Injectable} from '@angular/core';
-import {BodyClass, IS_ELECTRON} from '../../app.constants';
-import {IS_MAC} from '../../util/is-mac';
-import {take} from 'rxjs/operators';
-import {isTouchOnly} from '../../util/is-touch';
-import {MaterialCssVarsService} from 'angular-material-css-vars';
-import {DOCUMENT} from '@angular/common';
-import {MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
-import {ChromeExtensionInterfaceService} from '../chrome-extension-interface/chrome-extension-interface.service';
-import {ThemeService as NgChartThemeService} from 'ng2-charts';
-import {GlobalConfigService} from '../../features/config/global-config.service';
-import {MiscConfig} from '../../features/config/global-config.model';
-import {ElectronService} from '../electron/electron.service';
-import {WorkContextThemeCfg} from '../../features/work-context/work-context.model';
-import {WorkContextService} from '../../features/work-context/work-context.service';
+import { Inject, Injectable } from '@angular/core';
+import { BodyClass, IS_ELECTRON } from '../../app.constants';
+import { IS_MAC } from '../../util/is-mac';
+import { take } from 'rxjs/operators';
+import { isTouchOnly } from '../../util/is-touch';
+import { MaterialCssVarsService } from 'angular-material-css-vars';
+import { DOCUMENT } from '@angular/common';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ChromeExtensionInterfaceService } from '../chrome-extension-interface/chrome-extension-interface.service';
+import { ThemeService as NgChartThemeService } from 'ng2-charts';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { MiscConfig } from '../../features/config/global-config.model';
+import { ElectronService } from '../electron/electron.service';
+import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
+import { WorkContextService } from '../../features/work-context/work-context.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class GlobalThemeService {
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -94,7 +92,6 @@ export class GlobalThemeService {
     // init theme watchers
     this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) => this._setColorTheme(theme));
 
-
     // TODO beautify code here
     if (IS_ELECTRON && this._electronService.isMacOS) {
       this._setDarkTheme(this._electronService.remote.nativeTheme.shouldUseDarkColors);
@@ -146,7 +143,6 @@ export class GlobalThemeService {
       this.document.body.classList.add(BodyClass.isNoTouchOnly);
     }
   }
-
 
   private _setChartTheme(isDarkTheme: boolean) {
     const overrides = (isDarkTheme)

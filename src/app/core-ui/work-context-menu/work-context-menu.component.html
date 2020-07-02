@@ -1,25 +1,25 @@
-<button mat-menu-item
-        [routerLink]="[base,contextId,'worklog']">
+<button [routerLink]="[base,contextId,'worklog']"
+        mat-menu-item>
   <mat-icon>date_range</mat-icon>
   <span class="text">{{T.MH.WORKLOG|translate}}</span>
 </button>
 
 <button *ngIf="isForProject"
-        mat-menu-item
-        [routerLink]="[base,contextId,'metrics']">
+        [routerLink]="[base,contextId,'metrics']"
+        mat-menu-item>
   <mat-icon>donut_large</mat-icon>
   <span class="text">{{T.MH.METRICS|translate}}</span>
 </button>
 
-<button mat-menu-item
-        [routerLink]="[base,contextId,'settings']">
+<button [routerLink]="[base,contextId,'settings']"
+        mat-menu-item>
   <mat-icon>settings</mat-icon>
   <span class="text">{{T.MH.SETTINGS|translate}}</span>
 </button>
 
-<button *ngIf="!isForProject && contextId !== TODAY_TAG_ID"
-        mat-menu-item
-        (click)="deleteTag()">
+<button (click)="deleteTag()"
+        *ngIf="!isForProject && contextId !== TODAY_TAG_ID"
+        mat-menu-item>
   <mat-icon class="color-warn-i">delete_forever</mat-icon>
   <span class="text">{{T.MH.DELETE_TAG|translate}}</span>
 </button>

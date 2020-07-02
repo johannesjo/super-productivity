@@ -1,11 +1,10 @@
-import {Directive, HostListener, Input} from '@angular/core';
-import {IS_ELECTRON} from '../../../app.constants';
-import {BookmarkType} from '../bookmark.model';
-import {SnackService} from '../../../core/snack/snack.service';
-import {IPC} from '../../../../../electron/ipc-events.const';
-import {T} from '../../../t.const';
-import {ElectronService} from '../../../core/electron/electron.service';
-
+import { Directive, HostListener, Input } from '@angular/core';
+import { IS_ELECTRON } from '../../../app.constants';
+import { BookmarkType } from '../bookmark.model';
+import { SnackService } from '../../../core/snack/snack.service';
+import { IPC } from '../../../../../electron/ipc-events.const';
+import { T } from '../../../t.const';
+import { ElectronService } from '../../../core/electron/electron.service';
 
 @Directive({
   selector: '[bookmarkLink]'
@@ -45,7 +44,7 @@ export class BookmarkLinkDirective {
     }
   }
 
-  private _openExternalUrl(rawUrl) {
+  private _openExternalUrl(rawUrl: string) {
     // try to account for jira(?) adding a second http to the url
     const url = rawUrl
       .replace('https://https://', 'https://')
@@ -59,7 +58,7 @@ export class BookmarkLinkDirective {
     }
   }
 
-  private _exec(command) {
+  private _exec(command: string) {
     this._electronService.ipcRenderer.send(IPC.EXEC, command);
   }
 }

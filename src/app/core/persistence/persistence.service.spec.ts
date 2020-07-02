@@ -1,17 +1,16 @@
-import {TestBed} from '@angular/core/testing';
-import {SnackService} from '../snack/snack.service';
-import {DatabaseService} from './database.service';
-import {CompressionService} from '../compression/compression.service';
-import {PersistenceService} from './persistence.service';
-import {TestScheduler} from 'rxjs/testing';
-import {of} from 'rxjs';
-import {createEmptyEntity} from '../../util/create-empty-entity';
+import { TestBed } from '@angular/core/testing';
+import { SnackService } from '../snack/snack.service';
+import { DatabaseService } from './database.service';
+import { CompressionService } from '../compression/compression.service';
+import { PersistenceService } from './persistence.service';
+import { TestScheduler } from 'rxjs/testing';
+import { of } from 'rxjs';
+import { createEmptyEntity } from '../../util/create-empty-entity';
 
 const testScheduler = new TestScheduler((actual, expected) => {
   // asserting the two objects are equal
   expect(actual).toEqual(expected);
 });
-
 
 describe('PersistenceService', () => {
   beforeEach(() => {

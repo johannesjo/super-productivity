@@ -1,7 +1,7 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {msToString} from './ms-to-string.pipe';
+import { Pipe, PipeTransform } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { msToString } from './ms-to-string.pipe';
 
 @Pipe({
   name: 'msToString$'

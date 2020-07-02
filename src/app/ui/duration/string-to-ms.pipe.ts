@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
 export const stringToMs = (strValue: any, args?: any): any => {
   if (!strValue) {

@@ -1,28 +1,28 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Project, ProjectCopy} from '../../project.model';
-import {FormGroup} from '@angular/forms';
-import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
-import {ProjectService} from '../../project.service';
-import {DEFAULT_PROJECT} from '../../project.const';
-import {JiraCfg} from '../../../issue/providers/jira/jira.model';
-import {CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
-import {IssueIntegrationCfgs} from '../../../issue/issue.model';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Project, ProjectCopy } from '../../project.model';
+import { FormGroup } from '@angular/forms';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { ProjectService } from '../../project.service';
+import { DEFAULT_PROJECT } from '../../project.const';
+import { JiraCfg } from '../../../issue/providers/jira/jira.model';
+import { CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
+import { IssueIntegrationCfgs } from '../../../issue/issue.model';
 // tslint:disable-next-line
-import {DialogJiraInitialSetupComponent} from '../../../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
-import {SS_PROJECT_TMP} from '../../../../core/persistence/ls-keys.const';
-import {Subscription} from 'rxjs';
-import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
-import {GithubCfg} from '../../../issue/providers/github/github.model';
-import {DialogGithubInitialSetupComponent} from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import {GITHUB_TYPE, GITLAB_TYPE} from '../../../issue/issue.const';
-import {T} from '../../../../t.const';
-import {DEFAULT_JIRA_CFG} from '../../../issue/providers/jira/jira.const';
-import {DEFAULT_GITHUB_CFG} from '../../../issue/providers/github/github.const';
-import {WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG} from '../../../work-context/work-context.const';
-import {GitlabCfg} from 'src/app/features/issue/providers/gitlab/gitlab';
-import {DEFAULT_GITLAB_CFG} from 'src/app/features/issue/providers/gitlab/gitlab.const';
-import {DialogGitlabInitialSetupComponent} from 'src/app/features/issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.component';
+import { DialogJiraInitialSetupComponent } from '../../../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
+import { SS_PROJECT_TMP } from '../../../../core/persistence/ls-keys.const';
+import { Subscription } from 'rxjs';
+import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
+import { GithubCfg } from '../../../issue/providers/github/github.model';
+import { DialogGithubInitialSetupComponent } from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
+import { GITHUB_TYPE, GITLAB_TYPE } from '../../../issue/issue.const';
+import { T } from '../../../../t.const';
+import { DEFAULT_JIRA_CFG } from '../../../issue/providers/jira/jira.const';
+import { DEFAULT_GITHUB_CFG } from '../../../issue/providers/github/github.const';
+import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../../work-context/work-context.const';
+import { GitlabCfg } from 'src/app/features/issue/providers/gitlab/gitlab';
+import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitlab.const';
+import { DialogGitlabInitialSetupComponent } from 'src/app/features/issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.component';
 
 @Component({
   selector: 'dialog-create-project',
@@ -31,14 +31,14 @@ import {DialogGitlabInitialSetupComponent} from 'src/app/features/issue/provider
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
-  T = T;
+  T: any = T;
   projectData: ProjectCopy | Partial<ProjectCopy> = DEFAULT_PROJECT;
   jiraCfg: JiraCfg;
   githubCfg: GithubCfg;
   gitlabCfg: GitlabCfg;
 
-  formBasic = new FormGroup({});
-  formTheme = new FormGroup({});
+  formBasic: FormGroup = new FormGroup({});
+  formTheme: FormGroup = new FormGroup({});
   formOptionsBasic: FormlyFormOptions = {
     formState: {
       awesomeIsForced: false,
@@ -53,7 +53,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   basicSettingsFormCfg: FormlyFieldConfig[] = [];
   themeFormCfg: FormlyFieldConfig[] = [];
 
-  private _subs = new Subscription();
+  private _subs: Subscription = new Subscription();
   private _isSaveTmpProject: boolean;
 
   constructor(

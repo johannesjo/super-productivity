@@ -1,6 +1,6 @@
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {ImexMetaService} from './imex-meta.service';
+import { ImexMetaService } from './imex-meta.service';
 
 describe('ImexMetaService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));

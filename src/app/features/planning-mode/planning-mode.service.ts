@@ -1,14 +1,11 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, merge, Observable} from 'rxjs';
-import {delay, map, withLatestFrom} from 'rxjs/operators';
-import {ProjectService} from '../project/project.service';
-import {WorkContextService} from '../work-context/work-context.service';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, merge, Observable } from 'rxjs';
+import { delay, map, withLatestFrom } from 'rxjs/operators';
+import { WorkContextService } from '../work-context/work-context.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class PlanningModeService {
-  private _iPlanningModeEndedUser$ = new BehaviorSubject<boolean>(false);
+  private _iPlanningModeEndedUser$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   private _manualTriggerCheck$ = new BehaviorSubject(null);
   private _triggerCheck$ = merge(
     this._manualTriggerCheck$,

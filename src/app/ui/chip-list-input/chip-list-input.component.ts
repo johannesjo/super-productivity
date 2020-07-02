@@ -1,12 +1,11 @@
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {MatAutocomplete, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {MatChipInputEvent} from '@angular/material/chips';
-import {map, startWith} from 'rxjs/operators';
-import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {T} from '../../t.const';
-
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatChipInputEvent } from '@angular/material/chips';
+import { map, startWith } from 'rxjs/operators';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { T } from '../../t.const';
 
 interface Suggestion {
   id: string;
@@ -15,7 +14,6 @@ interface Suggestion {
   [key: string]: any;
 }
 
-
 @Component({
   selector: 'chip-list-input',
   templateUrl: './chip-list-input.component.html',
@@ -23,7 +21,7 @@ interface Suggestion {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChipListInputComponent {
-  T = T;
+  T: any = T;
 
   @Input() label: string;
   @Input() additionalActionIcon: string;
@@ -32,12 +30,12 @@ export class ChipListInputComponent {
   @Input() toggledItems: string[];
   @Input() isAutoFocus: boolean;
   suggestionsIn: Suggestion[];
-  @Output() addItem = new EventEmitter<string>();
-  @Output() addNewItem = new EventEmitter<string>();
-  @Output() removeItem = new EventEmitter<string>();
-  @Output() additionalAction = new EventEmitter<string>();
+  @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
+  @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
+  @Output() removeItem: EventEmitter<string> = new EventEmitter<string>();
+  @Output() additionalAction: EventEmitter<string> = new EventEmitter<string>();
   modelItems: Suggestion[];
-  inputCtrl = new FormControl();
+  inputCtrl: FormControl = new FormControl();
   separatorKeysCodes: number[] = [ENTER, COMMA];
   @ViewChild('inputElRef', {static: true}) inputEl: ElementRef<HTMLInputElement>;
   @ViewChild('autoElRef', {static: true}) matAutocomplete: MatAutocomplete;
@@ -52,7 +50,7 @@ export class ChipListInputComponent {
   constructor() {
   }
 
-  @Input() set suggestions(val) {
+  @Input() set suggestions(val: Suggestion[]) {
     this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
     this._updateModelItems(this._modelIds);
   }
@@ -99,7 +97,7 @@ export class ChipListInputComponent {
     return this.toggledItems && this.toggledItems.includes(id);
   }
 
-  private _updateModelItems(modelIds) {
+  private _updateModelItems(modelIds: string[]) {
     this.modelItems = (modelIds && this.suggestionsIn && this.suggestionsIn.length)
       ? modelIds.map(id => this.suggestionsIn.find(suggestion => suggestion.id === id))
       : [];
@@ -126,7 +124,7 @@ export class ChipListInputComponent {
   }
 
   private _filter(val: string): Suggestion[] {
-    if (!val || val === null) {
+    if (!val) {
       return this.suggestionsIn;
     }
 
