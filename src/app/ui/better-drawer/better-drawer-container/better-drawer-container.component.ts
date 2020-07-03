@@ -29,11 +29,10 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
   animations: [fadeAnimation]
 })
 export class BetterDrawerContainerComponent implements OnInit, AfterContentInit, OnDestroy {
-  @Input() sideWidth: number;
+  @Input() sideWidth: number = 0;
   @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
   containerWidth$: Observable<number> = this.contentEl$.pipe(
-    filter(el => !!el),
     switchMap((el) => observeWidth(el)),
     distinctUntilChanged(),
     share(),
@@ -46,7 +45,7 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
     map(v => v < VERY_SMALL_CONTAINER_WIDTH),
     distinctUntilChanged(),
   );
-  sideStyle: SafeStyle;
+  sideStyle: SafeStyle = '';
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -64,19 +63,17 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
   }
 
   @ViewChild('contentElRef', {read: ElementRef}) set setContentElRef(ref: ElementRef) {
-    if (ref) {
-      this.contentEl$.next(ref.nativeElement);
-    }
+    this.contentEl$.next(ref.nativeElement);
   }
 
-  private _isOpen: boolean;
+  private _isOpen: boolean = false;
 
   @Input() set isOpen(v: boolean) {
     this._isOpen = v;
     this._updateStyle();
   }
 
-  private _isOver: boolean;
+  private _isOver: boolean = false;
 
   @Input() set isOver(v: boolean) {
     this._isOver = v;

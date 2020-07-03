@@ -23,28 +23,32 @@ interface Suggestion {
 export class ChipListInputComponent {
   T: any = T;
 
-  @Input() label: string;
-  @Input() additionalActionIcon: string;
-  @Input() additionalActionTooltip: string;
-  @Input() additionalActionTooltipUnToggle: string;
-  @Input() toggledItems: string[];
-  @Input() isAutoFocus: boolean;
-  suggestionsIn: Suggestion[];
+  @Input() label?: string;
+  @Input() additionalActionIcon?: string;
+  @Input() additionalActionTooltip?: string;
+  @Input() additionalActionTooltipUnToggle?: string;
+  @Input() toggledItems?: string[];
+  @Input() isAutoFocus?: boolean;
+
   @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() removeItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() additionalAction: EventEmitter<string> = new EventEmitter<string>();
-  modelItems: Suggestion[];
+
+  suggestionsIn: Suggestion[] = [];
+  modelItems: Suggestion[] = [];
   inputCtrl: FormControl = new FormControl();
   separatorKeysCodes: number[] = [ENTER, COMMA];
-  @ViewChild('inputElRef', {static: true}) inputEl: ElementRef<HTMLInputElement>;
-  @ViewChild('autoElRef', {static: true}) matAutocomplete: MatAutocomplete;
+  @ViewChild('inputElRef', {static: true}) inputEl?: ElementRef<HTMLInputElement>;
+  @ViewChild('autoElRef', {static: true}) matAutocomplete?: MatAutocomplete;
   private _modelIds: string[] = [];
+
   filteredSuggestions: Observable<Suggestion[]> = this.inputCtrl.valueChanges.pipe(
     startWith(''),
-    map((val: string | null) => val
+    map((val: string | null) => (val !== null)
       ? this._filter(val)
-      : this.suggestionsIn.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
+      : this.suggestionsIn.filter(suggestion => !this._modelIds.includes(suggestion.id))
+    )
   );
 
   constructor() {
@@ -61,6 +65,10 @@ export class ChipListInputComponent {
   }
 
   add(event: MatChipInputEvent): void {
+    if (!this.matAutocomplete) {
+      throw new Error('Auto complete undefined');
+    }
+
     if (!this.matAutocomplete.isOpen) {
       const input = event.input;
       const value = event.value;
@@ -70,10 +78,7 @@ export class ChipListInputComponent {
         this._addByTitle(value.trim());
       }
 
-      // Reset the input value
-      if (input) {
-        input.value = '';
-      }
+      input.value = '';
 
       this.inputCtrl.setValue(null);
     }
@@ -85,7 +90,9 @@ export class ChipListInputComponent {
 
   selected(event: MatAutocompleteSelectedEvent): void {
     this._add(event.option.value);
-    this.inputEl.nativeElement.value = '';
+    if (this.inputEl) {
+      this.inputEl.nativeElement.value = '';
+    }
     this.inputCtrl.setValue(null);
   }
 
@@ -98,8 +105,8 @@ export class ChipListInputComponent {
   }
 
   private _updateModelItems(modelIds: string[]) {
-    this.modelItems = (modelIds && this.suggestionsIn && this.suggestionsIn.length)
-      ? modelIds.map(id => this.suggestionsIn.find(suggestion => suggestion.id === id))
+    this.modelItems = (this.suggestionsIn.length)
+      ? modelIds.map(id => this.suggestionsIn.find(suggestion => suggestion.id === id)) as Suggestion[]
       : [];
   }
 
@@ -130,7 +137,7 @@ export class ChipListInputComponent {
 
     const filterValue = val.toLowerCase();
     return this.suggestionsIn.filter(
-      suggestion => suggestion && suggestion.title.toLowerCase().indexOf(filterValue) === 0
+      suggestion => suggestion.title.toLowerCase().indexOf(filterValue) === 0
         && !this._modelIds.includes(suggestion.id)
     );
   }

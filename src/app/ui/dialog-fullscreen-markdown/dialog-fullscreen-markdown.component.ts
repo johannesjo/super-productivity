@@ -22,7 +22,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     // we want to save as default
     _matDialogRef.disableClose = true;
     this._subs.add(_matDialogRef.keydownEvents().subscribe(e => {
-      if (e.keyCode === ESCAPE) {
+      if ((e as any).keyCode === ESCAPE) {
         e.preventDefault();
         this.close();
       }
