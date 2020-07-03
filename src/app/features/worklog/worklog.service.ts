@@ -19,7 +19,7 @@ import { WorklogTask } from '../tasks/task.model';
 @Injectable({providedIn: 'root'})
 export class WorklogService {
   // treated as private but needs to be assigned first
-  _archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject(true);
+  _archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   _archiveUpdateTrigger$: Observable<any> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => merge(
       // this._workContextService.activeWorkContextOnceOnContextChange$,

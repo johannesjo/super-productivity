@@ -59,6 +59,10 @@ export interface AppDataForProjects {
   };
 }
 
+export interface AppDataCompleteOptionalSyncModelChange extends AppBaseData, AppDataForProjects {
+  lastLocalSyncModelChange?: number;
+}
+
 export interface AppDataComplete extends AppBaseData, AppDataForProjects {
   lastLocalSyncModelChange: number;
 }

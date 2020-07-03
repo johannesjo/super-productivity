@@ -19,8 +19,8 @@ interface MyDb extends DBSchema {
   providedIn: 'root',
 })
 export class DatabaseService {
-  db: IDBPDatabase<MyDb>;
-  isReady$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  db?: IDBPDatabase<MyDb>;
+  isReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   private _afterReady$: Observable<boolean> = this.isReady$.pipe(
     filter(isReady => isReady),
@@ -38,25 +38,25 @@ export class DatabaseService {
   async load(key: string): Promise<any> {
     this._lastParams = {a: 'load', key};
     await this._afterReady();
-    return await this.db.get(DB_MAIN_NAME, key);
+    return await (this.db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
   }
 
   async save(key: string, data: any): Promise<any> {
     this._lastParams = {a: 'save', key, data};
     await this._afterReady();
-    return await this.db.put(DB_MAIN_NAME, data, key);
+    return await (this.db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
   }
 
   async remove(key: string): Promise<any> {
     this._lastParams = {a: 'remove', key};
     await this._afterReady();
-    return await this.db.delete(DB_MAIN_NAME, key);
+    return await (this.db as IDBPDatabase<MyDb>).delete(DB_MAIN_NAME, key);
   }
 
   async clearDatabase(): Promise<any> {
     this._lastParams = {a: 'clearDatabase'};
     await this._afterReady();
-    return await this.db.clear(DB_MAIN_NAME);
+    return await (this.db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
   }
 
   private async _init() {

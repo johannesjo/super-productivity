@@ -62,7 +62,7 @@ describe('PersistenceService', () => {
 
     it('should refresh onAfterSave$', (done) => {
       const service: PersistenceService = TestBed.inject(PersistenceService);
-      let ll;
+      let ll: any;
       let i = 0;
       service.inMemoryComplete$.subscribe((data) => {
         const l = JSON.stringify(data).length;

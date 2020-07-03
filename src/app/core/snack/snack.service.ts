@@ -15,7 +15,7 @@ import * as debounceFn from 'debounce-fn';
   providedIn: 'root',
 })
 export class SnackService {
-  private _ref: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
+  private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
   private _onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
 
   private readonly _debouncedOpenSnack
@@ -79,7 +79,8 @@ export class SnackService {
     };
 
     if (showWhile$ || promise || isSpinner) {
-      cfg.panelClass = 'polling-snack';
+      // TODO check if still needed
+      (cfg as any).panelClass = 'polling-snack';
     }
 
     switch (type) {
@@ -95,7 +96,7 @@ export class SnackService {
       }
     }
 
-    if (actionStr && actionId) {
+    if (actionStr && actionId && this._ref) {
       this._ref.onAction()
         .pipe(takeUntil(_destroy$))
         .subscribe(() => {

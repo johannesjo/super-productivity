@@ -7,8 +7,8 @@ import { map } from 'rxjs/operators';
 export class BannerService {
   private _banners: Banner[] = [];
   private _banners$: ReplaySubject<Banner[]> = new ReplaySubject(1);
-  activeBanner$: Observable<Banner> = this._banners$.pipe(
-    map((banners) => banners && banners.length && banners[0])
+  activeBanner$: Observable<Banner | null> = this._banners$.pipe(
+    map((banners) => (banners && banners.length && banners[0]) || null)
   );
 
   constructor() {

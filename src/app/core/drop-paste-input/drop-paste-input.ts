@@ -1,18 +1,21 @@
 import { isImageUrlSimple } from '../../util/is-image-url';
 import { DropPasteIcons, DropPasteInput } from './drop-paste.model';
 
-export const createFromDrop = (ev): null | DropPasteInput => {
+export const createFromDrop = (ev: DragEvent): null | DropPasteInput => {
+  if (!ev.dataTransfer) {
+    throw new Error('No drop data');
+  }
   const text = ev.dataTransfer.getData('text');
   return text
     ? (_createTextBookmark(text))
     : (_createFileBookmark(ev.dataTransfer));
 };
 
-export const createFromPaste = (ev): null | DropPasteInput => {
-  if (ev.target.getAttribute('contenteditable')) {
-    return;
+export const createFromPaste = (ev: ClipboardEvent): null | DropPasteInput => {
+  if (ev.target && (ev.target as HTMLElement).getAttribute('contenteditable')) {
+    return null;
   }
-  const text = ev.clipboardData.getData('text/plain');
+  const text = ev.clipboardData && ev.clipboardData.getData('text/plain');
   if (text) {
     return _createTextBookmark(text);
   }

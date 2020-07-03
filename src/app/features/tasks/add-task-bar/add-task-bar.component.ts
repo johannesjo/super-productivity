@@ -48,7 +48,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @ViewChild('inputEl', {static: true}) inputEl: ElementRef;
 
   T: any = T;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   doubleEnterCount: number = 0;
 
   taskSuggestionsCtrl: FormControl = new FormControl();

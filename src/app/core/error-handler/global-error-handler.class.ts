@@ -5,6 +5,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { BannerService } from '../banner/banner.service';
 import { ElectronService } from '../electron/electron.service';
 import { createErrorAlert, getSimpleMeta, isHandledError, logAdvancedStacktrace } from './global-error-handler.util';
+import { remote } from 'electron';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
@@ -15,7 +16,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     private _electronService: ElectronService,
   ) {
     if (IS_ELECTRON) {
-      this._electronLogger = this._electronService.remote.require('electron-log');
+      this._electronLogger = (this._electronService.remote as typeof remote).require('electron-log');
     }
   }
 
@@ -44,7 +45,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
 
     const additionalLog = IS_ELECTRON
-      ? (stack) => this._electronLogger.error('Frontend Error Stack:', stack)
+      ? (stack: unknown) => this._electronLogger.error('Frontend Error Stack:', stack)
       : () => null;
 
     logAdvancedStacktrace(err, additionalLog).then();

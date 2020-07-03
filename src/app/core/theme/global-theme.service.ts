@@ -14,6 +14,7 @@ import { MiscConfig } from '../../features/config/global-config.model';
 import { ElectronService } from '../electron/electron.service';
 import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
+import { remote } from 'electron';
 
 @Injectable({providedIn: 'root'})
 export class GlobalThemeService {
@@ -94,11 +95,11 @@ export class GlobalThemeService {
 
     // TODO beautify code here
     if (IS_ELECTRON && this._electronService.isMacOS) {
-      this._setDarkTheme(this._electronService.remote.nativeTheme.shouldUseDarkColors);
-      this._electronService.remote.systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
+      this._setDarkTheme((this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors);
+      (this._electronService.remote as typeof remote).systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
         this._globalConfigService.misc$.pipe(take(1)).subscribe((misc: MiscConfig) => {
           const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
-            ? this._electronService.remote.nativeTheme.shouldUseDarkColors
+            ? (this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors
             : misc.isDarkMode;
 
           this._setDarkTheme(isDarkTheme);
@@ -107,7 +108,7 @@ export class GlobalThemeService {
     } else {
       this._globalConfigService.misc$.subscribe((misc: MiscConfig) => {
         const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
-          ? this._electronService.remote.nativeTheme.shouldUseDarkColors
+          ? (this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors
           : misc.isDarkMode;
 
         this._setDarkTheme(isDarkTheme);

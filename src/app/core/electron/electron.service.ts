@@ -2,19 +2,20 @@ import { Injectable } from '@angular/core';
 // If you import a module but never use any of the imported values other than as TypeScript types,
 // the resulting javascript file will look as if you never imported the module at all.
 import { ipcRenderer, remote, shell, webFrame } from 'electron';
+import { IS_ELECTRON } from '../../app.constants';
 
 @Injectable({providedIn: 'root'})
 export class ElectronService {
-  ipcRenderer: typeof ipcRenderer;
-  webFrame: typeof webFrame;
-  remote: typeof remote;
-  shell: typeof shell;
+  ipcRenderer?: typeof ipcRenderer;
+  webFrame?: typeof webFrame;
+  remote?: typeof remote;
+  shell?: typeof shell;
 
   // fs: typeof fs;
 
   constructor() {
     // Conditional imports
-    if (this.isElectron) {
+    if (IS_ELECTRON) {
       const electron = window.require('electron');
       this.ipcRenderer = electron.ipcRenderer;
       this.webFrame = electron.webFrame;

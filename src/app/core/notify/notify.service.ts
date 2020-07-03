@@ -26,8 +26,8 @@ export class NotifyService {
     }
   }
 
-  async notify(options: NotifyModel): Promise<Notification> {
-    const title = this._translateService.instant(options.title, options.translateParams);
+  async notify(options: NotifyModel): Promise<Notification | undefined> {
+    const title = options.title && this._translateService.instant(options.title, options.translateParams);
     const body = options.body && this._translateService.instant(options.body, options.translateParams);
 
     const svcReg = this._isServiceWorkerAvailable() && await navigator.serviceWorker.getRegistration('ngsw-worker.js');
@@ -80,7 +80,7 @@ export class NotifyService {
         return instance;
       } else {
         console.warn('No notifications supported');
-        return null;
+        return undefined;
       }
     }
   }

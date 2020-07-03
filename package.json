@@ -169,7 +169,7 @@
     "rxjs-tslint": "0.1.5",
     "sass-loader": "^7.1.0",
     "semver": "^7.3.2",
-    "shortid": "^2.2.14",
+    "shortid": "^2.2.15",
     "start-server-and-test": "^1.11.0",
     "style-loader": "^0.23.1",
     "throttle-debounce": "^2.0.1",

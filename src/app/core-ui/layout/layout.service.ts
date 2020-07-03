@@ -41,7 +41,7 @@ export class LayoutService {
     `(min-width: ${BOTH_OVER}px)`,
   ]).pipe(map(result => !result.matches));
   isNavOver$: Observable<boolean> = this.isNotesNextNavOver$.pipe(map(v => !v));
-  isScrolled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isScrolled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private _isShowSideNav$: Observable<boolean> = this._store$.pipe(select(selectIsShowSideNav));
   isShowSideNav$: Observable<boolean> = this._isShowSideNav$.pipe(
     switchMap((isShow) => {

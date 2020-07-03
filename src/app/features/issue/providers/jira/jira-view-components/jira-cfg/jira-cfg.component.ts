@@ -35,7 +35,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   customFieldSuggestionsCtrl: FormControl = new FormControl();
   customFields: any [] = [];
   customFieldsPromise: Promise<any>;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   fields: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};

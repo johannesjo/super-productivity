@@ -10,7 +10,7 @@ import { registerLocaleData } from '@angular/common';
 @Injectable({providedIn: 'root'})
 export class LanguageService {
   // I think a better approach is to add a field in every [lang].json file to specify the direction of the language
-  private isRTL: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private isRTL: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isLangRTL: Observable<boolean> = this.isRTL.asObservable();
 
   // Temporary solution for knowing the rtl languages

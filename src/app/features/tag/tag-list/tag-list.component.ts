@@ -27,7 +27,7 @@ export class TagListComponent implements OnDestroy {
   @Output() replacedTagForTask: EventEmitter<string[]> = new EventEmitter();
   projectTag: TagComponentTag;
   tags: Tag[];
-  private _isShowProjectTagAlways$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private _isShowProjectTagAlways$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private _projectId$: BehaviorSubject<string> = new BehaviorSubject(null);
   projectTag$: Observable<TagComponentTag> = combineLatest([
     this._workContextService.activeWorkContextTypeAndId$,

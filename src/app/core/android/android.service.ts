@@ -35,7 +35,7 @@ export class AndroidService {
             ...task,
             category: [
               ...(task.projectId
-                ? [projects.find(p => p.id === task.projectId).title]
+                ? [(projects.find((p) => p.id === task.projectId) as Project).title]
                 : []),
               ...(task.tagIds.length
                 ? tags
@@ -45,7 +45,7 @@ export class AndroidService {
             ].join(', '),
             categoryHtml: [
               ...(task.projectId
-                ? [this._getCategoryHtml(projects.find(p => p.id === task.projectId))]
+                ? [this._getCategoryHtml(projects.find(p => p.id === task.projectId) as Project)]
                 : []),
               ...(task.tagIds.length
                 ? tags

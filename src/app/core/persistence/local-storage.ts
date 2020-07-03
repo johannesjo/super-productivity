@@ -1,4 +1,4 @@
-export const loadFromLs = (key) => {
+export const loadFromLs = (key: string): unknown => {
   const serializedState = localStorage.getItem(key);
   if (!serializedState || serializedState === '') {
     return undefined;
@@ -6,12 +6,12 @@ export const loadFromLs = (key) => {
   return JSON.parse(serializedState);
 };
 
-export const saveToLs = (key, state) => {
+export const saveToLs = (key: string, state: { [key: string]: any }) => {
   const serializedState = JSON.stringify(state);
   localStorage.setItem(key, serializedState);
 };
 
-export const loadFromSessionStorage = (key) => {
+export const loadFromSessionStorage = (key: string): unknown => {
   const serializedState = sessionStorage.getItem(key);
   if (!serializedState || serializedState === '') {
     return undefined;
@@ -19,7 +19,7 @@ export const loadFromSessionStorage = (key) => {
   return JSON.parse(serializedState);
 };
 
-export const saveToSessionStorage = (key, state) => {
+export const saveToSessionStorage = (key: string, state: { [key: string]: any }) => {
   const serializedState = JSON.stringify(state);
   sessionStorage.setItem(key, serializedState);
 };

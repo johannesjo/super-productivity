@@ -26,7 +26,7 @@ import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 export class SideNavComponent implements OnDestroy {
   @Output() scrollToNotes: EventEmitter<void> = new EventEmitter();
 
-  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isProjectsExpanded: boolean = false;
   projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
@@ -40,7 +40,7 @@ export class SideNavComponent implements OnDestroy {
     )
   );
 
-  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isTagsExpanded: boolean = false;
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap(isExpanded => isExpanded

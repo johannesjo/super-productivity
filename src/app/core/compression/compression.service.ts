@@ -11,19 +11,16 @@ export class CompressionService {
   constructor(
     private readonly _snackService: SnackService,
   ) {
-    if (typeof Worker !== 'undefined') {
-      // Create a new
-      this._w = new Worker('./lz.worker', {
-        name: 'lz',
-        type: 'module'
-      });
-      this._w.addEventListener('message', this._onData.bind(this));
-      this._w.addEventListener('error', this._handleError.bind(this));
-    } else {
-      console.error('No web workers supported :(');
-      // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
+    if (typeof Worker === 'undefined') {
+      throw new Error('No web worker support');
     }
+    // Create a new
+    this._w = new Worker('./lz.worker', {
+      name: 'lz',
+      type: 'module'
+    });
+    this._w.addEventListener('message', this._onData.bind(this));
+    this._w.addEventListener('error', this._handleError.bind(this));
   }
 
   async compress(strToHandle: string): Promise<string> {

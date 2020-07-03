@@ -67,14 +67,14 @@ export class LegacyPersistenceService {
   taskRepeatCfg: any = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
-    taskRepeatCfgReducer,
+    taskRepeatCfgReducer as any,
   );
   taskArchive: any = this._cmProject<TaskArchive, TaskWithSubTasks>(
     LS_TASK_ARCHIVE,
     'taskArchive',
     // NOTE: this might be problematic, as we don't really have reducer logic for the archive
     // TODO add a working reducer for task archive
-    taskReducer,
+    taskReducer as any,
   );
   taskAttachment: any = this._cmProject<EntityState<TaskAttachment>, TaskAttachment>(
     LS_TASK_ATTACHMENT_STATE,
@@ -204,9 +204,9 @@ export class LegacyPersistenceService {
     // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
     const laParsed = Number.isNaN(Number(la))
       ? la
-      : +la;
+      : +(la as any);
     // NOTE: to account for legacy string dates
-    return new Date(laParsed).getTime();
+    return new Date(laParsed as any).getTime();
   }
 
   // NOTE: not including backup
@@ -243,7 +243,7 @@ export class LegacyPersistenceService {
     const model = {
       appDataKey,
       load: () => this._loadFromDb(lsKey).then(migrateFn),
-      save: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+      save: (data: any, isForce: any) => this._saveToDb(lsKey, data, isForce),
     };
 
     this._baseModels.push(model);
@@ -259,8 +259,8 @@ export class LegacyPersistenceService {
   ): LegacyPersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
-      load: (projectId): Promise<S> => this._loadFromDb(this._makeProjectKey(projectId, lsKey)).then(v => migrateFn(v, projectId)),
-      save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
+      load: (projectId: any): Promise<S> => this._loadFromDb(this._makeProjectKey(projectId, lsKey)).then(v => migrateFn(v, projectId)),
+      save: (projectId: any, data: any, isForce: any) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
     };
 
     this._projectModels.push(model);
@@ -283,8 +283,8 @@ export class LegacyPersistenceService {
   }
 
   // tslint:disable-next-line
-  private async _loadForProjectIds(pids, getDataFn: Function): Promise<any> {
-    return await pids.reduce(async (acc, projectId) => {
+  private async _loadForProjectIds(pids: any, getDataFn: Function): Promise<any> {
+    return await pids.reduce(async (acc: any, projectId: any) => {
       const prevAcc = await acc;
       const dataForProject = await getDataFn(projectId);
       return {
@@ -296,7 +296,7 @@ export class LegacyPersistenceService {
 
   // tslint:disable-next-line
   private async _saveForProjectIds(data: any, saveDataFn: Function, isForce = false) {
-    const promises = [];
+    const promises: Promise<any>[] = [];
     Object.keys(data).forEach(projectId => {
       if (data[projectId]) {
         promises.push(saveDataFn(projectId, data[projectId], isForce));

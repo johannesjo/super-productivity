@@ -120,7 +120,7 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
     };
   }, {});
 
-  if (!taskEntities || !taskEntities[task.parentId] || !(taskEntities[task.parentId] as Task).subTaskIds) {
+  if (!taskEntities[task.parentId] || !(taskEntities[task.parentId] as any).subTaskIds) {
     throw new Error('Task Restore Error: Missing taskEntities');
   }
 

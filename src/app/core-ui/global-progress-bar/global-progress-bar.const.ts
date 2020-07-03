@@ -1,7 +1,6 @@
 import { T } from '../../t.const';
 
-const a = T;
-export const PROGRESS_BAR_LABEL_MAP = {
+export const PROGRESS_BAR_LABEL_MAP: { [key: string]: string } = {
   'asset/': T.GPB.ASSETS,
 
   'https://api.dropboxapi.com/2/files/get_metadata': T.GPB.DBX_META,

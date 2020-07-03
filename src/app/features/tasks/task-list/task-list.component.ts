@@ -31,9 +31,9 @@ export class TaskListComponent implements OnDestroy, OnInit {
   tasksIN: TaskWithSubTasks[] = [];
   tasks$: ReplaySubject<TaskWithSubTasks[]> = new ReplaySubject(1);
   isHideDoneIN: boolean;
-  isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isHideAllIN: boolean;
-  isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   filteredTasks: TaskWithSubTasks[];
 
   @Input() parentId: string;

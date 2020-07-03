@@ -41,7 +41,7 @@ export class ReminderService {
   private _onReloadModel$: Subject<Reminder[]> = new Subject();
   onReloadModel$: Observable<Reminder[]> = this._onReloadModel$.asObservable();
 
-  private _isRemindersLoaded$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private _isRemindersLoaded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isRemindersLoaded$: Observable<boolean> = this._isRemindersLoaded$.asObservable();
 
   private _w: Worker;
