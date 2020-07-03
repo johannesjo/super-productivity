@@ -119,12 +119,12 @@ export class AppComponent implements OnDestroy {
     }
 
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.send(IPC.APP_READY);
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.APP_READY);
       this._initElectronErrorHandler();
       this._uiHelperService.initElectron();
 
       this._electronService.ipcRenderer.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
-        this._electronService.ipcRenderer.send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
       });
     } else {
       // WEB VERSION

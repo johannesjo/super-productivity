@@ -53,7 +53,7 @@ export class GlobalConfigEffects {
       filter((action: UpdateGlobalConfigSection) => IS_ELECTRON && action.payload.sectionKey === 'keyboard'),
       tap((action: UpdateGlobalConfigSection) => {
         const keyboardCfg: KeyboardConfig = action.payload.sectionCfg as KeyboardConfig;
-        this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
 
@@ -66,7 +66,7 @@ export class GlobalConfigEffects {
       tap((action) => {
         const appDataComplete = action.appDataComplete;
         const keyboardCfg: KeyboardConfig = (appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG).keyboard;
-        this._electronService.ipcRenderer.send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
 

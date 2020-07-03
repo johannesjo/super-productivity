@@ -164,7 +164,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         switchMap(() => this._projectService.getJiraCfgForProject$(this._taskData.projectId))
       ).subscribe((jiraCfg) => {
         if (jiraCfg.isEnabled) {
-          this._electronService.ipcRenderer.send(IPC.JIRA_SETUP_IMG_HEADERS, jiraCfg);
+          (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_SETUP_IMG_HEADERS, jiraCfg);
         }
       }));
     }

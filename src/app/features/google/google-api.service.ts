@@ -86,7 +86,7 @@ export class GoogleApiService {
         return new Promise((resolve) => resolve(true));
       }
 
-      this._electronService.ipcRenderer.send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
           this._updateSession({

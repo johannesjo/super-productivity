@@ -14,9 +14,9 @@ export interface TagComponentTag {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagComponent {
-  tag: TagComponentTag;
+  tag?: TagComponentTag;
   // @HostBinding('style.background')
-  color: string;
+  color?: string;
 
   constructor() {
   }

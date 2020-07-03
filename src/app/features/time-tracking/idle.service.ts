@@ -13,6 +13,7 @@ import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { ElectronService } from '../../core/electron/electron.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { WorkContextService } from '../work-context/work-context.service';
+import { ipcRenderer } from 'electron';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -33,9 +34,9 @@ export class IdleService {
   private _triggerResetBreakTimer$: Subject<boolean> = new Subject();
   triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
 
-  private lastCurrentTaskId: string;
+  private lastCurrentTaskId?: string | null;
   private isIdleDialogOpen: boolean = false;
-  private idlePollInterval: number;
+  private idlePollInterval?: number;
 
   constructor(
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
@@ -50,12 +51,12 @@ export class IdleService {
 
   init() {
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.on(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     }
     this._chromeExtensionInterfaceService.onReady$.subscribe(() => {
-      this._chromeExtensionInterfaceService.addEventListener(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
+      this._chromeExtensionInterfaceService.addEventListener(IPC.IDLE_TIME, (ev: any, idleTimeInMs: number) => {
         this.handleIdle(idleTimeInMs);
       });
     });

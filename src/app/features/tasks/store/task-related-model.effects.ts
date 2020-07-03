@@ -134,10 +134,10 @@ export class TaskRelatedModelEffects {
         task: act.payload.task,
       }))
     )),
-    filter(({defaultProjectId, task}) => defaultProjectId && !task.projectId && !task.parentId),
+    filter(({defaultProjectId, task}) => !!defaultProjectId && !task.projectId && !task.parentId),
     map(({task, defaultProjectId}) => new MoveToOtherProject({
-      task,
-      targetProjectId: defaultProjectId,
+      task: task as TaskWithSubTasks,
+      targetProjectId: defaultProjectId as string,
     })),
   );
 
@@ -162,7 +162,7 @@ export class TaskRelatedModelEffects {
     const taskIds = [task.id, ...task.subTaskIds];
     const currentArchive: TaskArchive = await this._persistenceService.taskArchive.loadState() || createEmptyEntity();
     const allIds = currentArchive.ids as string[] || [];
-    const idsToRemove = [];
+    const idsToRemove: string[] = [];
 
     taskIds.forEach((taskId) => {
       if (allIds.indexOf(taskId) > -1) {
@@ -194,6 +194,9 @@ export class TaskRelatedModelEffects {
     flatTasks
       .filter(t => !!t.reminderId)
       .forEach(t => {
+        if (!t.reminderId) {
+          throw new Error('No t.reminderId');
+        }
         this._reminderService.removeReminder(t.reminderId);
       });
 

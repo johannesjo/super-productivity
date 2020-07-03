@@ -335,7 +335,7 @@ export class JiraApiService {
 
     const requestToSend = {requestId, requestInit, url};
     if (this._electronService.isElectronApp) {
-      this._electronService.ipcRenderer.send(IPC.JIRA_MAKE_REQUEST_EVENT, {...requestToSend, jiraCfg});
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_MAKE_REQUEST_EVENT, {...requestToSend, jiraCfg});
     } else if (this._isExtension) {
       this._chromeExtensionInterfaceService.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
     }

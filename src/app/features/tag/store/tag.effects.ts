@@ -182,7 +182,7 @@ export class TagEffects {
       // remove orphaned for archive
       const taskArchiveState: TaskArchive = await this._persistenceService.taskArchive.loadState() || createEmptyEntity();
       const archiveTaskIdsToDelete = (taskArchiveState.ids as string[]).filter((id) => {
-        const t = taskArchiveState.entities[id];
+        const t = taskArchiveState.entities[id] as Task;
         return isOrphanedParentTask(t);
       });
       await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));

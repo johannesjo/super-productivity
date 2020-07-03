@@ -33,6 +33,6 @@ export class LocalBackupService {
 
   private async _backup() {
     const data = await this._dataImportService.getCompleteSyncData();
-    this._electronService.ipcRenderer.send(IPC.BACKUP, data);
+    (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);
   }
 }

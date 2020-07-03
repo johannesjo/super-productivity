@@ -12,6 +12,7 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { GlobalConfigState } from '../../config/global-config.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ElectronService } from '../../../core/electron/electron.service';
+import { ipcRenderer } from 'electron';
 
 // TODO send message to electron when current task changes here
 
@@ -25,7 +26,7 @@ export class TaskElectronEffects {
     withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
     tap(([action, current]) => {
       if (IS_ELECTRON) {
-        this._electronService.ipcRenderer.send(IPC.CURRENT_TASK_UPDATED, {current});
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.CURRENT_TASK_UPDATED, {current});
       }
     })
   );
@@ -38,7 +39,7 @@ export class TaskElectronEffects {
     filter(() => IS_ELECTRON),
     tap((act: SetCurrentTask) => {
       if (!act.payload) {
-        this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress: 0});
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SET_PROGRESS_BAR, {progress: 0});
       }
     }),
   );
@@ -55,7 +56,7 @@ export class TaskElectronEffects {
     map(([act]) => act.payload.task),
     tap((task: Task) => {
       const progress = task.timeSpent / task.timeEstimate;
-      this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress});
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SET_PROGRESS_BAR, {progress});
     }),
   );
 

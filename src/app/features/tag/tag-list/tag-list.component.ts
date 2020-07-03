@@ -25,17 +25,17 @@ export class TagListComponent implements OnDestroy {
   @Output() addedTagsToTask: EventEmitter<string[]> = new EventEmitter();
   @Output() removedTagsFromTask: EventEmitter<string[]> = new EventEmitter();
   @Output() replacedTagForTask: EventEmitter<string[]> = new EventEmitter();
-  projectTag: TagComponentTag;
-  tags: Tag[];
+  projectTag?: TagComponentTag | null;
+  tags?: Tag[];
   private _isShowProjectTagAlways$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private _projectId$: BehaviorSubject<string> = new BehaviorSubject(null);
-  projectTag$: Observable<TagComponentTag> = combineLatest([
+  private _projectId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  projectTag$: Observable<TagComponentTag | null> = combineLatest([
     this._workContextService.activeWorkContextTypeAndId$,
     this._isShowProjectTagAlways$
   ]).pipe(
     switchMap(([{activeType}, isShowAlways]) => isShowAlways || (activeType === WorkContextType.TAG)
       ? this._projectId$.pipe(
-        switchMap(id => this._projectService.getByIdOnce$(id)),
+        switchMap(id => this._projectService.getByIdOnce$(id as string)),
         map(project => (project && {
           ...project,
           icon: 'list'
@@ -44,7 +44,7 @@ export class TagListComponent implements OnDestroy {
       : of(null)
     ),
   );
-  private _tagIds$: BehaviorSubject<string[]> = new BehaviorSubject([]);
+  private _tagIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   tags$: Observable<Tag[]> = combineLatest([
     this._tagIds$,
     this._workContextService.activeWorkContextId$,
@@ -71,7 +71,7 @@ export class TagListComponent implements OnDestroy {
 
   // NOTE: should normally be enough
 
-  private _task: Task;
+  private _task?: Task;
 
   @Input() set task(task: Task) {
     this._task = task;

@@ -21,16 +21,16 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SplitComponent implements AfterViewInit {
-  @Input() splitTopEl: ElementRef;
-  @Input() splitBottomEl: ElementRef;
-  @Input() containerEl: HTMLElement;
-  @Input() counter: ElementRef;
-  @Input() isAnimateBtn: boolean;
+  @Input() splitTopEl?: ElementRef;
+  @Input() splitBottomEl?: ElementRef;
+  @Input() containerEl?: HTMLElement;
+  @Input() counter?: ElementRef;
+  @Input() isAnimateBtn?: boolean;
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
-  pos: number;
-  eventSubs: Subscription;
-  @ViewChild('buttonEl', {static: true}) buttonEl: ElementRef;
+  pos?: number;
+  eventSubs?: Subscription;
+  @ViewChild('buttonEl', {static: true}) buttonEl?: ElementRef;
   private _isDrag: boolean = false;
   private _isViewInitialized: boolean = false;
 
@@ -59,7 +59,7 @@ export class SplitComponent implements AfterViewInit {
     this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
     let newPos = 50;
-    if (this.pos > 45 && this.pos < 55) {
+    if (typeof this.pos !== 'number' || this.pos > 45 && this.pos < 55) {
       newPos = 100;
     }
     this._updatePos(newPos);
@@ -68,11 +68,11 @@ export class SplitComponent implements AfterViewInit {
   onTouchStart() {
     this._isDrag = false;
     const touchend$ = fromEvent(document, 'touchend');
-    this.eventSubs = touchend$.subscribe((e: TouchEvent) => this.onMoveEnd(e));
+    this.eventSubs = touchend$.subscribe(() => this.onMoveEnd());
 
     const touchmove$ = fromEvent(document, 'touchmove')
       .pipe(takeUntil(touchend$))
-      .subscribe((e: TouchEvent) => this.onMove(e));
+      .subscribe((e: Event) => this.onMove(e as TouchEvent));
 
     this.eventSubs.add(touchmove$);
   }
@@ -80,16 +80,16 @@ export class SplitComponent implements AfterViewInit {
   onMouseDown() {
     this._isDrag = false;
     const mouseup$ = fromEvent(document, 'mouseup');
-    this.eventSubs = mouseup$.subscribe((e: MouseEvent) => this.onMoveEnd(e));
+    this.eventSubs = mouseup$.subscribe(() => this.onMoveEnd());
 
     const mousemove$ = fromEvent(document, 'mousemove')
       .pipe(takeUntil(mouseup$))
-      .subscribe((e: MouseEvent) => this.onMove(e));
+      .subscribe((e: Event) => this.onMove(e as MouseEvent));
 
     this.eventSubs.add(mousemove$);
   }
 
-  onMoveEnd(ev: TouchEvent | MouseEvent): void {
+  onMoveEnd(): void {
     if (this.eventSubs) {
       this.eventSubs.unsubscribe();
       this.eventSubs = undefined;
@@ -101,6 +101,10 @@ export class SplitComponent implements AfterViewInit {
   }
 
   onMove(ev: TouchEvent | MouseEvent) {
+    if (!this.containerEl) {
+      throw new Error('No container el');
+    }
+
     const clientY = (typeof (ev as MouseEvent).clientY === 'number')
       ? (ev as MouseEvent).clientY
       : (ev as TouchEvent).touches[0].clientY;
@@ -121,7 +125,11 @@ export class SplitComponent implements AfterViewInit {
     this._updatePos(percentage);
   }
 
-  private _updatePos(pos: number, isWasOutsideChange: boolean = false) {
+  private _updatePos(pos: number | undefined, isWasOutsideChange: boolean = false) {
+    if (typeof pos !== 'number') {
+      throw new Error('Invalid pos');
+    }
+
     this.pos = pos;
     if (this.splitTopEl && this.splitBottomEl) {
       this._renderer.setStyle(

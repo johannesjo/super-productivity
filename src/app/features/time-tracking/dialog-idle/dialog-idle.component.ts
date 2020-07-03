@@ -16,9 +16,9 @@ import { T } from '../../../t.const';
 export class DialogIdleComponent implements OnInit {
   T: any = T;
   lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(this.data.lastCurrentTaskId);
-  selectedTask: Task;
-  newTaskTitle: string;
-  isCreate: boolean;
+  selectedTask: Task | null = null;
+  newTaskTitle?: string;
+  isCreate?: boolean;
 
   constructor(
     public configService: GlobalConfigService,
@@ -44,7 +44,7 @@ export class DialogIdleComponent implements OnInit {
       this.selectedTask = null;
     } else {
       this.selectedTask = taskOrTaskTitle as Task;
-      this.newTaskTitle = null;
+      this.newTaskTitle = undefined;
     }
   }
 

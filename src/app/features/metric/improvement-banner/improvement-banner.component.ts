@@ -15,7 +15,7 @@ import { T } from '../../../t.const';
 })
 export class ImprovementBannerComponent implements OnDestroy {
   T: any = T;
-  improvements: Improvement[];
+  improvements?: Improvement[];
 
   private _subs: Subscription = new Subscription();
 

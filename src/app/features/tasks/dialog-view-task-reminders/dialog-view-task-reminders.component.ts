@@ -36,9 +36,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       first(),
       map((tasks: Task[]) => tasks
         .filter(task => !!task)
-        .map((task) => ({
+        .map((task): TaskWithReminderData => ({
           ...task,
-          reminderData: reminders.find(r => r.relatedId === task.id)
+          reminderData: reminders.find(r => r.relatedId === task.id) as Reminder
         }))
       )
     )),
@@ -87,14 +87,14 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       reminderId: null,
     });
     this._reminderService.removeReminder(task.reminderData.id);
-    this._removeFromList(task.reminderId);
+    this._removeFromList(task.reminderId as string);
   }
 
   snooze(task: TaskWithReminderData, snoozeInMinutes: number) {
     this._reminderService.updateReminder(task.reminderData.id, {
       remindAt: Date.now() + (snoozeInMinutes * M)
     });
-    this._removeFromList(task.reminderId);
+    this._removeFromList(task.reminderId as string);
   }
 
   editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false) {
@@ -102,7 +102,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       restoreFocus: true,
       data: {task} as AddTaskReminderInterface
     }).afterClosed().subscribe(() => {
-      this._removeFromList(task.reminderId);
+      this._removeFromList(task.reminderId as string);
       if (isCloseAfter) {
         this._close();
       }

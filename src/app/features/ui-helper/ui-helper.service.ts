@@ -55,7 +55,7 @@ export class UiHelperService {
         (document.activeElement as HTMLElement).blur();
       }
 
-      this._electronService.ipcRenderer.send(IPC.SHOW_OR_FOCUS);
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SHOW_OR_FOCUS);
     } else {
       console.error('Cannot execute focus app window in browser');
     }

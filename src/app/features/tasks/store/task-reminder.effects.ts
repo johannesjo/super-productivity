@@ -51,7 +51,7 @@ export class TaskReminderEffects {
         ...(isMoveToBacklog
             ? [moveTaskToBacklogListAuto({
               taskId: task.id,
-              workContextId: task.projectId
+              workContextId: task.projectId as string
             })]
             : []
         ),
