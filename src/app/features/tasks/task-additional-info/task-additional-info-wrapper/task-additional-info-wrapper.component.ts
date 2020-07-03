@@ -16,7 +16,7 @@ export class TaskAdditionalInfoWrapperComponent {
   @Input() isAlwaysOver: boolean = false;
 
   // to still display its data when panel is closing
-  selectedTaskWithDelayForNone$: Observable<TaskWithSubTasks> = this.taskService.selectedTask$.pipe(
+  selectedTaskWithDelayForNone$: Observable<TaskWithSubTasks | null> = this.taskService.selectedTask$.pipe(
     switchMap((task) => task
       ? of(task)
       : of(null).pipe(delay(200))
