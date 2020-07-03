@@ -58,7 +58,7 @@ export class GithubIssueEffects {
       );
     }),
     map((cos) => cos
-      .filter(({cfg, task}: { cfg: GithubCfg, task: TaskWithSubTasks }) =>
+      .filter(({cfg, task}: { cfg: GithubCfg, task: TaskWithSubTasks }): boolean =>
         isGithubEnabled(cfg) && cfg.isAutoPoll
       )
       .map(({task}: { cfg: GithubCfg, task: TaskWithSubTasks }) => task)

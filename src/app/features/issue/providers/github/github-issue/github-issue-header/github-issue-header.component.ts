@@ -10,7 +10,7 @@ import { T } from '../../../../../../t.const';
 })
 export class GithubIssueHeaderComponent {
   T: any = T;
-  @Input() public task: TaskWithSubTasks;
+  @Input() task?: TaskWithSubTasks;
 
   constructor() {
   }

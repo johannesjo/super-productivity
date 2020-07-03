@@ -102,7 +102,7 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  currentTask$: Observable<Task> = this._store.pipe(
+  currentTask$: Observable<Task | null> = this._store.pipe(
     select(selectCurrentTask),
     // NOTE: we can't use share here, as we need the last emitted value
   );
@@ -112,7 +112,7 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  selectedTaskId$: Observable<string> = this._store.pipe(
+  selectedTaskId$: Observable<string | null> = this._store.pipe(
     select(selectSelectedTaskId),
     // NOTE: we can't use share here, as we need the last emitted value
   );
@@ -127,7 +127,7 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  currentTaskOrCurrentParent$: Observable<TaskWithSubTasks> = this._store.pipe(
+  currentTaskOrCurrentParent$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectCurrentTaskOrParentWithData),
     // NOTE: we can't use share here, as we need the last emitted value
   );
@@ -155,7 +155,10 @@ export class TaskService {
   // META FIELDS
   // -----------
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
-    map((task) => task && task.timeEstimate > 0 && task.timeSpent / task.timeEstimate)
+    map((task) => (task && task.timeEstimate > 0)
+      ? task.timeSpent / task.timeEstimate
+      : 0
+    )
   );
 
   private _allTasksWithSubTaskData$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasks));
@@ -323,7 +326,7 @@ export class TaskService {
     }
   }
 
-  moveUp(id: string, parentId: string = null, isBacklog: boolean) {
+  moveUp(id: string, parentId: string | null = null, isBacklog: boolean) {
     if (parentId) {
       this._store.dispatch(new MoveSubTaskUp({id, parentId}));
     } else {
@@ -339,7 +342,7 @@ export class TaskService {
     }
   }
 
-  moveDown(id: string, parentId: string = null, isBacklog: boolean) {
+  moveDown(id: string, parentId: string | null = null, isBacklog: boolean) {
     if (parentId) {
       this._store.dispatch(new MoveSubTaskDown({id, parentId}));
     } else {
@@ -375,7 +378,11 @@ export class TaskService {
   }
 
   focusTask(id: string) {
-    document.getElementById('t-' + id).focus();
+    const el = document.getElementById('t-' + id);
+    if (!el) {
+      throw new Error('Cannot find focus el');
+    }
+    el.focus();
   }
 
   focusTaskIfPossible(id: string) {
@@ -571,27 +578,27 @@ export class TaskService {
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
     const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
-      task => (task.projectId === projectId)
-    );
+      (task) => ((task as Task).projectId === projectId)
+    ) as Task[];
   }
 
   async getAllIssueIdsForProject(projectId: string, issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
     const allTasks = await this.getAllTasksForProject(projectId);
     return allTasks
       .filter(task => task.issueType === issueProviderKey)
-      .map(task => task.issueId);
+      .map(task => task.issueId) as string[] | number[];
   }
 
   // TODO check with new archive
   async checkForTaskWithIssue(issueId: string | number, issueProviderKey: IssueProviderKey): Promise<{
     task: Task,
-    subTasks: Task[],
+    subTasks: Task[] | null,
     isFromArchive: boolean,
-  }> {
+  } | null> {
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
     const taskWithSameIssue: Task = allTasks.find(
       task => task.issueId === issueId && task.issueType === issueProviderKey
-    );
+    ) as Task;
 
     if (taskWithSameIssue) {
       return {
@@ -603,13 +610,21 @@ export class TaskService {
       const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
-        const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issueId);
-        return archiveTaskWithSameIssue && {
-          task: archiveTaskWithSameIssue,
-          subTasks: archiveTaskWithSameIssue.subTaskIds && archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState.entities[id]),
-          isFromArchive: true
-        };
+        const archiveTaskWithSameIssue = ids
+          .map(id => archiveTaskState.entities[id])
+          .find((task) => task && task.issueId === issueId);
+
+        return archiveTaskWithSameIssue
+          ? {
+            task: archiveTaskWithSameIssue as Task,
+            subTasks: archiveTaskWithSameIssue.subTaskIds
+              ? archiveTaskWithSameIssue.subTaskIds.map(id => archiveTaskState.entities[id]) as Task[]
+              : null,
+            isFromArchive: true
+          }
+          : null;
       }
+      return null;
     }
   }
 

@@ -14,10 +14,10 @@ const MAX_VALIDATOR: any = {
   providers: [MAX_VALIDATOR]
 })
 export class MaxDirective implements Validator, OnInit, OnChanges {
-  @Input() max: number | undefined;
+  @Input() max?: number;
 
-  private _validator: ValidatorFn | undefined;
-  private _onChange: (() => void) | undefined;
+  private _validator?: ValidatorFn;
+  private _onChange?: (() => void);
 
   ngOnInit() {
     if (typeof this.max === 'number') {

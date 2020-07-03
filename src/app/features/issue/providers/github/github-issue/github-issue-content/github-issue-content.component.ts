@@ -14,8 +14,8 @@ import { TaskService } from '../../../../../tasks/task.service';
   animations: [expandAnimation]
 })
 export class GithubIssueContentComponent {
-  @Input() issue: GithubIssue;
-  @Input() task: TaskWithSubTasks;
+  @Input() issue?: GithubIssue;
+  @Input() task?: TaskWithSubTasks;
 
   T: any = T;
 

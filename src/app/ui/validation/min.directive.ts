@@ -14,10 +14,10 @@ const MIN_VALIDATOR: any = {
   providers: [MIN_VALIDATOR]
 })
 export class MinDirective implements Validator, OnInit, OnChanges {
-  @Input() min: number | undefined;
+  @Input() min?: number;
 
-  private _validator: ValidatorFn | undefined;
-  private _onChange: (() => void) | undefined;
+  private _validator?: ValidatorFn;
+  private _onChange?: (() => void);
 
   ngOnInit() {
     if (typeof this.min === 'number') {

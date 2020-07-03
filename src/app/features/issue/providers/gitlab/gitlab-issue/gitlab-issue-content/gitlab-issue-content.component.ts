@@ -13,8 +13,8 @@ import { TaskService } from '../../../../../tasks/task.service';
   animations: [expandAnimation]
 })
 export class GitlabIssueContentComponent {
-  @Input() public issue?: GitlabIssue;
-  @Input() public task?: TaskWithSubTasks;
+  @Input() issue?: GitlabIssue;
+  @Input() task?: TaskWithSubTasks;
 
   T: any = T;
 

@@ -54,7 +54,8 @@ export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEAT
 export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
 export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);
 export const selectIsTaskDataLoaded = createSelector(selectTaskFeatureState, state => state.isDataLoaded);
-export const selectCurrentTask = createSelector(selectTaskFeatureState, s => s.currentTaskId && s.entities[s.currentTaskId]);
+export const selectCurrentTask = createSelector(selectTaskFeatureState,
+  s => s.currentTaskId ? s.entities[s.currentTaskId] as Task : null);
 
 export const selectCurrentTaskOrParentWithData = createSelector(
   selectTaskFeatureState,
@@ -125,8 +126,8 @@ export const selectTaskById = createSelector(
 
 export const selectTasksById = createSelector(
   selectTaskFeatureState,
-  (state: TaskState, props: { ids: string[] }) => props.ids
-    ? props.ids.map(id => state.entities[id])
+  (state: TaskState, props: { ids: string[] }): Task[] => props.ids
+    ? props.ids.map(id => state.entities[id]) as Task[]
     : []
 );
 
@@ -144,12 +145,12 @@ export const selectTasksWithSubTasksByIds = createSelector(
 
 export const selectTaskByIdWithSubTaskData = createSelector(
   selectTaskFeatureState,
-  (state: TaskState, props: { id: string }): TaskWithSubTasks | null => {
+  (state: TaskState, props: { id: string }): TaskWithSubTasks => {
     const task = state.entities[props.id];
     if (!task) {
       devError('Task data not found for ' + props.id);
     }
-    return mapSubTasksToTask(task as Task, state);
+    return mapSubTasksToTask(task as Task, state) as TaskWithSubTasks;
   }
 );
 

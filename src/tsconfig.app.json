@@ -5,7 +5,8 @@
     "types": [],
     "strict": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization": true
+    "strictPropertyInitialization": true,
+    "allowSyntheticDefaultImports": true
   },
   "files": [
     "main.ts",

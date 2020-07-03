@@ -8,14 +8,15 @@ import { T } from 'src/app/t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OwlWrapperComponent {
-  @Input()
-  now: Date = new Date();
+  @Input() now: Date = new Date();
 
-  @Input()
-  model: number;
-  dateTime: number;
+  @Input() model?: number;
+
+  dateTime?: number;
+
   @Output()
   dateTimeChange: EventEmitter<number> = new EventEmitter();
+
   @Output()
   triggerSubmit: EventEmitter<number> = new EventEmitter();
   T: any = T;
