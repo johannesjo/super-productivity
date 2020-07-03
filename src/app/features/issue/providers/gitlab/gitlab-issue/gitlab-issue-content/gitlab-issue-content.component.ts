@@ -13,8 +13,8 @@ import { TaskService } from '../../../../../tasks/task.service';
   animations: [expandAnimation]
 })
 export class GitlabIssueContentComponent {
-  @Input() public issue: GitlabIssue;
-  @Input() public task: TaskWithSubTasks;
+  @Input() public issue?: GitlabIssue;
+  @Input() public task?: TaskWithSubTasks;
 
   T: any = T;
 
@@ -24,7 +24,7 @@ export class GitlabIssueContentComponent {
   }
 
   hideUpdates() {
-    this._taskService.markIssueUpdatesAsRead(this.task.id);
+    this._taskService.markIssueUpdatesAsRead((this.task as TaskWithSubTasks).id);
   }
 
   trackByIndex(i: number, p: any) {

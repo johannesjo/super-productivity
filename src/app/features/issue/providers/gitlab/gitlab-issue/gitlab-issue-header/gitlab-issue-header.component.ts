@@ -10,7 +10,7 @@ import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
 })
 export class GitlabIssueHeaderComponent {
   T: any = T;
-  @Input() public task: TaskWithSubTasks;
+  @Input() public task?: TaskWithSubTasks;
 
   constructor() {
   }

@@ -11,7 +11,7 @@ import { T } from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskSummaryTableComponent {
-  @Input() flatTasks: Task[];
+  @Input() flatTasks: Task[] = [];
   @Input() day: string = getWorklogStr();
   @Output() updated: EventEmitter<void> = new EventEmitter();
 

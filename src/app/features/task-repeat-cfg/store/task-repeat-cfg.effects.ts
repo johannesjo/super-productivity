@@ -141,7 +141,7 @@ export class TaskRepeatCfgEffects {
     filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
     map((task: TaskWithSubTasks) => new RemoveTaskReminder({
       id: task.id,
-      reminderId: task.reminderId
+      reminderId: task.reminderId as string
     })),
   );
 
@@ -171,7 +171,8 @@ export class TaskRepeatCfgEffects {
       const newState = {...taskArchive};
       const ids = newState.ids as string[];
 
-      const tasksWithRepeatCfgId = ids.map(id => newState.entities[id])
+      const tasksWithRepeatCfgId = ids
+        .map(id => newState.entities[id] as Task)
         .filter((task: TaskWithSubTasks) => task.repeatCfgId === repeatConfigId);
 
       if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
