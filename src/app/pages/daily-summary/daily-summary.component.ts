@@ -23,6 +23,7 @@ import { ElectronService } from '../../core/electron/electron.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { DropboxSyncService } from '../../features/dropbox/dropbox-sync.service';
 import { Task } from '../../features/tasks/task.model';
+import { ipcRenderer } from 'electron';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -40,7 +41,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   };
 
   isTimeSheetExported: boolean = true;
-  showSuccessAnimation: boolean;
+  showSuccessAnimation: boolean = false;
   selectedTabIndex: number = 0;
   isForToday: boolean = true;
 
@@ -85,7 +86,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   isBreakTrackingSupport$: Observable<boolean> = this.configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 
-  private _successAnimationTimeout: number;
+  private _successAnimationTimeout?: number;
 
   // calc time spent on todays tasks today
   private _subs: Subscription = new Subscription();
@@ -168,7 +169,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
             this._finishDayForGood(() => {
-              this._electronService.ipcRenderer.send(IPC.SHUTDOWN_NOW);
+              (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SHUTDOWN_NOW);
             });
           } else if (isConfirm === false) {
             this._finishDayForGood(() => {

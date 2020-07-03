@@ -30,7 +30,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   globalSyncProviderFormCfg: ConfigFormConfig;
   globalProductivityConfigFormCfg: ConfigFormConfig;
 
-  globalCfg: GlobalConfigState;
+  globalCfg?: GlobalConfigState;
 
   appVersion: string = environment.version;
 

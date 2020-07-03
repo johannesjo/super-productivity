@@ -16,11 +16,11 @@ import { Tag } from '../../features/tag/tag.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WorkContextMenuComponent implements OnDestroy {
-  @Input() contextId: string;
+  @Input() contextId?: string;
   T: any = T;
   TODAY_TAG_ID: string = TODAY_TAG.id;
-  isForProject: boolean;
-  base: string;
+  isForProject: boolean = true;
+  base: string = 'project';
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -42,13 +42,17 @@ export class WorkContextMenuComponent implements OnDestroy {
 
   deleteTag() {
     this._subs.add(this._confirmTagDelete().subscribe(isDelete => {
-      if (isDelete) {
+      if (isDelete && this.contextId) {
         this._tagService.removeTag(this.contextId);
       }
     }));
   }
 
   private _confirmTagDelete(): Observable<boolean> {
+    if (!this.contextId) {
+      throw new Error('No context id');
+    }
+
     return this._tagService.getTagById$(this.contextId).pipe(
       first(),
       concatMap((tag: Tag) => this._matDialog.open(DialogConfirmComponent, {

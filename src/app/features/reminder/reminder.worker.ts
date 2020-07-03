@@ -5,7 +5,7 @@ import { ReminderCopy } from './reminder.model';
 const CHECK_INTERVAL_DURATION = 1000;
 const MESSAGE_INTERVAL_DURATION = 10000;
 let currentMessageTimerVal = 0;
-let checkInterval;
+let checkInterval: any;
 
 addEventListener('message', ({data}) => {
   // console.log('REMINDER WORKER', data);

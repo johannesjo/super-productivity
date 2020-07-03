@@ -96,8 +96,8 @@ import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 })
 export class TaskService {
   // Currently used in idle service TODO remove
-  currentTaskId: string;
-  currentTaskId$: Observable<string> = this._store.pipe(
+  currentTaskId: string | null | undefined;
+  currentTaskId$: Observable<string | null> = this._store.pipe(
     select(selectCurrentTaskId),
     // NOTE: we can't use share here, as we need the last emitted value
   );
@@ -190,7 +190,7 @@ export class TaskService {
   // META
 
   // ----
-  setCurrentId(id: string) {
+  setCurrentId(id: string | null) {
     if (id) {
       this._store.dispatch(new SetCurrentTask(id));
     } else {
@@ -198,7 +198,7 @@ export class TaskService {
     }
   }
 
-  setSelectedId(id: string, taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default) {
+  setSelectedId(id: string | null, taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default) {
     this._store.dispatch(new SetSelectedTask({id, taskAdditionalInfoTargetPanel}));
   }
 

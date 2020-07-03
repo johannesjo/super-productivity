@@ -8,20 +8,20 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { TaskService } from '../../features/tasks/task.service';
+import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
-import { TakeABreakService } from '../../features/time-tracking/take-a-break/take-a-break.service';
+import { TakeABreakService } from '../time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
 import { from, fromEvent, Observable, ReplaySubject, Subscription, timer, zip } from 'rxjs';
-import { TaskWithSubTasks } from '../../features/tasks/task.model';
+import { TaskWithSubTasks } from '../tasks/task.model';
 import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { PlanningModeService } from '../../features/planning-mode/planning-mode.service';
+import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
-import { ImprovementService } from '../../features/metric/improvement/improvement.service';
-import { ProjectService } from '../../features/project/project.service';
+import { ImprovementService } from '../metric/improvement/improvement.service';
+import { ProjectService } from '../project/project.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
 
@@ -70,7 +70,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     public taskService: TaskService,
-    public projectService: ProjectService,
     public takeABreakService: TakeABreakService,
     public planningModeService: PlanningModeService,
     public improvementService: ImprovementService,

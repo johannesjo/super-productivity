@@ -47,14 +47,14 @@ export enum TaskActionTypes {
 export class SetCurrentTask implements Action {
   readonly type: string = TaskActionTypes.SetCurrentTask;
 
-  constructor(public payload: string) {
+  constructor(public payload: string | null) {
   }
 }
 
 export class SetSelectedTask implements Action {
   readonly type: string = TaskActionTypes.SetSelectedTask;
 
-  constructor(public payload: { id: string; taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel }) {
+  constructor(public payload: { id: string | null; taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel }) {
   }
 }
 

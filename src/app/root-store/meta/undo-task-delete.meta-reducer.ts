@@ -6,9 +6,10 @@ import { PROJECT_FEATURE_NAME, projectAdapter } from '../../features/project/sto
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reducer';
 import { taskAdapter } from '../../features/tasks/store/task.adapter';
+import { Project } from '../../features/project/project.model';
 
 export interface UndoTaskDeleteState {
-  projectId: string;
+  projectId: string | null;
   taskIdsForProjectBacklog?: string[];
   taskIdsForProject?: string[];
 
@@ -120,10 +121,6 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
     };
   }, {});
 
-  if (!taskEntities[task.parentId] || !(taskEntities[task.parentId] as any).subTaskIds) {
-    throw new Error('Task Restore Error: Missing taskEntities');
-  }
-
   // SUB TASK CASE
   // Note: should work independent as sub tasks dont show up in tag or project lists
   if (task.parentId) {
@@ -135,7 +132,7 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
     };
   } else {
     // PROJECT CASE
-    const project = state[PROJECT_FEATURE_NAME].entities[task.projectId];
+    const project: Project = state[PROJECT_FEATURE_NAME].entities[task.projectId as string] as Project;
     if (!project) {
       throw new Error('Task Restore Error: Missing project');
     }

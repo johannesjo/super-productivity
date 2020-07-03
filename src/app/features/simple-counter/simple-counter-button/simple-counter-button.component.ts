@@ -17,7 +17,7 @@ export class SimpleCounterButtonComponent {
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = getWorklogStr();
 
-  @Input() simpleCounter: SimpleCounter;
+  @Input() simpleCounter?: SimpleCounter;
 
   constructor(
     private _simpleCounterService: SimpleCounterService,
@@ -26,14 +26,23 @@ export class SimpleCounterButtonComponent {
   }
 
   toggleStopwatch() {
+    if (!this.simpleCounter) {
+      throw new Error('No simple counter model');
+    }
     this._simpleCounterService.toggleCounter(this.simpleCounter.id);
   }
 
   toggleCounter() {
+    if (!this.simpleCounter) {
+      throw new Error('No simple counter model');
+    }
     this._simpleCounterService.increaseCounterToday(this.simpleCounter.id, 1);
   }
 
   reset() {
+    if (!this.simpleCounter) {
+      throw new Error('No simple counter model');
+    }
     this._simpleCounterService.setCounterToday(this.simpleCounter.id, 0);
   }
 

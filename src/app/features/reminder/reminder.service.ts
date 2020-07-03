@@ -57,33 +57,30 @@ export class ReminderService {
     private readonly _noteService: NoteService,
     private readonly _imexMetaService: ImexMetaService,
   ) {
+    console.log('INIT START');
+    if (typeof Worker === 'undefined') {
+      throw new Error('No service workers supported :(');
+    }
+
+    this._w = new Worker('./reminder.worker', {
+      name: 'reminder',
+      type: 'module'
+    });
   }
 
   init() {
-    console.log('INIT START');
-
-    if (typeof Worker !== 'undefined') {
-      this._w = new Worker('./reminder.worker', {
-        name: 'reminder',
-        type: 'module'
-      });
-
-      // we do this to wait for syncing and the like
-      merge(
-        this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
-        timer(MAX_WAIT_FOR_INITIAL_SYNC),
-      ).pipe(
-        first(),
-      ).subscribe(async () => {
-        this._w.addEventListener('message', this._onReminderActivated.bind(this));
-        this._w.addEventListener('error', this._handleError.bind(this));
-        await this.reloadFromDatabase();
-        this._isRemindersLoaded$.next(true);
-      });
-
-    } else {
-      console.error('No service workers supported :(');
-    }
+    // we do this to wait for syncing and the like
+    merge(
+      this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
+      timer(MAX_WAIT_FOR_INITIAL_SYNC),
+    ).pipe(
+      first(),
+    ).subscribe(async () => {
+      this._w.addEventListener('message', this._onReminderActivated.bind(this));
+      this._w.addEventListener('error', this._handleError.bind(this));
+      await this.reloadFromDatabase();
+      this._isRemindersLoaded$.next(true);
+    });
   }
 
   async reloadFromDatabase() {
@@ -109,7 +106,7 @@ export class ReminderService {
     return _foundReminder && dirtyDeepCopy(_foundReminder);
   }
 
-  getById$(reminderId: string): Observable<ReminderCopy> {
+  getById$(reminderId: string): Observable<ReminderCopy | undefined> {
     return this.reminders$.pipe(
       map(reminders => reminders.find(reminder => reminder.id === reminderId)),
     );
@@ -183,7 +180,6 @@ export class ReminderService {
   private async _onReminderActivated(msg: MessageEvent) {
     const reminders = msg.data as Reminder[];
     const remindersWithData: Reminder[] = await Promise.all(reminders.map(async (reminder) => {
-
       const relatedModel = await this._getRelatedDataForReminder(reminder);
       // console.log('RelatedModel for Reminder', relatedModel);
       // only show when not currently syncing and related model still exists
@@ -194,8 +190,8 @@ export class ReminderService {
       } else {
         return reminder;
       }
-    }));
-    const finalReminders = remindersWithData.filter(reminder => !!reminder && reminder !== null);
+    })) as Reminder [];
+    const finalReminders = remindersWithData.filter(reminder => !!reminder);
 
     if (finalReminders.length > 0) {
       this._onRemindersActive$.next(finalReminders);

@@ -18,6 +18,7 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { Note } from '../note.model';
 import { T } from '../../../t.const';
+import { Task } from '../../tasks/task.model';
 
 @Component({
   selector: 'notes',
@@ -33,9 +34,9 @@ export class NotesComponent implements OnInit, OnDestroy {
   T: any = T;
   isElementWasAdded: boolean = false;
   isDragOver: boolean = false;
-  dragEnterTarget: HTMLElement;
+  dragEnterTarget?: HTMLElement;
 
-  @ViewChild('buttonEl', {static: true}) buttonEl: MatButton;
+  @ViewChild('buttonEl', {static: true}) buttonEl?: MatButton;
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -67,7 +68,7 @@ export class NotesComponent implements OnInit, OnDestroy {
     this._subs.add(this._dragulaService.dropModel('NOTES')
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
-        const targetNewIds = targetModel.map((task) => task.id);
+        const targetNewIds = targetModel.map((task: Task) => task.id);
         this.noteService.updateOrder(targetNewIds);
       })
     );
@@ -75,7 +76,7 @@ export class NotesComponent implements OnInit, OnDestroy {
     this._dragulaService.createGroup('NOTES', {
       direction: 'vertical',
       moves: (el, container, handle) => {
-        return handle.className.indexOf && handle.className.indexOf('handle-drag') > -1;
+        return !!handle && handle.className.indexOf && handle.className.indexOf('handle-drag') > -1;
       }
     });
   }

@@ -15,10 +15,10 @@ import { throttle } from 'helpful-decorators';
 })
 export class DialogAddNoteReminderComponent {
   T: any = T;
-  dateTime: number;
+  dateTime?: number;
   title: string;
   isEdit: boolean;
-  reminder: ReminderCopy;
+  reminder?: ReminderCopy | null;
   note: Note;
 
   constructor(
@@ -28,11 +28,11 @@ export class DialogAddNoteReminderComponent {
     @Inject(MAT_DIALOG_DATA) public data: { note: Note },
   ) {
     this.note = this.data.note;
-    this.reminder = this.note.reminderId && {
-      ...this._reminderService.getById(this.data.note.reminderId)
-    };
+    this.reminder = this.note.reminderId
+      ? this._reminderService.getById(this.data.note.reminderId as string)
+      : null;
     this.isEdit = !!(this.reminder && this.reminder.id);
-    if (this.isEdit) {
+    if (this.isEdit && this.reminder) {
       this.dateTime = this.reminder.remindAt;
       this.title = this.reminder.title;
     } else {
@@ -49,7 +49,7 @@ export class DialogAddNoteReminderComponent {
       return;
     }
 
-    if (this.isEdit) {
+    if (this.isEdit && this.reminder) {
       this._noteService.updateReminder(
         this.note.id,
         this.reminder.id,
@@ -70,6 +70,9 @@ export class DialogAddNoteReminderComponent {
   // NOTE: throttle is used as quick way to prevent multiple submits
   @throttle(2000, {leading: true, trailing: false})
   remove() {
+    if (!this.reminder) {
+      throw new Error('No reminder');
+    }
     this._noteService.removeReminder(this.note.id, this.reminder.id);
     this.close();
   }

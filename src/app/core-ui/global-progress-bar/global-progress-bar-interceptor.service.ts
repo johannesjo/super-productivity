@@ -13,7 +13,7 @@ export class GlobalProgressBarInterceptorService implements HttpInterceptor {
   ) {
 
     axios.interceptors.request.use((config) => {
-      this.globalProgressBarService.countUp(config.url);
+      this.globalProgressBarService.countUp(config.url as string);
       return config;
     }, (error) => {
       this.globalProgressBarService.countDown();

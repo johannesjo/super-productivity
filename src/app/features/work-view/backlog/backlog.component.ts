@@ -13,7 +13,7 @@ import { ProjectService } from '../../../features/project/project.service';
   animations: [standardListAnimation]
 })
 export class BacklogComponent {
-  @Input() backlogTasks: TaskWithSubTasks[];
+  @Input() backlogTasks: TaskWithSubTasks[] = [];
 
   @Output() closeBacklog: EventEmitter<any> = new EventEmitter<any>();
 
@@ -38,6 +38,9 @@ export class BacklogComponent {
   }
 
   removeReminder(task: TaskWithReminderData) {
+    if (!task.reminderId) {
+      throw new Error('Task without reminder');
+    }
     this.taskService.removeReminder(task.id, task.reminderId);
   }
 

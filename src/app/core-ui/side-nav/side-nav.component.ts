@@ -57,7 +57,7 @@ export class SideNavComponent implements OnDestroy {
   T: any = T;
   readonly PROJECTS_SIDE_NAV: string = 'PROJECTS_SIDE_NAV';
   readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
-  activeWorkContextId: string;
+  activeWorkContextId?: string;
   WorkContextType: typeof WorkContextType = WorkContextType;
 
   private _subs: Subscription = new Subscription();
@@ -73,7 +73,7 @@ export class SideNavComponent implements OnDestroy {
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
       moves: (el, container, handle) => {
-        return this.isProjectsExpanded && handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
+        return this.isProjectsExpanded && !!handle && handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
       }
     });
     this._subs.add(this.workContextService.activeWorkContextId$.subscribe(id => this.activeWorkContextId = id));
@@ -81,7 +81,7 @@ export class SideNavComponent implements OnDestroy {
     this._subs.add(this._dragulaService.dropModel(this.PROJECTS_SIDE_NAV)
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
-        const targetNewIds = targetModel.map((project) => project.id);
+        const targetNewIds = targetModel.map((project: Project) => project.id);
         this.projectService.updateOrder(targetNewIds);
       })
     );
@@ -104,7 +104,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   getThemeColor(color: string): { [key: string]: string } {
-    const standardColor = THEME_COLOR_MAP[color];
+    const standardColor = (THEME_COLOR_MAP as any)[color];
     const colorToUse = (standardColor)
       ? standardColor
       : color;

@@ -27,11 +27,11 @@ export class ScheduledTaskService {
             task => ({
               ...task,
               reminderData: reminders.find(reminder => reminder.relatedId === task.id)
-            })),
+            } as TaskWithReminderData)),
         ),
       );
     }),
-    map(tasks => tasks
+    map((tasks: TaskWithReminderData[]) => tasks
       .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)),
     shareReplay(1),
   );

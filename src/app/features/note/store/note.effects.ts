@@ -47,7 +47,7 @@ export class NoteEffects {
     ofType(
       addNote
     ),
-    filter((p) => p.remindAt && p.remindAt > 0),
+    filter(({remindAt}) => !!remindAt && remindAt > 0),
     map((p) => addNoteReminder({
       id: p.note.id,
       title: p.note.content.substr(0, 40),
