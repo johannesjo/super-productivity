@@ -21,7 +21,6 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
 import { ImprovementService } from '../metric/improvement/improvement.service';
-import { ProjectService } from '../project/project.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
 
@@ -36,9 +35,9 @@ const PARENT = 'PARENT';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
-  @Input() undoneTasks: TaskWithSubTasks[];
-  @Input() doneTasks: TaskWithSubTasks[];
-  @Input() backlogTasks: TaskWithSubTasks[];
+  @Input() undoneTasks: TaskWithSubTasks[] = [];
+  @Input() doneTasks: TaskWithSubTasks[] = [];
+  @Input() backlogTasks: TaskWithSubTasks[] = [];
   @Input() isShowBacklog: boolean = false;
 
   isShowTimeWorkedWithoutBreak: boolean = true;
@@ -66,7 +65,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     switchMap((el) => fromEvent(el, 'scroll')),
   );
   private _subs: Subscription = new Subscription();
-  private _switchListAnimationTimeout: number;
+  private _switchListAnimationTimeout?: number;
 
   constructor(
     public taskService: TaskService,
@@ -95,7 +94,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       this._dragulaService.createGroup(SUB, {
         direction: 'vertical',
         moves: (el, container, handle) => {
-          return handle.className.indexOf && handle.className.indexOf('handle-sub') > -1;
+          return !!handle && handle.className.indexOf && handle.className.indexOf('handle-sub') > -1;
         }
       });
     }
@@ -103,7 +102,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       this._dragulaService.createGroup(PARENT, {
         direction: 'vertical',
         moves: (el, container, handle) => {
-          return handle.className.indexOf && handle.className.indexOf('handle-par') > -1;
+          return !!handle && handle.className.indexOf && handle.className.indexOf('handle-par') > -1;
         }
       });
     }

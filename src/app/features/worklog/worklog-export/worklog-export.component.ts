@@ -18,6 +18,7 @@ import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { roundTime } from '../../../util/round-time';
 import { roundDuration } from '../../../util/round-duration';
+// @ts-ignore
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
 import { WorklogService } from '../worklog.service';
@@ -38,8 +39,8 @@ interface TaskWithParentTitle extends TaskCopy {
 
 interface RowItem {
   dates: string[];
-  workStart: number;
-  workEnd: number;
+  workStart: number | undefined;
+  workEnd: number | undefined;
   timeSpent: number;
   timeEstimate: number;
   tasks: TaskWithParentTitle[];
@@ -54,22 +55,22 @@ interface RowItem {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
-  @Input() rangeStart: Date;
-  @Input() rangeEnd: Date;
-  @Input() isWorklogExport: boolean;
-  @Input() isShowClose: boolean;
+  @Input() rangeStart?: Date;
+  @Input() rangeEnd?: Date;
+  @Input() isWorklogExport?: boolean;
+  @Input() isShowClose?: boolean;
 
   @Output() cancel: EventEmitter<void> = new EventEmitter();
 
   T: any = T;
   isShowAsText: boolean = false;
   headlineCols: string[] = [];
-  formattedRows: (string | number)[][];
+  formattedRows?: (string | number | undefined)[][];
   options: WorklogExportSettingsCopy = {
     ...WORKLOG_EXPORT_DEFAULTS,
     cols: [...WORKLOG_EXPORT_DEFAULTS.cols],
   };
-  txt: string;
+  txt: string = '';
   fileName: string = 'tasks.csv';
   roundTimeOptions: { id: string; title: string }[] = [
     {id: 'QUARTER', title: T.F.WORKLOG.EXPORT.O.FULL_QUARTERS},
@@ -109,15 +110,16 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    if (this.rangeStart && this.rangeEnd) {
-      this.fileName
-        = 'tasks'
-        + getWorklogStr(this.rangeStart)
-        + '-'
-        + getWorklogStr(this.rangeEnd)
-        + '.csv'
-      ;
+    if (!this.rangeStart || !this.rangeEnd) {
+      throw new Error('Worklog: Invalid date range');
     }
+    this.fileName
+      = 'tasks'
+      + getWorklogStr(this.rangeStart)
+      + '-'
+      + getWorklogStr(this.rangeEnd)
+      + '.csv'
+    ;
 
     this._subs.add(this._workContextService.advancedCfg$.pipe(
       distinctUntilChanged(distinctUntilChangedObject)
@@ -174,6 +176,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
               case 'ESTIMATE_STR':
               case 'ESTIMATE_CLOCK':
                 return 'Estimate';
+              default:
+                return 'INVALI COL';
             }
           });
 
@@ -218,7 +222,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     const _mapToGroups = (task: WorklogTask) => {
       const taskGroups: { [key: string]: RowItem } = {};
-      const createEmptyGroup = () => {
+      const createEmptyGroup = (): RowItem => {
         return {
           dates: [],
           timeSpent: 0,
@@ -292,10 +296,12 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           groups[groupKey].tasks.push(...taskGroups[groupKey].tasks);
           groups[groupKey].dates.push(...taskGroups[groupKey].dates);
           if (taskGroups[groupKey].workStart !== undefined) {
-            groups[groupKey].workStart = Math.min(groups[groupKey].workStart, taskGroups[groupKey].workStart);
+            // TODO check if this works as intended
+            groups[groupKey].workStart = Math.min(groups[groupKey].workStart as number, taskGroups[groupKey].workStart as number);
           }
           if (taskGroups[groupKey].workEnd !== undefined) {
-            groups[groupKey].workEnd = Math.min(groups[groupKey].workEnd, taskGroups[groupKey].workEnd);
+            // TODO check if this works as intended
+            groups[groupKey].workEnd = Math.min(groups[groupKey].workEnd as number, taskGroups[groupKey].workEnd as number);
           }
           groups[groupKey].timeEstimate += taskGroups[groupKey].timeEstimate;
           groups[groupKey].timeSpent += taskGroups[groupKey].timeSpent;
@@ -312,9 +318,9 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
       group.titlesWithSub = unique(group.tasks.map(t => t.title));
       group.titles = unique(group.tasks.map(t => (
-          t.parentId && tasks.find(ptIN => ptIN.id === t.parentId).title
+          t.parentId && (tasks.find(ptIN => ptIN.id === t.parentId) as TaskCopy).title
         ) || (!t.parentId && t.title)
-      )).filter(title => !!title);
+      )).filter((title: string) => !!title);
       group.dates = unique(group.dates).sort((a: string, b: string) => {
         const dateA: number = new Date(a).getTime();
         const dateB: number = new Date(b).getTime();
@@ -333,12 +339,17 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   }
 
-  private _formatRows(rows: RowItem[]): (string | number)[][] {
-    return rows.map(row => {
+  private _formatRows(rows: RowItem[]): (string | number | undefined)[][] {
+    return rows.map((row: RowItem) => {
       return this.options.cols.map(col => {
+        // TODO check if this is possible
         if (!col) {
           return;
         }
+        if (!row.titles || !row.titlesWithSub) {
+          throw new Error('Worklog: No titles');
+        }
+
         const timeSpent = (this.options.roundWorkTimeTo)
           ? roundDuration(row.timeSpent, this.options.roundWorkTimeTo, true).asMilliseconds()
           : row.timeSpent;
@@ -401,7 +412,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     });
   }
 
-  private _formatText(headlineCols: string[], rows: (string | number)[][]): string {
+  private _formatText(headlineCols: string[], rows: (string | number | undefined)[][]): string {
     let txt = '';
     txt += headlineCols.join(';') + LINE_SEPARATOR;
     txt += rows.map(cols => cols.join(';')).join(LINE_SEPARATOR);

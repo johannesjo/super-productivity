@@ -48,7 +48,7 @@ export class PomodoroService {
     this.currentCycle$,
     this.cfg$,
   ]).pipe(map(([isBreak, currentCycle, cfg]) => {
-    return isBreak && cfg.cyclesBeforeLongerBreak && Number.isInteger(((currentCycle + 1) / cfg.cyclesBeforeLongerBreak));
+    return isBreak && !!cfg.cyclesBeforeLongerBreak && Number.isInteger(((currentCycle + 1) / cfg.cyclesBeforeLongerBreak));
   }));
 
   isShortBreak$: Observable<boolean> = combineLatest([
@@ -91,6 +91,8 @@ export class PomodoroService {
         return cfg.breakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.breakDuration;
       } else if (isLong) {
         return cfg.longerBreakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration;
+      } else {
+        throw new Error('Pomodoro: nextSession$');
       }
     }),
     shareReplay(1),

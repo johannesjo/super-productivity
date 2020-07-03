@@ -15,19 +15,20 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { Observable, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
+import { ipcRenderer } from 'electron';
 
-const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
+const isEnabled = ([action, cfg, ...v]: any[] | any): boolean => !!cfg && !!cfg.isEnabled;
 
 @Injectable()
 export class PomodoroEffects {
-  currentTaskId$: Observable<string> = this._store$.pipe(select(selectCurrentTaskId));
+  currentTaskId$: Observable<string | null> = this._store$.pipe(select(selectCurrentTaskId));
 
   @Effect()
   playPauseOnCurrentUpdate$: Observable<unknown> = this._actions$.pipe(
@@ -48,7 +49,7 @@ export class PomodoroEffects {
       || (isBreak && currentSessionTime <= 0 && action.type === TaskActionTypes.SetCurrentTask)),
     concatMap(([action, , isBreak, currentSessionTime]) => {
       // tslint:disable-next-line
-      const payload = action['payload'];
+      const payload = (action as any)['payload'];
 
       if (payload && action.type !== TaskActionTypes.UnsetCurrentTask) {
         if (isBreak && currentSessionTime <= 0) {
@@ -178,15 +179,15 @@ export class PomodoroEffects {
   );
 
   @Effect({dispatch: false})
-  setTaskBarIconProgress$: Observable<unknown> = this._pomodoroService.sessionProgress$.pipe(
-    filter(() => IS_ELECTRON),
-    withLatestFrom(this._pomodoroService.cfg$),
-    // we display pomodoro progress for pomodoro
-    filter(([progress, cfg]: [number, PomodoroConfig]) => cfg && cfg.isEnabled),
-    tap(([progress, cfg]) => {
-      this._electronService.ipcRenderer.send(IPC.SET_PROGRESS_BAR, {progress});
-    }),
-  );
+  setTaskBarIconProgress$: Observable<unknown> = IS_ELECTRON
+    ? this._pomodoroService.sessionProgress$.pipe(
+      withLatestFrom(this._pomodoroService.cfg$),
+      // we display pomodoro progress for pomodoro
+      filter(([progress, cfg]: [number, PomodoroConfig]) => cfg && cfg.isEnabled),
+      tap(([progress, cfg]) => {
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SET_PROGRESS_BAR, {progress});
+      }),
+    ) : EMPTY;
 
   constructor(
     private _pomodoroService: PomodoroService,

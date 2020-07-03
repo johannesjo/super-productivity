@@ -22,7 +22,7 @@ import { T } from '../../../t.const';
 export class BookmarkBarComponent implements OnDestroy {
   isDragOver: boolean = false;
   isEditMode: boolean = false;
-  dragEnterTarget: HTMLElement;
+  dragEnterTarget?: HTMLElement;
   LIST_ID: string = 'BOOKMARKS';
   T: any = T;
   isContextMenuDisabled: boolean = false;
@@ -44,7 +44,7 @@ export class BookmarkBarComponent implements OnDestroy {
     this._subs.add(this._dragulaService.dropModel(this.LIST_ID)
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
-        const newIds = targetModel.map(m => m.id);
+        const newIds = targetModel.map((m: Bookmark) => m.id);
         this.bookmarkService.reorderBookmarks(newIds);
       })
     );

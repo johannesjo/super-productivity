@@ -38,9 +38,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
 
-  @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;
+  @ViewChild('circleSvg', {static: true}) circleSvg?: ElementRef;
 
-  currentTaskContext$: Observable<Project | Tag> = this.taskService.currentTaskParentOrCurrent$.pipe(
+  currentTaskContext$: Observable<Project | Tag | null> = this.taskService.currentTaskParentOrCurrent$.pipe(
     filter(ct => !!ct),
     switchMap((currentTask) => this.workContextService.activeWorkContextId$.pipe(
       switchMap((activeWorkContextId) => {
@@ -77,12 +77,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.taskService.currentTaskProgress$.subscribe((progressIN) => {
-      let progress = progressIN || 1;
-      if (progress > 1) {
-        progress = 1;
+      if (this.circleSvg) {
+        let progress = progressIN || 1;
+        if (progress > 1) {
+          progress = 1;
+        }
+        const dashOffset = this.circumference * -1 * progress;
+        this._renderer.setStyle(this.circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
       }
-      const dashOffset = this.circumference * -1 * progress;
-      this._renderer.setStyle(this.circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
     });
   }
 

@@ -29,6 +29,8 @@ import { NotifyService } from '../../../core/notify/notify.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { UiHelperService } from '../../ui-helper/ui-helper.service';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { Tick } from '../time-tracking';
+import { ipcRenderer } from 'electron';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -37,7 +39,7 @@ const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
 const LOCK_SCREEN_DELAY = 30 * 1000;
 
 // required because typescript freaks out
-const reduceBreak = (acc, tick) => {
+const reduceBreak = (acc: number, tick: Tick) => {
   return acc + tick.duration;
 };
 
@@ -181,7 +183,7 @@ export class TakeABreakService {
 
     this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
       if (IS_ELECTRON) {
-        this._electronService.ipcRenderer.send(IPC.LOCK_SCREEN);
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.LOCK_SCREEN);
       }
     });
 
@@ -193,7 +195,7 @@ export class TakeABreakService {
     });
 
     this._triggerBanner$.subscribe(([timeWithoutBreak, cfg]) => {
-      const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
+      const msg: string = this._createMessage(timeWithoutBreak, cfg.takeABreak) as string;
       if (IS_ELECTRON && cfg.takeABreak.isLockScreen) {
         this._triggerLockScreenCounter$.next(true);
       }
@@ -239,7 +241,7 @@ export class TakeABreakService {
     this._triggerLockScreenCounter$.next(false);
   }
 
-  private _createMessage(duration: number, cfg: TakeABreakConfig) {
+  private _createMessage(duration: number, cfg: TakeABreakConfig): string | undefined {
     if (cfg && cfg.takeABreakMessage) {
       const durationStr = msToString(duration);
       return cfg.takeABreakMessage

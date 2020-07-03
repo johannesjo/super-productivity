@@ -11,7 +11,7 @@ export interface PomodoroState {
 
 export const initialPomodoroState: PomodoroState = {
   isManualPause: true,
-  isBreak: undefined,
+  isBreak: false,
   currentCycle: 0,
 };
 
