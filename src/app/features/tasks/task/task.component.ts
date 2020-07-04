@@ -47,35 +47,35 @@ import { environment } from '../../../../environments/environment';
   animations: [expandAnimation, fadeAnimation, swirlAnimation]
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
-  task: TaskWithSubTasks;
-  @Input() isBacklog: boolean;
+  task?: TaskWithSubTasks;
+  @Input() isBacklog: boolean = false;
   T: any = T;
-  isDragOver: boolean;
   isTouchOnly: boolean = IS_TOUCH_ONLY;
+  isDragOver: boolean = false;
   isLockPanLeft: boolean = false;
   isLockPanRight: boolean = false;
   isPreventPointerEventsWhilePanning: boolean = false;
   isActionTriggered: boolean = false;
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition: { x: string; y: string } = {x: '0px', y: '0px'};
-  progress: number;
+  progress: number = 0;
   isDev: boolean = !environment.production;
-  @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl: ElementRef;
-  @ViewChild('blockLeftEl') blockLeftElRef: ElementRef;
-  @ViewChild('blockRightEl') blockRightElRef: ElementRef;
-  @ViewChild('innerWrapperEl', {static: true}) innerWrapperElRef: ElementRef;
+  @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl?: ElementRef;
+  @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
+  @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
+  @ViewChild('innerWrapperEl', {static: true}) innerWrapperElRef?: ElementRef;
   // only works because item comes first in dom
-  @ViewChild('contextMenuTriggerEl', {static: true, read: MatMenuTrigger}) contextMenu: MatMenuTrigger;
-  @ViewChild('projectMenuTriggerEl', {static: false, read: MatMenuTrigger}) projectMenuTrigger: MatMenuTrigger;
+  @ViewChild('contextMenuTriggerEl', {static: true, read: MatMenuTrigger}) contextMenu?: MatMenuTrigger;
+  @ViewChild('projectMenuTriggerEl', {static: false, read: MatMenuTrigger}) projectMenuTrigger?: MatMenuTrigger;
   @HostBinding('tabindex') tabIndex: number = 1;
-  @HostBinding('class.isDone') isDone: boolean;
-  @HostBinding('id') taskIdWithPrefix: string;
+  @HostBinding('class.isDone') isDone: boolean = false;
+  @HostBinding('id') taskIdWithPrefix: string = 'NO';
   // @see ngOnInit
-  @HostBinding('class.isCurrent') isCurrent: boolean;
-  @HostBinding('class.isSelected') isSelected: boolean;
+  @HostBinding('class.isCurrent') isCurrent: boolean = false;
+  @HostBinding('class.isSelected') isSelected: boolean = false;
   TODAY_TAG_ID: string = TODAY_TAG.id;
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
-  issueUrl$: Observable<string> = this._task$.pipe(
+  issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
       return (v.issueType && v.issueId && v.projectId)
         ? this._issueService.issueLink$(v.issueType, v.issueId, v.projectId)
@@ -88,9 +88,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
-  private _dragEnterTarget: HTMLElement;
+  private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
-  private _currentPanTimeout: number;
+  private _currentPanTimeout?: number;
 
   constructor(
     private readonly _taskService: TaskService,
@@ -155,7 +155,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
-    this._attachmentService.createFromDrop(ev, this.task.id);
+    this._attachmentService.createFromDrop(ev, (this.task as TaskWithSubTasks).id);
     ev.stopPropagation();
     this.isDragOver = false;
   }
@@ -164,13 +164,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.currentTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
-        this.isCurrent = (this.task && id === this.task.id);
+        this.isCurrent = ((this.task as TaskWithSubTasks) && id === (this.task as TaskWithSubTasks).id);
         this._cd.markForCheck();
       });
     this._taskService.selectedTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
-        this.isSelected = (this.task && id === this.task.id);
+        this.isSelected = ((this.task as TaskWithSubTasks) && id === (this.task as TaskWithSubTasks).id);
         this._cd.markForCheck();
       });
   }
@@ -181,13 +181,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     //     takeUntil(this._destroy$),
     //   )
     //   .subscribe((id) => {
-    //     if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
+    //     if (id === (this.task as TaskWithSubTasks).id && document.activeElement !== this._elementRef.nativeElement) {
     //       this.focusSelfElement();
     //     }
     //   });
 
     // hacky but relatively performant
-    if (this.task.parentId && Date.now() - 100 < this.task.created) {
+    if ((this.task as TaskWithSubTasks).parentId && Date.now() - 100 < (this.task as TaskWithSubTasks).created) {
       setTimeout(() => {
         this.focusTitleForEdit();
       });
@@ -204,12 +204,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   editReminder() {
-    if (this.task.repeatCfgId) {
+    if ((this.task as TaskWithSubTasks).repeatCfgId) {
       return;
     }
 
     this._matDialog.open(DialogAddTaskReminderComponent, {
-      data: {task: this.task} as AddTaskReminderInterface
+      data: {task: (this.task as TaskWithSubTasks)} as AddTaskReminderInterface
     })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
@@ -217,13 +217,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateIssueData() {
-    this._issueService.refreshIssue(this.task, true, true);
+    this._issueService.refreshIssue((this.task as TaskWithSubTasks), true, true);
   }
 
   editTaskRepeatCfg() {
     this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
       data: {
-        task: this.task,
+        task: (this.task as TaskWithSubTasks),
       }
     })
       .afterClosed()
@@ -232,16 +232,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   handleUpdateBtnClick() {
-    this._taskService.setSelectedId(this.task.id);
+    this._taskService.setSelectedId((this.task as TaskWithSubTasks).id);
   }
 
   deleteTask() {
-    this._taskService.remove(this.task);
+    this._taskService.remove((this.task as TaskWithSubTasks));
     this.focusNext(true);
   }
 
   startTask() {
-    this._taskService.setCurrentId(this.task.id);
+    this._taskService.setCurrentId((this.task as TaskWithSubTasks).id);
     this.focusSelf();
   }
 
@@ -251,14 +251,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
     if (isChanged) {
-      this._taskService.update(this.task.id, {title: newTitle});
+      this._taskService.update((this.task as TaskWithSubTasks).id, {title: newTitle});
     }
     this.focusSelf();
   }
 
   estimateTime() {
     this._matDialog.open(DialogTimeEstimateComponent, {
-      data: {task: this.task},
+      data: {task: (this.task as TaskWithSubTasks)},
       autoFocus: !isTouchOnly(),
     })
       .afterClosed()
@@ -275,55 +275,55 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(result => {
         this.focusSelf();
         if (result) {
-          this._attachmentService.addAttachment(this.task.id, result);
+          this._attachmentService.addAttachment((this.task as TaskWithSubTasks).id, result);
         }
       });
   }
 
   addSubTask() {
-    this._taskService.addSubTaskTo(this.task.parentId || this.task.id);
+    this._taskService.addSubTaskTo((this.task as TaskWithSubTasks).parentId || (this.task as TaskWithSubTasks).id);
   }
 
   toggleTaskDone() {
-    if (this.task.parentId) {
+    if ((this.task as TaskWithSubTasks).parentId) {
       this.focusNext(true);
     }
-    this.task.isDone
-      ? this._taskService.setUnDone(this.task.id)
-      : this._taskService.setDone(this.task.id);
+    (this.task as TaskWithSubTasks).isDone
+      ? this._taskService.setUnDone((this.task as TaskWithSubTasks).id)
+      : this._taskService.setDone((this.task as TaskWithSubTasks).id);
   }
 
   showAdditionalInfos() {
-    this._taskService.setSelectedId(this.task.id);
+    this._taskService.setSelectedId((this.task as TaskWithSubTasks).id);
     this.focusSelf();
   }
 
   hideAdditionalInfos() {
-    this._taskService.setSelectedId(this.task.id);
+    this._taskService.setSelectedId((this.task as TaskWithSubTasks).id);
     this.focusSelf();
   }
 
   toggleShowAdditionalInfoOpen() {
     this.isSelected
       ? this._taskService.setSelectedId(null)
-      : this._taskService.setSelectedId(this.task.id);
+      : this._taskService.setSelectedId((this.task as TaskWithSubTasks).id);
     // this.focusSelf();
   }
 
   toggleShowAttachments() {
-    this._taskService.setSelectedId(this.task.id, TaskAdditionalInfoTargetPanel.Attachments);
+    this._taskService.setSelectedId((this.task as TaskWithSubTasks).id, TaskAdditionalInfoTargetPanel.Attachments);
     this.focusSelf();
   }
 
   toggleSubTaskMode() {
-    this._taskService.toggleSubTaskMode(this.task.id, true, true);
+    this._taskService.toggleSubTaskMode((this.task as TaskWithSubTasks).id, true, true);
     this.focusSelf();
   }
 
   editTags() {
     this._matDialog.open(DialogEditTagsForTaskComponent, {
       data: {
-        task: this.task
+        task: (this.task as TaskWithSubTasks)
       }
     })
       .afterClosed()
@@ -332,11 +332,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   addToMyDay() {
-    this.onTagsUpdated([TODAY_TAG.id, ...this.task.tagIds]);
+    this.onTagsUpdated([TODAY_TAG.id, ...(this.task as TaskWithSubTasks).tagIds]);
   }
 
   removeFromMyDay() {
-    this.onTagsUpdated(this.task.tagIds.filter(tagId => tagId !== TODAY_TAG.id));
+    this.onTagsUpdated((this.task as TaskWithSubTasks).tagIds.filter(tagId => tagId !== TODAY_TAG.id));
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false) {
@@ -378,7 +378,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   focusSelf() {
     this.focusSelfElement();
-    // this._taskService.focusTask(this.task.id);
+    // this._taskService.focusTask((this.task as TaskWithSubTasks).id);
   }
 
   focusSelfElement() {
@@ -386,10 +386,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusTitleForEdit() {
+    if (!this.contentEditableOnClickEl) {
+      throw new Error('No el');
+    }
     this.contentEditableOnClickEl.nativeElement.focus();
   }
 
   openContextMenu(event: MouseEvent) {
+    if (!this.contentEditableOnClickEl || !this.contextMenu) {
+      throw new Error('No el');
+    }
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
@@ -400,12 +406,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTagsUpdated(tagIds: string[]) {
-    this._taskService.updateTags(this.task, tagIds, this.task.tagIds);
+    this._taskService.updateTags((this.task as TaskWithSubTasks), tagIds, (this.task as TaskWithSubTasks).tagIds);
   }
 
   onPanStart(ev: any) {
     if (!IS_TOUCH_ONLY) {
       return;
+    }
+    if (!this.contentEditableOnClickEl) {
+      throw new Error('No el');
     }
 
     this._resetAfterPan();
@@ -429,6 +438,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!IS_TOUCH_ONLY || !this.isLockPanLeft && !this.isLockPanRight) {
       return;
     }
+    if (!this.blockLeftElRef || !this.blockRightElRef) {
+      throw new Error('No el');
+    }
 
     this.isPreventPointerEventsWhilePanning = false;
     this._renderer.removeStyle(this.blockLeftElRef.nativeElement, 'transition');
@@ -444,16 +456,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         this._currentPanTimeout = window.setTimeout(() => {
 
           if (this.workContextService.isToday) {
-            if (this.task.repeatCfgId) {
+            if ((this.task as TaskWithSubTasks).repeatCfgId) {
               this.editTaskRepeatCfg();
             } else {
               this.editReminder();
             }
           } else {
-            if (this.task.parentId) {
+            if ((this.task as TaskWithSubTasks).parentId) {
               // NOTHING
             } else {
-              if (this.task.tagIds.includes(TODAY_TAG.id)) {
+              if ((this.task as TaskWithSubTasks).tagIds.includes(TODAY_TAG.id)) {
                 this.removeFromMyDay();
               } else {
                 this.addToMyDay();
@@ -483,15 +495,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveTaskToProject(projectId: string) {
-    this._taskService.moveToProject(this.task, projectId);
+    this._taskService.moveToProject((this.task as TaskWithSubTasks), projectId);
   }
 
   moveToBacklog() {
-    this._taskService.moveToBacklog(this.task.id);
+    this._taskService.moveToBacklog((this.task as TaskWithSubTasks).id);
   }
 
   moveToToday() {
-    this._taskService.moveToToday(this.task.id);
+    this._taskService.moveToToday((this.task as TaskWithSubTasks).id);
   }
 
   trackByProjectId(i: number, project: Project) {
@@ -503,6 +515,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       || !this.isLockPanLeft && !this.isLockPanRight
       || ev.eventType === 8) {
       return;
+    }
+    if (!this.innerWrapperElRef) {
+      throw new Error('No el');
     }
 
     const targetRef = this.isLockPanRight
@@ -531,6 +546,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _resetAfterPan() {
+    if (!this.contentEditableOnClickEl || !this.blockLeftElRef || !this.blockRightElRef || !this.innerWrapperElRef) {
+      throw new Error('No el');
+    }
+
     this.isPreventPointerEventsWhilePanning = false;
     this.isActionTriggered = false;
     this.isLockPanLeft = false;
@@ -549,7 +568,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const keys = this._configService.cfg.keyboard;
-    const isShiftOrCtrlPressed = (ev.shiftKey === true || ev.ctrlKey === true);
+    const isShiftOrCtrlPressed = (ev.shiftKey || ev.ctrlKey);
 
     if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {
       this.focusTitleForEdit();
@@ -572,6 +591,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.addSubTask();
     }
     if (checkKeyCombo(ev, keys.taskMoveToProject)) {
+      if (!this.projectMenuTrigger) {
+        throw new Error('No el');
+      }
       this.projectMenuTrigger.openMenu();
     }
 
@@ -588,16 +610,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
-      if (!this.task.parentId) {
+      if (!(this.task as TaskWithSubTasks).parentId) {
         this.focusPrevious(true);
-        this._taskService.moveToBacklog(this.task.id);
+        this._taskService.moveToBacklog((this.task as TaskWithSubTasks).id);
       }
     }
 
     if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
-      if (!this.task.parentId) {
+      if (!(this.task as TaskWithSubTasks).parentId) {
         this.focusNext(true);
-        this._taskService.moveToToday(this.task.id);
+        this._taskService.moveToToday((this.task as TaskWithSubTasks).id);
       }
     }
 
@@ -614,14 +636,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // collapse sub tasks
     if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
+      const hasSubTasks = (this.task as TaskWithSubTasks).subTasks
+        && ((this.task as TaskWithSubTasks).subTasks as any).length > 0;
       if (this.isSelected) {
         this.hideAdditionalInfos();
-      } else if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.HideAll) {
-        this._taskService.toggleSubTaskMode(this.task.id, true, false);
+      } else if (hasSubTasks && (this.task as TaskWithSubTasks)._showSubTasksMode !== ShowSubTasksMode.HideAll) {
+        this._taskService.toggleSubTaskMode((this.task as TaskWithSubTasks).id, true, false);
         // TODO find a solution
-        // } else if (this.task.parentId) {
-        // this._taskService.focusTask(this.task.parentId);
+        // } else if ((this.task as TaskWithSubTasks).parentId) {
+        // this._taskService.focusTask((this.task as TaskWithSubTasks).parentId);
       } else {
         this.focusPrevious();
       }
@@ -629,9 +652,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
-      const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
-      if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.Show) {
-        this._taskService.toggleSubTaskMode(this.task.id, false, false);
+      const hasSubTasks = (this.task as TaskWithSubTasks).subTasks
+        && ((this.task as TaskWithSubTasks).subTasks as any).length > 0;
+      if (hasSubTasks && (this.task as TaskWithSubTasks)._showSubTasksMode !== ShowSubTasksMode.Show) {
+        this._taskService.toggleSubTaskMode((this.task as TaskWithSubTasks).id, false, false);
       } else if (!this.isSelected) {
         this.showAdditionalInfos();
       } else {
@@ -642,14 +666,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // moving items
     // move task up
     if (checkKeyCombo(ev, keys.moveTaskUp)) {
-      this._taskService.moveUp(this.task.id, this.task.parentId, this.isBacklog);
+      this._taskService.moveUp((this.task as TaskWithSubTasks).id, (this.task as TaskWithSubTasks).parentId, this.isBacklog);
       ev.stopPropagation();
       ev.preventDefault();
       // timeout required to let changes take place @TODO hacky
       setTimeout(this.focusSelf.bind(this));
     }
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
-      this._taskService.moveDown(this.task.id, this.task.parentId, this.isBacklog);
+      this._taskService.moveDown((this.task as TaskWithSubTasks).id, (this.task as TaskWithSubTasks).parentId, this.isBacklog);
       ev.stopPropagation();
       ev.preventDefault();
     }

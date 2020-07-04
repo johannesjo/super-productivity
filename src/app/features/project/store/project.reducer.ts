@@ -79,7 +79,7 @@ export const selectGitlabCfgByProjectId = createSelector(
 
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(
   selectProjectFeatureState,
-  (s, props: { currentId: string }) => {
+  (s: ProjectState, props: { currentId: string | null }) => {
     const ids = s.ids as string[];
     return ids.filter(id => id !== props.currentId).map(id => s.entities[id]).filter(p => !p.isArchived && p.id);
   },

@@ -30,25 +30,25 @@ export class TaskListComponent implements OnDestroy, OnInit {
   T: any = T;
   tasksIN: TaskWithSubTasks[] = [];
   tasks$: ReplaySubject<TaskWithSubTasks[]> = new ReplaySubject(1);
-  isHideDoneIN: boolean;
+  isHideDoneIN: boolean = false;
   isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  isHideAllIN: boolean;
+  isHideAllIN: boolean = false;
   isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  filteredTasks: TaskWithSubTasks[];
+  filteredTasks: TaskWithSubTasks[] = [];
 
-  @Input() parentId: string;
-  @Input() listModelId: string;
-  @Input() noTasksMsg: string;
-  @Input() isBacklog: boolean;
-  listId: string;
-  @ViewChild('listEl', {static: true}) listEl: ElementRef;
+  @Input() parentId?: string;
+  @Input() listModelId?: string;
+  @Input() noTasksMsg?: string;
+  @Input() isBacklog: boolean = false;
+  listId?: string;
+  @ViewChild('listEl', {static: true}) listEl?: ElementRef;
   isBlockAni: boolean = false;
   doneTasksLength: number = 0;
   undoneTasksLength: number = 0;
   allTasksLength: number = 0;
-  currentTaskId: string;
+  currentTaskId: string | null = null;
   private _subs: Subscription = new Subscription();
-  private _blockAnimationTimeout: number;
+  private _blockAnimationTimeout?: number;
   private _filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
     this.tasks$,
     this.isHideDone$,
@@ -106,12 +106,12 @@ export class TaskListComponent implements OnDestroy, OnInit {
     this._subs.add(this._dragulaService.dropModel(this.listId)
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
-        if (this.listEl.nativeElement === target) {
+        if (this.listEl && this.listEl.nativeElement === target) {
           this._blockAnimation();
 
           const sourceModelId = source.dataset.id;
           const targetModelId = target.dataset.id;
-          const targetNewIds = targetModel.map((task) => task.id);
+          const targetNewIds = targetModel.map((task: Task) => task.id);
           const movedTaskId = item.id;
           this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
         }
@@ -133,6 +133,10 @@ export class TaskListComponent implements OnDestroy, OnInit {
   }
 
   expandDoneTasks() {
+    if (!this.parentId) {
+      throw new Error();
+    }
+
     this._taskService.showSubTasks(this.parentId);
     this._taskService.focusTask(this.parentId);
   }
