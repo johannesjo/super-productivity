@@ -218,7 +218,7 @@ export class TakeABreakService {
           label: T.F.TIME_TRACKING.B.SNOOZE,
           fn: () => this.snooze()
         },
-        img: cfg.takeABreak.motivationalImg
+        img: cfg.takeABreak.motivationalImg || undefined
       });
 
     });

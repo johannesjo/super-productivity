@@ -19,6 +19,6 @@ export function convertToWesternArabic(data: string): string {
 
 function _replaceHinduArabic(val: string): string {
   return val.replace(/[١٢٣٤٥٦٧٨٩٠]/g, (match) => {
-    return arabicNumberMap[match];
+    return (arabicNumberMap as any)[match];
   });
 }

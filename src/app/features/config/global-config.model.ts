@@ -3,41 +3,41 @@ import { ProjectCfgFormKey } from '../project/project.model';
 import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
 
 export type KeyboardConfig = Readonly<{
-  globalShowHide: string,
-  globalAddNote: string,
-  globalAddTask: string,
-  toggleBacklog: string,
-  goToWorkView: string,
-  // goToFocusMode: string,
-  // goToDailyAgenda: string,
-  goToSettings: string,
-  addNewTask: string,
-  globalToggleTaskStart: string,
-  showHelp: string,
-  addNewNote: string,
-  openProjectNotes: string,
-  toggleBookmarks: string;
-  openDistractionPanel: string,
-  zoomIn: string,
-  zoomOut: string,
-  zoomDefault: string,
-  taskEditTitle: string,
-  taskToggleAdditionalInfoOpen: string,
-  taskOpenEstimationDialog: string,
-  taskToggleDone: string,
-  taskAddSubTask: string,
-  taskMoveToProject: string,
-  taskDelete: string,
-  taskSchedule: string,
-  selectPreviousTask: string,
-  selectNextTask: string,
-  moveTaskUp: string,
-  moveTaskDown: string,
-  moveToBacklog: string,
-  moveToTodaysTasks: string,
-  expandSubTasks: string,
-  collapseSubTasks: string,
-  togglePlay: string,
+  globalShowHide: string | null,
+  globalAddNote: string | null,
+  globalAddTask: string | null,
+  toggleBacklog: string | null,
+  goToWorkView: string | null,
+  // goToFocusMode: string|null,
+  // goToDailyAgenda: string|null,
+  goToSettings: string | null,
+  addNewTask: string | null,
+  globalToggleTaskStart: string | null,
+  showHelp: string | null,
+  addNewNote: string | null,
+  openProjectNotes: string | null,
+  toggleBookmarks: string | null;
+  openDistractionPanel: string | null,
+  zoomIn: string | null,
+  zoomOut: string | null,
+  zoomDefault: string | null,
+  taskEditTitle: string | null,
+  taskToggleAdditionalInfoOpen: string | null,
+  taskOpenEstimationDialog: string | null,
+  taskToggleDone: string | null,
+  taskAddSubTask: string | null,
+  taskMoveToProject: string | null,
+  taskDelete: string | null,
+  taskSchedule: string | null,
+  selectPreviousTask: string | null,
+  selectNextTask: string | null,
+  moveTaskUp: string | null,
+  moveTaskDown: string | null,
+  moveToBacklog: string | null,
+  moveToTodaysTasks: string | null,
+  expandSubTasks: string | null,
+  collapseSubTasks: string | null,
+  togglePlay: string | null,
 }>;
 
 export type MiscConfig = Readonly<{
@@ -68,7 +68,7 @@ export type TakeABreakConfig = Readonly<{
   isFocusWindow: boolean;
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
-  motivationalImg: string;
+  motivationalImg: string | null;
 }>;
 
 export type PomodoroConfig = Readonly<{
@@ -97,15 +97,15 @@ export interface GoogleDriveSyncConfig {
   isCompressData: boolean;
   syncInterval: number;
   syncFileName: string;
-  _backupDocId: string;
+  _backupDocId: string | null;
 }
 
 export interface DropboxSyncConfig {
   isEnabled: boolean;
-  authCode: string;
-  accessToken: string;
+  authCode: string|null;
+  accessToken: string|null;
   syncInterval: number;
-  _backupDocId: string;
+  _backupDocId: string|null;
   // isCompressData: boolean;
 }
 
@@ -114,7 +114,7 @@ export type LocalBackupConfig = Readonly<{
 }>;
 
 export type LanguageConfig = Readonly<{
-  lng: LanguageCode,
+  lng: LanguageCode | null,
 }>;
 
 export type GlobalConfigState = Readonly<{

@@ -140,16 +140,20 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async addAllToToday() {
     this.isDisableControls = true;
-    const tasksToDismiss = await this.tasks$.pipe(first()).toPromise();
+    const tasksToDismiss = await this.tasks$.pipe(first()).toPromise() as TaskWithReminderData[];
     const mainTasks = tasksToDismiss.filter(t => !t.parentId);
-    const parentIds: string[] = unique(tasksToDismiss.map(t => t.parentId).filter(pid => pid));
+    const parentIds: string[] = unique<string>(
+      tasksToDismiss
+        .map(t => t.parentId as string)
+        .filter(pid => !!pid)
+    );
     const parents = await Promise.all(parentIds.map(parentId => this._taskService.getByIdOnce$(parentId).pipe(first()).toPromise()));
     const updateTagTasks = [...parents, ...mainTasks];
 
     updateTagTasks.forEach(task => {
       this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
     });
-    tasksToDismiss.forEach((task) => {
+    tasksToDismiss.forEach((task: TaskWithReminderData) => {
       this.dismiss(task);
     });
 

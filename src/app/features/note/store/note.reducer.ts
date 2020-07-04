@@ -34,7 +34,13 @@ export const selectNoteFeatureState = createFeatureSelector<NoteState>(NOTE_FEAT
 export const selectAllNotes = createSelector(selectNoteFeatureState, selectAll);
 export const selectNoteById = createSelector(
   selectNoteFeatureState,
-  (state, props: { id: string }) => state.entities[props.id]
+  (state: NoteState, props: { id: string }): Note => {
+    const n = state.entities[props.id];
+    if (!n) {
+      throw new Error('No note');
+    }
+    return n;
+  }
 );
 
 const _reducer = createReducer<NoteState>(

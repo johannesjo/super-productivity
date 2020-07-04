@@ -324,7 +324,7 @@ export function projectReducer(
     case TaskActionTypes.MoveToArchive: {
       const {tasks} = action.payload;
       const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
-      const projectIds = unique(
+      const projectIds = unique<string>(
         tasks
           .map((t: Task) => t.projectId)
           .filter((pid: string) => !!pid)
@@ -332,8 +332,10 @@ export function projectReducer(
       const updates: Update<Project>[] = projectIds.map((pid: string) => ({
         id: pid,
         changes: {
-          taskIds: (state.entities[pid] as Project).taskIds.filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
-          backlogTaskIds: (state.entities[pid] as Project).backlogTaskIds.filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
+          taskIds: (state.entities[pid] as Project).taskIds
+            .filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
+          backlogTaskIds: (state.entities[pid] as Project).backlogTaskIds
+            .filter(taskId => !taskIdsToMoveToArchive.includes(taskId)),
         }
       }));
       return projectAdapter.updateMany(updates, state);

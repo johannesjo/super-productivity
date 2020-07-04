@@ -7,7 +7,7 @@ import {
 } from '../work-context/work-context.const';
 
 export const DEFAULT_PROJECT: Project = {
-  id: null,
+  id: '',
   title: '',
   isArchived: false,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,

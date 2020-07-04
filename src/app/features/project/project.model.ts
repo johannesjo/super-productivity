@@ -1,7 +1,7 @@
 import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue.model';
 import { WorkContextAdvancedCfgKey, WorkContextCommon } from '../work-context/work-context.model';
 
-export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
+export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null;
 
 export interface ProjectBasicCfg {
   title: string;

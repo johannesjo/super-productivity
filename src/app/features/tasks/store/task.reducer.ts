@@ -414,7 +414,9 @@ export function taskReducer(
         id => (state.entities[id] as Task).subTaskIds.length === 0 || !!(state.entities[id] as Task).parentId
       );
       const subTaskIds: string[] = idsToUpdateDirectly.filter(id => !!(state.entities[id] as Task).parentId);
-      const parentTaskToReCalcIds: string[] = unique(subTaskIds.map(id => (state.entities[id] as Task).parentId));
+      const parentTaskToReCalcIds: string[] = unique<string>(subTaskIds
+        .map(id => (state.entities[id] as Task).parentId as string)
+      );
 
       const updateSubsAndMainWithoutSubs: Update<Task>[] = idsToUpdateDirectly.map(id => {
         const spentOnDayBefore = (state.entities[id] as Task).timeSpentOnDay;

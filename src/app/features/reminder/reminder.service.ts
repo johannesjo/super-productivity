@@ -102,9 +102,11 @@ export class ReminderService {
   }
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
-  getById(reminderId: string): ReminderCopy {
+  getById(reminderId: string): ReminderCopy | null {
     const _foundReminder = this._reminders && this._reminders.find(reminder => reminder.id === reminderId);
-    return _foundReminder && dirtyDeepCopy(_foundReminder);
+    return !!_foundReminder
+      ? dirtyDeepCopy<ReminderCopy>(_foundReminder)
+      : null;
   }
 
   getById$(reminderId: string): Observable<ReminderCopy | null> {
@@ -113,9 +115,11 @@ export class ReminderService {
     );
   }
 
-  getByRelatedId(relatedId: string): ReminderCopy {
+  getByRelatedId(relatedId: string): ReminderCopy | null {
     const _foundReminder = this._reminders && this._reminders.find(reminder => reminder.relatedId === relatedId);
-    return _foundReminder && dirtyDeepCopy(_foundReminder);
+    return !!_foundReminder
+      ? dirtyDeepCopy<ReminderCopy>(_foundReminder)
+      : null;
   }
 
   addReminder(type: ReminderType, relatedId: string, title: string, remindAt: number, recurringConfig?: RecurringConfig): string {

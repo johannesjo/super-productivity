@@ -12,9 +12,9 @@ export interface JiraTransitionConfig {
 export interface JiraCfg {
   isEnabled: boolean;
   _isBlockAccess: boolean;
-  host: string;
-  userName: string;
-  password?: string;
+  host: string | null;
+  userName: string | null;
+  password?: string | null;
   isAutoPollTickets: boolean;
   isAllowSelfSignedCertificate: boolean;
   searchJqlQuery: string;
@@ -32,12 +32,12 @@ export interface JiraCfg {
 
   isCheckToReAssignTicketOnTaskStart: boolean;
 
-  storyPointFieldId: string;
+  storyPointFieldId: string|null;
 
   isTransitionIssuesEnabled: boolean;
   transitionConfig: JiraTransitionConfig;
   availableTransitions: JiraOriginalTransition[];
-  userToAssignOnDone: string;
+  userToAssignOnDone: string|null;
 }
 
 /*

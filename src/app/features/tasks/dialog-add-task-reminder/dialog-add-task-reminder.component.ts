@@ -20,7 +20,7 @@ export class DialogAddTaskReminderComponent {
   T: any = T;
   task: Task = this.data.task;
   reminder?: ReminderCopy = this.task.reminderId
-    ? this._reminderService.getById(this.task.reminderId)
+    ? this._reminderService.getById(this.task.reminderId) || undefined
     : undefined;
   isEdit: boolean = !!(this.reminder && this.reminder.id);
 

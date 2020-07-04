@@ -37,7 +37,7 @@ export const selectImprovementBannerImprovements = createSelector(
     const selectedTomorrowIds = metric && metric.improvementsTomorrow || [];
     const all = unique(repeatedImprovementIds.concat(selectedTomorrowIds))
       .filter((id: string) => !hiddenIds.includes(id));
-    return all.map((id: string) => improvementState.entities[id]);
+    return all.map((id: string) => improvementState.entities[id] as Improvement);
   });
 
 export const selectHasLastTrackedImprovements = createSelector(

@@ -12,7 +12,7 @@ export interface SimpleCounterCfgFields {
   // basic cfg
   title: string;
   isEnabled: boolean;
-  icon: string;
+  icon: string | null;
   iconOn?: string;
   type: SimpleCounterType;
 

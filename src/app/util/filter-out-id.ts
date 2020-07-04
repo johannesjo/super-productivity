@@ -1,1 +1,1 @@
-export const filterOutId = (idToFilterOut) => (id) => id !== idToFilterOut;
+export const filterOutId = (idToFilterOut: string) => (id: string): boolean => id !== idToFilterOut;

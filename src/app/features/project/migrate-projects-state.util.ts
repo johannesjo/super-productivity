@@ -19,12 +19,12 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
 
   const projectEntities: Dictionary<Project> = {...projectState.entities};
   Object.keys(projectEntities).forEach((key) => {
-    projectEntities[key] = _updateThemeModel(projectEntities[key]);
-    projectEntities[key] = _convertToWesternArabicDateKeys(projectEntities[key]);
+    projectEntities[key] = _updateThemeModel(projectEntities[key] as Project);
+    projectEntities[key] = _convertToWesternArabicDateKeys(projectEntities[key] as Project);
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
-    projectEntities[key] = _extendProjectDefaults(projectEntities[key]);
-    projectEntities[key] = _removeOutdatedData(projectEntities[key]);
+    projectEntities[key] = _extendProjectDefaults(projectEntities[key] as Project);
+    projectEntities[key] = _removeOutdatedData(projectEntities[key] as Project);
   });
 
   return {
@@ -95,7 +95,7 @@ const _updateThemeModel = (project: Project): Project => {
           // tslint:disable-next-line
           primary: (project.themeColor)
             // tslint:disable-next-line
-            ? THEME_COLOR_MAP[project.themeColor]
+            ? (THEME_COLOR_MAP as any)[project.themeColor]
             : WORK_CONTEXT_DEFAULT_THEME.primary,
           // tslint:disable-next-line
         }
@@ -122,8 +122,12 @@ const _fixIds = (projectState: ProjectState): ProjectState => {
     let newIds;
     const allP = allIds.map(id => projectState.entities[id]);
 
-    const archivedIds = allP.filter(p => p.isArchived).map(p => p.id);
-    const unarchivedIds = allP.filter(p => !p.isArchived).map(p => p.id);
+    const archivedIds = allP
+      .filter((p) => (p as Project).isArchived)
+      .map(p => (p as Project).id);
+    const unarchivedIds = allP
+      .filter(p => !(p as Project).isArchived)
+      .map(p => (p as Project).id);
     if (currentIds.length === unarchivedIds.length) {
       newIds = [...currentIds, ...archivedIds];
     } else if (currentIds.length === unarchivedIds.length) {
