@@ -72,7 +72,7 @@ export class IssueService {
 
   getMappedAttachments(issueType: IssueProviderKey, issueDataIN: IssueData): TaskAttachment[] {
     if (!this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments) {
-      throw new Error('Issue method not available');
+      return [];
     }
     return (this.ISSUE_SERVICE_MAP[issueType].getMappedAttachments as any)(issueDataIN);
   }
