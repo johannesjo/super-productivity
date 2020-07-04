@@ -10,7 +10,8 @@ import { T } from '../../../../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraInitialSetupComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   jiraCfg: JiraCfg;
 
   constructor(

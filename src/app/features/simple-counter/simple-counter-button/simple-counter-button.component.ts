@@ -13,7 +13,8 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleCounterButtonComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = getWorklogStr();
 

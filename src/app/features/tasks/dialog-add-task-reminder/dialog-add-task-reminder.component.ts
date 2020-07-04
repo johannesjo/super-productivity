@@ -17,7 +17,8 @@ import { Task } from '../task.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddTaskReminderComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   task: Task = this.data.task;
   reminder?: ReminderCopy = this.task.reminderId
     ? this._reminderService.getById(this.task.reminderId) || undefined

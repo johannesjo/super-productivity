@@ -22,7 +22,8 @@ import { Tag } from '../../features/tag/tag.model';
   animations: [standardListAnimation]
 })
 export class SchedulePageComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   TODAY_TAG: Tag = TODAY_TAG;
 
   constructor(

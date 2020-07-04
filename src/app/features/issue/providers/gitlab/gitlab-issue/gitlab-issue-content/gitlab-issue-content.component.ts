@@ -16,7 +16,8 @@ export class GitlabIssueContentComponent {
   @Input() issue?: GitlabIssue;
   @Input() task?: TaskWithSubTasks;
 
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   constructor(
     private readonly  _taskService: TaskService,

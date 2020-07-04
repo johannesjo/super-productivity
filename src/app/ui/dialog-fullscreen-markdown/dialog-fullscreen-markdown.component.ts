@@ -11,7 +11,8 @@ import { ESCAPE } from '@angular/cdk/keycodes';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogFullscreenMarkdownComponent implements OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   private _subs: Subscription = new Subscription();
 

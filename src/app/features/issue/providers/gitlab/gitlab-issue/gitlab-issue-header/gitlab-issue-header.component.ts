@@ -9,7 +9,8 @@ import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GitlabIssueHeaderComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   @Input() public task?: TaskWithSubTasks;
 
   constructor() {

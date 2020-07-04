@@ -28,7 +28,8 @@ const M = 1000 * 60;
   animations: [standardListAnimation],
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   isDisableControls: boolean = false;
   reminders$: BehaviorSubject<Reminder[]> = new BehaviorSubject(this.data.reminders);
   tasks$: Observable<TaskWithReminderData[]> = this.reminders$.pipe(

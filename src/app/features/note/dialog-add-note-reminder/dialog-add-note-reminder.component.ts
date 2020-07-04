@@ -14,7 +14,8 @@ import { throttle } from 'helpful-decorators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddNoteReminderComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   dateTime?: number;
   title: string;
   isEdit: boolean;

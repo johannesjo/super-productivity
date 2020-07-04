@@ -12,7 +12,8 @@ import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogWorklogExportComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
   strStart: string;
   strEnd: string;

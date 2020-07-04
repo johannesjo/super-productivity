@@ -25,7 +25,8 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   globalConfigFormCfg: ConfigFormConfig;
   globalSyncProviderFormCfg: ConfigFormConfig;
   globalProductivityConfigFormCfg: ConfigFormConfig;

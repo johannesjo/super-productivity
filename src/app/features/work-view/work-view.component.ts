@@ -43,7 +43,8 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   isShowTimeWorkedWithoutBreak: boolean = true;
   splitInputPos: number = 100;
   isPreloadBacklog: boolean = false;
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   // NOTE: not perfect but good enough for now
   isTriggerBacklogIconAni$: Observable<boolean> = this.workContextService.onMoveToBacklog$.pipe(

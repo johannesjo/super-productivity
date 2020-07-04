@@ -21,7 +21,8 @@ import { switchMap } from 'rxjs/operators';
 export class JiraIssueContentComponent {
   description?: string;
   attachments?: TaskAttachment[];
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   issue?: JiraIssue;
   task?: TaskWithSubTasks;
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);

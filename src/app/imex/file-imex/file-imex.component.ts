@@ -13,7 +13,8 @@ import { T } from '../../t.const';
 })
 export class FileImexComponent {
   @ViewChild('fileInput', {static: true}) fileInputRef?: ElementRef;
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   constructor(
     private _dataImportService: DataImportService,

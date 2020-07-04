@@ -23,7 +23,8 @@ import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitl
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   projectThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   issueIntegrationFormCfg: ConfigFormConfig;
   globalConfigFormCfg: ConfigFormConfig;

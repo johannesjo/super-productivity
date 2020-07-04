@@ -16,7 +16,8 @@ import { map } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddNoteComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   noteContent: string;
   reminderDate?: number;
   isSubmitted: boolean = false;

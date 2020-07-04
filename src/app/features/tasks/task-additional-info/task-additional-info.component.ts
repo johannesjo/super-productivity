@@ -68,7 +68,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   selectedItemIndex: number = 0;
   isFocusNotes: boolean = false;
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   issueAttachments: TaskAttachment[] = [];
   reminderId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
   reminderData$: Observable<ReminderCopy | null> = this.reminderId$.pipe(

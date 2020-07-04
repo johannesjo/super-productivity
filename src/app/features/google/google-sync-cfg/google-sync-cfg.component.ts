@@ -26,7 +26,8 @@ import { T } from '../../../t.const';
   animations: [expandFadeAnimation]
 })
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   tmpSyncFile: any;
   cfg?: GoogleDriveSyncConfig;
   loginPromise?: Promise<any>;

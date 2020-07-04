@@ -14,7 +14,8 @@ import { T } from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogIdleComponent implements OnInit {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(this.data.lastCurrentTaskId);
   selectedTask: Task | null = null;
   newTaskTitle?: string;

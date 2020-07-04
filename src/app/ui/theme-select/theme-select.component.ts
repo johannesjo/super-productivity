@@ -9,7 +9,8 @@ import { T } from '../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ThemeSelectComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   themes: string[] = ALL_THEMES;
 
   trackBy(i: number, theme: string) {

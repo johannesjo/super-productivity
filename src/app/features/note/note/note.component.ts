@@ -18,7 +18,8 @@ export class NoteComponent {
 
   @ViewChild('markdownEl') markdownEl?: HTMLElement;
 
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   constructor(
     private readonly _matDialog: MatDialog,

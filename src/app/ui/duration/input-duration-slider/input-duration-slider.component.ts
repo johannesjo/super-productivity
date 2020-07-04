@@ -23,7 +23,8 @@ import { T } from '../../../t.const';
   animations: [dotAnimation],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   minutesBefore: number = 0;
   dots: any[] = [];
   uid: string = 'duration-input-slider' + shortid();

@@ -17,7 +17,8 @@ export class BacklogComponent {
 
   @Output() closeBacklog: EventEmitter<any> = new EventEmitter<any>();
 
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   // we do it here to have the tasks in memory all the time
   // backlogTasks$: Observable<TaskWithSubTasks[]> = this._projectService.isProjectChanging$.pipe(

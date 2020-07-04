@@ -18,7 +18,8 @@ export class TaskAttachmentListComponent {
   @Input() attachments?: TaskAttachment[];
   @Input() isDisableControls: boolean = false;
 
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   isError: boolean[] = [];
 
   constructor(

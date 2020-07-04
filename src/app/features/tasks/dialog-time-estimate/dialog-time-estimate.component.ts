@@ -15,7 +15,8 @@ import { T } from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogTimeEstimateComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   todayStr: string;
   task: Task;
   taskCopy: TaskCopy;

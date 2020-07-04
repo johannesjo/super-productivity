@@ -21,7 +21,8 @@ interface Suggestion {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChipListInputComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   @Input() label?: string;
   @Input() additionalActionIcon?: string;

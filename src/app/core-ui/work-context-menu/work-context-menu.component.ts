@@ -17,7 +17,8 @@ import { Tag } from '../../features/tag/tag.model';
 })
 export class WorkContextMenuComponent implements OnDestroy {
   @Input() contextId?: string;
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   TODAY_TAG_ID: string = TODAY_TAG.id as string;
   isForProject: boolean = true;
   base: string = 'project';

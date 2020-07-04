@@ -15,7 +15,8 @@ import { first } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraAddWorklogComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   timeSpent: number;
   started: string;
   comment: string;

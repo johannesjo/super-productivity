@@ -31,7 +31,8 @@ import { DialogGitlabInitialSetupComponent } from 'src/app/features/issue/provid
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   projectData: ProjectCopy | Partial<ProjectCopy> = DEFAULT_PROJECT;
   jiraCfg?: JiraCfg;
   githubCfg?: GithubCfg;

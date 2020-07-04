@@ -24,7 +24,8 @@ export class BookmarkBarComponent implements OnDestroy {
   isEditMode: boolean = false;
   dragEnterTarget?: HTMLElement;
   LIST_ID: string = 'BOOKMARKS';
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   isContextMenuDisabled: boolean = false;
   bookmarkBarHeight: number = 50;
   private _subs: Subscription = new Subscription();

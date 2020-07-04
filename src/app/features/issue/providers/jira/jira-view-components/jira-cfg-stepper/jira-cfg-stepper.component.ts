@@ -27,7 +27,8 @@ import { HANDLED_ERROR_PROP_STR, HelperClasses } from '../../../../../../app.con
   animations: [expandAnimation]
 })
 export class JiraCfgStepperComponent implements OnDestroy {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
   credentialsFormGroup: FormGroup = new FormGroup({});
   credentialsFormConfig: FormlyFieldConfig[] = [];

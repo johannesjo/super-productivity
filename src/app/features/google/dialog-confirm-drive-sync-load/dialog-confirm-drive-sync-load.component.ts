@@ -9,7 +9,8 @@ import { T } from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogConfirmDriveSyncLoadComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogConfirmDriveSyncLoadComponent>,

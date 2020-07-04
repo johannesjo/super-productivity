@@ -9,7 +9,8 @@ import { T } from '../../../../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GithubIssueHeaderComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   @Input() task?: TaskWithSubTasks;
 
   constructor() {

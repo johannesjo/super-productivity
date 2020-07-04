@@ -11,7 +11,8 @@ import { DropboxConflictResolution } from '../dropbox.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogDbxSyncConflictComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   remote: string = this._formatDate(this.data.remote);
   local: string = this._formatDate(this.data.local);

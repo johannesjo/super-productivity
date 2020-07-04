@@ -49,7 +49,8 @@ import { environment } from '../../../../environments/environment';
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   task?: TaskWithSubTasks;
   @Input() isBacklog: boolean = false;
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   isTouchOnly: boolean = IS_TOUCH_ONLY;
   isDragOver: boolean = false;
   isLockPanLeft: boolean = false;

@@ -24,7 +24,8 @@ import { WorkContextService } from '../work-context/work-context.service';
   animations: [expandFadeAnimation, standardListAnimation, fadeAnimation]
 })
 export class WorklogComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   expanded: { [key: string]: boolean } = {};
 
   constructor(

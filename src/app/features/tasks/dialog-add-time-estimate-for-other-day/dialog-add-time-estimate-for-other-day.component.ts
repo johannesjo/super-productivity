@@ -14,7 +14,8 @@ interface NewTimeEntry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogAddTimeEstimateForOtherDayComponent {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
   newEntry: NewTimeEntry;
 
   constructor(private _matDialogRef: MatDialogRef<DialogAddTimeEstimateForOtherDayComponent>) {

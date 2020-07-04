@@ -14,7 +14,8 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
   animations: [standardListAnimation],
 })
 export class RepeatSectionTypeComponent extends FieldArrayType {
-  T: any = T;
+  // tslint:disable-next-line:typedef
+  T = T;
 
   constructor(private _matDialog: MatDialog) {
     super();
