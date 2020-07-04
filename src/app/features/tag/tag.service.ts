@@ -4,7 +4,6 @@ import {
   selectAllTags,
   selectAllTagsWithoutMyDay,
   selectTagById,
-  selectTagByName,
   selectTagsByIds
 } from './store/tag.reducer';
 import { addTag, deleteTag, deleteTags, updateTag, upsertTag } from './store/tag.actions';
@@ -33,10 +32,6 @@ export class TagService {
 
   getTagsByIds$(ids: string[]): Observable<Tag[]> {
     return this._store$.pipe(select(selectTagsByIds, {ids}));
-  }
-
-  getByName$(name: string): Observable<Tag> {
-    return this._store$.pipe(select(selectTagByName, {name}));
   }
 
   addTag(tag: Partial<Tag>): string {

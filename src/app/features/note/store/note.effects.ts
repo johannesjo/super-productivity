@@ -51,7 +51,7 @@ export class NoteEffects {
     map((p) => addNoteReminder({
       id: p.note.id,
       title: p.note.content.substr(0, 40),
-      remindAt: p.remindAt,
+      remindAt: p.remindAt as number,
     }))
   ));
 
