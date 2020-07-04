@@ -15,11 +15,11 @@ import { unique } from '../../../util/unique';
 export const selectMetricFeatureState = createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = metricAdapter.getSelectors();
 export const selectAllMetrics = createSelector(selectMetricFeatureState, selectAll);
-export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, (state: MetricState) => {
+export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, (state: MetricState): Metric | null => {
   const ids = state.ids as string[];
   const sorted = sortWorklogDates(ids);
   const id = sorted[sorted.length - 1];
-  return state.entities[id];
+  return state.entities[id] || null;
 });
 
 export const selectMetricHasData = createSelector(selectMetricFeatureState, (state) => state && !!state.ids.length);
@@ -28,7 +28,7 @@ export const selectImprovementBannerImprovements = createSelector(
   selectLastTrackedMetric,
   selectImprovementFeatureState,
   selectRepeatedImprovementIds,
-  (metric: Metric, improvementState: ImprovementState, repeatedImprovementIds: string[]): Improvement[] => {
+  (metric: Metric | null, improvementState: ImprovementState, repeatedImprovementIds: string[]): Improvement[] | null => {
     if (!improvementState.ids.length) {
       return null;
     }
@@ -36,8 +36,8 @@ export const selectImprovementBannerImprovements = createSelector(
 
     const selectedTomorrowIds = metric && metric.improvementsTomorrow || [];
     const all = unique(repeatedImprovementIds.concat(selectedTomorrowIds))
-      .filter(id => !hiddenIds.includes(id));
-    return all.map(id => improvementState.entities[id]);
+      .filter((id: string) => !hiddenIds.includes(id));
+    return all.map((id: string) => improvementState.entities[id]);
   });
 
 export const selectHasLastTrackedImprovements = createSelector(
@@ -49,7 +49,7 @@ export const selectAllUsedImprovementIds = createSelector(
   selectAllMetrics,
   (metrics: Metric[]): string[] => {
     return unique(
-      metrics.reduce((acc, metric) => [
+      metrics.reduce((acc: string[], metric: Metric): string[] => [
         ...acc,
         ...metric.improvements,
         ...metric.improvementsTomorrow,
@@ -60,7 +60,7 @@ export const selectAllUsedImprovementIds = createSelector(
 
 export const selectUnusedImprovementIds = createSelector(
   selectAllUsedImprovementIds,
-  selectAllImprovementIds,
+  selectAllImprovementIds as any,
   (usedIds: string[], allIds: string[]): string[] => {
     return allIds.filter(id => !usedIds.includes(id));
   }
@@ -70,7 +70,7 @@ export const selectAllUsedObstructionIds = createSelector(
   selectAllMetrics,
   (metrics: Metric[]): string[] => {
     return unique(
-      metrics.reduce((acc, metric) => [
+      metrics.reduce((acc: string[], metric: Metric): string[] => [
         ...acc,
         ...metric.obstructions,
       ], [])
@@ -80,7 +80,7 @@ export const selectAllUsedObstructionIds = createSelector(
 
 export const selectUnusedObstructionIds = createSelector(
   selectAllUsedObstructionIds,
-  selectAllObstructionIds,
+  selectAllObstructionIds as any,
   (usedIds: string[], allIds: string[]): string[] => {
     return allIds.filter(id => !usedIds.includes(id));
   }
@@ -90,7 +90,12 @@ export const selectUnusedObstructionIds = createSelector(
 // -------
 export const selectMetricById = createSelector(
   selectMetricFeatureState,
-  (state, props: { id: string }) => state.entities[props.id]
+  (state: MetricState, props: { id: string }): Metric => {
+    if (!state.entities[props.id]) {
+      throw new Error('Metric not found');
+    }
+    return state.entities[props.id] as Metric;
+  }
 );
 
 // STATISTICS
@@ -98,12 +103,12 @@ export const selectMetricById = createSelector(
 export const selectImprovementCountsPieChartData = createSelector(
   selectAllMetrics,
   selectImprovementFeatureState,
-  (metrics: Metric[], improvementState: ImprovementState): PieChartData => {
+  (metrics: Metric[], improvementState: ImprovementState): PieChartData | null => {
     if (!metrics.length || !improvementState.ids.length) {
       return null;
     }
 
-    const counts = {};
+    const counts: any = {};
     metrics.forEach((metric: Metric) => {
       metric.improvements.forEach((improvementId: string) => {
         counts[improvementId] = counts[improvementId]
@@ -116,8 +121,9 @@ export const selectImprovementCountsPieChartData = createSelector(
       data: [],
     };
     Object.keys(counts).forEach(id => {
-      if (improvementState.entities[id]) {
-        chart.labels.push(improvementState.entities[id].title);
+      const imp = improvementState.entities[id];
+      if (imp) {
+        chart.labels.push(imp.title);
         chart.data.push(counts[id]);
       } else {
         console.warn('No improvement entity found');
@@ -130,12 +136,12 @@ export const selectImprovementCountsPieChartData = createSelector(
 export const selectObstructionCountsPieChartData = createSelector(
   selectAllMetrics,
   selectObstructionFeatureState,
-  (metrics: Metric[], obstructionState: ObstructionState): PieChartData => {
+  (metrics: Metric[], obstructionState: ObstructionState): PieChartData | null => {
     if (!metrics.length || !obstructionState.ids.length) {
       return null;
     }
 
-    const counts = {};
+    const counts: any = {};
     metrics.forEach((metric: Metric) => {
       metric.obstructions.forEach((obstructionId: string) => {
         counts[obstructionId] = counts[obstructionId]
@@ -148,8 +154,9 @@ export const selectObstructionCountsPieChartData = createSelector(
       data: [],
     };
     Object.keys(counts).forEach(id => {
-      if (obstructionState.entities[id]) {
-        chart.labels.push(obstructionState.entities[id].title);
+      const obstr = obstructionState.entities[id];
+      if (obstr) {
+        chart.labels.push(obstr.title);
         chart.data.push(counts[id]);
       } else {
         console.warn('No obstruction entity found');
@@ -165,7 +172,7 @@ export const selectProductivityHappinessLineChartDataComplete = createSelector(
     const ids = state.ids as string[];
     const sorted = sortWorklogDates(ids);
 
-    const v = {
+    const v: any = {
       labels: [],
       data: [
         {data: [], label: 'Mood'},
@@ -173,7 +180,7 @@ export const selectProductivityHappinessLineChartDataComplete = createSelector(
       ],
     };
     sorted.forEach(id => {
-      const metric = state.entities[id];
+      const metric = state.entities[id] as Metric;
       v.labels.push(metric.id);
       v.data[0].data.push(metric.mood);
       v.data[1].data.push(metric.productivity);
@@ -189,8 +196,8 @@ export const selectProductivityHappinessLineChartData = createSelector(
     return {
       labels: chart.labels.slice(f),
       data: [
-        {data: chart.data[0].data.slice(f), label: chart.data[0].label},
-        {data: chart.data[1].data.slice(f), label: chart.data[1].label},
+        {data: (chart.data[0] as any).data.slice(f), label: chart.data[0].label},
+        {data: (chart.data[1] as any).data.slice(f), label: chart.data[1].label},
       ],
     };
   }

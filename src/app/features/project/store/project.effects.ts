@@ -57,11 +57,12 @@ import { setActiveWorkContext } from '../../work-context/store/work-context.acti
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Project } from '../project.model';
 import { TaskService } from '../../tasks/task.service';
-import { TaskArchive, TaskState } from '../../tasks/task.model';
+import { Task, TaskArchive, TaskState } from '../../tasks/task.model';
 import { unique } from '../../../util/unique';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY, Observable, of } from 'rxjs';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 @Injectable()
 export class ProjectEffects {
@@ -155,7 +156,7 @@ export class ProjectEffects {
     .pipe(
       ofType(TaskActionTypes.AddTimeSpent),
       filter((action: AddTimeSpent) => !!action.payload.task.projectId),
-      concatMap((action: AddTimeSpent) => this._projectService.getByIdOnce$(action.payload.task.projectId).pipe(first())),
+      concatMap((action: AddTimeSpent) => this._projectService.getByIdOnce$(action.payload.task.projectId as string).pipe(first())),
       filter((project: Project) => !project.workStart[getWorklogStr()]),
       map((project) => {
         return new UpdateProjectWorkStart({
@@ -173,7 +174,7 @@ export class ProjectEffects {
       filter((action: AddTimeSpent) => !!action.payload.task.projectId),
       map((action: AddTimeSpent) => {
         return new UpdateProjectWorkEnd({
-          id: action.payload.task.projectId,
+          id: action.payload.task.projectId as string,
           date: getWorklogStr(),
           newVal: Date.now(),
         });
@@ -439,10 +440,9 @@ export class ProjectEffects {
   moveToTodayListOnAddTodayTag: Observable<unknown> = this._actions$.pipe(
     ofType(TaskActionTypes.UpdateTaskTags),
     filter((action: UpdateTaskTags) =>
-      action.payload.task.projectId &&
-      action.payload.newTagIds.includes(TODAY_TAG.id)
+      !!action.payload.task.projectId && action.payload.newTagIds.includes(TODAY_TAG.id)
     ),
-    concatMap((action) => this._projectService.getByIdOnce$(action.payload.task.projectId).pipe(
+    concatMap((action) => this._projectService.getByIdOnce$(action.payload.task.projectId as string).pipe(
       map((project) => ({
         project,
         p: action.payload,
@@ -506,7 +506,10 @@ export class ProjectEffects {
       first(),
     ).toPromise();
     const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
-      const t = taskState.entities[id];
+      const t = taskState.entities[id] as Task;
+      if (!t) {
+        throw new Error('No task');
+      }
       // NOTE sub tasks are accounted for in DeleteMainTasks action
       return t.projectId === projectIdToDelete && !t.parentId;
     });
@@ -520,7 +523,10 @@ export class ProjectEffects {
     // NOTE: task archive might not if there never was a day completed
     const archiveTaskIdsToDelete = !!(taskArchiveState)
       ? (taskArchiveState.ids as string[]).filter((id) => {
-        const t = taskArchiveState.entities[id];
+        const t = taskArchiveState.entities[id] as Task;
+        if (!t) {
+          throw new Error('No task');
+        }
         // NOTE sub tasks are accounted for in DeleteMainTasks action
         return t.projectId === projectIdToDelete && !t.parentId;
       })
@@ -531,18 +537,18 @@ export class ProjectEffects {
   }
 
   private async _removeAllRepeatingTasksForProject(projectIdToDelete: string): Promise<any> {
-    const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(first()).toPromise();
+    const taskRepeatCfgs: TaskRepeatCfg[] = await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(first()).toPromise();
 
-    const cfgsIdsToRemove = taskRepeatCfgs
+    const cfgsIdsToRemove: string[] = taskRepeatCfgs
       .filter(cfg => cfg.projectId === projectIdToDelete && (!cfg.tagIds || cfg.tagIds.length === 0))
-      .map(cfg => cfg.id);
+      .map(cfg => cfg.id as string);
     if (cfgsIdsToRemove.length > 0) {
       this._taskRepeatCfgService.deleteTaskRepeatCfgsNoTaskCleanup(cfgsIdsToRemove);
     }
 
-    const cfgsToUpdate = taskRepeatCfgs
+    const cfgsToUpdate: string[] = taskRepeatCfgs
       .filter(cfg => cfg.projectId === projectIdToDelete && cfg.tagIds && cfg.tagIds.length > 0)
-      .map(taskRepeatCfg => taskRepeatCfg.id);
+      .map(taskRepeatCfg => taskRepeatCfg.id as string);
     if (cfgsToUpdate.length > 0) {
       this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, {projectId: null});
     }

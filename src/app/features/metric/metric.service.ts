@@ -7,14 +7,11 @@ import { LineChartData, Metric, MetricState, PieChartData, SimpleMetrics } from 
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import {
-  selectAllMetrics,
   selectImprovementCountsPieChartData,
-  selectLastTrackedMetric,
   selectMetricById,
   selectMetricHasData,
   selectObstructionCountsPieChartData,
-  selectProductivityHappinessLineChartData,
-  selectProductivityHappinessLineChartDataComplete
+  selectProductivityHappinessLineChartData
 } from './store/metric.selectors';
 import { filter, map, switchMap, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
@@ -33,12 +30,12 @@ import {
   providedIn: 'root',
 })
 export class MetricService {
-  metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
+  // metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
   hasData$: Observable<boolean> = this._store$.pipe(select(selectMetricHasData));
-  lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
-  improvementCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectImprovementCountsPieChartData));
-  obstructionCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectObstructionCountsPieChartData));
-  productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
+  // lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
+  improvementCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(select(selectImprovementCountsPieChartData));
+  obstructionCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(select(selectObstructionCountsPieChartData));
+  // productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
 
   simpleMetrics$: Observable<SimpleMetrics> = this._workContextService.activeWorkContextTypeAndId$.pipe(
     switchMap(({activeType, activeId}) => {

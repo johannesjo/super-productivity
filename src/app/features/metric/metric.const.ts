@@ -6,7 +6,7 @@ export const DEFAULT_METRIC_FOR_DAY: Omit<Metric, 'id'> = {
   obstructions: [],
   improvements: [],
   improvementsTomorrow: [],
-  mood: null,
-  productivity: null,
+  mood: undefined,
+  productivity: undefined,
 };
 

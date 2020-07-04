@@ -81,7 +81,7 @@ export function improvementReducer(
       return adapter.updateOne({
         id: (action as ToggleImprovementRepeat).payload.id,
         changes: {
-          isRepeat: !itemI.isRepeat
+          isRepeat: !(itemI as Improvement).isRepeat
         },
       }, state);
 
@@ -101,7 +101,7 @@ export function improvementReducer(
 
     case ImprovementActionTypes.AddImprovementCheckedDay: {
       const {id, checkedDay} = (action as AddImprovementCheckedDay).payload;
-      const allCheckedDays = state.entities[id].checkedDays || [];
+      const allCheckedDays = (state.entities[id] as Improvement).checkedDays || [];
 
       return (allCheckedDays.includes(checkedDay) && checkedDay)
         ? state

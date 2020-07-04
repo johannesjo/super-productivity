@@ -30,7 +30,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 export class ImprovementService {
   improvements$: Observable<Improvement[]> = this._store$.pipe(select(selectAllImprovements));
   repeatedImprovementIds$: Observable<string[]> = this._store$.pipe(select(selectRepeatedImprovementIds));
-  improvementBannerImprovements$: Observable<Improvement[]> = this._store$.pipe(select(selectImprovementBannerImprovements));
+  improvementBannerImprovements$: Observable<Improvement[] | null> = this._store$.pipe(select(selectImprovementBannerImprovements));
   hasLastTrackedImprovements$: Observable<boolean> = this._store$.pipe(select(selectHasLastTrackedImprovements));
 
   constructor(

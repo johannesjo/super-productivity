@@ -72,7 +72,7 @@ export class DropboxEffects {
             this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
           }
         })
-        .catch((e) => {
+        .catch((e: unknown) => {
           console.error(e);
           this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
         });
@@ -96,7 +96,7 @@ export class DropboxEffects {
         .then(() => {
           this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
         })
-        .catch((e) => {
+        .catch((e: unknown) => {
           console.error(e);
           this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
           if (confirm('Sync failed. Close App anyway?')) {
