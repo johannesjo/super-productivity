@@ -48,10 +48,10 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     isNotifyNoUpdateRequired: boolean = false
   ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue } | null> {
     if (!task.projectId) {
-      throw new Error('No projectId for task');
+      throw new Error('No projectId');
     }
     if (!task.issueId) {
-      throw new Error('No issueId for task');
+      throw new Error('No issueId');
     }
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();

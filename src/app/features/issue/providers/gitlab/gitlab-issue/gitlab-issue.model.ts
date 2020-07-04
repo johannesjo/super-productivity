@@ -37,7 +37,7 @@ export type GitlabIssue = Readonly<{
   _id: number;
 
   // transformed
-  comments?: GitlabComment[];
+  comments: GitlabComment[];
   url: string;
   // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
   id: number;

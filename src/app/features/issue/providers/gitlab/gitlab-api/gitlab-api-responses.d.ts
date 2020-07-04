@@ -37,7 +37,7 @@ export type GitlabOriginalIssue = Readonly<{
   closed_at: string;
   closed_by: string;
   labels: string[];
-  milestone: null;
+  milestone: unknown;
   assignees: GitlabOriginalUser[];
   author: GitlabOriginalUser;
   assignee: GitlabOriginalUser;

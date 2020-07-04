@@ -4,9 +4,11 @@ import { Task } from '../tasks/task.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
-  issueLink$?(issueId: string | number, projectId: string): Observable<string>;
+  issueLink$(issueId: string | number, projectId: string): Observable<string>;
 
-  getById$?(id: string | number, projectId: string): Observable<IssueData>;
+  getById$(id: string | number, projectId: string): Observable<IssueData>;
+
+  getAddTaskData(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
 
   searchIssues$?(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
 
@@ -16,8 +18,6 @@ export interface IssueServiceInterface {
     taskChanges: Partial<Task>,
     issue: IssueData
   } | null>;
-
-  getAddTaskData?(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
 
   getMappedAttachments?(issueDataIN: IssueData): TaskAttachment[];
 }

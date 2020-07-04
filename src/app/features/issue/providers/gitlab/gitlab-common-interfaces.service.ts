@@ -47,7 +47,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false
-  ): Promise<{ taskChanges: Partial<Task>, issue: GitlabIssue }> {
+  ): Promise<{ taskChanges: Partial<Task>, issue: GitlabIssue } | null> {
+    if (!task.projectId) {
+      throw new Error('No projectId');
+    }
+    if (!task.issueId) {
+      throw new Error('No issueId');
+    }
+
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
 
@@ -90,6 +97,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         issue,
       };
     }
+    return null;
   }
 
   getAddTaskData(issue: GitlabIssue): { title: string; additionalFields: Partial<IssueFieldsForTask> } {

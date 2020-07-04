@@ -21,9 +21,6 @@ const BASE = GITLAB_API_BASE_URL;
   providedIn: 'root',
 })
 export class GitlabApiService {
-  /** @deprecated */
-  private _header: HttpHeaders;
-
   constructor(
     private _projectService: ProjectService,
     private _snackService: SnackService,
@@ -69,7 +66,7 @@ export class GitlabApiService {
   }
 
   searchIssueInProject$(searchText: string, cfg: GitlabCfg): Observable<SearchResultItem[]> {
-    const filterFn = issue => {
+    const filterFn = (issue: GitlabIssue) => {
       try {
         return issue.title.toLowerCase().match(searchText.toLowerCase())
           || issue.body.toLowerCase().match(searchText.toLowerCase());
