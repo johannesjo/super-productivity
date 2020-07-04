@@ -58,7 +58,7 @@ export class GlobalConfigService {
     shareReplay(1),
   );
 
-  cfg: GlobalConfigState;
+  cfg?: GlobalConfigState;
 
   constructor(
     private readonly _store: Store<any>,

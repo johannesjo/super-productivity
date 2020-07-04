@@ -142,7 +142,11 @@ export class AppComponent implements OnDestroy {
       this._chromeExtensionInterfaceService.init();
 
       window.addEventListener('beforeunload', (e) => {
-        if (this._configService.cfg.misc.isConfirmBeforeExit) {
+        const gCfg = this._configService.cfg;
+        if (!gCfg) {
+          throw new Error();
+        }
+        if (gCfg.misc.isConfirmBeforeExit) {
           e.preventDefault();
           e.returnValue = '';
         }

@@ -29,13 +29,13 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     : {
       ...DEFAULT_GLOBAL_CONFIG.idle,
       // tslint:disable-next-line
-      isOnlyOpenIdleWhenCurrentTask: config.misc['isOnlyOpenIdleWhenCurrentTask'],
+      isOnlyOpenIdleWhenCurrentTask: (config.misc as any)['isOnlyOpenIdleWhenCurrentTask'],
       // tslint:disable-next-line
-      isEnableIdleTimeTracking: config.misc['isEnableIdleTimeTracking'],
+      isEnableIdleTimeTracking: (config.misc as any)['isEnableIdleTimeTracking'],
       // tslint:disable-next-line
-      minIdleTime: config.misc['minIdleTime'],
+      minIdleTime: (config.misc as any)['minIdleTime'],
       // tslint:disable-next-line
-      isUnTrackedIdleResetsBreakTimer: config.misc['isUnTrackedIdleResetsBreakTimer'],
+      isUnTrackedIdleResetsBreakTimer: (config.misc as any)['isUnTrackedIdleResetsBreakTimer'],
     };
 
   const takeABreak: TakeABreakConfig = !!(config.takeABreak)
@@ -43,11 +43,11 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     : {
       ...DEFAULT_GLOBAL_CONFIG.takeABreak,
       // tslint:disable-next-line
-      isTakeABreakEnabled: config.misc['isTakeABreakEnabled'],
+      isTakeABreakEnabled: (config.misc as any)['isTakeABreakEnabled'],
       // tslint:disable-next-line
-      takeABreakMessage: config.misc['takeABreakMessage'],
+      takeABreakMessage: (config.misc as any)['takeABreakMessage'],
       // tslint:disable-next-line
-      takeABreakMinWorkingTime: config.misc['takeABreakMinWorkingTime'],
+      takeABreakMinWorkingTime: (config.misc as any)['takeABreakMinWorkingTime'],
     };
 
   // we delete the old keys. worst case is, that the default settings are used for outdated versions of the app
@@ -63,8 +63,8 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
   ];
 
   obsoleteMiscKeys.forEach(key => {
-    if (config[key]) {
-      delete config[key];
+    if ((config as any)[key]) {
+      delete (config as any)[key];
     }
   });
 

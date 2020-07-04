@@ -26,7 +26,7 @@ import { WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping } from '../
 import { T } from '../../../t.const';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
-import { WorkStartEnd } from '../../work-context/work-context.model';
+import { WorkContextAdvancedCfg, WorkStartEnd } from '../../work-context/work-context.model';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 
@@ -123,7 +123,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     this._subs.add(this._workContextService.advancedCfg$.pipe(
       distinctUntilChanged(distinctUntilChangedObject)
-    ).subscribe(advancedCfg => {
+    ).subscribe((advancedCfg: WorkContextAdvancedCfg) => {
       if (advancedCfg.worklogExportSettings) {
         this.options = {
           ...WORKLOG_EXPORT_DEFAULTS,

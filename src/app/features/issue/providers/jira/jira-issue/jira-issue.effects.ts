@@ -57,7 +57,7 @@ export class JiraIssueEffects {
       this._workContextService.activeWorkContextId$
     ),
     filter(([, isActiveContextProject]) => isActiveContextProject),
-    concatMap(([act, , projectId]) => this._getCfgOnce$(projectId).pipe(
+    concatMap(([act, , projectId]) => this._getCfgOnce$(projectId as string).pipe(
       map(jiraCfg => ({
         act,
         projectId,
@@ -68,7 +68,7 @@ export class JiraIssueEffects {
     withLatestFrom(this._store$.pipe(select(selectTaskEntities))),
     tap(([{act, projectId, jiraCfg}, taskEntities]: [{
       act: UpdateTask,
-      projectId: string,
+      projectId: string | null,
       jiraCfg: JiraCfg
     }, Dictionary<Task>]) => {
       const taskId = act.payload.task.id;

@@ -68,7 +68,11 @@ export class IdleService {
 
   handleIdle(idleTime: number) {
     console.log('IDLE_TIME', idleTime, new Date());
-    const cfg = this._configService.cfg.idle;
+    const gCfg = this._configService.cfg;
+    if (!gCfg) {
+      throw new Error();
+    }
+    const cfg = gCfg.idle;
     const minIdleTime = cfg.minIdleTime || DEFAULT_MIN_IDLE_TIME;
 
     // don't run if option is not enabled

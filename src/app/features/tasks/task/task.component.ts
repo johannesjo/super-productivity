@@ -567,7 +567,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const keys = this._configService.cfg.keyboard;
+    const cfg = this._configService.cfg;
+    if (!cfg) {
+      throw new Error();
+    }
+    const keys = cfg.keyboard;
     const isShiftOrCtrlPressed = (ev.shiftKey || ev.ctrlKey);
 
     if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {

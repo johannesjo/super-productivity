@@ -64,6 +64,10 @@ export class ShortcutService {
 
   handleKeyDown(ev: KeyboardEvent) {
     const cfg = this._configService.cfg;
+    if (!cfg) {
+      throw new Error();
+    }
+
     const keys = cfg.keyboard;
     const el = ev.target as HTMLElement;
 

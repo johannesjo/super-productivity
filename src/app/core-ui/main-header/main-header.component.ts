@@ -43,8 +43,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   currentTaskContext$: Observable<Project | Tag | null> = this.taskService.currentTaskParentOrCurrent$.pipe(
     filter(ct => !!ct),
     switchMap((currentTask) => this.workContextService.activeWorkContextId$.pipe(
+      filter((activeWorkContextId) => !!activeWorkContextId),
       switchMap((activeWorkContextId) => {
-        if (currentTask.projectId === activeWorkContextId || currentTask.tagIds.includes(activeWorkContextId)) {
+        if (currentTask.projectId === activeWorkContextId || currentTask.tagIds.includes(activeWorkContextId as string)) {
           return of(null);
         }
         return currentTask.projectId

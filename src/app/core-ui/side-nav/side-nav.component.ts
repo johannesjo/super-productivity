@@ -57,7 +57,7 @@ export class SideNavComponent implements OnDestroy {
   T: any = T;
   readonly PROJECTS_SIDE_NAV: string = 'PROJECTS_SIDE_NAV';
   readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
-  activeWorkContextId?: string;
+  activeWorkContextId?: string | null;
   WorkContextType: typeof WorkContextType = WorkContextType;
 
   private _subs: Subscription = new Subscription();

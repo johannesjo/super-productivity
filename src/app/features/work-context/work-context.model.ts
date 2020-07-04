@@ -80,7 +80,7 @@ export interface WorkContextCopy extends WorkContextCommon {
 export type WorkContext = Readonly<WorkContextCopy>;
 
 export interface WorkContextState {
-  activeId: string;
-  activeType: WorkContextType;
+  activeId: string | null;
+  activeType: WorkContextType | null;
   // additional entities state properties
 }

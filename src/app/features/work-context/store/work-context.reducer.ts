@@ -8,13 +8,13 @@ export const selectContextFeatureState = createFeatureSelector<WorkContextState>
 export const selectActiveContextId = createSelector(selectContextFeatureState, (state) => state.activeId);
 export const selectActiveContextType = createSelector(selectContextFeatureState, (state) => state.activeType);
 
-export const selectActiveContextTypeAndId = createSelector(selectContextFeatureState, (state): {
+export const selectActiveContextTypeAndId = createSelector(selectContextFeatureState, (state: WorkContextState): {
   activeId: string;
   activeType: WorkContextType;
   // additional entities state properties
 } => ({
-  activeType: state.activeType,
-  activeId: state.activeId,
+  activeType: state.activeType as WorkContextType,
+  activeId: state.activeId as string,
 }));
 
 export const initialContextState: WorkContextState = {

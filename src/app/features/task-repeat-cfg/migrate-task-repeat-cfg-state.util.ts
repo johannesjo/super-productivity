@@ -13,7 +13,7 @@ export const migrateTaskRepeatCfgState = (taskRepeatState: TaskRepeatCfgState): 
   const taskRepeatEntities: Dictionary<TaskRepeatCfg> = {...taskRepeatState.entities};
   Object.keys(taskRepeatEntities).forEach((key) => {
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
-    taskRepeatEntities[key] = _addNewFieldsToTaskRepeatCfgs(taskRepeatEntities[key]);
+    taskRepeatEntities[key] = _addNewFieldsToTaskRepeatCfgs(taskRepeatEntities[key] as TaskRepeatCfg);
   });
 
   return {
