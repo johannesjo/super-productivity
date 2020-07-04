@@ -62,8 +62,8 @@ export class DropboxSyncService {
     // TODO initial syncing (do with immediate triggers)
   }
 
-  async sync() {
-    let local: AppDataComplete;
+  async sync(): Promise<unknown> {
+    let local: AppDataComplete | undefined;
     await this._isReadyForRequests$.toPromise();
 
     this._updateLocalLastSyncCheck();
@@ -238,7 +238,7 @@ export class DropboxSyncService {
     });
   }
 
-  private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata> {
+  private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | unknown> {
     try {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,
@@ -262,7 +262,7 @@ export class DropboxSyncService {
 
   // LS HELPER
   // ---------
-  private _getLocalRev(): string {
+  private _getLocalRev(): string | null {
     return localStorage.getItem(LS_DROPBOX_LAST_LOCAL_REVISION);
   }
 
@@ -275,10 +275,10 @@ export class DropboxSyncService {
   }
 
   private _getLocalLastSync(): number {
-    const it = +localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC);
+    const it = +(localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC) as any);
     return isNaN(it)
       ? 0
-      : it;
+      : it || 0;
   }
 
   private _setLocalLastSync(localLastSync: number) {

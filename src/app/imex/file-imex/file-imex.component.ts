@@ -12,7 +12,7 @@ import { T } from '../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileImexComponent {
-  @ViewChild('fileInput', {static: true}) fileInputRef: ElementRef;
+  @ViewChild('fileInput', {static: true}) fileInputRef?: ElementRef;
   T: any = T;
 
   constructor(
@@ -28,10 +28,10 @@ export class FileImexComponent {
     reader.onload = async () => {
       const textData = reader.result;
       console.log(textData);
-      let data: AppDataComplete;
+      let data: AppDataComplete | undefined;
       let oldData;
       try {
-        data = oldData = JSON.parse(textData.toString());
+        data = oldData = JSON.parse((textData as any).toString());
       } catch (e) {
         this._snackService.open({type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA});
       }
@@ -39,7 +39,11 @@ export class FileImexComponent {
       if (oldData.config && Array.isArray(oldData.tasks)) {
         alert('V1 Data. Migration not imported any more.');
       } else {
-        await this._dataImportService.importCompleteSyncData(data);
+        await this._dataImportService.importCompleteSyncData(data as AppDataComplete);
+      }
+
+      if (!this.fileInputRef) {
+        throw new Error();
       }
 
       // clear input

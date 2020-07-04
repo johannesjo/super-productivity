@@ -53,7 +53,10 @@ export class SchedulePageComponent {
   }
 
   removeReminder(task: TaskWithReminderData) {
-    this._taskService.removeReminder(task.id, task.reminderId);
+    if (task.reminderId) {
+      this._taskService.removeReminder(task.id, task.reminderId);
+    }
+
   }
 
   editReminder(task: TaskWithReminderData) {
@@ -80,7 +83,9 @@ export class SchedulePageComponent {
     } else {
       this._taskService.moveToToday(task.id, true);
     }
-    this._taskService.removeReminder(task.id, task.reminderId);
+    if (task.reminderId) {
+      this._taskService.removeReminder(task.id, task.reminderId);
+    }
     this._taskService.setCurrentId(task.id);
     this._router.navigate(['/active/tasks']);
   }

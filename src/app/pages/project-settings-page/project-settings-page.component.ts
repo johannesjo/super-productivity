@@ -29,10 +29,10 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   globalConfigFormCfg: ConfigFormConfig;
   basicFormCfg: ConfigFormSection<Project>;
 
-  currentProject: Project;
-  currentProjectTheme: WorkContextThemeCfg;
-  projectCfg: WorkContextAdvancedCfg;
-  issueIntegrationCfgs: IssueIntegrationCfgs;
+  currentProject?: Project | null;
+  currentProjectTheme?: WorkContextThemeCfg;
+  projectCfg?: WorkContextAdvancedCfg;
+  issueIntegrationCfgs?: IssueIntegrationCfgs;
 
   private _subs: Subscription = new Subscription();
 
@@ -49,8 +49,12 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this.projectService.currentProject$.subscribe((project) => {
-      this.currentProject = project;
+    this._subs.add(this.projectService.currentProject$.subscribe((project: Project | null) => {
+      if (!project) {
+        throw new Error();
+      }
+
+      this.currentProject = project as Project;
       this.projectCfg = project.advancedCfg;
       this.currentProjectTheme = project.theme;
 
@@ -81,7 +85,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   saveProjectThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: WorkContextThemeCfg }) {
-    if (!$event.config) {
+    if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     } else {
       this.projectService.update(this.currentProject.id, {
@@ -93,7 +97,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: Project }) {
-    if (!$event.config) {
+    if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     } else {
       this.projectService.update(this.currentProject.id, {
@@ -103,6 +107,9 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   saveIssueProviderCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: IssueIntegrationCfg }) {
+    if (!$event.config || !this.currentProject) {
+      throw new Error('Not enough data');
+    }
     const {sectionKey, config} = $event;
     const sectionKeyIN = sectionKey as IssueProviderKey;
     this.projectService.updateIssueProviderConfig(this.currentProject.id, sectionKeyIN, {

@@ -25,17 +25,17 @@ import { T } from '../../../t.const';
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   T: any = T;
   minutesBefore: number = 0;
-  dots: any[];
+  dots: any[] = [];
   uid: string = 'duration-input-slider' + shortid();
   el: HTMLElement;
 
-  startHandler: (ev: any) => void;
-  endHandler: () => void;
-  moveHandler: (ev: any) => void;
+  startHandler?: (ev: any) => void;
+  endHandler?: () => void;
+  moveHandler?: (ev: any) => void;
 
-  @ViewChild('circleEl', {static: true}) circleEl: ElementRef;
+  @ViewChild('circleEl', {static: true}) circleEl?: ElementRef;
 
-  @Input() label: string;
+  @Input() label: string = '';
   @Output() modelChange: EventEmitter<number> = new EventEmitter();
 
   constructor(
@@ -45,7 +45,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.el = _el.nativeElement;
   }
 
-  _model: number;
+  _model: number = 0;
 
   @Input() set model(val: number) {
     if (this._model !== val) {
@@ -56,6 +56,11 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.startHandler = (ev) => {
+
+      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+        throw new Error();
+      }
+
       // don't execute when clicked on label or input
       if (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT') {
         this.endHandler();
@@ -76,6 +81,9 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
         (ev.target.tagName === 'LABEL' ||
           ev.target.tagName === 'INPUT')) {
         return;
+      }
+      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+        throw new Error();
       }
 
       // prevent touchmove
@@ -110,6 +118,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     };
 
     this.endHandler = () => {
+      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+        throw new Error();
+      }
+
       this.el.classList.remove('is-dragging');
       this.el.removeEventListener('mousemove', this.moveHandler);
       document.removeEventListener('mouseup', this.endHandler);
@@ -127,6 +139,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl) {
+      throw new Error();
+    }
+
     // remove mouse events
     this.el.removeEventListener('mousedown', this.startHandler);
     this.el.removeEventListener('mousemove', this.moveHandler);
@@ -139,6 +155,9 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setCircleRotation(cssDegrees: number) {
+    if (!this.circleEl) {
+      throw new Error();
+    }
     this.circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
   }
 
@@ -160,7 +179,6 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = ((degrees + 360) / 360 * 60);
     }
 
-    minutesFromDegrees = parseInt(minutesFromDegrees, 10);
     minutesFromDegrees = Math.round(minutesFromDegrees / 5) * 5;
 
     if (minutesFromDegrees >= 60) {

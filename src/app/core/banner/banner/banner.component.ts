@@ -16,9 +16,9 @@ import { T } from '../../../t.const';
 export class BannerComponent {
   T: any = T;
   height: number = 120;
-  private _dirtyReference: string;
+  private _dirtyReference?: string | null;
   // TODO maybe improve if initial delay is annoying
-  activeBanner$: Observable<Banner> = this.bannerService.activeBanner$.pipe(
+  activeBanner$: Observable<Banner | null> = this.bannerService.activeBanner$.pipe(
     concatMap((activeBanner) => {
       if (activeBanner) {
         if (!this._dirtyReference || this._dirtyReference === activeBanner.id) {

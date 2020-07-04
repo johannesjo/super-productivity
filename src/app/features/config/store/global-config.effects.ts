@@ -14,6 +14,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
+import { ipcRenderer } from 'electron';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -77,10 +78,10 @@ export class GlobalConfigEffects {
       ),
       filter((action: UpdateGlobalConfigSection) => action.payload.sectionKey === 'lang'),
       // tslint:disable-next-line
-      filter((action: UpdateGlobalConfigSection) => action.payload.sectionCfg && action.payload.sectionCfg['lng']),
+      filter((action: UpdateGlobalConfigSection) => action.payload.sectionCfg && (action.payload.sectionCfg as any)['lng']),
       tap((action: UpdateGlobalConfigSection) => {
         // tslint:disable-next-line
-        this._languageService.setLng(action.payload.sectionCfg['lng']);
+        this._languageService.setLng((action.payload.sectionCfg as any)['lng']);
       })
     );
 
@@ -106,9 +107,9 @@ export class GlobalConfigEffects {
   ) {
   }
 
-  private async _saveToLs([action, state]: [any, GlobalConfigState]) {
+  private async _saveToLs([action, completeState]: [any, any]) {
     this._persistenceService.updateLastLocalSyncModelChange();
-    const globalConfig = state[CONFIG_FEATURE_NAME];
+    const globalConfig = completeState[CONFIG_FEATURE_NAME];
     await this._persistenceService.globalConfig.saveState(globalConfig);
   }
 }

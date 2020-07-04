@@ -6,6 +6,7 @@ import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { DataImportService } from '../sync/data-import.service';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { ElectronService } from '../../core/electron/electron.service';
+import { ipcRenderer } from 'electron';
 
 const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 

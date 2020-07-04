@@ -1,4 +1,4 @@
-export const getCoords = (elem) => { // crossbrowser version
+export const getCoords = (elem: HTMLElement) => { // crossbrowser version
   const box = elem.getBoundingClientRect();
 
   const body = document.body;

@@ -8,14 +8,14 @@ const LARGE_IMG_ID = 'enlarged-img';
 })
 export class EnlargeImgDirective {
   imageEl: HTMLElement;
-  newImageEl: HTMLElement;
+  newImageEl?: HTMLElement;
   lightboxParentEl: HTMLElement = document.body;
-  enlargedImgWrapperEl: HTMLElement;
-  isImg: boolean;
+  enlargedImgWrapperEl?: HTMLElement;
+  isImg?: boolean;
   zoomMode: number = 0;
-  zoomMoveHandler: () => void;
+  zoomMoveHandler?: (ev: MouseEvent) => void;
 
-  @Input() enlargeImg: string;
+  @Input() enlargeImg?: string;
 
   constructor(
     private _renderer: Renderer2,
@@ -24,7 +24,7 @@ export class EnlargeImgDirective {
     this.imageEl = _el.nativeElement;
   }
 
-  @HostListener('click', ['$event']) onClick(ev: MouseEvent) {
+  @HostListener('click', ['$event']) onClick() {
     this.isImg = (this.imageEl.tagName.toLowerCase() === 'img');
 
     if (this.isImg || this.enlargeImg) {
@@ -36,13 +36,21 @@ export class EnlargeImgDirective {
     this._setOriginCoordsForImageAni();
     this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-remove');
     this._renderer.removeClass(this.enlargedImgWrapperEl, 'ani-enter');
-
+    if (!this.enlargedImgWrapperEl) {
+      throw new Error();
+    }
     this.enlargedImgWrapperEl.addEventListener('transitionend', () => {
+      if (!this.enlargedImgWrapperEl) {
+        throw new Error();
+      }
       this.enlargedImgWrapperEl.remove();
     });
   }
 
   private _setOriginCoordsForImageAni() {
+    if (!this.newImageEl) {
+      throw new Error();
+    }
     const origImgCoords = getCoords(this.imageEl);
     const newImageCoords = getCoords(this.newImageEl);
     const scale = this.imageEl.offsetWidth / this.newImageEl.offsetWidth || 0.01;
@@ -53,7 +61,7 @@ export class EnlargeImgDirective {
   }
 
   private _showImg() {
-    const src = this.enlargeImg || this.imageEl.getAttribute('src');
+    const src = this.enlargeImg || this.imageEl.getAttribute('src') as string;
 
     const img = new Image();
     img.src = src;
@@ -77,7 +85,7 @@ export class EnlargeImgDirective {
       if (this.zoomMode === 0) {
         this._hideImg();
       } else {
-        this.newImageEl.addEventListener('transitionend', () => {
+        (this.newImageEl as HTMLElement).addEventListener('transitionend', () => {
           setTimeout(() => {
             this._hideImg();
           });
@@ -85,13 +93,13 @@ export class EnlargeImgDirective {
         this._zoomOutImg();
       }
     });
-    this.newImageEl.addEventListener('click', (ev) => {
+    (this.newImageEl as HTMLElement).addEventListener('click', (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
       if (this.zoomMode === 0) {
         this._zoomImg();
       } else {
-        this.newImageEl.addEventListener('transitionend', () => {
+        (this.newImageEl as HTMLElement).addEventListener('transitionend', () => {
           setTimeout(() => {
             this._hideImg();
           });
@@ -103,16 +111,22 @@ export class EnlargeImgDirective {
   }
 
   private _zoomImg() {
+    if (!this.enlargedImgWrapperEl) {
+      throw new Error();
+    }
     this._renderer.addClass(this.enlargedImgWrapperEl, 'isZoomed');
-    this._renderer.setStyle(this.newImageEl, 'transform', `scale(2) translate3d(-25%, -25%, 0)`);
+    this._renderer.setStyle((this.newImageEl as HTMLElement), 'transform', `scale(2) translate3d(-25%, -25%, 0)`);
     this.zoomMoveHandler = this._zoom.bind(this);
     this.enlargedImgWrapperEl.addEventListener('mousemove', this.zoomMoveHandler);
   }
 
   private _zoomOutImg() {
+    if (!this.enlargedImgWrapperEl || !this.zoomMoveHandler) {
+      throw new Error();
+    }
     this.enlargedImgWrapperEl.removeEventListener('mousemove', this.zoomMoveHandler);
     this._renderer.removeClass(this.enlargedImgWrapperEl, 'isZoomed');
-    this._renderer.setStyle(this.newImageEl, 'transform', `scale(1) translate3d(0, 0, 0)`);
+    this._renderer.setStyle((this.newImageEl as HTMLElement), 'transform', `scale(1) translate3d(0, 0, 0)`);
   }
 
   private _htmlToElement(html: string): HTMLElement {
@@ -123,6 +137,9 @@ export class EnlargeImgDirective {
   }
 
   private _zoom(e: MouseEvent) {
+    if (!this.enlargedImgWrapperEl) {
+      throw new Error();
+    }
     const offsetX = e.clientX;
     const offsetY = e.clientY;
     const zoomer = this.enlargedImgWrapperEl;
@@ -130,7 +147,7 @@ export class EnlargeImgDirective {
     const magicSpace = 5;
     const x = (offsetX / zoomer.offsetWidth * 100 - magicSpace) * -0.5 * extra;
     const y = (offsetY / zoomer.offsetHeight * 100 - magicSpace) * -0.5 * extra;
-    this._renderer.setStyle(this.newImageEl, 'transform', `scale(2) translate3d(${x}%, ${y}%, 0)`);
+    this._renderer.setStyle((this.newImageEl as HTMLElement), 'transform', `scale(2) translate3d(${x}%, ${y}%, 0)`);
   }
 
   private _waitForImgRender() {
@@ -140,7 +157,7 @@ export class EnlargeImgDirective {
       });
     }
 
-    function checkElement(id: string) {
+    function checkElement(id: string): Promise<any> {
       const el = document.getElementById(id);
       if (el === null || !(el.offsetHeight > 1)) {
         return rafAsync().then(() => checkElement(id));

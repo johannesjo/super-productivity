@@ -28,9 +28,9 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
   globalConfigFormCfg: ConfigFormConfig;
   basicFormCfg: ConfigFormSection<Tag>;
 
-  activeWorkContext: WorkContext;
-  workContextAdvCfg: WorkContextAdvancedCfg;
-  currentWorkContextTheme: WorkContextThemeCfg;
+  activeWorkContext?: WorkContext;
+  workContextAdvCfg?: WorkContextAdvancedCfg;
+  currentWorkContextTheme?: WorkContextThemeCfg;
 
   private _subs: Subscription = new Subscription();
 
@@ -59,7 +59,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   saveTagThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: WorkContextThemeCfg }) {
-    if (!$event.config) {
+    if (!$event.config || !this.activeWorkContext) {
       throw new Error('Not enough data');
     } else {
       this.tagService.updateTag(this.activeWorkContext.id, {
@@ -71,7 +71,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: Tag }) {
-    if (!$event.config) {
+    if (!$event.config || !this.activeWorkContext) {
       throw new Error('Not enough data');
     } else {
       const {title, icon, color} = $event.config;

@@ -20,6 +20,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { MatDialog } from '@angular/material/dialog';
 import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { ElectronService } from '../../core/electron/electron.service';
+import { shell } from 'electron';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -217,7 +218,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   private _makeLinksWorkForElectron() {
-    const shell = this._electronService.shell;
     if (!this.wrapperEl) {
       throw new Error('Wrapper el not visible');
     }
@@ -227,7 +227,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         const href = target.getAttribute('href');
         if (href !== null) {
           ev.preventDefault();
-          shell.openExternal(href);
+          (this._electronService.shell as typeof shell).openExternal(href);
         }
       }
     });

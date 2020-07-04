@@ -487,6 +487,9 @@ export class TaskService {
   }
 
   removeReminder(taskId: string, reminderId: string) {
+    if (reminderId) {
+      throw new Error();
+    }
     this._store.dispatch(new RemoveTaskReminder({id: taskId, reminderId}));
   }
 

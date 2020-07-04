@@ -6,7 +6,7 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import axios, { AxiosResponse, Method } from 'axios';
-import qs from 'qs';
+import qs from 'querystring';
 import { DropboxFileMetadata } from './dropbox.model';
 import { toDropboxIsoString } from './iso-date-without-ms.util.';
 
@@ -43,7 +43,7 @@ export class DropboxApiService {
     }).then((res) => res.data);
   }
 
-  async download<T>({path, localRev}: { path: string; localRev?: string }): Promise<{ meta: DropboxFileMetadata, data: T }> {
+  async download<T>({path, localRev}: { path: string; localRev?: string | null }): Promise<{ meta: DropboxFileMetadata, data: T }> {
     await this._isReady$.toPromise();
 
     return this._request({
@@ -66,7 +66,7 @@ export class DropboxApiService {
   async upload({path, localRev, data, clientModified, isForceOverwrite = false}: {
     path: string;
     clientModified?: number;
-    localRev?: string;
+    localRev?: string | null;
     data: any;
     isForceOverwrite?: boolean;
   }): Promise<DropboxFileMetadata> {

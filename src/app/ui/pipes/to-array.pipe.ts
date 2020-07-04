@@ -16,7 +16,7 @@ export class ToArrayPipe implements PipeTransform {
           keys.splice(index, 1);
         }
       }
-      const newArray = [];
+      const newArray: any[] = [];
       keys.forEach((key) => {
         newArray.push({
           key,

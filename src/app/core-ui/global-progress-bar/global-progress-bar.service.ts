@@ -20,10 +20,10 @@ export class GlobalProgressBarService {
     delay(0),
   );
 
-  private _label$: BehaviorSubject<string | null> = new BehaviorSubject(null);
+  private _label$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
   label$: Observable<string> = this._label$.pipe(
     distinctUntilChanged(),
-    switchMap((label) => !!label
+    switchMap((label: string | any) => !!label
       ? of(label)
       : of(null).pipe(delay(DELAY))
     ),
@@ -46,14 +46,14 @@ export class GlobalProgressBarService {
     }
   }
 
-  private _urlToLabel(url: string): string {
+  private _urlToLabel(url: string): string | null {
     const [urlWithoutParams]: string[] = url.split('?');
 
     if (PROGRESS_BAR_LABEL_MAP[url]) {
       return PROGRESS_BAR_LABEL_MAP[url];
     } else {
       const key = Object.keys(PROGRESS_BAR_LABEL_MAP).find((keyIn) => urlWithoutParams.includes(keyIn));
-      return key && PROGRESS_BAR_LABEL_MAP[key];
+      return key ? PROGRESS_BAR_LABEL_MAP[key] : null;
     }
   }
 }

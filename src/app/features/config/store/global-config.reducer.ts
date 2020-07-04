@@ -43,6 +43,7 @@ export function globalConfigReducer(
       return {
         ...state,
         [sectionKey]: {
+          // @ts-ignore
           ...state[sectionKey],
           ...sectionCfg
         }

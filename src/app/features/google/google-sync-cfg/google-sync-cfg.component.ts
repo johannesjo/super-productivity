@@ -28,10 +28,10 @@ import { T } from '../../../t.const';
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   T: any = T;
   tmpSyncFile: any;
-  cfg: GoogleDriveSyncConfig;
-  loginPromise: Promise<any>;
+  cfg?: GoogleDriveSyncConfig;
+  loginPromise?: Promise<any>;
 
-  @ViewChild('formRef', {static: true}) formRef: FormGroup;
+  @ViewChild('formRef', {static: true}) formRef?: FormGroup;
 
   @Output() save: EventEmitter<any> = new EventEmitter();
 
@@ -59,15 +59,20 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   submit() {
-    if (this.formRef.valid) {
+    const f = this.formRef;
+    if (!f) {
+      throw new Error();
+    }
+
+    if (f.valid) {
       this.save.emit({
         sectionKey: 'googleDriveSync',
         config: this.cfg,
       });
     } else {
-      Object.keys(this.formRef.controls)
+      Object.keys(f.controls)
         .forEach(fieldName =>
-          this.formRef.controls[fieldName].markAsDirty()
+          f.controls[fieldName].markAsDirty()
         );
     }
   }

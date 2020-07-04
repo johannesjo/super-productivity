@@ -114,6 +114,7 @@
     "@ngx-translate/core": "^11.0.1",
     "@ngx-translate/http-loader": "^4.0.0",
     "@schematics/angular": "^8.0.1",
+    "@types/hammerjs": "^2.0.36",
     "@types/jasmine": "^3.3.12",
     "@types/jasminewd2": "~2.0.3",
     "@types/lz-string": "^1.3.34",

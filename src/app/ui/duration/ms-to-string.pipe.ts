@@ -7,7 +7,7 @@ const H = M * 60;
 export const msToString = (value: any, isShowSeconds?: boolean, isHideEmptyPlaceholder?: boolean): string => {
   const hours = Math.floor(value / H);
   const minutes = Math.floor((value - hours * H) / M);
-  const seconds = isShowSeconds && Math.floor((value - (hours * H) - (minutes * M)) / S);
+  const seconds = isShowSeconds ? Math.floor((value - (hours * H) - (minutes * M)) / S) : 0;
 
   const parsed =
     // ((+md.days() > 0) ? (md.days() + 'd ') : '')
