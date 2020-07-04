@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../../app.constants';
 import { TaskAttachment, TaskAttachmentCopy, TaskAttachmentType } from '../task-attachment.model';
@@ -16,7 +16,7 @@ interface TaskAttachmentSelectType {
   styleUrls: ['./dialog-edit-task-attachment.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogEditTaskAttachmentComponent implements OnInit {
+export class DialogEditTaskAttachmentComponent {
   types: TaskAttachmentSelectType[];
   attachmentCopy: TaskAttachmentCopy;
   T: any = T;
@@ -26,14 +26,11 @@ export class DialogEditTaskAttachmentComponent implements OnInit {
     private _translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-  }
-
-  ngOnInit() {
     this.attachmentCopy = {...this.data.attachment} as TaskAttachmentCopy;
-
     if (!this.attachmentCopy.type) {
       this.attachmentCopy.type = 'LINK';
     }
+
     this.types = [
       {type: 'LINK', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.LINK},
       {type: 'IMG', title: T.F.ATTACHMENT.DIALOG_EDIT.TYPES.IMG},

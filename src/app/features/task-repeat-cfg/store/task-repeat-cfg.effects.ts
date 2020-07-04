@@ -61,14 +61,18 @@ export class TaskRepeatCfgEffects {
       flatMap((taskRepeatCfg: TaskRepeatCfg) =>
         // NOTE: there might be multiple configs in case something went wrong
         // we want to move all of them to the archive
-        this._taskService.getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id).pipe(
+        this._taskService.getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id as string).pipe(
           take(1),
-          concatMap((tasks) => {
+          concatMap((tasks: Task[]) => {
             const isCreateNew = (tasks.filter(task => isToday(task.created)).length === 0);
             const moveToArchiveActions: (MoveToArchive | AddTask | UpdateTaskRepeatCfg)[] = isCreateNew
               ? tasks.filter(task => isToday(task.created))
                 .map(task => new MoveToArchive({tasks: [task]}))
               : [];
+
+            if (!taskRepeatCfg.id) {
+              throw new Error('No taskRepeatCfg.id');
+            }
 
             return from([
               ...moveToArchiveActions,

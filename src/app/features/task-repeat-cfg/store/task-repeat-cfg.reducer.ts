@@ -23,7 +23,7 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSe
 export const selectAllTaskRepeatCfgs = createSelector(selectTaskRepeatCfgFeatureState, selectAll);
 export const selectTaskRepeatCfgById = createSelector(
   selectTaskRepeatCfgFeatureState,
-  (state, props: { id: string }) => state.entities[props.id]
+  (state: TaskRepeatCfgState, props: { id: string }) => state.entities[props.id]
 );
 
 export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialState({

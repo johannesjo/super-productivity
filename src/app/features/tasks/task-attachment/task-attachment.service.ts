@@ -48,7 +48,7 @@ export class TaskAttachmentService {
   // HANDLE INPUT
   // ------------
   createFromDrop(ev: DragEvent, taskId: string) {
-    this._handleInput(createFromDrop(ev), ev, taskId);
+    this._handleInput(createFromDrop(ev) as DropPasteInput, ev, taskId);
   }
 
   // createFromPaste(ev, taskId: string) {

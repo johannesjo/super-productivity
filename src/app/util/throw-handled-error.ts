@@ -1,7 +1,7 @@
 import { HANDLED_ERROR_PROP_STR } from '../app.constants';
 
-export const throwHandledError = (errorTxt => {
+export const throwHandledError = ((errorTxt: string) => {
   const e = new Error(errorTxt);
-  e[HANDLED_ERROR_PROP_STR] = errorTxt;
+  (e as any)[HANDLED_ERROR_PROP_STR] = errorTxt;
   throw e;
 });

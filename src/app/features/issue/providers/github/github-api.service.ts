@@ -97,7 +97,7 @@ export class GithubApiService {
   }
 
   private _isValidSettings(cfg: GithubCfg): boolean {
-    return cfg && cfg.repo && cfg.repo.length > 0;
+    return !!cfg && !!cfg.repo && cfg.repo.length > 0;
   }
 
   private _sendRequest$(params: HttpRequest<string> | any, cfg: GithubCfg): Observable<any> {

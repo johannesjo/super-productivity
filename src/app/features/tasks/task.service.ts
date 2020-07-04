@@ -513,6 +513,9 @@ export class TaskService {
   }
 
   getTasksWithSubTasksByRepeatCfgId$(repeatCfgId: string): Observable<TaskWithSubTasks[]> {
+    if (!repeatCfgId) {
+      throw new Error('No repeatCfgId');
+    }
     return this._store.pipe(select(selectTaskWithSubTasksByRepeatConfigId, {repeatCfgId}));
   }
 
