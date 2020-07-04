@@ -38,14 +38,14 @@ import { Project } from '../../project/project.model';
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog: boolean = false;
-  @Input() isAddToBottom: boolean;
+  @Input() isAddToBottom: boolean = false;
   @Input() isDoubleEnterMode: boolean = false;
-  @Input() isElevated: boolean;
-  @Input() isDisableAutoFocus: boolean;
+  @Input() isElevated: boolean = false;
+  @Input() isDisableAutoFocus: boolean = false;
   @Output() blurred: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('inputEl', {static: true}) inputEl: ElementRef;
+  @ViewChild('inputEl', {static: true}) inputEl?: ElementRef;
 
   T: any = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -60,7 +60,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     switchMap(([searchTerm, {activeType, activeId}]) => (activeType === WorkContextType.PROJECT)
       ? this._searchForProject$(searchTerm)
       : this._searchForTag$(searchTerm, activeId)
-    ),
+    ) as any,
     // don't show issues twice
     // NOTE: this only works because backlog items come first
     map((items: AddTaskSuggestion[]) => items.reduce(
@@ -68,7 +68,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         return (item.issueData && unique.find(
           // NOTE: we check defined because we don't want to run into
           // false == false or similar
-          u => u.taskIssueId && u.taskIssueId === item.issueData.id
+          u => !!u.taskIssueId && !!item.issueData && u.taskIssueId === item.issueData.id
         ))
           ? unique
           : [...unique, item];
@@ -79,11 +79,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  private _isAddInProgress: boolean;
-  private _blurTimeout: number;
-  private _autofocusTimeout: number;
-  private _attachKeyDownHandlerTimeout: number;
-  private _lastAddedTaskId: string;
+  private _isAddInProgress?: boolean;
+  private _blurTimeout?: number;
+  private _autofocusTimeout?: number;
+  private _attachKeyDownHandlerTimeout?: number;
+  private _lastAddedTaskId?: string;
 
   constructor(
     private _taskService: TaskService,
@@ -100,15 +100,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this._autofocusTimeout = setTimeout(() => {
       if (!this.isDisableAutoFocus) {
-        this.inputEl.nativeElement.focus();
+        (this.inputEl as ElementRef).nativeElement.focus();
       }
     });
 
     this._attachKeyDownHandlerTimeout = setTimeout(() => {
-      this.inputEl.nativeElement.addEventListener('keydown', (ev) => {
+      (this.inputEl as ElementRef).nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
         if (ev.key === 'Escape') {
           this.blurred.emit();
-        } else if (ev.key === '1' && ev.ctrlKey === true) {
+        } else if (ev.key === '1' && ev.ctrlKey) {
           this.isAddToBacklog = !this.isAddToBacklog;
           this._cd.detectChanges();
           ev.preventDefault();
@@ -137,7 +137,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   onBlur(ev: FocusEvent) {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     if (relatedTarget && relatedTarget.className.includes('switch-add-to-btn')) {
-      this.inputEl.nativeElement.focus();
+      (this.inputEl as ElementRef).nativeElement.focus();
     } else if (relatedTarget && relatedTarget.className.includes('mat-option')) {
       this._blurTimeout = window.setTimeout(() => {
         if (!this._isAddInProgress) {
@@ -154,7 +154,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   trackByFn(i: number, item: AddTaskSuggestion) {
-    return item.taskId || item.issueData.id;
+    return item.taskId || (item.issueData && item.issueData.id);
   }
 
   async addTask() {
@@ -206,6 +206,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         translateParams: {title: item.title},
       });
     } else {
+      if (!item.issueType || !item.issueData) {
+        throw new Error('No issueData');
+      }
       const res = await this._taskService.checkForTaskWithIssue(item.issueData.id, item.issueType);
       if (!res) {
         this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
@@ -216,7 +219,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         );
       } else if (res.isFromArchive) {
         this._lastAddedTaskId = res.task.id;
-        this._taskService.restoreTask(res.task, res.subTasks);
+        this._taskService.restoreTask(res.task, res.subTasks || []);
         this._snackService.open({
           ico: 'info',
           msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
@@ -240,7 +243,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private async _getCtxForTaskSuggestion({projectId, tagIds}: AddTaskSuggestion): Promise<Tag | Project> {
     return projectId
       ? await this._projectService.getByIdOnce$(projectId).toPromise()
-      : await this._tagService.getTagById$(tagIds[0]).pipe(first()).toPromise();
+      : await this._tagService.getTagById$((tagIds as string[])[0]).pipe(first()).toPromise();
   }
 
   private _filterBacklog(searchText: string, task: Task) {
@@ -261,8 +264,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           .map((task): AddTaskSuggestion => ({
             title: task.title,
             taskId: task.id,
-            taskIssueId: task.issueId,
-            issueType: task.issueType,
+            taskIssueId: task.issueId || undefined,
+            issueType: task.issueType || undefined,
           }))
         )
       );
@@ -285,16 +288,16 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             return {
               title: task.title,
               taskId: task.id,
-              taskIssueId: task.issueId,
-              issueType: task.issueType,
-              projectId: task.projectId,
+              taskIssueId: task.issueId || undefined,
+              issueType: task.issueType || undefined,
+              projectId: task.projectId || undefined,
 
               isFromOtherContextAndTagOnlySearch: true,
               tagIds: task.tagIds,
             };
           })
         ),
-        switchMap(tasks => tasks.length
+        switchMap(tasks => !!(tasks.length)
           ? forkJoin(tasks.map(task => {
             const isFromProject = !!task.projectId;
             return from(this._getCtxForTaskSuggestion(task)).pipe(
@@ -310,7 +313,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           }))
           : of([])
         ),
-      );
+        // TODO revisit typing here
+      ) as any;
     } else {
       return of([]);
     }

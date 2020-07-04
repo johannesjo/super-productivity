@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskAttachment } from '../task-attachment.model';
 import { TaskAttachmentService } from '../task-attachment.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,9 +13,9 @@ import { T } from '../../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation]
 })
-export class TaskAttachmentListComponent implements OnInit {
-  @Input() taskId: string;
-  @Input() attachments: TaskAttachment[];
+export class TaskAttachmentListComponent {
+  @Input() taskId?: string;
+  @Input() attachments?: TaskAttachment[];
   @Input() isDisableControls: boolean = false;
 
   T: any = T;
@@ -25,9 +25,6 @@ export class TaskAttachmentListComponent implements OnInit {
     public readonly attachmentService: TaskAttachmentService,
     private readonly _matDialog: MatDialog,
   ) {
-  }
-
-  ngOnInit() {
   }
 
   openEditDialog(attachment?: TaskAttachment) {
@@ -42,6 +39,9 @@ export class TaskAttachmentListComponent implements OnInit {
       },
     }).afterClosed()
       .subscribe((attachmentIN) => {
+        if (!this.taskId) {
+          throw new Error('No taskId');
+        }
         if (attachmentIN) {
           if (attachmentIN.id) {
             this.attachmentService.updateAttachment(this.taskId, attachmentIN.id, attachmentIN);
@@ -53,6 +53,9 @@ export class TaskAttachmentListComponent implements OnInit {
   }
 
   remove(id: string) {
+    if (!this.taskId) {
+      throw new Error('No taskId');
+    }
     this.attachmentService.deleteAttachment(this.taskId, id);
   }
 

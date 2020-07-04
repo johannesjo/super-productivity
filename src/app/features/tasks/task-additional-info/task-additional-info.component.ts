@@ -44,6 +44,12 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
+import { ipcRenderer } from 'electron';
+
+interface IssueAndType {
+  id: string | number | null;
+  type: IssueProviderKey | null;
+}
 
 @Component({
   selector: 'task-additional-info',
@@ -56,36 +62,36 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
 export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @HostBinding('@noop') alwaysTrue: boolean = true;
 
-  @ViewChildren(TaskAdditionalInfoItemComponent) itemEls: QueryList<TaskAdditionalInfoItemComponent>;
-  @ViewChild('attachmentPanelElRef') attachmentPanelElRef: TaskAdditionalInfoItemComponent;
+  @ViewChildren(TaskAdditionalInfoItemComponent) itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
+  @ViewChild('attachmentPanelElRef') attachmentPanelElRef?: TaskAdditionalInfoItemComponent;
 
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   selectedItemIndex: number = 0;
   isFocusNotes: boolean = false;
   T: any = T;
-  issueAttachments: TaskAttachment[];
-  reminderId$: BehaviorSubject<string | null> = new BehaviorSubject(null);
-  reminderData$: Observable<ReminderCopy> = this.reminderId$.pipe(
+  issueAttachments: TaskAttachment[] = [];
+  reminderId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  reminderData$: Observable<ReminderCopy | null> = this.reminderId$.pipe(
     switchMap(id => id
       ? this._reminderService.getById$(id)
       : of(null)
     ),
   );
 
-  issueIdAndType$: Subject<{ id: string | number; type: IssueProviderKey }> = new Subject();
-  issueIdAndTypeShared$: Observable<{ id: string | number; type: IssueProviderKey }> = this.issueIdAndType$.pipe(
+  issueIdAndType$: Subject<IssueAndType> = new Subject();
+  issueIdAndTypeShared$: Observable<IssueAndType> = this.issueIdAndType$.pipe(
     shareReplay(1),
   );
 
-  issueDataNullTrigger$: Subject<{ id: string | number; type: IssueProviderKey }> = new Subject();
+  issueDataNullTrigger$: Subject<IssueAndType | null> = new Subject();
 
-  issueDataTrigger$: Observable<{ id: string | number; type: IssueProviderKey }> = merge(
+  issueDataTrigger$: Observable<IssueAndType | null> = merge(
     this.issueIdAndTypeShared$,
     this.issueDataNullTrigger$
   );
-  issueData: IssueData;
-  repeatCfgId$: BehaviorSubject<string | null> = new BehaviorSubject(null);
-  repeatCfgDays$: Observable<string> = this.repeatCfgId$.pipe(
+  issueData?: IssueData | null | false;
+  repeatCfgId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  repeatCfgDays$: Observable<string | null> = this.repeatCfgId$.pipe(
     switchMap(id => (id)
       ? this._taskRepeatCfgService.getTaskRepeatCfgById$(id).pipe(
         map(repeatCfg => {
@@ -103,24 +109,30 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       : of(null)
     ),
   );
-  parentId$: BehaviorSubject<string> = new BehaviorSubject(null);
-  parentTaskData$: Observable<TaskWithSubTasks> = this.parentId$.pipe(
-    switchMap((id) => id ? this.taskService.getByIdWithSubTaskData$(id) : of(null))
-  );
-  localAttachments: TaskAttachment[];
-  private _taskData: TaskWithSubTasks;
-  issueData$: Observable<IssueData> = this.issueDataTrigger$.pipe(
-    switchMap((args) => (args && args.id && args.type)
-      ? this._issueService.getById$(args.type, args.id, this._taskData.projectId)
-        // ? throwError({[HANDLED_ERROR_PROP_STR]: 'XX'})
-        .pipe(
-          // delayWhen(x => timer(3000)),
+  parentId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  parentTaskData$: Observable<TaskWithSubTasks | null> = this.parentId$.pipe(switchMap((id) => !!id
+    ? this.taskService.getByIdWithSubTaskData$(id)
+    : of(null)
+  ));
+
+  localAttachments?: TaskAttachment[];
+  private _taskData?: TaskWithSubTasks;
+
+  issueData$: Observable<IssueData | null | false> = this.issueDataTrigger$.pipe(
+    switchMap((args) => {
+      if (!this._taskData || !this._taskData.projectId) {
+        throw new Error('task data not ready');
+      }
+
+      return (args && args.id && args.type)
+        ? this._issueService.getById$(args.type, args.id, this._taskData.projectId).pipe(
           // NOTE we need this, otherwise the error is going to weird up the observable
           catchError(() => {
             return of(false);
           }),
-        )
-      : of(null)),
+        ) as Observable<false | IssueData>
+        : of(null);
+    }),
     shareReplay(1),
     // NOTE: this seems to fix the issue loading bug, when we end up with the
     // expandable closed when the data is loaded
@@ -133,7 +145,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       : [])
   );
 
-  private _focusTimeout: number;
+  private _focusTimeout?: number;
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -161,7 +173,12 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       this._subs.add(this.issueIdAndTypeShared$.pipe(
         filter(({id, type}) => type === JIRA_TYPE),
         // not strictly reactive reactive but should work a 100% as issueIdAndType are triggered after task data
-        switchMap(() => this._projectService.getJiraCfgForProject$(this._taskData.projectId))
+        switchMap(() => {
+          if (!this._taskData || !this._taskData.projectId) {
+            throw new Error('task data not ready');
+          }
+          return this._projectService.getJiraCfgForProject$(this._taskData.projectId);
+        })
       ).subscribe((jiraCfg) => {
         if (jiraCfg.isEnabled) {
           (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_SETUP_IMG_HEADERS, jiraCfg);
@@ -174,7 +191,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   get task(): TaskWithSubTasks {
-    return this._taskData;
+    return this._taskData as TaskWithSubTasks;
   }
 
   @Input() set task(newVal: TaskWithSubTasks) {
@@ -223,6 +240,9 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       filter(([, id]) => !!id),
     ).subscribe(([v]) => {
       if (v === TaskAdditionalInfoTargetPanel.Attachments) {
+        if (!this.attachmentPanelElRef) {
+          throw new Error();
+        }
         this.focusItem(this.attachmentPanelElRef);
       } else {
         this._focusFirst();
@@ -295,19 +315,27 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   onItemKeyPress(ev: KeyboardEvent) {
+    if (!this.itemEls) {
+      throw new Error();
+    }
+
     if (ev.key === 'ArrowUp' && this.selectedItemIndex > 0) {
       this.selectedItemIndex--;
-      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
-    } else if (ev.key === 'ArrowDown' && this.itemEls.toArray().length > (this.selectedItemIndex + 1)) {
+      (this.itemEls).toArray()[this.selectedItemIndex].focusEl();
+    } else if (ev.key === 'ArrowDown' && (this.itemEls).toArray().length > (this.selectedItemIndex + 1)) {
       this.selectedItemIndex++;
-      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
+      (this.itemEls).toArray()[this.selectedItemIndex].focusEl();
     }
   }
 
   focusItem(cmpInstance: TaskAdditionalInfoItemComponent, timeoutDuration: number = 150) {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
-      const i = this.itemEls.toArray().findIndex(el => el === cmpInstance);
+      if (!this.itemEls) {
+        throw new Error();
+      }
+
+      const i = (this.itemEls).toArray().findIndex(el => el === cmpInstance);
       if (i === -1) {
         this.focusItem(cmpInstance);
       } else {
@@ -319,13 +347,20 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
     if (isChanged) {
+      if (!this._taskData) {
+        throw new Error('No task data');
+      }
+
       this.taskService.update(this._taskData.id, {title: newTitle});
     }
   }
 
   private _focusFirst() {
     this._focusTimeout = window.setTimeout(() => {
-      this.focusItem(this.itemEls.first, 0);
+      if (!this.itemEls) {
+        throw new Error();
+      }
+      this.focusItem((this.itemEls).first, 0);
     }, 150);
   }
 

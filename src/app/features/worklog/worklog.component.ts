@@ -73,7 +73,7 @@ export class WorklogComponent {
             }
 
             console.log('RESTORE', task, subTasks);
-            this._taskService.restoreTask(task, subTasks);
+            this._taskService.restoreTask(task, (subTasks || []) as Task[]);
             this._router.navigate(['/active/tasks']);
           }
         }

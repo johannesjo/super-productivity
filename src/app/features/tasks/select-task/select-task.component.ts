@@ -15,7 +15,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 export class SelectTaskComponent implements OnInit, OnDestroy {
   T: any = T;
   taskSelectCtrl: FormControl = new FormControl();
-  filteredTasks: Task[];
+  filteredTasks: Task[] = [];
   isCreate: boolean = false;
   @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
   private _destroy$: Subject<boolean> = new Subject<boolean>();

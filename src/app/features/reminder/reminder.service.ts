@@ -106,9 +106,9 @@ export class ReminderService {
     return _foundReminder && dirtyDeepCopy(_foundReminder);
   }
 
-  getById$(reminderId: string): Observable<ReminderCopy | undefined> {
+  getById$(reminderId: string): Observable<ReminderCopy | null> {
     return this.reminders$.pipe(
-      map(reminders => reminders.find(reminder => reminder.id === reminderId)),
+      map(reminders => reminders.find(reminder => reminder.id === reminderId) || null),
     );
   }
 
