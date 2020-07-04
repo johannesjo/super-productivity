@@ -38,6 +38,7 @@ import { InitialDialogService } from './features/initial-dialog/initial-dialog.s
 import { SyncService } from './imex/sync/sync.service';
 import { environment } from '../environments/environment';
 import { RouterOutlet } from '@angular/router';
+import { ipcRenderer } from 'electron';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -58,10 +59,10 @@ export class AppComponent implements OnDestroy {
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
-  @ViewChild('notesElRef', {read: ViewContainerRef}) notesElRef: ViewContainerRef;
-  @ViewChild('sideNavElRef', {read: ViewContainerRef}) sideNavElRef: ViewContainerRef;
+  @ViewChild('notesElRef', {read: ViewContainerRef}) notesElRef?: ViewContainerRef;
+  @ViewChild('sideNavElRef', {read: ViewContainerRef}) sideNavElRef?: ViewContainerRef;
 
-  isRTL: boolean;
+  isRTL: boolean = false;
 
   private _subs: Subscription = new Subscription();
 
@@ -123,7 +124,7 @@ export class AppComponent implements OnDestroy {
       this._initElectronErrorHandler();
       this._uiHelperService.initElectron();
 
-      this._electronService.ipcRenderer.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
         (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
       });
     } else {
@@ -197,11 +198,11 @@ export class AppComponent implements OnDestroy {
   }
 
   scrollToNotes() {
-    this.notesElRef.element.nativeElement.scrollIntoView({behavior: 'smooth'});
+    (this.notesElRef as ViewContainerRef).element.nativeElement.scrollIntoView({behavior: 'smooth'});
   }
 
   scrollToSidenav() {
-    this.sideNavElRef.element.nativeElement.scrollIntoView({behavior: 'smooth'});
+    (this.sideNavElRef as ViewContainerRef).element.nativeElement.scrollIntoView({behavior: 'smooth'});
   }
 
   ngOnDestroy() {
@@ -209,7 +210,7 @@ export class AppComponent implements OnDestroy {
   }
 
   private _initElectronErrorHandler() {
-    this._electronService.ipcRenderer.on(IPC.ERROR, (ev, data: {
+    (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ERROR, (ev, data: {
       error: any,
       stack: any,
       errorStr: string,
@@ -244,9 +245,12 @@ export class AppComponent implements OnDestroy {
     if (environment.production) {
       if ('storage' in navigator && 'estimate' in navigator.storage) {
         navigator.storage.estimate().then(({usage, quota}) => {
-          const percentUsed = Math.round(usage / quota * 100);
-          const usageInMib = Math.round(usage / (1024 * 1024));
-          const quotaInMib = Math.round(quota / (1024 * 1024));
+          const u = usage || 0;
+          const q = quota || 0;
+
+          const percentUsed = Math.round(u / q * 100);
+          const usageInMib = Math.round(u / (1024 * 1024));
+          const quotaInMib = Math.round(q / (1024 * 1024));
           const details = `${usageInMib} out of ${quotaInMib} MiB used (${percentUsed}%)`;
           console.log(details);
           if ((quotaInMib - usageInMib) <= 333) {

@@ -12,12 +12,13 @@ import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { ElectronService } from '../../core/electron/electron.service';
+import { ipcRenderer } from 'electron';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ShortcutService {
-  backlogPos: number;
+  backlogPos?: number;
 
   constructor(
     private _configService: GlobalConfigService,
@@ -41,17 +42,17 @@ export class ShortcutService {
 
     // GLOBAL SHORTCUTS
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.on(IPC.TASK_TOGGLE_START, () => {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.TASK_TOGGLE_START, () => {
         this._ngZone.run(() => {
           this._taskService.toggleStartTask();
         });
       });
-      this._electronService.ipcRenderer.on(IPC.ADD_TASK, () => {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ADD_TASK, () => {
         this._ngZone.run(() => {
           this._layoutService.showAddTaskBar();
         });
       });
-      this._electronService.ipcRenderer.on(IPC.ADD_NOTE, () => {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ADD_NOTE, () => {
         if (this._matDialog.openDialogs.length === 0) {
           this._ngZone.run(() => {
             this._matDialog.open(DialogAddNoteComponent);

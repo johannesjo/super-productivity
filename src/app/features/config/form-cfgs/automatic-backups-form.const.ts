@@ -4,7 +4,7 @@ import { T } from '../../../t.const';
 import { getElectron } from '../../../util/get-electron';
 import { IS_ELECTRON } from '../../../app.constants';
 
-const backupPath = IS_ELECTRON && `${getElectron().remote.app.getPath('userData')}/backups`;
+const backupPath = IS_ELECTRON && `${(getElectron() as Electron.RendererInterface).remote.app.getPath('userData')}/backups`;
 
 export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
   isElectronOnly: true,

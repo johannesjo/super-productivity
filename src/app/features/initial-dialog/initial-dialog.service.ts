@@ -30,7 +30,8 @@ export class InitialDialogService {
 
     return this._dataInitService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._http.get(URL)),
-      timeout(3000),
+      // TODO check
+      timeout(3000) as any,
       switchMap((res: InitialDialogResponse) => {
         const lastLocalDialogNr = this._loadDialogNr();
         const isNewUser = !lastLocalDialogNr;
@@ -67,7 +68,8 @@ export class InitialDialogService {
   }
 
   private _loadDialogNr(): number {
-    return +localStorage.getItem(LS_INITIAL_DIALOG_NR) || 0;
+    const v = localStorage.getItem(LS_INITIAL_DIALOG_NR);
+    return v ? +v : 0;
   }
 
   private _saveDialogNr(nr: number = 0) {

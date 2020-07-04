@@ -33,9 +33,9 @@ import { DialogGitlabInitialSetupComponent } from 'src/app/features/issue/provid
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   T: any = T;
   projectData: ProjectCopy | Partial<ProjectCopy> = DEFAULT_PROJECT;
-  jiraCfg: JiraCfg;
-  githubCfg: GithubCfg;
-  gitlabCfg: GitlabCfg;
+  jiraCfg?: JiraCfg;
+  githubCfg?: GithubCfg;
+  gitlabCfg?: GitlabCfg;
 
   formBasic: FormGroup = new FormGroup({});
   formTheme: FormGroup = new FormGroup({});
@@ -54,7 +54,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   themeFormCfg: FormlyFieldConfig[] = [];
 
   private _subs: Subscription = new Subscription();
-  private _isSaveTmpProject: boolean;
+  private _isSaveTmpProject: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private _project: Project,
@@ -64,8 +64,8 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here,
-    this.basicSettingsFormCfg = CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG.items;
-    this.themeFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG.items;
+    this.basicSettingsFormCfg = CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG.items as any;
+    this.themeFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG.items as any;
   }
 
   ngOnInit() {
@@ -73,10 +73,11 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       this.projectData = {...this._project};
 
     } else {
-      if (loadFromSessionStorage(SS_PROJECT_TMP)) {
+      const ssVal: any = loadFromSessionStorage(SS_PROJECT_TMP);
+      if (ssVal) {
         this.projectData = {
           ...DEFAULT_PROJECT,
-          ...loadFromSessionStorage(SS_PROJECT_TMP),
+          ...ssVal,
         };
       }
       this._isSaveTmpProject = true;
@@ -136,7 +137,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       this._projectService.add(projectDataToSave);
     }
     this._isSaveTmpProject = false;
-    saveToSessionStorage(SS_PROJECT_TMP, null);
+    sessionStorage.removeItem(SS_PROJECT_TMP);
 
     this._matDialogRef.close();
   }
