@@ -23,10 +23,10 @@ export class FormlyTranslatedTemplateComponent extends FieldType implements OnIn
   }
 
   ngOnInit(): void {
-    this._createTag();
     if (!this.field || !this.field.templateOptions) {
       throw new Error();
     }
+    this._createTag();
 
     const translationId = this.field.templateOptions.text;
     if (!translationId) {
@@ -44,7 +44,7 @@ export class FormlyTranslatedTemplateComponent extends FieldType implements OnIn
   }
 
   private _createTag() {
-    if (!this.field || !this.field.templateOptions || !this.tplWrapper || !this._el) {
+    if (!this.field || !this.field.templateOptions || !this.tplWrapper) {
       throw new Error();
     }
     const tag = this.field.templateOptions.tag || 'div';

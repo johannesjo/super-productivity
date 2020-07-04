@@ -34,7 +34,8 @@ import { SimpleCounter } from '../../features/simple-counter/simple-counter.mode
   animations: [fadeAnimation, expandFadeHorizontalAnimation]
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
-  // tslint:disable-next-line:typedefT = T;
+   // tslint:disable-next-line:typedef
+  T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
 

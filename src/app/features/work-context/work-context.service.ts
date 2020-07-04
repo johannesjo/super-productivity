@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, interval, Observable, of, timer } from 'rxjs';
+import { combineLatest, EMPTY, interval, Observable, of, timer } from 'rxjs';
 import {
   WorkContext,
   WorkContextAdvancedCfg,
@@ -68,7 +68,7 @@ export class WorkContextService {
 
   // CONTEXT LEVEL
   // -------------
-  activeWorkContextId$: Observable<string|null> = this._store$.pipe(
+  activeWorkContextId$: Observable<string | null> = this._store$.pipe(
     select(selectActiveContextId),
     distinctUntilChanged(),
     shareReplay(1),
@@ -135,8 +135,8 @@ export class WorkContextService {
           })),
         );
       }
-      throw new Error('Invalid work context type');
-      // return EMPTY;
+      // return nothing until defined
+      return EMPTY;
     }),
     // TODO find out why this is sometimes undefined
     filter(ctx => !!ctx),
