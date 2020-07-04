@@ -36,7 +36,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
   advancedSettingsFormConfig: FormlyFieldConfig[] = [];
 
   isTestCredentialsSuccess: boolean = false;
-  user: JiraOriginalUser;
+  user?: JiraOriginalUser;
   jiraCfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
   @Output() saveCfg: EventEmitter<JiraCfg> = new EventEmitter();
 
@@ -74,7 +74,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
       this._jiraApiService.getCurrentUser$(this.jiraCfg, true)
         .pipe(catchError((err) => {
           this.isTestCredentialsSuccess = false;
-          this.user = null;
+          this.user = undefined;
           this._changeDetectorRef.detectChanges();
           return throwError({[HANDLED_ERROR_PROP_STR]: err});
         }))

@@ -210,12 +210,16 @@ export class GoogleDriveSyncEffects {
         return this._googleApiService.getFileInfo$(cfg._backupDocId).pipe(
           catchError(err => this._handleErrorForSave$(err)),
           concatMap((res: any): Observable<any> => {
-
-            const lastLocalSyncModelChange: number = this._persistenceService.getLastLocalSyncModelChange();
+            // if we don't have any local changes (unlikely) we assume its the lowest possible value
+            const lastLocalSyncModelChange: number = this._persistenceService.getLastLocalSyncModelChange() || 0;
             const lastModifiedRemote: string = res.modifiedDate;
             const lastSync = getGoogleLocalLastSync();
 
-            if (this._isEqual(lastLocalSyncModelChange, lastModifiedRemote)) {
+            if (lastSync === null) {
+              // never synced so ask what to do
+              this._openConfirmSaveDialog(lastModifiedRemote);
+              return of(new SaveToGoogleDriveCancel());
+            } else if (this._isEqual(lastLocalSyncModelChange, lastModifiedRemote)) {
               if (!action.payload || !action.payload.isSkipSnack) {
                 this._snackService.open({
                   type: 'SUCCESS',
@@ -319,7 +323,8 @@ export class GoogleDriveSyncEffects {
                   );
                 }),
                 concatMap(([loadResponse, appData]: [any, AppDataComplete]): any => {
-                  const lastLocalSyncModelChange = this._persistenceService.getLastLocalSyncModelChange();
+                  // if we don't have any local changes (unlikely) we assume its the lowest possible value
+                  const lastLocalSyncModelChange = this._persistenceService.getLastLocalSyncModelChange() || 0;
 
                   const lastLocalSyncModelChangeRemote = appData.lastLocalSyncModelChange
                     // NOTE: needed to support previous property name
@@ -387,7 +392,7 @@ export class GoogleDriveSyncEffects {
     tap((modifiedDate) => saveGoogleLocalLastSync(modifiedDate as string)),
   );
 
-  private _config: GoogleDriveSyncConfig;
+  private _config?: GoogleDriveSyncConfig;
 
   constructor(
     private _actions$: Actions,
@@ -420,13 +425,16 @@ export class GoogleDriveSyncEffects {
 
   private _checkIfRemoteUpdate$(): Observable<boolean> {
     const lastSync = getGoogleLocalLastSync();
+    if (!this._config) {
+      throw new Error('No cfg');
+    }
 
     return this._googleApiService.getFileInfo$(this._config._backupDocId)
       .pipe(
         tap(res => console.log(this._formatDate(res.modifiedDate))),
-        tap(res => console.log(this._formatDate(lastSync))),
-        tap(res => console.log(this._isNewerThan(res.modifiedDate, lastSync), res.modifiedDate, lastSync)),
-        map((res: any) => this._isNewerThan(res.modifiedDate, lastSync)),
+        tap(res => console.log(lastSync && this._formatDate(lastSync))),
+        tap(res => console.log(this._isNewerThan(res.modifiedDate, lastSync || 0), res.modifiedDate, lastSync)),
+        map((res: any) => this._isNewerThan(res.modifiedDate, lastSync || 0)),
       );
   }
 
@@ -436,14 +444,19 @@ export class GoogleDriveSyncEffects {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncSaveComponent.name;
     })) {
       const lastLocalSyncModelChange = this._persistenceService.getLastLocalSyncModelChange();
+      const googleLocalLastSync = getGoogleLocalLastSync();
       this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
         restoreFocus: true,
         data: {
           loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
           saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
           remoteModified: this._formatDate(remoteModified),
-          lastLocalSyncModelChange: this._formatDate(lastLocalSyncModelChange),
-          lastSync: this._formatDate(getGoogleLocalLastSync()),
+          lastLocalSyncModelChange: !!lastLocalSyncModelChange
+            ? this._formatDate(lastLocalSyncModelChange)
+            : '–',
+          lastSync: googleLocalLastSync
+            ? this._formatDate(googleLocalLastSync)
+            : '–',
         }
       });
     }
@@ -454,7 +467,8 @@ export class GoogleDriveSyncEffects {
     if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
       return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
     })) {
-      const lastLocalSyncModelChange: number = this._persistenceService.getLastLocalSyncModelChange();
+      const lastLocalSyncModelChange = this._persistenceService.getLastLocalSyncModelChange();
+      const googleLocalLastSync = getGoogleLocalLastSync();
       this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
         restoreFocus: true,
         data: {
@@ -464,8 +478,12 @@ export class GoogleDriveSyncEffects {
             this._store$.dispatch(new SaveToGoogleDrive());
           },
           remoteModified: this._formatDate(remoteModified),
-          lastLocalSyncModelChange: this._formatDate(lastLocalSyncModelChange),
-          lastSync: this._formatDate(getGoogleLocalLastSync()),
+          lastLocalSyncModelChange: !!lastLocalSyncModelChange
+            ? this._formatDate(lastLocalSyncModelChange)
+            : '–',
+          lastSync: googleLocalLastSync
+            ? this._formatDate(googleLocalLastSync)
+            : '–',
         }
       }).afterClosed().subscribe((isCanceled) => {
         if (isCanceled) {
@@ -507,6 +525,9 @@ export class GoogleDriveSyncEffects {
 
   // DATE HELPER
   private _loadFile$(): Observable<any> {
+    if (!this._config) {
+      throw new Error('No cfg');
+    }
     if (!this._config.syncFileName) {
       return throwError({[HANDLED_ERROR_PROP_STR]: 'No file name specified'});
     }
@@ -522,7 +543,7 @@ export class GoogleDriveSyncEffects {
   }
 
   private async _decodeAppDataIfNeeded(backupStr: string | AppDataComplete): Promise<AppDataComplete> {
-    let backupData: AppDataComplete;
+    let backupData: AppDataComplete | undefined;
 
     // we attempt this regardless of the option, because data might be compressed anyway
     if (typeof backupStr === 'string') {

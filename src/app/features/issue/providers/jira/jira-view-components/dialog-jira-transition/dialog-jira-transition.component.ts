@@ -22,14 +22,14 @@ import { JiraCfg } from '../../jira.model';
 export class DialogJiraTransitionComponent {
   T: any = T;
 
-  _jiraCfg$: Observable<JiraCfg> = this._projectService.getJiraCfgForProject$(this.data.task.projectId);
+  _jiraCfg$: Observable<JiraCfg> = this._projectService.getJiraCfgForProject$(this.data.task.projectId as string);
 
   availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraCfg$.pipe(
     first(),
     switchMap((cfg) => this._jiraApiService.getTransitionsForIssue$(this.data.issue.id, cfg))
   );
 
-  chosenTransition: JiraOriginalTransition;
+  chosenTransition?: JiraOriginalTransition;
 
   constructor(
     private _jiraApiService: JiraApiService,
@@ -43,6 +43,9 @@ export class DialogJiraTransitionComponent {
       task: Task,
     }
   ) {
+    if (!this.data.task.projectId) {
+      throw new Error('No projectId for task');
+    }
   }
 
   close() {
@@ -51,15 +54,17 @@ export class DialogJiraTransitionComponent {
 
   transitionIssue() {
     if (this.chosenTransition && this.chosenTransition.id) {
+      const trans: JiraOriginalTransition = this.chosenTransition;
+
       this._jiraCfg$.pipe(
-        concatMap((jiraCfg) => this._jiraApiService.transitionIssue$(this.data.issue.id, this.chosenTransition.id, jiraCfg)),
+        concatMap((jiraCfg) => this._jiraApiService.transitionIssue$(this.data.issue.id, trans.id, jiraCfg)),
         first(),
       ).subscribe(() => {
         this._jiraCommonInterfacesService.refreshIssue(this.data.task, false, false);
         this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.JIRA.S.TRANSITION,
-          translateParams: {issueKey: this.data.issue.key, name: this.chosenTransition.name}
+          translateParams: {issueKey: this.data.issue.key, name: trans.name}
         });
         this.close();
       });

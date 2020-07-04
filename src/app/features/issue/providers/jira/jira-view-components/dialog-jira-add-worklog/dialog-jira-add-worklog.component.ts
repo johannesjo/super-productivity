@@ -42,7 +42,7 @@ export class DialogJiraAddWorklogComponent {
   }
 
   async submitWorklog() {
-    if (this.issue.id && this.started && this.timeSpent) {
+    if (this.issue.id && this.started && this.timeSpent && this.data.task.projectId) {
       const cfg = await this._projectService.getJiraCfgForProject$(this.data.task.projectId).pipe(first()).toPromise();
       this._jiraApiService.addWorklog$({
         issueId: this.issue.id,
