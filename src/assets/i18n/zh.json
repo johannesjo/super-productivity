@@ -313,7 +313,7 @@
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "允许自签名证书",
-        "HOST": "主持人（例如：http：//my-host.de：1234）",
+        "HOST": "主机地址（例如：http://my-host.de:1234）",
         "PASSWORD": "令牌/密码",
         "USER_NAME": "电子邮件/用户名"
       },
