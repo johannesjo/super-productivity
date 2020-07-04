@@ -165,10 +165,10 @@ export class GoogleApiService {
     }
   }
 
-  getFileInfo$(fileId: string): Observable<any> {
+  getFileInfo$(fileId: string | null): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
-      throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
     }
 
     return this._mapHttp$({
@@ -200,10 +200,10 @@ export class GoogleApiService {
   }
 
   // NOTE: file will always be returned as text (makes sense)
-  loadFile$(fileId: string): Observable<any> {
+  loadFile$(fileId: string | null): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
-      throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
+      return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
     }
 
     return this.getFileInfo$(fileId).pipe(

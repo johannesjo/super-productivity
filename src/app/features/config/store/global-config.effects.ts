@@ -5,9 +5,9 @@ import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from './global-con
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './global-config.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { GlobalConfigState, KeyboardConfig } from '../global-config.model';
+import { KeyboardConfig } from '../global-config.model';
 import { IPC } from '../../../../../electron/ipc-events.const';
-import { IS_ELECTRON } from '../../../app.constants';
+import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { LanguageService } from '../../../core/language/language.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -93,7 +93,7 @@ export class GlobalConfigEffects {
       tap((action) => {
         const cfg = action.appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
         const lng = cfg && cfg.lang && cfg.lang.lng;
-        this._languageService.setLng(lng);
+        this._languageService.setLng(lng as LanguageCode);
       })
     );
 

@@ -2,7 +2,7 @@ const isSpecialKeyExactlyRight = (isKeyRequired: boolean, isKeyPressed: boolean)
   return (isKeyRequired && isKeyPressed) || (!isKeyRequired && !isKeyPressed);
 };
 
-export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string) => {
+export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string | null) => {
   if (comboToTest) {
     const isPlusKey = comboToTest.includes('++');
     const comboKeys: string[] = comboToTest.split('+');

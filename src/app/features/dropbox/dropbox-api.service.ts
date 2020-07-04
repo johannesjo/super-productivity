@@ -12,9 +12,9 @@ import { toDropboxIsoString } from './iso-date-without-ms.util.';
 
 @Injectable({providedIn: 'root'})
 export class DropboxApiService {
-  authCode$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
+  authCode$: Observable<string | null> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
 
-  private _accessToken$: Observable<string> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.accessToken));
+  private _accessToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.accessToken));
 
   isTokenAvailable$: Observable<boolean> = this._accessToken$.pipe(
     map((token) => !!token),
@@ -115,7 +115,7 @@ export class DropboxApiService {
     accessToken?: string
   }): Promise<AxiosResponse> {
     await this._isReady$.toPromise();
-    accessToken = accessToken || await this._accessToken$.pipe(first()).toPromise();
+    accessToken = accessToken || await this._accessToken$.pipe(first()).toPromise() || undefined;
 
     return axios.request({
       url: params
