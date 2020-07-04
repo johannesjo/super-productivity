@@ -4,7 +4,7 @@ import { filterOutId } from '../../../util/filter-out-id';
 export const moveTaskForWorkContextLikeState = (
   taskId: string,
   newOrderedIds: string[],
-  target: DropListModelSource,
+  target: DropListModelSource | null,
   taskIdsBefore: string[]
 ): string[] => {
   const idsFilteredMoving = taskIdsBefore.filter(filterOutId(taskId));

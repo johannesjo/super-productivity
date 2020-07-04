@@ -13,6 +13,7 @@ import { T } from '../../../t.const';
 import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
 import { Tag } from '../../tag/tag.model';
+import { exists } from '../../../util/exists';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -31,7 +32,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
     tagIds: [...this.task.tagIds],
   };
 
-  taskRepeatCfgId: string = this.task.repeatCfgId;
+  taskRepeatCfgId: string | null = this.task.repeatCfgId;
   isEdit: boolean = !!this.taskRepeatCfgId;
 
   fields: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG;
@@ -53,7 +54,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.isEdit) {
+    if (this.isEdit && this.task.repeatCfgId) {
       this._subs.add(this._taskRepeatCfgService.getTaskRepeatCfgById$(this.task.repeatCfgId).subscribe((cfg) => {
         this.taskRepeatCfg = cfg;
         this._cd.detectChanges();
@@ -67,16 +68,16 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   save() {
     if (this.isEdit) {
-      this._taskRepeatCfgService.updateTaskRepeatCfg(this.taskRepeatCfgId, this.taskRepeatCfg);
+      this._taskRepeatCfgService.updateTaskRepeatCfg(exists(this.taskRepeatCfgId), this.taskRepeatCfg);
       this.close();
     } else {
-      this._taskRepeatCfgService.addTaskRepeatCfgToTask(this.task.id, this.task.projectId, this.taskRepeatCfg);
+      this._taskRepeatCfgService.addTaskRepeatCfgToTask(this.task.id, exists(this.task.projectId), this.taskRepeatCfg);
       this.close();
     }
   }
 
   remove() {
-    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(this.task.repeatCfgId);
+    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(exists(this.task.repeatCfgId));
     this.close();
   }
 

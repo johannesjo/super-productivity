@@ -219,7 +219,8 @@ export class TaskService {
 
   // Tasks
   // -----
-  add(title: string,
+  add(
+    title: string | null,
     isAddToBacklog: boolean = false,
     additional: Partial<Task> = {},
     isAddToBottom: boolean = false,
@@ -634,7 +635,7 @@ export class TaskService {
     workContextType = this._workContextService.activeWorkContextType,
     workContextId = this._workContextService.activeWorkContextId
   }: {
-    title: string;
+    title: string | null;
     additional?: Partial<Task>;
     workContextType?: WorkContextType;
     workContextId?: string;
@@ -643,7 +644,7 @@ export class TaskService {
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
       created: Date.now(),
-      title,
+      title: title as string,
       id: shortid(),
 
       projectId: (workContextType === WorkContextType.PROJECT)

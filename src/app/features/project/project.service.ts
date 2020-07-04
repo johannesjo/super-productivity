@@ -123,6 +123,9 @@ export class ProjectService {
   }
 
   getByIdOnce$(id: string): Observable<Project> {
+    if (!id) {
+      throw new Error('No id given');
+    }
     return this._store$.pipe(select(selectProjectById, {id}), take(1));
   }
 
