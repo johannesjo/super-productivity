@@ -15,9 +15,9 @@ import { JIRA_TYPE } from '../../../issue.const';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
-export const mapToSearchResults = (res): SearchResultItem[] => {
-  const issues = dedupeByKey(res.response.sections.map(sec => sec.issues).flat(), 'key')
-    .map(issue => {
+export const mapToSearchResults = (res: any): SearchResultItem[] => {
+  const issues = dedupeByKey(res.response.sections.map((sec: any) => sec.issues).flat(), 'key')
+    .map((issue: any) => {
       return {
         title: issue.key + ' ' + issue.summaryText,
         titleHighlighted: issue.key + ' ' + issue.summary,
@@ -32,15 +32,15 @@ export const mapToSearchResults = (res): SearchResultItem[] => {
   return issues;
 };
 
-export const mapIssuesResponse = (res, cfg: JiraCfg): JiraIssue[] => {
-  return res.response.issues.map((issue) => {
+export const mapIssuesResponse = (res: any, cfg: JiraCfg): JiraIssue[] => {
+  return res.response.issues.map((issue: JiraIssueOriginal) => {
     return mapIssue(issue, cfg);
   });
 };
 
-export const mapResponse = (res) => res.response;
+export const mapResponse = (res: any): unknown => res.response;
 
-export const mapIssueResponse = (res, cfg: JiraCfg): JiraIssue => mapIssue(res.response, cfg);
+export const mapIssueResponse = (res: any, cfg: JiraCfg): JiraIssue => mapIssue(res.response, cfg);
 
 export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   const issueCopy = Object.assign({}, issue);
@@ -56,33 +56,28 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
     summary: fields.summary,
     updated: fields.updated,
     status: fields.status,
-    storyPoints: cfg.storyPointFieldId && fields[cfg.storyPointFieldId],
+    storyPoints: (!!cfg.storyPointFieldId && !!(fields as any)[cfg.storyPointFieldId])
+      ? (fields as any)[cfg.storyPointFieldId] as number
+      : undefined,
     attachments: fields.attachment && fields.attachment.map(mapAttachment),
-    comments: fields.comment && fields.comment.comments.map(mapComments),
-    changelog: mapChangelog(issueCopy.changelog),
+    comments: (!!fields.comment && !!fields.comment.comments)
+      ? fields.comment.comments.map(mapComments)
+      : [],
+    changelog: mapChangelog(issueCopy.changelog as JiraOriginalChangelog),
     assignee: mapAuthor(fields.assignee),
     // url: makeIssueUrl(cfg.host, issueCopy.key)
   };
 };
 
-export const makeIssueUrl = (host: string, issueKey: string): string => {
-  let fullLink = host + '/browse/' + issueKey;
-  if (!fullLink.match(matchProtocolRegEx)) {
-    fullLink = 'https://' + fullLink;
-  }
-  return fullLink;
-};
-
 export const mapAuthor = (author: JiraOriginalAuthor): JiraAuthor => {
-  if (author) {
-    return Object.assign({}, author, {
-      self: undefined,
-      avatarUrls: undefined,
-      avatarUrl: author.avatarUrls['48x48'],
-    });
-  } else {
-    return null;
+  if (!author) {
+    throw new Error('No author for issue');
   }
+  return Object.assign({}, author, {
+    self: undefined,
+    avatarUrls: undefined,
+    avatarUrl: author.avatarUrls['48x48'],
+  });
 };
 export const mapAttachment = (attachment: JiraOriginalAttachment): JiraAttachment => {
   return Object.assign({}, attachment, {
@@ -111,7 +106,7 @@ export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment): T
 };
 
 export const mapChangelog = (changelog: JiraOriginalChangelog): JiraChangelogEntry[] => {
-  const newChangelog = [];
+  const newChangelog: JiraChangelogEntry[] = [];
   if (!changelog) {
     return [];
   }

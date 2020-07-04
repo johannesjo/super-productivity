@@ -3,7 +3,7 @@ import { DropPasteInput, DropPasteInputType } from '../../../core/drop-paste-inp
 export type TaskAttachmentType = DropPasteInputType;
 
 export interface TaskAttachmentCopy extends DropPasteInput {
-  id: string;
+  id: string | null;
   originalImgPath?: string;
 }
 

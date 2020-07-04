@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue.const';
 import { IssueData } from '../issue.model';
@@ -9,17 +9,13 @@ import { IssueData } from '../issue.model';
   styleUrls: ['./issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class IssueContentComponent implements OnInit {
-  @Input() task: TaskWithSubTasks;
-  @Input() issueData: IssueData;
+export class IssueContentComponent {
+  @Input() task?: TaskWithSubTasks;
+  @Input() issueData?: IssueData;
   readonly GITLAB_TYPE: string = GITLAB_TYPE;
   readonly GITHUB_TYPE: string = GITHUB_TYPE;
   readonly JIRA_TYPE: string = JIRA_TYPE;
 
   constructor() {
   }
-
-  ngOnInit() {
-  }
-
 }

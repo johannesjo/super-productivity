@@ -46,7 +46,14 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false
-  ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue }> {
+  ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue } | null> {
+    if (!task.projectId) {
+      throw new Error('No projectId for task');
+    }
+    if (!task.issueId) {
+      throw new Error('No issueId for task');
+    }
+
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._jiraApiService.getIssueById$(task.issueId, cfg).toPromise() as JiraIssue;
 
@@ -85,6 +92,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
         issue,
       };
     }
+    return null;
   }
 
   getAddTaskData(issue: JiraIssueReduced): { title: string; additionalFields: Partial<Task> } {
@@ -100,6 +108,10 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   issueLink$(issueId: string | number, projectId: string): Observable<string> {
+    if (!issueId || !projectId) {
+      throw new Error('No issueId or no projectId');
+    }
+
     return this._projectService.getJiraCfgForProject$(projectId).pipe(
       first(),
       map((jiraCfg) => jiraCfg.host + '/browse/' + issueId)

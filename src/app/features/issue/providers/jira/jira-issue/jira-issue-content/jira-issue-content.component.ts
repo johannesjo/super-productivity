@@ -5,6 +5,7 @@ import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { TaskAttachment } from '../../../../../tasks/task-attachment/task-attachment.model';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
+// @ts-ignore
 import * as j2m from 'jira2md';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { Observable, ReplaySubject } from 'rxjs';
@@ -18,14 +19,14 @@ import { switchMap } from 'rxjs/operators';
   animations: [expandAnimation]
 })
 export class JiraIssueContentComponent {
-  description: string;
-  attachments: TaskAttachment[];
+  description?: string;
+  attachments?: TaskAttachment[];
   T: any = T;
-  issue: JiraIssue;
-  task: TaskWithSubTasks;
+  issue?: JiraIssue;
+  task?: TaskWithSubTasks;
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
   issueUrl$: Observable<string> = this._task$.pipe(
-    switchMap((task) => this._jiraCommonInterfacesService.issueLink$(task.issueId, task.projectId))
+    switchMap((task) => this._jiraCommonInterfacesService.issueLink$(task.issueId as string, task.projectId as string))
   );
 
   constructor(
@@ -45,6 +46,9 @@ export class JiraIssueContentComponent {
   }
 
   hideUpdates() {
+    if (!this.task) {
+      throw new Error('No task');
+    }
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 

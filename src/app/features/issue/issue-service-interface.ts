@@ -15,7 +15,7 @@ export interface IssueServiceInterface {
     isNotifyNoUpdateRequired: boolean): Promise<{
     taskChanges: Partial<Task>,
     issue: IssueData
-  }>;
+  } | null>;
 
   getAddTaskData?(issueData: IssueDataReduced): { title: string; additionalFields: Partial<Task> };
 

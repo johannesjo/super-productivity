@@ -35,7 +35,7 @@ export class GithubIssueEffects {
         tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
         withLatestFrom(
           this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE)
+          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE) as Promise<number[]>
         ),
         tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
           const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
@@ -48,13 +48,18 @@ export class GithubIssueEffects {
     first(),
     switchMap((tasks) => {
       const gitIssueTasks = tasks.filter(task => task.issueType === GITHUB_TYPE);
-      return forkJoin(gitIssueTasks.map(task => this._projectService.getGithubCfgForProject$(task.projectId).pipe(
-        first(),
-        map(cfg => ({
-          cfg,
-          task,
-        }))
-        ))
+      return forkJoin(gitIssueTasks.map(task => {
+          if (!task.projectId) {
+            throw new Error('No project for task');
+          }
+          return this._projectService.getGithubCfgForProject$(task.projectId).pipe(
+            first(),
+            map(cfg => ({
+              cfg,
+              task,
+            }))
+          );
+        })
       );
     }),
     map((cos) => cos

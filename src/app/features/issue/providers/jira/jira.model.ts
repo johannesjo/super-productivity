@@ -4,7 +4,7 @@ export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | JiraOriginalTransit
 
 export interface JiraTransitionConfig {
   // NOTE: keys mirror IssueLocalState type
-  // OPEN: JiraTransitionOption;
+  OPEN: JiraTransitionOption;
   IN_PROGRESS: JiraTransitionOption;
   DONE: JiraTransitionOption;
 }

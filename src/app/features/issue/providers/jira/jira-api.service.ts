@@ -20,7 +20,6 @@ import { JiraCfg } from './jira.model';
 import { IPC } from '../../../../../../electron/ipc-events.const';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../../../app.constants';
-import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
 import { Observable, of, throwError } from 'rxjs';
 import { SearchResultItem } from '../../issue.model';
 import { catchError, concatMap, finalize, first, mapTo, shareReplay, take } from 'rxjs/operators';
@@ -35,6 +34,7 @@ import { fromPromise } from 'rxjs/internal-compatibility';
 import { getJiraResponseErrorTxt } from '../../../../util/get-jira-response-error-text';
 import { isOnline } from '../../../../util/is-online';
 import { GlobalProgressBarService } from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
+import { ipcRenderer, IpcRendererEvent } from 'electron';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -66,7 +66,7 @@ interface JiraRequestCfg {
 })
 export class JiraApiService {
   private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
-  private _isBlockAccess: boolean = loadFromSessionStorage(BLOCK_ACCESS_KEY);
+  private _isBlockAccess: boolean = !!sessionStorage.getItem(BLOCK_ACCESS_KEY);
   private _isExtension: boolean = false;
   private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
     ? of(true).pipe()
@@ -84,8 +84,8 @@ export class JiraApiService {
     private _bannerService: BannerService,
   ) {
     // set up callback listener for electron
-    if (this._electronService.isElectronApp) {
-      this._electronService.ipcRenderer.on(IPC.JIRA_CB_EVENT, (ev, res) => {
+    if (IS_ELECTRON) {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: unknown) => {
         this._handleResponse(res);
       });
     }
@@ -93,7 +93,7 @@ export class JiraApiService {
     this._chromeExtensionInterfaceService.onReady$
       .subscribe(() => {
         this._isExtension = true;
-        this._chromeExtensionInterfaceService.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
+        this._chromeExtensionInterfaceService.addEventListener('SP_JIRA_RESPONSE', (ev: unknown, data: unknown) => {
           this._handleResponse(data);
         });
       });
@@ -101,7 +101,7 @@ export class JiraApiService {
 
   unblockAccess() {
     this._isBlockAccess = false;
-    saveToSessionStorage(BLOCK_ACCESS_KEY, false);
+    sessionStorage.removeItem(BLOCK_ACCESS_KEY);
   }
 
   issuePicker$(searchTerm: string, cfg: JiraCfg): Observable<SearchResultItem[]> {
@@ -147,7 +147,7 @@ export class JiraApiService {
     }
 
     return this._sendRequest$({
-      transform: mapIssuesResponse,
+      transform: mapIssuesResponse as (res: any, cfg?: JiraCfg) => any,
       pathname: 'search',
       method: 'POST',
       body: {
@@ -241,7 +241,7 @@ export class JiraApiService {
 
   private _getIssueById$(issueId: string, cfg: JiraCfg, isGetChangelog: boolean = false): Observable<JiraIssue> {
     return this._sendRequest$({
-      transform: mapIssueResponse,
+      transform: mapIssueResponse as (res: any, cfg?: JiraCfg) => any,
       pathname: `issue/${issueId}`,
       query: {
         expand: isGetChangelog ? ['changelog', 'description'] : ['description']
@@ -335,7 +335,10 @@ export class JiraApiService {
 
     const requestToSend = {requestId, requestInit, url};
     if (this._electronService.isElectronApp) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_MAKE_REQUEST_EVENT, {...requestToSend, jiraCfg});
+      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_MAKE_REQUEST_EVENT, {
+        ...requestToSend,
+        jiraCfg
+      });
     } else if (this._isExtension) {
       this._chromeExtensionInterfaceService.dispatchEvent('SP_JIRA_REQUEST', requestToSend);
     }
@@ -443,7 +446,7 @@ export class JiraApiService {
   private _blockAccess() {
     // TODO also shut down all existing requests
     this._isBlockAccess = true;
-    saveToSessionStorage(BLOCK_ACCESS_KEY, true);
+    sessionStorage.setItem(BLOCK_ACCESS_KEY, 'true');
   }
 
   private _b64EncodeUnicode(str: string) {

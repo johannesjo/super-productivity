@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JiraIssueHeaderComponent {
-  @Input() public task: TaskWithSubTasks;
+  @Input() task?: TaskWithSubTasks;
   isOnline$: Observable<boolean> = isOnline$;
 
   constructor() {

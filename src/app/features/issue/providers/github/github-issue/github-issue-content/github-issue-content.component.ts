@@ -26,6 +26,9 @@ export class GithubIssueContentComponent {
   }
 
   hideUpdates() {
+    if (!this.task) {
+      throw new Error('No task');
+    }
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 
