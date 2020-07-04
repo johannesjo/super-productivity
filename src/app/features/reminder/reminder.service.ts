@@ -17,6 +17,7 @@ import { delay, filter, first, map, mapTo, switchMap, take } from 'rxjs/operator
 import { migrateReminders } from './migrate-reminder.util';
 import { WorkContextService } from '../work-context/work-context.service';
 import { devError } from '../../util/dev-error';
+import { WorkContextType } from '../work-context/work-context.model';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const DELAY = 5000;
@@ -125,8 +126,8 @@ export class ReminderService {
 
     this._reminders.push({
       id,
-      workContextId: this._workContextService.activeWorkContextId,
-      workContextType: this._workContextService.activeWorkContextType,
+      workContextId: this._workContextService.activeWorkContextId as string,
+      workContextType: this._workContextService.activeWorkContextType as WorkContextType,
       relatedId,
       title,
       remindAt,

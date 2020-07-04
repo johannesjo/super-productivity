@@ -70,7 +70,7 @@ export type WorkContextAdvancedCfgKey = keyof WorkContextAdvancedCfg;
 export interface WorkContextCopy extends WorkContextCommon {
   id: string;
   title: string;
-  icon: string;
+  icon: string | null;
   routerLink: string;
   taskIds: string[];
   backlogTaskIds?: string[];

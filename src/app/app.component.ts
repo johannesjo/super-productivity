@@ -155,15 +155,15 @@ export class AppComponent implements OnDestroy {
   }
 
   // prevent page reloads on missed drops
-  @HostListener('document:dragover', ['$event']) onDragOver(ev: Event) {
+  @HostListener('document:dragover', ['$event']) onDragOver(ev: DragEvent) {
     ev.preventDefault();
   }
 
-  @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
+  @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent) {
     ev.preventDefault();
   }
 
-  @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
+  @HostListener('document:paste', ['$event']) onPaste(ev: ClipboardEvent) {
     this._bookmarkService.createFromPaste(ev);
   }
 

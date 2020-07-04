@@ -197,7 +197,7 @@ export class TagEffects {
     ),
     map((a: any) => a.ids ? a.ids : [a.id]),
     tap(async (tagIdsToRemove: string[]) => {
-      if (tagIdsToRemove.includes(this._workContextService.activeWorkContextId)) {
+      if (tagIdsToRemove.includes(this._workContextService.activeWorkContextId as string)) {
         this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
       }
     }),

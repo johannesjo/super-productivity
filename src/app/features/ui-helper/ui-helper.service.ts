@@ -9,11 +9,11 @@ import { IPC } from '../../../../electron/ipc-events.const';
 import { IS_ELECTRON } from '../../app.constants';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
-import { webFrame } from 'electron';
+import { ipcRenderer, webFrame } from 'electron';
 
 @Injectable({providedIn: 'root'})
 export class UiHelperService {
-  private _webFrame: typeof webFrame = this._electronService.webFrame;
+  private _webFrame: typeof webFrame = (this._electronService.webFrame as typeof webFrame);
 
   constructor(
     @Inject(DOCUMENT) private _document: Document,
@@ -26,7 +26,7 @@ export class UiHelperService {
   }
 
   zoomTo(zoomFactor: number) {
-    if (Number.isNaN(zoomFactor) || typeof zoomFactor !== 'number') {
+    if (Number.isNaN(zoomFactor)) {
       console.error('Invalid zoom factor', zoomFactor);
       return;
     }
@@ -36,7 +36,7 @@ export class UiHelperService {
   }
 
   zoomBy(zoomBy: number) {
-    if (Number.isNaN(zoomBy) || typeof zoomBy !== 'number') {
+    if (Number.isNaN(zoomBy)) {
       console.error('Invalid zoom factor', zoomBy);
       return;
     }
@@ -69,7 +69,7 @@ export class UiHelperService {
 
     fromEvent(this._document, 'mousewheel').pipe(
       throttleTime(20)
-    ).subscribe((event: WheelEvent) => {
+    ).subscribe((event: any) => {
       if (event && event.ctrlKey) {
         // this does not prevent scrolling unfortunately
         // event.preventDefault();
@@ -87,7 +87,7 @@ export class UiHelperService {
   }
 
   private _getLocalUiHelperSettings(): LocalUiHelperSettings {
-    return loadFromLs(LS_LOCAL_UI_HELPER) || UI_LOCAL_HELPER_DEFAULT;
+    return loadFromLs(LS_LOCAL_UI_HELPER) as LocalUiHelperSettings || UI_LOCAL_HELPER_DEFAULT;
   }
 
   private _updateLocalUiHelperSettings(newCfg: Partial<LocalUiHelperSettings>) {

@@ -60,20 +60,20 @@ export class BookmarkBarComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
     this.dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     this.isDragOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
     if (this.dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       this.isDragOver = false;
     }
   }
 
-  @HostListener('drop', ['$event']) onDrop(ev: Event) {
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
     this.bookmarkService.createFromDrop(ev);
     this.isDragOver = false;
   }

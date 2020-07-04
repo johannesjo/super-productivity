@@ -183,7 +183,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
       this._lastAddedTaskId = item.taskId;
       const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
-      this._taskService.updateTags(task, [...task.tagIds, this._workContextService.activeWorkContextId], task.tagIds);
+      this._taskService.updateTags(task, [...task.tagIds, this._workContextService.activeWorkContextId as string], task.tagIds);
 
       this._snackService.open({
         ico: 'playlist_add',
@@ -214,7 +214,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
           item.issueType,
           item.issueData.id,
-          this._workContextService.activeWorkContextId,
+          this._workContextService.activeWorkContextId as string,
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {
@@ -269,7 +269,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           }))
         )
       );
-      const issues$ = this._issueService.searchIssues$(searchTerm, this._workContextService.activeWorkContextId);
+      const issues$ = this._issueService.searchIssues$(searchTerm, this._workContextService.activeWorkContextId as string);
       return zip(backlog$, issues$).pipe(
         map(([backlog, issues]) => ([...backlog, ...issues])),
       );

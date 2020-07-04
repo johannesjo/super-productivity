@@ -15,7 +15,7 @@ export const updateNoteOrder = createAction(
 
 export const addNote = createAction(
   '[Note] Add Note',
-  props<{ note: Note, isPreventFocus?: boolean, remindAt: number }>(),
+  props<{ note: Note, isPreventFocus?: boolean, remindAt: number|null }>(),
 );
 
 export const upsertNote = createAction(

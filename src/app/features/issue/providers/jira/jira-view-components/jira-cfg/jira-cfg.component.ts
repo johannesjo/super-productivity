@@ -42,9 +42,9 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.issueSuggestionsCtrl.valueChanges.pipe(
     debounceTime(300),
     tap(() => this.isLoading$.next(true)),
-    switchMap((searchTerm) => {
+    switchMap((searchTerm: string) => {
       return (searchTerm && searchTerm.length > 1)
-        ? this._projectService.getJiraCfgForProject$(this._workContextService.activeWorkContextId)
+        ? this._projectService.getJiraCfgForProject$(this._workContextService.activeWorkContextId as string)
           .pipe(
             first(),
             switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
@@ -54,6 +54,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
           )
         // Note: the outer array signifies the observable stream the other is the value
         : [[]];
+      // TODO fix type
     }),
     tap((suggestions) => {
       this.isLoading$.next(false);
@@ -124,7 +125,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
       throw new Error('Should only be called when in project context');
     }
-    const projectId = this._workContextService.activeWorkContextId;
+    const projectId = this._workContextService.activeWorkContextId as string;
     this._projectService.updateIssueProviderConfig(projectId, JIRA_TYPE, {
       isEnabled,
     });
@@ -154,7 +155,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   loadCustomFields() {
-    this.customFieldsPromise = this._projectService.getJiraCfgForProject$(this._workContextService.activeWorkContextId).pipe(
+    this.customFieldsPromise = this._projectService.getJiraCfgForProject$(this._workContextService.activeWorkContextId as string).pipe(
       first(),
       concatMap((jiraCfg) => this._jiraApiService.listFields$(jiraCfg))
     ).toPromise();

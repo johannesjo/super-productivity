@@ -22,8 +22,8 @@ interface BookmarkSelectType {
 })
 export class DialogEditBookmarkComponent implements OnInit {
   T: any = T;
-  types: BookmarkSelectType[];
-  bookmarkCopy: BookmarkCopy;
+  types?: BookmarkSelectType[];
+  bookmarkCopy?: BookmarkCopy;
   customIcons: string[] = MATERIAL_ICONS;
   iconControl: FormControl = new FormControl();
   filteredIcons$: Observable<string[]> = this.iconControl.valueChanges.pipe(
@@ -63,6 +63,9 @@ export class DialogEditBookmarkComponent implements OnInit {
   }
 
   submit() {
+    if (!this.bookmarkCopy) {
+      throw new Error();
+    }
     if (!this.bookmarkCopy.path) {
       return;
     }

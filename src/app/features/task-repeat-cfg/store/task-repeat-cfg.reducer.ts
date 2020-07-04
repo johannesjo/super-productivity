@@ -23,7 +23,13 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSe
 export const selectAllTaskRepeatCfgs = createSelector(selectTaskRepeatCfgFeatureState, selectAll);
 export const selectTaskRepeatCfgById = createSelector(
   selectTaskRepeatCfgFeatureState,
-  (state: TaskRepeatCfgState, props: { id: string }) => state.entities[props.id]
+  (state: TaskRepeatCfgState, props: { id: string }): TaskRepeatCfg => {
+    const cfg = state.entities[props.id];
+    if (!cfg) {
+      throw new Error('Missing taskRepeatCfg');
+    }
+    return cfg;
+  }
 );
 
 export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialState({

@@ -20,6 +20,7 @@ import { isToday } from '../../../util/is-today.util';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncService } from '../../../imex/sync/sync.service';
+import { WorkContextType } from '../../work-context/work-context.model';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -88,8 +89,8 @@ export class TaskRepeatCfgEffects {
                           projectId: taskRepeatCfg.projectId,
                         }
                       }),
-                      workContextType: this._workContextService.activeWorkContextType,
-                      workContextId: this._workContextService.activeWorkContextId,
+                      workContextType: this._workContextService.activeWorkContextType as WorkContextType,
+                      workContextId: this._workContextService.activeWorkContextId as string,
                       isAddToBacklog: false,
                       isAddToBottom: taskRepeatCfg.isAddToBottom || false,
                     }),

@@ -83,12 +83,12 @@ export class BookmarkService {
 
   // HANDLE INPUT
   // ------------
-  createFromDrop(ev: Event) {
-    this._handleInput(createFromDrop(ev), ev);
+  createFromDrop(ev: DragEvent) {
+    this._handleInput(createFromDrop(ev) as DropPasteInput, ev);
   }
 
-  createFromPaste(ev: Event) {
-    this._handleInput(createFromPaste(ev), ev);
+  createFromPaste(ev: ClipboardEvent) {
+    this._handleInput(createFromPaste(ev) as DropPasteInput, ev);
   }
 
   private _handleInput(bookmark: DropPasteInput, ev: Event) {

@@ -18,7 +18,7 @@ import { map } from 'rxjs/operators';
 export class DialogAddNoteComponent {
   T: any = T;
   noteContent: string;
-  reminderDate: number;
+  reminderDate?: number;
   isSubmitted: boolean = false;
   isInProjectContext$: Observable<boolean> = this._workContextService.activeWorkContextTypeAndId$.pipe(
     map(({activeType}) => activeType === WorkContextType.PROJECT)

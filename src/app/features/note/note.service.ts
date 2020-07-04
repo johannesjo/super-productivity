@@ -49,7 +49,7 @@ export class NoteService {
     this._store$.dispatch(loadNoteState({state}));
   }
 
-  public add(note: Partial<Note> = {}, remindAt: number = null, isPreventFocus: boolean = false) {
+  public add(note: Partial<Note> = {}, remindAt: number | null = null, isPreventFocus: boolean = false) {
     const id = shortid();
 
     this._store$.dispatch(addNote({
@@ -108,7 +108,7 @@ export class NoteService {
   }
 
   createFromDrop(ev: DragEvent) {
-    this._handleInput(createFromDrop(ev), ev);
+    this._handleInput(createFromDrop(ev) as DropPasteInput, ev);
   }
 
   private async _handleInput(drop: DropPasteInput, ev: Event) {

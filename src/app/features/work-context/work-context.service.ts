@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, EMPTY, interval, Observable, of, timer } from 'rxjs';
+import { combineLatest, interval, Observable, of, timer } from 'rxjs';
 import {
   WorkContext,
   WorkContextAdvancedCfg,
@@ -103,8 +103,8 @@ export class WorkContextService {
   );
 
   // for convenience...
-  activeWorkContextId: string;
-  activeWorkContextType: WorkContextType;
+  activeWorkContextId?: string;
+  activeWorkContextType?: WorkContextType;
 
   activeWorkContext$: Observable<WorkContext> = this.activeWorkContextTypeAndId$.pipe(
     switchMap(({activeId, activeType}) => {
@@ -135,7 +135,8 @@ export class WorkContextService {
           })),
         );
       }
-      return EMPTY;
+      throw new Error('Invalid work context type');
+      // return EMPTY;
     }),
     // TODO find out why this is sometimes undefined
     filter(ctx => !!ctx),
@@ -236,16 +237,16 @@ export class WorkContextService {
     switchMap(([activeContext, entities]) => {
       const taskIds = activeContext.taskIds;
       return of(
-        Object.keys(entities)
+        (Object.keys(entities)
           .filter((id) => {
-            const t = entities[id];
+            const t = entities[id] as Task;
             return !t.isDone && (
               (t.parentId)
                 ? (taskIds.includes(t.parentId))
                 : (taskIds.includes(id) && (!t.subTaskIds || t.subTaskIds.length === 0))
             );
           })
-          .map(key => entities[key])
+          .map(key => entities[key]) as Task[])
       );
     })
   );
@@ -281,7 +282,7 @@ export class WorkContextService {
     map(tasks => flattenTasks(tasks)),
   );
 
-  isToday: boolean;
+  isToday: boolean = false;
   isToday$: Observable<boolean> = this.activeWorkContextId$.pipe(
     map(id => id === TODAY_TAG.id),
     shareReplay(1),
@@ -308,11 +309,11 @@ export class WorkContextService {
       filter(event => event instanceof NavigationEnd),
       withLatestFrom(this._isAllDataLoaded$),
       concatMap(([next, isAllDataLoaded]) => isAllDataLoaded
-        ? of(next)
+        ? of(next as NavigationEnd)
         : this._isAllDataLoaded$.pipe(
           filter(isLoaded => isLoaded),
           take(1),
-          mapTo(next),
+          mapTo(next as NavigationEnd),
         )
       ),
     ).subscribe(({urlAfterRedirects}: NavigationEnd) => {
@@ -422,8 +423,8 @@ export class WorkContextService {
   }
 
   updateWorkStartForActiveContext(date: string, newVal: number) {
-    const payload = {
-      id: this.activeWorkContextId,
+    const payload: { id: string; date: string; newVal: number; } = {
+      id: this.activeWorkContextId as string,
       date,
       newVal,
     };
@@ -434,8 +435,8 @@ export class WorkContextService {
   }
 
   updateWorkEndForActiveContext(date: string, newVal: number) {
-    const payload = {
-      id: this.activeWorkContextId,
+    const payload: { id: string; date: string; newVal: number; } = {
+      id: this.activeWorkContextId as string,
       date,
       newVal,
     };
@@ -446,8 +447,8 @@ export class WorkContextService {
   }
 
   addToBreakTimeForActiveContext(date: string = getWorklogStr(), valToAdd: number) {
-    const payload = {
-      id: this.activeWorkContextId,
+    const payload: { id: string; date: string; valToAdd: number; } = {
+      id: this.activeWorkContextId as string,
       date,
       valToAdd,
     };
@@ -460,13 +461,13 @@ export class WorkContextService {
   private _updateAdvancedCfgForCurrentContext(sectionKey: WorkContextAdvancedCfgKey, data: any) {
     if (this.activeWorkContextType === WorkContextType.PROJECT) {
       this._store$.dispatch(new UpdateProjectAdvancedCfg({
-        projectId: this.activeWorkContextId,
+        projectId: this.activeWorkContextId as string,
         sectionKey,
         data,
       }));
     } else if (this.activeWorkContextType === WorkContextType.TAG) {
       this._store$.dispatch(updateAdvancedConfigForTag({
-        tagId: this.activeWorkContextId,
+        tagId: this.activeWorkContextId as string,
         sectionKey,
         data
       }));

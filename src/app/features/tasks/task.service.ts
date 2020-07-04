@@ -225,8 +225,8 @@ export class TaskService {
     additional: Partial<Task> = {},
     isAddToBottom: boolean = false,
   ): string {
-    const workContextId = this._workContextService.activeWorkContextId;
-    const workContextType = this._workContextService.activeWorkContextType;
+    const workContextId = this._workContextService.activeWorkContextId as string;
+    const workContextType = this._workContextService.activeWorkContextType as WorkContextType;
     const task = this.createNewTaskWithDefaults({title, additional, workContextType, workContextId});
 
     this._store.dispatch(new AddTask({
@@ -302,11 +302,11 @@ export class TaskService {
     newOrderedIds: string[]) {
     const isSrcTodayList = (src === 'DONE' || src === 'UNDONE');
     const isTargetTodayList = (target === 'DONE' || target === 'UNDONE');
-    const workContextId = this._workContextService.activeWorkContextId;
+    const workContextId = this._workContextService.activeWorkContextId as string;
 
     if (isSrcTodayList && isTargetTodayList) {
       // move inside today
-      const workContextType = this._workContextService.activeWorkContextType;
+      const workContextType = this._workContextService.activeWorkContextType as WorkContextType;
       this._store.dispatch(moveTaskInTodayList({taskId, newOrderedIds, src, target, workContextId, workContextType}));
 
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
@@ -332,8 +332,8 @@ export class TaskService {
       this._store.dispatch(new MoveSubTaskUp({id, parentId}));
     } else {
 
-      const workContextId = this._workContextService.activeWorkContextId;
-      const workContextType = this._workContextService.activeWorkContextType;
+      const workContextId = this._workContextService.activeWorkContextId as string;
+      const workContextType = this._workContextService.activeWorkContextType as WorkContextType;
 
       if (isBacklog) {
         this._store.dispatch(moveTaskUpInBacklogList({taskId: id, workContextId}));
@@ -348,8 +348,8 @@ export class TaskService {
       this._store.dispatch(new MoveSubTaskDown({id, parentId}));
     } else {
 
-      const workContextId = this._workContextService.activeWorkContextId;
-      const workContextType = this._workContextService.activeWorkContextType;
+      const workContextId = this._workContextService.activeWorkContextId as string;
+      const workContextType = this._workContextService.activeWorkContextType as WorkContextType;
 
       if (isBacklog) {
         this._store.dispatch(moveTaskDownInBacklogList({taskId: id, workContextId}));
@@ -395,16 +395,16 @@ export class TaskService {
   }
 
   moveToToday(id: string, isMoveToTop: boolean = false) {
-    const workContextId = this._workContextService.activeWorkContextId;
-    const workContextType = this._workContextService.activeWorkContextType;
+    const workContextId = this._workContextService.activeWorkContextId as string;
+    const workContextType = this._workContextService.activeWorkContextType as WorkContextType;
     if (workContextType === WorkContextType.PROJECT) {
       this._store.dispatch(moveTaskToTodayListAuto({taskId: id, isMoveToTop, workContextId}));
     }
   }
 
   moveToBacklog(id: string) {
-    const workContextId = this._workContextService.activeWorkContextId;
-    const workContextType = this._workContextService.activeWorkContextType;
+    const workContextId = this._workContextService.activeWorkContextId as string;
+    const workContextType = this._workContextService.activeWorkContextType as WorkContextType;
     if (workContextType === WorkContextType.PROJECT) {
       this._store.dispatch(moveTaskToBacklogListAuto({taskId: id, workContextId}));
     }
@@ -638,8 +638,8 @@ export class TaskService {
   createNewTaskWithDefaults({
     title,
     additional = {},
-    workContextType = this._workContextService.activeWorkContextType,
-    workContextId = this._workContextService.activeWorkContextId
+    workContextType = this._workContextService.activeWorkContextType as WorkContextType,
+    workContextId = this._workContextService.activeWorkContextId as string
   }: {
     title: string | null;
     additional?: Partial<Task>;
