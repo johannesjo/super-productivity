@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { selectAllSimpleCounters, selectSimpleCounterById } from './store/simple-counter.reducer';
+import { selectAllSimpleCounters } from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
   deleteSimpleCounter,
@@ -68,10 +68,6 @@ export class SimpleCounterService {
     private _store$: Store<SimpleCounterState>,
     private _persistenceService: PersistenceService,
   ) {
-  }
-
-  getSimpleCounterById$(id: string): Observable<SimpleCounter> {
-    return this._store$.pipe(select(selectSimpleCounterById, {id}));
   }
 
   updateAll(items: SimpleCounter[]) {

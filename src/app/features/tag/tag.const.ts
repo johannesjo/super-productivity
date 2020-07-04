@@ -22,9 +22,9 @@ export const TODAY_TAG: Tag = {
 };
 
 export const DEFAULT_TAG: Tag = {
-  id: null,
+  id: '',
   icon: null,
-  title: null,
+  title: '',
   color: null,
   created: Date.now(),
   modified: Date.now(),

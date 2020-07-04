@@ -7,7 +7,7 @@ import { arrayToDictionary } from '../../../util/array-to-dictionary';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { updateAllInDictionary } from '../../../util/update-all-in-dictionary';
-import { migrateSimpleCounterState } from '../mgirate-simple-counter-state.util';
+import { migrateSimpleCounterState } from '../migrate-simple-counter-state.util';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -17,7 +17,7 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSe
 export const selectAllSimpleCounters = createSelector(selectSimpleCounterFeatureState, selectAll);
 export const selectSimpleCounterById = createSelector(
   selectSimpleCounterFeatureState,
-  (state, props: { id: string }) => state.entities[props.id]
+  (state: SimpleCounterState, props: { id: string }) => state.entities[props.id]
 );
 
 export const initialSimpleCounterState: SimpleCounterState = adapter.getInitialState<SimpleCounterState>({
@@ -62,7 +62,7 @@ const _reducer = createReducer<SimpleCounterState>(
     id,
     changes: {
       countOnDay: {
-        ...state.entities[id].countOnDay,
+        ...(state.entities[id] as SimpleCounter).countOnDay,
         [getWorklogStr()]: newVal,
       }
     }
@@ -70,7 +70,7 @@ const _reducer = createReducer<SimpleCounterState>(
 
   on(simpleCounterActions.increaseSimpleCounterCounterToday, (state, {id, increaseBy}) => {
     const todayStr = getWorklogStr();
-    const oldEntity = state.entities[id];
+    const oldEntity = state.entities[id] as SimpleCounter;
     const currentTotalCount = oldEntity.countOnDay || {};
     const currentVal = currentTotalCount[todayStr] || 0;
     const newValForToday = currentVal + increaseBy;
@@ -87,7 +87,7 @@ const _reducer = createReducer<SimpleCounterState>(
 
   on(simpleCounterActions.toggleSimpleCounterCounter, (state, {id}) => adapter.updateOne({
     id,
-    changes: {isOn: !state.entities[id].isOn}
+    changes: {isOn: !(state.entities[id] as SimpleCounter).isOn}
   }, state)),
 
   on(simpleCounterActions.setSimpleCounterCounterOn, (state, {id}) => adapter.updateOne({

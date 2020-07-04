@@ -12,7 +12,7 @@ export const migrateSimpleCounterState = (simpleCounterState: SimpleCounterState
 
   const simpleCounterEntities: Dictionary<SimpleCounter> = {...simpleCounterState.entities};
   Object.keys(simpleCounterEntities).forEach((key) => {
-    simpleCounterEntities[key] = _migrateSimpleCounterEntity(simpleCounterEntities[key]);
+    simpleCounterEntities[key] = _migrateSimpleCounterEntity(simpleCounterEntities[key] as SimpleCounter);
   });
 
   // Update model version after all migrations ran successfully
