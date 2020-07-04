@@ -6,28 +6,28 @@ import { taskAdapter } from './task.adapter';
 import { filterOutId } from '../../../util/filter-out-id';
 import { Update } from '@ngrx/entity';
 
-export const getTaskById = (taskId: string, state: TaskState) => {
+export const getTaskById = (taskId: string, state: TaskState): Task => {
   if (!state.entities[taskId]) {
     throw new Error('Task not found');
   } else {
-    return state.entities[taskId];
+    return state.entities[taskId] as Task;
   }
 };
 
 // SHARED REDUCER ACTIONS
 // ----------------------
-export const reCalcTimesForParentIfParent = (parentId, state: TaskState): TaskState => {
+export const reCalcTimesForParentIfParent = (parentId: string, state: TaskState): TaskState => {
   const stateWithTimeEstimate = reCalcTimeEstimateForParentIfParent(parentId, state);
   return reCalcTimeSpentForParentIfParent(parentId, stateWithTimeEstimate);
 };
 
-export const reCalcTimeSpentForParentIfParent = (parentId, state: TaskState): TaskState => {
+export const reCalcTimeSpentForParentIfParent = (parentId: string, state: TaskState): TaskState => {
   if (parentId) {
     const parentTask: Task = getTaskById(parentId, state);
-    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
-    const timeSpentOnDayParent = {};
+    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id] as Task);
+    const timeSpentOnDayParent: { [key: string]: number } = {};
 
-    subTasks.forEach((subTask) => {
+    subTasks.forEach((subTask: Task) => {
       Object.keys(subTask.timeSpentOnDay).forEach(strDate => {
         if (subTask.timeSpentOnDay[strDate]) {
           if (!timeSpentOnDayParent[strDate]) {
@@ -49,15 +49,15 @@ export const reCalcTimeSpentForParentIfParent = (parentId, state: TaskState): Ta
   }
 };
 
-export const reCalcTimeEstimateForParentIfParent = (parentId, state: TaskState): TaskState => {
+export const reCalcTimeEstimateForParentIfParent = (parentId: string, state: TaskState): TaskState => {
   if (parentId) {
-    const parentTask: Task = state.entities[parentId];
-    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
+    const parentTask: Task = state.entities[parentId] as Task;
+    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id] as Task);
 
     return taskAdapter.updateOne({
       id: parentId,
       changes: {
-        timeEstimate: subTasks.reduce((acc, task) => acc + task.timeEstimate, 0),
+        timeEstimate: subTasks.reduce((acc: number, task: Task) => acc + task.timeEstimate, 0),
       }
     }, state);
   } else {
@@ -69,7 +69,7 @@ export const updateDoneOnForTask = (
   upd: Update<Task>,
   state: TaskState,
 ): TaskState => {
-  const task = state.entities[upd.id];
+  const task = state.entities[upd.id] as Task;
   const isToDone = (upd.changes.isDone === true);
   const isToUnDone = (upd.changes.isDone === false);
   if (isToDone || isToUnDone) {
@@ -113,11 +113,11 @@ export const updateTimeSpentForTask = (
 
 export const updateTimeEstimateForTask = (
   taskId: string,
-  newEstimate: number = null,
+  newEstimate: number | null = null,
   state: TaskState,
 ): TaskState => {
 
-  if (!newEstimate) {
+  if (typeof newEstimate !== 'number') {
     return state;
   }
 
@@ -138,12 +138,14 @@ export const deleteTask = (state: TaskState,
   taskToDelete: TaskWithSubTasks | Task): TaskState => {
   let stateCopy: TaskState = taskAdapter.removeOne(taskToDelete.id, state);
 
-  let currentTaskId = (state.currentTaskId === taskToDelete.id) ? null : state.currentTaskId;
+  let currentTaskId = (state.currentTaskId === taskToDelete.id)
+    ? null
+    : state.currentTaskId;
 
   // PARENT TASK side effects
   // also delete from parent task if any
   if (taskToDelete.parentId) {
-    const parentTask = state.entities[taskToDelete.parentId];
+    const parentTask = state.entities[taskToDelete.parentId] as Task;
     const isWasLastSubTask = (parentTask.subTaskIds.length === 1);
 
     stateCopy = taskAdapter.updateOne({
@@ -175,7 +177,9 @@ export const deleteTask = (state: TaskState,
   if (taskToDelete.subTaskIds) {
     stateCopy = taskAdapter.removeMany(taskToDelete.subTaskIds, stateCopy);
     // unset current if one of them is the current task
-    currentTaskId = taskToDelete.subTaskIds.includes(currentTaskId) ? null : currentTaskId;
+    currentTaskId = !!currentTaskId && taskToDelete.subTaskIds.includes(currentTaskId)
+      ? null
+      : currentTaskId;
   }
 
   return {

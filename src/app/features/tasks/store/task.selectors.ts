@@ -94,7 +94,7 @@ export const selectCurrentTaskOrParentWithData = createSelector(
 //   });
 
 export const selectSelectedTaskId = createSelector(selectTaskFeatureState, (state) => state.selectedTaskId);
-export const selectTaskAdditionalInfoTargetPanel = createSelector(selectTaskFeatureState, (state) => state.taskAdditionalInfoTargetPanel);
+export const selectTaskAdditionalInfoTargetPanel = createSelector(selectTaskFeatureState, (state: TaskState) => state.taskAdditionalInfoTargetPanel);
 export const selectSelectedTask = createSelector(
   selectTaskFeatureState,
   (s): TaskWithSubTasks => {      // @ts-ignore

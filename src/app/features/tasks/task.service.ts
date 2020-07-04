@@ -122,7 +122,7 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel> = this._store.pipe(
+  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> = this._store.pipe(
     select(selectTaskAdditionalInfoTargetPanel),
     // NOTE: we can't use share here, as we need the last emitted value
   );

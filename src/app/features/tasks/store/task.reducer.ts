@@ -91,11 +91,16 @@ export function taskReducer(
     case TaskActionTypes.SetCurrentTask: {
       const a: SetCurrentTask = action as SetCurrentTask;
       if (a.payload) {
-        const subTaskIds = state.entities[a.payload].subTaskIds;
+        const task = state.entities[a.payload] as Task;
+        const subTaskIds = task.subTaskIds;
         let taskToStartId = a.payload;
         if (subTaskIds && subTaskIds.length) {
-          const undoneTasks = subTaskIds.map(id => state.entities[id]).filter(task => !task.isDone);
-          taskToStartId = undoneTasks.length ? undoneTasks[0].id : subTaskIds[0];
+          const undoneTasks = subTaskIds
+            .map(id => state.entities[id] as Task)
+            .filter((ta: Task) => !ta.isDone);
+          taskToStartId = undoneTasks.length
+            ? undoneTasks[0].id
+            : subTaskIds[0];
         }
         return {
           ...(taskAdapter.updateOne({
@@ -123,8 +128,10 @@ export function taskReducer(
         ...state,
         taskAdditionalInfoTargetPanel: (!id || (id === state.selectedTaskId))
           ? null
-          : taskAdditionalInfoTargetPanel,
-        selectedTaskId: (id === state.selectedTaskId) ? null : id,
+          : taskAdditionalInfoTargetPanel || null,
+        selectedTaskId: (id === state.selectedTaskId)
+          ? null
+          : id,
       };
     }
 
@@ -143,7 +150,9 @@ export function taskReducer(
       const a: UpdateTask = action as UpdateTask;
       const id = a.payload.task.id as string;
       const {timeSpentOnDay, timeEstimate} = a.payload.task.changes;
-      stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
+      stateCopy = timeSpentOnDay
+        ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
+        : stateCopy;
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
       stateCopy = updateDoneOnForTask(a.payload.task, stateCopy);
       return taskAdapter.updateOne(a.payload.task, stateCopy);
@@ -167,7 +176,7 @@ export function taskReducer(
       const updates: Update<Task>[] = state.ids.map((taskId) => ({
         id: taskId,
         changes: {
-          tagIds: state.entities[taskId].tagIds.filter(
+          tagIds: (state.entities[taskId] as Task).tagIds.filter(
             tagId => !(action as RemoveTagsForAllTasks).payload.tagIdsToRemove.includes(tagId)
           ),
         }
@@ -178,9 +187,9 @@ export function taskReducer(
     // TODO simplify
     case TaskActionTypes.ToggleTaskShowSubTasks: {
       const {taskId, isShowLess, isEndless} = (action as ToggleTaskShowSubTasks).payload;
-      const task = state.entities[taskId];
-      const subTasks = task.subTaskIds.map(id => state.entities[id]);
-      const doneTasksLength = subTasks.filter(t => t.isDone).length;
+      const task = (state.entities[taskId] as Task);
+      const subTasks = task.subTaskIds.map(id => state.entities[id] as Task);
+      const doneTasksLength = subTasks.filter((t) => t.isDone).length;
       const isDoneTaskCaseNeeded = doneTasksLength && (doneTasksLength < subTasks.length);
       const oldVal = +task._showSubTasksMode;
       let newVal;
@@ -218,7 +227,9 @@ export function taskReducer(
       }
 
       // failsafe
-      newVal = (isNaN(newVal)) ? ShowSubTasksMode.HideAll : newVal;
+      newVal = (isNaN(newVal as any))
+        ? ShowSubTasksMode.HideAll
+        : newVal;
 
       return taskAdapter.updateOne({
         id: taskId,
@@ -233,11 +244,11 @@ export function taskReducer(
     }
 
     case TaskActionTypes.DeleteMainTasks: {
-      const allIds = (action as DeleteMainTasks).payload.taskIds.reduce((acc, id) => {
+      const allIds = (action as DeleteMainTasks).payload.taskIds.reduce((acc: string[], id: string) => {
         return [
           ...acc,
           id,
-          ...state.entities[id].subTaskIds
+          ...(state.entities[id] as Task).subTaskIds
         ];
       }, []);
       return taskAdapter.removeMany(allIds, state);
@@ -246,8 +257,8 @@ export function taskReducer(
     case TaskActionTypes.MoveSubTask: {
       let newState = state;
       const {taskId, srcTaskId, targetTaskId, newOrderedIds} = (action as MoveSubTask).payload;
-      const oldPar = state.entities[srcTaskId];
-      const newPar = state.entities[targetTaskId];
+      const oldPar = state.entities[srcTaskId] as Task;
+      const newPar = state.entities[targetTaskId] as Task;
 
       // for old parent remove
       newState = taskAdapter.updateOne({
@@ -281,7 +292,7 @@ export function taskReducer(
 
     case TaskActionTypes.MoveSubTaskUp: {
       const {id, parentId} = (action as MoveSubTaskUp).payload;
-      const parentSubTaskIds = state.entities[parentId].subTaskIds;
+      const parentSubTaskIds = (state.entities[parentId] as Task).subTaskIds;
       return taskAdapter.updateOne({
         id: parentId,
         changes: {
@@ -292,7 +303,7 @@ export function taskReducer(
 
     case TaskActionTypes.MoveSubTaskDown: {
       const {id, parentId} = (action as MoveSubTaskDown).payload;
-      const parentSubTaskIds = state.entities[parentId].subTaskIds;
+      const parentSubTaskIds = (state.entities[parentId] as Task).subTaskIds;
       return taskAdapter.updateOne({
         id: parentId,
         changes: {
@@ -316,7 +327,7 @@ export function taskReducer(
 
     case TaskActionTypes.RemoveTimeSpent: {
       const {id, date, duration} = (action as RemoveTimeSpent).payload;
-      const task = getTaskById(id, state);
+      const task = getTaskById(id, state) as Task;
       const currentTimeSpentForTickDay = task.timeSpentOnDay && +task.timeSpentOnDay[date] || 0;
 
       return updateTimeSpentForTask(
@@ -330,7 +341,7 @@ export function taskReducer(
 
     case TaskActionTypes.AddSubTask: {
       const {task, parentId} = (action as AddSubTask).payload;
-      const parentTask = state.entities[parentId];
+      const parentTask = state.entities[parentId] as Task;
 
       // add item1
       const stateCopy = taskAdapter.addOne({
@@ -400,13 +411,13 @@ export function taskReducer(
     case TaskActionTypes.RoundTimeSpentForDay: {
       const {day, taskIds, isRoundUp, roundTo} = (action as RoundTimeSpentForDay).payload;
       const idsToUpdateDirectly: string[] = taskIds.filter(
-        id => state.entities[id].subTaskIds.length === 0 || !!state.entities[id].parentId
+        id => (state.entities[id] as Task).subTaskIds.length === 0 || !!(state.entities[id] as Task).parentId
       );
-      const subTaskIds: string[] = idsToUpdateDirectly.filter(id => !!state.entities[id].parentId);
-      const parentTaskToReCalcIds: string[] = unique(subTaskIds.map(id => state.entities[id].parentId));
+      const subTaskIds: string[] = idsToUpdateDirectly.filter(id => !!(state.entities[id] as Task).parentId);
+      const parentTaskToReCalcIds: string[] = unique(subTaskIds.map(id => (state.entities[id] as Task).parentId));
 
       const updateSubsAndMainWithoutSubs: Update<Task>[] = idsToUpdateDirectly.map(id => {
-        const spentOnDayBefore = state.entities[id].timeSpentOnDay;
+        const spentOnDayBefore = (state.entities[id] as Task).timeSpentOnDay;
         const timeSpentOnDayUpdated = {
           ...spentOnDayBefore,
           [day]: roundDurationVanilla(spentOnDayBefore[day], roundTo, isRoundUp)
@@ -467,7 +478,7 @@ export function taskReducer(
         id: taskId,
         changes: {
           attachments: [
-            ...state.entities[taskId].attachments, taskAttachment
+            ...(state.entities[taskId] as Task).attachments, taskAttachment
           ]
         }
       }, state);
@@ -475,7 +486,7 @@ export function taskReducer(
 
     case TaskAttachmentActionTypes.UpdateTaskAttachment: {
       const {taskId, taskAttachment} = (action as UpdateTaskAttachment).payload;
-      const attachments = state.entities[taskId].attachments;
+      const attachments = (state.entities[taskId] as Task).attachments;
       const updatedAttachments = attachments.map(
         attachment => attachment.id === taskAttachment.id
           ? ({
@@ -498,7 +509,7 @@ export function taskReducer(
       return taskAdapter.updateOne({
         id: taskId,
         changes: {
-          attachments: state.entities[taskId].attachments.filter(at => at.id !== id)
+          attachments: (state.entities[taskId] as Task).attachments.filter(at => at.id !== id)
         }
       }, state);
     }

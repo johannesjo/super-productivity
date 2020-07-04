@@ -1,10 +1,10 @@
-export const arrayMove = (arrIN, from, to, on = 1) => {
+export const arrayMove = <T>(arrIN: T[], from: number, to: number, on: number = 1): T[] => {
   const arr = arrIN.slice(0);
   arr.splice(to, 0, ...arr.splice(from, on));
   return arr;
 };
 
-export const arrayMoveLeft = (arr, val) => {
+export const arrayMoveLeft = <T>(arr: T[], val: T): T[] => {
   if (!arr.includes(val)) {
     return arr;
   }
@@ -18,7 +18,7 @@ export const arrayMoveLeft = (arr, val) => {
   return arr;
 };
 
-export const arrayMoveRight = (arr, val) => {
+export const arrayMoveRight = <T>(arr: T[], val: T): T[] => {
   if (!arr.includes(val)) {
     return arr;
   }
