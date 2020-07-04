@@ -3,7 +3,7 @@
 /**
  * Helper for building multipart requests for uploading to Drive.
  */
-export const MultiPartBuilder = function() {
+export const MultiPartBuilder = function(this: any) {
   this.boundary = Math.random().toString(36).slice(2);
   this.mimeType = 'multipart/mixed; boundary="' + this.boundary + '"';
   this.parts = [];

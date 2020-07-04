@@ -25,7 +25,7 @@ export class WorklogService {
       // this._workContextService.activeWorkContextOnceOnContextChange$,
       this._archiveUpdateManualTrigger$,
       this._router.events.pipe(
-        filter(event => event instanceof NavigationEnd),
+        filter((event: any) => event instanceof NavigationEnd),
         filter(({urlAfterRedirects}: NavigationEnd) =>
           urlAfterRedirects.includes('worklog')
           || urlAfterRedirects.includes('daily-summary')
@@ -50,7 +50,7 @@ export class WorklogService {
 
   worklog$: Observable<Worklog> = this._worklogDataIfDefined$.pipe(map(data => data.worklog));
   totalTimeSpent$: Observable<number> = this._worklogDataIfDefined$.pipe(map(data => data.totalTimeSpent));
-  currentWeek$: Observable<WorklogWeek> = this.worklog$.pipe(
+  currentWeek$: Observable<WorklogWeek | null> = this.worklog$.pipe(
     map(worklog => {
       const now = new Date();
       const year = now.getFullYear();
@@ -58,8 +58,9 @@ export class WorklogService {
       const weekNr = getWeekNumber(now);
 
       if (worklog[year] && worklog[year].ent[month]) {
-        return worklog[year].ent[month].weeks.find(week => week.weekNr === weekNr);
+        return worklog[year].ent[month].weeks.find(week => week.weekNr === weekNr) || null;
       }
+      return null;
     }),
   );
 
@@ -111,15 +112,15 @@ export class WorklogService {
   getTaskListForRange$(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays: boolean = false): Observable<WorklogTask[]> {
     return this.worklogTasks$.pipe(
       map(tasks => {
-        tasks = tasks.filter((task) => {
-          const taskDate = new Date(task.dateStr);
+        tasks = tasks.filter((task: WorklogTask) => {
+          const taskDate = new Date(task.dateStr as string);
           return (taskDate >= rangeStart && taskDate <= rangeEnd);
         });
 
         if (isFilterOutTimeSpentOnOtherDays) {
           tasks = tasks.map((task): WorklogTask => {
 
-            const timeSpentOnDay = {};
+            const timeSpentOnDay: any = {};
             Object.keys(task.timeSpentOnDay).forEach(dateStr => {
               const date = new Date(dateStr);
 
@@ -162,7 +163,7 @@ export class WorklogService {
     }
     return {
       worklog: {},
-      totalTimeSpent: null
+      totalTimeSpent: 0
     };
   }
 

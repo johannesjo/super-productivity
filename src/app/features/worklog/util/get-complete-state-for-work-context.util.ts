@@ -32,19 +32,24 @@ export const getCompleteStateForWorkContext = (workContext: WorkContext, taskSta
 };
 
 const _filterIdsForProject = (state: EntityState<Task>, workContextId: string): string[] => (state.ids as string[]).filter(
-  id => !!(state.entities[id].parentId)
-    ? state.entities[state.entities[id].parentId].projectId === workContextId
-    : state.entities[id].projectId === workContextId
+  id => {
+    const t = state.entities[id] as Task;
+    return !!(t.parentId)
+      ? (state.entities[t.parentId] as Task).projectId === workContextId
+      : t.projectId === workContextId;
+  }
 );
 
 const _filterIdsForTag = (state: EntityState<Task>, workContextId: string): string[] => (state.ids as string[]).filter(
-  id => !!(state.entities[id].parentId)
-    ? state.entities[state.entities[id].parentId].tagIds.includes(workContextId)
-    : state.entities[id].tagIds.includes(workContextId)
-);
+  id => {
+    const t = state.entities[id] as Task;
+    !!(t.parentId)
+      ? (state.entities[t.parentId] as Task).tagIds.includes(workContextId)
+      : t.tagIds.includes(workContextId);
+  });
 
 const _limitStateToIds = (stateIn: EntityState<Task>, ids: string[]): Dictionary<Task> => {
-  const newState = {};
+  const newState: any = {};
   ids.forEach(id => {
     newState[id] = stateIn.entities[id];
   });

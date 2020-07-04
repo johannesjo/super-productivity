@@ -48,9 +48,11 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
       withLatestFrom(this.projectService.archived$),
       ).subscribe(([params, archived]: any) => {
         const {target, source, targetModel, item} = params;
-        const targetNewIds = targetModel.map((project) => project.id);
+        const targetNewIds = targetModel.map((project: Project) => project.id);
 
-        const archivedIds = archived ? archived.map(p => p.id) : [];
+        const archivedIds = archived
+          ? archived.map((p: Project) => p.id)
+          : [];
         this.projectService.updateOrder([...targetNewIds, ...archivedIds]);
       })
     );
@@ -77,7 +79,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
 
       let project: ExportedProject;
       try {
-        project = JSON.parse(textData.toString());
+        project = JSON.parse((textData as any).toString());
         this.projectService.importCompleteProject(project);
       } catch (e) {
         console.error(e);
@@ -144,7 +146,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   getThemeColor(color: string): { [key: string]: string } {
-    const standardColor = THEME_COLOR_MAP[color];
+    const standardColor = (THEME_COLOR_MAP as any)[color];
     const colorToUse = (standardColor)
       ? standardColor
       : color;

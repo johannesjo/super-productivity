@@ -55,13 +55,13 @@ export const checkForUpdate = (params: { remote: number, local: number, lastSync
 
 const _logHelper = (params: { remote: number, local: number, lastSync: number }) => {
   console.log(params);
-  const oldestFirst = Object.keys(params).sort((k1, k2) => params[k1] - params[k2]);
+  const oldestFirst = Object.keys(params).sort((k1: string, k2: string) => (params as any)[k1] - (params as any)[k2]);
   const keyOfOldest = oldestFirst[0];
   const zeroed = oldestFirst.reduce((acc, key) =>
       ({
         ...acc,
-        [key]: (params[key] - params[keyOfOldest]) / 1000,
+        [key]: ((params as any)[key] - (params as any)[keyOfOldest]) / 1000,
       }),
     {});
-  console.log(zeroed, (Date.now() - params[keyOfOldest]) / 1000);
+  console.log(zeroed, (Date.now() - (params as any)[keyOfOldest]) / 1000);
 };

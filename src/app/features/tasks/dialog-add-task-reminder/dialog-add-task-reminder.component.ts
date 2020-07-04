@@ -19,10 +19,12 @@ import { Task } from '../task.model';
 export class DialogAddTaskReminderComponent {
   T: any = T;
   task: Task = this.data.task;
-  reminder: ReminderCopy = this.task.reminderId && this._reminderService.getById(this.task.reminderId);
+  reminder?: ReminderCopy = this.task.reminderId
+    ? this._reminderService.getById(this.task.reminderId)
+    : undefined;
   isEdit: boolean = !!(this.reminder && this.reminder.id);
 
-  dateTime: number = this.reminder && this.reminder.remindAt;
+  dateTime?: number = this.reminder && this.reminder.remindAt;
   isShowMoveToBacklog: boolean = (!this.isEdit && !!this.task.projectId);
   isMoveToBacklog: boolean = (this.isShowMoveToBacklog);
 
@@ -45,7 +47,7 @@ export class DialogAddTaskReminderComponent {
       return;
     }
 
-    if (this.isEdit) {
+    if (this.isEdit && this.reminder) {
       this._taskService.updateReminder(
         this.task.id,
         this.reminder.id,
@@ -66,6 +68,9 @@ export class DialogAddTaskReminderComponent {
   // NOTE: throttle is used as quick way to prevent multiple submits
   @throttle(2000, {leading: true, trailing: false})
   remove() {
+    if (!this.reminder) {
+      throw new Error();
+    }
     this._taskService.removeReminder(this.task.id, this.reminder.id);
     this.close();
   }

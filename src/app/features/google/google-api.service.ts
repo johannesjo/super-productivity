@@ -18,6 +18,7 @@ import { isOnline } from '../../util/is-online';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../core/android/android-interface';
 import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-session';
+import { ipcRenderer } from 'electron';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -25,7 +26,7 @@ const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
   providedIn: 'root',
 })
 export class GoogleApiService {
-  public isLoggedIn: boolean;
+  public isLoggedIn: boolean = false;
   private _session$: BehaviorSubject<GoogleSession> = new BehaviorSubject(getGoogleSession());
   private _onTokenExpire$: Observable<number> = this._session$.pipe(
     switchMap((session) => {
@@ -88,7 +89,7 @@ export class GoogleApiService {
 
       (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
       return new Promise((resolve, reject) => {
-        this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
+        (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
@@ -97,7 +98,7 @@ export class GoogleApiService {
           showSuccessMsg();
           resolve(data);
         });
-        this._electronService.ipcRenderer.on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
+        (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
           reject(err);
         });
       });
@@ -122,7 +123,7 @@ export class GoogleApiService {
           //       refreshToken: res.code
           //     });
           //   });
-          const successHandler = (res) => {
+          const successHandler = (res: any) => {
             this._saveToken(res);
             showSuccessMsg();
           };
@@ -247,7 +248,7 @@ export class GoogleApiService {
       metadata.mimeType = 'application/json';
     }
 
-    const multipart = new MultiPartBuilder()
+    const multipart: any = new (MultiPartBuilder() as any)
       .append('application/json', JSON.stringify(metadata))
       .append(metadata.mimeType, content)
       .finish();
@@ -307,7 +308,7 @@ export class GoogleApiService {
     return new Promise((resolve, reject) => {
       return this._loadJs().then(() => {
         // tslint:disable-next-line
-        this._gapi = window['gapi'];
+        this._gapi = (window as any)['gapi'];
         this._gapi.load('client:auth2', () => {
           this.initClient()
             .then(() => {
@@ -330,8 +331,9 @@ export class GoogleApiService {
       expires_at?: string | number;
     }
   }) {
-    const accessToken = res.accessToken || res.access_token || res.Zi.access_token;
-    const expiresAt = +(res.expiresAt || res.expires_at || res.Zi.expires_at);
+    const r: any = res;
+    const accessToken = r.accessToken || r.access_token || r.Zi.access_token;
+    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi.expires_at);
 
     if (accessToken !== this._session.accessToken || expiresAt !== this._session.expiresAt) {
       this._updateSession({accessToken, expiresAt});
@@ -463,9 +465,8 @@ export class GoogleApiService {
         resolve();
       };
 
-      const errorFunction = (e) => {
+      const errorFunction = (e: unknown) => {
         console.log('ERROR FB');
-
         reject(e);
       };
 
