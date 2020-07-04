@@ -4,6 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { T } from '../../../t.const';
+import { exists } from '../../../util/exists';
 
 @Component({
   selector: 'config-form',
@@ -15,9 +16,9 @@ export class ConfigFormComponent {
 
   T: any = T;
   config: any;
-  @Input() sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
+  @Input() sectionKey?: GlobalConfigSectionKey | ProjectCfgFormKey;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
-  fields: FormlyFieldConfig[];
+  fields?: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
 
@@ -38,7 +39,7 @@ export class ConfigFormComponent {
       throw new Error('No config for ' + this.sectionKey);
     } else {
       this.save.emit({
-        sectionKey: this.sectionKey,
+        sectionKey: exists(this.sectionKey),
         config: this.config,
       });
     }

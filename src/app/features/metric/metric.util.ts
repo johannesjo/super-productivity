@@ -23,7 +23,7 @@ export const mapSimpleMetrics = (
     nrOfMainTasks: 0,
     nrOfParentTasks: 0,
     daysWorked: Object.keys(worklog).reduce((acc, y: any) => {
-      return acc + exists(worklog[y]).daysWorked;
+      return acc + exists<any>(worklog[y]).daysWorked;
     }, 0),
   };
 

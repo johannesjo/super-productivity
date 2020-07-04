@@ -18,9 +18,9 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleCounterCfgComponent implements OnDestroy {
-  @Input() section: ConfigFormSection<SimpleCounterConfig>;
+  @Input() section?: ConfigFormSection<SimpleCounterConfig>;
+  @Input() cfg?: SimpleCounterConfig;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
-  @Input() cfg: SimpleCounterConfig;
 
   T: any = T;
   form: FormGroup = new FormGroup({});
@@ -32,9 +32,9 @@ export class SimpleCounterCfgComponent implements OnDestroy {
     })),
   );
 
-  editModel: SimpleCounterConfig;
+  editModel?: SimpleCounterConfig;
 
-  private _inModelCopy: SimpleCounterConfig;
+  private _inModelCopy?: SimpleCounterConfig;
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -58,11 +58,18 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   }
 
   submit() {
+    if (!this._inModelCopy || !this.editModel) {
+      throw new Error('Model not ready');
+    }
+
     const oldIds = this._inModelCopy.counters.map(item => item.id);
     const newItemIds = this.editModel.counters.map(item => item.id);
 
     if (oldIds.find(id => !newItemIds.includes(id))) {
       this._confirmDeletion$().subscribe(isConfirm => {
+        if (!this._inModelCopy || !this.editModel) {
+          throw new Error('Model not ready');
+        }
         if (isConfirm) {
           this.simpleCounterService.updateAll(this.editModel.counters);
         }

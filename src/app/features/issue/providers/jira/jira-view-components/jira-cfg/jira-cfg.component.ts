@@ -27,16 +27,16 @@ import { JIRA_TYPE } from '../../../../issue.const';
   animations: [expandAnimation]
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
-  @Input() section: ConfigFormSection<JiraCfg>;
+  @Input() section?: ConfigFormSection<JiraCfg>;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
   T: any = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
   issueSuggestionsCtrl: FormControl = new FormControl();
   customFieldSuggestionsCtrl: FormControl = new FormControl();
   customFields: any [] = [];
-  customFieldsPromise: Promise<any>;
+  customFieldsPromise?: Promise<any>;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  fields: FormlyFieldConfig[];
+  fields?: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
   filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.issueSuggestionsCtrl.valueChanges.pipe(
@@ -62,7 +62,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   filteredCustomFieldSuggestions$: Observable<any[]> = this.customFieldSuggestionsCtrl.valueChanges.pipe(
     map(value => this._filterCustomFieldSuggestions(value)),
   );
-  transitionConfigOpts: { key: keyof JiraTransitionConfig; val: JiraTransitionOption }[];
+  transitionConfigOpts: { key: keyof JiraTransitionConfig; val: JiraTransitionOption }[] = [];
 
   private _subs: Subscription = new Subscription();
 
@@ -74,41 +74,46 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  private _cfg: JiraCfg;
+  private _cfg?: JiraCfg;
 
-  get cfg() {
-    return this._cfg;
+  get cfg(): JiraCfg {
+    return this._cfg as JiraCfg;
   }
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: JiraCfg) {
-    this._cfg = cfg
+    const newCfg: JiraCfg = cfg
       ? {...cfg}
       : DEFAULT_JIRA_CFG;
 
-    if (!this._cfg.transitionConfig) {
-      this._cfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
+    if (!newCfg.transitionConfig) {
+      newCfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
     } else {
       // CLEANUP keys that we're not using
-      Object.keys(this._cfg.transitionConfig).forEach((key) => {
+      Object.keys(newCfg.transitionConfig).forEach((key: string) => {
         if (!(key in DEFAULT_JIRA_CFG.transitionConfig)) {
-          delete this._cfg.transitionConfig[key];
+          delete (newCfg.transitionConfig as any)[key];
         }
       });
     }
 
-    if (!Array.isArray(this._cfg.availableTransitions)) {
-      this._cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
+    if (!Array.isArray(newCfg.availableTransitions)) {
+      newCfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
     }
 
-    this.transitionConfigOpts = Object.keys(this._cfg.transitionConfig).map((key: keyof JiraTransitionConfig) => ({
-      key,
-      val: this._cfg.transitionConfig[key]
-    }));
+    this._cfg = newCfg;
+
+    this.transitionConfigOpts = Object.keys(newCfg.transitionConfig).map((k: string) => {
+      const key = k as keyof JiraTransitionConfig;
+      return ({
+        key,
+        val: newCfg.transitionConfig[key]
+      });
+    });
   }
 
   ngOnInit(): void {
-    this.fields = this.section.items;
+    this.fields = (this.section as ConfigFormSection<JiraCfg>).items;
   }
 
   ngOnDestroy(): void {
@@ -127,10 +132,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
 
   submit() {
     if (!this.cfg) {
-      throw new Error('No config for ' + this.section.key);
+      throw new Error('No config for ' + (this.section as ConfigFormSection<JiraCfg>).key);
     } else {
       this.save.emit({
-        sectionKey: this.section.key,
+        sectionKey: (this.section as ConfigFormSection<JiraCfg>).key,
         config: this.cfg,
       });
     }

@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
-import { MatInput } from '@angular/material/input';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
 import { T } from 'src/app/t.const';
@@ -12,7 +11,7 @@ import { T } from 'src/app/t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectProjectComponent extends FieldType {
-  @ViewChild(MatInput) formFieldControl: MatInput;
+  // @ViewChild(MatInput) formFieldControl: MatInput;
 
   T: any = T;
 
