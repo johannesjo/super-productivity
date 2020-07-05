@@ -1,6 +1,5 @@
 /// <reference lib="webworker" />
-// @ts-ignore
-import * as LZString from 'lz-string/libs/lz-string';
+import * as LZString from 'lz-string';
 
 function handleData(msgData: any) {
   switch (msgData.type) {

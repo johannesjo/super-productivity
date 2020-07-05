@@ -13,8 +13,8 @@ addEventListener('message', ({data}) => {
 });
 
 const reInitCheckInterval = (reminders: ReminderCopy[]) => {
-  if (checkInterval) {
-    clearInterval(checkInterval);
+  if (checkInterval as any) {
+    clearInterval(checkInterval as any);
   }
   if (!reminders || !reminders.length) {
     return;
