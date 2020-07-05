@@ -10,7 +10,7 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import * as moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';

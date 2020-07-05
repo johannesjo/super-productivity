@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
   JIRA_ADDITIONAL_ISSUE_FIELDS,

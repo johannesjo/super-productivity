@@ -14,7 +14,7 @@ import {
 } from './store/simple-counter.actions';
 import { Observable } from 'rxjs';
 import { SimpleCounter, SimpleCounterCfgFields, SimpleCounterState } from './simple-counter.model';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 

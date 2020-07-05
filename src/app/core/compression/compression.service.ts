@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { T } from '../../t.const';
 
 @Injectable({providedIn: 'root'})

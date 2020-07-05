@@ -19,7 +19,7 @@ import {
 } from './store/improvement.actions';
 import { Observable } from 'rxjs';
 import { Improvement, ImprovementState } from './improvement.model';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectHasLastTrackedImprovements, selectImprovementBannerImprovements } from '../store/metric.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';

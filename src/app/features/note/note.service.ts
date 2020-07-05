@@ -12,7 +12,7 @@ import {
   updateNoteOrder,
   updateNoteReminder
 } from './store/note.actions';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { initialNoteState, NoteState, selectAllNotes, selectNoteById } from './store/note.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';

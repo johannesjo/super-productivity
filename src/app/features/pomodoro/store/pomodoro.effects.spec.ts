@@ -13,13 +13,14 @@ import { SetCurrentTask } from '../../tasks/store/task.actions';
 import { PomodoroConfig } from '../../config/global-config.model';
 import { PomodoroActionTypes } from './pomodoro.actions';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { Action } from '@ngrx/store';
 
 describe('PomodoroEffects', () => {
   let actions$: Observable<any>;
   let effects: PomodoroEffects;
-  let cfg$;
-  let currentSessionTime$;
-  let isBreak$;
+  let cfg$: BehaviorSubject<PomodoroConfig>;
+  let currentSessionTime$: BehaviorSubject<number>;
+  let isBreak$: BehaviorSubject<boolean>;
 
   beforeEach(() => {
     cfg$ = new BehaviorSubject<PomodoroConfig>({
@@ -72,7 +73,7 @@ describe('PomodoroEffects', () => {
     currentSessionTime$.next(0);
     actions$ = of(new SetCurrentTask('something'));
 
-    const as = [];
+    const as: Action[] = [];
     effects.playPauseOnCurrentUpdate$.subscribe(effectAction => {
       as.push(effectAction);
       if (as.length === 2) {

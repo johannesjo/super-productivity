@@ -4,7 +4,7 @@ import { Project } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import {
   selectArchivedProjects,
   selectGithubCfgByProjectId,

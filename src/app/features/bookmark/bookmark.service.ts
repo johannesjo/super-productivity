@@ -18,7 +18,7 @@ import {
 } from './store/bookmark.actions';
 import { Observable } from 'rxjs';
 import { Bookmark } from './bookmark.model';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { MatDialog } from '@angular/material/dialog';
 import { PersistenceService } from '../../core/persistence/persistence.service';

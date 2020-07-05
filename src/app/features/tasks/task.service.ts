@@ -1,4 +1,4 @@
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { delay, filter, first, map, switchMap, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';

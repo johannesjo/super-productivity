@@ -13,7 +13,7 @@ import {
 } from './pomodoro.actions';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
-import { select, Store } from '@ngrx/store';
+import { Action, select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
 import { EMPTY, Observable, of } from 'rxjs';
 import { NotifyService } from '../../../core/notify/notify.service';
@@ -31,7 +31,7 @@ export class PomodoroEffects {
   currentTaskId$: Observable<string | null> = this._store$.pipe(select(selectCurrentTaskId));
 
   @Effect()
-  playPauseOnCurrentUpdate$: Observable<unknown> = this._actions$.pipe(
+  playPauseOnCurrentUpdate$: Observable<Action> = this._actions$.pipe(
     ofType(
       TaskActionTypes.SetCurrentTask,
       TaskActionTypes.UnsetCurrentTask,

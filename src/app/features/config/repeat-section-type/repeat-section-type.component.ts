@@ -3,7 +3,7 @@ import { FieldArrayType } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { EMPTY_SIMPLE_COUNTER } from '../../simple-counter/simple-counter.const';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 
 @Component({

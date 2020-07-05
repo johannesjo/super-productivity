@@ -17,7 +17,7 @@ import { initialTagState } from '../../features/tag/store/tag.reducer';
 import { Project } from '../../features/project/project.model';
 import { concatMap, map } from 'rxjs/operators';
 import { migrateTaskState } from '../../features/tasks/migrate-task-state.util';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { initialSimpleCounterState } from '../../features/simple-counter/store/simple-counter.reducer';
 
 interface ReplaceIdMap {

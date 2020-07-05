@@ -9,7 +9,7 @@ import {
 import { addTag, deleteTag, deleteTags, updateTag, upsertTag } from './store/tag.actions';
 import { Observable } from 'rxjs';
 import { Tag, TagState } from './tag.model';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { DEFAULT_TAG } from './tag.const';
 

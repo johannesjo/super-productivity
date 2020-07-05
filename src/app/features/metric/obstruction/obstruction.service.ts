@@ -10,7 +10,7 @@ import {
 } from './store/obstruction.actions';
 import { Observable } from 'rxjs';
 import { Obstruction, ObstructionState } from './obstruction.model';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 
 @Injectable({
