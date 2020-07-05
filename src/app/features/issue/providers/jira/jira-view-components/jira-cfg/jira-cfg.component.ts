@@ -177,7 +177,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
 
   updateTransitionOptions() {
     const searchResultItem = this.issueSuggestionsCtrl.value as SearchResultItem;
-    if (!searchResultItem || typeof searchResultItem === 'string') {
+    if (!searchResultItem || typeof (searchResultItem as any) === 'string') {
       this.issueSuggestionsCtrl.setValue('');
       return;
     } else {

@@ -13,15 +13,6 @@
       false,
       "kebab-case"
     ],
-    "strict-boolean-expressions": [
-      true,
-      "allow-enum",
-      "allow-mix",
-      "allow-number",
-      "allow-string",
-      "allow-undefined-union",
-      "ignore-rhs"
-    ],
     "typedef": [
       true,
       "array-destructuring",

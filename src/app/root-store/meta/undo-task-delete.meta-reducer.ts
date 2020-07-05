@@ -123,7 +123,7 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
 
   // SUB TASK CASE
   // Note: should work independent as sub tasks dont show up in tag or project lists
-  if (task.parentId) {
+  if (task.parentId !== null) {
     return {
       projectId: task.projectId,
       parentTaskId: task.parentId,
@@ -132,20 +132,15 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
     };
   } else {
     // PROJECT CASE
-    const project: Project = state[PROJECT_FEATURE_NAME].entities[task.projectId as string] as Project;
-    if (!project) {
+    const project: (Project | undefined) = state[PROJECT_FEATURE_NAME].entities[task.projectId as string];
+    if (task.projectId === null || project === undefined) {
       throw new Error('Task Restore Error: Missing project');
     }
 
-    const taskIdsForProjectBacklog = (task.projectId && project.backlogTaskIds);
-    const taskIdsForProject = (task.projectId && project.taskIds);
+    const taskIdsForProjectBacklog = project.backlogTaskIds;
+    const taskIdsForProject = project.taskIds;
+
     const tagState = state[TAG_FEATURE_NAME];
-    if (!taskIdsForProjectBacklog) {
-      throw new Error('Task Restore Error: Missing taskIdsForProjectBacklog');
-    }
-    if (!taskIdsForProject) {
-      throw new Error('Task Restore Error: Missing taskIdsForProject');
-    }
 
     const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
       const tag = tagState.entities[id];

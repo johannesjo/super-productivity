@@ -282,7 +282,7 @@ export class DropboxSyncService {
   }
 
   private _setLocalLastSync(localLastSync: number) {
-    if (typeof localLastSync !== 'number') {
+    if (typeof (localLastSync as any) !== 'number') {
       throw new Error('No correct localLastSync given');
     }
     return localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC, localLastSync.toString());

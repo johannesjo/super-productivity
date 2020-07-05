@@ -79,12 +79,12 @@ export class SchedulePageComponent {
   }
 
   private _startTaskFronCurrentProject(task: TaskWithReminderData) {
-    if (task.parentId) {
+    if (!!task.parentId) {
       this._taskService.moveToToday(task.parentId, true);
     } else {
       this._taskService.moveToToday(task.id, true);
     }
-    if (task.reminderId) {
+    if (!!task.reminderId) {
       this._taskService.removeReminder(task.id, task.reminderId);
     }
     this._taskService.setCurrentId(task.id);

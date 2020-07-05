@@ -116,7 +116,7 @@ export const getSimpleMeta = (): string => {
 export const isHandledError = (err: unknown): boolean => {
   const errStr = (typeof err === 'string')
     ? err
-    : (typeof err === 'object' && err !== null && typeof err.toString === 'function' && err.toString());
+    : (typeof err === 'object' && err !== null && typeof (err as any).toString === 'function' && err.toString());
   // NOTE: for some unknown reason sometimes err is undefined while err.toString is not...
   // this is why we also check the string value
   return (err && (err as {}).hasOwnProperty(HANDLED_ERROR_PROP_STR)) || !!((errStr as string).match(HANDLED_ERROR_PROP_STR));

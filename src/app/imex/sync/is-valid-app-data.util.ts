@@ -16,22 +16,22 @@ export const isValidAppData = (data: AppDataComplete, isSkipInconsistentTaskStat
   // console.time('time isValidAppData');
   const isValid = (isCapableModelVersion)
 
-    ? (typeof data === 'object')
-    && typeof data.note === 'object'
-    && typeof data.bookmark === 'object'
-    && typeof data.improvement === 'object'
-    && typeof data.obstruction === 'object'
-    && typeof data.metric === 'object'
-    && typeof data.task === 'object'
-    && typeof data.tag === 'object'
-    && typeof data.globalConfig === 'object'
-    && typeof data.taskArchive === 'object'
-    && typeof data.project === 'object'
+    ? (typeof (data as any) === 'object')
+    && typeof (data as any).note === 'object'
+    && typeof (data as any).bookmark === 'object'
+    && typeof (data as any).improvement === 'object'
+    && typeof (data as any).obstruction === 'object'
+    && typeof (data as any).metric === 'object'
+    && typeof (data as any).task === 'object'
+    && typeof (data as any).tag === 'object'
+    && typeof (data as any).globalConfig === 'object'
+    && typeof (data as any).taskArchive === 'object'
+    && typeof (data as any).project === 'object'
     && Array.isArray(data.reminders)
     && _isEntityStatesConsistent(data)
     && _isTaskIdsConsistent(data, isSkipInconsistentTaskStateError)
 
-    : typeof data === 'object'
+    : typeof (data as any) === 'object'
   ;
   // console.timeEnd('time isValidAppData');
 

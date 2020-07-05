@@ -9,7 +9,7 @@
 
 <mat-autocomplete #auto="matAutocomplete"
                   [autoActiveFirstOption]="false">
-  <mat-option *ngFor="let icon of (filteredIcons$|async)"
+  <mat-option *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
               [value]="icon">
     <mat-icon>{{icon}}</mat-icon>
     <span>{{icon}}</span>

@@ -379,7 +379,7 @@ export class WorkContextService {
         ...repeatableTasks,
         // NOTE: remove double tasks
         ...workedOnOrDoneTasks.filter(
-          (task => !task.repeatCfgId || task.repeatCfgId === null)
+          (task => !task.repeatCfgId)
         ),
       ]),
     );

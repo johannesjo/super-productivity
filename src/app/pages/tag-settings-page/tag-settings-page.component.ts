@@ -23,14 +23,14 @@ import { BASIC_TAG_CONFIG_FORM_CONFIG } from '../../features/tag/tag-form-cfg.co
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagSettingsPageComponent implements OnInit, OnDestroy {
-   // tslint:disable-next-line:typedef
+  // tslint:disable-next-line:typedef
   T = T;
   tagThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   globalConfigFormCfg: ConfigFormConfig;
   basicFormCfg: ConfigFormSection<Tag>;
 
-  activeWorkContext?: WorkContext;
-  workContextAdvCfg?: WorkContextAdvancedCfg;
+  activeWorkContext: WorkContext | null = null;
+  workContextAdvCfg: WorkContextAdvancedCfg | null = null;
   currentWorkContextTheme?: WorkContextThemeCfg;
 
   private _subs: Subscription = new Subscription();
@@ -60,7 +60,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   saveTagThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: WorkContextThemeCfg }) {
-    if (!$event.config || !this.activeWorkContext) {
+    if (!$event.config || this.activeWorkContext === null) {
       throw new Error('Not enough data');
     } else {
       this.tagService.updateTag(this.activeWorkContext.id, {
@@ -72,7 +72,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
   }
 
   saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: Tag }) {
-    if (!$event.config || !this.activeWorkContext) {
+    if (!$event.config || this.activeWorkContext === null) {
       throw new Error('Not enough data');
     } else {
       const {title, icon, color} = $event.config;

@@ -450,7 +450,7 @@ export class JiraApiService {
   }
 
   private _b64EncodeUnicode(str: string) {
-    if (typeof btoa === 'function') {
+    if (typeof (btoa as any) === 'function') {
       return btoa(str);
     }
     throw new Error('Jira: btoo not supported');

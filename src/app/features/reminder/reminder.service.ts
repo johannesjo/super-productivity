@@ -59,7 +59,7 @@ export class ReminderService {
     private readonly _imexMetaService: ImexMetaService,
   ) {
     console.log('INIT START');
-    if (typeof Worker === 'undefined') {
+    if (typeof (Worker as any) === 'undefined') {
       throw new Error('No service workers supported :(');
     }
 

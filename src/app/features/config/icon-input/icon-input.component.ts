@@ -34,4 +34,8 @@ export class IconInputComponent extends FieldType implements OnInit {
       }),
     );
   }
+
+  trackByIndex(i: number, p: any) {
+    return i;
+  }
 }

@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { isTouchOnly } from '../../../util/is-touch';
 
 const ANIMATABLE_CLASS = 'isAnimatable';
 
@@ -28,7 +29,7 @@ export class SplitComponent implements AfterViewInit {
   @Input() isAnimateBtn?: boolean;
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
-  pos: number = 0;
+  pos: number = 100;
   eventSubs?: Subscription;
   @ViewChild('buttonEl', {static: true}) buttonEl?: ElementRef;
   private _isDrag: boolean = false;
@@ -59,7 +60,7 @@ export class SplitComponent implements AfterViewInit {
     this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
     let newPos = 50;
-    if (typeof this.pos !== 'number' || this.pos > 45 && this.pos < 55) {
+    if (this.pos > 45 && this.pos < 55) {
       newPos = 100;
     }
     this._updatePos(newPos);
@@ -105,9 +106,10 @@ export class SplitComponent implements AfterViewInit {
       throw new Error('No container el');
     }
 
-    const clientY = (typeof (ev as MouseEvent).clientY === 'number')
-      ? (ev as MouseEvent).clientY
-      : (ev as TouchEvent).touches[0].clientY;
+    // const clientY = (typeof (ev as MouseEvent).clientY === 'number')
+    const clientY = isTouchOnly()
+      ? (ev as TouchEvent).touches[0].clientY
+      : (ev as MouseEvent).clientY;
     this._renderer.removeClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.removeClass(this.splitBottomEl, ANIMATABLE_CLASS);
     this._isDrag = true;

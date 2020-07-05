@@ -160,7 +160,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   async addTask() {
     this._isAddInProgress = true;
-    const item: AddTaskSuggestion = this.taskSuggestionsCtrl.value;
+    const item: AddTaskSuggestion | string = this.taskSuggestionsCtrl.value;
 
     if (!item) {
       return;

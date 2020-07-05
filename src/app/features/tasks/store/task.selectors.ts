@@ -177,7 +177,7 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(selectAllTasks, (tas
 export const selectAllRepeatableTaskWithSubTasks = createSelector(
   selectAllTasksWithSubTasks,
   (tasks: TaskWithSubTasks[]) => {
-    return tasks.filter(task => !!task.repeatCfgId && task.repeatCfgId !== null);
+    return tasks.filter(task => !!task.repeatCfgId);
   }
 );
 export const selectAllRepeatableTaskWithSubTasksFlat = createSelector(

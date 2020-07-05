@@ -11,7 +11,7 @@ export class CompressionService {
   constructor(
     private readonly _snackService: SnackService,
   ) {
-    if (typeof Worker === 'undefined') {
+    if (typeof (Worker as any) === 'undefined') {
       throw new Error('No web worker support');
     }
     // Create a new
