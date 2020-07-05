@@ -9,10 +9,10 @@ import { filter } from 'rxjs/operators';
 import { Reminder } from './reminder.model';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { NotifyService } from '../../core/notify/notify.service';
-import { throttle } from 'throttle-debounce';
 import { DialogViewNoteReminderComponent } from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
 import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { DataInitService } from '../../core/data-init/data-init.service';
+import { throttle } from 'helpful-decorators';
 
 @NgModule({
   declarations: [],
@@ -23,8 +23,6 @@ import { DataInitService } from '../../core/data-init/data-init.service';
   ],
 })
 export class ReminderModule {
-  private _throttledShowNotification: any = throttle(60000, this._showNotification.bind(this));
-
   constructor(
     private readonly _reminderService: ReminderService,
     private readonly _matDialog: MatDialog,
@@ -44,7 +42,7 @@ export class ReminderModule {
         this._uiHelperService.focusApp();
       }
 
-      this._throttledShowNotification(reminders);
+      this._showNotification(reminders);
 
       const oldest = reminders[0];
       if (oldest.type === 'NOTE') {
@@ -67,6 +65,7 @@ export class ReminderModule {
     });
   }
 
+  @throttle(60000)
   private _showNotification(reminders: Reminder[]) {
     const isMultiple = reminders.length > 1;
     const title = isMultiple

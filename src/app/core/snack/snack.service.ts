@@ -9,7 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Actions, ofType } from '@ngrx/effects';
 import { setActiveWorkContext } from '../../features/work-context/store/work-context.actions';
-import * as debounceFn from 'debounce-fn';
+import { debounce } from 'helpful-decorators';
 
 @Injectable({
   providedIn: 'root',
@@ -17,10 +17,6 @@ import * as debounceFn from 'debounce-fn';
 export class SnackService {
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
   private _onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
-
-  private readonly _debouncedOpenSnack
-    : (params: SnackParams) => void
-    = debounceFn(this._openSnack.bind(this), {wait: 100});
 
   constructor(
     private _store$: Store<any>,
@@ -38,7 +34,7 @@ export class SnackService {
     if (typeof params === 'string') {
       params = {msg: params};
     }
-    this._debouncedOpenSnack(params);
+    this._openSnack(params);
   }
 
   close() {
@@ -47,6 +43,7 @@ export class SnackService {
     }
   }
 
+  @debounce(100)
   private _openSnack(params: SnackParams) {
     const _destroy$: Subject<boolean> = new Subject<boolean>();
     const destroySubs = () => {

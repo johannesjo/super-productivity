@@ -32,7 +32,6 @@
               "contra/emitter",
               "file-saver",
               "semver",
-              "debounce-fn",
               "stack-generator",
               "stacktrace-gps",
               "error-stack-parser",
