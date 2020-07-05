@@ -1,5 +1,5 @@
 <div class="wrapper">
-  <div *ngIf="task.issueWasUpdated"
+  <div *ngIf="task?.issueWasUpdated"
        [@expand]
        class="updates">
     <div>
@@ -12,7 +12,7 @@
 
     <h3 class="mat-h3">{{T.F.JIRA.ISSUE_CONTENT.LIST_OF_CHANGES|translate}}</h3>
     <ul class="changelog">
-      <li *ngFor="let entry of issue.changelog">
+      <li *ngFor="let entry of issue?.changelog">
         <em *ngIf="entry.author">{{entry.author.displayName}}</em>
         {{T.F.JIRA.ISSUE_CONTENT.CHANGED|translate}}
         <strong>{{entry.field}}</strong>
@@ -26,32 +26,32 @@
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.SUMMARY|translate}}</th>
       <td class="summary"><strong><a [href]="issueUrl$|async"
-                                     target="_blank">{{issue.key}} {{issue.summary}}</a></strong></td>
+                                     target="_blank">{{issue?.key}} {{issue?.summary}}</a></strong></td>
     </tr>
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.STATUS|translate}}</th>
       <td>
         <!--<img [src]="issue?.status?.iconUrl"-->
         <!--*ngIf="issue?.status?.iconUrl">-->
-        {{issue.status?.name}}</td>
+        {{issue?.status?.name}}</td>
     </tr>
-    <tr *ngIf="issue.storyPoints">
+    <tr *ngIf="issue?.storyPoints">
       <th>{{T.F.JIRA.ISSUE_CONTENT.STORY_POINTS|translate}}</th>
-      <td>{{issue.storyPoints}}</td>
+      <td>{{issue?.storyPoints}}</td>
     </tr>
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
-      <td>{{issue.assignee?.displayName || '–'}}</td>
+      <td>{{issue?.assignee?.displayName || '–'}}</td>
     </tr>
-    <tr *ngIf="issue.timespent || issue.timeestimate">
+    <tr *ngIf="issue?.timespent || issue?.timeestimate">
       <th>{{T.F.JIRA.ISSUE_CONTENT.WORKLOG|translate}}</th>
-      <td>{{(issue.timespent * 1000)|msToString}} / {{(issue.timeestimate * 1000)|msToString}}</td>
+      <td>{{(issue?.timespent * 1000)|msToString}} / {{(issue?.timeestimate * 1000)|msToString}}</td>
     </tr>
-    <tr *ngIf="issue.components?.length">
+    <tr *ngIf="issue?.components?.length">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMPONENTS|translate}}</th>
       <td>
         <mat-chip-list>
-          <mat-chip *ngFor="let component of issue.components; trackBy: trackByIndex"
+          <mat-chip *ngFor="let component of issue?.components; trackBy: trackByIndex"
                     [title]="component.description">{{component.name}}
           </mat-chip>
         </mat-chip-list>
@@ -77,10 +77,10 @@
     <!--        </div>-->
     <!--      </td>-->
     <!--    </tr>-->
-    <tr *ngIf="issue.comments">
+    <tr *ngIf="issue?.comments">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMMENTS|translate}}</th>
       <td>
-        <div *ngFor="let comment of (issue.comments|sort:'created'); trackBy: trackByIndex"
+        <div *ngFor="let comment of (issue?.comments|sort:'created'); trackBy: trackByIndex"
              class="comment">
 
           <img [src]="comment.author.avatarUrl"

@@ -13,7 +13,7 @@
     <table class="issue-table">
       <tr>
         <th>{{T.F.GITHUB.ISSUE_CONTENT.SUMMARY|translate}}</th>
-        <td><a [href]="issue.html_url"
+        <td><a [href]="issue?.html_url"
                target="_blank"><strong>{{issue?.title}} #{{issue?.number}}</strong></a></td>
       </tr>
       <tr>
@@ -35,7 +35,7 @@
           </mat-chip-list>
         </td>
       </tr>
-      <tr *ngIf="issue.body">
+      <tr *ngIf="issue?.body">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
           <div [data]="issue?.body"

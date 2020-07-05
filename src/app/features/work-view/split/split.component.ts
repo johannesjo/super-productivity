@@ -28,7 +28,7 @@ export class SplitComponent implements AfterViewInit {
   @Input() isAnimateBtn?: boolean;
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
-  pos?: number;
+  pos: number = 0;
   eventSubs?: Subscription;
   @ViewChild('buttonEl', {static: true}) buttonEl?: ElementRef;
   private _isDrag: boolean = false;

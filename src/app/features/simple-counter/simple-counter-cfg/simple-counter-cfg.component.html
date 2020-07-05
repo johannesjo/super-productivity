@@ -2,7 +2,7 @@
       [formGroup]="form">
 
   <formly-form (modelChange)="onModelChange($event)"
-               [fields]="section.items"
+               [fields]="section?.items"
                [form]="form"
                [model]="editModel"
                [options]="options">

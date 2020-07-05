@@ -3,12 +3,12 @@
 <form #formRef="ngForm"
       (submit)="submit()">
   <mat-slide-toggle (ngModelChange)="toggleEnabled($event)"
-                    [ngModel]="cfg.isEnabled"
+                    [ngModel]="cfg?.isEnabled"
                     name="isEnabled">
     {{T.F.GOOGLE.SYNC_CFG.ENABLE|translate}}
   </mat-slide-toggle>
   <!--NOTE: [@expandFade] not working nicely here -->
-  <div *ngIf="cfg.isEnabled">
+  <div *ngIf="cfg && cfg?.isEnabled">
     <section class="btns">
       <button (click)="login()"
               *ngIf="!(googleApiService.isLoggedIn$|async)"

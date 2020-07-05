@@ -1,4 +1,5 @@
-<div [class.hasReminder]="note.reminderId"
+<div *ngIf="note"
+     [class.hasReminder]="note.reminderId"
      [class.isFocused]="isFocus"
      [class.isImg]="note.imgUrl"
      class="note">
@@ -62,7 +63,9 @@
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
 
-        {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) : (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
+        {{note.isLock
+        ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate)
+        : (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
       </button>
 
       <button (click)="removeNote()"

@@ -16,14 +16,14 @@ import { T } from '../../../t.const';
 export class ImprovementBannerComponent implements OnDestroy {
   // tslint:disable-next-line:typedef
   T = T;
-  improvements?: Improvement[] | null;
+  improvements: Improvement[] = [];
 
   private _subs: Subscription = new Subscription();
 
   constructor(
     public improvementService: ImprovementService,
   ) {
-    this._subs.add(this.improvementService.improvementBannerImprovements$.subscribe(val => this.improvements = val));
+    this._subs.add(this.improvementService.improvementBannerImprovements$.subscribe(val => this.improvements = val || []));
   }
 
   ngOnDestroy(): void {
