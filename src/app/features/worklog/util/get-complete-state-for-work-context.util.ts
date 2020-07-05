@@ -43,7 +43,7 @@ const _filterIdsForProject = (state: EntityState<Task>, workContextId: string): 
 const _filterIdsForTag = (state: EntityState<Task>, workContextId: string): string[] => (state.ids as string[]).filter(
   id => {
     const t = state.entities[id] as Task;
-    !!(t.parentId)
+    return !!(t.parentId)
       ? (state.entities[t.parentId] as Task).tagIds.includes(workContextId)
       : t.tagIds.includes(workContextId);
   });
