@@ -1,5 +1,6 @@
 <form #form="ngForm"
-      (submit)="submit()">
+      (submit)="submit()"
+      *ngIf="bookmarkCopy">
   <h1 mat-dialog-title>{{ (bookmarkCopy.id ?
     (T.F.BOOKMARK.DIALOG_EDIT.EDIT_BOOKMARK) :
     (T.F.BOOKMARK.DIALOG_EDIT.ADD_BOOKMARK))

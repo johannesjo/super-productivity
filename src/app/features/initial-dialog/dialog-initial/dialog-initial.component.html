@@ -6,7 +6,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <a *ngIf="data.btnUrl"
+  <a *ngIf="data.btnUrl && data.btnTxt"
      [href]="data.btnUrl"
      mat-button
      target="_blank">

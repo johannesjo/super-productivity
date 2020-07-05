@@ -60,7 +60,11 @@
           <label *ngIf="opt.key==='OPEN'">{{T.F.JIRA.CFG_CMP.OPEN|translate}}</label>
           <label *ngIf="opt.key==='IN_PROGRESS'">{{T.F.JIRA.CFG_CMP.IN_PROGRESS|translate}}</label>
           <label *ngIf="opt.key==='DONE'">{{T.F.JIRA.CFG_CMP.DONE|translate}}</label>
-          <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"
+
+          <!-- TODO check for a better way to do this -->
+          <!--          <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"-->
+          <mat-select [ngModel]="getTransition(opt.key)"
+                      (ngModelChange)="setTransition(opt.key, $event)"
                       [ngModelOptions]="{standalone: true}">
             <mat-option value="DO_NOT">{{T.F.JIRA.CFG_CMP.DO_NOT|translate}}</mat-option>
             <mat-option value="ALWAYS_ASK">{{T.F.JIRA.CFG_CMP.ALWAYS_ASK|translate}}</mat-option>

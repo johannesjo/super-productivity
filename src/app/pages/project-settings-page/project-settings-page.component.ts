@@ -117,4 +117,11 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
       ...config,
     }, true);
   }
+
+  getIssueIntegrationCfg(key: IssueProviderKey): IssueIntegrationCfg {
+    if (!(this.issueIntegrationCfgs as any)[key]) {
+      throw new Error('Invalid issue integration cfg');
+    }
+    return (this.issueIntegrationCfgs as any)[key];
+  }
 }

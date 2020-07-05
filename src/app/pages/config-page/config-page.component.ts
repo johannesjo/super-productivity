@@ -9,7 +9,8 @@ import {
   ConfigFormConfig,
   ConfigFormSection,
   GlobalConfigSectionKey,
-  GlobalConfigState
+  GlobalConfigState,
+  GlobalSectionConfig
 } from '../../features/config/global-config.model';
 import { Subscription } from 'rxjs';
 import { ProjectCfgFormKey } from '../../features/project/project.model';
@@ -73,5 +74,9 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   toggleDarkMode(change: MatSlideToggleChange) {
     this.configService.updateSection('misc', {isDarkMode: change.checked});
+  }
+
+  getGlobalCfgSection(sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey): GlobalSectionConfig {
+    return (this.globalCfg as any)[sectionKey];
   }
 }

@@ -122,6 +122,14 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
+  getTransition(key: keyof JiraTransitionConfig): JiraTransitionOption {
+    return this.cfg.transitionConfig[key];
+  }
+
+  setTransition(key: keyof JiraTransitionConfig, value: JiraTransitionOption) {
+    return this.cfg.transitionConfig[key] = value;
+  }
+
   toggleEnabled(isEnabled: boolean) {
     if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
       throw new Error('Should only be called when in project context');

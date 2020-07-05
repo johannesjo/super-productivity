@@ -24,7 +24,7 @@
     <div *ngFor="let section of issueIntegrationFormCfg; trackBy:trackBySectionKey;">
       <section class="config-section ">
         <config-section (save)="saveIssueProviderCfg($event)"
-                        [cfg]="issueIntegrationCfgs[section.key]"
+                        [cfg]="getIssueIntegrationCfg(section.key)"
                         [section]="section"></config-section>
       </section>
     </div>
