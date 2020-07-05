@@ -26,7 +26,7 @@ describe('projectReducer', () => {
       ] as Partial<Project>[]);
       const ids = ['B', 'A'];
       expect(() => {
-        const r = projectReducer(s as any, new UpdateProjectOrder({ids}));
+        projectReducer(s as any, new UpdateProjectOrder({ids}));
       }).toThrowError('Invalid param given to UpdateProjectOrder');
     });
 
