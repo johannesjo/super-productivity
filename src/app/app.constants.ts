@@ -4,37 +4,20 @@ export const TRACKING_INTERVAL = 1000;
 
 export const MODEL_VERSION_KEY = '__modelVersion';
 
-import en from '@angular/common/locales/en';
-import es from '@angular/common/locales/es';
-import de from '@angular/common/locales/de';
-import ar from '@angular/common/locales/ar';
-import fa from '@angular/common/locales/fa';
-import fr from '@angular/common/locales/fr';
-import ja from '@angular/common/locales/ja';
-import ko from '@angular/common/locales/ko';
-import ru from '@angular/common/locales/ru';
-import tr from '@angular/common/locales/tr';
-import zh from '@angular/common/locales/zh';
-import it from '@angular/common/locales/it';
-import pt from '@angular/common/locales/pt';
-import nl from '@angular/common/locales/nl';
-
-export const NG_LOCALES = {
-  en,
-  es,
-  de,
-  ar,
-  fa,
-  fr,
-  ja,
-  ko,
-  ru,
-  tr,
-  zh,
-  it,
-  pt,
-  nl,
-};
+import '@angular/common/locales/global/en';
+import '@angular/common/locales/global/es';
+import '@angular/common/locales/global/de';
+import '@angular/common/locales/global/ar';
+import '@angular/common/locales/global/fa';
+import '@angular/common/locales/global/fr';
+import '@angular/common/locales/global/ja';
+import '@angular/common/locales/global/ko';
+import '@angular/common/locales/global/ru';
+import '@angular/common/locales/global/tr';
+import '@angular/common/locales/global/zh';
+import '@angular/common/locales/global/it';
+import '@angular/common/locales/global/pt';
+import '@angular/common/locales/global/nl';
 
 export const ALL_THEMES = [
   'blue',
