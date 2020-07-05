@@ -28,11 +28,6 @@ import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.compon
     DialogViewNoteReminderComponent,
     DialogAddNoteComponent
   ],
-  entryComponents: [
-    DialogAddNoteReminderComponent,
-    DialogViewNoteReminderComponent,
-    DialogAddNoteComponent,
-  ],
   exports: [NotesComponent],
 })
 export class NoteModule {

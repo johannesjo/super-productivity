@@ -24,9 +24,6 @@ import { TagComponent } from './tag/tag.component';
     TagComponent,
     // FindContrastColorPipe
   ],
-  entryComponents: [
-    DialogEditTagsForTaskComponent,
-  ],
   exports: [
     DialogEditTagsForTaskComponent,
     TagListComponent,

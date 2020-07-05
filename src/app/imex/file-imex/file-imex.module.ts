@@ -13,9 +13,6 @@ import { FormsModule } from '@angular/forms';
   declarations: [
     FileImexComponent,
   ],
-  entryComponents: [
-    FileImexComponent,
-  ],
   exports: [
     FileImexComponent,
   ]

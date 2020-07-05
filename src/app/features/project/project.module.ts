@@ -27,9 +27,6 @@ import { DialogGitlabInitialSetupModule } from '../issue/providers/gitlab/dialog
   providers: [
     ProjectService
   ],
-  entryComponents: [
-    DialogCreateProjectComponent,
-  ]
 })
 export class ProjectModule {
 }

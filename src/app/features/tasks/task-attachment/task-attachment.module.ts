@@ -17,9 +17,6 @@ import { TaskAttachmentListComponent } from './task-attachment-list/task-attachm
     TaskAttachmentLinkDirective,
     TaskAttachmentListComponent,
   ],
-  entryComponents: [
-    DialogEditTaskAttachmentComponent
-  ],
   exports: [
     TaskAttachmentListComponent,
   ],

@@ -17,9 +17,6 @@ import { TasksModule } from '../tasks/tasks.module';
   declarations: [
     DialogIdleComponent
   ],
-  entryComponents: [
-    DialogIdleComponent,
-  ],
   exports: [
     TakeABreakModule,
   ]

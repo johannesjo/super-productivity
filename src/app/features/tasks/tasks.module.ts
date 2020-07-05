@@ -80,12 +80,6 @@ import { DialogViewTaskRemindersComponent } from './dialog-view-task-reminders/d
     TaskAdditionalInfoComponent,
     TaskAdditionalInfoWrapperComponent,
   ],
-  entryComponents: [
-    DialogTimeEstimateComponent,
-    DialogViewTaskRemindersComponent,
-    DialogAddTaskReminderComponent,
-    DialogAddTimeEstimateForOtherDayComponent,
-  ],
   providers: [TagService]
 
 })

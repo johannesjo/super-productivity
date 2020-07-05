@@ -23,9 +23,6 @@ import { BookmarkLinkDirective } from './bookmark-link/bookmark-link.directive';
     DialogEditBookmarkComponent,
     BookmarkLinkDirective
   ],
-  entryComponents: [
-    DialogEditBookmarkComponent
-  ],
   exports: [
     BookmarkBarComponent,
     DialogEditBookmarkComponent

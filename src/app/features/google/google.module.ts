@@ -22,10 +22,6 @@ import { GOOGLE_DRIVE_FEATURE_NAME } from './store/google-drive-sync.reducer';
     DialogConfirmDriveSyncLoadComponent,
     DialogConfirmDriveSyncSaveComponent,
   ],
-  entryComponents: [
-    DialogConfirmDriveSyncLoadComponent,
-    DialogConfirmDriveSyncSaveComponent,
-  ],
   exports: [],
 })
 export class GoogleModule {

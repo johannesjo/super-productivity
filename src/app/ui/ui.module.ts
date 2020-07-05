@@ -189,9 +189,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [
     ...COMPONENT_AND_PIPES,
     OwlWrapperComponent,
   ],
-  entryComponents: [
-    ...DIALOG_COMPONENTS
-  ],
   exports: [
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,

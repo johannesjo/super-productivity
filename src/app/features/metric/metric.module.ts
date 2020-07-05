@@ -36,7 +36,6 @@ import { RouterModule } from '@angular/router';
     MetricComponent,
     ImprovementBannerComponent,
   ],
-  entryComponents: [],
 })
 export class MetricModule {
 

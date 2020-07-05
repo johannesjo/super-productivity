@@ -13,9 +13,6 @@ import { UiModule } from '../../ui/ui.module';
   declarations: [
     SnackCustomComponent,
   ],
-  entryComponents: [
-    SnackCustomComponent,
-  ],
 })
 export class SnackModule {
 }

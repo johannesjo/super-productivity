@@ -17,7 +17,6 @@ import { FormsModule } from '@angular/forms';
     EffectsModule.forFeature([TaskRepeatCfgEffects])
   ],
   declarations: [DialogEditTaskRepeatCfgComponent],
-  entryComponents: [DialogEditTaskRepeatCfgComponent],
   exports: [],
 })
 export class TaskRepeatCfgModule {

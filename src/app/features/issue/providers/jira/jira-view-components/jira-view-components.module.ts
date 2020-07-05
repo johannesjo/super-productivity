@@ -21,12 +21,6 @@ import { DialogJiraAddWorklogComponent } from './dialog-jira-add-worklog/dialog-
     JiraCfgStepperComponent,
     JiraCfgComponent,
   ],
-  entryComponents: [
-    DialogJiraTransitionComponent,
-    DialogJiraInitialSetupComponent,
-    DialogJiraAddWorklogComponent,
-    JiraCfgComponent,
-  ],
   exports: [
     JiraCfgStepperComponent
   ],

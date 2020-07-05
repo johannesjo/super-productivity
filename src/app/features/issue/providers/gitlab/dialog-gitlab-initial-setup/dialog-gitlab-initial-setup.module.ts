@@ -9,7 +9,6 @@ import { DialogGitlabInitialSetupComponent } from './dialog-gitlab-initial-setup
     UiModule,
   ],
   declarations: [DialogGitlabInitialSetupComponent],
-  entryComponents: [DialogGitlabInitialSetupComponent],
   exports: [],
 })
 export class DialogGitlabInitialSetupModule {

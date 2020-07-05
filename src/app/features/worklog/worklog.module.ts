@@ -19,9 +19,6 @@ import { WorklogWeekComponent } from './worklog-week/worklog-week.component';
     WorklogExportComponent,
     WorklogWeekComponent,
   ],
-  entryComponents: [
-    DialogWorklogExportComponent,
-  ],
   exports: [
     WorklogComponent,
     DialogWorklogExportComponent,

@@ -12,7 +12,6 @@ import { IMPROVEMENT_FEATURE_NAME, improvementReducer } from './store/improvemen
     EffectsModule.forFeature([ImprovementEffects])
   ],
   declarations: [],
-  entryComponents: [],
   exports: [],
 })
 export class ImprovementModule {

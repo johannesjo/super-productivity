@@ -12,7 +12,6 @@ import { OBSTRUCTION_FEATURE_NAME, obstructionReducer } from './store/obstructio
     EffectsModule.forFeature([ObstructionEffects])
   ],
   declarations: [],
-  entryComponents: [],
   exports: [],
 })
 export class ObstructionModule {

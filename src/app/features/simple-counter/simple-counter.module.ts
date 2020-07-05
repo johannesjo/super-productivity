@@ -24,9 +24,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     SimpleCounterCfgComponent,
     DialogSimpleCounterEditComponent,
   ],
-  entryComponents: [
-    DialogSimpleCounterEditComponent,
-  ],
   exports: [
     SimpleCounterButtonComponent,
     SimpleCounterCfgComponent,

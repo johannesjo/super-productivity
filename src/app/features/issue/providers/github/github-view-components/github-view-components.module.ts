@@ -9,7 +9,6 @@ import { DialogGithubInitialSetupComponent } from './dialog-github-initial-setup
     UiModule,
   ],
   declarations: [DialogGithubInitialSetupComponent],
-  entryComponents: [DialogGithubInitialSetupComponent],
   exports: [],
 })
 export class GithubViewComponentsModule {

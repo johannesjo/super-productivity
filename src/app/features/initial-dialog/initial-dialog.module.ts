@@ -5,7 +5,6 @@ import { UiModule } from '../../ui/ui.module';
 
 @NgModule({
   declarations: [DialogInitialComponent],
-  entryComponents: [DialogInitialComponent],
   imports: [
     CommonModule,
     UiModule,

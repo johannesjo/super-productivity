@@ -12,7 +12,6 @@ import { WORK_CONTEXT_FEATURE_NAME, workContextReducer } from './store/work-cont
     EffectsModule.forFeature([WorkContextEffects])
   ],
   declarations: [],
-  entryComponents: [],
   exports: [],
 })
 export class WorkContextModule {
