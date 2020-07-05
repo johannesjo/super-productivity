@@ -13,6 +13,8 @@ function handleData(msgData: any) {
     case 'DECOMPRESS_UTF16':
       // tslint:disable-next-line
       return LZString['decompressFromUTF16'](msgData.strToHandle);
+    default:
+      throw new Error('Invalid type');
   }
 }
 
