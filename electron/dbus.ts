@@ -1,6 +1,6 @@
 'use strict';
 
-import {IPC} from './ipc-events.const';
+import { IPC } from './ipc-events.const';
 
 const errorHandler = require('./error-handler');
 const mainWinMod = require('./main-window');
@@ -46,12 +46,11 @@ function init(params) {
     if (retCode === 1) {
       console.log(`Successfully requested service name '${serviceName}'!`);
       proceed();
-    }
-    /* Other return codes means various errors, check here
-    (https://dbus.freedesktop.org/doc/api/html/group__DBusShared.html#ga37a9bc7c6eb11d212bf8d5e5ff3b50f9) for more
-    information
-    */
-    else {
+      /* Other return codes means various errors, check here
+  (https://dbus.freedesktop.org/doc/api/html/group__DBusShared.html#ga37a9bc7c6eb11d212bf8d5e5ff3b50f9) for more
+  information
+  */
+    } else {
       isDBusError = true;
       errorHandler(`DBus: Failed to request service name '${serviceName}'.Check what return code '${retCode}' means.`);
     }
@@ -86,28 +85,28 @@ function init(params) {
 
     // Then we need to create the interface implementation (with actual functions)
     iface = {
-      markAsDone: function () {
+      markAsDone: () => {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
         mainWin.webContents.send(IPC.TASK_MARK_AS_DONE);
       },
-      startTask: function () {
+      startTask: () => {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
         mainWin.webContents.send(IPC.TASK_START);
       },
-      pauseTask: function () {
+      pauseTask: () => {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
         mainWin.webContents.send(IPC.TASK_PAUSE);
       },
-      showApp: function () {
+      showApp: () => {
         params.showApp();
       },
-      quitApp: function () {
+      quitApp: () => {
         params.quitApp();
       },
-      emit: function () {
+      emit: () => {
         // no nothing, as usual
       }
     };
@@ -124,7 +123,7 @@ let isErrorShownOnce = false;
 
 if (!isDBusError) {
   module.exports = {
-    init: init,
+    init,
     setTask: (taskId, taskText) => {
       // fail silently to prevent hundreds of error messages
       if (isDBusError || isErrorShownOnce) {

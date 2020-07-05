@@ -2,61 +2,61 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-        xmlns:dc="http://purl.org/dc/elements/1.1/"
-        xmlns:cc="http://creativecommons.org/ns#"
-        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-        xmlns="http://www.w3.org/2000/svg"
-        width="64"
-        height="64"
-        id="svg3360"
-        version="1.1"
-        inkscape:version="0.91 r13725"
-        viewBox="0 0 64 64"
-        sodipodi:docname="ico-white.svg">
-    <defs
-            id="defs3362"/>
-    <sodipodi:namedview
-            id="base"
-            pagecolor="#ffffff"
-            bordercolor="#666666"
-            borderopacity="1.0"
-            inkscape:pageopacity="0.0"
-            inkscape:pageshadow="2"
-            inkscape:zoom="3.8890873"
-            inkscape:cx="82.291165"
-            inkscape:cy="47.350794"
-            inkscape:current-layer="layer1"
-            showgrid="true"
-            inkscape:document-units="px"
-            inkscape:grid-bbox="true"
-            inkscape:window-width="1869"
-            inkscape:window-height="1056"
-            inkscape:window-x="51"
-            inkscape:window-y="24"
-            inkscape:window-maximized="1"/>
-    <metadata
-            id="metadata3365">
-        <rdf:RDF>
-            <cc:Work
-                    rdf:about="">
-                <dc:format>image/svg+xml</dc:format>
-                <dc:type
-                        rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-                <dc:title></dc:title>
-            </cc:Work>
-        </rdf:RDF>
-    </metadata>
-    <g
-            id="layer1"
-            inkscape:label="Layer 1"
-            inkscape:groupmode="layer">
-        <path
-                id="path3395"
-                style="fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1;fill:#ffffff"
-                d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
-                inkscape:connector-curvature="0"
-                sodipodi:nodetypes="ccccc"/>
-    </g>
+  height="64"
+  id="svg3360"
+  inkscape:version="0.91 r13725"
+  sodipodi:docname="ico-white.svg"
+  version="1.1"
+  viewBox="0 0 64 64"
+  width="64"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:cc="http://creativecommons.org/ns#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd">
+  <defs
+    id="defs3362" />
+  <sodipodi:namedview
+    bordercolor="#666666"
+    borderopacity="1.0"
+    id="base"
+    inkscape:current-layer="layer1"
+    inkscape:cx="82.291165"
+    inkscape:cy="47.350794"
+    inkscape:document-units="px"
+    inkscape:grid-bbox="true"
+    inkscape:pageopacity="0.0"
+    inkscape:pageshadow="2"
+    inkscape:window-height="1056"
+    inkscape:window-maximized="1"
+    inkscape:window-width="1869"
+    inkscape:window-x="51"
+    inkscape:window-y="24"
+    inkscape:zoom="3.8890873"
+    pagecolor="#ffffff"
+    showgrid="true" />
+  <metadata
+    id="metadata3365">
+    <rdf:RDF>
+      <cc:Work
+        rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+          rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+    id="layer1"
+    inkscape:groupmode="layer"
+    inkscape:label="Layer 1">
+    <path
+      d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+      id="path3395"
+      inkscape:connector-curvature="0"
+      sodipodi:nodetypes="ccccc"
+      style="fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1;fill:#ffffff" />
+  </g>
 </svg>

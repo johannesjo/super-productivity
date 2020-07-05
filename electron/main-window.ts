@@ -9,21 +9,26 @@ import {
   MessageBoxReturnValue,
   shell
 } from 'electron';
-import {errorHandler} from './error-handler';
-import {join, normalize} from 'path';
-import {format} from 'url';
-import {IPC} from './ipc-events.const';
-import {getSettings} from './get-settings';
+import { errorHandler } from './error-handler';
+import { join, normalize } from 'path';
+import { format } from 'url';
+import { IPC } from './ipc-events.const';
+import { getSettings } from './get-settings';
 
 let mainWin: BrowserWindow;
-let indicatorMod;
 
-const mainWinModule = {
+const mainWinModule: {
+  win?: BrowserWindow;
+  isAppReady: boolean;
+} = {
   win: undefined,
   isAppReady: false
 };
 
-export const getWin = () => {
+export const getWin = (): BrowserWindow => {
+  if (!mainWinModule.win) {
+    throw new Error('No main window');
+  }
   return mainWinModule.win;
 };
 
@@ -31,19 +36,24 @@ export const getIsAppReady = () => {
   return mainWinModule.isAppReady;
 };
 
-export const createWindow = (params) => {
+export const createWindow = ({
+  IS_DEV,
+  ICONS_FOLDER,
+  IS_MAC,
+  quitApp,
+  app,
+}: {
+  IS_DEV: boolean;
+  ICONS_FOLDER: string;
+  IS_MAC: boolean;
+  quitApp: () => void;
+  app: App;
+}): BrowserWindow => {
   // make sure the main window isn't already created
   if (mainWin) {
     errorHandler('Main window already exists');
-    return;
+    return mainWin;
   }
-
-  const IS_DEV = params.IS_DEV;
-  const ICONS_FOLDER = params.ICONS_FOLDER;
-  const IS_MAC = params.IS_MAC;
-  const quitApp = params.quitApp;
-  const app = params.app;
-  indicatorMod = params.indicatorMod;
 
   // workaround for https://github.com/electron/electron/issues/16521
   if (!IS_MAC) {
@@ -159,12 +169,11 @@ function createMenu(quitApp) {
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTplOUT));
 }
 
-
 // TODO this is ugly as f+ck
 const appCloseHandler = (
   app: App,
 ) => {
-  let ids = [];
+  let ids: string[] = [];
 
   const _quitApp = () => {
     (app as any).isQuiting = true;

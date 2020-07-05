@@ -9,6 +9,12 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "strictPropertyInitialization": true,
+    "allowSyntheticDefaultImports": true,
     "target": "es5",
     "resolveJsonModule": true,
     "typeRoots": [

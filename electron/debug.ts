@@ -57,19 +57,19 @@ function inspectElements() {
   }
 }
 
-const addExtensionIfInstalled = (name, getPath) => {
-  const isExtensionInstalled = nameIN => {
-    return BrowserWindow.getDevToolsExtensions &&
-      {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), nameIN);
-  };
-
-  try {
-    if (!isExtensionInstalled(name)) {
-      BrowserWindow.addDevToolsExtension(getPath(name));
-    }
-  } catch (_) {
-  }
-};
+// const addExtensionIfInstalled = (name, getPath) => {
+//   const isExtensionInstalled = nameIN => {
+//     return BrowserWindow.getDevToolsExtensions &&
+//       {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), nameIN);
+//   };
+//
+//   try {
+//     if (!isExtensionInstalled(name)) {
+//       BrowserWindow.addDevToolsExtension(getPath(name));
+//     }
+//   } catch (_) {
+//   }
+// };
 
 export const initDebug = (opts, isAddReload) => {
   opts = Object.assign({

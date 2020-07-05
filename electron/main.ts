@@ -1,22 +1,22 @@
 'use strict';
-import {App, app, globalShortcut, ipcMain, powerMonitor, BrowserWindow} from 'electron';
+import { App, app, BrowserWindow, globalShortcut, ipcMain, powerMonitor } from 'electron';
 import * as electronDl from 'electron-dl';
 
-import {info} from 'electron-log';
-import {CONFIG} from './CONFIG';
+import { info } from 'electron-log';
+import { CONFIG } from './CONFIG';
 
-import {initIndicator} from './indicator';
-import {createWindow} from './main-window';
+import { initIndicator } from './indicator';
+import { createWindow } from './main-window';
 
-import {sendJiraRequest, setupRequestHeadersForImages} from './jira';
-import {getGitLog} from './git-log';
-import {initGoogleAuth} from './google-auth';
-import {errorHandler} from './error-handler';
-import {initDebug} from './debug';
-import {IPC} from './ipc-events.const';
-import {backupData} from './backup';
-import {JiraCfg} from '../src/app/features/issue/providers/jira/jira.model';
-import {KeyboardConfig} from '../src/app/features/config/global-config.model';
+import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
+import { getGitLog } from './git-log';
+import { initGoogleAuth } from './google-auth';
+import { errorHandler } from './error-handler';
+import { initDebug } from './debug';
+import { IPC } from './ipc-events.const';
+import { backupData } from './backup';
+import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
+import { KeyboardConfig } from '../src/app/features/config/global-config.model';
 import lockscreen from './lockscreen';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
@@ -140,7 +140,6 @@ appIN.on('ready', () => {
   });
 });
 
-
 appIN.on('will-quit', () => {
   // un-register all shortcuts.
   globalShortcut.unregisterAll();
@@ -193,7 +192,6 @@ ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, {progress, mode}) => {
   }
 });
 
-
 ipcMain.on(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
   registerShowAppShortCuts(cfg);
 });
@@ -235,8 +233,6 @@ function createMainWin() {
     ICONS_FOLDER,
     IS_MAC,
     quitApp,
-    // TODO fix
-    // indicatorMod,
   });
   initGoogleAuth();
 }
@@ -291,6 +287,9 @@ function registerShowAppShortCuts(cfg: KeyboardConfig) {
               mainWin.webContents.send(IPC.ADD_TASK);
             };
             break;
+
+          default:
+            actionFn = () => undefined;
         }
 
         if (shortcut && shortcut.length > 0) {
@@ -348,7 +347,6 @@ function exec(ev, command) {
     }
   });
 }
-
 
 // required for graceful closing
 // @see: https://github.com/electron/electron/issues/5708

@@ -1,7 +1,7 @@
-import {google} from 'googleapis';
-import {BrowserWindow, ipcMain, BrowserWindowConstructorOptions} from 'electron';
-import {getWin} from './main-window';
-import {IPC} from './ipc-events.const';
+import { google } from 'googleapis';
+import { BrowserWindow, BrowserWindowConstructorOptions, ipcMain } from 'electron';
+import { getWin } from './main-window';
+import { IPC } from './ipc-events.const';
 
 const A = {
   CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',
@@ -30,8 +30,6 @@ const BROWSER_WINDOW_PARAMS: BrowserWindowConstructorOptions = {
   },
 };
 
-
-
 /**
  * Create a new OAuth2 client with the configured keys.
  */
@@ -40,7 +38,6 @@ const oauth2Client = new google.auth.OAuth2(
   CLIENT_SECRET,
   'urn:ietf:wg:oauth:2.0:oob'
 );
-
 
 google.options({auth: oauth2Client});
 
@@ -70,8 +67,11 @@ async function authenticate(refreshToken) {
       });
       oauth2Client.getAccessToken()
         .then((res) => {
+          if (!res || !res.res) {
+            reject(res);
+          }
           // console.log('TOKEN REFRESH ', res.res.data);
-          resolve(res.res.data);
+          resolve((res.res as any).data);
         })
         .catch((err) => {
           console.log(err);
@@ -121,7 +121,6 @@ function openAuthWindow(url) {
 //   }
 //   console.log(tokens.access_token);
 // });
-
 
 export const initGoogleAuth = () => {
   ipcMain.on(IPC.TRIGGER_GOOGLE_AUTH, (ev, refreshToken) => {

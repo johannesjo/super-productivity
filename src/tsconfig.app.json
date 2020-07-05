@@ -2,14 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "types": [],
-    "strict": true,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "strictPropertyInitialization": true,
-    "allowSyntheticDefaultImports": true
+    "types": []
   },
   "files": [
     "main.ts",

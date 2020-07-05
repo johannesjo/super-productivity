@@ -1,5 +1,5 @@
-import {getWin} from './main-window';
-import {IPC} from './ipc-events.const';
+import { getWin } from './main-window';
+import { IPC } from './ipc-events.const';
 
 export const getGitLog = (data) => {
   const exec = require('child_process').exec;
@@ -7,10 +7,10 @@ export const getGitLog = (data) => {
 
   exec(cmd, {
     cwd: data.cwd
-  }, function (error, stdout) {
+  }, (error, stdout) => {
     const mainWin = getWin();
     mainWin.webContents.send(IPC.GIT_LOG_RESPONSE, {
-      stdout: stdout,
+      stdout,
       requestId: data.requestId
     });
   });

@@ -1,4 +1,4 @@
-import {exec} from 'child_process';
+import { exec } from 'child_process';
 
 export default (cb?, customCommands?) => {
   const lockCommands = customCommands || {

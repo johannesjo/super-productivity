@@ -1,14 +1,14 @@
-import {getWin} from './main-window';
-import {IPC} from './ipc-events.const';
-import {session} from 'electron';
-import {JiraCfg} from '../src/app/features/issue/providers/jira/jira.model';
+import { getWin } from './main-window';
+import { IPC } from './ipc-events.const';
+import { session } from 'electron';
+import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 // import rp from 'request-promise';
 // const rp = require('request-promise');
 import fetch from 'node-fetch';
-import {Agent} from 'https';
+import { Agent } from 'https';
 
 export const sendJiraRequest = ({requestId, requestInit, url, jiraCfg}:
-                                  { requestId: string; requestInit: RequestInit; url: string, jiraCfg: JiraCfg }) => {
+  { requestId: string; requestInit: RequestInit; url: string, jiraCfg: JiraCfg }) => {
   const mainWin = getWin();
   // console.log('--------------------------------------------------------------------');
   // console.log(url);
@@ -51,7 +51,7 @@ export const sendJiraRequest = ({requestId, requestInit, url, jiraCfg}:
 
 // TODO simplify and do encoding in frontend service
 export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
-  const {host, protocol, port} = parseHostAndPort(jiraCfg);
+  const {host, protocol} = parseHostAndPort(jiraCfg);
 
   // TODO export to util fn
   const _b64EncodeUnicode = (str) => {
@@ -73,14 +73,18 @@ export const setupRequestHeadersForImages = (jiraCfg: JiraCfg) => {
 const MATCH_PROTOCOL_REG_EX = /(^[^:]+):\/\//;
 const MATCH_PORT_REG_EX = /:\d{2,4}/;
 
-const parseHostAndPort = (config: JiraCfg) => {
-  let host = config.host;
+const parseHostAndPort = (config: JiraCfg): { host: string, protocol: string, port: number } => {
+  let host: string = config.host as string;
   let protocol;
   let port;
 
+  if (!host) {
+    throw new Error('No host given');
+  }
+
   // parse port from host and remove it
   if (host.match(MATCH_PORT_REG_EX)) {
-    const match = MATCH_PORT_REG_EX.exec(host);
+    const match = MATCH_PORT_REG_EX.exec(host) as RegExpExecArray;
     host = host.replace(MATCH_PORT_REG_EX, '');
     port = parseInt(match[0].replace(':', ''), 10);
   }
@@ -93,7 +97,7 @@ const parseHostAndPort = (config: JiraCfg) => {
       // remove trailing slash just in case
       .replace(/\/$/, '');
 
-    protocol = match[1];
+    protocol = (match as any)[1];
   } else {
     protocol = 'https';
   }

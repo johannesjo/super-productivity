@@ -1,5 +1,5 @@
-import {ipcMain} from 'electron';
-import {IPC} from './ipc-events.const';
+import { ipcMain } from 'electron';
+import { IPC } from './ipc-events.const';
 
 let cb;
 export const getSettings = (win, cbIN) => {

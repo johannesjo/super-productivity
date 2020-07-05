@@ -4,7 +4,6 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 export const BACKUP_DIR = `${app.getPath('userData')}/backups`;
 console.log('Saving backups to', BACKUP_DIR);
 
-
 export function backupData(ev, data) {
   if (!existsSync(BACKUP_DIR)) {
     mkdirSync(BACKUP_DIR);
