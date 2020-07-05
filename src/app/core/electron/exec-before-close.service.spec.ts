@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: ExecBeforeCloseService = TestBed.get(ExecBeforeCloseService);
+//     const service: ExecBeforeCloseService = TestBed.inject(ExecBeforeCloseService);
 //     expect(service).toBeTruthy();
 //   });
 // });

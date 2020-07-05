@@ -15,7 +15,7 @@
     "noUnusedLocals": true,
     "strictPropertyInitialization": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es5",
+    "target": "es2018",
     "resolveJsonModule": true,
     "typeRoots": [
       "node_modules/@types"

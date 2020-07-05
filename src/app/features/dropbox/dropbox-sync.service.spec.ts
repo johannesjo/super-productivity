@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: DropboxSyncService = TestBed.get(DropboxSyncService);
+//     const service: DropboxSyncService = TestBed.inject(DropboxSyncService);
 //     expect(service).toBeTruthy();
 //   });
 // });

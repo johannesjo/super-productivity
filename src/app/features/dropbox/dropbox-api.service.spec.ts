@@ -6,7 +6,7 @@
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: DropboxApiService = TestBed.get(DropboxApiService);
+//     const service: DropboxApiService = TestBed.inject(DropboxApiService);
 //     expect(service).toBeTruthy();
 //   });
 // });
