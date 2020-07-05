@@ -12,7 +12,6 @@ import {
 import { Observable } from 'rxjs';
 import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
 import * as shortid from 'shortid';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
@@ -25,7 +24,6 @@ export class TaskRepeatCfgService {
 
   constructor(
     private _store$: Store<TaskRepeatCfgState>,
-    private _persistenceService: PersistenceService,
     private _matDialog: MatDialog,
   ) {
   }

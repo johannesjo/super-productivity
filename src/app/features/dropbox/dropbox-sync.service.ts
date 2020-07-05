@@ -238,7 +238,7 @@ export class DropboxSyncService {
     });
   }
 
-  private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | unknown> {
+  private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | undefined> {
     try {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,
@@ -258,6 +258,7 @@ export class DropboxSyncService {
         return this._uploadAppData(data, true);
       }
     }
+    return;
   }
 
   // LS HELPER

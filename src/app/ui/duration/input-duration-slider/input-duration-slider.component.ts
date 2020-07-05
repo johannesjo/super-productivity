@@ -43,7 +43,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     private _el: ElementRef,
     private _cd: ChangeDetectorRef,
   ) {
-    this.el = _el.nativeElement;
+    this.el = this._el.nativeElement;
   }
 
   _model: number = 0;

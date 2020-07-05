@@ -1,5 +1,5 @@
 import { EntityState } from '@ngrx/entity';
-import { Task, WorklogTask } from '../../tasks/task.model';
+import { Task } from '../../tasks/task.model';
 import { getWeeksInMonth } from '../../../util/get-weeks-in-month';
 import { getWeekNumber } from '../../../util/get-week-number';
 import * as moment from 'moment';

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, EMPTY, fromEvent, merge, Observable, of, ReplaySubject } from 'rxjs';
 import {
   auditTime,
@@ -106,7 +105,6 @@ export class SyncService {
   );
 
   constructor(
-    private readonly _store: Store<any>,
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _dataInitService: DataInitService,
     private readonly _persistenceService: PersistenceService,

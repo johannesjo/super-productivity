@@ -1,16 +1,10 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import {
-  selectAllTags,
-  selectAllTagsWithoutMyDay,
-  selectTagById,
-  selectTagsByIds
-} from './store/tag.reducer';
+import { selectAllTags, selectAllTagsWithoutMyDay, selectTagById, selectTagsByIds } from './store/tag.reducer';
 import { addTag, deleteTag, deleteTags, updateTag, upsertTag } from './store/tag.actions';
 import { Observable } from 'rxjs';
 import { Tag, TagState } from './tag.model';
 import * as shortid from 'shortid';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { DEFAULT_TAG } from './tag.const';
 
 @Injectable({
@@ -22,7 +16,6 @@ export class TagService {
 
   constructor(
     private _store$: Store<TagState>,
-    private _persistenceService: PersistenceService,
   ) {
   }
 

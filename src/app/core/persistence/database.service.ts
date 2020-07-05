@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { SnackService } from '../snack/snack.service';
 import { DBSchema, IDBPTransaction, openDB } from 'idb';
 import { IDBPDatabase } from 'idb/build/esm/entry';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -29,9 +28,7 @@ export class DatabaseService {
 
   private _lastParams: any;
 
-  constructor(
-    private _snackService: SnackService,
-  ) {
+  constructor() {
     this._init().then();
   }
 

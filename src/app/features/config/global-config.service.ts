@@ -20,7 +20,6 @@ import {
   selectMiscConfig,
   selectTakeABreakConfig
 } from './store/global-config.reducer';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 
@@ -62,7 +61,6 @@ export class GlobalConfigService {
 
   constructor(
     private readonly _store: Store<any>,
-    private readonly _persistenceService: PersistenceService
   ) {
     // this.cfg$.subscribe((val) => console.log(val));
     this.cfg$.subscribe((cfg) => this.cfg = cfg);

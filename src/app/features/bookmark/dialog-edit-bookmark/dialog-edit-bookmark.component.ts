@@ -7,7 +7,6 @@ import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { T } from '../../../t.const';
-import { TranslateService } from '@ngx-translate/core';
 
 interface BookmarkSelectType {
   type: BookmarkType;
@@ -39,7 +38,6 @@ export class DialogEditBookmarkComponent implements OnInit {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,
-    private _translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
   }

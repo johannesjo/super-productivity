@@ -9,7 +9,6 @@ import {
   WorkContextThemeCfg,
   WorkContextType
 } from './work-context.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { setActiveWorkContext } from './store/work-context.actions';
 import { selectActiveContextId, selectActiveContextTypeAndId } from './store/work-context.reducer';
 import { NavigationEnd, Router } from '@angular/router';
@@ -290,7 +289,6 @@ export class WorkContextService {
 
   constructor(
     private _store$: Store<WorkContextState>,
-    private _persistenceService: PersistenceService,
     private _actions$: Actions,
     private _tagService: TagService,
     private _router: Router,

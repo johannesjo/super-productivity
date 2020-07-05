@@ -14,7 +14,7 @@ import {
 import { fadeAnimation } from '../../animations/fade.ani';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map, share, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, share, switchMap } from 'rxjs/operators';
 import { observeWidth } from '../../../util/resize-observer-obs';
 import { MainContainerClass } from '../../../app.constants';
 

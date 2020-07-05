@@ -34,7 +34,6 @@ export class ActiveWorkContextGuard implements CanActivate {
 @Injectable({providedIn: 'root'})
 export class ValidTagIdGuard implements CanActivate {
   constructor(
-    private _router: Router,
     private _tagService: TagService,
     private _dataInitService: DataInitService,
   ) {
@@ -53,7 +52,6 @@ export class ValidTagIdGuard implements CanActivate {
 @Injectable({providedIn: 'root'})
 export class ValidProjectIdGuard implements CanActivate {
   constructor(
-    private _router: Router,
     private _projectService: ProjectService,
     private _dataInitService: DataInitService,
   ) {

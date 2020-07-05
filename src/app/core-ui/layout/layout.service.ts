@@ -10,11 +10,10 @@ import {
 } from './store/layout.actions';
 import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
 import { select, Store } from '@ngrx/store';
-import { LayoutState, selectIsShowAddTaskBar, selectIsShowNotes, selectIsShowSideNav } from './store/layout.reducer';
+import { LayoutState, selectIsShowAddTaskBar, selectIsShowSideNav } from './store/layout.reducer';
 import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { NoteService } from '../../features/note/note.service';
-import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 
 const NAV_ALWAYS_VISIBLE = 1250;
@@ -58,13 +57,11 @@ export class LayoutService {
   //       : this.isBothAlwaysVisible$;
   //   }),
   // );
-  private _isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
+  // private _isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
 
   constructor(
     private _store$: Store<LayoutState>,
-    private _noteService: NoteService,
     private _router: Router,
-    private _activatedRoute: ActivatedRoute,
     private _workContextService: WorkContextService,
     private _breakPointObserver: BreakpointObserver,
   ) {

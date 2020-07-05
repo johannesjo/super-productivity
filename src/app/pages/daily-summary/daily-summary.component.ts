@@ -6,13 +6,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { NoteService } from '../../features/note/note.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
-import { SnackService } from '../../core/snack/snack.service';
 import { filter, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
-import { GoogleApiService } from '../../features/google/google-api.service';
-import { ProjectService } from '../../features/project/project.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import * as moment from 'moment';
 import { RoundTimeOption } from '../../features/project/project.model';
@@ -99,11 +95,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _googleDriveSync: GoogleDriveSyncService,
     private readonly _dropboxSync: DropboxSyncService,
     private readonly _router: Router,
-    private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
-    private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
-    private readonly _googleApiService: GoogleApiService,
     private readonly _electronService: ElectronService,
     private readonly _worklogService: WorklogService,
     private readonly _cd: ChangeDetectorRef,

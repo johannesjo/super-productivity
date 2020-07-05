@@ -48,7 +48,7 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
     this._subs.add(this._dragulaService.dropModel('PROJECTS').pipe(
       withLatestFrom(this.projectService.archived$),
       ).subscribe(([params, archived]: any) => {
-        const {target, source, targetModel, item} = params;
+        const {targetModel} = params;
         const targetNewIds = targetModel.map((project: Project) => project.id);
 
         const archivedIds = archived

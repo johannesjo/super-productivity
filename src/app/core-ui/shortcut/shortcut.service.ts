@@ -4,7 +4,6 @@ import { checkKeyCombo } from '../../util/check-key-combo';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LayoutService } from '../layout/layout.service';
-import { NoteService } from '../../features/note/note.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
@@ -26,7 +25,6 @@ export class ShortcutService {
     private _electronService: ElectronService,
     private _layoutService: LayoutService,
     private _matDialog: MatDialog,
-    private _noteService: NoteService,
     private _taskService: TaskService,
     private _activatedRoute: ActivatedRoute,
     private _uiHelperService: UiHelperService,

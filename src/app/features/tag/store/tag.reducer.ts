@@ -211,7 +211,7 @@ export function tagReducer(
     // ---------
     case TaskActionTypes.AddTask: {
       const {payload} = action as AddTask;
-      const {workContextId, workContextType, task, isAddToBottom} = payload;
+      const {task, isAddToBottom} = payload;
       const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
         id: tagId,
         changes: {

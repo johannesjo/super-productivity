@@ -6,7 +6,6 @@ import { MultiPartBuilder } from './util/multi-part-builder';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
-import { GlobalConfigService } from '../config/global-config.service';
 import { catchError, concatMap, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { BehaviorSubject, EMPTY, from, merge, Observable, of, throwError, timer } from 'rxjs';
 import { IPC } from '../../../../electron/ipc-events.const';
@@ -62,7 +61,6 @@ export class GoogleApiService {
 
   constructor(
     private readonly _http: HttpClient,
-    private readonly _configService: GlobalConfigService,
     private readonly _electronService: ElectronService,
     private readonly _snackService: SnackService,
     private readonly _bannerService: BannerService,

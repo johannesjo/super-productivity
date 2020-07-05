@@ -56,7 +56,7 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 // SELECTORS
 // ---------
 export const selectProjectFeatureState = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
-const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSelectors();
+const {selectAll} = projectAdapter.getSelectors();
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => !p.isArchived));
 
@@ -285,7 +285,7 @@ export function projectReducer(
     // Meta Actions
     // ------------
     case TaskActionTypes.AddTask: {
-      const {workContextId, workContextType, task, isAddToBottom, isAddToBacklog} = payload;
+      const {task, isAddToBottom, isAddToBacklog} = payload;
       const affectedEntity = task.projectId && state.entities[task.projectId];
       const prop: 'backlogTaskIds' | 'taskIds' = isAddToBacklog ? 'backlogTaskIds' : 'taskIds';
 

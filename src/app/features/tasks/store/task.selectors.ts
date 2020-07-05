@@ -49,7 +49,7 @@ export const flattenTasks = (tasksIN: TaskWithSubTasks[]): TaskWithSubTasks[] =>
 
 // SELECTORS
 // ---------
-const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
+const {selectEntities, selectAll} = taskAdapter.getSelectors();
 export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
 export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
 export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);

@@ -4,7 +4,6 @@ import { GlobalConfigService } from '../config/global-config.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
 import axios, { AxiosResponse, Method } from 'axios';
 import qs from 'querystring';
 import { DropboxFileMetadata } from './dropbox.model';
@@ -29,7 +28,6 @@ export class DropboxApiService {
   constructor(
     private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
-    private  _httpClient: HttpClient,
   ) {
   }
 

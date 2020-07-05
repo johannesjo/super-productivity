@@ -32,7 +32,6 @@ import {
 import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
 import { NoteState } from '../../features/note/store/note.reducer';
 import { Reminder } from '../../features/reminder/reminder.model';
-import { SnackService } from '../snack/snack.service';
 import { DatabaseService } from './database.service';
 import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 import {
@@ -158,7 +157,6 @@ export class PersistenceService {
   private _isBlockSaving: boolean = false;
 
   constructor(
-    private _snackService: SnackService,
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {

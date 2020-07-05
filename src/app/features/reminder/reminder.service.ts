@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
@@ -49,7 +48,6 @@ export class ReminderService {
   private _reminders: Reminder[] = [];
 
   constructor(
-    private readonly _projectService: ProjectService,
     private readonly _workContextService: WorkContextService,
     private readonly _syncService: SyncService,
     private readonly _persistenceService: PersistenceService,

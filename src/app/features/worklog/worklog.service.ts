@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Worklog, WorklogDay, WorklogWeek } from './worklog.model';
 import { dedupeByKey } from '../../util/de-dupe-by-key';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { ProjectService } from '../project/project.service';
 import { BehaviorSubject, from, merge, Observable } from 'rxjs';
 import { concatMap, filter, first, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
 import { getWeekNumber } from '../../util/get-week-number';
@@ -98,7 +97,6 @@ export class WorklogService {
     private readonly _persistenceService: PersistenceService,
     private readonly _workContextService: WorkContextService,
     private readonly _dataInitService: DataInitService,
-    private readonly _projectService: ProjectService,
     private readonly _taskService: TaskService,
     private readonly _router: Router,
   ) {

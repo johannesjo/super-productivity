@@ -39,9 +39,7 @@ import { Note } from '../../features/note/note.model';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import { Improvement, ImprovementState } from '../../features/metric/improvement/improvement.model';
 import { Obstruction, ObstructionState } from '../../features/metric/obstruction/obstruction.model';
-import { SnackService } from '../snack/snack.service';
 import { DatabaseService } from '../persistence/database.service';
-import { CompressionService } from '../compression/compression.service';
 import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 import { Action } from '@ngrx/store';
 import { Injectable } from '@angular/core';
@@ -109,9 +107,7 @@ export class LegacyPersistenceService {
   private _isBlockSaving: boolean = false;
 
   constructor(
-    private _snackService: SnackService,
     private _databaseService: DatabaseService,
-    private _compressionService: CompressionService,
   ) {
     // this.loadComplete().then(d => console.log('XXXXXXXXX', d, JSON.stringify(d).length));
     // this.loadAllRelatedModelDataForProject('DEFAULT').then(d => console.log(d));
@@ -267,11 +263,6 @@ export class LegacyPersistenceService {
     return model;
   }
 
-  private async _getProjectIds(): Promise<string[]> {
-    const projectState = await this.project.load();
-    return projectState.ids as string[];
-  }
-
   private async _loadLegacyAppDataForProjects(projectIds: string[]): Promise<LegacyAppDataForProjects> {
     const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
       const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
@@ -294,17 +285,6 @@ export class LegacyPersistenceService {
     }, Promise.resolve({}));
   }
 
-  // tslint:disable-next-line
-  private async _saveForProjectIds(data: any, saveDataFn: Function, isForce = false) {
-    const promises: Promise<any>[] = [];
-    Object.keys(data).forEach(projectId => {
-      if (data[projectId]) {
-        promises.push(saveDataFn(projectId, data[projectId], isForce));
-      }
-    });
-    return await Promise.all(promises);
-  }
-
   private _makeProjectKey(projectId: string, subKey: string, additional?: string) {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
   }
@@ -317,15 +297,6 @@ export class LegacyPersistenceService {
     } else {
       console.warn('BLOCKED SAVING for ', key);
       return Promise.reject('Data import currently in progress. Saving disabled');
-    }
-  }
-
-  private async _removeFromDb(key: string, isForce: boolean = false): Promise<any> {
-    if (!this._isBlockSaving || isForce === true) {
-      return this._databaseService.remove(key);
-    } else {
-      console.warn('BLOCKED SAVING for ', key);
-      return Promise.reject('Data import currently in progress. Removing disabled');
     }
   }
 

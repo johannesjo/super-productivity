@@ -21,7 +21,7 @@ export class EnlargeImgDirective {
     private _renderer: Renderer2,
     private _el: ElementRef
   ) {
-    this.imageEl = _el.nativeElement;
+    this.imageEl = this._el.nativeElement;
   }
 
   @HostListener('click', ['$event']) onClick() {

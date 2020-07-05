@@ -3,10 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskService } from '../task.service';
 import { ReminderCopy } from '../../reminder/reminder.model';
 import { ReminderService } from '../../reminder/reminder.service';
-import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { AddTaskReminderInterface } from './add-task-reminder-interface';
-import { WorkContextService } from '../../work-context/work-context.service';
 import { throttle } from 'helpful-decorators';
 import { Task } from '../task.model';
 
@@ -31,8 +29,6 @@ export class DialogAddTaskReminderComponent {
 
   constructor(
     private _taskService: TaskService,
-    private _snackService: SnackService,
-    private _workContextService: WorkContextService,
     private _reminderService: ReminderService,
     private _matDialogRef: MatDialogRef<DialogAddTaskReminderComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddTaskReminderInterface,

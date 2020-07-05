@@ -2,10 +2,6 @@ import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 import { concatMap, filter, shareReplay, switchMap, take } from 'rxjs/operators';
 import { ProjectService } from '../../features/project/project.service';
-import { TagService } from '../../features/tag/tag.service';
-import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
-import { TaskService } from '../../features/tasks/task.service';
-import { GlobalConfigService } from '../../features/config/global-config.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
@@ -13,8 +9,6 @@ import { PersistenceService } from '../persistence/persistence.service';
 import { ProjectState } from '../../features/project/store/project.reducer';
 import { MigrationService } from '../migration/migration.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
-import { environment } from '../../../environments/environment';
 
 @Injectable({providedIn: 'root'})
 export class DataInitService {
@@ -37,10 +31,6 @@ export class DataInitService {
     private _persistenceService: PersistenceService,
     private _migrationService: MigrationService,
     private _projectService: ProjectService,
-    private _tagService: TagService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _taskService: TaskService,
-    private _configService: GlobalConfigService,
     private _workContextService: WorkContextService,
     private _store$: Store<any>,
   ) {
@@ -57,9 +47,9 @@ export class DataInitService {
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(isOmitTokens: boolean = false): Promise<any> {
     const appDataComplete = await this._persistenceService.loadComplete();
-    if (!environment.production) {
-      const isValid = isValidAppData(appDataComplete);
-    }
+    // if (!environment.production) {
+    //   const isValid = isValidAppData(appDataComplete);
+    // }
     this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
   }
 }

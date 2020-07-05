@@ -67,7 +67,6 @@ import {
 } from './store/task.selectors';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { ProjectService } from '../project/project.service';
 import { RoundTimeOption } from '../project/project.model';
 import { TagService } from '../tag/tag.service';
 import { TODAY_TAG } from '../tag/tag.const';
@@ -167,7 +166,6 @@ export class TaskService {
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
     private readonly _tagService: TagService,
-    private readonly _projectService: ProjectService,
     private readonly _workContextService: WorkContextService,
     private readonly _imexMetaService: ImexMetaService,
     private readonly _snackService: SnackService,
