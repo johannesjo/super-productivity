@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { Observable, of } from 'rxjs';
 import { concatMap, map, switchMap, take } from 'rxjs/operators';
@@ -16,7 +16,7 @@ export class ActiveWorkContextGuard implements CanActivate {
   ) {
   }
 
-  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
+  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<UrlTree> {
     return this._workContextService.activeWorkContextTypeAndId$.pipe(
       take(1),
       switchMap(({activeType, activeId}) => {

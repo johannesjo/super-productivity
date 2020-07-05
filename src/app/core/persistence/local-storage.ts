@@ -6,7 +6,7 @@ export const loadFromLs = (key: string): unknown => {
   return JSON.parse(serializedState);
 };
 
-export const saveToLs = (key: string, state: { [key: string]: any }) => {
+export const saveToLs = (key: string, state: { [key: string]: unknown }) => {
   const serializedState = JSON.stringify(state);
   localStorage.setItem(key, serializedState);
 };
@@ -19,7 +19,7 @@ export const loadFromSessionStorage = (key: string): unknown => {
   return JSON.parse(serializedState);
 };
 
-export const saveToSessionStorage = (key: string, state: { [key: string]: any }) => {
+export const saveToSessionStorage = (key: string, state: { [key: string]: unknown }) => {
   const serializedState = JSON.stringify(state);
   sessionStorage.setItem(key, serializedState);
 };

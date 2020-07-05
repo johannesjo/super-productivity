@@ -17,8 +17,8 @@ export class LanguageService {
 
   constructor(
     private _translateService: TranslateService,
-    private _dateTimeAdapter: DateTimeAdapter<any>,
-    private _dateAdapter: DateAdapter<any>,
+    private _dateTimeAdapter: DateTimeAdapter<unknown>,
+    private _dateAdapter: DateAdapter<unknown>,
   ) {
   }
 

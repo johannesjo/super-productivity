@@ -14,9 +14,9 @@ export interface SnackParams {
   actionId?: string;
   // tslint:disable-next-line
   actionFn?: Function;
-  actionPayload?: any;
+  actionPayload?: unknown;
   config?: MatSnackBarConfig;
   isSpinner?: boolean;
-  promise?: Promise<any>;
-  showWhile$?: Observable<any>;
+  promise?: Promise<unknown>;
+  showWhile$?: Observable<unknown>;
 }

@@ -16,9 +16,9 @@ export class ConfigFormComponent {
 
   // tslint:disable-next-line:typedef
   T = T;
-  config: any;
+  config?: {};
   @Input() sectionKey?: GlobalConfigSectionKey | ProjectCfgFormKey;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: unknown }> = new EventEmitter();
   fields?: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
@@ -26,7 +26,7 @@ export class ConfigFormComponent {
   constructor() {
   }
 
-  @Input() set cfg(cfg: any) {
+  @Input() set cfg(cfg: {}) {
     this.config = {...cfg};
   }
 

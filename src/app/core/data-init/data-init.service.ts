@@ -45,7 +45,7 @@ export class DataInitService {
 
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
-  async reInit(isOmitTokens: boolean = false): Promise<any> {
+  async reInit(isOmitTokens: boolean = false): Promise<void> {
     const appDataComplete = await this._persistenceService.loadComplete();
     // if (!environment.production) {
     //   const isValid = isValidAppData(appDataComplete);

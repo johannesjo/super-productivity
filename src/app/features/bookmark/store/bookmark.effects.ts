@@ -5,13 +5,13 @@ import { select, Store } from '@ngrx/store';
 import { BookmarkActionTypes } from './bookmark.actions';
 import { BookmarkState, selectBookmarkFeatureState } from './bookmark.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { WorkContextService } from '../../work-context/work-context.service';
 
 @Injectable()
 export class BookmarkEffects {
 
-  @Effect({dispatch: false}) updateBookmarks$: any = this._actions$
+  @Effect({dispatch: false}) updateBookmarks$: Observable<unknown> = this._actions$
     .pipe(
       ofType(
         BookmarkActionTypes.AddBookmark,

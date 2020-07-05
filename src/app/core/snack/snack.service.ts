@@ -16,7 +16,7 @@ import { debounce } from 'helpful-decorators';
 })
 export class SnackService {
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
-  private _onWorkContextChange$: Observable<any> = this._actions$.pipe(ofType(setActiveWorkContext));
+  private _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(ofType(setActiveWorkContext));
 
   constructor(
     private _store$: Store<any>,

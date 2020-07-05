@@ -29,7 +29,7 @@ export class GlobalProgressBarInterceptorService implements HttpInterceptor {
     });
   }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     this.globalProgressBarService.countUp(req.url);
     return next.handle(req).pipe(
       finalize(() => {

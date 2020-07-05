@@ -21,9 +21,9 @@ export class GlobalProgressBarService {
   );
 
   private _label$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
-  label$: Observable<string> = this._label$.pipe(
+  label$: Observable<string | null> = this._label$.pipe(
     distinctUntilChanged(),
-    switchMap((label: string | any) => !!label
+    switchMap((label: string | null) => !!label
       ? of(label)
       : of(null).pipe(delay(DELAY))
     ),

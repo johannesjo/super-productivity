@@ -71,8 +71,8 @@ import { devError } from '../../util/dev-error';
 export class PersistenceService {
 
   // handled as private but needs to be assigned before the creations
-  _baseModels: PersistenceBaseModel<any>[] = [];
-  _projectModels: PersistenceForProjectModel<any, any>[] = [];
+  _baseModels: PersistenceBaseModel<unknown>[] = [];
+  _projectModels: PersistenceForProjectModel<unknown, unknown>[] = [];
 
   // TODO auto generate ls keys from appDataKey where possible
   globalConfig: PersistenceBaseModel<GlobalConfigState> = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig', migrateGlobalConfigState);
@@ -81,7 +81,7 @@ export class PersistenceService {
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<ProjectState, Project>(
     LS_PROJECT_META_LIST,
     'project',
-    projectReducer as any,
+    projectReducer,
     migrateProjectState,
   );
 
@@ -112,7 +112,7 @@ export class PersistenceService {
   taskRepeatCfg: PersistenceBaseEntityModel<TaskRepeatCfgState, TaskRepeatCfg> = this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
-    taskRepeatCfgReducer as any,
+    taskRepeatCfgReducer,
     migrateTaskRepeatCfgState,
   );
 
@@ -138,7 +138,7 @@ export class PersistenceService {
     'obstruction',
   );
 
-  onAfterSave$: Subject<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> = new Subject();
+  onAfterSave$: Subject<{ appDataKey: AllowedDBKeys, data: unknown, isDataImport: boolean, projectId?: string }> = new Subject();
   onAfterImport$: Subject<AppDataComplete> = new Subject();
 
   inMemoryComplete$: Observable<AppDataComplete> = merge(
@@ -172,7 +172,7 @@ export class PersistenceService {
     });
   }
 
-  async saveProjectArchive(data: ProjectArchive, isDataImport: boolean = false): Promise<any> {
+  async saveProjectArchive(data: ProjectArchive, isDataImport: boolean = false): Promise<unknown> {
     return await this._saveToDb({dbKey: 'archivedProjects', data, isDataImport});
   }
 
@@ -185,7 +185,7 @@ export class PersistenceService {
     return parsed;
   }
 
-  async removeArchivedProject(projectId: string): Promise<any> {
+  async removeArchivedProject(projectId: string): Promise<void> {
     const archive = await this._loadFromDb({
       dbKey: 'archivedProjects',
       legacyDBKey: LS_PROJECT_ARCHIVE
@@ -228,25 +228,25 @@ export class PersistenceService {
     };
   }
 
-  async removeCompleteRelatedDataForProject(projectId: string): Promise<any> {
+  async removeCompleteRelatedDataForProject(projectId: string): Promise<void> {
     await Promise.all(this._projectModels.map((modelCfg) => {
       return modelCfg.remove(projectId);
     }));
   }
 
-  async restoreCompleteRelatedDataForProject(projectId: string, data: ProjectArchivedRelatedData): Promise<any> {
+  async restoreCompleteRelatedDataForProject(projectId: string, data: ProjectArchivedRelatedData): Promise<void> {
     await Promise.all(this._projectModels.map((modelCfg) => {
       return modelCfg.save(projectId, data[modelCfg.appDataKey]);
     }));
   }
 
-  async archiveProject(projectId: string): Promise<any> {
+  async archiveProject(projectId: string): Promise<void> {
     const projectData = await this.loadAllRelatedModelDataForProject(projectId);
     await this.saveArchivedProject(projectId, projectData);
     await this.removeCompleteRelatedDataForProject(projectId);
   }
 
-  async unarchiveProject(projectId: string): Promise<any> {
+  async unarchiveProject(projectId: string): Promise<void> {
     const projectData = await this.loadArchivedProject(projectId);
     await this.restoreCompleteRelatedDataForProject(projectId, projectData);
     await this.removeArchivedProject(projectId);
@@ -280,7 +280,7 @@ export class PersistenceService {
     return this._loadFromDb({dbKey: LS_BACKUP, legacyDBKey: LS_BACKUP});
   }
 
-  async saveBackup(backup?: AppDataComplete): Promise<any> {
+  async saveBackup(backup?: AppDataComplete): Promise<unknown> {
     const data: AppDataComplete = backup || await this.loadComplete();
     return this._saveToDb({dbKey: LS_BACKUP, data, isDataImport: true});
   }

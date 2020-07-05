@@ -19,11 +19,6 @@ platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
   return;
 }).catch(err => console.log(err));
 
-declare global {
-  interface Window {
-    ipcRenderer: any;
-  }
-}
 // fix mobile scrolling while dragging
 window.addEventListener('touchmove', () => {
 });

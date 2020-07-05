@@ -38,7 +38,7 @@ export class DialogEditBookmarkComponent implements OnInit {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: { bookmark: Bookmark }
   ) {
   }
 
@@ -89,7 +89,7 @@ export class DialogEditBookmarkComponent implements OnInit {
     }
   }
 
-  trackByIndex(i: number, p: any) {
+  trackByIndex(i: number, p: unknown) {
     return i;
   }
 }

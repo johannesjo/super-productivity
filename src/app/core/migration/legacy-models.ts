@@ -59,7 +59,7 @@ export interface LegacyPersistenceBaseModel<T> {
 
   load(isSkipMigration?: boolean): Promise<T>;
 
-  save(state: T, isForce?: boolean): Promise<any>;
+  save(state: T, isForce?: boolean): Promise<unknown>;
 }
 
 export interface LegacyPersistenceForProjectModel<S, M> {
@@ -67,5 +67,5 @@ export interface LegacyPersistenceForProjectModel<S, M> {
 
   load(projectId: string): Promise<S>;
 
-  save(projectId: string, state: S, isForce?: boolean): Promise<any>;
+  save(projectId: string, state: S, isForce?: boolean): Promise<unknown>;
 }

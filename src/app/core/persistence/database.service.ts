@@ -26,31 +26,31 @@ export class DatabaseService {
     shareReplay(1),
   );
 
-  private _lastParams: any;
+  private _lastParams?: { a: string; key?: string, data?: unknown };
 
   constructor() {
     this._init().then();
   }
 
-  async load(key: string): Promise<any> {
+  async load(key: string): Promise<unknown> {
     this._lastParams = {a: 'load', key};
     await this._afterReady();
     return await (this.db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
   }
 
-  async save(key: string, data: any): Promise<any> {
+  async save(key: string, data: unknown): Promise<unknown> {
     this._lastParams = {a: 'save', key, data};
     await this._afterReady();
     return await (this.db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
   }
 
-  async remove(key: string): Promise<any> {
+  async remove(key: string): Promise<unknown> {
     this._lastParams = {a: 'remove', key};
     await this._afterReady();
     return await (this.db as IDBPDatabase<MyDb>).delete(DB_MAIN_NAME, key);
   }
 
-  async clearDatabase(): Promise<any> {
+  async clearDatabase(): Promise<unknown> {
     this._lastParams = {a: 'clearDatabase'};
     await this._afterReady();
     return await (this.db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
