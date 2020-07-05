@@ -519,7 +519,6 @@ export class PersistenceService {
     if (!this._isBlockSaving || isDataImport === true) {
       const idbKey = this._getIDBKey(dbKey, projectId);
       const r = await this._databaseService.save(idbKey, data);
-      console.log('AFTER R');
 
       this._updateInMemory({
         projectId,
@@ -527,7 +526,6 @@ export class PersistenceService {
         data
       });
 
-      console.log('BEFORE ON_AFTER');
       this.onAfterSave$.next({appDataKey: dbKey, data, isDataImport, projectId});
 
       return r;
