@@ -63,9 +63,9 @@
 
           <!-- TODO check for a better way to do this -->
           <!--          <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"-->
-          <mat-select [ngModel]="getTransition(opt.key)"
-                      (ngModelChange)="setTransition(opt.key, $event)"
-                      [ngModelOptions]="{standalone: true}">
+          <mat-select (ngModelChange)="setTransition(opt.key, $event)"
+                      [ngModelOptions]="{standalone: true}"
+                      [ngModel]="getTransition(opt.key)">
             <mat-option value="DO_NOT">{{T.F.JIRA.CFG_CMP.DO_NOT|translate}}</mat-option>
             <mat-option value="ALWAYS_ASK">{{T.F.JIRA.CFG_CMP.ALWAYS_ASK|translate}}</mat-option>
             <mat-option *ngFor="let transition of cfg.availableTransitions"

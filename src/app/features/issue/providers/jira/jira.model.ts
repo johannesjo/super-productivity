@@ -32,12 +32,12 @@ export interface JiraCfg {
 
   isCheckToReAssignTicketOnTaskStart: boolean;
 
-  storyPointFieldId: string|null;
+  storyPointFieldId: string | null;
 
   isTransitionIssuesEnabled: boolean;
   transitionConfig: JiraTransitionConfig;
   availableTransitions: JiraOriginalTransition[];
-  userToAssignOnDone: string|null;
+  userToAssignOnDone: string | null;
 }
 
 /*

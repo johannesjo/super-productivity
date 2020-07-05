@@ -1,5 +1,5 @@
-<div class="wrapper"
-     *ngIf="simpleCounter">
+<div *ngIf="simpleCounter"
+     class="wrapper">
   <ng-container *ngIf="simpleCounter.type===SimpleCounterType.StopWatch">
     <button (click)="toggleStopwatch()"
             (contextmenu)="edit($event)"

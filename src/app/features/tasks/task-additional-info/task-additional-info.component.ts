@@ -116,8 +116,9 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ));
 
   localAttachments?: TaskAttachment[];
-  private _taskData?: TaskWithSubTasks;
 
+  // NOTE: should be treated as private
+  _taskData?: TaskWithSubTasks;
   issueData$: Observable<IssueData | null | false> = this.issueDataTrigger$.pipe(
     switchMap((args) => {
       if (args && args.id && args.type) {
