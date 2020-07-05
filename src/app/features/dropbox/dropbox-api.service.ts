@@ -5,7 +5,7 @@ import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { Observable } from 'rxjs';
 import axios, { AxiosResponse, Method } from 'axios';
-import qs from 'querystring';
+import { stringify } from 'query-string';
 import { DropboxFileMetadata } from './dropbox.model';
 import { toDropboxIsoString } from './iso-date-without-ms.util.';
 
@@ -117,7 +117,7 @@ export class DropboxApiService {
 
     return axios.request({
       url: params
-        ? url + qs.stringify(params)
+        ? url + stringify(params)
         : url,
       method,
       data,
@@ -136,7 +136,7 @@ export class DropboxApiService {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
       },
-      data: qs.stringify({
+      data: stringify({
         code: authCode,
         grant_type: 'authorization_code',
         client_id: DROPBOX_APP_KEY,
