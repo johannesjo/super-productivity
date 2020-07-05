@@ -11,7 +11,6 @@ import {
 import { GoogleApiService } from '../google-api.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
-import { SnackService } from '../../../core/snack/snack.service';
 import { GoogleDriveSyncConfig } from '../../config/global-config.model';
 import { Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
@@ -42,7 +41,6 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     public readonly googleApiService: GoogleApiService,
     public readonly googleDriveSyncService: GoogleDriveSyncService,
     private readonly _configService: GlobalConfigService,
-    private readonly _snackService: SnackService,
     private readonly _cd: ChangeDetectorRef,
   ) {
   }

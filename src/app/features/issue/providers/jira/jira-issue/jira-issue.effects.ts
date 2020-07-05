@@ -14,9 +14,7 @@ import {
   throttleTime,
   withLatestFrom
 } from 'rxjs/operators';
-import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { JiraApiService } from '../jira-api.service';
-import { GlobalConfigService } from '../../../../config/global-config.service';
 import { JiraIssueReduced } from './jira-issue.model';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { Task, TaskWithSubTasks } from '../../../../tasks/task.model';
@@ -42,7 +40,6 @@ import { HANDLED_ERROR_PROP_STR } from '../../../../../app.constants';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { setActiveWorkContext } from '../../../../work-context/store/work-context.actions';
 import { WorkContextType } from '../../../../work-context/work-context.model';
-import { SyncService } from '../../../../../imex/sync/sync.service';
 import { isJiraEnabled } from '../is-jira-enabled.util';
 
 @Injectable()
@@ -295,17 +292,15 @@ export class JiraIssueEffects {
     )),
   );
 
-  constructor(private readonly _actions$: Actions,
+  constructor(
+    private readonly _actions$: Actions,
     private readonly _store$: Store<any>,
-    private readonly _configService: GlobalConfigService,
     private readonly _snackService: SnackService,
     private readonly _projectService: ProjectService,
-    private readonly _syncService: SyncService,
     private readonly _taskService: TaskService,
     private readonly _workContextService: WorkContextService,
     private readonly _jiraApiService: JiraApiService,
     private readonly _issueService: IssueService,
-    private readonly _persistenceService: PersistenceService,
     private readonly _matDialog: MatDialog,
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {

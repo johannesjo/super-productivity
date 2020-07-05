@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  Renderer2,
-  ViewChild
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
@@ -15,7 +6,6 @@ import { TaskService } from '../../features/tasks/task.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { T } from '../../t.const';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { Router } from '@angular/router';
 import { filter, first, switchMap } from 'rxjs/operators';
 import { Observable, of, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
@@ -34,7 +24,7 @@ import { SimpleCounter } from '../../features/simple-counter/simple-counter.mode
   animations: [fadeAnimation, expandFadeHorizontalAnimation]
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
-   // tslint:disable-next-line:typedef
+  // tslint:disable-next-line:typedef
   T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
@@ -66,10 +56,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public readonly pomodoroService: PomodoroService,
     public readonly layoutService: LayoutService,
     public readonly simpleCounterService: SimpleCounterService,
-    private readonly _router: Router,
     private readonly _tagService: TagService,
     private readonly _renderer: Renderer2,
-    private readonly _cd: ChangeDetectorRef,
   ) {
   }
 

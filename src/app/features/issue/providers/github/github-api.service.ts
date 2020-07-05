@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ProjectService } from '../../../project/project.service';
 import { GithubCfg } from './github.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
@@ -21,7 +20,6 @@ const BASE = GITHUB_API_BASE_URL;
 })
 export class GithubApiService {
   constructor(
-    private _projectService: ProjectService,
     private _snackService: SnackService,
     private _http: HttpClient,
   ) {

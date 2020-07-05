@@ -59,7 +59,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
 
-    const issueUpdate: number = new Date(issue.updated_at).getTime();
+    // const issueUpdate: number = new Date(issue.updated_at).getTime();
     const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
     const commentsByOthers = (filterUserName && filterUserName.length > 1)
       ? issue.comments.filter(comment => comment.user.login.toLowerCase() !== cfg.filterUsername)

@@ -13,8 +13,6 @@ import { TaskAttachment } from '../../../../tasks/task-attachment/task-attachmen
 import { dedupeByKey } from '../../../../../util/de-dupe-by-key';
 import { JIRA_TYPE } from '../../../issue.const';
 
-const matchProtocolRegEx = /(^[^:]+):\/\//;
-
 export const mapToSearchResults = (res: any): SearchResultItem[] => {
   const issues = dedupeByKey(res.response.sections.map((sec: any) => sec.issues).flat(), 'key')
     .map((issue: any) => {

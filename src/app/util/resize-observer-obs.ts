@@ -1,7 +1,7 @@
-import { Observable } from 'rxjs';
+import { Observable, Subscriber } from 'rxjs';
 
 export const observeWidth = (target: HTMLElement): Observable<number> => {
-  return new Observable((observer) => {
+  return new Observable((observer: Subscriber<number>) => {
     // tslint:disable-next-line
     if ((window as any).ResizeObserver) {
       // tslint:disable-next-line
@@ -14,6 +14,7 @@ export const observeWidth = (target: HTMLElement): Observable<number> => {
       };
     } else {
       console.warn('ResizeObserver not supported in this browser');
+      return undefined;
     }
   });
 };

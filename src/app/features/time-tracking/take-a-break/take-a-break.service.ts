@@ -241,11 +241,12 @@ export class TakeABreakService {
     this._triggerLockScreenCounter$.next(false);
   }
 
-  private _createMessage(duration: number, cfg: TakeABreakConfig): string | undefined {
+  private _createMessage(duration: number, cfg: TakeABreakConfig): string| undefined {
     if (cfg && cfg.takeABreakMessage) {
       const durationStr = msToString(duration);
       return cfg.takeABreakMessage
         .replace(/\$\{duration\}/gi, durationStr);
     }
+    return undefined;
   }
 }

@@ -220,13 +220,13 @@ export class UiModule {
   constructor(
     private _markdownService: MarkdownService,
   ) {
-    const linkRenderer = _markdownService.renderer.link;
-    _markdownService.renderer.link = (href, title, text) => {
-      const html = linkRenderer.call(_markdownService.renderer, href, title, text);
+    const linkRenderer = this._markdownService.renderer.link;
+    this._markdownService.renderer.link = (href, title, text) => {
+      const html = linkRenderer.call(this._markdownService.renderer, href, title, text);
       return html.replace(/^<a /, '<a target="_blank" ');
     };
 
-    _markdownService.renderer.paragraph = (text) => {
+    this._markdownService.renderer.paragraph = (text) => {
       const split = text.split('\n');
       return split.reduce((acc, p) => {
         const result = /h(\d)\./.exec(p);

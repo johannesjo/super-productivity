@@ -555,7 +555,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isActionTriggered = false;
     this.isLockPanLeft = false;
     this.isLockPanRight = false;
-    const scale = 0;
+    // const scale = 0;
     // this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
     // this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
     this._renderer.removeClass(this.blockLeftElRef.nativeElement, 'isActive');

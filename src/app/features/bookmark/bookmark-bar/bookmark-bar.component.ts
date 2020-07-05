@@ -43,8 +43,8 @@ export class BookmarkBarComponent implements OnDestroy {
     // });
 
     this._subs.add(this._dragulaService.dropModel(this.LIST_ID)
-      .subscribe((params: any) => {
-        const {target, source, targetModel, item} = params;
+      .subscribe(({targetModel}: any) => {
+        // const {target, source, targetModel, item} = params;
         const newIds = targetModel.map((m: Bookmark) => m.id);
         this.bookmarkService.reorderBookmarks(newIds);
       })

@@ -15,7 +15,6 @@ import {
   withLatestFrom
 } from 'rxjs/operators';
 import { combineLatest, EMPTY, from, Observable, of, throwError, zip } from 'rxjs';
-import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { GoogleApiService } from '../google-api.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -44,7 +43,6 @@ import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-syn
 import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';
 import { CompressionService } from '../../../core/compression/compression.service';
-import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { SyncService } from '../../../imex/sync/sync.service';
 import { SyncProvider } from '../../../imex/sync/sync-provider';
@@ -397,12 +395,10 @@ export class GoogleDriveSyncEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _googleDriveSyncService: GoogleDriveSyncService,
     private _googleApiService: GoogleApiService,
     private _configService: GlobalConfigService,
     private _syncService: SyncService,
     private _snackService: SnackService,
-    private _translateService: TranslateService,
     private _compressionService: CompressionService,
     private _matDialog: MatDialog,
     private _dataInitService: DataInitService,

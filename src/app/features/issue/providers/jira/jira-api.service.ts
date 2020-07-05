@@ -7,7 +7,6 @@ import {
   JIRA_MAX_RESULTS,
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
-import { ProjectService } from '../../../project/project.service';
 import {
   mapIssueResponse,
   mapIssuesResponse,
@@ -77,7 +76,6 @@ export class JiraApiService {
 
   constructor(
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _projectService: ProjectService,
     private _electronService: ElectronService,
     private _globalProgressBarService: GlobalProgressBarService,
     private _snackService: SnackService,

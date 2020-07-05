@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FieldArrayType } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
-import { MatDialog } from '@angular/material/dialog';
 import { EMPTY_SIMPLE_COUNTER } from '../../simple-counter/simple-counter.const';
 import * as shortid from 'shortid';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
@@ -17,7 +16,7 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
   // tslint:disable-next-line:typedef
   T = T;
 
-  constructor(private _matDialog: MatDialog) {
+  constructor() {
     super();
   }
 

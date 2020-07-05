@@ -36,8 +36,6 @@ import { MetricService } from '../../metric/metric.service';
 import { ObstructionService } from '../../metric/obstruction/obstruction.service';
 import { ImprovementService } from '../../metric/improvement/improvement.service';
 import { ProjectService } from '../project.service';
-import { BannerService } from '../../../core/banner/banner.service';
-import { Router } from '@angular/router';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
 import {
@@ -487,7 +485,6 @@ export class ProjectEffects {
     private _persistenceService: PersistenceService,
     private _bookmarkService: BookmarkService,
     private _noteService: NoteService,
-    private _bannerService: BannerService,
     private _globalConfigService: GlobalConfigService,
     private _reminderService: ReminderService,
     private _metricService: MetricService,
@@ -496,7 +493,6 @@ export class ProjectEffects {
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _router: Router,
   ) {
   }
 

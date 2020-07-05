@@ -17,7 +17,6 @@ import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.mode
 import { BehaviorSubject, forkJoin, from, Observable, of, zip } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
-import { JiraApiService } from '../../issue/providers/jira/jira-api.service';
 import { T } from '../../../t.const';
 import { Task } from '../task.model';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
@@ -90,7 +89,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _taskService: TaskService,
     private _workContextService: WorkContextService,
     private _issueService: IssueService,
-    private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
     private _projectService: ProjectService,
     private _tagService: TagService,
@@ -124,6 +122,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
     if (this._attachKeyDownHandlerTimeout) {
       window.clearTimeout(this._attachKeyDownHandlerTimeout);
+    }
+    if (this._autofocusTimeout) {
+      window.clearTimeout(this._autofocusTimeout);
     }
 
     if (this._lastAddedTaskId) {

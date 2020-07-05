@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
-import { GithubApiService } from '../../github-api.service';
 import { GithubIssue } from '../github-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../../t.const';
@@ -21,7 +20,6 @@ export class GithubIssueContentComponent {
   T = T;
 
   constructor(
-    private readonly  _githubApiService: GithubApiService,
     private readonly  _taskService: TaskService,
   ) {
   }

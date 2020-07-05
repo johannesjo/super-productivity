@@ -5,7 +5,6 @@ import * as shortid from 'shortid';
 import { DialogEditTaskAttachmentComponent } from './dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DropPasteInput } from '../../../core/drop-paste-input/drop-paste.model';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { AddTaskAttachment, DeleteTaskAttachment, UpdateTaskAttachment } from './task-attachment.actions';
 import { TaskState } from '../task.model';
 import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
@@ -18,7 +17,6 @@ export class TaskAttachmentService {
   constructor(
     private _store$: Store<TaskState>,
     private _matDialog: MatDialog,
-    private _persistenceService: PersistenceService,
   ) {
   }
 

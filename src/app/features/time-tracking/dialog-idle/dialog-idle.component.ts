@@ -4,7 +4,6 @@ import { TaskService } from '../../tasks/task.service';
 import { Observable } from 'rxjs';
 import { Task } from '../../tasks/task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { MetricService } from '../../metric/metric.service';
 import { T } from '../../../t.const';
 
 @Component({
@@ -24,7 +23,6 @@ export class DialogIdleComponent implements OnInit {
   constructor(
     public configService: GlobalConfigService,
     private _taskService: TaskService,
-    private _metricService: MetricService,
     private _matDialogRef: MatDialogRef<DialogIdleComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {

@@ -17,6 +17,7 @@ platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
   if ('serviceWorker' in navigator && environment.production && !IS_ELECTRON) {
     return navigator.serviceWorker.register('ngsw-worker.js');
   }
+  return;
 }).catch(err => console.log(err));
 
 declare global {

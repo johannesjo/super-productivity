@@ -53,9 +53,11 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   @Input() isAllowSeconds: boolean = false;
 
   // by the Control Value Accessor
+  // @ts-ignore
   private _onTouchedCallback: () => void = noop;
 
   // Placeholders for the callbacks which are later provided
+  // @ts-ignore
   private _validatorOnChange: (_: any) => void = noop;
   private _onChangeCallback: (_: any) => void = noop;
   // -----------

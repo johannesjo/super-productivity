@@ -10,12 +10,10 @@ import {
   UpdateTask,
   UpdateTaskTags
 } from './task.actions';
-import { Store } from '@ngrx/store';
 import { concatMap, filter, first, map, mapTo, switchMap, tap } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
-import { Router } from '@angular/router';
 import { moveTaskInTodayList, moveTaskToTodayList } from '../../work-context/store/work-context-meta.actions';
 import { taskAdapter } from './task.adapter';
 import { flattenTasks } from './task.selectors';
@@ -143,12 +141,10 @@ export class TaskRelatedModelEffects {
 
   constructor(
     private _actions$: Actions,
-    private _store$: Store<any>,
     private _reminderService: ReminderService,
     private _taskService: TaskService,
     private _projectService: ProjectService,
     private _globalConfigService: GlobalConfigService,
-    private _router: Router,
     private _persistenceService: PersistenceService
   ) {
   }

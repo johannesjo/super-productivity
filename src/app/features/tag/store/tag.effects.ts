@@ -39,7 +39,6 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
 import { TODAY_TAG } from '../tag.const';
 import { createEmptyEntity } from '../../../util/create-empty-entity';
-import { DataInitService } from '../../../core/data-init/data-init.service';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -233,7 +232,6 @@ export class TagEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _dataInitService: DataInitService,
     private _snackService: SnackService,
     private _tagService: TagService,
     private _workContextService: WorkContextService,

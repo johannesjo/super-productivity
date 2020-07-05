@@ -18,7 +18,6 @@ import {
 } from 'rxjs/operators';
 import { DropboxApiService } from '../dropbox-api.service';
 import { DropboxSyncService } from '../dropbox-sync.service';
-import { GlobalConfigService } from '../../config/global-config.service';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SyncService } from '../../../imex/sync/sync.service';
 import { DROPBOX_BEFORE_CLOSE_ID, DROPBOX_MIN_SYNC_INTERVAL } from '../dropbox.const';
@@ -29,7 +28,6 @@ import { isOnline$ } from '../../../util/is-online';
 import { SnackService } from '../../../core/snack/snack.service';
 import { dbxLog } from '../dropbox-log.util';
 import { T } from '../../../t.const';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { ExecBeforeCloseService } from '../../../core/electron/exec-before-close.service';
 import { IS_ELECTRON } from '../../../app.constants';
 
@@ -149,10 +147,8 @@ export class DropboxEffects {
     private _actions$: Actions,
     private _dropboxApiService: DropboxApiService,
     private _dropboxSyncService: DropboxSyncService,
-    private _globalConfigService: GlobalConfigService,
     private _syncService: SyncService,
     private _snackService: SnackService,
-    private _electronService: ElectronService,
     private _dataInitService: DataInitService,
     private _execBeforeCloseService: ExecBeforeCloseService,
   ) {

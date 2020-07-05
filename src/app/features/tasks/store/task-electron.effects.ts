@@ -4,7 +4,6 @@ import { AddTimeSpent, SetCurrentTask, TaskActionTypes } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from './task.selectors';
-import { TaskService } from '../task.service';
 import { Task } from '../task.model';
 import { Observable } from 'rxjs';
 import { IPC } from '../../../../../electron/ipc-events.const';
@@ -63,7 +62,6 @@ export class TaskElectronEffects {
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
-    private _taskService: TaskService,
     private _configService: GlobalConfigService,
     private _electronService: ElectronService,
   ) {

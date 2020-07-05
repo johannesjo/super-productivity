@@ -6,16 +6,11 @@ import { TaskService } from '../task.service';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
 import { first, map, switchMap } from 'rxjs/operators';
-import { ProjectService } from '../../project/project.service';
-import { Router } from '@angular/router';
 import { T } from '../../../t.const';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
-import { WorkContextService } from '../../work-context/work-context.service';
-import { TagService } from '../../tag/tag.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
-import { DataInitService } from '../../../core/data-init/data-init.service';
 import { unique } from '../../../util/unique';
 
 const M = 1000 * 60;
@@ -49,12 +44,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewTaskRemindersComponent>,
     private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _tagService: TagService,
-    private _workContextService: WorkContextService,
-    private _router: Router,
     private _matDialog: MatDialog,
-    private _dataInitService: DataInitService,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminders: Reminder[] },
   ) {

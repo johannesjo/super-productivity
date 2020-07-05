@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 import { from, merge, Observable, of, Subject, zip } from 'rxjs';
-import { ProjectService } from '../project/project.service';
 import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from './issue.const';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
@@ -30,7 +29,6 @@ export class IssueService {
   };
 
   constructor(
-    private _projectService: ProjectService,
     private _taskService: TaskService,
     private _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private _githubCommonInterfacesService: GithubCommonInterfacesService,

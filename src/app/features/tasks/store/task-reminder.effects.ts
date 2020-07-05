@@ -9,14 +9,12 @@ import {
   UpdateTaskReminder,
   UpdateTaskTags
 } from './task.actions';
-import { Store } from '@ngrx/store';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
 import { truncate } from '../../../util/truncate';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { moveTaskToBacklogListAuto } from '../../work-context/store/work-context-meta.actions';
-import { WorkContextService } from '../../work-context/work-context.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 
 @Injectable()
@@ -127,10 +125,8 @@ export class TaskReminderEffects {
 
   constructor(
     private _actions$: Actions,
-    private _store$: Store<any>,
     private _reminderService: ReminderService,
     private _snackService: SnackService,
-    private _workContextService: WorkContextService,
   ) {
   }
 }

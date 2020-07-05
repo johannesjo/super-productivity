@@ -4,7 +4,6 @@ import { environment } from '../../../environments/environment';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_MOBILE } from '../../util/is-mobile';
 import { TranslateService } from '@ngx-translate/core';
-import { ElectronService } from '../electron/electron.service';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../android/android-interface';
@@ -14,16 +13,16 @@ import { androidInterface } from '../android/android-interface';
 })
 export class NotifyService {
   constructor(
-    private _electronService: ElectronService,
     private _translateService: TranslateService,
     private _uiHelperService: UiHelperService,
   ) {
   }
 
-  async notifyDesktop(options: NotifyModel) {
+  async notifyDesktop(options: NotifyModel): Promise<Notification | undefined> {
     if (!IS_MOBILE) {
       return this.notify(options);
     }
+    return;
   }
 
   async notify(options: NotifyModel): Promise<Notification | undefined> {
@@ -78,11 +77,10 @@ export class NotifyService {
           instance.close();
         }, options.duration || 10000);
         return instance;
-      } else {
-        console.warn('No notifications supported');
-        return undefined;
       }
     }
+    console.warn('No notifications supported');
+    return undefined;
   }
 
   private _isBasicNotificationSupport(): boolean {

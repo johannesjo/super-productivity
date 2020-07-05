@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { PersistenceService } from '../../../../../core/persistence/persistence.service';
+import { Effect } from '@ngrx/effects';
 import { GithubApiService } from '../github-api.service';
-import { GlobalConfigService } from '../../../../config/global-config.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
@@ -78,16 +75,12 @@ export class GithubIssueEffects {
     );
 
   constructor(
-    private readonly _actions$: Actions,
-    private readonly _store$: Store<any>,
-    private readonly _configService: GlobalConfigService,
     private readonly _snackService: SnackService,
     private readonly _projectService: ProjectService,
     private readonly _githubApiService: GithubApiService,
     private readonly _issueService: IssueService,
     private readonly _taskService: TaskService,
     private readonly _workContextService: WorkContextService,
-    private readonly _persistenceService: PersistenceService,
     private readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {
   }

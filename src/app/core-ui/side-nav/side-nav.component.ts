@@ -5,7 +5,6 @@ import { DialogCreateProjectComponent } from '../../features/project/dialogs/cre
 import { Project } from '../../features/project/project.model';
 import { MatDialog } from '@angular/material/dialog';
 import { THEME_COLOR_MAP } from '../../app.constants';
-import { Router } from '@angular/router';
 import { DragulaService } from 'ng2-dragula';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
@@ -68,7 +67,6 @@ export class SideNavComponent implements OnDestroy {
     public readonly projectService: ProjectService,
     public readonly workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
-    private readonly _router: Router,
     private readonly _dragulaService: DragulaService,
   ) {
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
@@ -80,8 +78,8 @@ export class SideNavComponent implements OnDestroy {
     this._subs.add(this.workContextService.activeWorkContextId$.subscribe(id => this.activeWorkContextId = id));
 
     this._subs.add(this._dragulaService.dropModel(this.PROJECTS_SIDE_NAV)
-      .subscribe((params: any) => {
-        const {target, source, targetModel, item} = params;
+      .subscribe(({targetModel}: any) => {
+        // const {target, source, targetModel, item} = params;
         const targetNewIds = targetModel.map((project: Project) => project.id);
         this.projectService.updateOrder(targetNewIds);
       })

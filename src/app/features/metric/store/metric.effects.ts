@@ -5,7 +5,6 @@ import { select, Store } from '@ngrx/store';
 import { MetricActionTypes } from './metric.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectMetricFeatureState } from './metric.selectors';
-import { SnackService } from '../../../core/snack/snack.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { combineLatest } from 'rxjs';
 import { MetricState } from '../metric.model';
@@ -45,7 +44,6 @@ export class MetricEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _snackService: SnackService,
     private _workContextService: WorkContextService,
   ) {
   }

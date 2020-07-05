@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Task } from '../../tasks/task.model';
-import { TaskService } from '../../tasks/task.service';
-import { SnackService } from '../../../core/snack/snack.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
@@ -44,9 +42,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor(
-    private _taskService: TaskService,
     private _tagService: TagService,
-    private _snackService: SnackService,
     private _cd: ChangeDetectorRef,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _matDialogRef: MatDialogRef<DialogEditTaskRepeatCfgComponent>,

@@ -3,7 +3,6 @@ import { TaskService } from '../../../features/tasks/task.service';
 import { TaskWithReminderData, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { T } from '../../../t.const';
-import { ProjectService } from '../../../features/project/project.service';
 
 @Component({
   selector: 'backlog',
@@ -30,7 +29,6 @@ export class BacklogComponent {
 
   constructor(
     public taskService: TaskService,
-    private _projectService: ProjectService,
   ) {
   }
 

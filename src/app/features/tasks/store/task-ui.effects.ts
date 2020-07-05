@@ -12,7 +12,6 @@ import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { Router } from '@angular/router';
 import { GlobalConfigState } from '../../config/global-config.model';
 
 @Injectable()
@@ -71,7 +70,6 @@ export class TaskUiEffects {
     private _notifyService: NotifyService,
     private _taskService: TaskService,
     private _bannerService: BannerService,
-    private _router: Router,
     private _snackService: SnackService,
   ) {
   }

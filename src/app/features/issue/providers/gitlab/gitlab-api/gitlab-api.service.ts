@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
-
-import { ProjectService } from 'src/app/features/project/project.service';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
 import { GitlabCfg } from '../gitlab';
@@ -22,7 +20,6 @@ const BASE = GITLAB_API_BASE_URL;
 })
 export class GitlabApiService {
   constructor(
-    private _projectService: ProjectService,
     private _snackService: SnackService,
     private _http: HttpClient,
   ) {

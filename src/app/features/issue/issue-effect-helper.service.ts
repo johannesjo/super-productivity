@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ProjectService } from '../project/project.service';
 import { Actions, ofType } from '@ngrx/effects';
 import { setActiveWorkContext } from '../work-context/store/work-context.actions';
 import { ProjectActionTypes } from '../project/store/project.actions';
@@ -35,7 +34,6 @@ export class IssueEffectHelperService {
 
   constructor(
     private  _actions$: Actions,
-    private _projectService: ProjectService,
     private _workContextService: WorkContextService,
     private _syncService: SyncService,
   ) {

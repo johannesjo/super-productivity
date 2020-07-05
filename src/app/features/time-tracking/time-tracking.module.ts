@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TimeTrackingService } from './time-tracking.service';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { IdleService } from './idle.service';
 import { UiModule } from '../../ui/ui.module';
@@ -27,7 +26,6 @@ import { TasksModule } from '../tasks/tasks.module';
 })
 export class TimeTrackingModule {
   constructor(
-    private readonly _timeTrackingService: TimeTrackingService,
     private readonly _idleService: IdleService,
   ) {
     this._idleService.init();

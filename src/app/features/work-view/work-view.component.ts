@@ -75,7 +75,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     public improvementService: ImprovementService,
     public layoutService: LayoutService,
     public workContextService: WorkContextService,
-    private _elementRef: ElementRef,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
   ) {

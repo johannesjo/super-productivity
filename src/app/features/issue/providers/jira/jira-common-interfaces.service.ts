@@ -5,7 +5,6 @@ import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { JiraApiService } from './jira-api.service';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { TaskService } from '../../../tasks/task.service';
 import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
@@ -22,7 +21,6 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _jiraApiService: JiraApiService,
     private readonly _snackService: SnackService,
-    private readonly _taskService: TaskService,
     private readonly _projectService: ProjectService,
   ) {
   }

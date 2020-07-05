@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../../app.constants';
 import { TaskAttachment, TaskAttachmentCopy, TaskAttachmentType } from '../task-attachment.model';
 import { T } from '../../../../t.const';
-import { TranslateService } from '@ngx-translate/core';
 
 interface TaskAttachmentSelectType {
   type: TaskAttachmentType;
@@ -24,7 +23,6 @@ export class DialogEditTaskAttachmentComponent {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditTaskAttachmentComponent>,
-    private _translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.attachmentCopy = {...this.data.attachment} as TaskAttachmentCopy;

@@ -7,7 +7,6 @@ import { IS_ELECTRON } from '../../app.constants';
 import { TasksModule } from '../tasks/tasks.module';
 import { filter } from 'rxjs/operators';
 import { Reminder } from './reminder.model';
-import { ElectronService } from '../../core/electron/electron.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { NotifyService } from '../../core/notify/notify.service';
 import { throttle } from 'throttle-debounce';
@@ -29,7 +28,6 @@ export class ReminderModule {
   constructor(
     private readonly _reminderService: ReminderService,
     private readonly _matDialog: MatDialog,
-    private readonly _electronService: ElectronService,
     private readonly _uiHelperService: UiHelperService,
     private readonly _notifyService: NotifyService,
     private readonly _dataInitService: DataInitService,

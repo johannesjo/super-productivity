@@ -15,7 +15,6 @@ import {
 import { Observable } from 'rxjs';
 import { SimpleCounter, SimpleCounterCfgFields, SimpleCounterState } from './simple-counter.model';
 import * as shortid from 'shortid';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
@@ -66,7 +65,6 @@ export class SimpleCounterService {
 
   constructor(
     private _store$: Store<SimpleCounterState>,
-    private _persistenceService: PersistenceService,
   ) {
   }
 
