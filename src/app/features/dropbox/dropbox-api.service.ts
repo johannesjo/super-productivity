@@ -90,7 +90,7 @@ export class DropboxApiService {
       data,
       headers: {
         'Content-Type': 'application/octet-stream',
-        'Dropbox-API-Arg': JSON.stringify({path, ...args}),
+        'Dropbox-API-Arg': JSON.stringify(args),
       },
     }).then((res) => res.data);
   }
