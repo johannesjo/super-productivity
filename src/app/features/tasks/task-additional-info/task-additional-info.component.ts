@@ -121,18 +121,18 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   issueData$: Observable<IssueData | null | false> = this.issueDataTrigger$.pipe(
     switchMap((args) => {
-      if (!this._taskData || !this._taskData.projectId) {
-        throw new Error('task data not ready');
-      }
-
-      return (args && args.id && args.type)
-        ? this._issueService.getById$(args.type, args.id, this._taskData.projectId).pipe(
+      if (args && args.id && args.type) {
+        if (!this._taskData || !this._taskData.projectId) {
+          throw new Error('task data not ready');
+        }
+        return this._issueService.getById$(args.type, args.id, this._taskData.projectId).pipe(
           // NOTE we need this, otherwise the error is going to weird up the observable
           catchError(() => {
             return of(false);
           }),
-        ) as Observable<false | IssueData>
-        : of(null);
+        ) as Observable<false | IssueData>;
+      }
+      return of(null);
     }),
     shareReplay(1),
     // NOTE: this seems to fix the issue loading bug, when we end up with the
