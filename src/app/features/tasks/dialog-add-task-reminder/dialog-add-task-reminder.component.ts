@@ -24,7 +24,7 @@ export class DialogAddTaskReminderComponent {
   isEdit: boolean = !!(this.reminder && this.reminder.id);
 
   dateTime?: number = this.reminder && this.reminder.remindAt;
-  isShowMoveToBacklog: boolean = (!this.isEdit && !!this.task.projectId);
+  isShowMoveToBacklog: boolean = (!this.isEdit && !!this.task.projectId && this.task.parentId === null);
   isMoveToBacklog: boolean = (this.isShowMoveToBacklog);
 
   constructor(
