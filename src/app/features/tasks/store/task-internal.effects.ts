@@ -130,8 +130,8 @@ export class TaskInternalEffects {
   ) {
   }
 
-  private _findNextTask(state: TaskState, todaysTaskIds: string[], oldCurrentId?: string): string {
-    let nextId = null;
+  private _findNextTask(state: TaskState, todaysTaskIds: string[], oldCurrentId?: string): string | null {
+    let nextId: string | null = null;
     const {entities} = state;
 
     const filterUndoneNotCurrent = (id: string) => !(entities[id] as Task).isDone && id !== oldCurrentId;
@@ -158,8 +158,11 @@ export class TaskInternalEffects {
         const selectableBefore = flattenToSelectable(mainTasksBefore);
         const selectableAfter = flattenToSelectable(mainTasksAfter);
         nextId = selectableAfter.find(filterUndoneNotCurrent)
-          || selectableBefore.reverse().find(filterUndoneNotCurrent);
-        nextId = (Array.isArray(nextId)) ? nextId[0] : nextId;
+          || selectableBefore.reverse().find(filterUndoneNotCurrent)
+          || null;
+        nextId = (Array.isArray(nextId))
+          ? nextId[0]
+          : nextId;
 
       }
     } else {

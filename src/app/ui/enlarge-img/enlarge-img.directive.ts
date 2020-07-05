@@ -117,7 +117,7 @@ export class EnlargeImgDirective {
     this._renderer.addClass(this.enlargedImgWrapperEl, 'isZoomed');
     this._renderer.setStyle((this.newImageEl as HTMLElement), 'transform', `scale(2) translate3d(-25%, -25%, 0)`);
     this.zoomMoveHandler = this._zoom.bind(this);
-    this.enlargedImgWrapperEl.addEventListener('mousemove', this.zoomMoveHandler);
+    this.enlargedImgWrapperEl.addEventListener('mousemove', this.zoomMoveHandler as any);
   }
 
   private _zoomOutImg() {

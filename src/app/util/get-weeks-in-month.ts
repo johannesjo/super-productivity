@@ -2,14 +2,15 @@
 import { WeeksInMonth } from './get-week-in-month-model';
 
 export const getWeeksInMonth = (month: number, year: number): WeeksInMonth[] => {
-  const weeks = [];
+  const weeks: { start: number; end: number; }[] = [];
   const firstDate = new Date(year, month, 1);
   const lastDate = new Date(year, month + 1, 0);
 
   const numDays = lastDate.getDate();
 
-  let end = 7 - firstDate.getDay();
-  let start = 1;
+  let end: number;
+  let start: number = 1;
+
   if (firstDate.getDay() === 0) {
     end = 1;
   } else {
