@@ -40,8 +40,10 @@ describe('PersistenceService', () => {
     );
   });
 
-  it('database update should trigger onAfterSave$', (done) => {
+  it('database update should trigger onAfterSave$', async (done) => {
     const service: PersistenceService = TestBed.inject(PersistenceService);
+    // once is required to fill up data
+    await service.loadComplete();
     service.onAfterSave$.subscribe(({data}) => {
       expect(data).toEqual(createEmptyEntity());
       done();

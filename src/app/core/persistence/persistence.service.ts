@@ -292,7 +292,9 @@ export class PersistenceService {
     let r;
     if (!this._inMemoryComplete) {
       const projectState = await this.project.loadState();
-      const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
+      const pids = projectState
+        ? projectState.ids as string[]
+        : [DEFAULT_PROJECT_ID];
       if (!pids) {
         throw new Error('Project State is broken');
       }
@@ -393,7 +395,7 @@ export class PersistenceService {
       //   }
       //   return data;
       // },
-      saveState: (data: any, isDataImport?: boolean) => {
+      saveState: (data: any, isDataImport: boolean = false) => {
         if (data && data.ids && data.entities) {
           data = checkFixEntityStateConsistency(data, appDataKey);
         }
@@ -519,6 +521,7 @@ export class PersistenceService {
     if (!this._isBlockSaving || isDataImport === true) {
       const idbKey = this._getIDBKey(dbKey, projectId);
       const r = await this._databaseService.save(idbKey, data);
+      console.log('AFTER R');
 
       this._updateInMemory({
         projectId,
@@ -526,6 +529,7 @@ export class PersistenceService {
         data
       });
 
+      console.log('BEFORE ON_AFTER');
       this.onAfterSave$.next({appDataKey: dbKey, data, isDataImport, projectId});
 
       return r;
