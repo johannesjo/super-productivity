@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { concatMap, filter, flatMap, map, take, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, map, mergeMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { Action, select, Store } from '@ngrx/store';
 import {
   AddTaskRepeatCfgToTask,
@@ -58,8 +58,8 @@ export class TaskRepeatCfgEffects {
     filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
 
     // existing tasks with sub tasks are loaded, because need to move them to the archive
-    flatMap(taskRepeatCfgs => from(taskRepeatCfgs).pipe(
-      flatMap((taskRepeatCfg: TaskRepeatCfg) =>
+    mergeMap(taskRepeatCfgs => from(taskRepeatCfgs).pipe(
+      mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
         // NOTE: there might be multiple configs in case something went wrong
         // we want to move all of them to the archive
         this._taskService.getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id as string).pipe(
@@ -123,7 +123,7 @@ export class TaskRepeatCfgEffects {
       ),
     ),
     filter(tasks => tasks && !!tasks.length),
-    flatMap((tasks: Task[]) => tasks.map(task => new UpdateTask({
+    mergeMap((tasks: Task[]) => tasks.map(task => new UpdateTask({
       task: {
         id: task.id,
         changes: {repeatCfgId: null}

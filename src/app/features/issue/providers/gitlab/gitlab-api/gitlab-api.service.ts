@@ -8,7 +8,7 @@ import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-respons
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL } from '../gitlab.const';
 import { T } from 'src/app/t.const';
-import { catchError, filter, flatMap, map, share, switchMap, take } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, share, switchMap, take } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
@@ -30,7 +30,7 @@ export class GitlabApiService {
       return EMPTY;
     }
     return this._getProjectIssues$(1, cfg).pipe(
-      flatMap(
+      mergeMap(
         (issues: GitlabIssue[]) => {
           if (issues && issues.length) {
             return forkJoin([
