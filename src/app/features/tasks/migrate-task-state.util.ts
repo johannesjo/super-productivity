@@ -4,12 +4,13 @@ import { GITHUB_TYPE } from '../issue/issue.const';
 import { MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT } from '../../app.constants';
 import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
+import { isMigrateModel } from '../../util/model-version';
 
-const MODEL_VERSION = 3.1313;
+const MODEL_VERSION = 3.3333;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState): TaskState => {
-  if (!taskState || (taskState && taskState[MODEL_VERSION_KEY] === MODEL_VERSION)) {
+  if (!isMigrateModel(taskState, MODEL_VERSION, 'task')) {
     return taskState;
   }
 
@@ -17,6 +18,7 @@ export const migrateTaskState = (taskState: TaskState): TaskState => {
 
   Object.keys(taskEntities).forEach((key) => {
     taskEntities[key] = _addNewIssueFields(taskEntities[key] as TaskCopy);
+    taskEntities[key] = _makeNullAndArraysConsistent(taskEntities[key] as TaskCopy);
     taskEntities[key] = _replaceLegacyGitType(taskEntities[key] as TaskCopy);
     taskEntities[key] = _addTagIds(taskEntities[key] as TaskCopy);
     taskEntities[key] = _deleteUnusedFields(taskEntities[key] as TaskCopy);
@@ -108,7 +110,7 @@ const _convertToWesternArabicDateKeys = (task: Task) => {
     : task;
 };
 
-const _deleteUnusedFields = (task: Task) => {
+const _deleteUnusedFields = (task: Task): Task => {
   const {
     // legacy
     _isAdditionalInfoOpen,
@@ -117,6 +119,33 @@ const _deleteUnusedFields = (task: Task) => {
     ...cleanTask
   }: any | Task = task;
   return cleanTask;
+};
+
+const _makeNullAndArraysConsistent = (task: Task): Task => {
+  return {
+    ...task,
+
+    projectId: task.projectId ?? null,
+    doneOn: task.doneOn ?? null,
+    parentId: task.parentId ?? null,
+    reminderId: task.reminderId ?? null,
+    repeatCfgId: task.repeatCfgId ?? null,
+
+    tagIds: task.tagIds ?? [],
+    subTaskIds: task.subTaskIds ?? [],
+    attachments: task.attachments ?? [],
+
+    notes: task.notes ?? '',
+
+    isDone: task.isDone ?? false,
+
+    issueId: task.issueId ?? null,
+    issueType: task.issueType ?? null,
+    issueWasUpdated: task.issueWasUpdated ?? null,
+    issueLastUpdated: task.issueLastUpdated ?? null,
+    issueAttachmentNr: task.issueAttachmentNr ?? null,
+    issuePoints: task.issuePoints ?? null,
+  };
 };
 
 const _addProjectIdForSubTasksAndRemoveTags = (entities: Dictionary<Task>): Dictionary<Task> => {

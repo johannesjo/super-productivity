@@ -1,6 +1,6 @@
 import { MODEL_VERSION_KEY } from '../app.constants';
 
-export const isMigrateModel = (modelData: any, localVersion: number): boolean => {
+export const isMigrateModel = (modelData: any, localVersion: number, modelType: string = '?'): boolean => {
   const importVersion = modelData && modelData[MODEL_VERSION_KEY];
 
   if (!modelData) {
@@ -17,7 +17,7 @@ export const isMigrateModel = (modelData: any, localVersion: number): boolean =>
       return false;
     }
   } else {
-    console.log(`Migrating model to version from ${importVersion} to ${localVersion}`, modelData);
+    console.log(`Migrating model "${modelType}" to version from ${importVersion} to ${localVersion}`, modelData);
     return true;
   }
 };
