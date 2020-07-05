@@ -1,5 +1,7 @@
 import { HammerGestureConfig } from '@angular/platform-browser';
 import { Injectable } from '@angular/core';
+// TODO remove once https://github.com/angular/angular/issues/37907 is resolved
+import 'hammerjs';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
