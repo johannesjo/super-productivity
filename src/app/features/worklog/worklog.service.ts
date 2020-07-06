@@ -111,7 +111,7 @@ export class WorklogService {
     return this.worklogTasks$.pipe(
       map(tasks => {
         tasks = tasks.filter((task: WorklogTask) => {
-          const taskDate = new Date(task.dateStr as string);
+          const taskDate = new Date(task.dateStr);
           return (taskDate >= rangeStart && taskDate <= rangeEnd);
         });
 

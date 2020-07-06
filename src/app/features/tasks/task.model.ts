@@ -131,5 +131,5 @@ export interface TaskState extends EntityState<Task> {
 }
 
 export interface WorklogTask extends Task {
-  dateStr?: string;
+  dateStr: string;
 }
