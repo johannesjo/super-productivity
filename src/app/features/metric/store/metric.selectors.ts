@@ -90,11 +90,11 @@ export const selectUnusedObstructionIds = createSelector(
 // -------
 export const selectMetricById = createSelector(
   selectMetricFeatureState,
-  (state: MetricState, props: { id: string }): Metric => {
-    if (!state.entities[props.id]) {
-      throw new Error('Metric not found');
-    }
-    return state.entities[props.id] as Metric;
+  (state: MetricState, props: { id: string }): Metric | null => {
+    // if (!state.entities[props.id]) {
+    //   throw new Error('Metric not found');
+    // }
+    return state.entities[props.id] || null;
   }
 );
 

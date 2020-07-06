@@ -79,12 +79,12 @@ export class MetricService {
     this._store$.dispatch(new LoadMetricState({state}));
   }
 
-  getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
-    if (!id) {
-      throw new Error('No valid id provided');
-    }
-    return this._store$.pipe(select(selectMetricById, {id}), take(1));
-  }
+  // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
+  //   if (!id) {
+  //     throw new Error('No valid id provided');
+  //   }
+  //   return this._store$.pipe(select(selectMetricById, {id}), take(1));
+  // }
 
   getMetricForDayOrDefaultWithCheckedImprovements$(day: string = getWorklogStr()): Observable<Metric> {
     return this._workContextService.activeWorkContextIdIfProject$.pipe(
