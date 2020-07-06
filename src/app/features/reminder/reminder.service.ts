@@ -56,7 +56,6 @@ export class ReminderService {
     private readonly _noteService: NoteService,
     private readonly _imexMetaService: ImexMetaService,
   ) {
-    console.log('INIT START');
     if (typeof (Worker as any) === 'undefined') {
       throw new Error('No service workers supported :(');
     }

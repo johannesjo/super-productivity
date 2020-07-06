@@ -3,13 +3,12 @@ import { LS_INITIAL_DIALOG_NR } from '../../core/persistence/ls-keys.const';
 import { HttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { catchError, switchMap, tap, timeout } from 'rxjs/operators';
-import { InitialDialogResponse } from './initial-dialog.model';
+import { InitialDialogResponse, instanceOfInitialDialogResponse } from './initial-dialog.model';
 import { Observable, of } from 'rxjs';
 import { DialogInitialComponent } from './dialog-initial/dialog-initial.component';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { version } from '../../../../package.json';
 import { lt } from 'semver';
-import { environment } from '../../../environments/environment';
 
 const URL = 'https://app.super-productivity.com/news.json?ngsw-bypass=true&no-cache=' + Date.now();
 
@@ -24,34 +23,39 @@ export class InitialDialogService {
   }
 
   showDialogIfNecessary$(): Observable<any> {
-    if (!environment.production) {
-      return of(null);
-    }
+    // if (!environment.production) {
+    //   return of(null);
+    // }
 
     return this._dataInitService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._http.get(URL)),
       // TODO check
       timeout(3000) as any,
-      switchMap((res: InitialDialogResponse) => {
+      switchMap((res: InitialDialogResponse | unknown) => {
         const lastLocalDialogNr = this._loadDialogNr();
         const isNewUser = !lastLocalDialogNr;
 
-        if (isNewUser && !res.isShowToNewUsers) {
-          // we need to get started somehow
-          if (lastLocalDialogNr === 0) {
-            this._saveDialogNr(1);
-          }
-          return of(null);
-        } else if (res.dialogNr <= lastLocalDialogNr) {
-          return of(null);
-        } else if (res.showStartingWithVersion && lt(version, res.showStartingWithVersion)) {
+        if (!instanceOfInitialDialogResponse(res)) {
+          console.error('Invalid initial Dialog response');
           return of(null);
         } else {
-          return this._openDialog$(res).pipe(
-            tap(() => {
-              this._saveDialogNr(res.dialogNr);
-            }),
-          );
+          if (isNewUser && !res.isShowToNewUsers) {
+            // we need to get started somehow
+            if (!lastLocalDialogNr) {
+              this._saveDialogNr(1);
+            }
+            return of(null);
+          } else if (res.dialogNr <= lastLocalDialogNr) {
+            return of(null);
+          } else if (res.showStartingWithVersion && lt(version, res.showStartingWithVersion)) {
+            return of(null);
+          } else {
+            return this._openDialog$(res).pipe(
+              tap(() => {
+                this._saveDialogNr(res.dialogNr);
+              }),
+            );
+          }
         }
       }),
       catchError((err) => {
