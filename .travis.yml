@@ -55,7 +55,7 @@ script:
       echo '____RUNNING DOCKER____'
       bash ${TRAVIS_BUILD_DIR}/build/docker/run-linux-win.sh ${PUB}
     else
-      NOYARNPOSTINSTALL=1 yarn install && yarn add 7zip-bin-mac
+      yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron
       travis_wait 30 yarn dist:mac:dl -p $PUB
     fi

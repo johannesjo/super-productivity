@@ -19,4 +19,4 @@ docker run $ENVS --rm \
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         $(docker image build -q .) \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && echo $PUB && node -v && npm -v && yarn -v && ls -l && NOYARNPOSTINSTALL=1 yarn --link-duplicates --pure-lockfile && yarn run dist:linuxAndWin -p ${PUB} && ls -l ./dist"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && echo $PUB && node -v && npm -v && yarn -v && ls -l && yarn --link-duplicates --pure-lockfile && yarn run dist:linuxAndWin -p ${PUB} && ls -l ./dist"
