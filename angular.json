@@ -25,26 +25,6 @@
             "customWebpackConfig": {
               "path": "./extra-webpack.config.js"
             },
-            "allowedCommonJsDependencies": [
-              "shortid",
-              "dragula",
-              "crossvent",
-              "contra/emitter",
-              "file-saver",
-              "semver",
-              "stack-generator",
-              "stacktrace-gps",
-              "error-stack-parser",
-              "stacktrace-js",
-              "helpful-decorators",
-              "pkce-challenge",
-              "moment-duration-format",
-              "axios",
-              "crypto",
-              "jira2md",
-              "query-string",
-              "chart.js"
-            ],
             "aot": true,
             "outputPath": "dist",
             "index": "src/index.html",
