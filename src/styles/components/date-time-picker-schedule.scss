@@ -733,6 +733,7 @@ $owl-missing: $owl-light-selected-bg !default;
   border-left: 4px solid transparent;
   color: $owl-text-color-strong;
   opacity: .9;
+  text-align: left;
 
   @include mq(xs, max) {
     padding: 0;
