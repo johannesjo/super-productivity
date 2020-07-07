@@ -147,7 +147,7 @@ export class ReminderService {
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
     const i = this._reminders.findIndex(reminder => reminder.id === reminderId);
     if (i > -1) {
-      this._reminders[i] = Object.assign(this._reminders[i], reminderChanges);
+      this._reminders[i] = Object.assign({}, this._reminders[i], reminderChanges);
     }
     this._saveModel(this._reminders);
   }
