@@ -59,6 +59,7 @@ export class InitialDialogService {
         }
       }),
       catchError((err) => {
+        console.error('Initial Dialog Error');
         console.error(err);
         return of(null);
       }),
