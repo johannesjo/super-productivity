@@ -12,26 +12,36 @@ import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
 import { SyncService } from '../../imex/sync/sync.service';
-import { delay, filter, first, map, mapTo, switchMap, take } from 'rxjs/operators';
+import { filter, first, map, mapTo, skipUntil, startWith, switchMap } from 'rxjs/operators';
 import { migrateReminders } from './migrate-reminder.util';
 import { WorkContextService } from '../work-context/work-context.service';
 import { devError } from '../../util/dev-error';
 import { WorkContextType } from '../work-context/work-context.model';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
-const DELAY = 5000;
+const PAUSE_AFTER_UPDATE = 5000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReminderService {
+  private _triggerPauseAfterUpdate$: Subject<void> = new Subject();
+  private _pauseAfterUpdate$: Observable<boolean> = this._triggerPauseAfterUpdate$.pipe(
+    switchMap(() =>
+      timer(PAUSE_AFTER_UPDATE).pipe(
+        mapTo(false),
+        startWith(true) // until the timer fires, you'll have this value
+      )
+    ),
+  );
+
   private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
   onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(
-    switchMap((reminders) => this._imexMetaService.isDataImportInProgress$.pipe(
+    skipUntil(this._imexMetaService.isDataImportInProgress$.pipe(
       filter(isInProgress => !isInProgress),
-      take(1),
-      mapTo(reminders),
-      delay(DELAY),
+    )),
+    skipUntil(this._pauseAfterUpdate$.pipe(
+      filter(isPause => !isPause),
     ))
   );
 
@@ -56,6 +66,11 @@ export class ReminderService {
     private readonly _noteService: NoteService,
     private readonly _imexMetaService: ImexMetaService,
   ) {
+    // this._triggerPauseAfterUpdate$.subscribe((v) => console.log('_triggerPauseAfterUpdate$', v));
+    // this._pauseAfterUpdate$.subscribe((v) => console.log('_pauseAfterUpdate$', v));
+    // this._onRemindersActive$.subscribe((v) => console.log('_onRemindersActive$', v));
+    // this.onRemindersActive$.subscribe((v) => console.log('onRemindersActive$', v));
+
     if (typeof (Worker as any) === 'undefined') {
       throw new Error('No service workers supported :(');
     }
@@ -215,6 +230,7 @@ export class ReminderService {
 
   private _updateRemindersInWorker(reminders: Reminder[]) {
     this._w.postMessage(reminders);
+    this._triggerPauseAfterUpdate$.next();
   }
 
   private _handleError(err: any) {
