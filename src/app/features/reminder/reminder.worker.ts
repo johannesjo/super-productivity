@@ -2,9 +2,7 @@
 
 import { ReminderCopy } from './reminder.model';
 
-const CHECK_INTERVAL_DURATION = 1000;
-const MESSAGE_INTERVAL_DURATION = 10000;
-let currentMessageTimerVal = 0;
+const CHECK_INTERVAL_DURATION = 10000;
 let checkInterval: any;
 
 addEventListener('message', ({data}) => {
@@ -30,13 +28,8 @@ const reInitCheckInterval = (reminders: ReminderCopy[]) => {
         // NOTE: for notes we just send the oldest due reminder
         : [oldest];
 
-      if (currentMessageTimerVal <= 0) {
-        postMessage(remindersToSend);
-        console.log('Worker postMessage', remindersToSend);
-        currentMessageTimerVal = MESSAGE_INTERVAL_DURATION;
-      } else {
-        currentMessageTimerVal -= CHECK_INTERVAL_DURATION;
-      }
+      postMessage(remindersToSend);
+      console.log('Worker postMessage', remindersToSend);
     }
   }, CHECK_INTERVAL_DURATION);
 };

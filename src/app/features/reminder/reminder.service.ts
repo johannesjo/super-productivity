@@ -12,37 +12,23 @@ import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
 import { SyncService } from '../../imex/sync/sync.service';
-import { filter, first, map, mapTo, skipUntil, startWith, switchMap } from 'rxjs/operators';
+import { filter, first, map, skipUntil } from 'rxjs/operators';
 import { migrateReminders } from './migrate-reminder.util';
 import { WorkContextService } from '../work-context/work-context.service';
 import { devError } from '../../util/dev-error';
 import { WorkContextType } from '../work-context/work-context.model';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
-const PAUSE_AFTER_UPDATE = 5000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReminderService {
-  private _triggerPauseAfterUpdate$: Subject<void> = new Subject();
-  private _pauseAfterUpdate$: Observable<boolean> = this._triggerPauseAfterUpdate$.pipe(
-    switchMap(() =>
-      timer(PAUSE_AFTER_UPDATE).pipe(
-        mapTo(false),
-        startWith(true) // until the timer fires, you'll have this value
-      )
-    ),
-  );
-
   private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
   onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(
     skipUntil(this._imexMetaService.isDataImportInProgress$.pipe(
       filter(isInProgress => !isInProgress),
     )),
-    skipUntil(this._pauseAfterUpdate$.pipe(
-      filter(isPause => !isPause),
-    ))
   );
 
   private _reminders$: ReplaySubject<Reminder[]> = new ReplaySubject(1);
@@ -108,9 +94,9 @@ export class ReminderService {
       this._reminders = [];
     }
 
+    this._updateRemindersInWorker(this._reminders);
     this._onReloadModel$.next(this._reminders);
     this._reminders$.next(this._reminders);
-    this._updateRemindersInWorker(this._reminders);
   }
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
@@ -222,15 +208,14 @@ export class ReminderService {
   }
 
   private _saveModel(reminders: Reminder[]) {
+    this._updateRemindersInWorker(this._reminders);
     this._persistenceService.updateLastLocalSyncModelChange();
     this._persistenceService.reminders.saveState(reminders);
-    this._updateRemindersInWorker(this._reminders);
     this._reminders$.next(this._reminders);
   }
 
   private _updateRemindersInWorker(reminders: Reminder[]) {
     this._w.postMessage(reminders);
-    this._triggerPauseAfterUpdate$.next();
   }
 
   private _handleError(err: any) {
