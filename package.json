@@ -84,7 +84,6 @@
     "electron-window-state": "^5.0.3",
     "googleapis": "^52.1.0",
     "node-fetch": "^2.6.0",
-    "source-map-support": "^0.5.19",
     "stacktrace-js": "^2.0.1"
   },
   "devDependencies": {

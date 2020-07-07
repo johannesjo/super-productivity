@@ -127,6 +127,10 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.toggleBookmarks)) {
       this._bookmarkService.toggleBookmarks();
       ev.preventDefault();
+    } else if (checkKeyCombo(ev, 'Ctrl+Shift+*')
+      && document.activeElement
+      && document.activeElement.getAttribute('routerlink') === '/procrastination') {
+      throw new Error('Intentional Error Fun (dont worry)');
     }
 
     // special hidden dev tools combo to use them for production
