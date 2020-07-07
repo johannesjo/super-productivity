@@ -1,5 +1,5 @@
-import {BASE} from '../e2e.const';
-import {NBrowser} from '../n-browser-interface';
+import { BASE } from '../e2e.const';
+import { NBrowser } from '../n-browser-interface';
 
 const WORK_VIEW_URL = `${BASE}/`;
 
@@ -33,13 +33,12 @@ module.exports = {
     .assert.containsText(DIALOG_TASK1, '0 A task')
     .end(),
 
-
   'should display a modal with 2 scheduled task if due': (browser: NBrowser) => {
     return browser
       .url(WORK_VIEW_URL)
       // NOTE: tasks are sorted by due time
       .addTaskWithReminder({title: '0 B task'})
-      .addTaskWithReminder({title: '1 B task'})
+      .addTaskWithReminder({title: '1 B task', scheduleTime: Date.now()})
       .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
       .assert.elementPresent(DIALOG)
       .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME)
@@ -48,7 +47,6 @@ module.exports = {
       .assert.containsText(DIALOG_TASKS_WRAPPER, '1 B task')
       .end();
   },
-
 
   'should start single task': (browser: NBrowser) => browser
     .url(WORK_VIEW_URL)
@@ -60,15 +58,14 @@ module.exports = {
     .assert.cssClassPresent(TODAY_TASK_1, 'isCurrent')
     .end(),
 
-
   'should manually empty list via add to today': (browser: NBrowser) => {
-    const start = Date.now() + 120000;
+    const start = Date.now() + 100000;
     return browser
       .url(WORK_VIEW_URL)
       // NOTE: tasks are sorted by due time
       .addTaskWithReminder({title: '0 D task xyz', scheduleTime: start})
       .addTaskWithReminder({title: '1 D task xyz', scheduleTime: start})
-      .addTaskWithReminder({title: '2 D task xyz', scheduleTime: start})
+      .addTaskWithReminder({title: '2 D task xyz', scheduleTime: Date.now()})
       .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME + 120000)
       // wait for all tasks to be present
       .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME + 120000)

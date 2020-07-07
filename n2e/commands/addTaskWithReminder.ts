@@ -1,5 +1,5 @@
-import {AddTaskWithReminderParams, NBrowser,} from '../n-browser-interface';
-import {Key} from 'protractor';
+import { AddTaskWithReminderParams, NBrowser, } from '../n-browser-interface';
+import { Key } from 'protractor';
 
 const TASK = 'task';
 const SCHEDULE_TASK_ITEM = 'task-additional-info-item:nth-child(2)';
@@ -13,7 +13,7 @@ const M = 60 * 1000;
 
 // being slightly longer than a minute prevents the edge case
 // of the wrong minute if the rest before takes to long
-const DEFAULT_DELTA = (1.5 * M);
+const DEFAULT_DELTA = (1.2 * M);
 
 // NOTE: needs to
 // be executed from work view
