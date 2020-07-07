@@ -14,10 +14,14 @@ if (environment.production) {
 platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
   // TODO make asset caching work for electron
   if ('serviceWorker' in navigator && environment.production && !IS_ELECTRON) {
+    console.log('Registering Service worker');
     return navigator.serviceWorker.register('ngsw-worker.js');
   }
   return;
-}).catch(err => console.log(err));
+}).catch(err => {
+  console.log('Service Worker Registration Error');
+  console.log(err);
+});
 
 // fix mobile scrolling while dragging
 window.addEventListener('touchmove', () => {
