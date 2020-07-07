@@ -76,6 +76,7 @@ export const createWindow = ({
       scrollBounce: true,
       webSecurity: !IS_DEV,
       nodeIntegration: true,
+      devTools: true
     },
     icon: ICONS_FOLDER + '/icon_256x256.png'
   });

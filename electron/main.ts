@@ -25,6 +25,8 @@ const IS_LINUX = process.platform === 'linux';
 const DESKTOP_ENV = process.env.DESKTOP_SESSION;
 const IS_GNOME = (DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg');
 const IS_DEV = process.env.NODE_ENV === 'DEV';
+
+let IS_SHOW_DEV_TOOLS: boolean = IS_DEV;
 if (IS_DEV) {
   console.log('Starting in DEV Mode!!!');
 }
@@ -36,6 +38,9 @@ process.argv.forEach((val) => {
     console.log('Using custom directory for user data', customUserDir);
     app.setPath('userData', customUserDir);
   }
+  if (val && val.includes('--dev-tools')) {
+    IS_SHOW_DEV_TOOLS = true;
+  }
 });
 
 interface MyApp extends App {
@@ -46,7 +51,7 @@ const appIN: MyApp = app;
 // NOTE: to get rid of the warning => https://github.com/electron/electron/issues/18397
 appIN.allowRendererProcessReuse = true;
 
-initDebug({showDevTools: IS_DEV}, IS_DEV);
+initDebug({showDevTools: IS_SHOW_DEV_TOOLS}, IS_DEV);
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
