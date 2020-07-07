@@ -42,12 +42,14 @@ export const createWindow = ({
   IS_MAC,
   quitApp,
   app,
+  customUrl,
 }: {
   IS_DEV: boolean;
   ICONS_FOLDER: string;
   IS_MAC: boolean;
   quitApp: () => void;
   app: App;
+  customUrl?: string;
 }): BrowserWindow => {
   // make sure the main window isn't already created
   if (mainWin) {
@@ -83,13 +85,15 @@ export const createWindow = ({
 
   mainWindowState.manage(mainWin);
 
-  const url = (IS_DEV)
-    ? 'http://localhost:4200'
-    : format({
-      pathname: normalize(join(__dirname, '../dist/index.html')),
-      protocol: 'file:',
-      slashes: true,
-    });
+  const url = customUrl
+    ? customUrl
+    : (IS_DEV)
+      ? 'http://localhost:4200'
+      : format({
+        pathname: normalize(join(__dirname, '../dist/index.html')),
+        protocol: 'file:',
+        slashes: true,
+      });
 
   mainWin.loadURL(url);
 

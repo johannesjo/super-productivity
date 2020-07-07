@@ -26,7 +26,9 @@ const DESKTOP_ENV = process.env.DESKTOP_SESSION;
 const IS_GNOME = (DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg');
 const IS_DEV = process.env.NODE_ENV === 'DEV';
 
-let IS_SHOW_DEV_TOOLS: boolean = IS_DEV;
+let isShowDevTools: boolean = IS_DEV;
+let customUrl: string;
+
 if (IS_DEV) {
   console.log('Starting in DEV Mode!!!');
 }
@@ -38,8 +40,14 @@ process.argv.forEach((val) => {
     console.log('Using custom directory for user data', customUserDir);
     app.setPath('userData', customUserDir);
   }
+
+  if (val && val.includes('--custom-url=')) {
+    customUrl = val.replace('--custom-url=', '').trim();
+    console.log('Using custom url', customUrl);
+  }
+
   if (val && val.includes('--dev-tools')) {
-    IS_SHOW_DEV_TOOLS = true;
+    isShowDevTools = true;
   }
 });
 
@@ -51,7 +59,7 @@ const appIN: MyApp = app;
 // NOTE: to get rid of the warning => https://github.com/electron/electron/issues/18397
 appIN.allowRendererProcessReuse = true;
 
-initDebug({showDevTools: IS_SHOW_DEV_TOOLS}, IS_DEV);
+initDebug({showDevTools: isShowDevTools}, IS_DEV);
 
 // NOTE: opening the folder crashes the mas build
 if (!IS_MAC) {
@@ -238,6 +246,7 @@ function createMainWin() {
     ICONS_FOLDER,
     IS_MAC,
     quitApp,
+    customUrl,
   });
   initGoogleAuth();
 }
