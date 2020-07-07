@@ -5,7 +5,7 @@ import { Task, TaskWithReminderData } from '../task.model';
 import { TaskService } from '../task.service';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
-import { first, map, switchMap } from 'rxjs/operators';
+import { first, map, switchMap, takeWhile } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
@@ -39,6 +39,12 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       )
     )),
   );
+  isMultiple$: Observable<boolean> = this.tasks$.pipe(
+    map(tasks => tasks.length > 1),
+    takeWhile(isMultiple => !isMultiple, true)
+  );
+  isMultiple: boolean = false;
+
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -55,6 +61,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._subs.add(this._reminderService.onRemindersActive$.subscribe(reminders => {
       this.reminders$.next(reminders);
     }));
+    this._subs.add(this.isMultiple$.subscribe(isMultiple => this.isMultiple = isMultiple));
   }
 
   ngOnDestroy(): void {

@@ -1,7 +1,7 @@
 <ng-container *ngIf="(tasks$|async) as tasks">
   <h1 mat-dialog-title>
     <mat-icon class="dialog-header-icon">alarm</mat-icon>
-    <span>{{(tasks.length > 1
+    <span>{{(isMultiple
       ? T.F.TASK.D_REMINDER_VIEW.DUE_TASKS
       : T.F.TASK.D_REMINDER_VIEW.DUE_TASK)|translate}}</span>
   </h1>
@@ -17,7 +17,7 @@
                     [isShowProjectTagAlways]="true"
                     [task]="task"></tag-list>
         </div>
-        <div *ngIf="tasks.length > 1"
+        <div *ngIf="isMultiple"
              class="actions">
           <button (click)="dismiss(task)"
                   [title]="T.G.DISMISS|translate"
@@ -88,7 +88,7 @@
               mat-button
               type="button">
         <mat-icon>snooze</mat-icon>
-        {{(tasks.length > 1
+        {{(isMultiple
         ? T.F.TASK.D_REMINDER_VIEW.SNOOZE_ALL
         : T.F.TASK.D_REMINDER_VIEW.SNOOZE)|translate }}
       </button>
@@ -99,13 +99,13 @@
               mat-stroked-button
               type="button">
         <mat-icon>wb_sunny</mat-icon>
-        {{(tasks.length > 1
+        {{(isMultiple
         ? T.F.TASK.D_REMINDER_VIEW.ADD_ALL_TO_TODAY
         : T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY)|translate }}
       </button>
 
       <button (click)="play()"
-              *ngIf="tasks.length === 1"
+              *ngIf="!isMultiple"
               [disabled]="isDisableControls"
               color="primary"
               mat-stroked-button
@@ -143,7 +143,7 @@
       {{T.F.TASK.D_REMINDER_VIEW.SNOOZE_UNTIL_TOMORROW|translate}}
     </button>
     <button (click)="editReminder(tasks[0], true)"
-            *ngIf="tasks.length === 1"
+            *ngIf="!isMultiple"
             mat-menu-item>
       <mat-icon>edit</mat-icon>
       {{T.G.EDIT|translate}}
@@ -152,7 +152,7 @@
             [disabled]="isDisableControls"
             mat-menu-item>
       <mat-icon>alarm_off</mat-icon>
-      {{(tasks.length > 1
+      {{(isMultiple
       ? T.F.TASK.D_REMINDER_VIEW.DISMISS_ALL
       : T.G.DISMISS)|translate}}
     </button>
