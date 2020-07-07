@@ -42,7 +42,7 @@ module.exports = {
       .addTaskWithReminder({title: '1 B task'})
       .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
       .assert.elementPresent(DIALOG)
-      .waitForElementVisible(DIALOG_TASK1)
+      .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME)
       .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME)
       .assert.containsText(DIALOG_TASKS_WRAPPER, '0 B task')
       .assert.containsText(DIALOG_TASKS_WRAPPER, '1 B task')
@@ -53,7 +53,7 @@ module.exports = {
   'should start single task': (browser: NBrowser) => browser
     .url(WORK_VIEW_URL)
     .addTaskWithReminder({title: '0 C task', scheduleTime: Date.now()})
-    .waitForElementVisible(DIALOG)
+    .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
     .waitForElementVisible(DIALOG_TASK1)
     .click(D_PLAY)
     .pause(100)
