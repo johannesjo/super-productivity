@@ -44,6 +44,7 @@ import { IPC } from '../../../../../electron/ipc-events.const';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { ipcRenderer } from 'electron';
+import { devError } from '../../../util/dev-error';
 
 interface IssueAndType {
   id: string | number | null;
@@ -238,12 +239,15 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       delay(50),
       withLatestFrom(this.taskService.selectedTaskId$),
       filter(([, id]) => !!id),
+      // delay(100),
     ).subscribe(([v]) => {
       if (v === TaskAdditionalInfoTargetPanel.Attachments) {
         if (!this.attachmentPanelElRef) {
-          throw new Error();
+          devError('this.attachmentPanelElRef not ready');
+          this._focusFirst();
+        } else {
+          this.focusItem(this.attachmentPanelElRef);
         }
-        this.focusItem(this.attachmentPanelElRef);
       } else {
         this._focusFirst();
       }
