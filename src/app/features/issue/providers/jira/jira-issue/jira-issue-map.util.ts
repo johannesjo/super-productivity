@@ -62,14 +62,14 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
       ? fields.comment.comments.map(mapComments)
       : [],
     changelog: mapChangelog(issueCopy.changelog as JiraOriginalChangelog),
-    assignee: mapAuthor(fields.assignee),
+    assignee: mapAuthor(fields.assignee, true),
     // url: makeIssueUrl(cfg.host, issueCopy.key)
   };
 };
 
-export const mapAuthor = (author: JiraOriginalAuthor): JiraAuthor => {
+export const mapAuthor = (author: JiraOriginalAuthor, isOptional: boolean = false): JiraAuthor | null => {
   if (!author) {
-    throw new Error('No author for issue');
+    return null;
   }
   return Object.assign({}, author, {
     self: undefined,
@@ -112,7 +112,7 @@ export const mapChangelog = (changelog: JiraOriginalChangelog): JiraChangelogEnt
   changelog.histories.forEach(entry => {
     entry.items.forEach(item => {
       newChangelog.push({
-        author: mapAuthor(entry.author),
+        author: mapAuthor(entry.author, true),
         created: entry.created,
         field: item.field,
         from: item.fromString,

@@ -35,7 +35,7 @@ export type JiraComment = Readonly<{
 }>;
 
 export type JiraChangelogEntry = Readonly<{
-  author: JiraAuthor;
+  author: JiraAuthor | null;
   created: string;
   field: string;
   from: string;
@@ -59,7 +59,7 @@ export type JiraIssueReduced = Readonly<{
 
   // mapped data
   attachments: JiraAttachment[];
-  assignee: JiraAuthor;
+  assignee: JiraAuthor | null;
 
   // new properties (mapped)
   comments: JiraComment[];
