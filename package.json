@@ -27,7 +27,7 @@
     "buildFrontendElectron:preCheck": "yarn preCheck && yarn buildFrontendElectron",
     "buildFrontendElectron:watch": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --aot --prod --base-href='' --watch",
     "buildAllElectron": "yarn buildFrontendElectron:preCheck && yarn electron:build",
-    "buildAllElectronNoE2E": "yarn lint && yarn test && yarn buildFrontendElectron && yarn electron:build",
+    "buildAllElectronNoTests": "yarn lint && yarn buildFrontendElectron && yarn electron:build",
     "buildApp": "yarn preCheck && yarn buildAllElectron && yarn electron-builder",
     "test": "ng test --watch=false",
     "test:watch": "ng test --browsers ChromeHeadless",
