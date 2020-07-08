@@ -74,20 +74,19 @@ export class JiraIssueEffects {
         throw new Error('No task');
       }
 
-      if (jiraCfg.isWorklogEnabled
-        && task && task.issueType === JIRA_TYPE && task.issueId
-        && !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)) {
-        this._openWorklogDialog(task, task.issueId, jiraCfg);
-      } else {
-        const parent = task.parentId && taskEntities[task.parentId];
-        if (!parent || !parent.issueId) {
-          throw new Error('No issueId for task');
-        }
-        if (parent && jiraCfg.isAddWorklogOnSubTaskDone && parent.issueType === JIRA_TYPE) {
-          // NOTE we're still sending the sub task for the meta data we need
-          this._openWorklogDialog(task, parent.issueId, jiraCfg);
+      if (jiraCfg.isAddWorklogOnSubTaskDone && jiraCfg.isWorklogEnabled) {
+        if (task && task.issueType === JIRA_TYPE && task.issueId
+          && !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)) {
+          this._openWorklogDialog(task, task.issueId, jiraCfg);
+        } else if (task.parentId) {
+          const parent = taskEntities[task.parentId];
+          if (parent && parent.issueId && parent.issueType === JIRA_TYPE) {
+            // NOTE we're still sending the sub task for the meta data we need
+            this._openWorklogDialog(task, parent.issueId, jiraCfg);
+          }
         }
       }
+      return undefined;
     })
   );
 
