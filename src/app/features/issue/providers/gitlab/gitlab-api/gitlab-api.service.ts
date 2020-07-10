@@ -6,7 +6,7 @@ import { SnackService } from 'src/app/core/snack/snack.service';
 import { GitlabCfg } from '../gitlab';
 import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
-import { GITLAB_API_BASE_URL } from '../gitlab.const';
+import { GITLAB_API_BASE_URL, GITLAB_URL_REGEX, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import { catchError, filter, map, mergeMap, share, switchMap, take } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
@@ -86,7 +86,7 @@ export class GitlabApiService {
 
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendRequest$({
-      url: `${this._projectAPILink(cfg)}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`
+      url: `${this.apiLink(cfg)}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`
     }, cfg).pipe(
       take(1),
       map((issues: GitlabOriginalIssue[]) => {
@@ -100,7 +100,7 @@ export class GitlabApiService {
       return EMPTY;
     }
     return this._sendRequest$({
-      url: `${this._projectAPILink(cfg)}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
+      url: `${this.apiLink(cfg)}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
     }, cfg).pipe(
       map((comments: GitlabOriginalComment[]) => {
         return comments ? comments : [];
@@ -178,14 +178,24 @@ export class GitlabApiService {
     return throwError({[HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.'});
   }
 
-  private _projectAPILink(projectConfig: GitlabCfg): string {
-    const projectURL: string = projectConfig.project ? projectConfig.project.replace('/', '%2F') : '';
-    let apiURL: string = GITLAB_API_BASE_URL + '/' + projectURL;
-    if (projectConfig.hostURL) {
-      console.log(';)');
-
-      apiURL = projectConfig.hostURL + 'api/v4/projects/' + projectURL;
+  private apiLink(projectConfig: GitlabCfg): string {
+    let apiURL: string = '';
+    let projectURL: string = projectConfig.project ? projectConfig.project : '';
+    const hostURL = projectConfig.project?.match(GITLAB_URL_REGEX);
+    if (hostURL) {
+      apiURL = hostURL[0] + 'api/v4/projects/';
+      projectURL = projectURL.substring(hostURL[0].length);
+    } else {
+      apiURL = GITLAB_API_BASE_URL + '/';
     }
+    const projectPath = projectURL.match(GITLAB_PROJECT_REGEX);
+    if (projectPath) {
+      projectURL = projectURL.replace(/\//ig, '%2F');
+    } else {
+      // Should never enter here
+      throwError('Gitlab Project URL');
+    }
+    apiURL += projectURL;
     return apiURL;
   }
 }

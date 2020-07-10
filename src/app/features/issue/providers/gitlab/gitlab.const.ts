@@ -5,7 +5,6 @@ import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/glo
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
-  hostURL: null,
   project: null,
   token: null,
   isSearchIssuesFromGitlab: false,
@@ -22,23 +21,17 @@ export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 // export const GITLAB_POLL_INTERVAL = 15 * 1000;
 export const GITLAB_API_BASE_URL = 'https://gitlab.com/api/v4/projects';
 
+export const GITLAB_URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\//i;
+export const GITLAB_PROJECT_REGEX = /(\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$/i;
+
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
-  {
-    key: 'hostURL',
-    type: 'input',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.HOST,
-      type: 'text',
-      pattern: /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\//i,
-    },
-  },
   {
     key: 'project',
     type: 'input',
     templateOptions: {
       label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
-      pattern: /^(\w-?|\.-?)+(\/(\w-?|\.-?)+)+$/i,
+      pattern: /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\/)((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)|(^(\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i,
     },
   },
   {

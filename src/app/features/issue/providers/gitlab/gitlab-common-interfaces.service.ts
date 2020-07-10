@@ -11,6 +11,7 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { T } from '../../../../t.const';
+import { GITLAB_URL_REGEX } from './gitlab.const';
 
 @Injectable({
   providedIn: 'root',
@@ -26,10 +27,10 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
       map((cfg) => {
-        if (cfg.hostURL) {
-          return `${cfg.hostURL}${cfg.project}/issues/${issueId}`;
+        if (cfg.project && cfg.project?.search(GITLAB_URL_REGEX) >= 0) {
+          return `${cfg.project}/issues/${issueId}`;
         } else {
-          return `https://gitlab.com/${cfg.project}/issues/${issueId}`;
+          return `https://gitlab.com/${cfg.project?.replace(/%2F/g, '/')}/issues/${issueId}`;
         }
       })
     );

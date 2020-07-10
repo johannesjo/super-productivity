@@ -160,8 +160,7 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Gitlab to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
-        "HOST": "Self hosted instance URL ex: https://mygilab.com/",
-        "PROJECT": "Path to project gitlabURL/'path to project'",
+        "PROJECT": "Full path or user name/project",
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
