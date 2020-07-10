@@ -38,7 +38,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     templateOptions: {
       label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
-      pattern: /^.+\%2F.+?$/i,
+      pattern: /^(\w-?|\.-?)+(\/(\w-?|\.-?)+)+$/i,
     },
   },
   {
