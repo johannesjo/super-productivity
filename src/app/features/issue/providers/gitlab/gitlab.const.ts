@@ -5,6 +5,7 @@ import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/glo
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
+  hostURL: null,
   project: null,
   token: null,
   isSearchIssuesFromGitlab: false,
@@ -22,6 +23,15 @@ export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 export const GITLAB_API_BASE_URL = 'https://gitlab.com/api/v4/projects';
 
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
+  {
+    key: 'hostURL',
+    type: 'input',
+    templateOptions: {
+      label: T.F.GITLAB.FORM.HOST,
+      type: 'text',
+      pattern: /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\//i,
+    },
+  },
   {
     key: 'project',
     type: 'input',

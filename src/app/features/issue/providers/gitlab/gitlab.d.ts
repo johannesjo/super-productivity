@@ -3,6 +3,7 @@ export interface GitlabCfg {
   isAutoAddToBacklog: boolean;
   isAutoPoll: boolean;
   filterUsername: string | null;
+  hostURL: string | null;
   project: string | null;
   token: string | null;
 }

@@ -13,8 +13,6 @@ import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
 
-const BASE = GITLAB_API_BASE_URL;
-
 @Injectable({
   providedIn: 'root',
 })
@@ -88,7 +86,7 @@ export class GitlabApiService {
 
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendRequest$({
-      url: `${BASE}/${cfg.project}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`
+      url: `${this._projectAPILink(cfg)}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`
     }, cfg).pipe(
       take(1),
       map((issues: GitlabOriginalIssue[]) => {
@@ -102,7 +100,7 @@ export class GitlabApiService {
       return EMPTY;
     }
     return this._sendRequest$({
-      url: `${BASE}/${cfg.project}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
+      url: `${this._projectAPILink(cfg)}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
     }, cfg).pipe(
       map((comments: GitlabOriginalComment[]) => {
         return comments ? comments : [];
@@ -178,5 +176,16 @@ export class GitlabApiService {
       return throwError({[HANDLED_ERROR_PROP_STR]: 'Gitlab: ' + error.message});
     }
     return throwError({[HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.'});
+  }
+
+  private _projectAPILink(projectConfig: GitlabCfg): string {
+    const projectURL: string = projectConfig.project ? projectConfig.project.replace('/', '%2F') : '';
+    let apiURL: string = GITLAB_API_BASE_URL + '/' + projectURL;
+    if (projectConfig.hostURL) {
+      console.log(';)');
+
+      apiURL = projectConfig.hostURL + 'api/v4/projects/' + projectURL;
+    }
+    return apiURL;
   }
 }
