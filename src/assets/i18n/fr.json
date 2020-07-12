@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de Gitlab au backlog",
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
-        "PROJECT": "\"username% 2FProjectName\" pour le projet gitlab que vous souhaitez suivre",
+        "PROJECT": "Chemin complet ou nom d'utilisateur / projet",
         "TOKEN": "Jeton d'accès"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues Gitlab ouvertes pour un repository spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
+        "HELP": "<p> Ici, vous pouvez configurer SuperProductivity pour répertorier les problèmes ouverts de Gitlab (que ce soit la version en ligne ou une instance auto-hébergée) pour un projet spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront répertoriés sous forme de suggestions et fourniront un lien vers le problème ainsi que plus d'informations à ce sujet. </p> <p> En outre, vous pouvez automatiquement ajouter et synchroniser tous les problèmes ouverts à votre carnet de tâches. </p>",
         "TITLE": "Gitlab"
       },
       "ISSUE_CONTENT": {

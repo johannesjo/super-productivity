@@ -21,6 +21,9 @@ export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 // export const GITLAB_POLL_INTERVAL = 15 * 1000;
 export const GITLAB_API_BASE_URL = 'https://gitlab.com/api/v4/projects';
 
+export const GITLAB_URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\//i;
+export const GITLAB_PROJECT_REGEX = /(\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$/i;
+
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   {
     key: 'project',
@@ -28,7 +31,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     templateOptions: {
       label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
-      pattern: /^.+\%2F.+?$/i,
+      pattern: /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\/)((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)|(^(\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i,
     },
   },
   {
@@ -36,6 +39,15 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     type: 'input',
     templateOptions: {
       label: T.F.GITLAB.FORM.TOKEN,
+    },
+    validation: {
+      show: true,
+    },
+    expressionProperties: {
+      // !! is used to get the associated boolean value of a non boolean value
+      // It's not a fancy trick using model.project alone gets the required case right but won't remove it
+      // if the project field is empty so this is needed for the wanted behavior
+      'templateOptions.required': '!!model.project',
     },
   },
   {

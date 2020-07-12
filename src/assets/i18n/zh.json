@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Gitlab添加到待办事项",
         "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的问题显示为建议",
-        "PROJECT": "您要跟踪的git存储库的“username%2FProjectName”",
+        "PROJECT": "完整路径或用户名/项目",
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
-        "HELP": "<p>您可以在此处配置SuperProductivity，以在日常计划视图的任务创建面板中列出特定存储库的打开Gitlab问题。它们将被列为建议，并将提供该问题的链接以及有关该问题的更多信息。</p> <p>此外，您还可以自动将所有未解决的问题添加并同步到任务待办事项中。</p>",
+        "HELP": "<p>在这里，您可以配置SuperProductivity在日常计划视图的任务创建面板中列出特定项目的打开的Gitlab问题（在线版本或自托管实例）。它们将作为建议列出，并提供指向该问题的链接以及有关此问题的更多信息。</p> <p>此外，您可以自动将所有未解决的问题添加并同步到任务积压。</p>",
         "TITLE": "Gitlab上"
       },
       "ISSUE_CONTENT": {
