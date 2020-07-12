@@ -102,7 +102,7 @@ export class ShortcutService {
       this._router.navigate(['/active/tasks']);
 
     } else if (checkKeyCombo(ev, keys.goToSettings)) {
-      this._router.navigate(['/settings']);
+      this._router.navigate(['/config']);
 
       // } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
       //   this._router.navigate(['/daily-agenda']);
