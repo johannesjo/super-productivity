@@ -42,7 +42,7 @@ export const selectTagById = createSelector(
   (state: TagState, props: { id: string }): Tag => {
     const tag = state.entities[props.id];
     if (!tag) {
-      throw new Error('No tag');
+      throw new Error('No tag ' + props.id);
     }
     return tag;
   }
@@ -53,7 +53,7 @@ export const selectTagsByIds = createSelector(
     ? props.ids.map(id => {
       const tag = state.entities[id];
       if (!tag) {
-        throw new Error('No tag');
+        throw new Error('No tag ' + id);
       }
       return tag;
     })

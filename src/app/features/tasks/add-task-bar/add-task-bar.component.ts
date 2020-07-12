@@ -243,9 +243,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   private async _getCtxForTaskSuggestion({projectId, tagIds}: AddTaskSuggestion): Promise<Tag | Project> {
-    return projectId
-      ? await this._projectService.getByIdOnce$(projectId).toPromise()
-      : await this._tagService.getTagById$((tagIds as string[])[0]).pipe(first()).toPromise();
+    if (projectId) {
+      return await this._projectService.getByIdOnce$(projectId).toPromise();
+    } else {
+      const firstTagId = (tagIds as string[])[0];
+      if (!firstTagId) {
+        throw new Error('No first tag');
+      }
+      return await this._tagService.getTagById$(firstTagId).pipe(first()).toPromise();
+    }
   }
 
   private _filterBacklog(searchText: string, task: Task) {
