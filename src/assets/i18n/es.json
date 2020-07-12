@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Gitlab a la cola de tareas",
         "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
-        "PROJECT": "\"username%2FProjectName\" para el repositorio de git que desea seguir",
+        "PROJECT": "Ruta completa o nombre de usuario / proyecto",
         "TOKEN": "Token de acceso"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de Gitlab para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
+        "HELP": "<p> Aquí puede configurar SuperProductividad para enumerar los problemas abiertos de Gitlab (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto. </p> <p> Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a la acumulación de tareas. </p>",
         "TITLE": "gitlab"
       },
       "ISSUE_CONTENT": {

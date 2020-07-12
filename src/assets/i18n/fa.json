@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
-        "PROJECT": "\"نام کاربری٪ 2FProjectName\" برای پروژه gitlab که می خواهید ردیابی کنید",
+        "PROJECT": "مسیر کامل یا نام کاربری / پروژه",
         "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open Gitlab issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "HELP": "<p> در اینجا می توانید SuperProductivity را تنظیم کنید تا لیست Gitlab باز (یا نسخه آنلاین آن یا یک نمونه خود میزبان) را برای یک پروژه خاص در پانل ایجاد کار در نمای برنامه ریزی روزانه تنظیم کنید. آنها به عنوان پیشنهادات ذکر شده اند و پیوندی به موضوع و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند. </p> <p> علاوه بر این می توانید به طور خودکار همه موارد باز را به بک گراند وظیفه خود اضافه کنید و همگام سازی کنید. </p>",
         "TITLE": "گیت لاب"
       },
       "ISSUE_CONTENT": {
