@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van Gitlab toe aan de achterstand",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
-        "PROJECT": "\"gebruikersnaam% 2FProjectName\" voor het gitlab-project dat u wilt volgen",
+        "PROJECT": "Volledig pad of gebruikersnaam / project",
         "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Hier kunt u SuperProductivity configureren om open Gitlab-problemen voor een specifiek project weer te geven in het paneel voor het maken van taken in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar het probleem en meer informatie erover.</p> <p>Daarnaast kunt u automatisch alle openstaande problemen toevoegen en synchroniseren met uw taakachterstand.</p>",
+        "HELP": "<p> Hier kunt u SuperProductivity configureren om open Gitlab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw taakachterstand. </p>",
         "TITLE": "Gitlab"
       },
       "ISSUE_CONTENT": {

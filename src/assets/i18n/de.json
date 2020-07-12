@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Gitlab automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
-        "PROJECT": "\"Benutzername%2FProjectname\" für das Git-Repository, das Sie verfolgen möchten",
+        "PROJECT": "Vollständiger Pfad oder Benutzername / Projekt",
         "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene Gitlab-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
+        "HELP": "<p> Hier können Sie SuperProductivity so konfigurieren, dass offene Gitlab-Probleme (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Bereich zur Aufgabenerstellung in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Problem sowie weitere Informationen dazu. </p> <p> Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren. </p>",
         "TITLE": "gitlab"
       },
       "ISSUE_CONTENT": {

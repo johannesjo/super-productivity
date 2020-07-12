@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da Github al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
-        "PROJECT": "\"username%2FProjectName\" per il progetto su Gitlab che vuoi tracciare",
+        "PROJECT": "Percorso completo o nome utente / progetto",
         "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione task nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti al backlog dei task.</p>",
+        "HELP": "<p> Qui puoi configurare SuperProductivity per elencare i problemi di Gitlab aperti (sia la versione online o un'istanza ospitata autonomamente) per un progetto specifico nel pannello di creazione dell'attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un collegamento al problema, nonché ulteriori informazioni al riguardo. </p> <p> Inoltre puoi aggiungere e sincronizzare automaticamente tutti i problemi aperti nel tuo backlog delle attività. </p>",
         "TITLE": "Gitlab"
       },
       "ISSUE_CONTENT": {

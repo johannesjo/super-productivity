@@ -160,11 +160,11 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Gitlab'dan backlog'a ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
-        "PROJECT": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
+        "PROJECT": "Tam yol veya kullanıcı adı / projesi",
         "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Burada Süper Verimliliği, günlük planlama görünümünde görev oluşturma panelinde belirli bir depo için açık Gitlab sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili daha fazla bilgi sunacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz.</p>",
+        "HELP": "<p> Burada SuperProductivity'yi günlük planlama görünümünde görev oluşturma panelinde belirli bir proje için açık Gitlab (çevrimiçi sürümü veya kendi kendine barındırılan bir örnek) sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Bunlar öneri olarak listelenecek ve sorunla ilgili bir bağlantı ve bununla ilgili daha fazla bilgi sağlayacaktır. </p> <p> Buna ek olarak, tüm açık sorunları otomatik olarak görev birikiminize ekleyebilir ve senkronize edebilirsiniz. </p>",
         "TITLE": "Gitlab"
       },
       "ISSUE_CONTENT": {
