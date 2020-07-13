@@ -47,6 +47,10 @@ export const toggleSimpleCounterCounter = createAction(
   props<{ id: string; }>(),
 );
 
+export const turnOffAllSimpleCounterCounters = createAction(
+  '[SimpleCounter] Turn off all simple counters',
+);
+
 export const setSimpleCounterCounterOff = createAction(
   '[SimpleCounter] Set SimpleCounter Counter Off',
   props<{ id: string; }>(),

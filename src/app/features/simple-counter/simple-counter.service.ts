@@ -7,7 +7,7 @@ import {
   deleteSimpleCounters,
   increaseSimpleCounterCounterToday,
   setSimpleCounterCounterToday,
-  toggleSimpleCounterCounter,
+  toggleSimpleCounterCounter, turnOffAllSimpleCounterCounters,
   updateAllSimpleCounters,
   updateSimpleCounter,
   upsertSimpleCounter,
@@ -82,6 +82,10 @@ export class SimpleCounterService {
 
   toggleCounter(id: string) {
     this._store$.dispatch(toggleSimpleCounterCounter({id}));
+  }
+
+  turnOffAll() {
+    this._store$.dispatch(turnOffAllSimpleCounterCounters());
   }
 
   addSimpleCounter(simpleCounter: SimpleCounter) {

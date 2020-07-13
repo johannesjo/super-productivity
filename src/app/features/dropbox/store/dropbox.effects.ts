@@ -4,6 +4,7 @@ import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../config
 import {
   catchError,
   concatMap,
+  delay,
   distinctUntilChanged,
   exhaustMap,
   filter,
@@ -30,6 +31,8 @@ import { dbxLog } from '../dropbox-log.util';
 import { T } from '../../../t.const';
 import { ExecBeforeCloseService } from '../../../core/electron/exec-before-close.service';
 import { IS_ELECTRON } from '../../../app.constants';
+import { TaskService } from '../../tasks/task.service';
+import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 
 @Injectable()
 export class DropboxEffects {
@@ -90,6 +93,12 @@ export class DropboxEffects {
         : EMPTY
       ),
       filter(ids => ids.includes(DROPBOX_BEFORE_CLOSE_ID)),
+      tap(() => {
+        this._taskService.setCurrentId(null);
+        this._simpleCounterService.turnOffAll();
+      }),
+      // minimally hacky...
+      delay(100),
       switchMap(() => this._dropboxSyncService.sync()
         .then(() => {
           this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
@@ -149,6 +158,8 @@ export class DropboxEffects {
     private _dropboxSyncService: DropboxSyncService,
     private _syncService: SyncService,
     private _snackService: SnackService,
+    private _taskService: TaskService,
+    private _simpleCounterService: SimpleCounterService,
     private _dataInitService: DataInitService,
     private _execBeforeCloseService: ExecBeforeCloseService,
   ) {

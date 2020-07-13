@@ -1,13 +1,14 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import * as simpleCounterActions from './simple-counter.actions';
 import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
-import { SimpleCounter, SimpleCounterState } from '../simple-counter.model';
+import { SimpleCounter, SimpleCounterState, SimpleCounterType } from '../simple-counter.model';
 import { DEFAULT_SIMPLE_COUNTERS } from '../simple-counter.const';
 import { arrayToDictionary } from '../../../util/array-to-dictionary';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { updateAllInDictionary } from '../../../util/update-all-in-dictionary';
 import { migrateSimpleCounterState } from '../migrate-simple-counter-state.util';
+import { Update } from '@ngrx/entity/src/models';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -109,6 +110,18 @@ const _reducer = createReducer<SimpleCounterState>(
   on(simpleCounterActions.deleteSimpleCounter, (state, {id}) => adapter.removeOne(id, state)),
 
   on(simpleCounterActions.deleteSimpleCounters, (state, {ids}) => adapter.removeMany(ids, state)),
+
+  on(simpleCounterActions.turnOffAllSimpleCounterCounters, (state) => {
+    const updates: Update<SimpleCounter>[] = state.ids
+      .filter(id => state.entities[id]?.type === SimpleCounterType.StopWatch && state.entities[id]?.isOn)
+      .map((id: string) => ({
+        id,
+        changes: {
+          isOn: false,
+        }
+      }));
+    return adapter.updateMany(updates, state);
+  }),
 );
 
 export function simpleCounterReducer(
