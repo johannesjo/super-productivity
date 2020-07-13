@@ -48,9 +48,12 @@ export class SyncService {
   // we might need this for mobile, as we can't rely on focus as much
   private _someMobileActivityTrigger$: Observable<string> = of(isTouchOnly()).pipe(
     switchMap((isTouchIn) => isTouchIn
-      ? fromEvent(window, 'touchstart').pipe(
+      ? merge(
+        fromEvent(window, 'touchstart'),
+        fromEvent(window, 'visibilitychange'),
+      ).pipe(
         throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
-        mapTo('I_MOUSE_TOUCH_MOVE'),
+        mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
       )
       : EMPTY
     ),
