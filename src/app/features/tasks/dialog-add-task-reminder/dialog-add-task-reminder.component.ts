@@ -65,7 +65,8 @@ export class DialogAddTaskReminderComponent {
   // NOTE: throttle is used as quick way to prevent multiple submits
   @throttle(2000, {leading: true, trailing: false})
   remove() {
-    if (!this.reminder) {
+    if (!this.reminder || this.reminder.id) {
+      console.log(this.reminder, this.task);
       throw new Error();
     }
     this._taskService.removeReminder(this.task.id, this.reminder.id);
