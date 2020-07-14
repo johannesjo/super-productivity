@@ -5,6 +5,7 @@
   "main": "./electron/main.js",
   "author": "johannesjo <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "MIT",
+  "productName": "Super Productivity",
   "homepage": "http://super-productivity.com",
   "repository": {
     "type": "git",
