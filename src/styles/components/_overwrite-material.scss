@@ -92,6 +92,7 @@ body .mat-form-field {
 .mat-button {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  max-width: 100%;
 }
 
 .mat-flat-button,
