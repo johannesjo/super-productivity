@@ -13,6 +13,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isAutoStartNextTask: true,
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: false,
+    isDisableInitialDialog: false,
     defaultProjectId: null
   },
   evaluation: {

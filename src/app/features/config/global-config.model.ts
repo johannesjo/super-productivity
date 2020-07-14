@@ -48,6 +48,7 @@ export type MiscConfig = Readonly<{
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTurnOffMarkdown: boolean;
   isAutoAddWorkedOnToToday: boolean;
+  isDisableInitialDialog: boolean;
   defaultProjectId: string | null;
 }>;
 

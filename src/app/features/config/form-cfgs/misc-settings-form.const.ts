@@ -50,6 +50,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isDisableInitialDialog',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_DISABLE_INITIAL_DIALOG,
+      },
+    },
+    {
       key: 'isAutoAddWorkedOnToToday',
       type: 'checkbox',
       templateOptions: {
