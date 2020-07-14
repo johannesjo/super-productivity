@@ -77,6 +77,15 @@ $summary-point-inner-margin: $s;
   }
 }
 
+.tabs{
+  margin-left: -2*$s;
+  margin-right: -2*$s;
+
+  @include mq(xs) {
+    margin: 0;
+  }
+}
+
 .daily-summary-actions {
   margin-top: 30px;
 

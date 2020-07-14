@@ -69,7 +69,8 @@
 
     <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
                    [selectedIndex]="selectedTabIndex"
-                   dynamicHeight>
+                   dynamicHeight
+                   class="tabs">
       <mat-tab [label]="(isForToday)
       ? (T.PDS.TODAY|translate)
       : (T.PDS.TASK_LIST|translate)">
