@@ -133,15 +133,19 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
   } else {
     // PROJECT CASE
     const project: (Project | undefined) = state[PROJECT_FEATURE_NAME].entities[task.projectId as string];
-    if (task.projectId === null || project === undefined) {
-      throw new Error('Task Restore Error: Missing project');
+    const isProjectTask = (task.projectId !== null && project !== undefined);
+
+    let taskIdsForProjectBacklog;
+    let taskIdsForProject;
+    if (isProjectTask) {
+      taskIdsForProjectBacklog = (project as Project).backlogTaskIds;
+      taskIdsForProject = (project as Project).taskIds;
+      if (!taskIdsForProject || !taskIdsForProjectBacklog || (!taskIdsForProjectBacklog.length && !taskIdsForProject.length)) {
+        throw new Error('Invalid project data');
+      }
     }
 
-    const taskIdsForProjectBacklog = project.backlogTaskIds;
-    const taskIdsForProject = project.taskIds;
-
     const tagState = state[TAG_FEATURE_NAME];
-
     const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
       const tag = tagState.entities[id];
       if (!tag) {
@@ -158,7 +162,6 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
       }
     }, {});
 
-    // TODO handle sub task only case
     return {
       projectId: task.projectId,
       taskIdsForProjectBacklog,
