@@ -32,9 +32,7 @@ export class InitialDialogService {
     return this._dataInitService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._globalConfigService.misc$),
       filter(miscCfg => !miscCfg.isDisableInitialDialog),
-      switchMap(() => this._http.get(URL)),
-      // TODO check
-      timeout(3000) as any,
+      switchMap(() => this._http.get(URL).pipe(timeout(4000))),
       switchMap((res: InitialDialogResponse | unknown) => {
         const lastLocalDialogNr = this._loadDialogNr();
         const isNewUser = !lastLocalDialogNr;
