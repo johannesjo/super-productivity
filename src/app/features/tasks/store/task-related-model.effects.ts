@@ -10,7 +10,7 @@ import {
   UpdateTask,
   UpdateTaskTags
 } from './task.actions';
-import { concatMap, filter, first, map, mapTo, switchMap, tap } from 'rxjs/operators';
+import { concatMap, filter, first, map, mapTo, mergeMap, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -21,9 +21,11 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { ProjectService } from '../../project/project.service';
+import { TagService } from '../../tag/tag.service';
+import { shortSyntax } from '../short-syntax.util';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -139,10 +141,47 @@ export class TaskRelatedModelEffects {
     })),
   );
 
+  @Effect()
+  shortSyntax$: any = this._actions$.pipe(
+    ofType(
+      TaskActionTypes.AddTask,
+      TaskActionTypes.UpdateTask,
+    ),
+    filter((action: AddTask | UpdateTask): boolean => {
+      if (action.type !== TaskActionTypes.UpdateTask) {
+        return true;
+      }
+      const changeProps = Object.keys((action as UpdateTask).payload.task.changes);
+      // we only want to execute this for task title updates
+      return (changeProps.length === 1 && changeProps[0] === 'title');
+    }),
+    concatMap((action: AddTask | UpdateTask): Observable<any> => {
+      return this._taskService.getByIdOnce$(action.payload.task.id as string);
+    }),
+    withLatestFrom(this._tagService.tags$),
+    mergeMap(([task, tags]) => {
+      const updatedTask = shortSyntax(task, tags);
+      const actions = [
+        new UpdateTask({
+          task: {
+            id: task.id,
+            changes: updatedTask
+          }
+        })
+      ];
+
+      // if (updatedTask.tagIds) {
+      //   const newTags = t
+      // }
+      return actions;
+    }),
+  );
+
   constructor(
     private _actions$: Actions,
     private _reminderService: ReminderService,
     private _taskService: TaskService,
+    private _tagService: TagService,
     private _projectService: ProjectService,
     private _globalConfigService: GlobalConfigService,
     private _persistenceService: PersistenceService

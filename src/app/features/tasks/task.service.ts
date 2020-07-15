@@ -87,7 +87,6 @@ import { unique } from '../../util/unique';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
-import { shortSyntax } from './short-syntax.util';
 
 @Injectable({
   providedIn: 'root',
@@ -246,7 +245,7 @@ export class TaskService {
 
   update(id: string, changedFields: Partial<Task>) {
     this._store.dispatch(new UpdateTask({
-      task: {id, changes: this._shortSyntaxSimple(changedFields) as Partial<Task>}
+      task: {id, changes: changedFields}
     }));
   }
 
@@ -566,7 +565,7 @@ export class TaskService {
     return await this._persistenceService.taskArchive.execAction(new UpdateTask({
       task: {
         id,
-        changes: this._shortSyntaxSimple(changedFields) as Partial<Task>
+        changes: changedFields
       }
     }));
   }
@@ -643,7 +642,7 @@ export class TaskService {
     workContextType?: WorkContextType;
     workContextId?: string;
   }): Task {
-    return this._shortSyntaxSimple({
+    return {
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
       created: Date.now(),
@@ -658,11 +657,7 @@ export class TaskService {
         : [],
 
       ...additional,
-    }) as Task;
+    };
   }
 
-  // NOTE: won't be static once we check for the settings
-  private _shortSyntaxSimple(task: Task | Partial<Task>): Task | Partial<Task> {
-    return shortSyntax(task);
-  }
 }

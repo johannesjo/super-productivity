@@ -48,7 +48,7 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): Task |
 
       const newTagIds = allTags
         // NOTE requires exact match
-        .filter(tag => newTagTitlesTrimmed.find(newTagTitle => newTagTitle === tag.title) && !newTask.tagIds?.includes(tag.id))
+        .filter(tag => newTagTitlesTrimmed.find(newTagTitle => newTagTitle.toLowerCase() === tag.title.toLowerCase()) && !newTask.tagIds?.includes(tag.id))
         .map(tag => tag.id);
 
       newTask.tagIds = [...newTask.tagIds as string[], ...newTagIds];
