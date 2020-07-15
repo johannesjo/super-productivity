@@ -1,6 +1,8 @@
 import { ShowSubTasksMode, TaskCopy } from './task.model';
 import { shortSyntax } from './short-syntax.util';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { Tag } from '../tag/tag.model';
+import { DEFAULT_TAG } from '../tag/tag.const';
 
 const TASK: TaskCopy = {
   id: 'id',
@@ -30,6 +32,14 @@ const TASK: TaskCopy = {
   issueLastUpdated: null,
   issueWasUpdated: null,
 };
+const ALL_TAGS: Tag[] = [
+  {...DEFAULT_TAG, id: 'blu_id', title: 'blu'},
+  {...DEFAULT_TAG, id: 'bla_id', title: 'bla'},
+  {...DEFAULT_TAG, id: 'hihi_id', title: 'hihi'},
+  {...DEFAULT_TAG, id: '1_id', title: '1'},
+  {...DEFAULT_TAG, id: 'A_id', title: 'A'},
+  {...DEFAULT_TAG, id: 'multi_word_id', title: 'Multi Word Tag'},
+];
 
 describe('shortSyntax', () => {
   it('should work for no short syntax', () => {
@@ -55,7 +65,6 @@ describe('shortSyntax', () => {
       });
     });
 
-
     it('', () => {
       const t = {
         ...TASK,
@@ -72,5 +81,90 @@ describe('shortSyntax', () => {
         timeEstimate: 7200000
       });
     });
+  });
+
+  describe('tags', () => {
+    it('should work with tags', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #A'
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual({
+        ...t,
+        title: 'Fun title',
+        tagIds: ['blu_id', 'A_id']
+      });
+    });
+
+    it('should not overwrite existing tags', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blue #hihi',
+        tagIds: ['blue_id', 'A', 'multi_word_id']
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual({
+        ...t,
+        title: 'Fun title',
+        tagIds: ['blue_id', 'A', 'multi_word_id', 'hihi_id']
+      });
+    });
+
+    it('should ignore none-existing tag names (for now)', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #idontexist',
+        tagIds: []
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual({
+        ...t,
+        title: 'Fun title',
+        tagIds: ['blu_id']
+      });
+    });
+  });
+
+  describe('should work with all combined', () => {
+    it('', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu 10m/1h'
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+      expect(r).toEqual({
+        ...t,
+        title: 'Fun title',
+        // timeSpent: 7200000,
+        timeSpentOnDay: {
+          [getWorklogStr()]: 600000
+        },
+        timeEstimate: 3600000,
+        tagIds: ['blu_id']
+      });
+    });
+
+    // TODO make this work maybe
+    // it('', () => {
+    //   const t = {
+    //     ...TASK,
+    //     title: 'Fun title 10m/1h #blu'
+    //   };
+    //   const r = shortSyntax(t, ALL_TAGS);
+    //   expect(r).toEqual({
+    //     ...t,
+    //     title: 'Fun title',
+    //     // timeSpent: 7200000,
+    //     timeSpentOnDay: {
+    //       [getWorklogStr()]: 600000
+    //     },
+    //     timeEstimate: 3600000,
+    //     tagIds: ['blu_id']
+    //   });
+    // });
   });
 });
