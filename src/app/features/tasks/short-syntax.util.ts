@@ -63,12 +63,12 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
       taskChanges.tagIds = [...task.tagIds as string[], ...tagIdsToAdd];
       taskChanges.title = ((taskChanges.title || task.title) as string).replace(SHORT_SYNTAX_TAGS_REG_EX, '').trim();
 
-      // console.log(newTask.title);
-      // console.log('newTagTitles', newTagTitles);
-      // console.log('newTagTitlesTrimmed', newTagTitlesTrimmed);
-      // console.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
-      // console.log('newTagIds', newTagIds);
-      // console.log('newTask.title', newTask.title);
+      console.log(task.title);
+      console.log('newTagTitles', newTagTitles);
+      console.log('newTagTitlesTrimmed', newTagTitlesTrimmed);
+      console.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
+      console.log('taskChanges.tagIds', taskChanges.tagIds);
+      console.log('taskChanges.title', taskChanges.title);
     }
   }
 

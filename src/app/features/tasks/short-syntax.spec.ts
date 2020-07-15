@@ -96,6 +96,16 @@ describe('shortSyntax', () => {
   });
 
   describe('tags', () => {
+    fit('should not trigger for tasks with starting # (e.g. github issues)', () => {
+      const t = {
+        ...TASK,
+        title: '#134 Fun title'
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
     it('should work with tags', () => {
       const t = {
         ...TASK,
