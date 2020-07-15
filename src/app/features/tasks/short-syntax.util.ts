@@ -71,17 +71,17 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
       if (newTagTitlesToCreate.length || tagIdsToAdd.length) {
         taskChanges.title = initialTitle;
         regexTagTitlesTrimmedAndFiltered.forEach((tagTitle) => {
-          taskChanges.title = taskChanges.title?.replace(tagTitle, '');
+          taskChanges.title = taskChanges.title?.replace(`#${tagTitle}`, '');
         });
         taskChanges.title = taskChanges.title.trim();
       }
 
-      console.log(task.title);
-      console.log('newTagTitles', regexTagTitles);
-      console.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
-      console.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
-      console.log('taskChanges.tagIds', taskChanges.tagIds);
-      console.log('taskChanges.title', taskChanges.title);
+      // console.log(task.title);
+      // console.log('newTagTitles', regexTagTitles);
+      // console.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
+      // console.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
+      // console.log('taskChanges.tagIds', taskChanges.tagIds);
+      // console.log('taskChanges.title', taskChanges.title);
     }
   }
 

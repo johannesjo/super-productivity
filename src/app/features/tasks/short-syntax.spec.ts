@@ -96,7 +96,7 @@ describe('shortSyntax', () => {
   });
 
   describe('tags', () => {
-    fit('should not trigger for tasks with starting # (e.g. github issues)', () => {
+    it('should not trigger for tasks with starting # (e.g. github issues)', () => {
       const t = {
         ...TASK,
         title: '#134 Fun title'
@@ -104,6 +104,22 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, ALL_TAGS);
 
       expect(r).toEqual(undefined);
+    });
+
+    it('should not trigger for tasks with starting # (e.g. github issues) when adding tags', () => {
+      const t = {
+        ...TASK,
+        title: '#134 Fun title #blu'
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        taskChanges: {
+          title: '#134 Fun title',
+          tagIds: ['blu_id']
+        }
+      });
     });
 
     it('should work with tags', () => {
