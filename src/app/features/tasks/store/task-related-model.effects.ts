@@ -21,7 +21,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
-import { Observable, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
@@ -160,12 +160,16 @@ export class TaskRelatedModelEffects {
     }),
     withLatestFrom(this._tagService.tags$),
     mergeMap(([task, tags]) => {
-      const updatedTask = shortSyntax(task, tags);
+      const r = shortSyntax(task, tags);
+      if (!r) {
+        return EMPTY;
+      }
+
       const actions = [
         new UpdateTask({
           task: {
             id: task.id,
-            changes: updatedTask
+            changes: r.taskChanges
           }
         })
       ];

@@ -42,9 +42,9 @@ const ALL_TAGS: Tag[] = [
 ];
 
 describe('shortSyntax', () => {
-  it('should work for no short syntax', () => {
+  it('should ignore for no short syntax', () => {
     const r = shortSyntax(TASK);
-    expect(r).toEqual(TASK);
+    expect(r).toEqual(undefined);
   });
 
   describe('should work for time short syntax', () => {
@@ -55,13 +55,14 @@ describe('shortSyntax', () => {
       };
       const r = shortSyntax(t);
       expect(r).toEqual({
-        ...t,
-        title: 'Fun title',
-        // timeSpent: 7200000,
-        timeSpentOnDay: {
-          [getWorklogStr()]: 600000
-        },
-        timeEstimate: 3600000
+        taskChanges: {
+          title: 'Fun title',
+          // timeSpent: 7200000,
+          timeSpentOnDay: {
+            [getWorklogStr()]: 600000
+          },
+          timeEstimate: 3600000
+        }
       });
     });
 
@@ -72,13 +73,14 @@ describe('shortSyntax', () => {
       };
       const r = shortSyntax(t);
       expect(r).toEqual({
-        ...TASK,
-        title: 'Fun title whatever',
-        // timeSpent: 7200000,
-        timeSpentOnDay: {
-          [getWorklogStr()]: 3600000
-        },
-        timeEstimate: 7200000
+        taskChanges: {
+          title: 'Fun title whatever',
+          // timeSpent: 7200000,
+          timeSpentOnDay: {
+            [getWorklogStr()]: 3600000
+          },
+          timeEstimate: 7200000
+        }
       });
     });
   });
@@ -92,9 +94,10 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, ALL_TAGS);
 
       expect(r).toEqual({
-        ...t,
-        title: 'Fun title',
-        tagIds: ['blu_id', 'A_id']
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id', 'A_id']
+        }
       });
     });
 
@@ -107,9 +110,10 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, ALL_TAGS);
 
       expect(r).toEqual({
-        ...t,
-        title: 'Fun title',
-        tagIds: ['blue_id', 'A', 'multi_word_id', 'hihi_id']
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blue_id', 'A', 'multi_word_id', 'hihi_id']
+        }
       });
     });
 
@@ -122,9 +126,10 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, ALL_TAGS);
 
       expect(r).toEqual({
-        ...t,
-        title: 'Fun title',
-        tagIds: ['blu_id']
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id']
+        }
       });
     });
   });
@@ -137,14 +142,15 @@ describe('shortSyntax', () => {
       };
       const r = shortSyntax(t, ALL_TAGS);
       expect(r).toEqual({
-        ...t,
-        title: 'Fun title',
-        // timeSpent: 7200000,
-        timeSpentOnDay: {
-          [getWorklogStr()]: 600000
-        },
-        timeEstimate: 3600000,
-        tagIds: ['blu_id']
+        taskChanges: {
+          title: 'Fun title',
+          // timeSpent: 7200000,
+          timeSpentOnDay: {
+            [getWorklogStr()]: 600000
+          },
+          timeEstimate: 3600000,
+          tagIds: ['blu_id']
+        }
       });
     });
 
@@ -156,7 +162,6 @@ describe('shortSyntax', () => {
     //   };
     //   const r = shortSyntax(t, ALL_TAGS);
     //   expect(r).toEqual({
-    //     ...t,
     //     title: 'Fun title',
     //     // timeSpent: 7200000,
     //     timeSpentOnDay: {
