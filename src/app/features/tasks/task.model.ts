@@ -114,7 +114,6 @@ export const DEFAULT_TASK: Task = {
   issueWasUpdated: null,
 };
 
-export const SHORT_SYNTAX_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 
 export interface TaskState extends EntityState<Task> {
   // overwrite entity model to avoid problems with typing

@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
-  SHORT_SYNTAX_REG_EX,
   ShowSubTasksMode,
   Task,
   TaskAdditionalInfoTargetPanel,
@@ -65,7 +64,6 @@ import {
   selectTasksByTag,
   selectTaskWithSubTasksByRepeatConfigId
 } from './store/task.selectors';
-import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { RoundTimeOption } from '../project/project.model';
 import { TagService } from '../tag/tag.service';
@@ -89,6 +87,7 @@ import { unique } from '../../util/unique';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { shortSyntax } from './short-syntax.util';
 
 @Injectable({
   providedIn: 'root',
@@ -247,7 +246,7 @@ export class TaskService {
 
   update(id: string, changedFields: Partial<Task>) {
     this._store.dispatch(new UpdateTask({
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+      task: {id, changes: this._shortSyntaxSimple(changedFields) as Partial<Task>}
     }));
   }
 
@@ -567,7 +566,7 @@ export class TaskService {
     return await this._persistenceService.taskArchive.execAction(new UpdateTask({
       task: {
         id,
-        changes: this._shortSyntax(changedFields) as Partial<Task>
+        changes: this._shortSyntaxSimple(changedFields) as Partial<Task>
       }
     }));
   }
@@ -644,7 +643,7 @@ export class TaskService {
     workContextType?: WorkContextType;
     workContextId?: string;
   }): Task {
-    return this._shortSyntax({
+    return this._shortSyntaxSimple({
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
       created: Date.now(),
@@ -663,35 +662,7 @@ export class TaskService {
   }
 
   // NOTE: won't be static once we check for the settings
-  private _shortSyntax(task: Task | Partial<Task>): Task | Partial<Task> {
-    if (!task.title) {
-      return task;
-    }
-    const matches = SHORT_SYNTAX_REG_EX.exec(task.title);
-
-    if (matches && matches.length >= 3) {
-      const full = matches[0];
-      const timeSpent = matches[2];
-      const timeEstimate = matches[4];
-
-      return {
-        ...task,
-        ...(
-          timeSpent
-            ? {
-              timeSpentOnDay: {
-                ...(task.timeSpentOnDay || {}),
-                [getWorklogStr()]: stringToMs(timeSpent)
-              }
-            }
-            : {}
-        ),
-        timeEstimate: stringToMs(timeEstimate),
-        title: task.title.replace(full, '')
-      };
-
-    } else {
-      return task;
-    }
+  private _shortSyntaxSimple(task: Task | Partial<Task>): Task | Partial<Task> {
+    return shortSyntax(task);
   }
 }
