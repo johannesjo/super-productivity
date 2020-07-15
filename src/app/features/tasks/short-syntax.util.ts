@@ -42,14 +42,18 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
   const newTagTitlesToCreate: string[] = [];
   // only exec if previous ones are also passed
   if (Array.isArray(task.tagIds) && Array.isArray(allTags)) {
-    const newTagTitles = ((taskChanges.title || task.title) as string).match(SHORT_SYNTAX_TAGS_REG_EX);
-    if (newTagTitles && newTagTitles.length) {
-      const newTagTitlesTrimmed: string[] = newTagTitles
+    const initialTitle = ((taskChanges.title || task.title) as string);
+    const regexTagTitles = initialTitle.match(SHORT_SYNTAX_TAGS_REG_EX);
+    if (regexTagTitles && regexTagTitles.length) {
+      const regexTagTitlesTrimmedAndFiltered: string[] = regexTagTitles
         .map(title => title.trim().replace('#', ''))
-        .filter(newTagTitle => isNaN(newTagTitle as any) && newTagTitle.length >= 1);
+        .filter(newTagTitle =>
+          newTagTitle.length >= 1
+          && initialTitle.trim().indexOf(newTagTitle) > 4
+        );
 
       const tagIdsToAdd: string[] = [];
-      newTagTitlesTrimmed.forEach(newTagTitle => {
+      regexTagTitlesTrimmedAndFiltered.forEach(newTagTitle => {
         const existingTag = allTags.find(tag => newTagTitle.toLowerCase() === tag.title.toLowerCase());
         if (existingTag) {
           if (!task.tagIds?.includes(existingTag.id)) {
@@ -60,12 +64,21 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
         }
       });
 
-      taskChanges.tagIds = [...task.tagIds as string[], ...tagIdsToAdd];
-      taskChanges.title = ((taskChanges.title || task.title) as string).replace(SHORT_SYNTAX_TAGS_REG_EX, '').trim();
+      if (tagIdsToAdd.length) {
+        taskChanges.tagIds = [...task.tagIds as string[], ...tagIdsToAdd];
+      }
+
+      if (newTagTitlesToCreate.length || tagIdsToAdd.length) {
+        taskChanges.title = initialTitle;
+        regexTagTitlesTrimmedAndFiltered.forEach((tagTitle) => {
+          taskChanges.title = taskChanges.title?.replace(tagTitle, '');
+        });
+        taskChanges.title = taskChanges.title.trim();
+      }
 
       console.log(task.title);
-      console.log('newTagTitles', newTagTitles);
-      console.log('newTagTitlesTrimmed', newTagTitlesTrimmed);
+      console.log('newTagTitles', regexTagTitles);
+      console.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
       console.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
       console.log('taskChanges.tagIds', taskChanges.tagIds);
       console.log('taskChanges.title', taskChanges.title);
