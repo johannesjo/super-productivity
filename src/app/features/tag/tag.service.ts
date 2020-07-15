@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { Tag, TagState } from './tag.model';
 import * as shortid from 'shortid';
 import { DEFAULT_TAG } from './tag.const';
+import { TypedAction } from '@ngrx/store/src/models';
 
 @Injectable({
   providedIn: 'root',
@@ -29,19 +30,7 @@ export class TagService {
 
   addTag(tag: Partial<Tag>): string {
     const id = shortid();
-    this._store$.dispatch(addTag({
-      tag: {
-        ...DEFAULT_TAG,
-        id,
-        title: tag.title || 'EMPTY',
-        created: Date.now(),
-        modified: Date.now(),
-        icon: null,
-        color: tag.color || null,
-        taskIds: [],
-        ...tag,
-      }
-    }));
+    this._store$.dispatch(this.getAddTagActionAndId(tag).action);
     return id;
   }
 
@@ -67,5 +56,24 @@ export class TagService {
 
   upsertTag(tag: Tag) {
     this._store$.dispatch(upsertTag({tag}));
+  }
+
+  getAddTagActionAndId(tag: Partial<Tag>): { action: TypedAction<any>; id: string } {
+    const id = shortid();
+    return {
+      id, action: addTag({
+        tag: {
+          ...DEFAULT_TAG,
+          id,
+          title: tag.title || 'EMPTY',
+          created: Date.now(),
+          modified: Date.now(),
+          icon: null,
+          color: tag.color || null,
+          taskIds: [],
+          ...tag,
+        }
+      })
+    };
   }
 }

@@ -165,18 +165,30 @@ export class TaskRelatedModelEffects {
         return EMPTY;
       }
 
-      const actions = [
-        new UpdateTask({
-          task: {
-            id: task.id,
-            changes: r.taskChanges
-          }
-        })
-      ];
+      const actions: any[] = [];
+      const tagIds: string[] = r.taskChanges.tagIds || task.tagIds;
 
-      // if (updatedTask.tagIds) {
-      //   const newTags = t
-      // }
+      if (r.newTagTitles.length) {
+        r.newTagTitles.forEach(newTagTitle => {
+          const {action, id} = this._tagService.getAddTagActionAndId({title: newTagTitle});
+          tagIds.push(id);
+          actions.push(action);
+        });
+      }
+
+      actions.push(
+        new UpdateTask({
+            task: {
+              id: task.id,
+              changes: {
+                ...r.taskChanges,
+                ...(tagIds !== task.tagIds ? {tagIds} : {}),
+              }
+            }
+          }
+        )
+      );
+
       return actions;
     }),
   );

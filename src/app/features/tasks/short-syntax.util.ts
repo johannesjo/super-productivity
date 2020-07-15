@@ -9,7 +9,7 @@ export const SHORT_SYNTAX_TAGS_REG_EX = /\#[^\#]+/gi;
 
 export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
   taskChanges: Partial<Task>,
-  newTagTitles?: string[]
+  newTagTitles: string[]
 } | undefined => {
   let taskChanges: Partial<TaskCopy> = {};
   if (!task.title) {
@@ -39,21 +39,28 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
     };
   }
 
+  const newTagTitlesToCreate: string[] = [];
   // only exec if previous ones are also passed
   if (Array.isArray(task.tagIds) && Array.isArray(allTags)) {
-
     const newTagTitles = ((taskChanges.title || task.title) as string).match(SHORT_SYNTAX_TAGS_REG_EX);
     if (newTagTitles && newTagTitles.length) {
       const newTagTitlesTrimmed: string[] = newTagTitles
         .map(title => title.trim().replace('#', ''))
         .filter(newTagTitle => isNaN(newTagTitle as any) && newTagTitle.length >= 1);
 
-      const newTagIds = allTags
-        // NOTE requires exact match
-        .filter(tag => newTagTitlesTrimmed.find(newTagTitle => newTagTitle.toLowerCase() === tag.title.toLowerCase()) && !task.tagIds?.includes(tag.id))
-        .map(tag => tag.id);
+      const tagIdsToAdd: string[] = [];
+      newTagTitlesTrimmed.forEach(newTagTitle => {
+        const existingTag = allTags.find(tag => newTagTitle.toLowerCase() === tag.title.toLowerCase());
+        if (existingTag) {
+          if (!task.tagIds?.includes(existingTag.id)) {
+            tagIdsToAdd.push(existingTag.id);
+          }
+        } else {
+          newTagTitlesToCreate.push(newTagTitle);
+        }
+      });
 
-      taskChanges.tagIds = [...task.tagIds as string[], ...newTagIds];
+      taskChanges.tagIds = [...task.tagIds as string[], ...tagIdsToAdd];
       taskChanges.title = ((taskChanges.title || task.title) as string).replace(SHORT_SYNTAX_TAGS_REG_EX, '').trim();
 
       // console.log(newTask.title);
@@ -65,5 +72,9 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
     }
   }
 
-  return {taskChanges};
+  if (!newTagTitlesToCreate.length && Object.keys(taskChanges).length === 0) {
+    return undefined;
+  }
+
+  return {taskChanges, newTagTitles: newTagTitlesToCreate};
 };

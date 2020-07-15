@@ -47,6 +47,14 @@ describe('shortSyntax', () => {
     expect(r).toEqual(undefined);
   });
 
+  it('should ignore if the changes cause no further changes', () => {
+    const r = shortSyntax({
+      ...TASK,
+      title: 'So what shall I do'
+    });
+    expect(r).toEqual(undefined);
+  });
+
   describe('should work for time short syntax', () => {
     it('', () => {
       const t = {
@@ -55,6 +63,7 @@ describe('shortSyntax', () => {
       };
       const r = shortSyntax(t);
       expect(r).toEqual({
+        newTagTitles: [],
         taskChanges: {
           title: 'Fun title',
           // timeSpent: 7200000,
@@ -73,6 +82,7 @@ describe('shortSyntax', () => {
       };
       const r = shortSyntax(t);
       expect(r).toEqual({
+        newTagTitles: [],
         taskChanges: {
           title: 'Fun title whatever',
           // timeSpent: 7200000,
@@ -94,6 +104,7 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, ALL_TAGS);
 
       expect(r).toEqual({
+        newTagTitles: [],
         taskChanges: {
           title: 'Fun title',
           tagIds: ['blu_id', 'A_id']
@@ -104,20 +115,21 @@ describe('shortSyntax', () => {
     it('should not overwrite existing tags', () => {
       const t = {
         ...TASK,
-        title: 'Fun title #blue #hihi',
-        tagIds: ['blue_id', 'A', 'multi_word_id']
+        title: 'Fun title #blu #hihi',
+        tagIds: ['blu_id', 'A', 'multi_word_id']
       };
       const r = shortSyntax(t, ALL_TAGS);
 
       expect(r).toEqual({
+        newTagTitles: [],
         taskChanges: {
           title: 'Fun title',
-          tagIds: ['blue_id', 'A', 'multi_word_id', 'hihi_id']
+          tagIds: ['blu_id', 'A', 'multi_word_id', 'hihi_id']
         }
       });
     });
 
-    it('should ignore none-existing tag names (for now)', () => {
+    it('should add new tag names', () => {
       const t = {
         ...TASK,
         title: 'Fun title #blu #idontexist',
@@ -126,6 +138,7 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, ALL_TAGS);
 
       expect(r).toEqual({
+        newTagTitles: ['idontexist'],
         taskChanges: {
           title: 'Fun title',
           tagIds: ['blu_id']
@@ -142,6 +155,7 @@ describe('shortSyntax', () => {
       };
       const r = shortSyntax(t, ALL_TAGS);
       expect(r).toEqual({
+        newTagTitles: [],
         taskChanges: {
           title: 'Fun title',
           // timeSpent: 7200000,
