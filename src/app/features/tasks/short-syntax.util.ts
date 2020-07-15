@@ -1,10 +1,11 @@
 import { Task } from './task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
+import { Tag } from '../tag/tag.model';
 
 export const SHORT_SYNTAX_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 
-export const shortSyntax = (task: Task | Partial<Task>): Task | Partial<Task> => {
+export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): Task | Partial<Task> => {
   if (!task.title) {
     return task;
   }
