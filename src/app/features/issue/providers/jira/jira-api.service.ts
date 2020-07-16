@@ -107,23 +107,29 @@ export class JiraApiService {
     const jql = (cfg.searchJqlQuery ? `${encodeURI(cfg.searchJqlQuery)}` : '');
 
     return this._sendRequest$({
-      pathname: 'issue/picker',
-      followAllRedirects: true,
-      query: {
-        showSubTasks: true,
-        showSubTaskParent: true,
-        query: searchStr,
-        currentJQL: jql
+      jiraReqCfg: {
+        pathname: 'issue/picker',
+        followAllRedirects: true,
+        query: {
+          showSubTasks: true,
+          showSubTaskParent: true,
+          query: searchStr,
+          currentJQL: jql
+        },
+        transform: mapToSearchResults
+        // NOTE: we pass the cfg as well to avoid race conditions
       },
-      transform: mapToSearchResults
-      // NOTE: we pass the cfg as well to avoid race conditions
-    }, cfg);
+      cfg
+    });
   }
 
   listFields$(cfg: JiraCfg): Observable<any> {
     return this._sendRequest$({
-      pathname: 'field',
-    }, cfg);
+      jiraReqCfg: {
+        pathname: 'field',
+      },
+      cfg
+    });
   }
 
   findAutoImportIssues$(cfg: JiraCfg, isFetchAdditional?: boolean,
@@ -146,14 +152,17 @@ export class JiraApiService {
     }
 
     return this._sendRequest$({
-      transform: mapIssuesResponse as (res: any, cfg?: JiraCfg) => any,
-      pathname: 'search',
-      method: 'POST',
-      body: {
-        ...options,
-        jql: searchQuery
+      jiraReqCfg: {
+        transform: mapIssuesResponse as (res: any, cfg?: JiraCfg) => any,
+        pathname: 'search',
+        method: 'POST',
+        body: {
+          ...options,
+          jql: searchQuery
+        },
       },
-    }, cfg);
+      cfg
+    });
   }
 
   getIssueById$(issueId: string, cfg: JiraCfg): Observable<JiraIssue> {
@@ -166,50 +175,66 @@ export class JiraApiService {
 
   getCurrentUser$(cfg: JiraCfg, isForce: boolean = false): Observable<JiraOriginalUser> {
     return this._sendRequest$({
-      pathname: `myself`,
-      transform: mapResponse,
-    }, cfg, isForce);
+      jiraReqCfg: {
+        pathname: `myself`,
+        transform: mapResponse,
+      },
+      cfg,
+      isForce
+    });
   }
 
   listStatus$(cfg: JiraCfg): Observable<JiraOriginalStatus[]> {
     return this._sendRequest$({
-      pathname: `status`,
-      transform: mapResponse,
-    }, cfg);
+      jiraReqCfg: {
+        pathname: `status`,
+        transform: mapResponse,
+      },
+      cfg
+    });
   }
 
   getTransitionsForIssue$(issueId: string, cfg: JiraCfg): Observable<JiraOriginalTransition[]> {
     return this._sendRequest$({
-      pathname: `issue/${issueId}/transitions`,
-      method: 'GET',
-      query: {
-        expand: 'transitions.fields'
+      jiraReqCfg: {
+        pathname: `issue/${issueId}/transitions`,
+        method: 'GET',
+        query: {
+          expand: 'transitions.fields'
+        },
+        transform: mapTransitionResponse,
       },
-      transform: mapTransitionResponse,
-    }, cfg);
+      cfg
+    });
   }
 
   transitionIssue$(issueId: string, transitionId: string, cfg: JiraCfg): Observable<any> {
     return this._sendRequest$({
-      pathname: `issue/${issueId}/transitions`,
-      method: 'POST',
-      body: {
-        transition: {
-          id: transitionId,
-        }
+      jiraReqCfg: {
+        pathname: `issue/${issueId}/transitions`,
+        method: 'POST',
+        body: {
+          transition: {
+            id: transitionId,
+          }
+        },
+        transform: mapResponse,
       },
-      transform: mapResponse,
-    }, cfg);
+      cfg
+    });
   }
 
   updateAssignee$(issueId: string, accountId: string, cfg: JiraCfg): Observable<any> {
     return this._sendRequest$({
-      pathname: `issue/${issueId}/assignee`,
-      method: 'PUT',
-      body: {
-        accountId,
+      jiraReqCfg: {
+        pathname: `issue/${issueId}/assignee`,
+        method: 'PUT',
+        body: {
+          accountId,
+        },
       },
-    }, cfg);
+      cfg
+    });
   }
 
   addWorklog$({
@@ -231,21 +256,27 @@ export class JiraApiService {
       comment,
     };
     return this._sendRequest$({
-      pathname: `issue/${issueId}/worklog`,
-      method: 'POST',
-      body: worklog,
-      transform: mapResponse,
-    }, cfg);
+      jiraReqCfg: {
+        pathname: `issue/${issueId}/worklog`,
+        method: 'POST',
+        body: worklog,
+        transform: mapResponse,
+      },
+      cfg
+    });
   }
 
   private _getIssueById$(issueId: string, cfg: JiraCfg, isGetChangelog: boolean = false): Observable<JiraIssue> {
     return this._sendRequest$({
-      transform: mapIssueResponse as (res: any, cfg?: JiraCfg) => any,
-      pathname: `issue/${issueId}`,
-      query: {
-        expand: isGetChangelog ? ['changelog', 'description'] : ['description']
-      }
-    }, cfg);
+      jiraReqCfg: {
+        transform: mapIssueResponse as (res: any, cfg?: JiraCfg) => any,
+        pathname: `issue/${issueId}`,
+        query: {
+          expand: isGetChangelog ? ['changelog', 'description'] : ['description']
+        }
+      },
+      cfg
+    });
   }
 
   // Complex Functions
@@ -256,7 +287,15 @@ export class JiraApiService {
       && (IS_ELECTRON || this._isExtension);
   }
 
-  private _sendRequest$(jiraReqCfg: JiraRequestCfg, cfg: JiraCfg, isForce: boolean = false): Observable<any> {
+  private _sendRequest$({
+    jiraReqCfg,
+    cfg,
+    isForce = false,
+  }: {
+    jiraReqCfg: JiraRequestCfg,
+    cfg: JiraCfg,
+    isForce?: boolean
+  }): Observable<any> {
     return this._isInterfacesReadyIfNeeded$.pipe(
       take(1),
       concatMap(() => {
