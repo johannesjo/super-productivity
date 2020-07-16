@@ -83,7 +83,7 @@ export class JiraApiService {
   ) {
     // set up callback listener for electron
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: unknown) => {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: any) => {
         this._handleResponse(res);
       });
     }
@@ -91,7 +91,7 @@ export class JiraApiService {
     this._chromeExtensionInterfaceService.onReady$
       .subscribe(() => {
         this._isExtension = true;
-        this._chromeExtensionInterfaceService.addEventListener('SP_JIRA_RESPONSE', (ev: unknown, data: unknown) => {
+        this._chromeExtensionInterfaceService.addEventListener('SP_JIRA_RESPONSE', (ev: unknown, data: any) => {
           this._handleResponse(data);
         });
       });
@@ -126,7 +126,8 @@ export class JiraApiService {
     }, cfg);
   }
 
-  findAutoImportIssues$(cfg: JiraCfg, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssueReduced[]> {
+  findAutoImportIssues$(cfg: JiraCfg, isFetchAdditional?: boolean,
+    maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssueReduced[]> {
     const options = {
       maxResults,
       fields: [
@@ -312,7 +313,8 @@ export class JiraApiService {
       }));
   }
 
-  private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform: any, jiraCfg: JiraCfg): Observable<any> {
+  private _sendRequestToExecutor$(requestId: string, url: string, requestInit: RequestInit, transform: any,
+    jiraCfg: JiraCfg): Observable<any> {
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
@@ -407,7 +409,7 @@ export class JiraApiService {
     };
   }
 
-  private _handleResponse(res: any) {
+  private _handleResponse(res: { requestId?: string; error?: any }) {
     // check if proper id is given in callback and if exists in requestLog
     if (res.requestId && this._requestsLog[res.requestId]) {
       const currentRequest = this._requestsLog[res.requestId];
@@ -418,10 +420,12 @@ export class JiraApiService {
       if (!res || res.error) {
         console.error('JIRA_RESPONSE_ERROR', res, currentRequest);
         // let msg =
-        if (res.error &&
-          (res.error.statusCode && res.error.statusCode === 401)
-          || (res.error && res.error === 401)
-        ) {
+        if (res?.error && (
+          res.error.statusCode === 401
+          || res.error === 401
+          || res.error.message === 'Forbidden'
+          || res.error.message === 'Unauthorized'
+        )) {
           this._blockAccess();
         }
 
