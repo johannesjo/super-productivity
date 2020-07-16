@@ -25,6 +25,7 @@ import { AppDataComplete } from './sync.model';
 import { SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME } from './sync.const';
 import { isTouchOnly } from '../../util/is-touch';
 import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
+import { IdleService } from '../../features/time-tracking/idle.service';
 
 // TODO naming
 @Injectable({
@@ -45,6 +46,18 @@ export class SyncService {
     throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
     mapTo('I_FOCUS_THROTTLED'),
   );
+
+  private _mouseMoveAfterIdle$: Observable<string | never> = this._idleService.isIdle$.pipe(
+    distinctUntilChanged(),
+    switchMap((isIdle) => isIdle
+      ? fromEvent(window, 'mousemove').pipe(
+        take(1),
+        mapTo('I_MOUSE_MOVE_AFTER_IDLE'),
+      )
+      : EMPTY
+    )
+  );
+
   // we might need this for mobile, as we can't rely on focus as much
   private _someMobileActivityTrigger$: Observable<string> = of(isTouchOnly()).pipe(
     switchMap((isTouchIn) => isTouchIn
@@ -68,6 +81,7 @@ export class SyncService {
   // OTHER INITIAL SYNC STUFF
   private _immediateSyncTrigger$: Observable<string> = merge(
     this._focusAppTrigger$,
+    this._mouseMoveAfterIdle$,
     this._someMobileActivityTrigger$,
     this._isOnlineTrigger$,
   );
@@ -110,6 +124,7 @@ export class SyncService {
   constructor(
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _dataInitService: DataInitService,
+    private readonly _idleService: IdleService,
     private readonly _persistenceService: PersistenceService,
   ) {
     // this.getSyncTrigger$(5000).subscribe((v) => console.log('.getSyncTrigger$(5000)', v));
