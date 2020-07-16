@@ -28,6 +28,11 @@ export const sendJiraRequest = ({requestId, requestInit, url, jiraCfg}:
     .then((response) => {
       // console.log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {
+        console.log('Jira Error Error Response ELECTRON: ', response);
+        try {
+          console.log(JSON.stringify(response));
+        } catch (e) {
+        }
         throw Error(response.statusText);
       }
       return response;
@@ -41,7 +46,7 @@ export const sendJiraRequest = ({requestId, requestInit, url, jiraCfg}:
       });
     })
     .catch((error) => {
-      console.error('JIRA_ERR_ERR', error);
+      // console.error('JIRA_ERR_ERR_ELECTRON', error);
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         error,
         requestId,
