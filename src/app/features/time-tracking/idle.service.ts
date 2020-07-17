@@ -54,12 +54,13 @@ export class IdleService {
       (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
-    }
-    this._chromeExtensionInterfaceService.onReady$.subscribe(() => {
-      this._chromeExtensionInterfaceService.addEventListener(IPC.IDLE_TIME, (ev: any, idleTimeInMs: number) => {
-        this.handleIdle(idleTimeInMs);
+    } else {
+      this._chromeExtensionInterfaceService.onReady$.subscribe(() => {
+        this._chromeExtensionInterfaceService.addEventListener(IPC.IDLE_TIME, (ev: any, idleTimeInMs: number) => {
+          this.handleIdle(idleTimeInMs);
+        });
       });
-    });
+    }
 
     // window.setTimeout(() => {
     //   this.handleIdle(800000);

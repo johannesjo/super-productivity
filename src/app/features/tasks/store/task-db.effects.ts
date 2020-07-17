@@ -8,6 +8,7 @@ import { selectTaskFeatureState } from './task.selectors';
 import { TaskRepeatCfgActionTypes } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import { TaskAttachmentActionTypes } from '../task-attachment/task-attachment.actions';
 import { TaskState } from '../task.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable()
 export class TaskDbEffects {
@@ -72,7 +73,15 @@ export class TaskDbEffects {
   }
 
   private _saveToLs(taskState: TaskState) {
-    this._persistenceService.task.saveState(taskState);
+    this._persistenceService.task.saveState({
+      ...taskState,
+
+      // make sure those are never set to something
+      selectedTaskId: environment.production
+        ? null
+        : taskState.selectedTaskId,
+      currentTaskId: null,
+    });
   }
 }
 
