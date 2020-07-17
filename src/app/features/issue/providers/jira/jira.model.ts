@@ -16,6 +16,8 @@ export interface JiraCfg {
   userName: string | null;
   password?: string | null;
   isAutoPollTickets: boolean;
+  isWonkyCookieMode: boolean;
+
   isAllowSelfSignedCertificate: boolean;
   searchJqlQuery: string;
 

@@ -34,6 +34,9 @@ import { getJiraResponseErrorTxt } from '../../../../util/get-jira-response-erro
 import { isOnline } from '../../../../util/is-online';
 import { GlobalProgressBarService } from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
 import { ipcRenderer, IpcRendererEvent } from 'electron';
+import { SS_JIRA_WONKY_COOKIE } from '../../../../core/persistence/ls-keys.const';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -80,10 +83,12 @@ export class JiraApiService {
     private _globalProgressBarService: GlobalProgressBarService,
     private _snackService: SnackService,
     private _bannerService: BannerService,
+    private _matDialog: MatDialog,
   ) {
     // set up callback listener for electron
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: any) => {
+      (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent,
+        res: any) => {
         this._handleResponse(res);
       });
     }
@@ -259,6 +264,10 @@ export class JiraApiService {
   private _sendRequest$(jiraReqCfg: JiraRequestCfg, cfg: JiraCfg, isForce: boolean = false): Observable<any> {
     return this._isInterfacesReadyIfNeeded$.pipe(
       take(1),
+      concatMap(() => (IS_ELECTRON && cfg.isWonkyCookieMode)
+        ? this._checkSetWonkyCookie(cfg)
+        : of(true)
+      ),
       concatMap(() => {
         // assign uuid to request to know which responsive belongs to which promise
         const requestId = `${jiraReqCfg.pathname}__${jiraReqCfg.method || 'GET'}__${shortid()}`;
@@ -359,17 +368,46 @@ export class JiraApiService {
   }
 
   private _makeRequestInit(jr: JiraRequestCfg, cfg: JiraCfg): RequestInit {
-    const encoded = this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`);
-
     return {
       method: jr.method || 'GET',
+
       ...(jr.body ? {body: JSON.stringify(jr.body)} : {}),
-      headers: {
-        authorization: `Basic ${encoded}`,
-        Cookie: '',
-        'Content-Type': 'application/json'
-      }
+
+      headers: (IS_ELECTRON && cfg.isWonkyCookieMode)
+        ? {
+          Cookie: sessionStorage.getItem(SS_JIRA_WONKY_COOKIE) as string,
+        }
+        : {
+          authorization: `Basic ${this._b64EncodeUnicode(`${cfg.userName}:${cfg.password}`)}`,
+          Cookie: '',
+          'Content-Type': 'application/json'
+        }
     };
+  }
+
+  private async _checkSetWonkyCookie(cfg: JiraCfg): Promise<string | null> {
+    const ssVal = sessionStorage.getItem(SS_JIRA_WONKY_COOKIE);
+    if (ssVal) {
+      return ssVal;
+    } else {
+      const url = `${cfg.host}/rest/api/${API_VERSION}/myself`;
+
+      const val = await this._matDialog.open(DialogPromptComponent, {
+        data: {
+          // TODO add message to translations
+          message: `<h3>Jira Wonky Cookie Mode</h3>
+<p>Log into Jira in your browser, then <a href="${url}" target="_blank">go to this url</a> and open up the dev tools to copy all cookies being set and enter them here.</p>`
+        }
+      }).afterClosed().toPromise();
+
+      if (typeof val === 'string') {
+        sessionStorage.setItem(SS_JIRA_WONKY_COOKIE, val);
+        return val;
+      }
+    }
+
+    this._blockAccess();
+    return null;
   }
 
   private _makeJiraRequestLogItem({
@@ -449,6 +487,7 @@ export class JiraApiService {
     // TODO also shut down all existing requests
     this._isBlockAccess = true;
     sessionStorage.setItem(BLOCK_ACCESS_KEY, 'true');
+    sessionStorage.removeItem(SS_JIRA_WONKY_COOKIE);
   }
 
   private _b64EncodeUnicode(str: string) {

@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "Allow self signed certificate",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username"
+        "USER_NAME": "Email / Username",
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Mode (desktop app only)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Advanced Config",
