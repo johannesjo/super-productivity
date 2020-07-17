@@ -47,7 +47,7 @@
     "dist": "yarn buildAllElectron && electron-builder",
     "dist:only": "electron-builder",
     "dist:linuxAndWin": "yarn buildAllElectron && electron-builder --linux --win",
-    "dist:win": "yarn buildAllElectron && electron-builder --win",
+    "dist:win": "yarn buildAllElectronNoTests && electron-builder --win",
     "dist:win:only": "electron-builder --win",
     "dist:win:appx": "yarn buildAllElectron && electron-builder --win --config=build/electron-builder.appx.yaml",
     "dist:win:store": "git stash && git pull && yarn && git stash pop && yarn dist:win",
