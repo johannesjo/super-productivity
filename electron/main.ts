@@ -209,8 +209,8 @@ ipcMain.on(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
   registerShowAppShortCuts(cfg);
 });
 
-ipcMain.on(IPC.JIRA_SETUP_IMG_HEADERS, (ev, jiraCfg: JiraCfg) => {
-  setupRequestHeadersForImages(jiraCfg);
+ipcMain.on(IPC.JIRA_SETUP_IMG_HEADERS, (ev, {jiraCfg, wonkyCookie}: { jiraCfg: JiraCfg, wonkyCookie?: string }) => {
+  setupRequestHeadersForImages(jiraCfg, wonkyCookie);
 });
 
 ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {

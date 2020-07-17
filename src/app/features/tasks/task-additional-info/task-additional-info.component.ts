@@ -45,6 +45,7 @@ import { ElectronService } from '../../../core/electron/electron.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { ipcRenderer } from 'electron';
 import { devError } from '../../../util/dev-error';
+import { SS_JIRA_WONKY_COOKIE } from '../../../core/persistence/ls-keys.const';
 
 interface IssueAndType {
   id: string | number | null;
@@ -182,7 +183,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
         })
       ).subscribe((jiraCfg) => {
         if (jiraCfg.isEnabled) {
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_SETUP_IMG_HEADERS, jiraCfg);
+          (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.JIRA_SETUP_IMG_HEADERS, {
+            jiraCfg,
+            wonkyCookie: jiraCfg.isWonkyCookieMode && sessionStorage.getItem(SS_JIRA_WONKY_COOKIE)
+          });
         }
       }));
     }
