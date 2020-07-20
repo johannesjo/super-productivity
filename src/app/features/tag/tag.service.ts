@@ -29,8 +29,8 @@ export class TagService {
   }
 
   addTag(tag: Partial<Tag>): string {
-    const id = shortid();
-    this._store$.dispatch(this.getAddTagActionAndId(tag).action);
+    const {id, action} = this.getAddTagActionAndId(tag);
+    this._store$.dispatch(action);
     return id;
   }
 
