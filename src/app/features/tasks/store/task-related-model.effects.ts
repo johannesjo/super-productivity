@@ -166,7 +166,7 @@ export class TaskRelatedModelEffects {
       }
 
       const actions: any[] = [];
-      const tagIds: string[] = r.taskChanges.tagIds || task.tagIds;
+      const tagIds: string[] = [...(r.taskChanges.tagIds || task.tagIds)];
 
       if (r.newTagTitles.length) {
         r.newTagTitles.forEach(newTagTitle => {
