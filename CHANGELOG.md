@@ -1,3 +1,27 @@
+## [5.5.1](https://github.com/johannesjo/super-productivity/compare/v5.5.0...v5.5.1) (2020-07-22)
+
+
+### Bug Fixes
+
+* over style for better drawer container ([e999b8e](https://github.com/johannesjo/super-productivity/commit/e999b8e5ac8afc683cc46d980e9d89131b534984))
+* **jira:** check for empty cookie value and prompt again ([db0b4e3](https://github.com/johannesjo/super-productivity/commit/db0b4e35add597b80f14781da9bcc23d4bc31359))
+* add fallback to prevent NaN for daily summary ([4a80f26](https://github.com/johannesjo/super-productivity/commit/4a80f260be6169b49d1274666047efe515043c68))
+* array not being writeable ([b2ec051](https://github.com/johannesjo/super-productivity/commit/b2ec0512cb3ae7aad853ebe7f5586079f8753d07))
+* **tag:** add tag returning wrong id ([a0a300a](https://github.com/johannesjo/super-productivity/commit/a0a300a6823f410f8421e16b46fc72a08139690b))
+* don't listen to chrome extension for idle if in electron context ([6f3fbaf](https://github.com/johannesjo/super-productivity/commit/6f3fbaf48a8b02ce5b697e973dd7705e281fd2cb))
+* don't persist selected task ([e5960d1](https://github.com/johannesjo/super-productivity/commit/e5960d17c01815535b0a62a4b74765e2ffea27f1))
+
+
+### Features
+
+* **dbx:** add mousemove after idle sync trigger ([d9b8dd2](https://github.com/johannesjo/super-productivity/commit/d9b8dd2e359f44e062ce4c8ba90abf724cafb0ab))
+* **jira:** improve error logging for electron ([e88d72e](https://github.com/johannesjo/super-productivity/commit/e88d72e5584fa0440a21a645d76a9e524a25965b))
+* **jira:** improve unauthorized handling ([07057d4](https://github.com/johannesjo/super-productivity/commit/07057d4ba7e14cad4df55ffb31cbd1db5ea056c0))
+* **jira:** make wonky cookie mode work ([c25e29a](https://github.com/johannesjo/super-productivity/commit/c25e29a23693cd249da2e92dfdf6d4d3870cc238))
+* **jira:** make wonky cookie mode work for images and attachments ([ba8ccb5](https://github.com/johannesjo/super-productivity/commit/ba8ccb56d4856a849ee454fe03407b23014feb95))
+
+
+
 # [5.5.0](https://github.com/johannesjo/super-productivity/compare/v5.4.3...v5.5.0) (2020-07-15)
 
 
