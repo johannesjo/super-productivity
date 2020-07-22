@@ -426,7 +426,7 @@ export class JiraApiService {
 
   private async _checkSetWonkyCookie(cfg: JiraCfg): Promise<string | null> {
     const ssVal = sessionStorage.getItem(SS_JIRA_WONKY_COOKIE);
-    if (ssVal) {
+    if (ssVal && ssVal.length > 0) {
       return ssVal;
     } else {
       const url = `${cfg.host}/rest/api/${API_VERSION}/myself`;
