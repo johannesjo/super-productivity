@@ -1,0 +1,15 @@
+@import "../../../../variables";
+
+.project-section {
+  margin-top: $s*2;
+  margin-bottom: $s*3;
+
+  h2 {
+    margin-bottom: $s;
+
+    > span,
+    > mat-icon {
+      vertical-align: middle;
+    }
+  }
+}
