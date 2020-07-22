@@ -80,56 +80,10 @@
             <p>{{T.PDS.NO_TASKS|translate}}</p>
           </ng-template>
 
-          <ng-container *ngIf="(hasTasksForToday$|async); else noTasks">
-            <task-summary-table (updated)="onTaskSummaryEdit()"
-                                [day]="(dayStr$|async)"
-                                [flatTasks]="(tasksWorkedOnOrDoneOrRepeatableFlat$|async)"></task-summary-table>
-            <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
-              <button [matMenuTriggerFor]="roundTimeActions"
-                      [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate"
-                      mat-button>
-                <mat-icon>restore</mat-icon>
-                {{T.PDS.ROUND_TIME_SPENT|translate}}
-              </button>
-              <button (click)="showExportModal()"
-                      *ngIf="isForToday"
-                      mat-button>
-                <mat-icon>call_made</mat-icon>
-                {{T.PDS.EXPORT_TASK_LIST|translate}}
-              </button>
-
-              <mat-menu #roundTimeActions="matMenu">
-                <button mat-menu-item
-                        style="color: red;">
-                  {{T.PDS.ROUND_TIME_WARNING|translate}}
-                </button>
-                <button (click)="roundTimeForTasks('5M')"
-                        mat-menu-item>
-                  {{T.PDS.ROUND_5M|translate}}
-                </button>
-                <button (click)="roundTimeForTasks('5M', true)"
-                        mat-menu-item>
-                  {{T.PDS.ROUND_UP_5M|translate}}
-                </button>
-                <button (click)="roundTimeForTasks('QUARTER')"
-                        mat-menu-item>
-                  {{T.PDS.ROUND_15M|translate}}
-                </button>
-                <button (click)="roundTimeForTasks('QUARTER', true)"
-                        mat-menu-item>
-                  {{T.PDS.ROUND_UP_15M|translate}}
-                </button>
-                <button (click)="roundTimeForTasks('HALF')"
-                        mat-menu-item>
-                  {{T.PDS.ROUND_30M|translate}}
-                </button>
-                <button (click)="roundTimeForTasks('HALF', true)"
-                        mat-menu-item>
-                  {{T.PDS.ROUND_UP_30M|translate}}
-                </button>
-              </mat-menu>
-            </div>
-          </ng-container>
+          <task-summary-tables *ngIf="(hasTasksForToday$|async); else noTasks"
+                               [flatTasks]="tasksWorkedOnOrDoneOrRepeatableFlat$|async"
+                               [isForToday]="isForToday"
+                               [dayStr]="dayStr"></task-summary-tables>
         </section>
       </mat-tab>
 
