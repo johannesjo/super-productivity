@@ -29,7 +29,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   // NOTE: if this value is to big it might mess, with the push out logic, as
   // the width is not really 40% any more
   min-width: 200px;
-  max-width: 700px;
+  max-width: 720px;
   background: transparent;
   border: 1px solid;
   border-right: 0;
@@ -57,14 +57,9 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     top: 0;
     bottom: 0;
     z-index: $z-task-side-bar-over;
-    right: -80vw;
-
-    @include mq(sm, max) {
-      max-width: 600px;
-    }
+    right: 0;
 
     @include mq(xs, max) {
-      right: -100%;
       width: 100% !important;
     }
   }

@@ -107,17 +107,15 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
   }
 
   private _updateStyle() {
+    const widthStyle = ` width: ${this.sideWidth}%;`;
     const style = (this.isOverGet)
       ? (this.isOpenGet)
-        ? 'transform: translateX(-100%);'
-        : `transform: translateX(0);`
+        ? 'transform: translateX(0);'
+        : 'transform: translateX(100%);'
       : (this.isOpenGet)
-        ? 'margin-right: 0;'
-        : `margin-right: ${-1 * this.sideWidth}%;`
+        ? `margin-right: 0; ${widthStyle}`
+        : `margin-right: ${-1 * this.sideWidth}%; ${widthStyle}`
     ;
-    const widthStyle = ` width: ${this.sideWidth}%;`;
-    this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(style + widthStyle);
-    // TODO tmp fix, because the line above doesn't seem to work any more
-    this.sideStyle = style + widthStyle;
+    this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(style);
   }
 }
