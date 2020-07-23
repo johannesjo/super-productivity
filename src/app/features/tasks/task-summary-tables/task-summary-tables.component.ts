@@ -85,10 +85,10 @@ export class TaskSummaryTablesComponent {
     });
   }
 
-  roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp: boolean = false) {
+  roundTimeForTasks(projectId: string, roundTo: RoundTimeOption, isRoundUp: boolean = false) {
     const taskIds = this.flatTasks.map(task => task.id);
     this._taskService.roundTimeSpentForDay({
-      day: this.dayStr, taskIds, roundTo, isRoundUp
+      day: this.dayStr, taskIds, roundTo, isRoundUp, projectId
     });
   }
 
