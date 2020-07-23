@@ -429,13 +429,21 @@ export class JiraApiService {
     if (ssVal && ssVal.length > 0) {
       return ssVal;
     } else {
-      const url = `${cfg.host}/rest/api/${API_VERSION}/myself`;
+      const loginUrl = `${cfg.host}`;
+      const apiUrl = `${cfg.host}/rest/api/${API_VERSION}/myself`;
 
       const val = await this._matDialog.open(DialogPromptComponent, {
         data: {
           // TODO add message to translations
-          message: `<h3>Jira Wonky Cookie Mode</h3>
-<p>Log into Jira in your browser, then <a href="${url}" target="_blank">go to this url</a> and open up the dev tools to copy all cookies being set and enter them here.</p>`
+          placeholder: 'Insert Cookie String',
+          message: `<h3>Jira Wonky Cookie Authentication</h3>
+<ol>
+  <li><a href="${loginUrl}">Log into Jira from your browser</a></li>
+  <li><a href="${apiUrl}" target="_blank">Go to this api url</a></li>
+  <li>Open up the dev tools</li>
+  <li>Navigate to "network" and reload page</li>
+  <li>Copy all request header cookies from the api request and enter them here</li>
+</ol>`
         }
       }).afterClosed().toPromise();
 
