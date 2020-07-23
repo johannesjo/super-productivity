@@ -429,7 +429,7 @@ export class TaskService {
   }
 
   roundTimeSpentForDay({day, taskIds, roundTo, isRoundUp = false, projectId}: {
-    day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean, projectId?: string
+    day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean, projectId?: string | null
   }) {
     this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp, projectId}));
   }

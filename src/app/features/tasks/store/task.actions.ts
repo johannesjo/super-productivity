@@ -233,7 +233,7 @@ export class ToggleStart implements Action {
 export class RoundTimeSpentForDay implements Action {
   readonly type: string = TaskActionTypes.RoundTimeSpentForDay;
 
-  constructor(public payload: { day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean, projectId?: string }) {
+  constructor(public payload: { day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean, projectId?: string|null }) {
   }
 }
 

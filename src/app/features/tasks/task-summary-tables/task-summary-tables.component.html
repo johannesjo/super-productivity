@@ -2,7 +2,7 @@
          class="project-section">
   <div *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
        class="project-title"
-       [style.border-color]="project.theme.primary">
+       [style.border-color]="project.color">
     <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
     <div>{{project.timeSpentToday|msToString}}</div>

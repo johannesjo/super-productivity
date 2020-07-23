@@ -13,7 +13,10 @@ import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
 
-interface ProjectWithTasks extends Project {
+interface ProjectWithTasks {
+  id?: string | null;
+  title?: string;
+  color?: string;
   tasks: Task[];
   timeSpentToday: number;
 }
@@ -43,22 +46,25 @@ export class TaskSummaryTablesComponent {
   projectIds$: BehaviorSubject<string[]> = new BehaviorSubject([]);
   projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
     withLatestFrom(this._projectService.list$),
-    map(([pids, projects]) => pids.map((pid) => {
-      const project = projects.find(p => p.id === pid);
-      if (!project) {
-        throw new Error('Project not found');
+    map(([pids, projects]) => {
+      const mappedProjects = pids.map((pid) => {
+        const project = projects.find(p => p.id === pid);
+        if (!project) {
+          throw new Error('Project not found');
+        }
+        return this._mapToProjectWithTasks(project);
+      });
+      console.log(this.flatTasks);
+
+      if (this.flatTasks.find(task => !task.projectId)) {
+        const noProjectProject: ProjectWithTasks = this._mapToProjectWithTasks({
+          id: null,
+          title: 'No Project',
+        });
+        return [...mappedProjects, noProjectProject];
       }
-
-      // NOTE: this only works, because projectIds is only triggered before assign flatTasks
-      const tasks = this.flatTasks.filter(task => task.projectId === project.id);
-      const timeSpentToday = tasks.reduce((acc, task) =>
-        (acc + (task.parentId
-            ? 0
-            : task.timeSpentOnDay[this.dayStr])
-        ), 0);
-
-      return {...project, tasks, timeSpentToday};
-    }))
+      return mappedProjects;
+    })
   );
 
   constructor(
@@ -94,5 +100,22 @@ export class TaskSummaryTablesComponent {
 
   trackById(i: number, item: Project) {
     return item.id;
+  }
+
+  private _mapToProjectWithTasks(project: Project | { id: string | null; title: string }): ProjectWithTasks {
+    // NOTE: this only works, because projectIds is only triggered before assign flatTasks
+    const tasks = this.flatTasks.filter(task => task.projectId === project.id);
+    const timeSpentToday = tasks.reduce((acc, task) =>
+      (acc + (task.parentId
+          ? 0
+          : task.timeSpentOnDay[this.dayStr])
+      ), 0);
+    return {
+      id: project.id,
+      title: project.title,
+      color: (project as Project)?.theme?.primary,
+      tasks,
+      timeSpentToday
+    };
   }
 }

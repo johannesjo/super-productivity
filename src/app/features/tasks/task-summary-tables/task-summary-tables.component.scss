@@ -10,7 +10,14 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  border-bottom: 2px solid #000000;
+  border-bottom: 2px solid;
+
+  @include lightTheme {
+    border-color: $light-theme-extra-border-color;
+  }
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+  }
 
   mat-icon {
     margin: 0 $s/2;
