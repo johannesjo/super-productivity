@@ -68,8 +68,6 @@ export class TaskSummaryTablesComponent {
     private readonly _worklogService: WorklogService,
     private readonly _projectService: ProjectService,
   ) {
-    this.projectIds$.subscribe((v) => console.log('projectIds$', v));
-    this.projects$.subscribe((v) => console.log('projects$', v));
   }
 
   onTaskSummaryEdit() {
@@ -89,7 +87,9 @@ export class TaskSummaryTablesComponent {
 
   roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp: boolean = false) {
     const taskIds = this.flatTasks.map(task => task.id);
-    this._taskService.roundTimeSpentForDay(this.dayStr, taskIds, roundTo, isRoundUp);
+    this._taskService.roundTimeSpentForDay({
+      day: this.dayStr, taskIds, roundTo, isRoundUp
+    });
   }
 
   trackById(i: number, item: Project) {

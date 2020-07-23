@@ -428,7 +428,9 @@ export class TaskService {
     this._store.dispatch(new RestoreTask({task, subTasks}));
   }
 
-  roundTimeSpentForDay(day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean = false) {
+  roundTimeSpentForDay({day, taskIds, roundTo, isRoundUp = false}: {
+    day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean
+  }) {
     this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp}));
   }
 
