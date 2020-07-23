@@ -3,13 +3,18 @@
 .project-section {
   margin-top: $s*2;
   margin-bottom: $s*3;
+}
 
-  h2 {
-    margin-bottom: $s;
+.project-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  border-bottom: 2px solid #000000;
 
-    > span,
-    > mat-icon {
-      vertical-align: middle;
-    }
+  h2,
+  h3 {
+    margin: 0;
+    padding: 0;
   }
 }

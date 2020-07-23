@@ -1,9 +1,11 @@
-
 <section *ngFor="let project of (projects$|async); trackBy: trackById"
          class="project-section">
-  <h2><span>{{project.title}} 3:12</span>
+  <div class="project-title"
+       [style.border-color]="project.theme.primary">
+    <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
-  </h2>
+    <div>3:12</div>
+  </div>
   <task-summary-table (updated)="onTaskSummaryEdit()"
                       [day]="dayStr"
                       [flatTasks]="flatTasks"></task-summary-table>
