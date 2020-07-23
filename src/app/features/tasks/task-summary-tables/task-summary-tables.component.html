@@ -1,14 +1,16 @@
 <section *ngFor="let project of (projects$|async); trackBy: trackById"
          class="project-section">
-  <div class="project-title"
+  <div *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
+       class="project-title"
        [style.border-color]="project.theme.primary">
     <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
-    <div>3:12</div>
+    <div>{{project.timeSpentToday|msToString}}</div>
   </div>
+
   <task-summary-table (updated)="onTaskSummaryEdit()"
                       [day]="dayStr"
-                      [flatTasks]="flatTasks"></task-summary-table>
+                      [flatTasks]="project.tasks"></task-summary-table>
   <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
     <button [matMenuTriggerFor]="roundTimeActions"
             [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate"

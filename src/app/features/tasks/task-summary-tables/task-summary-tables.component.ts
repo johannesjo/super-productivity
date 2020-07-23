@@ -13,6 +13,11 @@ import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
 
+interface ProjectWithTasks extends Project {
+  tasks: Task[];
+  timeSpentToday: number;
+}
+
 @Component({
   selector: 'task-summary-tables',
   templateUrl: './task-summary-tables.component.html',
@@ -36,14 +41,23 @@ export class TaskSummaryTablesComponent {
   flatTasks: Task[] = [];
 
   projectIds$: BehaviorSubject<string[]> = new BehaviorSubject([]);
-  projects$: Observable<Project[]> = this.projectIds$.pipe(
+  projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
     withLatestFrom(this._projectService.list$),
     map(([pids, projects]) => pids.map((pid) => {
       const project = projects.find(p => p.id === pid);
       if (!project) {
         throw new Error('Project not found');
       }
-      return project;
+
+      // NOTE: this only works, because projectIds is only triggered before assign flatTasks
+      const tasks = this.flatTasks.filter(task => task.projectId === project.id);
+      const timeSpentToday = tasks.reduce((acc, task) =>
+        (acc + (task.parentId
+            ? 0
+            : task.timeSpentOnDay[this.dayStr])
+        ), 0);
+
+      return {...project, tasks, timeSpentToday};
     }))
   );
 
