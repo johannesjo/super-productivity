@@ -5,6 +5,7 @@ import * as StackTrace from 'stacktrace-js';
 import * as pThrottle from 'p-throttle';
 import * as newGithubIssueUrl from 'new-github-issue-url';
 import { remote } from 'electron';
+import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 
 let isWasErrorAlertCreated = false;
 
@@ -126,8 +127,8 @@ const getGithubUrl = (errEscaped: string, stackTrace: string): string => {
   return newGithubIssueUrl({
     user: 'johannesjo',
     repo: 'super-productivity',
-    body: getGithubIssueErrorMarkdown(stackTrace),
     title: errEscaped,
+    body: getGithubIssueErrorMarkdown(stackTrace),
   });
 };
 
@@ -164,5 +165,10 @@ ${code}
 
 ### Meta Info
 ${getSimpleMeta()}
+
+### Actions Before Error
+${code}
+${getBeforeLastErrorActionLog().join(' \n')}
+${code}
 `;
 };

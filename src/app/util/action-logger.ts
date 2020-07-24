@@ -24,7 +24,15 @@ export const actionLogger = (action: any) => {
   saveToRealLs(LS_ACTION_LOG, current);
 };
 
-export const saveBeforeLastError = () => {
+export const saveBeforeLastErrorActionLog = () => {
   const current = getActionLog();
+  console.log('Last actions before error:', current);
   saveToRealLs(LS_ACTION_BEFORE_LAST_ERROR_LOG, current);
+};
+
+export const getBeforeLastErrorActionLog = (): string[] => {
+  const current = loadFromRealLs(LS_ACTION_BEFORE_LAST_ERROR_LOG);
+  return Array.isArray(current)
+    ? current
+    : [];
 };

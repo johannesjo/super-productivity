@@ -5,6 +5,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../electron/electron.service';
 import { createErrorAlert, getSimpleMeta, isHandledError, logAdvancedStacktrace } from './global-error-handler.util';
 import { remote } from 'electron';
+import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
@@ -28,6 +29,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     // if not our custom error handler we have a critical error on our hands
     if (!isHandledError(err)) {
       const errorStr = this._getErrorStr(err) || errStr;
+      saveBeforeLastErrorActionLog();
 
       // NOTE: dom exceptions will break all rendering that's why
       if (err.constructor && err.constructor === DOMException) {
