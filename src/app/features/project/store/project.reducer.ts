@@ -72,7 +72,7 @@ export const selectProjectById = createSelector(
       throw new Error('No project id given');
     }
     if (!p) {
-      throw new Error('Project not found');
+      throw new Error(`Project ${props.id} not found`);
     }
     return p;
   }
