@@ -107,12 +107,15 @@ export class WorklogService {
   }
 
   // TODO this is not waiting for worklog data
-  getTaskListForRange$(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays: boolean = false): Observable<WorklogTask[]> {
+  getTaskListForRange$(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays: boolean = false, projectId?: string | null): Observable<WorklogTask[]> {
+    const isProjectIdProvided: boolean = !!projectId || projectId === null;
+
     return this.worklogTasks$.pipe(
       map(tasks => {
         tasks = tasks.filter((task: WorklogTask) => {
           const taskDate = new Date(task.dateStr);
-          return (taskDate >= rangeStart && taskDate <= rangeEnd);
+          return (!isProjectIdProvided || task.projectId === projectId)
+            && (taskDate >= rangeStart && taskDate <= rangeEnd);
         });
 
         if (isFilterOutTimeSpentOnOtherDays) {

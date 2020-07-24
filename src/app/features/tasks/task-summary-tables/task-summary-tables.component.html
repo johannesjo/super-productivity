@@ -18,7 +18,7 @@
       <mat-icon>restore</mat-icon>
       {{T.PDS.ROUND_TIME_SPENT|translate}}
     </button>
-    <button (click)="showExportModal()"
+    <button (click)="showExportModal(project.id)"
             *ngIf="isForToday"
             mat-button>
       <mat-icon>call_made</mat-icon>

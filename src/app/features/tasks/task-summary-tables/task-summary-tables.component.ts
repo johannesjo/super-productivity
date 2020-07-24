@@ -80,11 +80,12 @@ export class TaskSummaryTablesComponent {
     this._worklogService.refreshWorklog();
   }
 
-  showExportModal() {
+  showExportModal(projectId?: string | null) {
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
       panelClass: 'big',
       data: {
+        projectId,
         rangeStart: new Date().setHours(0, 0, 0, 0),
         rangeEnd: new Date().setHours(23, 59, 59),
       }
