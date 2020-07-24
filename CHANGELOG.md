@@ -1,3 +1,30 @@
+## [5.5.2](https://github.com/johannesjo/super-productivity/compare/v5.5.1...v5.5.2) (2020-07-24)
+
+
+### Bug Fixes
+
+* also migrate old keyboard values [#453](https://github.com/johannesjo/super-productivity/issues/453) [#456](https://github.com/johannesjo/super-productivity/issues/456) [#457](https://github.com/johannesjo/super-productivity/issues/457) ([16ad187](https://github.com/johannesjo/super-productivity/commit/16ad1872c5e1cd39ab6dcc1845a0883b97c76b30))
+* cannot read property 'includes' of undefined [#453](https://github.com/johannesjo/super-productivity/issues/453) [#456](https://github.com/johannesjo/super-productivity/issues/456) [#457](https://github.com/johannesjo/super-productivity/issues/457) ([0f4d2b7](https://github.com/johannesjo/super-productivity/commit/0f4d2b7550b225bfefca40245394775e7bb8fad9))
+* remove test for now ([dabdae3](https://github.com/johannesjo/super-productivity/commit/dabdae302c80384a6958e396b722426049275bb2))
+
+
+### Features
+
+* improve error ([a8be825](https://github.com/johannesjo/super-productivity/commit/a8be825db02c76f7ebcf03f1540d624f6549e70f))
+* **dailySummary:** add translation for missing project ([0b0e7da](https://github.com/johannesjo/super-productivity/commit/0b0e7da553fe02163e87ada3db9707db19ed888d))
+* **dailySummary:** allow export based on project ([c2eabc6](https://github.com/johannesjo/super-productivity/commit/c2eabc67ef306cb50353a2c3dd4f1fe01b1c6d4b))
+* **dailySummary:** also show no project tasks ([96258e1](https://github.com/johannesjo/super-productivity/commit/96258e12934650594ca0457091b4795b6c481424))
+* **dailySummary:** extract summary tables to their own component ([3162ecd](https://github.com/johannesjo/super-productivity/commit/3162ecd5a2d8eb75f2239b9bb37889e854bebd0c))
+* **dailySummary:** limit round time to single list ([55c1816](https://github.com/johannesjo/super-productivity/commit/55c181640fb838ca5d4c546d536b4bc2727e28f3))
+* **dailySummary:** make display values work for different projects ([b668a21](https://github.com/johannesjo/super-productivity/commit/b668a218c31c08a0279df7aa46d369ff20d61368))
+* **dailySummary:** order projects like in the menu ([4fde55e](https://github.com/johannesjo/super-productivity/commit/4fde55e6ab9d7f3e70aa57de1efe01b0a1dea2fe))
+* **dailySummary:** outline ui ([6ca5f9f](https://github.com/johannesjo/super-productivity/commit/6ca5f9fddc2fb4693567a2c8688733231998535c))
+* **dailySummary:** polish ui ([91b1b45](https://github.com/johannesjo/super-productivity/commit/91b1b450439c9d24723b8dd9b97bdfc70d0205aa))
+* **i18n:** update translations ([4e1befd](https://github.com/johannesjo/super-productivity/commit/4e1befdf1d5751304fe309e3dcc90055625e2d15))
+* **jira:** improve text for wonky cookie mode modal ([249346a](https://github.com/johannesjo/super-productivity/commit/249346aa9e6f1d594974fe669c3472b7124007d1))
+
+
+
 ## [5.5.1](https://github.com/johannesjo/super-productivity/compare/v5.5.0...v5.5.1) (2020-07-22)
 
 
