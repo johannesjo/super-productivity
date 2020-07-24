@@ -428,8 +428,10 @@ export class TaskService {
     this._store.dispatch(new RestoreTask({task, subTasks}));
   }
 
-  roundTimeSpentForDay(day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean = false) {
-    this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp}));
+  roundTimeSpentForDay({day, taskIds, roundTo, isRoundUp = false, projectId}: {
+    day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean, projectId?: string | null
+  }) {
+    this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp, projectId}));
   }
 
   startTaskFromOtherContext$(taskId: string, workContextType: WorkContextType, workContextId: string): Observable<any> {

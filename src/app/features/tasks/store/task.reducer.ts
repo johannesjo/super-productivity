@@ -409,9 +409,14 @@ export function taskReducer(
     }
 
     case TaskActionTypes.RoundTimeSpentForDay: {
-      const {day, taskIds, isRoundUp, roundTo} = (action as RoundTimeSpentForDay).payload;
-      const idsToUpdateDirectly: string[] = taskIds.filter(
-        id => (state.entities[id] as Task).subTaskIds.length === 0 || !!(state.entities[id] as Task).parentId
+      const {day, taskIds, isRoundUp, roundTo, projectId} = (action as RoundTimeSpentForDay).payload;
+      const isLimitToProject: boolean = !!projectId || projectId === null;
+
+      const idsToUpdateDirectly: string[] = taskIds.filter(id => {
+          const task: Task = state.entities[id] as Task;
+          return (task.subTaskIds.length === 0 || !!task.parentId)
+            && (!isLimitToProject || task.projectId === projectId);
+        }
       );
       const subTaskIds: string[] = idsToUpdateDirectly.filter(id => !!(state.entities[id] as Task).parentId);
       const parentTaskToReCalcIds: string[] = unique<string>(subTaskIds

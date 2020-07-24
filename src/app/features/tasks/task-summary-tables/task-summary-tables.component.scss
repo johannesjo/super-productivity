@@ -1,0 +1,31 @@
+@import "../../../../variables";
+
+.project-section {
+  margin-top: $s;
+  margin-bottom: $s*3;
+}
+
+.project-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  border-bottom: 2px solid;
+
+  @include lightTheme {
+    border-color: $light-theme-extra-border-color;
+  }
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+  }
+
+  mat-icon {
+    margin: 0 $s/2;
+  }
+
+  h2,
+  h3 {
+    margin: 0;
+    padding: 0;
+  }
+}

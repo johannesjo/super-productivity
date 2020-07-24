@@ -832,7 +832,8 @@
     "SAVE": "Save",
     "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "Update"
+    "UPDATE": "Update",
+    "WITHOUT_PROJECT": "Without Project"
   },
   "GCF": {
     "AUTO_BACKUPS": {

@@ -59,6 +59,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   @Input() rangeEnd?: Date;
   @Input() isWorklogExport?: boolean;
   @Input() isShowClose?: boolean;
+  @Input() projectId?: string | null;
 
   @Output() cancel: EventEmitter<void> = new EventEmitter();
 
@@ -147,7 +148,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     this._subs.add(
       combineLatest([
-        this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true),
+        this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true, this.projectId),
         this._workContextService.activeWorkContext$,
       ])
         .pipe(

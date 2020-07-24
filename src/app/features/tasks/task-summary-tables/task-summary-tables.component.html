@@ -1,0 +1,59 @@
+<section *ngFor="let project of (projects$|async); trackBy: trackById"
+         class="project-section">
+  <div *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
+       class="project-title"
+       [style.border-color]="project.color">
+    <h3>{{project.title}}</h3>
+    <mat-icon>timer</mat-icon>
+    <div>{{project.timeSpentToday|msToString}}</div>
+  </div>
+
+  <task-summary-table (updated)="onTaskSummaryEdit()"
+                      [day]="dayStr"
+                      [flatTasks]="project.tasks"></task-summary-table>
+  <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
+    <button [matMenuTriggerFor]="roundTimeActions"
+            [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate"
+            mat-button>
+      <mat-icon>restore</mat-icon>
+      {{T.PDS.ROUND_TIME_SPENT|translate}}
+    </button>
+    <button (click)="showExportModal(project.id)"
+            *ngIf="isForToday"
+            mat-button>
+      <mat-icon>call_made</mat-icon>
+      {{T.PDS.EXPORT_TASK_LIST|translate}}
+    </button>
+
+    <mat-menu #roundTimeActions="matMenu">
+      <button mat-menu-item
+              style="color: red;">
+        {{T.PDS.ROUND_TIME_WARNING|translate}}
+      </button>
+      <button (click)="roundTimeForTasks(project.id,'5M')"
+              mat-menu-item>
+        {{T.PDS.ROUND_5M|translate}}
+      </button>
+      <button (click)="roundTimeForTasks(project.id,'5M', true)"
+              mat-menu-item>
+        {{T.PDS.ROUND_UP_5M|translate}}
+      </button>
+      <button (click)="roundTimeForTasks(project.id,'QUARTER')"
+              mat-menu-item>
+        {{T.PDS.ROUND_15M|translate}}
+      </button>
+      <button (click)="roundTimeForTasks(project.id,'QUARTER', true)"
+              mat-menu-item>
+        {{T.PDS.ROUND_UP_15M|translate}}
+      </button>
+      <button (click)="roundTimeForTasks(project.id,'HALF')"
+              mat-menu-item>
+        {{T.PDS.ROUND_30M|translate}}
+      </button>
+      <button (click)="roundTimeForTasks(project.id,'HALF', true)"
+              mat-menu-item>
+        {{T.PDS.ROUND_UP_30M|translate}}
+      </button>
+    </mat-menu>
+  </div>
+</section>

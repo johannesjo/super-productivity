@@ -11,10 +11,7 @@ import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.
 import { filter, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import * as moment from 'moment';
-import { RoundTimeOption } from '../../features/project/project.model';
 import { T } from '../../t.const';
-import { WorklogService } from '../../features/worklog/worklog.service';
-import { DialogWorklogExportComponent } from '../../features/worklog/dialog-worklog-export/dialog-worklog-export.component';
 import { ElectronService } from '../../core/electron/electron.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { DropboxSyncService } from '../../features/dropbox/dropbox-sync.service';
@@ -42,6 +39,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   selectedTabIndex: number = 0;
   isForToday: boolean = true;
 
+  // TODO remove one?
   dayStr: string = getWorklogStr();
 
   dayStr$: Observable<string> = this._activatedRoute.paramMap.pipe(
@@ -97,7 +95,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _router: Router,
     private readonly _matDialog: MatDialog,
     private readonly _electronService: ElectronService,
-    private readonly _worklogService: WorklogService,
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
   ) {
@@ -132,17 +129,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   onEvaluationSave() {
     this.selectedTabIndex = 1;
-  }
-
-  showExportModal() {
-    this._matDialog.open(DialogWorklogExportComponent, {
-      restoreFocus: true,
-      panelClass: 'big',
-      data: {
-        rangeStart: new Date().setHours(0, 0, 0, 0),
-        rangeEnd: new Date().setHours(23, 59, 59),
-      }
-    });
   }
 
   async finishDay() {
@@ -191,20 +177,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
-  async roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp: boolean = false) {
-    const taskIds = await this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
-      map(tasks => tasks.map(task => task.id)),
-      take(1),
-    ).toPromise();
-    this._taskService.roundTimeSpentForDay(this.dayStr, taskIds, roundTo, isRoundUp);
-  }
-
   onTabIndexChange(i: number) {
     this.selectedTabIndex = i;
-  }
-
-  onTaskSummaryEdit() {
-    this._worklogService.refreshWorklog();
   }
 
   private async _finishDayForGood(cb?: any) {
