@@ -12,6 +12,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
+import { TranslateService } from '@ngx-translate/core';
 
 interface ProjectWithTasks {
   id?: string | null;
@@ -44,6 +45,8 @@ export class TaskSummaryTablesComponent {
   flatTasks: Task[] = [];
 
   projectIds$: BehaviorSubject<string[]> = new BehaviorSubject([]);
+
+  // NOTE: the order is like the ones in the menu
   projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
     withLatestFrom(this._projectService.list$),
     map(([pids, projects]) => {
@@ -54,12 +57,11 @@ export class TaskSummaryTablesComponent {
         }
         return this._mapToProjectWithTasks(project);
       });
-      console.log(this.flatTasks);
 
       if (this.flatTasks.find(task => !task.projectId)) {
         const noProjectProject: ProjectWithTasks = this._mapToProjectWithTasks({
           id: null,
-          title: 'No Project',
+          title: this._translateService.instant(T.G.WITHOUT_PROJECT),
         });
         return [...mappedProjects, noProjectProject];
       }
@@ -70,6 +72,7 @@ export class TaskSummaryTablesComponent {
   constructor(
     public readonly workContextService: WorkContextService,
     private readonly _taskService: TaskService,
+    private readonly _translateService: TranslateService,
     private readonly _matDialog: MatDialog,
     private readonly _worklogService: WorklogService,
     private readonly _projectService: ProjectService,
