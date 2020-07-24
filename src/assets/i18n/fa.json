@@ -7,7 +7,7 @@
     },
     "B_OFFLINE": "شما از اینترنت جدا هستید. همگام سازی و درخواست داده های ارائه دهنده مشکل کار نمی کند.",
     "D_INITIAL": {
-      "TITLE": ""
+      "TITLE": "به v{{nr}}خوش آمدید "
     },
     "UPDATE_MAIN_MODEL": "سوپر بهره وری به روزرسانی اساسی را بدست آورده است! برخی از مهاجرت ها برای داده های شما مورد نیاز است. لطفا توجه داشته باشید که این داده های شما را با نسخه های قدیمی تر برنامه ناسازگار می کند.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "هیچ به روزرسانی مدل انتخاب نشده است. لطفاً توجه داشته باشید که اگر نمی خواهید به روزرسانی مدل را انجام دهید ، به آخرین نسخه پایین بروید.",
@@ -138,7 +138,7 @@
       "S": {
         "ERR_NETWORK": "گیت هاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
         "ERR_NOT_CONFIGURED": "گیت هاب: به درستی پیکربندی نشده است",
-        "ERR_UNKNOWN": "",
+        "ERR_UNKNOWN": "Github: خطای ناشناخته{{errorMsg}} {{statusCode}} . محدودیت نرخ Api بیش از?",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
@@ -180,7 +180,7 @@
       "S": {
         "ERR_NETWORK": "گیت لاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
         "ERR_NOT_CONFIGURED": "گیت لاب: به درستی پیکربندی نشده است",
-        "ERR_UNKNOWN": "",
+        "ERR_UNKNOWN": "Gitlab: خطای ناشناخته {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Imported {{issuesLength}} new issues from git to backlog",
         "IMPORTED_SINGLE_ISSUE": "Gitlab: Imported issue \"{{issueText}}\" from git to backlog",
         "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "اجازه گواهی خود امضا شده",
         "HOST": "آدرس جیرای شما (مثلا: http://my-jira.ir:1234)",
         "PASSWORD": "توکن / کلمه عبور",
-        "USER_NAME": "ایمیل / نام کاربری"
+        "USER_NAME": "ایمیل / نام کاربری",
+        "WONKY_COOKIE_MODE": "تأیید هویت کوکی Wonky Cookie (فقط برنامه دسک تاپ)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "تنظیمات پیشرفته",
@@ -692,7 +693,7 @@
       "S": {
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
-        "FOUND_MOVE_FROM_OTHER_LIST": "",
+        "FOUND_MOVE_FROM_OTHER_LIST": " <strong>کار اضافه شده{{title}}</strong> از <strong>{{contextTitle}}</strong> به لیست فعلی",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "شما در حال تلاش برای حذف آخرین برچسب یک کار غیر پروژه هستید. این مجاز نیست!",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
@@ -831,12 +832,14 @@
     "SAVE": "ذخیره",
     "TITLE": "عنوان",
     "UNDO": "Undo",
-    "UPDATE": "بروز رسانی"
+    "UPDATE": "بروز رسانی",
+    "WITHOUT_PROJECT": "بدون پروژه"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
       "LABEL_IS_ENABLED": "فعال کردن پشتیبان گیری خودکار",
+      "LOCATION_INFO": "",
       "TITLE": "پشتیبان گیری خودکار"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "هنگام علامت گذاری جریان ، به عنوان انجام کار ، ردیابی کار بعدی را شروع کنید",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
+      "IS_DISABLE_INITIAL_DIALOG": "گفتگوی اطلاعات اولیه را غیرفعال کنید (ممکن است به روزرسانی های مهم را از دست دهید!)",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "به امروز اضافه کنید و یادآوری را حذف کنید",
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
     "START_TASK": "Start task now and remove reminder"
   },

@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "Permitir certificado autofirmado",
         "HOST": "Host (por ejemplo, http://my-host.de:1234)",
         "PASSWORD": "Token / Contraseña",
-        "USER_NAME": "Email / Nombre de usuario"
+        "USER_NAME": "Email / Nombre de usuario",
+        "WONKY_COOKIE_MODE": "Autenticación de recuperación de cookies Wonky (solo aplicación de escritorio)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Configuración avanzada",
@@ -831,12 +832,14 @@
     "SAVE": "Guardar",
     "TITLE": "Título",
     "UNDO": "Deshacer",
-    "UPDATE": "Actualizar"
+    "UPDATE": "Actualizar",
+    "WITHOUT_PROJECT": "Sin proyecto"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "Guarde automáticamente todos los datos en la carpeta de su aplicación para tenerlos listos en caso de que algo salga mal.",
       "LABEL_IS_ENABLED": "Habilitar copias de seguridad automáticas",
+      "LOCATION_INFO": "",
       "TITLE": "Copias de seguridad automáticas"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "Comience a rastrear la siguiente tarea cuando marque actual como hecha",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación",
       "IS_DARK_MODE": "Modo oscuro",
+      "IS_DISABLE_INITIAL_DIALOG": "Deshabilite el diálogo de información inicial (¡podría perderse actualizaciones importantes!)",
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace sobre el encabezado principal (solo para escritorio)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
       "IS_TURN_OFF_MARKDOWN": "Desactiva el análisis de descuento para notas",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "Agregar a hoy y eliminar recordatorio",
     "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
     "START_TASK": "Inicie la tarea ahora y elimine el recordatorio"
   },

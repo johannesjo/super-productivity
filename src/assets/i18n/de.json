@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "Selbstsigniertes Zertifikat zulassen",
         "HOST": "Host (z. B .: http://my-host.de:1234)",
         "PASSWORD": "Token / Passwort",
-        "USER_NAME": "E-Mail / Benutzername"
+        "USER_NAME": "E-Mail / Benutzername",
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback-Authentifizierung (nur Desktop-App)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Erweiterte Konfiguration",
@@ -831,12 +832,14 @@
     "SAVE": "Speichern",
     "TITLE": "Titel",
     "UNDO": "Rückgängig machen",
-    "UPDATE": "Aktualisieren"
+    "UPDATE": "Aktualisieren",
+    "WITHOUT_PROJECT": "Ohne Projekt"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "Speichern Sie alle Daten automatisch in Ihrem App-Ordner, um sie für den Fall, dass ein Fehler auftritt, bereit zu halten.",
       "LABEL_IS_ENABLED": "Aktivieren Sie automatische Sicherungen",
+      "LOCATION_INFO": "",
       "TITLE": "Automatische Backups"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der Verfolgung der nächsten Aufgabe, wenn Sie den aktuellen als erledigt markieren",
       "IS_CONFIRM_BEFORE_EXIT": "Bestätigen Sie, bevor Sie die App beenden",
       "IS_DARK_MODE": "Dark Mode",
+      "IS_DISABLE_INITIAL_DIALOG": "Deaktivieren Sie den anfänglichen Informationsdialog (möglicherweise verpassen Sie wichtige Updates!)",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "Zum heutigen Tag hinzufügen und Erinnerung entfernen",
     "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
     "START_TASK": "Aufgabe jetzt starten und Erinnerung entfernen"
   },

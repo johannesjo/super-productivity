@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "Consenti certificato autofirmato",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username"
+        "USER_NAME": "Email / Username",
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (solo app desktop)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Configurazione avanzata",
@@ -831,12 +832,14 @@
     "SAVE": "Salva",
     "TITLE": "Titolo",
     "UNDO": "Annulla",
-    "UPDATE": "Aggiorna"
+    "UPDATE": "Aggiorna",
+    "WITHOUT_PROJECT": "Senza progetto"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "Salva automaticamente tutti i dati sulla cartella dell'applicazione in modo da averli pronti nel caso succedesse qualcosa.",
       "LABEL_IS_ENABLED": "Abilita backup automatici",
+      "LOCATION_INFO": "",
       "TITLE": "Backup automatici"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "Inizia a tracciare l'attività successiva quando si contrassegna corrente come fatto",
       "IS_CONFIRM_BEFORE_EXIT": "Conferma prima di uscire dall'applicazione",
       "IS_DARK_MODE": "Tema scuro",
+      "IS_DISABLE_INITIAL_DIALOG": "Disabilita la finestra di dialogo delle informazioni iniziali (potresti perdere importanti aggiornamenti!)",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "Aggiungi a oggi e rimuovi promemoria",
     "NO_SCHEDULED": "Non ci sono task pianificati al momento. Puoi pianificare un task scegliendo \"Pianifica task\" nel menu di contesto. Per aprirlo clicca i tre puntini sulla destra dei task.",
     "START_TASK": "Inizia il task ora e rimuovi promemoria"
   },

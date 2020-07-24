@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "자체 서명 된 인증서 허용",
         "HOST": "호스트 (예 : http://my-host.de:1234)",
         "PASSWORD": "토큰 / 비밀번호",
-        "USER_NAME": "이메일 / 사용자 이름"
+        "USER_NAME": "이메일 / 사용자 이름",
+        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (데스크톱 앱만 해당)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "고급 구성",
@@ -831,12 +832,14 @@
     "SAVE": "구하다",
     "TITLE": "표제",
     "UNDO": "끄르다",
-    "UPDATE": "최신 정보"
+    "UPDATE": "최신 정보",
+    "WITHOUT_PROJECT": "프로젝트없이"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "뭔가 잘못되었을 때를 대비하여 모든 데이터를 앱 폴더에 자동 저장하십시오.",
       "LABEL_IS_ENABLED": "자동 백업 사용",
+      "LOCATION_INFO": "",
       "TITLE": "자동 백업"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
+      "IS_DISABLE_INITIAL_DIALOG": "초기 정보 대화 상자를 비활성화합니다 (중요한 업데이트가 누락 될 수 있습니다).",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "오늘 추가하고 알림 제거",
     "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",
     "START_TASK": "지금 작업을 시작하고 알림 제거"
   },

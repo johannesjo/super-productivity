@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "自己署名証明書を許可する",
         "HOST": "ホスト（例：http://my-host.de:1234）",
         "PASSWORD": "トークン/パスワード",
-        "USER_NAME": "電子メール/ユーザー名"
+        "USER_NAME": "電子メール/ユーザー名",
+        "WONKY_COOKIE_MODE": "Wonky Cookieフォールバック認証（デスクトップアプリのみ）"
       },
       "FORM_SECTION": {
         "ADV_CFG": "詳細設定",
@@ -831,12 +832,14 @@
     "SAVE": "保存する",
     "TITLE": "タイトル",
     "UNDO": "元に戻す",
-    "UPDATE": "更新"
+    "UPDATE": "更新",
+    "WITHOUT_PROJECT": "プロジェクトなし"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "問題が発生した場合に備えて、すべてのデータをアプリフォルダに自動保存して準備します。",
       "LABEL_IS_ENABLED": "自動バックアップを有効にする",
+      "LOCATION_INFO": "",
       "TITLE": "自動バックアップ"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "現在の完了マークを付けたときに次のタスクの追跡を開始する",
       "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
       "IS_DARK_MODE": "ダークモード",
+      "IS_DISABLE_INITIAL_DIALOG": "初期情報ダイアログを無効にする（重要な更新を見逃す可能性があります！）",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "今日に追加してリマインダーを削除",
     "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
     "START_TASK": "今すぐタスクを開始してリマインダーを削除"
   },

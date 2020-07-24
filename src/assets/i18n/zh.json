@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "允许自签名证书",
         "HOST": "主机地址（例如：http://my-host.de:1234）",
         "PASSWORD": "令牌/密码",
-        "USER_NAME": "电子邮件/用户名"
+        "USER_NAME": "电子邮件/用户名",
+        "WONKY_COOKIE_MODE": "Wonky Cookie后备身份验证（仅桌面应用程序）"
       },
       "FORM_SECTION": {
         "ADV_CFG": "高级配置",
@@ -831,12 +832,14 @@
     "SAVE": "保存",
     "TITLE": "标题",
     "UNDO": "解开",
-    "UPDATE": "更新"
+    "UPDATE": "更新",
+    "WITHOUT_PROJECT": "没有专案"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "自动将所有数据保存到您的应用程序文件夹，以便在出现问题时准备好。",
       "LABEL_IS_ENABLED": "启用自动备份",
+      "LOCATION_INFO": "",
       "TITLE": "自动备份"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始跟踪下一个任务",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_DARK_MODE": "暗模式",
+      "IS_DISABLE_INITIAL_DIALOG": "禁用初始信息对话框（您可能会错过重要更新！）",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "超出时间估算时通知",
       "IS_TURN_OFF_MARKDOWN": "关闭标记的降价解析",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "添加到今天并删除提醒",
     "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",
     "START_TASK": "立即开始任务并删除提醒"
   },

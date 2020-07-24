@@ -315,7 +315,8 @@
         "ALLOW_SELF_SIGNED": "Kendinden imzalı sertifikaya izin ver",
         "HOST": "Ev sahibi (örneğin: http://my-host.de:1234)",
         "PASSWORD": "Jeton / Şifre",
-        "USER_NAME": "Email / Kullanıcı Adı"
+        "USER_NAME": "Email / Kullanıcı Adı",
+        "WONKY_COOKIE_MODE": "Wonky Cookie Yedek Kimlik Doğrulaması (yalnızca masaüstü uygulaması)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Gelişmiş Yapılandırma",
@@ -831,12 +832,14 @@
     "SAVE": "Kayıt etmek",
     "TITLE": "Başlık",
     "UNDO": "Geri alma",
-    "UPDATE": "Güncelleştirme"
+    "UPDATE": "Güncelleştirme",
+    "WITHOUT_PROJECT": "Proje Olmadan"
   },
   "GCF": {
     "AUTO_BACKUPS": {
       "HELP": "Bir şeyler ters gittiğinde, hazır olması için tüm verileri otomatik olarak uygulama klasörünüze kaydedin.",
       "LABEL_IS_ENABLED": "Otomatik yedeklemeyi etkinleştir",
+      "LOCATION_INFO": "",
       "TITLE": "Otomatik Yedeklemeler"
     },
     "EVALUATION": {
@@ -926,6 +929,7 @@
       "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
       "IS_DARK_MODE": "Karanlık modu",
+      "IS_DISABLE_INITIAL_DIALOG": "İlk bilgi iletişim kutusunu devre dışı bırak (önemli güncellemeleri kaçırabilirsiniz!)",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
@@ -1078,7 +1082,6 @@
     }
   },
   "SCHEDULE": {
-    "ADD_TO_TODAY": "Bugüne ekle ve hatırlatıcıyı kaldır",
     "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
     "START_TASK": "Görevi şimdi başlat ve anımsatıcıyı kaldır"
   },
