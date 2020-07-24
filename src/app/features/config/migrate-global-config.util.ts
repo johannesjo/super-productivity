@@ -3,7 +3,7 @@ import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 
-const MODEL_VERSION = 1;
+const MODEL_VERSION = 1.1;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
   if (!isMigrateModel(globalConfigState, MODEL_VERSION)) {
@@ -12,6 +12,9 @@ export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): 
 
   // NOTE: needs to run before default stuff
   globalConfigState = _migrateMiscToSeparateKeys(globalConfigState);
+
+  // NOTE: needs to run before default stuff
+  globalConfigState = _migrateUndefinedShortcutsToNull(globalConfigState);
 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
   globalConfigState = _extendConfigDefaults(globalConfigState);
@@ -79,6 +82,24 @@ const _extendConfigDefaults = (config: GlobalConfigState): GlobalConfigState => 
   return {
     ...DEFAULT_GLOBAL_CONFIG,
     ...config,
+  };
+};
+
+const _migrateUndefinedShortcutsToNull = (config: GlobalConfigState): GlobalConfigState => {
+  const keyboardCopy = {
+    // also add new keys
+    ...DEFAULT_GLOBAL_CONFIG.keyboard,
+    ...config.keyboard,
+  };
+  Object.keys(keyboardCopy).forEach(key => {
+    if (keyboardCopy[key] === false || keyboardCopy[key] === undefined) {
+      keyboardCopy[key] = null;
+    }
+  });
+
+  return {
+    ...config,
+    keyboard: keyboardCopy,
   };
 };
 
