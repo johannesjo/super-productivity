@@ -46,17 +46,13 @@ export class TaskSummaryTablesComponent {
 
   projectIds$: BehaviorSubject<string[]> = new BehaviorSubject([]);
 
-  // NOTE: the order is like the ones in the menu
   projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
     withLatestFrom(this._projectService.list$),
     map(([pids, projects]) => {
-      const mappedProjects = pids.map((pid) => {
-        const project = projects.find(p => p.id === pid);
-        if (!project) {
-          throw new Error('Project not found');
-        }
-        return this._mapToProjectWithTasks(project);
-      });
+      // NOTE: the order is like the ones in the menu
+      const mappedProjects = projects
+        .filter(project => pids.includes(project.id))
+        .map((project) => this._mapToProjectWithTasks(project));
 
       if (this.flatTasks.find(task => !task.projectId)) {
         const noProjectProject: ProjectWithTasks = this._mapToProjectWithTasks({
