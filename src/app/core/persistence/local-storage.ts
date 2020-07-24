@@ -1,4 +1,4 @@
-export const loadFromLs = (key: string): unknown => {
+export const loadFromRealLs = (key: string): unknown => {
   const serializedState = localStorage.getItem(key);
   if (!serializedState || serializedState === '') {
     return undefined;
@@ -6,7 +6,7 @@ export const loadFromLs = (key: string): unknown => {
   return JSON.parse(serializedState);
 };
 
-export const saveToLs = (key: string, state: { [key: string]: unknown }) => {
+export const saveToRealLs = (key: string, state: { [key: string]: unknown } | unknown[]) => {
   const serializedState = JSON.stringify(state);
   localStorage.setItem(key, serializedState);
 };

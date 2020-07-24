@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
+import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 import { LS_LOCAL_UI_HELPER } from '../../core/persistence/ls-keys.const';
 import { DOCUMENT } from '@angular/common';
 import { LocalUiHelperSettings } from './ui-helper.model';
@@ -87,11 +87,11 @@ export class UiHelperService {
   }
 
   private _getLocalUiHelperSettings(): LocalUiHelperSettings {
-    return loadFromLs(LS_LOCAL_UI_HELPER) as LocalUiHelperSettings || UI_LOCAL_HELPER_DEFAULT;
+    return loadFromRealLs(LS_LOCAL_UI_HELPER) as LocalUiHelperSettings || UI_LOCAL_HELPER_DEFAULT;
   }
 
   private _updateLocalUiHelperSettings(newCfg: Partial<LocalUiHelperSettings>) {
-    saveToLs(LS_LOCAL_UI_HELPER, {
+    saveToRealLs(LS_LOCAL_UI_HELPER, {
       ...this._getLocalUiHelperSettings(),
       ...newCfg,
     });
