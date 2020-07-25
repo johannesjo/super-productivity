@@ -6,7 +6,7 @@ import { isMigrateModel } from '../../util/model-version';
 const MODEL_VERSION = 1.1;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
-  if (!isMigrateModel(globalConfigState, MODEL_VERSION)) {
+  if (!isMigrateModel(globalConfigState, MODEL_VERSION, 'GlobalConfig')) {
     return globalConfigState;
   }
 

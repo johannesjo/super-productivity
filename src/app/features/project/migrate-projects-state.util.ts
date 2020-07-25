@@ -13,7 +13,7 @@ import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 const MODEL_VERSION = PROJECT_MODEL_VERSION;
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
-  if (!isMigrateModel(projectState, MODEL_VERSION)) {
+  if (!isMigrateModel(projectState, MODEL_VERSION, 'Project')) {
     return projectState;
   }
 

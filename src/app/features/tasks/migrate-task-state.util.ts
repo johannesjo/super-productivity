@@ -10,7 +10,7 @@ const MODEL_VERSION = 3.3333;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState): TaskState => {
-  if (!isMigrateModel(taskState, MODEL_VERSION, 'task')) {
+  if (!isMigrateModel(taskState, MODEL_VERSION, 'Task')) {
     return taskState;
   }
 
