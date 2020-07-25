@@ -138,7 +138,7 @@ export class PersistenceService {
     'obstruction',
   );
 
-  onAfterSave$: Subject<{ appDataKey: AllowedDBKeys, data: unknown, isDataImport: boolean, projectId?: string }> = new Subject();
+  onAfterSave$: Subject<{ appDataKey: AllowedDBKeys, data: unknown, isDataImport: boolean, isNoSyncChange: boolean, projectId?: string }> = new Subject();
   onAfterImport$: Subject<AppDataComplete> = new Subject();
 
   inMemoryComplete$: Observable<AppDataComplete> = merge(
@@ -173,7 +173,7 @@ export class PersistenceService {
   }
 
   async saveProjectArchive(data: ProjectArchive, isDataImport: boolean = false): Promise<unknown> {
-    return await this._saveToDb({dbKey: 'archivedProjects', data, isDataImport});
+    return await this._saveToDb({dbKey: 'archivedProjects', data, isDataImport, isNoSyncChange: false});
   }
 
   async loadArchivedProject(projectId: string): Promise<ProjectArchivedRelatedData> {
@@ -282,7 +282,7 @@ export class PersistenceService {
 
   async saveBackup(backup?: AppDataComplete): Promise<unknown> {
     const data: AppDataComplete = backup || await this.loadComplete();
-    return this._saveToDb({dbKey: LS_BACKUP, data, isDataImport: true});
+    return this._saveToDb({dbKey: LS_BACKUP, data, isDataImport: true, isNoSyncChange: true});
   }
 
   // NOTE: not including backup
@@ -393,11 +393,11 @@ export class PersistenceService {
       //   }
       //   return data;
       // },
-      saveState: (data: any, isDataImport: boolean = false) => {
+      saveState: (data: any, isDataImport: boolean = false, isNoSyncChange) => {
         if (data && data.ids && data.entities) {
           data = checkFixEntityStateConsistency(data, appDataKey);
         }
-        return this._saveToDb({dbKey: appDataKey, data, isDataImport});
+        return this._saveToDb({dbKey: appDataKey, data, isDataImport, isNoSyncChange});
       },
     };
     if (!isSkipPush) {
@@ -446,11 +446,12 @@ export class PersistenceService {
         projectId,
         legacyDBKey: this._makeProjectKey(projectId, lsKey)
       }).then(v => migrateFn(v, projectId)),
-      save: (projectId: string, data: any, isDataImport?: boolean) => this._saveToDb({
+      save: (projectId: string, data: any, isDataImport?: boolean, isNoSyncChange?: boolean) => this._saveToDb({
         dbKey: appDataKey,
         data,
         isDataImport,
-        projectId
+        projectId,
+        isNoSyncChange,
       }),
       remove: (projectId: string) => this._removeFromDb({dbKey: appDataKey, projectId}),
       ent: {
@@ -510,11 +511,12 @@ export class PersistenceService {
       : dbKey;
   }
 
-  private async _saveToDb({dbKey, data, isDataImport = false, projectId}: {
+  private async _saveToDb({dbKey, data, isDataImport = false, projectId, isNoSyncChange = false}: {
     dbKey: AllowedDBKeys;
     data: any;
     projectId?: string,
     isDataImport?: boolean,
+    isNoSyncChange?: boolean,
   }): Promise<any> {
     if (!this._isBlockSaving || isDataImport === true) {
       const idbKey = this._getIDBKey(dbKey, projectId);
@@ -526,7 +528,7 @@ export class PersistenceService {
         data
       });
 
-      this.onAfterSave$.next({appDataKey: dbKey, data, isDataImport, projectId});
+      this.onAfterSave$.next({appDataKey: dbKey, data, isDataImport, projectId, isNoSyncChange});
 
       return r;
     } else {
