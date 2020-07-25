@@ -64,12 +64,7 @@ import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 @Injectable()
 export class ProjectEffects {
-  saveToLs$: Observable<unknown> = this._store$.pipe(
-    // tap(() => console.log('SAVE')),
-    select(selectProjectFeatureState),
-    take(1),
-    switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
-  );
+
   @Effect({dispatch: false})
   syncProjectToLs$: Observable<unknown> = this._actions$
     .pipe(
@@ -94,16 +89,17 @@ export class ProjectEffects {
         moveTaskToBacklogListAuto.type,
         moveTaskToTodayListAuto.type,
       ),
-      tap((a) => {
+      switchMap((a) => {
         // exclude ui only actions
-        if (!([
+        if (([
           ProjectActionTypes.UpdateProjectWorkStart,
           ProjectActionTypes.UpdateProjectWorkEnd,
         ].includes(a.type as any))) {
-          this._persistenceService.updateLastLocalSyncModelChange.bind(this);
+          return this.saveToLs$(false);
+        } else {
+          return this.saveToLs$(true);
         }
       }),
-      switchMap(() => this.saveToLs$),
     );
   @Effect({dispatch: false})
   updateProjectStorageConditionalTask$: Observable<unknown> = this._actions$.pipe(
@@ -137,7 +133,7 @@ export class ProjectEffects {
         ? of(a)
         : EMPTY;
     }),
-    switchMap(() => this.saveToLs$),
+    switchMap(() => this.saveToLs$(true)),
   );
   @Effect({dispatch: false})
   updateProjectStorageConditional$: Observable<unknown> = this._actions$.pipe(
@@ -147,7 +143,7 @@ export class ProjectEffects {
       moveTaskDownInTodayList,
     ),
     filter((p) => p.workContextType === WorkContextType.PROJECT),
-    switchMap(() => this.saveToLs$),
+    switchMap(() => this.saveToLs$(true)),
   );
   @Effect()
   updateWorkStart$: any = this._actions$
@@ -548,6 +544,15 @@ export class ProjectEffects {
     if (cfgsToUpdate.length > 0) {
       this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, {projectId: null});
     }
+  }
+
+  private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
+    return this._store$.pipe(
+      // tap(() => console.log('SAVE')),
+      select(selectProjectFeatureState),
+      take(1),
+      switchMap((projectState) => this._persistenceService.project.saveState(projectState, {isSyncModelChange})),
+    );
   }
 }
 
