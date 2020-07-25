@@ -162,8 +162,7 @@ export class TaskRepeatCfgEffects {
   }
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]) {
-    this._persistenceService.updateLastLocalSyncModelChange();
-    this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState);
+    this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState, {isSyncModelChange: true});
   }
 
   private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string) {
@@ -182,7 +181,7 @@ export class TaskRepeatCfgEffects {
 
       if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
         tasksWithRepeatCfgId.forEach((task: any) => task.repeatCfgId = null);
-        this._persistenceService.taskArchive.saveState(newState);
+        this._persistenceService.taskArchive.saveState(newState, {isSyncModelChange: true});
       }
     });
   }

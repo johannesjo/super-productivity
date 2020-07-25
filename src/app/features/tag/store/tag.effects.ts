@@ -51,8 +51,7 @@ export class TagEffects {
   saveToLs$: Observable<unknown> = this._store$.pipe(
     select(selectTagFeatureState),
     take(1),
-    switchMap((tagState) => this._persistenceService.tag.saveState(tagState)),
-    tap(this._updateLastLocalSyncModelChange.bind(this)),
+    switchMap((tagState) => this._persistenceService.tag.saveState(tagState, {isSyncModelChange: true})),
   );
   updateTagsStorage$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(
@@ -255,9 +254,5 @@ export class TagEffects {
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _router: Router,
   ) {
-  }
-
-  private _updateLastLocalSyncModelChange() {
-    this._persistenceService.updateLastLocalSyncModelChange();
   }
 }

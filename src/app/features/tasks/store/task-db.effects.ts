@@ -47,8 +47,7 @@ export class TaskDbEffects {
       withLatestFrom(
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(([, taskState]) => this._saveToLs(taskState)),
-      tap(this._updateLastLocalSyncModelChange.bind(this)),
+      tap(([, taskState]) => this._saveToLs(taskState, true)),
     );
 
   @Effect({dispatch: false}) updateTaskUi$: any = this._actions$
@@ -68,11 +67,7 @@ export class TaskDbEffects {
     private _persistenceService: PersistenceService) {
   }
 
-  private _updateLastLocalSyncModelChange() {
-    this._persistenceService.updateLastLocalSyncModelChange();
-  }
-
-  private _saveToLs(taskState: TaskState) {
+  private _saveToLs(taskState: TaskState, isSyncModelChange: boolean = false) {
     this._persistenceService.task.saveState({
       ...taskState,
 
@@ -81,7 +76,7 @@ export class TaskDbEffects {
         ? null
         : taskState.selectedTaskId,
       currentTaskId: null,
-    });
+    }, {isSyncModelChange});
   }
 }
 

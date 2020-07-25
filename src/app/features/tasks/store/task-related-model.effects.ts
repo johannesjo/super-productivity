@@ -225,7 +225,7 @@ export class TaskRelatedModelEffects {
     return this._persistenceService.taskArchive.saveState({
       ...currentArchive,
       ids: allIds.filter((id) => !idsToRemove.includes(id)),
-    });
+    }, {isSyncModelChange: true});
   }
 
   private async _moveToArchive(action: MoveToArchive) {
@@ -251,7 +251,7 @@ export class TaskRelatedModelEffects {
         this._reminderService.removeReminder(t.reminderId);
       });
 
-    return this._persistenceService.taskArchive.saveState(newArchive);
+    return this._persistenceService.taskArchive.saveState(newArchive, {isSyncModelChange: true});
   }
 
   private _moveToOtherProject(action: MoveToOtherProject) {

@@ -108,8 +108,7 @@ export class GlobalConfigEffects {
   }
 
   private async _saveToLs([action, completeState]: [any, any]) {
-    this._persistenceService.updateLastLocalSyncModelChange();
     const globalConfig = completeState[CONFIG_FEATURE_NAME];
-    await this._persistenceService.globalConfig.saveState(globalConfig);
+    await this._persistenceService.globalConfig.saveState(globalConfig, {isSyncModelChange: true});
   }
 }
