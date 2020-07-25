@@ -33,7 +33,6 @@ export class NoteEffects {
       this._store$.pipe(select(selectNoteFeatureState)),
     ]).pipe(first())),
     tap(([projectId, state]) => this._saveToLs(projectId, state)),
-    tap(this._updateLastLocalSyncModelChange.bind(this)),
   ), {dispatch: false});
 
   deleteNote$: any = createEffect(() => this._actions$.pipe(
@@ -119,13 +118,9 @@ export class NoteEffects {
   ) {
   }
 
-  private _updateLastLocalSyncModelChange() {
-    this._persistenceService.updateLastLocalSyncModelChange();
-  }
-
   private async _saveToLs(currentProjectId: string, noteState: NoteState) {
     if (currentProjectId) {
-      this._persistenceService.note.save(currentProjectId, noteState);
+      this._persistenceService.note.save(currentProjectId, noteState, {isSyncModelChange: true});
     } else {
       throw new Error('No current project id');
     }
