@@ -122,7 +122,7 @@
         "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Hier kunt u SuperProductivity configureren om openstaande GithHub-problemen voor een specifieke repository weer te geven in het paneel voor het maken van taken in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar het probleem en meer informatie erover.</p> <p>Daarnaast kunt u automatisch alle openstaande problemen toevoegen en synchroniseren met uw taakachterstand.</p>",
+        "HELP": "<p>Hier kunt u SuperProductivity configureren om openstaande GitHub-problemen voor een specifieke repository weer te geven in het paneel voor het maken van taken in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar het probleem en meer informatie erover.</p> <p>Daarnaast kunt u automatisch alle openstaande problemen toevoegen en synchroniseren met uw taakachterstand.</p>",
         "TITLE": "Github"
       },
       "ISSUE_CONTENT": {

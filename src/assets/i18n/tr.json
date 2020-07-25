@@ -122,7 +122,7 @@
         "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Burada Süper Verimliliği, günlük planlama görünümünde görev oluşturma panelinde belirli bir depo için açık GithHub sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili daha fazla bilgi sunacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz.</p>",
+        "HELP": "<p>Burada Süper Verimliliği, günlük planlama görünümünde görev oluşturma panelinde belirli bir depo için açık GitHub sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili daha fazla bilgi sunacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz.</p>",
         "TITLE": "Github"
       },
       "ISSUE_CONTENT": {

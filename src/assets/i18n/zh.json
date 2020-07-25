@@ -1,23 +1,23 @@
 {
   "APP": {
     "B_INSTALL": {
-      "IGNORE": "忽视",
+      "IGNORE": "忽略",
       "INSTALL": "安装",
-      "MSG": "您想将Super Productivity安装为PWA吗？"
+      "MSG": "您想将 Super Productivity 安装为渐进式 WEB 程序吗？"
     },
-    "B_OFFLINE": "您已断开与互联网的连接。同步和请求问题提供者数据将不起作用。",
+    "B_OFFLINE": "您已断开与互联网的连接。同步和数据请求将失效。",
     "D_INITIAL": {
-      "TITLE": "欢迎使用v{{nr}}"
+      "TITLE": "欢迎使用 v{{nr}} 版"
     },
-    "UPDATE_MAIN_MODEL": "超级生产力有了重大更新！您的数据需要进行一些迁移。请注意，这会使您的数据与该应用的旧版本不兼容。",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "未选择模型更新。请注意，如果您不想执行模型升级，则必须降级到最新版本。",
-    "UPDATE_WEB_APP": "新版本可用。加载新版本？"
+    "UPDATE_MAIN_MODEL": "Super Productivity 有了重大更新！您的数据需要进行一些迁移。请注意，这会使您的数据与该应用的旧版本不兼容。",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "未选择模型更新。请注意，如果您不想执行模型升级，则必须降级到上一版本。",
+    "UPDATE_WEB_APP": "新版本可用，是否加载新版本？"
   },
   "BL": {
     "FROM_OTHER_PROJECTS": "来自其他项目",
-    "NO_TASKS": "您的待办事项中目前没有任务",
-    "SCHEDULED": "计划",
-    "TITLE": "积压"
+    "NO_TASKS": "目前您的待办事项中没有任务",
+    "SCHEDULED": "已计划",
+    "TITLE": "待办事项"
   },
   "DATETIME_INPUT": {
     "IN": "在 {{time}}",
@@ -27,7 +27,7 @@
     "LATER_TODAY": "今天晚些时候",
     "NEXT_WEEK": "下周",
     "PLACEHOLDER": "请选择一个日期",
-    "PRESS_ENTER_AGAIN": "再次按Enter保存",
+    "PRESS_ENTER_AGAIN": "再次按 Enter 保存",
     "TOMORROW": "明天"
   },
   "F": {
@@ -42,7 +42,7 @@
         },
         "SELECT_TYPE": "选择一种类型",
         "TYPES": {
-          "FILE": "文件（默认打开系统应用程序）",
+          "FILE": "文件（打开系统默认应用程序）",
           "IMG": "图像（显示为缩略图）",
           "LINK": "链接（在浏览器中打开）"
         }
@@ -68,7 +68,7 @@
         "SELECT_TYPE": "选择一种类型",
         "TYPES": {
           "COMMAND": "命令（自定义shell命令）",
-          "FILE": "文件（默认打开系统应用程序）",
+          "FILE": "文件（打开系统默认应用程序）",
           "IMG": "图像（显示为缩略图）",
           "LINK": "链接（在浏览器中打开）"
         }
@@ -76,7 +76,7 @@
     },
     "CONFIG": {
       "S": {
-        "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong>的设置"
+        "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong> 的设置"
       }
     },
     "DROPBOX": {
@@ -86,96 +86,96 @@
         "LOCAL": "本地",
         "LOCAL_REMOTE": "本地->远程",
         "REMOTE": "远程",
-        "TEXT": "<p>从Dropbox更新。本地和远程数据似乎都被修改。</p>",
-        "TITLE": "Dropbox：冲突数据",
+        "TEXT": "<p>从 Dropbox 更新。本地和远程数据似乎都已被修改。</p>",
+        "TITLE": "Dropbox：数据冲突",
         "USE_LOCAL": "使用本地",
-        "USE_REMOTE": "使用遥控器"
+        "USE_REMOTE": "使用远程"
       },
       "FORM": {
         "B_GENERATE_TOKEN": "生成令牌",
-        "FOLLOW_LINK": "请打开以下链接，并将提供的身份验证代码复制到输入字段中。",
+        "FOLLOW_LINK": "请打开以下链接，并将提供的身份验证代码复制到输入框中。",
         "L_ACCESS_TOKEN": "访问令牌（从身份验证代码生成）",
         "L_AUTH_CODE": "授权码",
-        "L_ENABLE_SYNCING": "启用Dropbox同步",
+        "L_ENABLE_SYNCING": "启用 Dropbox 同步",
         "L_SYNC_INTERVAL": "同步间隔",
-        "TITLE": "通过Dropbox同步（推荐）"
+        "TITLE": "通过 Dropbox 同步（推荐）"
       },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox：无法从身份验证代码生成访问令牌",
         "ACCESS_TOKEN_GENERATED": "Dropbox：根据验证码生成的访问令牌",
         "AUTH_ERROR": "Dropbox：提供了无效的访问令牌",
-        "OFFLINE": "投寄箱：无法同步，因为离线",
+        "OFFLINE": "Dropbox：已离线，无法同步",
         "SYNC_ERROR": "Dropbox：同步时出错",
-        "UNKNOWN_ERROR": "投寄箱：未知错误： {{errorStr}}"
+        "UNKNOWN_ERROR": "Dropbox：未知错误： {{errorStr}}"
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "为项目设置Github"
+        "TITLE": "为项目设置 Github"
       },
       "FORM": {
-        "FILTER_USER": "用户名（例如，自行过滤掉更改）",
-        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Github添加到待办事项",
-        "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的问题显示为建议",
-        "REPO": "您要跟踪的git存储库的“username / repositoryName”",
+        "FILTER_USER": "用户名（请输入您的用户名）",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将 Github 未解决的 Issue 添加到待办事项",
+        "IS_AUTO_POLL": "自动拉取导入的git Issue",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将 git 中的 Issue 显示为建议",
+        "REPO": "GitHub：“username / repositoryName”",
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
-        "HELP": "<p>您可以在此处配置SuperProductivity，以在日常计划视图的任务创建面板中列出特定存储库的打开GithHub问题。它们将被列为建议，并将提供该问题的链接以及有关该问题的更多信息。</p> <p>此外，您还可以自动将所有未解决的问题添加并同步到任务待办事项中。</p>",
-        "TITLE": "Github上"
+        "HELP": "<p>您可以在此处配置 Super Productivity，以在日常计划视图的任务创建面板中列出特定存储库的打开 GitHub Issue。它们将被列为建议，并将提供该问题的链接以及有关该 Issue 的更多信息。</p> <p>此外，您还可以自动将所有未解决的问题添加并同步到任务待办事项中。</p>",
+        "TITLE": "Github"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "代理人",
+        "ASSIGNEE": "代理人 Assignee",
         "AT": "在",
         "DESCRIPTION": "描述",
         "LABELS": "标签",
         "MARK_AS_CHECKED": "将更新标记为已选中",
         "STATUS": "状态",
-        "SUMMARY": "摘要",
-        "WRITE_A_COMMENT": "留个评论"
+        "SUMMARY": "总结",
+        "WRITE_A_COMMENT": "评论"
       },
       "S": {
         "ERR_NETWORK": "Github：由于客户端网络错误，请求失败",
         "ERR_NOT_CONFIGURED": "Github：没有正确配置",
         "ERR_UNKNOWN": "Github：未知错误 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github：从git到backlog导入 {{issuesLength}} 个新问题",
-        "IMPORTED_SINGLE_ISSUE": "Github：从git导入问题“{{issueText}}”到积压",
-        "ISSUE_DELETED_OR_CLOSED": "Github：问题“{{issueText}}”似乎在git上被删除或关闭",
+        "IMPORTED_MULTIPLE_ISSUES": "Github：从git导入到待办事项 {{issuesLength}} 个新问题",
+        "IMPORTED_SINGLE_ISSUE": "Github：从git导入问题“{{issueText}}”到积压待办事项",
+        "ISSUE_DELETED_OR_CLOSED": "Github：Issue “{{issueText}}” 似乎在git上被删除或关闭",
         "ISSUE_NO_UPDATE_REQUIRED": "Github：不需要更新",
         "ISSUE_UPDATE": "Github：更新了“{{issueText}}”的数据",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "Github：发现缺少问题数据的任务。重装。",
+        "MISSING_ISSUE_DATA": "Github：发现缺少问题数据的任务。正在重新加载。",
         "NEW_COMMENT": "Github：对“{{issueText}}”的新评论",
-        "POLLING": "Github：轮询问题的变化",
-        "SHOW_ISSUE_BTN": "给我看看"
+        "POLLING": "Github：拉取问题的变更",
+        "SHOW_ISSUE_BTN": "为我显示"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "为项目设置Gitlab"
+        "TITLE": "为项目设置 Gitlab"
       },
       "FORM": {
         "FILTER_USER": "用户名（例如，自行过滤掉更改）",
-        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Gitlab添加到待办事项",
-        "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的问题显示为建议",
-        "PROJECT": "完整路径或用户名/项目",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的 Issue 从 Gitlab 添加到待办事项",
+        "IS_AUTO_POLL": "自动拉取导入的 git 的 Issue 以进行更改",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的 Issue 显示为建议",
+        "PROJECT": "Gitlab 完整路径或用户名/repo",
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
-        "HELP": "<p>在这里，您可以配置SuperProductivity在日常计划视图的任务创建面板中列出特定项目的打开的Gitlab问题（在线版本或自托管实例）。它们将作为建议列出，并提供指向该问题的链接以及有关此问题的更多信息。</p> <p>此外，您可以自动将所有未解决的问题添加并同步到任务积压。</p>",
-        "TITLE": "Gitlab上"
+        "HELP": "<p>在这里，您可以配置 Super Productivity 在日常计划视图的任务创建面板中列出特定项目的打开的 Gitlab 问题Issue（在线版本或自托管实例）。它们将作为建议列出，并提供指向该问题的链接以及有关此 Issue 的更多信息。</p> <p>此外，您可以自动将所有未解决的问题添加并同步到待办事项。</p>",
+        "TITLE": "Gitlab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "代理人",
+        "ASSIGNEE": "代理人 Assignee",
         "AT": "在",
         "DESCRIPTION": "描述",
         "LABELS": "标签",
         "MARK_AS_CHECKED": "将更新标记为已选中",
         "STATUS": "状态",
-        "SUMMARY": "摘要",
-        "WRITE_A_COMMENT": "留个评论"
+        "SUMMARY": "总结",
+        "WRITE_A_COMMENT": "评论"
       },
       "S": {
         "ERR_NETWORK": "Gitlab：由于客户端网络错误，请求失败",
