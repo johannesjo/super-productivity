@@ -225,7 +225,7 @@ export class TaskRelatedModelEffects {
     return this._persistenceService.taskArchive.saveState({
       ...currentArchive,
       ids: allIds.filter((id) => !idsToRemove.includes(id)),
-    }, true);
+    });
   }
 
   private async _moveToArchive(action: MoveToArchive) {
