@@ -32,7 +32,7 @@ export class TaskRepeatCfgService {
     return this._store$.pipe(select(selectTaskRepeatCfgById, {id}));
   }
 
-  addTaskRepeatCfgToTask(taskId: string, projectId: string, taskRepeatCfg: TaskRepeatCfg) {
+  addTaskRepeatCfgToTask(taskId: string, projectId: string | null, taskRepeatCfg: TaskRepeatCfg) {
     this._store$.dispatch(new AddTaskRepeatCfgToTask({
       taskRepeatCfg: {
         ...taskRepeatCfg,

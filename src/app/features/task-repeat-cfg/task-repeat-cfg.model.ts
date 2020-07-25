@@ -12,6 +12,7 @@ export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
 ];
 
 export interface TaskRepeatCfgCopy {
+  // TODO null should not be possible
   id: string | null;
   projectId: string | null;
   lastTaskCreation: number;

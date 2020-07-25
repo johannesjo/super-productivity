@@ -44,6 +44,7 @@ import {
   moveTaskInTodayList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
+import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 
 @Injectable()
 export class TagEffects {
@@ -185,6 +186,21 @@ export class TagEffects {
         return isOrphanedParentTask(t);
       });
       await this._persistenceService.taskArchive.execAction(new DeleteMainTasks({taskIds: archiveTaskIdsToDelete}));
+
+      // remove from task repeat
+      const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(take(1)).toPromise();
+      taskRepeatCfgs.forEach(taskRepeatCfg => {
+        if (taskRepeatCfg.tagIds.some(r => tagIdsToRemove.indexOf(r) >= 0)) {
+          const tagIds = taskRepeatCfg.tagIds.filter(tagId => !tagIdsToRemove.includes(tagId));
+          if (tagIds.length === 0 && !taskRepeatCfg.projectId) {
+            this._taskRepeatCfgService.deleteTaskRepeatCfg(taskRepeatCfg.id as string);
+          } else {
+            this._taskRepeatCfgService.updateTaskRepeatCfg(taskRepeatCfg.id as string, {
+              tagIds
+            });
+          }
+        }
+      });
     }),
   );
 
@@ -236,6 +252,7 @@ export class TagEffects {
     private _tagService: TagService,
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _router: Router,
   ) {
   }
