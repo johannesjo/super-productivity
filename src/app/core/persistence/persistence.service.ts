@@ -320,7 +320,7 @@ export class PersistenceService {
     this._isBlockSaving = true;
 
     const forBase = Promise.all(this._baseModels.map(async (modelCfg: PersistenceBaseModel<any>) => {
-      return await modelCfg.saveState(data[modelCfg.appDataKey], true);
+      return await modelCfg.saveState(data[modelCfg.appDataKey], {isDataImport: true});
     }));
     const forProject = Promise.all(this._projectModels.map(async (modelCfg: PersistenceForProjectModel<any, any>) => {
       if (!data[modelCfg.appDataKey]) {
@@ -393,7 +393,7 @@ export class PersistenceService {
       //   }
       //   return data;
       // },
-      saveState: (data: any, isDataImport: boolean = false, isNoSyncChange) => {
+      saveState: (data: any, {isDataImport = false, isNoSyncChange}) => {
         if (data && data.ids && data.entities) {
           data = checkFixEntityStateConsistency(data, appDataKey);
         }
@@ -424,7 +424,7 @@ export class PersistenceService {
       execAction: async (action: Action): Promise<S> => {
         const state = await model.loadState();
         const newState = reducerFn(state, action);
-        await model.saveState(newState, false);
+        await model.saveState(newState, {isDataImport: false});
         return newState;
       },
     };
@@ -446,7 +446,7 @@ export class PersistenceService {
         projectId,
         legacyDBKey: this._makeProjectKey(projectId, lsKey)
       }).then(v => migrateFn(v, projectId)),
-      save: (projectId: string, data: any, isDataImport?: boolean, isNoSyncChange?: boolean) => this._saveToDb({
+      save: (projectId: string, data: any, {isDataImport, isNoSyncChange}: { isDataImport?: boolean, isNoSyncChange?: boolean }) => this._saveToDb({
         dbKey: appDataKey,
         data,
         isDataImport,
@@ -528,6 +528,9 @@ export class PersistenceService {
         data
       });
 
+      if (!isNoSyncChange) {
+        this.updateLastLocalSyncModelChange();
+      }
       this.onAfterSave$.next({appDataKey: dbKey, data, isDataImport, projectId, isNoSyncChange});
 
       return r;
