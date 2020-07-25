@@ -25,7 +25,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   T = T;
   task: Task = this.data.task;
 
-  taskRepeatCfg: TaskRepeatCfgCopy = {
+  taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'> = {
     ...DEFAULT_TASK_REPEAT_CFG,
     title: this.task.title,
     tagIds: [...this.task.tagIds],

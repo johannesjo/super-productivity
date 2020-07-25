@@ -10,7 +10,7 @@ import {
   UpsertTaskRepeatCfg,
 } from './store/task-repeat-cfg.actions';
 import { Observable } from 'rxjs';
-import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
+import { TaskRepeatCfg, TaskRepeatCfgCopy, TaskRepeatCfgState } from './task-repeat-cfg.model';
 import * as shortid from 'shortid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -32,7 +32,7 @@ export class TaskRepeatCfgService {
     return this._store$.pipe(select(selectTaskRepeatCfgById, {id}));
   }
 
-  addTaskRepeatCfgToTask(taskId: string, projectId: string | null, taskRepeatCfg: TaskRepeatCfg) {
+  addTaskRepeatCfgToTask(taskId: string, projectId: string | null, taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'>) {
     this._store$.dispatch(new AddTaskRepeatCfgToTask({
       taskRepeatCfg: {
         ...taskRepeatCfg,
