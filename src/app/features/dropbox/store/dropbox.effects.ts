@@ -97,7 +97,7 @@ export class DropboxEffects {
         this._taskService.setCurrentId(null);
         this._simpleCounterService.turnOffAll();
       }),
-      // minimally hacky...
+      // minimally hacky delay to wait for inMemoryDatabase update...
       delay(100),
       switchMap(() => this._dropboxSyncService.sync()
         .then(() => {
