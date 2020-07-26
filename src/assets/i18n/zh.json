@@ -122,7 +122,7 @@
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
-        "HELP": "<p>您可以在此处配置 Super Productivity，以在日常计划视图的任务创建面板中列出特定存储库的打开 GitHub Issue。它们将被列为建议，并将提供该问题的链接以及有关该 Issue 的更多信息。</p> <p>此外，您还可以自动将所有未解决的问题添加并同步到任务待办事项中。</p>",
+        "HELP": "<p>您可以在此处配置 Super Productivity，以在日常计划视图的任务创建面板中列出特定存储库的打开 GitHub Issue。它们将被列为建议，并将提供该 Issue 的链接以及有关该 Issue 的更多信息。</p> <p>此外，您还可以自动将所有未解决的 Issue 添加并同步到任务待办事项中。</p>",
         "TITLE": "Github"
       },
       "ISSUE_CONTENT": {
@@ -139,15 +139,15 @@
         "ERR_NETWORK": "Github：由于客户端网络错误，请求失败",
         "ERR_NOT_CONFIGURED": "Github：没有正确配置",
         "ERR_UNKNOWN": "Github：未知错误 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github：从git导入到待办事项 {{issuesLength}} 个新问题",
-        "IMPORTED_SINGLE_ISSUE": "Github：从git导入问题“{{issueText}}”到积压待办事项",
+        "IMPORTED_MULTIPLE_ISSUES": "Github：从git导入到待办事项 {{issuesLength}} 个新 Issue ",
+        "IMPORTED_SINGLE_ISSUE": "Github：从git导入 Issue “{{issueText}}”到积压待办事项",
         "ISSUE_DELETED_OR_CLOSED": "Github：Issue “{{issueText}}” 似乎在git上被删除或关闭",
         "ISSUE_NO_UPDATE_REQUIRED": "Github：不需要更新",
         "ISSUE_UPDATE": "Github：更新了“{{issueText}}”的数据",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Github：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "Github：发现缺少问题数据的任务。正在重新加载。",
+        "MISSING_ISSUE_DATA": "Github：发现缺少 Issue 数据的任务。正在重新加载。",
         "NEW_COMMENT": "Github：对“{{issueText}}”的新评论",
-        "POLLING": "Github：拉取问题的变更",
+        "POLLING": "Github：拉取 Issue 的变更",
         "SHOW_ISSUE_BTN": "为我显示"
       }
     },
@@ -164,7 +164,7 @@
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
-        "HELP": "<p>在这里，您可以配置 Super Productivity 在日常计划视图的任务创建面板中列出特定项目的打开的 Gitlab 问题Issue（在线版本或自托管实例）。它们将作为建议列出，并提供指向该问题的链接以及有关此 Issue 的更多信息。</p> <p>此外，您可以自动将所有未解决的问题添加并同步到待办事项。</p>",
+        "HELP": "<p>在这里，您可以配置 Super Productivity 在日常计划视图的任务创建面板中列出特定项目的打开的 Gitlab Issue（在线版本或自托管实例）。它们将作为建议列出，并提供指向该 Issue 的链接以及有关此 Issue 的更多信息。</p> <p>此外，您可以自动将所有未解决的 Issue 添加并同步到待办事项。</p>",
         "TITLE": "Gitlab"
       },
       "ISSUE_CONTENT": {
@@ -181,16 +181,16 @@
         "ERR_NETWORK": "Gitlab：由于客户端网络错误，请求失败",
         "ERR_NOT_CONFIGURED": "Gitlab：没有正确配置",
         "ERR_UNKNOWN": "Gitlab：未知错误 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab：从git到backlog导入 {{issuesLength}} 个新问题",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab：从git导入问题“{{issueText}}”到积压",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab：问题“{{issueText}}”似乎在git上被删除或关闭",
+        "IMPORTED_MULTIPLE_ISSUES": "Gitlab：从git导入到待办事项  {{issuesLength}} 个新 Issue ",
+        "IMPORTED_SINGLE_ISSUE": "Gitlab：从git导入 Issue “{{issueText}}”到积压",
+        "ISSUE_DELETED_OR_CLOSED": "Gitlab： Issue “{{issueText}}”似乎在git上被删除或关闭",
         "ISSUE_NO_UPDATE_REQUIRED": "Gitlab：不需要更新",
         "ISSUE_UPDATE": "Gitlab：更新了“{{issueText}}”的数据",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "Gitlab：发现缺少问题数据的任务。重装。",
+        "MISSING_ISSUE_DATA": "Gitlab：发现缺少 Issue 数据的任务，重新加载。",
         "NEW_COMMENT": "Gitlab：对“{{issueText}}”的新评论",
-        "POLLING": "Gitlab：轮询问题的变化",
-        "SHOW_ISSUE_BTN": "给我看看"
+        "POLLING": "Gitlab：自动拉取 Issue 的变化",
+        "SHOW_ISSUE_BTN": "为我显示"
       }
     },
     "GOOGLE": {
@@ -198,8 +198,8 @@
         "AUTH_FAIL": "GoogleApi：无法验证，请尝试重新登录！"
       },
       "DIALOG": {
-        "CREATE_SYNC_FILE": "Google云端硬盘：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。 <strong>在Google云端硬盘上将其</strong> 创建为同步文件？",
-        "USE_EXISTING_SYNC_FILE": "Google云端硬盘：使用 <strong>现有</strong> 文件 <strong>“{{fileName}}”</strong> 作为同步文件？如果没有，请更改同步文件名。"
+        "CREATE_SYNC_FILE": "Google Drive：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。是否在<strong>Google Drive</strong> 上将其创建为同步文件？",
+        "USE_EXISTING_SYNC_FILE": "Google Drive：使用 <strong>现有</strong> 文件 <strong>“{{fileName}}”</strong> 作为同步文件？如果没有，请更改同步文件名。"
       },
       "D_CONFIRM_LOAD": {
         "LAST_MOD": "最后修改：",
@@ -209,8 +209,8 @@
         "OVERWRITE_LOCAL": "覆盖本地数据",
         "OVERWRITE_REMOTE": "覆盖远程数据",
         "REMOTE": "远程",
-        "TEXT": "<p>从Google Drive备份进行更新。本地和远程数据似乎都被修改。您要覆盖未保存的本地更改吗？ <strong>所有数据将永远丢失</strong>。</p>",
-        "TITLE": "使用GDrive Update覆盖本地数据？"
+        "TEXT": "<p>从 Google Drive 备份进行更新。本地和远程数据似乎都被修改。您要覆盖未保存的本地更改吗？ <strong>所有数据将永远丢失</strong>。</p>",
+        "TITLE": "是否使用Google Drive 更新本地数据？"
       },
       "D_CONFIRM_SAVE": {
         "LAST_MOD": "最后修改：",
@@ -220,27 +220,27 @@
         "OVERWRITE_LOCAL": "覆盖本地数据",
         "OVERWRITE_REMOTE": "覆盖远程数据",
         "REMOTE": "远程",
-        "TEXT": "  <p>Google云端硬盘似乎有一些变化，您没有本地更改。你想要覆盖它们吗？</p>",
-        "TITLE": "覆盖Google云端硬盘上未保存的数据？"
+        "TEXT": "  <p>Google Drive 存在新于本地的更改，你想要覆盖它们吗？</p>",
+        "TITLE": "覆盖 Google Drive 上未保存的数据？"
       },
       "S": {
-        "DOWNLOADING_UPDATE": "Google云端硬盘：有远程更新！下载...",
-        "ERROR": "Google云端硬盘 - 错误：",
-        "ERROR_INITIAL_IMPORT": "Google云端硬盘：尝试最初导入数据时出错",
-        "LOCAL_UP_TO_DATE": "Google云端硬盘：本地数据已经是最新的",
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请删除除一个以外的所有名称或选择其他名称。",
-        "NO_UPDATE_REQUIRED": "Google云端硬盘：无需更新",
-        "REMOTE_UP_TO_DATE": "Google云端硬盘：远程数据已经是最新的",
-        "SUCCESS": "Google云端硬盘：已成功保存备份",
-        "SYNCING": "Google云端硬盘：同步"
+        "DOWNLOADING_UPDATE": "Google Drive：有远程更新！下载中...",
+        "ERROR": "Google Drive - 错误：{{errTxt}}",
+        "ERROR_INITIAL_IMPORT": "Google Drive：尝试导入最初数据时出错",
+        "LOCAL_UP_TO_DATE": "Google Drive：本地数据已经是最新的",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请进保留一个文件或选择其他名称。",
+        "NO_UPDATE_REQUIRED": "Google Drive：无需更新",
+        "REMOTE_UP_TO_DATE": "Google Drive：远程数据已经是最新的",
+        "SUCCESS": "Google Drive：已成功保存备份",
+        "SYNCING": "Google Drive：同步中"
       },
       "SYNC_CFG": {
         "AUTO_LOGIN": "启动应用时自动登录",
         "AUTO_SYNC": "自动将数据同步到远程",
         "BACKUP_NOW": "立即备份",
         "COMPRESS": "压缩数据",
-        "ENABLE": "通过Google云端硬盘启用同步功能",
-        "LOAD_FROM": "从GDrive加载",
+        "ENABLE": "启Google Drive用同步功能",
+        "LOAD_FROM": "从Google Drive加载",
         "LOAD_ON_STARTUP": "启动时加载远程数据",
         "NOTIFY": "同步时通知",
         "SYNC_FILE_NAME": "同步文件名",
@@ -256,21 +256,21 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira：为了防止api被拒绝，Super Productivity阻止了访问。您可能应该检查您的jira设置！",
+        "BLOCK_ACCESS_MSG": "Jira：为了防止api被拒绝，Super Productivity阻止了访问。您可能应该检查您的Jira设置！",
         "BLOCK_ACCESS_UNBLOCK": "解除封锁"
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "始终打开对话框",
-        "DONE": "完成任务的状态",
-        "DO_NOT": "不要过渡",
-        "ENABLE": "启用Jira集成",
+        "DONE": "已完成任务的状态",
+        "DO_NOT": "禁用转换",
+        "ENABLE": "启用Jira",
         "ENABLE_TRANSITIONS": "启用过渡处理",
         "IN_PROGRESS": "启动任务的状态",
         "LOAD_SUGGESTIONS": "加载建议",
         "MAP_CUSTOM_FIELDS": "映射自定义字段",
-        "MAP_CUSTOM_FIELDS_INFO": "不幸的是，Jira的一些数据保存在自定义字段下，每个安装都有不同的字段。如果要包含此数据，则需要为其选择适当的自定义字段。",
-        "OPEN": "暂停任务的状态",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "选择问题以加载可用的转换",
+        "MAP_CUSTOM_FIELDS_INFO": "不幸的是，Jira的一些数据保存在自定义字段下，每个安装实例都有不同的字段。如果要包含此数据，则需要为其选择适当的自定义字段。",
+        "OPEN": "已暂停任务的状态",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "选择 Issue 以加载可用的转换",
         "STORY_POINTS": "故事点"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
@@ -282,7 +282,7 @@
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "选择要分配的状态",
-        "CURRENT_ASSIGNEE": "现任受让人：",
+        "CURRENT_ASSIGNEE": "现任 Assignee 受理人：",
         "CURRENT_STATUS": "当前状态：",
         "TITLE": "Jira：更新状态",
         "UPDATE_STATUS": "更新状态"
@@ -291,23 +291,23 @@
         "CURRENTLY_LOGGED": "目前记录的时间：",
         "INVALID_DATE": "输入的值不是日期！",
         "SAVE_WORKLOG": "保存工作日志",
-        "STARTED": "入门",
-        "SUBMIT_WORKLOG_FOR": "将工作日志提交给Jira for",
+        "STARTED": "已开始入门",
+        "SUBMIT_WORKLOG_FOR": "将工作日志提交给Jira",
         "TIME_SPENT": "所花费的时间",
-        "TITLE": "Jira：提交Worklog"
+        "TITLE": "Jira：提交工作日志Worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Github添加到待办事项",
-        "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的问题显示为建议",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的 Issue 从Github添加到待办事项",
+        "IS_AUTO_POLL": "自动拉取导入的git Issue 进行的更改",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的Issue显示为建议",
         "REPO": "您要跟踪的git存储库的“username / repositoryName”"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用于自动向待办事项添加任务",
-        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任务完成后，打开对话框将工作日志提交给jira",
-        "IS_AUTO_ADD_TO_BACKLOG": "自动向Jira积压添加问题",
-        "IS_AUTO_POLL_TICKETS": "自动检查导入的问题以进行更改并通知",
-        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "检查当前处理的问题是否已分配给当前用户",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任务完成后，打开对话框将工作日志提交给Jira",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动向Jira待办事项添加 Issue ",
+        "IS_AUTO_POLL_TICKETS": "自动检查导入的 Issue 以进行更改并通知",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "检查当前处理的 Issue 是否已分配给当前用户",
         "IS_WORKLOG_ENABLED": "打开对话框，在任务完成时将工作日志提交给jira",
         "SEARCH_JQL_QUERY": "JQL Query用于限制搜索器任务"
       },
@@ -330,16 +330,16 @@
           "P1_3": "如果要自动配置（例如，每次访问计划视图时），还可以配置将自定义JQL查询指定的所有新任务添加到待办事项。",
           "P1_4": "另一个选项是“检查当前票证是否分配给当前用户”。如果启用并且您正在启动，那么如果您当前已在Jira上分配了该票证，则会进行检查，如果没有出现可以选择将票证分配给您自己的对话框。",
           "P2_1": "有几个选项可以确定您何时以及如何提交工作日志。启用 <em>'打开工作日志对话框，在任务完成时向Jira添加工作日志'</em> 打开一个对话框，每次将Jira任务标记为已完成时添加工作日志。所以请记住，工作日志将添加到目前为止所跟踪的所有内容之上。因此，如果您将任务标记为第二次完成，则可能不希望再次为该任务提交完整的工作时间。",
-          "P2_2": "<em>'当子任务完成时打开工作日志对话框而不是子任务本身的任务'</em> 每次将Jira问题的子任务标记为已完成时打开工作日志对话框。因为您已经通过子任务跟踪了时间，所以一旦将Jira任务标记为已完成，就不会打开任何对话框。",
+          "P2_2": "<em>'当子任务完成时打开工作日志对话框而不是子任务本身的任务'</em> 每次将Jira Issue 的子任务标记为已完成时打开工作日志对话框。因为您已经通过子任务跟踪了时间，所以一旦将Jira任务标记为已完成，就不会打开任何对话框。",
           "P2_3": "<em>'在没有对话框的情况下自动向工作日志发送更新'</em> 完成了它所说的内容。由于将任务标记为已完成多次会导致整个工作时间被跟踪两次，因此不建议这样做。",
           "P3_1": "在这里，您可以重新配置默认转换。 Jira支持广泛的转换配置，通常会在Jira Agile板上的不同列中生效，我们无法对转换任务的位置和时间做出假设，您需要手动设置它。"
         }
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "代理人",
+        "ASSIGNEE": "代理人 Assignee",
         "AT": "在",
         "ATTACHMENTS": "附件",
-        "CHANGED": "变",
+        "CHANGED": "变化",
         "COMMENTS": "评论",
         "COMPONENTS": "组件",
         "DESCRIPTION": "描述",
@@ -350,74 +350,74 @@
         "STORY_POINTS": "故事点",
         "SUMMARY": "摘要",
         "WORKLOG": "工作日志",
-        "WRITE_A_COMMENT": "留个评论"
+        "WRITE_A_COMMENT": "评论"
       },
       "S": {
         "ADDED_WORKLOG_FOR": "Jira：为 {{issueKey}}添加了工作日志",
-        "EXTENSION_NOT_LOADED": "超级生产力扩展未加载。重新加载页面可能会有所帮助",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira：从jira到backlog导入 {{issuesLength}} 个新问题",
-        "IMPORTED_SINGLE_ISSUE": "Jira：从jira导入问题“{{issueText}}”到积压",
+        "EXTENSION_NOT_LOADED": "Super Productivity扩展未加载。重新加载页面可能会有所帮助",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira：从jira导入到待办事项 {{issuesLength}} 个新 Issue",
+        "IMPORTED_SINGLE_ISSUE": "Jira：从jira导入 Issue e“{{issueText}}”到积压",
         "INSUFFICIENT_SETTINGS": "为Jira提供的设置不足",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira：“{{issueText}}”已经是最新的",
         "ISSUE_UPDATE": "Jira：更新了“{{issueText}}”的数据",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "Jira：发现缺少问题数据的任务。重装。",
+        "MISSING_ISSUE_DATA": "Jira：发现缺少Issue数据的任务，重新加载。",
         "NO_AUTO_IMPORT_JQL": "Jira：没有为自动导入定义搜索查询",
         "NO_VALID_TRANSITION": "Jira：未配置有效转换",
-        "POLLING": "Jira：轮询问题的变化",
+        "POLLING": "Jira：自动拉取Issue的变化",
         "TIMED_OUT": "Jira：请求超时",
-        "TRANSITION": "Jira：将问题“{{issueKey}}”设置为“{{name}}”",
+        "TRANSITION": "Jira：将 Issue “{{issueKey}}”设置为“{{name}}”",
         "TRANSITIONS_LOADED": "Jira：加载过渡。使用下面的选项分配它们",
-        "TRANSITION_SUCCESS": "Jira：将问题 {{issueKey}} 设置为 <strong>{{chosenTransition}}</strong>",
+        "TRANSITION_SUCCESS": "Jira：将 Issue  {{issueKey}} 设置为 <strong>{{chosenTransition}}</strong>",
         "UNABLE_TO_REASSIGN": "Jira：无法为自己重新分配票证，因为您没有指定用户名。请访问设置。"
       },
       "STEPPER": {
         "CREDENTIALS": "证书",
         "DONE": "你现在完成了。",
         "LOGIN_SUCCESS": "登陆成功！",
-        "TEST_CREDENTIALS": "测试凭证",
+        "TEST_CREDENTIALS": "测试证书",
         "WELCOME_USER": "欢迎 {{user}}！"
       }
     },
     "METRIC": {
       "BANNER": {
-        "CHECK": "x"
+        "CHECK": "已完成！"
       },
       "CMP": {
-        "AVG_BREAKS_PER_DAY": "平均。每天休息",
-        "AVG_TASKS_PER_DAY_WORKED": "平均。每天工作的任务",
-        "AVG_TIME_SPENT_ON_BREAKS": "平均。花在休息上的时间",
-        "AVG_TIME_SPENT_PER_DAY": "平均。每天花费的时间",
-        "AVG_TIME_SPENT_PER_TASK": "平均。每个任务花费的时间",
+        "AVG_BREAKS_PER_DAY": "平均休息次数",
+        "AVG_TASKS_PER_DAY_WORKED": "平均完成任务数",
+        "AVG_TIME_SPENT_ON_BREAKS": "平均休息时间",
+        "AVG_TIME_SPENT_PER_DAY": "平均花费时间",
+        "AVG_TIME_SPENT_PER_TASK": "平均任务花费时间",
         "COUNTING_SUBTASKS": "（计算子任务）",
-        "DAYS_WORKED": "工作日",
-        "IMPROVEMENT_SELECTION_COUNT": "选择改进因子的次数",
-        "MOOD_PRODUCTIVITY_OVER_TIME": "随着时间的推移情绪和生产力",
-        "NO_ADDITIONAL_DATA_YET": "尚未收集其他数据。使用每日摘要“评估”面板上的表单来执行此操作。",
-        "OBSTRUCTION_SELECTION_COUNT": "选择阻碍因子的次数",
-        "TASKS_DONE_CREATED": "任务（完成/创建）",
+        "DAYS_WORKED": "持续天数",
+        "IMPROVEMENT_SELECTION_COUNT": "选择积极因子的次数",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "情绪和效率的时间变化",
+        "NO_ADDITIONAL_DATA_YET": "尚未收集其他数据，完成每日任务后通过添加“评估”来执行此操作。",
+        "OBSTRUCTION_SELECTION_COUNT": "选择消极因子的次数",
+        "TASKS_DONE_CREATED": "任务数目（完成/创建）",
         "TIME_ESTIMATED": "估计时间",
-        "TIME_SPENT": "所花费的时间"
+        "TIME_SPENT": "花费时间"
       },
       "EVAL_FORM": {
-        "ADD_NOTE_FOR_TOMORROW": "明天添加注释",
-        "DISABLE_REPEAT_EVERY_DAY": "每天禁用重复",
+        "ADD_NOTE_FOR_TOMORROW": "为明天添加建议",
+        "DISABLE_REPEAT_EVERY_DAY": "禁用每日重复",
         "ENABLE_REPEAT_EVERY_DAY": "每天重复",
         "HELP_H1": "我为什么要在乎？",
         "HELP_LINK_TXT": "转到指标部分",
-        "HELP_P1": "时间进行一点自我评估！此处的答案已保存，并为您提供有关如何在指标部分工作的一些统计信息。此外，明天的建议将在第二天出现在您的任务列表上方。",
-        "HELP_P2": "这不仅仅是为了计算精确的指标，也不是为了提高机器效率，而是为了改善您对工作的看法。评估日常生活中的痛点可能会有所帮助，也就是找到可以帮助你的因素。对它有点系统性希望有助于更好地掌握这些并改善你的能力。",
-        "IMPROVEMENTS": "什么提高了你的生产力",
-        "IMPROVEMENTS_TOMORROW": "你能做些什么来明天改善？",
+        "HELP_P1": "花时间进行自我评估！此处的答案已保存，并为您提供有关如何在指标部分工作的一些统计信息。此外，对明天的建议将在第二天出现在您的任务列表上方。",
+        "HELP_P2": "这不仅仅是为了计算精确的指标，或是提高效率，而是为了改善您对工作的看法。评估日常生活中的自己的不足可能会对进步有所帮助。对它的清晰认识有助于更好地掌握这些并改善你的能力。",
+        "IMPROVEMENTS": "什么提高了你的效率生产力？",
+        "IMPROVEMENTS_TOMORROW": "你能做些什么来让明天更高效？",
         "MOOD": "你觉得怎么样？",
         "MOOD_HINT": "1：太可怕了 -  10：太棒了",
         "NOTES": "明天的注意事项",
         "OBSTRUCTIONS": "是什么阻碍了你的生产力？",
         "PRODUCTIVITY": "你的工作效率如何？",
-        "PRODUCTIVITY_HINT": "1：还没开始 -  10：非常有效率"
+        "PRODUCTIVITY_HINT": "1：几乎未开始工作 -  10：非常有效率"
       },
       "S": {
-        "SAVE_METRIC": "公制成功保存"
+        "SAVE_METRIC": "评估成功保存"
       }
     },
     "NOTE": {
@@ -633,7 +633,7 @@
         "MOVE_TO_OTHER_PROJECT": "转到其他项目",
         "MOVE_TO_TODAY": "转到今天的列表",
         "OPEN_ATTACH": "附加文件或链接",
-        "OPEN_ISSUE": "在新的浏览器选项卡中打开问题",
+        "OPEN_ISSUE": "在新的浏览器选项卡中打开 Issue ",
         "OPEN_TIME": "估计时间/增加花费的时间",
         "REMOVE_FROM_MY_DAY": "从我的日子中删除",
         "REPEAT_EDIT": "编辑重复任务配置",
@@ -645,7 +645,7 @@
         "TOGGLE_SUB_TASK_VISIBILITY": "切换子任务可见性",
         "TRACK_TIME": "开始跟踪时间",
         "TRACK_TIME_STOP": "暂停跟踪时间",
-        "UPDATE_ISSUE_DATA": "更新问题数据"
+        "UPDATE_ISSUE_DATA": "更新 Issue 数据"
       },
       "D_REMINDER_ADD": {
         "DATETIME_FOR": "提醒的日期时间",
@@ -720,7 +720,7 @@
         "EDIT": "编辑重复任务配置",
         "HELP1": "重复任务适用于日常琐事，例如：“组织”，“每日会议”，“代码审查”，“检查电子邮件”或可能一次又一次发生的类似任务。",
         "HELP2": "配置完成后，一旦打开项目，将在下面选择的每一天重新创建重复任务，并在一天结束时自动标记为已完成。它们将作为不同的实例处理。所以你可以自由添加子任务等。",
-        "HELP3": "从Jira或Git问题导入的任务不能重复。所有提醒也将在重复任务中删除。",
+        "HELP3": "从Jira或Git Issue 导入的任务不能重复。所有提醒也将在重复任务中删除。",
         "TAG_LABEL": "要添加的标签"
       },
       "F": {
@@ -848,7 +848,7 @@
     },
     "GOOGLE_DRIVE_SYNC": {
       "HELP": "在这里，您可以将应用配置为自动与单个Google驱动器文件同步。所有数据都将以未加密的方式保存，因此请确保您不会意外地与他人共享此文件。",
-      "TITLE": "通过Google云端硬盘同步"
+      "TITLE": "通过Google Drive同步"
     },
     "IDLE": {
       "HELP": "<div><p>启用空闲时间处理后，将在指定的时间后打开一个对话框，以检查您在空闲时是否以及在哪个任务上跟踪您的时间。</p></div>",
@@ -870,7 +870,7 @@
       "EXPAND_SUB_TASKS": "展开子任务",
       "GLOBAL_ADD_NOTE": "添加新笔记",
       "GLOBAL_ADD_TASK": "添加新任务",
-      "GLOBAL_SHOW_HIDE": "显示/隐藏超级生产力",
+      "GLOBAL_SHOW_HIDE": "显示/隐藏Super Productivity",
       "GLOBAL_TOGGLE_TASK_START": "切换上次活动任务的时间跟踪",
       "GO_TO_DAILY_AGENDA": "转到议程",
       "GO_TO_FOCUS_MODE": "进入对焦模式",
@@ -972,10 +972,10 @@
     "DBX_GEN_TOKEN": "Dropbox：生成令牌...",
     "DBX_META": "Dropbox：获取文件元数据...",
     "DBX_UPLOAD": "Dropbox：上传文件...",
-    "GDRIVE_DOWNLOAD": "Google云端硬盘：下载文件...",
-    "GDRIVE_UPLOAD": "Google云端硬盘：上传文件...",
-    "GITHUB_LOAD_ISSUE": "Github：加载问题数据...",
-    "JIRA_LOAD_ISSUE": "Jira：加载问题数据..."
+    "GDRIVE_DOWNLOAD": "Google Drive：下载文件...",
+    "GDRIVE_UPLOAD": "Google Drive：上传文件...",
+    "GITHUB_LOAD_ISSUE": "Github：加载 Issue 数据...",
+    "JIRA_LOAD_ISSUE": "Jira：加载 Issue 数据..."
   },
   "MH": {
     "ADD_NEW_TASK": "添加新任务",
