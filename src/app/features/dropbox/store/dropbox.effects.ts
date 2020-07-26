@@ -79,11 +79,11 @@ export class DropboxEffects {
         });
     }),
   );
-  @Effect({dispatch: false}) syncBeforeQuit$: any = IS_ELECTRON
-    ? this._dataInitService.isAllDataLoadedInitially$.pipe(
+  @Effect({dispatch: false}) syncBeforeQuit$: any = !IS_ELECTRON
+    ? EMPTY
+    : this._dataInitService.isAllDataLoadedInitially$.pipe(
       concatMap(() => this._dropboxSyncService.isEnabledAndReady$),
       distinctUntilChanged(),
-      // TODO find out why this get's called many times
       tap((isEnabled) => isEnabled
         ? this._execBeforeCloseService.schedule(DROPBOX_BEFORE_CLOSE_ID)
         : this._execBeforeCloseService.unschedule(DROPBOX_BEFORE_CLOSE_ID)
@@ -110,9 +110,8 @@ export class DropboxEffects {
             this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
           }
         })
-      )
-    )
-    : EMPTY;
+      ),
+    );
 
   private _isChangedAuthCode$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     // NOTE: it is important that we don't use distinct until changed here
