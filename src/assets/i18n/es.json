@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "Nueva versión disponible. ¿Cargar nueva versión?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "De otros proyectos",
-    "NO_TASKS": "Actualmente no hay tareas en tu registro de trabajo",
-    "SCHEDULED": "Programado",
-    "TITLE": "RESERVA"
+    "NO_TASKS": "Actualmente no hay tareas en tu registro de trabajo"
   },
   "DATETIME_INPUT": {
     "IN": "en {{time}}",
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "Guarde automáticamente todos los datos en la carpeta de su aplicación para tenerlos listos en caso de que algo salga mal.",
       "LABEL_IS_ENABLED": "Habilitar copias de seguridad automáticas",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "Las copias de seguridad se guardan en:",
       "TITLE": "Copias de seguridad automáticas"
     },
     "EVALUATION": {

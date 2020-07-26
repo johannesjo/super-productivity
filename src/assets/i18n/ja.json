@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "新しいバージョンがあります。新しいバージョンをロードしますか？"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "他のプロジェクトから",
-    "NO_TASKS": "現在、バックログにタスクはありません",
-    "SCHEDULED": "予定",
-    "TITLE": "バックログ"
+    "NO_TASKS": "現在、バックログにタスクはありません"
   },
   "DATETIME_INPUT": {
     "IN": " {{time}}に",
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "問題が発生した場合に備えて、すべてのデータをアプリフォルダに自動保存して準備します。",
       "LABEL_IS_ENABLED": "自動バックアップを有効にする",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "バックアップは次の場所に保存されます：",
       "TITLE": "自動バックアップ"
     },
     "EVALUATION": {

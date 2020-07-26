@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "새 버전을 사용할 수 있습니다. 새 버전을로드 하시겠습니까?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "다른 프로젝트에서",
-    "NO_TASKS": "현재 백 로그에 작업이 없습니다.",
-    "SCHEDULED": "예정",
-    "TITLE": "백 로그"
+    "NO_TASKS": "현재 백 로그에 작업이 없습니다."
   },
   "DATETIME_INPUT": {
     "IN": " {{time}}에",
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "뭔가 잘못되었을 때를 대비하여 모든 데이터를 앱 폴더에 자동 저장하십시오.",
       "LABEL_IS_ENABLED": "자동 백업 사용",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "백업은 다음 위치에 저장됩니다.",
       "TITLE": "자동 백업"
     },
     "EVALUATION": {

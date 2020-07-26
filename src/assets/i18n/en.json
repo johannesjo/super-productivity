@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "New version available. Load New Version?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "From other Projects",
-    "NO_TASKS": "There are currently no tasks in your backlog",
-    "SCHEDULED": "Scheduled",
-    "TITLE": "Backlog"
+    "NO_TASKS": "There are currently no tasks in your backlog"
   },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",

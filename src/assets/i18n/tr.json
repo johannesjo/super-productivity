@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yükle?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "Diğer Projelerden",
-    "NO_TASKS": "İş günlüğünüzde şu anda görev yok",
-    "SCHEDULED": "tarifeli",
-    "TITLE": "birikim"
+    "NO_TASKS": "İş günlüğünüzde şu anda görev yok"
   },
   "DATETIME_INPUT": {
     "IN": " {{time}}içinde",
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "Bir şeyler ters gittiğinde, hazır olması için tüm verileri otomatik olarak uygulama klasörünüze kaydedin.",
       "LABEL_IS_ENABLED": "Otomatik yedeklemeyi etkinleştir",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "Yedekler şuraya kaydedilir:",
       "TITLE": "Otomatik Yedeklemeler"
     },
     "EVALUATION": {

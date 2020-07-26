@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "新版本可用。加载新版本？"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "来自其他项目",
-    "NO_TASKS": "您的待办事项中目前没有任务",
-    "SCHEDULED": "计划",
-    "TITLE": "积压"
+    "NO_TASKS": "您的待办事项中目前没有任务"
   },
   "DATETIME_INPUT": {
     "IN": "在 {{time}}",
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "自动将所有数据保存到您的应用程序文件夹，以便在出现问题时准备好。",
       "LABEL_IS_ENABLED": "启用自动备份",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "备份保存到：",
       "TITLE": "自动备份"
     },
     "EVALUATION": {
