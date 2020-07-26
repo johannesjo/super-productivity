@@ -35,7 +35,6 @@ export class TaskRelatedModelEffects {
   moveToArchive$: any = this._actions$.pipe(
     ofType(TaskActionTypes.MoveToArchive),
     tap(this._moveToArchive.bind(this)),
-    tap(this._updateLastLocalSyncModelChange.bind(this)),
   );
 
   // TODO remove once reminder is changed
@@ -202,10 +201,6 @@ export class TaskRelatedModelEffects {
     private _globalConfigService: GlobalConfigService,
     private _persistenceService: PersistenceService
   ) {
-  }
-
-  private _updateLastLocalSyncModelChange() {
-    this._persistenceService.updateLastLocalSyncModelChange();
   }
 
   private async _removeFromArchive(action: RestoreTask) {
