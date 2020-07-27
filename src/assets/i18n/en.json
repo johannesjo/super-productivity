@@ -615,7 +615,7 @@
         "START": "Press enter one more time to start"
       },
       "B": {
-        "ADD_HALF_HOUR": "Add 1/2 hou",
+        "ADD_HALF_HOUR": "Add 1/2 hour",
         "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\""
       },
       "CMP": {

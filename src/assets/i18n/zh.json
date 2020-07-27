@@ -417,19 +417,19 @@
         "PRODUCTIVITY_HINT": "1：几乎未开始工作 -  10：非常有效率"
       },
       "S": {
-        "SAVE_METRIC": "评估成功保存"
+        "SAVE_METRIC": "评估已保存"
       }
     },
     "NOTE": {
       "ADD_REMINDER": "添加提醒",
       "D_ADD": {
         "DATETIME_LABEL": "提醒日期时间（可选）",
-        "NOTE_LABEL": "输入一些文本以保存为注释..."
+        "NOTE_LABEL": "请输入提醒的内容..."
       },
       "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "你需要输入一个标题",
+        "E_ENTER_TITLE": "请输入标题",
         "L_DATETIME": "提醒的日期时间",
-        "L_TITLE": "通知标题"
+        "L_TITLE": "提醒的标题"
       },
       "D_VIEW_REMINDER": {
         "SNOOZE": "暂停",
@@ -439,24 +439,24 @@
       "EDIT_REMINDER": "编辑提醒",
       "NOTES_CMP": {
         "ADD_BTN": "添加新笔记",
-        "DROP_TO_ADD": "放在这里添加新笔记"
+        "DROP_TO_ADD": "拖动到此处以添加新笔记"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "禁用降价解析",
-        "ENABLE_PARSE": "启用降价解析"
+        "DISABLE_PARSE": "禁用 Markdown",
+        "ENABLE_PARSE": "启用 Markdown"
       },
       "REMOVE_REMINDER": "删除提醒",
       "S": {
-        "ADDED_REMINDER": "添加提醒备注",
-        "DELETED_REMINDER": "已删除备注提醒",
-        "UPDATED_REMINDER": "更新了提醒注意事项"
+        "ADDED_REMINDER": "添加提醒笔记备注",
+        "DELETED_REMINDER": "已删除笔记提醒",
+        "UPDATED_REMINDER": "更新了笔记的提醒"
       },
       "UPDATE_REMINDER": "更新提醒"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "回去工作！",
-      "BREAK_IS_DONE": "你的休息完成了！",
-      "ENJOY_YOURSELF": "享受自己，让自己感动，回来：",
+      "BACK_TO_WORK": "继续加油！",
+      "BREAK_IS_DONE": "休息已完成！",
+      "ENJOY_YOURSELF": "放松一会再继续吧！",
       "FINISH_SESSION_X": "您已成功完成会话 <strong>{{nr}}</strong>！",
       "NOTIFICATION": {
         "BREAK_X_START": "番茄钟：休息 {{nr}} 开始了！",
@@ -468,49 +468,49 @@
       "SKIP_BREAK": "跳过休息"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "回去工作！",
+      "BACK_TO_WORK": "继续加油！",
       "COMP": {
-        "INTRO": "向自己展示一些同情心总是一个好主意。当然，它可以提高你的自我价值感，培养积极的情绪，并可以帮助你克服拖延。尝试一点运动：",
-        "L1": "如果你愿意的话，坐下来伸展自己，伸展一下",
-        "L2": "尽量倾听所产生的想法和感受",
-        "L3": "你是否以回应朋友的方式回应自己？",
+        "INTRO": "适当的放松是一种不错的方式，这样可以提高你的自我体验并且获得良好的情绪，克服拖延。做点运动放松下吧！",
+        "L1": "做点伸展运动放松一下吧，这会让你变得平静",
+        "L2": "倾听你自己的内心",
+        "L3": "你是否以回应朋友的方式回应自己的想法？",
         "L4": "如果答案是否定的，那就想象一下你朋友的情况。你会对他们说什么？你会为他们做什么？",
         "OUTRO": "可以在此处</a> 或 <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>找到更多练习 <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">。",
-        "TITLE": "自我同情"
+        "TITLE": "自我认可"
       },
       "CUR": {
-        "INTRO": "拖延很有意思，不是吗？这样做没有意义。根本不符合您的长期利益。但是仍然每个人都这样做。享受和探索！",
-        "L1": "什么样的感觉引起你拖延的诱惑？",
-        "L2": "你觉得它们在你体内的哪个部位？",
-        "L3": "他们提醒你什么？",
-        "L4": "当你观察它时，拖延的想法会发生什么？它会加剧吗？消散？导致其他情绪出现？",
+        "INTRO": "拖延会带来短暂的快感，但是这样不符合长期利益。",
+        "L1": "拖延给你的带来怎样的感受？",
+        "L2": "你是如何感受到拖延的快感？",
+        "L3": "拖延让你想起了什么？",
+        "L4": "当你发现自己的拖延时，这个念头会发生什么变化？加剧？减弱？导致其他情绪出现？",
         "L5": "当你继续保持对它们的认识时，你身体的感觉如何变化？",
         "TITLE": "好奇心"
       },
-      "H1": "减少一些自己的松懈！",
-      "P1": "首先放松一下！每个人都会偶尔做一次。如果你没有做你应该做的事，你至少应该享受它！然后查看以下部分以获取有用的信息。",
+      "H1": "减少松懈！",
+      "P1": "首先放松一下！每个人都会偶尔懈怠。如果你脱离了计划，你至少应该享受这段时间！然后再继续去做有意义的事情。",
       "P2": "如果你想了解更多有关背后的科学知识，我可以推荐 <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">这篇文章</a> ，其中有一些练习。",
       "P3": "记住：拖延是一种情绪调节问题，而不是时间管理问题。",
       "REFRAME": {
-        "INTRO": "考虑一下尽管有这个任务可能会有什么积极意义。",
-        "TITLE": "重新定义",
-        "TL1": "它可能有趣吗？",
+        "INTRO": "考虑一下这个任务的积极意义（尽管存在一些消极的点）。",
+        "TITLE": "重新规划",
+        "TL1": "它存在哪些吸引人的特点？",
         "TL2": "如果你完成它会得到什么？",
-        "TL3": "如果你完成它，你会怎么想？"
+        "TL3": "如果你完成它，你的感受会如何？"
       },
       "SPLIT_UP": {
         "INTRO": "将任务分成尽可能多的小块。",
-        "OUTRO": "完成了吗？然后考虑一下。什么是 - 严格的理论 - 如果</i> 你开始从事这项任务，你会做 <i>的第一件事？考虑一下...",
-        "TITLE": "分开吧！"
+        "OUTRO": "完成了吗？然后考虑一下。如果</i> 你开始从事这项任务，你会做 <i>的第一件事？考虑一下...",
+        "TITLE": "分割任务吧！"
       }
     },
     "PROJECT": {
       "D_CREATE": {
         "CREATE": "创建项目",
         "EDIT": "编辑项目",
-        "SETUP_GIT": "设置Github集成",
-        "SETUP_GITLAB": "设置Gitlab集成",
-        "SETUP_JIRA": "设置Jira集成"
+        "SETUP_GIT": "关联 Github",
+        "SETUP_GITLAB": "关联 Gitlab",
+        "SETUP_JIRA": "关联 Jira"
       },
       "FORM_BASIC": {
         "L_TITLE": "项目名",
@@ -518,9 +518,9 @@
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "如果系统支持全局暗模式，则不会使用。",
-        "HELP": "项目的主题设置。",
+        "HELP": "项目主题设置。",
         "L_COLOR_ACCENT": "强调色",
-        "L_COLOR_PRIMARY": "原色",
+        "L_COLOR_PRIMARY": "主体色",
         "L_COLOR_WARN": "警告/错误颜色",
         "L_HUE_ACCENT": "强调颜色背景上的暗文本的阈值",
         "L_HUE_PRIMARY": "原色背景上的暗文本阈值",
@@ -566,7 +566,7 @@
         "L_IS_ENABLED": "启用",
         "L_TITLE": "标题",
         "L_TYPE": "类型",
-        "TITLE": "简单柜台",
+        "TITLE": "简单计数器",
         "TYPE_CLICK_COUNTER": "点击计数器",
         "TYPE_STOPWATCH": "跑表"
       }
@@ -585,7 +585,7 @@
         "LABEL": "标签"
       },
       "FORM_BASIC": {
-        "L_COLOR": "颜色（如果使用了未定义的主要主题颜色）",
+        "L_COLOR": "颜色（缺省使用主体色）",
         "L_ICON": "图标",
         "L_TITLE": "标签名称",
         "TITLE": "基本设置"
@@ -599,7 +599,7 @@
         "ADD_ATTACHMENT": "添加附件",
         "ADD_SUB_TASK": "添加子任务",
         "ATTACHMENTS": "附件 {{nr}}",
-        "FROM_PARENT": "（来自家长）",
+        "FROM_PARENT": "（来自父任务）",
         "LOCAL_ATTACHMENTS": "本地附件",
         "NOTES": "笔记",
         "PARENT": "亲",
@@ -611,12 +611,12 @@
       },
       "ADD_TASK_BAR": {
         "ADD_TASK": "添加任务",
-        "ADD_TASK_TO_BACKLOG": "将任务添加到积压中",
+        "ADD_TASK_TO_BACKLOG": "将任务添加到待办事项中",
         "START": "再次按回车键开始"
       },
       "B": {
-        "ADD_HALF_HOUR": "加1/2小时",
-        "ESTIMATE_EXCEEDED": "超过“{{title}}”的时间估计"
+        "ADD_HALF_HOUR": "增加半小时",
+        "ESTIMATE_EXCEEDED": "已超过“{{title}}”的时间估计"
       },
       "CMP": {
         "ADD_SUB_TASK": "添加子任务",
@@ -629,14 +629,14 @@
         "EDIT_TAGS": "编辑标签",
         "MARK_DONE": "标为已完成",
         "MARK_UNDONE": "标记为撤消",
-        "MOVE_TO_BACKLOG": "转到积压",
+        "MOVE_TO_BACKLOG": "转到待办事项",
         "MOVE_TO_OTHER_PROJECT": "转到其他项目",
         "MOVE_TO_TODAY": "转到今天的列表",
         "OPEN_ATTACH": "附加文件或链接",
         "OPEN_ISSUE": "在新的浏览器选项卡中打开 Issue ",
-        "OPEN_TIME": "估计时间/增加花费的时间",
-        "REMOVE_FROM_MY_DAY": "从我的日子中删除",
-        "REPEAT_EDIT": "编辑重复任务配置",
+        "OPEN_TIME": "估计时间/增加花费的已用时间",
+        "REMOVE_FROM_MY_DAY": "从我的一天中删除",
+        "REPEAT_EDIT": "编辑重复任务",
         "SCHEDULE": "安排任务",
         "SHOW_UPDATES": "显示更新",
         "TOGGLE_ADDITIONAL": "显示/隐藏其他信息",
@@ -650,44 +650,44 @@
       "D_REMINDER_ADD": {
         "DATETIME_FOR": "提醒的日期时间",
         "EDIT": "编辑提醒",
-        "MOVE_TO_BACKLOG": "将任务移至待办事项直到计划",
-        "SCHEDULE": "时间表",
-        "UNSCHEDULE": "取消调度"
+        "MOVE_TO_BACKLOG": "在计划时间到来后将任务移至待办事项",
+        "SCHEDULE": "计划时间",
+        "UNSCHEDULE": "取消计划"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
-        "ADD_TO_TODAY": "今天添加",
-        "DISMISS": "解雇提醒",
+        "ADD_TO_TODAY": "添加到今天",
+        "DISMISS": "取消提醒",
         "DISMISS_ALL": "关闭所有",
-        "DUE_TASK": "适当的任务",
+        "DUE_TASK": "到期任务",
         "DUE_TASKS": "到期任务",
-        "FOR_CURRENT": "任务到期了。你想开始工作吗？",
+        "FOR_CURRENT": "任务到期了，你想开始工作吗？",
         "FOR_OTHER": "任务到期了。你想开始工作吗？",
         "FROM_PROJECT": "来自项目",
         "FROM_TAG": "来自标签：“{{title}}”",
         "SNOOZE": "暂停",
         "SNOOZE_ALL": "全部暂停",
-        "SNOOZE_UNTIL_TOMORROW": "直到明天",
+        "SNOOZE_UNTIL_TOMORROW": "明天重新开始",
         "START": "开始任务",
-        "SWITCH_CONTEXT_START": "切换上下文并开始"
+        "SWITCH_CONTEXT_START": "切换内容上下文并开始"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "添加其他时间花费的时间",
+        "ADD_FOR_OTHER_DAY": "添加已花费的时间",
         "DELETE_FOR": "删除当天的条目",
         "ESTIMATE": "估计",
-        "TIME_SPENT": "所花费的时间",
-        "TIME_SPENT_ON": "花费的时间 {{date}}",
-        "TITLE": "花费的时间/估计"
+        "TIME_SPENT": "已花费的时间",
+        "TIME_SPENT_ON": "{{date}} 已花费的时间",
+        "TITLE": "已花费的时间/估计"
       },
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "为 {{date}}添加新条目",
         "DATE": "新条目的日期",
         "HELP": "示例：<br> 30m => 30分钟<br> 2h => 2小时<br> 2h 30m => 2小时30分钟",
         "TINE_SPENT": "所花费的时间",
-        "TITLE": "添加一天"
+        "TITLE": "添加今天任务"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "超出时间估计！",
+        "ESTIMATE_EXCEEDED": "超出预估时间！",
         "ESTIMATE_EXCEEDED_BODY": "您超出了“{{title}}”的预计时间。"
       },
       "S": {
