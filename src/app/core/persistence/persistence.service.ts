@@ -327,7 +327,7 @@ export class PersistenceService {
         devError('No data for ' + modelCfg.appDataKey + ' - ' + data[modelCfg.appDataKey]);
         return;
       }
-      return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg.save, true);
+      return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg, true);
     }));
 
     return await Promise.all([
@@ -489,11 +489,11 @@ export class PersistenceService {
   }
 
   // tslint:disable-next-line
-  private async _saveForProjectIds(data: any, saveDataFn: Function, isDataImport = false) {
+  private async _saveForProjectIds(data: any, projectModel: PersistenceForProjectModel<unknown, unknown>, isDataImport = false) {
     const promises: Promise<any>[] = [];
     Object.keys(data).forEach(projectId => {
       if (data[projectId]) {
-        promises.push(saveDataFn(projectId, data[projectId], isDataImport));
+        promises.push(projectModel.save(projectId, data[projectId], {isDataImport}));
       }
     });
     return await Promise.all(promises);
