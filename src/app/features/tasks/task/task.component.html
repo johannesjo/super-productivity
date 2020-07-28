@@ -258,6 +258,15 @@
             {{T.F.TASK.CMP.TRACK_TIME_STOP|translate}}
           </button>
 
+          <button (click)="removeFromMyDay()"
+                  *ngIf="!task?.parentId && !task?.isDone && task?.tagIds.includes(TODAY_TAG_ID) && (task?.projectId || task?.tagIds?.length > 1)"
+                  class="show-only-on-touch-only"
+                  mat-menu-item
+                  tabindex="2">
+            <mat-icon svgIcon="remove_today"></mat-icon>
+            {{T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate}}
+          </button>
+
           <button (click)="estimateTime()"
                   *ngIf="!task?.subTasks?.length"
                   class="hide-xs"
