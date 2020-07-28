@@ -341,6 +341,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false) {
+    if (IS_TOUCH_ONLY) {
+      return;
+    }
+
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const prevEl = taskEls[currentIndex - 1] as HTMLElement;
@@ -360,6 +364,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusNext(isFocusReverseIfNotPossible: boolean = false) {
+    if (IS_TOUCH_ONLY) {
+      return;
+    }
+
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const nextEl = taskEls[currentIndex + 1] as HTMLElement;
@@ -378,6 +386,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusSelf() {
+    if (IS_TOUCH_ONLY) {
+      return;
+    }
+
     this.focusSelfElement();
     // this._taskService.focusTask((this.task as TaskWithSubTasks).id);
   }
