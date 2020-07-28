@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { concatMap, delay, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { concatMap, delay, filter, first, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -50,7 +50,7 @@ import {
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
-import { WorkContextType } from '../../work-context/work-context.model';
+import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Project } from '../project.model';
@@ -397,6 +397,25 @@ export class ProjectEffects {
             taskIds: allIds.filter((id => !!id)),
           });
           alert('Done!');
+        }
+      }),
+    );
+
+  @Effect({dispatch: false})
+  fixWeirdUnlistedTasks: Observable<unknown> = this._workContextService.activeWorkContext$
+    .pipe(
+      // only run in prod, because we want to debug this
+      // filter(() => environment.production),
+      filter(({type, taskIds}) => type === WorkContextType.PROJECT && taskIds.length === 0),
+      withLatestFrom(this._taskService.allTasks$),
+      tap(([{id}, allTasks]: [WorkContext, Task[]]) => {
+        const unlistedParentTasks = allTasks.filter(task => !task.parentId && task.projectId === id);
+        if (unlistedParentTasks.length
+          && confirm('Nooo! We found some tasks that are not listed (but should be). Do you want to list them?')) {
+          const unlistedIds = unlistedParentTasks.map(task => task.id);
+          this._projectService.update(id, {
+            taskIds: unlistedIds
+          });
         }
       }),
     );
