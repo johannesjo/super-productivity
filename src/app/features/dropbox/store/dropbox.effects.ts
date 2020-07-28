@@ -145,9 +145,9 @@ export class DropboxEffects {
         msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED
       }), 200)
     ),
-    map((_accessToken: string) => new UpdateGlobalConfigSection({
+    map((accessToken: string) => new UpdateGlobalConfigSection({
       sectionKey: 'dropboxSync',
-      sectionCfg: {accessToken: _accessToken}
+      sectionCfg: {accessToken}
     })),
   );
 
