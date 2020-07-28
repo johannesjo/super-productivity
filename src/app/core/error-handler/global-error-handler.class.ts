@@ -3,7 +3,7 @@ import { isObject } from '../../util/is-object';
 import { getJiraResponseErrorTxt } from '../../util/get-jira-response-error-text';
 import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../electron/electron.service';
-import { createErrorAlert, getSimpleMeta, isHandledError, logAdvancedStacktrace } from './global-error-handler.util';
+import { createErrorAlert, isHandledError, logAdvancedStacktrace } from './global-error-handler.util';
 import { remote } from 'electron';
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
 
@@ -37,7 +37,6 @@ export class GlobalErrorHandler implements ErrorHandler {
       } else {
         createErrorAlert(this._electronService, errorStr, simpleStack, err);
       }
-      console.log(getSimpleMeta());
     }
 
     if (IS_ELECTRON) {

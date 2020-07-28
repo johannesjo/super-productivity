@@ -32,7 +32,6 @@ async function _getStacktrace(err: Error | any): Promise<string> {
 const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
 
 export const logAdvancedStacktrace = (origErr: unknown, additionalLogFn?: (stack: string) => void) => _getStacktraceThrottled(origErr).then(stack => {
-  console.log(stack);
 
   if (additionalLogFn) {
     additionalLogFn(stack);
@@ -44,7 +43,6 @@ export const logAdvancedStacktrace = (origErr: unknown, additionalLogFn?: (stack
   }
 
   const githubIssueLink = document.getElementById('github-issue-url');
-  console.log(githubIssueLink);
 
   if (githubIssueLink) {
     const errEscaped = _cleanHtml(origErr as string);
