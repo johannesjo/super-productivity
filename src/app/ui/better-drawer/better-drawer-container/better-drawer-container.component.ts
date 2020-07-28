@@ -17,6 +17,7 @@ import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, share, switchMap } from 'rxjs/operators';
 import { observeWidth } from '../../../util/resize-observer-obs';
 import { MainContainerClass } from '../../../app.constants';
+import { IS_TOUCH_ONLY } from '../../../util/is-touch';
 
 const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;
@@ -103,6 +104,14 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
   }
 
   close() {
+    // FORCE blur because otherwise task notes won't save
+    if (IS_TOUCH_ONLY) {
+      document.querySelectorAll('input,textarea').forEach((element) => {
+        if (element === document.activeElement) {
+          return (element as HTMLElement).blur();
+        }
+      });
+    }
     this.wasClosed.emit();
   }
 
