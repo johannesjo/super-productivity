@@ -692,11 +692,11 @@
       },
       "S": {
         "DELETED": "已删除任务“{{title}}”",
-        "FOUND_MOVE_FROM_BACKLOG": "将现有任务 <strong>{{title}}</strong> 移至今日任务列表",
+        "FOUND_MOVE_FROM_BACKLOG": "将任务 <strong>{{title}}</strong> 移至今日任务列表",
         "FOUND_MOVE_FROM_OTHER_LIST": "已将任务 <strong>{{title}}</strong> 从 <strong>{{contextTitle}}</strong> 添加到当前列表",
-        "FOUND_RESTORE_FROM_ARCHIVE": "已恢复的任务 <strong>{{title}}</strong> 与存档问题相关",
+        "FOUND_RESTORE_FROM_ARCHIVE": "已恢复的任务 <strong>{{title}}</strong> 与存档 Issue 相关",
         "LAST_TAG_DELETION_WARNING": "您正在尝试删除非项目任务的最后一个标签。这是不允许的！",
-        "REMINDER_ADDED": "计划任务“{{title}}”",
+        "REMINDER_ADDED": "已计划任务“{{title}}”",
         "REMINDER_DELETED": "已删除任务提醒",
         "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒",
         "TASK_CREATED": "已创建任务“{{title}}”"
@@ -704,27 +704,27 @@
       "SELECT_OR_CREATE": "选择或创建任务",
       "SUMMARY_TABLE": {
         "ESTIMATE": "估计",
-        "SPENT_TODAY": "花了今天",
-        "SPENT_TOTAL": "花费总计",
+        "SPENT_TODAY": "今天用时",
+        "SPENT_TOTAL": "总计用时",
         "TASK": "任务",
-        "TOGGLE_DONE": "un- /标记为已完成"
+        "TOGGLE_DONE": "取消标记/标记为已完成"
       }
     },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "删除重复配置会将此任务的所有先前实例转换为常规任务。你确定要继续吗？",
+        "MSG": "删除重复配置会将此任务的所有先前实例转换为常规任务，是否继续？",
         "OK": "完全删除"
       },
       "D_EDIT": {
         "ADD": "添加重复任务配置",
         "EDIT": "编辑重复任务配置",
-        "HELP1": "重复任务适用于日常琐事，例如：“组织”，“每日会议”，“代码审查”，“检查电子邮件”或可能一次又一次发生的类似任务。",
-        "HELP2": "配置完成后，一旦打开项目，将在下面选择的每一天重新创建重复任务，并在一天结束时自动标记为已完成。它们将作为不同的实例处理。所以你可以自由添加子任务等。",
+        "HELP1": "重复任务适用于日常琐事，例如：“每日会议”，“代码审查”，“检查电子邮件”或可能一次又一次发生的类似任务。",
+        "HELP2": "配置完成后，一旦打开项目，将在选择的每一天重新创建重复任务，并在一天结束时自动标记为已完成。它们将作为不同的实例处理。所以你可以自由添加子任务等。",
         "HELP3": "从Jira或Git Issue 导入的任务不能重复。所有提醒也将在重复任务中删除。",
         "TAG_LABEL": "要添加的标签"
       },
       "F": {
-        "DEFAULT_ESTIMATE": "默认估计",
+        "DEFAULT_ESTIMATE": "默认预估用时",
         "FRIDAY": "星期️五",
         "IS_ADD_TO_BOTTOM": "将任务移到列表底部",
         "MONDAY": "星期一",
@@ -738,13 +738,13 @@
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "我已经做了",
+        "ALREADY_DID": "已完成",
         "SNOOZE": "暂停 {{time}}"
       },
       "D_IDLE": {
-        "BREAK": "打破",
+        "BREAK": "休息",
         "CREATE_AND_TRACK": "<em>创建</em> 并跟踪到：",
-        "IDLE_FOR": "你一直闲着：",
+        "IDLE_FOR": "你一直未开始工作：",
         "SKIP": "跳跃",
         "TASK": "任务",
         "TASK_BREAK": "任务中断",
@@ -758,48 +758,48 @@
         "REPEATING_TASK": "重复任务",
         "RESTORE_TASK_FROM_ARCHIVE": "从存档还原任务",
         "TASKS": "任务",
-        "TOTAL_TIME": "花费的时间总计：",
-        "WEEK_NR": "周 {{nr}}",
-        "WORKED": "工作"
+        "TOTAL_TIME": "总花费时间：",
+        "WEEK_NR": "{{nr}}周 ",
+        "WORKED": "已完成"
       },
       "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？",
-      "D_EXPORT_TITLE": "工作日志导出 {{start}} - {{end}}",
-      "D_EXPORT_TITLE_SINGLE": "工作日志导出 {{day}}",
+      "D_EXPORT_TITLE": "导出 {{start}} - {{end}}工作日志",
+      "D_EXPORT_TITLE_SINGLE": "导出 {{day} 工作日志}",
       "EXPORT": {
-        "ADD_COL": "添加栏",
+        "ADD_COL": "添加列",
         "COPY_TO_CLIPBOARD": "复制到剪贴板",
-        "DONT_ROUND": "不圆",
-        "EDIT_COL": "编辑栏",
-        "GROUP_BY": "通过...分组",
+        "DONT_ROUND": "禁用取整",
+        "EDIT_COL": "编辑列",
+        "GROUP_BY": "分组依据",
         "O": {
           "DATE": "日期",
           "ENDED_WORKING": "结束工作",
-          "ESTIMATE_AS_CLOCK": "估计为时钟（例如5:23）",
+          "ESTIMATE_AS_CLOCK": "估计 数字格式（例如5:23）",
           "ESTIMATE_AS_MILLISECONDS": "估计为毫秒",
-          "ESTIMATE_AS_STRING": "估计为字符串（例如5小时23分钟）",
-          "FULL_HALF_HOURS": "整整半个小时",
-          "FULL_HOURS": "整整一个小时",
-          "FULL_QUARTERS": "整个季度",
+          "ESTIMATE_AS_STRING": "估计 叙述格式（例如5h23m）",
+          "FULL_HALF_HOURS": "半小时",
+          "FULL_HOURS": "一小时",
+          "FULL_QUARTERS": "一刻钟",
           "PARENT_TASK": "父任务",
           "PARENT_TASK_TITLES_ONLY": "仅限父任务标题",
-          "STARTED_WORKING": "开始工作了",
+          "STARTED_WORKING": "开始工作",
           "TASK_SUBTASK": "任务/子任务",
-          "TIME_AS_CLOCK": "时间作为时钟（例如5:23）",
+          "TIME_AS_CLOCK": "用时 数字格式（例如5:23）",
           "TIME_AS_MILLISECONDS": "时间为毫秒",
-          "TIME_AS_STRING": "时间为字符串（例如5小时23分钟）",
+          "TIME_AS_STRING": "用时 叙述格式（如 5h23m）",
           "TITLES_AND_SUB_TASK_TITLES": "标题和子任务标题",
           "WORKLOG": "工作日志"
         },
         "OPTIONS": "选项",
-        "ROUND_END_TIME_TO": "结束时间到",
-        "ROUND_START_TIME_TO": "回合开始时间",
-        "ROUND_TIME_WORKED_TO": "回合时间适用于",
+        "ROUND_END_TIME_TO": "结束时间取整到",
+        "ROUND_START_TIME_TO": "开始时间取整到",
+        "ROUND_TIME_WORKED_TO": "工作时间取整到",
         "SAVE_TO_FILE": "保存到文件",
-        "SEPARATE_TASKS_BY": "分开任务",
+        "SEPARATE_TASKS_BY": "任务分开依据",
         "SHOW_AS_TEXT": "显示为文字"
       },
       "WEEK": {
-        "EXPORT": "出口周数据",
+        "EXPORT": "导出周数据",
         "NO_DATA": "本周还没有任务。",
         "TITLE": "标题"
       }
@@ -815,8 +815,8 @@
     "CLICK_TO_EDIT": "点击编辑",
     "CLOSE": "关",
     "DELETE": "删除",
-    "DISMISS": "解雇",
-    "DO_IT": "做吧！",
+    "DISMISS": "取消",
+    "DO_IT": "开始吧！",
     "EDIT": "编辑",
     "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
     "LOGIN": "登录",
@@ -837,9 +837,9 @@
   },
   "GCF": {
     "AUTO_BACKUPS": {
-      "HELP": "自动将所有数据保存到您的应用程序文件夹，以便在出现问题时准备好。",
+      "HELP": "自动将所有数据保存到您的应用程序文件夹，以防出现问题。",
       "LABEL_IS_ENABLED": "启用自动备份",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "备份存储到：",
       "TITLE": "自动备份"
     },
     "EVALUATION": {
@@ -847,7 +847,7 @@
       "TITLE": "评估与指标"
     },
     "GOOGLE_DRIVE_SYNC": {
-      "HELP": "在这里，您可以将应用配置为自动与单个Google驱动器文件同步。所有数据都将以未加密的方式保存，因此请确保您不会意外地与他人共享此文件。",
+      "HELP": "在这里，您可以将应用配置为自动与单个Google Drive文件同步。所有数据都将以未加密的方式保存，因此请确保您不会意外地与他人共享此文件。",
       "TITLE": "通过Google Drive同步"
     },
     "IDLE": {
@@ -855,7 +855,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "启用空闲时间处理",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "仅在选择当前任务时触发空闲时间对话框",
       "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未跟踪的空闲时间重置需要休息计时器",
-      "MIN_IDLE_TIME": "X后触发空闲",
+      "MIN_IDLE_TIME": "触发空闲的时间阈值",
       "TITLE": "闲置处理"
     },
     "IMEX": {
@@ -865,15 +865,15 @@
     "KEYBOARD": {
       "ADD_NEW_NOTE": "添加新笔记",
       "ADD_NEW_TASK": "添加新任务",
-      "APP_WIDE_SHORTCUTS": "全局快捷方式（适用范围广）",
+      "APP_WIDE_SHORTCUTS": "全局快捷键",
       "COLLAPSE_SUB_TASKS": "折叠子任务",
       "EXPAND_SUB_TASKS": "展开子任务",
       "GLOBAL_ADD_NOTE": "添加新笔记",
       "GLOBAL_ADD_TASK": "添加新任务",
-      "GLOBAL_SHOW_HIDE": "显示/隐藏Super Productivity",
-      "GLOBAL_TOGGLE_TASK_START": "切换上次活动任务的时间跟踪",
+      "GLOBAL_SHOW_HIDE": "显示/隐藏 Super Productivity",
+      "GLOBAL_TOGGLE_TASK_START": "切换上次活动任务进行时间跟踪",
       "GO_TO_DAILY_AGENDA": "转到议程",
-      "GO_TO_FOCUS_MODE": "进入对焦模式",
+      "GO_TO_FOCUS_MODE": "进入专注模式",
       "GO_TO_SETTINGS": "前往设置",
       "GO_TO_WORK_VIEW": "转到工作视图",
       "HELP": "<p>您可以在此处配置所有键盘快捷键。</p> <p>单击文本输入并输入所需的键盘组合。按Enter键保存，Escape退出。</p> <p>有三种类型的快捷方式：</p> <ul> <li> <strong>全局快捷方式：</strong> 当应用程序运行时，它将触发其他所有应用程序的操作。 </li> <li> <strong>应用程序级快捷方式：</strong> 将从应用程序的每个屏幕触发，但如果您当前正在编辑文本字段则不会。 </li> <li> <strong>任务级快捷方式：</strong> 只有通过鼠标或键盘选择任务并且通常会触发与该任务特定相关的操作时，它们才会触发。 </li> </ul>",
@@ -896,29 +896,29 @@
       "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "显示/隐藏其他任务信息",
       "TASK_TOGGLE_DONE": "切换完成",
       "TITLE": "键盘快捷键",
-      "TOGGLE_BACKLOG": "显示/隐藏任务积压",
+      "TOGGLE_BACKLOG": "显示/隐藏待办事项",
       "TOGGLE_BOOKMARKS": "显示/隐藏书签栏",
       "TOGGLE_PLAY": "启动/停止任务",
-      "ZOOM_DEFAULT": "缩放默认值（仅限桌面）",
-      "ZOOM_IN": "放大（仅限桌面）",
-      "ZOOM_OUT": "缩小（仅限桌面）"
+      "ZOOM_DEFAULT": "缩放默认值（仅限桌面端）",
+      "ZOOM_IN": "放大（仅限桌面端）",
+      "ZOOM_OUT": "缩小（仅限桌面端）"
     },
     "LANG": {
-      "AR": "阿拉伯",
+      "AR": "阿拉伯语",
       "DE": "德语",
       "EN": "英语",
       "ES": "西班牙语",
-      "FA": "波斯語",
-      "FR": "法国",
-      "IT": "意大利",
-      "JA": "日本",
-      "KO": "朝鲜的",
+      "FA": "波斯语",
+      "FR": "法语",
+      "IT": "意大利语",
+      "JA": "日本语",
+      "KO": "朝鲜语",
       "LABEL": "请选择一种语言",
       "NL": "荷兰语",
       "PT": "葡萄牙语",
       "RU": "俄语",
       "TITLE": "语言",
-      "TR": "土耳其",
+      "TR": "土耳其语",
       "ZH": "中文"
     },
     "MISC": {
@@ -936,17 +936,17 @@
       "TITLE": "其他设置"
     },
     "POMODORO": {
-      "BREAK_DURATION": "短暂休息的持续时间",
-      "CYCLES_BEFORE_LONGER_BREAK": "在X工作会话后开始更长的休息",
+      "BREAK_DURATION": "番茄钟短休息",
+      "CYCLES_BEFORE_LONGER_BREAK": "长休息番茄钟间隔",
       "DURATION": "工作时间",
       "HELP": "<p>可以通过几种设置配置番茄钟定时器。每个工作会话的持续时间，正常休息的持续时间，开始较长休息之前运行的工作会话的数量以及此较长休息的持续时间。</p> <p>您还可以设置是否要在番茄钟休息时显示您的注意力分散。</p> <p>设置“暂停时间跟踪番茄钟休息时间”也会跟踪您的休息时间作为在任务上花费的工作时间。 </p> <p>当您暂停任务时，启用“当没有活动任务时暂停番茄钟会话”也会暂停番茄钟会话。</p>",
       "IS_ENABLED": "启用番茄钟计时器",
-      "IS_MANUAL_CONTINUE": "手动确认开始下一个番茄钟会议",
+      "IS_MANUAL_CONTINUE": "手动确认开始下一个番茄钟",
       "IS_PLAY_SOUND": "会话完成后播放声音",
       "IS_PLAY_SOUND_AFTER_BREAK": "休息时播放声音",
       "IS_PLAY_TICK": "每秒播放滴答声",
       "IS_STOP_TRACKING_ON_BREAK": "停止时间跟踪任务中断",
-      "LONGER_BREAK_DURATION": "较长休息时间",
+      "LONGER_BREAK_DURATION": "番茄钟长休息",
       "TITLE": "番茄钟"
     },
     "TAKE_A_BREAK": {
@@ -955,19 +955,19 @@
       "IS_FOCUS_WINDOW": "提醒处于活动状态时关注应用程序窗口（仅限桌面）",
       "IS_LOCK_SCREEN": "休息时锁定屏幕（仅限桌面）",
       "MESSAGE": "休息一下",
-      "MIN_WORKING_TIME": "X工作后没有一个触发器会触发中断通知",
+      "MIN_WORKING_TIME": "触发休息提醒的工作时长",
       "MOTIVATIONAL_IMG": "励志图片（网址）",
-      "TITLE": "打破提醒"
+      "TITLE": "休息提醒"
     }
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "复制到剪贴板",
-    "ERR_COMPRESSION": "压缩接口出错",
+    "ERR_COMPRESSION": "压缩界面出错",
     "PERSISTENCE_DISALLOWED": "数据将不会永久保存。请注意，这可能会导致数据丢失！！",
     "RUNNING_X": "运行“{{str}}”。"
   },
   "GPB": {
-    "ASSETS": "正在加载资产...",
+    "ASSETS": "正在加载数据...",
     "DBX_DOWNLOAD": "Dropbox：下载文件...",
     "DBX_GEN_TOKEN": "Dropbox：生成令牌...",
     "DBX_META": "Dropbox：获取文件元数据...",
@@ -984,7 +984,7 @@
     "DELETE_TAG": "删除标签",
     "GO_TO_TASK_LIST": "转到任务列表",
     "MANAGE_PROJECTS": "管理项目",
-    "METRICS": "度量",
+    "METRICS": "评估",
     "NOTES": "笔记",
     "PROCRASTINATE": "拖延",
     "PROJECTS": "项目",
@@ -1007,8 +1007,8 @@
     "CLEAR_ALL_CONTINUE": "清除所有完成并继续",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "不，只是清除任务",
-      "MSG": "你的工作已经完成。该回家了！",
-      "OK": "好的好的！关掉！"
+      "MSG": "你的工作已经完成！返回主界面",
+      "OK": "好的！结束程序！"
     },
     "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
@@ -1020,15 +1020,15 @@
     "ROUND_TIME_SPENT": "花了很长时间",
     "ROUND_TIME_SPENT_TITLE": "花在所有任务上的时间。小心！你不能撤消这个！",
     "ROUND_TIME_WARNING": "！小心这不能撤消！",
-    "ROUND_UP_15M": "将所有任务完成为15分钟",
-    "ROUND_UP_30M": "将所有任务完成30分钟",
-    "ROUND_UP_5M": "将所有任务完成为5分钟",
-    "SAVE_AND_GO_HOME": "保存并回家",
+    "ROUND_UP_15M": "将所有任务向上取整为15分钟",
+    "ROUND_UP_30M": "将所有任务向上取整为30分钟",
+    "ROUND_UP_5M": "将所有任务向上取整为5分钟",
+    "SAVE_AND_GO_HOME": "保存并返回主界面",
     "START_END": "开始 - 结束",
     "SUMMARY_FOR": " {{dayStr}}的每日摘要",
     "TASKS_COMPLETED": "任务已完成",
     "TASK_LIST": "任务列表",
-    "TIME_SPENT_AND_ESTIMATE_LABEL": "花费的时间/估计",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "花费时间/估计",
     "TIME_SPENT_ESTIMATE_TITLE": "花费的时间：今天花费的总时间。存档的任务不包括在内。 - 估计时间：今天工作的任务估计时间减去其他日子已经花费的时间。",
     "TODAY": "今天",
     "WEEK": "周"
@@ -1075,8 +1075,8 @@
   },
   "S": {
     "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "导入数据时出错了。回到本地备份。",
-      "ERROR_INVALID_DATA": "同步时出错。无效数据",
+      "ERROR_FALLBACK_TO_BACKUP": "导入数据时出错，回滚到本地备份。",
+      "ERROR_INVALID_DATA": "同步时出错，数据无效",
       "IMPORTING": "导入数据",
       "SUCCESS": "数据已导入"
     }
@@ -1096,11 +1096,11 @@
     "green": "绿色",
     "indigo": "靛青",
     "light-blue": "浅蓝",
-    "light-green": "浅绿色的",
+    "light-green": "浅绿色",
     "lime": "酸橙",
     "pink": "粉",
     "purple": "紫色",
-    "teal": "水鸭",
+    "teal": "茶色",
     "yellow": "黄色"
   },
   "V": {
@@ -1111,21 +1111,21 @@
     "E_MIN": "应小于 {{val}}",
     "E_MIN_LENGTH": "长度至少应为 {{val}} 个字符",
     "E_PATTERN": "输入无效",
-    "E_REQUIRED": "这是必填栏"
+    "E_REQUIRED": "必填"
   },
   "WW": {
     "ADD_MORE": "添加更多",
-    "ADD_SOME_TASKS": "添加一些任务来计划你的一天！",
+    "ADD_SOME_TASKS": "添加一些任务来规划你的一天！",
     "COMPLETED_TASKS": "完成的任务",
-    "ESTIMATE_REMAINING": "美东时间。其余：",
+    "ESTIMATE_REMAINING": "预估剩余时间：",
     "FINISH_DAY": "完成日",
-    "HELP_PROCRASTINATION": "帮助我拖延！",
+    "HELP_PROCRASTINATION": "帮帮我！我在拖延！",
     "NO_COMPLETED_TASKS": "目前还没有完成的任务",
     "NO_PLANNED_TASKS": "没有计划的任务",
     "READY_TO_WORK": "准备好工作了！",
     "RESET_BREAK_TIMER": "无需中断计时器即可重置",
     "TIME_ESTIMATED": "估计时间：",
-    "WITHOUT_BREAK": "没有休息：",
+    "WITHOUT_BREAK": "持续工作时间：",
     "WORKING_TODAY": "今天工作："
   }
 }
