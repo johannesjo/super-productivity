@@ -12,6 +12,11 @@ import { IPC } from '../../../../electron/ipc-events.const';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { ElectronService } from '../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { WorkContextType } from '../../features/work-context/work-context.model';
+import { SnackService } from '../../core/snack/snack.service';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -26,9 +31,12 @@ export class ShortcutService {
     private _layoutService: LayoutService,
     private _matDialog: MatDialog,
     private _taskService: TaskService,
+    private _workContextService: WorkContextService,
+    private _snackService: SnackService,
     private _activatedRoute: ActivatedRoute,
     private _uiHelperService: UiHelperService,
     private _bookmarkService: BookmarkService,
+    private _translateService: TranslateService,
     private _ngZone: NgZone,
   ) {
     this._activatedRoute.queryParams
@@ -121,12 +129,23 @@ export class ShortcutService {
       }
 
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
-      this._layoutService.toggleNotes();
       ev.preventDefault();
-
+      if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
+        this._layoutService.toggleNotes();
+      } else {
+        this._snackService.open({
+          msg: this._translateService.instant(T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_NOTES_FROM_TAG, {keyCombo: keys.openProjectNotes}),
+        });
+      }
     } else if (checkKeyCombo(ev, keys.toggleBookmarks)) {
-      this._bookmarkService.toggleBookmarks();
       ev.preventDefault();
+      if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
+        this._bookmarkService.toggleBookmarks();
+      } else {
+        this._snackService.open({
+          msg: this._translateService.instant(T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG, {keyCombo: keys.openProjectNotes}),
+        });
+      }
     } else if (checkKeyCombo(ev, 'Ctrl+Shift+*')
       && document.activeElement
       && document.activeElement.getAttribute('routerlink') === '/procrastination') {
