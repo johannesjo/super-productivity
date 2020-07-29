@@ -74,13 +74,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
         label: T.GCF.KEYBOARD.ADD_NEW_NOTE
       },
     },
-    {
-      key: 'openProjectNotes',
-      type: 'keyboard',
-      templateOptions: {
-        label: T.GCF.KEYBOARD.OPEN_PROJECT_NOTES
-      },
-    },
+    // {
+    //   key: 'openProjectNotes',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: T.GCF.KEYBOARD.OPEN_PROJECT_NOTES
+    //   },
+    // },
     // {
     //   key: 'openDistractionPanel',
     //   type: 'keyboard',
