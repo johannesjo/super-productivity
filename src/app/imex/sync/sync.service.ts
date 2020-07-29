@@ -21,11 +21,11 @@ import { SyncProvider } from './sync-provider';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { AppDataComplete } from './sync.model';
 import { SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME } from './sync.const';
 import { isTouchOnly } from '../../util/is-touch';
 import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
 import { IdleService } from '../../features/time-tracking/idle.service';
+import { AppDataComplete } from './sync.model';
 
 // TODO naming
 @Injectable({
@@ -39,7 +39,7 @@ export class SyncService {
   // ----------------------
   private _onUpdateLocalDataTrigger$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
     this._persistenceService.onAfterSave$.pipe(
-      filter(({appDataKey, data, isDataImport}) => !!data && !isDataImport),
+      filter(({appDataKey, data, isDataImport, isSyncModelChange}) => !!data && !isDataImport && isSyncModelChange),
     );
   // ------------------
   private _focusAppTrigger$: Observable<string> = fromEvent(window, 'focus').pipe(

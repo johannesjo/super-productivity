@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
   GLOBAL_CONFIG_FORM_CONFIG,
@@ -39,6 +39,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor(
+    private readonly _cd: ChangeDetectorRef,
     public readonly configService: GlobalConfigService,
   ) {
     // somehow they are only unproblematic if assigned here
@@ -50,6 +51,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this._subs.add(this.configService.cfg$.subscribe((cfg) => {
       this.globalCfg = cfg;
+      this._cd.detectChanges();
     }));
   }
 

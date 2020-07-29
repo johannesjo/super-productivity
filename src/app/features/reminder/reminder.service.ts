@@ -209,8 +209,7 @@ export class ReminderService {
 
   private _saveModel(reminders: Reminder[]) {
     this._updateRemindersInWorker(this._reminders);
-    this._persistenceService.updateLastLocalSyncModelChange();
-    this._persistenceService.reminders.saveState(reminders);
+    this._persistenceService.reminders.saveState(reminders, {isSyncModelChange: true});
     this._reminders$.next(this._reminders);
   }
 

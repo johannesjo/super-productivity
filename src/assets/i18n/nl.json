@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "Nieuwe versie beschikbaar. Nieuwe versie laden?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "Van andere projecten",
-    "NO_TASKS": "Er staan momenteel geen taken in uw backlog",
-    "SCHEDULED": "Gepland",
-    "TITLE": "Achterstand"
+    "NO_TASKS": "Er staan momenteel geen taken in uw backlog"
   },
   "DATETIME_INPUT": {
     "IN": "op {{time}}",
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "Sla alle gegevens automatisch op in uw app-map om deze gereed te hebben voor het geval er iets misgaat.",
       "LABEL_IS_ENABLED": "Schakel automatische back-ups in",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "Back-ups worden opgeslagen in:",
       "TITLE": "Automatische back-ups"
     },
     "EVALUATION": {

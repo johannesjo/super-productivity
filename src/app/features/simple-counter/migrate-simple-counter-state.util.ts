@@ -6,7 +6,7 @@ import { Dictionary } from '@ngrx/entity';
 const MODEL_VERSION = 2;
 
 export const migrateSimpleCounterState = (simpleCounterState: SimpleCounterState): SimpleCounterState => {
-  if (!isMigrateModel(simpleCounterState, MODEL_VERSION)) {
+  if (!isMigrateModel(simpleCounterState, MODEL_VERSION, 'SimpleCounter')) {
     return simpleCounterState;
   }
 

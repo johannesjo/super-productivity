@@ -38,6 +38,7 @@ import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { WorkContextModule } from './features/work-context/work-context.module';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
 import { InitialDialogModule } from './features/initial-dialog/initial-dialog.module';
+import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -80,7 +81,7 @@ export function createTranslateLoader(http: HttpClient) {
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers,
       {
-        metaReducers: [undoTaskDeleteMetaReducer],
+        metaReducers: [undoTaskDeleteMetaReducer, actionLoggerReducer],
         ...(environment.production
           ? {
             runtimeChecks: {

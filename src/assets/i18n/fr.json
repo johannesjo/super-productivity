@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "Une nouvelle version est disponible. Charger la nouvelle version ?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "À partir d'autres projets",
-    "NO_TASKS": "Il n'y a actuellement aucune tâche dans votre backlog",
-    "SCHEDULED": "Planifié",
-    "TITLE": "Backlog"
+    "NO_TASKS": "Il n'y a actuellement aucune tâche dans votre backlog"
   },
   "DATETIME_INPUT": {
     "IN": "dans {{time}}",
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "Sauvegardez automatiquement toutes les données dans votre dossier d'applications afin de les retrouver en cas de problème.",
       "LABEL_IS_ENABLED": "Activer les sauvegardes automatiques",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "Les sauvegardes sont enregistrées dans:",
       "TITLE": "Sauvegardes automatiques"
     },
     "EVALUATION": {

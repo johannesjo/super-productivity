@@ -14,10 +14,14 @@
     "UPDATE_WEB_APP": "新版本可用，是否加载新版本？"
   },
   "BL": {
+<<<<<<< HEAD
     "FROM_OTHER_PROJECTS": "来自其他项目",
     "NO_TASKS": "目前您的待办事项中没有任务",
     "SCHEDULED": "已计划",
     "TITLE": "待办事项"
+=======
+    "NO_TASKS": "您的待办事项中目前没有任务"
+>>>>>>> upstream/master
   },
   "DATETIME_INPUT": {
     "IN": "在 {{time}}",

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { getCacheId } from './get-cache-id';
 import { tap } from 'rxjs/operators';
-import { loadFromLs, saveToLs } from '../../../core/persistence/local-storage';
+import { loadFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
 
 export interface CacheItem {
   r: any;
@@ -32,16 +32,16 @@ export class IssueCacheService {
       e: minAlive ? (Date.now() + minAlive) : null,
       r: response,
     };
-    saveToLs(cacheId, item);
+    saveToRealLs(cacheId, item);
   }
 
   private _loadResponseFromCache(cacheId: string) {
-    const cacheItem = loadFromLs(cacheId);
+    const cacheItem = loadFromRealLs(cacheId);
     return cacheItem && cacheItem.r;
   }
 
   private _loadResponseItemFromCache(cacheId: string): CacheItem {
-    return loadFromLs(cacheId);
+    return loadFromRealLs(cacheId);
   }
 
   private _isUseCache(cacheId: string) {

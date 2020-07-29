@@ -48,7 +48,7 @@ describe('PersistenceService', () => {
       expect(data).toEqual(createEmptyEntity());
       done();
     });
-    service.tag.saveState(createEmptyEntity());
+    service.tag.saveState(createEmptyEntity(), {isSyncModelChange: true});
   });
 
   describe('inMemoryComplete$', () => {

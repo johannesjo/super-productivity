@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { concatMap, delay, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { concatMap, delay, filter, first, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -50,7 +50,7 @@ import {
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
-import { WorkContextType } from '../../work-context/work-context.model';
+import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Project } from '../project.model';
@@ -64,12 +64,7 @@ import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 @Injectable()
 export class ProjectEffects {
-  saveToLs$: Observable<unknown> = this._store$.pipe(
-    // tap(() => console.log('SAVE')),
-    select(selectProjectFeatureState),
-    take(1),
-    switchMap((projectState) => this._persistenceService.project.saveState(projectState)),
-  );
+
   @Effect({dispatch: false})
   syncProjectToLs$: Observable<unknown> = this._actions$
     .pipe(
@@ -94,16 +89,17 @@ export class ProjectEffects {
         moveTaskToBacklogListAuto.type,
         moveTaskToTodayListAuto.type,
       ),
-      tap((a) => {
+      switchMap((a) => {
         // exclude ui only actions
-        if (!([
+        if (([
           ProjectActionTypes.UpdateProjectWorkStart,
           ProjectActionTypes.UpdateProjectWorkEnd,
         ].includes(a.type as any))) {
-          this._persistenceService.updateLastLocalSyncModelChange.bind(this);
+          return this.saveToLs$(false);
+        } else {
+          return this.saveToLs$(true);
         }
       }),
-      switchMap(() => this.saveToLs$),
     );
   @Effect({dispatch: false})
   updateProjectStorageConditionalTask$: Observable<unknown> = this._actions$.pipe(
@@ -137,7 +133,7 @@ export class ProjectEffects {
         ? of(a)
         : EMPTY;
     }),
-    switchMap(() => this.saveToLs$),
+    switchMap(() => this.saveToLs$(true)),
   );
   @Effect({dispatch: false})
   updateProjectStorageConditional$: Observable<unknown> = this._actions$.pipe(
@@ -147,7 +143,7 @@ export class ProjectEffects {
       moveTaskDownInTodayList,
     ),
     filter((p) => p.workContextType === WorkContextType.PROJECT),
-    switchMap(() => this.saveToLs$),
+    switchMap(() => this.saveToLs$(true)),
   );
   @Effect()
   updateWorkStart$: any = this._actions$
@@ -406,6 +402,25 @@ export class ProjectEffects {
     );
 
   @Effect({dispatch: false})
+  fixWeirdUnlistedTasks: Observable<unknown> = this._workContextService.activeWorkContext$
+    .pipe(
+      // only run in prod, because we want to debug this
+      // filter(() => environment.production),
+      filter(({type, taskIds}) => type === WorkContextType.PROJECT && taskIds.length === 0),
+      withLatestFrom(this._taskService.allTasks$),
+      tap(([{id}, allTasks]: [WorkContext, Task[]]) => {
+        const unlistedParentTasks = allTasks.filter(task => !task.parentId && task.projectId === id);
+        if (unlistedParentTasks.length
+          && confirm('Nooo! We found some tasks that are not listed (but should be). Do you want to list them?')) {
+          const unlistedIds = unlistedParentTasks.map(task => task.id);
+          this._projectService.update(id, {
+            taskIds: unlistedIds
+          });
+        }
+      }),
+    );
+
+  @Effect({dispatch: false})
   cleanupNullTasksForBacklog: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
     .pipe(
       // only run in prod, because we want to debug this
@@ -548,6 +563,15 @@ export class ProjectEffects {
     if (cfgsToUpdate.length > 0) {
       this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, {projectId: null});
     }
+  }
+
+  private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
+    return this._store$.pipe(
+      // tap(() => console.log('SAVE')),
+      select(selectProjectFeatureState),
+      take(1),
+      switchMap((projectState) => this._persistenceService.project.saveState(projectState, {isSyncModelChange})),
+    );
   }
 }
 

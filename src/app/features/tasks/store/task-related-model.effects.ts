@@ -35,7 +35,6 @@ export class TaskRelatedModelEffects {
   moveToArchive$: any = this._actions$.pipe(
     ofType(TaskActionTypes.MoveToArchive),
     tap(this._moveToArchive.bind(this)),
-    tap(this._updateLastLocalSyncModelChange.bind(this)),
   );
 
   // TODO remove once reminder is changed
@@ -204,10 +203,6 @@ export class TaskRelatedModelEffects {
   ) {
   }
 
-  private _updateLastLocalSyncModelChange() {
-    this._persistenceService.updateLastLocalSyncModelChange();
-  }
-
   private async _removeFromArchive(action: RestoreTask) {
     const task = action.payload.task;
     const taskIds = [task.id, ...task.subTaskIds];
@@ -225,7 +220,7 @@ export class TaskRelatedModelEffects {
     return this._persistenceService.taskArchive.saveState({
       ...currentArchive,
       ids: allIds.filter((id) => !idsToRemove.includes(id)),
-    }, true);
+    }, {isSyncModelChange: true});
   }
 
   private async _moveToArchive(action: MoveToArchive) {
@@ -251,7 +246,7 @@ export class TaskRelatedModelEffects {
         this._reminderService.removeReminder(t.reminderId);
       });
 
-    return this._persistenceService.taskArchive.saveState(newArchive);
+    return this._persistenceService.taskArchive.saveState(newArchive, {isSyncModelChange: true});
   }
 
   private _moveToOtherProject(action: MoveToOtherProject) {

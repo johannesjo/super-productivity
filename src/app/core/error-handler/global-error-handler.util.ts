@@ -5,6 +5,7 @@ import * as StackTrace from 'stacktrace-js';
 import * as pThrottle from 'p-throttle';
 import * as newGithubIssueUrl from 'new-github-issue-url';
 import { remote } from 'electron';
+import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 
 let isWasErrorAlertCreated = false;
 
@@ -31,7 +32,6 @@ async function _getStacktrace(err: Error | any): Promise<string> {
 const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
 
 export const logAdvancedStacktrace = (origErr: unknown, additionalLogFn?: (stack: string) => void) => _getStacktraceThrottled(origErr).then(stack => {
-  console.log(stack);
 
   if (additionalLogFn) {
     additionalLogFn(stack);
@@ -43,7 +43,6 @@ export const logAdvancedStacktrace = (origErr: unknown, additionalLogFn?: (stack
   }
 
   const githubIssueLink = document.getElementById('github-issue-url');
-  console.log(githubIssueLink);
 
   if (githubIssueLink) {
     const errEscaped = _cleanHtml(origErr as string);
@@ -126,8 +125,8 @@ const getGithubUrl = (errEscaped: string, stackTrace: string): string => {
   return newGithubIssueUrl({
     user: 'johannesjo',
     repo: 'super-productivity',
-    body: getGithubIssueErrorMarkdown(stackTrace),
     title: errEscaped,
+    body: getGithubIssueErrorMarkdown(stackTrace),
   });
 };
 
@@ -164,5 +163,10 @@ ${code}
 
 ### Meta Info
 ${getSimpleMeta()}
+
+### Actions Before Error
+${code}
+${getBeforeLastErrorActionLog().join(' \n')}
+${code}
 `;
 };

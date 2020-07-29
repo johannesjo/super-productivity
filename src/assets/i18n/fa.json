@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "نسخه جدید موجود است، نسخه جدید بارگیری شود?"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "از پروژه های دیگر",
-    "NO_TASKS": "کاری در بک لاگ شما وجود ندارد",
-    "SCHEDULED": "برنامه ریزی شده است",
-    "TITLE": "بک لاگ"
+    "NO_TASKS": "کاری در بک لاگ شما وجود ندارد"
   },
   "DATETIME_INPUT": {
     "IN": "در {{time}}",
@@ -106,7 +103,7 @@
         "AUTH_ERROR": "Dropbox: نشانه دسترسی نامعتبر ارائه شده است",
         "OFFLINE": "Dropbox: همگام سازی امکان پذیر نیست ، زیرا آفلاین است",
         "SYNC_ERROR": "Dropbox: خطا هنگام همگام سازی",
-        "UNKNOWN_ERROR": ""
+        "UNKNOWN_ERROR": "Dropbox: خطای ناشناخته: {{errorStr}}"
       }
     },
     "GITHUB": {
@@ -839,7 +836,7 @@
     "AUTO_BACKUPS": {
       "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
       "LABEL_IS_ENABLED": "فعال کردن پشتیبان گیری خودکار",
-      "LOCATION_INFO": "",
+      "LOCATION_INFO": "نسخه پشتیبان تهیه شده در:",
       "TITLE": "پشتیبان گیری خودکار"
     },
     "EVALUATION": {

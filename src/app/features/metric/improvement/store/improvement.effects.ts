@@ -64,8 +64,7 @@ export class ImprovementEffects {
 
   private _saveToLs(currentProjectId: string, improvementState: ImprovementState) {
     if (currentProjectId) {
-      this._persistenceService.updateLastLocalSyncModelChange();
-      this._persistenceService.improvement.save(currentProjectId, improvementState);
+      this._persistenceService.improvement.save(currentProjectId, improvementState, {isSyncModelChange: true});
     } else {
       throw new Error('No current project id');
     }

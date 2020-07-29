@@ -33,6 +33,7 @@ export const DROPBOX_SYNC_FORM: ConfigFormSection<DropboxSyncConfig> = {
       hideExpression: ((model: DropboxSyncConfig) => !!model.accessToken || !model.authCode),
       templateOptions: {
         tag: 'button',
+        class: 'mat-raised-button',
         text: T.F.DROPBOX.FORM.B_GENERATE_TOKEN,
       },
     },

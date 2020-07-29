@@ -25,7 +25,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   T = T;
   task: Task = this.data.task;
 
-  taskRepeatCfg: TaskRepeatCfgCopy = {
+  taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'> = {
     ...DEFAULT_TASK_REPEAT_CFG,
     title: this.task.title,
     tagIds: [...this.task.tagIds],
@@ -68,7 +68,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       this._taskRepeatCfgService.updateTaskRepeatCfg(exists(this.taskRepeatCfgId), this.taskRepeatCfg);
       this.close();
     } else {
-      this._taskRepeatCfgService.addTaskRepeatCfgToTask(this.task.id, exists(this.task.projectId), this.taskRepeatCfg);
+      this._taskRepeatCfgService.addTaskRepeatCfgToTask(this.task.id, this.task.projectId, this.taskRepeatCfg);
       this.close();
     }
   }

@@ -6,7 +6,7 @@ import { TaskRepeatCfg, TaskRepeatCfgState } from './task-repeat-cfg.model';
 const MODEL_VERSION = 1;
 
 export const migrateTaskRepeatCfgState = (taskRepeatState: TaskRepeatCfgState): TaskRepeatCfgState => {
-  if (!isMigrateModel(taskRepeatState, MODEL_VERSION)) {
+  if (!isMigrateModel(taskRepeatState, MODEL_VERSION, 'TaskRepeat')) {
     return taskRepeatState;
   }
 

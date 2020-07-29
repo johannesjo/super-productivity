@@ -79,11 +79,11 @@ export class DropboxEffects {
         });
     }),
   );
-  @Effect({dispatch: false}) syncBeforeQuit$: any = IS_ELECTRON
-    ? this._dataInitService.isAllDataLoadedInitially$.pipe(
+  @Effect({dispatch: false}) syncBeforeQuit$: any = !IS_ELECTRON
+    ? EMPTY
+    : this._dataInitService.isAllDataLoadedInitially$.pipe(
       concatMap(() => this._dropboxSyncService.isEnabledAndReady$),
       distinctUntilChanged(),
-      // TODO find out why this get's called many times
       tap((isEnabled) => isEnabled
         ? this._execBeforeCloseService.schedule(DROPBOX_BEFORE_CLOSE_ID)
         : this._execBeforeCloseService.unschedule(DROPBOX_BEFORE_CLOSE_ID)
@@ -97,7 +97,7 @@ export class DropboxEffects {
         this._taskService.setCurrentId(null);
         this._simpleCounterService.turnOffAll();
       }),
-      // minimally hacky...
+      // minimally hacky delay to wait for inMemoryDatabase update...
       delay(100),
       switchMap(() => this._dropboxSyncService.sync()
         .then(() => {
@@ -110,9 +110,8 @@ export class DropboxEffects {
             this._execBeforeCloseService.setDone(DROPBOX_BEFORE_CLOSE_ID);
           }
         })
-      )
-    )
-    : EMPTY;
+      ),
+    );
 
   private _isChangedAuthCode$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     // NOTE: it is important that we don't use distinct until changed here
@@ -146,9 +145,9 @@ export class DropboxEffects {
         msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED
       }), 200)
     ),
-    map((_accessToken: string) => new UpdateGlobalConfigSection({
+    map((accessToken: string) => new UpdateGlobalConfigSection({
       sectionKey: 'dropboxSync',
-      sectionCfg: {accessToken: _accessToken}
+      sectionCfg: {accessToken}
     })),
   );
 

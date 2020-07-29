@@ -255,7 +255,7 @@ $owl-missing: $owl-light-selected-bg !default;
     background-color: $owl-accent-color;
 
     &.owl-dt-calendar-cell-today {
-      box-shadow: inset 0 0 0 1px hsla(0, 0%, 100%, .85);
+      box-shadow: inset 0 0 0 2px hsla(0, 0%, 100%, .85);
     }
   }
 
@@ -835,6 +835,7 @@ $ico-size-real: 20px;
   text-align: center;
   color: $owl-text-color-strong;
   background: $owl-light-selected-bg;
+
   @include darkTheme(true) {
     color: $owl-dark-text-color-strong;
     background: $owl-dark-light-selected-bg;
@@ -873,5 +874,27 @@ $ico-size-real: 20px;
 
   &::-webkit-calendar-picker-indicator {
     display: none;
+  }
+}
+
+
+
+.owl-dt-calendar-cell-content.owl-dt-calendar-cell-selected {
+  font-weight: bold;
+}
+
+.owl-dt-calendar-cell-active:focus > {
+  .owl-dt-calendar-cell-content.owl-dt-calendar-cell-selected {
+    color: $owl-text-color-strong;
+    background: $owl-light-selected-bg;
+
+    &.owl-dt-calendar-cell-today {
+      border-color: $owl-accent-color;
+    }
+
+    @include darkTheme(true) {
+      color: $owl-dark-text-color-strong;
+      background: $owl-dark-light-selected-bg;
+    }
   }
 }

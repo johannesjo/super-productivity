@@ -12,7 +12,7 @@ export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
 ];
 
 export interface TaskRepeatCfgCopy {
-  id: string | null;
+  id: string;
   projectId: string | null;
   lastTaskCreation: number;
   title: string | null;
@@ -35,8 +35,7 @@ export interface TaskRepeatCfgState extends EntityState<TaskRepeatCfg> {
   [MODEL_VERSION_KEY]?: number;
 }
 
-export const DEFAULT_TASK_REPEAT_CFG: TaskRepeatCfgCopy = {
-  id: null,
+export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'>= {
   lastTaskCreation: Date.now(),
   title: null,
   defaultEstimate: undefined,
