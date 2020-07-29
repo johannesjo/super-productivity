@@ -119,7 +119,7 @@
         "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GithHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
+        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GitHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
         "TITLE": "github"
       },
       "ISSUE_CONTENT": {

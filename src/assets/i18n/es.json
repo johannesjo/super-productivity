@@ -119,7 +119,7 @@
         "TOKEN": "Token de acceso"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de GithHub para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
+        "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de GitHub para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
         "TITLE": "gitHub"
       },
       "ISSUE_CONTENT": {
