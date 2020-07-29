@@ -11,7 +11,7 @@ export class DurationFromStringPipe implements PipeTransform {
 
 export const durationFromString = (strValue: any, args?: any): any => {
   const milliseconds = stringToMs(strValue);
-  if (typeof milliseconds === 'number' || milliseconds > 0) {
+  if (milliseconds > 0) {
     return moment.duration({
       milliseconds,
     });

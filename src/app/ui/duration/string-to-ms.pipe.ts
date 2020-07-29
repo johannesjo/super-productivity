@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-export const stringToMs = (strValue: any, args?: any): any => {
+export const stringToMs = (strValue: string, args?: any): number => {
   if (!strValue) {
-    return;
+    return 0;
   }
 
   let d: number | undefined;
@@ -33,17 +33,17 @@ export const stringToMs = (strValue: any, args?: any): any => {
   });
 
   if (typeof s === 'number' || typeof m === 'number' || typeof h === 'number' || typeof d === 'number') {
-    s = typeof s === 'number' ? s : 0;
-    m = typeof m === 'number' ? m : 0;
-    h = typeof h === 'number' ? h : 0;
-    d = typeof d === 'number' ? d : 0;
+    s = (typeof s === 'number' && !isNaN(s)) ? s : 0;
+    m = (typeof m === 'number' && !isNaN(m)) ? m : 0;
+    h = (typeof h === 'number' && !isNaN(h)) ? h : 0;
+    d = (typeof d === 'number' && !isNaN(d)) ? d : 0;
 
     return +(s * 1000)
       + (m * 1000 * 60)
       + (h * 1000 * 60 * 60)
       + (d * 1000 * 60 * 60 * 24);
   } else {
-    return null;
+    return 0;
   }
 };
 
