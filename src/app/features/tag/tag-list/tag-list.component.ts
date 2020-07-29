@@ -53,7 +53,9 @@ export class TagListComponent implements OnDestroy {
     this._workContextService.activeWorkContextId$,
   ]).pipe(
     // TODO there should be a better way...
-    switchMap(([ids, activeId]) => this._tagService.getTagsByIds$((ids.filter(id => id !== activeId)))),
+    switchMap(([ids, activeId]) =>
+      this._tagService.getTagsByIds$(ids.filter(id => id !== activeId), true)
+    ),
   );
   // private _hideId: string = this._workContextService.activeWorkContextId;
   private _subs: Subscription = new Subscription();

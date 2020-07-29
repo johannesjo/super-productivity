@@ -49,15 +49,18 @@ export const selectTagById = createSelector(
 );
 export const selectTagsByIds = createSelector(
   selectTagFeatureState,
-  (state: TagState, props: { ids: string[] }): Tag[] => props.ids
-    ? props.ids.map(id => {
+  (state: TagState, props: { ids: string[]; isAllowNull: boolean }): Tag[] => (props.isAllowNull
+    ? props.ids
+      .map(id => state.entities[id])
+      .filter(tag => !!tag) as Tag[]
+
+    : props.ids.map(id => {
       const tag = state.entities[id];
       if (!tag) {
         throw new Error('No tag ' + id);
       }
       return tag;
-    })
-    : []
+    }))
 );
 
 export const initialTagState: TagState = tagAdapter.getInitialState({

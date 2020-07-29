@@ -24,8 +24,8 @@ export class TagService {
     return this._store$.pipe(select(selectTagById, {id}));
   }
 
-  getTagsByIds$(ids: string[]): Observable<Tag[]> {
-    return this._store$.pipe(select(selectTagsByIds, {ids}));
+  getTagsByIds$(ids: string[], isAllowNull: boolean = false): Observable<Tag[]> {
+    return this._store$.pipe(select(selectTagsByIds, {ids, isAllowNull}));
   }
 
   addTag(tag: Partial<Tag>): string {

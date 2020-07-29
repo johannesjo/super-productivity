@@ -2,12 +2,14 @@ import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/c
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
-import { Observable, Subscription } from 'rxjs';
+import { from, Observable, of, Subscription } from 'rxjs';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TagService } from '../../features/tag/tag.service';
-import { concatMap, first } from 'rxjs/operators';
+import { concatMap, filter, first, switchMap, take, tap } from 'rxjs/operators';
 import { Tag } from '../../features/tag/tag.model';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'work-context-menu',
@@ -27,6 +29,8 @@ export class WorkContextMenuComponent implements OnDestroy {
   constructor(
     private _matDialog: MatDialog,
     private _tagService: TagService,
+    private _workContextService: WorkContextService,
+    private _router: Router,
   ) {
   }
 
@@ -42,8 +46,16 @@ export class WorkContextMenuComponent implements OnDestroy {
   }
 
   deleteTag() {
-    this._subs.add(this._confirmTagDelete().subscribe(isDelete => {
-      if (isDelete && this.contextId) {
+    this._subs.add(this._confirmTagDelete().pipe(
+      filter(isDelete => isDelete && !!this.contextId),
+      switchMap(() => this._workContextService.activeWorkContextTypeAndId$.pipe(take(1))),
+      tap(({activeId}) => console.log(activeId, this.contextId)),
+      switchMap(({activeId}) => (activeId === this.contextId)
+        ? from(this._router.navigateByUrl('/'))
+        : of(true)
+      ),
+    ).subscribe(() => {
+      if (this.contextId) {
         this._tagService.removeTag(this.contextId);
       }
     }));
