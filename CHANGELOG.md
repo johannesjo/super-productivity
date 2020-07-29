@@ -1,3 +1,42 @@
+## [5.5.3](https://github.com/johannesjo/super-productivity/compare/v5.5.2...v5.5.3) (2020-07-29)
+
+
+### Bug Fixes
+
+* allow to delete tag when tag is active context [#467](https://github.com/johannesjo/super-productivity/issues/467) ([e44fae1](https://github.com/johannesjo/super-productivity/commit/e44fae12d94eccd8811d8a3d7f00f696068dd2c0))
+* invalid array length [#463](https://github.com/johannesjo/super-productivity/issues/463) ([8b33ccb](https://github.com/johannesjo/super-productivity/commit/8b33ccb4f2738cceaf461208fa9a57347f12155a))
+* not in project context error for show bookmarks shortcut [#466](https://github.com/johannesjo/super-productivity/issues/466) ([c277ead](https://github.com/johannesjo/super-productivity/commit/c277eada87c48cc88c4dee302df6a0bb2fd047ec))
+* **dbx:** view not updating after generating access token ([d1223b0](https://github.com/johannesjo/super-productivity/commit/d1223b0ee6fb135f671c351e901e6324d6e9bf7f))
+* **mobile:** task notes not being saved when swiping away ([60c0f65](https://github.com/johannesjo/super-productivity/commit/60c0f65201f79cac7ed6b070462abaa4f5f81021))
+* **task:** prevent scroll jump when deleting task on mobile ([52c9f82](https://github.com/johannesjo/super-productivity/commit/52c9f829ca58f9cd18d60bbefa7ecfdc8e380a43))
+* cleanup uneeded sync model chagne udate ([75af323](https://github.com/johannesjo/super-productivity/commit/75af323b176c022ac44d48e43015bfd5e9d8ea9b))
+* project data being lost on import ([4c6623e](https://github.com/johannesjo/super-productivity/commit/4c6623e84cbced3e0175741d4b9b7d131e89389d))
+* test ([7c356df](https://github.com/johannesjo/super-productivity/commit/7c356df872a522339b4622e963856076f2e83b1a))
+* typing ([861740c](https://github.com/johannesjo/super-productivity/commit/861740c75fc7206577de83f98951a2b3b3567537))
+
+
+### Features
+
+* cleanup excess error logging ([e5de11a](https://github.com/johannesjo/super-productivity/commit/e5de11ad8c8e1baa69d6dc07bbd725d6d43683c7))
+* hide open project notes shortcut for now ([9099cb2](https://github.com/johannesjo/super-productivity/commit/9099cb267c5475dcc14875b73e4e499f2a7b99ca))
+* **dbx:** beautify generate token button ([850f1eb](https://github.com/johannesjo/super-productivity/commit/850f1eb732556cd73db3aa41bd099be87e2751b7))
+* **i18n:** update translations [#451](https://github.com/johannesjo/super-productivity/issues/451) ([b24857e](https://github.com/johannesjo/super-productivity/commit/b24857e66e02bdd76c252264b8a74b48dd03ecd5))
+* **task:** add remove from today to task context menu for mobile touch ([a64d263](https://github.com/johannesjo/super-productivity/commit/a64d2631d4019417a52e265e8a800a28c4caa343))
+* add action log to issue ([ecc647c](https://github.com/johannesjo/super-productivity/commit/ecc647ce471790c60241f95bd162cd9d6c7dc167))
+* add data fix effect for unlsited tasks ([375cda8](https://github.com/johannesjo/super-productivity/commit/375cda8d2e67ef8453586b5ddbc0df0c993eed88))
+* adjust sync model change var ([679c7e8](https://github.com/johannesjo/super-productivity/commit/679c7e88fe0fd3eb33bf649a9a2307b9263bf6ef))
+* allow repeating tasks for tag only tasks and add cleanup [#460](https://github.com/johannesjo/super-productivity/issues/460) ([6811c5b](https://github.com/johannesjo/super-productivity/commit/6811c5b6f2b49a0bfc8a33739bac6d9a19c9cef5))
+* implement last action log ([c8ce931](https://github.com/johannesjo/super-productivity/commit/c8ce9311b26907ae9b58a99841d74a1ba1d31f43))
+* improve keyboard selection styles for datepicker ([c87d391](https://github.com/johannesjo/super-productivity/commit/c87d391ac4da2bbe509239774b33f6bf424a0b37))
+* improve migration logging ([a45ffcd](https://github.com/johannesjo/super-productivity/commit/a45ffcd0b7ab7598bd59128abe611f15b4df96b9))
+* migrate project models to new isSyncModelChange ([c016564](https://github.com/johannesjo/super-productivity/commit/c01656454c882ce258a5c753a4d6091cd665aded))
+* migrate project to new isSyncModelChange ([75a8afe](https://github.com/johannesjo/super-productivity/commit/75a8afed80184aa9c2d385e55ec9db3954a692df))
+* migrate simpler ones to new isSyncModelChange ([3f37f6b](https://github.com/johannesjo/super-productivity/commit/3f37f6bc604374ebc62d096c3d89eb5aa5f9596c))
+* prepare isNoSyncChange ([6388571](https://github.com/johannesjo/super-productivity/commit/6388571ce889a2ea72c9b9d938600878995a1b31))
+* use new sync trigger param for sync ([f3dc5a1](https://github.com/johannesjo/super-productivity/commit/f3dc5a101bb6a04bd44dd50c079b383eda9c2062))
+
+
+
 ## [5.5.2](https://github.com/johannesjo/super-productivity/compare/v5.5.1...v5.5.2) (2020-07-24)
 
 
