@@ -119,7 +119,7 @@
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
         "TITLE": "Github"
       },
       "ISSUE_CONTENT": {
@@ -612,7 +612,7 @@
         "START": "Press enter one more time to start"
       },
       "B": {
-        "ADD_HALF_HOUR": "Add 1/2 hou",
+        "ADD_HALF_HOUR": "Add 1/2 hour",
         "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\""
       },
       "CMP": {
