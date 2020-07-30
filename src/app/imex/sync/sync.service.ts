@@ -21,32 +21,34 @@ import { SyncProvider } from './sync-provider';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { SYNC_DEFAULT_AUDIT_TIME, SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME } from './sync.const';
-import { isTouchOnly } from '../../util/is-touch';
+import {
+  SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME,
+  SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
+  SYNC_DEFAULT_AUDIT_TIME
+} from './sync.const';
+import { IS_TOUCH_ONLY } from '../../util/is-touch';
 import { AllowedDBKeys } from '../../core/persistence/ls-keys.const';
 import { IdleService } from '../../features/time-tracking/idle.service';
 import { AppDataComplete } from './sync.model';
+import { IS_ELECTRON } from '../../app.constants';
+import { ElectronService } from '../../core/electron/electron.service';
+import { IpcRenderer } from 'electron';
+import { IPC } from '../../../../electron/ipc-events.const';
 
 // TODO naming
 @Injectable({
   providedIn: 'root',
 })
 export class SyncService {
-  // SAVE TO REMOTE TRIGGER
   inMemory$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$;
 
-  // IMMEDIATE TRIGGERS
-  // ----------------------
   private _onUpdateLocalDataTrigger$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
     this._persistenceService.onAfterSave$.pipe(
       filter(({appDataKey, data, isDataImport, isSyncModelChange}) => !!data && !isDataImport && isSyncModelChange),
     );
-  // ------------------
-  private _focusAppTrigger$: Observable<string> = fromEvent(window, 'focus').pipe(
-    throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
-    mapTo('I_FOCUS_THROTTLED'),
-  );
 
+  // IMMEDIATE TRIGGERS
+  // ----------------------
   private _mouseMoveAfterIdle$: Observable<string | never> = this._idleService.isIdle$.pipe(
     distinctUntilChanged(),
     switchMap((isIdle) => isIdle
@@ -58,19 +60,33 @@ export class SyncService {
     )
   );
 
-  // we might need this for mobile, as we can't rely on focus as much
-  private _someMobileActivityTrigger$: Observable<string> = of(isTouchOnly()).pipe(
-    switchMap((isTouchIn) => isTouchIn
+  private _activityAfterSomethingElseTriggers$: Observable<string> = merge(
+    fromEvent(window, 'focus').pipe(mapTo('I_FOCUS_THROTTLED')),
+
+    IS_ELECTRON
+      ? fromEvent((this._electronService.ipcRenderer as IpcRenderer), IPC.RESUME).pipe(mapTo('I_IPC_RESUME'))
+      : EMPTY,
+
+    IS_TOUCH_ONLY
       ? merge(
-        fromEvent(window, 'touchstart'),
-        fromEvent(window, 'visibilitychange'),
-      ).pipe(
-        throttleTime(SYNC_USER_ACTIVITY_CHECK_THROTTLE_TIME),
-        mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
-      )
-      : EMPTY
-    ),
+      fromEvent(window, 'touchstart'),
+      fromEvent(window, 'visibilitychange'),
+      ).pipe(mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'))
+      : EMPTY,
+
+    this._mouseMoveAfterIdle$
+  ).pipe(
+    throttleTime(SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME),
   );
+
+  private _beforeGoingToSleepTriggers$: Observable<string> = merge(
+    IS_ELECTRON
+      ? fromEvent((this._electronService.ipcRenderer as IpcRenderer), IPC.SUSPEND).pipe(mapTo('I_IPC_SUSPEND'))
+      : EMPTY,
+  ).pipe(
+    throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME)
+  );
+
   private _isOnlineTrigger$: Observable<string> = isOnline$.pipe(
     // skip initial online which always fires on page load
     skip(1),
@@ -80,9 +96,8 @@ export class SyncService {
 
   // OTHER INITIAL SYNC STUFF
   private _immediateSyncTrigger$: Observable<string> = merge(
-    this._focusAppTrigger$,
-    this._mouseMoveAfterIdle$,
-    this._someMobileActivityTrigger$,
+    this._activityAfterSomethingElseTriggers$,
+    this._beforeGoingToSleepTriggers$,
     this._isOnlineTrigger$,
   );
   // ------------------------
@@ -126,6 +141,7 @@ export class SyncService {
     private readonly _dataInitService: DataInitService,
     private readonly _idleService: IdleService,
     private readonly _persistenceService: PersistenceService,
+    private readonly _electronService: ElectronService,
   ) {
     // this.getSyncTrigger$(5000).subscribe((v) => console.log('.getSyncTrigger$(5000)', v));
   }

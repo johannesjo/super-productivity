@@ -135,21 +135,25 @@ appIN.on('ready', () => {
   powerMonitor.on('suspend', () => {
     isLocked = true;
     suspendStart = Date.now();
+    mainWin.webContents.send(IPC.SUSPEND);
   });
 
   powerMonitor.on('lock-screen', () => {
     isLocked = true;
     suspendStart = Date.now();
+    mainWin.webContents.send(IPC.SUSPEND);
   });
 
   powerMonitor.on('resume', () => {
     isLocked = false;
     sendIdleMsgIfOverMin(Date.now() - suspendStart);
+    mainWin.webContents.send(IPC.RESUME);
   });
 
   powerMonitor.on('unlock-screen', () => {
     isLocked = false;
     sendIdleMsgIfOverMin(Date.now() - suspendStart);
+    mainWin.webContents.send(IPC.RESUME);
   });
 });
 
