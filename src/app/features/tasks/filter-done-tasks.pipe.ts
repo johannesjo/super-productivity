@@ -6,7 +6,7 @@ export const filterDoneTasks = (tasks: TaskWithSubTasks[], currentTaskId: string
     ? tasks.filter(task => !task.isDone)
     : (isFilterAll)
       ? !!currentTaskId
-        ? tasks.filter(task => task.id !== currentTaskId)
+        ? tasks.filter(task => task.id === currentTaskId)
         : []
       : tasks;
 };
