@@ -36,6 +36,15 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
 
 @Injectable()
 export class DropboxEffects {
+  private _wasJustEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    // NOTE: it is important that we don't use distinct until changed here
+    switchMap(() => this._dropboxSyncService.isEnabledAndReady$),
+    pairwise(),
+    map(([a, b]) => !a && !!b),
+    filter(wasJustEnabled => wasJustEnabled),
+    shareReplay(),
+  );
+
   @Effect({dispatch: false}) triggerSync$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => merge(
       // dynamic
@@ -48,12 +57,16 @@ export class DropboxEffects {
           : EMPTY
         ),
       ),
-      // initial
+
+      // initial after starting app
       this._dropboxSyncService.isEnabledAndReady$.pipe(
         take(1),
         filter(isEnabledAndReady => isEnabledAndReady),
         mapTo(SYNC_INITIAL_SYNC_TRIGGER),
-      )
+      ),
+
+      // initial after enabling it,
+      this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
     )),
     tap((x) => dbxLog('sync(effect).....', x)),
     withLatestFrom(isOnline$),
@@ -79,6 +92,7 @@ export class DropboxEffects {
         });
     }),
   );
+
   @Effect({dispatch: false}) syncBeforeQuit$: any = !IS_ELECTRON
     ? EMPTY
     : this._dataInitService.isAllDataLoadedInitially$.pipe(
@@ -120,6 +134,7 @@ export class DropboxEffects {
     map(([a, b]) => a !== b),
     shareReplay(),
   );
+
   @Effect() generateAccessCode$: any = this._actions$.pipe(
     ofType(
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
