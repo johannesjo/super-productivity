@@ -14,14 +14,11 @@
     "UPDATE_WEB_APP": "新版本可用，是否加载新版本？"
   },
   "BL": {
-<<<<<<< HEAD
     "FROM_OTHER_PROJECTS": "来自其他项目",
     "NO_TASKS": "目前您的待办事项中没有任务",
     "SCHEDULED": "已计划",
     "TITLE": "待办事项"
-=======
     "NO_TASKS": "您的待办事项中目前没有任务"
->>>>>>> upstream/master
   },
   "DATETIME_INPUT": {
     "IN": "在 {{time}}",
@@ -927,7 +924,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "如果未指定，则用于任务的默认项目",
-      "HELP": "<p><strong>没有看到桌面通知？</strong> 对于Windows，您可能需要检查系统>通知和操作，并检查是否已启用所需的通知。</p>",
+      "HELP": "<p><strong>没有看到桌面通知？</strong>对于Windows，您可能需要检查 系统>通知和操作 ，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
       "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始跟踪下一个任务",
@@ -935,29 +932,29 @@
       "IS_DARK_MODE": "暗模式",
       "IS_DISABLE_INITIAL_DIALOG": "禁用初始信息对话框（您可能会错过重要更新！）",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "超出时间估算时通知",
-      "IS_TURN_OFF_MARKDOWN": "关闭标记的降价解析",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
+      "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
       "TITLE": "其他设置"
     },
     "POMODORO": {
-      "BREAK_DURATION": "番茄钟短休息",
-      "CYCLES_BEFORE_LONGER_BREAK": "长休息番茄钟间隔",
-      "DURATION": "工作时间",
-      "HELP": "<p>可以通过几种设置配置番茄钟定时器。每个工作会话的持续时间，正常休息的持续时间，开始较长休息之前运行的工作会话的数量以及此较长休息的持续时间。</p> <p>您还可以设置是否要在番茄钟休息时显示您的注意力分散。</p> <p>设置“暂停时间跟踪番茄钟休息时间”也会跟踪您的休息时间作为在任务上花费的工作时间。 </p> <p>当您暂停任务时，启用“当没有活动任务时暂停番茄钟会话”也会暂停番茄钟会话。</p>",
-      "IS_ENABLED": "启用番茄钟计时器",
-      "IS_MANUAL_CONTINUE": "手动确认开始下一个番茄钟",
+      "BREAK_DURATION": "短休息时长",
+      "CYCLES_BEFORE_LONGER_BREAK": "完成n个任务后，进行长休息",
+      "DURATION": "番茄时长",
+      "HELP": "<p>番茄钟有一些可以设定的参数：任务时长、短休息时长、开始长休息之前的番茄数量，及长休息时长。</p> <p>您还可以设置是否要在番茄钟休息时显示您的分心情况。</p> <p>设置“暂停在进行番茄钟休息时记录时间”会把您的休息时间也计入在任务上花费的工作时间。 </p> <p>当您暂停任务时，启用“当没有活动任务时暂停番茄钟会话”会一并暂停番茄钟会话。</p>",
+      "IS_ENABLED": "启用番茄钟",
+      "IS_MANUAL_CONTINUE": "手动确认再开始下一个番茄钟",
       "IS_PLAY_SOUND": "会话完成后播放声音",
-      "IS_PLAY_SOUND_AFTER_BREAK": "休息时播放声音",
+      "IS_PLAY_SOUND_AFTER_BREAK": "休息结束时播放声音",
       "IS_PLAY_TICK": "每秒播放滴答声",
-      "IS_STOP_TRACKING_ON_BREAK": "停止时间跟踪任务中断",
-      "LONGER_BREAK_DURATION": "番茄钟长休息",
+      "IS_STOP_TRACKING_ON_BREAK": "休息时暂停记录工作时长",
+      "LONGER_BREAK_DURATION": "长休息时长",
       "TITLE": "番茄钟"
     },
     "TAKE_A_BREAK": {
-      "HELP": "<div> <p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration} 将被替换为不间断花费的时间。</p> </div>",
-      "IS_ENABLED": "启用暂停提醒",
-      "IS_FOCUS_WINDOW": "提醒处于活动状态时关注应用程序窗口（仅限桌面）",
-      "IS_LOCK_SCREEN": "休息时锁定屏幕（仅限桌面）",
+      "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
+      "IS_ENABLED": "启用休息提醒",
+      "IS_FOCUS_WINDOW": "有提醒时激活本应用窗口（仅限桌面）",
+      "IS_LOCK_SCREEN": "休息时间到时锁定屏幕（仅限桌面）",
       "MESSAGE": "休息一下",
       "MIN_WORKING_TIME": "触发休息提醒的工作时长",
       "MOTIVATIONAL_IMG": "励志图片（网址）",
