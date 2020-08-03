@@ -1,3 +1,19 @@
+## [5.5.4](https://github.com/johannesjo/super-productivity/compare/v5.5.3...v5.5.4) (2020-08-03)
+
+
+### Bug Fixes
+
+* sub task collapsing not working as it should ([7bd6ed8](https://github.com/johannesjo/super-productivity/commit/7bd6ed8f16e20737a3ce3ecdbe41f1ba6ff0aa13))
+* sub task collapsing not working as it should ([c68b6a0](https://github.com/johannesjo/super-productivity/commit/c68b6a077e6e9388371ce94042cfcddcc0a1b9c8))
+
+
+### Features
+
+* **dbx:** execute right after enabling it ([bbc8969](https://github.com/johannesjo/super-productivity/commit/bbc8969e790fed3a5153ee9b8f045fb4cc1771ce))
+* **dbx:** improve syncing once more ([3666571](https://github.com/johannesjo/super-productivity/commit/36665712672a96dade56dbf795922e231b47a21c))
+
+
+
 ## [5.5.3](https://github.com/johannesjo/super-productivity/compare/v5.5.2...v5.5.3) (2020-07-29)
 
 
