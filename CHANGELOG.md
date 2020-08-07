@@ -1,3 +1,12 @@
+## [5.5.5](https://github.com/johannesjo/super-productivity/compare/v5.5.4...v5.5.5) (2020-08-07)
+
+
+### Bug Fixes
+
+* google drive sync not working anymore [#474](https://github.com/johannesjo/super-productivity/issues/474) ([5a366dd](https://github.com/johannesjo/super-productivity/commit/5a366dd22d1922775f0119a15e730c3d77151802))
+
+
+
 ## [5.5.4](https://github.com/johannesjo/super-productivity/compare/v5.5.3...v5.5.4) (2020-08-03)
 
 
