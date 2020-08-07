@@ -49,7 +49,7 @@ export const flattenTasks = (tasksIN: TaskWithSubTasks[]): TaskWithSubTasks[] =>
 
 // SELECTORS
 // ---------
-const {selectEntities, selectAll} = taskAdapter.getSelectors();
+const {selectEntities, selectAll, selectIds} = taskAdapter.getSelectors();
 export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
 export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
 export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);
@@ -113,6 +113,7 @@ export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeature
 );
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
+export const selectAllTaskIds = createSelector(selectTaskFeatureState, selectIds);
 export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) => tasks.filter(task => task.reminderId));
 
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasks, mapSubTasksToTasks);

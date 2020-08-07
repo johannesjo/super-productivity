@@ -26,13 +26,18 @@ import {
   take,
   withLatestFrom
 } from 'rxjs/operators';
-import { TODAY_TAG } from '../tag/tag.const';
+import { ALL_TAG, TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
 import { Task, TaskWithSubTasks } from '../tasks/task.model';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
-import { flattenTasks, selectTaskEntities, selectTasksWithSubTasksByIds } from '../tasks/store/task.selectors';
+import {
+  flattenTasks,
+  selectAllTaskIds,
+  selectTaskEntities,
+  selectTasksWithSubTasksByIds
+} from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
 import { moveTaskToBacklogList } from './store/work-context-meta.actions';
 import { selectProjectById } from '../project/store/project.reducer';
@@ -108,6 +113,30 @@ export class WorkContextService {
   activeWorkContext$: Observable<WorkContext> = this.activeWorkContextTypeAndId$.pipe(
     switchMap(({activeId, activeType}) => {
       if (activeType === WorkContextType.TAG) {
+        if (activeId === ALL_TAG.id) {
+          return this._store$.pipe(select(selectAllTaskIds)).pipe(
+            take(1),
+            switchMap((allIds: string[] = []) => this._tagService.getTagById$(activeId).pipe(
+              // TODO find out why this is sometimes undefined
+              filter(p => !!p),
+              map(tag => {
+                  const ids = [
+                    // existing list without removed ones
+                    ...tag.taskIds.filter(tagId => allIds.includes(tagId)),
+                    // all without already existing list ones
+                    ...allIds.filter(tagId => !tag.taskIds.includes(tagId))
+                  ];
+                  return {
+                    ...tag,
+                    type: WorkContextType.TAG,
+                    routerLink: `tag/${tag.id}`,
+                    taskIds: ids,
+                  };
+                }
+              ))
+            )
+          );
+        }
         return this._tagService.getTagById$(activeId).pipe(
           // TODO find out why this is sometimes undefined
           filter(p => !!p),

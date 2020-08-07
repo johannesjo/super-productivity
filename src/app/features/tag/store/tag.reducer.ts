@@ -11,7 +11,7 @@ import {
   TaskActionTypes,
   UpdateTaskTags
 } from '../../tasks/store/task.actions';
-import { TODAY_TAG } from '../tag.const';
+import { ALL_TAG, TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
@@ -67,19 +67,32 @@ export const initialTagState: TagState = tagAdapter.getInitialState({
   // additional entity state properties
 });
 
-const _addMyDayTagIfNecessary = (state: TagState): TagState => {
+const _addMyDayTagAndAllIfNecessary = (state: TagState): TagState => {
   const ids = state.ids as string[];
+  let newState = state;
   if (ids && !ids.includes(TODAY_TAG.id)) {
-    return {
-      ...state,
+    newState = {
+      ...newState,
       ids: ([TODAY_TAG.id, ...ids] as string[]),
       entities: {
-        ...state.entities,
+        ...newState.entities,
         [TODAY_TAG.id]: TODAY_TAG,
       }
     };
   }
-  return state;
+
+  if (ids && !ids.includes(ALL_TAG.id)) {
+    newState = {
+      ...newState,
+      ids: ([ALL_TAG.id, ...ids] as string[]),
+      entities: {
+        ...newState.entities,
+        [ALL_TAG.id]: ALL_TAG,
+      }
+    };
+  }
+
+  return newState;
 };
 
 const _reducer = createReducer<TagState>(
@@ -87,7 +100,7 @@ const _reducer = createReducer<TagState>(
 
   // META ACTIONS
   // ------------
-  on(loadAllData, (oldState, {appDataComplete}) => _addMyDayTagIfNecessary(
+  on(loadAllData, (oldState, {appDataComplete}) => _addMyDayTagAndAllIfNecessary(
     appDataComplete.tag
       ? {...appDataComplete.tag}
       : oldState)

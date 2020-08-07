@@ -21,6 +21,21 @@ export const TODAY_TAG: Tag = {
   }
 };
 
+export const ALL_TAG: Tag = {
+  id: 'ALL',
+  icon: 'wb_sunny',
+  title: 'All',
+  color: null,
+  created: Date.now(),
+  modified: Date.now(),
+  taskIds: [],
+  ...WORK_CONTEXT_DEFAULT_COMMON,
+  theme: {
+    ...WORK_CONTEXT_DEFAULT_THEME,
+    primary: DEFAULT_TODAY_TAG_COLOR,
+  }
+};
+
 export const DEFAULT_TAG: Tag = {
   id: '',
   icon: null,
