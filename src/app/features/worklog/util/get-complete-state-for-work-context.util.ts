@@ -1,6 +1,7 @@
 import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
 import { Dictionary, EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
+import { ALL_TAG } from '../../tag/tag.const';
 
 export const getCompleteStateForWorkContext = (workContext: WorkContext, taskState: EntityState<Task>, archive: EntityState<Task>): {
   completeStateForWorkContext: EntityState<Task>,
@@ -40,13 +41,19 @@ const _filterIdsForProject = (state: EntityState<Task>, workContextId: string): 
   }
 );
 
-const _filterIdsForTag = (state: EntityState<Task>, workContextId: string): string[] => (state.ids as string[]).filter(
-  id => {
-    const t = state.entities[id] as Task;
-    return !!(t.parentId)
-      ? (state.entities[t.parentId] as Task).tagIds.includes(workContextId)
-      : t.tagIds.includes(workContextId);
-  });
+const _filterIdsForTag = (state: EntityState<Task>, workContextId: string): string[] => {
+  if (workContextId === ALL_TAG.id) {
+    return state.ids as string[];
+  }
+
+  return (state.ids as string[]).filter(
+    id => {
+      const t = state.entities[id] as Task;
+      return !!(t.parentId)
+        ? (state.entities[t.parentId] as Task).tagIds.includes(workContextId)
+        : t.tagIds.includes(workContextId);
+    });
+};
 
 const _limitStateToIds = (stateIn: EntityState<Task>, ids: string[]): Dictionary<Task> => {
   const newState: any = {};
