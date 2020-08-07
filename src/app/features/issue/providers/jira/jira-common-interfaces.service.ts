@@ -25,12 +25,14 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   ) {
   }
 
+  // NOTE: we're using the issueKey instead of the real issueId
   getById$(issueId: string | number, projectId: string) {
     return this._getCfgOnce$(projectId).pipe(
       switchMap(jiraCfg => this._jiraApiService.getIssueById$(issueId as string, jiraCfg))
     );
   }
 
+  // NOTE: this gives back issueKey instead of issueId
   searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(projectId).pipe(
       switchMap((jiraCfg) => (jiraCfg && jiraCfg.isEnabled)
@@ -109,7 +111,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     if (!issueId || !projectId) {
       throw new Error('No issueId or no projectId');
     }
-
+    // const isIssueKey = isNaN(Number(issueId));
     return this._projectService.getJiraCfgForProject$(projectId).pipe(
       first(),
       map((jiraCfg) => jiraCfg.host + '/browse/' + issueId)

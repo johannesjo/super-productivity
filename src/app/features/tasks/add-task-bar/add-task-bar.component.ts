@@ -53,7 +53,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   taskSuggestionsCtrl: FormControl = new FormControl();
 
-  filteredIssueSuggestions$: Observable<(AddTaskSuggestion)[]> = this.taskSuggestionsCtrl.valueChanges.pipe(
+  filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> = this.taskSuggestionsCtrl.valueChanges.pipe(
     debounceTime(300),
     tap(() => this.isLoading$.next(true)),
     withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),

@@ -23,6 +23,7 @@ export const mapToSearchResults = (res: any): SearchResultItem[] => {
         issueData: {
           ...issue,
           summary: issue.summaryText,
+          // NOTE THIS
           id: issue.key,
         },
       };
