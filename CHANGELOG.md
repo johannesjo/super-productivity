@@ -1,3 +1,12 @@
+## [5.5.6](https://github.com/johannesjo/super-productivity/compare/v5.5.5...v5.5.6) (2020-08-08)
+
+
+### Bug Fixes
+
+* error object object [#485](https://github.com/johannesjo/super-productivity/issues/485) ([a9fc6e0](https://github.com/johannesjo/super-productivity/commit/a9fc6e0c8c0f55045c41aa3042db39781df6d275))
+
+
+
 ## [5.5.5](https://github.com/johannesjo/super-productivity/compare/v5.5.4...v5.5.5) (2020-08-07)
 
 
