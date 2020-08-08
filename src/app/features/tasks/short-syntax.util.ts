@@ -8,10 +8,11 @@ export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 
 const CH_PRO = '@';
-export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^\\${CH_PRO}]+`, 'gi');
-
 const CH_TAG = '#';
-export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^\\${CH_TAG}]+`, 'gi');
+const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG})`
+
+export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
+export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}]+`, 'gi');
 
 // const CHS_DUE = 'due:';
 // export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CHS_DUE}+`, 'gi');
