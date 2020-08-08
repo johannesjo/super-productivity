@@ -6,8 +6,11 @@ import { Project } from '../project/project.model';
 
 export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
-export const SHORT_SYNTAX_TAGS_REG_EX = /\#[^\#]+/gi;
-export const SHORT_SYNTAX_PROJECT_REG_EX = /\+[^\+]+/i;
+
+const CH_PRO = '+';
+const CH_TAG = '#';
+export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^\\${CH_TAG}]+`, 'gi');
+export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^\\${CH_PRO}]+`, 'gi');
 
 export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProjects?: Project[]): {
   taskChanges: Partial<Task>,
@@ -41,13 +44,36 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
 };
 
 const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): Partial<TaskCopy> => {
-  if (!allProjects || allProjects.length === 0) {
+  // don't allow for issue tasks
+  if (task.issueId) {
     return {};
   }
+  // TODO check if we can allow this
+  if (task.projectId) {
+    return {};
+  }
+  if (!Array.isArray(allProjects) || !allProjects || allProjects.length === 0) {
+    return {};
+  }
+
+  const initialTitle = task.title as string;
+  const rr = initialTitle.match(SHORT_SYNTAX_PROJECT_REG_EX);
+
+  if (rr && rr[0]) {
+    const projectTitle: string = rr[0].trim().replace('+', '');
+    const existingProject = allProjects.find(project => projectTitle.toLowerCase() === project.title.toLowerCase());
+
+    if (existingProject) {
+      return {
+        title: task.title?.replace(`+${projectTitle}`, '').trim(),
+        projectId: existingProject.id,
+      };
+    }
+  }
+
   return {};
 };
 
-// TODO don't mutate data
 const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChanges: Partial<TaskCopy>, newTagTitlesToCreate: string[] } => {
   const taskChanges: Partial<TaskCopy> = {};
 

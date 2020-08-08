@@ -221,7 +221,7 @@ describe('shortSyntax', () => {
     // });
   });
 
-  xdescribe('should work for projects', () => {
+  describe('should work for projects', () => {
     let projects: Project[];
     beforeEach(() => {
       projects = [
@@ -252,26 +252,10 @@ describe('shortSyntax', () => {
       });
     });
 
-    it('should work with only the beginning of a project title', () => {
-      const t = {
-        ...TASK,
-        title: 'Fun title +Project'
-      };
-      const r = shortSyntax(t, [], projects);
-      expect(r).toEqual({
-        newTagTitles: [],
-        remindAt: null,
-        taskChanges: {
-          title: 'Fun title',
-          projectId: 'ProjectEasyShortID'
-        },
-      });
-    });
-
     it('should work together with time estimates', () => {
       const t = {
         ...TASK,
-        title: 'Fun title +Project 10m/1h'
+        title: 'Fun title +ProjectEasyShort 10m/1h'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual({
@@ -288,5 +272,21 @@ describe('shortSyntax', () => {
         },
       });
     });
+
+    // it('should work with only the beginning of a project title if it is at least 3 chars long', () => {
+    //   const t = {
+    //     ...TASK,
+    //     title: 'Fun title +Project'
+    //   };
+    //   const r = shortSyntax(t, [], projects);
+    //   expect(r).toEqual({
+    //     newTagTitles: [],
+    //     remindAt: null,
+    //     taskChanges: {
+    //       title: 'Fun title',
+    //       projectId: 'ProjectEasyShortID'
+    //     },
+    //   });
+    // });
   });
 });
