@@ -30,7 +30,7 @@ import { T } from '../../../../t.const';
 import { ElectronService } from '../../../../core/electron/electron.service';
 import { stringify } from 'query-string';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import { getJiraResponseErrorTxt } from '../../../../util/get-jira-response-error-text';
+import { getErrorTxt } from '../../../../util/get-error-text';
 import { isOnline } from '../../../../util/is-online';
 import { GlobalProgressBarService } from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
 import { ipcRenderer, IpcRendererEvent } from 'electron';
@@ -396,8 +396,8 @@ export class JiraApiService {
       .pipe(
         catchError((err) => {
           console.log(err);
-          console.log(getJiraResponseErrorTxt(err));
-          const errTxt = `Jira: ${getJiraResponseErrorTxt(err)}`;
+          console.log(getErrorTxt(err));
+          const errTxt = `Jira: ${getErrorTxt(err)}`;
           this._snackService.open({type: 'ERROR', msg: errTxt});
           return throwError({[HANDLED_ERROR_PROP_STR]: errTxt});
         }),
