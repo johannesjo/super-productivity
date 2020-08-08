@@ -239,7 +239,7 @@ describe('shortSyntax', () => {
     it('should work', () => {
       const t = {
         ...TASK,
-        title: 'Fun title +ProjectEasyShort'
+        title: 'Fun title @ProjectEasyShort'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual({
@@ -255,7 +255,7 @@ describe('shortSyntax', () => {
     it('should work together with time estimates', () => {
       const t = {
         ...TASK,
-        title: 'Fun title +ProjectEasyShort 10m/1h'
+        title: 'Fun title @ProjectEasyShort 10m/1h'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual({
@@ -276,7 +276,7 @@ describe('shortSyntax', () => {
     it('should work with only the beginning of a project title if it is at least 3 chars long', () => {
       const t = {
         ...TASK,
-        title: 'Fun title +Project'
+        title: 'Fun title @Project'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual({
@@ -292,7 +292,7 @@ describe('shortSyntax', () => {
     it('should work with multi word project titles', () => {
       const t = {
         ...TASK,
-        title: 'Fun title +Some Project Title'
+        title: 'Fun title @Some Project Title'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual({
@@ -308,7 +308,7 @@ describe('shortSyntax', () => {
     it('should work with multi word project titles partial', () => {
       const t = {
         ...TASK,
-        title: 'Fun title +Some Pro'
+        title: 'Fun title @Some Pro'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual({
@@ -324,7 +324,7 @@ describe('shortSyntax', () => {
     it('should work with multi word project titles partial written without white space', () => {
       const t = {
         ...TASK,
-        title: 'Other fun title +SomePro'
+        title: 'Other fun title @SomePro'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual({
@@ -340,7 +340,7 @@ describe('shortSyntax', () => {
     it('should ignore non existing', () => {
       const t = {
         ...TASK,
-        title: 'Other fun title +Some non existing project'
+        title: 'Other fun title @Some non existing project'
       };
       const r = shortSyntax(t, [], projects);
       expect(r).toEqual(undefined);
