@@ -221,7 +221,7 @@ describe('shortSyntax', () => {
     // });
   });
 
-  describe('should work for projects', () => {
+  describe('projects', () => {
     let projects: Project[];
     beforeEach(() => {
       projects = [
@@ -273,20 +273,80 @@ describe('shortSyntax', () => {
       });
     });
 
-    // it('should work with only the beginning of a project title if it is at least 3 chars long', () => {
-    //   const t = {
-    //     ...TASK,
-    //     title: 'Fun title +Project'
-    //   };
-    //   const r = shortSyntax(t, [], projects);
-    //   expect(r).toEqual({
-    //     newTagTitles: [],
-    //     remindAt: null,
-    //     taskChanges: {
-    //       title: 'Fun title',
-    //       projectId: 'ProjectEasyShortID'
-    //     },
-    //   });
-    // });
+    it('should work with only the beginning of a project title if it is at least 3 chars long', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title +Project'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        taskChanges: {
+          title: 'Fun title',
+          projectId: 'ProjectEasyShortID'
+        },
+      });
+    });
+
+    it('should work with multi word project titles', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title +Some Project Title'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        taskChanges: {
+          title: 'Fun title',
+          projectId: 'SomeProjectID'
+        },
+      });
+    });
+
+    it('should work with multi word project titles partial', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title +Some Pro'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        taskChanges: {
+          title: 'Fun title',
+          projectId: 'SomeProjectID'
+        },
+      });
+    });
+
+    it('should work with multi word project titles partial written without white space', () => {
+      const t = {
+        ...TASK,
+        title: 'Other fun title +SomePro'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        taskChanges: {
+          title: 'Other fun title',
+          projectId: 'SomeProjectID'
+        },
+      });
+    });
+
+    it('should ignore non existing', () => {
+      const t = {
+        ...TASK,
+        title: 'Other fun title +Some non existing project'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual(undefined);
+    });
+  });
+
+  describe('due:', () => {
   });
 });

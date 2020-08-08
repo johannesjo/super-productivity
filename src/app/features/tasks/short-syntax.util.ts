@@ -7,10 +7,14 @@ import { Project } from '../project/project.model';
 export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 
-const CH_PRO = '+';
-const CH_TAG = '#';
-export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^\\${CH_TAG}]+`, 'gi');
-export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^\\${CH_PRO}]+`, 'gi');
+const CH_PRO = '\\+';
+export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`${CH_PRO}[^${CH_PRO}]+`, 'gi');
+
+const CH_TAG = '\\#';
+export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`${CH_TAG}[^${CH_TAG}]+`, 'gi');
+
+// const CHS_DUE = 'due:';
+// export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CHS_DUE}+`, 'gi');
 
 export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProjects?: Project[]): {
   taskChanges: Partial<Task>,
@@ -61,7 +65,16 @@ const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): 
 
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace('+', '');
-    const existingProject = allProjects.find(project => projectTitle.toLowerCase() === project.title.toLowerCase());
+    const existingProject = allProjects.find(
+      project => project.title
+        .replace(' ', '')
+        .toLowerCase()
+        .indexOf(
+          projectTitle
+            .replace(' ', '')
+            .toLowerCase()
+        ) === 0
+    );
 
     if (existingProject) {
       return {
