@@ -3,6 +3,7 @@ import { shortSyntax } from './short-syntax.util';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { Tag } from '../tag/tag.model';
 import { DEFAULT_TAG } from '../tag/tag.const';
+import { Project } from '../project/project.model';
 
 const TASK: TaskCopy = {
   id: 'id',
@@ -218,5 +219,74 @@ describe('shortSyntax', () => {
     //     tagIds: ['blu_id']
     //   });
     // });
+  });
+
+  describe('should work for projects', () => {
+    let projects: Project[];
+    beforeEach(() => {
+      projects = [
+        {
+          title: 'ProjectEasyShort',
+          id: 'ProjectEasyShortID'
+        },
+        {
+          title: 'Some Project Title',
+          id: 'SomeProjectID'
+        }
+      ] as any;
+    });
+
+    it('should work', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title +ProjectEasyShort'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        taskChanges: {
+          title: 'Fun title',
+          projectId: 'ProjectEasyShortID'
+        },
+      });
+    });
+
+    it('should work with only the beginning of a project title', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title +Project'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        taskChanges: {
+          title: 'Fun title',
+          projectId: 'ProjectEasyShortID'
+        },
+      });
+    });
+
+    it('should work together with time estimates', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title +Project 10m/1h'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        taskChanges: {
+          title: 'Fun title',
+          projectId: 'ProjectEasyShortID',
+          // timeSpent: 7200000,
+          timeSpentOnDay: {
+            [getWorklogStr()]: 600000
+          },
+          timeEstimate: 3600000
+        },
+      });
+    });
   });
 });
