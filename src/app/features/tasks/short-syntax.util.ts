@@ -7,44 +7,54 @@ import { Project } from '../project/project.model';
 export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 export const SHORT_SYNTAX_TAGS_REG_EX = /\#[^\#]+/gi;
+export const SHORT_SYNTAX_PROJECT_REG_EX = /\+[^\+]+/i;
 
 export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProjects?: Project[]): {
   taskChanges: Partial<Task>,
   newTagTitles: string[],
   remindAt: number | null,
 } | undefined => {
-  let taskChanges: Partial<TaskCopy> = {};
   if (!task.title) {
     return;
   }
 
-  const matches = SHORT_SYNTAX_TIME_REG_EX.exec(task.title);
+  // TODO clean up this mess
+  let taskChanges: Partial<TaskCopy>;
 
-  if (matches && matches.length >= 3) {
-    const full = matches[0];
-    const timeSpent = matches[2];
-    const timeEstimate = matches[4];
+  taskChanges = parseTimeSpentChanges(task);
+  taskChanges = {
+    ...taskChanges,
+    ...parseProjectChanges({...task, title: taskChanges.title || task.title}, allProjects)
+  };
 
-    taskChanges = {
-      ...(
-        timeSpent
-          ? {
-            timeSpentOnDay: {
-              ...(task.timeSpentOnDay || {}),
-              [getWorklogStr()]: stringToMs(timeSpent)
-            }
-          }
-          : {}
-      ),
-      timeEstimate: stringToMs(timeEstimate),
-      title: task.title.replace(full, '')
-    };
+  const rTag = parseTagChanges({...task, title: taskChanges.title || task.title}, allTags);
+  taskChanges = {
+    ...taskChanges,
+    ...rTag.taskChanges
+  };
+
+  if (Object.keys(taskChanges).length === 0) {
+    return undefined;
   }
+
+  return {taskChanges, newTagTitles: rTag.newTagTitlesToCreate, remindAt: null};
+};
+
+const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): Partial<TaskCopy> => {
+  if (!allProjects || allProjects.length === 0) {
+    return {};
+  }
+  return {};
+};
+
+// TODO don't mutate data
+const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChanges: Partial<TaskCopy>, newTagTitlesToCreate: string[] } => {
+  const taskChanges: Partial<TaskCopy> = {};
 
   const newTagTitlesToCreate: string[] = [];
   // only exec if previous ones are also passed
   if (Array.isArray(task.tagIds) && Array.isArray(allTags)) {
-    const initialTitle = ((taskChanges.title || task.title) as string);
+    const initialTitle = task.title as string;
     const regexTagTitles = initialTitle.match(SHORT_SYNTAX_TAGS_REG_EX);
     if (regexTagTitles && regexTagTitles.length) {
       const regexTagTitlesTrimmedAndFiltered: string[] = regexTagTitles
@@ -82,14 +92,45 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
       // console.log('newTagTitles', regexTagTitles);
       // console.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
       // console.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
-      // console.log('taskChanges.tagIds', taskChanges.tagIds);
-      // console.log('taskChanges.title', taskChanges.title);
+      // console.log('task.tagIds', task.tagIds);
+      // console.log('task.title', task.title);
     }
   }
+  console.log(taskChanges);
 
-  if (!newTagTitlesToCreate.length && Object.keys(taskChanges).length === 0) {
-    return undefined;
+  return {
+    taskChanges,
+    newTagTitlesToCreate
+  };
+};
+
+const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
+  if (!task.title) {
+    return {};
   }
 
-  return {taskChanges, newTagTitles: newTagTitlesToCreate, remindAt: null};
+  const matches = SHORT_SYNTAX_TIME_REG_EX.exec(task.title);
+
+  if (matches && matches.length >= 3) {
+    const full = matches[0];
+    const timeSpent = matches[2];
+    const timeEstimate = matches[4];
+
+    return {
+      ...(
+        timeSpent
+          ? {
+            timeSpentOnDay: {
+              ...(task.timeSpentOnDay || {}),
+              [getWorklogStr()]: stringToMs(timeSpent)
+            }
+          }
+          : {}
+      ),
+      timeEstimate: stringToMs(timeEstimate),
+      title: task.title.replace(full, '')
+    };
+  }
+
+  return {};
 };

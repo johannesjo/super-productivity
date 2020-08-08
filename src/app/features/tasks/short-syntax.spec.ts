@@ -221,7 +221,7 @@ describe('shortSyntax', () => {
     // });
   });
 
-  describe('should work for projects', () => {
+  xdescribe('should work for projects', () => {
     let projects: Project[];
     beforeEach(() => {
       projects = [
