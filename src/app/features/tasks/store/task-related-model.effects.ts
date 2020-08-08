@@ -157,9 +157,12 @@ export class TaskRelatedModelEffects {
     concatMap((action: AddTask | UpdateTask): Observable<any> => {
       return this._taskService.getByIdOnce$(action.payload.task.id as string);
     }),
-    withLatestFrom(this._tagService.tags$),
-    mergeMap(([task, tags]) => {
-      const r = shortSyntax(task, tags);
+    withLatestFrom(
+      this._tagService.tags$,
+      this._projectService.list$,
+    ),
+    mergeMap(([task, tags, projects]) => {
+      const r = shortSyntax(task, tags, projects);
       if (!r) {
         return EMPTY;
       }

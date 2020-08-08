@@ -2,14 +2,16 @@ import { Task, TaskCopy } from './task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { Tag } from '../tag/tag.model';
+import { Project } from '../project/project.model';
 
 export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 export const SHORT_SYNTAX_TAGS_REG_EX = /\#[^\#]+/gi;
 
-export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
+export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProjects?: Project[]): {
   taskChanges: Partial<Task>,
-  newTagTitles: string[]
+  newTagTitles: string[],
+  remindAt: number | null,
 } | undefined => {
   let taskChanges: Partial<TaskCopy> = {};
   if (!task.title) {
@@ -89,5 +91,5 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[]): {
     return undefined;
   }
 
-  return {taskChanges, newTagTitles: newTagTitlesToCreate};
+  return {taskChanges, newTagTitles: newTagTitlesToCreate, remindAt: null};
 };

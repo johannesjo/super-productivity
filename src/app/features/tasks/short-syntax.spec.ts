@@ -64,6 +64,7 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t);
       expect(r).toEqual({
         newTagTitles: [],
+        remindAt: null,
         taskChanges: {
           title: 'Fun title',
           // timeSpent: 7200000,
@@ -71,7 +72,7 @@ describe('shortSyntax', () => {
             [getWorklogStr()]: 600000
           },
           timeEstimate: 3600000
-        }
+        },
       });
     });
 
@@ -83,6 +84,7 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t);
       expect(r).toEqual({
         newTagTitles: [],
+        remindAt: null,
         taskChanges: {
           title: 'Fun title whatever',
           // timeSpent: 7200000,
@@ -115,6 +117,7 @@ describe('shortSyntax', () => {
 
       expect(r).toEqual({
         newTagTitles: [],
+        remindAt: null,
         taskChanges: {
           title: '#134 Fun title',
           tagIds: ['blu_id']
@@ -131,6 +134,7 @@ describe('shortSyntax', () => {
 
       expect(r).toEqual({
         newTagTitles: [],
+        remindAt: null,
         taskChanges: {
           title: 'Fun title',
           tagIds: ['blu_id', 'A_id']
@@ -148,6 +152,7 @@ describe('shortSyntax', () => {
 
       expect(r).toEqual({
         newTagTitles: [],
+        remindAt: null,
         taskChanges: {
           title: 'Fun title',
           tagIds: ['blu_id', 'A', 'multi_word_id', 'hihi_id']
@@ -165,6 +170,7 @@ describe('shortSyntax', () => {
 
       expect(r).toEqual({
         newTagTitles: ['idontexist'],
+        remindAt: null,
         taskChanges: {
           title: 'Fun title',
           tagIds: ['blu_id']
@@ -182,6 +188,7 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, ALL_TAGS);
       expect(r).toEqual({
         newTagTitles: [],
+        remindAt: null,
         taskChanges: {
           title: 'Fun title',
           // timeSpent: 7200000,
