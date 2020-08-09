@@ -6,7 +6,7 @@ import * as moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
 import { isMigrateModel } from '../../util/model-version';
 
-const MODEL_VERSION = 3.3333;
+const MODEL_VERSION = 3.3334;
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
 export const migrateTaskState = (taskState: TaskState): TaskState => {
