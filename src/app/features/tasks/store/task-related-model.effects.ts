@@ -170,13 +170,15 @@ export class TaskRelatedModelEffects {
       const actions: any[] = [];
       const tagIds: string[] = [...(r.taskChanges.tagIds || task.tagIds)];
 
-      if (r.newTagTitles.length) {
-        r.newTagTitles.forEach(newTagTitle => {
-          const {action, id} = this._tagService.getAddTagActionAndId({title: newTagTitle});
-          tagIds.push(id);
-          actions.push(action);
-        });
-      }
+      actions.push(
+        new UpdateTask({
+            task: {
+              id: task.id,
+              changes: r.taskChanges,
+            }
+          }
+        )
+      );
 
       if (r.projectId) {
         actions.push(new MoveToOtherProject({
@@ -185,18 +187,24 @@ export class TaskRelatedModelEffects {
         }));
       }
 
-      actions.push(
-        new UpdateTask({
-            task: {
-              id: task.id,
-              changes: {
-                ...r.taskChanges,
-                ...(tagIds !== task.tagIds ? {tagIds} : {}),
-              }
-            }
-          }
-        )
-      );
+      if (r.newTagTitles.length) {
+        r.newTagTitles.forEach(newTagTitle => {
+          const {action, id} = this._tagService.getAddTagActionAndId({title: newTagTitle});
+          tagIds.push(id);
+          actions.push(action);
+        });
+      }
+
+      if (tagIds && tagIds.length) {
+        if (!task.tagIds) {
+          throw new Error('Task Old TagIds need to be passed');
+        }
+        actions.push(new UpdateTaskTags({
+          task,
+          newTagIds: unique(tagIds),
+          oldTagIds: task.tagIds,
+        }));
+      }
 
       return actions;
     }),
