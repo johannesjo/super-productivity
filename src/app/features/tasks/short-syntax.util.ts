@@ -9,19 +9,19 @@ export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|
 
 const CH_PRO = '+';
 const CH_TAG = '#';
-const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG})`;
+const CH_DUE = '@';
+const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG}|\\${CH_DUE})`;
 
 export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
 export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}]+`, 'gi');
-
-// const CHS_DUE = 'due:';
-// export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CHS_DUE}+`, 'gi');
+// export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi');
 
 export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProjects?: Project[]): {
   taskChanges: Partial<Task>,
   newTagTitles: string[],
   remindAt: number | null,
   projectId: string | undefined,
+  // due: number | undefined,
 } | undefined => {
   if (!task.title) {
     return;
@@ -31,19 +31,27 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   let taskChanges: Partial<TaskCopy>;
 
   taskChanges = parseTimeSpentChanges(task);
-  const projectChanges = parseProjectChanges({...task, title: taskChanges.title || task.title}, allProjects);
-  if (projectChanges.projectId) {
+  const changesForProject = parseProjectChanges({...task, title: taskChanges.title || task.title}, allProjects);
+  if (changesForProject.projectId) {
     taskChanges = {
       ...taskChanges,
-      title: projectChanges.title,
+      title: changesForProject.title,
     };
   }
 
-  const rTag = parseTagChanges({...task, title: taskChanges.title || task.title}, allTags);
+  const changesForTag = parseTagChanges({...task, title: taskChanges.title || task.title}, allTags);
   taskChanges = {
     ...taskChanges,
-    ...rTag.taskChanges
+    ...changesForTag.taskChanges
   };
+
+  // const changesForDue = parseDueChanges({...task, title: taskChanges.title || task.title});
+  // if (changesForDue.due) {
+  //   taskChanges = {
+  //     ...taskChanges,
+  //     title: changesForDue.title,
+  //   };
+  // }
 
   if (Object.keys(taskChanges).length === 0) {
     return undefined;
@@ -51,9 +59,10 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
 
   return {
     taskChanges,
-    newTagTitles: rTag.newTagTitlesToCreate,
+    newTagTitles: changesForTag.newTagTitlesToCreate,
     remindAt: null,
-    projectId: projectChanges.projectId,
+    projectId: changesForProject.projectId,
+    // due: changesForDue.due
   };
 };
 
@@ -185,3 +194,29 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
 
   return {};
 };
+
+// const parseDueChanges = (task: Partial<TaskCopy>): {
+//   title?: string;
+//   due?: number;
+// } => {
+//   if (!task.title) {
+//     return {};
+//   }
+//
+//   const matches = SHORT_SYNTAX_DUE_REG_EX.exec(task.title);
+//   console.log(matches);
+//
+//   if (matches && matches[0]) {
+//     const dateStr = matches[0].replace(CH_DUE, '');
+//     console.log(dateStr);
+//     const m = moment(dateStr);
+//     if (m.isValid()) {
+//       const title = task.title.replace(matches[0], '');
+//       console.log(m);
+//       console.log(title);
+//     } else {
+//       // TODO parse clock string here
+//     }
+//   }
+//   return {};
+// };
