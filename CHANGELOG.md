@@ -1,3 +1,18 @@
+## [5.5.7](https://github.com/johannesjo/super-productivity/compare/v5.5.6...v5.5.7) (2020-08-09)
+
+
+### Bug Fixes
+
+* invalid time value [#491](https://github.com/johannesjo/super-productivity/issues/491) ([2064abd](https://github.com/johannesjo/super-productivity/commit/2064abd1cb6f32eb202f0b62033a79bc18e08523))
+* trigger task migrate script [#481](https://github.com/johannesjo/super-productivity/issues/481) ([b42517d](https://github.com/johannesjo/super-productivity/commit/b42517dd361a1bbffc79769591d9e1446fe5c58a))
+
+
+### Features
+
+* improve error message handling [#485](https://github.com/johannesjo/super-productivity/issues/485) ([5c035bc](https://github.com/johannesjo/super-productivity/commit/5c035bc022e54743923982c701037bb550cd3ed9))
+
+
+
 ## [5.5.6](https://github.com/johannesjo/super-productivity/compare/v5.5.5...v5.5.6) (2020-08-08)
 
 
