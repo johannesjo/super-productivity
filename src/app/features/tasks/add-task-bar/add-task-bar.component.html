@@ -37,8 +37,7 @@
   <div class="short-syntax-bar"
        *ngIf="(shortSyntaxTags$|async) as shortSyntaxTags">
     <div class="example"
-         *ngIf="shortSyntaxTags.length===0">Example: "Some task title @projectName #some tag #some other tag 10m/3h"
-    </div>
+         *ngIf="shortSyntaxTags.length===0">{{T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate}}</div>
     <tag *ngFor="let shortSyntaxTags of shortSyntaxTags; trackBy: trackById"
          [tag]="shortSyntaxTags"></tag>
   </div>

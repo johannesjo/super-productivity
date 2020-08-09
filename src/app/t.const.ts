@@ -609,6 +609,7 @@ export const T = {
       'ADD_TASK_BAR': {
         'ADD_TASK': 'F.TASK.ADD_TASK_BAR.ADD_TASK',
         'ADD_TASK_TO_BACKLOG': 'F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BACKLOG',
+        'EXAMPLE': 'F.TASK.ADD_TASK_BAR.EXAMPLE',
         'START': 'F.TASK.ADD_TASK_BAR.START'
       },
       'B': {
