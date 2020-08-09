@@ -65,10 +65,6 @@ const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): 
   if (task.issueId) {
     return {};
   }
-  // TODO check if we can allow this
-  if (task.projectId) {
-    return {};
-  }
   if (!Array.isArray(allProjects) || !allProjects || allProjects.length === 0) {
     return {};
   }
