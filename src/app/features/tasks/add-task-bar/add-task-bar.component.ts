@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
-import { debounceTime, first, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, first, map, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import { BehaviorSubject, forkJoin, from, Observable, of, zip } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
@@ -29,7 +29,6 @@ import { ProjectService } from '../../project/project.service';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { shortSyntaxToTags } from './short-syntax-to-tags.util';
-import { improvementBannerAnimation } from '../../metric/improvement-banner/improvement-banner.ani';
 
 @Component({
   selector: 'add-task-bar',
@@ -89,6 +88,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       projects,
       defaultColor: activeWorkContext.theme.primary
     })),
+    startWith([]),
   );
 
   private _isAddInProgress?: boolean;

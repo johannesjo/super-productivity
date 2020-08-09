@@ -29,7 +29,7 @@
   }
 }
 
-$short-syntax-bar-height: 32px;
+$short-syntax-bar-height: 28px;
 .add-task-form {
   width: 100%;
   position: relative;
@@ -120,11 +120,10 @@ $short-syntax-bar-height: 32px;
 
 .short-syntax-bar {
   padding: 0 1.75*$s;
-  padding-top: 1px;
   height: $short-syntax-bar-height;
   line-height: $short-syntax-bar-height;
   margin-top: -1*$short-syntax-bar-height;
-  color: #000000;
+  color: $light-theme-text-color-muted;
   background: #ffffff;
   border-top: 1px dashed $light-theme-extra-border-color;
   position: relative;
@@ -136,6 +135,6 @@ $short-syntax-bar-height: 32px;
   @include darkTheme {
     background-color: $dark-theme-bg-lightest;
     border-color: $dark-theme-extra-border-color;
-    color: #eeeeee;
+    color: $dark-theme-text-color-muted;
   }
 }
