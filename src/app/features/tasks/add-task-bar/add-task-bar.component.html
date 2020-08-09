@@ -34,8 +34,9 @@
     </button>
   </div>
 
-  <div class="short-syntax-bar">
-    <tag *ngFor="let shortSyntaxTags of (shortSyntaxTags$|async)"
+  <div class="short-syntax-bar"
+       *ngIf="(shortSyntaxTags$|async) as shortSyntaxTags">
+    <tag *ngFor="let shortSyntaxTags of shortSyntaxTags; trackBy: trackById"
          [tag]="shortSyntaxTags"></tag>
   </div>
 

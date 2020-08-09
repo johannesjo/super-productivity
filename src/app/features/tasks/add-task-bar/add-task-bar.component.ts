@@ -29,6 +29,7 @@ import { ProjectService } from '../../project/project.service';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { shortSyntaxToTags } from './short-syntax-to-tags.util';
+import { improvementBannerAnimation } from '../../metric/improvement-banner/improvement-banner.ani';
 
 @Component({
   selector: 'add-task-bar',
@@ -169,6 +170,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   trackByFn(i: number, item: AddTaskSuggestion) {
     return item.taskId || (item.issueData && item.issueData.id);
+  }
+
+  trackById(i: number, item: any): string {
+    return item.id;
   }
 
   async addTask() {
