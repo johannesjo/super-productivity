@@ -72,9 +72,11 @@ export class DatetimeInputComponent {
     }
   }
 
-  private _updateValues(v: number | Date, isFromInput: boolean = false) {
+  private _updateValues(v: number | Date | string, isFromInput: boolean = false) {
     if (v instanceof Date) {
       v = v.getTime();
+    } else if (typeof v === 'string') {
+      v = new Date(v).getTime();
     }
     this.nrValue = v;
     this.modelChange.emit(v);
