@@ -9,7 +9,7 @@ export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|
 
 const CH_PRO = '@';
 const CH_TAG = '#';
-const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG})`
+const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG})`;
 
 export const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
 export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}]+`, 'gi');
@@ -58,6 +58,9 @@ const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): 
     return {};
   }
   if (!Array.isArray(allProjects) || !allProjects || allProjects.length === 0) {
+    return {};
+  }
+  if (!task.title) {
     return {};
   }
 
