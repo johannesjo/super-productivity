@@ -21,7 +21,6 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   newTagTitles: string[],
   remindAt: number | null,
   projectId: string | undefined,
-  // due: number | undefined,
 } | undefined => {
   if (!task.title) {
     return;
@@ -46,7 +45,7 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   };
 
   // const changesForDue = parseDueChanges({...task, title: taskChanges.title || task.title});
-  // if (changesForDue.due) {
+  // if (changesForDue.remindAt) {
   //   taskChanges = {
   //     ...taskChanges,
   //     title: changesForDue.title,
@@ -62,7 +61,7 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
     newTagTitles: changesForTag.newTagTitlesToCreate,
     remindAt: null,
     projectId: changesForProject.projectId,
-    // due: changesForDue.due
+    // remindAt: changesForDue.remindAt
   };
 };
 
@@ -197,7 +196,7 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
 
 // const parseDueChanges = (task: Partial<TaskCopy>): {
 //   title?: string;
-//   due?: number;
+//   remindAt?: number;
 // } => {
 //   if (!task.title) {
 //     return {};
