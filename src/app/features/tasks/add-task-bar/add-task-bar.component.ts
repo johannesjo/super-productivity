@@ -28,6 +28,7 @@ import { TagService } from '../../tag/tag.service';
 import { ProjectService } from '../../project/project.service';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
+import { shortSyntaxToTags } from './short-syntax-to-tags.util';
 
 @Component({
   selector: 'add-task-bar',
@@ -79,13 +80,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  fakeTags: any[] = [
-    {title: 'Project Title', icon: 'list', color: 'orange'},
-    {title: '2h/3h', icon: 'timer', color: '#343434'},
-    {title: 'due:12/12/20 9:00', icon: 'alarm', color: '#343434'},
-    {title: 'Tag1', icon: 'style', color: '#343434'},
-    {title: 'Tag2 Hi', icon: 'style', color: '#343434'},
-  ];
+  shortSyntaxTags$: Observable<any> = this.taskSuggestionsCtrl.valueChanges.pipe(
+    withLatestFrom(this._tagService.tags$, this._projectService.list$, this._workContextService.activeWorkContext$),
+    map(([val, tags, projects, activeWorkContext]) => shortSyntaxToTags({
+      val,
+      tags,
+      projects,
+      defaultColor: activeWorkContext.theme.primary
+    })),
+  );
 
   private _isAddInProgress?: boolean;
   private _blurTimeout?: number;
@@ -102,6 +105,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _tagService: TagService,
     private _cd: ChangeDetectorRef,
   ) {
+    this.shortSyntaxTags$.subscribe((v) => console.log('shortSyntaxTags$', v));
   }
 
   ngAfterViewInit(): void {

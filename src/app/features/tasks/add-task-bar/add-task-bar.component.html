@@ -26,6 +26,7 @@
            matInput>
 
     <button (click)="closeBtnClose($event)"
+            *ngIf="isElevated"
             class="close-btn"
             mat-icon-button
             type="button">
@@ -34,8 +35,8 @@
   </div>
 
   <div class="short-syntax-bar">
-    <tag *ngFor="let fakeTag of fakeTags"
-         [tag]="fakeTag"></tag>
+    <tag *ngFor="let shortSyntaxTags of (shortSyntaxTags$|async)"
+         [tag]="shortSyntaxTags"></tag>
   </div>
 
   <mat-autocomplete #autoEl="matAutocomplete"
