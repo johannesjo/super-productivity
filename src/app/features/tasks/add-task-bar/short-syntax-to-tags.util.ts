@@ -20,14 +20,18 @@ export const shortSyntaxToTags = ({val, tags, projects, defaultColor}: {
     tagIds: [],
     projectId: undefined,
   }, tags, projects);
-  const shortSyntaxTags: any[] = [];
+  const shortSyntaxTags: {
+    title: string;
+    color: string;
+    icon: string;
+  }[] = [];
 
   if (!r) {
     return [];
   }
 
-  if (r.taskChanges.projectId) {
-    const project = projects.find(p => p.id === r.taskChanges.projectId);
+  if (r.projectId) {
+    const project = projects.find(p => p.id === r.projectId);
     if (!project) {
       throw new Error('Project not found');
     }

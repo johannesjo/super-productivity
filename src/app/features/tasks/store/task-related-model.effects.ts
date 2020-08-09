@@ -178,10 +178,10 @@ export class TaskRelatedModelEffects {
         });
       }
 
-      if (r.taskChanges.projectId) {
+      if (r.projectId) {
         actions.push(new MoveToOtherProject({
           task,
-          targetProjectId: r.taskChanges.projectId,
+          targetProjectId: r.projectId,
         }));
       }
 

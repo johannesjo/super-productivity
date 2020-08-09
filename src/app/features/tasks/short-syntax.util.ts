@@ -21,6 +21,7 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   taskChanges: Partial<Task>,
   newTagTitles: string[],
   remindAt: number | null,
+  projectId: string | undefined,
 } | undefined => {
   if (!task.title) {
     return;
@@ -30,10 +31,13 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   let taskChanges: Partial<TaskCopy>;
 
   taskChanges = parseTimeSpentChanges(task);
-  taskChanges = {
-    ...taskChanges,
-    ...parseProjectChanges({...task, title: taskChanges.title || task.title}, allProjects)
-  };
+  const projectChanges = parseProjectChanges({...task, title: taskChanges.title || task.title}, allProjects);
+  if (projectChanges.projectId) {
+    taskChanges = {
+      ...taskChanges,
+      title: projectChanges.title,
+    };
+  }
 
   const rTag = parseTagChanges({...task, title: taskChanges.title || task.title}, allTags);
   taskChanges = {
@@ -45,10 +49,18 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
     return undefined;
   }
 
-  return {taskChanges, newTagTitles: rTag.newTagTitlesToCreate, remindAt: null};
+  return {
+    taskChanges,
+    newTagTitles: rTag.newTagTitlesToCreate,
+    remindAt: null,
+    projectId: projectChanges.projectId,
+  };
 };
 
-const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): Partial<TaskCopy> => {
+const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): {
+  title?: string,
+  projectId?: string,
+} => {
   // don't allow for issue tasks
   if (task.issueId) {
     return {};
