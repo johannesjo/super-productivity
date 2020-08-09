@@ -7,7 +7,7 @@ import { Project } from '../project/project.model';
 export const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 
-const CH_PRO = '@';
+const CH_PRO = '+';
 const CH_TAG = '#';
 const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG})`;
 
