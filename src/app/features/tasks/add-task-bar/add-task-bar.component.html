@@ -2,34 +2,41 @@
       [class.mat-elevation-z1]="!isElevated"
       [class.mat-elevation-z2]="isElevated"
       class="add-task-form">
-  <div *ngIf="(isLoading$|async)"
-       class="spinner">
-    <mat-spinner diameter="50"></mat-spinner>
-  </div>
-  <button (click)="isAddToBacklog=!isAddToBacklog"
-          class="switch-add-to-btn"
-          mat-icon-button
-          type="button">
-    <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
-    <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
-  </button>
-  <input #inputEl
-         (blur)="onBlur($event)"
-         [formControl]="taskSuggestionsCtrl"
-         [matAutocomplete]="autoEl"
-         [placeholder]="(doubleEnterCount > 0)
+  <div class="input-wrapper">
+    <div *ngIf="(isLoading$|async)"
+         class="spinner">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+    <button (click)="isAddToBacklog=!isAddToBacklog"
+            class="switch-add-to-btn"
+            mat-icon-button
+            type="button">
+      <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
+      <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
+    </button>
+    <input #inputEl
+           (blur)="onBlur($event)"
+           [formControl]="taskSuggestionsCtrl"
+           [matAutocomplete]="autoEl"
+           [placeholder]="(doubleEnterCount > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)
          : isAddToBacklog
            ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BACKLOG|translate)
            : (T.F.TASK.ADD_TASK_BAR.ADD_TASK|translate)"
-         matInput>
+           matInput>
 
-  <button (click)="closeBtnClose($event)"
-          class="close-btn"
-          mat-icon-button
-          type="button">
-    <mat-icon>close</mat-icon>
-  </button>
+    <button (click)="closeBtnClose($event)"
+            class="close-btn"
+            mat-icon-button
+            type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="short-syntax-bar">
+    <tag *ngFor="let fakeTag of fakeTags"
+         [tag]="fakeTag"></tag>
+  </div>
 
   <mat-autocomplete #autoEl="matAutocomplete"
                     (optionSelected)="addTask()"

@@ -29,6 +29,7 @@
   }
 }
 
+$short-syntax-bar-height: 32px;
 .add-task-form {
   width: 100%;
   position: relative;
@@ -38,7 +39,13 @@
     color: #eeeeee;
   }
 
+  .input-wrapper {
+    position: relative;
+  }
+
   input {
+    padding-bottom: $short-syntax-bar-height;
+
     display: block;
     width: 100%;
     font-size: 16px;
@@ -87,6 +94,7 @@
   transform: translateY(-50%);
   z-index: 2;
   opacity: 0.4;
+  margin-top: -.5*$short-syntax-bar-height;
 
   &:hover {
     opacity: 1;
@@ -100,11 +108,34 @@
   transform: translateY(-50%);
   z-index: 2;
   opacity: 0.4;
+  margin-top: -.5*$short-syntax-bar-height;
 
   &:hover {
     opacity: 1;
   }
 
   @include mq(xs) {
+  }
+}
+
+.short-syntax-bar {
+  padding: 0 1.75*$s;
+  padding-top: 1px;
+  height: $short-syntax-bar-height;
+  line-height: $short-syntax-bar-height;
+  margin-top: -1*$short-syntax-bar-height;
+  color: #000000;
+  background: #ffffff;
+  border-top: 1px dashed $light-theme-extra-border-color;
+  position: relative;
+  z-index: 1;
+  border-bottom-left-radius: $card-border-radius;
+  border-bottom-right-radius: $card-border-radius;
+  pointer-events: none;
+
+  @include darkTheme {
+    background-color: $dark-theme-bg-lightest;
+    border-color: $dark-theme-extra-border-color;
+    color: #eeeeee;
   }
 }

@@ -79,6 +79,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
+  fakeTags: any[] = [
+    {title: 'Project Title', icon: 'list', color: 'orange'},
+    {title: '2h/3h', icon: 'timer', color: '#343434'},
+    {title: 'due:12/12/20 9:00', icon: 'alarm', color: '#343434'},
+    {title: 'Tag1', icon: 'style', color: '#343434'},
+    {title: 'Tag2 Hi', icon: 'style', color: '#343434'},
+  ];
+
   private _isAddInProgress?: boolean;
   private _blurTimeout?: number;
   private _autofocusTimeout?: number;
