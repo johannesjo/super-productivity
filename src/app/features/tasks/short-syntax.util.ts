@@ -80,8 +80,7 @@ const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): 
     return {};
   }
 
-  const initialTitle = task.title as string;
-  const rr = initialTitle.match(SHORT_SYNTAX_PROJECT_REG_EX);
+  const rr = task.title.match(SHORT_SYNTAX_PROJECT_REG_EX);
 
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
