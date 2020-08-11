@@ -138,3 +138,9 @@ $short-syntax-bar-height: 28px;
     color: $dark-theme-text-color-muted;
   }
 }
+
+.info-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
