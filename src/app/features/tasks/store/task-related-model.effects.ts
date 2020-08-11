@@ -162,6 +162,8 @@ export class TaskRelatedModelEffects {
       this._projectService.list$,
     ),
     mergeMap(([task, tags, projects]) => {
+      console.log('ADDED TASK', task);
+
       const r = shortSyntax(task, tags, projects);
       if (!r) {
         return EMPTY;

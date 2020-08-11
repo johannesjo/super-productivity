@@ -34,6 +34,7 @@ $short-syntax-bar-height: 28px;
   width: 100%;
   position: relative;
   color: #000000;
+  border-radius: $card-border-radius;
 
   @include darkTheme {
     color: #eeeeee;
@@ -52,7 +53,6 @@ $short-syntax-bar-height: 28px;
     box-sizing: border-box;
     border-style: solid;
     border-width: 0;
-    border-radius: $card-border-radius;
     outline: 0;
     border-color: $c-primary;
 
@@ -118,7 +118,7 @@ $short-syntax-bar-height: 28px;
   }
 }
 
-.short-syntax-bar {
+.info-bar {
   padding: 0 1.75*$s;
   height: $short-syntax-bar-height;
   line-height: $short-syntax-bar-height;
@@ -128,8 +128,8 @@ $short-syntax-bar-height: 28px;
   border-top: 1px dashed $light-theme-extra-border-color;
   position: relative;
   z-index: 1;
-  border-bottom-left-radius: $card-border-radius;
-  border-bottom-right-radius: $card-border-radius;
+  //border-bottom-left-radius: $card-border-radius;
+  //border-bottom-right-radius: $card-border-radius;
   pointer-events: none;
 
   @include darkTheme {

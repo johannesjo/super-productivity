@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
-import { debounceTime, first, map, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, filter, first, map, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import { BehaviorSubject, forkJoin, from, Observable, of, zip } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
@@ -80,7 +80,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  shortSyntaxTags$: Observable<any> = this.taskSuggestionsCtrl.valueChanges.pipe(
+  activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> = new BehaviorSubject(null);
+
+  shortSyntaxTags$: Observable<{
+    title: string;
+    color: string;
+    icon: string;
+  }[]> = this.taskSuggestionsCtrl.valueChanges.pipe(
+    filter(val => typeof val === 'string'),
     withLatestFrom(this._tagService.tags$, this._projectService.list$, this._workContextService.activeWorkContext$),
     map(([val, tags, projects, activeWorkContext]) => shortSyntaxToTags({
       val,
@@ -106,7 +113,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _tagService: TagService,
     private _cd: ChangeDetectorRef,
   ) {
-    this.shortSyntaxTags$.subscribe((v) => console.log('shortSyntaxTags$', v));
   }
 
   ngAfterViewInit(): void {
@@ -147,6 +153,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   closeBtnClose(ev: Event) {
     this.blurred.emit(ev);
+  }
+
+  onOptionActivated(val: any) {
+    this.activatedIssueTask$.next(val);
   }
 
   onBlur(ev: FocusEvent) {

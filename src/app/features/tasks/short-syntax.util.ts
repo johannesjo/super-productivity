@@ -25,6 +25,9 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
   if (!task.title) {
     return;
   }
+  if (typeof (task.title as any) !== 'string') {
+    throw new Error('No str');
+  }
 
   // TODO clean up this mess
   let taskChanges: Partial<TaskCopy>;

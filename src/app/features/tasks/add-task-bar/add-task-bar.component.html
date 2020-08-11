@@ -34,17 +34,29 @@
     </button>
   </div>
 
-  <div class="short-syntax-bar"
-       *ngIf="(shortSyntaxTags$|async) as shortSyntaxTags">
-    <div class="example"
-         *ngIf="shortSyntaxTags.length===0">{{T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate}}</div>
-    <tag *ngFor="let shortSyntaxTags of shortSyntaxTags; trackBy: trackById"
-         [tag]="shortSyntaxTags"></tag>
+
+  <div class="info-bar">
+    <ng-container *ngIf="(activatedIssueTask$|async) as selectedIssueTask">
+      <div class="info-text"
+           *ngIf="selectedIssueTask.issueType">{{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{issueType: selectedIssueTask.issueType} }}</div>
+      <div class="info-text"
+           *ngIf="selectedIssueTask.issueType=== undefined">{{T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: {taskTitle: selectedIssueTask.title} }}</div>
+    </ng-container>
+
+    <ng-container *ngIf="!(activatedIssueTask$|async) && (shortSyntaxTags$|async) as shortSyntaxTags">
+      <tag *ngFor="let shortSyntaxTags of shortSyntaxTags; trackBy: trackById"
+           [tag]="shortSyntaxTags"></tag>
+      <div class="info-text"
+           *ngIf="shortSyntaxTags.length===0">{{T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate}}</div>
+    </ng-container>
   </div>
 
+
+  <!-- NOTE: [autoActiveFirstOption]="taskSuggestionsCtrl.value?.length <= 3"
+  causes optionActivated not to be fired :(--->
   <mat-autocomplete #autoEl="matAutocomplete"
+                    (optionActivated)="onOptionActivated($event?.option?.value)"
                     (optionSelected)="addTask()"
-                    [autoActiveFirstOption]="taskSuggestionsCtrl.value?.length <= 3"
                     [displayWith]="displayWith">
     <mat-option *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
                 [value]="item">

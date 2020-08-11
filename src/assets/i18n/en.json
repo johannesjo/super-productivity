@@ -607,6 +607,8 @@
         "TIME": "Time"
       },
       "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Add task from {{issueType}}",
         "ADD_TASK": "Add task",
         "ADD_TASK_TO_BACKLOG": "Add task to backlog",
         "EXAMPLE": "Example: \"Some task title +projectName #some tag #some other tag 10m/3h\"",

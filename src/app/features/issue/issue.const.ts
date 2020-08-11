@@ -8,6 +8,7 @@ export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
 export const JIRA_TYPE: IssueProviderKey = 'JIRA';
 
+// TODO uppercase
 export const issueProviderKeys: IssueProviderKey[] = [JIRA_TYPE, GITHUB_TYPE, GITLAB_TYPE];
 
 export const issueProviderIconMap = {
