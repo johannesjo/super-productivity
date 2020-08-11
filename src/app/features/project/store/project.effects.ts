@@ -407,7 +407,9 @@ export class ProjectEffects {
     switchMap(() => this._workContextService.activeWorkContext$),
     // only run in prod, because we want to debug this
     // filter(() => environment.production),
-    filter(({type, taskIds}) => type === WorkContextType.PROJECT && taskIds.length === 0),
+    filter(({type, taskIds, backlogTaskIds}) => (type === WorkContextType.PROJECT
+      && taskIds.length === 0
+      && backlogTaskIds?.length === 0)),
     withLatestFrom(this._taskService.allTasks$),
     tap(([{id}, allTasks]: [WorkContext, Task[]]) => {
       const unlistedParentTasks = allTasks.filter(task => !task.parentId && task.projectId === id);
