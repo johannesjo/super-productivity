@@ -401,24 +401,25 @@ export class ProjectEffects {
       }),
     );
 
+  // NOTE: trigger needs to be id only otherwise we subscribe to every change
   @Effect({dispatch: false})
-  fixWeirdUnlistedTasks: Observable<unknown> = this._workContextService.activeWorkContext$
-    .pipe(
-      // only run in prod, because we want to debug this
-      // filter(() => environment.production),
-      filter(({type, taskIds}) => type === WorkContextType.PROJECT && taskIds.length === 0),
-      withLatestFrom(this._taskService.allTasks$),
-      tap(([{id}, allTasks]: [WorkContext, Task[]]) => {
-        const unlistedParentTasks = allTasks.filter(task => !task.parentId && task.projectId === id);
-        if (unlistedParentTasks.length
-          && confirm('Nooo! We found some tasks that are not listed (but should be). Do you want to list them?')) {
-          const unlistedIds = unlistedParentTasks.map(task => task.id);
-          this._projectService.update(id, {
-            taskIds: unlistedIds
-          });
-        }
-      }),
-    );
+  fixWeirdUnlistedTasks: Observable<unknown> = this._workContextService.activeWorkContextId$.pipe(
+    switchMap(() => this._workContextService.activeWorkContext$),
+    // only run in prod, because we want to debug this
+    // filter(() => environment.production),
+    filter(({type, taskIds}) => type === WorkContextType.PROJECT && taskIds.length === 0),
+    withLatestFrom(this._taskService.allTasks$),
+    tap(([{id}, allTasks]: [WorkContext, Task[]]) => {
+      const unlistedParentTasks = allTasks.filter(task => !task.parentId && task.projectId === id);
+      if (unlistedParentTasks.length
+        && confirm('Nooo! We found some tasks that are not listed (but should be). Do you want to list them?')) {
+        const unlistedIds = unlistedParentTasks.map(task => task.id);
+        this._projectService.update(id, {
+          taskIds: unlistedIds
+        });
+      }
+    }),
+  );
 
   @Effect({dispatch: false})
   cleanupNullTasksForBacklog: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
