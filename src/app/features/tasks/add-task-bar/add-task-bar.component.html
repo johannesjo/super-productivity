@@ -38,7 +38,10 @@
   <div class="info-bar">
     <ng-container *ngIf="(activatedIssueTask$|async) as selectedIssueTask">
       <div class="info-text"
-           *ngIf="selectedIssueTask.issueType">{{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{issueType: selectedIssueTask.issueType, issueNr: selectedIssueTask.taskIssueId||selectedIssueTask.issueData.key||selectedIssueTask.issueData.id} }}</div>
+           *ngIf="selectedIssueTask.issueType">{{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{
+        issueType: selectedIssueTask.issueType,
+        issueNr: selectedIssueTask.taskIssueId || selectedIssueTask.issueData.key || selectedIssueTask.issueData.id
+      } }}</div>
       <div class="info-text"
            *ngIf="selectedIssueTask.issueType=== undefined">{{T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: {taskTitle: selectedIssueTask.title} }}</div>
     </ng-container>
@@ -46,8 +49,12 @@
     <ng-container *ngIf="!(activatedIssueTask$|async) && (shortSyntaxTags$|async) as shortSyntaxTags">
       <tag *ngFor="let shortSyntaxTags of shortSyntaxTags; trackBy: trackById"
            [tag]="shortSyntaxTags"></tag>
-      <div class="info-text"
-           *ngIf="shortSyntaxTags.length===0">{{T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate}}</div>
+      <ng-container *ngIf="shortSyntaxTags.length===0 && (taskSuggestionsCtrl.valueChanges|async) as val">
+        <div class="info-text"
+             *ngIf="val?.length<1">{{T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate}}</div>
+        <div class="info-text"
+             *ngIf="val?.length>=1">{{T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate}}</div>
+      </ng-container>
     </ng-container>
   </div>
 
