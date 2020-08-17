@@ -220,15 +220,15 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       this.issueDataNullTrigger$.next(null);
     }
 
-    if (!prev || prev.issueId !== newVal.issueId) {
+    if (!prev || (prev.reminderId !== newVal.reminderId)) {
       this.reminderId$.next(newVal.reminderId);
     }
 
-    if (!prev || prev.issueId !== newVal.issueId) {
+    if (!prev || (prev.repeatCfgId !== newVal.repeatCfgId)) {
       this.repeatCfgId$.next(newVal.repeatCfgId);
     }
 
-    if (!prev || prev.issueId !== newVal.issueId) {
+    if (!prev || (prev.parentId !== newVal.parentId)) {
       this.parentId$.next(newVal.parentId);
     }
   }
