@@ -31,6 +31,9 @@ export const selectTaskRepeatCfgById = createSelector(
     return cfg;
   }
 );
+export const selectTaskRepeatCfgByIdAllowUndefined = createSelector(
+  selectTaskRepeatCfgFeatureState,
+  (state: TaskRepeatCfgState, props: { id: string }): TaskRepeatCfg | undefined => state.entities[props.id]);
 
 export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialState({
   // additional entity state properties

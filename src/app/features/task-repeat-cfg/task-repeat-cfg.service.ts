@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { selectAllTaskRepeatCfgs, selectTaskRepeatCfgById } from './store/task-repeat-cfg.reducer';
+import {
+  selectAllTaskRepeatCfgs,
+  selectTaskRepeatCfgById,
+  selectTaskRepeatCfgByIdAllowUndefined
+} from './store/task-repeat-cfg.reducer';
 import {
   AddTaskRepeatCfgToTask,
   DeleteTaskRepeatCfg,
@@ -30,6 +34,9 @@ export class TaskRepeatCfgService {
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
     return this._store$.pipe(select(selectTaskRepeatCfgById, {id}));
+  }
+  getTaskRepeatCfgByIdAllowUndefined$(id: string): Observable<TaskRepeatCfg|undefined> {
+    return this._store$.pipe(select(selectTaskRepeatCfgByIdAllowUndefined, {id}));
   }
 
   addTaskRepeatCfgToTask(taskId: string, projectId: string | null, taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'>) {

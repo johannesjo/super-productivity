@@ -95,7 +95,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   repeatCfgId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
   repeatCfgDays$: Observable<string | null> = this.repeatCfgId$.pipe(
     switchMap(id => (id)
-      ? this._taskRepeatCfgService.getTaskRepeatCfgById$(id).pipe(
+      // TODO for some reason this can be undefined, maybe there is a better way
+      ? this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(id).pipe(
         map(repeatCfg => {
           if (!repeatCfg) {
             return null;
