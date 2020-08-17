@@ -1,3 +1,40 @@
+# [5.6.0](https://github.com/johannesjo/super-productivity/compare/v5.5.7...v5.6.0) (2020-08-17)
+
+
+### Bug Fixes
+
+* example text for mobile [#487](https://github.com/johannesjo/super-productivity/issues/487) ([38b22d3](https://github.com/johannesjo/super-productivity/commit/38b22d3abab060a3f6792942e6e4c30460bbf04f))
+* missing taskRepeatCfg for taskAdditionalInfo [#499](https://github.com/johannesjo/super-productivity/issues/499) ([690df86](https://github.com/johannesjo/super-productivity/commit/690df86e176743de8e5715fbce976a25579f6405))
+* potential error [#487](https://github.com/johannesjo/super-productivity/issues/487) ([bff1ade](https://github.com/johannesjo/super-productivity/commit/bff1adece9342e78640cdf09563ce1150a971d88))
+* replace setInterval with lazy implementation everywhere [#493](https://github.com/johannesjo/super-productivity/issues/493) ([cd8438d](https://github.com/johannesjo/super-productivity/commit/cd8438db2391d2fa70ad5e4fa9e96c2eef9815a2))
+* several issues with project id parsing [#487](https://github.com/johannesjo/super-productivity/issues/487) ([3a8d35e](https://github.com/johannesjo/super-productivity/commit/3a8d35ef4b366b924b0e84e4df354056f5525823))
+* tasks not being added to tag task lists [#487](https://github.com/johannesjo/super-productivity/issues/487) ([12d6190](https://github.com/johannesjo/super-productivity/commit/12d619024a7fc8b889c670c4d1aa3a73d4bafa6d))
+* unlisted error when moving all tasks to backlog via shortcut ([1c26488](https://github.com/johannesjo/super-productivity/commit/1c26488eac7101283a060c2e11e5d6e268249ff5))
+* weird listing bug ([67e3c44](https://github.com/johannesjo/super-productivity/commit/67e3c44f1735a0397cf27ecea8797efbf360e2d9))
+* wrong update checks for side panel ([5484ec1](https://github.com/johannesjo/super-productivity/commit/5484ec1208bce73866a748af33c526633a282ff5))
+
+
+### Features
+
+* add basic ui for add task bar [#487](https://github.com/johannesjo/super-productivity/issues/487) ([f25f19e](https://github.com/johannesjo/super-productivity/commit/f25f19ee330c9355ae4554d7c7622a14b8ab7606))
+* add basic ui for add task bar [#487](https://github.com/johannesjo/super-productivity/issues/487) ([634c43b](https://github.com/johannesjo/super-productivity/commit/634c43bf300e5b4621d3b45a46addcb5f583598b))
+* add better indication ([bee8de8](https://github.com/johannesjo/super-productivity/commit/bee8de8d1c6e2459aac512971f7e02cf8796cfd7))
+* add track by [#487](https://github.com/johannesjo/super-productivity/issues/487) ([902528e](https://github.com/johannesjo/super-productivity/commit/902528efe48ea46040eda8bcd7048bfba003c8cf))
+* add translation [#487](https://github.com/johannesjo/super-productivity/issues/487) ([09a7f04](https://github.com/johannesjo/super-productivity/commit/09a7f043d05c9e8c3befa53f86be547f839a027a))
+* allow moving tasks via short syntax [#487](https://github.com/johannesjo/super-productivity/issues/487) ([3e8a190](https://github.com/johannesjo/super-productivity/commit/3e8a190dbd55e4c204b544ebfdabd83086b99c52))
+* also display issue nr for short syntax bar ([c9b7e2b](https://github.com/johannesjo/super-productivity/commit/c9b7e2b05b782383959bbe00a7571f69619722c9))
+* comment out due for now [#487](https://github.com/johannesjo/super-productivity/issues/487) ([ef97840](https://github.com/johannesjo/super-productivity/commit/ef97840eef5491f11370b90bce64d9458aabb7bb))
+* improve styling [#487](https://github.com/johannesjo/super-productivity/issues/487) ([c1210ee](https://github.com/johannesjo/super-productivity/commit/c1210eefb44e4d25bdc6a3bb2d1fa491a01647e1))
+* only show example when no text otherwise show "Create new task" ([eca6af2](https://github.com/johannesjo/super-productivity/commit/eca6af27c25e5b331b65f37ab50f2e62b153ed24))
+* use + key for project [#487](https://github.com/johannesjo/super-productivity/issues/487) ([6376320](https://github.com/johannesjo/super-productivity/commit/63763203e38c93117d3f8127c4ec29934221c597))
+* **advancedShortSyntax:** make order more flexible [#487](https://github.com/johannesjo/super-productivity/issues/487) ([abf1b0c](https://github.com/johannesjo/super-productivity/commit/abf1b0c5d6f2e9d0b5b96e2ded38cd4a22a0fd96))
+* **advancedShortSyntax:** make partial project work [#487](https://github.com/johannesjo/super-productivity/issues/487) ([bb587f5](https://github.com/johannesjo/super-productivity/commit/bb587f54b65d2111d815ef654b47f445c65da1a8))
+* **advancedShortSyntax:** make project work [#487](https://github.com/johannesjo/super-productivity/issues/487) ([58aee57](https://github.com/johannesjo/super-productivity/commit/58aee579ee2e9b8f3f39ad59c34979725b6dbd76))
+* **advancedShortSyntax:** prepare new interface ([4033d71](https://github.com/johannesjo/super-productivity/commit/4033d717a21417a785cb22e669d4bc83b700f87f))
+* **advancedShortSyntax:** use @ instead of - for projects [#487](https://github.com/johannesjo/super-productivity/issues/487) ([02507d9](https://github.com/johannesjo/super-productivity/commit/02507d903ef20d0a64b81a5a07f271b7912118d4))
+
+
+
 ## [5.5.7](https://github.com/johannesjo/super-productivity/compare/v5.5.6...v5.5.7) (2020-08-09)
 
 
