@@ -14,7 +14,7 @@ import { ElectronService } from '../../core/electron/electron.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ipcRenderer } from 'electron';
-import { lazySetInterval } from '../../util/lazy-set-interval';
+import { lazySetInterval } from '../../../../electron/lazy-set-interval';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;

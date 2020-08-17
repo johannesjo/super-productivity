@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import { ReminderCopy } from './reminder.model';
-import { lazySetInterval } from '../../util/lazy-set-interval';
+import { lazySetInterval } from '../../../../electron/lazy-set-interval';
 
 const CHECK_INTERVAL_DURATION = 10000;
 let cancelCheckInterval: (() => void) | undefined;
