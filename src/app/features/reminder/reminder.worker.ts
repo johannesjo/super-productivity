@@ -1,9 +1,10 @@
 /// <reference lib="webworker" />
 
 import { ReminderCopy } from './reminder.model';
+import { lazySetInterval } from '../../util/lazy-set-interval';
 
 const CHECK_INTERVAL_DURATION = 10000;
-let checkInterval: any;
+let cancelCheckInterval: (() => void) | undefined;
 
 addEventListener('message', ({data}) => {
   // console.log('REMINDER WORKER', data);
@@ -11,14 +12,15 @@ addEventListener('message', ({data}) => {
 });
 
 const reInitCheckInterval = (reminders: ReminderCopy[]) => {
-  if (checkInterval as any) {
-    clearInterval(checkInterval as any);
+  if (cancelCheckInterval) {
+    cancelCheckInterval();
+    cancelCheckInterval = undefined;
   }
   if (!reminders || !reminders.length) {
     return;
   }
 
-  checkInterval = setInterval(() => {
+  cancelCheckInterval = lazySetInterval(() => {
     const dueReminders = getDueReminders(reminders);
     if (dueReminders.length) {
       const oldest = dueReminders[0];
