@@ -1,3 +1,12 @@
+## [5.6.1](https://github.com/johannesjo/super-productivity/compare/v5.6.0...v5.6.1) (2020-08-17)
+
+
+### Bug Fixes
+
+* make lazy set intervals work with electron ([3ca1f57](https://github.com/johannesjo/super-productivity/commit/3ca1f57c63a6885b65628406d5c6aefa17a530ce))
+
+
+
 # [5.6.0](https://github.com/johannesjo/super-productivity/compare/v5.5.7...v5.6.0) (2020-08-17)
 
 
