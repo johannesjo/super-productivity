@@ -13,14 +13,7 @@ import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
 import { TranslateService } from '@ngx-translate/core';
-
-interface ProjectWithTasks {
-  id?: string | null;
-  title?: string;
-  color?: string;
-  tasks: Task[];
-  timeSpentToday: number;
-}
+import { mapToProjectWithTasks, ProjectWithTasks } from './map-to-project-with-tasks.util';
 
 @Component({
   selector: 'task-summary-tables',
@@ -103,19 +96,6 @@ export class TaskSummaryTablesComponent {
   }
 
   private _mapToProjectWithTasks(project: Project | { id: string | null; title: string }): ProjectWithTasks {
-    // NOTE: this only works, because projectIds is only triggered before assign flatTasks
-    const tasks = this.flatTasks.filter(task => task.projectId === project.id);
-    const timeSpentToday = tasks.reduce((acc, task) =>
-      (acc + (task.parentId
-          ? 0
-          : task.timeSpentOnDay[this.dayStr])
-      ), 0);
-    return {
-      id: project.id,
-      title: project.title,
-      color: (project as Project)?.theme?.primary,
-      tasks,
-      timeSpentToday
-    };
+    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr);
   }
 }
