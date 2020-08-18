@@ -22,17 +22,23 @@ describe('mapToProjectWithTasks()', () => {
     };
     const TDS = 'TODAY_STR';
     const flatTasks = [
-      {parentId: 'IGNORE', timeSpentOnDay: {[TDS]: 100000}},
-      {timeSpentOnDay: {[TDS]: 111}},
-      {timeSpentOnDay: {[TDS]: 222}},
-      {timeSpentOnDay: {fakeOtherDayProp: 444}},
+      {projectId: 'PID', parentId: 'IGNORE', timeSpentOnDay: {[TDS]: 100000}},
+      {projectId: 'PID', timeSpentOnDay: {[TDS]: 111}},
+      {projectId: 'PID', timeSpentOnDay: {[TDS]: 222}},
+      {projectId: 'PID', timeSpentOnDay: {fakeOtherDayProp: 444}},
+      {projectId: 'OTHER_PID', timeSpentOnDay: {[TDS]: 222}},
     ];
     expect(mapToProjectWithTasks(project as any, flatTasks as any, TDS)).toEqual({
       id: 'PID',
       title: 'P_TITLE',
       color: undefined,
-      tasks: [],
-      timeSpentToday: 0
+      tasks: [
+        {projectId: 'PID', parentId: 'IGNORE', timeSpentOnDay: {[TDS]: 100000}},
+        {projectId: 'PID', timeSpentOnDay: {[TDS]: 111}},
+        {projectId: 'PID', timeSpentOnDay: {[TDS]: 222}},
+        {projectId: 'PID', timeSpentOnDay: {fakeOtherDayProp: 444}}
+      ] as any,
+      timeSpentToday: 333
     });
   });
 });
