@@ -16,6 +16,21 @@
   }
 
   td {
+    @include lightTheme() {
+      color: $light-theme-text-color-muted;
+    }
+    @include darkTheme {
+      color: $dark-theme-text-color-muted;
+    }
+
+    inline-input {
+      @include lightTheme() {
+        color: $light-theme-text-color;
+      }
+      @include darkTheme {
+        color: $dark-theme-text-color;
+      }
+    }
   }
 
   th {
