@@ -157,7 +157,7 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChange
       // console.log('task.title', task.title);
     }
   }
-  console.log(taskChanges);
+  // console.log(taskChanges);
 
   return {
     taskChanges,

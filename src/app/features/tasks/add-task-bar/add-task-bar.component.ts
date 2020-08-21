@@ -14,7 +14,7 @@ import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { debounceTime, filter, first, map, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
-import { BehaviorSubject, forkJoin, from, Observable, of, zip } from 'rxjs';
+import { BehaviorSubject, forkJoin, from, Observable, of, Subscription, zip } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
@@ -29,12 +29,15 @@ import { ProjectService } from '../../project/project.service';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { shortSyntaxToTags } from './short-syntax-to-tags.util';
+import { slideAnimation } from '../../../ui/animations/slide.ani';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
 
 @Component({
   selector: 'add-task-bar',
   templateUrl: './add-task-bar.component.html',
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [slideAnimation, fadeAnimation]
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog: boolean = false;
@@ -81,7 +84,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   );
 
   activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> = new BehaviorSubject(null);
+  activatedIssueTask: AddTaskSuggestion | null = null;
 
+  shortSyntaxTags: {
+    title: string;
+    color: string;
+    icon: string;
+  }[] = [];
   shortSyntaxTags$: Observable<{
     title: string;
     color: string;
@@ -98,11 +107,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     startWith([]),
   );
 
+  inputVal: string = '';
+  inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
+
   private _isAddInProgress?: boolean;
   private _blurTimeout?: number;
   private _autofocusTimeout?: number;
   private _attachKeyDownHandlerTimeout?: number;
   private _lastAddedTaskId?: string;
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _taskService: TaskService,
@@ -113,6 +126,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _tagService: TagService,
     private _cd: ChangeDetectorRef,
   ) {
+    this._subs.add(this.activatedIssueTask$.subscribe((v) => this.activatedIssueTask = v));
+    this._subs.add(this.shortSyntaxTags$.subscribe((v) => this.shortSyntaxTags = v));
+    this._subs.add(this.inputVal$.subscribe((v) => this.inputVal = v));
+    this.shortSyntaxTags$.subscribe((v) => console.log('shortSyntaxTags$', v));
+
   }
 
   ngAfterViewInit(): void {
