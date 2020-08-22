@@ -1,3 +1,19 @@
+## [5.6.2](https://github.com/johannesjo/super-productivity/compare/v5.6.1...v5.6.2) (2020-08-22)
+
+
+### Bug Fixes
+
+* lazy interval bug (unable to delete reminder) ([1a364ac](https://github.com/johannesjo/super-productivity/commit/1a364ac5bc7efe571d54286424b5615c9f8e05cf))
+* **dailySummary:** total time for project not being calculated when a value is zero ([69141b9](https://github.com/johannesjo/super-productivity/commit/69141b9c9c4a3cec6e70e01c0662e60b381ccda6))
+
+
+### Features
+
+* better indicate editable table cells for task summary table ([d14a75c](https://github.com/johannesjo/super-productivity/commit/d14a75c52ee0c27e32fedf75665bcda2f23d793c))
+* improve add task bar info text behaviour ([06acd32](https://github.com/johannesjo/super-productivity/commit/06acd32b5b22f4528771b1c704fdf1dfb06805cb))
+
+
+
 ## [5.6.1](https://github.com/johannesjo/super-productivity/compare/v5.6.0...v5.6.1) (2020-08-17)
 
 
