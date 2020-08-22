@@ -6,7 +6,7 @@ export const lazySetInterval = (func: () => void, intervalDuration: number): () 
     func.call(null);
   };
 
-  setTimeout(interval, intervalDuration);
+  lastTimeoutId = setTimeout(interval, intervalDuration);
 
   return () => {
     clearTimeout(lastTimeoutId);
