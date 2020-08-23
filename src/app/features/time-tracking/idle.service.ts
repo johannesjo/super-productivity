@@ -57,7 +57,8 @@ export class IdleService {
       });
     } else {
       this._chromeExtensionInterfaceService.onReady$.subscribe(() => {
-        this._chromeExtensionInterfaceService.addEventListener(IPC.IDLE_TIME, (ev: any, idleTimeInMs: number) => {
+        this._chromeExtensionInterfaceService.addEventListener(IPC.IDLE_TIME, (ev: Event, data?: unknown) => {
+          const idleTimeInMs = Number(data);
           this.handleIdle(idleTimeInMs);
         });
       });

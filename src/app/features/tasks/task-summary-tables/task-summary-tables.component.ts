@@ -37,7 +37,7 @@ export class TaskSummaryTablesComponent {
 
   flatTasks: Task[] = [];
 
-  projectIds$: BehaviorSubject<string[]> = new BehaviorSubject([]);
+  projectIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 
   projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
     withLatestFrom(this._projectService.list$),

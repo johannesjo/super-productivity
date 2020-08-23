@@ -81,7 +81,7 @@ export class PersistenceService {
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<ProjectState, Project>(
     LS_PROJECT_META_LIST,
     'project',
-    projectReducer,
+    projectReducer as any,
     migrateProjectState,
   );
 
@@ -112,7 +112,7 @@ export class PersistenceService {
   taskRepeatCfg: PersistenceBaseEntityModel<TaskRepeatCfgState, TaskRepeatCfg> = this._cmBaseEntity<TaskRepeatCfgState, TaskRepeatCfg>(
     LS_TASK_REPEAT_CFG_STATE,
     'taskRepeatCfg',
-    taskRepeatCfgReducer,
+    taskRepeatCfgReducer as any,
     migrateTaskRepeatCfgState,
   );
 
@@ -393,7 +393,7 @@ export class PersistenceService {
       //   }
       //   return data;
       // },
-      saveState: (data: any, {isDataImport = false, isSyncModelChange}) => {
+      saveState: (data: any, {isDataImport = false, isSyncModelChange}: { isDataImport?: boolean, isSyncModelChange: boolean }) => {
         if (data && data.ids && data.entities) {
           data = checkFixEntityStateConsistency(data, appDataKey);
         }

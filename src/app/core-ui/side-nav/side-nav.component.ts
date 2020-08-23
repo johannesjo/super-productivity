@@ -103,7 +103,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   getThemeColor(color: THEME_COLOR_MAP | string): { [key: string]: string } {
-    const standardColor = THEME_COLOR_MAP[color];
+    const standardColor = (THEME_COLOR_MAP as any)[color];
     const colorToUse = (standardColor)
       ? standardColor
       : color;

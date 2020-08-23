@@ -83,7 +83,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }),
   );
 
-  activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> = new BehaviorSubject(null);
+  activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> = new BehaviorSubject<AddTaskSuggestion | null>(null);
   activatedIssueTask: AddTaskSuggestion | null = null;
 
   shortSyntaxTags: {

@@ -1,5 +1,5 @@
 export const lazySetInterval = (func: () => void, intervalDuration: number): () => void => {
-  let lastTimeoutId;
+  let lastTimeoutId: any;
 
   const interval = () => {
     lastTimeoutId = setTimeout(interval, intervalDuration);

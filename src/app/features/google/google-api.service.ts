@@ -246,7 +246,7 @@ export class GoogleApiService {
       metadata.mimeType = 'application/json';
     }
 
-    const multipart: any = (new MultiPartBuilder())
+    const multipart: any = (new (MultiPartBuilder as any)())
       .append('application/json', JSON.stringify(metadata))
       .append(metadata.mimeType, content)
       .finish();

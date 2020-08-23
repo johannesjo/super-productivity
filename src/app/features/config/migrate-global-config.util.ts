@@ -86,12 +86,12 @@ const _extendConfigDefaults = (config: GlobalConfigState): GlobalConfigState => 
 };
 
 const _migrateUndefinedShortcutsToNull = (config: GlobalConfigState): GlobalConfigState => {
-  const keyboardCopy = {
+  const keyboardCopy: any = {
     // also add new keys
     ...DEFAULT_GLOBAL_CONFIG.keyboard,
     ...config.keyboard,
   };
-  Object.keys(keyboardCopy).forEach(key => {
+  Object.keys(keyboardCopy).forEach((key: string) => {
     if (keyboardCopy[key] === false || keyboardCopy[key] === undefined) {
       keyboardCopy[key] = null;
     }
