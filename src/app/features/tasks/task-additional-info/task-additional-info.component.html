@@ -123,7 +123,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="task.issueId"
-    [expanded]="!!issueData"
+    [expanded]="!IS_MOBILE && (!!issueData)"
     [type]="'panel'">
     <ng-container panel-header>
       <issue-header [task]="task"></issue-header>
@@ -146,7 +146,7 @@
     (collapseParent)="collapseParent()"
     (editActionTriggered)="isFocusNotes=true"
     (keyPress)="onItemKeyPress($event)"
-    [expanded]="task.notes || (!(task.issueId) && !task.attachments?.length)"
+    [expanded]="!IS_MOBILE && (task.notes || (!(task.issueId) && !task.attachments?.length))"
     [type]="'panel'">
     <ng-container panel-header>
       <mat-icon *ngIf="task.notes">chat</mat-icon>
@@ -171,7 +171,7 @@
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     *ngIf="issueAttachments?.length || localAttachments?.length"
-    [expanded]="true"
+    [expanded]="!IS_MOBILE"
     [type]="'panel'">
     <ng-container panel-header>
       <mat-icon>attachment</mat-icon>

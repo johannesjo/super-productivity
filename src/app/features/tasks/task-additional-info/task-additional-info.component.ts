@@ -46,6 +46,7 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { ipcRenderer } from 'electron';
 import { devError } from '../../../util/dev-error';
 import { SS_JIRA_WONKY_COOKIE } from '../../../core/persistence/ls-keys.const';
+import { IS_MOBILE } from '../../../util/is-mobile';
 
 interface IssueAndType {
   id: string | number | null;
@@ -148,6 +149,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       ? this._issueService.getMappedAttachments(type, data)
       : [])
   );
+  IS_MOBILE: boolean = IS_MOBILE;
 
   private _focusTimeout?: number;
   private _subs: Subscription = new Subscription();
