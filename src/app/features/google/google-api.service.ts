@@ -330,8 +330,13 @@ export class GoogleApiService {
     }
   }) {
     const r: any = res;
-    const accessToken = r.accessToken || r.access_token || r.Zi.access_token;
-    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi.expires_at);
+    const accessToken = r.accessToken || r.access_token || r.Zi?.access_token;
+    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi?.expires_at);
+
+    if (!accessToken) {
+      console.log(res);
+      throw new Error('No access token in response');
+    }
 
     if (accessToken !== this._session.accessToken || expiresAt !== this._session.expiresAt) {
       this._updateSession({accessToken, expiresAt});
