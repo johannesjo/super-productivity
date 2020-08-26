@@ -1,3 +1,12 @@
+## [5.6.3](https://github.com/johannesjo/super-productivity/compare/v5.6.2...v5.6.3) (2020-08-26)
+
+
+### Features
+
+* **mobile:** don't expand task additional info items per default ([a561ed4](https://github.com/johannesjo/super-productivity/commit/a561ed4780f6e863a1711663b2b80336254ce049))
+
+
+
 ## [5.6.2](https://github.com/johannesjo/super-productivity/compare/v5.6.1...v5.6.2) (2020-08-22)
 
 
