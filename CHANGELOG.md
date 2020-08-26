@@ -1,3 +1,17 @@
+## [5.6.4](https://github.com/johannesjo/super-productivity/compare/v5.6.2...v5.6.4) (2020-08-26)
+
+
+### Bug Fixes
+
+* **advancedShortSyntax:** adding task twice ([26354ad](https://github.com/johannesjo/super-productivity/commit/26354ad555e351b66a2a7f754eb2a4f9ca812d87))
+
+
+### Features
+
+* **mobile:** don't expand task additional info items per default ([a561ed4](https://github.com/johannesjo/super-productivity/commit/a561ed4780f6e863a1711663b2b80336254ce049))
+
+
+
 ## [5.6.3](https://github.com/johannesjo/super-productivity/compare/v5.6.2...v5.6.3) (2020-08-26)
 
 
