@@ -43,6 +43,7 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { exists } from '../../../util/exists';
 import { Task } from '../../tasks/task.model';
 import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
+import { devError } from '../../../util/dev-error';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -359,6 +360,11 @@ export function projectReducer(
       const {task, targetProjectId} = action.payload;
       const srcProjectId = task.projectId;
       const updates: Update<Project>[] = [];
+
+      if (srcProjectId === targetProjectId) {
+        devError('Moving task from same project to same project.');
+        return  state;
+      }
 
       if (srcProjectId) {
         updates.push({

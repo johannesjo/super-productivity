@@ -181,8 +181,7 @@ export class TaskRelatedModelEffects {
           }
         )
       );
-
-      if (r.projectId) {
+      if (r.projectId && r.projectId !== task.projectId) {
         actions.push(new MoveToOtherProject({
           task,
           targetProjectId: r.projectId,
