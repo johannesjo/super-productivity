@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { AddTask, DeleteTask, TaskActionTypes } from './task.actions';
-import { Action, select, Store } from '@ngrx/store';
-import { tap, throttleTime, withLatestFrom } from 'rxjs/operators';
-import { selectCurrentTask } from './task.selectors';
-import { NotifyService } from '../../../core/notify/notify.service';
-import { TaskService } from '../task.service';
-import { selectConfigFeatureState } from '../../config/store/global-config.reducer';
-import { truncate } from '../../../util/truncate';
-import { BannerService } from '../../../core/banner/banner.service';
-import { BannerId } from '../../../core/banner/banner.model';
-import { T } from '../../../t.const';
-import { SnackService } from '../../../core/snack/snack.service';
-import { GlobalConfigState } from '../../config/global-config.model';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {AddTask, DeleteTask, TaskActionTypes, UpdateTask} from './task.actions';
+import {Action, select, Store} from '@ngrx/store';
+import {filter, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {selectCurrentTask} from './task.selectors';
+import {NotifyService} from '../../../core/notify/notify.service';
+import {TaskService} from '../task.service';
+import {selectConfigFeatureState} from '../../config/store/global-config.reducer';
+import {truncate} from '../../../util/truncate';
+import {BannerService} from '../../../core/banner/banner.service';
+import {BannerId} from '../../../core/banner/banner.model';
+import {T} from '../../../t.const';
+import {SnackService} from '../../../core/snack/snack.service';
+import {GlobalConfigState} from '../../config/global-config.model';
 
 @Injectable()
 export class TaskUiEffects {
@@ -61,7 +61,17 @@ export class TaskUiEffects {
       this._store$.pipe(select(selectCurrentTask)),
       this._store$.pipe(select(selectConfigFeatureState)),
     ),
-    tap(this._notifyAboutTimeEstimateExceeded.bind(this))
+    tap((args) => this._notifyAboutTimeEstimateExceeded(args))
+  );
+
+
+  @Effect({dispatch: false})
+  taskDoneSound$: any = this._actions$.pipe(
+    ofType(
+      TaskActionTypes.UpdateTask,
+    ),
+    filter(({payload: {task: {changes}}}: UpdateTask) => !!changes.isDone),
+    tap(() => this._playDoneSound())
   );
 
   constructor(
@@ -72,6 +82,13 @@ export class TaskUiEffects {
     private _bannerService: BannerService,
     private _snackService: SnackService,
   ) {
+  }
+
+  private _playDoneSound() {
+    const a = new Audio('/assets/snd/done4.mp3')
+    a.volume = .4;
+    a.playbackRate = 1.5;
+    a.play();
   }
 
   private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]: [Action, any, GlobalConfigState]) {
