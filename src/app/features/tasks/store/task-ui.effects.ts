@@ -85,10 +85,38 @@ export class TaskUiEffects {
   }
 
   private _playDoneSound() {
-    const a = new Audio('/assets/snd/done4.mp3')
-    a.volume = .4;
-    a.playbackRate = 1.5;
-    a.play();
+    const file = '/assets/snd/done4.mp3';
+    // const speed = 1.8
+    const speed = 0.5
+    // const a = new Audio('/assets/snd/done4.mp3');
+    // console.log(a);
+    // a.volume = .4;
+    // a.playbackRate = 1.5;
+    // (a as any).mozPreservesPitch = false;
+    // (a as any).webkitPreservesPitch = false;
+    // a.play();
+
+    const audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+    console.log(audioCtx);
+    const source = audioCtx.createBufferSource();
+    const request = new XMLHttpRequest();
+    request.open('GET', file, true);
+    request.responseType = 'arraybuffer';
+    request.onload = () => {
+      const audioData = request.response;
+
+      audioCtx.decodeAudioData(audioData, function (buffer) {
+          source.buffer = buffer;
+          source.playbackRate.value = speed;
+          source.connect(audioCtx.destination);
+        },
+        (e) => {
+          throw new Error("Error with decoding audio data" + e.error);
+        });
+
+    }
+    request.send();
+    source.start(0);
   }
 
   private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]: [Action, any, GlobalConfigState]) {
