@@ -1,3 +1,14 @@
+## [5.6.5](https://github.com/johannesjo/super-productivity/compare/v5.6.4...v5.6.5) (2020-08-28)
+
+
+### Features
+
+* **reminder:** add snooze until tomorrow to list items ([f1f6af9](https://github.com/johannesjo/super-productivity/commit/f1f6af930fe1cb8cfcc242dcafabe10a97ee565d))
+* add debug info for add task bar ([275ddec](https://github.com/johannesjo/super-productivity/commit/275ddec740c773b41756e89351fb006cd4a136ee))
+* **google:** better handle access token [#514](https://github.com/johannesjo/super-productivity/issues/514) ([49c0d80](https://github.com/johannesjo/super-productivity/commit/49c0d80d6e9338fadf71e529c9ed5cc7a61656e2))
+
+
+
 ## [5.6.4](https://github.com/johannesjo/super-productivity/compare/v5.6.2...v5.6.4) (2020-08-26)
 
 
