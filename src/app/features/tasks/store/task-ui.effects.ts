@@ -12,8 +12,9 @@ import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { GlobalConfigState } from '../../config/global-config.model';
+import { GlobalConfigState, SoundConfig } from '../../config/global-config.model';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { GlobalConfigService } from '../../config/global-config.service';
 
 @Injectable()
 export class TaskUiEffects {
@@ -71,8 +72,8 @@ export class TaskUiEffects {
       TaskActionTypes.UpdateTask,
     ),
     filter(({payload: {task: {changes}}}: UpdateTask) => !!changes.isDone),
-    withLatestFrom(this._workContextService.flatDoneTodayPercent$),
-    tap(([, donePercent]) => this._playDoneSound('/assets/snd/done4.mp3', donePercent)),
+    withLatestFrom(this._workContextService.flatDoneTodayPercent$, this._globalConfigService.sound$),
+    tap(([, donePercent, soundCfg]) => this._playDoneSound(soundCfg, donePercent)),
   );
 
   constructor(
@@ -82,12 +83,14 @@ export class TaskUiEffects {
     private _taskService: TaskService,
     private _bannerService: BannerService,
     private _snackService: SnackService,
+    private _globalConfigService: GlobalConfigService,
     private _workContextService: WorkContextService,
   ) {
   }
 
-  private _playDoneSound(file: string, percentOfTasksDone: number = 0) {
+  private _playDoneSound(soundCfg: SoundConfig, percentOfTasksDone: number = 0) {
     const speed = 1;
+    const file = soundCfg.doneSound;
     // const speed = 0.5;
     // const a = new Audio('/assets/snd/done4.mp3');
     // console.log(a);
@@ -96,7 +99,12 @@ export class TaskUiEffects {
     // (a as any).mozPreservesPitch = false;
     // (a as any).webkitPreservesPitch = false;
     // a.play();
-    const pitchFactor = (100 - 25) + (percentOfTasksDone * 100 * 5);
+    console.log(soundCfg);
+
+    const pitchFactor = soundCfg.isIncreaseDoneSoundPitch
+      ? (100 - 25) + (percentOfTasksDone * 100 * 5)
+      : 100;
+
     console.log(pitchFactor);
 
     const audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
@@ -112,6 +120,10 @@ export class TaskUiEffects {
           source.playbackRate.value = speed;
           // source.detune.value = 100; // value in cents
           source.detune.value = pitchFactor; // value in cents
+          if (soundCfg.volume !== 100) {
+            const gain = audioCtx.createGain();
+            gain.gain.value = soundCfg.volume / 100;
+          }
           source.connect(audioCtx.destination);
         },
         (e: DOMException) => {

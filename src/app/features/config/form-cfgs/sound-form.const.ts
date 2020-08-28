@@ -4,7 +4,7 @@ import { T } from '../../../t.const';
 
 export const SOUND_FORM_CFG: ConfigFormSection<SoundConfig> = {
   title: T.GCF.SOUND.TITLE,
-  key: 'misc',
+  key: 'sound',
   items: [
     {
       key: 'volume',
