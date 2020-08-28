@@ -12,6 +12,7 @@ import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-r
 import { TODAY_TAG } from '../../tag/tag.const';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { unique } from '../../../util/unique';
+import { getTomorrow } from '../../../util/get-tomorrow';
 
 const M = 1000 * 60;
 
@@ -95,6 +96,13 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId as string);
   }
 
+  snoozeUntilTomorrow(task: TaskWithReminderData) {
+    this._reminderService.updateReminder(task.reminderData.id, {
+      remindAt: getTomorrow().getTime()
+    });
+    this._removeFromList(task.reminderId as string);
+  }
+
   editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false) {
     this._subs.add(this._matDialog.open(DialogAddTaskReminderComponent, {
       restoreFocus: true,
@@ -125,12 +133,10 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   snoozeAllUntilTomorrow() {
     this.isDisableControls = true;
-    const date = new Date();
-    date.setHours(9, 0, 0, 0);
-    date.setDate(date.getDate() + 1);
+    const tomorrow = getTomorrow().getTime();
     this.reminders$.getValue().forEach((reminder) => {
       this._reminderService.updateReminder(reminder.id, {
-        remindAt: date.getTime()
+        remindAt: tomorrow
       });
     });
     this._close();
