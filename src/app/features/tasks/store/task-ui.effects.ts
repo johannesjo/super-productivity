@@ -115,16 +115,19 @@ export class TaskUiEffects {
     request.onload = () => {
       const audioData = request.response;
       audioCtx.decodeAudioData(audioData, (buffer: AudioBuffer) => {
-          console.log(buffer);
           source.buffer = buffer;
           source.playbackRate.value = speed;
           // source.detune.value = 100; // value in cents
           source.detune.value = pitchFactor; // value in cents
+
           if (soundCfg.volume !== 100) {
-            const gain = audioCtx.createGain();
-            gain.gain.value = soundCfg.volume / 100;
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = soundCfg.volume / 100;
+            source.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+          } else {
+            source.connect(audioCtx.destination);
           }
-          source.connect(audioCtx.destination);
         },
         (e: DOMException) => {
           throw new Error('Error with decoding audio data SP: ' + e.message);
