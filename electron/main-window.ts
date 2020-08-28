@@ -78,6 +78,8 @@ export const createWindow = ({
       scrollBounce: true,
       webSecurity: !IS_DEV,
       nodeIntegration: true,
+      // NOTE: will be deprecated with v10
+      enableRemoteModule: true
     },
     icon: ICONS_FOLDER + '/icon_256x256.png'
   });
