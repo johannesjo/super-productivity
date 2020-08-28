@@ -950,6 +950,13 @@
       "LONGER_BREAK_DURATION": "Duration of longer breaks",
       "TITLE": "Pomodoro Timer"
     },
+    "SOUND": {
+      "TITLE": "Sound",
+      "DONE_SOUND": "Task done sound",
+      "IS_INCREASE_DONE_PITCH": "Increase pitch for every task done",
+      "IS_PLAY_DONE_SOUND": "Play sound when task is marked done",
+      "VOLUME": "Volume"
+    },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
       "IS_ENABLED": "Enable take a break reminder",

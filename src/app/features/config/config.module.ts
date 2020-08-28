@@ -15,6 +15,7 @@ import { FileImexModule } from '../../imex/file-imex/file-imex.module';
 import { IconInputComponent } from './icon-input/icon-input.component';
 import { SelectProjectComponent } from './select-project/select-project.component';
 import { RepeatSectionTypeComponent } from './repeat-section-type/repeat-section-type.component';
+import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
 
 @NgModule({
   imports: [
@@ -42,6 +43,7 @@ import { RepeatSectionTypeComponent } from './repeat-section-type/repeat-section
         component: RepeatSectionTypeComponent,
       }]
     }),
+    FormlyMatSliderModule,
     CommonModule,
     StoreModule.forFeature(CONFIG_FEATURE_NAME, globalConfigReducer),
     EffectsModule.forFeature([GlobalConfigEffects]),
