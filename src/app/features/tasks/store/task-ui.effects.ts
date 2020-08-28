@@ -90,7 +90,8 @@ export class TaskUiEffects {
 
   private _playDoneSound(soundCfg: SoundConfig, percentOfTasksDone: number = 0) {
     const speed = 1;
-    const file = soundCfg.doneSound;
+    const BASE = './assets/snd';
+    const file = `${BASE}/${soundCfg.doneSound}`;
     // const speed = 0.5;
     // const a = new Audio('/assets/snd/done4.mp3');
     // console.log(a);

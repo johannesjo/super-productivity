@@ -30,10 +30,10 @@ export const SOUND_FORM_CFG: ConfigFormSection<SoundConfig> = {
       templateOptions: {
         label: T.GCF.SOUND.DONE_SOUND,
         options: [
-          {label: 'Sound 1', value: '/assets/snd/done1.mp3'},
-          {label: 'Sound 2', value: '/assets/snd/done2.mp3'},
-          {label: 'Sound 3', value: '/assets/snd/done3.mp3'},
-          {label: 'Sound 4', value: '/assets/snd/done4.mp3'},
+          {label: 'Sound 1', value: 'done1.mp3'},
+          {label: 'Sound 2', value: 'done2.mp3'},
+          {label: 'Sound 3', value: 'done3.mp3'},
+          {label: 'Sound 4', value: 'done4.mp3'},
         ],
         hideExpression: ((model: any) => {
           return !model.isPlayDoneSound;

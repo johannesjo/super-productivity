@@ -111,6 +111,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     volume: 100,
     isPlayDoneSound: true,
     isIncreaseDoneSoundPitch: true,
-    doneSound: '/assets/snd/done4.mp3',
+    doneSound: 'done4.mp3',
   }
 };
