@@ -64,12 +64,6 @@
     "int:clean": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json --marker _",
     "postinstall": "ngcc --tsconfig src/tsconfig.app.json"
   },
-  "browserslist": [
-    "last 1 version",
-    "> 2%",
-    "maintained node versions",
-    "not dead"
-  ],
   "publish": [
     {
       "provider": "github",

@@ -6,19 +6,14 @@
 
 > 0.5%
 last 2 versions
-Firefox ESR
 not dead
 not IE 9-11
-not samsung 4
-not android 4.4.3-4.4.4
-not last 2 ie_mob versions
-not last 2 op_mini versions
-not last 2 op_mob versions
-not last 2 baidu versions
-not last 2 kaios versions
-not last 2 and_uc versions
-not last 2 and_qq versions
-not last 2 edge versions
-not chrome 49
-not chrome 50
-Chrome >= 51
+not edge < 79
+not baidu < 10
+not ie_mob < 12
+not kaios < 5
+not op_mini all
+not op_mob < 47
+not bb < 14
+not and_uc < 13
+not and_qq < 2
