@@ -162,7 +162,6 @@
     "nightwatch": "^1.3.6",
     "p-throttle": "^3.1.0",
     "pkce-challenge": "2.1.0",
-    "protractor": "~7.0.0",
     "query-string": "^6.11.0",
     "rxjs": "^6.6.0",
     "semver": "^7.3.2",
