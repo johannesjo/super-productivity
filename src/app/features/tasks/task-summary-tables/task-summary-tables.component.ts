@@ -22,8 +22,7 @@ import { mapToProjectWithTasks, ProjectWithTasks } from './map-to-project-with-t
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskSummaryTablesComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   @Input() dayStr: string = getWorklogStr();
 

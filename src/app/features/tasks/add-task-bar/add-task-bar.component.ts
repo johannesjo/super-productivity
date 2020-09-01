@@ -50,8 +50,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('inputEl', {static: true}) inputEl?: ElementRef;
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   doubleEnterCount: number = 0;
 

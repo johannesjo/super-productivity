@@ -20,8 +20,7 @@ interface BookmarkSelectType {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditBookmarkComponent implements OnInit {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   types?: BookmarkSelectType[];
   bookmarkCopy?: BookmarkCopy;
   customIcons: string[] = MATERIAL_ICONS;

@@ -27,8 +27,7 @@ const SUCCESS_ANIMATION_DURATION = 500;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   cfg: any = {
     isBlockFinishDayUntilTimeTimeTracked: false

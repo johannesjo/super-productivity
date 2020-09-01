@@ -14,8 +14,7 @@ import { exists } from '../../../util/exists';
 })
 export class ConfigFormComponent {
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   config?: {};
   @Input() sectionKey?: GlobalConfigSectionKey | ProjectCfgFormKey;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: unknown }> = new EventEmitter();

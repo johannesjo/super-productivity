@@ -21,8 +21,7 @@ import { exists } from '../../../util/exists';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   task: Task = this.data.task;
 
   taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'> = {

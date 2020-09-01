@@ -15,8 +15,7 @@ export class TaskSummaryTableComponent {
   @Input() day: string = getWorklogStr();
   @Output() updated: EventEmitter<void> = new EventEmitter();
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor(
     private _taskService: TaskService,

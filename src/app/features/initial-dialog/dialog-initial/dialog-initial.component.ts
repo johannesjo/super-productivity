@@ -11,8 +11,7 @@ import { version } from '../../../../../package.json';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogInitialComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   version: string = version;
 
   constructor(

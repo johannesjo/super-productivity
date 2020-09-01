@@ -31,8 +31,7 @@ import { Task } from '../../tasks/task.model';
 export class NotesComponent implements OnInit, OnDestroy {
   @Output() scrollToSidenav: EventEmitter<void> = new EventEmitter();
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   isElementWasAdded: boolean = false;
   isDragOver: boolean = false;
   dragEnterTarget?: HTMLElement;

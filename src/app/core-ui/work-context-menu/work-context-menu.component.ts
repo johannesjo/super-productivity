@@ -19,8 +19,7 @@ import { Router } from '@angular/router';
 })
 export class WorkContextMenuComponent implements OnDestroy {
   @Input() contextId?: string;
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   TODAY_TAG_ID: string = TODAY_TAG.id as string;
   isForProject: boolean = true;
   base: string = 'project';

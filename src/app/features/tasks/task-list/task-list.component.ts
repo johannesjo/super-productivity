@@ -27,8 +27,7 @@ import { T } from '../../../t.const';
 
 })
 export class TaskListComponent implements OnDestroy, OnInit {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   tasksIN: TaskWithSubTasks[] = [];
   tasks$: ReplaySubject<TaskWithSubTasks[]> = new ReplaySubject(1);
   isHideDoneIN: boolean = false;

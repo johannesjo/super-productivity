@@ -21,8 +21,7 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
 })
 export class WorklogWeekComponent {
   visibility: boolean[] = [];
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   keys: (o: object) => string[] = Object.keys;
 
   constructor(
