@@ -602,6 +602,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleTaskDone();
+      if (!(this.task as TaskWithSubTasks).parentId) {
+        if ((this.task as TaskWithSubTasks).isDone) {
+          this.focusPrevious(true);
+        } else {
+          this.focusNext(true);
+        }
+      }
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();
