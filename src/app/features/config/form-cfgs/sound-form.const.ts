@@ -34,6 +34,9 @@ export const SOUND_FORM_CFG: ConfigFormSection<SoundConfig> = {
           {label: 'Sound 2', value: 'done2.mp3'},
           {label: 'Sound 3', value: 'done3.mp3'},
           {label: 'Sound 4', value: 'done4.mp3'},
+          {label: 'Sound 5', value: 'done5.mp3'},
+          {label: 'Sound 6', value: 'done6.mp3'},
+          {label: 'Sound 7', value: 'done7.mp3'},
         ],
         hideExpression: ((model: any) => {
           return !model.isPlayDoneSound;

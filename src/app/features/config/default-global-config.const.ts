@@ -108,9 +108,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnabled: true,
   },
   sound: {
-    volume: 100,
+    volume: 75,
     isPlayDoneSound: true,
     isIncreaseDoneSoundPitch: true,
-    doneSound: 'done4.mp3',
+    doneSound: 'done2.mp3',
   }
 };
