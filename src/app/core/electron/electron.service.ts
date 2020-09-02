@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 // the resulting javascript file will look as if you never imported the module at all.
 import { ipcRenderer, remote, shell, webFrame } from 'electron';
 import { IS_ELECTRON } from '../../app.constants';
+import { getElectron } from '../../util/get-electron';
+import * as ElectronRenderer from 'electron/renderer';
 
 @Injectable({providedIn: 'root'})
 export class ElectronService {
@@ -16,11 +18,12 @@ export class ElectronService {
   constructor() {
     // Conditional imports
     if (IS_ELECTRON) {
-      const electron = window.require('electron');
+      const electron = getElectron() as typeof ElectronRenderer;
       this.ipcRenderer = electron.ipcRenderer;
       this.webFrame = electron.webFrame;
       this.remote = electron.remote;
-      this.shell = electron.shell;
+      // NOTE: works for non-sandboxed electron only
+      this.shell = (electron as any).shell;
     }
 
     // NOTE: useful in case we want to disable the node integration
