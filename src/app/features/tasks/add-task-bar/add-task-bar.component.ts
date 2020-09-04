@@ -257,7 +257,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       if (!item.issueType || !item.issueData) {
         throw new Error('No issueData');
       }
-      const res = await this._taskService.checkForTaskWithIssue(item.issueData.id, item.issueType);
+      const res = await this._taskService.checkForTaskWithIssueInProject(item.issueData.id, item.issueType, this._workContextService.activeWorkContextId as string);
       if (!res) {
         this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
           item.issueType,
