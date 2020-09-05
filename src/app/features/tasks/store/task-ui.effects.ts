@@ -12,9 +12,10 @@ import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { GlobalConfigState, SoundConfig } from '../../config/global-config.model';
+import { GlobalConfigState } from '../../config/global-config.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { GlobalConfigService } from '../../config/global-config.service';
+import { playDoneSound } from '../util/play-done-sound';
 
 @Injectable()
 export class TaskUiEffects {
@@ -73,7 +74,7 @@ export class TaskUiEffects {
     ),
     filter(({payload: {task: {changes}}}: UpdateTask) => !!changes.isDone),
     withLatestFrom(this._workContextService.flatDoneTodayPercent$, this._globalConfigService.sound$),
-    tap(([, donePercent, soundCfg]) => this._playDoneSound(soundCfg, donePercent)),
+    tap(([, donePercent, soundCfg]) => playDoneSound(soundCfg, donePercent)),
   );
 
   constructor(
@@ -86,57 +87,6 @@ export class TaskUiEffects {
     private _globalConfigService: GlobalConfigService,
     private _workContextService: WorkContextService,
   ) {
-  }
-
-  private _playDoneSound(soundCfg: SoundConfig, percentOfTasksDone: number = 0) {
-    const speed = 1;
-    const BASE = './assets/snd';
-    const file = `${BASE}/${soundCfg.doneSound}`;
-    // const speed = 0.5;
-    // const a = new Audio('/assets/snd/done4.mp3');
-    // console.log(a);
-    // a.volume = .4;
-    // a.playbackRate = 1.5;
-    // (a as any).mozPreservesPitch = false;
-    // (a as any).webkitPreservesPitch = false;
-    // a.play();
-    console.log(soundCfg);
-
-    const pitchFactor = soundCfg.isIncreaseDoneSoundPitch
-      ? (100 - 25) + (percentOfTasksDone * 100 * 5)
-      : 100;
-
-    console.log(pitchFactor);
-
-    const audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
-    const source = audioCtx.createBufferSource();
-    const request = new XMLHttpRequest();
-    request.open('GET', file, true);
-    request.responseType = 'arraybuffer';
-    request.onload = () => {
-      const audioData = request.response;
-      audioCtx.decodeAudioData(audioData, (buffer: AudioBuffer) => {
-          source.buffer = buffer;
-          source.playbackRate.value = speed;
-          // source.detune.value = 100; // value in cents
-          source.detune.value = pitchFactor; // value in cents
-
-          if (soundCfg.volume !== 100) {
-            const gainNode = audioCtx.createGain();
-            gainNode.gain.value = soundCfg.volume / 100;
-            source.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-          } else {
-            source.connect(audioCtx.destination);
-          }
-        },
-        (e: DOMException) => {
-          throw new Error('Error with decoding audio data SP: ' + e.message);
-        });
-
-    };
-    request.send();
-    source.start(0);
   }
 
   private _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]: [Action, any, GlobalConfigState]) {
