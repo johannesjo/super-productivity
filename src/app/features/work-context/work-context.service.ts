@@ -276,11 +276,11 @@ export class WorkContextService {
     ]))
   );
 
-  flatDoneTodayPercent$: Observable<number> = this.todaysTasks$.pipe(
+  flatDoneTodayNr$: Observable<number> = this.todaysTasks$.pipe(
     map(tasks => flattenTasks(tasks)),
     map(tasks => {
       const done = tasks.filter(task => task.isDone);
-      return done.length / tasks.length;
+      return done.length;
     })
   );
 

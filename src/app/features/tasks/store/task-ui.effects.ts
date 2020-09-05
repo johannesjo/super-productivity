@@ -73,8 +73,8 @@ export class TaskUiEffects {
       TaskActionTypes.UpdateTask,
     ),
     filter(({payload: {task: {changes}}}: UpdateTask) => !!changes.isDone),
-    withLatestFrom(this._workContextService.flatDoneTodayPercent$, this._globalConfigService.sound$),
-    tap(([, donePercent, soundCfg]) => playDoneSound(soundCfg, donePercent)),
+    withLatestFrom(this._workContextService.flatDoneTodayNr$, this._globalConfigService.sound$),
+    tap(([, doneToday, soundCfg]) => playDoneSound(soundCfg, doneToday)),
   );
 
   constructor(

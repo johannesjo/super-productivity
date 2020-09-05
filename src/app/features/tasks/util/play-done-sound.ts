@@ -1,8 +1,9 @@
 import { SoundConfig } from '../../config/global-config.model';
 
-export const playDoneSound = (soundCfg: SoundConfig, percentOfTasksDone: number = 0) => {
+export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0) => {
   const speed = 1;
   const BASE = './assets/snd';
+  const PITCH_OFFSET = 0;
   const file = `${BASE}/${soundCfg.doneSound}`;
   // const speed = 0.5;
   // const a = new Audio('/assets/snd/done4.mp3');
@@ -12,13 +13,10 @@ export const playDoneSound = (soundCfg: SoundConfig, percentOfTasksDone: number 
   // (a as any).mozPreservesPitch = false;
   // (a as any).webkitPreservesPitch = false;
   // a.play();
-  console.log(soundCfg);
 
   const pitchFactor = soundCfg.isIncreaseDoneSoundPitch
-    ? (100 - 25) + (percentOfTasksDone * 100 * 5)
-    : 100;
-
-  console.log(pitchFactor);
+    ? PITCH_OFFSET + (nrOfDoneTasks * 100)
+    : 0;
 
   const audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
   const source = audioCtx.createBufferSource();
