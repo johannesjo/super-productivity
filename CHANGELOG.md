@@ -1,3 +1,29 @@
+# [5.7.0](https://github.com/johannesjo/super-productivity/compare/v5.6.5...v5.7.0) (2020-09-07)
+
+
+### Bug Fixes
+
+* switch to today before importing data in fileimex to avoid error for missing project ([1d82ae1](https://github.com/johannesjo/super-productivity/commit/1d82ae1114b824fcac5ffca28805e33d3f5dedcd))
+* **dbx:** only allow rev checking when there is a rev ([cedfc82](https://github.com/johannesjo/super-productivity/commit/cedfc826c9a94b786b973d2defb9d932e94c2587))
+* **git:** wrong project task import ([1da0c8e](https://github.com/johannesjo/super-productivity/commit/1da0c8e90e4294d9e09095b509a545cdc32ac565))
+
+
+### Features
+
+* **doneSound:** add and play sounds ([2c9ba1d](https://github.com/johannesjo/super-productivity/commit/2c9ba1d2e8720e2150492d11c55b85539ffc1ee2))
+* **doneSound:** apply sound config ([b1b2e64](https://github.com/johannesjo/super-productivity/commit/b1b2e64e49403bc6641260ab4f311f7b0096fc02))
+* **doneSound:** make basic pitching work ([dc7bfb5](https://github.com/johannesjo/super-productivity/commit/dc7bfb5edc7255031fbcd41171a61a962b07f384))
+* **doneSound:** make it work in electron built app ([6bf8403](https://github.com/johannesjo/super-productivity/commit/6bf84039da1ffda17722ea5728686c8e12fe10f6))
+* **doneSound:** make sound stuff configurable ([efb8a50](https://github.com/johannesjo/super-productivity/commit/efb8a50923311a2a6872be8d5ee84cd8f379cdb2))
+* **doneSound:** make volume work ([42e30de](https://github.com/johannesjo/super-productivity/commit/42e30de4fe84601dd6f657a9d32562e98a772e87))
+* **doneSound:** prepare pitching ([fe0ea56](https://github.com/johannesjo/super-productivity/commit/fe0ea56d103f55d8cc2d1b0e28ee12bd1d7fa5f8))
+* **git:** add issue add debug code ([d817bde](https://github.com/johannesjo/super-productivity/commit/d817bdee20a1d1e65385e144331c744709fb098d))
+* **sound:** adjust autopitch ([ad3a91e](https://github.com/johannesjo/super-productivity/commit/ad3a91e9a75edcab66b585659a149709a0d26de5))
+* add new sounds ([635f1f9](https://github.com/johannesjo/super-productivity/commit/635f1f9c705302da0c81e9298dd77be70b6edbb7))
+* **task:** improve focus behaviour for toggle done ([97969de](https://github.com/johannesjo/super-productivity/commit/97969de2b651d60e558aa5029b3b9f65b38b70d1))
+
+
+
 ## [5.6.5](https://github.com/johannesjo/super-productivity/compare/v5.6.4...v5.6.5) (2020-08-28)
 
 
