@@ -48,7 +48,21 @@
                     mat-icon-button>
               <mat-icon svgIcon="play"></mat-icon>
             </button>
-            <button (click)="toggleToday(task)"
+
+            <button *ngIf="task.parentId && task.parentData"
+                    (click)="toggleToday(task.parentData)"
+                    [matTooltip]="(task.parentData.tagIds.includes(TODAY_TAG.id)
+                    ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
+                    :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
+                    class="action-btn"
+                    mat-icon-button>
+              <mat-icon *ngIf="task.parentData.tagIds.includes(TODAY_TAG.id)"
+                        svgIcon="remove_today"></mat-icon>
+              <mat-icon *ngIf="!task.parentData.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>
+            </button>
+
+            <button *ngIf="!task.parentId"
+                    (click)="toggleToday(task)"
                     [matTooltip]="(task.tagIds.includes(TODAY_TAG.id)
                     ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
                     :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
