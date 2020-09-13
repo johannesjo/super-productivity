@@ -21,7 +21,7 @@ export interface PersistenceBaseModel<T> {
 
   loadState(isSkipMigration?: boolean): Promise<T>;
 
-  saveState(state: T, flags?: { isDataImport?: boolean, isSyncModelChange?: boolean }): Promise<unknown>;
+  saveState(state: T, flags: { isDataImport?: boolean, isSyncModelChange?: boolean }): Promise<unknown>;
 }
 
 export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S> {
@@ -42,7 +42,7 @@ export interface PersistenceForProjectModel<S, M> {
 
   load(projectId: string): Promise<S>;
 
-  save(projectId: string, state: S, flags?: { isDataImport?: boolean, isSyncModelChange?: boolean }): Promise<unknown>;
+  save(projectId: string, state: S, flags: { isDataImport?: boolean, isSyncModelChange?: boolean }): Promise<unknown>;
 
   /* @deprecated */
   remove(projectId: string): Promise<unknown>;

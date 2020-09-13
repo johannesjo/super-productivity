@@ -86,7 +86,7 @@ export class NoteService {
     } else {
       console.warn('Note not found while trying to update for different project');
     }
-    return await this._persistenceService.note.save(workContextId, noteState);
+    return await this._persistenceService.note.save(workContextId, noteState, {isSyncModelChange: true});
   }
 
   public updateOrder(ids: string[]) {

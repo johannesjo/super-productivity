@@ -236,7 +236,7 @@ export class PersistenceService {
 
   async restoreCompleteRelatedDataForProject(projectId: string, data: ProjectArchivedRelatedData): Promise<void> {
     await Promise.all(this._projectModels.map((modelCfg) => {
-      return modelCfg.save(projectId, data[modelCfg.appDataKey]);
+      return modelCfg.save(projectId, data[modelCfg.appDataKey], {});
     }));
   }
 
@@ -446,7 +446,7 @@ export class PersistenceService {
         projectId,
         legacyDBKey: this._makeProjectKey(projectId, lsKey)
       }).then(v => migrateFn(v, projectId)),
-      save: (projectId: string, data: any, {isDataImport, isSyncModelChange}: { isDataImport?: boolean, isSyncModelChange?: boolean }) => this._saveToDb({
+      save: (projectId: string, data: any, {isDataImport = false, isSyncModelChange}: { isDataImport?: boolean, isSyncModelChange?: boolean }) => this._saveToDb({
         dbKey: appDataKey,
         data,
         isDataImport,
