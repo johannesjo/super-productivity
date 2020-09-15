@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   HostBinding,
+  HostListener,
   Input,
   OnDestroy,
   QueryList,
@@ -70,6 +71,8 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   selectedItemIndex: number = 0;
   isFocusNotes: boolean = false;
+  isDragOver: boolean = false;
+
   T: typeof T = T;
   issueAttachments: TaskAttachment[] = [];
   reminderId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
@@ -152,6 +155,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   private _focusTimeout?: number;
   private _subs: Subscription = new Subscription();
+  private _dragEnterTarget?: HTMLElement;
 
   constructor(
     public attachmentService: TaskAttachmentService,
@@ -162,6 +166,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _matDialog: MatDialog,
     private _projectService: ProjectService,
+    private readonly _attachmentService: TaskAttachmentService,
     private _electronService: ElectronService,
     private _cd: ChangeDetectorRef,
   ) {
@@ -195,6 +200,27 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
     // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
     // this.issueData$.subscribe((v) => console.log('issueData$', v));
+  }
+
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
+    this._dragEnterTarget = ev.target as HTMLElement;
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
+    if (this._dragEnterTarget === (ev.target as HTMLElement)) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      this.isDragOver = false;
+    }
+  }
+
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
+    this._attachmentService.createFromDrop(ev, this.task.id);
+    ev.stopPropagation();
+    this.isDragOver = false;
   }
 
   get task(): TaskWithSubTasks {

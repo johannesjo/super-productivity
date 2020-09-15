@@ -72,3 +72,18 @@ progress-bar {
   }
 }
 
+
+.drag-over-msg {
+  pointer-events: none;
+  position: absolute;
+  top: -$s;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  opacity: 1;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  display: flex;
+  z-index: 2;
+}
