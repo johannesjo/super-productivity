@@ -17,8 +17,7 @@ export class DatetimeInputComponent {
   nrValue: number | undefined;
   strValue: string | undefined | null;
   lastVal: number | undefined;
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor() {
     const lastVal = localStorage.getItem(LS_LAST_REMINDER_DATE);

@@ -19,8 +19,7 @@ export class OwlWrapperComponent {
 
   @Output()
   triggerSubmit: EventEmitter<number> = new EventEmitter();
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   date: Date = new Date();
   laterTodaySlots: string[] = [
     '9:00',

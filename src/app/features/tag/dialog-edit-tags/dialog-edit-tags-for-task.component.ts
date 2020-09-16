@@ -17,8 +17,7 @@ import { Tag } from '../tag.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditTagsForTaskComponent implements OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   title: string = truncate(this.data.task.title, 20);
   task$: Observable<Task> = this._taskService.getByIdLive$(this.data.task.id);
   task: Task = this.data.task;

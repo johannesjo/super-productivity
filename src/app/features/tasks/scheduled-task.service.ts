@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import { TaskService } from './task.service';
 import { ReminderService } from '../reminder/reminder.service';
@@ -28,6 +28,13 @@ export class ScheduledTaskService {
               ...task,
               reminderData: reminders.find(reminder => reminder.relatedId === task.id)
             } as TaskWithReminderData)),
+        ),
+        switchMap((tasks: TaskWithReminderData[]) => forkJoin(tasks.map(task => !!task.parentId
+          ? this._taskService.getByIdOnce$(task.parentId).pipe(map(parentData => ({
+            ...task,
+            parentData
+          })))
+          : of(task)))
         ),
       );
     }),

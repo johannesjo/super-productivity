@@ -14,8 +14,7 @@ import { T } from '../../../t.const';
   animations: [slideAnimation]
 })
 export class BannerComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   height: number = 120;
   private _dirtyReference?: string | null;
   // TODO maybe improve if initial delay is annoying

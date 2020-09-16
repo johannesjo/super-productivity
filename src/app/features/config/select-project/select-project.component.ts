@@ -13,8 +13,7 @@ import { T } from 'src/app/t.const';
 export class SelectProjectComponent extends FieldType {
   // @ViewChild(MatInput) formFieldControl: MatInput;
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor(
     public projectService: ProjectService,

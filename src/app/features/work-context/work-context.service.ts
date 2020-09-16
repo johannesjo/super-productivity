@@ -276,6 +276,14 @@ export class WorkContextService {
     ]))
   );
 
+  flatDoneTodayNr$: Observable<number> = this.todaysTasks$.pipe(
+    map(tasks => flattenTasks(tasks)),
+    map(tasks => {
+      const done = tasks.filter(task => task.isDone);
+      return done.length;
+    })
+  );
+
   allRepeatableTasksFlat$: Observable<TaskWithSubTasks[]> = this.allNonArchiveTasks$.pipe(
     map((tasks) => (tasks.filter(task => !!task.repeatCfgId))),
     map(tasks => flattenTasks(tasks)),

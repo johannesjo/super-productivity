@@ -63,8 +63,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   @Output() cancel: EventEmitter<void> = new EventEmitter();
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   isShowAsText: boolean = false;
   headlineCols: string[] = [];
   formattedRows?: (string | number | undefined)[][];

@@ -24,8 +24,7 @@ import { ExportedProject } from '../../features/project/project-archive.model';
   animations: [standardListAnimation],
 })
 export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   private _subs: Subscription = new Subscription();
 
   constructor(

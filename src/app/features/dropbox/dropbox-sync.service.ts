@@ -106,8 +106,8 @@ export class DropboxSyncService {
     const lastSync = this._getLocalLastSync();
     const localRev = this._getLocalRev();
 
-    if (rev === localRev) {
-      dbxLog('DBX PRE1: ↔ Same Rev');
+    if (rev && rev === localRev) {
+      dbxLog('DBX PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
       local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {

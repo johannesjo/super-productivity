@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "5.6.5",
+  "version": "5.7.0",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
   "author": "johannesjo <contact@super-productivity.com> (http://super-productivity.com)",
@@ -77,7 +77,7 @@
     "electron-log": "^4.2.2",
     "electron-window-state": "^5.0.3",
     "googleapis": "^52.1.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "stacktrace-js": "^2.0.1"
   },
   "devDependencies": {
@@ -130,7 +130,7 @@
     "codelyzer": "^6.0.0",
     "conventional-changelog-cli": "^2.0.21",
     "cross-env": "^7.0.2",
-    "electron": "^9.1.1",
+    "electron": "^10.1.0",
     "electron-builder": "^22.7.0",
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.2.5",

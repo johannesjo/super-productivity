@@ -79,6 +79,7 @@ export type Task = Readonly<TaskCopy>;
 
 export interface TaskWithReminderData extends Task {
   readonly reminderData: Reminder;
+  readonly parentData?: Task;
 }
 
 export interface TaskWithSubTasks extends Task {

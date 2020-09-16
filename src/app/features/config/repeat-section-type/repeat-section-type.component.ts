@@ -13,8 +13,7 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
   animations: [standardListAnimation],
 })
 export class RepeatSectionTypeComponent extends FieldArrayType {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor() {
     super();

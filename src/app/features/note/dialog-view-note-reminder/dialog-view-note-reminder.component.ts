@@ -20,8 +20,7 @@ import { TagService } from '../../tag/tag.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogViewNoteReminderComponent implements OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   note$: Observable<Note> = this._noteService.getById$(this.data.reminder.relatedId);
   reminder: Reminder = this.data.reminder;
   isForCurrentContext: boolean = (this.reminder.workContextId === this._workContextService.activeWorkContextId);

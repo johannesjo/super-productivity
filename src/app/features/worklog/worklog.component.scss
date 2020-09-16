@@ -9,6 +9,12 @@
 }
 
 .year {
+  border-top: 1px dashed $dark-theme-separator-color;
+
+  @include lightTheme() {
+    border-color: $light-theme-separator-color;
+  }
+
   &-title {
     margin-top: 3*$s;
   }
@@ -16,12 +22,19 @@
   &-time-spent {
     font-size: 20px;
     line-height: 26px;
+    margin-bottom: $s*4;
   }
 }
 
 .month {
   margin-top: 3*$s;
   margin-bottom: 0;
+  border-top: 1px dashed $dark-theme-separator-color;
+  padding-top: $s*2;
+
+  @include lightTheme() {
+    border-color: $light-theme-separator-color;
+  }
 
   &-title {
     margin-bottom: $s;

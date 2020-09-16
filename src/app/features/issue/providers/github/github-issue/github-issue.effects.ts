@@ -36,7 +36,10 @@ export class GithubIssueEffects {
         ),
         tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
           const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
-          this._importNewIssuesToBacklog(pId, issuesToAdd);
+          console.log('issuesToAdd', issuesToAdd);
+          if (issuesToAdd?.length) {
+            this._importNewIssuesToBacklog(pId, issuesToAdd);
+          }
         })
       )),
     )),

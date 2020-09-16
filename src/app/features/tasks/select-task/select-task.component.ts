@@ -13,8 +13,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   taskSelectCtrl: FormControl = new FormControl();
   filteredTasks: Task[] = [];
   isCreate: boolean = false;

@@ -22,8 +22,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   @Input() cfg?: SimpleCounterConfig;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};
 

@@ -15,8 +15,7 @@ import { T } from '../../t.const';
   animations: [fadeAnimation],
 })
 export class MetricComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   productivityHappiness$: Observable<LineChartData> = this.metricService.getProductivityHappinessChartData$();
 

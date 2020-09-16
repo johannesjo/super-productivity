@@ -13,8 +13,7 @@ import { DEFAULT_GITLAB_CFG, GITLAB_CONFIG_FORM } from '../gitlab.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogGitlabInitialSetupComponent implements OnInit {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   gitlabCfg: GitlabCfg;
   formGroup: FormGroup = new FormGroup({});
   formConfig: FormlyFieldConfig[] = GITLAB_CONFIG_FORM;

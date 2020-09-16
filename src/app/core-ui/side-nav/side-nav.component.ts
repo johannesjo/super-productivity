@@ -53,8 +53,7 @@ export class SideNavComponent implements OnDestroy {
     )
   );
 
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   readonly PROJECTS_SIDE_NAV: string = 'PROJECTS_SIDE_NAV';
   readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
   activeWorkContextId?: string | null;

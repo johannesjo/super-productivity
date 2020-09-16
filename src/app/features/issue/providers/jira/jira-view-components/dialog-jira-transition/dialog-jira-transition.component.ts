@@ -20,8 +20,7 @@ import { JiraCfg } from '../../jira.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraTransitionComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   _jiraCfg$: Observable<JiraCfg> = this._projectService.getJiraCfgForProject$(this.data.task.projectId as string);
 

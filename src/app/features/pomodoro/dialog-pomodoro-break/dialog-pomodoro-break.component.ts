@@ -12,8 +12,7 @@ import { T } from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogPomodoroBreakComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   isStopCurrentTime$: Subject<boolean> = new Subject();
   currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(
     takeUntil(this.isStopCurrentTime$),

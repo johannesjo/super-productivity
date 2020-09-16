@@ -8,8 +8,7 @@ import { T } from '../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricPageComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor() {
   }

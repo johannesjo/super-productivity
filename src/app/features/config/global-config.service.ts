@@ -10,6 +10,7 @@ import {
   GoogleDriveSyncConfig,
   IdleConfig,
   MiscConfig,
+  SoundConfig,
   TakeABreakConfig
 } from './global-config.model';
 import {
@@ -18,6 +19,7 @@ import {
   selectGoogleDriveSyncConfig,
   selectIdleConfig,
   selectMiscConfig,
+  selectSoundConfig,
   selectTakeABreakConfig
 } from './store/global-config.reducer';
 import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
@@ -40,6 +42,11 @@ export class GlobalConfigService {
 
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
+    shareReplay(1),
+  );
+
+  sound$: Observable<SoundConfig> = this._store.pipe(
+    select(selectSoundConfig),
     shareReplay(1),
   );
 

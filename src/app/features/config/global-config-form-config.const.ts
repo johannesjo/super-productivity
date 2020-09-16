@@ -11,12 +11,14 @@ import { LANGUAGE_SELECTION_FORM_FORM } from './form-cfgs/language-selection-for
 import { EVALUATION_SETTINGS_FORM_CFG } from './form-cfgs/evaluation-settings-form.const';
 import { SIMPLE_COUNTER_FORM } from './form-cfgs/simple-counter-form.const';
 import { DROPBOX_SYNC_FORM } from './form-cfgs/dropbox-sync-form.const';
+import { SOUND_FORM_CFG } from './form-cfgs/sound-form.const';
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   (LANGUAGE_SELECTION_FORM_FORM as GenericConfigFormSection),
   (MISC_SETTINGS_FORM_CFG as GenericConfigFormSection),
   (IDLE_FORM_CFG as GenericConfigFormSection),
   (KEYBOARD_SETTINGS_FORM_CFG as GenericConfigFormSection),
+  (SOUND_FORM_CFG as GenericConfigFormSection),
 ];
 
 export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [

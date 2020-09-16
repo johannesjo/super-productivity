@@ -14,8 +14,7 @@ import { T } from '../../../t.const';
   animations: [improvementBannerAnimation]
 })
 export class ImprovementBannerComponent implements OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   improvements: Improvement[] = [];
 
   private _subs: Subscription = new Subscription();

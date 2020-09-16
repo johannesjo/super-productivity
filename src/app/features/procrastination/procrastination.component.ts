@@ -9,8 +9,7 @@ import { T } from '../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProcrastinationComponent implements OnInit {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor(
     public taskService: TaskService,

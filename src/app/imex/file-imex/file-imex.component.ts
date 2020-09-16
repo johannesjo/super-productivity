@@ -4,6 +4,8 @@ import { SnackService } from '../../core/snack/snack.service';
 import { AppDataComplete } from '../sync/sync.model';
 import { download } from '../../util/download';
 import { T } from '../../t.const';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'file-imex',
@@ -13,12 +15,12 @@ import { T } from '../../t.const';
 })
 export class FileImexComponent {
   @ViewChild('fileInput', {static: true}) fileInputRef?: ElementRef;
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor(
     private _dataImportService: DataImportService,
     private _snackService: SnackService,
+    private _router: Router,
   ) {
   }
 
@@ -40,6 +42,7 @@ export class FileImexComponent {
       if (oldData.config && Array.isArray(oldData.tasks)) {
         alert('V1 Data. Migration not imported any more.');
       } else {
+        await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
         await this._dataImportService.importCompleteSyncData(data as AppDataComplete);
       }
 

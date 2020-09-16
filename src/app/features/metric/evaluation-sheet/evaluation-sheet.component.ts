@@ -27,8 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
   @Output() save: EventEmitter<any> = new EventEmitter();
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   metricForDay?: MetricCopy;
   day$: BehaviorSubject<string> = new BehaviorSubject(getWorklogStr());
   private _metricForDay$: Observable<MetricCopy> = this.day$.pipe(

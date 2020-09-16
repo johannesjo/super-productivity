@@ -238,5 +238,10 @@
       </div>
     </ng-container>
   </task-additional-info-item>
+</div>
 
+<div *ngIf="isDragOver"
+     class="bgc-accent drag-over-msg">
+  <mat-icon>add</mat-icon>
+  {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task?.title} }}
 </div>

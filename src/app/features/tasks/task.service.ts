@@ -3,6 +3,7 @@ import { delay, filter, first, map, switchMap, take, withLatestFrom } from 'rxjs
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  ArchiveTask,
   DEFAULT_TASK,
   DropListModelSource,
   ShowSubTasksMode,
@@ -595,15 +596,18 @@ export class TaskService {
   }
 
   // TODO check with new archive
-  async checkForTaskWithIssue(issueId: string | number, issueProviderKey: IssueProviderKey): Promise<{
+  async checkForTaskWithIssueInProject(issueId: string | number, issueProviderKey: IssueProviderKey, projectId: string): Promise<{
     task: Task,
     subTasks: Task[] | null,
     isFromArchive: boolean,
   } | null> {
+    if (!projectId) {
+      throw new Error('No project id');
+    }
+
+    const findTaskFn = (task: Task | ArchiveTask | undefined) => task && task.issueId === issueId && task.issueType === issueProviderKey && task.projectId === projectId;
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
-    const taskWithSameIssue: Task = allTasks.find(
-      task => task.issueId === issueId && task.issueType === issueProviderKey
-    ) as Task;
+    const taskWithSameIssue: Task = allTasks.find(findTaskFn) as Task;
 
     if (taskWithSameIssue) {
       return {
@@ -617,7 +621,7 @@ export class TaskService {
       if (ids) {
         const archiveTaskWithSameIssue = ids
           .map(id => archiveTaskState.entities[id])
-          .find((task) => task && task.issueId === issueId);
+          .find(findTaskFn);
 
         return archiveTaskWithSameIssue
           ? {

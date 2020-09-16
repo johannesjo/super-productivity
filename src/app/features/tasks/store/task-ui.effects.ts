@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { AddTask, DeleteTask, TaskActionTypes } from './task.actions';
+import { AddTask, DeleteTask, TaskActionTypes, UpdateTask } from './task.actions';
 import { Action, select, Store } from '@ngrx/store';
-import { tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { filter, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from './task.selectors';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { TaskService } from '../task.service';
@@ -13,6 +13,9 @@ import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalConfigState } from '../../config/global-config.model';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { playDoneSound } from '../util/play-done-sound';
 
 @Injectable()
 export class TaskUiEffects {
@@ -61,7 +64,17 @@ export class TaskUiEffects {
       this._store$.pipe(select(selectCurrentTask)),
       this._store$.pipe(select(selectConfigFeatureState)),
     ),
-    tap(this._notifyAboutTimeEstimateExceeded.bind(this))
+    tap((args) => this._notifyAboutTimeEstimateExceeded(args))
+  );
+
+  @Effect({dispatch: false})
+  taskDoneSound$: any = this._actions$.pipe(
+    ofType(
+      TaskActionTypes.UpdateTask,
+    ),
+    filter(({payload: {task: {changes}}}: UpdateTask) => !!changes.isDone),
+    withLatestFrom(this._workContextService.flatDoneTodayNr$, this._globalConfigService.sound$),
+    tap(([, doneToday, soundCfg]) => playDoneSound(soundCfg, doneToday)),
   );
 
   constructor(
@@ -71,6 +84,8 @@ export class TaskUiEffects {
     private _taskService: TaskService,
     private _bannerService: BannerService,
     private _snackService: SnackService,
+    private _globalConfigService: GlobalConfigService,
+    private _workContextService: WorkContextService,
   ) {
   }
 

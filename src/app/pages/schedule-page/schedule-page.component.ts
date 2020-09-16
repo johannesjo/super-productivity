@@ -22,8 +22,7 @@ import { Tag } from '../../features/tag/tag.model';
   animations: [standardListAnimation]
 })
 export class SchedulePageComponent {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
 
   constructor(
@@ -44,7 +43,7 @@ export class SchedulePageComponent {
     }
   }
 
-  toggleToday(task: TaskWithReminderData) {
+  toggleToday(task: TaskWithReminderData|Task) {
     if (task.tagIds.includes(TODAY_TAG.id)) {
       this._taskService.updateTags(task, task.tagIds.filter(id => id !== TODAY_TAG.id), task.tagIds);
     } else {

@@ -23,8 +23,7 @@ import { BASIC_TAG_CONFIG_FORM_CONFIG } from '../../features/tag/tag-form-cfg.co
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagSettingsPageComponent implements OnInit, OnDestroy {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   tagThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   globalConfigFormCfg: ConfigFormConfig;
   basicFormCfg: ConfigFormSection<Tag>;

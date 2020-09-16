@@ -13,8 +13,7 @@ import { T } from '../../../../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogGithubInitialSetupComponent implements OnInit {
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
   githubCfg: GithubCfg;
   formGroup: FormGroup = new FormGroup({});
   formConfig: FormlyFieldConfig[] = GITHUB_CONFIG_FORM;

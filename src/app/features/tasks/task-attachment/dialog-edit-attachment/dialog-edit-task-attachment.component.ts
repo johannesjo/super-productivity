@@ -18,8 +18,7 @@ interface TaskAttachmentSelectType {
 export class DialogEditTaskAttachmentComponent {
   types: TaskAttachmentSelectType[];
   attachmentCopy: TaskAttachmentCopy;
-  // tslint:disable-next-line:typedef
-  T = T;
+  T: typeof T = T;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditTaskAttachmentComponent>,
