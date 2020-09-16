@@ -1,4 +1,3 @@
-import {Key} from 'protractor';
 import {BASE} from '../e2e.const';
 import {NBrowser} from '../n-browser-interface';
 
@@ -27,7 +26,7 @@ module.exports = {
     .waitForElementVisible(ADD_TASK_INITIAL)
 
     .setValue(ADD_TASK_INITIAL, '1 test task hihi')
-    .setValue(ADD_TASK_INITIAL, Key.ENTER)
+    .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
 
     .waitForElementVisible(TASK)
     .assert.visible(TASK)
@@ -39,9 +38,9 @@ module.exports = {
     .waitForElementVisible(ADD_TASK_INITIAL)
 
     .setValue(ADD_TASK_INITIAL, '2 test task hihi')
-    .setValue(ADD_TASK_INITIAL, Key.ENTER)
+    .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
     .setValue(ADD_TASK_INITIAL, '3 some other task')
-    .setValue(ADD_TASK_INITIAL, Key.ENTER)
+    .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
 
     .waitForElementVisible(TASK)
     .assert.visible(TASK)
@@ -57,9 +56,9 @@ module.exports = {
     .waitForElementVisible(ADD_TASK_GLOBAL)
 
     .setValue(ADD_TASK_GLOBAL, '4 test task hohoho')
-    .setValue(ADD_TASK_GLOBAL, Key.ENTER)
+    .setValue(ADD_TASK_GLOBAL, browser.Keys.ENTER)
     .setValue(ADD_TASK_GLOBAL, '5 some other task xoxo')
-    .setValue(ADD_TASK_GLOBAL, Key.ENTER)
+    .setValue(ADD_TASK_GLOBAL, browser.Keys.ENTER)
 
     .waitForElementVisible(TASK)
     .assert.visible(TASK)

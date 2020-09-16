@@ -1,5 +1,4 @@
 import { AddTaskWithReminderParams, NBrowser, } from '../n-browser-interface';
-import { Key } from 'protractor';
 
 const TASK = 'task';
 const SCHEDULE_TASK_ITEM = 'task-additional-info-item:nth-child(2)';
@@ -38,7 +37,7 @@ module.exports = {
       .pause(50)
       .setValue(TIME_INP_H, h.toString())
       .pause(50)
-      .setValue(TIME_INP_H, Key.ARROW_RIGHT)
+      .setValue(TIME_INP_H, this.Keys.ARROW_RIGHT)
       .pause(50)
       .setValue(TIME_INP_M, m.toString())
       .waitForElementVisible(DIALOG_SUBMIT)
