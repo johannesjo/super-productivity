@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, EMPTY, fromEvent, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { combineLatest, EMPTY, fromEvent, merge, Observable, of, ReplaySubject, throwError } from 'rxjs';
 import {
-  auditTime,
+  auditTime, catchError,
   concatMap,
   debounceTime,
   distinctUntilChanged,
@@ -44,7 +44,8 @@ import { isValidAppData } from './is-valid-app-data.util';
 export class SyncService {
   inMemoryValidOnly$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$.pipe(
     skipWhile(complete => !isValidAppData(complete)),
-    timeout(2500),
+    timeout(5000),
+    catchError(() => throwError('Error while trying to get inMemoryComplete$')),
   );
 
   private _onUpdateLocalDataTrigger$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
