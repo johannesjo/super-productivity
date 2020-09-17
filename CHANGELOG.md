@@ -1,3 +1,12 @@
+## [5.7.6](https://github.com/johannesjo/super-productivity/compare/v5.7.5...v5.7.6) (2020-09-17)
+
+
+### Features
+
+* improve error handling ([6892605](https://github.com/johannesjo/super-productivity/commit/68926057ec43716e467381350ba569bf7ec9294e))
+
+
+
 ## [5.7.5](https://github.com/johannesjo/super-productivity/compare/v5.7.4...v5.7.5) (2020-09-17)
 
 
