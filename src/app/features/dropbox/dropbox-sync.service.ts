@@ -82,7 +82,7 @@ export class DropboxSyncService {
 
       if (isAxiosError && e.response.data && e.response.data.error_summary === 'path/not_found/..') {
         dbxLog('DBX: File not found => ↑↑↑ Initial Upload ↑↑↑');
-        local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
+        local = await this._syncService.inMemoryValidOnly$.pipe(take(1)).toPromise();
         return await this._uploadAppData(local);
       } else if (isAxiosError && e.response.status === 401) {
         this._snackService.open({msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR'});
@@ -112,7 +112,7 @@ export class DropboxSyncService {
     if (rev && rev === localRev) {
       dbxLog('DBX PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
-      local = await this._syncService.inMemory$.pipe(take(1)).toPromise();
+      local = await this._syncService.inMemoryValidOnly$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
         dbxLog('DBX PRE1: No local changes to sync');
         return;
@@ -123,7 +123,7 @@ export class DropboxSyncService {
     // simple check based on file meta data
     // ------------------------------------
     // if not defined yet
-    local = local || await this._syncService.inMemory$.pipe(take(1)).toPromise();
+    local = local || await this._syncService.inMemoryValidOnly$.pipe(take(1)).toPromise();
     if (local.lastLocalSyncModelChange === 0) {
       console.log(local);
       if (!(this._c(T.F.DROPBOX.C.EMPTY_SYNC))) {

@@ -10,11 +10,12 @@ import {
   mapTo,
   shareReplay,
   skip,
+  skipWhile,
   startWith,
   switchMap,
   take,
   tap,
-  throttleTime
+  throttleTime, timeout
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { SyncProvider } from './sync-provider';
@@ -34,13 +35,17 @@ import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/ipc-events.const';
+import { isValidAppData } from './is-valid-app-data.util';
 
 // TODO naming
 @Injectable({
   providedIn: 'root',
 })
 export class SyncService {
-  inMemory$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$;
+  inMemoryValidOnly$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$.pipe(
+    skipWhile(complete => !isValidAppData(complete)),
+    timeout(2500),
+  );
 
   private _onUpdateLocalDataTrigger$: Observable<{ appDataKey: AllowedDBKeys, data: any, isDataImport: boolean, projectId?: string }> =
     this._persistenceService.onAfterSave$.pipe(
