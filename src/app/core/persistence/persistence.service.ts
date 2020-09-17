@@ -62,8 +62,9 @@ import { checkFixEntityStateConsistency } from '../../util/check-fix-entity-stat
 import { SimpleCounter, SimpleCounterState } from '../../features/simple-counter/simple-counter.model';
 import { simpleCounterReducer } from '../../features/simple-counter/store/simple-counter.reducer';
 import { from, merge, Observable, Subject } from 'rxjs';
-import { concatMap, shareReplay } from 'rxjs/operators';
+import { concatMap, shareReplay, skipWhile } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
+import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 
 @Injectable({
   providedIn: 'root',
@@ -147,7 +148,7 @@ export class PersistenceService {
     this.onAfterSave$.pipe(
       concatMap(() => this.loadComplete()),
       // TODO maybe not necessary
-      // skipWhile(complete => !isValidAppData(complete)),
+      skipWhile(complete => !isValidAppData(complete)),
     ),
   ).pipe(
     shareReplay(1),

@@ -10,7 +10,6 @@ import {
   mapTo,
   shareReplay,
   skip,
-  skipWhile,
   startWith,
   switchMap,
   take,
@@ -35,15 +34,13 @@ import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/ipc-events.const';
-import { isValidAppData } from './is-valid-app-data.util';
 
 // TODO naming
 @Injectable({
   providedIn: 'root',
 })
 export class SyncService {
-  inMemoryValidOnly$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$.pipe(
-    skipWhile(complete => !isValidAppData(complete)),
+  inMemoryComplete$: Observable<AppDataComplete> = this._persistenceService.inMemoryComplete$.pipe(
     timeout(5000),
     catchError(() => throwError('Error while trying to get inMemoryComplete$')),
   );
