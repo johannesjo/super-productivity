@@ -14,10 +14,7 @@
     "UPDATE_WEB_APP": "新版本可用，是否加载新版本？"
   },
   "BL": {
-    "FROM_OTHER_PROJECTS": "来自其他项目",
-    "NO_TASKS": "目前您的待办事项中没有任务",
-    "SCHEDULED": "已计划",
-    "TITLE": "待办事项"
+    "NO_TASKS": "目前您的待办事项中没有任务"
   },
   "DATETIME_INPUT": {
     "IN": "在 {{time}}",
@@ -80,6 +77,13 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "您正在尝试同步一个空的数据对象。这是您（几乎）原始应用程序的第一次同步吗？",
+        "FORCE_IMPORT": "反正导入远程数据？",
+        "FORCE_UPLOAD": "仍要上传本地数据吗？",
+        "FORCE_UPLOAD_AFTER_ERROR": "上载本地数据时发生错误。尝试强制更新？",
+        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "最后一次变更：",
         "LAST_SYNC": "上次同步：",
@@ -610,8 +614,12 @@
         "TIME": "时间"
       },
       "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "添加现有任务“{{taskTitle}}”",
+        "ADD_ISSUE_TASK": "从 {{issueType}}添加问题＃{{issueNr}} ",
         "ADD_TASK": "添加任务",
         "ADD_TASK_TO_BACKLOG": "将任务添加到待办事项中",
+        "CREATE_TASK": "创建新任务",
+        "EXAMPLE": "示例：“某些任务标题+ projectName＃一些标签＃一些其他标签10m / 3h”",
         "START": "再次按回车键开始"
       },
       "B": {
@@ -949,6 +957,13 @@
       "LONGER_BREAK_DURATION": "长休息时长",
       "TITLE": "番茄钟"
     },
+    "SOUND": {
+      "DONE_SOUND": "任务完成声音",
+      "IS_INCREASE_DONE_PITCH": "为完成的每项任务增加音调",
+      "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音",
+      "TITLE": "声音",
+      "VOLUME": "体积"
+    },
     "TAKE_A_BREAK": {
       "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
       "IS_ENABLED": "启用休息提醒",
@@ -964,7 +979,9 @@
     "COPY_TO_CLIPPBOARD": "复制到剪贴板",
     "ERR_COMPRESSION": "压缩界面出错",
     "PERSISTENCE_DISALLOWED": "数据将不会永久保存。请注意，这可能会导致数据丢失！！",
-    "RUNNING_X": "运行“{{str}}”。"
+    "RUNNING_X": "运行“{{str}}”。",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": " 按下了{{keyCombo}} ，但是打开书签快捷方式仅在项目上下文中可用。",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": " 按下了{{keyCombo}} ，但是仅在项目上下文中，打开注释快捷方式才可用。"
   },
   "GPB": {
     "ASSETS": "正在加载数据...",

@@ -77,6 +77,13 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "空のデータオブジェクトを同期しようとしています。これは（ほぼ）未使用のアプリの最初の同期ですか？",
+        "FORCE_IMPORT": "とにかくリモートデータをインポートしますか？",
+        "FORCE_UPLOAD": "とにかくローカルデータをアップロードしますか？",
+        "FORCE_UPLOAD_AFTER_ERROR": "ローカルデータのアップロード中にエラーが発生しました。強制的に更新しますか？",
+        "TRY_LOAD_REMOTE_AGAIN": "リモートからもう一度データを再ロードしてみますか？"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "最終変更：",
         "LAST_SYNC": "最終同期：",
@@ -607,8 +614,12 @@
         "TIME": "時間"
       },
       "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "既存のタスク「{{taskTitle}}」を追加",
+        "ADD_ISSUE_TASK": " {{issueType}}から問題番号{{issueNr}} を追加",
         "ADD_TASK": "タスクを追加",
         "ADD_TASK_TO_BACKLOG": "バックログにタスクを追加",
+        "CREATE_TASK": "新しいタスクを作成する",
+        "EXAMPLE": "例：「Some task title + projectName #some tag #some other tag 10m / 3h」",
         "START": "もう一度Enterキーを押して開始します"
       },
       "B": {
@@ -946,6 +957,13 @@
       "LONGER_BREAK_DURATION": "長い休憩時間",
       "TITLE": "ポモドーロタイマー"
     },
+    "SOUND": {
+      "DONE_SOUND": "タスク完了音",
+      "IS_INCREASE_DONE_PITCH": "実行するすべてのタスクのピッチを上げる",
+      "IS_PLAY_DONE_SOUND": "タスクが完了とマークされたときに音を鳴らす",
+      "TITLE": "音",
+      "VOLUME": "ボリューム"
+    },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>休憩せずに指定した時間作業したときに繰り返し発生するアラームを設定できます。</p> <p>表示されたメッセージを変更できます。 ${duration} は中断せずに費やした時間に置き換えられます。</p> </div>",
       "IS_ENABLED": "休憩のお知らせを有効にする",
@@ -961,7 +979,9 @@
     "COPY_TO_CLIPPBOARD": "クリップボードにコピー",
     "ERR_COMPRESSION": "圧縮インターフェースのエラー",
     "PERSISTENCE_DISALLOWED": "データは永続的に保持されません。これはデータの損失につながる可能性があることに注意してください!!",
-    "RUNNING_X": "\"{{str}}\"を実行しています。"
+    "RUNNING_X": "\"{{str}}\"を実行しています。",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} が押されましたが、ブックマークを開くショートカットはプロジェクトコンテキストでのみ使用できます。",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} が押されましたが、メモを開くショートカットはプロジェクトコンテキストでのみ使用できます。"
   },
   "GPB": {
     "ASSETS": "アセットを読み込んでいます...",

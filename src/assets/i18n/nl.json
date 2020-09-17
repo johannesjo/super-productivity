@@ -77,6 +77,13 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "U probeert een leeg gegevensobject te synchroniseren. Is dit uw allereerste synchronisatie van een (bijna) nieuwe app?",
+        "FORCE_IMPORT": "Toch externe gegevens importeren?",
+        "FORCE_UPLOAD": "Lokale gegevens toch uploaden?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Er is een fout opgetreden tijdens het uploaden van uw lokale gegevens. Probeer de update te forceren?",
+        "TRY_LOAD_REMOTE_AGAIN": "Wilt u nogmaals gegevens van de afstandsbediening opnieuw laden?"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "laatste wijziging:",
         "LAST_SYNC": "laatste gesynchroniseerd:",
@@ -607,8 +614,12 @@
         "TIME": "Tijd"
       },
       "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Voeg bestaande taak \"{{taskTitle}}\" toe",
+        "ADD_ISSUE_TASK": "Voeg probleem #{{issueNr}} van {{issueType}}toe",
         "ADD_TASK": "Voeg taak toe",
         "ADD_TASK_TO_BACKLOG": "Taak toevoegen aan achterstand",
+        "CREATE_TASK": "Maak een nieuwe taak",
+        "EXAMPLE": "Voorbeeld: \"Een taaktitel + projectnaam # een tag # een andere tag 10 m / 3 uur\"",
         "START": "Druk nogmaals op Enter om te beginnen"
       },
       "B": {
@@ -946,6 +957,13 @@
       "LONGER_BREAK_DURATION": "Duur van langere pauzes",
       "TITLE": "Pomodoro Timer"
     },
+    "SOUND": {
+      "DONE_SOUND": "Taak gedaan geluid",
+      "IS_INCREASE_DONE_PITCH": "Verhoog de toon voor elke uitgevoerde taak",
+      "IS_PLAY_DONE_SOUND": "Speel geluid af wanneer de taak is gemarkeerd als voltooid",
+      "TITLE": "Geluid",
+      "VOLUME": "Volume"
+    },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Hiermee kunt u een terugkerende herinnering configureren wanneer u een bepaalde tijd hebt gewerkt zonder een pauze te nemen.</p> <p>U kunt het weergegeven bericht wijzigen. $ {duration} wordt vervangen door de tijd die u zonder pauze doorbrengt.</p> </div>",
       "IS_ENABLED": "Schakel een pauzeherinnering in",
@@ -961,7 +979,9 @@
     "COPY_TO_CLIPPBOARD": "Gekopieerd naar het klembord",
     "ERR_COMPRESSION": "Fout voor compressie-interface",
     "PERSISTENCE_DISALLOWED": "Gegevens worden niet permanent bewaard. Houd er rekening mee dat dit kan leiden tot gegevensverlies !!",
-    "RUNNING_X": "\"{{Str}}\" wordt uitgevoerd."
+    "RUNNING_X": "\"{{Str}}\" wordt uitgevoerd.",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling naar bladwijzers openen is alleen beschikbaar in projectcontext.",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling voor open notities is alleen beschikbaar in projectcontext."
   },
   "GPB": {
     "ASSETS": "Activa laden ...",

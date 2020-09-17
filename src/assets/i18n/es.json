@@ -77,6 +77,13 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "Estás intentando sincronizar un objeto de datos vacío. ¿Es esta tu primera sincronización de una aplicación (casi) virgen?",
+        "FORCE_IMPORT": "¿Importar datos remotos de todos modos?",
+        "FORCE_UPLOAD": "¿Subir datos locales de todos modos?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Se produjo un error al cargar sus datos locales. ¿Intentas forzar la actualización?",
+        "TRY_LOAD_REMOTE_AGAIN": "¿Intentar volver a cargar datos desde el control remoto?"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "ultimo cambio:",
         "LAST_SYNC": "Última sincronización:",
@@ -607,8 +614,12 @@
         "TIME": "hora"
       },
       "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Agregar tarea existente \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Agregar problema n. °{{issueNr}} de {{issueType}}",
         "ADD_TASK": "Agregar tarea",
         "ADD_TASK_TO_BACKLOG": "Agregar tarea al registro de trabajo",
+        "CREATE_TASK": "Crear nueva tarea",
+        "EXAMPLE": "Ejemplo: \"Un título de tarea + nombre de proyecto # alguna etiqueta # alguna otra etiqueta 10m / 3h\"",
         "START": "Presiona entrar una vez más para comenzar"
       },
       "B": {
@@ -946,6 +957,13 @@
       "LONGER_BREAK_DURATION": "Duración de los descansos más largos",
       "TITLE": "Pomodoro Timer"
     },
+    "SOUND": {
+      "DONE_SOUND": "Sonido de tarea realizada",
+      "IS_INCREASE_DONE_PITCH": "Aumente el tono para cada tarea realizada",
+      "IS_PLAY_DONE_SOUND": "Reproducir sonido cuando la tarea esté marcada como terminada",
+      "TITLE": "Sonar",
+      "VOLUME": "Volumen"
+    },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Le permite configurar un recordatorio recurrente cuando ha trabajado durante un período de tiempo específico sin tomar un descanso.</p> <p>Puede modificar el mensaje que se muestra. ${duration} será reemplazado con el tiempo dedicado sin descanso.</p> </div>",
       "IS_ENABLED": "Habilitar recordatorio para tomar un descanso",
@@ -961,7 +979,9 @@
     "COPY_TO_CLIPPBOARD": "Copiado al portapapeles",
     "ERR_COMPRESSION": "Error para la interfaz de compresión",
     "PERSISTENCE_DISALLOWED": "Los datos no se conservarán de forma permanente. ¡Tenga en cuenta que esto puede conducir a la pérdida de datos!",
-    "RUNNING_X": "Ejecutando \"{{str}}\"."
+    "RUNNING_X": "Ejecutando \"{{str}}\".",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} presionado, pero el acceso directo a marcadores abiertos solo está disponible en el contexto del proyecto.",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} presionado, pero el acceso directo de notas abiertas solo está disponible en el contexto del proyecto."
   },
   "GPB": {
     "ASSETS": "Cargando activos ...",
