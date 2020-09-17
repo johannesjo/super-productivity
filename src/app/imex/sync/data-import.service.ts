@@ -8,6 +8,7 @@ import { T } from '../../t.const';
 import { MigrationService } from '../../core/migration/migration.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isValidAppData } from './is-valid-app-data.util';
+import { LS_CHECK_STRAY_PERSISTENCE_BACKUP } from '../../core/persistence/ls-keys.const';
 
 // TODO some of this can be done in a background script
 
@@ -24,6 +25,7 @@ export class DataImportService {
     private _migrationService: MigrationService,
     private _dataInitService: DataInitService,
   ) {
+    this._checkForStrayBackup();
   }
 
   async getCompleteSyncData(): Promise<AppDataComplete> {
@@ -36,6 +38,14 @@ export class DataImportService {
 
     // get rid of outdated project data
     if (!isBackupReload) {
+      const isBackupWasRestored = await this._checkForStrayBackup();
+      console.log(isBackupReload);
+      console.log(isBackupWasRestored);
+
+      if (!isBackupWasRestored) {
+        return;
+      }
+
       await this._persistenceService.saveBackup();
       await this._persistenceService.clearDatabaseExceptBackup();
     }
@@ -46,6 +56,7 @@ export class DataImportService {
         // save data to database first then load to store from there
         await this._persistenceService.importComplete(migratedData);
         await this._loadAllFromDatabaseToStore();
+        await this._persistenceService.clearBackup();
         this._imexMetaService.setDataImportInProgress(false);
         this._snackService.open({type: 'SUCCESS', msg: T.S.SYNC.SUCCESS});
 
@@ -55,10 +66,12 @@ export class DataImportService {
           msg: T.S.SYNC.ERROR_FALLBACK_TO_BACKUP,
         });
         console.error(e);
-        await this._loadBackup();
+        await this._importBackup();
         this._imexMetaService.setDataImportInProgress(false);
       }
     } else {
+      console.log('I am here!');
+
       this._snackService.open({type: 'ERROR', msg: T.S.SYNC.ERROR_INVALID_DATA});
       console.error(data);
       this._imexMetaService.setDataImportInProgress(false);
@@ -73,8 +86,30 @@ export class DataImportService {
     ]);
   }
 
-  private async _loadBackup(): Promise<any> {
+  private async _importBackup(): Promise<any> {
     const data = await this._persistenceService.loadBackup();
     return this.importCompleteSyncData(data, true);
+  }
+
+  private async _checkForStrayBackup(): Promise<boolean> {
+    const backup = await this._persistenceService.loadBackup();
+    if (!localStorage.getItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP)) {
+      if (backup) {
+        await this._persistenceService.clearBackup();
+      }
+      localStorage.setItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP, 'true');
+    }
+
+    if (backup) {
+      if (confirm('During last sync there might have been some error. Do you want to restore the last backup?')) {
+        await this._importBackup();
+        return true;
+      } else {
+        if (confirm('Do you want to delete the back to avoid seeing this dialog?')) {
+          await this._persistenceService.clearBackup();
+        }
+      }
+    }
+    return false;
   }
 }

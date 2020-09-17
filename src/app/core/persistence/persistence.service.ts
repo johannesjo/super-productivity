@@ -285,6 +285,10 @@ export class PersistenceService {
     return this._saveToDb({dbKey: LS_BACKUP, data, isDataImport: true, isSyncModelChange: true});
   }
 
+  async clearBackup(): Promise<unknown> {
+    return this._removeFromDb({dbKey: LS_BACKUP});
+  }
+
   // NOTE: not including backup
   async loadComplete(): Promise<AppDataComplete> {
     let r;
