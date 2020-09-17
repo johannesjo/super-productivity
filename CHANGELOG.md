@@ -1,3 +1,25 @@
+## [5.7.1](https://github.com/johannesjo/super-productivity/compare/v5.7.0...v5.7.1) (2020-09-17)
+
+
+### Bug Fixes
+
+* editing sub task tags should not be possible [#522](https://github.com/johannesjo/super-productivity/issues/522) ([eb11530](https://github.com/johannesjo/super-productivity/commit/eb11530193f91232fe2e109a8ad792a2180e258d))
+* model check for empty data ([4a8a784](https://github.com/johannesjo/super-productivity/commit/4a8a7841f8db6cd23541caf74bf7a955ddc1eecb))
+* note reminder from tag view [#524](https://github.com/johannesjo/super-productivity/issues/524) ([f9e508f](https://github.com/johannesjo/super-productivity/commit/f9e508fb13f5d3a44d284da166af8c84893cad7e))
+
+
+### Features
+
+* add auto import backup when something went wrong with data import previously ([f281470](https://github.com/johannesjo/super-productivity/commit/f281470f193f93692a3bd37b0f59c34a2c894bb8))
+* alert on indexeddb error ([09f8a22](https://github.com/johannesjo/super-productivity/commit/09f8a22ad018a9052bea3ded77a4a48d2528d07b))
+* allow drag & drop attachments on task additional info ([9377b80](https://github.com/johannesjo/super-productivity/commit/9377b80742e1fe3e9fb4b02f3b4059e06174775c))
+* improve persistence permission request ([0e8cb34](https://github.com/johannesjo/super-productivity/commit/0e8cb34219dbf464c30ee5d1c2c8c2cdb2f90bb7))
+* **doneSound:** make pitching work for a bigger amount of tasks ([51489d2](https://github.com/johannesjo/super-productivity/commit/51489d263df6338e2f12c62a62697784a28bdf9c))
+* **style:** add separators to worklog ([11127f1](https://github.com/johannesjo/super-productivity/commit/11127f10c4f4e6924a3257a9dca2a59c4d2fc656))
+* **style:** use checkmark for bookmark-bar edit mode ([46d4ccb](https://github.com/johannesjo/super-productivity/commit/46d4ccb4bed5aad65135d0206b03665638cc3ff0))
+
+
+
 # [5.7.0](https://github.com/johannesjo/super-productivity/compare/v5.6.5...v5.7.0) (2020-09-07)
 
 
