@@ -1,3 +1,15 @@
+## [5.7.3](https://github.com/johannesjo/super-productivity/compare/v5.7.2...v5.7.3) (2020-09-17)
+
+
+### Features
+
+* **i18n:** add missing translations ([a229186](https://github.com/johannesjo/super-productivity/commit/a22918681274ffdd576184b3f281ae07f2e5b45b))
+* improve pre-check ([ed9fc7a](https://github.com/johannesjo/super-productivity/commit/ed9fc7a8b681cca2d7acfc2ea0718427cbe06187))
+* improve warning for empty data sync ([5f27d43](https://github.com/johannesjo/super-productivity/commit/5f27d4397750c3272a164f36b6d15aff904104ee))
+* make dropbox sync confirms translatable ([e8c97ee](https://github.com/johannesjo/super-productivity/commit/e8c97ee32f8271db89bd0ab312d96a92514fbce1))
+
+
+
 ## [5.7.2](https://github.com/johannesjo/super-productivity/compare/v5.7.1...v5.7.2) (2020-09-17)
 
 
