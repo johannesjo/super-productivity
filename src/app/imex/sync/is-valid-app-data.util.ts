@@ -8,7 +8,9 @@ import { Project } from '../../features/project/project.model';
 // TODO unit test this
 export const isValidAppData = (data: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {
   // TODO remove this later on
-  const isCapableModelVersion = data.project
+  const isCapableModelVersion =
+    (typeof (data as any) === 'object')
+    && data.project
     && data.project[MODEL_VERSION_KEY]
     && typeof data.project[MODEL_VERSION_KEY] === 'number'
     && (data.project[MODEL_VERSION_KEY] as number) >= 5;
