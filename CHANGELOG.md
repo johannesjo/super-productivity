@@ -1,3 +1,12 @@
+## [5.7.5](https://github.com/johannesjo/super-productivity/compare/v5.7.4...v5.7.5) (2020-09-17)
+
+
+### Bug Fixes
+
+* prevent dropbox from syncing invalid ([6ddc711](https://github.com/johannesjo/super-productivity/commit/6ddc7115c60f8ad2516c6e38d0bbe4fc802a34d3))
+
+
+
 ## [5.7.4](https://github.com/johannesjo/super-productivity/compare/v5.7.3...v5.7.4) (2020-09-17)
 
 
