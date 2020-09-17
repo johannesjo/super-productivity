@@ -123,7 +123,8 @@ export class DropboxSyncService {
     // if not defined yet
     local = local || await this._syncService.inMemory$.pipe(take(1)).toPromise();
     if (local.lastLocalSyncModelChange === 0) {
-      if (!confirm('lastLocalSyncModelChange is 0. Which means data has been deleted or something is wrong. Proceed with Dropbox sync?')) {
+      console.log(local);
+      if (!confirm('You\'re trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?')) {
         return;
       }
     }
