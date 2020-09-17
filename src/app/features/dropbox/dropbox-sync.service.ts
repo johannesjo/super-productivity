@@ -128,15 +128,6 @@ export class DropboxSyncService {
       }
     }
 
-    // PRE CHECK 4
-    // check if app model is valid otherwise don't thin
-    // ------------------------------------
-    // if not defined yet
-    if (!isValidAppData(local)) {
-      console.log(local);
-      throw new Error('Local sync data is invalid for some reason');
-    }
-
     // NOTE: missing milliseconds :(
     const remoteClientUpdate = clientUpdate / 1000;
     // NOTE: not 100% an exact science, but changes occurring at the same time
@@ -249,6 +240,11 @@ export class DropboxSyncService {
   }
 
   private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | undefined> {
+    if (!isValidAppData(data)) {
+      console.log(data);
+      throw new Error('The data you are trying to upload is invalid');
+    }
+
     try {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,
