@@ -22,6 +22,7 @@ import { DialogDbxSyncConflictComponent } from './dialog-dbx-sync-conflict/dialo
 import { SnackService } from '../../core/snack/snack.service';
 import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
+import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 
 @Injectable({providedIn: 'root'})
 export class DropboxSyncService {
@@ -125,6 +126,15 @@ export class DropboxSyncService {
       if (!confirm('lastLocalSyncModelChange is 0. Which means data has been deleted or something is wrong. Proceed with Dropbox sync?')) {
         return;
       }
+    }
+
+    // PRE CHECK 4
+    // check if app model is valid otherwise don't thin
+    // ------------------------------------
+    // if not defined yet
+    if (!isValidAppData(local)) {
+      console.log(local);
+      throw new Error('Local sync data is invalid for some reason');
     }
 
     // NOTE: missing milliseconds :(
