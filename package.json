@@ -145,7 +145,7 @@
     "hammerjs": "^2.0.8",
     "helpful-decorators": "^2.1.0",
     "husky": "^4.2.5",
-    "idb": "^5.0.3",
+    "idb": "^5.0.6",
     "jasmine-core": "^3.4.0",
     "jasmine-marbles": "^0.6.0",
     "jasmine-spec-reporter": "^5.0.2",
