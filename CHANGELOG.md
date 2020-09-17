@@ -1,3 +1,12 @@
+## [5.7.2](https://github.com/johannesjo/super-productivity/compare/v5.7.1...v5.7.2) (2020-09-17)
+
+
+### Features
+
+* add pre-check for invalid local data before saving ([955aed7](https://github.com/johannesjo/super-productivity/commit/955aed7e0c3edf1c656d0ddc2307a939f86f73e2))
+
+
+
 ## [5.7.1](https://github.com/johannesjo/super-productivity/compare/v5.7.0...v5.7.1) (2020-09-17)
 
 
