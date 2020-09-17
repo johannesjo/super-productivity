@@ -23,6 +23,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({providedIn: 'root'})
 export class DropboxSyncService {
@@ -59,6 +60,7 @@ export class DropboxSyncService {
     private _dataInitService: DataInitService,
     private _snackService: SnackService,
     private _matDialog: MatDialog,
+    private _translateService: TranslateService,
   ) {
     // TODO initial syncing (do with immediate triggers)
   }
@@ -124,7 +126,7 @@ export class DropboxSyncService {
     local = local || await this._syncService.inMemory$.pipe(take(1)).toPromise();
     if (local.lastLocalSyncModelChange === 0) {
       console.log(local);
-      if (!confirm('You\'re trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?')) {
+      if (!(this._c(T.F.DROPBOX.C.EMPTY_SYNC))) {
         return;
       }
     }
@@ -171,7 +173,7 @@ export class DropboxSyncService {
 
       case UpdateCheckResult.RemoteNotUpToDateDespiteSync: {
         dbxLog('DBX: X Remote not up to date despite sync');
-        if (confirm('Try to re-load data from remote once again?')) {
+        if (this._c(T.F.DROPBOX.C.TRY_LOAD_REMOTE_AGAIN)) {
           return this.sync();
         } else {
           return this._handleConflict({remote, local, lastSync, downloadMeta: r.meta});
@@ -194,11 +196,11 @@ export class DropboxSyncService {
       case UpdateCheckResult.ErrorLastSyncNewerThanLocal: {
         dbxLog('DBX: XXX Wrong Data');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
-          if (confirm('Upload local data anyway?')) {
+          if (this._c(T.F.DROPBOX.C.FORCE_UPLOAD)) {
             return await this._uploadAppData(local, true);
           }
         } else {
-          if (confirm('Import remote data anyway?')) {
+          if (this._c(T.F.DROPBOX.C.FORCE_IMPORT)) {
             return await this._importData(remote, r.meta.rev);
           }
         }
@@ -261,7 +263,7 @@ export class DropboxSyncService {
     } catch (e) {
       console.error(e);
       dbxLog('DBX: X Upload Request Error');
-      if (confirm('An Error occurred while uploading your local data. Try to force the update?')) {
+      if (this._c(T.F.DROPBOX.C.FORCE_UPLOAD_AFTER_ERROR)) {
         return this._uploadAppData(data, true);
       }
     }
@@ -336,4 +338,9 @@ export class DropboxSyncService {
       }
     }).afterClosed();
   }
+
+  private _c(str: string): boolean {
+    return confirm(this._translateService.instant(str));
+  };
+
 }
