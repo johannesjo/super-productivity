@@ -25,7 +25,7 @@ export class DataImportService {
     private _migrationService: MigrationService,
     private _dataInitService: DataInitService,
   ) {
-    this._checkForStrayBackup();
+    this._isCheckForStrayBackupAndImport();
   }
 
   async getCompleteSyncData(): Promise<AppDataComplete> {
@@ -38,11 +38,7 @@ export class DataImportService {
 
     // get rid of outdated project data
     if (!isBackupReload) {
-      const isBackupWasRestored = await this._checkForStrayBackup();
-      console.log(isBackupReload);
-      console.log(isBackupWasRestored);
-
-      if (!isBackupWasRestored) {
+      if (await this._isCheckForStrayBackupAndImport()) {
         return;
       }
 
@@ -91,7 +87,7 @@ export class DataImportService {
     return this.importCompleteSyncData(data, true);
   }
 
-  private async _checkForStrayBackup(): Promise<boolean> {
+  private async _isCheckForStrayBackupAndImport(): Promise<boolean> {
     const backup = await this._persistenceService.loadBackup();
     if (!localStorage.getItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP)) {
       if (backup) {
