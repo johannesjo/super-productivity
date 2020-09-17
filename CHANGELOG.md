@@ -1,3 +1,12 @@
+## [5.7.4](https://github.com/johannesjo/super-productivity/compare/v5.7.3...v5.7.4) (2020-09-17)
+
+
+### Bug Fixes
+
+* stray import stuff being wrong ([b2fae30](https://github.com/johannesjo/super-productivity/commit/b2fae30bc7eafcca5b5449f11dd19d6b0440a007))
+
+
+
 ## [5.7.3](https://github.com/johannesjo/super-productivity/compare/v5.7.2...v5.7.3) (2020-09-17)
 
 
