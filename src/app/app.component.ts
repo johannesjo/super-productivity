@@ -91,19 +91,6 @@ export class AppComponent implements OnDestroy {
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });
 
-    // try to avoid data-loss
-    if (navigator.storage && navigator.storage.persist) {
-      navigator.storage.persist().then(granted => {
-        if (granted) {
-          console.log('Persistent store granted');
-        } else {
-          const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
-          console.warn('Persistence not allowed');
-          this._snackService.open({msg});
-        }
-      });
-    }
-
     // check for dialog
     this._initialDialogService.showDialogIfNecessary$().subscribe();
 
@@ -113,6 +100,7 @@ export class AppComponent implements OnDestroy {
     // init offline banner in lack of a better place for it
     this._initOfflineBanner();
 
+    this._requestPersistence();
     this._checkAvailableStorage();
 
     if (IS_ANDROID_WEB_VIEW) {
@@ -243,6 +231,30 @@ export class AppComponent implements OnDestroy {
         this._bannerService.dismiss(BannerId.Offline);
       }
     });
+  }
+
+  private _requestPersistence() {
+    if (navigator.storage) {
+      // try to avoid data-loss
+      Promise.all([
+        navigator.storage.persisted(),
+        navigator.permissions.query({name: 'persistent-storage'})
+      ]).then(([persisted, permission]) => {
+        if (!persisted && permission && (permission as any).status === 'granted') {
+          navigator.storage.persist().then(granted => {
+            if (granted) {
+              console.log('Persistent store granted');
+            } else {
+              const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
+              console.warn('Persistence not allowed');
+              this._snackService.open({msg});
+            }
+          });
+        } else if (!persisted && permission && (permission as any).status === 'prompt') {
+          alert('To persist your data, you need to give permission.');
+        }
+      });
+    }
   }
 
   private _checkAvailableStorage() {
