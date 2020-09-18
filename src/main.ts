@@ -7,13 +7,13 @@ import { IS_ELECTRON } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/core/android/android-interface';
 
-if (environment.production) {
+if (environment.production || environment.stage) {
   enableProdMode();
 }
 
 platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
   // TODO make asset caching work for electron
-  if ('serviceWorker' in navigator && environment.production && !IS_ELECTRON) {
+  if ('serviceWorker' in navigator && (environment.production || environment.stage) && !IS_ELECTRON) {
     console.log('Registering Service worker');
     return navigator.serviceWorker.register('ngsw-worker.js');
   }
@@ -27,7 +27,7 @@ platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
 window.addEventListener('touchmove', () => {
 });
 
-if (!environment.production && IS_ANDROID_WEB_VIEW) {
+if (!(environment.production || environment.stage) && IS_ANDROID_WEB_VIEW) {
   setTimeout(() => {
     androidInterface.showToast('Android DEV works');
     console.log(androidInterface);

@@ -59,7 +59,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition: { x: string; y: string } = {x: '0px', y: '0px'};
   progress: number = 0;
-  isDev: boolean = !environment.production;
+  isDev: boolean = !(environment.production || environment.stage);
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
   @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
