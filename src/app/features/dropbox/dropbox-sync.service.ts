@@ -245,6 +245,7 @@ export class DropboxSyncService {
   private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | undefined> {
     if (!isValidAppData(data)) {
       console.log(data);
+      alert('The data you are trying to upload is invalid');
       throw new Error('The data you are trying to upload is invalid');
     }
 
