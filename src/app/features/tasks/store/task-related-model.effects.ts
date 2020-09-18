@@ -162,8 +162,6 @@ export class TaskRelatedModelEffects {
       this._projectService.list$,
     ),
     mergeMap(([task, tags, projects]) => {
-      console.log('ADDED TASK', task);
-
       const r = shortSyntax(task, tags, projects);
       if (!r) {
         return EMPTY;
@@ -197,14 +195,17 @@ export class TaskRelatedModelEffects {
       }
 
       if (tagIds && tagIds.length) {
+        const isEqualTags = (JSON.stringify(tagIds) === JSON.stringify(task.tagIds));
         if (!task.tagIds) {
           throw new Error('Task Old TagIds need to be passed');
         }
-        actions.push(new UpdateTaskTags({
-          task,
-          newTagIds: unique(tagIds),
-          oldTagIds: task.tagIds,
-        }));
+        if (!isEqualTags) {
+          actions.push(new UpdateTaskTags({
+            task,
+            newTagIds: unique(tagIds),
+            oldTagIds: task.tagIds,
+          }));
+        }
       }
 
       return actions;
