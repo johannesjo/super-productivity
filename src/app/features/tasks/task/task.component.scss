@@ -103,13 +103,14 @@
       // NOTE: somehow ng build messes up, if we don't include it like that
       border-color: $task-c-focus;
       border-width: 1px;
-      border-style: dashed !important;
+      border-style: solid !important;
     }
   }
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
     border-color: $task-c-current !important;
     border-width: 1px !important;
+    border-style: dashed;
 
     border-radius: 12px !important;
     bottom: -2px;
