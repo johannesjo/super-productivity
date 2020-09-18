@@ -48,7 +48,7 @@ import { Obstruction, ObstructionState } from '../../features/metric/obstruction
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { Bookmark } from '../../features/bookmark/bookmark.model';
 import { Note } from '../../features/note/note.model';
-import { Action } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { Tag, TagState } from '../../features/tag/tag.model';
 import { migrateProjectState } from '../../features/project/migrate-projects-state.util';
@@ -65,6 +65,7 @@ import { from, merge, Observable, Subject } from 'rxjs';
 import { concatMap, shareReplay, skipWhile } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
+import { loadFromDb, removeFromDb, saveToDb } from './persistence.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -160,6 +161,7 @@ export class PersistenceService {
   constructor(
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
+    private _store: Store<any>,
   ) {
     // this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
   }
@@ -525,6 +527,7 @@ export class PersistenceService {
   }): Promise<any> {
     if (!this._isBlockSaving || isDataImport === true) {
       const idbKey = this._getIDBKey(dbKey, projectId);
+      this._store.dispatch(saveToDb({dbKey, data}));
       const r = await this._databaseService.save(idbKey, data);
 
       this._updateInMemory({
@@ -552,6 +555,7 @@ export class PersistenceService {
   }): Promise<any> {
     const idbKey = this._getIDBKey(dbKey, projectId);
     if (!this._isBlockSaving || isDataImport === true) {
+      this._store.dispatch(removeFromDb({dbKey}));
       return this._databaseService.remove(idbKey);
     } else {
       console.warn('BLOCKED SAVING for ', dbKey);
@@ -565,6 +569,7 @@ export class PersistenceService {
     projectId?: string,
   }): Promise<any> {
     const idbKey = this._getIDBKey(dbKey, projectId);
+    this._store.dispatch(loadFromDb({dbKey}));
     // TODO remove legacy stuff
     return await this._databaseService.load(idbKey) || await this._databaseService.load(legacyDBKey) || undefined;
   }
