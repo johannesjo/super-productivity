@@ -238,9 +238,8 @@ export class AppComponent implements OnDestroy {
       // try to avoid data-loss
       Promise.all([
         navigator.storage.persisted(),
-        navigator.permissions.query({name: 'persistent-storage'})
-      ]).then(([persisted, permission]) => {
-        if (!persisted && permission && (permission as any).status === 'granted') {
+      ]).then(([persisted]) => {
+        if (!persisted) {
           navigator.storage.persist().then(granted => {
             if (granted) {
               console.log('Persistent store granted');
@@ -250,8 +249,8 @@ export class AppComponent implements OnDestroy {
               this._snackService.open({msg});
             }
           });
-        } else if (!persisted && permission && (permission as any).status === 'prompt') {
-          alert('To persist your data, you need to give permission.');
+        } else {
+          console.log('Persistence already allowed');
         }
       });
     }
