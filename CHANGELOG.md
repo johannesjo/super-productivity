@@ -1,3 +1,26 @@
+## [5.7.7](https://github.com/johannesjo/super-productivity/compare/v5.7.6...v5.7.7) (2020-09-18)
+
+
+### Bug Fixes
+
+* allow deletion of multiple tasks in fast succession ([8b41fb9](https://github.com/johannesjo/super-productivity/commit/8b41fb9fe9532f54653e04596a75ed0f050952ae))
+* persistence request for mobile ([113dafd](https://github.com/johannesjo/super-productivity/commit/113dafdc5b600259ba62e7fa664ca9b6c5e9d647))
+* weird error for reminders ([c4c2a33](https://github.com/johannesjo/super-productivity/commit/c4c2a33289d8b68854f29e5aa3e4f86e4613ceb6))
+* weird reminder error ([260a80c](https://github.com/johannesjo/super-productivity/commit/260a80c2c6239cffec10312c908b35ca843f1c48))
+* **task:** case when adding task via short syntax with project id to today ([2e96c0f](https://github.com/johannesjo/super-productivity/commit/2e96c0fa52270232c3238667ab6401c15bcb613b))
+
+
+### Features
+
+* add additional debug info for undo task delete meta reducer ([01ea6d9](https://github.com/johannesjo/super-productivity/commit/01ea6d9343a897681c721039d7e9cf9f6df467be))
+* add debugging actions for persistence ([dfe459e](https://github.com/johannesjo/super-productivity/commit/dfe459e65f7846a4bdc6f2125a419ad26e3f7f68))
+* add error alert ([389063a](https://github.com/johannesjo/super-productivity/commit/389063aaeb4ab7562b034cb3d533d904d754457e))
+* limit inMemoryComplete$ to valid only ([5021969](https://github.com/johannesjo/super-productivity/commit/502196951d7ad98a34b35c62322c5ac9fe42ec05))
+* make adjustments for stage behaviour ([75042ee](https://github.com/johannesjo/super-productivity/commit/75042ee4c4a1cd76968047927e695e227e83ff7a))
+* remove load from db action because it's too much clutter ([ea05fda](https://github.com/johannesjo/super-productivity/commit/ea05fda38069ab09f975a4be4146b24f49a052d7))
+
+
+
 ## [5.7.6](https://github.com/johannesjo/super-productivity/compare/v5.7.5...v5.7.6) (2020-09-17)
 
 
