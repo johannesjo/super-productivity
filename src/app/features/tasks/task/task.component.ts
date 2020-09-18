@@ -91,6 +91,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout?: number;
+  private _isTaskDeleteTriggered: boolean = false;
 
   constructor(
     private readonly _taskService: TaskService,
@@ -236,6 +237,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   deleteTask() {
+    if (this._isTaskDeleteTriggered) {
+      return;
+    }
+
+    this._isTaskDeleteTriggered = true;
     this._taskService.remove(this.task);
     this.focusNext(true);
   }
