@@ -22,7 +22,7 @@
   //overflow: visible;
 
   :host:focus & {
-    border: 1px dashed $c-focus-border;
+    border: 1px solid $c-focus-border;
     border-color: $c-focus-border !important;
   }
 
