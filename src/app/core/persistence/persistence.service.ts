@@ -65,7 +65,7 @@ import { from, merge, Observable, Subject } from 'rxjs';
 import { concatMap, shareReplay, skipWhile } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
-import { loadFromDb, removeFromDb, saveToDb } from './persistence.actions';
+import { removeFromDb, saveToDb } from './persistence.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -569,7 +569,8 @@ export class PersistenceService {
     projectId?: string,
   }): Promise<any> {
     const idbKey = this._getIDBKey(dbKey, projectId);
-    this._store.dispatch(loadFromDb({dbKey}));
+    // NOTE: too much clutter
+    // this._store.dispatch(loadFromDb({dbKey}));
     // TODO remove legacy stuff
     return await this._databaseService.load(idbKey) || await this._databaseService.load(legacyDBKey) || undefined;
   }
