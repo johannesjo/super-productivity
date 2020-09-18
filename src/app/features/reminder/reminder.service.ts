@@ -125,20 +125,19 @@ export class ReminderService {
     if (this.getByRelatedId(relatedId)) {
       throw new Error('A reminder for this ' + type + ' already exists');
     }
-    // weirdly this sometimes throws an "object is not extensible" error
-    this._reminders = [
-      ...this._reminders,
-      {
-        id,
-        workContextId: this._workContextService.activeWorkContextId as string,
-        workContextType: this._workContextService.activeWorkContextType as WorkContextType,
-        relatedId,
-        title,
-        remindAt,
-        type,
-        recurringConfig
-      }
-    ];
+
+    // TODO find out why we need to do this
+    this._reminders = dirtyDeepCopy(this._reminders);
+    this._reminders.push({
+      id,
+      workContextId: this._workContextService.activeWorkContextId as string,
+      workContextType: this._workContextService.activeWorkContextType as WorkContextType,
+      relatedId,
+      title,
+      remindAt,
+      type,
+      recurringConfig
+    });
     this._saveModel(this._reminders);
     return id;
   }
@@ -151,6 +150,8 @@ export class ReminderService {
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
     const i = this._reminders.findIndex(reminder => reminder.id === reminderId);
     if (i > -1) {
+      // TODO find out why we need to do this
+      this._reminders = dirtyDeepCopy(this._reminders);
       this._reminders[i] = Object.assign({}, this._reminders[i], reminderChanges);
     }
     this._saveModel(this._reminders);
@@ -160,6 +161,8 @@ export class ReminderService {
     const i = this._reminders.findIndex(reminder => reminder.id === reminderIdToRemove);
 
     if (i > -1) {
+      // TODO find out why we need to do this
+      this._reminders = dirtyDeepCopy(this._reminders);
       this._reminders.splice(i, 1);
       this._saveModel(this._reminders);
     } else {
