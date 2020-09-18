@@ -125,17 +125,20 @@ export class ReminderService {
     if (this.getByRelatedId(relatedId)) {
       throw new Error('A reminder for this ' + type + ' already exists');
     }
-
-    this._reminders.push({
-      id,
-      workContextId: this._workContextService.activeWorkContextId as string,
-      workContextType: this._workContextService.activeWorkContextType as WorkContextType,
-      relatedId,
-      title,
-      remindAt,
-      type,
-      recurringConfig
-    });
+    // weirdly this sometimes throws an "object is not extensible" error
+    this._reminders = [
+      ...this._reminders,
+      {
+        id,
+        workContextId: this._workContextService.activeWorkContextId as string,
+        workContextType: this._workContextService.activeWorkContextType as WorkContextType,
+        relatedId,
+        title,
+        remindAt,
+        type,
+        recurringConfig
+      }
+    ];
     this._saveModel(this._reminders);
     return id;
   }
