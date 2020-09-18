@@ -10,7 +10,7 @@ import {
   UpdateTask,
   UpdateTaskTags
 } from './task.actions';
-import { concatMap, filter, first, map, mapTo, mergeMap, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, delay, filter, first, map, mapTo, mergeMap, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -154,6 +154,8 @@ export class TaskRelatedModelEffects {
       // we only want to execute this for task title updates
       return (changeProps.length === 1 && changeProps[0] === 'title');
     }),
+    // dirty fix to execute this after setDefaultProjectId$ effect
+    delay(20),
     concatMap((action: AddTask | UpdateTask): Observable<any> => {
       return this._taskService.getByIdOnce$(action.payload.task.id as string);
     }),
