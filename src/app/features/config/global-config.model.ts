@@ -125,6 +125,11 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
+export type TrackingReminderConfig = Readonly<{
+  isEnabled: boolean;
+  minTime: number;
+}>;
+
 export type GlobalConfigState = Readonly<{
   lang: LanguageConfig;
   misc: MiscConfig;
@@ -137,6 +142,7 @@ export type GlobalConfigState = Readonly<{
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
+  trackingReminder: TrackingReminderConfig;
 
   [MODEL_VERSION_KEY]?: number;
 }>;

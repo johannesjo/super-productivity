@@ -112,5 +112,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isPlayDoneSound: true,
     isIncreaseDoneSoundPitch: true,
     doneSound: 'done2.mp3',
+  },
+  trackingReminder: {
+    isEnabled: true,
+    minTime: minute * 2,
   }
 };

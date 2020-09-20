@@ -984,6 +984,12 @@
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "Motivational image (web url)",
       "TITLE": "Break Reminder"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
+      "TITLE": "Time Tracking Reminder",
+      "L_IS_ENABLED": "Enabled",
+      "L_MIN_TIME": "Time to wait before showing Banner"
     }
   },
   "GLOBAL_SNACK": {

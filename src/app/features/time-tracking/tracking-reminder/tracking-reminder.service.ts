@@ -14,17 +14,13 @@ import { Task } from '../../tasks/task.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { T } from '../../../t.const';
 import { TranslateService } from '@ngx-translate/core';
+import { TrackingReminderConfig } from '../../config/global-config.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TrackingReminderService {
-  // TODO implement
-  cfgx$: any = this._globalConfigService.cfg$;
-  _cfg$: Observable<{ minTime: number; isEnabled: boolean }> = of({
-    minTime: 65000,
-    isEnabled: true,
-  });
+  _cfg$: Observable<TrackingReminderConfig> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.trackingReminder));
 
   _counter$: Observable<number> = realTimer$(1000);
 
