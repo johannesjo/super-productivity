@@ -45,9 +45,7 @@ export class DialogStartTrackingReminderComponent implements OnInit {
   }
 
   cancel() {
-    this._matDialogRef.close({
-      isCancel: true
-    });
+    this._matDialogRef.close();
   }
 
   track() {
