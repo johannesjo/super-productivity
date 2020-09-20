@@ -125,12 +125,13 @@ export class IdleService {
 
             if (task) {
               if (typeof task === 'string') {
-                this._taskService.add(task, false, {
+                const currId = this._taskService.add(task, false, {
                   timeSpent,
                   timeSpentOnDay: {
                     [getWorklogStr()]: timeSpent
                   }
                 });
+                this._taskService.setCurrentId(currId);
               } else {
                 this._taskService.addTimeSpent(task, timeSpent);
                 this._taskService.setCurrentId(task.id);

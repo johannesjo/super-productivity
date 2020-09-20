@@ -749,14 +749,25 @@
         "ALREADY_DID": "I already did",
         "SNOOZE": "Snooze {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "Add to Task",
+        "MSG": "You have not been tracking time for {{time}}"
+      },
       "D_IDLE": {
         "BREAK": "Break",
-        "CREATE_AND_TRACK": "<em>Create</em> and track to:",
+        "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
         "SKIP": "Skip",
         "TASK": "Task",
         "TASK_BREAK": "Task+Break",
-        "TRACK_TO": "Track to:"
+        "TRACK_TO": "Track to"
+      },
+      "D_TRACKING_REMINDER": {
+        "UNTRACKED_TIME": "Untracked time:",
+        "TRACK_TO": "Track to:",
+        "CREATE_AND_TRACK": "<em>Create</em> and track to",
+        "IDLE_FOR": "You have been idle for:",
+        "TASK": "Task"
       }
     },
     "WORKLOG": {

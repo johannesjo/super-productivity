@@ -2,12 +2,18 @@ import { Injectable } from '@angular/core';
 import { IdleService } from '../time-tracking/idle.service';
 import { TaskService } from '../tasks/task.service';
 import { GlobalConfigService } from '../config/global-config.service';
-import { combineLatest, EMPTY, Observable, of, Subject } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { combineLatest, EMPTY, Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay, switchMap, withLatestFrom } from 'rxjs/operators';
 import { realTimer$ } from './real-timer';
 import { BannerService } from '../../core/banner/banner.service';
 import { BannerId } from '../../core/banner/banner.model';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogStartTrackingReminderComponent } from './dialog-start-tracking-reminder/dialog-start-tracking-reminder.component';
+import { Task } from '../tasks/task.model';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { T } from '../../t.const';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root'
@@ -20,11 +26,7 @@ export class StartTrackingReminderService {
     isEnabled: true,
   });
 
-  // counter$: any = interval(1000).pipe(
-  //   timeInterval(),
-  //   scan((acc: number, curr) => (acc + curr.interval), 0)
-  // );
-  counter$: any = realTimer$(1000);
+  counter$: Observable<number> = realTimer$(1000);
 
   // TODO replace with settings once done
   remindCounter$: Observable<any> = of(true).pipe(
@@ -39,7 +41,8 @@ export class StartTrackingReminderService {
     switchMap((isEnabled) => isEnabled
       ? this.counter$
       : of(0)
-    )
+    ),
+    shareReplay(),
   );
 
   // private _manualReset$: Subject<void> = new Subject();
@@ -49,9 +52,9 @@ export class StartTrackingReminderService {
     private _taskService: TaskService,
     private _globalConfigService: GlobalConfigService,
     private _bannerService: BannerService,
+    private _matDialog: MatDialog,
+    private _translateService: TranslateService,
   ) {
-    // this.counter$.subscribe((v) => console.log('test', v))
-    this.remindCounter$.subscribe((v) => console.log('remind$', v));
   }
 
   init() {
@@ -63,26 +66,50 @@ export class StartTrackingReminderService {
         this._bannerService.dismiss(BannerId.StartTrackingReminder);
       }
     });
-
   }
 
   private _openBanner(duration: number, cfg: any) {
     const durationStr = msToString(duration);
     this._bannerService.open({
       id: BannerId.StartTrackingReminder,
-      ico: 'free_breakfast',
-      msg: 'You have been not tracking time for' + durationStr,
-      translateParams: {
-        time: '15m'
-      },
+      ico: 'timer',
+      msg: this._translateService.instant(T.F.TIME_TRACKING.B_TTR.MSG, {time: durationStr}),
+      // 'You have been not been tracking time for' + durationStr,
       action: {
-        label: 'Add to task',
+        label: T.F.TIME_TRACKING.B_TTR.ADD_TO_TASK,
         fn: () => {
-          this._bannerService.dismiss(BannerId.StartTrackingReminder);
+          this._matDialog.open(DialogStartTrackingReminderComponent, {
+            data: {
+              remindCounter$: this.remindCounter$,
+            }
+          }).afterClosed()
+            .pipe(
+              withLatestFrom(this.remindCounter$),
+            )
+            .subscribe(async ([{task, isCancel = false}, remindCounter]: [{ task: Task | string, isCancel: boolean, isTrackAsBreak: boolean }, number]): Promise<void> => {
+              const timeSpent = remindCounter;
+              if (task) {
+                if (typeof task === 'string') {
+                  const currId = this._taskService.add(task, false, {
+                    timeSpent,
+                    timeSpentOnDay: {
+                      [getWorklogStr()]: timeSpent
+                    }
+                  });
+                  this._taskService.setCurrentId(currId);
+                } else {
+                  this._taskService.addTimeSpent(task, timeSpent);
+                  this._taskService.setCurrentId(task.id);
+                }
+              }
+              // this.cancelIdlePoll();
+              // this._isIdle$.next(false);
+              // this.isIdleDialogOpen = false;
+            });
         }
       },
       action2: {
-        label: 'Dismiss',
+        label: T.G.DISMISS,
         fn: () => {
           this._bannerService.dismiss(BannerId.StartTrackingReminder);
         }
