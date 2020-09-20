@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { IdleService } from '../time-tracking/idle.service';
 import { TaskService } from '../tasks/task.service';
 import { GlobalConfigService } from '../config/global-config.service';
-import { combineLatest, EMPTY, interval, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map, scan, switchMap, timeInterval } from 'rxjs/operators';
+import { combineLatest, EMPTY, Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { realTimer$ } from './real-timer';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +13,11 @@ export class StartTrackingReminderService {
   // TODO implement
   cfg$: any = this._globalConfigService.cfg$;
 
-  counter$: any = interval(1000).pipe(
-    timeInterval(),
-    scan((acc: number, curr) => (acc + curr.interval), 0)
-  );
+  // counter$: any = interval(1000).pipe(
+  //   timeInterval(),
+  //   scan((acc: number, curr) => (acc + curr.interval), 0)
+  // );
+  counter$: any = realTimer$(1000);
 
   // TODO replace with settings once done
   remindCounter$: Observable<any> = of(true).pipe(
