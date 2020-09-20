@@ -39,6 +39,7 @@ import { SyncService } from './imex/sync/sync.service';
 import { environment } from '../environments/environment';
 import { RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
+import { StartTrackingReminderService } from './features/start-tracking-reminder/start-tracking-reminder.service';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -81,6 +82,7 @@ export class AppComponent implements OnDestroy {
     private _androidService: AndroidService,
     private _initialDialogService: InitialDialogService,
     private _bookmarkService: BookmarkService,
+    private _startTrackingReminderService: StartTrackingReminderService,
     public readonly syncService: SyncService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
@@ -99,6 +101,9 @@ export class AppComponent implements OnDestroy {
 
     // init offline banner in lack of a better place for it
     this._initOfflineBanner();
+
+    // basically init
+    this._startTrackingReminderService.init();
 
     this._requestPersistence();
     this._checkAvailableStorage();
