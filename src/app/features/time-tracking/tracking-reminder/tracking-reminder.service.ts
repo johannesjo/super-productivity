@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core';
-import { IdleService } from '../time-tracking/idle.service';
-import { TaskService } from '../tasks/task.service';
-import { GlobalConfigService } from '../config/global-config.service';
+import { IdleService } from '../idle.service';
+import { TaskService } from '../../tasks/task.service';
+import { GlobalConfigService } from '../../config/global-config.service';
 import { combineLatest, EMPTY, merge, Observable, of, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, switchMap, withLatestFrom } from 'rxjs/operators';
-import { realTimer$ } from './real-timer';
-import { BannerService } from '../../core/banner/banner.service';
-import { BannerId } from '../../core/banner/banner.model';
-import { msToString } from '../../ui/duration/ms-to-string.pipe';
+import { realTimer$ } from '../../../util/real-timer';
+import { BannerService } from '../../../core/banner/banner.service';
+import { BannerId } from '../../../core/banner/banner.model';
+import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogStartTrackingReminderComponent } from './dialog-start-tracking-reminder/dialog-start-tracking-reminder.component';
-import { Task } from '../tasks/task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { T } from '../../t.const';
+import { DialogTrackingReminderComponent } from './dialog-tracking-reminder/dialog-tracking-reminder.component';
+import { Task } from '../../tasks/task.model';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { T } from '../../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root'
 })
-export class StartTrackingReminderService {
+export class TrackingReminderService {
   // TODO implement
   cfgx$: any = this._globalConfigService.cfg$;
   _cfg$: Observable<{ minTime: number; isEnabled: boolean }> = of({
@@ -95,7 +95,7 @@ export class StartTrackingReminderService {
   }
 
   private _openDialog() {
-    this._matDialog.open(DialogStartTrackingReminderComponent, {
+    this._matDialog.open(DialogTrackingReminderComponent, {
       data: {
         remindCounter$: this.remindCounter$,
       }
