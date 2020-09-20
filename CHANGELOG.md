@@ -1,3 +1,26 @@
+# [5.8.0](https://github.com/johannesjo/super-productivity/compare/v5.7.7...v5.8.0) (2020-09-20)
+
+
+### Bug Fixes
+
+* **task:** undone done when marking a lot of tasks as done in fast succession ([59574c5](https://github.com/johannesjo/super-productivity/commit/59574c55a4ce271842d3177ace25761dff297a73))
+
+
+### Features
+
+* **startTrackingReminder:** make configurable and add translations for it [#507](https://github.com/johannesjo/super-productivity/issues/507) ([4ad922c](https://github.com/johannesjo/super-productivity/commit/4ad922c5c2b50aca18c0831bb182895b792aab87))
+* make dark mode default ([b6c72f5](https://github.com/johannesjo/super-productivity/commit/b6c72f57c077bfe2f5214831d06502a02fd37539))
+* **startTrackingReminder:** implement timer as real timer [#507](https://github.com/johannesjo/super-productivity/issues/507) ([71d18a6](https://github.com/johannesjo/super-productivity/commit/71d18a67c320f628e506296723c062656de9bcaf))
+* **startTrackingReminder:** make dialog work and translations [#507](https://github.com/johannesjo/super-productivity/issues/507) ([2cac5c7](https://github.com/johannesjo/super-productivity/commit/2cac5c72023bfa020555839a0038957aadb2819c))
+* **startTrackingReminder:** make reset timer work [#507](https://github.com/johannesjo/super-productivity/issues/507) ([7f6cb61](https://github.com/johannesjo/super-productivity/commit/7f6cb61d859b375af36d3c869d5c68f9ee818edb))
+* **startTrackingReminder:** make timer work [#507](https://github.com/johannesjo/super-productivity/issues/507) ([fc37243](https://github.com/johannesjo/super-productivity/commit/fc37243e4355a861481971eafad4c856db631f29))
+* **startTrackingReminder:** outline service [#507](https://github.com/johannesjo/super-productivity/issues/507) ([455c2b3](https://github.com/johannesjo/super-productivity/commit/455c2b322bab3793b7c6abbdb76f30e4394f8e99))
+* **startTrackingReminder:** prepare banner [#507](https://github.com/johannesjo/super-productivity/issues/507) ([68e802e](https://github.com/johannesjo/super-productivity/commit/68e802eeb32781b1b884ee51154b652c28830f5b))
+* **task:** improve current/focus border styling ([8308862](https://github.com/johannesjo/super-productivity/commit/83088629750dd8b6f884bfe2054689439b27a5a7))
+* **task:** use solid border for task additional info panel as well ([934843a](https://github.com/johannesjo/super-productivity/commit/934843a58215028aece5e8ad6d17c6ee473ce52f))
+
+
+
 ## [5.7.7](https://github.com/johannesjo/super-productivity/compare/v5.7.6...v5.7.7) (2020-09-18)
 
 
