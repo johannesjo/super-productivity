@@ -56,7 +56,7 @@ script:
       bash ${TRAVIS_BUILD_DIR}/build/docker/run-linux-win.sh ${PUB}
     else
       yarn install && yarn add 7zip-bin-mac
-      yarn run buildAllElectronNoTests
+      yarn run buildAllElectron:noTests
       travis_wait 30 yarn dist:mac:dl -p $PUB
     fi
 
