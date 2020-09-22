@@ -3,6 +3,7 @@ import { AppDataComplete } from './sync.model';
 import { EntityState } from '@ngrx/entity';
 import { isValidAppData } from './is-valid-app-data.util';
 import { MODEL_VERSION_KEY } from '../../app.constants';
+import { DEFAULT_TASK } from '../../features/tasks/task.model';
 
 const EMPTY_ENTITY_MOCK = (): EntityState<any> => ({
   ids: [],
@@ -97,8 +98,17 @@ describe('isValidAppData()', () => {
     });
 
     it('inconsistent task state', () => {
-
+      const prop = 'task';
+      expect(() => isValidAppData({
+        ...mock,
+        task: {
+          ...mock[prop],
+          entities: {'A asdds': DEFAULT_TASK},
+          ids: ['asasdasd']
+        },
+      })).toThrowError(`Inconsistent entity state "${prop}"`);
     });
+
     it('orphaned today entries for projects', () => {
 
     });
