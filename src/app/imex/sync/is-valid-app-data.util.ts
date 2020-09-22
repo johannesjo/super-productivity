@@ -87,8 +87,10 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
   const baseStateKeys: (keyof AppBaseData)[] = [
     'task',
     'taskArchive',
+    'taskRepeatCfg',
     'tag',
     'project',
+    'simpleCounter',
   ];
   const projectStateKeys: (keyof AppDataForProjects)[] = [
     'note',

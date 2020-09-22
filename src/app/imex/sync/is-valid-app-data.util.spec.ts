@@ -44,23 +44,69 @@ const MOCK = (): AppDataComplete => ({
   obstruction: {},
 });
 
+// const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
+//   'task',
+//   'taskArchive',
+//   'tag',
+//   'project',
+// ];
+// const PROJECT_STATE_KEYS: (keyof AppDataForProjects)[] = [
+//   'note',
+//   'bookmark',
+//   'metric',
+//   'improvement',
+//   'obstruction',
+// ];
+
 describe('isValidAppData()', () => {
-  it('should work for valid data', () => {
-    expect(isValidAppData(MOCK())).toBe(true);
+  let mock: AppDataComplete;
+  beforeEach(() => {
+    mock = MOCK();
+    spyOn(window, 'alert').and.stub();
   });
 
-  describe('should error for', () => {
+  it('should work for valid data', () => {
+    expect(isValidAppData(mock)).toBe(true);
+  });
 
-    ['note', 'bookmark', 'improvement', 'obstruction', 'metric', 'task', 'tag', 'globalConfig', 'taskArchive', 'project',
-    ].forEach((prop) => {
+  describe('should return false for', () => {
+    ['note', 'bookmark', 'improvement', 'obstruction', 'metric', 'task', 'tag', 'globalConfig', 'taskArchive'].forEach((prop) => {
       it('missing prop ' + prop, () => {
         expect(isValidAppData({
-          ...MOCK(),
+          ...mock,
           [prop]: null,
         })).toBe(false);
       });
     });
+  });
 
+  describe('should error for', () => {
+    describe('inconsistent entity state', () => {
+      ['task', 'taskArchive', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'].forEach(prop => {
+        it(prop, () => {
+          expect(() => isValidAppData({
+            ...mock,
+            [prop]: {
+              ...mock[prop],
+              entities: {},
+              ids: ['asasdasd']
+            },
+          })).toThrowError(`Inconsistent entity state "${prop}"`);
+        });
+      });
+    });
 
+    it('inconsistent task state', () => {
+
+    });
+    it('orphaned today entries for projects', () => {
+
+    });
+    it('orphaned backlog entries for projects', () => {
+
+    });
+    it('orphaned today entries for tags', () => {
+
+    });
   });
 });
