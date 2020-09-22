@@ -5,7 +5,6 @@ import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 
-// TODO unit test this
 export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {
   const dAny: any = d;
   // TODO remove this later on
@@ -32,7 +31,7 @@ export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateEr
     && typeof dAny.project === 'object' && dAny.project !== null
     && Array.isArray(d.reminders)
     && _isEntityStatesConsistent(d)
-    && _isTaskIdsConsistent(d, isSkipInconsistentTaskStateError)
+    && (isSkipInconsistentTaskStateError || _isAllTasksAvailable(d))
 
     : typeof dAny === 'object'
   ;
@@ -41,7 +40,7 @@ export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateEr
   return isValid;
 };
 
-const _isTaskIdsConsistent = (data: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {
+const _isAllTasksAvailable = (data: AppDataComplete): boolean => {
   let allIds: string [] = [];
 
   (data.tag.ids as string[])
@@ -68,8 +67,7 @@ const _isTaskIdsConsistent = (data: AppDataComplete, isSkipInconsistentTaskState
     );
 
   const notFound = allIds.find(id => !(data.task.ids.includes(id)));
-
-  if (notFound && !isSkipInconsistentTaskStateError) {
+  if (notFound) {
     const tag = (data.tag.ids as string[])
       .map(id => data.tag.entities[id])
       .find(tagI => (tagI as Tag).taskIds.includes(notFound));

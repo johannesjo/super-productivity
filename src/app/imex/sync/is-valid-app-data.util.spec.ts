@@ -3,10 +3,10 @@ import { AppDataComplete } from './sync.model';
 import { EntityState } from '@ngrx/entity';
 import { isValidAppData } from './is-valid-app-data.util';
 import { MODEL_VERSION_KEY } from '../../app.constants';
-import { DEFAULT_TASK } from '../../features/tasks/task.model';
+import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
-import { DEFAULT_PROJECT } from '../../features/project/project.const';
-import { DEFAULT_TAG } from '../../features/tag/tag.const';
+import { Project } from '../../features/project/project.model';
+import { Tag } from '../../features/tag/tag.model';
 
 const EMPTY_ENTITY_MOCK = (): EntityState<any> => ({
   ids: [],
@@ -101,51 +101,76 @@ describe('isValidAppData()', () => {
     });
 
     it('inconsistent task state', () => {
-      const prop = 'task';
       expect(() => isValidAppData({
         ...mock,
         task: {
-          ...mock[prop],
+          ...mock.task,
           entities: {'A asdds': DEFAULT_TASK},
           ids: ['asasdasd']
         },
-      })).toThrowError(`Inconsistent entity state "${prop}"`);
+      })).toThrowError(`Inconsistent entity state "task"`);
     });
 
-    xit('orphaned today entries for projects', () => {
+    it('missing today task data for projects', () => {
       expect(() => isValidAppData({
         ...mock,
         // NOTE: it's empty
         task: mock.task,
-        project: fakeEntityStateFromArray([{
-          ...DEFAULT_PROJECT,
-          taskIds: ['gone']
-        }])
-      })).toThrowError(`NOT DEFINED YET`);
+        project: {
+          ...fakeEntityStateFromArray([{
+            title: 'TEST_T',
+            id: 'TEST_ID',
+            taskIds: ['gone'],
+          }] as Partial<Project> []),
+          [MODEL_VERSION_KEY]: 5
+        },
+      })).toThrowError(`Inconsistent Task State: Missing task id gone for Project/Tag TEST_T`);
     });
 
-    xit('orphaned backlog entries for projects', () => {
+    it('missing backlog task data for projects', () => {
       expect(() => isValidAppData({
         ...mock,
         // NOTE: it's empty
         task: mock.task,
-        project: fakeEntityStateFromArray([{
-          ...DEFAULT_PROJECT,
-          backlogIds: ['gone']
-        }])
-      })).toThrowError(`NOT DEFINED YET`);
+        project: {
+          ...fakeEntityStateFromArray([{
+            title: 'TEST_T',
+            id: 'TEST_ID',
+            taskIds: [],
+            backlogTaskIds: ['goneBL'],
+          }] as Partial<Project> []),
+          [MODEL_VERSION_KEY]: 5
+        },
+      })).toThrowError(`Inconsistent Task State: Missing task id goneBL for Project/Tag TEST_T`);
     });
 
-    xit('orphaned today entries for tags', () => {
+    it('missing today task data for tags', () => {
       expect(() => isValidAppData({
         ...mock,
         // NOTE: it's empty
         task: mock.task,
-        tag: fakeEntityStateFromArray([{
-          ...DEFAULT_TAG,
-          taskIds: ['gone']
-        }])
-      })).toThrowError(`NOT DEFINED YET`);
+        tag: {
+          ...fakeEntityStateFromArray([{
+            title: 'TEST_TAG',
+            id: 'TEST_ID_TAG',
+            taskIds: ['goneTag'],
+          }] as Partial<Tag> []),
+          [MODEL_VERSION_KEY]: 5
+        },
+      })).toThrowError(`Inconsistent Task State: Missing task id goneTag for Project/Tag TEST_TAG`);
+    });
+
+    xit('missing tag for task', () => {
+      expect(() => isValidAppData({
+        ...mock,
+        task: {
+          ...mock.task,
+          ...fakeEntityStateFromArray<Task>([{
+            ...DEFAULT_TASK,
+            tagIds: ['Non existent']
+          }])
+        } as any,
+      })).toThrowError(`No tagX`);
     });
   });
 });
