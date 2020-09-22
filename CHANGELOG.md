@@ -1,3 +1,12 @@
+## [5.8.2](https://github.com/johannesjo/super-productivity/compare/v5.8.1...v5.8.2) (2020-09-22)
+
+
+### Bug Fixes
+
+* private policy link [#531](https://github.com/johannesjo/super-productivity/issues/531) ([8ccf7b1](https://github.com/johannesjo/super-productivity/commit/8ccf7b1ea4619f08ab71e6544d950c14b5ad3c98))
+
+
+
 ## [5.8.1](https://github.com/johannesjo/super-productivity/compare/v5.8.0...v5.8.1) (2020-09-21)
 
 
