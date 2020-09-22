@@ -53,7 +53,7 @@ export class GithubApiService {
       `+repo:${cfg.repo}`;
 
     return this._sendRequest$({
-      url: `${BASE}search/issues?q=${encodeURI(searchText + repoQuery)}`
+      url: `${BASE}search/issues?q=${encodeURIComponent(searchText + repoQuery)}`
     }, cfg)
       .pipe(
         map((res: GithubIssueSearchResult) => {

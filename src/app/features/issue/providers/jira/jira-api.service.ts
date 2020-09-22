@@ -109,7 +109,7 @@ export class JiraApiService {
 
   issuePicker$(searchTerm: string, cfg: JiraCfg): Observable<SearchResultItem[]> {
     const searchStr = `${searchTerm}`;
-    const jql = (cfg.searchJqlQuery ? `${encodeURI(cfg.searchJqlQuery)}` : '');
+    const jql = (cfg.searchJqlQuery ? `${encodeURIComponent(cfg.searchJqlQuery)}` : '');
 
     return this._sendRequest$({
       jiraReqCfg: {
