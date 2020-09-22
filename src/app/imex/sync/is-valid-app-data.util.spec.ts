@@ -4,6 +4,9 @@ import { EntityState } from '@ngrx/entity';
 import { isValidAppData } from './is-valid-app-data.util';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK } from '../../features/tasks/task.model';
+import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
+import { DEFAULT_PROJECT } from '../../features/project/project.const';
+import { DEFAULT_TAG } from '../../features/tag/tag.const';
 
 const EMPTY_ENTITY_MOCK = (): EntityState<any> => ({
   ids: [],
@@ -109,14 +112,40 @@ describe('isValidAppData()', () => {
       })).toThrowError(`Inconsistent entity state "${prop}"`);
     });
 
-    it('orphaned today entries for projects', () => {
-
+    xit('orphaned today entries for projects', () => {
+      expect(() => isValidAppData({
+        ...mock,
+        // NOTE: it's empty
+        task: mock.task,
+        project: fakeEntityStateFromArray([{
+          ...DEFAULT_PROJECT,
+          taskIds: ['gone']
+        }])
+      })).toThrowError(`NOT DEFINED YET`);
     });
-    it('orphaned backlog entries for projects', () => {
 
+    xit('orphaned backlog entries for projects', () => {
+      expect(() => isValidAppData({
+        ...mock,
+        // NOTE: it's empty
+        task: mock.task,
+        project: fakeEntityStateFromArray([{
+          ...DEFAULT_PROJECT,
+          backlogIds: ['gone']
+        }])
+      })).toThrowError(`NOT DEFINED YET`);
     });
-    it('orphaned today entries for tags', () => {
 
+    xit('orphaned today entries for tags', () => {
+      expect(() => isValidAppData({
+        ...mock,
+        // NOTE: it's empty
+        task: mock.task,
+        tag: fakeEntityStateFromArray([{
+          ...DEFAULT_TAG,
+          taskIds: ['gone']
+        }])
+      })).toThrowError(`NOT DEFINED YET`);
     });
   });
 });
