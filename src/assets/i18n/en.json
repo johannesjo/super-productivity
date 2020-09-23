@@ -16,6 +16,9 @@
   "BL": {
     "NO_TASKS": "There are currently no tasks in your backlog"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "Your data seems to be damaged. Do you want to try to automatically fix it? This might result in partial data loss."
+  },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",
     "TOMORROW": "tomorrow {{time}}"

@@ -9,6 +9,7 @@ import { MigrationService } from '../../core/migration/migration.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { LS_CHECK_STRAY_PERSISTENCE_BACKUP } from '../../core/persistence/ls-keys.const';
+import { DataRepairService } from '../../core/data-repair/data-repair.service';
 
 // TODO some of this can be done in a background script
 
@@ -24,6 +25,8 @@ export class DataImportService {
     private _imexMetaService: ImexMetaService,
     private _migrationService: MigrationService,
     private _dataInitService: DataInitService,
+    private _dataRepairService: DataRepairService,
+    // private _translateService: TranslateService,
   ) {
     this._isCheckForStrayBackupAndImport();
   }
@@ -65,9 +68,10 @@ export class DataImportService {
         await this._importBackup();
         this._imexMetaService.setDataImportInProgress(false);
       }
+    } else if (this._dataRepairService.isRepairConfirmed()) {
+      const fixedData = await this._dataRepairService.repairData(data);
+      await this.importCompleteSyncData(fixedData, isBackupReload);
     } else {
-      console.log('I am here!');
-
       this._snackService.open({type: 'ERROR', msg: T.S.SYNC.ERROR_INVALID_DATA});
       console.error(data);
       this._imexMetaService.setDataImportInProgress(false);

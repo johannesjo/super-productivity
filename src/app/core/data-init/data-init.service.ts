@@ -9,8 +9,8 @@ import { PersistenceService } from '../persistence/persistence.service';
 import { ProjectState } from '../../features/project/store/project.reducer';
 import { MigrationService } from '../migration/migration.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import { environment } from '../../../environments/environment';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
+import { DataRepairService } from '../data-repair/data-repair.service';
 
 @Injectable({providedIn: 'root'})
 export class DataInitService {
@@ -35,6 +35,7 @@ export class DataInitService {
     private _projectService: ProjectService,
     private _workContextService: WorkContextService,
     private _store$: Store<any>,
+    private _dataRepairService: DataRepairService,
   ) {
     // TODO better construction than this
     this.isAllDataLoadedInitially$.pipe(
@@ -49,10 +50,17 @@ export class DataInitService {
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(isOmitTokens: boolean = false): Promise<void> {
     const appDataComplete = await this._persistenceService.loadComplete();
-    if (!environment.production) {
-      const isValid = isValidAppData(appDataComplete);
-      console.log('isValidAppData', isValid);
+    const isValid = isValidAppData(appDataComplete);
+    if (isValid) {
+      this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
+    } else {
+      if (this._dataRepairService.isRepairConfirmed()) {
+        const fixedData = await this._dataRepairService.repairData(appDataComplete);
+        this._store$.dispatch(loadAllData({
+          appDataComplete: fixedData,
+          isOmitTokens,
+        }));
+      }
     }
-    this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
   }
 }

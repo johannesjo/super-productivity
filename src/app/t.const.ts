@@ -16,6 +16,9 @@ export const T = {
   'BL': {
     'NO_TASKS': 'BL.NO_TASKS'
   },
+  'CONFIRM': {
+    'AUTO_FIX': 'CONFIRM.AUTO_FIX'
+  },
   'DATETIME_INPUT': {
     'IN': 'DATETIME_INPUT.IN',
     'TOMORROW': 'DATETIME_INPUT.TOMORROW'
