@@ -1,52 +1,11 @@
-import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { AppDataComplete } from './sync.model';
-import { EntityState } from '@ngrx/entity';
 import { isValidAppData } from './is-valid-app-data.util';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
 import { Project } from '../../features/project/project.model';
 import { Tag } from '../../features/tag/tag.model';
-
-const EMPTY_ENTITY_MOCK = (): EntityState<any> => ({
-  ids: [],
-  entities: {}
-});
-
-const MOCK = (): AppDataComplete => ({
-  project: {
-    ...EMPTY_ENTITY_MOCK(),
-    [MODEL_VERSION_KEY]: 5
-  },
-  archivedProjects: {},
-  globalConfig: DEFAULT_GLOBAL_CONFIG,
-
-  task: {
-    ...EMPTY_ENTITY_MOCK(),
-    ids: [],
-    currentTaskId: null,
-    selectedTaskId: null,
-    taskAdditionalInfoTargetPanel: null,
-    lastCurrentTaskId: null,
-    isDataLoaded: false,
-  },
-  tag: EMPTY_ENTITY_MOCK(),
-  simpleCounter: {
-    ...EMPTY_ENTITY_MOCK(),
-    ids: []
-  },
-  taskArchive: EMPTY_ENTITY_MOCK(),
-  taskRepeatCfg: EMPTY_ENTITY_MOCK(),
-  lastLocalSyncModelChange: 0,
-
-  // OPTIONAL though they are really not
-  reminders: [],
-  note: {},
-  bookmark: {},
-  metric: {},
-  improvement: {},
-  obstruction: {},
-});
+import { createAppDataCompleteMock } from '../../util/app-data-mock';
 
 // const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
 //   'task',
@@ -65,7 +24,7 @@ const MOCK = (): AppDataComplete => ({
 describe('isValidAppData()', () => {
   let mock: AppDataComplete;
   beforeEach(() => {
-    mock = MOCK();
+    mock = createAppDataCompleteMock();
     spyOn(window, 'alert').and.stub();
   });
 
