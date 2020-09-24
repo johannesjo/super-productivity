@@ -36,6 +36,9 @@ const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete =>
         delete data.taskArchive.entities[id];
       }
     });
+    if (duplicateIds.length > 0) {
+      console.log(duplicateIds.length + ' duplicates removed from archive.');
+    }
   }
   return data;
 };
@@ -78,6 +81,9 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (data: AppDataComplete)
   task.ids = [...taskIds, ...taskIdsToRestoreFromArchive];
   taskArchive.ids = taskArchiveIds.filter(id => !taskIdsToRestoreFromArchive.includes(id));
 
+  if (taskIdsToRestoreFromArchive.length > 0) {
+    console.log(taskIdsToRestoreFromArchive.length + ' missing tasks restored from archive.');
+  }
   return data;
 };
 
@@ -111,6 +117,10 @@ const _addOrphanedTasksToProjectLists = (data: AppDataComplete): AppDataComplete
     }
     project.entities[taskItem.projectId as string]?.taskIds.push(tid);
   });
+
+  if (orphanedTaskIds.length > 0) {
+    console.log(orphanedTaskIds.length + ' orphaned tasks found & restored.');
+  }
 
   return data;
 };

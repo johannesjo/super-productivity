@@ -8,7 +8,7 @@ import { Tag, TagState } from '../../features/tag/tag.model';
 import { ProjectState } from '../../features/project/store/project.reducer';
 import { Project } from '../../features/project/project.model';
 
-fdescribe('dataRepair()', () => {
+describe('dataRepair()', () => {
   let mock: AppDataComplete;
   beforeEach(() => {
     mock = createAppDataCompleteMock();
