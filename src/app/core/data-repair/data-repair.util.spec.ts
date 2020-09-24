@@ -234,7 +234,25 @@ fdescribe('dataRepair()', () => {
 
   describe('should fix inconsistent entity states for', () => {
     it('task', () => {
-
+      expect(dataRepair({
+        ...mock,
+        task: {
+          ids: ['AAA, XXX', 'YYY'],
+          entities: {
+            AAA: {},
+            CCC: {},
+          }
+        } as any,
+      })).toEqual({
+        ...mock,
+        task: {
+          ids: ['AAA', 'CCC'],
+          entities: {
+            AAA: {},
+            CCC: {},
+          }
+        } as any,
+      });
     });
     it('taskArchive', () => {
       expect(dataRepair({
@@ -323,5 +341,67 @@ fdescribe('dataRepair()', () => {
   });
 
   it('should add orphan tasks to their project list', () => {
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'orphanedTask',
+        title: 'orphanedTask',
+        projectId: 'TEST_ID_PROJECT',
+        parentId: null,
+      }, {
+        ...DEFAULT_TASK,
+        id: 'orphanedTaskOtherProject',
+        title: 'orphanedTaskOtherProject',
+        projectId: 'TEST_ID_PROJECT_OTHER',
+        parentId: null,
+      }, {
+        ...DEFAULT_TASK,
+        id: 'regularTaskOtherProject',
+        title: 'regularTaskOtherProject',
+        projectId: 'TEST_ID_PROJECT_OTHER',
+        parentId: null,
+      }])
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([{
+        title: 'TEST_PROJECT',
+        id: 'TEST_ID_PROJECT',
+        taskIds: ['GONE'],
+        backlogTaskIds: [],
+      }, {
+        title: 'TEST_PROJECT_OTHER',
+        id: 'TEST_ID_PROJECT_OTHER',
+        taskIds: ['regularTaskOtherProject'],
+        backlogTaskIds: [],
+      }] as Partial<Project> []),
+    };
+
+    expect(dataRepair({
+      ...mock,
+      project: projectState,
+      task: taskState,
+    })).toEqual({
+      ...mock,
+      task: taskState,
+      project: {
+        ...projectState,
+        entities: {
+          TEST_ID_PROJECT: {
+            title: 'TEST_PROJECT',
+            id: 'TEST_ID_PROJECT',
+            taskIds: ['orphanedTask'],
+            backlogTaskIds: [],
+          },
+          TEST_ID_PROJECT_OTHER: {
+            title: 'TEST_PROJECT_OTHER',
+            id: 'TEST_ID_PROJECT_OTHER',
+            taskIds: ['regularTaskOtherProject', 'orphanedTaskOtherProject'],
+            backlogTaskIds: [],
+          },
+        } as any
+      }
+    });
   });
 });

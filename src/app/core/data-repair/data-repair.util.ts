@@ -9,8 +9,9 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   let dataOut: AppDataComplete = data;
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
   dataOut = _fixEntityStates(dataOut);
-  dataOut = _removeMissingIdsFromListsOrRestoreFromArchive(dataOut);
+  dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
+  dataOut = _addOrphanedTasksToProjectLists(dataOut);
   // console.timeEnd('dataRepair');
   return dataOut;
 };
@@ -39,7 +40,7 @@ const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete =>
   return data;
 };
 
-const _removeMissingIdsFromListsOrRestoreFromArchive = (data: AppDataComplete): AppDataComplete => {
+const _removeMissingTasksFromListsOrRestoreFromArchive = (data: AppDataComplete): AppDataComplete => {
   const {task, project, tag, taskArchive} = data;
   const taskIds: string[] = task.ids;
   const taskArchiveIds: string[] = taskArchive.ids as string[];
@@ -86,3 +87,31 @@ const _resetEntityIdsFromObjects = <T>(data: AppBaseDataEntityLikeStates): AppBa
     ids: Object.keys(data.entities)
   };
 };
+
+const _addOrphanedTasksToProjectLists = (data: AppDataComplete): AppDataComplete => {
+  const {task, project} = data;
+  let allTaskIdsOnProjectLists: string[] = [];
+
+  project.ids.forEach((pId: string | number) => {
+    const projectItem = project.entities[pId] as ProjectCopy;
+    allTaskIdsOnProjectLists = allTaskIdsOnProjectLists.concat(projectItem.taskIds, projectItem.backlogTaskIds);
+  });
+  const orphanedTaskIds: string[] = task.ids.filter(tid => {
+    const taskItem = task.entities[tid];
+    if (!taskItem) {
+      throw new Error('Missing task');
+    }
+    return !taskItem.parentId && !allTaskIdsOnProjectLists.includes(tid) && taskItem.projectId;
+  });
+
+  orphanedTaskIds.forEach(tid => {
+    const taskItem = task.entities[tid];
+    if (!taskItem) {
+      throw new Error('Missing task');
+    }
+    project.entities[taskItem.projectId as string]?.taskIds.push(tid);
+  });
+
+  return data;
+};
+
