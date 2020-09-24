@@ -1,3 +1,30 @@
+# [5.9.0](https://github.com/johannesjo/super-productivity/compare/v5.8.2...v5.9.0) (2020-09-24)
+
+
+### Bug Fixes
+
+* another read-only error [#538](https://github.com/johannesjo/super-productivity/issues/538) ([8f2afcc](https://github.com/johannesjo/super-productivity/commit/8f2afcc171901d09b4af2e5281ddb044a3329743))
+* disabling done sound not working [#534](https://github.com/johannesjo/super-productivity/issues/534) ([2179118](https://github.com/johannesjo/super-productivity/commit/2179118f9468962876f647199dc0d1e93bcfbd13))
+* lint ([763e991](https://github.com/johannesjo/super-productivity/commit/763e99158211c977e7e1b621eb175698998a66bd))
+* use encodeURIComponent instead of encodeURI [#523](https://github.com/johannesjo/super-productivity/issues/523) ([ba06b0b](https://github.com/johannesjo/super-productivity/commit/ba06b0b60057fd510de68d3622762bf9035f9a0b))
+
+
+### Features
+
+* **autoRepair:** add a little bit of logging ([70e4e20](https://github.com/johannesjo/super-productivity/commit/70e4e20943d97beb02227b1b627f2875e5be41c6))
+* **autoRepair:** make _removeDuplicatesFromArchive work ([6a111d9](https://github.com/johannesjo/super-productivity/commit/6a111d92ce31e94ac86a0a69aa899d918df6b692))
+* **autoRepair:** make _removeMissingIdsFromLists work ([192ef5a](https://github.com/johannesjo/super-productivity/commit/192ef5ad8679b012aee75bbd593cf61014d8e95d))
+* **autoRepair:** make fix duplicate tasks work ([002ec09](https://github.com/johannesjo/super-productivity/commit/002ec096f2466e9c0a4651aff8a046379437bf49))
+* **autoRepair:** make restore from archive work ([c706f26](https://github.com/johannesjo/super-productivity/commit/c706f26586badb6a4c1a5e6fe03ffc822a5402d1))
+* **autoRepair:** make restoring orphaned tasks work ([5fe3fbe](https://github.com/johannesjo/super-productivity/commit/5fe3fbe139eb67850a51521598f252784b83573d))
+* **autoRepair:** make stray backup stuff translateable ([35cd773](https://github.com/johannesjo/super-productivity/commit/35cd7736995cfc7ffcabad35887f5b2829cc0f54))
+* **autoRepair:** re-enable stray backup check ([ec6c844](https://github.com/johannesjo/super-productivity/commit/ec6c8449861981bfb8ed7c8c13426b4820f2e4a5))
+* **autoRepair:** trigger for data import and data init if data is broken ([a80054a](https://github.com/johannesjo/super-productivity/commit/a80054a2fc47866e7c05fe14964022715ba70778))
+* add missing null checks for is valid app data ([577383b](https://github.com/johannesjo/super-productivity/commit/577383bb44c469eb43654ca31eb83fa7bd150c70))
+* also check for miss-matched ids in entity states ([81ca47c](https://github.com/johannesjo/super-productivity/commit/81ca47c0d9047c399a45de7eb058890f5c638490))
+
+
+
 ## [5.8.2](https://github.com/johannesjo/super-productivity/compare/v5.8.1...v5.8.2) (2020-09-22)
 
 

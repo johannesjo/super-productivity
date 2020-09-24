@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "5.8.2",
+  "version": "5.9.0",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
   "author": "johannesjo <contact@super-productivity.com> (http://super-productivity.com)",
