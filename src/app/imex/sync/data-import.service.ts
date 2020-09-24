@@ -10,6 +10,7 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { DataRepairService } from '../../core/data-repair/data-repair.service';
 import { LS_CHECK_STRAY_PERSISTENCE_BACKUP } from '../../core/persistence/ls-keys.const';
+import { TranslateService } from '@ngx-translate/core';
 
 // TODO some of this can be done in a background script
 
@@ -26,7 +27,7 @@ export class DataImportService {
     private _migrationService: MigrationService,
     private _dataInitService: DataInitService,
     private _dataRepairService: DataRepairService,
-    // private _translateService: TranslateService,
+    private _translateService: TranslateService,
   ) {
     this._isCheckForStrayBackupAndImport();
   }
@@ -101,11 +102,11 @@ export class DataImportService {
     }
 
     if (backup) {
-      if (confirm('During last sync there might have been some error. Do you want to restore the last backup?')) {
+      if (confirm(this._translateService.instant(T.CONFIRM.RESTORE_STRAY_BACKUP))) {
         await this._importBackup();
         return true;
       } else {
-        if (confirm('Do you want to delete the back to avoid seeing this dialog?')) {
+        if (confirm(this._translateService.instant(T.CONFIRM.DELETE_STRAY_BACKUP))) {
           await this._persistenceService.clearBackup();
         }
       }
