@@ -8,7 +8,6 @@ import { T } from '../../t.const';
 import { MigrationService } from '../../core/migration/migration.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isValidAppData } from './is-valid-app-data.util';
-import { LS_CHECK_STRAY_PERSISTENCE_BACKUP } from '../../core/persistence/ls-keys.const';
 import { DataRepairService } from '../../core/data-repair/data-repair.service';
 
 // TODO some of this can be done in a background script
@@ -92,24 +91,24 @@ export class DataImportService {
   }
 
   private async _isCheckForStrayBackupAndImport(): Promise<boolean> {
-    const backup = await this._persistenceService.loadBackup();
-    if (!localStorage.getItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP)) {
-      if (backup) {
-        await this._persistenceService.clearBackup();
-      }
-      localStorage.setItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP, 'true');
-    }
-
-    if (backup) {
-      if (confirm('During last sync there might have been some error. Do you want to restore the last backup?')) {
-        await this._importBackup();
-        return true;
-      } else {
-        if (confirm('Do you want to delete the back to avoid seeing this dialog?')) {
-          await this._persistenceService.clearBackup();
-        }
-      }
-    }
+    // const backup = await this._persistenceService.loadBackup();
+    // if (!localStorage.getItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP)) {
+    //   if (backup) {
+    //     await this._persistenceService.clearBackup();
+    //   }
+    //   localStorage.setItem(LS_CHECK_STRAY_PERSISTENCE_BACKUP, 'true');
+    // }
+    //
+    // if (backup) {
+    //   if (confirm('During last sync there might have been some error. Do you want to restore the last backup?')) {
+    //     await this._importBackup();
+    //     return true;
+    //   } else {
+    //     if (confirm('Do you want to delete the back to avoid seeing this dialog?')) {
+    //       await this._persistenceService.clearBackup();
+    //     }
+    //   }
+    // }
     return false;
   }
 }

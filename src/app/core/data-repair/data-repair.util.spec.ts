@@ -12,7 +12,7 @@ fdescribe('dataRepair()', () => {
     mock = createAppDataCompleteMock();
   });
 
-  xit('should delete tasks with same id in "task" and "taskArchive', () => {
+  xit('should delete tasks with same id in "task" and "taskArchive" from taskArchive', () => {
     const taskState = {
       ...mock.task,
       ...fakeEntityStateFromArray<Task>([{
@@ -34,7 +34,6 @@ fdescribe('dataRepair()', () => {
       },
     });
   });
-
 
   xit('should delete missing tasks for tags today list', () => {
     const taskState = {
@@ -74,24 +73,109 @@ fdescribe('dataRepair()', () => {
     });
   });
 
-
   it('should delete missing tasks for projects today list', () => {
   });
   it('should delete missing tasks for projects backlog list', () => {
   });
 
-  // NOTE: by just executing unique on "ids"
   describe('should fix duplicate entities for', () => {
     it('task', () => {
+      expect(dataRepair({
+        ...mock,
+        task: {
+          ...mock.task,
+          ...fakeEntityStateFromArray<Task>([{
+            ...DEFAULT_TASK,
+            id: 'DUPE',
+            title: 'DUPE',
+          }, {
+            ...DEFAULT_TASK,
+            id: 'DUPE',
+            title: 'DUPE',
+          }, {
+            ...DEFAULT_TASK,
+            id: 'NO_DUPE',
+            title: 'NO_DUPE',
+          }])
+        } as any,
+      })).toEqual({
+        ...mock,
+        task: {
+          ...mock.task,
+          ...fakeEntityStateFromArray<Task>([{
+            ...DEFAULT_TASK,
+            id: 'DUPE',
+            title: 'DUPE',
+          }, {
+            ...DEFAULT_TASK,
+            id: 'NO_DUPE',
+            title: 'NO_DUPE',
+          }])
+        } as any,
+      });
     });
+
     it('taskArchive', () => {
+      expect(dataRepair({
+        ...mock,
+        taskArchive: {
+          ...mock.taskArchive,
+          ...fakeEntityStateFromArray<Task>([{
+            ...DEFAULT_TASK,
+            id: 'DUPE',
+            title: 'DUPE',
+          }, {
+            ...DEFAULT_TASK,
+            id: 'DUPE',
+            title: 'DUPE',
+          }, {
+            ...DEFAULT_TASK,
+            id: 'NO_DUPE',
+            title: 'NO_DUPE',
+          }])
+        } as any,
+      })).toEqual({
+        ...mock,
+        taskArchive: {
+          ...mock.taskArchive,
+          ...fakeEntityStateFromArray<Task>([{
+            ...DEFAULT_TASK,
+            id: 'DUPE',
+            title: 'DUPE',
+          }, {
+            ...DEFAULT_TASK,
+            id: 'NO_DUPE',
+            title: 'NO_DUPE',
+          }])
+        } as any,
+      });
     });
   });
 
   describe('should fix inconsistent entity states for', () => {
     it('task', () => {
+
     });
     it('taskArchive', () => {
+      expect(dataRepair({
+        ...mock,
+        taskArchive: {
+          ids: ['AAA, XXX', 'YYY'],
+          entities: {
+            AAA: {},
+            CCC: {},
+          }
+        } as any,
+      })).toEqual({
+        ...mock,
+        taskArchive: {
+          ids: ['AAA', 'CCC'],
+          entities: {
+            AAA: {},
+            CCC: {},
+          }
+        } as any,
+      });
     });
   });
 

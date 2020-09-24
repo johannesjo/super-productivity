@@ -40,6 +40,8 @@ export interface AppBaseData {
   taskAttachment?: TaskAttachmentState;
 }
 
+export type AppBaseDataEntityLikeStates = ProjectState | TaskState | TaskRepeatCfgState | TaskArchive | SimpleCounterState;
+
 // NOTE: [key:string] always refers to projectId
 export interface AppDataForProjects {
   note?: {
