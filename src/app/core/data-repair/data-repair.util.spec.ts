@@ -12,7 +12,7 @@ fdescribe('dataRepair()', () => {
     mock = createAppDataCompleteMock();
   });
 
-  xit('should delete tasks with same id in "task" and "taskArchive" from taskArchive', () => {
+  it('should delete tasks with same id in "task" and "taskArchive" from taskArchive', () => {
     const taskState = {
       ...mock.task,
       ...fakeEntityStateFromArray<Task>([{
@@ -24,12 +24,15 @@ fdescribe('dataRepair()', () => {
     expect(dataRepair({
       ...mock,
       task: taskState,
-      taskArchive: taskState,
+      taskArchive: fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'TEST',
+        title: 'TEST',
+      }]),
     })).toEqual({
       ...mock,
       task: taskState,
       taskArchive: {
-        ...taskState,
         ...createEmptyEntity()
       },
     });
@@ -180,5 +183,8 @@ fdescribe('dataRepair()', () => {
   });
 
   xit('should restore missing tasks from taskArchive if available', () => {
+  });
+
+  it('should add orphan tasks to their project list', () => {
   });
 });

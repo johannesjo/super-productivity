@@ -6,7 +6,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   // console.time('dataRepair');
   let dataOut: AppDataComplete = data;
   dataOut = _fixEntityStates(dataOut);
-  // dataOut = _removeDuplicatesFromArchive(dataOut);
+  dataOut = _removeDuplicatesFromArchive(dataOut);
   // console.timeEnd('dataRepair');
   return dataOut;
 };
@@ -20,18 +20,21 @@ const _fixEntityStates = (data: AppDataComplete): AppDataComplete => {
 };
 
 //
-// const _fixEntityStates = (data: AppDataComplete): AppDataComplete => {
-//   console.time('_removeDuplicatesFromArchive');
-//   const taskIds = data.task.ids as string[];
-//   const archiveTaskIds = data.taskArchive.ids as string[];
-//   const duplicateIds = taskIds.filter((id) => archiveTaskIds.includes(id));
-//   if (duplicateIds.length) {
-//     data.taskArchive.ids = archiveTaskIds.filter(id => duplicateIds.includes(id));
-//   }
-//
-//   console.timeEnd('_removeDuplicatesFromArchive');
-//   return data;
-// };
+const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete => {
+  const taskIds = data.task.ids as string[];
+  const archiveTaskIds = data.taskArchive.ids as string[];
+  const duplicateIds = taskIds.filter((id) => archiveTaskIds.includes(id));
+
+  if (duplicateIds.length) {
+    data.taskArchive.ids = archiveTaskIds.filter(id => !duplicateIds.includes(id));
+    duplicateIds.forEach(id => {
+      if (data.taskArchive.entities[id]) {
+        delete data.taskArchive.entities[id];
+      }
+    });
+  }
+  return data;
+};
 
 // const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete => {
 //   return data;
