@@ -14,7 +14,7 @@ export class DataRepairService {
   ) {
   }
 
-  async repairData(dataIn: AppDataComplete): Promise<AppDataComplete> {
+  repairData(dataIn: AppDataComplete): AppDataComplete {
     return dataRepair(dataIn);
   }
 

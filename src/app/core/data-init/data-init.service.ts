@@ -55,7 +55,7 @@ export class DataInitService {
       this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
     } else {
       if (this._dataRepairService.isRepairConfirmed()) {
-        const fixedData = await this._dataRepairService.repairData(appDataComplete);
+        const fixedData = this._dataRepairService.repairData(appDataComplete);
         this._store$.dispatch(loadAllData({
           appDataComplete: fixedData,
           isOmitTokens,
