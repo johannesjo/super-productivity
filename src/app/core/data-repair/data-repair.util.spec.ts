@@ -259,7 +259,67 @@ fdescribe('dataRepair()', () => {
     });
   });
 
-  xit('should restore missing tasks from taskArchive if available', () => {
+  it('should restore missing tasks from taskArchive if available', () => {
+    const taskArchiveState = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'goneToArchiveToday',
+        title: 'goneToArchiveToday',
+        projectId: 'TEST_ID_PROJECT',
+      }, {
+        ...DEFAULT_TASK,
+        id: 'goneToArchiveBacklog',
+        title: 'goneToArchiveBacklog',
+        projectId: 'TEST_ID_PROJECT',
+      }])
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([{
+        title: 'TEST_PROJECT',
+        id: 'TEST_ID_PROJECT',
+        taskIds: ['goneToArchiveToday', 'GONE'],
+        backlogTaskIds: ['goneToArchiveBacklog', 'GONE'],
+      }] as Partial<Project> []),
+    };
+
+    expect(dataRepair({
+      ...mock,
+      project: projectState,
+      taskArchive: taskArchiveState,
+      task: {
+        ...mock.task,
+        ...createEmptyEntity()
+      } as any,
+    })).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'goneToArchiveToday',
+          title: 'goneToArchiveToday',
+          projectId: 'TEST_ID_PROJECT',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'goneToArchiveBacklog',
+          title: 'goneToArchiveBacklog',
+          projectId: 'TEST_ID_PROJECT',
+        }])
+      } as any,
+      project: {
+        ...projectState,
+        entities: {
+          TEST_ID_PROJECT: {
+            title: 'TEST_PROJECT',
+            id: 'TEST_ID_PROJECT',
+            taskIds: ['goneToArchiveToday'],
+            backlogTaskIds: ['goneToArchiveBacklog'],
+          },
+        } as any
+      }
+    });
   });
 
   it('should add orphan tasks to their project list', () => {

@@ -9,8 +9,8 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   let dataOut: AppDataComplete = data;
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
   dataOut = _fixEntityStates(dataOut);
+  dataOut = _removeMissingIdsFromListsOrRestoreFromArchive(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
-  dataOut = _removeMissingIdsFromLists(dataOut);
   // console.timeEnd('dataRepair');
   return dataOut;
 };
@@ -39,21 +39,43 @@ const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete =>
   return data;
 };
 
-const _removeMissingIdsFromLists = (data: AppDataComplete): AppDataComplete => {
-  const {task, project, tag} = data;
-
-  project.ids.forEach(() => {
-  });
+const _removeMissingIdsFromListsOrRestoreFromArchive = (data: AppDataComplete): AppDataComplete => {
+  const {task, project, tag, taskArchive} = data;
+  const taskIds: string[] = task.ids;
+  const taskArchiveIds: string[] = taskArchive.ids as string[];
+  const taskIdsToRestoreFromArchive: string[] = [];
 
   project.ids.forEach((pId: string | number) => {
     const projectItem = project.entities[pId] as ProjectCopy;
-    projectItem.taskIds = projectItem.taskIds.filter(id => task.ids.includes(id));
-    projectItem.backlogTaskIds = projectItem.backlogTaskIds.filter(id => task.ids.includes(id));
+
+    projectItem.taskIds = projectItem.taskIds.filter((id: string): boolean => {
+      if (taskArchiveIds.includes(id)) {
+        taskIdsToRestoreFromArchive.push(id);
+        return true;
+      }
+      return taskIds.includes(id);
+    });
+
+    projectItem.backlogTaskIds = projectItem.backlogTaskIds.filter((id: string): boolean => {
+      if (taskArchiveIds.includes(id)) {
+        taskIdsToRestoreFromArchive.push(id);
+        return true;
+      }
+      return taskIds.includes(id);
+    });
   });
+
   tag.ids.forEach((tId: string | number) => {
     const tagItem = tag.entities[tId] as TagCopy;
-    tagItem.taskIds = tagItem.taskIds.filter(id => task.ids.includes(id));
+    tagItem.taskIds = tagItem.taskIds.filter(id => taskIds.includes(id));
   });
+
+  taskIdsToRestoreFromArchive.forEach(id => {
+    task.entities[id] = taskArchive.entities[id];
+    delete taskArchive.entities[id];
+  });
+  task.ids = [...taskIds, ...taskIdsToRestoreFromArchive];
+  taskArchive.ids = taskArchiveIds.filter(id => !taskIdsToRestoreFromArchive.includes(id));
 
   return data;
 };
