@@ -5,6 +5,8 @@ import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-arra
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { Tag, TagState } from '../../features/tag/tag.model';
+import { ProjectState } from '../../features/project/store/project.reducer';
+import { Project } from '../../features/project/project.model';
 
 fdescribe('dataRepair()', () => {
   let mock: AppDataComplete;
@@ -38,7 +40,7 @@ fdescribe('dataRepair()', () => {
     });
   });
 
-  xit('should delete missing tasks for tags today list', () => {
+  it('should delete missing tasks for tags today list', () => {
     const taskState = {
       ...mock.task,
       ...fakeEntityStateFromArray<Task>([{
@@ -77,8 +79,83 @@ fdescribe('dataRepair()', () => {
   });
 
   it('should delete missing tasks for projects today list', () => {
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'TEST',
+        title: 'TEST',
+      }])
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([{
+        title: 'TEST_PROJECT',
+        id: 'TEST_ID_PROJECT',
+        taskIds: ['goneProject', 'TEST', 'noneExisting'],
+        backlogTaskIds: [],
+      }] as Partial<Project> []),
+    };
+
+    expect(dataRepair({
+      ...mock,
+      project: projectState,
+      task: taskState,
+    })).toEqual({
+      ...mock,
+      task: taskState as any,
+      project: {
+        ...projectState,
+        entities: {
+          TEST_ID_PROJECT: {
+            title: 'TEST_PROJECT',
+            id: 'TEST_ID_PROJECT',
+            taskIds: ['TEST'],
+            backlogTaskIds: [],
+          },
+        } as any
+      }
+    });
   });
+
   it('should delete missing tasks for projects backlog list', () => {
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'TEST',
+        title: 'TEST',
+      }])
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([{
+        title: 'TEST_PROJECT',
+        id: 'TEST_ID_PROJECT',
+        taskIds: [],
+        backlogTaskIds: ['goneProject', 'TEST', 'noneExisting'],
+      }] as Partial<Project> []),
+    };
+
+    expect(dataRepair({
+      ...mock,
+      project: projectState,
+      task: taskState,
+    })).toEqual({
+      ...mock,
+      task: taskState as any,
+      project: {
+        ...projectState,
+        entities: {
+          TEST_ID_PROJECT: {
+            title: 'TEST_PROJECT',
+            id: 'TEST_ID_PROJECT',
+            taskIds: [],
+            backlogTaskIds: ['TEST'],
+          },
+        } as any
+      }
+    });
   });
 
   describe('should fix duplicate entities for', () => {
