@@ -1,4 +1,5 @@
-:hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: 
+:hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts:
+ 
 Welcome you awesome human being! You want to contribute to this repository? This is gonna be great!
 
 The best way to start is to open up a [new issue](https://github.com/johannesjo/super-productivity/issues/new) or [to search for already existing ones](https://github.com/johannesjo/super-productivity/issues) covering your topic. 
