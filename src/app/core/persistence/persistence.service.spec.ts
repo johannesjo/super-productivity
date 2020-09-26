@@ -6,6 +6,7 @@ import { PersistenceService } from './persistence.service';
 import { TestScheduler } from 'rxjs/testing';
 import { of } from 'rxjs';
 import { createEmptyEntity } from '../../util/create-empty-entity';
+import { provideMockStore } from '@ngrx/store/testing';
 
 const testScheduler = new TestScheduler((actual, expected) => {
   // asserting the two objects are equal
@@ -16,6 +17,7 @@ describe('PersistenceService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
         providers: [
+          provideMockStore({initialState: {}}),
           {
             provide: SnackService, useValue: {
               open: () => false,

@@ -6,7 +6,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     lng: null
   },
   misc: {
-    isDarkMode: false,
+    isDarkMode: true,
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
     isAutMarkParentAsDone: false,
@@ -112,5 +112,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isPlayDoneSound: true,
     isIncreaseDoneSoundPitch: true,
     doneSound: 'done2.mp3',
+  },
+  trackingReminder: {
+    isEnabled: true,
+    minTime: minute * 2,
   }
 };

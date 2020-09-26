@@ -88,6 +88,6 @@ export class NotifyService {
   }
 
   private _isServiceWorkerAvailable(): boolean {
-    return 'serviceWorker' in navigator && environment.production && !IS_ELECTRON;
+    return 'serviceWorker' in navigator && (environment.production || environment.stage) && !IS_ELECTRON;
   }
 }

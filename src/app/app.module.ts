@@ -102,7 +102,7 @@ export function createTranslateLoader(http: HttpClient) {
       }
     ),
     EffectsModule.forRoot([]),
-    !environment.production ? StoreDevtoolsModule.instrument() : [],
+    (!environment.production && !environment.stage) ? StoreDevtoolsModule.instrument() : [],
     ReactiveFormsModule,
     FormlyModule.forRoot({
       extras: {
@@ -112,7 +112,7 @@ export function createTranslateLoader(http: HttpClient) {
         {name: 'pattern', message: 'Invalid input'},
       ],
     }),
-    ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
+    ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production || environment.stage}),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

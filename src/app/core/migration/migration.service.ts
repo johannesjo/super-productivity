@@ -68,7 +68,7 @@ export class MigrationService {
       lastLocalSyncModelChange: legacyAppDataComplete.lastActiveTime,
       archivedProjects: legacyAppDataComplete.archivedProjects,
       globalConfig: legacyAppDataComplete.globalConfig,
-      reminders: legacyAppDataComplete.reminders,
+      reminders: legacyAppDataComplete.reminders || [],
       // new
       tag: initialTagState,
       simpleCounter: initialSimpleCounterState,
@@ -82,6 +82,13 @@ export class MigrationService {
 
       task: this._mTaskState(legacyAppDataComplete),
       taskArchive: this._mTaskArchiveState(legacyAppDataComplete),
+
+      // NEW PROJECT MODELS
+      note: {},
+      metric: {},
+      improvement: {},
+      obstruction: {},
+      bookmark: {},
     };
 
     console.log('DATA AFTER MIGRATIONS', newAppData);

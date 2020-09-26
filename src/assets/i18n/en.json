@@ -16,6 +16,11 @@
   "BL": {
     "NO_TASKS": "There are currently no tasks in your backlog"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "Your data seems to be damaged. Do you want to try to automatically fix it? This might result in partial data loss.",
+    "DELETE_STRAY_BACKUP": "Do you want to delete the back to avoid seeing this dialog?",
+    "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?"
+  },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",
     "TOMORROW": "tomorrow {{time}}"
@@ -77,6 +82,13 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "You're trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?",
+        "FORCE_IMPORT": "Import remote data anyway?",
+        "FORCE_UPLOAD": "Upload local data anyway?",
+        "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
+        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "last change:",
         "LAST_SYNC": "last sync:",
@@ -742,14 +754,25 @@
         "ALREADY_DID": "I already did",
         "SNOOZE": "Snooze {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "Add to Task",
+        "MSG": "You have not been tracking time for {{time}}"
+      },
       "D_IDLE": {
         "BREAK": "Break",
-        "CREATE_AND_TRACK": "<em>Create</em> and track to:",
+        "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
         "SKIP": "Skip",
         "TASK": "Task",
         "TASK_BREAK": "Task+Break",
-        "TRACK_TO": "Track to:"
+        "TRACK_TO": "Track to"
+      },
+      "D_TRACKING_REMINDER": {
+        "UNTRACKED_TIME": "Untracked time:",
+        "TRACK_TO": "Track to:",
+        "CREATE_AND_TRACK": "<em>Create</em> and track to",
+        "IDLE_FOR": "You have been idle for:",
+        "TASK": "Task"
       }
     },
     "WORKLOG": {
@@ -951,10 +974,10 @@
       "TITLE": "Pomodoro Timer"
     },
     "SOUND": {
-      "TITLE": "Sound",
       "DONE_SOUND": "Task done sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task done",
       "IS_PLAY_DONE_SOUND": "Play sound when task is marked done",
+      "TITLE": "Sound",
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
@@ -966,6 +989,12 @@
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "Motivational image (web url)",
       "TITLE": "Break Reminder"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
+      "TITLE": "Time Tracking Reminder",
+      "L_IS_ENABLED": "Enabled",
+      "L_MIN_TIME": "Time to wait before showing Banner"
     }
   },
   "GLOBAL_SNACK": {

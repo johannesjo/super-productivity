@@ -141,6 +141,10 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
       taskIdsForProjectBacklog = (project as Project).backlogTaskIds;
       taskIdsForProject = (project as Project).taskIds;
       if (!taskIdsForProject || !taskIdsForProjectBacklog || (!taskIdsForProjectBacklog.length && !taskIdsForProject.length)) {
+        console.log('------ERR_ADDITIONAL_INFO------');
+        console.log('project', project);
+        console.log('taskIdsForProject', taskIdsForProject);
+        console.log('taskIdsForProjectBacklog', taskIdsForProjectBacklog);
         throw new Error('Invalid project data');
       }
     }
@@ -149,6 +153,10 @@ const _createTaskDeleteState = (state: RootState, task: TaskWithSubTasks): UndoT
     const tagTaskIdMap = (task.tagIds).reduce((acc, id) => {
       const tag = tagState.entities[id];
       if (!tag) {
+        console.log('------ERR_ADDITIONAL_INFO------');
+        console.log('id', id);
+        console.log('tagState', tagState);
+        console.log('tagTaskIdMap', tagTaskIdMap);
         throw new Error('Task Restore Error: Missing tag');
       }
 

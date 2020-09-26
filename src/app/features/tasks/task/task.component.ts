@@ -38,6 +38,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { environment } from '../../../../environments/environment';
+import { throttle } from 'helpful-decorators';
 
 @Component({
   selector: 'task',
@@ -59,7 +60,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   contextMenuPosition: { x: string; y: string } = {x: '0px', y: '0px'};
   progress: number = 0;
-  isDev: boolean = !environment.production;
+  isDev: boolean = !(environment.production || environment.stage);
   @ViewChild('contentEditableOnClickEl', {static: true}) contentEditableOnClickEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
   @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
@@ -91,6 +92,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout?: number;
+  private _isTaskDeleteTriggered: boolean = false;
 
   constructor(
     private readonly _taskService: TaskService,
@@ -236,6 +238,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   deleteTask() {
+    if (this._isTaskDeleteTriggered) {
+      return;
+    }
+
+    this._isTaskDeleteTriggered = true;
     this._taskService.remove(this.task);
     this.focusNext(true);
   }
@@ -282,6 +289,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   addSubTask() {
     this._taskService.addSubTaskTo(this.task.parentId || this.task.id);
+  }
+
+  @throttle(200, {leading: true, trailing: false})
+  toggleDoneKeyboard() {
+    this.toggleTaskDone();
+    if (!this.task.parentId) {
+      this.focusNext(true);
+    }
   }
 
   toggleTaskDone() {
@@ -601,14 +616,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.editReminder();
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
-      this.toggleTaskDone();
-      if (!this.task.parentId) {
-        if (this.task.isDone) {
-          this.focusPrevious(true);
-        } else {
-          this.focusNext(true);
-        }
-      }
+      this.toggleDoneKeyboard();
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();

@@ -39,6 +39,7 @@ import { SyncService } from './imex/sync/sync.service';
 import { environment } from '../environments/environment';
 import { RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
+import { TrackingReminderService } from './features/time-tracking/tracking-reminder/tracking-reminder.service';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -81,6 +82,7 @@ export class AppComponent implements OnDestroy {
     private _androidService: AndroidService,
     private _initialDialogService: InitialDialogService,
     private _bookmarkService: BookmarkService,
+    private _startTrackingReminderService: TrackingReminderService,
     public readonly syncService: SyncService,
     public readonly imexMetaService: ImexMetaService,
     public readonly workContextService: WorkContextService,
@@ -91,19 +93,6 @@ export class AppComponent implements OnDestroy {
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });
 
-    // try to avoid data-loss
-    if (navigator.storage && navigator.storage.persist) {
-      navigator.storage.persist().then(granted => {
-        if (granted) {
-          console.log('Persistent store granted');
-        } else {
-          const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
-          console.warn('Persistence not allowed');
-          this._snackService.open({msg});
-        }
-      });
-    }
-
     // check for dialog
     this._initialDialogService.showDialogIfNecessary$().subscribe();
 
@@ -113,6 +102,10 @@ export class AppComponent implements OnDestroy {
     // init offline banner in lack of a better place for it
     this._initOfflineBanner();
 
+    // basically init
+    this._startTrackingReminderService.init();
+
+    this._requestPersistence();
     this._checkAvailableStorage();
 
     if (IS_ANDROID_WEB_VIEW) {
@@ -243,6 +236,29 @@ export class AppComponent implements OnDestroy {
         this._bannerService.dismiss(BannerId.Offline);
       }
     });
+  }
+
+  private _requestPersistence() {
+    if (navigator.storage) {
+      // try to avoid data-loss
+      Promise.all([
+        navigator.storage.persisted(),
+      ]).then(([persisted]) => {
+        if (!persisted) {
+          navigator.storage.persist().then(granted => {
+            if (granted) {
+              console.log('Persistent store granted');
+            } else {
+              const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
+              console.warn('Persistence not allowed');
+              this._snackService.open({msg});
+            }
+          });
+        } else {
+          console.log('Persistence already allowed');
+        }
+      });
+    }
   }
 
   private _checkAvailableStorage() {

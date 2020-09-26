@@ -1,4 +1,5 @@
 import { devError } from './dev-error';
+import { arrayEquals } from './array-equals';
 
 export const checkFixEntityStateConsistency = (data: any, additionalStr = ''): any => {
   if (!isEntityStateConsistent(data, additionalStr)) {
@@ -23,7 +24,8 @@ export const isEntityStateConsistent = (data: any, additionalStr = ''): boolean 
   if (!data
     || !data.entities
     || !data.ids
-    || Object.keys(data.entities).length !== data.ids.length) {
+    || Object.keys(data.entities).length !== data.ids.length
+    || !arrayEquals(Object.keys(data.entities).sort(), [...data.ids].sort())) {
     console.log(data);
     devError(`Inconsistent entity state "${additionalStr}"`);
     return false;

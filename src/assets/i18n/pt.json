@@ -77,6 +77,13 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "Você está tentando sincronizar um objeto de dados vazio. Esta é a sua primeira sincronização de um aplicativo (quase) virgem?",
+        "FORCE_IMPORT": "Importar dados remotos mesmo assim?",
+        "FORCE_UPLOAD": "Enviar dados locais mesmo assim?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Ocorreu um erro ao enviar seus dados locais. Tentar forçar a atualização?",
+        "TRY_LOAD_REMOTE_AGAIN": "Tentar recarregar os dados remotamente mais uma vez?"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "última mudança:",
         "LAST_SYNC": "última sincronização:",
@@ -607,8 +614,12 @@
         "TIME": "tempo"
       },
       "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Adicionar tarefa existente \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Adicione a edição nº{{issueNr}} de {{issueType}}",
         "ADD_TASK": "Adicionar tarefa",
         "ADD_TASK_TO_BACKLOG": "Adicionar tarefa ao backlog",
+        "CREATE_TASK": "Criar nova tarefa",
+        "EXAMPLE": "Exemplo: \"Algum título da tarefa + nome do projeto # alguma tag # alguma outra tag 10m / 3h\"",
         "START": "Pressione enter mais uma vez para iniciar"
       },
       "B": {
@@ -946,6 +957,13 @@
       "LONGER_BREAK_DURATION": "Duração de pausas mais longas",
       "TITLE": "Configurações do Pomodoro"
     },
+    "SOUND": {
+      "DONE_SOUND": "Som de tarefa concluída",
+      "IS_INCREASE_DONE_PITCH": "Aumente o tom para cada tarefa realizada",
+      "IS_PLAY_DONE_SOUND": "Tocar som quando a tarefa for marcada como concluída",
+      "TITLE": "Som",
+      "VOLUME": "Volume"
+    },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Permite configurar um lembrete recorrente quando você trabalha por um período de tempo especificado sem fazer uma pausa.</p> <p>Você pode modificar a mensagem exibida. ${duration} será substituído pelo tempo gasto sem interrupção.</p> </div>",
       "IS_ENABLED": "Ativar lembrete de pausa",
@@ -961,7 +979,9 @@
     "COPY_TO_CLIPPBOARD": "Copiado para a área de transferência",
     "ERR_COMPRESSION": "Erro para interface de compactação",
     "PERSISTENCE_DISALLOWED": "Os dados não serão mantidos permanentemente. Esteja ciente de que isso pode levar à perda de dados!",
-    "RUNNING_X": "Rodando \"{{str}}\"."
+    "RUNNING_X": "Rodando \"{{str}}\".",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressionado, mas o atalho para abrir favoritos só está disponível no contexto do projeto.",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} pressionado, mas o atalho para abrir notas só está disponível no contexto do projeto."
   },
   "GPB": {
     "ASSETS": "Carregando recursos...",

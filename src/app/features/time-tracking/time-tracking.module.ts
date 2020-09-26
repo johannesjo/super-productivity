@@ -6,6 +6,7 @@ import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { TakeABreakModule } from './take-a-break/take-a-break.module';
 import { TasksModule } from '../tasks/tasks.module';
+import { DialogTrackingReminderComponent } from './tracking-reminder/dialog-tracking-reminder/dialog-tracking-reminder.component';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { TasksModule } from '../tasks/tasks.module';
     TasksModule,
   ],
   declarations: [
-    DialogIdleComponent
+    DialogIdleComponent,
+    DialogTrackingReminderComponent
   ],
   exports: [
     TakeABreakModule,

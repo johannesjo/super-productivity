@@ -1,5 +1,6 @@
 export enum BannerId {
   TakeABreak = 'TakeABreak',
+  StartTrackingReminder = 'StartTrackingReminder',
   GoogleLogin = 'GoogleLogin',
   JiraUnblock = 'JiraUnblock',
   InstallWebApp = 'InstallWebApp',

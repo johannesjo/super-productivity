@@ -1,0 +1,21 @@
+@import "../../../../../variables";
+
+.dialog-content {
+  p,
+  .track-to-label,
+  .time {
+    text-align: center;
+  }
+}
+
+.time {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: $s;
+}
+
+.track-to-label {
+  margin-bottom: $s;
+  font-size: $s*2;
+  font-weight: bold;
+}

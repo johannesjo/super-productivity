@@ -77,6 +77,13 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "빈 데이터 개체를 동기화하려고합니다. 이것이 (거의) 처녀 앱의 첫 번째 동기화입니까?",
+        "FORCE_IMPORT": "그래도 원격 데이터를 가져 오시겠습니까?",
+        "FORCE_UPLOAD": "그래도 로컬 데이터를 업로드 하시겠습니까?",
+        "FORCE_UPLOAD_AFTER_ERROR": "로컬 데이터를 업로드하는 동안 오류가 발생했습니다. 강제로 업데이트 하시겠습니까?",
+        "TRY_LOAD_REMOTE_AGAIN": "원격에서 데이터를 다시로드 하시겠습니까?"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "마지막 변경:",
         "LAST_SYNC": "마지막 동기화 :",
@@ -607,8 +614,12 @@
         "TIME": "시각"
       },
       "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "기존 작업 \"{{taskTitle}}\"추가",
+        "ADD_ISSUE_TASK": " {{issueType}}의{{issueNr}} 호 추가",
         "ADD_TASK": "작업 추가",
         "ADD_TASK_TO_BACKLOG": "백 로그에 작업 추가",
+        "CREATE_TASK": "새 할 일 만들기",
+        "EXAMPLE": "예 : \"일부 작업 제목 + projectName #some tag #some other tag 10m / 3h\"",
         "START": "시작하려면 한 번 더 입력하십시오."
       },
       "B": {
@@ -946,6 +957,13 @@
       "LONGER_BREAK_DURATION": "긴 휴식 시간",
       "TITLE": "포모 도로 타이머"
     },
+    "SOUND": {
+      "DONE_SOUND": "작업 완료 소리",
+      "IS_INCREASE_DONE_PITCH": "모든 작업에 대한 피치 높이기",
+      "IS_PLAY_DONE_SOUND": "작업이 완료로 표시되면 소리 재생",
+      "TITLE": "소리",
+      "VOLUME": "음량"
+    },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>중단하지 않고 지정된 시간 동안 작업 한 경우 다시 알림을 구성 할 수 있습니다.</p> <p>표시된 메시지를 수정할 수 있습니다. ${duration} 은 휴식 시간없이 바뀝니다.</p> </div>",
       "IS_ENABLED": "휴식 알림을 사용하도록 설정",
@@ -961,7 +979,9 @@
     "COPY_TO_CLIPPBOARD": "클립 보드에 복사 됨",
     "ERR_COMPRESSION": "압축 인터페이스 오류",
     "PERSISTENCE_DISALLOWED": "데이터는 영구적으로 유지되지 않습니다. 이로 인해 데이터가 손실 될 수 있습니다 !!",
-    "RUNNING_X": "\"{{str}}\"실행 중."
+    "RUNNING_X": "\"{{str}}\"실행 중.",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} 을 눌렀지만 북마크 열기 바로 가기는 프로젝트 컨텍스트에서만 사용할 수 있습니다.",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} 을 눌렀지만 노트 열기 단축키는 프로젝트 컨텍스트에서만 사용할 수 있습니다."
   },
   "GPB": {
     "ASSETS": "자산로드 중 ...",

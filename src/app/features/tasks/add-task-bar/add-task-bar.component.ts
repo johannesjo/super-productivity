@@ -128,10 +128,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     this._subs.add(this.activatedIssueTask$.subscribe((v) => this.activatedIssueTask = v));
     this._subs.add(this.shortSyntaxTags$.subscribe((v) => this.shortSyntaxTags = v));
     this._subs.add(this.inputVal$.subscribe((v) => this.inputVal = v));
-
-    // TODO remove
-    this._subs.add(this.shortSyntaxTags$.subscribe((v) => console.log('shortSyntaxTags$', v)));
-    this._subs.add(this.filteredIssueSuggestions$.subscribe((val) => console.log('filteredIssueSuggestions$', val)));
   }
 
   ngAfterViewInit(): void {

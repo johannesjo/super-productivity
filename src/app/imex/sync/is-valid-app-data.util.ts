@@ -5,40 +5,42 @@ import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 
-// TODO unit test this
-export const isValidAppData = (data: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {
+export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {
+  const dAny: any = d;
   // TODO remove this later on
-  const isCapableModelVersion = data.project
-    && data.project[MODEL_VERSION_KEY]
-    && typeof data.project[MODEL_VERSION_KEY] === 'number'
-    && (data.project[MODEL_VERSION_KEY] as number) >= 5;
+  const isCapableModelVersion =
+    (typeof dAny === 'object')
+    && d.project
+    && d.project[MODEL_VERSION_KEY]
+    && typeof d.project[MODEL_VERSION_KEY] === 'number'
+    && (d.project[MODEL_VERSION_KEY] as number) >= 5;
 
   // console.time('time isValidAppData');
   const isValid = (isCapableModelVersion)
 
-    ? (typeof (data as any) === 'object')
-    && typeof (data as any).note === 'object'
-    && typeof (data as any).bookmark === 'object'
-    && typeof (data as any).improvement === 'object'
-    && typeof (data as any).obstruction === 'object'
-    && typeof (data as any).metric === 'object'
-    && typeof (data as any).task === 'object'
-    && typeof (data as any).tag === 'object'
-    && typeof (data as any).globalConfig === 'object'
-    && typeof (data as any).taskArchive === 'object'
-    && typeof (data as any).project === 'object'
-    && Array.isArray(data.reminders)
-    && _isEntityStatesConsistent(data)
-    && _isTaskIdsConsistent(data, isSkipInconsistentTaskStateError)
+    ? (typeof dAny === 'object') && dAny !== null
+    && typeof dAny.note === 'object' && dAny.note !== null
+    && typeof dAny.bookmark === 'object' && dAny.bookmark !== null
+    && typeof dAny.improvement === 'object' && dAny.improvement !== null
+    && typeof dAny.obstruction === 'object' && dAny.obstruction !== null
+    && typeof dAny.metric === 'object' && dAny.metric !== null
+    && typeof dAny.task === 'object' && dAny.task !== null
+    && typeof dAny.tag === 'object' && dAny.tag !== null
+    && typeof dAny.globalConfig === 'object' && dAny.globalConfig !== null
+    && typeof dAny.taskArchive === 'object' && dAny.taskArchive !== null
+    && typeof dAny.project === 'object' && dAny.project !== null
+    && Array.isArray(d.reminders)
+    && _isEntityStatesConsistent(d)
+    && (isSkipInconsistentTaskStateError || _isAllTasksAvailable(d))
 
-    : typeof (data as any) === 'object'
+    : typeof dAny === 'object'
   ;
   // console.timeEnd('time isValidAppData');
 
   return isValid;
 };
 
-const _isTaskIdsConsistent = (data: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {
+const _isAllTasksAvailable = (data: AppDataComplete): boolean => {
   let allIds: string [] = [];
 
   (data.tag.ids as string[])
@@ -65,8 +67,7 @@ const _isTaskIdsConsistent = (data: AppDataComplete, isSkipInconsistentTaskState
     );
 
   const notFound = allIds.find(id => !(data.task.ids.includes(id)));
-
-  if (notFound && !isSkipInconsistentTaskStateError) {
+  if (notFound) {
     const tag = (data.tag.ids as string[])
       .map(id => data.tag.entities[id])
       .find(tagI => (tagI as Tag).taskIds.includes(notFound));
@@ -84,8 +85,10 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
   const baseStateKeys: (keyof AppBaseData)[] = [
     'task',
     'taskArchive',
+    'taskRepeatCfg',
     'tag',
     'project',
+    'simpleCounter',
   ];
   const projectStateKeys: (keyof AppDataForProjects)[] = [
     'note',

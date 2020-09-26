@@ -77,6 +77,7 @@ export class DatabaseService {
     } catch (e) {
       console.error('Database initialization failed');
       console.error('_lastParams', this._lastParams);
+      alert('IndexedDB Error');
       throw new Error(e);
     }
 

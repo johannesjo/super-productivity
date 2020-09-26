@@ -28,7 +28,7 @@ export interface AppBaseData {
   project: ProjectState;
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfigState;
-  reminders?: Reminder[];
+  reminders: Reminder[];
 
   task: TaskState;
   tag: TagState;
@@ -40,21 +40,28 @@ export interface AppBaseData {
   taskAttachment?: TaskAttachmentState;
 }
 
+export type AppBaseDataEntityLikeStates =
+  ProjectState
+  | TaskState
+  | TaskRepeatCfgState
+  | TaskArchive
+  | SimpleCounterState;
+
 // NOTE: [key:string] always refers to projectId
 export interface AppDataForProjects {
-  note?: {
+  note: {
     [key: string]: NoteState;
   };
-  bookmark?: {
+  bookmark: {
     [key: string]: BookmarkState;
   };
-  metric?: {
+  metric: {
     [key: string]: MetricState;
   };
-  improvement?: {
+  improvement: {
     [key: string]: ImprovementState;
   };
-  obstruction?: {
+  obstruction: {
     [key: string]: ObstructionState;
   };
 }
