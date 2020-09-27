@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect} from '@ngrx/effects';
+import { Injectable } from '@angular/core';
+import { Effect } from '@ngrx/effects';
 import {
   concatMap,
   delay,
@@ -15,25 +15,25 @@ import {
   tap,
   withLatestFrom
 } from 'rxjs/operators';
-import {DataInitService} from '../../core/data-init/data-init.service';
-import {SyncService} from '../../imex/sync/sync.service';
-import {SyncProvider} from '../../imex/sync/sync-provider';
-import {SYNC_BEFORE_CLOSE_ID, SYNC_INITIAL_SYNC_TRIGGER, SYNC_MIN_INTERVAL} from '../../imex/sync/sync.const';
-import {combineLatest, EMPTY, merge, Observable, of} from 'rxjs';
-import {isOnline$} from '../../util/is-online';
-import {SnackService} from '../../core/snack/snack.service';
-import {T} from '../../t.const';
-import {ExecBeforeCloseService} from '../../core/electron/exec-before-close.service';
-import {IS_ELECTRON} from '../../app.constants';
-import {DropboxSyncService} from '../../features/dropbox/dropbox-sync.service';
-import {TaskService} from '../../features/tasks/task.service';
-import {SimpleCounterService} from '../../features/simple-counter/simple-counter.service';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { SyncService } from '../../imex/sync/sync.service';
+import { SyncProvider } from '../../imex/sync/sync-provider';
+import { SYNC_BEFORE_CLOSE_ID, SYNC_INITIAL_SYNC_TRIGGER, SYNC_MIN_INTERVAL } from '../../imex/sync/sync.const';
+import { combineLatest, EMPTY, merge, Observable, of } from 'rxjs';
+import { isOnline$ } from '../../util/is-online';
+import { SnackService } from '../../core/snack/snack.service';
+import { T } from '../../t.const';
+import { ExecBeforeCloseService } from '../../core/electron/exec-before-close.service';
+import { IS_ELECTRON } from '../../app.constants';
+import { TaskService } from '../../features/tasks/task.service';
+import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
+import { SyncProviderService } from './sync-provider.service';
 
 @Injectable()
 export class SyncEffects {
   private _wasJustEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     // NOTE: it is important that we don't use distinct until changed here
-    switchMap(() => this._dropboxSyncService.isEnabledAndReady$),
+    switchMap(() => this._syncProviderService.isEnabledAndReady$),
     pairwise(),
     map(([a, b]) => !a && !!b),
     filter(wasJustEnabled => wasJustEnabled),
@@ -44,8 +44,8 @@ export class SyncEffects {
     switchMap(() => merge(
       // dynamic
       combineLatest([
-        this._dropboxSyncService.isEnabledAndReady$,
-        this._dropboxSyncService.syncInterval$,
+        this._syncProviderService.isEnabledAndReady$,
+        this._syncProviderService.syncInterval$,
       ]).pipe(
         switchMap(([isEnabledAndReady, syncInterval]) => isEnabledAndReady
           ? this._syncService.getSyncTrigger$(syncInterval, SYNC_MIN_INTERVAL)
@@ -54,7 +54,7 @@ export class SyncEffects {
       ),
 
       // initial after starting app
-      this._dropboxSyncService.isEnabledAndReady$.pipe(
+      this._syncProviderService.isEnabledAndReady$.pipe(
         take(1),
         filter(isEnabledAndReady => isEnabledAndReady),
         mapTo(SYNC_INITIAL_SYNC_TRIGGER),
@@ -75,7 +75,7 @@ export class SyncEffects {
         // we need to return something
         return of(null);
       }
-      return this._dropboxSyncService.sync()
+      return this._syncProviderService.sync()
         .then(() => {
           if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
             this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
@@ -91,7 +91,7 @@ export class SyncEffects {
   @Effect({dispatch: false}) syncBeforeQuit$: any = !IS_ELECTRON
     ? EMPTY
     : this._dataInitService.isAllDataLoadedInitially$.pipe(
-      concatMap(() => this._dropboxSyncService.isEnabledAndReady$),
+      concatMap(() => this._syncProviderService.isEnabledAndReady$),
       distinctUntilChanged(),
       tap((isEnabled) => isEnabled
         ? this._execBeforeCloseService.schedule(SYNC_BEFORE_CLOSE_ID)
@@ -108,7 +108,7 @@ export class SyncEffects {
       }),
       // minimally hacky delay to wait for inMemoryDatabase update...
       delay(100),
-      switchMap(() => this._dropboxSyncService.sync()
+      switchMap(() => this._syncProviderService.sync()
         .then(() => {
           this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
         })
@@ -123,7 +123,7 @@ export class SyncEffects {
     );
 
   constructor(
-    private _dropboxSyncService: DropboxSyncService,
+    private _syncProviderService: SyncProviderService,
     private _syncService: SyncService,
     private _snackService: SnackService,
     private _taskService: TaskService,
