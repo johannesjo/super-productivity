@@ -1,19 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { DropboxSyncService } from '../../features/dropbox/dropbox-sync.service';
+import { SyncProviderServiceInterface } from './sync-provider.model';
 
 // TODO naming
 @Injectable({
   providedIn: 'root',
 })
 export class SyncProviderService {
-  isEnabledAndReady$: Observable<boolean> = this._dropboxSyncService.isEnabledAndReady$;
-  syncInterval$: Observable<number> = this._dropboxSyncService.syncInterval$;
+  currentProvider$: ReplaySubject<SyncProviderServiceInterface> = new ReplaySubject(1);
 
   constructor(private _dropboxSyncService: DropboxSyncService) {
-  }
-
-  sync(): Promise<unknown> {
-    return this._dropboxSyncService.sync();
+    this.currentProvider$.next(this._dropboxSyncService);
   }
 }

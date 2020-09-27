@@ -17,7 +17,7 @@ import {
   throttleTime, timeout
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { SyncProvider } from './sync-provider';
+import { SyncProviderModel } from './sync-provider.model';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -169,7 +169,7 @@ export class SyncService {
   }
 
   // tslint:disable-next-line
-  setInitialSyncDone(val: boolean, syncProvider: SyncProvider) {
+  setInitialSyncDone(val: boolean, syncProvider: SyncProviderModel) {
     this._isInitialSyncDoneManual$.next(val);
   }
 }
