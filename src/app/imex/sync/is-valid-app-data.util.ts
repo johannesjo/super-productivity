@@ -103,7 +103,7 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     ||
     projectStateKeys.find(projectModelKey => {
       const dataForProjects = data[projectModelKey];
-      if (typeof dataForProjects !== 'object') {
+      if (typeof (dataForProjects as any) !== 'object') {
         throw new Error('No dataForProjects');
       }
       return Object.keys(dataForProjects).find(projectId =>
