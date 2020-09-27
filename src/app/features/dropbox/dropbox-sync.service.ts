@@ -24,9 +24,12 @@ import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { TranslateService } from '@ngx-translate/core';
+import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync-provider.model';
 
 @Injectable({providedIn: 'root'})
-export class DropboxSyncService {
+export class DropboxSyncService implements SyncProviderServiceInterface {
+  id: SyncProvider = SyncProvider.Dropbox;
+
   dropboxCfg$: Observable<DropboxSyncConfig> = this._globalConfigService.cfg$.pipe(
     map(cfg => cfg.dropboxSync)
   );

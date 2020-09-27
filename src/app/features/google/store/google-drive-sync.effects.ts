@@ -45,7 +45,7 @@ import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';
 import { CompressionService } from '../../../core/compression/compression.service';
 import { T } from '../../../t.const';
 import { SyncService } from '../../../imex/sync/sync.service';
-import { SyncProvider } from '../../../imex/sync/sync-provider';
+import { SyncProvider } from '../../../imex/sync/sync-provider.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../app.constants';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { getGoogleLocalLastSync, saveGoogleLocalLastSync } from '../google-session';
