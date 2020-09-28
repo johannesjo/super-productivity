@@ -108,9 +108,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   dropboxSync: {
     // TODO remove / migrate
-    isEnabled: false,
-    syncInterval: minute,
-
     authCode: null,
     accessToken: null,
     _backupDocId: null,

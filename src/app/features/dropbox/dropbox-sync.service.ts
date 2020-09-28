@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
-import { GlobalConfigService } from '../config/global-config.service';
-import { combineLatest, Observable } from 'rxjs';
-import { DropboxSyncConfig } from '../config/global-config.model';
-import { concatMap, distinctUntilChanged, first, map, take, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { concatMap, distinctUntilChanged, first, take, tap } from 'rxjs/operators';
 import { DropboxApiService } from './dropbox-api.service';
 import { DROPBOX_SYNC_FILE_PATH } from './dropbox.const';
 import { AppDataComplete } from '../../imex/sync/sync.model';
@@ -30,33 +28,17 @@ import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync
 export class DropboxSyncService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.Dropbox;
 
-  dropboxCfg$: Observable<DropboxSyncConfig> = this._globalConfigService.cfg$.pipe(
-    map(cfg => cfg.dropboxSync)
-  );
-  isEnabled$: Observable<boolean> = this.dropboxCfg$.pipe(
-    map(cfg => cfg && cfg.isEnabled),
-  );
-  syncInterval$: Observable<number> = this.dropboxCfg$.pipe(
-    map(cfg => cfg && cfg.syncInterval),
+  isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    concatMap(() => this._dropboxApiService.isTokenAvailable$),
     distinctUntilChanged(),
   );
 
-  isEnabledAndReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    concatMap(() => combineLatest([
-      this._dropboxApiService.isTokenAvailable$,
-      this.isEnabled$,
-    ])),
-    map(([isTokenAvailable, isEnabled]) => isTokenAvailable && isEnabled),
-    distinctUntilChanged(),
-  );
-
-  private _isReadyForRequests$: Observable<boolean> = this.isEnabledAndReady$.pipe(
+  private _isReadyForRequests$: Observable<boolean> = this.isReady$.pipe(
     tap((isReady) => !isReady && new Error('Dropbox Sync not ready')),
     first(),
   );
 
   constructor(
-    private _globalConfigService: GlobalConfigService,
     private _dataImportService: DataImportService,
     private _syncService: SyncService,
     private _dropboxApiService: DropboxApiService,
