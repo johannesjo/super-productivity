@@ -86,25 +86,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     collapseSubTasks: null,
     togglePlay: 'y',
   },
-  googleDriveSync: {
-    isEnabled: false,
-    isAutoLogin: false,
-    isAutoSyncToRemote: false,
-    isNotifyOnSync: false,
-    isLoadRemoteDataOnStartup: false,
-    isCompressData: true,
-    syncInterval: minute * 5,
-    syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
-    _backupDocId: null,
-  },
-  dropboxSync: {
-    isEnabled: false,
-    syncInterval: minute,
-    authCode: null,
-    accessToken: null,
-    _backupDocId: null,
-    // isCompressData: true,
-  },
   localBackup: {
     isEnabled: true,
   },
@@ -118,5 +99,34 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnabled: true,
     isShowOnMobile: false,
     minTime: minute * 2,
-  }
+  },
+
+  sync: {
+    isEnabled: false,
+    syncProvider: null,
+    syncInterval: minute,
+  },
+  dropboxSync: {
+    // TODO remove / migrate
+    isEnabled: false,
+    syncInterval: minute,
+
+    authCode: null,
+    accessToken: null,
+    _backupDocId: null,
+    // isCompressData: true,
+  },
+  googleDriveSync: {
+    // TODO remove / migrate
+    isEnabled: false,
+    isAutoSyncToRemote: false,
+    isNotifyOnSync: false,
+    isLoadRemoteDataOnStartup: false,
+    syncInterval: minute * 5,
+
+    isAutoLogin: false,
+    isCompressData: true,
+    syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
+    _backupDocId: null,
+  },
 };
