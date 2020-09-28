@@ -8,8 +8,7 @@ export enum SyncProvider {
 
 export interface SyncProviderServiceInterface {
   id: SyncProvider;
-  isEnabledAndReady$: Observable<boolean>;
-  syncInterval$: Observable<number>;
+  isReady$: Observable<boolean>;
 
   sync(): Promise<unknown>;
 }

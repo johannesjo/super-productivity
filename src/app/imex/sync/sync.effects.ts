@@ -6,10 +6,7 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
-  map,
   mapTo,
-  pairwise,
-  shareReplay,
   switchMap,
   take,
   tap,
@@ -44,12 +41,11 @@ export class SyncEffects {
   private _wasJustEnabled$: Observable<boolean> = of(false);
 
   @Effect({dispatch: false}) triggerSync$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => this._syncProviderService.currentProvider$),
-    switchMap((currentProvider) => merge(
+    switchMap(() => merge(
       // dynamic
       combineLatest([
-        currentProvider.isEnabledAndReady$,
-        currentProvider.syncInterval$,
+        this._syncProviderService.isEnabledAndReady$,
+        this._syncProviderService.syncInterval$,
       ]).pipe(
         switchMap(([isEnabledAndReady, syncInterval]) => isEnabledAndReady
           ? this._syncService.getSyncTrigger$(syncInterval, SYNC_MIN_INTERVAL)
@@ -58,7 +54,7 @@ export class SyncEffects {
       ),
 
       // initial after starting app
-      currentProvider.isEnabledAndReady$.pipe(
+      this._syncProviderService.isEnabledAndReady$.pipe(
         take(1),
         filter((isEnabledAndReady: boolean) => isEnabledAndReady),
         mapTo(SYNC_INITIAL_SYNC_TRIGGER),
@@ -66,69 +62,64 @@ export class SyncEffects {
 
       // initial after enabling it,
       this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
-    ).pipe(
-      tap((x) => console.log('sync(effect).....', x)),
-      withLatestFrom(isOnline$),
-      // don't run multiple after each other when dialog is open
-      exhaustMap(([trigger, isOnline]) => {
-        if (!isOnline) {
-          // this._snackService.open({msg: T.F.DROPBOX.S.OFFLINE, type: 'ERROR'});
+    )),
+    tap((x) => console.log('sync(effect).....', x)),
+    withLatestFrom(isOnline$),
+    // don't run multiple after each other when dialog is open
+    exhaustMap(([trigger, isOnline]) => {
+      if (!isOnline) {
+        // this._snackService.open({msg: T.F.DROPBOX.S.OFFLINE, type: 'ERROR'});
+        if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
+          this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
+        }
+        // we need to return something
+        return of(null);
+      }
+      return this._syncProviderService.sync()
+        .then(() => {
           if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
             this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
           }
-          // we need to return something
-          return of(null);
-        }
-        return currentProvider.sync()
-          .then(() => {
-            if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
-              this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
-            }
-          })
-          .catch((e: unknown) => {
-            console.error(e);
-            // TODO update snack message
-            this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
-          });
-      }),
-    )),
+        })
+        .catch((e: unknown) => {
+          console.error(e);
+          this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
+        });
+    }),
   );
 
   @Effect({dispatch: false}) syncBeforeQuit$: any = !IS_ELECTRON
     ? EMPTY
     : this._dataInitService.isAllDataLoadedInitially$.pipe(
-      concatMap(() => this._syncProviderService.currentProvider$),
-      concatMap((currentProvider) => currentProvider.isEnabledAndReady$.pipe(
-        distinctUntilChanged(),
-        tap((isEnabled) => isEnabled
-          ? this._execBeforeCloseService.schedule(SYNC_BEFORE_CLOSE_ID)
-          : this._execBeforeCloseService.unschedule(SYNC_BEFORE_CLOSE_ID)
-        ),
-        switchMap((isEnabled) => isEnabled
-          ? this._execBeforeCloseService.onBeforeClose$
-          : EMPTY
-        ),
-        filter(ids => ids.includes(SYNC_BEFORE_CLOSE_ID)),
-        tap(() => {
-          this._taskService.setCurrentId(null);
-          this._simpleCounterService.turnOffAll();
-        }),
-        // minimally hacky delay to wait for inMemoryDatabase update...
-        delay(100),
-        switchMap(() => currentProvider.sync()
-          .then(() => {
+      concatMap(() => this._syncProviderService.isEnabledAndReady$),
+      distinctUntilChanged(),
+      tap((isEnabled) => isEnabled
+        ? this._execBeforeCloseService.schedule(SYNC_BEFORE_CLOSE_ID)
+        : this._execBeforeCloseService.unschedule(SYNC_BEFORE_CLOSE_ID)
+      ),
+      switchMap((isEnabled) => isEnabled
+        ? this._execBeforeCloseService.onBeforeClose$
+        : EMPTY
+      ),
+      filter(ids => ids.includes(SYNC_BEFORE_CLOSE_ID)),
+      tap(() => {
+        this._taskService.setCurrentId(null);
+        this._simpleCounterService.turnOffAll();
+      }),
+      // minimally hacky delay to wait for inMemoryDatabase update...
+      delay(100),
+      switchMap(() => this._syncProviderService.sync()
+        .then(() => {
+          this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
+        })
+        .catch((e: unknown) => {
+          console.error(e);
+          this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
+          if (confirm('Sync failed. Close App anyway?')) {
             this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
-          })
-          .catch((e: unknown) => {
-            console.error(e);
-            // TODO update snack message
-            this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
-            if (confirm('Sync failed. Close App anyway?')) {
-              this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
-            }
-          })
-        ),
-      )),
+          }
+        })
+      ),
     );
 
   constructor(
