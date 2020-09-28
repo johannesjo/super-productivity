@@ -172,10 +172,9 @@ export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldCon
 
 export type CustomCfgSection =
   'FILE_IMPORT_EXPORT'
-  | 'GOOGLE_SYNC'
+  | 'SYNC'
   | 'JIRA_CFG'
-  | 'SIMPLE_COUNTER_CFG'
-  | 'DROPBOX_SYNC';
+  | 'SIMPLE_COUNTER_CFG';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {

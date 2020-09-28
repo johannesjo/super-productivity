@@ -1,0 +1,132 @@
+<!--<h3 class="md-subtitle">Sync via Google Drive</h3>-->
+
+<form #formRef="ngForm"
+      (submit)="submit()">
+  <mat-slide-toggle (ngModelChange)="toggleEnabled($event)"
+                    [ngModel]="cfg?.isEnabled"
+                    name="isEnabled">
+    {{T.F.GOOGLE.SYNC_CFG.ENABLE|translate}}
+  </mat-slide-toggle>
+  <!--NOTE: [@expandFade] not working nicely here -->
+  <div *ngIf="cfg && cfg?.isEnabled">
+    <section class="btns">
+      <button (click)="login()"
+              *ngIf="!(googleApiService.isLoggedIn$|async)"
+              [promiseBtn]="loginPromise"
+              color="primary"
+              mat-stroked-button
+              type="button">
+        <mat-icon>exit_to_app</mat-icon>
+        {{T.G.LOGIN|translate}}
+      </button>
+      <button (click)="logout()"
+              *ngIf="(googleApiService.isLoggedIn$|async)"
+              color="primary"
+              mat-stroked-button
+              type="button">
+        <mat-icon>clear</mat-icon>
+        {{T.G.LOGOUT|translate}}
+      </button>
+
+      <button (click)="saveToGoogleDrive()"
+              *ngIf="(googleApiService.isLoggedIn$|async)"
+              [disabled]="googleDriveSyncService.isLoadInProgress$|async"
+              [promiseBtn]="googleDriveSyncService.isSaveInProgress$|async"
+              color="primary"
+              mat-stroked-button
+              type="button">
+        <mat-icon>arrow_upward</mat-icon>
+        {{T.F.GOOGLE.SYNC_CFG.BACKUP_NOW|translate}}
+      </button>
+      <button (click)="loadFromGoogleDrive()"
+              *ngIf="(googleApiService.isLoggedIn$|async)"
+              [disabled]="googleDriveSyncService.isSaveInProgress$|async"
+              [promiseBtn]="googleDriveSyncService.isLoadInProgress$|async"
+              color="primary"
+              mat-stroked-button
+              type="button">
+        <mat-icon>arrow_downward</mat-icon>
+        {{T.F.GOOGLE.SYNC_CFG.LOAD_FROM|translate}}
+      </button>
+    </section>
+
+    <section *ngIf="(googleApiService.isLoggedIn$|async)"
+             class="form-inputs">
+      <mat-form-field>
+        <input [(ngModel)]="tmpSyncFile"
+               [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_FILE_NAME|translate"
+               matInput
+               name="tmpSyncFile"
+               type="text">
+        <mat-icon matSuffix="">file_upload</mat-icon>
+      </mat-form-field>
+
+      <button (click)="changeSyncFileName(tmpSyncFile)"
+              color="primary"
+              mat-stroked-button
+              type="button">
+        <mat-icon>save</mat-icon>
+        {{T.F.GOOGLE.SYNC_CFG.UPDATE_SYNC_FILE|translate}}
+      </button>
+      <br>
+      <mat-checkbox [(ngModel)]="cfg.isAutoLogin"
+                    name="isAutoLogin">
+        {{T.F.GOOGLE.SYNC_CFG.AUTO_LOGIN|translate}}
+      </mat-checkbox>
+
+      <section *ngIf="cfg.isAutoLogin"
+               class="auto-sync-settings">
+        <mat-checkbox [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
+                      name="isLoadRemoteDataOnStartup">
+          {{T.F.GOOGLE.SYNC_CFG.LOAD_ON_STARTUP|translate}}
+        </mat-checkbox>
+        <mat-checkbox [(ngModel)]="cfg.isAutoSyncToRemote"
+                      name="isAutoSyncToRemote">
+          {{T.F.GOOGLE.SYNC_CFG.AUTO_SYNC|translate}}
+        </mat-checkbox>
+        <mat-checkbox [(ngModel)]="cfg.isCompressData"
+                      name="isCompressData">
+          {{T.F.GOOGLE.SYNC_CFG.COMPRESS|translate}}
+        </mat-checkbox>
+        <mat-checkbox [(ngModel)]="cfg.isNotifyOnSync"
+                      name="isNotifyOnSync">
+          {{T.F.GOOGLE.SYNC_CFG.NOTIFY|translate}}
+        </mat-checkbox>
+
+        <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
+          <input [(ngModel)]="cfg.syncInterval"
+                 [isAllowSeconds]="true"
+                 [placeholder]="T.F.GOOGLE.SYNC_CFG.SYNC_INTERVAL|translate"
+                 inputDuration
+                 matInput
+                 name="syncInterval"
+                 type="text">
+          <mat-icon matSuffix="">timer</mat-icon>
+        </mat-form-field>
+      </section>
+
+      <a class="md-stroked"
+         color=primary
+         external-link
+         href="https://myaccount.google.com/permissions"
+         mat-button
+         target="_blank">
+        <mat-icon>remove_circle</mat-icon>
+        Revoke permissions
+      </a>
+    </section>
+
+
+  </div>
+
+
+  <div class="controls">
+    <button class="btn btn-primary submit-button"
+            color="primary"
+            mat-raised-button
+            type="submit">
+      <mat-icon>save</mat-icon>
+      {{T.G.SAVE|translate}}
+    </button>
+  </div>
+</form>
