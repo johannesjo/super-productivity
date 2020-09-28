@@ -1,6 +1,7 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectCfgFormKey } from '../project/project.model';
 import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
+import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string | null,
@@ -125,6 +126,12 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
+export type SyncConfig = Readonly<{
+  isEnabled: boolean;
+  syncProvider: SyncProvider | null,
+  syncInterval: number,
+}>;
+
 export type TrackingReminderConfig = Readonly<{
   isEnabled: boolean;
   minTime: number;
@@ -137,12 +144,14 @@ export type GlobalConfigState = Readonly<{
   idle: IdleConfig;
   takeABreak: TakeABreakConfig;
   pomodoro: PomodoroConfig;
-  googleDriveSync: GoogleDriveSyncConfig;
-  dropboxSync: DropboxSyncConfig;
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
   trackingReminder: TrackingReminderConfig;
+
+  sync: SyncConfig;
+  dropboxSync: DropboxSyncConfig;
+  googleDriveSync: GoogleDriveSyncConfig;
 
   [MODEL_VERSION_KEY]?: number;
 }>;
