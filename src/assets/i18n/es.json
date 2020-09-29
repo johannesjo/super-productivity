@@ -2,15 +2,15 @@
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Ignorar",
-      "INSTALL": "instalar",
-      "MSG": "¿Desea instalar Super Productividad como PWA?"
+      "INSTALL": "Instalar",
+      "MSG": "¿Deseas instalar Super Productivity como una PWA?"
     },
-    "B_OFFLINE": "Estás desconectado de internet. Sincronizar y solicitar datos del proveedor de problemas no funcionará.",
+    "B_OFFLINE": "Estás desconectado de internet. La sincronización y solicitud de datos del proveedor no funcionarán.",
     "D_INITIAL": {
       "TITLE": "Bienvenido a v{{nr}}"
     },
-    "UPDATE_MAIN_MODEL": "¡Super Productivity ha recibido una actualización importante! Se requieren algunas migraciones para sus datos. Tenga en cuenta que esto hace que sus datos sean incompatibles con versiones anteriores de la aplicación.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "No se eligió ninguna actualización del modelo. Tenga en cuenta que, si no desea realizar la actualización del modelo, debe bajar a la última versión.",
+    "UPDATE_MAIN_MODEL": "¡Super Productivity ha recibido una actualización importante! Se requieren algunas migraciones de tus datos. Ten en cuenta que esto hace que tus datos sean incompatibles con versiones anteriores de la aplicación.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "No se eligió ninguna actualización del modelo. Ten en cuenta que, si no deseas realizar la actualización del modelo, debes descargar la última versión.",
     "UPDATE_WEB_APP": "Nueva versión disponible. ¿Cargar nueva versión?"
   },
   "BL": {
@@ -23,21 +23,21 @@
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Mas tarde, hoy",
     "NEXT_WEEK": "La próxima semana",
-    "PLACEHOLDER": "Por favor seleccione una fecha",
-    "PRESS_ENTER_AGAIN": "Presione enter nuevamente para guardar",
+    "PLACEHOLDER": "Selecciona una fecha",
+    "PRESS_ENTER_AGAIN": "Presiona enter nuevamente para guardar",
     "TOMORROW": "mañana"
   },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
-        "ADD_ATTACHMENT": "Añadir un adjunto",
+        "ADD_ATTACHMENT": "Agregar un adjunto",
         "EDIT_ATTACHMENT": "Editar adjunto",
         "LABELS": {
           "FILE": "Ruta de archivo",
           "IMG": "Imagen",
           "LINK": "Url"
         },
-        "SELECT_TYPE": "Seleccione un tipo",
+        "SELECT_TYPE": "Selecciona un tipo",
         "TYPES": {
           "FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
           "IMG": "Imagen (mostrada como miniatura)",
@@ -47,13 +47,13 @@
     },
     "BOOKMARK": {
       "BAR": {
-        "ADD": "Añadir marcador",
+        "ADD": "Agregar marcador",
         "DROP": "Suelta aquí para agregar un marcador",
         "EDIT": "Editar marcadores",
         "NO_BOOKMARKS": "No tienes marcadores de proyectos. Agregue una a través de arrastrar y soltar o haciendo clic en el ícono ''."
       },
       "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Añadir marcador",
+        "ADD_BOOKMARK": "Agregar marcador",
         "EDIT_BOOKMARK": "Editar marcador",
         "LABELS": {
           "COMMAND": "Comando",
@@ -61,8 +61,8 @@
           "IMG": "Imagen",
           "LINK": "Url"
         },
-        "SELECT_ICON": "Seleccione un ícono",
-        "SELECT_TYPE": "Seleccione un tipo",
+        "SELECT_ICON": "Selecciona un ícono",
+        "SELECT_TYPE": "Selecciona un tipo",
         "TYPES": {
           "COMMAND": "Comando (comando shell personalizado)",
           "FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
@@ -97,7 +97,7 @@
       },
       "FORM": {
         "B_GENERATE_TOKEN": "Generar token",
-        "FOLLOW_LINK": "Abra el siguiente enlace y copie el código de autenticación proporcionado allí en el campo de entrada.",
+        "FOLLOW_LINK": "Abre el siguiente enlace y copia el código de autenticación proporcionado allí en el campo de entrada.",
         "L_ACCESS_TOKEN": "Token de acceso (generado a partir del código de autenticación)",
         "L_AUTH_CODE": "código de autenticación",
         "L_ENABLE_SYNCING": "Habilitar sincronización de Dropbox",
@@ -232,7 +232,7 @@
         "ERROR": "Google Drive - Error:",
         "ERROR_INITIAL_IMPORT": "Google Drive: error al intentar importar datos inicialmente",
         "LOCAL_UP_TO_DATE": "Google Drive: datos locales ya actualizados",
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Por favor, elimine todos menos uno o elija un nombre diferente.",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Elimine todos menos uno o elija un nombre diferente.",
         "NO_UPDATE_REQUIRED": "Google Drive: No se requiere actualización",
         "REMOTE_UP_TO_DATE": "Google Drive: datos remotos ya actualizados",
         "SUCCESS": "Google Drive: Copia de seguridad guardada con éxito",
@@ -260,7 +260,7 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: Para evitar el cierre de api, Super Productividad ha bloqueado el acceso. ¡Probablemente deberías revisar tu configuración de jira!",
+        "BLOCK_ACCESS_MSG": "Jira: Para evitar el cierre de api, Super Productivity ha bloqueado el acceso. ¡Probablemente deberías revisar tu configuración de jira!",
         "BLOCK_ACCESS_UNBLOCK": "Desbloquear"
       },
       "CFG_CMP": {
@@ -285,7 +285,7 @@
         "TITLE": "Configurar Jira para Proyecto"
       },
       "DIALOG_TRANSITION": {
-        "CHOOSE_STATUS": "Elija estado para asignar",
+        "CHOOSE_STATUS": "Elija estado a asignar",
         "CURRENT_ASSIGNEE": "Asignado actual:",
         "CURRENT_STATUS": "Estado actual:",
         "TITLE": "Jira: Estado de actualización",
@@ -293,7 +293,7 @@
       },
       "DIALOG_WORKLOG": {
         "CURRENTLY_LOGGED": "Tiempo registrado actualmente:",
-        "INVALID_DATE": "El valor introducido no es una fecha!",
+        "INVALID_DATE": "¡El valor introducido no es una fecha!",
         "SAVE_WORKLOG": "Guardar registro de trabajo",
         "STARTED": "Empezado",
         "SUBMIT_WORKLOG_FOR": "Enviar un registro de trabajo a Jira para",
@@ -304,12 +304,12 @@
         "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github al registro de trabajo",
         "IS_AUTO_POLL": "Comprobar automáticamente los problemas de git importados por cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
-        "REPO": "\"username / repositoryName\" para el repositorio de git que desee seguir"
+        "REPO": "\"username/repositoryName\" para el repositorio de git que desee seguir"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para agregar tareas automáticamente al registro de trabajo",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir el cuadro de diálogo para enviar el registro de trabajo a jira cuando se realiza la subtarea",
-        "IS_AUTO_ADD_TO_BACKLOG": "Añadir automáticamente problemas al registro de trabajo de Jira",
+        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas al registro de trabajo de Jira",
         "IS_AUTO_POLL_TICKETS": "Verifica automáticamente los problemas importados por cambios y notifica",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Compruebe si el problema actualmente trabajado está asignado al usuario actual",
         "IS_WORKLOG_ENABLED": "Abrir el cuadro de diálogo para enviar el registro de trabajo a jira cuando se realiza la tarea",
@@ -358,7 +358,7 @@
       },
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Registro de trabajo agregado para {{issueKey}}",
-        "EXTENSION_NOT_LOADED": "Extensión de Super Productividad no cargada. Recargar la página podría ayudar",
+        "EXTENSION_NOT_LOADED": "Extensión de Super Productivity no cargada. Recargar la página podría ayudar",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: Importó {{issuesLength}} problemas nuevos de jira al registro de trabajo",
         "IMPORTED_SINGLE_ISSUE": "Jira: problema importado \"{{issueText}}\" de jira al registro de trabajo",
         "INSUFFICIENT_SETTINGS": "Ajustes insuficientes proporcionados para Jira",
@@ -373,14 +373,14 @@
         "TRANSITION": "Jira: establece el problema \"{{issueKey}}\" en \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Transiciones cargadas. Usa las selecciones de abajo para asignarlas.",
         "TRANSITION_SUCCESS": "Jira: establece el problema {{issueKey}} a <strong>{{chosenTransition}}</strong>",
-        "UNABLE_TO_REASSIGN": "Jira: No se puede reasignar el ticket a ti mismo, porque no especificaste un nombre de usuario. Por favor, visite los ajustes."
+        "UNABLE_TO_REASSIGN": "Jira: No se puede reasignar el ticket a ti mismo, porque no especificaste un nombre de usuario. Visite los ajustes."
       },
       "STEPPER": {
         "CREDENTIALS": "Credenciales",
         "DONE": "Ya has terminado.",
         "LOGIN_SUCCESS": "¡Inicio de sesión exitoso!",
         "TEST_CREDENTIALS": "Credenciales de prueba",
-        "WELCOME_USER": "Bienvenido {{user}}!"
+        "WELCOME_USER": "¡Bienvenido {{user}}!"
       }
     },
     "METRIC": {
@@ -399,12 +399,12 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "Estado de ánimo y productividad a lo largo del tiempo.",
         "NO_ADDITIONAL_DATA_YET": "No se han recopilado datos adicionales todavía. Use el formulario en el resumen diario \"Evaluación\" del panel para hacerlo.",
         "OBSTRUCTION_SELECTION_COUNT": "Número de veces que se seleccionó un factor de obstrucción",
-        "TASKS_DONE_CREATED": "Tareas (realizada / creada)",
+        "TASKS_DONE_CREATED": "Tareas (realizada/creada)",
         "TIME_ESTIMATED": "Tiempo estimado",
         "TIME_SPENT": "Tiempo empleado"
       },
       "EVAL_FORM": {
-        "ADD_NOTE_FOR_TOMORROW": "Añadir nota para mañana",
+        "ADD_NOTE_FOR_TOMORROW": "Agregar nota para mañana",
         "DISABLE_REPEAT_EVERY_DAY": "Desactivar repetir todos los días",
         "ENABLE_REPEAT_EVERY_DAY": "Repite todos los dias",
         "HELP_H1": "¿Por qué debería importarme?",
@@ -442,7 +442,7 @@
       "EDIT_FULLSCREEN": "Editar en pantalla completa",
       "EDIT_REMINDER": "Editar recordatorio",
       "NOTES_CMP": {
-        "ADD_BTN": "Añadir nueva nota",
+        "ADD_BTN": "Agregar nueva nota",
         "DROP_TO_ADD": "Suelta aquí para agregar una nueva nota"
       },
       "NOTE_CMP": {
@@ -459,7 +459,7 @@
     },
     "POMODORO": {
       "BACK_TO_WORK": "¡Volver al trabajo!",
-      "BREAK_IS_DONE": "Tu descanso ha terminado!",
+      "BREAK_IS_DONE": "!Tu descanso ha terminado!",
       "ENJOY_YOURSELF": "Diviértete, muévete, vuelve en:",
       "FINISH_SESSION_X": "¡Has completado exitosamente la sesión <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
@@ -492,7 +492,7 @@
         "TITLE": "Curiosidad"
       },
       "H1": "¡Relájate un poco!",
-      "P1": "Primero que nada, a relajarse! Todo el mundo lo hace de vez en cuando. Y si no estás haciendo lo que debes, ¡al menos deberías disfrutarlo! Entonces revisa las secciones de abajo para algo útil.",
+      "P1": "!Primero que nada, a relajarse! Todo el mundo lo hace de vez en cuando. Y si no estás haciendo lo que debes, ¡al menos deberías disfrutarlo! Entonces revisa las secciones de abajo para algo útil.",
       "P2": "Si desea saber más sobre la ciencia detrás de todo esto, puedo recomendar <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">este artículo</a> , en el cual se encuentran algunos de los ejercicios.",
       "P3": "Recuerde: la procrastinación es un problema de regulación emocional, no un problema de gestión del tiempo.",
       "REFRAME": {
@@ -560,7 +560,7 @@
         "TITLE": "Editar contador simple"
       },
       "FORM": {
-        "ADD_NEW": "Añadir contador simple",
+        "ADD_NEW": "Agregar contador simple",
         "HELP": "Aquí puede configurar botones simples que aparecerán en la esquina superior derecha. Pueden ser temporizadores o simplemente un contador simple, que se cuenta, haciendo clic en él.",
         "L_AUTO_COUNT_UP": "El gatillo automático cuenta para",
         "L_AUTO_SWITCH_OFF": "Disparador automático apagado para",
@@ -600,8 +600,8 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "Añadir un adjunto",
-        "ADD_SUB_TASK": "Añadir sub tarea",
+        "ADD_ATTACHMENT": "Agregar un adjunto",
+        "ADD_SUB_TASK": "Agregar subtarea",
         "ATTACHMENTS": "Adjuntos {{nr}}",
         "FROM_PARENT": "(del padre)",
         "LOCAL_ATTACHMENTS": "Adjuntos locales",
@@ -619,15 +619,15 @@
         "ADD_TASK": "Agregar tarea",
         "ADD_TASK_TO_BACKLOG": "Agregar tarea al registro de trabajo",
         "CREATE_TASK": "Crear nueva tarea",
-        "EXAMPLE": "Ejemplo: \"Un título de tarea + nombre de proyecto # alguna etiqueta # alguna otra etiqueta 10m / 3h\"",
+        "EXAMPLE": "Ejemplo: \"Título de tarea + nombre de proyecto #una etiqueta #otra etiqueta 10m/3h\"",
         "START": "Presiona entrar una vez más para comenzar"
       },
       "B": {
-        "ADD_HALF_HOUR": "Añadir 1/2 hora",
+        "ADD_HALF_HOUR": "Agregar 1/2 hora",
         "ESTIMATE_EXCEEDED": "Tiempo estimado superado para \"{{title}}\""
       },
       "CMP": {
-        "ADD_SUB_TASK": "Añadir subtarea",
+        "ADD_SUB_TASK": "Agregar subtarea",
         "ADD_TO_MY_DAY": "Agregar a mi día",
         "ADD_TO_PROJECT": "Agregar a un proyecto",
         "CONVERT_TO_PARENT_TASK": "Convertir a tarea principal",
@@ -647,8 +647,8 @@
         "REPEAT_EDIT": "Editar Repetir Tarea Config.",
         "SCHEDULE": "Programar tarea",
         "SHOW_UPDATES": "Mostrar actualizaciones",
-        "TOGGLE_ADDITIONAL": "Mostrar / Ocultar información adicional",
-        "TOGGLE_ATTACHMENTS": "Mostrar / Ocultar archivos adjuntos",
+        "TOGGLE_ADDITIONAL": "Mostrar/Ocultar información adicional",
+        "TOGGLE_ATTACHMENTS": "Mostrar/Ocultar archivos adjuntos",
         "TOGGLE_DONE": "Marcar como realizada / no realizada",
         "TOGGLE_SUB_TASK_VISIBILITY": "Alternar visibilidad de subtareas",
         "TRACK_TIME": "Comenzar el tiempo de seguimiento",
@@ -663,8 +663,8 @@
         "UNSCHEDULE": "Desprogramar"
       },
       "D_REMINDER_VIEW": {
-        "ADD_ALL_TO_TODAY": "Agrega todo a hoy",
-        "ADD_TO_TODAY": "Añadir a hoy",
+        "ADD_ALL_TO_TODAY": "Agregar todo a hoy",
+        "ADD_TO_TODAY": "Agregar a hoy",
         "DISMISS": "Descartar recordatorio",
         "DISMISS_ALL": "Descartar todo",
         "DUE_TASK": "Tarea debida",
@@ -680,7 +680,7 @@
         "SWITCH_CONTEXT_START": "Cambiar contexto e inicio"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "Añadir tiempo empleado para otro día",
+        "ADD_FOR_OTHER_DAY": "Agregar tiempo empleado para otro día",
         "DELETE_FOR": "Borrar entrada por dia",
         "ESTIMATE": "Estimado",
         "TIME_SPENT": "Tiempo empleado",
@@ -688,14 +688,14 @@
         "TITLE": "Tiempo empleado / Estimaciones"
       },
       "D_TIME_FOR_DAY": {
-        "ADD_ENTRY_FOR": "Añadir nueva entrada para {{date}}",
+        "ADD_ENTRY_FOR": "Agregar nueva entrada para {{date}}",
         "DATE": "Fecha para la nueva entrada",
         "HELP": "Ejemplos:<br> 30m => 30 minutos<br> 2h => 2 horas<br> 2h 30m => 2 horas y 30 minutos",
         "TINE_SPENT": "Tiempo empleado",
-        "TITLE": "Añadir para el día"
+        "TITLE": "Agregar para el día"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "Tiempo estimado superado!",
+        "ESTIMATE_EXCEEDED": "!Tiempo estimado superado!",
         "ESTIMATE_EXCEEDED_BODY": "Has excedido tu tiempo estimado para \"{{title}}\"."
       },
       "S": {
@@ -724,7 +724,7 @@
         "OK": "Quitar completamente"
       },
       "D_EDIT": {
-        "ADD": "Añadir Repetir configuración de tarea",
+        "ADD": "Agregar Repetir configuración de tarea",
         "EDIT": "Editar Repetir Tarea Config.",
         "HELP1": "Las tareas repetitivas están destinadas a las tareas diarias, por ejemplo, \"Organización\", \"Reunión diaria\", \"Revisión de código\", \"Comprobación de correos electrónicos\" o tareas similares que pueden ocurrir una y otra vez.",
         "HELP2": "Una vez configurada, se volverá a crear una tarea repetitiva en cada día seleccionado a continuación tan pronto como abra su proyecto y se marcará automáticamente como finalizada al final del día. Serán manejados como diferentes instancias. Así que puedes agregar libremente subtareas, etc.",
@@ -774,7 +774,7 @@
       "D_EXPORT_TITLE": "Exportar registro de trabajo {{start}}-{{end}}",
       "D_EXPORT_TITLE_SINGLE": "Exportar registro de trabajo {{day}}",
       "EXPORT": {
-        "ADD_COL": "Añadir columna",
+        "ADD_COL": "Agregar columna",
         "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
         "DONT_ROUND": "no redondear",
         "EDIT_COL": "Editar columna",
@@ -871,42 +871,42 @@
       "TITLE": "Importación y exportación"
     },
     "KEYBOARD": {
-      "ADD_NEW_NOTE": "Añadir nueva nota",
+      "ADD_NEW_NOTE": "Agregar nueva nota",
       "ADD_NEW_TASK": "Agregar nueva tarea",
-      "APP_WIDE_SHORTCUTS": "Accesos directos globales (en toda la aplicación)",
+      "APP_WIDE_SHORTCUTS": "Atajos globales (en toda la aplicación)",
       "COLLAPSE_SUB_TASKS": "Contraer subtareas",
       "EXPAND_SUB_TASKS": "Expandir subtareas",
-      "GLOBAL_ADD_NOTE": "Añadir nueva nota",
+      "GLOBAL_ADD_NOTE": "Agregar nueva nota",
       "GLOBAL_ADD_TASK": "Agregar nueva tarea",
-      "GLOBAL_SHOW_HIDE": "Mostrar / Ocultar Super Productividad",
+      "GLOBAL_SHOW_HIDE": "Mostrar/Ocultar Super Productivity",
       "GLOBAL_TOGGLE_TASK_START": "Alternar el seguimiento de tiempo para la última tarea activa",
       "GO_TO_DAILY_AGENDA": "Ir a Agenda",
       "GO_TO_FOCUS_MODE": "Ir al Modo de Enfoque",
       "GO_TO_SETTINGS": "Ir a Ajustes",
       "GO_TO_WORK_VIEW": "Ir a la Vista de Trabajo",
-      "HELP": "<p>Aquí puedes configurar todos los atajos del teclado.</p> <p>Haga clic en la entrada de texto e ingrese la combinación de teclas deseada. Pulsa Enter para guardar y Escape para abortar.</p> <p>Hay tres tipos de accesos directos:</p> <ul> <li> <strong>Atajos globales:</strong> Cuando la aplicación se está ejecutando, se activará la acción desde cualquier otra aplicación. </li> <li> <strong>Atajos de nivel de aplicación:</strong> Se activará desde todas las pantallas de la aplicación, pero no si está editando un campo de texto. </li> <li> <strong>Atajos de nivel de tarea:</strong> Solo se activarán si ha seleccionado una tarea mediante el mouse o el teclado y, por lo general, activará una acción relacionada específicamente con esa tarea. </li> </ul>",
+      "HELP": "<p>Aquí puedes configurar todos los atajos del teclado.</p> <p>Haga clic en la entrada de texto e ingrese la combinación de teclas deseada. Pulsa Enter para guardar y Escape para abortar.</p> <p>Hay tres tipos de atajos:</p> <ul> <li> <strong>Atajos globales:</strong> Cuando la aplicación se está ejecutando, se activará la acción desde cualquier otra aplicación. </li> <li> <strong>Atajos de nivel de aplicación:</strong> Se activará desde todas las pantallas de la aplicación, pero no si está editando un campo de texto. </li> <li> <strong>Atajos de nivel de tarea:</strong> Solo se activarán si ha seleccionado una tarea mediante el mouse o el teclado y, por lo general, activará una acción relacionada específicamente con esa tarea. </li> </ul>",
       "MOVE_TASK_DOWN": "Mueve la tarea hacia abajo en la lista",
       "MOVE_TASK_UP": "Mover la tarea hacia arriba en la lista",
       "MOVE_TO_BACKLOG": "Mover la tarea al registro de trabajo",
       "MOVE_TO_TODAYS_TASKS": "Mueve la tarea a la lista de tareas de hoy",
-      "OPEN_PROJECT_NOTES": "Mostrar / Ocultar Notas del Proyecto",
+      "OPEN_PROJECT_NOTES": "Mostrar/Ocultar Notas del Proyecto",
       "SELECT_NEXT_TASK": "Seleccionar tarea siguiente",
       "SELECT_PREVIOUS_TASK": "Seleccionar tarea previa",
       "SYSTEM_SHORTCUTS": "Atajos globales (en todo el sistema)",
-      "TASK_ADD_SUB_TASK": "Añadir subtarea",
+      "TASK_ADD_SUB_TASK": "Agregar subtarea",
       "TASK_DELETE": "Eliminar tarea",
       "TASK_EDIT_TITLE": "Editar Título",
       "TASK_MOVE_TO_PROJECT": "Abrir mover tarea al menú del proyecto",
       "TASK_OPEN_ESTIMATION_DIALOG": "Editar estimación / tiempo empleado",
       "TASK_SCHEDULE": "Programar tarea",
       "TASK_SHORTCUTS": "Tareas",
-      "TASK_SHORTCUTS_INFO": "Los siguientes atajos se aplican a la tarea seleccionada actualmente (seleccionada mediante una pestaña o un mouse).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Mostrar / Ocultar información adicional de la tarea",
+      "TASK_SHORTCUTS_INFO": "Los siguientes atajos se aplican a la tarea seleccionada actual (seleccionada a través de una pestaña o con el ratón).",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Mostrar/Ocultar información adicional de la tarea",
       "TASK_TOGGLE_DONE": "Altenado realizado",
       "TITLE": "Atajos de teclado",
-      "TOGGLE_BACKLOG": "Mostrar / Ocultar registro de la tarea",
-      "TOGGLE_BOOKMARKS": "Mostrar / Ocultar barra de marcadores",
-      "TOGGLE_PLAY": "Iniciar / detener tarea",
+      "TOGGLE_BACKLOG": "Mostrar/Ocultar registro de la tarea",
+      "TOGGLE_BOOKMARKS": "Mostrar/Ocultar barra de marcadores",
+      "TOGGLE_PLAY": "Iniciar/Detener tarea",
       "ZOOM_DEFAULT": "Valor predeterminado de zoom (solo para escritorio)",
       "ZOOM_IN": "Acercar (solo para escritorio)",
       "ZOOM_OUT": "Alejar (solo para escritorio)"
@@ -918,30 +918,30 @@
       "ES": "Español",
       "FA": "Farsi",
       "FR": "Francés",
-      "IT": "italiano",
+      "IT": "Italiano",
       "JA": "Japonés",
       "KO": "Coreano",
-      "LABEL": "Por favor, seleccione un idioma",
+      "LABEL": "Selecciona un idioma",
       "NL": "Holandés",
-      "PT": "portugués",
+      "PT": "Portugués",
       "RU": "Ruso",
       "TITLE": "Idioma",
       "TR": "Turco",
       "ZH": "Chino"
     },
     "MISC": {
-      "DEFAULT_PROJECT": "Proyecto predeterminado para usar para tareas si no se especifica ninguno",
-      "HELP": "<p><strong>¿No ve las notificaciones de escritorio?</strong> Para Windows, es posible que desee revisar Sistema> Notificaciones y acciones y verificar si se han habilitado las notificaciones requeridas.</p>",
-      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Agregue automáticamente la etiqueta de hoy a las tareas trabajadas",
-      "IS_AUTO_MARK_PARENT_AS_DONE": "Marque la tarea principal como realizada, cuando todas las subtareas estén listas",
-      "IS_AUTO_START_NEXT_TASK": "Comience a rastrear la siguiente tarea cuando marque actual como hecha",
+      "DEFAULT_PROJECT": "Proyecto predeterminado a usar para las tareas si no se especifica ninguno",
+      "HELP": "<p><strong>¿No se ven las notificaciones de escritorio?</strong> En Windows, puedes revisar en Sistema> Notificaciones y acciones, y verificar si se han habilitado las notificaciones requeridas.</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Agregar automáticamente la etiqueta de hoy a las tareas completadas",
+      "IS_AUTO_MARK_PARENT_AS_DONE": "Marcar la tarea principal como realizada, cuando se completen todas las subtareas",
+      "IS_AUTO_START_NEXT_TASK": "Comenzar a rastrear la siguiente tarea cuando se marque la tarea actual como completa",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación",
-      "IS_DARK_MODE": "Modo oscuro",
-      "IS_DISABLE_INITIAL_DIALOG": "Deshabilite el diálogo de información inicial (¡podría perderse actualizaciones importantes!)",
+      "IS_DARK_MODE": "Modo Oscuro",
+      "IS_DISABLE_INITIAL_DIALOG": "Deshabilitar el diálogo de información inicial (¡podrías perderte actualizaciones importantes!)",
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace sobre el encabezado principal (solo para escritorio)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
-      "IS_TURN_OFF_MARKDOWN": "Desactiva el análisis de descuento para notas",
-      "TITLE": "Ajustes varios"
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excede el tiempo estimado",
+      "IS_TURN_OFF_MARKDOWN": "Desactivar la sintaxis markdown para las notas",
+      "TITLE": "Ajustes Variados"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duración de las pausas breves",
@@ -952,16 +952,16 @@
       "IS_MANUAL_CONTINUE": "Confirmar manualmente el inicio de la siguiente sesión de pomodoro",
       "IS_PLAY_SOUND": "Reproducir sonido cuando la sesión haya terminado",
       "IS_PLAY_SOUND_AFTER_BREAK": "Reproducir sonido cuando el descanso haya terminado",
-      "IS_PLAY_TICK": "Reproduce el sonido de tick cada segundo",
+      "IS_PLAY_TICK": "Reproducir el sonido de tick cada segundo",
       "IS_STOP_TRACKING_ON_BREAK": "Detener el tiempo de seguimiento para la tarea en descanso",
       "LONGER_BREAK_DURATION": "Duración de los descansos más largos",
-      "TITLE": "Pomodoro Timer"
+      "TITLE": "Temporizador Pomodoro"
     },
     "SOUND": {
       "DONE_SOUND": "Sonido de tarea realizada",
       "IS_INCREASE_DONE_PITCH": "Aumente el tono para cada tarea realizada",
       "IS_PLAY_DONE_SOUND": "Reproducir sonido cuando la tarea esté marcada como terminada",
-      "TITLE": "Sonar",
+      "TITLE": "Sonido",
       "VOLUME": "Volumen"
     },
     "TAKE_A_BREAK": {
@@ -973,6 +973,12 @@
       "MIN_WORKING_TIME": "Mostrar una notificación de descanso después de X tiempo trabajando sin una",
       "MOTIVATIONAL_IMG": "Imagen motivacional (url web)",
       "TITLE": "Recordatorio de descanso"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "Establecer un recordatorio para que aparezca en caso de que haya olvidado iniciar el seguimiento del tiempo.",
+      "TITLE": "Recordatorio de Seguimiento de Tiempo",
+      "L_IS_ENABLED": "Activado",
+      "L_MIN_TIME": "Tiempo a esperar antes de que se mueste el recordatorio"
     }
   },
   "GLOBAL_SNACK": {
@@ -980,8 +986,8 @@
     "ERR_COMPRESSION": "Error para la interfaz de compresión",
     "PERSISTENCE_DISALLOWED": "Los datos no se conservarán de forma permanente. ¡Tenga en cuenta que esto puede conducir a la pérdida de datos!",
     "RUNNING_X": "Ejecutando \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} presionado, pero el acceso directo a marcadores abiertos solo está disponible en el contexto del proyecto.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} presionado, pero el acceso directo de notas abiertas solo está disponible en el contexto del proyecto."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} presionado, pero el atajo a marcadores abiertos solo está disponible en el contexto del proyecto.",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} presionado, pero el atajo de notas abiertas solo está disponible en el contexto del proyecto."
   },
   "GPB": {
     "ASSETS": "Cargando activos ...",
@@ -1012,14 +1018,14 @@
     "TAGS": "Etiquetas",
     "TASKS": "Tareas",
     "TASK_LIST": "Lista de tareas",
-    "TOGGLE_SHOW_BOOKMARKS": "Mostrar / Ocultar Marcadores",
-    "TOGGLE_SHOW_NOTES": "Mostrar / Ocultar Notas del Proyecto",
+    "TOGGLE_SHOW_BOOKMARKS": "Mostrar/Ocultar Marcadores",
+    "TOGGLE_SHOW_NOTES": "Mostrar/Ocultar Notas del Proyecto",
     "TOGGLE_TRACK_TIME": "Iniciar / Detener el tiempo de seguimiento",
     "WORKLOG": "Registro de trabajo"
   },
   "PDS": {
-    "BACK": "Espera me olvidé de algo!",
-    "BREAK_LABEL": "Descansos (nr / tiempo)",
+    "BACK": "!Espera me olvidé de algo!",
+    "BREAK_LABEL": "Descansos (nr/tiempo)",
     "CELEBRATE": "¡Tómate un momento para celebrar <i>!</i>",
     "CLEAR_ALL_CONTINUE": "Borrar todo listo y continuar",
     "D_CONFIRM_APP_CLOSE": {
@@ -1063,11 +1069,11 @@
       "OK": "Archivar"
     },
     "D_CONFIRM_DELETE": {
-      "MSG": "¿Estás seguro de que quieres eliminar este proyecto? Se recomienda hacer una copia de seguridad de sus datos antes de hacer esto.",
+      "MSG": "¿Seguro que quieres eliminar este proyecto? Se recomienda hacer una copia de seguridad de sus datos antes de hacer esto.",
       "OK": "Borrar"
     },
     "D_CONFIRM_UNARCHIVE": {
-      "MSG": "¿Estás seguro de que quieres desarchivar este proyecto?",
+      "MSG": "¿Seguro que quieres desarchivar este proyecto?",
       "OK": "Desarchivar"
     },
     "EDIT_PROJECT": "Editar proyecto",
@@ -1084,11 +1090,11 @@
     "GLOBAL_SETTINGS": "Ajustes globales",
     "ISSUE_INTEGRATION": "Integración de problemas",
     "PRIVATE_POLICY": "Política privada",
-    "PRODUCTIVITY_HELPER": "Ayudante de productividad",
+    "PRODUCTIVITY_HELPER": "Ayudante de Productividad",
     "PROJECT_SETTINGS": "Ajustes Específicos del Proyecto",
     "SYNC_EXPORT": "Sincronizar y Exportar",
     "TAG_SETTINGS": "Configuraciones específicas de etiqueta",
-    "TOGGLE_DARK_MODE": "Cambiar modo oscuro"
+    "TOGGLE_DARK_MODE": "Cambiar a modo oscuro"
   },
   "S": {
     "SYNC": {
@@ -1103,7 +1109,7 @@
     "START_TASK": "Inicie la tarea ahora y elimine el recordatorio"
   },
   "THEMES": {
-    "SELECT_THEME": "Seleccione el tema",
+    "SELECT_THEME": "Selecciona el tema",
     "amber": "Ámbar",
     "blue": "Azul",
     "blue-grey": "Gris azulado",
@@ -1121,7 +1127,7 @@
     "yellow": "Amarillo"
   },
   "V": {
-    "E_1TO10": "Por favor, introduzca un valor entre 1 y 10",
+    "E_1TO10": "Ingresa un valor entre 1 y 10",
     "E_DATETIME": "El valor ingresado no es una fecha y hora!",
     "E_MAX": "No debe ser más grande que {{val}}",
     "E_MAX_LENGTH": "Debe tener una longitud máxima de {{val}} caracteres",
@@ -1131,12 +1137,12 @@
     "E_REQUIRED": "Este campo es requerido"
   },
   "WW": {
-    "ADD_MORE": "Añadir más",
+    "ADD_MORE": "Agregar más",
     "ADD_SOME_TASKS": "¡Agrega algunas tareas para planificar tu día!",
     "COMPLETED_TASKS": "Tareas completadas",
     "ESTIMATE_REMAINING": "Estimación restante:",
     "FINISH_DAY": "Fin de dia",
-    "HELP_PROCRASTINATION": "Ayuda, estoy procrastinando!",
+    "HELP_PROCRASTINATION": "Ayuda, !estoy procrastinando!",
     "NO_COMPLETED_TASKS": "Actualmente no hay tareas completadas.",
     "NO_PLANNED_TASKS": "No hay tareas planificadas",
     "READY_TO_WORK": "¡Listo para trabajar!",
