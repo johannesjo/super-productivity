@@ -23,7 +23,7 @@ export const mapToSearchResults = (res: any): SearchResultItem[] => {
         issueData: {
           ...issue,
           summary: issue.summaryText,
-          // NOTE THIS
+          // NOTE: we always use the key, because it allows us to create the right link
           id: issue.key,
         },
       };
@@ -47,7 +47,8 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
 
   return {
     key: issueCopy.key,
-    id: issueCopy.id,
+    // NOTE: we always use the key, because it allows us to create the right link
+    id: issueCopy.key,
     components: fields.components,
     timeestimate: fields.timeestimate,
     timespent: fields.timespent,
