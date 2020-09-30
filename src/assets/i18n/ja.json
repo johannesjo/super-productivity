@@ -826,7 +826,7 @@
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
     "EDIT": "編集",
-    "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、クロム拡張</a> をダウンロード <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> してください。これはモバイルでは機能しないことに注意してください。",
+    "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、クロム拡張</a> をダウンロード <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> してください。これはモバイルでは機能しないことに注意してください。",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
     "MINUTES": "{{m}} 分",

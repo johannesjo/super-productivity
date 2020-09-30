@@ -826,7 +826,7 @@
     "DISMISS": "Отклонить",
     "DO_IT": "Сделай это!",
     "EDIT": "Редактировать",
-    "EXTENSION_INFO": "Пожалуйста, <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> загрузите расширение Chrome</a> , чтобы обеспечить связь с Jira Api и Idle Time Handling. Обратите внимание, что это не работает для мобильных устройств.",
+    "EXTENSION_INFO": "Пожалуйста, <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> загрузите расширение Chrome</a> , чтобы обеспечить связь с Jira Api и Idle Time Handling. Обратите внимание, что это не работает для мобильных устройств.",
     "LOGIN": "Авторизоваться",
     "LOGOUT": "Выйти",
     "MINUTES": "{{m}} минут",

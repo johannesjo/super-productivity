@@ -826,7 +826,7 @@
     "DISMISS": "Verwerfen",
     "DO_IT": "TU es!",
     "EDIT": "Bearbeiten",
-    "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Idle Time Handling zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
+    "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Idle Time Handling zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "LOGIN": "Anmeldung",
     "LOGOUT": "Ausloggen",
     "MINUTES": "{{m}} Minuten",
