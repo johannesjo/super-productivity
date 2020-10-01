@@ -18,7 +18,16 @@ export class DataRepairService {
     return dataRepair(dataIn);
   }
 
-  isRepairConfirmed(): boolean {
+  isRepairPossibleAndConfirmed(dataIn: AppDataComplete): boolean {
+    const isDataRepairPossible: boolean =
+      typeof dataIn === 'object' && dataIn !== null
+      && typeof dataIn.task === 'object' && dataIn.task !== null
+      && typeof dataIn.project === 'object' && dataIn.project !== null
+
+    if (!isDataRepairPossible) {
+      alert('Data damaged, repair not possible.')
+      return false;
+    }
     return confirm(this._translateService.instant(T.CONFIRM.AUTO_FIX));
   }
 }
