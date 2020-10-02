@@ -1,10 +1,15 @@
 import { AppBaseDataEntityLikeStates, AppDataComplete } from '../../imex/sync/sync.model';
 import { TagCopy } from '../../features/tag/tag.model';
 import { ProjectCopy } from '../../features/project/project.model';
+import { isDataRepairPossible } from './is-data-repair-possible.util';
 
 const ENTITY_STATE_KEYS: (keyof AppDataComplete)[] = ['task', 'taskArchive', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'];
 
 export const dataRepair = (data: AppDataComplete): AppDataComplete => {
+  if (!isDataRepairPossible(data)) {
+    throw new Error('Data repair attempted but not possible');
+  }
+
   // console.time('dataRepair');
   let dataOut: AppDataComplete = data;
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
