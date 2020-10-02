@@ -15,6 +15,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { T } from '../../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { TrackingReminderConfig } from '../../config/global-config.model';
+import { IS_TOUCH_ONLY } from '../../../util/is-touch';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +35,7 @@ export class TrackingReminderService {
   );
 
   remindCounter$: Observable<number> = this._cfg$.pipe(
-    switchMap((cfg) => !cfg.isEnabled
+    switchMap((cfg) => !cfg.isEnabled || (!cfg.isShowOnMobile && IS_TOUCH_ONLY)
       ? EMPTY
       : combineLatest([
         this._taskService.currentTaskId$,

@@ -115,6 +115,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   trackingReminder: {
     isEnabled: true,
+    isShowOnMobile: false,
     minTime: minute * 2,
   }
 };

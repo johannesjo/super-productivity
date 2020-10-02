@@ -127,6 +127,7 @@ export type SoundConfig = Readonly<{
 
 export type TrackingReminderConfig = Readonly<{
   isEnabled: boolean;
+  isShowOnMobile: boolean;
   minTime: number;
 }>;
 

@@ -994,6 +994,7 @@
       "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
       "TITLE": "Time Tracking Reminder",
       "L_IS_ENABLED": "Enabled",
+      "L_IS_SHOW_ON_MOBILE": "Show on mobile app",
       "L_MIN_TIME": "Time to wait before showing Banner"
     }
   },
