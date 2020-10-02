@@ -75,7 +75,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       type: 'select',
       templateOptions: {
         label: T.GCF.MISC.FIRST_DAY_OF_WEEK,
-        required: true,
         options: [
           {label: T.F.TASK_REPEAT.F.SUNDAY, value: 0},
           {label: T.F.TASK_REPEAT.F.MONDAY, value: 1},
