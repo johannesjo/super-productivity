@@ -57,7 +57,7 @@ script:
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run buildAllElectron:noTests
-      travis_wait 30 yarn dist:mac:dl -p $PUB
+      travis_wait 33 yarn dist:mac:dl -p $PUB
     fi
 
 # NOTE: disabled until next release of electron builder
