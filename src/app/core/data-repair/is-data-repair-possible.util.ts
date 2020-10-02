@@ -1,7 +1,8 @@
 import { AppDataComplete } from '../../imex/sync/sync.model';
 
 export const isDataRepairPossible = (data: AppDataComplete): boolean => {
-  return typeof data === 'object' && data !== null
-    && typeof data.task === 'object' && data.task !== null
-    && typeof data.project === 'object' && data.project !== null;
+  const d: any = data as any;
+  return typeof d === 'object' && d !== null
+    && typeof d.task === 'object' && d.task !== null
+    && typeof d.project === 'object' && d.project !== null;
 };
