@@ -28,10 +28,15 @@ export class TrackingReminderService {
   _manualReset$: Subject<void> = new Subject();
 
   _resetableCounter$: Observable<number> = merge(
-    of(true),
+    of('INITIAL'),
     this._manualReset$,
   ).pipe(
     switchMap(() => this._counter$),
+  );
+
+  _hideTrigger$: Observable<any> = merge(
+    this._taskService.currentTaskId$.pipe(filter(currentId => !!currentId)),
+    this._idleService.isIdle$.pipe(filter(isIdle => isIdle)),
   );
 
   remindCounter$: Observable<number> = this._cfg$.pipe(
@@ -67,6 +72,14 @@ export class TrackingReminderService {
     this.remindCounter$.subscribe((count) => {
       this._triggerBanner(count, {});
     });
+
+    this._hideTrigger$.subscribe((v) => {
+      this._hideBanner();
+    });
+  }
+
+  private _hideBanner() {
+    this._bannerService.dismiss(BannerId.StartTrackingReminder);
   }
 
   private _triggerBanner(duration: number, cfg: any) {
