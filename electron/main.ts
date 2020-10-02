@@ -1,5 +1,5 @@
 'use strict';
-import { App, app, BrowserWindow, globalShortcut, ipcMain, powerMonitor } from 'electron';
+import { App, app, BrowserWindow, globalShortcut, ipcMain, powerMonitor, protocol } from 'electron';
 import * as electronDl from 'electron-dl';
 
 import { info } from 'electron-log';
@@ -155,6 +155,11 @@ appIN.on('ready', () => {
     isLocked = false;
     sendIdleMsgIfOverMin(Date.now() - suspendStart);
     mainWin.webContents.send(IPC.RESUME);
+  });
+
+  protocol.registerFileProtocol('file', (request, callback) => {
+    const pathname = decodeURI(request.url.replace('file:///', ''));
+    callback(pathname);
   });
 });
 
