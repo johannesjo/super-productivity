@@ -1,3 +1,27 @@
+## [5.9.1](https://github.com/johannesjo/super-productivity/compare/v5.9.0...v5.9.1) (2020-10-02)
+
+
+### Bug Fixes
+
+* allow to display images from file system [#549](https://github.com/johannesjo/super-productivity/issues/549) ([2c8255b](https://github.com/johannesjo/super-productivity/commit/2c8255b0814e03623048ac52cd960cf7b3710999))
+* chrome extension link ([58be356](https://github.com/johannesjo/super-productivity/commit/58be3561c4b1a9695f7bc75b01baf747dc54734a))
+* lint ([b1b8796](https://github.com/johannesjo/super-productivity/commit/b1b87960d7b394784d9bafa92cd84021cec64f7c))
+* **jira:** wrong issue link for auto-imported issues [#551](https://github.com/johannesjo/super-productivity/issues/551) ([ca7cb4b](https://github.com/johannesjo/super-productivity/commit/ca7cb4bf5c702664ea83feba9c60265d2ad48b4d))
+* **task:** only start first startable when there is none already running ([c96b846](https://github.com/johannesjo/super-productivity/commit/c96b846377807441500ea99565106190c8a6a8e3))
+* lint error ([a8d371e](https://github.com/johannesjo/super-productivity/commit/a8d371ed53552c3e354d4bfa9bcc839d15f3856b))
+
+
+### Features
+
+* **startTrackingReminder:** auto hide on idle and when starting to track on a task manually ([a7e41d9](https://github.com/johannesjo/super-productivity/commit/a7e41d937655671986d080a62f8f202cedf4a138))
+* **startTrackingReminder:** hide on mobile per default and make configurable ([b2b210b](https://github.com/johannesjo/super-productivity/commit/b2b210bfe54c04e92b34b47bc25d1816241d7978))
+* add new productivity tips ([a53878a](https://github.com/johannesjo/super-productivity/commit/a53878ab3176e06617f4665039ec163a0a60d56c))
+* improve broken data handling [#555](https://github.com/johannesjo/super-productivity/issues/555) ([c9c2e0c](https://github.com/johannesjo/super-productivity/commit/c9c2e0cad56383fd69f3414d266aec7f6c44189d))
+* improve data repair handling [#552](https://github.com/johannesjo/super-productivity/issues/552) ([1012edb](https://github.com/johannesjo/super-productivity/commit/1012edbd42f8bb99217437843e8a455d7b729dfb))
+* make AppDataForProjects non optional ([8b1a9cf](https://github.com/johannesjo/super-productivity/commit/8b1a9cf79c01f5e876ec2d972e23ecebdac60c0d))
+
+
+
 # [5.9.0](https://github.com/johannesjo/super-productivity/compare/v5.8.2...v5.9.0) (2020-09-24)
 
 
