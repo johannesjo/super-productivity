@@ -14,7 +14,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: false,
     isDisableInitialDialog: false,
-    defaultProjectId: null
+    defaultProjectId: null,
+    firstDayOfWeek: 0,
   },
   evaluation: {
     isHideEvaluationSheet: false,
