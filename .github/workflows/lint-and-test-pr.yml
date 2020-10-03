@@ -1,0 +1,25 @@
+name: "Lint & Test PRs"
+
+on:
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
+
+jobs:
+  test-on-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - run: yarn lint
+      - run: yarn test
+      - run: yarn e2e
+
+
