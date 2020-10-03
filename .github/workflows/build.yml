@@ -58,7 +58,7 @@ jobs:
       - name: NPM or Yarn install with caching
         uses: bahmutov/npm-install@v1.1.0
 
-      - run: 'echo "$PROVISION_PROFILE" > embedded.provisionprofile'
+      - run: 'echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile'
         shell: bash
         env:
           PROVISION_PROFILE: ${{secrets.dl_provision_profile}}
