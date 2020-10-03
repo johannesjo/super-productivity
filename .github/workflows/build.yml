@@ -64,7 +64,6 @@ jobs:
           PROVISION_PROFILE: ${{secrets.dl_provision_profile}}
 
       - name: Prepare for app notarization
-        if: startsWith(matrix.os, 'macos')
         # Import Apple API key for app notarization on macOS
         run: |
           mkdir -p ~/private_keys/
