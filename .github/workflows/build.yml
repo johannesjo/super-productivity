@@ -1,14 +1,12 @@
-name: Build/release
+name: Build/Release
 
-on: push
+on:
+  push:
+    branches: [master, test/git-actions]
 
 jobs:
-  release:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+  linux-bin-and-snap-release:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out Git repository
@@ -19,9 +17,92 @@ jobs:
         with:
           node-version: 12
 
+      - name: NPM or Yarn install with caching
+        uses: bahmutov/npm-install@v1.1.0
+
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
+          # GitHub token, automatically provided to the action
+          # (No need to define this secret in the repo settings)
+          github_token: ${{ secrets.github_token }}
+
+          # If the commit is tagged with a version (e.g. "v1.0.0"),
+          # release the app after building
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+        with:
+          # Log in to Snap Store
+          snapcraft_token: ${{ secrets.snapcraft_token }}
+      # Release to edge if no tag and to candidate if tag
+      - run: snapcraft push app-builds/superProductivity*.snap --release edge
+        if: {{ github.ref != 'ref/head/v*' }}
+      - run: snapcraft push app-builds/superProductivity*.snap --release candidate
+        if: {{ github.ref == 'ref/head/v*' }}
+
+
+  mac-bin:
+    runs-on: macos-latest
+    if: {{ github.ref == 'ref/head/v*' }}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: NPM or Yarn install with caching
+        uses: bahmutov/npm-install@v1.1.0
+
+      - name: Prepare for app notarization
+        if: startsWith(matrix.os, 'macos')
+        # Import Apple API key for app notarization on macOS
+        run: |
+          mkdir -p ~/private_keys/
+          echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
+
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          # GitHub token, automatically provided to the action
+          # (No need to define this secret in the repo settings)
+          github_token: ${{ secrets.github_token }}
+          mac_certs: ${{ secrets.mac_certs }}
+          mac_certs_password: ${{ secrets.mac_certs_password }}
+
+          # If the commit is tagged with a version (e.g. "v1.0.0"),
+          # release the app after building
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          # macOS notarization API key
+          API_KEY_ID: ${{ secrets.mac_api_key_id }}
+          API_KEY_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}
+
+  windows-bin:
+    runs-on: windows-latest
+    if: {{ github.ref == 'ref/head/v*' }}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: NPM or Yarn install with caching
+        uses: bahmutov/npm-install@v1.1.0
+
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          build_script_name: build:noTest
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.github_token }}

@@ -29,7 +29,7 @@
     "buildAllElectron:stage": "yarn preCheck && yarn buildFrontend:stage && yarn electron:build",
     "buildAllElectron:noTests": "yarn lint && yarn buildFrontend:prod && yarn electron:build",
     "build": "yarn preCheck && yarn buildAllElectron:prod",
-    "build:noTest": "yarn lint &&  yarn buildAllElectron:prod",
+    "build:noTest": "yarn lint && yarn buildAllElectron:prod",
     "buildApp": "yarn preCheck && yarn buildAllElectron:prod && yarn electron-builder",
     "test": "ng test --watch=false",
     "test:watch": "ng test --browsers ChromeHeadless",
