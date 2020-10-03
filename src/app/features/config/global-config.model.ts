@@ -50,6 +50,7 @@ export type MiscConfig = Readonly<{
   isAutoAddWorkedOnToToday: boolean;
   isDisableInitialDialog: boolean;
   defaultProjectId: string | null;
+  firstDayOfWeek: number;
 }>;
 
 export type EvaluationConfig = Readonly<{

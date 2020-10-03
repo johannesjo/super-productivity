@@ -5,6 +5,9 @@ import { DateAdapter } from '@angular/material/core';
 import * as moment from 'moment';
 import { AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap, RTL_LANGUAGES } from '../../app.constants';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { GlobalConfigService } from 'src/app/features/config/global-config.service';
+import { map, startWith } from 'rxjs/operators';
+import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 
 @Injectable({providedIn: 'root'})
 export class LanguageService {
@@ -19,6 +22,7 @@ export class LanguageService {
     private _translateService: TranslateService,
     private _dateTimeAdapter: DateTimeAdapter<unknown>,
     private _dateAdapter: DateAdapter<unknown>,
+    private _globalConfigService: GlobalConfigService,
   ) {
   }
 
@@ -32,6 +36,15 @@ export class LanguageService {
 
   setDefault(lng: LanguageCode) {
     this._translateService.setDefaultLang(lng);
+
+    let firstDayOfWeek = DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
+    this._globalConfigService.misc$.pipe(
+      map(cfg => cfg.firstDayOfWeek),
+      startWith(0),
+    ).subscribe((_firstDayOfWeek: number) => {
+      firstDayOfWeek = _firstDayOfWeek;
+     });
+    this._dateAdapter.getFirstDayOfWeek = () => firstDayOfWeek;
   }
 
   setFromBrowserLngIfAutoSwitchLng() {
