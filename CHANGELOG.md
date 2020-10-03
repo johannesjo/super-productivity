@@ -1,3 +1,7 @@
+## [5.9.5](https://github.com/johannesjo/super-productivity/compare/v5.9.4...v5.9.5) (2020-10-03)
+
+
+
 ## [5.9.4](https://github.com/johannesjo/super-productivity/compare/v5.9.3...v5.9.4) (2020-10-03)
 
 
