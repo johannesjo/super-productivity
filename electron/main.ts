@@ -14,7 +14,7 @@ import { initGoogleAuth } from './google-auth';
 import { errorHandler } from './error-handler';
 import { initDebug } from './debug';
 import { IPC } from './ipc-events.const';
-import { backupData } from './backup';
+import { initBackupAdapter } from './backup';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 import { KeyboardConfig } from '../src/app/features/config/global-config.model';
 import lockscreen from './lockscreen';
@@ -51,6 +51,7 @@ process.argv.forEach((val) => {
     isShowDevTools = true;
   }
 });
+const BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
 interface MyApp extends App {
   isQuiting?: boolean;
@@ -100,6 +101,7 @@ appIN.on('certificate-error', (event, webContents, url, error, certificate, call
 // -------------------
 appIN.on('ready', createMainWin);
 appIN.on('ready', createIndicator);
+appIN.on('ready', () => initBackupAdapter(BACKUP_DIR));
 
 appIN.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
@@ -194,8 +196,6 @@ appIN.on('will-quit', () => {
 ipcMain.on(IPC.SHUTDOWN_NOW, quitAppNow);
 
 ipcMain.on(IPC.EXEC, exec);
-
-ipcMain.on(IPC.BACKUP, backupData);
 
 ipcMain.on(IPC.LOCK_SCREEN, () => {
   if (isLocked) {

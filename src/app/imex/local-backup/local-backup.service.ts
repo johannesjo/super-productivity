@@ -32,6 +32,17 @@ export class LocalBackupService {
     this._triggerBackups.subscribe();
   }
 
+  // TODO return backup info
+  isBackupAvailable(): Promise<false | {}> {
+    // return this._electronService.callMain(IPC.DB_SAVE, {key, data: JSON.stringify(dataIn)} as any);
+    return Promise.resolve(true);
+  }
+
+  restoreBackup(): void {
+    // return this._electronService.callMain(IPC.DB_SAVE, {key, data: JSON.stringify(dataIn)} as any);
+
+  }
+
   private async _backup() {
     const data = await this._dataImportService.getCompleteSyncData();
     (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);

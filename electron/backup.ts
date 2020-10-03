@@ -1,10 +1,17 @@
-import { app } from 'electron';
+import { app, ipcMain } from 'electron';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { IPC } from './ipc-events.const';
 
-export const BACKUP_DIR = `${app.getPath('userData')}/backups`;
-console.log('Saving backups to', BACKUP_DIR);
+let BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
-export function backupData(ev, data) {
+export function initBackupAdapter(backupDir: string) {
+  BACKUP_DIR = backupDir;
+  console.log('Saving backups to', BACKUP_DIR);
+
+  ipcMain.on(IPC.BACKUP, backupData);
+}
+
+function backupData(ev, data) {
   if (!existsSync(BACKUP_DIR)) {
     mkdirSync(BACKUP_DIR);
   }
