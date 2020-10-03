@@ -2,7 +2,7 @@ name: "Lint & Test PRs"
 
 on:
   push:
-    branches: [master, test/git-actions]
+    branches: [master]
 
   pull_request:
     # The branches below must be a subset of the branches above
