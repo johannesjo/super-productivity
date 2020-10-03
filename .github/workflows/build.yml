@@ -1,8 +1,7 @@
 name: Build & Release
 
-on:
-  push:
-    branches: [ master, test/git-actions ]
+on: [push]
+
 
 jobs:
   linux-bin-and-snap-release:
@@ -43,7 +42,7 @@ jobs:
 
     steps:
       - name: Echo is Release
-        run: echo 'IS_RELEASE $IS_RELEASE, ${{ startsWith(github.ref, 'refs/tags/v') }}'
+        run: echo "IS_RELEASE $IS_RELEASE, ${{ startsWith(github.ref, 'refs/tags/v') }}"
         env:
           IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
