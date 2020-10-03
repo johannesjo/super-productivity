@@ -58,6 +58,11 @@ jobs:
       - name: NPM or Yarn install with caching
         uses: bahmutov/npm-install@v1.1.0
 
+      - run: 'echo "$PROVISION_PROFILE" > embedded.provisionprofile'
+        shell: bash
+        env:
+          PROVISION_PROFILE: ${{secrets.dl_provision_profile}}
+
       - name: Prepare for app notarization
         if: startsWith(matrix.os, 'macos')
         # Import Apple API key for app notarization on macOS
