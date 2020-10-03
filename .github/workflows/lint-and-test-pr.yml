@@ -1,6 +1,9 @@
 name: "Lint & Test PRs"
 
 on:
+  push:
+    branches: [master, test/git-actions]
+
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
@@ -17,6 +20,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
+
+      - name: NPM or Yarn install with caching
+        uses: bahmutov/npm-install@v1.1.0
 
       - run: yarn lint
       - run: yarn test
