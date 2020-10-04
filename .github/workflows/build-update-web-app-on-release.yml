@@ -20,8 +20,14 @@ jobs:
         with:
           node-version: 12
 
-      - name: NPM or Yarn install with caching
-        uses: bahmutov/npm-install@v1.1.0
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Yarn Packages
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install
 
       - name: Lint
         run: yarn lint

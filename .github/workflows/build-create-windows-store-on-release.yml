@@ -32,7 +32,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Install yarn packages
+      - name: Install Yarn Packages
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
