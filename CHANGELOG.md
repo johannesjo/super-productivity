@@ -1,3 +1,13 @@
+## [5.9.10](https://github.com/johannesjo/super-productivity/compare/v5.9.2...v5.9.10) (2020-10-04)
+
+
+### Features
+
+* set first day of the week [#528](https://github.com/johannesjo/super-productivity/issues/528) ([b83bfea](https://github.com/johannesjo/super-productivity/commit/b83bfeafc6fd1c8258da9b7a040815f578d2dbc7))
+* set first day of week in DateAdapter ([6b9c5e7](https://github.com/johannesjo/super-productivity/commit/6b9c5e72692367cbb50f51e0e2a8fd94572be0d4))
+
+
+
 ## [5.9.9](https://github.com/johannesjo/super-productivity/compare/v5.9.8...v5.9.9) (2020-10-04)
 
 
