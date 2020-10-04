@@ -24,34 +24,34 @@ jobs:
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
-#      - run: 'echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile'
-#        shell: bash
-#        env:
-#          PROVISION_PROFILE: ${{secrets.mas_provision_profile}}
-#
-#      - name: Lint
-#        run: yarn lint
-#
-#      - name: Test Unit
-#        run: yarn test
-#
-##      - name: Test E2E
-##        run: yarn e2e
-#
-#      - name: Build Frontend & Electron
-#        run: yarn build
-#
-#      - name: Build Electron app
-#        run: dist:mac:mas:buildOnly
-#
-#      - name: Validate App
-#        run: xcrun altool --validate-app -f app-builds/mas/superProductivity-*.pkg -u $APPLEID -p APPLEIDPASS
-#        env:
-#          APPLEID: ${{secrets.APPLEID}}
-#          APPLEIDPASS: ${{secrets.APPLEIDPASS}}
-#
-#      - name: Push to Store
-#        run: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u $APPLEID -p APPLEIDPASS
-#        env:
-#          APPLEID: ${{secrets.APPLEID}}
-#          APPLEIDPASS: ${{secrets.APPLEIDPASS}}
+      - run: 'echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile'
+        shell: bash
+        env:
+          PROVISION_PROFILE: ${{secrets.mas_provision_profile}}
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test Unit
+        run: yarn test
+
+#      - name: Test E2E
+#        run: yarn e2e
+
+      - name: Build Frontend & Electron
+        run: yarn build
+
+      - name: Build Electron app
+        run: dist:mac:mas:buildOnly
+
+      - name: Validate App
+        run: xcrun altool --validate-app -f app-builds/mas/superProductivity-*.pkg -u $APPLEID -p APPLEIDPASS
+        env:
+          APPLEID: ${{secrets.APPLEID}}
+          APPLEIDPASS: ${{secrets.APPLEIDPASS}}
+
+      - name: Push to Store
+        run: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u $APPLEID -p APPLEIDPASS
+        env:
+          APPLEID: ${{secrets.APPLEID}}
+          APPLEIDPASS: ${{secrets.APPLEIDPASS}}
