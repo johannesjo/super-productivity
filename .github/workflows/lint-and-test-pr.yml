@@ -1,12 +1,6 @@
 name: "Lint & Test PRs"
 
-on:
-  push:
-    branches: [master]
-
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [master]
+on: [pull_request]
 
 jobs:
   test-on-linux:
