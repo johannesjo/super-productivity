@@ -30,14 +30,11 @@ jobs:
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
-#      - name: Lint
-#        run: yarn lint
-#
-#      - name: Test Unit
-#        run: yarn test
-#
-#      - name: Build Frontend & Electron
-#        run: yarn build
+      - name: Lint
+        run: yarn lint
+
+      - name: Test Unit
+        run: yarn test
 
       - name: Build Frontend & Electron
         run: yarn build
