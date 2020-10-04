@@ -33,6 +33,7 @@ jobs:
         with:
           # Log in to Snap Store
           snapcraft_token: ${{ secrets.snapcraft_token }}
+
       # Release to edge if no tag and to candidate if tag
       - run: snapcraft push app-builds/superProductivity*.snap --release edge
         if: false == startsWith(github.ref, 'refs/tags/v')
@@ -75,7 +76,7 @@ jobs:
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
-          build_script_name: build:noTest
+          build_script_name: build
           github_token: ${{ secrets.github_token }}
           mac_certs: ${{ secrets.mac_certs }}
           mac_certs_password: ${{ secrets.mac_certs_password }}
