@@ -21,7 +21,9 @@ jobs:
           node-version: 12
 
       - name: Load Electron Builder Config
-        run: echo ${{secrets.WIN_STORE_ELECTRON_BUILDER_YML}} | base64 --decode > electron-builder.win-store.yaml
+        run: echo $WIN_STORE_ELECTRON_BUILDER_YML | base64 --decode > electron-builder.win-store.yaml
+        env:
+          WIN_STORE_ELECTRON_BUILDER_YML: ${{secrets.WIN_STORE_ELECTRON_BUILDER_YML}}
 
       - name: NPM or Yarn install with caching
         uses: bahmutov/npm-install@v1.1.0
