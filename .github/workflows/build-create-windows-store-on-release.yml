@@ -16,16 +16,9 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Load Electron Builder Windows Store Config
-        run: echo $WIN_STORE_ELECTRON_BUILDER_YML | base64 --decode > electron-builder.yaml
+        run: del /f electron-builder.yaml && (echo %WIN_STORE_ELECTRON_BUILDER_YML%) > out && certutil -decode out electron-builder.yaml
         env:
           WIN_STORE_ELECTRON_BUILDER_YML: ${{secrets.WIN_STORE_ELECTRON_BUILDER_YML}}
-
-      - name: Load Electron Builder Windows Store Config
-        id: write_file
-        uses: timheuer/base64-to-file@v1.0.3
-        with:
-          fileName: electron-builder.yaml
-          encodedString: ${{ secrets.WIN_STORE_ELECTRON_BUILDER_YML }}
 
       - uses: actions/cache@v2
         with:
