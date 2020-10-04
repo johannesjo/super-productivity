@@ -42,6 +42,7 @@
     "electron:build": "tsc -p electron/tsconfig.electron.json",
     "electron:watch": "tsc -p electron/tsconfig.electron.json --watch",
     "electronBuilderOnly": "electron-builder",
+    "empty": "echo 'EMPTY YEAH'",
     "pack": "electron-builder --dir",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron:stage && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:prod": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron:prod && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
