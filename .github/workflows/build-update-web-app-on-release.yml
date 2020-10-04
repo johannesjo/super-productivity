@@ -2,6 +2,8 @@ name: Update Web App after Release
 on:
   release:
     types: [released]
+  workflow_dispatch:
+    inputs: null
 
 jobs:
   upload-to-app-super-productivity:
