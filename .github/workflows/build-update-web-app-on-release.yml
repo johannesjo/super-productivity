@@ -1,4 +1,4 @@
-name: Update Web App after Release
+name: Web App on Release
 on:
   release:
     types: [published]

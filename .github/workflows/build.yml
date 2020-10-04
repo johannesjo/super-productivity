@@ -1,4 +1,4 @@
-name: Build & Release
+name: Build All & Release
 on:
   push:
     branches: [ master, test/git-actions ]

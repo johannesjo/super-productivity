@@ -1,4 +1,4 @@
-name: Create Win Store Release File on Release
+name: Win Store File on Release
 on:
   release:
     types: [published]
