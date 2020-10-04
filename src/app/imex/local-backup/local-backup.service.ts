@@ -33,13 +33,12 @@ export class LocalBackupService {
     this._triggerBackups.subscribe();
   }
 
-  // TODO return backup info
   isBackupAvailable(): Promise<false | LocalBackupMeta> {
     return this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, null) as Promise<false | LocalBackupMeta>;
   }
 
   loadBackup(backupPath: string): Promise<string> {
-    return this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, backupPath) as Promise<string>;
+    return this._electronService.callMain(IPC.BACKUP_LOAD_DATA, backupPath) as Promise<string>;
   }
 
   private async _backup() {

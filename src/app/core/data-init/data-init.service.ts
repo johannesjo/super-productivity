@@ -11,9 +11,6 @@ import { MigrationService } from '../migration/migration.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { DataRepairService } from '../data-repair/data-repair.service';
-import { LocalBackupService } from '../../imex/local-backup/local-backup.service';
-import { IS_ELECTRON } from '../../app.constants';
-import { AppDataComplete } from '../../imex/sync/sync.model';
 
 @Injectable({providedIn: 'root'})
 export class DataInitService {
@@ -39,8 +36,6 @@ export class DataInitService {
     private _workContextService: WorkContextService,
     private _store$: Store<any>,
     private _dataRepairService: DataRepairService,
-    // private _dataImportService: DataImportService,
-    private _localBackupService: LocalBackupService,
   ) {
     // TODO better construction than this
     this.isAllDataLoadedInitially$.pipe(
@@ -58,7 +53,6 @@ export class DataInitService {
     const isValid = isValidAppData(appDataComplete);
     if (isValid) {
       this._store$.dispatch(loadAllData({appDataComplete, isOmitTokens}));
-      this._checkForBackupIfEmpty(appDataComplete);
     } else {
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
         const fixedData = this._dataRepairService.repairData(appDataComplete);
@@ -70,21 +64,4 @@ export class DataInitService {
     }
   }
 
-  private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete) {
-    console.log(IS_ELECTRON, appDataComplete);
-
-    if (IS_ELECTRON) {
-      if (appDataComplete.task.ids.length === 0 && appDataComplete.taskArchive.ids.length === 0) {
-        const r = await this._localBackupService.isBackupAvailable();
-        if (r) {
-          console.log(r);
-          if (confirm('NO TASK DATA IMPORT BACKUP FROM?' + r.path)) {
-            const d = await this._localBackupService.loadBackup(r.path);
-            console.log(d);
-            // await this._dataImportService.importCompleteSyncData(JSON.parse(d));
-          }
-        }
-      }
-    }
-  }
 }

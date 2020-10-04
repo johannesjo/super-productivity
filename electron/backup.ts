@@ -36,7 +36,7 @@ export function initBackupAdapter(backupDir: string) {
   });
 
   // RESTORE_BACKUP
-  answerRenderer(IPC.BACKUP_RESTORE, (backupPath): string => {
+  answerRenderer(IPC.BACKUP_LOAD_DATA, (backupPath): string => {
     console.log('Reading backup file: ', backupPath);
     return readFileSync(backupPath, {encoding: 'utf8'});
   });
