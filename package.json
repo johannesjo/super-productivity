@@ -57,6 +57,7 @@
     "dist:win:store": "git pull && yarn && copy electron-builder.win-store.yaml electron-builder.yaml && yarn dist:win && git checkout electron-builder.yaml || git checkout electron-builder.yaml",
     "dist:mac:dl": "cp tools/mac-profiles/dl.provisionprofile embedded.provisionprofile && electron-builder --mac",
     "dist:mac:mas": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml",
+    "dist:mac:mas:buildOnly": "electron-builder --mac mas --config=build/electron-builder.mas.yaml",
     "dist:mac:mas:dev": "cp tools/mac-profiles/mas-dev.provisionprofile embedded.provisionprofile; electron-builder --mac mas-dev --config=build/electron-builder.mas-dev.yaml",
     "release": "yarn release.changelog && yarn dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
