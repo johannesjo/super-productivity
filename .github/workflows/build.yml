@@ -36,8 +36,8 @@ jobs:
 
       - name: Build/Release Electron app
         uses: samuelmeuli/action-electron-builder@v1
-        build_script_name: empty
         with:
+          build_script_name: empty
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
