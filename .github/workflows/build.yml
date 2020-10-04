@@ -22,6 +22,15 @@ jobs:
       - name: NPM or Yarn install with caching
         uses: bahmutov/npm-install@v1.1.0
 
+      - name: Test Lint
+        run: yarn lint
+
+      - name: Test Unit
+        run: yarn test
+
+      - name: Test E2E
+        run: yarn e2e
+
       - name: Build Frontend & Electron
         run: yarn build
 
@@ -77,6 +86,15 @@ jobs:
           mkdir -p ~/private_keys/
           echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
 
+      - name: Test Lint
+        run: yarn lint
+
+      - name: Test Unit
+        run: yarn test
+
+      - name: Test E2E
+        run: yarn e2e
+
       - name: Build Frontend & Electron
         run: yarn build
 
@@ -109,8 +127,14 @@ jobs:
       - name: NPM or Yarn install with caching
         uses: bahmutov/npm-install@v1.1.0
 
+      - name: Test Lint
+        run: yarn lint
+
+      - name: Test Unit
+        run: yarn test
+
       - name: Build Frontend & Electron
-        run: yarn build:noTest
+        run: yarn build
 
       - name: Build/Release Electron app
         uses: samuelmeuli/action-electron-builder@v1
