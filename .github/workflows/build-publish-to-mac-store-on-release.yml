@@ -50,13 +50,13 @@ jobs:
         run: yarn dist:mac:mas:buildOnly
 
       - name: Validate App
-        run: xcrun altool --validate-app -f app-builds/mas/superProductivity-*.pkg -u $APPLEID -p APPLEIDPASS
+        run: xcrun altool --validate-app -f app-builds/mas/superProductivity-*.pkg -u ${{secrets.APPLEID}} -p ${{secrets.APPLEIDPASS}}
         env:
           APPLEID: ${{secrets.APPLEID}}
           APPLEIDPASS: ${{secrets.APPLEIDPASS}}
 
       - name: Push to Store
-        run: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u $APPLEID -p APPLEIDPASS
+        run: xcrun altool --upload-app -f app-builds/mas/superProductivity-*.pkg -u ${{secrets.APPLEID}} -p ${{secrets.APPLEIDPASS}}
         env:
           APPLEID: ${{secrets.APPLEID}}
           APPLEIDPASS: ${{secrets.APPLEIDPASS}}
