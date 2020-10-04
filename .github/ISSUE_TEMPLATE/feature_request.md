@@ -2,7 +2,7 @@
 name: Feature request
 labels: enhancement
 ---
-<! ---
+<!--
 Thank for taking the time to fill this feature request fully! This will help a lot to communicate what this is about and to focus the discussion of the feature.
 
 Please also make sure that there is no similar feature already opened up!
