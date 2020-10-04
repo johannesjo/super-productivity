@@ -6,6 +6,9 @@ import { AppDataComplete } from '../sync/sync.model';
 import { IS_ELECTRON } from '../../app.constants';
 import { LocalBackupService } from './local-backup.service';
 import { DataImportService } from '../sync/data-import.service';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../t.const';
+import * as moment from 'moment';
 
 @Injectable()
 export class LocalBackupEffects {
@@ -25,6 +28,7 @@ export class LocalBackupEffects {
     private _actions$: Actions,
     private _localBackupService: LocalBackupService,
     private _dataImportService: DataImportService,
+    private _translateService: TranslateService,
   ) {
   }
 
@@ -35,7 +39,10 @@ export class LocalBackupEffects {
         const backupMeta = await this._localBackupService.isBackupAvailable();
         if (backupMeta) {
           console.log('backupMeta', backupMeta);
-          if (confirm('NO TASK DATA IMPORT BACKUP FROM?' + backupMeta.path)) {
+          if (confirm(this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
+            dir: backupMeta.folder,
+            from: this._formatDate(backupMeta.created),
+          }))) {
             const backupData = await this._localBackupService.loadBackup(backupMeta.path);
             console.log('backupData', backupData);
             await this._dataImportService.importCompleteSyncData(JSON.parse(backupData));
@@ -43,5 +50,9 @@ export class LocalBackupEffects {
         }
       }
     }
+  }
+
+  private _formatDate(date: Date | string | number) {
+    return moment(date).format('DD-MM-YYYY, hh:mm:ss');
   }
 }

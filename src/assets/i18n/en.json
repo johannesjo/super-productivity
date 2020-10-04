@@ -19,7 +19,8 @@
   "CONFIRM": {
     "AUTO_FIX": "Your data seems to be damaged. Do you want to try to automatically fix it? This might result in partial data loss.",
     "DELETE_STRAY_BACKUP": "Do you want to delete the back to avoid seeing this dialog?",
-    "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?"
+    "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?",
+    "RESTORE_FILE_BACKUP": "There seems to be NO DATA, but there are backups available at \"{{dir}}\". Do you want to restore the latest backup from {{from}}?"
   },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",

@@ -25,6 +25,7 @@ export function initBackupAdapter(backupDir: string) {
       return false;
     }
     const filesWithMeta: LocalBackupMeta[] = files.map((fileName: string): LocalBackupMeta => ({
+      name: fileName,
       path: path.join(BACKUP_DIR, fileName),
       folder: BACKUP_DIR,
       created: statSync(path.join(BACKUP_DIR, fileName)).mtime.getTime()
