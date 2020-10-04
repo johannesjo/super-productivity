@@ -1,6 +1,9 @@
 ---
 name: Bug Report
 labels: bug
+about: Report a bug you encountered
+title: ''
+assignees: ''
 ---
 
 <!--- Your issue may already be reported!
