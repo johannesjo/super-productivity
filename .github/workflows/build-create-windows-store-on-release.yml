@@ -52,5 +52,5 @@ jobs:
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v2
         with:
-          name: WinStoreReleas
+          name: WinStoreRelease
           path: app-builds/*.appx
