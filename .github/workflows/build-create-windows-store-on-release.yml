@@ -42,6 +42,7 @@ jobs:
         with:
           build_script_name: empty
           release: false
+          github_token: ${{ secrets.github_token }}
 
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v2
