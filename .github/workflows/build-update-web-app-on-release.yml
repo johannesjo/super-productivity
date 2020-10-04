@@ -1,14 +1,15 @@
 name: Update Web App after Release
 on:
   release:
-    types: [released]
+    types: [published]
   workflow_dispatch:
     inputs: null
 
 jobs:
   upload-to-app-super-productivity:
-
     runs-on: ubuntu-latest
+
+    if: "!github.event.release.prerelease"
 
     steps:
       - name: Check out Git repository

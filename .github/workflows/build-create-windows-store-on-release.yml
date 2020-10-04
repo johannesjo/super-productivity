@@ -1,15 +1,15 @@
 name: Create Win Store Release File on Release
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs: null
 
-  release:
-    types: [ released ]
-
 jobs:
-
   windows-store-artifact:
     runs-on: windows-latest
+
+    if: "!github.event.release.prerelease"
 
     steps:
       - name: Check out Git repository
