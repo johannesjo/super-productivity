@@ -7,7 +7,7 @@ on:
 
 jobs:
   mac-store-release:
-    runs-on: windows-latest
+    runs-on: macos-latest
 
     if: "!github.event.release.prerelease"
 
