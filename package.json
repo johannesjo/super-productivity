@@ -142,6 +142,7 @@
     "cross-env": "^7.0.2",
     "electron": "^10.1.2",
     "electron-builder": "^22.7.0",
+    "electron-builder-notarize": "^1.2.0",
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.2.5",
     "file-saver": "^2.0.2",
