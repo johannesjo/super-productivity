@@ -23,9 +23,6 @@ jobs:
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: NPM or Yarn install with caching
-        uses: bahmutov/npm-install@v1.1.0
-
       - name: Lint
         run: yarn lint
 
@@ -80,9 +77,6 @@ jobs:
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: NPM or Yarn install with caching
-        uses: bahmutov/npm-install@v1.1.0
-
       - run: 'echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile'
         shell: bash
         env:
@@ -135,9 +129,6 @@ jobs:
       - name: Install Yarn Packages
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
-
-      - name: NPM or Yarn install with caching
-        uses: bahmutov/npm-install@v1.1.0
 
       - name: Lint
         run: yarn lint
