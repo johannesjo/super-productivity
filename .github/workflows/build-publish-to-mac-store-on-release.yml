@@ -42,7 +42,7 @@ jobs:
         run: yarn build
 
       - name: Build Electron app
-        run: dist:mac:mas:buildOnly
+        run: yarn dist:mac:mas:buildOnly
 
       - name: Validate App
         run: xcrun altool --validate-app -f app-builds/mas/superProductivity-*.pkg -u $APPLEID -p APPLEIDPASS
