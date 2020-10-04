@@ -1,0 +1,48 @@
+name: Create Win Store Release File on Release
+on:
+  release:
+    types: [ released ]
+
+jobs:
+
+  windows-store-artifact:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Load Electron Builder Config
+        run: 'echo "WIN_STORE_ELECTRON_BUILDER_YML" | base64 --decode > electron-builder.win-store.yaml'
+        shell: bash
+        env:
+          WIN_STORE_ELECTRON_BUILDER_YML: ${{secrets.WIN_STORE_ELECTRON_BUILDER_YML}}
+
+      - name: NPM or Yarn install with caching
+        uses: bahmutov/npm-install@v1.1.0
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test Unit
+        run: yarn test
+
+      - name: Build Frontend & Electron
+        run: yarn dist:win:store
+
+      - name: Build/Release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          build_script_name: empty
+          release: false
+
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v2
+        with:
+          name: WinStoreReleas
+          path: app-builds/*.appx
