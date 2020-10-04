@@ -3,10 +3,11 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { interval, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { DataImportService } from '../sync/data-import.service';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { ElectronService } from '../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { LocalBackupMeta } from './local-backup.model';
 
 const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 
@@ -23,7 +24,7 @@ export class LocalBackupService {
 
   constructor(
     private _configService: GlobalConfigService,
-    private _dataImportService: DataImportService,
+    private _persistenceService: PersistenceService,
     private _electronService: ElectronService,
   ) {
   }
@@ -33,18 +34,16 @@ export class LocalBackupService {
   }
 
   // TODO return backup info
-  isBackupAvailable(): Promise<false | {}> {
-    // return this._electronService.callMain(IPC.DB_SAVE, {key, data: JSON.stringify(dataIn)} as any);
-    return Promise.resolve(true);
+  isBackupAvailable(): Promise<false | LocalBackupMeta> {
+    return this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, null) as Promise<false | LocalBackupMeta>;
   }
 
-  restoreBackup(): void {
-    // return this._electronService.callMain(IPC.DB_SAVE, {key, data: JSON.stringify(dataIn)} as any);
-
+  loadBackup(backupPath: string): Promise<string> {
+    return this._electronService.callMain(IPC.BACKUP_IS_AVAILABLE, backupPath) as Promise<string>;
   }
 
   private async _backup() {
-    const data = await this._dataImportService.getCompleteSyncData();
+    const data = await this._persistenceService.loadComplete();
     (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.BACKUP, data);
   }
 }
