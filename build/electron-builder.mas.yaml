@@ -1,5 +1,5 @@
 appId: com.super-productivity.app
-#afterSign: build/scripts/notarize.js
+afterSign: electron-builder-notarize
 files:
   - electron/**/*
   - "!electron/**/*.ts"
