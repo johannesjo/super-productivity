@@ -22,7 +22,7 @@ jobs:
       - name: NPM or Yarn install with caching
         uses: bahmutov/npm-install@v1.1.0
 
-      - name: Test Lint
+      - name: Lint
         run: yarn lint
 
       - name: Test Unit
@@ -86,7 +86,7 @@ jobs:
           mkdir -p ~/private_keys/
           echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
 
-      - name: Test Lint
+      - name: Lint
         run: yarn lint
 
       - name: Test Unit
@@ -127,7 +127,7 @@ jobs:
       - name: NPM or Yarn install with caching
         uses: bahmutov/npm-install@v1.1.0
 
-      - name: Test Lint
+      - name: Lint
         run: yarn lint
 
       - name: Test Unit
