@@ -5,38 +5,40 @@ on:
 
 jobs:
   upload-to-app-super-productivity:
+
     runs-on: ubuntu-latest
-      steps:
-        - name: Check out Git repository
-          uses: actions/checkout@v1
 
-        - name: Install Node.js, NPM and Yarn
-          uses: actions/setup-node@v1
-          with:
-            node-version: 12
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
 
-        - name: NPM or Yarn install with caching
-          uses: bahmutov/npm-install@v1.1.0
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
 
-        - name: Lint
-          run: yarn lint
+      - name: NPM or Yarn install with caching
+        uses: bahmutov/npm-install@v1.1.0
 
-        - name: Test Unit
-          run: yarn test
+      - name: Lint
+        run: yarn lint
 
-        - name: Test E2E
-          run: yarn e2e
+      - name: Test Unit
+        run: yarn test
 
-        - name: Build Frontend & Electron
-          run: yarn buildFrontend:prodWeb
+      - name: Test E2E
+        run: yarn e2e
 
-        - name: Deploy to Web Server
-          uses: easingthemes/ssh-deploy@v2.1.5
-          env:
-            SSH_PRIVATE_KEY: ${{ secrets.WEB_SERVER_SSH_KEY }}
-            ARGS: "-rltgoDzvO --delete"
-            SOURCE: "dist/"
-            REMOTE_HOST: ${{ secrets.WEB_REMOTE_HOST }}
-            REMOTE_USER: ${{ secrets.WEB_REMOTE_USER }}
-            TARGET: ${{ secrets.WEB_REMOTE_TARGET }}
+      - name: Build Frontend & Electron
+        run: yarn buildFrontend:prodWeb
+
+      - name: Deploy to Web Server
+        uses: easingthemes/ssh-deploy@v2.1.5
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.WEB_SERVER_SSH_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.WEB_REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.WEB_REMOTE_USER }}
+          TARGET: ${{ secrets.WEB_REMOTE_TARGET }}
 
