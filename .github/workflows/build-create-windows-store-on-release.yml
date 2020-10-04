@@ -16,7 +16,8 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Load Electron Builder Windows Store Config
-        run: del /f electron-builder.yaml && (echo %WIN_STORE_ELECTRON_BUILDER_YML%) > out && certutil -decode out electron-builder.yaml
+        run: echo $WIN_STORE_ELECTRON_BUILDER_YML | base64 --decode > electron-builder.yaml
+        shell: bash
         env:
           WIN_STORE_ELECTRON_BUILDER_YML: ${{secrets.WIN_STORE_ELECTRON_BUILDER_YML}}
 
