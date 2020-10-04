@@ -39,6 +39,9 @@ jobs:
 #      - name: Build Frontend & Electron
 #        run: yarn build
 
+      - name: Build Frontend & Electron
+        run: yarn build
+
       - name: Build/Release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
