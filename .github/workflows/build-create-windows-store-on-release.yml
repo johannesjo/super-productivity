@@ -1,5 +1,8 @@
 name: Create Win Store Release File on Release
 on:
+  workflow_dispatch:
+    inputs: null
+
   release:
     types: [ released ]
 
