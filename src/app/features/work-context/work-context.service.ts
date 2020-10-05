@@ -226,28 +226,26 @@ export class WorkContextService {
     map(([today, backlog]) => [...today, ...backlog])
   );
 
-  // TODO make it more efficient
   startableTasks$: Observable<Task[]> = combineLatest([
     this.activeWorkContext$,
     this._store$.pipe(
       select(selectTaskEntities),
     )
   ]).pipe(
-    switchMap(([activeContext, entities]) => {
-      const taskIds = activeContext.taskIds;
-      return of(
-        (Object.keys(entities)
-          .filter((id) => {
-            const t = entities[id] as Task;
-            return !t.isDone && (
-              (t.parentId)
-                ? (taskIds.includes(t.parentId))
-                : (taskIds.includes(id) && (!t.subTaskIds || t.subTaskIds.length === 0))
-            );
-          })
-          .map(key => entities[key]) as Task[])
-      );
-    })
+    map(([activeContext, entities]) => {
+      let startableTasks: Task[] = [];
+      activeContext.taskIds.forEach(id => {
+        const task: Task | undefined = entities[id];
+        if (!task) throw new Error('Task not found');
+
+        if (task.subTaskIds && task.subTaskIds.length) {
+          startableTasks = startableTasks.concat(task.subTaskIds.map(sid => entities[sid] as Task));
+        } else {
+          startableTasks.push(task);
+        }
+      });
+      return startableTasks.filter(task => !task.isDone);
+    }),
   );
 
   workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
