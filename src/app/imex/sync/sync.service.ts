@@ -17,7 +17,7 @@ import {
   throttleTime, timeout
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { SyncProviderModel } from './sync-provider.model';
+import { SyncProvider } from './sync-provider.model';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -104,6 +104,7 @@ export class SyncService {
     this._isOnlineTrigger$,
   );
   // ------------------------
+  // TODO refactor
   private _isInitialSyncEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => combineLatest([
         // GoogleDrive
@@ -113,7 +114,8 @@ export class SyncService {
         // Dropbox
         this._globalConfigService.cfg$.pipe(
           map(cfg => cfg.dropboxSync),
-          map(cfg => cfg && cfg.isEnabled && !!cfg.accessToken),
+          // TODO sync fix
+          map(cfg => cfg && cfg.accessToken && !!cfg.accessToken),
         ),
       ]).pipe(
       map(all => all.includes(true)),
@@ -169,7 +171,7 @@ export class SyncService {
   }
 
   // tslint:disable-next-line
-  setInitialSyncDone(val: boolean, syncProvider: SyncProviderModel) {
+  setInitialSyncDone(val: boolean, syncProvider: SyncProvider) {
     this._isInitialSyncDoneManual$.next(val);
   }
 }
