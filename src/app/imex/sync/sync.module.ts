@@ -4,12 +4,16 @@ import { SyncEffects } from './sync.effects';
 import { SyncCfgComponent } from './sync-cfg/sync-cfg.component';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
+import { ConfigModule } from '../../features/config/config.module';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   imports: [
     FormsModule,
     UiModule,
-    EffectsModule.forFeature([SyncEffects])
+    ConfigModule,
+    EffectsModule.forFeature([SyncEffects]),
+    CommonModule
   ],
   declarations: [SyncCfgComponent]
 })

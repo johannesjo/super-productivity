@@ -1,19 +1,16 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   EventEmitter,
+  Input,
   OnDestroy,
   OnInit,
   Output,
   ViewChild
 } from '@angular/core';
-import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
+import { ConfigFormSection, SyncConfig } from '../../../features/config/global-config.model';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { GoogleApiService } from '../../../features/google/google-api.service';
-import { GoogleDriveSyncService } from '../../../features/google/google-drive-sync.service';
-import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { T } from 'src/app/t.const';
 
 @Component({
@@ -23,10 +20,10 @@ import { T } from 'src/app/t.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SyncCfgComponent implements OnInit, OnDestroy {
+  @Input() section?: ConfigFormSection<SyncConfig>;
+  @Input() cfg?: SyncConfig;
+
   T: typeof T = T;
-  tmpSyncFile: any;
-  cfg?: GoogleDriveSyncConfig;
-  loginPromise?: Promise<any>;
 
   @ViewChild('formRef', {static: true}) formRef?: FormGroup;
 
@@ -34,20 +31,10 @@ export class SyncCfgComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly googleApiService: GoogleApiService,
-    public readonly googleDriveSyncService: GoogleDriveSyncService,
-    private readonly _configService: GlobalConfigService,
-    private readonly _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
   }
 
   ngOnInit() {
-    this._subs.add(this._configService.googleDriveSyncCfg$.subscribe((cfg) => {
-      this.cfg = {...cfg};
-      this.tmpSyncFile = this.cfg.syncFileName;
-      this._cd.detectChanges();
-    }));
   }
 
   ngOnDestroy() {
@@ -71,31 +58,5 @@ export class SyncCfgComponent implements OnInit, OnDestroy {
           f.controls[fieldName].markAsDirty()
         );
     }
-  }
-
-  saveToGoogleDrive() {
-    this.googleDriveSyncService.saveTo();
-  }
-
-  loadFromGoogleDrive() {
-    this.googleDriveSyncService.loadFrom();
-  }
-
-  login() {
-    this.loginPromise = this.googleApiService.login();
-  }
-
-  logout() {
-    this.googleApiService.logout();
-  }
-
-  changeSyncFileName(newSyncFile: string) {
-    this.googleDriveSyncService.changeSyncFileName(newSyncFile);
-  }
-
-  toggleEnabled(isEnabled: boolean) {
-    this._configService.updateSection('googleDriveSync', {
-      isEnabled,
-    });
   }
 }
