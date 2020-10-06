@@ -50,6 +50,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this._subs.add(this.configService.cfg$.subscribe((cfg) => {
       this.globalCfg = cfg;
+      console.log(cfg);
+
       this._cd.detectChanges();
     }));
   }

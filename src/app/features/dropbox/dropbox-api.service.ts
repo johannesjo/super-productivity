@@ -11,9 +11,9 @@ import { toDropboxIsoString } from './iso-date-without-ms.util.';
 
 @Injectable({providedIn: 'root'})
 export class DropboxApiService {
-  authCode$: Observable<string | null> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.authCode));
+  authCode$: Observable<string | null> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.sync.dropboxSync.authCode));
 
-  private _accessToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(map(cfg => cfg && cfg.dropboxSync && cfg.dropboxSync.accessToken));
+  private _accessToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.sync.dropboxSync.accessToken));
 
   isTokenAvailable$: Observable<boolean> = this._accessToken$.pipe(
     map((token) => !!token),

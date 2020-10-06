@@ -113,7 +113,7 @@ export class SyncService {
         ),
         // Dropbox
         this._globalConfigService.cfg$.pipe(
-          map(cfg => cfg.dropboxSync),
+          map(cfg => cfg.sync.dropboxSync),
           // TODO sync fix
           map(cfg => cfg && cfg.accessToken && !!cfg.accessToken),
         ),

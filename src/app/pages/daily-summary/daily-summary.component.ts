@@ -190,10 +190,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       await this._googleDriveSync.onSaveEnd$.pipe(take(1)).toPromise();
       this._initSuccessAnimation(cb);
       // });
-    } else if (this.configService.cfg
-      && this.configService.cfg.dropboxSync
-      // TODO sync fix
-      && this.configService.cfg.dropboxSync.accessToken && this.configService.cfg.dropboxSync.accessToken) {
+    } else if (this.configService.cfg?.sync.dropboxSync.accessToken) {
       await this._dropboxSync.sync();
       this._initSuccessAnimation(cb);
     } else {

@@ -7,6 +7,7 @@ import { DataInitService } from '../../../core/data-init/data-init.service';
 import { EMPTY, from, Observable } from 'rxjs';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
+import { SyncConfig } from '../../config/global-config.model';
 
 @Injectable()
 export class DropboxEffects {
@@ -23,8 +24,8 @@ export class DropboxEffects {
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
     filter(({payload}: UpdateGlobalConfigSection): boolean =>
-      payload.sectionKey === 'dropboxSync'
-      && (payload.sectionCfg as any).authCode),
+      payload.sectionKey === 'sync'
+      && !!(payload.sectionCfg as SyncConfig)?.dropboxSync.authCode),
     withLatestFrom(this._isChangedAuthCode$),
     filter(([, isChanged]: [any, boolean]): boolean => isChanged),
     switchMap(([{payload}, isChanged]: [UpdateGlobalConfigSection, boolean]) =>
@@ -36,16 +37,23 @@ export class DropboxEffects {
           // filter
           return EMPTY;
         }),
-      )
+        map((accessToken) => ({accessToken, sync: payload.sectionCfg as SyncConfig}))
+      ),
     ),
-    tap(() => setTimeout(() => this._snackService.open({
+    tap((): any => setTimeout(() => this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED
       }), 200)
     ),
-    map((accessToken: string) => new UpdateGlobalConfigSection({
-      sectionKey: 'dropboxSync',
-      sectionCfg: {accessToken}
+    map(({accessToken, sync}: { accessToken: string, sync: SyncConfig }) => new UpdateGlobalConfigSection({
+      sectionKey: 'sync',
+      sectionCfg: ({
+        ...sync,
+        dropboxSync: {
+          ...sync.dropboxSync,
+          accessToken
+        }
+      } as SyncConfig)
     })),
   );
 

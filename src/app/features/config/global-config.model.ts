@@ -106,7 +106,6 @@ export interface GoogleDriveSyncConfig {
 export interface DropboxSyncConfig {
   authCode: string | null;
   accessToken: string | null;
-  _backupDocId: string | null;
   // isCompressData: boolean;
 }
 
@@ -129,6 +128,8 @@ export type SyncConfig = Readonly<{
   isEnabled: boolean;
   syncProvider: SyncProvider | null,
   syncInterval: number,
+
+  dropboxSync: DropboxSyncConfig;
 }>;
 
 export type TrackingReminderConfig = Readonly<{
@@ -150,7 +151,6 @@ export type GlobalConfigState = Readonly<{
   trackingReminder: TrackingReminderConfig;
 
   sync: SyncConfig;
-  dropboxSync: DropboxSyncConfig;
   googleDriveSync: GoogleDriveSyncConfig;
 
   [MODEL_VERSION_KEY]?: number;

@@ -105,13 +105,13 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnabled: false,
     syncProvider: null,
     syncInterval: minute,
-  },
-  dropboxSync: {
-    // TODO remove / migrate
-    authCode: null,
-    accessToken: null,
-    _backupDocId: null,
-    // isCompressData: true,
+
+    dropboxSync: {
+      // TODO remove / migrate
+      authCode: null,
+      accessToken: null,
+      // isCompressData: true,
+    },
   },
   googleDriveSync: {
     // TODO remove / migrate
