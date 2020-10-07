@@ -23,23 +23,25 @@ export class DropboxEffects {
     ofType(
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
-    filter(({payload}: UpdateGlobalConfigSection): boolean =>
-      payload.sectionKey === 'sync'
-      && !!(payload.sectionCfg as SyncConfig)?.dropboxSync.authCode),
+    filter(({payload}: UpdateGlobalConfigSection): boolean => payload.sectionKey === 'sync'),
     withLatestFrom(this._isChangedAuthCode$),
-    filter(([, isChanged]: [any, boolean]): boolean => isChanged),
-    switchMap(([{payload}, isChanged]: [UpdateGlobalConfigSection, boolean]) =>
-      from(this._dropboxApiService.getAccessTokenFromAuthCode((payload.sectionCfg as any).authCode)).pipe(
-        // NOTE: catch needs to be limited to request only, otherwise we break the chain
-        catchError((e) => {
-          console.error(e);
-          this._snackService.open({type: 'ERROR', msg: T.F.DROPBOX.S.ACCESS_TOKEN_ERROR});
-          // filter
-          return EMPTY;
-        }),
-        map((accessToken) => ({accessToken, sync: payload.sectionCfg as SyncConfig}))
-      ),
-    ),
+    switchMap(([{payload}, isChanged]: [UpdateGlobalConfigSection, boolean]) => {
+      const syncConfig = payload.sectionCfg as SyncConfig;
+      if (isChanged && typeof syncConfig.dropboxSync.authCode === 'string') {
+        return from(this._dropboxApiService.getAccessTokenFromAuthCode(syncConfig.dropboxSync.authCode)).pipe(
+          // NOTE: catch needs to be limited to request only, otherwise we break the chain
+          catchError((e) => {
+            console.error(e);
+            this._snackService.open({type: 'ERROR', msg: T.F.DROPBOX.S.ACCESS_TOKEN_ERROR});
+            // filter
+            return EMPTY;
+          }),
+          map((accessToken) => ({accessToken, sync: syncConfig as SyncConfig})),
+        );
+      } else {
+        return EMPTY;
+      }
+    }),
     tap((): any => setTimeout(() => this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED

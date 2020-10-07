@@ -105,10 +105,7 @@
         "B_GENERATE_TOKEN": "Generate Token",
         "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
         "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
-        "L_AUTH_CODE": "Auth Code",
-        "L_ENABLE_SYNCING": "Enable Dropbox Syncing",
-        "L_SYNC_INTERVAL": "Sync Interval",
-        "TITLE": "Sync via Dropbox (recommended)"
+        "L_AUTH_CODE": "Auth Code"
       },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Unable to generate Access Token from Auth Code",
@@ -579,6 +576,14 @@
         "TITLE": "Simple Counters",
         "TYPE_CLICK_COUNTER": "Click Counter",
         "TYPE_STOPWATCH": "Stopwatch"
+      }
+    },
+    "SYNC": {
+      "FORM": {
+        "L_ENABLE_SYNCING": "Enable Syncing",
+        "L_SYNC_INTERVAL": "Sync Interval",
+        "L_SYNC_PROVIDER": "Sync Provider",
+        "TITLE": "Sync"
       }
     },
     "TAG": {
