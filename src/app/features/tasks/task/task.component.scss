@@ -43,15 +43,19 @@
   margin-bottom: 0;
 }
 
+//::ng-deep task .box {
+//  background: red !important;
+//}
+
 .box {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  top: -1px;
+  bottom: 1px;
+  top: 1px;
   transition: $transition-standard;
   transition-property: transform, box-shadow;
-  border: 1px solid $task-c-border-light;
+  border: 1px solid transparent;
 
   :host.gu-mirror & {
     box-shadow: $whiteframe-shadow-8dp !important;
@@ -59,24 +63,22 @@
 
   @include lightTheme {
     background: $task-c-bg-light;
-    border-color: $task-c-border-light;
   }
 
   @include darkTheme {
     background: $task-c-bg-dark;
-    border-color: $task-c-border-dark;
   }
 
   // NOTE: also applies to child tasks
   :host-context(.isLightTheme).isSelected & {
     background: $task-c-selected-bg-light;
-    border-color: $task-c-selected-border-light;
+    //border-color: $task-c-selected-border-light;
     border-width: 0;
   }
 
   :host-context(.isDarkTheme).isSelected & {
     background: $task-c-selected-bg-dark;
-    border-color: $task-c-selected-border-dark;
+    //border-color: $task-c-selected-border-dark;
   }
 
   .inner-wrapper.isSelected > & {
@@ -125,7 +127,7 @@
   }
 
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
-    background: $dark-theme-bg-slightly-lighter;
+    background: #2c2c2c;
     box-shadow: $task-active-shadow-dark;
   }
 
@@ -153,6 +155,12 @@
   @include mq(xs) {
     //margin: $s $s*2 $s $s*3;
     margin: $s 0 $s $s*5;
+  }
+
+  ::ng-deep .box {
+    @include darkTheme {
+      background: $sub-task-c-bg-dark;
+    }
   }
 }
 
