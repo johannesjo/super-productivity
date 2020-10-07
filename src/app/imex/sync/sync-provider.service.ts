@@ -5,6 +5,7 @@ import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.mode
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
+import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 
 // TODO naming
 @Injectable({
@@ -14,10 +15,16 @@ export class SyncProviderService {
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.sync));
   currentProvider$: Observable<SyncProviderServiceInterface> = this.syncCfg$.pipe(
     map((cfg: SyncConfig): SyncProviderServiceInterface => {
+      console.log(cfg.syncProvider);
+
       switch (cfg.syncProvider) {
         case SyncProvider.Dropbox:
           return this._dropboxSyncService;
+        case SyncProvider.GoogleDrive:
+          return this._googleDriveSyncService;
         default:
+          // TODO sync fix
+          throw new Error('s');
           return this._dropboxSyncService;
       }
     }),
@@ -35,6 +42,7 @@ export class SyncProviderService {
 
   constructor(
     private _dropboxSyncService: DropboxSyncService,
+    private _googleDriveSyncService: GoogleDriveSyncService,
     private _globalConfigService: GlobalConfigService,
   ) {
   }
