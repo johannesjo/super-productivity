@@ -52,6 +52,7 @@ export enum LanguageCode {
   it = 'it',
   pt = 'pt',
   nl = 'nl',
+  nb = 'nb',
 }
 
 export enum LanguageCodeMomentMap {
@@ -68,6 +69,7 @@ export enum LanguageCodeMomentMap {
   it = 'it',
   pt = 'pt',
   nl = 'nl',
+  nb = 'nb',
   zh = 'zh-cn',
 }
 

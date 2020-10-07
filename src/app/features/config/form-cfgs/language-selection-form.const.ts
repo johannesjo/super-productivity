@@ -27,6 +27,7 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
           {label: T.GCF.LANG.IT, value: LanguageCode.it},
           {label: T.GCF.LANG.PT, value: LanguageCode.pt},
           {label: T.GCF.LANG.NL, value: LanguageCode.nl},
+          {label: T.GCF.LANG.NB, value: LanguageCode.nb},
         ],
       },
     },
