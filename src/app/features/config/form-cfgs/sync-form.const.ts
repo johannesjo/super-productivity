@@ -85,19 +85,26 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         },
       ],
     },
-    // {
-    //   // hideExpression: 'model.syncProvider!==' + SyncProvider.GoogleDrive,
-    //   key: 'googleDriveSync',
-    //   // templateOptions: {label: 'Address'},
-    //   fieldGroup: [{
-    //     key: 'town',
-    //     type: 'input',
-    //     templateOptions: {
-    //       required: true,
-    //       type: 'text',
-    //       label: 'Town',
-    //     },
-    //   }],
-    // },
+    {
+      hideExpression: ((m, v, field) => field?.parent?.model.syncProvider !== SyncProvider.GoogleDrive),
+      key: 'googleDriveSync',
+      // templateOptions: {label: 'Address'},
+      fieldGroup: [
+        {
+          key: 'syncFileName',
+          type: 'input',
+          templateOptions: {
+            label: T.F.GOOGLE.SYNC_CFG.SYNC_FILE_NAME,
+          },
+        },
+        {
+          key: 'isCompressData',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.GOOGLE.SYNC_CFG.COMPRESS,
+          },
+        },
+      ],
+    },
   ]
 };

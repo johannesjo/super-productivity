@@ -26,7 +26,7 @@ export class GoogleDriveSyncService {
   isSaveInProgress$: Observable<boolean> = this._store$.select(selectIsGoogleDriveSaveInProgress)
     .pipe(distinctUntilChanged());
 
-  cfg$: Observable<GoogleDriveSyncConfig> = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
+  cfg$: Observable<GoogleDriveSyncConfig> = this._configService.cfg$.pipe(map(cfg => cfg.sync.googleDriveSync));
 
   onSaveEnd$: Observable<any> = this._actions$.pipe(ofType(
     GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,

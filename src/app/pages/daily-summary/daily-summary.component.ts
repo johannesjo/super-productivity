@@ -181,16 +181,17 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   private async _finishDayForGood(cb?: any) {
-    if (this.configService.cfg
-      && this.configService.cfg.googleDriveSync.isEnabled
-      && this.configService.cfg.googleDriveSync.isAutoSyncToRemote) {
+    const syncCfg = this.configService.cfg?.sync;
+    // TODO sync fix
+    if (syncCfg?.isEnabled && syncCfg.googleDriveSync.isAutoSyncToRemote) {
       // login in again, will hopefully prevent google errors
       // this._googleApiService.login().then(() => {
       this._googleDriveSync.saveForSync();
       await this._googleDriveSync.onSaveEnd$.pipe(take(1)).toPromise();
       this._initSuccessAnimation(cb);
       // });
-    } else if (this.configService.cfg?.sync.dropboxSync.accessToken) {
+      // TODO sync fix
+    } else if (syncCfg?.dropboxSync.accessToken) {
       await this._dropboxSync.sync();
       this._initSuccessAnimation(cb);
     } else {

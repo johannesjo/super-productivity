@@ -34,7 +34,7 @@ import {
 } from './google-drive-sync.actions';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { GoogleDriveSyncConfig } from '../../config/global-config.model';
+import { GoogleDriveSyncConfig, SyncConfig } from '../../config/global-config.model';
 import { DataImportService } from '../../../imex/sync/data-import.service';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
 import { DialogConfirmDriveSyncSaveComponent } from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
@@ -54,10 +54,11 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 
 @Injectable()
 export class GoogleDriveSyncEffects {
-  config$: Observable<GoogleDriveSyncConfig> = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
-  isEnabled$: Observable<boolean> = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
-  isAutoSyncToRemote$: Observable<boolean> = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
-  syncInterval$: Observable<number> = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
+  syncCfg$: Observable<SyncConfig> = this._configService.cfg$.pipe(map(cfg => cfg?.sync));
+  driveCfg$: Observable<GoogleDriveSyncConfig> = this.syncCfg$.pipe(map(cfg => cfg?.googleDriveSync));
+  isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map(cfg => cfg?.isEnabled), distinctUntilChanged());
+  isAutoSyncToRemote$: Observable<boolean> = this.driveCfg$.pipe(map(cfg => cfg?.isAutoSyncToRemote), distinctUntilChanged());
+  syncInterval$: Observable<number> = this.syncCfg$.pipe(map(cfg => cfg?.syncInterval), distinctUntilChanged());
   isInitialSyncDone: boolean = false;
 
   @Effect() triggerSync$: any = this._actions$.pipe(
@@ -100,8 +101,8 @@ export class GoogleDriveSyncEffects {
     //   GlobalConfigActionTypes.LoadGlobalConfig,
     // ),
     // take(1),
-    withLatestFrom(this.config$),
-    filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
+    withLatestFrom(this.syncCfg$),
+    filter(([act, cfg]) => cfg.isEnabled && cfg.googleDriveSync.isAutoLogin),
     concatMap(() => from(this._googleApiService.login(true))),
     concatMap(() => this._checkIfRemoteUpdate$()),
     concatMap((isUpdate): any => {
@@ -195,7 +196,7 @@ export class GoogleDriveSyncEffects {
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow,
     ),
-    withLatestFrom(this.config$),
+    withLatestFrom(this.driveCfg$),
     concatMap(([action, cfg]: [SaveToGoogleDrive, GoogleDriveSyncConfig]): any => {
       // when we have no backup file we create one directly
       if (!cfg._backupDocId) {
@@ -252,7 +253,7 @@ export class GoogleDriveSyncEffects {
     ),
     concatMap((action: SaveToGoogleDrive): any =>
       from(this._getLocalAppData()).pipe(
-        withLatestFrom(this.config$),
+        withLatestFrom(this.driveCfg$),
         concatMap(([completeData, cfg]) => {
           const contentObs: Observable<string | AppDataComplete> = (cfg.isCompressData)
             ? from(this._compressionService.compressUTF16(JSON.stringify(completeData)))
@@ -300,7 +301,7 @@ export class GoogleDriveSyncEffects {
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
     ),
-    withLatestFrom(this.config$),
+    withLatestFrom(this.driveCfg$),
     concatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
       // when we have no backup file we create one directly
       if (!cfg._backupDocId) {
@@ -368,7 +369,7 @@ export class GoogleDriveSyncEffects {
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDrive,
     ),
-    withLatestFrom(this.config$),
+    withLatestFrom(this.driveCfg$),
     concatMap(([act, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]) => {
       return (act.payload && act.payload.loadResponse)
         ? of(act.payload.loadResponse)
@@ -406,7 +407,7 @@ export class GoogleDriveSyncEffects {
     private _persistenceService: PersistenceService,
   ) {
     this._configService.cfg$.subscribe((cfg) => {
-      this._config = cfg.googleDriveSync;
+      this._config = cfg.sync.googleDriveSync;
     });
   }
 
@@ -560,8 +561,10 @@ export class GoogleDriveSyncEffects {
 
   private _updateConfig(data: Partial<GoogleDriveSyncConfig>): UpdateGlobalConfigSection {
     return new UpdateGlobalConfigSection({
-      sectionKey: 'googleDriveSync',
-      sectionCfg: data,
+      sectionKey: 'sync',
+      sectionCfg: {
+        googleDriveSync: data
+      } as SyncConfig,
     });
   }
 

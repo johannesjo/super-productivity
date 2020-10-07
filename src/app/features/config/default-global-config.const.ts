@@ -112,18 +112,17 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       accessToken: null,
       // isCompressData: true,
     },
-  },
-  googleDriveSync: {
-    // TODO remove / migrate
-    isEnabled: false,
-    isAutoSyncToRemote: false,
-    isNotifyOnSync: false,
-    isLoadRemoteDataOnStartup: false,
-    syncInterval: minute * 5,
 
-    isAutoLogin: false,
-    isCompressData: true,
-    syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
-    _backupDocId: null,
+    googleDriveSync: {
+      // TODO remove / migrate
+      isAutoSyncToRemote: false,
+      isNotifyOnSync: false,
+      isLoadRemoteDataOnStartup: false,
+      isAutoLogin: false,
+
+      isCompressData: true,
+      syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
+      _backupDocId: null,
+    },
   },
 };

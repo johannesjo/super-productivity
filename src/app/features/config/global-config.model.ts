@@ -92,13 +92,12 @@ export type PomodoroConfig = Readonly<{
 
 // NOTE: needs to be writable due to how we use it
 export interface GoogleDriveSyncConfig {
-  isEnabled: boolean;
   isAutoLogin: boolean;
   isAutoSyncToRemote: boolean;
   isNotifyOnSync: boolean;
   isLoadRemoteDataOnStartup: boolean;
+
   isCompressData: boolean;
-  syncInterval: number;
   syncFileName: string;
   _backupDocId: string | null;
 }
@@ -130,6 +129,7 @@ export type SyncConfig = Readonly<{
   syncInterval: number,
 
   dropboxSync: DropboxSyncConfig;
+  googleDriveSync: GoogleDriveSyncConfig;
 }>;
 
 export type TrackingReminderConfig = Readonly<{
@@ -151,7 +151,6 @@ export type GlobalConfigState = Readonly<{
   trackingReminder: TrackingReminderConfig;
 
   sync: SyncConfig;
-  googleDriveSync: GoogleDriveSyncConfig;
 
   [MODEL_VERSION_KEY]?: number;
 }>;

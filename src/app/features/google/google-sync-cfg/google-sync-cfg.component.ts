@@ -96,8 +96,8 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   toggleEnabled(isEnabled: boolean) {
-    this._configService.updateSection('googleDriveSync', {
-      isEnabled,
-    });
+    // this._configService.updateSection('googleDriveSync', {
+    //   isEnabled,
+    // });
   }
 }

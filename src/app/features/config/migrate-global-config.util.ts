@@ -117,9 +117,9 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
     prevProvider = SyncProvider.Dropbox;
     syncInterval = (config as any).dropboxSync.syncInterval;
   }
-  if ((config.googleDriveSync as any).isEnabled) {
+  if ((config as any).googleDriveSync.isEnabled) {
     prevProvider = SyncProvider.GoogleDrive;
-    syncInterval = (config.googleDriveSync as any).syncInterval;
+    syncInterval = (config as any).googleDriveSync.syncInterval;
   }
 
   return {
@@ -132,6 +132,9 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
         dropboxSync: {
           accessToken:  (config as any).dropboxSync.accessToken,
           authCode:  (config as any).dropboxSync.authCode,
+        },
+        googleDriveSync: {
+          ...(config as any).googleDriveSync,
         }
       }
       : DEFAULT_GLOBAL_CONFIG.sync,
