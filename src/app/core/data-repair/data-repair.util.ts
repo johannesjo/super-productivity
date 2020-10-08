@@ -2,7 +2,8 @@ import { AppBaseDataEntityLikeStates, AppDataComplete } from '../../imex/sync/sy
 import { TagCopy } from '../../features/tag/tag.model';
 import { ProjectCopy } from '../../features/project/project.model';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
-import { Task, TaskArchive, TaskState } from '../../features/tasks/task.model';
+import { TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
+import { unique } from '../../util/unique';
 
 const ENTITY_STATE_KEYS: (keyof AppDataComplete)[] = ['task', 'taskArchive', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'];
 
@@ -19,6 +20,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _removeDuplicatesFromArchive(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
+  dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
   // console.timeEnd('dataRepair');
   return dataOut;
 };
@@ -55,11 +57,11 @@ const _moveArchivedSubTasksToUnarchivedParents = (data: AppDataComplete): AppDat
   const taskState: TaskState = data.task;
   const taskArchiveState: TaskArchive = data.taskArchive;
   const taskArchiveIds = taskArchiveState.ids as string[];
-  const orhphanedArchivedSubTasks: Task[] = taskArchiveIds
-    .map((id: string) => taskArchiveState.entities[id] as Task)
-    .filter((t: Task) => t.parentId && !taskArchiveIds.includes(t.parentId));
+  const orhphanedArchivedSubTasks: TaskCopy[] = taskArchiveIds
+    .map((id: string) => taskArchiveState.entities[id] as TaskCopy)
+    .filter((t: TaskCopy) => t.parentId && !taskArchiveIds.includes(t.parentId));
 
-  orhphanedArchivedSubTasks.forEach((t: Task) => {
+  orhphanedArchivedSubTasks.forEach((t: TaskCopy) => {
     // delete archived if duplicate
     if (taskState.ids.includes(t.id as string)) {
       taskArchiveState.ids = taskArchiveIds.filter(id => t.id !== id);
@@ -69,13 +71,50 @@ const _moveArchivedSubTasksToUnarchivedParents = (data: AppDataComplete): AppDat
     else if (taskState.ids.includes(t.parentId as string)) {
       taskState.ids.push((t.id));
       taskState.entities[t.id] = t;
-      const par: Task = taskState.entities[t.parentId as string] as Task;
-      par.subTaskIds.push(t.id);
+      const par: TaskCopy = taskState.entities[t.parentId as string] as TaskCopy;
+
+      par.subTaskIds = unique([...par.subTaskIds, t.id]);
 
       // and delete from archive
       taskArchiveState.ids = taskArchiveIds.filter(id => t.id !== id);
-      console.log(taskArchiveIds);
       delete taskArchiveState.entities[t.id];
+    }
+    // make main if it doesn't
+    else {
+      // @ts-ignore
+      t.parentId = null;
+    }
+  });
+
+  return data;
+};
+
+const _moveUnArchivedSubTasksToArchivedParents = (data: AppDataComplete): AppDataComplete => {
+  // to avoid ambiguity
+  const taskState: TaskState = data.task;
+  const taskArchiveState: TaskArchive = data.taskArchive;
+  const taskArchiveIds = taskArchiveState.ids as string[];
+  const orhphanedUnArchivedSubTasks: TaskCopy[] = taskState.ids
+    .map((id: string) => taskState.entities[id] as TaskCopy)
+    .filter((t: TaskCopy) => t.parentId && !taskState.ids.includes(t.parentId));
+
+  orhphanedUnArchivedSubTasks.forEach((t: TaskCopy) => {
+    // delete un-archived if duplicate
+    if (taskArchiveIds.includes(t.id as string)) {
+      taskState.ids = taskState.ids.filter(id => t.id !== id);
+      delete taskState.entities[t.id];
+    }
+    // copy to archive if parent exists
+    else if (taskArchiveIds.includes(t.parentId as string)) {
+      taskArchiveIds.push((t.id));
+      taskArchiveState.entities[t.id] = t;
+
+      const par: TaskCopy = taskArchiveState.entities[t.parentId as string] as TaskCopy;
+      par.subTaskIds = unique([...par.subTaskIds, t.id]);
+
+      // and delete from today
+      taskState.ids = taskState.ids.filter(id => t.id !== id);
+      delete taskState.entities[t.id];
     }
     // make main if it doesn't
     else {
