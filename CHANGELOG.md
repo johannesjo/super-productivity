@@ -1,3 +1,12 @@
+## [5.9.14](https://github.com/johannesjo/super-productivity/compare/v5.9.13...v5.9.14) (2020-10-08)
+
+
+### Bug Fixes
+
+* about for mas... ([cdc7687](https://github.com/johannesjo/super-productivity/commit/cdc76876bc4508e9f01e20deb63a2719f1374190))
+
+
+
 ## [5.9.13](https://github.com/johannesjo/super-productivity/compare/v5.9.12...v5.9.13) (2020-10-08)
 
 
