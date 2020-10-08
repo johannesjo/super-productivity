@@ -47,7 +47,7 @@
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron:stage && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:prod": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron:prod && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:quick": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildFrontend:stage && yarn electron:build && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
-    "localInstall:mac": "sudo echo 'Starting local install. Don`t forget APPLEID & APPLEIDPASS !!' && yarn buildAllElectron:prod && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/superProductivity.app/ /Applications/superProductivity.app",
+    "localInstall:mac": "sudo echo 'Starting local install. Don`t forget APPLEID & APPLEIDPASS !!' && yarn buildAllElectron:noTests:prod && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/Super\\ Productivity.app/ /Applications/superProductivity.app",
     "dist": "yarn buildAllElectron:prod && electron-builder",
     "dist:only": "electron-builder",
     "dist:linuxAndWin": "yarn buildAllElectron:prod && electron-builder --linux --win",
