@@ -34,7 +34,6 @@ snap:
 
 mac:
   appId: com.super-productivity.app
-  productName: Super Productivity
   type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
