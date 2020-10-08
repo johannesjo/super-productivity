@@ -4,6 +4,7 @@ import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consi
 import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
+import { Task } from '../../features/tasks/task.model';
 
 export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateError = false): boolean => {
   const dAny: any = d;
@@ -31,7 +32,10 @@ export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateEr
     && typeof dAny.project === 'object' && dAny.project !== null
     && Array.isArray(d.reminders)
     && _isEntityStatesConsistent(d)
-    && (isSkipInconsistentTaskStateError || _isAllTasksAvailable(d))
+    && (isSkipInconsistentTaskStateError ||
+      _isAllTasksAvailable(d)
+      && _isNoLonelySubTasks(d)
+    )
 
     : typeof dAny === 'object'
   ;
@@ -115,4 +119,24 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     });
 
   return !brokenItem;
+};
+
+const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
+  data.task.ids.forEach((id: string) => {
+    const t: Task = data.task.entities[id] as Task;
+    if (t.parentId && !data.task.ids.includes(t.parentId)) {
+      console.log(t);
+      throw new Error(`Inconsistent Task State: Lonely Sub Task in Today`);
+    }
+  });
+
+  data.taskArchive.ids.forEach((id: string) => {
+    const t: Task = data.taskArchive.entities[id] as Task;
+    if (t.parentId && !data.taskArchive.ids.includes(t.parentId)) {
+      console.log(t);
+      throw new Error(`Inconsistent Task State: Lonely Sub Task in Archive`);
+    }
+  });
+
+  return true;
 };

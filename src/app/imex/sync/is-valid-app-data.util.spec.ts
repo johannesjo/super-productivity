@@ -119,6 +119,76 @@ describe('isValidAppData()', () => {
       })).toThrowError(`Inconsistent Task State: Missing task id goneTag for Project/Tag TEST_TAG`);
     });
 
+    it('orphaned archived sub tasks', () => {
+      const taskState = {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTaskUnarchived',
+          title: 'subTaskUnarchived',
+          parentId: 'parent',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'parent',
+          title: 'parent',
+          parentId: null,
+          subTaskIds: ['subTaskUnarchived']
+        }])
+      } as any;
+
+      const taskArchiveState = {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTaskArchived',
+          title: 'subTaskArchived',
+          parentId: 'parent',
+        }])
+      } as any;
+
+      expect(() => isValidAppData({
+        ...mock,
+        // NOTE: it's empty
+        task: taskState,
+        taskArchive: taskArchiveState,
+      })).toThrowError(`Inconsistent Task State: Lonely Sub Task in Archive`);
+    });
+
+    it('orphaned today sub tasks', () => {
+      const taskState = {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTaskUnarchived',
+          title: 'subTaskUnarchived',
+          parentId: 'parent',
+        }])
+      } as any;
+
+      const taskArchiveState = {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTaskArchived',
+          title: 'subTaskArchived',
+          parentId: 'parent',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'parent',
+          title: 'parent',
+          parentId: null,
+          subTaskIds: ['subTaskArchived']
+        }])
+      } as any;
+
+      expect(() => isValidAppData({
+        ...mock,
+        // NOTE: it's empty
+        task: taskState,
+        taskArchive: taskArchiveState,
+      })).toThrowError(`Inconsistent Task State: Lonely Sub Task in Today`);
+    });
+
     xit('missing tag for task', () => {
       expect(() => isValidAppData({
         ...mock,

@@ -31,7 +31,7 @@ describe('dataRepair()', () => {
         id: 'TEST',
         title: 'TEST',
       }]),
-    })).toEqual({
+    } as any)).toEqual({
       ...mock,
       task: taskState,
       taskArchive: {
