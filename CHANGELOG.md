@@ -1,3 +1,22 @@
+## [5.9.11](https://github.com/johannesjo/super-productivity/compare/v5.9.10...v5.9.11) (2020-10-08)
+
+
+### Bug Fixes
+
+* not in project context [#545](https://github.com/johannesjo/super-productivity/issues/545) ([a293f2f](https://github.com/johannesjo/super-productivity/commit/a293f2f736d7a61d87cc792b669864b7c2f5c5e8))
+
+
+### Features
+
+* **autoBackupRestore:** add translations [#553](https://github.com/johannesjo/super-productivity/issues/553) ([cfeed8d](https://github.com/johannesjo/super-productivity/commit/cfeed8de1048c26e69b65ec1b7689a9f8eebb720))
+* **autoBackupRestore:** implement most basic variant – circular dependency [#553](https://github.com/johannesjo/super-productivity/issues/553) ([bdd3cbc](https://github.com/johannesjo/super-productivity/commit/bdd3cbc49649a6e8d6e7dee613932d9fd4dbe688))
+* **autoBackupRestore:** make it work [#553](https://github.com/johannesjo/super-productivity/issues/553) ([a54711d](https://github.com/johannesjo/super-productivity/commit/a54711d9651d19a0f15b66f0e2f6b4d97f7a3e83))
+* **autoBackupRestore:** outline [#553](https://github.com/johannesjo/super-productivity/issues/553) ([7d00652](https://github.com/johannesjo/super-productivity/commit/7d00652eb9212a80b4a48c487f91623a41fdd11d))
+* **i18n:** add norwegian ([a512c94](https://github.com/johannesjo/super-productivity/commit/a512c94584ddaa529d0a0a198fc8d9e7a58fc98d))
+* **task:** make startable tasks work better ([ada4c97](https://github.com/johannesjo/super-productivity/commit/ada4c97db9fb7075419f43d845b4e33606dbeba2))
+
+
+
 ## [5.9.10](https://github.com/johannesjo/super-productivity/compare/v5.9.2...v5.9.10) (2020-10-04)
 
 
