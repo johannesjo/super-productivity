@@ -404,4 +404,65 @@ describe('dataRepair()', () => {
       }
     });
   });
+
+  fit('should move archived sub tasks back to their unarchived parents', () => {
+    const taskStateBefore = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'subTaskUnarchived',
+        title: 'subTaskUnarchived',
+        parentId: 'parent',
+      }, {
+        ...DEFAULT_TASK,
+        id: 'parent',
+        title: 'parent',
+        parentId: null,
+        subTaskIds: ['subTaskUnarchived']
+      }])
+    } as any;
+
+    const taskArchiveStateBefore = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'subTaskArchived',
+        title: 'subTaskArchived',
+        parentId: 'parent',
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      task: taskStateBefore,
+      taskArchive: taskArchiveStateBefore,
+    })).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTaskUnarchived',
+          title: 'subTaskUnarchived',
+          parentId: 'parent',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'parent',
+          title: 'parent',
+          parentId: null,
+          subTaskIds: ['subTaskUnarchived', 'subTaskArchived'],
+        }, {
+          ...DEFAULT_TASK,
+          id: 'subTaskArchived',
+          title: 'subTaskArchived',
+          parentId: 'parent',
+        }])
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([])
+      } as any,
+    });
+  });
+
 });
