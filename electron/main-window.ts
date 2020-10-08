@@ -150,7 +150,7 @@ function createMenu(quitApp) {
   const menuTpl = [{
     label: 'Application',
     submenu: [
-      {label: 'About Application', selector: 'orderFrontStandardAboutPanel:'},
+      {label: 'About Super Productivity', selector: 'orderFrontStandardAboutPanel:'},
       {type: 'separator'},
       {
         label: 'Quit', click: quitApp
