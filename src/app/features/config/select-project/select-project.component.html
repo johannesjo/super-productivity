@@ -4,7 +4,7 @@
         [id]="id"
         [readonly]="to.readonly"
         matNativeControl>
-  <option [ngValue]="null">{{T.G.NONE|translate}}</option>
+  <option [ngValue]="T.G.NONE || ''">{{T.G.NONE | translate}}</option>
   <ng-container *ngFor="let opt of projectService.list$|async; trackBy: trackById">
     <option [ngValue]="opt.id">{{ opt.title }}</option>
   </ng-container>
