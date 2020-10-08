@@ -1,5 +1,6 @@
 appId: com.super-productivity.app
 afterSign: electron-builder-notarize
+productName: Super Productivity
 files:
   - electron/**/*
   - "!electron/**/*.ts"
