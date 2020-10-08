@@ -122,11 +122,13 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
 };
 
 const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
+  let isValid: boolean = true;
   data.task.ids.forEach((id: string) => {
     const t: Task = data.task.entities[id] as Task;
     if (t.parentId && !data.task.ids.includes(t.parentId)) {
       console.log(t);
-      throw new Error(`Inconsistent Task State: Lonely Sub Task in Today`);
+      // devError(`Inconsistent Task State: Lonely Sub Task in Today`);
+      isValid = false;
     }
   });
 
@@ -134,9 +136,10 @@ const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
     const t: Task = data.taskArchive.entities[id] as Task;
     if (t.parentId && !data.taskArchive.ids.includes(t.parentId)) {
       console.log(t);
-      throw new Error(`Inconsistent Task State: Lonely Sub Task in Archive`);
+      // devError(`Inconsistent Task State: Lonely Sub Task in Archive`);
+      isValid = false;
     }
   });
 
-  return true;
+  return isValid;
 };

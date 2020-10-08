@@ -17,10 +17,11 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
-  dataOut = _removeDuplicatesFromArchive(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
+  dataOut = _removeDuplicatesFromArchive(dataOut);
+
   // console.timeEnd('dataRepair');
   return dataOut;
 };
@@ -56,16 +57,20 @@ const _moveArchivedSubTasksToUnarchivedParents = (data: AppDataComplete): AppDat
   // to avoid ambiguity
   const taskState: TaskState = data.task;
   const taskArchiveState: TaskArchive = data.taskArchive;
-  const taskArchiveIds = taskArchiveState.ids as string[];
-  const orhphanedArchivedSubTasks: TaskCopy[] = taskArchiveIds
+  const orhphanedArchivedSubTasks: TaskCopy[] = taskArchiveState.ids
     .map((id: string) => taskArchiveState.entities[id] as TaskCopy)
-    .filter((t: TaskCopy) => t.parentId && !taskArchiveIds.includes(t.parentId));
+    .filter((t: TaskCopy) => t.parentId && !taskArchiveState.ids.includes(t.parentId));
 
+  console.log('orhphanedArchivedSubTasks', orhphanedArchivedSubTasks);
   orhphanedArchivedSubTasks.forEach((t: TaskCopy) => {
     // delete archived if duplicate
     if (taskState.ids.includes(t.id as string)) {
-      taskArchiveState.ids = taskArchiveIds.filter(id => t.id !== id);
+      taskArchiveState.ids = taskArchiveState.ids.filter(id => t.id !== id);
       delete taskArchiveState.entities[t.id];
+      // if entity is empty for some reason
+      if (!taskState.entities[t.id]) {
+        taskState.entities[t.id] = t;
+      }
     }
     // copy to today if parent exists
     else if (taskState.ids.includes(t.parentId as string)) {
@@ -76,7 +81,8 @@ const _moveArchivedSubTasksToUnarchivedParents = (data: AppDataComplete): AppDat
       par.subTaskIds = unique([...par.subTaskIds, t.id]);
 
       // and delete from archive
-      taskArchiveState.ids = taskArchiveIds.filter(id => t.id !== id);
+      taskArchiveState.ids = taskArchiveState.ids.filter(id => t.id !== id);
+
       delete taskArchiveState.entities[t.id];
     }
     // make main if it doesn't
@@ -93,20 +99,24 @@ const _moveUnArchivedSubTasksToArchivedParents = (data: AppDataComplete): AppDat
   // to avoid ambiguity
   const taskState: TaskState = data.task;
   const taskArchiveState: TaskArchive = data.taskArchive;
-  const taskArchiveIds = taskArchiveState.ids as string[];
   const orhphanedUnArchivedSubTasks: TaskCopy[] = taskState.ids
     .map((id: string) => taskState.entities[id] as TaskCopy)
     .filter((t: TaskCopy) => t.parentId && !taskState.ids.includes(t.parentId));
 
+  console.log('orhphanedUnArchivedSubTasks', orhphanedUnArchivedSubTasks);
   orhphanedUnArchivedSubTasks.forEach((t: TaskCopy) => {
     // delete un-archived if duplicate
-    if (taskArchiveIds.includes(t.id as string)) {
+    if (taskArchiveState.ids.includes(t.id as string)) {
       taskState.ids = taskState.ids.filter(id => t.id !== id);
       delete taskState.entities[t.id];
+      // if entity is empty for some reason
+      if (!taskArchiveState.entities[t.id]) {
+        taskArchiveState.entities[t.id] = t;
+      }
     }
     // copy to archive if parent exists
-    else if (taskArchiveIds.includes(t.parentId as string)) {
-      taskArchiveIds.push((t.id));
+    else if (taskArchiveState.ids.includes(t.parentId as string)) {
+      taskArchiveState.ids.push((t.id));
       taskArchiveState.entities[t.id] = t;
 
       const par: TaskCopy = taskArchiveState.entities[t.parentId as string] as TaskCopy;
