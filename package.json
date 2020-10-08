@@ -3,7 +3,7 @@
   "version": "5.9.11",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
-  "author": "johannesjo <contact@super-productivity.com> (http://super-productivity.com)",
+  "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "MIT",
   "homepage": "http://super-productivity.com",
   "repository": {
