@@ -12,7 +12,7 @@ import { AppDataComplete } from '../../imex/sync/sync.model';
 
 import { T } from '../../t.const';
 import { checkForUpdate, UpdateCheckResult } from '../../imex/sync/check-for-update.util';
-import { DropboxConflictResolution, DropboxFileMetadata } from '../dropbox/dropbox.model';
+import { DropboxConflictResolution } from '../dropbox/dropbox.model';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import {
   LS_GOOGLE_LAST_LOCAL_REVISION,
@@ -22,6 +22,8 @@ import {
 import { DialogDbxSyncConflictComponent } from '../dropbox/dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
 import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync-provider.model';
 import { GoogleApiService } from './google-api.service';
+import { GoogleDriveFileMeta } from './google-api.model';
+import { CompressionService } from '../../core/compression/compression.service';
 
 export const gdLog = (...args: any) => console.log(...args);
 
@@ -39,7 +41,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   );
 
   private _isReadyForRequests$: Observable<boolean> = this.isReady$.pipe(
-    tap((isReady) => !isReady && new Error('Dropbox Sync not ready')),
+    tap((isReady) => !isReady && new Error('Google Drive Sync not ready')),
     first(),
   );
 
@@ -50,6 +52,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     private _googleApiService: GoogleApiService,
     private _dataInitService: DataInitService,
     // private _snackService: SnackService,
+    private _compressionService: CompressionService,
     private _matDialog: MatDialog,
     private _translateService: TranslateService,
   ) {
@@ -107,7 +110,20 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     // COMPLEX SYNC HANDLING
     // ---------------------
     const r = (await this._downloadAppData());
+
+    // PRE CHECK 4
     const remote = r.data;
+    // TODO sync fix check for valid data
+    if (!remote || !remote.lastLocalSyncModelChange) {
+      console.log(r, remote);
+      // TODO sync fix i18n
+      if (confirm('No remote data found. Upload local to Remote?')) {
+        gdLog('GD: ↑ Update Remote');
+        return await this._uploadAppData(local);
+      }
+      return;
+    }
+
     const timestamps = {
       local: local.lastLocalSyncModelChange,
       lastSync,
@@ -122,7 +138,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
       case UpdateCheckResult.LocalUpdateRequired: {
         gdLog('GD: ↓ Update Local');
-        return await this._importData(remote, r.meta.rev);
+        return await this._importData(remote, r.meta.md5Checksum as string); // r.meta.rev
       }
 
       case UpdateCheckResult.RemoteUpdateRequired: {
@@ -160,7 +176,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
           }
         } else {
           if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
-            return await this._importData(remote, r.meta.rev);
+            return await this._importData(remote, r.meta.md5Checksum as string);
           }
         }
         return;
@@ -184,8 +200,8 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   private async _importData(data: AppDataComplete, rev: string) {
     if (!data) {
       const r = (await this._downloadAppData());
-      data = r.data;
-      rev = r.meta.rev;
+      data = r.data as AppDataComplete;
+      rev = r.meta.md5Checksum as string;
     }
     if (!rev) {
       throw new Error('No rev given');
@@ -197,10 +213,15 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     gdLog('GD: ↓ Imported Data ↓ ✓');
   }
 
-  private async _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
+  private async _downloadAppData(): Promise<{ meta: GoogleDriveFileMeta, data: AppDataComplete | undefined }> {
     const cfg = await this.cfg$.pipe(first()).toPromise();
-    const d = this._googleApiService.loadFile$(cfg._backupDocId).toPromise();
-    return d;
+    const {backup, meta} = await this._googleApiService.loadFile$(cfg._backupDocId).pipe(first()).toPromise();
+    console.log(backup, meta);
+
+    const data = !!backup
+      ? await this._decodeAppDataIfNeeded(backup)
+      : undefined;
+    return {meta, data};
   }
 
   private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<unknown> {
@@ -210,25 +231,34 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       throw new Error('The data you are trying to upload is invalid');
     }
 
-    // try {
-    //   const r = await this._dropboxApiService.upload({
-    //     path: GOOGLE_SYNC_FILE_PATH,
-    //     data,
-    //     clientModified: data.lastLocalSyncModelChange,
-    //     localRev: this._getLocalRev(),
-    //     isForceOverwrite
-    //   });
-    //   this._setLocalRev(r.rev);
-    //   this._setLocalLastSync(data.lastLocalSyncModelChange);
-    //   gdLog('GD: ↑ Uploaded Data ↑ ✓');
-    //   return r;
-    // } catch (e) {
-    //   console.error(e);
-    //   gdLog('GD: X Upload Request Error');
-    //   if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-    //     return this._uploadAppData(data, true);
-    //   }
-    // }
+    try {
+      const cfg = await this.cfg$.pipe(first()).toPromise();
+      console.log(cfg, data);
+
+      const uploadData = cfg.isCompressData
+        ? await this._compressionService.compressUTF16(JSON.stringify(data))
+        : JSON.stringify(data);
+      const r: any = await this._googleApiService.saveFile$(uploadData, {
+        title: cfg.syncFileName,
+        id: cfg._backupDocId,
+        editable: true,
+        mimeType: cfg.isCompressData ? 'text/plain' : 'application/json',
+      }).toPromise();
+      if (!r.md5Checksum) {
+        throw new Error('N md5Checksum');
+      }
+
+      this._setLocalRev(r.md5Checksum);
+      this._setLocalLastSync(data.lastLocalSyncModelChange);
+      gdLog('GD: ↑ Uploaded Data ↑ ✓');
+      return r;
+    } catch (e) {
+      console.error(e);
+      gdLog('GD: X Upload Request Error');
+      if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
+        return this._uploadAppData(data, true);
+      }
+    }
     return;
   }
 
@@ -269,7 +299,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     remote: AppDataComplete;
     local: AppDataComplete;
     lastSync: number;
-    downloadMeta: DropboxFileMetadata;
+    downloadMeta: GoogleDriveFileMeta;
   }) {
     const dr = await this._openConflictDialog$({
       local: local.lastLocalSyncModelChange,
@@ -282,7 +312,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       return await this._uploadAppData(local, true);
     } else if (dr === 'USE_REMOTE') {
       gdLog('GD: Dialog => ↓ Update Local');
-      return await this._importData(remote, downloadMeta.rev);
+      return await this._importData(remote, downloadMeta.md5Checksum as string);
     }
     return;
   }
@@ -305,4 +335,24 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   private _c(str: string): boolean {
     return confirm(this._translateService.instant(str));
   };
+
+  private async _decodeAppDataIfNeeded(backupStr: string | AppDataComplete): Promise<AppDataComplete> {
+    let backupData: AppDataComplete | undefined;
+
+    // we attempt this regardless of the option, because data might be compressed anyway
+    if (typeof backupStr === 'string') {
+      try {
+        backupData = JSON.parse(backupStr) as AppDataComplete;
+      } catch (e) {
+        try {
+          const decompressedData = await this._compressionService.decompressUTF16(backupStr);
+          backupData = JSON.parse(decompressedData) as AppDataComplete;
+        } catch (e) {
+          console.error('Drive Sync, invalid data');
+          console.warn(e);
+        }
+      }
+    }
+    return backupData || (backupStr as AppDataComplete);
+  }
 }

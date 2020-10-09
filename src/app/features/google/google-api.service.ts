@@ -18,6 +18,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../core/android/android-interface';
 import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-session';
 import { ipcRenderer } from 'electron';
+import { GoogleDriveFileMeta } from './google-api.model';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -163,7 +164,7 @@ export class GoogleApiService {
     }
   }
 
-  getFileInfo$(fileId: string | null): Observable<any> {
+  getFileInfo$(fileId: string | null): Observable<GoogleDriveFileMeta> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
@@ -198,7 +199,7 @@ export class GoogleApiService {
   }
 
   // NOTE: file will always be returned as text (makes sense)
-  loadFile$(fileId: string | null): Observable<any> {
+  loadFile$(fileId: string | null): Observable<{backup: string|undefined, meta: GoogleDriveFileMeta}> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
@@ -218,7 +219,7 @@ export class GoogleApiService {
       }).pipe(
         map((res) => {
           return {
-            backup: res,
+            backup: res.body,
             meta,
           };
         }),
@@ -226,11 +227,7 @@ export class GoogleApiService {
     );
   }
 
-  saveFile$(content: any, metadata: any = {}): Observable<{}> {
-    if ((typeof content !== 'string')) {
-      content = JSON.stringify(content);
-    }
-
+  saveFile$(content: string, metadata: any = {}): Observable<{}> {
     let path;
     let method;
 
