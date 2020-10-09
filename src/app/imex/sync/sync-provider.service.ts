@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { DropboxSyncService } from '../../features/dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { map, switchMap, take } from 'rxjs/operators';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 
@@ -14,20 +14,19 @@ import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.
 export class SyncProviderService {
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.sync));
   currentProvider$: Observable<SyncProviderServiceInterface> = this.syncCfg$.pipe(
-    map((cfg: SyncConfig): SyncProviderServiceInterface => {
+    map((cfg: SyncConfig): SyncProviderServiceInterface | null => {
       console.log(cfg.syncProvider);
-
       switch (cfg.syncProvider) {
         case SyncProvider.Dropbox:
           return this._dropboxSyncService;
         case SyncProvider.GoogleDrive:
           return this._googleDriveSyncService;
         default:
-          // TODO sync fix
-          throw new Error('s');
-          return this._dropboxSyncService;
+          return null;
       }
     }),
+    filter(p => !!p),
+    map((v) => v as SyncProviderServiceInterface),
   );
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map(cfg => cfg.syncInterval));
   isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map(cfg => cfg.isEnabled));
