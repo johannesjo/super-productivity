@@ -143,7 +143,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       && remoteClientUpdate === Math.floor(lastSync / 1000)
       && lastSync < local.lastLocalSyncModelChange
     ) {
-      gdLog('DBX PRE2: ↑ Update Remote');
+      gdLog('GD PRE2: ↑ Update Remote');
       return await this._uploadAppData(local);
     }
 
