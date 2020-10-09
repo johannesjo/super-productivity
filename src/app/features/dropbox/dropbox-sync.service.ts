@@ -111,7 +111,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     local = local || await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
     if (local.lastLocalSyncModelChange === 0) {
       console.log(local);
-      if (!(this._c(T.F.DROPBOX.C.EMPTY_SYNC))) {
+      if (!(this._c(T.F.SYNC.C.EMPTY_SYNC))) {
         return;
       }
     }
@@ -158,7 +158,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
 
       case UpdateCheckResult.RemoteNotUpToDateDespiteSync: {
         dbxLog('DBX: X Remote not up to date despite sync');
-        if (this._c(T.F.DROPBOX.C.TRY_LOAD_REMOTE_AGAIN)) {
+        if (this._c(T.F.SYNC.C.TRY_LOAD_REMOTE_AGAIN)) {
           return this.sync();
         } else {
           return this._handleConflict({remote, local, lastSync, downloadMeta: r.meta});
@@ -181,11 +181,11 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
       case UpdateCheckResult.ErrorLastSyncNewerThanLocal: {
         dbxLog('DBX: XXX Wrong Data');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
-          if (this._c(T.F.DROPBOX.C.FORCE_UPLOAD)) {
+          if (this._c(T.F.SYNC.C.FORCE_UPLOAD)) {
             return await this._uploadAppData(local, true);
           }
         } else {
-          if (this._c(T.F.DROPBOX.C.FORCE_IMPORT)) {
+          if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
             return await this._importData(remote, r.meta.rev);
           }
         }
@@ -249,7 +249,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     } catch (e) {
       console.error(e);
       dbxLog('DBX: X Upload Request Error');
-      if (this._c(T.F.DROPBOX.C.FORCE_UPLOAD_AFTER_ERROR)) {
+      if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
         return this._uploadAppData(data, true);
       }
     }

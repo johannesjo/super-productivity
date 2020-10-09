@@ -83,13 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "You're trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?",
-        "FORCE_IMPORT": "Import remote data anyway?",
-        "FORCE_UPLOAD": "Upload local data anyway?",
-        "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
-        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
-      },
       "D_CONFLICT": {
         "LAST_CHANGE": "last change:",
         "LAST_SYNC": "last sync:",
@@ -579,6 +572,13 @@
       }
     },
     "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "You're trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?",
+        "FORCE_IMPORT": "Import remote data anyway?",
+        "FORCE_UPLOAD": "Upload local data anyway?",
+        "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
+        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
+      },
       "FORM": {
         "L_ENABLE_SYNCING": "Enable Syncing",
         "L_SYNC_INTERVAL": "Sync Interval",

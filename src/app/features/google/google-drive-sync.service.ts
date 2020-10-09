@@ -35,6 +35,7 @@ import {
 import { DialogDbxSyncConflictComponent } from '../dropbox/dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
 import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync-provider.model';
 import { GoogleApiService } from './google-api.service';
+import { dbxLog } from '../dropbox/dropbox-log.util';
 
 export const gdLog = (...args: any) => console.log(...args);
 
@@ -81,32 +82,44 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
   }
 
-  get _config(): GoogleDriveSyncConfig | undefined {
-    return this._configService.cfg?.sync?.googleDriveSync;
-  }
-
+  // TODO remove all
   saveForSync(): void {
     this._store$.dispatch(new SaveForSync());
   }
-
   saveTo(): void {
     this._store$.dispatch(new SaveToGoogleDriveFlow());
   }
-
   loadFrom(): void {
     this._store$.dispatch(new LoadFromGoogleDriveFlow());
   }
 
+  // TODO triger via effect
   changeSyncFileName(newFileName: string): void {
     this._store$.dispatch(new ChangeSyncFileName({newFileName}));
   }
 
   async sync(): Promise<unknown> {
     let local: AppDataComplete | undefined;
-    const lastSync = this._getLocalLastSync();
 
     await this._isReadyForRequests$.toPromise();
+    const lastSync = this._getLocalLastSync();
+    const localRev = this._getLocalRev();
     this._updateLocalLastSyncCheck();
+
+    // PRE CHECK 2
+    // check if file revision changed
+    // ------------------------------
+    const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
+
+    if (rev && rev === localRev) {
+      dbxLog('DBX PRE1: ↔ Same Rev', rev);
+      // NOTE: same rev, doesn't mean. that we can't have local changes
+      local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
+      if (lastSync === local.lastLocalSyncModelChange) {
+        dbxLog('DBX PRE1: No local changes to sync');
+        return;
+      }
+    }
 
     // PRE CHECK 3
     // simple check based on file meta data
@@ -115,13 +128,10 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
     if (local.lastLocalSyncModelChange === 0) {
       console.log(local);
-      if (!(this._c(T.F.GOOGLE.C.EMPTY_SYNC))) {
+      if (!(this._c(T.F.SYNC.C.EMPTY_SYNC))) {
         return;
       }
     }
-
-    // TODO get
-    const clientUpdate = 2222;
 
     // NOTE: missing milliseconds :(
     const remoteClientUpdate = clientUpdate / 1000;
@@ -165,7 +175,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
       case UpdateCheckResult.RemoteNotUpToDateDespiteSync: {
         gdLog('GD: X Remote not up to date despite sync');
-        if (this._c(T.F.GOOGLE.C.TRY_LOAD_REMOTE_AGAIN)) {
+        if (this._c(T.F.SYNC.C.TRY_LOAD_REMOTE_AGAIN)) {
           return this.sync();
         } else {
           return this._handleConflict({remote, local, lastSync, downloadMeta: r.meta});
@@ -188,17 +198,30 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       case UpdateCheckResult.ErrorLastSyncNewerThanLocal: {
         gdLog('GD: XXX Wrong Data');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
-          if (this._c(T.F.GOOGLE.C.FORCE_UPLOAD)) {
+          if (this._c(T.F.SYNC.C.FORCE_UPLOAD)) {
             return await this._uploadAppData(local, true);
           }
         } else {
-          if (this._c(T.F.GOOGLE.C.FORCE_IMPORT)) {
+          if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
             return await this._importData(remote, r.meta.rev);
           }
         }
         return;
       }
     }
+  }
+
+  // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
+  private async _getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number }> {
+    const cfg = await this.cfg$.pipe(first()).toPromise();
+    const fileId = cfg._backupDocId;
+    const r: any = await this._googleApiService.getFileInfo$(fileId);
+    console.log(r);
+    const d = new Date(r.client_modified);
+    return {
+      clientUpdate: d.getTime(),
+      rev: r.rev,
+    };
   }
 
   private async _importData(data: AppDataComplete, rev: string) {
@@ -217,13 +240,11 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     gdLog('GD: ↓ Imported Data ↓ ✓');
   }
 
-  private _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
-    return this._googleApiService.loadFile$(this._config._backupDocId).toPromise();
+  private async _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
+    const cfg = await this.cfg$.pipe(first()).toPromise();
+    return this._googleApiService.loadFile$(cfg._backupDocId).toPromise();
   }
 
-  private _getFileMeta(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
-    return this._googleApiService.getFileInfo$(this._config._backupDocId);
-  }
 
   private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | undefined> {
     if (!isValidAppData(data)) {
@@ -232,25 +253,25 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       throw new Error('The data you are trying to upload is invalid');
     }
 
-    try {
-      const r = await this._dropboxApiService.upload({
-        path: GOOGLE_SYNC_FILE_PATH,
-        data,
-        clientModified: data.lastLocalSyncModelChange,
-        localRev: this._getLocalRev(),
-        isForceOverwrite
-      });
-      this._setLocalRev(r.rev);
-      this._setLocalLastSync(data.lastLocalSyncModelChange);
-      gdLog('GD: ↑ Uploaded Data ↑ ✓');
-      return r;
-    } catch (e) {
-      console.error(e);
-      gdLog('GD: X Upload Request Error');
-      if (this._c(T.F.GOOGLE.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return this._uploadAppData(data, true);
-      }
-    }
+    // try {
+    //   const r = await this._dropboxApiService.upload({
+    //     path: GOOGLE_SYNC_FILE_PATH,
+    //     data,
+    //     clientModified: data.lastLocalSyncModelChange,
+    //     localRev: this._getLocalRev(),
+    //     isForceOverwrite
+    //   });
+    //   this._setLocalRev(r.rev);
+    //   this._setLocalLastSync(data.lastLocalSyncModelChange);
+    //   gdLog('GD: ↑ Uploaded Data ↑ ✓');
+    //   return r;
+    // } catch (e) {
+    //   console.error(e);
+    //   gdLog('GD: X Upload Request Error');
+    //   if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
+    //     return this._uploadAppData(data, true);
+    //   }
+    // }
     return;
   }
 
