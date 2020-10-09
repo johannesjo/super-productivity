@@ -88,11 +88,4 @@ export class BannerService {
       this._banners$.next(this._banners);
     }
   }
-
-  dismissIfExisting(bannerId: BannerId) {
-    if (this._banners.find(bannerIN => bannerIN.id === bannerId)) {
-      this._banners.shift();
-      this._banners$.next(this._banners);
-    }
-  }
 }
