@@ -122,6 +122,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 
       isCompressData: true,
       syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
+      _syncFileNameForBackupDocId: null,
       _backupDocId: null,
     },
   },

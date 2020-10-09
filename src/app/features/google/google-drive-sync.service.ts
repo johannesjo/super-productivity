@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Store } from '@ngrx/store';
-import { LoadFromGoogleDriveFlow, SaveForSync, SaveToGoogleDriveFlow } from './store/google-drive-sync.actions';
-import { concatMap, distinctUntilChanged, filter, first, map, take, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { concatMap, distinctUntilChanged, first, map, take, tap } from 'rxjs/operators';
 import { GlobalConfigService } from '../config/global-config.service';
 import { GoogleDriveSyncConfig } from '../config/global-config.model';
 import { DataImportService } from '../../imex/sync/data-import.service';
@@ -46,7 +44,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   );
 
   constructor(
-    private _store$: Store<any>,
     private _configService: GlobalConfigService,
     private _dataImportService: DataImportService,
     private _syncService: SyncService,
@@ -56,27 +53,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     private _matDialog: MatDialog,
     private _translateService: TranslateService,
   ) {
-
-  }
-
-  // TODO remove all
-  saveForSync(): void {
-    this._store$.dispatch(new SaveForSync());
-  }
-
-  saveTo(): void {
-    this._store$.dispatch(new SaveToGoogleDriveFlow());
-  }
-
-  loadFrom(): void {
-    this._store$.dispatch(new LoadFromGoogleDriveFlow());
-  }
-
-  // TODO triger via effect
-  changeSyncFileName$(newFileName: string): Observable<string> {
-    // this._store$.dispatch(new ChangeSyncFileName({newFileName}));
-    // TODO get doc id
-    return of('TEST');
   }
 
   async sync(): Promise<unknown> {
@@ -201,7 +177,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     const d = new Date(r.client_modified);
     return {
       clientUpdate: d.getTime(),
-      rev: r.rev,
+      rev: r.md5Checksum,
     };
   }
 
@@ -223,10 +199,11 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
   private async _downloadAppData(): Promise<{ meta: DropboxFileMetadata, data: AppDataComplete }> {
     const cfg = await this.cfg$.pipe(first()).toPromise();
-    return this._googleApiService.loadFile$(cfg._backupDocId).toPromise();
+    const d = this._googleApiService.loadFile$(cfg._backupDocId).toPromise();
+    return d;
   }
 
-  private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | undefined> {
+  private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<unknown> {
     if (!isValidAppData(data)) {
       console.log(data);
       alert('The data you are trying to upload is invalid');
@@ -287,6 +264,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     localStorage.setItem(LS_GOOGLE_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
   }
 
+  // TODO sync fix use with drobox
   private async _handleConflict({remote, local, lastSync, downloadMeta}: {
     remote: AppDataComplete;
     local: AppDataComplete;
