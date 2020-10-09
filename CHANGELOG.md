@@ -1,3 +1,23 @@
+## [5.9.15](https://github.com/johannesjo/super-productivity/compare/v5.9.14...v5.9.15) (2020-10-09)
+
+
+### Bug Fixes
+
+* app not closing on windows for some people [#567](https://github.com/johannesjo/super-productivity/issues/567) ([5e340ad](https://github.com/johannesjo/super-productivity/commit/5e340aded20258533767bc87b54b4405c46ad5d1))
+* make tests work again ([bc227bc](https://github.com/johannesjo/super-productivity/commit/bc227bcae42cd12d2fb250182a88d8df98028b02))
+* prevent adding tags via short syntax for child tasks [#568](https://github.com/johannesjo/super-productivity/issues/568) ([94f8147](https://github.com/johannesjo/super-productivity/commit/94f814716174e97c2b28e481a8e90f778c3eb72b))
+* special case [#568](https://github.com/johannesjo/super-productivity/issues/568) ([c26f62b](https://github.com/johannesjo/super-productivity/commit/c26f62b0ae72c80ca4930073094baebd1c3959e3))
+* text overlap ([39508dc](https://github.com/johannesjo/super-productivity/commit/39508dc2f26f4228b4721d5fcaa255b702585088))
+* throw error for inconsistent sub task data [#568](https://github.com/johannesjo/super-productivity/issues/568) ([786235b](https://github.com/johannesjo/super-productivity/commit/786235b9e5ed936adf43aac7f8d9a995fb3cb558))
+
+
+### Features
+
+* write auto repair for wrongly archived sub tasks ([81f076a](https://github.com/johannesjo/super-productivity/commit/81f076aefb543b131cfb87e3e8b7696094b14fd2))
+* write auto repair for wrongly unarchived archived sub tasks [#568](https://github.com/johannesjo/super-productivity/issues/568) ([609941d](https://github.com/johannesjo/super-productivity/commit/609941ddebf83ac4a2040159d8087d75316f0716))
+
+
+
 ## [5.9.14](https://github.com/johannesjo/super-productivity/compare/v5.9.13...v5.9.14) (2020-10-08)
 
 
