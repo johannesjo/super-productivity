@@ -99,6 +99,7 @@ export interface GoogleDriveSyncConfig {
 
   isCompressData: boolean;
   syncFileName: string;
+  _syncFileNameForBackupDocId: string | null;
   _backupDocId: string | null;
 }
 

@@ -186,8 +186,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     if (syncCfg?.isEnabled && syncCfg.googleDriveSync.isAutoSyncToRemote) {
       // login in again, will hopefully prevent google errors
       // this._googleApiService.login().then(() => {
-      this._googleDriveSync.saveForSync();
-      await this._googleDriveSync.onSaveEnd$.pipe(take(1)).toPromise();
+      await this._googleDriveSync.sync();
       this._initSuccessAnimation(cb);
       // });
       // TODO sync fix

@@ -1,20 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
-import {
-  ChangeSyncFileName,
-  GoogleDriveSyncActionTypes,
-  LoadFromGoogleDriveFlow,
-  SaveForSync,
-  SaveToGoogleDriveFlow
-} from './store/google-drive-sync.actions';
-import {
-  selectIsGoogleDriveLoadInProgress,
-  selectIsGoogleDriveSaveInProgress
-} from './store/google-drive-sync.reducer';
-import { concatMap, distinctUntilChanged, first, map, take, tap } from 'rxjs/operators';
+import { LoadFromGoogleDriveFlow, SaveForSync, SaveToGoogleDriveFlow } from './store/google-drive-sync.actions';
+import { concatMap, distinctUntilChanged, filter, first, map, take, tap } from 'rxjs/operators';
 import { GlobalConfigService } from '../config/global-config.service';
-import { Actions, ofType } from '@ngrx/effects';
 import { GoogleDriveSyncConfig } from '../config/global-config.model';
 import { DataImportService } from '../../imex/sync/data-import.service';
 import { SyncService } from '../../imex/sync/sync.service';
@@ -35,7 +24,6 @@ import {
 import { DialogDbxSyncConflictComponent } from '../dropbox/dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
 import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync-provider.model';
 import { GoogleApiService } from './google-api.service';
-import { dbxLog } from '../dropbox/dropbox-log.util';
 
 export const gdLog = (...args: any) => console.log(...args);
 
@@ -45,17 +33,7 @@ export const gdLog = (...args: any) => console.log(...args);
 export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.GoogleDrive;
 
-  isLoadInProgress$: Observable<boolean> = this._store$.select(selectIsGoogleDriveLoadInProgress)
-    .pipe(distinctUntilChanged());
-  isSaveInProgress$: Observable<boolean> = this._store$.select(selectIsGoogleDriveSaveInProgress)
-    .pipe(distinctUntilChanged());
-
   cfg$: Observable<GoogleDriveSyncConfig> = this._configService.cfg$.pipe(map(cfg => cfg.sync.googleDriveSync));
-
-  onSaveEnd$: Observable<any> = this._actions$.pipe(ofType(
-    GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
-    GoogleDriveSyncActionTypes.SaveToGoogleDriveCancel,
-  ));
 
   isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => this._googleApiService.isLoggedIn$),
@@ -70,7 +48,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   constructor(
     private _store$: Store<any>,
     private _configService: GlobalConfigService,
-    private _actions$: Actions,
     private _dataImportService: DataImportService,
     private _syncService: SyncService,
     private _googleApiService: GoogleApiService,
@@ -86,16 +63,20 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   saveForSync(): void {
     this._store$.dispatch(new SaveForSync());
   }
+
   saveTo(): void {
     this._store$.dispatch(new SaveToGoogleDriveFlow());
   }
+
   loadFrom(): void {
     this._store$.dispatch(new LoadFromGoogleDriveFlow());
   }
 
   // TODO triger via effect
-  changeSyncFileName(newFileName: string): void {
-    this._store$.dispatch(new ChangeSyncFileName({newFileName}));
+  changeSyncFileName$(newFileName: string): Observable<string> {
+    // this._store$.dispatch(new ChangeSyncFileName({newFileName}));
+    // TODO get doc id
+    return of('TEST');
   }
 
   async sync(): Promise<unknown> {
@@ -112,11 +93,11 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     const {rev, clientUpdate} = await this._getRevAndLastClientUpdate();
 
     if (rev && rev === localRev) {
-      dbxLog('DBX PRE1: ↔ Same Rev', rev);
+      gdLog('DBX PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
       local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
-        dbxLog('DBX PRE1: No local changes to sync');
+        gdLog('DBX PRE1: No local changes to sync');
         return;
       }
     }
@@ -215,7 +196,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   private async _getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number }> {
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const fileId = cfg._backupDocId;
-    const r: any = await this._googleApiService.getFileInfo$(fileId);
+    const r: any = await this._googleApiService.getFileInfo$(fileId).pipe(first()).toPromise();
     console.log(r);
     const d = new Date(r.client_modified);
     return {
@@ -244,7 +225,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     const cfg = await this.cfg$.pipe(first()).toPromise();
     return this._googleApiService.loadFile$(cfg._backupDocId).toPromise();
   }
-
 
   private async _uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | undefined> {
     if (!isValidAppData(data)) {
