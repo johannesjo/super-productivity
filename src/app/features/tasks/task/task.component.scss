@@ -70,21 +70,21 @@
   }
 
   // NOTE: also applies to child tasks
-  :host-context(.isLightTheme).isSelected & {
+  :host-context(.isLightTheme).isSelected.isSelected & {
     background: $task-c-selected-bg-light;
     //border-color: $task-c-selected-border-light;
     border-width: 0;
   }
 
-  :host-context(.isDarkTheme).isSelected & {
+  :host-context(.isDarkTheme).isSelected.isSelected & {
     background: $task-c-selected-bg-dark;
     //border-color: $task-c-selected-border-dark;
   }
 
-  .inner-wrapper.isSelected > & {
+  .inner-wrapper.isSelected.isSelected > & {
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
-    box-shadow: $whiteframe-shadow-2dp;
+    //box-shadow: $whiteframe-shadow-2dp;
     //@include darkTheme {
     //  box-shadow: $whiteframe-shadow-1dp;
     //}
@@ -127,7 +127,7 @@
   }
 
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
-    background: #2c2c2c;
+    background: $task-c-current-bg-dark;
     box-shadow: $task-active-shadow-dark;
   }
 
