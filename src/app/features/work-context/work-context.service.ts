@@ -236,7 +236,9 @@ export class WorkContextService {
       let startableTasks: Task[] = [];
       activeContext.taskIds.forEach(id => {
         const task: Task | undefined = entities[id];
-        if (!task) throw new Error('Task not found');
+        if (!task) {
+          throw new Error('Task not found');
+        }
 
         if (task.subTaskIds && task.subTaskIds.length) {
           startableTasks = startableTasks.concat(task.subTaskIds.map(sid => entities[sid] as Task));
