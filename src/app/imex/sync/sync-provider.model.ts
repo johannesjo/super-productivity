@@ -9,10 +9,6 @@ export enum SyncProvider {
   'WebDAV' = 'WebDAV',
 }
 
-// TODO unify meta
-// export interface SyncFileMeta {
-// }
-
 export type SyncFileMeta = DropboxFileMetadata | GoogleDriveFileMeta;
 
 export interface SyncProviderServiceInterface {

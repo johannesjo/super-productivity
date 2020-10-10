@@ -40,6 +40,7 @@ import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.me
 import { InitialDialogModule } from './features/initial-dialog/initial-dialog.module';
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 import { SyncModule } from './imex/sync/sync.module';
+import { GoogleModule } from './features/google/google.module';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -71,6 +72,7 @@ export function createTranslateLoader(http: HttpClient) {
     BookmarkModule,
     TasksModule,
     SyncModule,
+    GoogleModule,
     InitialDialogModule,
     MaterialCssVarsModule.forRoot(),
 
