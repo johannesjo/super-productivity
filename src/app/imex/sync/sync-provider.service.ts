@@ -6,11 +6,10 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { GoogleDriveSyncService } from './google/google-drive-sync.service';
-import { AppDataComplete } from './sync.model';
+import { AppDataComplete, DialogConflictResolutionResult } from './sync.model';
 import { T } from '../../t.const';
 import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
-import { DropboxConflictResolution } from './dropbox/dropbox.model';
-import { DialogDbxSyncConflictComponent } from './dropbox/dialog-dbx-sync-conflict/dialog-dbx-sync-conflict.component';
+import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { TranslateService } from '@ngx-translate/core';
 import { SyncService } from './sync.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -292,8 +291,8 @@ export class SyncProviderService {
     remote: number;
     local: number;
     lastSync: number
-  }): Observable<DropboxConflictResolution> {
-    return this._matDialog.open(DialogDbxSyncConflictComponent, {
+  }): Observable<DialogConflictResolutionResult> {
+    return this._matDialog.open(DialogSyncConflictComponent, {
       restoreFocus: true,
       data: {
         remote,

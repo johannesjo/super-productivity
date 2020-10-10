@@ -1,4 +1,4 @@
-export type DropboxConflictResolution = 'USE_LOCAL' | 'USE_REMOTE' | false;
+
 
 export type DropboxTimestamp = string;
 export type DropboxRev = string;

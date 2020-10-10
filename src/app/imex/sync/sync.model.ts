@@ -86,3 +86,5 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   taskArchive: createEmptyEntity(),
   taskRepeatCfg: initialTaskRepeatCfgState,
 };
+
+export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;

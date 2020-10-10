@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import * as moment from 'moment';
-import { DropboxConflictResolution } from '../dropbox.model';
+import { DialogConflictResolutionResult } from '../sync.model';
 
 @Component({
-  selector: 'dialog-dbx-sync-conflict',
-  templateUrl: './dialog-dbx-sync-conflict.component.html',
-  styleUrls: ['./dialog-dbx-sync-conflict.component.scss'],
+  selector: 'dialog-sync-conflict',
+  templateUrl: './dialog-sync-conflict.component.html',
+  styleUrls: ['./dialog-sync-conflict.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogDbxSyncConflictComponent {
+export class DialogSyncConflictComponent {
   T: typeof T = T;
 
   remote: string = this._formatDate(this.data.remote);
@@ -18,7 +18,7 @@ export class DialogDbxSyncConflictComponent {
   lastSync: string = this._formatDate(this.data.lastSync);
 
   constructor(
-    private _matDialogRef: MatDialogRef<DialogDbxSyncConflictComponent>,
+    private _matDialogRef: MatDialogRef<DialogSyncConflictComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {
       remote: number;
       local: number;
@@ -28,7 +28,7 @@ export class DialogDbxSyncConflictComponent {
     _matDialogRef.disableClose = true;
   }
 
-  close(res?: DropboxConflictResolution) {
+  close(res?: DialogConflictResolutionResult) {
     this._matDialogRef.close(res);
   }
 
