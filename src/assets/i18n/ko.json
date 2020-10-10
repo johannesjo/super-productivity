@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "토큰 생성",
-        "FOLLOW_LINK": "다음 링크를 열고 제공된 인증 코드를 입력 필드에 복사하십시오.",
-        "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)",
-        "L_AUTH_CODE": "인증 코드"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox : 인증 코드에서 액세스 토큰을 생성 할 수 없습니다",
         "ACCESS_TOKEN_GENERATED": "Dropbox : 인증 코드에서 생성 된 액세스 토큰",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google 드라이브 : <strong>기존</strong> 파일 <strong>\"{{fileName}}\"</strong> 을 동기화 파일로 사용 하시겠습니까? 그렇지 않은 경우 동기화 파일 이름을 변경하십시오."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "이름이 \"{{newFileName}}\"인 파일이 여러 개 있습니다. 하나만 제외하고 모두 삭제하거나 다른 이름을 선택하십시오."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "이름이 \"{{newFileName}}\"인 파일이 여러 개 있습니다. 하나만 제외하고 모두 삭제하거나 다른 이름을 선택하십시오.",
+        "UPDATED_SYNC_FILE_NAME": "Google 드라이브 : 업데이트 된 동기화 파일 이름"
       },
       "S_API": {
         "ERR": "GoogleApi 오류 : {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "리모컨 사용"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "토큰 생성",
+          "FOLLOW_LINK": "다음 링크를 열고 제공된 인증 코드를 입력 필드에 복사하십시오.",
+          "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)",
+          "L_AUTH_CODE": "인증 코드"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "데이터 압축",
+          "L_SYNC_FILE_NAME": "파일 이름 동기화"
+        },
         "L_ENABLE_SYNCING": "동기화 활성화",
         "L_SYNC_INTERVAL": "동기화 간격",
         "L_SYNC_PROVIDER": "동기화 제공자",
-        "TITLE": "동조"
+        "TITLE": "동조",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>실험적 !!</strong> 이 작업을 수행하려면 Nextcloud 인스턴스에 대한 CORS를 비활성화하거나 제한해야합니다. 이는 보안에 부정적인 영향을 미칠 수 있습니다. 자세한 내용은 <a href='https://github.com/nextcloud/server/issues/3131'>이 스레드</a> 를 참조하십시오. 자신의 책임하에 사용하십시오!",
+          "L_BASE_URL": "기본 URL",
+          "L_PASSWORD": "암호",
+          "L_SYNC_FILE_PATH": "동기화 파일 경로",
+          "L_USER_NAME": "사용자 이름"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "데이터를 가져 오는 중에 문제가 발생했습니다. 로컬 백업으로 되돌아갑니다.",
+        "ERROR_INVALID_DATA": "동기화하는 동안 오류가 발생했습니다. 유효하지 않은 데이터",
+        "IMPORTING": "데이터 가져 오기",
+        "SUCCESS": "가져온 데이터",
+        "UNKNOWN_ERROR": "동기화하는 동안 알 수없는 오류가 발생했습니다. 콘솔을 확인하십시오."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google 드라이브 : 파일 다운로드 ...",
     "GDRIVE_UPLOAD": "Google 드라이브 : 파일 업로드 ...",
     "GITHUB_LOAD_ISSUE": "Github : 이슈 데이터로드 ...",
-    "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ..."
+    "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ...",
+    "UNKNOWN": "원격 데이터로드"
   },
   "MH": {
     "ADD_NEW_TASK": "새 작업 추가",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "동기화 및 내보내기",
     "TAG_SETTINGS": "태그 별 설정",
     "TOGGLE_DARK_MODE": "어두운 모드 전환"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "데이터를 가져 오는 중에 문제가 발생했습니다. 로컬 백업으로 되돌아갑니다.",
-      "ERROR_INVALID_DATA": "동기화하는 동안 오류가 발생했습니다. 유효하지 않은 데이터",
-      "IMPORTING": "데이터 가져 오기",
-      "SUCCESS": "가져온 데이터"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",

@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "Genereer Token",
-        "FOLLOW_LINK": "Open de volgende link en kopieer de daar aanwezige auth code in het invoerveld.",
-        "L_ACCESS_TOKEN": "Access Token (gegenereerd van Auth Code)",
-        "L_AUTH_CODE": "Auth Code"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Onmogelijk om een Access Token van Auth Code te genereren",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google Drive: gebruik je <strong>bestaand</strong> bestand <strong>\"{{fileName}}\"</strong> als synchronisatiebestand? Zo niet, wijzig dan de naam van het synchronisatiebestand."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Meerdere bestanden met de naam \"{{newFileName}}\" gevonden. Verwijder alle op één na of kies een andere naam."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Meerdere bestanden met de naam \"{{newFileName}}\" gevonden. Verwijder alle op één na of kies een andere naam.",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: bijgewerkte naam van synchronisatiebestand"
       },
       "S_API": {
         "ERR": "GoogleApi-fout: {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "Gebruik afstandsbediening"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Genereer token",
+          "FOLLOW_LINK": "Open de volgende link en kopieer de daar verstrekte auth-code naar het invoerveld.",
+          "L_ACCESS_TOKEN": "Toegangstoken (gegenereerd op basis van Auth Code)",
+          "L_AUTH_CODE": "Autorisatie code"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Comprimeer gegevens",
+          "L_SYNC_FILE_NAME": "Synchroniseer bestandsnaam"
+        },
         "L_ENABLE_SYNCING": "Schakel synchronisatie in",
         "L_SYNC_INTERVAL": "Synchronisatie-interval",
         "L_SYNC_PROVIDER": "Synchronisatieprovider",
-        "TITLE": "Synchroniseren"
+        "TITLE": "Synchroniseren",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>Experimenteel !!</strong> Om dit te laten werken, moet u CORS uitschakelen of beperken voor uw Nextcloud-instantie, wat negatieve gevolgen voor de veiligheid kan hebben! Raadpleeg <a href='https://github.com/nextcloud/server/issues/3131'>deze thread</a> voor meer informatie. Gebruik op eigen risico!",
+          "L_BASE_URL": "Basis-URL",
+          "L_PASSWORD": "Wachtwoord",
+          "L_SYNC_FILE_PATH": "Synchroniseer bestandspad",
+          "L_USER_NAME": "Gebruikersnaam"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Er is iets misgegaan tijdens het importeren van de gegevens. Terugvallen op lokale back-up.",
+        "ERROR_INVALID_DATA": "Fout tijdens het synchroniseren. Onjuiste data",
+        "IMPORTING": "Gegevens importeren",
+        "SUCCESS": "Gegevens geïmporteerd",
+        "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: bestand downloaden ...",
     "GDRIVE_UPLOAD": "Google Drive: bestand uploaden ...",
     "GITHUB_LOAD_ISSUE": "Github: Probleemgegevens laden ...",
-    "JIRA_LOAD_ISSUE": "Jira: Probleemgegevens laden ..."
+    "JIRA_LOAD_ISSUE": "Jira: Probleemgegevens laden ...",
+    "UNKNOWN": "Externe gegevens laden"
   },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "Synchroniseren en exporteren",
     "TAG_SETTINGS": "Label specifieke instellingen",
     "TOGGLE_DARK_MODE": "Schakel de donkere modus in"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Er is iets misgegaan bij het importeren van de gegevens. Terugvallen op lokale back-up.",
-      "ERROR_INVALID_DATA": "Fout bij het synchroniseren. Onjuiste data",
-      "IMPORTING": "Gegevens importeren",
-      "SUCCESS": "Gegevens geïmporteerd"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Er zijn momenteel geen geplande taken. U kunt een taak plannen door \"Taak plannen\" te kiezen in het taakcontextmenu. Klik op de 3 kleine puntjes rechts van een taak om deze te openen.",

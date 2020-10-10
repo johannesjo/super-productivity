@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "Genera token",
-        "FOLLOW_LINK": "Si prega di aprire il seguente link e copiare il codice di autenticazione fornito nel campo di input.",
-        "L_ACCESS_TOKEN": "Token di accesso (generato dal codice di autenticazione)",
-        "L_AUTH_CODE": "Codice di Autenticazione"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: impossibile generare il token di accesso dal codice di autenticazione",
         "ACCESS_TOKEN_GENERATED": "Dropbox: token di accesso generato dal codice di autenticazione",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google Drive: Usare il file <strong>esistente</strong> <strong>\"{{fileName}}\"</strong> come file sincronizzato? Se non lo desideri cambia il nome del file sincronizzato, per favore."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "File multipli con il nome \"{{newFileName}}\" trovati. Per favore rimuovili tutti tranne uno o scegli un nome diverso."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "File multipli con il nome \"{{newFileName}}\" trovati. Per favore rimuovili tutti tranne uno o scegli un nome diverso.",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nome del file di sincronizzazione aggiornato"
       },
       "S_API": {
         "ERR": "GoogleApi Errore: {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "Usa il telecomando"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Genera token",
+          "FOLLOW_LINK": "Si prega di aprire il seguente link e copiare il codice di autenticazione fornito nel campo di input.",
+          "L_ACCESS_TOKEN": "Token di accesso (generato dal codice di autenticazione)",
+          "L_AUTH_CODE": "Codice di Autenticazione"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Comprimi i dati",
+          "L_SYNC_FILE_NAME": "Nome file di sincronizzazione"
+        },
         "L_ENABLE_SYNCING": "Abilita sincronizzazione",
         "L_SYNC_INTERVAL": "Intervallo di sincronizzazione",
         "L_SYNC_PROVIDER": "Provider di sincronizzazione",
-        "TITLE": "Sync"
+        "TITLE": "Sync",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>Sperimentale !!</strong> Per fare in modo che funzioni, devi disabilitare o limitare CORS per la tua istanza Nextcloud, che può avere implicazioni negative per la sicurezza! Per ulteriori informazioni, <a href='https://github.com/nextcloud/server/issues/3131'>fai riferimento a questo thread</a> . Utilizzare a proprio rischio!",
+          "L_BASE_URL": "URL di base",
+          "L_PASSWORD": "Parola d'ordine",
+          "L_SYNC_FILE_PATH": "Sincronizza percorso file",
+          "L_USER_NAME": "Nome utente"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Qualcosa è andato storto durante l'importazione dei dati. Tornando al backup locale.",
+        "ERROR_INVALID_DATA": "Errore durante la sincronizzazione. Dati non validi",
+        "IMPORTING": "Importazione di dati",
+        "SUCCESS": "Dati importati",
+        "UNKNOWN_ERROR": "Errore sconosciuto durante la sincronizzazione. Si prega di controllare la console."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: scarica il file ...",
     "GDRIVE_UPLOAD": "Google Drive: carica il file ...",
     "GITHUB_LOAD_ISSUE": "Github: caricamento dati problema ...",
-    "JIRA_LOAD_ISSUE": "Jira: caricamento dati problema ..."
+    "JIRA_LOAD_ISSUE": "Jira: caricamento dati problema ...",
+    "UNKNOWN": "Caricamento dei dati remoti"
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuovo task",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "Sincronizza ed esporta",
     "TAG_SETTINGS": "Impostazioni specifiche dell'etichetta",
     "TOGGLE_DARK_MODE": "Abilita/disabilita tema scuro"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Qualcosa è andato storto durante l'importazione dei dati. Ritorno all'ultimo backup.",
-      "ERROR_INVALID_DATA": "Errore durante la sincronizzazione. Dati non validi",
-      "IMPORTING": "Importando i dati",
-      "SUCCESS": "Dati importati"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Non ci sono task pianificati al momento. Puoi pianificare un task scegliendo \"Pianifica task\" nel menu di contesto. Per aprirlo clicca i tre puntini sulla destra dei task.",

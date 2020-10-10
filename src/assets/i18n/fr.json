@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "Générer un jeton",
-        "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification fourni dans le champ de saisie.",
-        "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)",
-        "L_AUTH_CODE": "Code d'autorisation"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: impossible de générer un jeton d'accès à partir du code d'authentification",
         "ACCESS_TOKEN_GENERATED": "Dropbox: jeton d'accès généré à partir du code d'authentification",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google Drive : utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation? Sinon, veuillez changer le nom du fichier de synchronisation."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Plusieurs fichiers portant le nom \"{{newFileName}}\" ont été trouvés. Veuillez les supprimer tous sauf un ou choisir un nom différent."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Plusieurs fichiers portant le nom \"{{newFileName}}\" ont été trouvés. Veuillez les supprimer tous sauf un ou choisir un nom différent.",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nom du fichier de synchronisation mis à jour"
       },
       "S_API": {
         "ERR": "Erreur GoogleApi: {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "Utiliser la télécommande"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Générer un jeton",
+          "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification fourni dans le champ de saisie.",
+          "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)",
+          "L_AUTH_CODE": "Code d'autorisation"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Compresser les données",
+          "L_SYNC_FILE_NAME": "Nom du fichier de synchronisation"
+        },
         "L_ENABLE_SYNCING": "Activer la synchronisation",
         "L_SYNC_INTERVAL": "Intervalle de synchronisation",
         "L_SYNC_PROVIDER": "Fournisseur de synchronisation",
-        "TITLE": "Sync"
+        "TITLE": "Sync",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>Expérimental !!</strong> Pour que cela fonctionne, vous devez désactiver ou limiter CORS pour votre instance Nextcloud, ce qui peut avoir des implications négatives sur la sécurité! Veuillez <a href='https://github.com/nextcloud/server/issues/3131'>consulter ce fil de discussion</a> pour plus d'informations. À utiliser à vos risques et périls!",
+          "L_BASE_URL": "URL de base",
+          "L_PASSWORD": "Mot de passe",
+          "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation",
+          "L_USER_NAME": "Nom d'utilisateur"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Quelque chose s'est mal passé lors de l'importation des données. Retour à la sauvegarde locale.",
+        "ERROR_INVALID_DATA": "Erreur lors de la synchronisation. Données invalides",
+        "IMPORTING": "Importer des données",
+        "SUCCESS": "Données importées",
+        "UNKNOWN_ERROR": "Erreur inconnue lors de la synchronisation. Veuillez vérifier la console."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Télécharger le fichier ...",
     "GDRIVE_UPLOAD": "Google Drive: importer un fichier ...",
     "GITHUB_LOAD_ISSUE": "Github: Charger les données de problème ...",
-    "JIRA_LOAD_ISSUE": "Jira: Charger les données du problème ..."
+    "JIRA_LOAD_ISSUE": "Jira: Charger les données du problème ...",
+    "UNKNOWN": "Chargement des données à distance"
   },
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "Synchroniser et exporter",
     "TAG_SETTINGS": "Paramètres spécifiques aux balises",
     "TOGGLE_DARK_MODE": "Basculer en mode sombre"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Quelque chose s'est mal passé lors de l'importation des données. Retour à la sauvegarde locale.",
-      "ERROR_INVALID_DATA": "Erreur lors de la synchronisation. Données invalides",
-      "IMPORTING": "Importer des données",
-      "SUCCESS": "Données importées"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Il n'y a actuellement aucune tâche planifiée. Vous pouvez planifier une tâche en choisissant \"Planifier une tâche\" dans le menu contextuel de la tâche. Pour l'ouvrir, cliquez sur les 3 petits points à droite d'une tâche.",

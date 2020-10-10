@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "تولید توکن",
-        "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد Auth ارائه شده در قسمت ورودی را کپی کنید.",
-        "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)",
-        "L_AUTH_CODE": "کد تایید"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: تولید توکن دسترسی از Auth Code امکان پذیر نیست",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token تولید شده از Auth Code",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: نام فایل همگام سازی به روز شده است"
       },
       "S_API": {
         "ERR": "خطای GoogleApi : {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "از راه دور استفاده کنید"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "تولید توکن",
+          "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد Auth ارائه شده در قسمت ورودی را کپی کنید.",
+          "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)",
+          "L_AUTH_CODE": "کد تایید"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "فشرده سازی داده ها",
+          "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید"
+        },
         "L_ENABLE_SYNCING": "همگام سازی را فعال کنید",
         "L_SYNC_INTERVAL": "فاصله همگام سازی",
         "L_SYNC_PROVIDER": "ارائه دهنده همگام سازی",
-        "TITLE": "همگام سازی"
+        "TITLE": "همگام سازی",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>آزمایشی !!</strong> برای انجام این کار باید CORS را برای نمونه Nextcloud خود غیرفعال یا محدود کنید ، که این امر می تواند پیامدهای امنیتی منفی داشته باشد! لطفاً برای اطلاعات بیشتر <a href='https://github.com/nextcloud/server/issues/3131'>به این بخش مراجعه کنید</a> . با مسئولیت خود استفاده کنید!",
+          "L_BASE_URL": "آدرس پایگاه",
+          "L_PASSWORD": "کلمه عبور",
+          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
+          "L_USER_NAME": "نام کاربری"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "هنگام وارد کردن داده ها مشکلی پیش آمد. بازگشت به پشتیبان گیری محلی.",
+        "ERROR_INVALID_DATA": "خطا هنگام همگام سازی داده نامعتبر است",
+        "IMPORTING": "وارد کردن داده",
+        "SUCCESS": "داده وارد شد",
+        "UNKNOWN_ERROR": "خطای ناشناخته هنگام همگام سازی لطفا کنسول را بررسی کنید."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: بارگیری فایل ...",
     "GDRIVE_UPLOAD": "Google Drive: بارگذاری پرونده ...",
     "GITHUB_LOAD_ISSUE": "Github: بارگیری داده های شماره ...",
-    "JIRA_LOAD_ISSUE": "جیرا: بارگیری داده های شماره ..."
+    "JIRA_LOAD_ISSUE": "جیرا: بارگیری داده های شماره ...",
+    "UNKNOWN": "بارگیری داده های از راه دور"
   },
   "MH": {
     "ADD_NEW_TASK": "اضافه کردن کار جدید",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "همگام سازی و صادرات",
     "TAG_SETTINGS": "تنظیمات خاص را برچسب گذاری کنید",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
-      "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
-      "IMPORTING": "Importing data",
-      "SUCCESS": "Data imported"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",

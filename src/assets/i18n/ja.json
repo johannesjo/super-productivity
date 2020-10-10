@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "トークンを生成",
-        "FOLLOW_LINK": "次のリンクを開き、そこに提供されている認証コードを入力フィールドにコピーしてください。",
-        "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）",
-        "L_AUTH_CODE": "認証コード"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox：認証コードからアクセストークンを生成できません",
         "ACCESS_TOKEN_GENERATED": "Dropbox：認証コードから生成されたアクセストークン",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Googleドライブ：同期ファイルとして <strong>既存の</strong> ファイル <strong>\"{{fileName}}\"</strong> を使用しますか？そうでない場合は、同期ファイル名を変更してください。"
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\"という名前のファイルが複数見つかりました。 1つを除いてすべて削除するか、別の名前を選択してください。"
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\"という名前のファイルが複数見つかりました。 1つを除いてすべて削除するか、別の名前を選択してください。",
+        "UPDATED_SYNC_FILE_NAME": "Googleドライブ：同期ファイル名を更新"
       },
       "S_API": {
         "ERR": "GoogleApiエラー： {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "リモコンを使用"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "トークンを生成",
+          "FOLLOW_LINK": "次のリンクを開き、そこに提供されている認証コードを入力フィールドにコピーしてください。",
+          "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）",
+          "L_AUTH_CODE": "認証コード"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "データを圧縮する",
+          "L_SYNC_FILE_NAME": "同期ファイル名"
+        },
         "L_ENABLE_SYNCING": "同期を有効にする",
         "L_SYNC_INTERVAL": "同期間隔",
         "L_SYNC_PROVIDER": "同期プロバイダー",
-        "TITLE": "同期"
+        "TITLE": "同期",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>実験的!!</strong> これを機能させるには、NextcloudインスタンスのCORSを無効にするか制限する必要があります。これは、セキュリティに悪影響を与える可能性があります。詳細については、 <a href='https://github.com/nextcloud/server/issues/3131'>このスレッド</a> を参照してください。自己責任！",
+          "L_BASE_URL": "ベースURL",
+          "L_PASSWORD": "パスワード",
+          "L_SYNC_FILE_PATH": "同期ファイルパス",
+          "L_USER_NAME": "ユーザー名"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
+        "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
+        "IMPORTING": "データをインポートする",
+        "SUCCESS": "インポートされたデータ",
+        "UNKNOWN_ERROR": "同期中に不明なエラーが発生しました。コンソールを確認してください。"
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Googleドライブ：ファイルをダウンロード...",
     "GDRIVE_UPLOAD": "Googleドライブ：ファイルをアップロード...",
     "GITHUB_LOAD_ISSUE": "Github：問題データをロード...",
-    "JIRA_LOAD_ISSUE": "Jira：問題データをロード..."
+    "JIRA_LOAD_ISSUE": "Jira：問題データをロード...",
+    "UNKNOWN": "リモートデータの読み込み"
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "同期とエクスポート",
     "TAG_SETTINGS": "タグ固有の設定",
     "TOGGLE_DARK_MODE": "ダークモードの切り替え"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
-      "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
-      "IMPORTING": "データをインポートする",
-      "SUCCESS": "インポートされたデータ"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",

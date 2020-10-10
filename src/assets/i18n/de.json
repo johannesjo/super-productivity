@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "Token generieren",
-        "FOLLOW_LINK": "Bitte öffnen Sie den folgenden Link und kopieren Sie den dort angegebenen Authentifizierungscode in das Eingabefeld.",
-        "L_ACCESS_TOKEN": "Zugriffstoken (generiert aus Auth-Code)",
-        "L_AUTH_CODE": "Auth-Code"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Zugriffstoken aus Authentifizierungscode kann nicht generiert werden",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Aus Authentifizierungscode generiertes Zugriffstoken",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google Drive: <strong>vorhandene</strong> Datei <strong>\"{{fileName}}\"</strong> als Synchronisierungsdatei verwenden? Wenn nicht, ändern Sie bitte den Namen der Sync-Datei."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Mehrere Dateien mit dem Namen \"{{newFileName}}\" gefunden. Bitte löschen Sie alle bis auf einen oder wählen Sie einen anderen Namen."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Mehrere Dateien mit dem Namen \"{{newFileName}}\" gefunden. Bitte löschen Sie alle bis auf einen oder wählen Sie einen anderen Namen.",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Der Name der Synchronisierungsdatei wurde aktualisiert"
       },
       "S_API": {
         "ERR": "GoogleApi-Fehler: {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "Verwenden Sie die Fernbedienung"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Token generieren",
+          "FOLLOW_LINK": "Bitte öffnen Sie den folgenden Link und kopieren Sie den dort angegebenen Authentifizierungscode in das Eingabefeld.",
+          "L_ACCESS_TOKEN": "Zugriffstoken (generiert aus Auth-Code)",
+          "L_AUTH_CODE": "Auth-Code"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Daten komprimieren",
+          "L_SYNC_FILE_NAME": "Dateiname synchronisieren"
+        },
         "L_ENABLE_SYNCING": "Synchronisierung aktivieren",
         "L_SYNC_INTERVAL": "Synchronisierungsintervall",
         "L_SYNC_PROVIDER": "Anbieter synchronisieren",
-        "TITLE": "Sync"
+        "TITLE": "Sync",
+        "WEB_DAV": {
+          "CORS_INFO": "",
+          "L_BASE_URL": "Basis-URL",
+          "L_PASSWORD": "Passwort",
+          "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
+          "L_USER_NAME": "Nutzername"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Zurückgreifen auf lokales Backup.",
+        "ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
+        "IMPORTING": "Daten importieren",
+        "SUCCESS": "Daten importiert",
+        "UNKNOWN_ERROR": "Unbekannter Fehler beim Synchronisieren. Bitte überprüfen Sie die Konsole."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Datei herunterladen ...",
     "GDRIVE_UPLOAD": "Google Drive: Datei hochladen ...",
     "GITHUB_LOAD_ISSUE": "Github: Problemdaten laden ...",
-    "JIRA_LOAD_ISSUE": "Jira: Problemdaten laden ..."
+    "JIRA_LOAD_ISSUE": "Jira: Problemdaten laden ...",
+    "UNKNOWN": "Remote-Daten laden"
   },
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "Synchronisieren und exportieren",
     "TAG_SETTINGS": "Tag-spezifische Einstellungen",
     "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Lokales Backup wird wiederhergestellt.",
-      "ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
-      "IMPORTING": "Daten importieren",
-      "SUCCESS": "Daten importiert"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",

@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "Jeton Oluştur",
-        "FOLLOW_LINK": "Lütfen aşağıdaki bağlantıyı açın ve orada verilen kimlik doğrulama kodunu giriş alanına kopyalayın.",
-        "L_ACCESS_TOKEN": "Erişim Simgesi (Kimlik Doğrulama Kodundan üretilir)",
-        "L_AUTH_CODE": "Doğrulama kodu"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Yetkilendirme Kodundan Erişim Simgesi oluşturulamıyor",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Yetkilendirme Kodundan oluşturulan Erişim Simgesi",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google Drive: Senkronizasyon dosyası olarak <strong>var olan</strong> dosyayı <strong>\"{{fileName}}\"</strong> kullanıyor musunuz? Değilse, lütfen Eşitleme dosya adını değiştirin."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin.",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Güncellenmiş senkronizasyon dosyası adı"
       },
       "S_API": {
         "ERR": "GoogleApi Hatası: {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "Uzaktan kumandayı kullan"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Jeton Oluştur",
+          "FOLLOW_LINK": "Lütfen aşağıdaki bağlantıyı açın ve orada verilen kimlik doğrulama kodunu giriş alanına kopyalayın.",
+          "L_ACCESS_TOKEN": "Erişim Simgesi (Kimlik Doğrulama Kodundan üretilir)",
+          "L_AUTH_CODE": "Doğrulama kodu"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Veriyi Sıkıştır",
+          "L_SYNC_FILE_NAME": "Dosya adını senkronize et"
+        },
         "L_ENABLE_SYNCING": "Eşitlemeyi Etkinleştir",
         "L_SYNC_INTERVAL": "Senkron aralığı",
         "L_SYNC_PROVIDER": "Senkronizasyon Sağlayıcı",
-        "TITLE": "Sync"
+        "TITLE": "Sync",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>Deneysel !!</strong> Bunun çalışmasını sağlamak için, Nextcloud örneğiniz için CORS'u devre dışı bırakmanız veya sınırlamanız gerekir; bu, olumsuz güvenlik sonuçlarına neden olabilir! Daha fazla bilgi için lütfen <a href='https://github.com/nextcloud/server/issues/3131'>bu konu başlığına bakın</a> . Kendi sorumluluğunuzdadır kullanın!",
+          "L_BASE_URL": "Temel URL",
+          "L_PASSWORD": "Parola",
+          "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
+          "L_USER_NAME": "Kullanıcı adı"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
+        "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
+        "IMPORTING": "Veri alınıyor",
+        "SUCCESS": "Alınan veri",
+        "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Dosya indir ...",
     "GDRIVE_UPLOAD": "Google Drive: Dosya yükle ...",
     "GITHUB_LOAD_ISSUE": "Github: Sorun verilerini yükle ...",
-    "JIRA_LOAD_ISSUE": "Jira: Sorun verilerini yükle ..."
+    "JIRA_LOAD_ISSUE": "Jira: Sorun verilerini yükle ...",
+    "UNKNOWN": "Uzak verileri yükleme"
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "Senkronize Et ve Dışa Aktar",
     "TAG_SETTINGS": "Etikete Özgü Ayarlar",
     "TOGGLE_DARK_MODE": "Koyu Modu Değiştir"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
-      "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
-      "IMPORTING": "Veri alınıyor",
-      "SUCCESS": "Alınan veri"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",

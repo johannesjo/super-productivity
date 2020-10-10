@@ -83,12 +83,6 @@
       }
     },
     "DROPBOX": {
-      "FORM": {
-        "B_GENERATE_TOKEN": "Generar token",
-        "FOLLOW_LINK": "Abre el siguiente enlace y copia el código de autenticación proporcionado allí en el campo de entrada.",
-        "L_ACCESS_TOKEN": "Token de acceso (generado a partir del código de autenticación)",
-        "L_AUTH_CODE": "código de autenticación"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: no se puede generar el token de acceso desde el código de autenticación",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Token de acceso generado a partir del código de autenticación",
@@ -191,7 +185,8 @@
         "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>archivo</strong> existente <strong>\"{{fileName}}\"</strong> como archivo de sincronización? Si no es así, cambie el nombre del archivo de sincronización."
       },
       "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Elimine todos menos uno o elija un nombre diferente."
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Elimine todos menos uno o elija un nombre diferente.",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nombre de archivo de sincronización actualizado"
       },
       "S_API": {
         "ERR": "Error de GoogleApi: {{errStr}}",
@@ -538,10 +533,34 @@
         "USE_REMOTE": "Usar control remoto"
       },
       "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Generar token",
+          "FOLLOW_LINK": "Abra el siguiente enlace y copie el código de autenticación proporcionado allí en el campo de entrada.",
+          "L_ACCESS_TOKEN": "Token de acceso (generado a partir del código de autenticación)",
+          "L_AUTH_CODE": "código de autenticación"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Comprimir datos",
+          "L_SYNC_FILE_NAME": "Sincronizar nombre de archivo"
+        },
         "L_ENABLE_SYNCING": "Habilitar sincronización",
         "L_SYNC_INTERVAL": "Intervalo de sincronización",
         "L_SYNC_PROVIDER": "Proveedor de sincronización",
-        "TITLE": "Sincronizar"
+        "TITLE": "Sincronizar",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>¡Experimental!</strong> Para que esto funcione, debe deshabilitar o limitar CORS para su instancia de Nextcloud, lo que puede tener implicaciones de seguridad negativas. <a href='https://github.com/nextcloud/server/issues/3131'>Consulte este hilo</a> para obtener más información. ¡Úselo bajo su propio riesgo!",
+          "L_BASE_URL": "URL base",
+          "L_PASSWORD": "Contraseña",
+          "L_SYNC_FILE_PATH": "Ruta del archivo de sincronización",
+          "L_USER_NAME": "Nombre de usuario"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
+        "ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
+        "IMPORTING": "Importando datos",
+        "SUCCESS": "Datos importados",
+        "UNKNOWN_ERROR": "Error desconocido durante la sincronización. Compruebe la consola."
       }
     },
     "TAG": {
@@ -977,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Descargar archivo ...",
     "GDRIVE_UPLOAD": "Google Drive: Subir archivo ...",
     "GITHUB_LOAD_ISSUE": "Github: cargar datos de problemas ...",
-    "JIRA_LOAD_ISSUE": "Jira: cargar datos de problemas ..."
+    "JIRA_LOAD_ISSUE": "Jira: cargar datos de problemas ...",
+    "UNKNOWN": "Cargando datos remotos"
   },
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",
@@ -1074,14 +1094,6 @@
     "SYNC_EXPORT": "Sincronizar y Exportar",
     "TAG_SETTINGS": "Configuraciones específicas de etiqueta",
     "TOGGLE_DARK_MODE": "Cambiar a modo oscuro"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
-      "ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
-      "IMPORTING": "Importando datos",
-      "SUCCESS": "Datos importados"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
