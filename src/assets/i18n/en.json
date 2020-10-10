@@ -553,6 +553,9 @@
           "L_SYNC_FILE_PATH": "Sync File Path",
           "L_USER_NAME": "Username"
         }
+      },
+      "S": {
+        "UNKNOWN_ERROR": "Unknown error while syncing. Please check console."
       }
     },
     "TAG": {

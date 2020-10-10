@@ -57,23 +57,19 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         rev: r.etag,
       };
     } catch (e) {
-      // TODO handle correctly
       const isAxiosError = !!(e && e.response && e.response.status);
-      if (isAxiosError && e.response.data && e.response.data.error_summary === 'path/not_found/..') {
+      if (isAxiosError && e.response.status === 404) {
         return null;
-      } else if (isAxiosError && e.response.status === 401) {
-        this._snackService.open({msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR'});
+      }
+      console.error(e);
+      if (environment.production) {
+        this._snackService.open({
+          msg: T.F.SYNC.S.UNKNOWN_ERROR,
+          translateParams: {errorStr: e && e.toString && e.toString()},
+          type: 'ERROR'
+        });
       } else {
-        console.error(e);
-        if (environment.production) {
-          this._snackService.open({
-            msg: T.F.DROPBOX.S.UNKNOWN_ERROR,
-            translateParams: {errorStr: e && e.toString && e.toString()},
-            type: 'ERROR'
-          });
-        } else {
-          throw new Error('WebDAV: Unknown error');
-        }
+        throw new Error('WebDAV: Unknown error');
       }
     }
     return null;

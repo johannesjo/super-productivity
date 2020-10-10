@@ -553,6 +553,9 @@ export const T = {
           'L_SYNC_FILE_PATH': 'F.SYNC.FORM.WEB_DAV.L_SYNC_FILE_PATH',
           'L_USER_NAME': 'F.SYNC.FORM.WEB_DAV.L_USER_NAME'
         }
+      },
+      'S': {
+        'UNKNOWN_ERROR': 'F.SYNC.S.UNKNOWN_ERROR'
       }
     },
     'TAG': {
