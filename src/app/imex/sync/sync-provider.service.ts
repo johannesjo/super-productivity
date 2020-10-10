@@ -263,7 +263,6 @@ export class SyncProviderService {
 
   // OTHER
   // -----
-  // TODO sync fix use with drobox
   private async _handleConflict(cp: SyncProviderServiceInterface, {remote, local, lastSync, rev}: {
     remote: AppDataComplete;
     local: AppDataComplete;

@@ -7,8 +7,6 @@ import { DROPBOX_AUTH_CODE_URL } from '../../../imex/sync/dropbox/dropbox.const'
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
   key: 'sync',
-  // TODO sync fix  remove custom section stuff
-  // customSection: 'SYNC',
   items: [
     {
       key: 'isEnabled',
