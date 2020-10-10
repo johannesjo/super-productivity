@@ -106,7 +106,13 @@ export interface GoogleDriveSyncConfig {
 export interface DropboxSyncConfig {
   authCode: string | null;
   accessToken: string | null;
-  // isCompressData: boolean;
+}
+
+export interface WebDavConfig {
+  baseUrl: string | null;
+  userName: string | null;
+  password: string | null;
+  syncFilePath: string | null;
 }
 
 export type LocalBackupConfig = Readonly<{
@@ -131,6 +137,7 @@ export type SyncConfig = Readonly<{
 
   dropboxSync: DropboxSyncConfig;
   googleDriveSync: GoogleDriveSyncConfig;
+  webDav: WebDavConfig;
 }>;
 
 export type TrackingReminderConfig = Readonly<{

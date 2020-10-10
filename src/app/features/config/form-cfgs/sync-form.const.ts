@@ -34,6 +34,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         options: [
           {label: SyncProvider.Dropbox, value: SyncProvider.Dropbox},
           {label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive},
+          {label: SyncProvider.WebDAV, value: SyncProvider.WebDAV},
         ],
       },
     },
@@ -48,7 +49,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           templateOptions: {
             tag: 'p',
             // text: `<p>Please open the following link and copy the auth code provided there</p>`,
-            text: T.F.DROPBOX.FORM.FOLLOW_LINK,
+            text: T.F.SYNC.FORM.DROPBOX.FOLLOW_LINK,
           },
         }, {
           type: 'tpl',
@@ -61,7 +62,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'authCode',
           type: 'input',
           templateOptions: {
-            label: T.F.DROPBOX.FORM.L_AUTH_CODE,
+            label: T.F.SYNC.FORM.DROPBOX.L_AUTH_CODE,
           },
         },
         {
@@ -70,7 +71,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           templateOptions: {
             tag: 'button',
             class: 'mat-raised-button',
-            text: T.F.DROPBOX.FORM.B_GENERATE_TOKEN,
+            text: T.F.SYNC.FORM.DROPBOX.B_GENERATE_TOKEN,
           },
         },
         {
@@ -78,7 +79,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           type: 'input',
           hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
           templateOptions: {
-            label: T.F.DROPBOX.FORM.L_ACCESS_TOKEN,
+            label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
           },
         },
       ],
@@ -92,14 +93,55 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'syncFileName',
           type: 'input',
           templateOptions: {
-            label: T.F.GOOGLE.SYNC_CFG.SYNC_FILE_NAME,
+            required: true,
+            label: T.F.SYNC.FORM.GOOGLE.L_SYNC_FILE_NAME,
           },
         },
         {
           key: 'isCompressData',
           type: 'checkbox',
           templateOptions: {
-            label: T.F.GOOGLE.SYNC_CFG.COMPRESS,
+            label: T.F.SYNC.FORM.GOOGLE.L_IS_COMPRESS_DATA,
+          },
+        },
+      ],
+    },
+    {
+      hideExpression: ((m, v, field) => field?.parent?.model.syncProvider !== SyncProvider.WebDAV),
+      key: 'webDav',
+      // templateOptions: {label: 'Address'},
+      fieldGroup: [
+        {
+          key: 'baseUrl',
+          type: 'input',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
+          },
+        },
+        {
+          key: 'userName',
+          type: 'input',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+          },
+        },
+        {
+          key: 'password',
+          type: 'input',
+          templateOptions: {
+            type: 'password',
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
+          },
+        },
+        {
+          key: 'syncFilePath',
+          type: 'input',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FILE_PATH,
           },
         },
       ],

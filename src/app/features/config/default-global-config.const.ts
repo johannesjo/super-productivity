@@ -125,5 +125,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       _syncFileNameForBackupDocId: null,
       _backupDocId: null,
     },
+
+    webDav: {
+      baseUrl: null,
+      userName: null,
+      password: null,
+      syncFilePath: null,
+    }
   },
 };
