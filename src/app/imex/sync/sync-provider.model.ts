@@ -18,7 +18,7 @@ export interface SyncProviderServiceInterface {
 
   log(...args: any | any[]): void;
 
-  getRevAndLastClientUpdate(localRev: string | null): Promise<{ rev: string; clientUpdate: number } | null>;
+  getRevAndLastClientUpdate(localRev: string | null): Promise<{ rev: string; clientUpdate?: number } | null>;
 
   uploadAppData(data: AppDataComplete, localRev: string | null, isForceOverwrite?: boolean): Promise<string | null>;
 

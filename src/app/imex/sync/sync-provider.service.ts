@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { GoogleDriveSyncService } from './google/google-drive-sync.service';
 import { AppDataComplete, DialogConflictResolutionResult } from './sync.model';
@@ -19,6 +19,7 @@ import {
   LS_SYNC_LOCAL_LAST_SYNC_CHECK
 } from '../../core/persistence/ls-keys.const';
 import { DataImportService } from './data-import.service';
+import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 
 // TODO naming
 @Injectable({
@@ -27,13 +28,17 @@ import { DataImportService } from './data-import.service';
 export class SyncProviderService {
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.sync));
   currentProvider$: Observable<SyncProviderServiceInterface> = this.syncCfg$.pipe(
-    map((cfg: SyncConfig): SyncProviderServiceInterface | null => {
-      console.log(cfg.syncProvider);
-      switch (cfg.syncProvider) {
+    map((cfg: SyncConfig): SyncProvider | null => cfg.syncProvider),
+    distinctUntilChanged(),
+    map((syncProvider: SyncProvider | null): SyncProviderServiceInterface | null => {
+      console.log(syncProvider);
+      switch (syncProvider) {
         case SyncProvider.Dropbox:
           return this._dropboxSyncService;
         case SyncProvider.GoogleDrive:
           return this._googleDriveSyncService;
+        case SyncProvider.WebDAV:
+          return this._webDavSyncService;
         default:
           return null;
       }
@@ -56,6 +61,7 @@ export class SyncProviderService {
     private _dropboxSyncService: DropboxSyncService,
     private _dataImportService: DataImportService,
     private _googleDriveSyncService: GoogleDriveSyncService,
+    private _webDavSyncService: WebDavSyncService,
     private _globalConfigService: GlobalConfigService,
     private _translateService: TranslateService,
     private _syncService: SyncService,
@@ -82,7 +88,16 @@ export class SyncProviderService {
     // PRE CHECK 2
     // check if file revision changed
     // ------------------------------
-    const {rev, clientUpdate} = await cp.getRevAndLastClientUpdate(localRev) as { rev: string; clientUpdate: number };
+    const revRes = await cp.getRevAndLastClientUpdate(localRev);
+    if (!revRes) {
+      if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
+        cp.log('↑ Update Remote after no getRevAndLastClientUpdate()');
+        local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
+        return await this._uploadAppData(cp, local);
+      }
+      return;
+    }
+    const {rev, clientUpdate} = revRes as { rev: string; clientUpdate: number };
 
     if (rev && rev === localRev) {
       cp.log('DBX PRE1: ↔ Same Rev', rev);
