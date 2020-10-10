@@ -190,52 +190,9 @@
         "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "<p>Update from Google Drive Backup. Both local and remote data seem to be modified. Do you want to overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>",
-        "TITLE": "Overwrite local data with GDrive Update?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>",
-        "TITLE": "Overwrite unsaved data on Google Drive?"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
-        "ERROR": "Google Drive – Error: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
-        "LOCAL_UP_TO_DATE": "Google Drive: Local data already up to date",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "NO_UPDATE_REQUIRED": "Google Drive: No updated required",
-        "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
-        "SUCCESS": "Google Drive: Successfully saved backup",
-        "SYNCING": "Google Drive: Syncing",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "Auto login at when starting app",
-        "AUTO_SYNC": "Auto sync data to remote",
-        "BACKUP_NOW": "Backup now",
-        "COMPRESS": "Compress Data",
-        "ENABLE": "Enable syncing via Google Drive",
-        "LOAD_FROM": "Load From GDrive",
-        "LOAD_ON_STARTUP": "Load remote data on startup",
-        "NOTIFY": "Notify when syncing",
-        "SYNC_FILE_NAME": "Sync file name",
-        "SYNC_INTERVAL": "Sync interval",
-        "UPDATE_SYNC_FILE": "Update sync file"
       },
       "S_API": {
         "ERR": "GoogleApi Error: {{errStr}}",
@@ -877,10 +834,6 @@
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "TITLE": "Evaluation & Metrics"
-    },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
-      "TITLE": "Sync via Google Drive"
     },
     "IDLE": {
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
