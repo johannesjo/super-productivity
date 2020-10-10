@@ -6,7 +6,10 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
+  map,
   mapTo,
+  pairwise,
+  shareReplay,
   switchMap,
   take,
   tap,
@@ -28,17 +31,15 @@ import { SyncProviderService } from './sync-provider.service';
 
 @Injectable()
 export class SyncEffects {
-  // TODO redo!
-  // private _wasJustEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-  //   // NOTE: it is important that we don't use distinct until changed here
-  //   switchMap(() => this._syncProviderService.isEnabledAndReady$),
-  //   pairwise(),
-  //   map(([a, b]) => !a && !!b),
-  //   filter(wasJustEnabled => wasJustEnabled),
-  //   shareReplay(),
-  // );
-  // TODO redo!
-  private _wasJustEnabled$: Observable<boolean> = of(false);
+  private _wasJustEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
+    // NOTE: it is important that we don't use distinct until changed here
+    switchMap(() => this._syncProviderService.isEnabledAndReady$),
+    pairwise(),
+    map(([a, b]) => !a && !!b),
+    filter(wasJustEnabled => wasJustEnabled),
+    shareReplay(),
+  );
+  // private _wasJustEnabled$: Observable<boolean> = of(false);
 
   @Effect({dispatch: false}) triggerSync$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => merge(

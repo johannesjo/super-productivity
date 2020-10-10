@@ -37,6 +37,9 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
   isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => this._googleApiService.isLoggedIn$),
+    concatMap(() => this.cfg$.pipe(
+      map(cfg => cfg.syncFileName === cfg._syncFileNameForBackupDocId && !!cfg._backupDocId)),
+    ),
     distinctUntilChanged(),
   );
 
@@ -87,7 +90,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     // if not defined yet
     local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
     if (local.lastLocalSyncModelChange === 0) {
-      console.log(local);
       if (!(this._c(T.F.SYNC.C.EMPTY_SYNC))) {
         return;
       }
@@ -189,7 +191,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const fileId = cfg._backupDocId;
     const r: any = await this._googleApiService.getFileInfo$(fileId).pipe(first()).toPromise();
-    console.log(r);
     const d = new Date(r.client_modified);
     return {
       clientUpdate: d.getTime(),

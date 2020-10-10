@@ -232,7 +232,8 @@
         "NO_UPDATE_REQUIRED": "Google Drive: No updated required",
         "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
         "SUCCESS": "Google Drive: Successfully saved backup",
-        "SYNCING": "Google Drive: Syncing"
+        "SYNCING": "Google Drive: Syncing",
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
       },
       "SYNC_CFG": {
         "AUTO_LOGIN": "Auto login at when starting app",

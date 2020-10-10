@@ -79,10 +79,9 @@ export class GoogleDriveSyncEffects {
         return EMPTY;
       }
     }),
-    // TODO sync fix message
     tap((): any => setTimeout(() => this._snackService.open({
         type: 'SUCCESS',
-        msg: 'SYNCFILE_GENERATED'
+        msg: T.F.GOOGLE.S.UPDATED_SYNC_FILE_NAME
       }), 200)
     ),
     map(({syncFileName, _backupDocId, _syncFileNameForBackupDocId, sync}: {
