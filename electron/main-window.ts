@@ -150,7 +150,7 @@ function createMenu(quitApp) {
   const menuTpl = [{
     label: 'Application',
     submenu: [
-      {label: 'About Application', selector: 'orderFrontStandardAboutPanel:'},
+      {label: 'About Super Productivity', selector: 'orderFrontStandardAboutPanel:'},
       {type: 'separator'},
       {
         label: 'Quit', click: quitApp
@@ -207,7 +207,7 @@ const appCloseHandler = (
     }
   });
 
-  mainWin.on('close', (event) => {
+  app.on('window-all-closed', (event) => {
       // NOTE: this might not work if we run a second instance of the app
       console.log('close, isQuiting:', (app as any).isQuiting);
       if (!(app as any).isQuiting) {

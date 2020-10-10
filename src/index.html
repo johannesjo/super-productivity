@@ -52,7 +52,7 @@ TODO configure more restrictive Content-Security-Policy
   <meta content="default-src *;
           frame-src * data:;
           font-src * data:;
-          img-src * data:;
+          img-src * data: filesystem: file:;
           style-src * 'unsafe-inline' ;
           script-src * 'self' 'unsafe-inline' 'unsafe-eval'"
         http-equiv="Content-Security-Policy">
@@ -190,7 +190,13 @@ TODO configure more restrictive Content-Security-Policy
     ['Mess creates stress', 'Clean up your desk!'],
     ['Focus on a single task', 'Multi-tasking is the worst.'],
     ['Set your goals', 'Having a goal to aim for (or even some smaller ones) increases motivation and focus. Remind yourself why you are doing something.'],
-    ['Try to get it right the first time', 'This can help you to avoid dragging a task on forever.']
+    ['Try to get it right the first time', 'This can help you to avoid dragging a task on forever.'],
+    ['We are what we repeatedly do.', 'Excellence, then, is not an act, but a habit. - Aristotle'],
+    ['You don’t learn to walk by following rules.', 'You learn by doing, and by falling over. - Richard Branson'],
+    ['A problem well-put is half-solved', '- John Dewey'],
+    ['Wisdom is learning what to overlook', '- William James'],
+    ['It is not that I’m so smart', 'But I stay with the questions much longer - Albert Einstein'],
+    ['No problem can withstand the assault of sustained thinking', '- Voltaire'],
   ];
   var randomIndex = Math.floor(Math.random() * productivityTips.length);
   document.getElementById('heading').innerText = productivityTips[randomIndex][0];

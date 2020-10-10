@@ -16,9 +16,15 @@ platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
   if ('serviceWorker' in navigator && (environment.production || environment.stage) && !IS_ELECTRON) {
     console.log('Registering Service worker');
     return navigator.serviceWorker.register('ngsw-worker.js');
+  } else if ('serviceWorker' in navigator && IS_ELECTRON) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister();
+      }
+    });
   }
   return;
-}).catch(err => {
+}).catch((err: any) => {
   console.log('Service Worker Registration Error');
   console.log(err);
 });

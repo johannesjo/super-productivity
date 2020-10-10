@@ -50,6 +50,7 @@ export type MiscConfig = Readonly<{
   isAutoAddWorkedOnToToday: boolean;
   isDisableInitialDialog: boolean;
   defaultProjectId: string | null;
+  firstDayOfWeek: number;
 }>;
 
 export type EvaluationConfig = Readonly<{
@@ -127,6 +128,7 @@ export type SoundConfig = Readonly<{
 
 export type TrackingReminderConfig = Readonly<{
   isEnabled: boolean;
+  isShowOnMobile: boolean;
   minTime: number;
 }>;
 

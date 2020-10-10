@@ -204,7 +204,7 @@ export class TaskService {
 
   startFirstStartable() {
     this._workContextService.startableTasks$.pipe(take(1)).subscribe(tasks => {
-      if (tasks[0]) {
+      if (tasks[0] && !this.currentTaskId) {
         this.setCurrentId(tasks[0].id);
       }
     });

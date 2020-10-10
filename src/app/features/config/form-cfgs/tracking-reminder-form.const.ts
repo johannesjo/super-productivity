@@ -15,6 +15,13 @@ export const TRACKING_REMINDER_FORM_CFG: ConfigFormSection<TrackingReminderConfi
       },
     },
     {
+      key: 'isShowOnMobile',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TRACKING_REMINDER.L_IS_SHOW_ON_MOBILE,
+      },
+    },
+    {
       key: 'minTime',
       type: 'duration',
       templateOptions: {

@@ -3,7 +3,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
 import * as shortid from 'shortid';
-import { BehaviorSubject, merge, Observable, ReplaySubject, Subject, timer } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { TaskService } from '../tasks/task.service';
@@ -11,14 +11,12 @@ import { Note } from '../note/note.model';
 import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
-import { SyncService } from '../../imex/sync/sync.service';
-import { filter, first, map, skipUntil } from 'rxjs/operators';
+import { filter, map, skipUntil } from 'rxjs/operators';
 import { migrateReminders } from './migrate-reminder.util';
 import { WorkContextService } from '../work-context/work-context.service';
 import { devError } from '../../util/dev-error';
 import { WorkContextType } from '../work-context/work-context.model';
 
-const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +43,6 @@ export class ReminderService {
 
   constructor(
     private readonly _workContextService: WorkContextService,
-    private readonly _syncService: SyncService,
     private readonly _persistenceService: PersistenceService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
@@ -67,19 +64,11 @@ export class ReminderService {
     });
   }
 
-  init() {
-    // we do this to wait for syncing and the like
-    merge(
-      this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
-      timer(MAX_WAIT_FOR_INITIAL_SYNC),
-    ).pipe(
-      first(),
-    ).subscribe(async () => {
-      this._w.addEventListener('message', this._onReminderActivated.bind(this));
-      this._w.addEventListener('error', this._handleError.bind(this));
-      await this.reloadFromDatabase();
-      this._isRemindersLoaded$.next(true);
-    });
+  async init() {
+    this._w.addEventListener('message', this._onReminderActivated.bind(this));
+    this._w.addEventListener('error', this._handleError.bind(this));
+    await this.reloadFromDatabase();
+    this._isRemindersLoaded$.next(true);
   }
 
   async reloadFromDatabase() {

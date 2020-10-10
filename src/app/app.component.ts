@@ -40,6 +40,7 @@ import { environment } from '../environments/environment';
 import { RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/time-tracking/tracking-reminder/tracking-reminder.service';
+import { first } from 'rxjs/operators';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -160,8 +161,11 @@ export class AppComponent implements OnDestroy {
     ev.preventDefault();
   }
 
-  @HostListener('document:paste', ['$event']) onPaste(ev: ClipboardEvent) {
-    this._bookmarkService.createFromPaste(ev);
+  @HostListener('document:paste', ['$event'])
+  async onPaste(ev: ClipboardEvent) {
+    if (await this.workContextService.isActiveWorkContextProject$.pipe(first()).toPromise()) {
+      this._bookmarkService.createFromPaste(ev);
+    }
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(e: any) {

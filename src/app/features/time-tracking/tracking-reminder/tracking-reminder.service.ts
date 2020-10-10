@@ -15,6 +15,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { T } from '../../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { TrackingReminderConfig } from '../../config/global-config.model';
+import { IS_TOUCH_ONLY } from '../../../util/is-touch';
 
 @Injectable({
   providedIn: 'root'
@@ -27,14 +28,19 @@ export class TrackingReminderService {
   _manualReset$: Subject<void> = new Subject();
 
   _resetableCounter$: Observable<number> = merge(
-    of(true),
+    of('INITIAL'),
     this._manualReset$,
   ).pipe(
     switchMap(() => this._counter$),
   );
 
+  _hideTrigger$: Observable<any> = merge(
+    this._taskService.currentTaskId$.pipe(filter(currentId => !!currentId)),
+    this._idleService.isIdle$.pipe(filter(isIdle => isIdle)),
+  );
+
   remindCounter$: Observable<number> = this._cfg$.pipe(
-    switchMap((cfg) => !cfg.isEnabled
+    switchMap((cfg) => !cfg.isEnabled || (!cfg.isShowOnMobile && IS_TOUCH_ONLY)
       ? EMPTY
       : combineLatest([
         this._taskService.currentTaskId$,
@@ -66,6 +72,14 @@ export class TrackingReminderService {
     this.remindCounter$.subscribe((count) => {
       this._triggerBanner(count, {});
     });
+
+    this._hideTrigger$.subscribe((v) => {
+      this._hideBanner();
+    });
+  }
+
+  private _hideBanner() {
+    this._bannerService.dismiss(BannerId.StartTrackingReminder);
   }
 
   private _triggerBanner(duration: number, cfg: any) {

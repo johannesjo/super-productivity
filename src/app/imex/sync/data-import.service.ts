@@ -69,7 +69,7 @@ export class DataImportService {
         await this._importBackup();
         this._imexMetaService.setDataImportInProgress(false);
       }
-    } else if (this._dataRepairService.isRepairConfirmed()) {
+    } else if (this._dataRepairService.isRepairPossibleAndConfirmed(data)) {
       const fixedData = this._dataRepairService.repairData(data);
       await this.importCompleteSyncData(fixedData, isBackupReload, true);
     } else {

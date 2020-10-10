@@ -1,4 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { GlobalConfigService } from 'src/app/features/config/global-config.service';
 import { T } from 'src/app/t.const';
 
 @Component({
@@ -31,7 +34,12 @@ export class OwlWrapperComponent {
     '23:30',
   ];
 
-  constructor() {
+  firstDayOfWeek$: Observable<number> = this._globalConfigService.misc$.pipe(
+    map(cfg => cfg.firstDayOfWeek),
+    startWith(0),
+  );
+
+  constructor(private _globalConfigService: GlobalConfigService) {
   }
 
   @Input('dateTime')

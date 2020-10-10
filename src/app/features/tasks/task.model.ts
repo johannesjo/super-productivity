@@ -22,6 +22,7 @@ export interface TimeSpentOnDayCopy {
 }
 
 export interface TaskArchive extends EntityState<ArchiveTask> {
+  ids: string[];
   // additional entities state properties
   [MODEL_VERSION_KEY]?: number;
 }

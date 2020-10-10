@@ -31,7 +31,7 @@ describe('dataRepair()', () => {
         id: 'TEST',
         title: 'TEST',
       }]),
-    })).toEqual({
+    } as any)).toEqual({
       ...mock,
       task: taskState,
       taskArchive: {
@@ -404,4 +404,125 @@ describe('dataRepair()', () => {
       }
     });
   });
+
+  it('should move archived sub tasks back to their unarchived parents', () => {
+    const taskStateBefore = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'subTaskUnarchived',
+        title: 'subTaskUnarchived',
+        parentId: 'parent',
+      }, {
+        ...DEFAULT_TASK,
+        id: 'parent',
+        title: 'parent',
+        parentId: null,
+        subTaskIds: ['subTaskUnarchived']
+      }])
+    } as any;
+
+    const taskArchiveStateBefore = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'subTaskArchived',
+        title: 'subTaskArchived',
+        parentId: 'parent',
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      task: taskStateBefore,
+      taskArchive: taskArchiveStateBefore,
+    })).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTaskUnarchived',
+          title: 'subTaskUnarchived',
+          parentId: 'parent',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'parent',
+          title: 'parent',
+          parentId: null,
+          subTaskIds: ['subTaskUnarchived', 'subTaskArchived'],
+        }, {
+          ...DEFAULT_TASK,
+          id: 'subTaskArchived',
+          title: 'subTaskArchived',
+          parentId: 'parent',
+        }])
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([])
+      } as any,
+    });
+  });
+
+  it('should move unarchived sub tasks to their archived parents', () => {
+    const taskStateBefore = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'subTaskUnarchived',
+        title: 'subTaskUnarchived',
+        parentId: 'parent',
+      }])
+    } as any;
+
+    const taskArchiveStateBefore = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'subTaskArchived',
+        title: 'subTaskArchived',
+        parentId: 'parent',
+      }, {
+        ...DEFAULT_TASK,
+        id: 'parent',
+        title: 'parent',
+        parentId: null,
+        subTaskIds: ['subTaskArchived']
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      task: taskStateBefore,
+      taskArchive: taskArchiveStateBefore,
+    })).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([])
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTaskArchived',
+          title: 'subTaskArchived',
+          parentId: 'parent',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'parent',
+          title: 'parent',
+          parentId: null,
+          subTaskIds: ['subTaskArchived', 'subTaskUnarchived']
+        }, {
+          ...DEFAULT_TASK,
+          id: 'subTaskUnarchived',
+          title: 'subTaskUnarchived',
+          parentId: 'parent',
+        }])
+      } as any,
+    });
+  });
+
 });

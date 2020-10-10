@@ -5,12 +5,12 @@
       "INSTALL": "Instalar",
       "MSG": "Deseja instalar Super Productivity como PWA?"
     },
-    "B_OFFLINE": "Você está desconectado da internet. Sincronizar e solicitar dados do provedor de problemas não funcionará.",
+    "B_OFFLINE": "Você está desconectado da internet. A sincronização e solicitação de dados do provedor de problemas não funcionará.",
     "D_INITIAL": {
       "TITLE": "Bem-vindo à v{{nr}}"
     },
-    "UPDATE_MAIN_MODEL": "Super Produtividade recebeu uma grande atualização! Algumas migrações para seus dados são necessárias. Observe que isso torna seus dados incompatíveis com versões mais antigas do aplicativo.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "Nenhuma atualização de modelo escolhida. Observe que você deve fazer o downgrade para a última versão, se não desejar executar a atualização do modelo.",
+    "UPDATE_MAIN_MODEL": "Super Productivity recebeu uma grande atualização! Algumas migrações para seus dados são necessárias. Observe que isso torna seus dados incompatíveis com versões mais antigas do aplicativo.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Nenhuma atualização de modelo escolhida. Note que você deve fazer o downgrade para a última versão, se não desejar executar a atualização do modelo.",
     "UPDATE_WEB_APP": "Nova versão disponível. Carregar nova versão?"
   },
   "BL": {
@@ -61,7 +61,7 @@
           "IMG": "Imagem",
           "LINK": "Url"
         },
-        "SELECT_ICON": "Selecione um icone",
+        "SELECT_ICON": "Selecione um ícone",
         "SELECT_TYPE": "Selecione um tipo",
         "TYPES": {
           "COMMAND": "Comando (Comando shell personalizado)",
@@ -86,14 +86,14 @@
       },
       "D_CONFLICT": {
         "LAST_CHANGE": "última mudança:",
-        "LAST_SYNC": "última sincronização:",
+        "LAST_SYNC": "Última sincronização:",
         "LOCAL": "Local",
         "LOCAL_REMOTE": "local -> remoto",
-        "REMOTE": "Controlo remoto",
+        "REMOTE": "remoto",
         "TEXT": "<p>Atualização do Dropbox. Os dados locais e remotos parecem ter sido modificados.</p>",
         "TITLE": "Dropbox: dados conflitantes",
-        "USE_LOCAL": "Use local",
-        "USE_REMOTE": "Usar controle remoto"
+        "USE_LOCAL": "Usar local",
+        "USE_REMOTE": "Usar remoto"
       },
       "FORM": {
         "B_GENERATE_TOKEN": "Gerar token",
@@ -119,8 +119,8 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automáticamente problemas não resolvidos do Github para o backlog",
-        "IS_AUTO_POLL": "Obter automáticamente issues do Github para alterações",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do Github para o backlog",
+        "IS_AUTO_POLL": "Obter automaticamente issues do Github para alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do Github como sugestões qando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear",
         "TOKEN": "Token de acesso"
@@ -131,12 +131,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsável",
-        "AT": "at",
+        "AT": "em",
         "DESCRIPTION": "Descrição",
         "LABELS": "Etiquetas",
         "MARK_AS_CHECKED": "Marcar atualizações como checadas",
         "STATUS": "Status",
-        "SUMMARY": "Indíce",
+        "SUMMARY": "Índice",
         "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
@@ -161,8 +161,8 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automáticamente problemas não resolvidos do Gitlab para o backlog",
-        "IS_AUTO_POLL": "Obter automáticamente issues do Gitlab para alterações",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do Gitlab para o backlog",
+        "IS_AUTO_POLL": "Obter automaticamente issues do Gitlab para alterações",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do Gitlab como sugestões qando adicionar novas tarefas",
         "PROJECT": "Caminho completo ou nome de usuário / projeto",
         "TOKEN": "Token de acesso"
@@ -173,7 +173,7 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsável",
-        "AT": "at",
+        "AT": "em",
         "DESCRIPTION": "Descrição",
         "LABELS": "Etiquetas",
         "MARK_AS_CHECKED": "Marcar atualizações como checadas",
@@ -212,7 +212,7 @@
         "LOCAL_REMOTE": "local <=> remoto",
         "OVERWRITE_LOCAL": "Substituir local",
         "OVERWRITE_REMOTE": "Substituir remoto",
-        "REMOTE": "romoto",
+        "REMOTE": "remoto",
         "TEXT": "<p>Atualização do Google Drive Backup. Os dados locais e remotos parecem ter sido modificados. Deseja sobrescrever alterações locais não salvas? <strong>Todos os dados serão perdidos para sempre</strong>.</p>",
         "TITLE": "Sobrescrever dados locais com a Atualização GDrive?"
       },
@@ -260,7 +260,7 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: A fim de impedir o desligamento da API, o acesso foi bloqueado pela Super Produtividade. Você provavelmente deve verificar suas configurações do jira!",
+        "BLOCK_ACCESS_MSG": "Jira: A fim de impedir o desligamento da API, o acesso foi bloqueado pelo Super Productivity. Você provavelmente deve verificar suas configurações do jira!",
         "BLOCK_ACCESS_UNBLOCK": "Desbloquear"
       },
       "CFG_CMP": {
@@ -301,7 +301,7 @@
         "TITLE": "Jira: Enviar log de trabalho"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automáticamente problemas não resolvidos do Github para o backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do Github para o backlog",
         "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do Github como sugestões qando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
@@ -341,7 +341,7 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Resposável",
-        "AT": "at",
+        "AT": "em",
         "ATTACHMENTS": "Anexos",
         "CHANGED": "Alterado",
         "COMMENTS": "Comentarios",
@@ -349,7 +349,7 @@
         "DESCRIPTION": "Descrição",
         "LIST_OF_CHANGES": "Lista de mudanças",
         "MARK_AS_CHECKED": "Marcar atualizações como checadas",
-        "ON": "on",
+        "ON": "em",
         "STATUS": "Status",
         "STORY_POINTS": "Story Points",
         "SUMMARY": "Indíce",
@@ -463,7 +463,7 @@
       "ENJOY_YOURSELF": "Divirta-se, mexa-se, volte em:",
       "FINISH_SESSION_X": "Você terminou a sessão com sucesso <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Pausa {{nr}} iniciado!",
+        "BREAK_X_START": "Pomodoro: Pausa {{nr}} iniciada!",
         "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
       },
       "S": {
@@ -567,7 +567,7 @@
         "L_AUTO_SWITCH_ON": "O gatilho automático é ativado por",
         "L_ICON": "Ícone",
         "L_ICON_ON": "Ícone quando alternado",
-        "L_IS_ENABLED": "ativado",
+        "L_IS_ENABLED": "Ativado",
         "L_TITLE": "Título",
         "L_TYPE": "Tipo",
         "TITLE": "Contadores simples",
@@ -611,7 +611,7 @@
         "REPEAT": "Repetir",
         "SCHEDULE_TASK": "Agendar Tarefa",
         "SUB_TASKS": "Subtarefas ({{nr}})",
-        "TIME": "tempo"
+        "TIME": "Tempo"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Adicionar tarefa existente \"{{taskTitle}}\"",
@@ -826,7 +826,7 @@
     "DISMISS": "Dispensar",
     "DO_IT": "Fazer isto!",
     "EDIT": "Editar",
-    "EXTENSION_INFO": "Por favor <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> faça o download da extensão chrome</a> para permitir a comunicação com o Jira Api e o Idle Time Handling. Observe que isso não funciona para dispositivos móveis.",
+    "EXTENSION_INFO": "Por favor <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> faça o download da extensão chrome</a> para permitir a comunicação com o Jira Api e o Idle Time Handling. Observe que isso não funciona para dispositivos móveis.",
     "LOGIN": "Login",
     "LOGOUT": "Sair",
     "MINUTES": "{{m}} minutos",
@@ -912,22 +912,23 @@
       "ZOOM_OUT": "Diminuir o zoom (somente para computador)"
     },
     "LANG": {
-      "AR": "Arabic",
-      "DE": "German",
-      "EN": "English",
-      "ES": "Spanish",
+      "AR": "Árabe",
+      "DE": "Alemão",
+      "EN": "Inglês",
+      "ES": "Espanhol",
       "FA": "Persa",
-      "FR": "French",
-      "IT": "italiano",
-      "JA": "Japanese",
-      "KO": "Korean",
-      "LABEL": "Please select a language",
+      "FR": "Francês",
+      "IT": "Italiano",
+      "JA": "Japonês",
+      "KO": "Coreano",
+      "LABEL": "Por favor escolha um idioma",
+      "NB": "Bokmål norueguês",
       "NL": "Holandês",
-      "PT": "português",
-      "RU": "Russian",
-      "TITLE": "Language",
-      "TR": "Turkish",
-      "ZH": "Chinese"
+      "PT": "Português",
+      "RU": "Russo",
+      "TITLE": "Idioma",
+      "TR": "Turco",
+      "ZH": "Chinês"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",
@@ -1114,10 +1115,10 @@
     "indigo": "índigo",
     "light-blue": "azul claro",
     "light-green": "verde claro",
-    "lime": "Lima",
-    "pink": "Rosa",
+    "lime": "lima",
+    "pink": "rosa",
     "purple": "roxa",
-    "teal": "teal",
+    "teal": "azul petróleo",
     "yellow": "amarelo"
   },
   "V": {
@@ -1140,7 +1141,7 @@
     "NO_COMPLETED_TASKS": "No momento, não há tarefas concluídas",
     "NO_PLANNED_TASKS": "Nenhuma tarefa planejada",
     "READY_TO_WORK": "Pronto para trabalhar!",
-    "RESET_BREAK_TIMER": "Reset without break timer",
+    "RESET_BREAK_TIMER": "Reiniciar sem temporizador de pause",
     "TIME_ESTIMATED": "Tempo estimado:",
     "WITHOUT_BREAK": "Sem pausa:",
     "WORKING_TODAY": "Trabalhando hoje:"

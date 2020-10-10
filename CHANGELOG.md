@@ -1,3 +1,125 @@
+## [5.9.15](https://github.com/johannesjo/super-productivity/compare/v5.9.14...v5.9.15) (2020-10-09)
+
+
+### Bug Fixes
+
+* app not closing on windows for some people [#567](https://github.com/johannesjo/super-productivity/issues/567) ([5e340ad](https://github.com/johannesjo/super-productivity/commit/5e340aded20258533767bc87b54b4405c46ad5d1))
+* make tests work again ([bc227bc](https://github.com/johannesjo/super-productivity/commit/bc227bcae42cd12d2fb250182a88d8df98028b02))
+* prevent adding tags via short syntax for child tasks [#568](https://github.com/johannesjo/super-productivity/issues/568) ([94f8147](https://github.com/johannesjo/super-productivity/commit/94f814716174e97c2b28e481a8e90f778c3eb72b))
+* special case [#568](https://github.com/johannesjo/super-productivity/issues/568) ([c26f62b](https://github.com/johannesjo/super-productivity/commit/c26f62b0ae72c80ca4930073094baebd1c3959e3))
+* text overlap ([39508dc](https://github.com/johannesjo/super-productivity/commit/39508dc2f26f4228b4721d5fcaa255b702585088))
+* throw error for inconsistent sub task data [#568](https://github.com/johannesjo/super-productivity/issues/568) ([786235b](https://github.com/johannesjo/super-productivity/commit/786235b9e5ed936adf43aac7f8d9a995fb3cb558))
+
+
+### Features
+
+* write auto repair for wrongly archived sub tasks ([81f076a](https://github.com/johannesjo/super-productivity/commit/81f076aefb543b131cfb87e3e8b7696094b14fd2))
+* write auto repair for wrongly unarchived archived sub tasks [#568](https://github.com/johannesjo/super-productivity/issues/568) ([609941d](https://github.com/johannesjo/super-productivity/commit/609941ddebf83ac4a2040159d8087d75316f0716))
+
+
+
+## [5.9.14](https://github.com/johannesjo/super-productivity/compare/v5.9.13...v5.9.14) (2020-10-08)
+
+
+### Bug Fixes
+
+* about for mas... ([cdc7687](https://github.com/johannesjo/super-productivity/commit/cdc76876bc4508e9f01e20deb63a2719f1374190))
+
+
+
+## [5.9.13](https://github.com/johannesjo/super-productivity/compare/v5.9.12...v5.9.13) (2020-10-08)
+
+
+
+## [5.9.12](https://github.com/johannesjo/super-productivity/compare/v5.9.11...v5.9.12) (2020-10-08)
+
+
+
+## [5.9.11](https://github.com/johannesjo/super-productivity/compare/v5.9.10...v5.9.11) (2020-10-08)
+
+
+### Bug Fixes
+
+* not in project context [#545](https://github.com/johannesjo/super-productivity/issues/545) ([a293f2f](https://github.com/johannesjo/super-productivity/commit/a293f2f736d7a61d87cc792b669864b7c2f5c5e8))
+
+
+### Features
+
+* **autoBackupRestore:** add translations [#553](https://github.com/johannesjo/super-productivity/issues/553) ([cfeed8d](https://github.com/johannesjo/super-productivity/commit/cfeed8de1048c26e69b65ec1b7689a9f8eebb720))
+* **autoBackupRestore:** implement most basic variant – circular dependency [#553](https://github.com/johannesjo/super-productivity/issues/553) ([bdd3cbc](https://github.com/johannesjo/super-productivity/commit/bdd3cbc49649a6e8d6e7dee613932d9fd4dbe688))
+* **autoBackupRestore:** make it work [#553](https://github.com/johannesjo/super-productivity/issues/553) ([a54711d](https://github.com/johannesjo/super-productivity/commit/a54711d9651d19a0f15b66f0e2f6b4d97f7a3e83))
+* **autoBackupRestore:** outline [#553](https://github.com/johannesjo/super-productivity/issues/553) ([7d00652](https://github.com/johannesjo/super-productivity/commit/7d00652eb9212a80b4a48c487f91623a41fdd11d))
+* **i18n:** add norwegian ([a512c94](https://github.com/johannesjo/super-productivity/commit/a512c94584ddaa529d0a0a198fc8d9e7a58fc98d))
+* **task:** make startable tasks work better ([ada4c97](https://github.com/johannesjo/super-productivity/commit/ada4c97db9fb7075419f43d845b4e33606dbeba2))
+
+
+
+## [5.9.10](https://github.com/johannesjo/super-productivity/compare/v5.9.2...v5.9.10) (2020-10-04)
+
+
+### Features
+
+* set first day of the week [#528](https://github.com/johannesjo/super-productivity/issues/528) ([b83bfea](https://github.com/johannesjo/super-productivity/commit/b83bfeafc6fd1c8258da9b7a040815f578d2dbc7))
+* set first day of week in DateAdapter ([6b9c5e7](https://github.com/johannesjo/super-productivity/commit/6b9c5e72692367cbb50f51e0e2a8fd94572be0d4))
+
+
+
+## [5.9.9](https://github.com/johannesjo/super-productivity/compare/v5.9.8...v5.9.9) (2020-10-04)
+
+
+
+## [5.9.8](https://github.com/johannesjo/super-productivity/compare/v5.9.7...v5.9.8) (2020-10-04)
+
+
+
+## [5.9.7](https://github.com/johannesjo/super-productivity/compare/v5.9.6...v5.9.7) (2020-10-04)
+
+
+
+## [5.9.6](https://github.com/johannesjo/super-productivity/compare/v5.9.5...v5.9.6) (2020-10-04)
+
+
+
+## [5.9.5](https://github.com/johannesjo/super-productivity/compare/v5.9.4...v5.9.5) (2020-10-03)
+
+
+
+## [5.9.4](https://github.com/johannesjo/super-productivity/compare/v5.9.3...v5.9.4) (2020-10-03)
+
+
+
+## [5.9.3](https://github.com/johannesjo/super-productivity/compare/v0.0.1...v5.9.3) (2020-10-03)
+
+
+
+## [5.9.2](https://github.com/johannesjo/super-productivity/compare/v5.9.1...v5.9.2) (2020-10-02)
+
+
+
+## [5.9.1](https://github.com/johannesjo/super-productivity/compare/v5.9.0...v5.9.1) (2020-10-02)
+
+
+### Bug Fixes
+
+* allow to display images from file system [#549](https://github.com/johannesjo/super-productivity/issues/549) ([2c8255b](https://github.com/johannesjo/super-productivity/commit/2c8255b0814e03623048ac52cd960cf7b3710999))
+* chrome extension link ([58be356](https://github.com/johannesjo/super-productivity/commit/58be3561c4b1a9695f7bc75b01baf747dc54734a))
+* lint ([b1b8796](https://github.com/johannesjo/super-productivity/commit/b1b87960d7b394784d9bafa92cd84021cec64f7c))
+* **jira:** wrong issue link for auto-imported issues [#551](https://github.com/johannesjo/super-productivity/issues/551) ([ca7cb4b](https://github.com/johannesjo/super-productivity/commit/ca7cb4bf5c702664ea83feba9c60265d2ad48b4d))
+* **task:** only start first startable when there is none already running ([c96b846](https://github.com/johannesjo/super-productivity/commit/c96b846377807441500ea99565106190c8a6a8e3))
+* lint error ([a8d371e](https://github.com/johannesjo/super-productivity/commit/a8d371ed53552c3e354d4bfa9bcc839d15f3856b))
+
+
+### Features
+
+* **startTrackingReminder:** auto hide on idle and when starting to track on a task manually ([a7e41d9](https://github.com/johannesjo/super-productivity/commit/a7e41d937655671986d080a62f8f202cedf4a138))
+* **startTrackingReminder:** hide on mobile per default and make configurable ([b2b210b](https://github.com/johannesjo/super-productivity/commit/b2b210bfe54c04e92b34b47bc25d1816241d7978))
+* add new productivity tips ([a53878a](https://github.com/johannesjo/super-productivity/commit/a53878ab3176e06617f4665039ec163a0a60d56c))
+* improve broken data handling [#555](https://github.com/johannesjo/super-productivity/issues/555) ([c9c2e0c](https://github.com/johannesjo/super-productivity/commit/c9c2e0cad56383fd69f3414d266aec7f6c44189d))
+* improve data repair handling [#552](https://github.com/johannesjo/super-productivity/issues/552) ([1012edb](https://github.com/johannesjo/super-productivity/commit/1012edbd42f8bb99217437843e8a455d7b729dfb))
+* make AppDataForProjects non optional ([8b1a9cf](https://github.com/johannesjo/super-productivity/commit/8b1a9cf79c01f5e876ec2d972e23ecebdac60c0d))
+
+
+
 # [5.9.0](https://github.com/johannesjo/super-productivity/compare/v5.8.2...v5.9.0) (2020-09-24)
 
 

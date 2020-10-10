@@ -826,7 +826,7 @@
     "DISMISS": "Verwerfen",
     "DO_IT": "TU es!",
     "EDIT": "Bearbeiten",
-    "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Idle Time Handling zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
+    "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Idle Time Handling zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "LOGIN": "Anmeldung",
     "LOGOUT": "Ausloggen",
     "MINUTES": "{{m}} Minuten",
@@ -922,6 +922,7 @@
       "JA": "Japanisch",
       "KO": "Koreanisch",
       "LABEL": "Bitte wähle eine Sprache",
+      "NB": "Norwegischer Bokmål",
       "NL": "Niederländisch",
       "PT": "Portugiesisch",
       "RU": "Russisch",
@@ -941,7 +942,8 @@
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
-      "TITLE": "Verschiedene Einstellungen"
+      "TITLE": "Verschiedene Einstellungen",
+      "FIRST_DAY_OF_WEEK": "Erster Tag der Woche"
     },
     "POMODORO": {
       "BREAK_DURATION": "Dauer der kurzen Pausen",

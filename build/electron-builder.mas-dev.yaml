@@ -1,4 +1,5 @@
 appId: com.super-productivity.app
+productName: Super Productivity
 files:
   - electron/**/*
   - "!electron/**/*.ts"
