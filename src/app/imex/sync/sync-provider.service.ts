@@ -83,7 +83,7 @@ export class SyncProviderService {
     // PRE CHECK 2
     // check if file revision changed
     // ------------------------------
-    const {rev, clientUpdate} = await cp.getRevAndLastClientUpdate() as { rev: string; clientUpdate: number };
+    const {rev, clientUpdate} = await cp.getRevAndLastClientUpdate(localRev) as { rev: string; clientUpdate: number };
 
     if (rev && rev === localRev) {
       cp.log('DBX PRE1: ↔ Same Rev', rev);

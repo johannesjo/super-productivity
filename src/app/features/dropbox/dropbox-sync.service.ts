@@ -42,7 +42,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
 
   // TODO refactor in a way that it doesn't need to trigger uploadAppData itself
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
-  async getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number } | null> {
+  async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | null> {
     try {
       const r = await this._dropboxApiService.getMetaData(DROPBOX_SYNC_FILE_PATH);
       const d = new Date(r.client_modified);
@@ -55,7 +55,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
       if (isAxiosError && e.response.data && e.response.data.error_summary === 'path/not_found/..') {
         this.log('DBX: File not found => ↑↑↑ Initial Upload ↑↑↑');
         const local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
-        await this.uploadAppData(local);
+        await this.uploadAppData(local, localRev);
       } else if (isAxiosError && e.response.status === 401) {
         this._snackService.open({msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR'});
       } else {
