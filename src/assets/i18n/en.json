@@ -991,7 +991,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
     "GDRIVE_UPLOAD": "Google Drive: Upload file...",
     "GITHUB_LOAD_ISSUE": "Github: Load issue data...",
-    "JIRA_LOAD_ISSUE": "Jira: Load issue data..."
+    "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
+    "UNKNOWN": "Loading remote data"
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",

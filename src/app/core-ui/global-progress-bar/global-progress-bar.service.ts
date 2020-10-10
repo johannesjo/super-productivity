@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { delay, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { PROGRESS_BAR_LABEL_MAP } from './global-progress-bar.const';
+import { T } from '../../t.const';
 
 const DELAY = 100;
 
@@ -46,14 +47,16 @@ export class GlobalProgressBarService {
     }
   }
 
-  private _urlToLabel(url: string): string | null {
+  private _urlToLabel(url: string): string {
     const [urlWithoutParams]: string[] = url.split('?');
 
     if (PROGRESS_BAR_LABEL_MAP[url]) {
       return PROGRESS_BAR_LABEL_MAP[url];
     } else {
       const key = Object.keys(PROGRESS_BAR_LABEL_MAP).find((keyIn) => urlWithoutParams.includes(keyIn));
-      return key ? PROGRESS_BAR_LABEL_MAP[key] : null;
+      return key
+        ? PROGRESS_BAR_LABEL_MAP[key]
+        : T.GPB.UNKNOWN;
     }
   }
 }
