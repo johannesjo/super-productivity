@@ -16,6 +16,12 @@
   "BL": {
     "NO_TASKS": "目前您的待办事项中没有任务"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "您的数据似乎已损坏。您想尝试自动修复它吗？这可能会导致部分数据丢失。",
+    "DELETE_STRAY_BACKUP": "是否要删除背面以避免看到此对话框？",
+    "RESTORE_FILE_BACKUP": "似乎没有数据，但是“{{dir}}”处有可用的备份。您是否要从 {{from}}恢复最新备份？",
+    "RESTORE_STRAY_BACKUP": "在上次同步期间，可能有一些错误。您要还原上一个备份吗？"
+  },
   "DATETIME_INPUT": {
     "IN": "在 {{time}}",
     "TOMORROW": "明天 {{time}}"
@@ -77,32 +83,11 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "您正在尝试同步一个空的数据对象。这是您（几乎）原始应用程序的第一次同步吗？",
-        "FORCE_IMPORT": "反正导入远程数据？",
-        "FORCE_UPLOAD": "仍要上传本地数据吗？",
-        "FORCE_UPLOAD_AFTER_ERROR": "上载本地数据时发生错误。尝试强制更新？",
-        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "最后一次变更：",
-        "LAST_SYNC": "上次同步：",
-        "LOCAL": "本地",
-        "LOCAL_REMOTE": "本地->远程",
-        "REMOTE": "远程",
-        "TEXT": "<p>从 Dropbox 更新。本地和远程数据似乎都已被修改。</p>",
-        "TITLE": "Dropbox：数据冲突",
-        "USE_LOCAL": "使用本地",
-        "USE_REMOTE": "使用远程"
-      },
       "FORM": {
         "B_GENERATE_TOKEN": "生成令牌",
         "FOLLOW_LINK": "请打开以下链接，并将提供的身份验证代码复制到输入框中。",
         "L_ACCESS_TOKEN": "访问令牌（从身份验证代码生成）",
-        "L_AUTH_CODE": "授权码",
-        "L_ENABLE_SYNCING": "启用 Dropbox 同步",
-        "L_SYNC_INTERVAL": "同步间隔",
-        "TITLE": "通过 Dropbox 同步（推荐）"
+        "L_AUTH_CODE": "授权码"
       },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox：无法从身份验证代码生成访问令牌",
@@ -205,51 +190,8 @@
         "CREATE_SYNC_FILE": "Google Drive：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。是否在<strong>Google Drive</strong> 上将其创建为同步文件？",
         "USE_EXISTING_SYNC_FILE": "Google Drive：使用 <strong>现有</strong> 文件 <strong>“{{fileName}}”</strong> 作为同步文件？如果没有，请更改同步文件名。"
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "最后修改：",
-        "LAST_SYNC": "上次同步",
-        "LOCAL": "本地",
-        "LOCAL_REMOTE": "本地 <=> 远程",
-        "OVERWRITE_LOCAL": "覆盖本地数据",
-        "OVERWRITE_REMOTE": "覆盖远程数据",
-        "REMOTE": "远程",
-        "TEXT": "<p>从 Google Drive 备份进行更新。本地和远程数据似乎都被修改。您要覆盖未保存的本地更改吗？ <strong>所有数据将永远丢失</strong>。</p>",
-        "TITLE": "是否使用Google Drive 更新本地数据？"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "最后修改：",
-        "LAST_SYNC": "上次同步",
-        "LOCAL": "本地",
-        "LOCAL_REMOTE": "本地 <=> 远程",
-        "OVERWRITE_LOCAL": "覆盖本地数据",
-        "OVERWRITE_REMOTE": "覆盖远程数据",
-        "REMOTE": "远程",
-        "TEXT": "  <p>Google Drive 存在新于本地的更改，你想要覆盖它们吗？</p>",
-        "TITLE": "覆盖 Google Drive 上未保存的数据？"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive：有远程更新！下载中...",
-        "ERROR": "Google Drive - 错误：{{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Drive：尝试导入最初数据时出错",
-        "LOCAL_UP_TO_DATE": "Google Drive：本地数据已经是最新的",
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请进保留一个文件或选择其他名称。",
-        "NO_UPDATE_REQUIRED": "Google Drive：无需更新",
-        "REMOTE_UP_TO_DATE": "Google Drive：远程数据已经是最新的",
-        "SUCCESS": "Google Drive：已成功保存备份",
-        "SYNCING": "Google Drive：同步中"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "启动应用时自动登录",
-        "AUTO_SYNC": "自动将数据同步到远程",
-        "BACKUP_NOW": "立即备份",
-        "COMPRESS": "压缩数据",
-        "ENABLE": "启Google Drive用同步功能",
-        "LOAD_FROM": "从Google Drive加载",
-        "LOAD_ON_STARTUP": "启动时加载远程数据",
-        "NOTIFY": "同步时通知",
-        "SYNC_FILE_NAME": "同步文件名",
-        "SYNC_INTERVAL": "同步间隔",
-        "UPDATE_SYNC_FILE": "更新同步文件"
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请进保留一个文件或选择其他名称。"
       },
       "S_API": {
         "ERR": "GoogleApi错误： {{errStr}}",
@@ -575,6 +517,33 @@
         "TYPE_STOPWATCH": "跑表"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "您正在尝试同步一个空的数据对象。这是您（几乎）原始应用程序的第一次同步吗？",
+        "FORCE_IMPORT": "反正导入远程数据？",
+        "FORCE_UPLOAD": "仍要上传本地数据吗？",
+        "FORCE_UPLOAD_AFTER_ERROR": "上载本地数据时发生错误。尝试强制更新？",
+        "NO_REMOTE_DATA": "找不到远程数据。本地上传到远程吗？",
+        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "最后一次变更：",
+        "LAST_SYNC": "上次同步：",
+        "LOCAL": "本地",
+        "LOCAL_REMOTE": "本地->远程",
+        "REMOTE": "远程",
+        "TEXT": "<p>从Dropbox更新。本地和远程数据似乎都被修改。</p>",
+        "TITLE": "Dropbox：冲突数据",
+        "USE_LOCAL": "使用本地",
+        "USE_REMOTE": "使用遥控器"
+      },
+      "FORM": {
+        "L_ENABLE_SYNCING": "启用同步",
+        "L_SYNC_INTERVAL": "同步间隔",
+        "L_SYNC_PROVIDER": "同步提供者",
+        "TITLE": "同步"
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "创建标签",
@@ -749,6 +718,10 @@
         "ALREADY_DID": "已完成",
         "SNOOZE": "暂停 {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "添加到任务",
+        "MSG": "您尚未跟踪 {{time}}的时间"
+      },
       "D_IDLE": {
         "BREAK": "休息",
         "CREATE_AND_TRACK": "<em>创建</em> 并跟踪到：",
@@ -757,6 +730,13 @@
         "TASK": "任务",
         "TASK_BREAK": "任务中断",
         "TRACK_TO": "追踪到："
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em>创建</em> 并跟踪到",
+        "IDLE_FOR": "你一直闲着：",
+        "TASK": "任务",
+        "TRACK_TO": "追踪到：",
+        "UNTRACKED_TIME": "未追踪时间："
       }
     },
     "WORKLOG": {
@@ -854,10 +834,6 @@
       "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
       "TITLE": "评估与指标"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "在这里，您可以将应用配置为自动与单个Google Drive文件同步。所有数据都将以未加密的方式保存，因此请确保您不会意外地与他人共享此文件。",
-      "TITLE": "通过Google Drive同步"
-    },
     "IDLE": {
       "HELP": "<div><p>启用空闲时间处理后，将在指定的时间后打开一个对话框，以检查您在空闲时是否以及在哪个任务上跟踪您的时间。</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "启用空闲时间处理",
@@ -932,6 +908,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "如果未指定，则用于任务的默认项目",
+      "FIRST_DAY_OF_WEEK": "一周的第一天",
       "HELP": "<p><strong>没有看到桌面通知？</strong>对于Windows，您可能需要检查 系统>通知和操作 ，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
@@ -974,6 +951,13 @@
       "MIN_WORKING_TIME": "触发休息提醒的工作时长",
       "MOTIVATIONAL_IMG": "励志图片（网址）",
       "TITLE": "休息提醒"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "配置横幅以在您忘记开始时间跟踪的情况下显示。",
+      "L_IS_ENABLED": "启用",
+      "L_IS_SHOW_ON_MOBILE": "在移动应用上显示",
+      "L_MIN_TIME": "等待显示横幅广告的时间",
+      "TITLE": "时间跟踪提醒"
     }
   },
   "GLOBAL_SNACK": {

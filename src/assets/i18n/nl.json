@@ -16,6 +16,12 @@
   "BL": {
     "NO_TASKS": "Er staan momenteel geen taken in uw backlog"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "Uw gegevens lijken beschadigd te zijn. Wilt u proberen het automatisch op te lossen? Dit kan leiden tot gedeeltelijk gegevensverlies.",
+    "DELETE_STRAY_BACKUP": "Wilt u de achterkant verwijderen om dit dialoogvenster niet te zien?",
+    "RESTORE_FILE_BACKUP": "Er lijken GEEN GEGEVENS te zijn, maar er zijn back-ups beschikbaar op \"{{dir}}\". Wilt u de nieuwste back-up van {{from}}herstellen?",
+    "RESTORE_STRAY_BACKUP": "Tijdens de laatste synchronisatie is er mogelijk een fout opgetreden. Wilt u de laatste back-up herstellen?"
+  },
   "DATETIME_INPUT": {
     "IN": "op {{time}}",
     "TOMORROW": "morgen {{time}}"
@@ -77,32 +83,11 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "U probeert een leeg gegevensobject te synchroniseren. Is dit uw allereerste synchronisatie van een (bijna) nieuwe app?",
-        "FORCE_IMPORT": "Toch externe gegevens importeren?",
-        "FORCE_UPLOAD": "Lokale gegevens toch uploaden?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Er is een fout opgetreden tijdens het uploaden van uw lokale gegevens. Probeer de update te forceren?",
-        "TRY_LOAD_REMOTE_AGAIN": "Wilt u nogmaals gegevens van de afstandsbediening opnieuw laden?"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "laatste wijziging:",
-        "LAST_SYNC": "laatste gesynchroniseerd:",
-        "LOCAL": "lokaal",
-        "LOCAL_REMOTE": "lokaal -> extern",
-        "REMOTE": "extern",
-        "TEXT": "<p>Bijwerken van Dropbox. Zowel de lokala als externe gegevens lijken te zijn gewijzigd.</p>",
-        "TITLE": "Dropbox: Conflicterende gegevens",
-        "USE_LOCAL": "Gebruik lokaal",
-        "USE_REMOTE": "Gebruik extern"
-      },
       "FORM": {
         "B_GENERATE_TOKEN": "Genereer Token",
         "FOLLOW_LINK": "Open de volgende link en kopieer de daar aanwezige auth code in het invoerveld.",
         "L_ACCESS_TOKEN": "Access Token (gegenereerd van Auth Code)",
-        "L_AUTH_CODE": "Auth Code",
-        "L_ENABLE_SYNCING": "Activeer Dropbox Synchroniseren",
-        "L_SYNC_INTERVAL": "Synchronisatie tussenpoze",
-        "TITLE": "Synchronisatie via Dropbox (aanbevolen)"
+        "L_AUTH_CODE": "Auth Code"
       },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Onmogelijk om een Access Token van Auth Code te genereren",
@@ -205,51 +190,8 @@
         "CREATE_SYNC_FILE": "Google Drive: er is geen bestand gevonden met de naam <strong>\"{{fileName}}\"</strong> . <strong>Maak</strong> het als synchronisatiebestand op Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: gebruik je <strong>bestaand</strong> bestand <strong>\"{{fileName}}\"</strong> als synchronisatiebestand? Zo niet, wijzig dan de naam van het synchronisatiebestand."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "laatste aanpassing:",
-        "LAST_SYNC": "laatste synchronisatie",
-        "LOCAL": "lokaal",
-        "LOCAL_REMOTE": "lokale &lt;=> afstandsbediening",
-        "OVERWRITE_LOCAL": "Lokaal overschrijven",
-        "OVERWRITE_REMOTE": "Afstandsbediening overschrijven",
-        "REMOTE": "afgelegen",
-        "TEXT": "<p>Update van Google Drive Backup. Zowel lokale als externe gegevens lijken te zijn gewijzigd. Wilt u niet-opgeslagen lokale wijzigingen overschrijven? <strong>Alle gegevens gaan voor altijd verloren</strong>.</p>",
-        "TITLE": "Lokale gegevens overschrijven met GDrive Update?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "laatste aanpassing:",
-        "LAST_SYNC": "laatste synchronisatie",
-        "LOCAL": "lokaal",
-        "LOCAL_REMOTE": "lokale &lt;=> afstandsbediening",
-        "OVERWRITE_LOCAL": "Lokaal overschrijven",
-        "OVERWRITE_REMOTE": "Afstandsbediening overschrijven",
-        "REMOTE": "afgelegen",
-        "TEXT": "  <p>Er lijken wat veranderingen op Google Drive te zijn, die je niet lokaal hebt. Wil je ze toch overschrijven?</p>",
-        "TITLE": "Niet-opgeslagen gegevens overschrijven op Google Drive?"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: er is een update op afstand! Downloaden ...",
-        "ERROR": "Google Drive - Fout: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Drive: fout bij het in eerste instantie proberen om gegevens te importeren",
-        "LOCAL_UP_TO_DATE": "Google Drive: lokale gegevens zijn al up-to-date",
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Meerdere bestanden met de naam \"{{newFileName}}\" gevonden. Verwijder alle op één na of kies een andere naam.",
-        "NO_UPDATE_REQUIRED": "Google Drive: niet bijgewerkt vereist",
-        "REMOTE_UP_TO_DATE": "Google Drive: externe gegevens zijn al up-to-date",
-        "SUCCESS": "Google Drive: succesvol opgeslagen back-up",
-        "SYNCING": "Google Drive: synchroniseren"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "Automatisch inloggen bij het starten van de app",
-        "AUTO_SYNC": "Gegevens automatisch synchroniseren met afstandsbediening",
-        "BACKUP_NOW": "Nu backuppen",
-        "COMPRESS": "Comprimeer gegevens",
-        "ENABLE": "Schakel synchronisatie in via Google Drive",
-        "LOAD_FROM": "Laden vanuit GDrive",
-        "LOAD_ON_STARTUP": "Laad externe gegevens bij het opstarten",
-        "NOTIFY": "Melden bij synchronisatie",
-        "SYNC_FILE_NAME": "Bestandsnaam synchroniseren",
-        "SYNC_INTERVAL": "Synchronisatie-interval",
-        "UPDATE_SYNC_FILE": "Synchronisatiebestand bijwerken"
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Meerdere bestanden met de naam \"{{newFileName}}\" gevonden. Verwijder alle op één na of kies een andere naam."
       },
       "S_API": {
         "ERR": "GoogleApi-fout: {{errStr}}",
@@ -575,6 +517,33 @@
         "TYPE_STOPWATCH": "Stopwatch"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "U probeert een leeg gegevensobject te synchroniseren. Is dit uw allereerste synchronisatie van een (bijna) nieuwe app?",
+        "FORCE_IMPORT": "Toch externe gegevens importeren?",
+        "FORCE_UPLOAD": "Lokale gegevens toch uploaden?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Er is een fout opgetreden tijdens het uploaden van uw lokale gegevens. Probeer de update te forceren?",
+        "NO_REMOTE_DATA": "Geen externe gegevens gevonden. Lokaal uploaden naar Remote?",
+        "TRY_LOAD_REMOTE_AGAIN": "Wilt u nogmaals gegevens van de afstandsbediening opnieuw laden?"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "laatste wijziging:",
+        "LAST_SYNC": "laatste synchronisatie:",
+        "LOCAL": "Lokaal",
+        "LOCAL_REMOTE": "lokaal -> op afstand",
+        "REMOTE": "afgelegen",
+        "TEXT": "<p>Update vanuit Dropbox. Zowel lokale als externe gegevens lijken te zijn gewijzigd.</p>",
+        "TITLE": "Dropbox: tegenstrijdige gegevens",
+        "USE_LOCAL": "Gebruik lokaal",
+        "USE_REMOTE": "Gebruik afstandsbediening"
+      },
+      "FORM": {
+        "L_ENABLE_SYNCING": "Schakel synchronisatie in",
+        "L_SYNC_INTERVAL": "Synchronisatie-interval",
+        "L_SYNC_PROVIDER": "Synchronisatieprovider",
+        "TITLE": "Synchroniseren"
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "Tag maken",
@@ -749,6 +718,10 @@
         "ALREADY_DID": "heb ik al gedaan",
         "SNOOZE": "{{time}} snoozen"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "Toevoegen aan taak",
+        "MSG": "U heeft de tijd niet bijgehouden voor {{time}}"
+      },
       "D_IDLE": {
         "BREAK": "Pauze",
         "CREATE_AND_TRACK": "<em>Maak</em> en ga naar:",
@@ -757,6 +730,13 @@
         "TASK": "Taak",
         "TASK_BREAK": "Taak + pauze",
         "TRACK_TO": "Track naar:"
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em>Maken</em> en volgen naar",
+        "IDLE_FOR": "U bent inactief geweest voor:",
+        "TASK": "taak",
+        "TRACK_TO": "Track naar:",
+        "UNTRACKED_TIME": "Niet-bijgehouden tijd:"
       }
     },
     "WORKLOG": {
@@ -854,10 +834,6 @@
       "IS_HIDE_EVALUATION_SHEET": "Evaluatieblad verbergen op dagelijkse samenvatting",
       "TITLE": "Evaluatie en statistieken"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "Hier kunt u uw app configureren om automatisch te synchroniseren van en naar een enkel Google Drive-bestand. Alle gegevens worden onversleuteld opgeslagen, dus zorg ervoor dat u dit bestand niet per ongeluk met iemand deelt.",
-      "TITLE": "Synchroniseer via Google Drive"
-    },
     "IDLE": {
       "HELP": "<div><p>Wanneer de verwerking van inactieve tijd is ingeschakeld, wordt na een bepaalde tijd een dialoogvenster geopend om te controleren of en voor welke taak u uw tijd wilt bijhouden, wanneer u inactief bent geweest.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Inactieve tijdafhandeling inschakelen",
@@ -932,6 +908,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standaardproject om te gebruiken voor taken als er geen is opgegeven",
+      "FIRST_DAY_OF_WEEK": "Eerste dag van de week",
       "HELP": "<p><strong>Ziet u geen bureaubladmeldingen?</strong> Voor vensters wilt u misschien Systeem> Meldingen en acties controleren en controleren of de vereiste meldingen zijn ingeschakeld.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Voeg automatisch de tag voor vandaag toe aan taken",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Markeer de bovenliggende taak als voltooid wanneer alle subtaken zijn voltooid",
@@ -974,6 +951,13 @@
       "MIN_WORKING_TIME": "Trigger neemt een pauze-melding nadat X zonder een heeft gewerkt",
       "MOTIVATIONAL_IMG": "Motiverende afbeelding (web-URL)",
       "TITLE": "Pauzeherinnering"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "Configureer een banner om te verschijnen voor het geval u bent vergeten de tijdregistratie te starten.",
+      "L_IS_ENABLED": "Ingeschakeld",
+      "L_IS_SHOW_ON_MOBILE": "Weergeven op mobiele app",
+      "L_MIN_TIME": "Tijd om te wachten voordat je Banner laat zien",
+      "TITLE": "Herinnering voor tijdregistratie"
     }
   },
   "GLOBAL_SNACK": {

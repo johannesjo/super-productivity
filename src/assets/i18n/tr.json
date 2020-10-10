@@ -16,6 +16,12 @@
   "BL": {
     "NO_TASKS": "İş günlüğünüzde şu anda görev yok"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "Verileriniz zarar görmüş görünüyor. Otomatik olarak düzeltmeyi denemek ister misiniz? Bu, kısmi veri kaybına neden olabilir.",
+    "DELETE_STRAY_BACKUP": "Bu iletişim kutusunu görmemek için arka tarafı silmek istiyor musunuz?",
+    "RESTORE_FILE_BACKUP": "VERİ YOK gibi görünüyor, ancak \"{{dir}}\" adresinde yedeklemeler var. En son yedeklemeyi {{from}}kaynağından geri yüklemek istiyor musunuz?",
+    "RESTORE_STRAY_BACKUP": "Son senkronizasyon sırasında bazı hatalar olabilir. Son yedeği geri yüklemek istiyor musunuz?"
+  },
   "DATETIME_INPUT": {
     "IN": " {{time}}içinde",
     "TOMORROW": "yarın {{time}}"
@@ -77,32 +83,11 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "Boş bir veri nesnesini senkronize etmeye çalışıyorsunuz. Bu, (neredeyse) bakir bir uygulamanın ilk senkronizasyonunuz mu?",
-        "FORCE_IMPORT": "Yine de uzak veriler içe aktarılsın mı?",
-        "FORCE_UPLOAD": "Yine de yerel veriler yüklensin mi?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Yerel verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
-        "TRY_LOAD_REMOTE_AGAIN": "Verileri bir kez daha uzaktan kumandadan yeniden yüklemeyi mi deneyin?"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "son değişiklik:",
-        "LAST_SYNC": "son senkronizasyon:",
-        "LOCAL": "yerel",
-        "LOCAL_REMOTE": "yerel -> uzaktan",
-        "REMOTE": "uzak",
-        "TEXT": "<p>Dropbox'tan güncelleme. Hem yerel hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
-        "TITLE": "Dropbox: Çakışan Veriler",
-        "USE_LOCAL": "Yerel kullan",
-        "USE_REMOTE": "Uzaktan kumandayı kullan"
-      },
       "FORM": {
         "B_GENERATE_TOKEN": "Jeton Oluştur",
         "FOLLOW_LINK": "Lütfen aşağıdaki bağlantıyı açın ve orada verilen kimlik doğrulama kodunu giriş alanına kopyalayın.",
         "L_ACCESS_TOKEN": "Erişim Simgesi (Kimlik Doğrulama Kodundan üretilir)",
-        "L_AUTH_CODE": "Doğrulama kodu",
-        "L_ENABLE_SYNCING": "Dropbox Senkronizasyonunu Etkinleştir",
-        "L_SYNC_INTERVAL": "Senkron aralığı",
-        "TITLE": "Dropbox ile senkronize et (önerilir)"
+        "L_AUTH_CODE": "Doğrulama kodu"
       },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Yetkilendirme Kodundan Erişim Simgesi oluşturulamıyor",
@@ -205,51 +190,8 @@
         "CREATE_SYNC_FILE": "Google Drive: <strong>\"{{fileName}}\"</strong> adında bir dosya bulunamadı. <strong>Oluştur</strong> Google Drive’da senkronizasyon dosyası olarak?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Senkronizasyon dosyası olarak <strong>var olan</strong> dosyayı <strong>\"{{fileName}}\"</strong> kullanıyor musunuz? Değilse, lütfen Eşitleme dosya adını değiştirin."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "son değişiklik:",
-        "LAST_SYNC": "son senkronizasyon",
-        "LOCAL": "yerel",
-        "LOCAL_REMOTE": "yerel <=> uzak",
-        "OVERWRITE_LOCAL": "Yerel verilerin üzerine yaz",
-        "OVERWRITE_REMOTE": "Uzak verilerin üzerine yaz",
-        "REMOTE": "uzak",
-        "TEXT": " Google Drive Yedekleme'den<p>Güncelleme. Hem yerel hem de uzak veriler değiştirilmiş görünüyor. Kaydedilmemiş yerel değişikliklerin üzerine yazmak ister misiniz? <strong>Tüm veriler sonsuza dek kaybedilecek</strong>.</p>",
-        "TITLE": "GDrive Update ile yerel verilerin üzerine yazılsın mı?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "son değişiklik:",
-        "LAST_SYNC": "son senkronizasyon",
-        "LOCAL": "yerel",
-        "LOCAL_REMOTE": "yerel <=> uzak",
-        "OVERWRITE_LOCAL": "Yerel verilerin üzerine yaz",
-        "OVERWRITE_REMOTE": "Uzak verilerin üzerine yaz",
-        "REMOTE": "uzak",
-        "TEXT": "  <p>Google Drive’da yerel olarak sahip olmadığınız bazı değişiklikler var. Yine de üzerine yazmak ister misiniz?</p>",
-        "TITLE": "Google Drive'da kaydedilmemiş verilerin üzerine yazılsın mı?"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: Uzaktan güncelleme var! İndiriliyor ...",
-        "ERROR": "Google Drive - Hata:",
-        "ERROR_INITIAL_IMPORT": "Google Drive: Başlangıçta veri almaya çalışırken hata",
-        "LOCAL_UP_TO_DATE": "Google Drive: Yerel veriler zaten güncel",
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin.",
-        "NO_UPDATE_REQUIRED": "Google Drive: Güncelleme gerekmez",
-        "REMOTE_UP_TO_DATE": "Google Drive: Uzak veriler zaten güncel",
-        "SUCCESS": "Google Drive: Yedekleme başarıyla kaydedildi",
-        "SYNCING": "Google Drive: Senkronizasyon"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "Uygulamayı başlatırken otomatik giriş yapma",
-        "AUTO_SYNC": "Verileri uzaktan otomatik olarak senkronize et",
-        "BACKUP_NOW": "Şimdi yedekle",
-        "COMPRESS": "Veriyi Sıkıştır",
-        "ENABLE": "Google Drive ile senkronizasyonu etkinleştir",
-        "LOAD_FROM": "GDrive'dan Yük",
-        "LOAD_ON_STARTUP": "Başlangıçta uzak verileri yükle",
-        "NOTIFY": "Senkronizasyon yaparken bildir",
-        "SYNC_FILE_NAME": "Dosya adını senkronize et",
-        "SYNC_INTERVAL": "Senkron aralığı",
-        "UPDATE_SYNC_FILE": "Senkronizasyon dosyasını güncelle"
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin."
       },
       "S_API": {
         "ERR": "GoogleApi Hatası: {{errStr}}",
@@ -575,6 +517,33 @@
         "TYPE_STOPWATCH": "Kronometre"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "Boş bir veri nesnesini senkronize etmeye çalışıyorsunuz. Bu, (neredeyse) bakir bir uygulamanın ilk senkronizasyonunuz mu?",
+        "FORCE_IMPORT": "Yine de uzak veriler içe aktarılsın mı?",
+        "FORCE_UPLOAD": "Yine de yerel veriler yüklensin mi?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Yerel verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
+        "NO_REMOTE_DATA": "Uzak veri bulunamadı. Uzak'a yerel yüklensin mi?",
+        "TRY_LOAD_REMOTE_AGAIN": "Verileri bir kez daha uzaktan kumandadan yeniden yüklemeyi mi deneyin?"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "son değişiklik:",
+        "LAST_SYNC": "son senkronizasyon:",
+        "LOCAL": "yerel",
+        "LOCAL_REMOTE": "yerel -> uzaktan",
+        "REMOTE": "uzak",
+        "TEXT": "<p>Dropbox'tan güncelleme. Hem yerel hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
+        "TITLE": "Dropbox: Çakışan Veriler",
+        "USE_LOCAL": "Yerel kullan",
+        "USE_REMOTE": "Uzaktan kumandayı kullan"
+      },
+      "FORM": {
+        "L_ENABLE_SYNCING": "Eşitlemeyi Etkinleştir",
+        "L_SYNC_INTERVAL": "Senkron aralığı",
+        "L_SYNC_PROVIDER": "Senkronizasyon Sağlayıcı",
+        "TITLE": "Sync"
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "Etiket Oluştur",
@@ -749,6 +718,10 @@
         "ALREADY_DID": "zaten yaptım",
         "SNOOZE": "Erteleme {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "Göreve Ekle",
+        "MSG": " {{time}}için zamanı takip etmiyorsunuz"
+      },
       "D_IDLE": {
         "BREAK": "mola",
         "CREATE_AND_TRACK": "<em></em> oluşturun ve takip edin:",
@@ -757,6 +730,13 @@
         "TASK": "görev",
         "TASK_BREAK": "Görev Arası",
         "TRACK_TO": "Takip et:"
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em>Oluşturun</em> ve izleyin",
+        "IDLE_FOR": "Boşta kaldınız:",
+        "TASK": "görev",
+        "TRACK_TO": "Takip et:",
+        "UNTRACKED_TIME": "İzlenmeyen süre:"
       }
     },
     "WORKLOG": {
@@ -854,10 +834,6 @@
       "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
       "TITLE": "Değerlendirme ve Metrikler"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "Burada, uygulamanızı tek bir google sürücü dosyasına otomatik olarak senkronize edecek şekilde yapılandırabilirsiniz. Tüm veriler şifrelenmemiş olarak kaydedilir, bu nedenle bu dosyayı yanlışlıkla birisiyle paylaşmadığınızdan emin olun.",
-      "TITLE": "Google Drive ile senkronize et"
-    },
     "IDLE": {
       "HELP": "<div><p>Boşta kalma süresi işleme etkinleştirildiğinde, boşta olduğunuzda, hangi görevi ve zamanınızı izlemek istediğinizi kontrol etmek için belirli bir süre sonra bir iletişim kutusu açılır.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Boşta kalma süresini işlemeyi etkinleştir",
@@ -932,6 +908,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "Hiçbiri belirtilmezse görevler için kullanılacak varsayılan proje",
+      "FIRST_DAY_OF_WEEK": "Haftanın ilk günü",
       "HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Çalışılan görevlere bugün etiketini otomatik olarak ekle",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
@@ -974,6 +951,13 @@
       "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
       "MOTIVATIONAL_IMG": "Motivasyonel resim (web url'si)",
       "TITLE": "Hatırlatma Arası"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "Zaman izlemeyi başlatmayı unutmanız durumunda görünecek bir başlık yapılandırın.",
+      "L_IS_ENABLED": "Etkin",
+      "L_IS_SHOW_ON_MOBILE": "Mobil uygulamada göster",
+      "L_MIN_TIME": "Banner göstermeden önce bekleme süresi",
+      "TITLE": "Zaman İzleme Hatırlatıcısı"
     }
   },
   "GLOBAL_SNACK": {
