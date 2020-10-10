@@ -2,7 +2,7 @@
 import { T } from '../../../t.const';
 import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
-import { DROPBOX_AUTH_CODE_URL } from '../../dropbox/dropbox.const';
+import { DROPBOX_AUTH_CODE_URL } from '../../../imex/sync/dropbox/dropbox.const';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,

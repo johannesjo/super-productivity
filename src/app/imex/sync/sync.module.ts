@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { ConfigModule } from '../../features/config/config.module';
 import { CommonModule } from '@angular/common';
+import { DropboxModule } from './dropbox/dropbox.module';
+import { GoogleModule } from './google/google.module';
 
 @NgModule({
   imports: [
@@ -12,7 +14,10 @@ import { CommonModule } from '@angular/common';
     UiModule,
     ConfigModule,
     EffectsModule.forFeature([SyncEffects]),
-    CommonModule
+    CommonModule,
+
+    DropboxModule,
+    GoogleModule,
   ],
   declarations: []
 })

@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators';
-import { GlobalConfigService } from '../config/global-config.service';
-import { GoogleDriveSyncConfig } from '../config/global-config.model';
-import { DataInitService } from '../../core/data-init/data-init.service';
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
+import { DataInitService } from '../../../core/data-init/data-init.service';
+import { AppDataComplete } from '../sync.model';
 
-import { T } from '../../t.const';
-import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
-import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync-provider.model';
+import { T } from '../../../t.const';
+import { isValidAppData } from '../is-valid-app-data.util';
+import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { GoogleApiService } from './google-api.service';
-import { CompressionService } from '../../core/compression/compression.service';
+import { CompressionService } from '../../../core/compression/compression.service';
 import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({

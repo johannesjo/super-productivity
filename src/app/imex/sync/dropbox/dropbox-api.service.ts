@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { DROPBOX_APP_KEY, DROPBOX_CODE_VERIFIER } from './dropbox.const';
-import { GlobalConfigService } from '../config/global-config.service';
+import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
-import { DataInitService } from '../../core/data-init/data-init.service';
+import { DataInitService } from '../../../core/data-init/data-init.service';
 import { Observable } from 'rxjs';
 import axios, { AxiosResponse, Method } from 'axios';
 import { stringify } from 'query-string';

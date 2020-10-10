@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
-import { DropboxFileMetadata } from '../../features/dropbox/dropbox.model';
+import { DropboxFileMetadata } from './dropbox/dropbox.model';
 import { AppDataComplete } from './sync.model';
-import { GoogleDriveFileMeta } from '../../features/google/google-api.model';
+import { GoogleDriveFileMeta } from './google/google-api.model';
 
 export enum SyncProvider {
   'GoogleDrive' = 'GoogleDrive',

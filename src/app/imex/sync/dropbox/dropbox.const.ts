@@ -1,4 +1,4 @@
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { generatePKCECodes } from './generate-pkce-codes';
 
 export const DROPBOX_APP_KEY = 'm7w85uty7m745ph';

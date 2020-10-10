@@ -3,15 +3,15 @@ import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, take, tap } from 'rxjs/operators';
 import { DropboxApiService } from './dropbox-api.service';
 import { DROPBOX_SYNC_FILE_PATH } from './dropbox.const';
-import { AppDataComplete } from '../../imex/sync/sync.model';
-import { SyncService } from '../../imex/sync/sync.service';
-import { DataInitService } from '../../core/data-init/data-init.service';
-import { SnackService } from '../../core/snack/snack.service';
-import { environment } from '../../../environments/environment';
-import { T } from '../../t.const';
-import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
+import { AppDataComplete } from '../sync.model';
+import { SyncService } from '../sync.service';
+import { DataInitService } from '../../../core/data-init/data-init.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { environment } from '../../../../environments/environment';
+import { T } from '../../../t.const';
+import { isValidAppData } from '../is-valid-app-data.util';
 import { TranslateService } from '@ngx-translate/core';
-import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync-provider.model';
+import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 
 @Injectable({providedIn: 'root'})
 export class DropboxSyncService implements SyncProviderServiceInterface {

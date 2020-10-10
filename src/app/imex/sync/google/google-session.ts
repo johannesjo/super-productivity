@@ -1,6 +1,6 @@
 // SETTINGS (not configurable under config)
-import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
-import { LS_GOOGLE_SESSION } from '../../core/persistence/ls-keys.const';
+import { loadFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
+import { LS_GOOGLE_SESSION } from '../../../core/persistence/ls-keys.const';
 
 export type GoogleSession = Readonly<{
   accessToken: string | null;

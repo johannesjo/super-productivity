@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { EMPTY, Observable, of } from 'rxjs';
 import { concatMap, filter, map, switchMap, tap } from 'rxjs/operators';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../config/store/global-config.actions';
-import { SyncConfig } from '../../config/global-config.model';
-import { SnackService } from '../../../core/snack/snack.service';
-import { T } from '../../../t.const';
+import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
+import { SyncConfig } from '../../../../features/config/global-config.model';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { T } from '../../../../t.const';
 import { GoogleApiService } from '../google-api.service';
-import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
 

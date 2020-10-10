@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../config/store/global-config.actions';
+import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
 import { catchError, filter, map, pairwise, shareReplay, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { DropboxApiService } from '../dropbox-api.service';
-import { DataInitService } from '../../../core/data-init/data-init.service';
+import { DataInitService } from '../../../../core/data-init/data-init.service';
 import { EMPTY, from, Observable } from 'rxjs';
-import { SnackService } from '../../../core/snack/snack.service';
-import { T } from '../../../t.const';
-import { SyncConfig } from '../../config/global-config.model';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { T } from '../../../../t.const';
+import { SyncConfig } from '../../../../features/config/global-config.model';
 
 @Injectable()
 export class DropboxEffects {
