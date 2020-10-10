@@ -29,6 +29,7 @@ export class SyncProviderService {
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(map(cfg => cfg?.sync));
   currentProvider$: Observable<SyncProviderServiceInterface> = this.syncCfg$.pipe(
     map((cfg: SyncConfig): SyncProvider | null => cfg.syncProvider),
+    distinctUntilChanged(),
     map((syncProvider: SyncProvider | null): SyncProviderServiceInterface | null => {
       console.log(syncProvider);
       switch (syncProvider) {
@@ -81,9 +82,9 @@ export class SyncProviderService {
     let local: AppDataComplete | undefined;
 
     await cp.isReadyForRequests$.toPromise();
-    const lastSync = this.getLocalLastSync(cp);
-    const localRev = this.getLocalRev(cp);
-    this.updateLocalLastSyncCheck(cp);
+    const lastSync = this._getLocalLastSync(cp);
+    const localRev = this._getLocalRev(cp);
+    this._updateLocalLastSyncCheck(cp);
 
     // PRE CHECK 2
     // check if file revision changed
@@ -187,7 +188,7 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
         cp.log('X Last Sync not up to date');
-        this.setLocalLastSync(cp, local.lastLocalSyncModelChange);
+        this._setLocalLastSync(cp, local.lastLocalSyncModelChange);
         return;
       }
 
@@ -211,16 +212,16 @@ export class SyncProviderService {
   // WRAPPER
   // -------
   private _downloadAppData(cp: SyncProviderServiceInterface): Promise<{ rev: string, data: AppDataComplete | undefined }> {
-    const rev = this.getLocalRev(cp);
+    const rev = this._getLocalRev(cp);
     return cp.downloadAppData(rev);
   }
 
   private async _uploadAppData(cp: SyncProviderServiceInterface, data: AppDataComplete, isForceOverwrite: boolean = false): Promise<void> {
-    const localRev = this.getLocalRev(cp);
+    const localRev = this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(data, localRev, isForceOverwrite);
     if (typeof successRev === 'string') {
-      this.setLocalRev(cp, successRev);
-      this.setLocalLastSync(cp, data.lastLocalSyncModelChange);
+      this._setLocalRev(cp, successRev);
+      this._setLocalLastSync(cp, data.lastLocalSyncModelChange);
     }
   }
 
@@ -235,22 +236,17 @@ export class SyncProviderService {
     }
 
     await this._dataImportService.importCompleteSyncData(data);
-    this.setLocalRev(cp, rev);
-    this.setLocalLastSync(cp, data.lastLocalSyncModelChange);
+    this._setLocalRev(cp, rev);
+    this._setLocalLastSync(cp, data.lastLocalSyncModelChange);
   }
 
-  private _c(str: string): boolean {
-    return confirm(this._translateService.instant(str));
-  };
-
-  // TODO all private
   // LS HELPER
   // ---------
-  getLocalRev(cp: SyncProviderServiceInterface): string | null {
+  private _getLocalRev(cp: SyncProviderServiceInterface): string | null {
     return localStorage.getItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id);
   }
 
-  setLocalRev(cp: SyncProviderServiceInterface, rev: string) {
+  private _setLocalRev(cp: SyncProviderServiceInterface, rev: string) {
     if (!rev) {
       throw new Error('No rev given');
     }
@@ -258,21 +254,21 @@ export class SyncProviderService {
     return localStorage.setItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id, rev);
   }
 
-  getLocalLastSync(cp: SyncProviderServiceInterface): number {
+  private _getLocalLastSync(cp: SyncProviderServiceInterface): number {
     const it = +(localStorage.getItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id) as any);
     return isNaN(it)
       ? 0
       : it || 0;
   }
 
-  setLocalLastSync(cp: SyncProviderServiceInterface, localLastSync: number) {
+  private _setLocalLastSync(cp: SyncProviderServiceInterface, localLastSync: number) {
     if (typeof (localLastSync as any) !== 'number') {
       throw new Error('No correct localLastSync given');
     }
     return localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id, localLastSync.toString());
   }
 
-  updateLocalLastSyncCheck(cp: SyncProviderServiceInterface) {
+  private _updateLocalLastSyncCheck(cp: SyncProviderServiceInterface) {
     localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC_CHECK + cp.id, Date.now().toString());
   }
 
@@ -292,7 +288,7 @@ export class SyncProviderService {
 
     if (dr === 'USE_LOCAL') {
       cp.log('Dialog => ↑ Remote Update');
-      const localRev = this.getLocalRev(cp);
+      const localRev = this._getLocalRev(cp);
       return await cp.uploadAppData(local, localRev, true);
     } else if (dr === 'USE_REMOTE') {
       cp.log('Dialog => ↓ Update Local');
@@ -316,4 +312,7 @@ export class SyncProviderService {
     }).afterClosed();
   }
 
+  private _c(str: string): boolean {
+    return confirm(this._translateService.instant(str));
+  };
 }

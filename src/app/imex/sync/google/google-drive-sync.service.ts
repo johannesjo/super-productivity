@@ -43,7 +43,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   ) {
   }
 
-  // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
   async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number }> {
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const fileId = cfg._backupDocId;
