@@ -20,6 +20,7 @@ import {
 } from '../../core/persistence/ls-keys.const';
 import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
+import { SnackService } from '../../core/snack/snack.service';
 
 // TODO naming
 @Injectable({
@@ -66,6 +67,7 @@ export class SyncProviderService {
     private _globalConfigService: GlobalConfigService,
     private _translateService: TranslateService,
     private _syncService: SyncService,
+    private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {
   }
@@ -86,26 +88,45 @@ export class SyncProviderService {
     const localRev = this._getLocalRev(cp);
     this._updateLocalLastSyncCheck(cp);
 
-    // PRE CHECK 2
-    // check if file revision changed
-    // ------------------------------
+    // PRE CHECK 1
+    // check if remote data & file revision changed
+    // --------------------------------------------
     const revRes = await cp.getRevAndLastClientUpdate(localRev);
-    if (!revRes) {
-      if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
+    if (typeof revRes === 'string') {
+      if (revRes === 'AUTH_ERROR') {
+        return;
+      } else if (revRes === 'NO_REMOTE' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         cp.log('↑ Update Remote after no getRevAndLastClientUpdate()');
         local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
         return await this._uploadAppData(cp, local);
+      } else {
+        this._snackService.open({
+          msg: T.F.SYNC.S.UNKNOWN_ERROR,
+          type: 'ERROR'
+        });
+        return;
       }
-      return;
     }
     const {rev, clientUpdate} = revRes as { rev: string; clientUpdate: number };
 
     if (rev && rev === localRev) {
-      cp.log('DBX PRE1: ↔ Same Rev', rev);
+      cp.log('PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
       local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
-        cp.log('DBX PRE1: No local changes to sync');
+        cp.log('PRE1: No local changes to sync');
+        return;
+      }
+    }
+
+    // PRE CHECK 2
+    // simple check based on local meta
+    // ------------------------------------
+    // if not defined yet
+    local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
+    if (local.lastLocalSyncModelChange === 0) {
+      if (!(this._c(T.F.SYNC.C.EMPTY_SYNC))) {
+        cp.log('PRE2: Abort');
         return;
       }
     }
@@ -113,15 +134,7 @@ export class SyncProviderService {
     // PRE CHECK 3
     // simple check based on file meta data
     // ------------------------------------
-    // if not defined yet
-    local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
-    if (local.lastLocalSyncModelChange === 0) {
-      if (!(this._c(T.F.SYNC.C.EMPTY_SYNC))) {
-        return;
-      }
-    }
-
-    // NOTE: missing milliseconds :(
+    // NOTE: missing milliseconds for dropbox :(
     const remoteClientUpdate = clientUpdate / 1000;
     // NOTE: not 100% an exact science, but changes occurring at the same time
     // getting lost, might be unlikely and ok after all
@@ -131,24 +144,27 @@ export class SyncProviderService {
       && remoteClientUpdate === Math.floor(lastSync / 1000)
       && lastSync < local.lastLocalSyncModelChange
     ) {
-      cp.log('GD PRE2: ↑ Update Remote');
+      cp.log('PRE3: ↑ Update Remote');
       return await this._uploadAppData(cp, local);
     }
 
-    // COMPLEX SYNC HANDLING
-    // ---------------------
+    // DOWNLOAD OF REMOTE
     const r = (await this._downloadAppData(cp));
 
     // PRE CHECK 4
+    // check if there is no data or no valid remote data
+    // -------------------------------------------------
     const remote = r.data;
     if (!remote || !remote.lastLocalSyncModelChange) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        cp.log('↑ Update Remote');
+        cp.log('↑ PRE4: Update Remote');
         return await this._uploadAppData(cp, local);
       }
       return;
     }
 
+    // COMPLEX SYNC HANDLING
+    // ---------------------
     const timestamps = {
       local: local.lastLocalSyncModelChange,
       lastSync,

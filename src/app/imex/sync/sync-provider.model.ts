@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { DropboxFileMetadata } from './dropbox/dropbox.model';
-import { AppDataComplete } from './sync.model';
+import { AppDataComplete, SyncGetRevResult } from './sync.model';
 import { GoogleDriveFileMeta } from './google/google-api.model';
 
 export enum SyncProvider {
@@ -18,7 +18,7 @@ export interface SyncProviderServiceInterface {
 
   log(...args: any | any[]): void;
 
-  getRevAndLastClientUpdate(localRev: string | null): Promise<{ rev: string; clientUpdate?: number } | null>;
+  getRevAndLastClientUpdate(localRev: string | null): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
 
   uploadAppData(data: AppDataComplete, localRev: string | null, isForceOverwrite?: boolean): Promise<string | null>;
 
