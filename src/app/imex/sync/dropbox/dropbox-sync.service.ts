@@ -8,7 +8,6 @@ import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { environment } from '../../../../environments/environment';
 import { T } from '../../../t.const';
-import { isValidAppData } from '../is-valid-app-data.util';
 import { TranslateService } from '@ngx-translate/core';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 
@@ -51,7 +50,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     } catch (e) {
       const isAxiosError = !!(e && e.response && e.response.status);
       if (isAxiosError && e.response.data && e.response.data.error_summary === 'path/not_found/..') {
-        return 'NO_REMOTE';
+        return 'NO_REMOTE_DATA';
       } else if (isAxiosError && e.response.status === 401) {
         this._snackService.open({msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR'});
         return 'AUTH_ERROR';
@@ -78,12 +77,6 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   }
 
   async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
-    if (!isValidAppData(data)) {
-      console.log(data);
-      alert('The data you are trying to upload is invalid');
-      throw new Error('The data you are trying to upload is invalid');
-    }
-
     try {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,

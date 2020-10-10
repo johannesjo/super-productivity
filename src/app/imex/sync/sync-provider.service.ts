@@ -21,6 +21,7 @@ import {
 import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
+import { isValidAppData } from './is-valid-app-data.util';
 
 // TODO naming
 @Injectable({
@@ -95,7 +96,7 @@ export class SyncProviderService {
     if (typeof revRes === 'string') {
       if (revRes === 'AUTH_ERROR') {
         return;
-      } else if (revRes === 'NO_REMOTE' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
+      } else if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         cp.log('↑ Update Remote after no getRevAndLastClientUpdate()');
         local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
         return await this._uploadAppData(cp, local);
@@ -233,6 +234,12 @@ export class SyncProviderService {
   }
 
   private async _uploadAppData(cp: SyncProviderServiceInterface, data: AppDataComplete, isForceOverwrite: boolean = false): Promise<void> {
+    if (!isValidAppData(data)) {
+      console.log(data);
+      alert('The data you are trying to upload is invalid');
+      throw new Error('The data you are trying to upload is invalid');
+    }
+
     const localRev = this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(data, localRev, isForceOverwrite);
     if (typeof successRev === 'string') {

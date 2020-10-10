@@ -4,10 +4,9 @@ import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
-import { AppDataComplete } from '../sync.model';
+import { AppDataComplete, SyncGetRevResult } from '../sync.model';
 
 import { T } from '../../../t.const';
-import { isValidAppData } from '../is-valid-app-data.util';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { GoogleApiService } from './google-api.service';
 import { CompressionService } from '../../../core/compression/compression.service';
@@ -43,11 +42,12 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   ) {
   }
 
-  async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number }> {
+  async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const fileId = cfg._backupDocId;
     const r: any = await this._googleApiService.getFileInfo$(fileId).pipe(first()).toPromise();
     const d = new Date(r.client_modified);
+    // TODO error handling if we happen to need it
     return {
       clientUpdate: d.getTime(),
       rev: r.md5Checksum,
@@ -66,12 +66,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   }
 
   async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
-    if (!isValidAppData(data)) {
-      console.log(data);
-      alert('The data you are trying to upload is invalid');
-      throw new Error('The data you are trying to upload is invalid');
-    }
-
     let r: unknown;
     try {
       const cfg = await this.cfg$.pipe(first()).toPromise();

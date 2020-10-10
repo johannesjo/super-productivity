@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { TranslateService } from '@ngx-translate/core';
-import { AppDataComplete } from '../sync.model';
-import { isValidAppData } from '../is-valid-app-data.util';
+import { AppDataComplete, SyncGetRevResult } from '../sync.model';
 
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators';
@@ -12,7 +11,6 @@ import { environment } from '../../../../environments/environment';
 import { T } from '../../../t.const';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
-import { SnackService } from '../../../core/snack/snack.service';
 
 @Injectable({providedIn: 'root'})
 export class WebDavSyncService implements SyncProviderServiceInterface {
@@ -36,7 +34,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   constructor(
     private _webDavApiService: WebDavApiService,
     private _dataInitService: DataInitService,
-    private _snackService: SnackService,
     private _globalConfigService: GlobalConfigService,
     private _translateService: TranslateService,
   ) {
@@ -46,7 +43,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     return console.log('WebDAV:', ...args);
   }
 
-  async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | null> {
+  async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     const cfg = await this._cfg$.pipe(first()).toPromise();
 
     try {
@@ -59,20 +56,15 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     } catch (e) {
       const isAxiosError = !!(e && e.response && e.response.status);
       if (isAxiosError && e.response.status === 404) {
-        return null;
+        return 'NO_REMOTE_DATA';
       }
       console.error(e);
       if (environment.production) {
-        this._snackService.open({
-          msg: T.F.SYNC.S.UNKNOWN_ERROR,
-          translateParams: {errorStr: e && e.toString && e.toString()},
-          type: 'ERROR'
-        });
+        return 'UNKNOWN_ERROR';
       } else {
         throw new Error('WebDAV: Unknown error');
       }
     }
-    return null;
   }
 
   async downloadAppData(localRev: string): Promise<{ rev: string, data: AppDataComplete }> {
@@ -90,12 +82,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   }
 
   async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
-    if (!isValidAppData(data)) {
-      console.log(data);
-      alert('The data you are trying to upload is invalid');
-      throw new Error('The data you are trying to upload is invalid');
-    }
-
     try {
       const r = await this._webDavApiService.upload({
         data,
