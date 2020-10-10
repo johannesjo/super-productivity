@@ -54,7 +54,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     private _syncService: SyncService,
     private _googleApiService: GoogleApiService,
     private _dataInitService: DataInitService,
-    // private _snackService: SnackService,
     private _compressionService: CompressionService,
     private _matDialog: MatDialog,
     private _translateService: TranslateService,
@@ -115,11 +114,8 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
     // PRE CHECK 4
     const remote = r.data;
-    // TODO sync fix check for valid data
     if (!remote || !remote.lastLocalSyncModelChange) {
-      console.log(r, remote);
-      // TODO sync fix i18n
-      if (confirm('No remote data found. Upload local to Remote?')) {
+      if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         gdLog('GD: ↑ Update Remote');
         return await this._uploadAppData(local);
       }

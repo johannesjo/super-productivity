@@ -578,6 +578,7 @@
         "FORCE_IMPORT": "Import remote data anyway?",
         "FORCE_UPLOAD": "Upload local data anyway?",
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
+        "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
         "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
       },
       "FORM": {
