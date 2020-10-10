@@ -83,17 +83,6 @@
       }
     },
     "DROPBOX": {
-      "D_CONFLICT": {
-        "LAST_CHANGE": "last change:",
-        "LAST_SYNC": "last sync:",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local -> remote",
-        "REMOTE": "remote",
-        "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
-        "TITLE": "Dropbox: Conflicting Data",
-        "USE_LOCAL": "Use local",
-        "USE_REMOTE": "Use remote"
-      },
       "FORM": {
         "B_GENERATE_TOKEN": "Generate Token",
         "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
@@ -580,6 +569,17 @@
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
         "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
         "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "last change:",
+        "LAST_SYNC": "last sync:",
+        "LOCAL": "local",
+        "LOCAL_REMOTE": "local -> remote",
+        "REMOTE": "remote",
+        "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
+        "TITLE": "Dropbox: Conflicting Data",
+        "USE_LOCAL": "Use local",
+        "USE_REMOTE": "Use remote"
       },
       "FORM": {
         "L_ENABLE_SYNCING": "Enable Syncing",
