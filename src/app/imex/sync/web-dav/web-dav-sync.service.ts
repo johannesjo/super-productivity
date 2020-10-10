@@ -103,10 +103,8 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         isForceOverwrite
       });
       console.log(r);
-
       this.log('↑ Uploaded Data ↑ ✓');
-      // return rev;
-      return 'rev';
+      return r.headers.etag;
     } catch (e) {
       console.error(e);
       this.log('X Upload Request Error');

@@ -7,6 +7,7 @@ import { WebDavConfig } from '../../../features/config/global-config.model';
 // @ts-ignore
 import { createClient } from 'webdav/web';
 import { AppDataComplete } from '../sync.model';
+import { AxiosResponse } from 'axios';
 
 @Injectable({providedIn: 'root'})
 export class WebDavApiService {
@@ -34,7 +35,7 @@ export class WebDavApiService {
     localRev?: string | null;
     data: AppDataComplete;
     isForceOverwrite?: boolean;
-  }): Promise<unknown> {
+  }): Promise<AxiosResponse> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
     const client = createClient(cfg.baseUrl, {
@@ -78,65 +79,4 @@ export class WebDavApiService {
     console.log(r);
     return r;
   }
-
-  //
-  // async checkUser(accessToken: string): Promise<unknown> {
-  //   await this._isReady$.toPromise();
-  //   return this._request({
-  //     accessToken,
-  //     method: 'POST',
-  //     url: 'https://api.dropboxapi.com/2/check/user',
-  //   }).then((res) => res.data);
-  // }
-  //
-
-  // async upload({path, localRev, data, clientModified, isForceOverwrite = false}: {
-  //   path: string;
-  //   clientModified?: number;
-  //   localRev?: string | null;
-  //   data: any;
-  //   isForceOverwrite?: boolean;
-  // }): Promise<unknown> {
-  //   await this._isReady$.toPromise();
-  //   const cfg = await this._cfg$.pipe(first()).toPromise();
-  //
-  //   const args = {
-  //   };
-  //
-  //   // if (localRev && !isForceOverwrite) {
-  //   // }
-  //
-  //   return this._request({
-  //     method: 'POST',
-  //     url:  `${cfg.baseUrl}`,
-  //     data,
-  //     headers: {
-  //       // 'Content-Type': 'application/octet-stream',
-  //     },
-  //   }).then((res) => res.data);
-  // }
-  //
-  // async _request({url, method = 'GET', data, headers = {}, params = {}}: {
-  //   url: string;
-  //   method?: Method;
-  //   headers?: { [key: string]: any },
-  //   data?: string | object
-  //   params?: { [key: string]: string },
-  // }): Promise<AxiosResponse> {
-  //   await this._isReady$.toPromise();
-  //   const cfg = await this._cfg$.pipe(first()).toPromise();
-  //
-  //   return axios.request({
-  //     url: params
-  //       ? url + stringify(params)
-  //       : url,
-  //     method,
-  //     data,
-  //     headers: {
-  //       authorization: `Authorization ${cfg.userName}:${cfg.password}`,
-  //       'Content-Type': 'application/json;charset=UTF-8',
-  //       ...headers,
-  //     },
-  //   });
-  // }
 }
