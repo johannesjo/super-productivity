@@ -122,5 +122,5 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
   private _c(str: string): boolean {
     return confirm(this._translateService.instant(str));
-  };
+  }
 }

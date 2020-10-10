@@ -337,5 +337,5 @@ export class SyncProviderService {
 
   private _c(str: string): boolean {
     return confirm(this._translateService.instant(str));
-  };
+  }
 }
