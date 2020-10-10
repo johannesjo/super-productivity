@@ -37,7 +37,7 @@ export class DataImportService {
   }
 
   async importCompleteSyncData(data: AppDataComplete, isBackupReload: boolean = false, isSkipStrayBackupCheck: boolean = false) {
-    this._snackService.open({msg: T.S.SYNC.IMPORTING, ico: 'cloud_download'});
+    this._snackService.open({msg: T.F.SYNC.S.IMPORTING, ico: 'cloud_download'});
     this._imexMetaService.setDataImportInProgress(true);
 
     // get rid of outdated project data
@@ -58,12 +58,12 @@ export class DataImportService {
         await this._loadAllFromDatabaseToStore();
         await this._persistenceService.clearBackup();
         this._imexMetaService.setDataImportInProgress(false);
-        this._snackService.open({type: 'SUCCESS', msg: T.S.SYNC.SUCCESS});
+        this._snackService.open({type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS});
 
       } catch (e) {
         this._snackService.open({
           type: 'ERROR',
-          msg: T.S.SYNC.ERROR_FALLBACK_TO_BACKUP,
+          msg: T.F.SYNC.S.ERROR_FALLBACK_TO_BACKUP,
         });
         console.error(e);
         await this._importBackup();
@@ -73,7 +73,7 @@ export class DataImportService {
       const fixedData = this._dataRepairService.repairData(data);
       await this.importCompleteSyncData(fixedData, isBackupReload, true);
     } else {
-      this._snackService.open({type: 'ERROR', msg: T.S.SYNC.ERROR_INVALID_DATA});
+      this._snackService.open({type: 'ERROR', msg: T.F.SYNC.S.ERROR_INVALID_DATA});
       console.error(data);
       this._imexMetaService.setDataImportInProgress(false);
     }
