@@ -20,9 +20,7 @@ export interface SyncProviderServiceInterface {
   isReady$: Observable<boolean>;
   isReadyForRequests$: Observable<boolean>;
 
-  isAdditionalPreChecksPassed(args: any): Promise<boolean>;
-
-  log(...args: any|any[]): void;
+  log(...args: any | any[]): void;
 
   // revs
   updateLocalLastSyncCheck(): void;
@@ -35,7 +33,7 @@ export interface SyncProviderServiceInterface {
 
   setLocalRev(rev: string): void;
 
-  getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number }>;
+  getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number } | null>;
 
   // upload & download & import
   uploadAppData(data: AppDataComplete, isForceOverwrite?: boolean): Promise<unknown>;
