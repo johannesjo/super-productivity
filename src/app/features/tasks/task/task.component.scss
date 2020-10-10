@@ -8,7 +8,7 @@
 // NOTE: needs to come first to be overwritten by :host.isCurrent
 // NOTE: needs to be very light, because we're on a lighter background for the dark theme
 :host-context(.isDarkTheme) {
-  color: $dark-theme-text-color-most-intense;
+  color: $task-text-c-dark;
 }
 
 :host {
@@ -158,9 +158,13 @@
   }
 
   ::ng-deep .box {
+    @include lightTheme {
+      border-color: $light-theme-extra-border-color;
+    }
+
     @include darkTheme {
-      background: $sub-task-c-bg-dark;
       box-shadow: $whiteframe-shadow-1dp;
+      background: $sub-task-c-bg-dark;
     }
   }
 }
