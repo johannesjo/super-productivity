@@ -51,7 +51,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 1px;
+  bottom: 2px;
   top: 1px;
   transition: $transition-standard;
   transition-property: transform, box-shadow;
@@ -84,7 +84,7 @@
   .inner-wrapper.isSelected.isSelected > & {
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
-    //box-shadow: $whiteframe-shadow-2dp;
+    box-shadow: $task-selected-shadow;
     //@include darkTheme {
     //  box-shadow: $whiteframe-shadow-1dp;
     //}
@@ -160,6 +160,7 @@
   ::ng-deep .box {
     @include darkTheme {
       background: $sub-task-c-bg-dark;
+      box-shadow: $whiteframe-shadow-1dp;
     }
   }
 }
