@@ -14,6 +14,12 @@ import { DialogDbxSyncConflictComponent } from '../../features/dropbox/dialog-db
 import { TranslateService } from '@ngx-translate/core';
 import { SyncService } from './sync.service';
 import { MatDialog } from '@angular/material/dialog';
+import {
+  LS_SYNC_LAST_LOCAL_REVISION,
+  LS_SYNC_LOCAL_LAST_SYNC,
+  LS_SYNC_LOCAL_LAST_SYNC_CHECK
+} from '../../core/persistence/ls-keys.const';
+import { DataImportService } from './data-import.service';
 
 // TODO naming
 @Injectable({
@@ -49,6 +55,7 @@ export class SyncProviderService {
 
   constructor(
     private _dropboxSyncService: DropboxSyncService,
+    private _dataImportService: DataImportService,
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _globalConfigService: GlobalConfigService,
     private _translateService: TranslateService,
@@ -69,14 +76,14 @@ export class SyncProviderService {
     let local: AppDataComplete | undefined;
 
     await cp.isReadyForRequests$.toPromise();
-    const lastSync = cp.getLocalLastSync();
-    const localRev = cp.getLocalRev();
-    cp.updateLocalLastSyncCheck();
+    const lastSync = this.getLocalLastSync(cp);
+    const localRev = this.getLocalRev(cp);
+    this.updateLocalLastSyncCheck(cp);
 
     // PRE CHECK 2
     // check if file revision changed
     // ------------------------------
-    const {rev, clientUpdate} = await cp.getRevAndLastClientUpdate();
+    const {rev, clientUpdate} = await cp.getRevAndLastClientUpdate() as { rev: string; clientUpdate: number };
 
     if (rev && rev === localRev) {
       cp.log('DBX PRE1: ↔ Same Rev', rev);
@@ -110,19 +117,19 @@ export class SyncProviderService {
       && lastSync < local.lastLocalSyncModelChange
     ) {
       cp.log('GD PRE2: ↑ Update Remote');
-      return await cp.uploadAppData(local);
+      return await this._uploadAppData(cp, local);
     }
 
     // COMPLEX SYNC HANDLING
     // ---------------------
-    const r = (await cp.downloadAppData());
+    const r = (await this._downloadAppData(cp));
 
     // PRE CHECK 4
     const remote = r.data;
     if (!remote || !remote.lastLocalSyncModelChange) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         cp.log('↑ Update Remote');
-        return await cp.uploadAppData(local);
+        return await this._uploadAppData(cp, local);
       }
       return;
     }
@@ -141,12 +148,12 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LocalUpdateRequired: {
         cp.log('↓ Update Local');
-        return await cp.importAppData(remote, r.rev as string); // r.meta.rev
+        return await this._importAppData(cp, remote, r.rev as string);
       }
 
       case UpdateCheckResult.RemoteUpdateRequired: {
         cp.log('↑ Update Remote');
-        return await cp.uploadAppData(local);
+        return await this._uploadAppData(cp, local);
       }
 
       case UpdateCheckResult.RemoteNotUpToDateDespiteSync: {
@@ -166,7 +173,7 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
         cp.log('X Last Sync not up to date');
-        cp.setLocalLastSync(local.lastLocalSyncModelChange);
+        this.setLocalLastSync(cp, local.lastLocalSyncModelChange);
         return;
       }
 
@@ -175,11 +182,11 @@ export class SyncProviderService {
         cp.log('XXX Wrong Data');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
           if (this._c(T.F.SYNC.C.FORCE_UPLOAD)) {
-            return await cp.uploadAppData(local, true);
+            return await this._uploadAppData(cp, local, true);
           }
         } else {
           if (this._c(T.F.SYNC.C.FORCE_IMPORT)) {
-            return await cp.importAppData(remote, r.rev as string);
+            return await this._importAppData(cp, remote, r.rev as string);
           }
         }
         return;
@@ -187,6 +194,76 @@ export class SyncProviderService {
     }
   }
 
+  // WRAPPER
+  // -------
+  private _downloadAppData(cp: SyncProviderServiceInterface): Promise<{ rev: string, data: AppDataComplete | undefined }> {
+    const rev = this.getLocalRev(cp);
+    return cp.downloadAppData(rev);
+  }
+
+  private async _uploadAppData(cp: SyncProviderServiceInterface, data: AppDataComplete, isForceOverwrite: boolean = false): Promise<void> {
+    const localRev = this.getLocalRev(cp);
+    const successRev = await cp.uploadAppData(data, localRev, isForceOverwrite);
+    if (typeof successRev === 'string') {
+      this.setLocalRev(cp, successRev);
+      this.setLocalLastSync(cp, data.lastLocalSyncModelChange);
+    }
+  }
+
+  private async _importAppData(cp: SyncProviderServiceInterface, data: AppDataComplete, rev: string): Promise<void> {
+    if (!data) {
+      const r = (await this._downloadAppData(cp));
+      data = r.data as AppDataComplete;
+      rev = r.rev;
+    }
+    if (!rev) {
+      throw new Error('No rev given');
+    }
+
+    await this._dataImportService.importCompleteSyncData(data);
+    this.setLocalRev(cp, rev);
+    this.setLocalLastSync(cp, data.lastLocalSyncModelChange);
+  }
+
+  private _c(str: string): boolean {
+    return confirm(this._translateService.instant(str));
+  };
+
+  // TODO all private
+  // LS HELPER
+  // ---------
+  getLocalRev(cp: SyncProviderServiceInterface): string | null {
+    return localStorage.getItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id);
+  }
+
+  setLocalRev(cp: SyncProviderServiceInterface, rev: string) {
+    if (!rev) {
+      throw new Error('No rev given');
+    }
+
+    return localStorage.setItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id, rev);
+  }
+
+  getLocalLastSync(cp: SyncProviderServiceInterface): number {
+    const it = +(localStorage.getItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id) as any);
+    return isNaN(it)
+      ? 0
+      : it || 0;
+  }
+
+  setLocalLastSync(cp: SyncProviderServiceInterface, localLastSync: number) {
+    if (typeof (localLastSync as any) !== 'number') {
+      throw new Error('No correct localLastSync given');
+    }
+    return localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id, localLastSync.toString());
+  }
+
+  updateLocalLastSyncCheck(cp: SyncProviderServiceInterface) {
+    localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC_CHECK + cp.id, Date.now().toString());
+  }
+
+  // OTHER
+  // -----
   // TODO sync fix use with drobox
   private async _handleConflict(cp: SyncProviderServiceInterface, {remote, local, lastSync, rev}: {
     remote: AppDataComplete;
@@ -202,10 +279,11 @@ export class SyncProviderService {
 
     if (dr === 'USE_LOCAL') {
       cp.log('Dialog => ↑ Remote Update');
-      return await cp.uploadAppData(local, true);
+      const localRev = this.getLocalRev(cp);
+      return await cp.uploadAppData(local, localRev, true);
     } else if (dr === 'USE_REMOTE') {
       cp.log('Dialog => ↓ Update Local');
-      return await cp.importAppData(remote, rev);
+      return await this._importAppData(cp, remote, rev);
     }
     return;
   }
@@ -224,9 +302,5 @@ export class SyncProviderService {
       }
     }).afterClosed();
   }
-
-  private _c(str: string): boolean {
-    return confirm(this._translateService.instant(str));
-  };
 
 }

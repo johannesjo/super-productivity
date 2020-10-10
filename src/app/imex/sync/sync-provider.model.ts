@@ -22,23 +22,13 @@ export interface SyncProviderServiceInterface {
 
   log(...args: any | any[]): void;
 
-  // revs
-  updateLocalLastSyncCheck(): void;
-
-  setLocalLastSync(lastSync: number): void;
-
-  getLocalLastSync(): number;
-
-  getLocalRev(): string | null;
-
-  setLocalRev(rev: string): void;
-
   getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number } | null>;
 
   // upload & download & import
-  uploadAppData(data: AppDataComplete, isForceOverwrite?: boolean): Promise<unknown>;
+  // TODO params to object
+  uploadAppData(data: AppDataComplete, localRev: string | null, isForceOverwrite?: boolean): Promise<string | null>;
 
-  downloadAppData(): Promise<{ rev: string, data: AppDataComplete | undefined }>;
+  downloadAppData(localRev: string | null): Promise<{ rev: string, data: AppDataComplete | undefined }>;
 
-  importAppData(data: AppDataComplete, rev: string): Promise<unknown>;
+  // importAppData(data: AppDataComplete, rev: string): Promise<unknown>;
 }

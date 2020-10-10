@@ -6,13 +6,6 @@ import { DROPBOX_SYNC_FILE_PATH } from './dropbox.const';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { SyncService } from '../../imex/sync/sync.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
-import {
-  LS_DROPBOX_LAST_LOCAL_REVISION,
-  LS_DROPBOX_LOCAL_LAST_SYNC,
-  LS_DROPBOX_LOCAL_LAST_SYNC_CHECK
-} from '../../core/persistence/ls-keys.const';
-import { DropboxFileMetadata } from './dropbox.model';
-import { DataImportService } from '../../imex/sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
@@ -35,7 +28,6 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   );
 
   constructor(
-    private _dataImportService: DataImportService,
     private _syncService: SyncService,
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
@@ -48,22 +40,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     return console.log('DBX:', ...args);
   }
 
-  async importAppData(data: AppDataComplete, rev: string) {
-    if (!data) {
-      const r = (await this.downloadAppData());
-      data = r.data;
-      rev = r.rev;
-    }
-    if (!rev) {
-      throw new Error('No rev given');
-    }
-
-    await this._dataImportService.importCompleteSyncData(data);
-    this.setLocalRev(rev);
-    this.setLocalLastSync(data.lastLocalSyncModelChange);
-    this.log('DBX: ↓ Imported Data ↓ ✓');
-  }
-
+  // TODO refactor in a way that it doesn't need to trigger uploadAppData itself
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
   async getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number } | null> {
     try {
@@ -97,10 +74,10 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     return null;
   }
 
-  async downloadAppData(): Promise<{ rev: string, data: AppDataComplete }> {
+  async downloadAppData(localRev: string): Promise<{ rev: string, data: AppDataComplete }> {
     const r = await this._dropboxApiService.download<AppDataComplete>({
       path: DROPBOX_SYNC_FILE_PATH,
-      localRev: this.getLocalRev(),
+      localRev,
     });
     return {
       rev: r.meta.rev,
@@ -108,7 +85,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<DropboxFileMetadata | undefined> {
+  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
     if (!isValidAppData(data)) {
       console.log(data);
       alert('The data you are trying to upload is invalid');
@@ -120,53 +97,20 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
         path: DROPBOX_SYNC_FILE_PATH,
         data,
         clientModified: data.lastLocalSyncModelChange,
-        localRev: this.getLocalRev(),
+        localRev,
         isForceOverwrite
       });
-      this.setLocalRev(r.rev);
-      this.setLocalLastSync(data.lastLocalSyncModelChange);
+
       this.log('DBX: ↑ Uploaded Data ↑ ✓');
-      return r;
+      return r.rev;
     } catch (e) {
       console.error(e);
       this.log('DBX: X Upload Request Error');
       if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return this.uploadAppData(data, true);
+        return this.uploadAppData(data, localRev, true);
       }
     }
-    return;
-  }
-
-  // LS HELPER
-  // ---------
-  getLocalRev(): string | null {
-    return localStorage.getItem(LS_DROPBOX_LAST_LOCAL_REVISION);
-  }
-
-  setLocalRev(rev: string) {
-    if (!rev) {
-      throw new Error('No rev given');
-    }
-
-    return localStorage.setItem(LS_DROPBOX_LAST_LOCAL_REVISION, rev);
-  }
-
-  getLocalLastSync(): number {
-    const it = +(localStorage.getItem(LS_DROPBOX_LOCAL_LAST_SYNC) as any);
-    return isNaN(it)
-      ? 0
-      : it || 0;
-  }
-
-  setLocalLastSync(localLastSync: number) {
-    if (typeof (localLastSync as any) !== 'number') {
-      throw new Error('No correct localLastSync given');
-    }
-    return localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC, localLastSync.toString());
-  }
-
-  updateLocalLastSyncCheck() {
-    localStorage.setItem(LS_DROPBOX_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
+    return null;
   }
 
   private _c(str: string): boolean {
