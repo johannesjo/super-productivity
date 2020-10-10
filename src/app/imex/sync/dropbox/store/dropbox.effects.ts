@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
+import {
+  GlobalConfigActionTypes,
+  UpdateGlobalConfigSection
+} from '../../../../features/config/store/global-config.actions';
 import { catchError, filter, map, pairwise, shareReplay, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { DropboxApiService } from '../dropbox-api.service';
 import { DataInitService } from '../../../../core/data-init/data-init.service';
@@ -8,6 +11,7 @@ import { EMPTY, from, Observable } from 'rxjs';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { T } from '../../../../t.const';
 import { SyncConfig } from '../../../../features/config/global-config.model';
+import { SyncProvider } from '../../sync-provider.model';
 
 @Injectable()
 export class DropboxEffects {
@@ -24,9 +28,10 @@ export class DropboxEffects {
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
     filter(({payload}: UpdateGlobalConfigSection): boolean => payload.sectionKey === 'sync'),
+    map(({payload}) => payload.sectionCfg as SyncConfig),
+    filter(syncConfig => syncConfig.syncProvider === SyncProvider.Dropbox),
     withLatestFrom(this._isChangedAuthCode$),
-    switchMap(([{payload}, isChanged]: [UpdateGlobalConfigSection, boolean]) => {
-      const syncConfig = payload.sectionCfg as SyncConfig;
+    switchMap(([syncConfig, isChanged]: [SyncConfig, boolean]) => {
       if (isChanged && typeof syncConfig.dropboxSync.authCode === 'string') {
         return from(this._dropboxApiService.getAccessTokenFromAuthCode(syncConfig.dropboxSync.authCode)).pipe(
           // NOTE: catch needs to be limited to request only, otherwise we break the chain

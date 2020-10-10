@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { EMPTY, Observable, of } from 'rxjs';
 import { concatMap, filter, map, switchMap, tap } from 'rxjs/operators';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
+import {
+  GlobalConfigActionTypes,
+  UpdateGlobalConfigSection
+} from '../../../../features/config/store/global-config.actions';
 import { SyncConfig } from '../../../../features/config/global-config.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { T } from '../../../../t.const';
@@ -10,6 +13,7 @@ import { GoogleApiService } from '../google-api.service';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
+import { SyncProvider } from '../../sync-provider.model';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -18,16 +22,18 @@ export class GoogleDriveSyncEffects {
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
     filter(({payload}: UpdateGlobalConfigSection): boolean => payload.sectionKey === 'sync'),
-    switchMap(({payload}: UpdateGlobalConfigSection): Observable<{
+    map(({payload}) => payload.sectionCfg as SyncConfig),
+    switchMap((syncConfig: SyncConfig): Observable<{
       syncFileName: string,
       _backupDocId: string,
       _syncFileNameForBackupDocId: string,
       sync: SyncConfig
     } | never> => {
-      const syncConfig = payload.sectionCfg as SyncConfig;
       const isChanged = (syncConfig.googleDriveSync.syncFileName !== syncConfig.googleDriveSync._syncFileNameForBackupDocId);
-
-      if ((isChanged || !syncConfig.googleDriveSync._backupDocId) && syncConfig.googleDriveSync.syncFileName.length > 0) {
+      if (syncConfig.syncProvider === SyncProvider.GoogleDrive
+        && (isChanged || !syncConfig.googleDriveSync._backupDocId)
+        && syncConfig.googleDriveSync.syncFileName.length > 0
+      ) {
         const newFileName = syncConfig.googleDriveSync.syncFileName || DEFAULT_SYNC_FILE_NAME;
         return this._googleApiService.findFile$(newFileName).pipe(
           concatMap((res: any): any => {
