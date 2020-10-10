@@ -160,6 +160,8 @@
   ::ng-deep .box {
     @include lightTheme {
       border-color: $light-theme-extra-border-color;
+      bottom: 0;
+      top: -1px;
     }
 
     @include darkTheme {
