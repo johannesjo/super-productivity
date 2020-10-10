@@ -7,6 +7,7 @@ import { ConfigModule } from '../../features/config/config.module';
 import { CommonModule } from '@angular/common';
 import { DropboxModule } from './dropbox/dropbox.module';
 import { GoogleModule } from './google/google.module';
+import { WebDavModule } from './web-dav/web-dav.module';
 
 @NgModule({
   imports: [
@@ -18,6 +19,7 @@ import { GoogleModule } from './google/google.module';
 
     DropboxModule,
     GoogleModule,
+    WebDavModule,
   ],
   declarations: []
 })
