@@ -20,6 +20,7 @@
   margin: 8px;
   border-radius: $card-border-radius* 1;
   //overflow: visible;
+  border-color: transparent;
 
   :host:focus & {
     border: 1px solid $c-focus-border;
@@ -39,7 +40,6 @@
 
   @include darkTheme() {
     background: $dark6;
-    border-color: $dark-theme-extra-border-color;
     box-shadow: $whiteframe-shadow-1dp;
   }
   @include lightTheme {
