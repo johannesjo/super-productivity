@@ -3,17 +3,11 @@ import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators';
 import { GlobalConfigService } from '../config/global-config.service';
 import { GoogleDriveSyncConfig } from '../config/global-config.model';
-import { DataImportService } from '../../imex/sync/data-import.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 
 import { T } from '../../t.const';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
-import {
-  LS_GOOGLE_LAST_LOCAL_REVISION,
-  LS_GOOGLE_LOCAL_LAST_SYNC,
-  LS_GOOGLE_LOCAL_LAST_SYNC_CHECK
-} from '../../core/persistence/ls-keys.const';
 import { SyncProvider, SyncProviderServiceInterface } from '../../imex/sync/sync-provider.model';
 import { GoogleApiService } from './google-api.service';
 import { CompressionService } from '../../core/compression/compression.service';
@@ -42,7 +36,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
 
   constructor(
     private _configService: GlobalConfigService,
-    private _dataImportService: DataImportService,
     private _googleApiService: GoogleApiService,
     private _dataInitService: DataInitService,
     private _compressionService: CompressionService,
@@ -62,22 +55,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async importAppData(data: AppDataComplete, rev: string) {
-    if (!data) {
-      const r = (await this.downloadAppData());
-      data = r.data as AppDataComplete;
-      rev = r.rev as string;
-    }
-    if (!rev) {
-      throw new Error('No rev given');
-    }
-
-    await this._dataImportService.importCompleteSyncData(data);
-    this.setLocalRev(rev);
-    this.setLocalLastSync(data.lastLocalSyncModelChange);
-    this.log('↓ Imported Data ↓ ✓');
-  }
-
   async downloadAppData(): Promise<{ rev: string, data: AppDataComplete | undefined }> {
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const {backup, meta} = await this._googleApiService.loadFile$(cfg._backupDocId).pipe(first()).toPromise();
@@ -89,14 +66,14 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     return {rev: meta.md5Checksum as string, data};
   }
 
-  async uploadAppData(data: AppDataComplete, isForceOverwrite: boolean = false): Promise<unknown> {
+  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
     if (!isValidAppData(data)) {
       console.log(data);
       alert('The data you are trying to upload is invalid');
       throw new Error('The data you are trying to upload is invalid');
     }
 
-    let r: any;
+    let r: unknown;
     try {
       const cfg = await this.cfg$.pipe(first()).toPromise();
       console.log(cfg, data);
@@ -115,53 +92,19 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       console.error(e);
       this.log('X Upload Request Error');
       if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return this.uploadAppData(data, true);
+        return this.uploadAppData(data, localRev, true);
       }
     }
-    if (!r.md5Checksum) {
+
+    if (!(r as any).md5Checksum) {
       throw new Error('No md5Checksum');
     }
-
-    this.setLocalRev(r.md5Checksum);
-    this.setLocalLastSync(data.lastLocalSyncModelChange);
     this.log('↑ Uploaded Data ↑ ✓');
-    return r;
+    return (r as any).md5Checksum;
   }
 
   log(...args: any | any[]) {
     return console.log('GD:', ...args);
-  }
-
-  // LS HELPER
-  // ---------
-  getLocalRev(): string | null {
-    return localStorage.getItem(LS_GOOGLE_LAST_LOCAL_REVISION);
-  }
-
-  setLocalRev(rev: string) {
-    if (!rev) {
-      throw new Error('No rev given');
-    }
-
-    return localStorage.setItem(LS_GOOGLE_LAST_LOCAL_REVISION, rev);
-  }
-
-  getLocalLastSync(): number {
-    const it = +(localStorage.getItem(LS_GOOGLE_LOCAL_LAST_SYNC) as any);
-    return isNaN(it)
-      ? 0
-      : it || 0;
-  }
-
-  setLocalLastSync(localLastSync: number) {
-    if (typeof (localLastSync as any) !== 'number') {
-      throw new Error('No correct localLastSync given');
-    }
-    return localStorage.setItem(LS_GOOGLE_LOCAL_LAST_SYNC, localLastSync.toString());
-  }
-
-  updateLocalLastSyncCheck() {
-    localStorage.setItem(LS_GOOGLE_LOCAL_LAST_SYNC_CHECK, Date.now().toString());
   }
 
   private async _decodeAppDataIfNeeded(backupStr: string | AppDataComplete): Promise<AppDataComplete> {

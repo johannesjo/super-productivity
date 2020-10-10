@@ -24,11 +24,7 @@ export interface SyncProviderServiceInterface {
 
   getRevAndLastClientUpdate(): Promise<{ rev: string; clientUpdate: number } | null>;
 
-  // upload & download & import
-  // TODO params to object
   uploadAppData(data: AppDataComplete, localRev: string | null, isForceOverwrite?: boolean): Promise<string | null>;
 
   downloadAppData(localRev: string | null): Promise<{ rev: string, data: AppDataComplete | undefined }>;
-
-  // importAppData(data: AppDataComplete, rev: string): Promise<unknown>;
 }
