@@ -86,7 +86,7 @@
     //border-color: $task-c-selected-border-dark;
   }
 
-  .inner-wrapper.isSelected.isSelected > & {
+  :host.isSelected.isSelected > .inner-wrapper > & {
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
     box-shadow: $task-selected-shadow;
@@ -102,7 +102,7 @@
       border-bottom-left-radius: $task-border-radius;
     }
 
-    @at-root .inner-wrapper.isSelected.isSelected .sub-tasks ::ng-deep .box {
+    @at-root :host.isSelected.isSelected .sub-tasks ::ng-deep .box {
       @include darkTheme {
         background: $sub-task-c-bg-dark-in-selected;
       }
@@ -389,10 +389,6 @@
 // TASK TITLE
 .task-title {
   @include taskTitle;
-
-  .inner-wrapper.isSelected > .first-line & {
-    //font-weight: bold;
-  }
 }
 
 
