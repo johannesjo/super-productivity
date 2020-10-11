@@ -5,7 +5,6 @@ import { GlobalConfigActionTypes, UpdateGlobalConfigSection } from './global-con
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './global-config.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { KeyboardConfig } from '../global-config.model';
 import { IPC } from '../../../../../electron/ipc-events.const';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
@@ -15,6 +14,7 @@ import { ElectronService } from '../../../core/electron/electron.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { ipcRenderer } from 'electron';
+import { KeyboardConfig } from '../keyboard-config.model';
 
 @Injectable()
 export class GlobalConfigEffects {
