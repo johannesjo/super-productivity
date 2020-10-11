@@ -16,9 +16,9 @@ import { initDebug } from './debug';
 import { IPC } from './ipc-events.const';
 import { initBackupAdapter } from './backup';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
-import { KeyboardConfig } from '../src/app/features/config/global-config.model';
 import lockscreen from './lockscreen';
 import { lazySetInterval } from './lazy-set-interval';
+import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -86,7 +86,7 @@ if (!IS_MAC) {
   // because of https://github.com/electron/electron/issues/14094
   const isLockObtained = appIN.requestSingleInstanceLock();
   if (!isLockObtained && !IS_DEV) {
-    quitAppNow();
+    quitApp();
   }
 }
 
@@ -170,6 +170,13 @@ appIN.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
 
+appIN.on('window-all-closed', (event) => {
+  console.log('Quit after all windows being closed');
+  // if (!IS_MAC) {
+  app.quit();
+  // }
+});
+
 // AUTO-UPDATER
 // ------------
 // appIN.on('ready', () => {
@@ -193,7 +200,7 @@ appIN.on('will-quit', () => {
 
 // FRONTEND EVENTS
 // ---------------
-ipcMain.on(IPC.SHUTDOWN_NOW, quitAppNow);
+ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
 
 ipcMain.on(IPC.EXEC, exec);
 
@@ -331,10 +338,6 @@ function showApp() {
 }
 
 function quitApp() {
-  quitAppNow();
-}
-
-function quitAppNow() {
   // tslint:disable-next-line
   appIN.isQuiting = true;
   appIN.quit();
@@ -375,5 +378,8 @@ function exec(ev, command) {
 // required for graceful closing
 // @see: https://github.com/electron/electron/issues/5708
 process.on('exit', () => {
-  app.quit();
+  setTimeout(() => {
+    console.log('Quit after process exit');
+    app.quit();
+  }, 100);
 });

@@ -27,8 +27,7 @@ export class WorkContextEffects {
         contextActions.setActiveWorkContext,
       ),
       tap(() => {
-        // this._bannerService.dismissIfExisting(BannerId.ForgotToFinishDay);
-        this._bannerService.dismissIfExisting(BannerId.JiraUnblock);
+        this._bannerService.dismiss(BannerId.JiraUnblock);
       }),
     ), {dispatch: false});
 

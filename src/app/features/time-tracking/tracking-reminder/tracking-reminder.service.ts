@@ -70,7 +70,7 @@ export class TrackingReminderService {
 
   init() {
     this.remindCounter$.subscribe((count) => {
-      this._triggerBanner(count, {});
+      this._triggerBanner(count);
     });
 
     this._hideTrigger$.subscribe((v) => {
@@ -82,7 +82,7 @@ export class TrackingReminderService {
     this._bannerService.dismiss(BannerId.StartTrackingReminder);
   }
 
-  private _triggerBanner(duration: number, cfg: any) {
+  private _triggerBanner(duration: number) {
     // don't update if this or other dialogs are open
     if (this._matDialog.openDialogs.length !== 0) {
       return;
