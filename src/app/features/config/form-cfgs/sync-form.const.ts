@@ -126,6 +126,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
+            description: '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName'
           },
         },
         {
