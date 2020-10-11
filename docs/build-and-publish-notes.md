@@ -5,4 +5,4 @@
 * Press Cmd+Shift+4
 * Press Space
 * Hold down Alt key and Click on window
-* Scan results for Test, Beta or Release appearing somewhere on the screen, because of their stupid scan bot
+* Scan results and remove all references to "demo," "trial," "beta," or "test" in your app description, app icon, screenshots, previews, release notes, and binary.
