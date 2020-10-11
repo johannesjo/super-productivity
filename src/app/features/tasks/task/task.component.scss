@@ -59,6 +59,7 @@
 
   :host.gu-mirror & {
     box-shadow: $whiteframe-shadow-8dp !important;
+    border-radius: $task-border-radius !important;
   }
 
   :host-context(.isDarkTheme).gu-mirror & {
