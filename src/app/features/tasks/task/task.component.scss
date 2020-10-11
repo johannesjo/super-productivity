@@ -102,10 +102,8 @@
       border-bottom-left-radius: $task-border-radius;
     }
 
-    @at-root :host.isSelected.isSelected .sub-tasks ::ng-deep .box {
-      @include darkTheme {
-        background: $sub-task-c-bg-dark-in-selected;
-      }
+    @at-root :host-context(.isDarkTheme).isSelected.isSelected.isSelected .sub-tasks ::ng-deep .box {
+      background: $sub-task-c-bg-dark-in-selected;
     }
   }
 
