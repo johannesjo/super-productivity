@@ -1,14 +1,5 @@
 import * as windowStateKeeper from 'electron-window-state';
-import {
-  App,
-  BrowserWindow,
-  dialog,
-  ipcMain,
-  Menu,
-  MenuItemConstructorOptions,
-  MessageBoxReturnValue,
-  shell
-} from 'electron';
+import { App, BrowserWindow, dialog, ipcMain, Menu, MenuItemConstructorOptions, MessageBoxReturnValue, shell } from 'electron';
 import { errorHandler } from './error-handler';
 import { join, normalize } from 'path';
 import { format } from 'url';
@@ -207,37 +198,36 @@ const appCloseHandler = (
     }
   });
 
-  app.on('window-all-closed', (event) => {
-      // NOTE: this might not work if we run a second instance of the app
-      console.log('close, isQuiting:', (app as any).isQuiting);
-      if (!(app as any).isQuiting) {
-        event.preventDefault();
-        if (ids.length > 0) {
-          console.log('Actions to wait for ', ids);
-          mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
-        } else {
-          getSettings(mainWin, (appCfg) => {
-            if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
-              dialog.showMessageBox(mainWin,
-                {
-                  type: 'question',
-                  buttons: ['Yes', 'No'],
-                  title: 'Confirm',
-                  message: 'Are you sure you want to quit?'
-                }).then((choice: MessageBoxReturnValue) => {
-                if (choice.response === 1) {
-                  return;
-                } else if (choice.response === 0) {
-                  _quitApp();
-                  return;
-                }
-              });
-            } else {
-              _quitApp();
-            }
-          });
-        }
+  mainWin.on('close', (event) => {
+    // NOTE: this might not work if we run a second instance of the app
+    console.log('close, isQuiting:', (app as any).isQuiting);
+    if (!(app as any).isQuiting) {
+      event.preventDefault();
+      if (ids.length > 0) {
+        console.log('Actions to wait for ', ids);
+        mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
+      } else {
+        getSettings(mainWin, (appCfg) => {
+          if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
+            dialog.showMessageBox(mainWin,
+              {
+                type: 'question',
+                buttons: ['Yes', 'No'],
+                title: 'Confirm',
+                message: 'Are you sure you want to quit?'
+              }).then((choice: MessageBoxReturnValue) => {
+              if (choice.response === 1) {
+                return;
+              } else if (choice.response === 0) {
+                _quitApp();
+                return;
+              }
+            });
+          } else {
+            _quitApp();
+          }
+        });
       }
     }
-  );
+  });
 };
