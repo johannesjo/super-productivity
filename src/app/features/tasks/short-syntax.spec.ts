@@ -184,6 +184,18 @@ describe('shortSyntax', () => {
         }
       });
     });
+
+    it('should not add tags for sub tasks', () => {
+      const t = {
+        ...TASK,
+        parentId: 'SOMEPARENT',
+        title: 'Fun title #blu #idontexist',
+        tagIds: []
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
   });
 
   describe('should work with all combined', () => {
