@@ -76,6 +76,11 @@
     border-width: 0;
   }
 
+  :host-context(.isDarkTheme).isDone & {
+    background: $dark0;
+    //border-color: $task-c-selected-border-dark;
+  }
+
   :host-context(.isDarkTheme).isSelected.isSelected & {
     background: $task-c-selected-bg-dark;
     //border-color: $task-c-selected-border-dark;
@@ -175,6 +180,11 @@
       background: $sub-task-c-bg-dark;
     }
   }
+}
+
+:host-context(.isDarkTheme) ::ng-deep .isDone.isDone .box {
+  background: $sub-task-c-bg-dark-done;
+  //border-color: $task-c-selected-border-dark;
 }
 
 

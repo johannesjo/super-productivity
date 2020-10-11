@@ -43,12 +43,12 @@ $task-text-c-dark: $dark-theme-text-color;
 // NOTE: light is just standard color
 
 $task-c-bg-light: #fff;
-$task-c-bg-dark: $dark-theme-card-bg;
 $task-c-bg-dark: $dark1;
-//$sub-task-c-bg-dark: $dark4;
-$sub-task-c-bg-dark: $dark2;
+$sub-task-c-bg-dark: $dark3;
+$sub-task-c-bg-dark-done: $dark2;
+
 $sub-task-c-bg-dark-in-selected: $dark6;
-$task-c-current-bg-dark: $dark4;
+$task-c-current-bg-dark: $dark6;
 
 $task-c-border-light: $light-theme-extra-border-color;
 $task-c-selected-border-light: $task-c-border-light;
