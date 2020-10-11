@@ -96,6 +96,12 @@
       border-top-left-radius: $task-border-radius;
       border-bottom-left-radius: $task-border-radius;
     }
+
+    @at-root .inner-wrapper.isSelected.isSelected .sub-tasks ::ng-deep .box {
+      @include darkTheme {
+        background: $sub-task-c-bg-dark-in-selected;
+      }
+    }
   }
 
   @include isHostFocus('.inner-wrapper') {
