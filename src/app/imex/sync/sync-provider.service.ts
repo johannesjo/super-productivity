@@ -205,7 +205,7 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
         this._log(cp, 'X Last Sync not up to date');
-        this._setLocalLastSync(cp, local.lastLocalSyncModelChange);
+        this._setLocalRevAndLastSync(cp, r.rev, local.lastLocalSyncModelChange);
         return;
       }
 
@@ -243,8 +243,7 @@ export class SyncProviderService {
     const localRev = this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(data, localRev, isForceOverwrite);
     if (typeof successRev === 'string') {
-      this._setLocalRev(cp, successRev);
-      this._setLocalLastSync(cp, data.lastLocalSyncModelChange);
+      this._setLocalRevAndLastSync(cp, successRev, data.lastLocalSyncModelChange);
       this._log(cp, '↑ Uploaded Data ↑ ✓');
     } else {
       this._log(cp, 'X Upload Request Error');
@@ -265,8 +264,7 @@ export class SyncProviderService {
     }
 
     await this._dataImportService.importCompleteSyncData(data);
-    this._setLocalRev(cp, rev);
-    this._setLocalLastSync(cp, data.lastLocalSyncModelChange);
+    this._setLocalRevAndLastSync(cp, rev, data.lastLocalSyncModelChange);
   }
 
   // LS HELPER
@@ -275,12 +273,15 @@ export class SyncProviderService {
     return localStorage.getItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id);
   }
 
-  private _setLocalRev(cp: SyncProviderServiceInterface, rev: string) {
+  private _setLocalRevAndLastSync(cp: SyncProviderServiceInterface, rev: string, localLastSync: number) {
     if (!rev) {
       throw new Error('No rev given');
     }
-
-    return localStorage.setItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id, rev);
+    if (typeof (localLastSync as any) !== 'number') {
+      throw new Error('No correct localLastSync given');
+    }
+    localStorage.setItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id, rev);
+    localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id, localLastSync.toString());
   }
 
   private _getLocalLastSync(cp: SyncProviderServiceInterface): number {
@@ -288,13 +289,6 @@ export class SyncProviderService {
     return isNaN(it)
       ? 0
       : it || 0;
-  }
-
-  private _setLocalLastSync(cp: SyncProviderServiceInterface, localLastSync: number) {
-    if (typeof (localLastSync as any) !== 'number') {
-      throw new Error('No correct localLastSync given');
-    }
-    return localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id, localLastSync.toString());
   }
 
   private _updateLocalLastSyncCheck(cp: SyncProviderServiceInterface) {
