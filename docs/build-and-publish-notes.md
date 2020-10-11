@@ -5,3 +5,4 @@
 * Press Cmd+Shift+4
 * Press Space
 * Hold down Alt key and Click on window
+* Scan results for Test, Beta or Release appearing somewhere on the screen, because of their stupid scan bot
