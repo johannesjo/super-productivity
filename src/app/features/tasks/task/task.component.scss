@@ -73,7 +73,7 @@
   :host-context(.isLightTheme).isSelected.isSelected & {
     background: $task-c-selected-bg-light;
     //border-color: $task-c-selected-border-light;
-    border-width: 0;
+    //border-width: 0;
   }
 
   :host-context(.isDarkTheme).isDone & {
