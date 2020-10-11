@@ -61,6 +61,10 @@
     box-shadow: $whiteframe-shadow-8dp !important;
   }
 
+  :host-context(.isDarkTheme).gu-mirror & {
+    background: $task-c-drag-drop-bg-dark !important;
+  }
+
   @include lightTheme {
     background: $task-c-bg-light;
   }
