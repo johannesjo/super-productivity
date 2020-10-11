@@ -13,4 +13,6 @@ export const PROGRESS_BAR_LABEL_MAP: { [key: string]: string } = {
 
   '/issues/': T.GPB.GITHUB_LOAD_ISSUE,
   '/issue/': T.GPB.JIRA_LOAD_ISSUE,
+
+  '/webdav/': T.GPB.WEB_DAV_UPLOAD,
 };

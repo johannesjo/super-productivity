@@ -9,6 +9,7 @@ import { DataInitService } from '../../../core/data-init/data-init.service';
 import { environment } from '../../../../environments/environment';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { GlobalProgressBarService } from '../../../core-ui/global-progress-bar/global-progress-bar.service';
 
 @Injectable({providedIn: 'root'})
 export class WebDavSyncService implements SyncProviderServiceInterface {
@@ -33,6 +34,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     private _webDavApiService: WebDavApiService,
     private _dataInitService: DataInitService,
     private _globalConfigService: GlobalConfigService,
+    private _globalProgressBarService: GlobalProgressBarService,
   ) {
   }
 
@@ -75,6 +77,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   }
 
   async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
+    this._globalProgressBarService.countUp('webdav');
     try {
       const r = await this._webDavApiService.upload({
         data,
@@ -82,9 +85,11 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         isForceOverwrite
       });
       console.log(r);
+      this._globalProgressBarService.countDown();
       return r.headers.etag;
     } catch (e) {
       console.error(e);
+      this._globalProgressBarService.countDown();
       return e;
     }
   }

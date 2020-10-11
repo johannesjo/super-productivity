@@ -997,7 +997,8 @@
     "GDRIVE_UPLOAD": "Google Drive: Upload file...",
     "GITHUB_LOAD_ISSUE": "Github: Load issue data...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
-    "UNKNOWN": "Loading remote data"
+    "UNKNOWN": "Loading remote data",
+    "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
