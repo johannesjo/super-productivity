@@ -124,10 +124,6 @@
   }
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
-    border-color: $task-c-current !important;
-    border-width: 1px !important;
-    border-style: dashed;
-
     border-radius: 12px !important;
     bottom: -2px;
     top: -2px;
@@ -138,6 +134,9 @@
 
   :host-context(.isLightTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
     box-shadow: $task-active-shadow-light;
+    border-color: $task-c-current !important;
+    border-width: 1px !important;
+    border-style: dashed;
   }
 
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
