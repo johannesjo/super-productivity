@@ -1,4 +1,4 @@
-import { App, ipcMain, Menu, Tray } from 'electron';
+import { App, ipcMain, Menu, Tray, nativeTheme } from 'electron';
 import { existsSync, readFileSync } from 'fs';
 // const dbus = require('./dbus');
 import { errorHandler } from './error-handler';
@@ -53,7 +53,9 @@ export const initIndicator = ({
     if (IS_MAC) {
       trayIcoFile = 'tray-icoTemplate.png';
     } else {
-      trayIcoFile = 'tray-ico.png';
+      trayIcoFile = nativeTheme.shouldUseDarkColors
+        ? 'tray-ico.png'
+        : 'tray-icoTemplate.png';
     }
 
     tray = new Tray(ICONS_FOLDER + trayIcoFile);
@@ -186,4 +188,3 @@ function createContextMenu(showApp, quitApp) {
 export const isRunning = () => {
   return isIndicatorRunning || isGnomeShellExtensionRunning;
 };
-
