@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
-import { TranslateService } from '@ngx-translate/core';
 import { AppDataComplete, SyncGetRevResult } from '../sync.model';
 
 import { Observable } from 'rxjs';
@@ -8,7 +7,6 @@ import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators
 import { WebDavApiService } from './web-dav-api.service';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { environment } from '../../../../environments/environment';
-import { T } from '../../../t.const';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 
@@ -35,7 +33,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     private _webDavApiService: WebDavApiService,
     private _dataInitService: DataInitService,
     private _globalConfigService: GlobalConfigService,
-    private _translateService: TranslateService,
   ) {
   }
 
@@ -81,7 +78,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
+  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
     try {
       const r = await this._webDavApiService.upload({
         data,
@@ -94,14 +91,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     } catch (e) {
       console.error(e);
       this.log('X Upload Request Error');
-      if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return this.uploadAppData(data, localRev, true);
-      }
+      return e;
     }
-    return null;
-  }
-
-  private _c(str: string): boolean {
-    return confirm(this._translateService.instant(str));
   }
 }

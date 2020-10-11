@@ -5,12 +5,9 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
 import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { AppDataComplete, SyncGetRevResult } from '../sync.model';
-
-import { T } from '../../../t.const';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { GoogleApiService } from './google-api.service';
 import { CompressionService } from '../../../core/compression/compression.service';
-import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root',
@@ -38,7 +35,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     private _googleApiService: GoogleApiService,
     private _dataInitService: DataInitService,
     private _compressionService: CompressionService,
-    private _translateService: TranslateService,
   ) {
   }
 
@@ -65,8 +61,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     return {rev: meta.md5Checksum as string, data};
   }
 
-  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
-    let r: unknown;
+  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
     try {
       const cfg = await this.cfg$.pipe(first()).toPromise();
       console.log(cfg, data);
@@ -74,26 +69,22 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       const uploadData = cfg.isCompressData
         ? await this._compressionService.compressUTF16(JSON.stringify(data))
         : JSON.stringify(data);
-      r = await this._googleApiService.saveFile$(uploadData, {
+      const r = await this._googleApiService.saveFile$(uploadData, {
         title: cfg.syncFileName,
         id: cfg._backupDocId,
         editable: true,
         mimeType: cfg.isCompressData ? 'text/plain' : 'application/json',
       }).toPromise();
-
+      if (!(r as any).md5Checksum) {
+        throw new Error('No md5Checksum');
+      }
+      this.log('↑ Uploaded Data ↑ ✓');
+      return (r as any).md5Checksum;
     } catch (e) {
       console.error(e);
       this.log('X Upload Request Error');
-      if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return this.uploadAppData(data, localRev, true);
-      }
+      return e;
     }
-
-    if (!(r as any).md5Checksum) {
-      throw new Error('No md5Checksum');
-    }
-    this.log('↑ Uploaded Data ↑ ✓');
-    return (r as any).md5Checksum;
   }
 
   log(...args: any | any[]) {
@@ -118,9 +109,5 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       }
     }
     return backupData || (backupStr as AppDataComplete);
-  }
-
-  private _c(str: string): boolean {
-    return confirm(this._translateService.instant(str));
   }
 }

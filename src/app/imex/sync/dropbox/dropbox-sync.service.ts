@@ -8,7 +8,6 @@ import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { environment } from '../../../../environments/environment';
 import { T } from '../../../t.const';
-import { TranslateService } from '@ngx-translate/core';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 
 @Injectable({providedIn: 'root'})
@@ -29,7 +28,6 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     private _dropboxApiService: DropboxApiService,
     private _dataInitService: DataInitService,
     private _snackService: SnackService,
-    private _translateService: TranslateService,
   ) {
   }
 
@@ -76,7 +74,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | null> {
+  async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
     try {
       const r = await this._dropboxApiService.upload({
         path: DROPBOX_SYNC_FILE_PATH,
@@ -91,15 +89,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     } catch (e) {
       console.error(e);
       this.log('DBX: X Upload Request Error');
-      if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return this.uploadAppData(data, localRev, true);
-      }
+      return e;
     }
-    return null;
   }
-
-  private _c(str: string): boolean {
-    return confirm(this._translateService.instant(str));
-  }
-
 }

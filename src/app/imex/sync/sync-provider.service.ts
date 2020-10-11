@@ -245,6 +245,10 @@ export class SyncProviderService {
     if (typeof successRev === 'string') {
       this._setLocalRev(cp, successRev);
       this._setLocalLastSync(cp, data.lastLocalSyncModelChange);
+    } else {
+      if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
+        return this._uploadAppData(cp, data, true);
+      }
     }
   }
 
