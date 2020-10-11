@@ -97,7 +97,7 @@ export class SyncProviderService {
       if (revRes === 'AUTH_ERROR') {
         return;
       } else if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        cp.log('↑ Update Remote after no getRevAndLastClientUpdate()');
+        this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
         local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
         return await this._uploadAppData(cp, local);
       } else {
@@ -111,11 +111,11 @@ export class SyncProviderService {
     const {rev, clientUpdate} = revRes as { rev: string; clientUpdate: number };
 
     if (rev && rev === localRev) {
-      cp.log('PRE1: ↔ Same Rev', rev);
+      this._log(cp, 'PRE1: ↔ Same Rev', rev);
       // NOTE: same rev, doesn't mean. that we can't have local changes
       local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
       if (lastSync === local.lastLocalSyncModelChange) {
-        cp.log('PRE1: No local changes to sync');
+        this._log(cp, 'PRE1: No local changes to sync');
         return;
       }
     }
@@ -127,7 +127,7 @@ export class SyncProviderService {
     local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
     if (local.lastLocalSyncModelChange === 0) {
       if (!(this._c(T.F.SYNC.C.EMPTY_SYNC))) {
-        cp.log('PRE2: Abort');
+        this._log(cp, 'PRE2: Abort');
         return;
       }
     }
@@ -145,7 +145,7 @@ export class SyncProviderService {
       && remoteClientUpdate === Math.floor(lastSync / 1000)
       && lastSync < local.lastLocalSyncModelChange
     ) {
-      cp.log('PRE3: ↑ Update Remote');
+      this._log(cp, 'PRE3: ↑ Update Remote');
       return await this._uploadAppData(cp, local);
     }
 
@@ -158,7 +158,7 @@ export class SyncProviderService {
     const remote = r.data;
     if (!remote || !remote.lastLocalSyncModelChange) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        cp.log('↑ PRE4: Update Remote');
+        this._log(cp, '↑ PRE4: Update Remote');
         return await this._uploadAppData(cp, local);
       }
       return;
@@ -174,22 +174,22 @@ export class SyncProviderService {
 
     switch (checkForUpdate(timestamps)) {
       case UpdateCheckResult.InSync: {
-        cp.log('↔ In Sync => No Update');
+        this._log(cp, '↔ In Sync => No Update');
         return;
       }
 
       case UpdateCheckResult.LocalUpdateRequired: {
-        cp.log('↓ Update Local');
+        this._log(cp, '↓ Update Local');
         return await this._importAppData(cp, remote, r.rev as string);
       }
 
       case UpdateCheckResult.RemoteUpdateRequired: {
-        cp.log('↑ Update Remote');
+        this._log(cp, '↑ Update Remote');
         return await this._uploadAppData(cp, local);
       }
 
       case UpdateCheckResult.RemoteNotUpToDateDespiteSync: {
-        cp.log('X Remote not up to date despite sync');
+        this._log(cp, 'X Remote not up to date despite sync');
         if (this._c(T.F.SYNC.C.TRY_LOAD_REMOTE_AGAIN)) {
           return this.sync();
         } else {
@@ -198,20 +198,20 @@ export class SyncProviderService {
       }
 
       case UpdateCheckResult.DataDiverged: {
-        cp.log('^--------^-------^');
-        cp.log('⇎ X Diverged Data');
+        this._log(cp, '^--------^-------^');
+        this._log(cp, '⇎ X Diverged Data');
         return this._handleConflict(cp, {remote, local, lastSync, rev: r.rev});
       }
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
-        cp.log('X Last Sync not up to date');
+        this._log(cp, 'X Last Sync not up to date');
         this._setLocalLastSync(cp, local.lastLocalSyncModelChange);
         return;
       }
 
       case UpdateCheckResult.ErrorInvalidTimeValues:
       case UpdateCheckResult.ErrorLastSyncNewerThanLocal: {
-        cp.log('XXX Wrong Data');
+        this._log(cp, 'XXX Wrong Data');
         if (local.lastLocalSyncModelChange > remote.lastLocalSyncModelChange) {
           if (this._c(T.F.SYNC.C.FORCE_UPLOAD)) {
             return await this._uploadAppData(cp, local, true);
@@ -245,7 +245,9 @@ export class SyncProviderService {
     if (typeof successRev === 'string') {
       this._setLocalRev(cp, successRev);
       this._setLocalLastSync(cp, data.lastLocalSyncModelChange);
+      this._log(cp, '↑ Uploaded Data ↑ ✓');
     } else {
+      this._log(cp, 'X Upload Request Error');
       if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
         return this._uploadAppData(cp, data, true);
       }
@@ -314,11 +316,11 @@ export class SyncProviderService {
     }).toPromise();
 
     if (dr === 'USE_LOCAL') {
-      cp.log('Dialog => ↑ Remote Update');
+      this._log(cp, 'Dialog => ↑ Remote Update');
       const localRev = this._getLocalRev(cp);
       return await cp.uploadAppData(local, localRev, true);
     } else if (dr === 'USE_REMOTE') {
-      cp.log('Dialog => ↓ Update Local');
+      this._log(cp, 'Dialog => ↓ Update Local');
       return await this._importAppData(cp, remote, rev);
     }
     return;
@@ -342,4 +344,9 @@ export class SyncProviderService {
   private _c(str: string): boolean {
     return confirm(this._translateService.instant(str));
   }
+
+  private _log(cp: SyncProviderServiceInterface, ...args: any | any[]) {
+    return console.log(cp.id, ...args);
+  }
+
 }

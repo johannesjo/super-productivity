@@ -65,7 +65,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     try {
       const cfg = await this.cfg$.pipe(first()).toPromise();
       console.log(cfg, data);
-
       const uploadData = cfg.isCompressData
         ? await this._compressionService.compressUTF16(JSON.stringify(data))
         : JSON.stringify(data);
@@ -78,17 +77,11 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       if (!(r as any).md5Checksum) {
         throw new Error('No md5Checksum');
       }
-      this.log('↑ Uploaded Data ↑ ✓');
       return (r as any).md5Checksum;
     } catch (e) {
       console.error(e);
-      this.log('X Upload Request Error');
       return e;
     }
-  }
-
-  log(...args: any | any[]) {
-    return console.log('GD:', ...args);
   }
 
   private async _decodeAppDataIfNeeded(backupStr: string | AppDataComplete): Promise<AppDataComplete> {

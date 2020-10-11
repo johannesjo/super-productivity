@@ -31,10 +31,6 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   ) {
   }
 
-  log(...args: any | any[]) {
-    return console.log('DBX:', ...args);
-  }
-
   // TODO refactor in a way that it doesn't need to trigger uploadAppData itself
   // NOTE: this does not include milliseconds, which could lead to uncool edge cases... :(
   async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
@@ -83,12 +79,9 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
         localRev,
         isForceOverwrite
       });
-
-      this.log('DBX: ↑ Uploaded Data ↑ ✓');
       return r.rev;
     } catch (e) {
       console.error(e);
-      this.log('DBX: X Upload Request Error');
       return e;
     }
   }

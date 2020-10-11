@@ -16,8 +16,6 @@ export interface SyncProviderServiceInterface {
   isReady$: Observable<boolean>;
   isReadyForRequests$: Observable<boolean>;
 
-  log(...args: any | any[]): void;
-
   getRevAndLastClientUpdate(localRev: string | null): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
 
   uploadAppData(data: AppDataComplete, localRev: string | null, isForceOverwrite?: boolean): Promise<string | Error>;

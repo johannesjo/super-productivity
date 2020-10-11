@@ -36,10 +36,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   ) {
   }
 
-  log(...args: any | any[]) {
-    return console.log('WebDAV:', ...args);
-  }
-
   async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
     const cfg = await this._cfg$.pipe(first()).toPromise();
 
@@ -86,11 +82,9 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
         isForceOverwrite
       });
       console.log(r);
-      this.log('↑ Uploaded Data ↑ ✓');
       return r.headers.etag;
     } catch (e) {
       console.error(e);
-      this.log('X Upload Request Error');
       return e;
     }
   }
