@@ -89,10 +89,10 @@
   :host.isSelected.isSelected > .inner-wrapper > & {
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
-    box-shadow: $task-selected-shadow;
-    //@include darkTheme {
-    //  box-shadow: $whiteframe-shadow-1dp;
-    //}
+    box-shadow: $task-selected-shadow-light;
+    @include darkTheme {
+      box-shadow: $task-selected-shadow-dark;
+    }
 
     @include mq(xs) {
       transform-origin: left;
