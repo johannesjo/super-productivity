@@ -527,8 +527,8 @@
         "LOCAL": "local",
         "LOCAL_REMOTE": "local -> remote",
         "REMOTE": "remote",
-        "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
-        "TITLE": "Dropbox: Conflicting Data",
+        "TEXT": "<p>Update from remote. Both local and remote data seem to be modified.</p>",
+        "TITLE": "Sync: Conflicting Data",
         "USE_LOCAL": "Use local",
         "USE_REMOTE": "Use remote"
       },
