@@ -565,8 +565,8 @@
   pointer-events: none;
   color: $c-contrast;
   position: absolute;
-  top: 0;
-  bottom: 0;
+  bottom: 2px;
+  top: 1px;
   width: 0;
   z-index: $z-swipe-block;
   transition: $transition-standard;
