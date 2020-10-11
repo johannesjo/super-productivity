@@ -548,7 +548,7 @@
         "L_SYNC_PROVIDER": "Sync Provider",
         "TITLE": "Sync",
         "WEB_DAV": {
-          "CORS_INFO": "<strong>Experimental!!</strong> In order to make this work you need to disable or limit CORS for your Nextcloud instance, which can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread</a> for more information. Use at your own risk!",
+          "CORS_INFO": "<strong>Experimental!!</strong> In order to make this work for mobile or the browser you need to disable or limit CORS for your Nextcloud instance, which can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread</a> for more information. Use at your own risk!",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Password",
           "L_SYNC_FILE_PATH": "Sync File Path",
