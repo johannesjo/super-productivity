@@ -57,6 +57,14 @@
   transition-property: transform, box-shadow;
   border: 1px solid transparent;
 
+  @include lightTheme {
+    background: $task-c-bg-light;
+  }
+
+  @include darkTheme {
+    background: $task-c-bg-dark;
+  }
+
   :host.gu-mirror & {
     box-shadow: $whiteframe-shadow-8dp !important;
     border-radius: $task-border-radius !important;
@@ -66,29 +74,18 @@
     background: $task-c-drag-drop-bg-dark !important;
   }
 
-  @include lightTheme {
-    background: $task-c-bg-light;
-  }
-
-  @include darkTheme {
-    background: $task-c-bg-dark;
-  }
 
   // NOTE: also applies to child tasks
   :host-context(.isLightTheme).isSelected.isSelected & {
     background: $task-c-selected-bg-light;
-    //border-color: $task-c-selected-border-light;
-    //border-width: 0;
   }
 
   :host-context(.isDarkTheme).isDone & {
     background: $dark0;
-    //border-color: $task-c-selected-border-dark;
   }
 
   :host-context(.isDarkTheme).isSelected.isSelected & {
     background: $task-c-selected-bg-dark;
-    //border-color: $task-c-selected-border-dark;
   }
 
   :host.isSelected.isSelected > .inner-wrapper > & {
@@ -127,13 +124,14 @@
     border-radius: 12px !important;
     bottom: -1px;
     top: -1px;
+    box-shadow: $task-active-shadow-light;
+
     @include mq(xs) {
       transform: scale($task-current-task-zoom);
     }
   }
 
   :host-context(.isLightTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
-    box-shadow: $task-active-shadow-light;
     border-color: $task-c-current !important;
     border-width: 1px !important;
     border-style: dashed;
