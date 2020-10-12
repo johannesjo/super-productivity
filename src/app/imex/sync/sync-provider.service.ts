@@ -311,8 +311,7 @@ export class SyncProviderService {
 
     if (dr === 'USE_LOCAL') {
       this._log(cp, 'Dialog => ↑ Remote Update');
-      const localRev = this._getLocalRev(cp);
-      return await cp.uploadAppData(local, localRev, true);
+      return await this._uploadAppData(cp, local, true);
     } else if (dr === 'USE_REMOTE') {
       this._log(cp, 'Dialog => ↓ Update Local');
       return await this._importAppData(cp, remote, rev);
