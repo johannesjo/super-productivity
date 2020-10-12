@@ -26,8 +26,9 @@ module.exports = () => {
   };
 
   const parsed = parse(tr);
-  console.log(parsed);
-  const string = `export const T = ${JSON.stringify(parsed, null, 2)};
+  const string = `const T = ${JSON.stringify(parsed, null, 2)
+    .replace(/"(\w+)":/g, '$1:')};
+export { T };
 `.replace(/"/g, '\'');
 
 
