@@ -1,5 +1,4 @@
 import {NBrowser} from '../n-browser-interface';
-import {Key} from 'protractor';
 
 const SIDE_INNER = '.additional-info-panel';
 
@@ -11,7 +10,7 @@ module.exports = {
       .pause(50)
       .moveToElement(taskSel, 100, 15)
       .click(taskSel)
-      .sendKeys(taskSel, Key.ARROW_RIGHT)
+      .sendKeys(taskSel, this.Keys.ARROW_RIGHT)
       .waitForElementVisible(SIDE_INNER)
       .pause(50)
       ;

@@ -35,7 +35,7 @@ export interface TaskRepeatCfgState extends EntityState<TaskRepeatCfg> {
   [MODEL_VERSION_KEY]?: number;
 }
 
-export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'>= {
+export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   lastTaskCreation: Date.now(),
   title: null,
   defaultEstimate: undefined,

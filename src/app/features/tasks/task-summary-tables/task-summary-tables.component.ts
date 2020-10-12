@@ -32,7 +32,7 @@ export class TaskSummaryTablesComponent {
     this.flatTasks = v;
     const pids = unique(v.map(t => t.projectId).filter(pid => typeof pid === 'string')) as string[];
     this.projectIds$.next(pids);
-  };
+  }
 
   flatTasks: Task[] = [];
 

@@ -6,18 +6,16 @@
   -ms-overflow-style: -ms-autohiding-scrollbar;
 
   :host-context(.isNoMac) & {
-    @supports (overflow:overlay) {
-      @include mq(xs) {
-        overflow: hidden;
+    @include mq(xs) {
+      overflow: hidden;
 
-        &:hover {
-          overflow: auto;
-          overflow: overlay;
-        }
+      &:hover {
+        overflow: auto;
+        overflow: overlay;
+      }
 
-        @-moz-document url-prefix() {
-          overflow: auto;
-        }
+      @-moz-document url-prefix() {
+        overflow: auto;
       }
     }
   }
@@ -34,24 +32,8 @@
   :host-context(.isNoMac) & {
     overflow-y: overlay;
 
-    @supports (overflow: overlay) {
-      @include mq(xs) {
-        overflow-y: overlay;
-      }
-    }
-
-    @supports not (overflow: overlay) {
-      @include mq(xs) {
-        overflow-y: hidden;
-
-        &:hover {
-          overflow-y: scroll;
-        }
-
-        @-moz-document url-prefix() {
-          overflow-y: auto;
-        }
-      }
+    @include mq(xs) {
+      overflow-y: overlay;
     }
   }
 
@@ -69,17 +51,15 @@
   touch-action: pan-y;
 
   :host-context(.isNoMac) & {
-    @supports (overflow:overlay) {
-      @include mq(xs) {
-        overflow-y: hidden !important;
-        &:hover {
-          overflow-y: scroll !important;
-          overflow-y: overlay !important;
-        }
+    @include mq(xs) {
+      overflow-y: hidden !important;
+      &:hover {
+        overflow-y: scroll !important;
+        overflow-y: overlay !important;
+      }
 
-        @-moz-document url-prefix() {
-          overflow-y: auto;
-        }
+      @-moz-document url-prefix() {
+        overflow-y: auto;
       }
     }
   }
@@ -95,14 +75,12 @@
   overflow-x: scroll;
 
   :host-context(.isNoMac) & {
-    @supports (overflow:overlay) {
-      @include mq(xs) {
-        overflow-x: hidden;
+    @include mq(xs) {
+      overflow-x: hidden;
 
-        &:hover {
-          overflow-x: scroll;
-          overflow-x: overlay;
-        }
+      &:hover {
+        overflow-x: scroll;
+        overflow-x: overlay;
       }
     }
   }

@@ -19,7 +19,7 @@ describe('filterDoneTasks()', () => {
   });
 
   it('should filter all but current', () => {
-    const r = filterDoneTasks([{id: 'CURRENT'}, {id: '1',}, {id: '2'}, {id: '3'}] as any, 'CURRENT', false, true);
+    const r = filterDoneTasks([{id: 'CURRENT'}, {id: '1'}, {id: '2'}, {id: '3'}] as any, 'CURRENT', false, true);
     expect(r).toEqual([{id: 'CURRENT'}]);
   });
 

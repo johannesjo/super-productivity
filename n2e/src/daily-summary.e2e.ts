@@ -1,4 +1,3 @@
-import {Key} from 'protractor';
 import {BASE} from '../e2e.const';
 import {NBrowser} from '../n-browser-interface';
 
@@ -22,6 +21,6 @@ module.exports = {
     .waitForElementVisible(ADD_TASK_GLOBAL_SEL)
 
     .setValue(ADD_TASK_GLOBAL_SEL, 'test task hohoho')
-    .setValue(ADD_TASK_GLOBAL_SEL, Key.ENTER)
+    .setValue(ADD_TASK_GLOBAL_SEL, browser.Keys.ENTER)
     .end(),
 };
