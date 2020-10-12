@@ -125,8 +125,8 @@
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
     border-radius: 12px !important;
-    bottom: -2px;
-    top: -2px;
+    bottom: -1px;
+    top: -1px;
     @include mq(xs) {
       transform: scale($task-current-task-zoom);
     }
