@@ -120,7 +120,6 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
       @include darkTheme() {
         border-radius: $card-border-radius;
         background: $dark-theme-bg-lighter;
-        border: 1px solid $dark-theme-extra-border-color;
       }
     }
 
