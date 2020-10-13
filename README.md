@@ -38,19 +38,19 @@
 <br>
 <br>
 
-<a href="https://snapcraft.io/superproductivity">
+<a href="https://snapcraft.io/superproductivity"        target="_blank">
   <img alt="Get it from the Snap Store"
        src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg"
        align="center"
        height="50">
 </a>
-<a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'>
+<a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge' target="_blank">
   <img src='https://assets.windowsphone.com/85864462-9c82-451e-9355-a3d5f874397a/English_get-it-from-MS_InvariantCulture_Default.png'
        align="center"
        alt='English badge'
        height="50" />
 </a>
-<a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12'>
+<a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12' target="_blank">
   <img src='./screens/app-store-badge.svg'
        align="center"
        alt='App Store Badge'
@@ -111,6 +111,11 @@ Install via [homebrew cask](https://github.com/caskroom/homebrew-cask):
 ```
 brew cask install superproductivity
 ```
+<a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12' target="_blank">
+  <img src='./screens/app-store-badge.svg'
+       alt='App Store Badge'
+       height="50" />
+</a>
 
 ### Android
 There is a [very early(!) Android version available](https://play.google.com/store/apps/details?id=com.superproductivity.superproductivity&hl=gsw). The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
