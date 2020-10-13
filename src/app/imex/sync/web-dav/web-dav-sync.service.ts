@@ -10,6 +10,7 @@ import { environment } from '../../../../environments/environment';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GlobalProgressBarService } from '../../../core-ui/global-progress-bar/global-progress-bar.service';
+import { T } from '../../../t.const';
 
 @Injectable({providedIn: 'root'})
 export class WebDavSyncService implements SyncProviderServiceInterface {
@@ -63,21 +64,27 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   }
 
   async downloadAppData(localRev: string): Promise<{ rev: string, data: AppDataComplete }> {
+    this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
-    const r = await this._webDavApiService.download({
-      path: cfg.syncFilePath as string,
-      localRev,
-    });
-    const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
-
-    return {
-      rev: meta.etag,
-      data: r,
-    };
+    try {
+      const r = await this._webDavApiService.download({
+        path: cfg.syncFilePath as string,
+        localRev,
+      });
+      const meta = await this._webDavApiService.getMetaData('/' + cfg.syncFilePath);
+      this._globalProgressBarService.countDown();
+      return {
+        rev: meta.etag,
+        data: r,
+      };
+    } catch (e) {
+      this._globalProgressBarService.countDown();
+      return e;
+    }
   }
 
   async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
-    this._globalProgressBarService.countUp('webdav');
+    this._globalProgressBarService.countUp(T.GPB.WEB_DAV_UPLOAD);
     try {
       const r = await this._webDavApiService.upload({
         data,
