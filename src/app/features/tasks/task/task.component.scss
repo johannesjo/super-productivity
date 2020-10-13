@@ -184,7 +184,6 @@
 
 :host-context(.isDarkTheme) ::ng-deep .isDone.isDone .box {
   background: $sub-task-c-bg-dark-done;
-  //border-color: $task-c-selected-border-dark;
 }
 
 
@@ -294,6 +293,7 @@
   bottom: 0;
   z-index: $z-hover-controls;
   display: none;
+  border-radius: $card-border-radius;
 
   :host-context([dir=rtl]) & {
     position: absolute;
@@ -323,23 +323,21 @@
       background: $task-c-bg-dark;
     }
 
-    //:host-context(.isLightTheme).isSelected > .inner-wrapper > & {
-    //  background: $task-c-selected-bg-light;
-    //}
-    //
-    //:host-context(.isDarkTheme).isSelected > .inner-wrapper > & {
-    //  background: $task-c-selected-bg-dark;
-    //}
-    // NOTE: also applies to child tasks
     :host-context(.isLightTheme).isSelected & {
       background: $task-c-selected-bg-light;
     }
 
-    :host-context(.isDarkTheme).isCurrent &,
     :host-context(.isDarkTheme).isSelected & {
       background: $task-c-selected-bg-dark;
     }
 
+    :host-context(.isDarkTheme).isCurrent & {
+      background: $task-c-current-bg-dark;
+    }
+
+    .sub-tasks.sub-tasks.sub-tasks ::ng-deep & {
+      background: $sub-task-c-bg-dark;
+    }
   }
 
   // extra hitarea
@@ -357,18 +355,20 @@
     }
   }
 
-  &:before {
-    content: '';
-    border-left: 1px solid;
-    width: 1px;
-    height: 90%;
-    position: absolute;
-    left: 0;
-    top: 5%;
-    opacity: 0.5;
+  @include lightTheme() {
+    &:before {
+      content: '';
+      border-left: 1px solid;
+      width: 1px;
+      height: 90%;
+      position: absolute;
+      left: 0;
+      top: 5%;
+      opacity: 0.5;
 
-    :host-context([dir=rtl]) & {
-      right: 0;
+      :host-context([dir=rtl]) & {
+        right: 0;
+      }
     }
   }
 }
