@@ -155,17 +155,17 @@
 }
 
 .sub-tasks {
-  margin: $s 0 $s $s*3;
+  margin: $s $s $s $s*3;
   position: relative;
 
   @include smallMainContainer {
-    margin: $s 0 $s $s*3;
+    margin: $s $s $s $s*3;
     position: relative;
   }
 
   @include mq(xs) {
     //margin: $s $s*2 $s $s*3;
-    margin: $s 0 $s $s*5;
+    margin: $s $s $s $s*5;
   }
 
   ::ng-deep .box {
