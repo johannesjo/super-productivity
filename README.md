@@ -56,6 +56,12 @@
        alt='App Store Badge'
        height="50" />
 </a>
+<a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
+  <img src='./screens/google-play-badge.png'
+       align="center"
+       alt='App Store Badge'
+       height="50" />
+</a>
 
 
 
@@ -119,6 +125,14 @@ brew cask install superproductivity
 
 ### Android
 There is a [very early(!) Android version available](https://play.google.com/store/apps/details?id=com.superproductivity.superproductivity&hl=gsw). The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
+
+<a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
+  <img src='./screens/google-play-badge.png'
+       align="center"
+       alt='App Store Badge'
+       height="50" />
+</a>
+
 
 ## :hearts: Contributing
 Please check out the [CONTRIBUTING.md](CONTRIBUTING.md)
