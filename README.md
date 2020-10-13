@@ -59,7 +59,7 @@
 <a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
   <img src='./screens/google-play-badge.png'
        align="center"
-       alt='App Store Badge'
+       alt='Play Store Badge'
        height="50" />
 </a>
 
