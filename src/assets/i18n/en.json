@@ -514,7 +514,7 @@
     },
     "SYNC": {
       "C": {
-        "EMPTY_SYNC": "You're trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?",
+        "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
         "FORCE_IMPORT": "Import remote data anyway?",
         "FORCE_UPLOAD": "Upload local data anyway?",
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
