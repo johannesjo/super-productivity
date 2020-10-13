@@ -22,6 +22,7 @@ import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
+import { truncate } from '../../util/truncate';
 
 // TODO naming
 @Injectable({
@@ -94,20 +95,22 @@ export class SyncProviderService {
     // --------------------------------------------
     const revRes = await cp.getRevAndLastClientUpdate(localRev);
     if (typeof revRes === 'string') {
-      if (revRes === 'AUTH_ERROR') {
-        return;
-      } else if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
+      if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
         local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
         return await this._uploadAppData(cp, local);
-      } else {
-        this._snackService.open({
-          msg: T.F.SYNC.S.UNKNOWN_ERROR,
-          type: 'ERROR'
-        });
-        return;
       }
+      return;
+    } else if (revRes instanceof Error) {
+      this._snackService.open({
+        msg: T.F.SYNC.S.UNKNOWN_ERROR,
+        translateParams: {
+          err: truncate(revRes.toString()),
+        },
+        type: 'ERROR'
+      });
     }
+
     const {rev, clientUpdate} = revRes as { rev: string; clientUpdate: number };
 
     if (rev && rev === localRev) {

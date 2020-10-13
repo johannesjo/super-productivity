@@ -55,7 +55,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       }
       console.error(e);
       if (environment.production) {
-        return 'UNKNOWN_ERROR';
+        return e;
       } else {
         throw new Error('WebDAV: Unknown error');
       }

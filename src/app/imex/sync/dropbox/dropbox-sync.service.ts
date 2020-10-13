@@ -47,11 +47,11 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
         return 'NO_REMOTE_DATA';
       } else if (isAxiosError && e.response.status === 401) {
         this._snackService.open({msg: T.F.DROPBOX.S.AUTH_ERROR, type: 'ERROR'});
-        return 'AUTH_ERROR';
+        return 'HANDLED_ERROR';
       } else {
         console.error(e);
         if (environment.production) {
-          return 'UNKNOWN_ERROR';
+          return e;
         } else {
           throw new Error('DBX: Unknown error');
         }

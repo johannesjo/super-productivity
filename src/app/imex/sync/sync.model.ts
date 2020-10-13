@@ -89,4 +89,4 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
 
 export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;
 
-export type SyncGetRevResult = 'NO_REMOTE_DATA' | 'UNKNOWN_ERROR' | 'AUTH_ERROR';
+export type SyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;
