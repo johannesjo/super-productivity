@@ -50,6 +50,12 @@
        alt='English badge'
        height="50" />
 </a>
+<a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12'>
+  <img src='./screens/app-store-badge.svg'
+       align="center"
+       alt='App Store Badge'
+       height="50" />
+</a>
 
 
 
