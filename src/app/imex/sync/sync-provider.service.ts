@@ -100,6 +100,7 @@ export class SyncProviderService {
         local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
         return await this._uploadAppData(cp, local);
       }
+      // NOTE: includes HANDLED_ERROR
       return;
     } else if (revRes instanceof Error) {
       this._snackService.open({
