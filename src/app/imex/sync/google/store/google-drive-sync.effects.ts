@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable, of } from 'rxjs';
-import { concatMap, filter, map, switchMap, tap } from 'rxjs/operators';
+import { EMPTY, Observable, of, throwError } from 'rxjs';
+import { catchError, concatMap, filter, map, switchMap, tap } from 'rxjs/operators';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import {
   GlobalConfigActionTypes,
@@ -14,6 +14,7 @@ import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-con
 import { MatDialog } from '@angular/material/dialog';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
 import { SyncProvider } from '../../sync-provider.model';
+import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -80,6 +81,14 @@ export class GoogleDriveSyncEffects {
             return EMPTY;
           }),
           map((v) => v as any),
+          catchError((err: any) => {
+            this._snackService.open({
+              type: 'ERROR',
+              msg: T.F.GOOGLE.S.SYNC_FILE_CREATION_ERROR,
+              translateParams: {err: this._getApiErrorString(err)},
+            });
+            return throwError({[HANDLED_ERROR_PROP_STR]: 'GD File creation: ' + this._getApiErrorString(err)});
+          })
         );
       } else {
         return EMPTY;
@@ -136,5 +145,15 @@ export class GoogleDriveSyncEffects {
         translateParams: {fileName},
       }
     }).afterClosed();
+  }
+
+  private _getApiErrorString(err: any): string {
+    if (err && err.details) {
+      return err.details;
+    }
+    if (err && err[HANDLED_ERROR_PROP_STR]?.details) {
+      return err[HANDLED_ERROR_PROP_STR].details;
+    }
+    return err.toString();
   }
 }

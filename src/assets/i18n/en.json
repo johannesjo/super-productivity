@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error while creating sync file. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
       },
       "S_API": {
