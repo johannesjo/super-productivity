@@ -10,7 +10,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { UiModule } from '../../ui/ui.module';
 import { KeyboardInputComponent } from './keyboard-input/keyboard-input.component';
-import { GoogleSyncCfgComponent } from '../google/google-sync-cfg/google-sync-cfg.component';
 import { FileImexModule } from '../../imex/file-imex/file-imex.module';
 import { IconInputComponent } from './icon-input/icon-input.component';
 import { SelectProjectComponent } from './select-project/select-project.component';
@@ -51,7 +50,6 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
     FileImexModule,
   ],
   declarations: [
-    GoogleSyncCfgComponent,
     ConfigSectionComponent,
     ConfigFormComponent,
     KeyboardInputComponent,

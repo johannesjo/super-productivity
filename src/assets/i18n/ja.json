@@ -16,6 +16,12 @@
   "BL": {
     "NO_TASKS": "現在、バックログにタスクはありません"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "データが破損しているようです。自動的に修正してみませんか？これにより、部分的なデータ損失が発生する可能性があります。",
+    "DELETE_STRAY_BACKUP": "このダイアログが表示されないように、背面を削除しますか？",
+    "RESTORE_FILE_BACKUP": "データがないようですが、「{{dir}}」で利用可能なバックアップがあります。 {{from}}から最新のバックアップを復元しますか？",
+    "RESTORE_STRAY_BACKUP": "最後の同期中に、エラーが発生した可能性があります。最後のバックアップを復元しますか？"
+  },
   "DATETIME_INPUT": {
     "IN": " {{time}}に",
     "TOMORROW": "明日 {{time}}"
@@ -77,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "空のデータオブジェクトを同期しようとしています。これは（ほぼ）未使用のアプリの最初の同期ですか？",
-        "FORCE_IMPORT": "とにかくリモートデータをインポートしますか？",
-        "FORCE_UPLOAD": "とにかくローカルデータをアップロードしますか？",
-        "FORCE_UPLOAD_AFTER_ERROR": "ローカルデータのアップロード中にエラーが発生しました。強制的に更新しますか？",
-        "TRY_LOAD_REMOTE_AGAIN": "リモートからもう一度データを再ロードしてみますか？"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "最終変更：",
-        "LAST_SYNC": "最終同期：",
-        "LOCAL": "地元",
-        "LOCAL_REMOTE": "ローカル->リモート",
-        "REMOTE": "遠い",
-        "TEXT": "<p>Dropboxから更新します。ローカルデータとリモートデータの両方が変更されているようです。</p>",
-        "TITLE": "Dropbox：矛盾するデータ",
-        "USE_LOCAL": "ローカルを使用",
-        "USE_REMOTE": "リモコンを使用"
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "トークンを生成",
-        "FOLLOW_LINK": "次のリンクを開き、そこに提供されている認証コードを入力フィールドにコピーしてください。",
-        "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）",
-        "L_AUTH_CODE": "認証コード",
-        "L_ENABLE_SYNCING": "Dropboxの同期を有効にする",
-        "L_SYNC_INTERVAL": "同期間隔",
-        "TITLE": "Dropbox経由の同期（推奨）"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox：認証コードからアクセストークンを生成できません",
         "ACCESS_TOKEN_GENERATED": "Dropbox：認証コードから生成されたアクセストークン",
@@ -205,51 +184,9 @@
         "CREATE_SYNC_FILE": "Googleドライブ： <strong>\"{{fileName}}\"</strong> という名前のファイルが見つかりませんでした。 <strong>Googleドライブに同期ファイルとして</strong> を作成しますか？",
         "USE_EXISTING_SYNC_FILE": "Googleドライブ：同期ファイルとして <strong>既存の</strong> ファイル <strong>\"{{fileName}}\"</strong> を使用しますか？そうでない場合は、同期ファイル名を変更してください。"
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "最後の修正：",
-        "LAST_SYNC": "最後の同期",
-        "LOCAL": "地元",
-        "LOCAL_REMOTE": "ローカル <=> リモート",
-        "OVERWRITE_LOCAL": "ローカルデータを上書きする",
-        "OVERWRITE_REMOTE": "リモートデータを上書きする",
-        "REMOTE": "遠い",
-        "TEXT": "<p>Googleドライブバックアップからの更新。ローカルデータとリモートデータの両方が変更されているようです。未保存のローカル変更を上書きしますか？ <strong>すべてのデータは永久に失われます</strong>。</p>",
-        "TITLE": "GDriveアップデートでローカルデータを上書きしますか？"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "最後の修正：",
-        "LAST_SYNC": "最後の同期",
-        "LOCAL": "地元",
-        "LOCAL_REMOTE": "ローカル <=> リモート",
-        "OVERWRITE_LOCAL": "ローカルデータを上書きする",
-        "OVERWRITE_REMOTE": "リモートデータを上書きする",
-        "REMOTE": "遠い",
-        "TEXT": "  <p>Googleドライブにいくつかの変更があるようですが、ローカルにはありません。上書きしますか？</p>",
-        "TITLE": "Googleドライブに保存されていないデータを上書きしますか？"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Googleドライブ：リモートアップデートがあります。ダウンロードしています...",
-        "ERROR": "Googleドライブ - エラー：",
-        "ERROR_INITIAL_IMPORT": "Googleドライブ：最初にデータをインポートしようとしたときにエラーが発生しました",
-        "LOCAL_UP_TO_DATE": "Googleドライブ：ローカルデータは既に最新の状態になっています",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\"という名前のファイルが複数見つかりました。 1つを除いてすべて削除するか、別の名前を選択してください。",
-        "NO_UPDATE_REQUIRED": "Googleドライブ：アップデート不要",
-        "REMOTE_UP_TO_DATE": "Googleドライブ：リモートデータは既に最新の状態になっています",
-        "SUCCESS": "Googleドライブ：バックアップを保存しました",
-        "SYNCING": "Googleドライブ：同期"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "アプリ起動時の自動ログイン",
-        "AUTO_SYNC": "リモートへのデータの自動同期",
-        "BACKUP_NOW": "今すぐバックアップ",
-        "COMPRESS": "データを圧縮する",
-        "ENABLE": "Googleドライブを介した同期を有効にする",
-        "LOAD_FROM": "GDriveからロード",
-        "LOAD_ON_STARTUP": "起動時にリモートデータを読み込む",
-        "NOTIFY": "同期時に通知する",
-        "SYNC_FILE_NAME": "同期ファイル名",
-        "SYNC_INTERVAL": "同期間隔",
-        "UPDATE_SYNC_FILE": "同期ファイルを更新する"
+        "UPDATED_SYNC_FILE_NAME": "Googleドライブ：同期ファイル名を更新"
       },
       "S_API": {
         "ERR": "GoogleApiエラー： {{errStr}}",
@@ -575,6 +512,57 @@
         "TYPE_STOPWATCH": "ストップウォッチ"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "空のデータオブジェクトを同期しようとしています。これは（ほぼ）未使用のアプリの最初の同期ですか？",
+        "FORCE_IMPORT": "とにかくリモートデータをインポートしますか？",
+        "FORCE_UPLOAD": "とにかくローカルデータをアップロードしますか？",
+        "FORCE_UPLOAD_AFTER_ERROR": "ローカルデータのアップロード中にエラーが発生しました。強制的に更新しますか？",
+        "NO_REMOTE_DATA": "リモートデータが見つかりません。ローカルをリモートにアップロードしますか？",
+        "TRY_LOAD_REMOTE_AGAIN": "リモートからもう一度データを再ロードしてみますか？"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "最終変更：",
+        "LAST_SYNC": "最終同期：",
+        "LOCAL": "地元",
+        "LOCAL_REMOTE": "ローカル->リモート",
+        "REMOTE": "遠い",
+        "TEXT": "<p>Dropboxから更新します。ローカルデータとリモートデータの両方が変更されているようです。</p>",
+        "TITLE": "Dropbox：矛盾するデータ",
+        "USE_LOCAL": "ローカルを使用",
+        "USE_REMOTE": "リモコンを使用"
+      },
+      "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "トークンを生成",
+          "FOLLOW_LINK": "次のリンクを開き、そこに提供されている認証コードを入力フィールドにコピーしてください。",
+          "L_ACCESS_TOKEN": "アクセストークン（認証コードから生成）",
+          "L_AUTH_CODE": "認証コード"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "データを圧縮する",
+          "L_SYNC_FILE_NAME": "同期ファイル名"
+        },
+        "L_ENABLE_SYNCING": "同期を有効にする",
+        "L_SYNC_INTERVAL": "同期間隔",
+        "L_SYNC_PROVIDER": "同期プロバイダー",
+        "TITLE": "同期",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>実験的!!</strong> これを機能させるには、NextcloudインスタンスのCORSを無効にするか制限する必要があります。これは、セキュリティに悪影響を与える可能性があります。詳細については、 <a href='https://github.com/nextcloud/server/issues/3131'>このスレッド</a> を参照してください。自己責任！",
+          "L_BASE_URL": "ベースURL",
+          "L_PASSWORD": "パスワード",
+          "L_SYNC_FILE_PATH": "同期ファイルパス",
+          "L_USER_NAME": "ユーザー名"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
+        "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
+        "IMPORTING": "データをインポートする",
+        "SUCCESS": "インポートされたデータ",
+        "UNKNOWN_ERROR": "同期中に不明なエラーが発生しました。コンソールを確認してください。"
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "タグを作成",
@@ -749,6 +737,10 @@
         "ALREADY_DID": "私はすでにやった",
         "SNOOZE": "スヌーズ {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "タスクに追加",
+        "MSG": " {{time}}の時間を追跡していません"
+      },
       "D_IDLE": {
         "BREAK": "ブレーク",
         "CREATE_AND_TRACK": "<em></em> を作成し、以下に移動します。",
@@ -757,6 +749,13 @@
         "TASK": "仕事",
         "TASK_BREAK": "タスクブレーク",
         "TRACK_TO": "追跡する："
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em></em> を作成し、追跡します",
+        "IDLE_FOR": "あなたはアイドル状態になっています。",
+        "TASK": "仕事",
+        "TRACK_TO": "追跡する：",
+        "UNTRACKED_TIME": "追跡されていない時間："
       }
     },
     "WORKLOG": {
@@ -854,10 +853,6 @@
       "IS_HIDE_EVALUATION_SHEET": "日次サマリーの評価シートを非表示",
       "TITLE": "評価と指標"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "ここでは、単一のGoogleドライブファイルとの間で自動的に同期するようにアプリを設定できます。すべてのデータは暗号化されずに保存されるため、誤ってこのファイルを他のユーザーと共有しないように注意してください。",
-      "TITLE": "Googleドライブで同期"
-    },
     "IDLE": {
       "HELP": "<div><p>アイドル時間処理が有効になっていると、アイドル時間が経過したときに、どのタスクで時間を追跡するかを確認するために、指定した時間が経過した後にダイアログが開きます。</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "アイドル時間処理を有効にする",
@@ -932,6 +927,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "何も指定されていない場合にタスクに使用するデフォルトのプロジェクト",
+      "FIRST_DAY_OF_WEEK": "週の最初の日",
       "HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "タスクに取り組むために今日タグを自動的に追加します",
       "IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
@@ -974,6 +970,13 @@
       "MIN_WORKING_TIME": "Xが動作していないのにトリガーがブレーク通知を受け取る",
       "MOTIVATIONAL_IMG": "やる気を起こさせる画像（ウェブのURL）",
       "TITLE": "リマインダーを破る"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "時間追跡の開始を忘れた場合に表示されるようにバナーを構成します。",
+      "L_IS_ENABLED": "有効",
+      "L_IS_SHOW_ON_MOBILE": "モバイルアプリに表示",
+      "L_MIN_TIME": "バナーを表示する前に待つ時間",
+      "TITLE": "タイムトラッキングリマインダー"
     }
   },
   "GLOBAL_SNACK": {
@@ -993,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Googleドライブ：ファイルをダウンロード...",
     "GDRIVE_UPLOAD": "Googleドライブ：ファイルをアップロード...",
     "GITHUB_LOAD_ISSUE": "Github：問題データをロード...",
-    "JIRA_LOAD_ISSUE": "Jira：問題データをロード..."
+    "JIRA_LOAD_ISSUE": "Jira：問題データをロード...",
+    "UNKNOWN": "リモートデータの読み込み"
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
@@ -1090,14 +1094,6 @@
     "SYNC_EXPORT": "同期とエクスポート",
     "TAG_SETTINGS": "タグ固有の設定",
     "TOGGLE_DARK_MODE": "ダークモードの切り替え"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
-      "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
-      "IMPORTING": "データをインポートする",
-      "SUCCESS": "インポートされたデータ"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",

@@ -1,6 +1,7 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectCfgFormKey } from '../project/project.model';
 import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
+import { SyncProvider } from '../../imex/sync/sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
 
 export type MiscConfig = Readonly<{
@@ -54,24 +55,27 @@ export type PomodoroConfig = Readonly<{
 
 // NOTE: needs to be writable due to how we use it
 export interface GoogleDriveSyncConfig {
-  isEnabled: boolean;
   isAutoLogin: boolean;
   isAutoSyncToRemote: boolean;
   isNotifyOnSync: boolean;
   isLoadRemoteDataOnStartup: boolean;
+
   isCompressData: boolean;
-  syncInterval: number;
   syncFileName: string;
+  _syncFileNameForBackupDocId: string | null;
   _backupDocId: string | null;
 }
 
 export interface DropboxSyncConfig {
-  isEnabled: boolean;
   authCode: string | null;
   accessToken: string | null;
-  syncInterval: number;
-  _backupDocId: string | null;
-  // isCompressData: boolean;
+}
+
+export interface WebDavConfig {
+  baseUrl: string | null;
+  userName: string | null;
+  password: string | null;
+  syncFilePath: string | null;
 }
 
 export type LocalBackupConfig = Readonly<{
@@ -89,6 +93,16 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
+export type SyncConfig = Readonly<{
+  isEnabled: boolean;
+  syncProvider: SyncProvider | null,
+  syncInterval: number,
+
+  dropboxSync: DropboxSyncConfig;
+  googleDriveSync: GoogleDriveSyncConfig;
+  webDav: WebDavConfig;
+}>;
+
 export type TrackingReminderConfig = Readonly<{
   isEnabled: boolean;
   isShowOnMobile: boolean;
@@ -102,12 +116,12 @@ export type GlobalConfigState = Readonly<{
   idle: IdleConfig;
   takeABreak: TakeABreakConfig;
   pomodoro: PomodoroConfig;
-  googleDriveSync: GoogleDriveSyncConfig;
-  dropboxSync: DropboxSyncConfig;
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
   trackingReminder: TrackingReminderConfig;
+
+  sync: SyncConfig;
 
   [MODEL_VERSION_KEY]?: number;
 }>;
@@ -128,10 +142,8 @@ export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldCon
 
 export type CustomCfgSection =
   'FILE_IMPORT_EXPORT'
-  | 'GOOGLE_SYNC'
   | 'JIRA_CFG'
-  | 'SIMPLE_COUNTER_CFG'
-  | 'DROPBOX_SYNC';
+  | 'SIMPLE_COUNTER_CFG';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {

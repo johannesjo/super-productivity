@@ -16,6 +16,12 @@
   "BL": {
     "NO_TASKS": "کاری در بک لاگ شما وجود ندارد"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "به نظر می رسد داده های شما آسیب دیده است. آیا می خواهید به طور خودکار آن را برطرف کنید؟ این ممکن است منجر به از دست دادن جزئی اطلاعات شود.",
+    "DELETE_STRAY_BACKUP": "آیا می خواهید برای جلوگیری از دیدن این گفتگو ، قسمت پشتی را حذف کنید؟",
+    "RESTORE_FILE_BACKUP": "به نظر می رسد هیچ داده ای وجود ندارد ، اما نسخه پشتیبان در \"{{dir}}\" موجود است. آیا می خواهید آخرین نسخه پشتیبان را از {{from}}بازیابی کنید؟",
+    "RESTORE_STRAY_BACKUP": "در آخرین همگام سازی ممکن است خطایی رخ داده باشد. آیا می خواهید آخرین نسخه پشتیبان را بازیابی کنید؟"
+  },
   "DATETIME_INPUT": {
     "IN": "در {{time}}",
     "TOMORROW": "فردا {{time}}"
@@ -77,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "شما در حال تلاش برای همگام سازی یک شی empty داده خالی هستید. آیا این اولین همگام سازی شما با یک برنامه (تقریبا) بکر است؟",
-        "FORCE_IMPORT": "به هر حال داده از راه دور وارد می شود؟",
-        "FORCE_UPLOAD": "به هر حال داده های محلی بارگذاری می شوند؟",
-        "FORCE_UPLOAD_AFTER_ERROR": "هنگام بارگذاری داده های محلی شما خطایی روی داد. سعی کنید به زودی بروزرسانی کنید؟",
-        "TRY_LOAD_REMOTE_AGAIN": "سعی می کنید بار دیگر داده ها را از راه دور بارگیری کنید؟"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "آخرین تغییر:",
-        "LAST_SYNC": "آخرین همگام سازی:",
-        "LOCAL": "محلی",
-        "LOCAL_REMOTE": "محلی -> از راه دور",
-        "REMOTE": "از راه دور",
-        "TEXT": "<p>از Dropbox به روز کنید. به نظر می رسد که هر دو داده محلی و از راه دور اصلاح شده اند.</p>",
-        "TITLE": "Dropbox: داده های متضاد",
-        "USE_LOCAL": "از محلی استفاده کنید",
-        "USE_REMOTE": "از راه دور استفاده کنید"
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "تولید توکن",
-        "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد Auth ارائه شده در قسمت ورودی را کپی کنید.",
-        "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)",
-        "L_AUTH_CODE": "کد تایید",
-        "L_ENABLE_SYNCING": "همگام سازی Dropbox را فعال کنید",
-        "L_SYNC_INTERVAL": "فاصله همگام سازی",
-        "TITLE": "همگام سازی از طریق Dropbox (توصیه می شود)"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: تولید توکن دسترسی از Auth Code امکان پذیر نیست",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token تولید شده از Auth Code",
@@ -205,51 +184,9 @@
         "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "آخرین تغییرات:",
-        "LAST_SYNC": "آخرین همگام سازی",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "<p>Update from Google Drive Backup. Both local and remote data seem to be modified. Do you want to overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>",
-        "TITLE": "Overwrite local data with GDrive Update?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "آخرین تغییرات:",
-        "LAST_SYNC": "آخرین همگام سازی",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>",
-        "TITLE": "Overwrite unsaved data on Google Drive?"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "درایو گوگل: یک بروزرسانی از ریموت وجود دارد،در حال دانلود...",
-        "ERROR": "درایو گوگل – خطا: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "درایو گوگل: هنگام تلاش برای وارد کردن اطلاعات ابتدای خطایی رخ داد",
-        "LOCAL_UP_TO_DATE": "درایو گوگل: اطلاعات محلی قبلا بروزرسانی شده است",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "NO_UPDATE_REQUIRED": "درایو گوگل: نیازی به بروزرسانی نیست",
-        "REMOTE_UP_TO_DATE": "درایو گوگل: اطلاعات ریموت قبلا بروزرسانی شده است",
-        "SUCCESS": "درایو گوگل: پشتیبان گیری با موفقیت ذخیره شد",
-        "SYNCING": "درایو گوگل: همگام سازی"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "ورود خودکار هنگام شروع برنامه",
-        "AUTO_SYNC": "همگام سازی خودکار اطلاعات به ریموت",
-        "BACKUP_NOW": "همین حالا نسخه  پشتیبان تهیه کن",
-        "COMPRESS": "فشرده سازی اطلاعات",
-        "ENABLE": "فعال کردن همگام سازی با درایو گوگل",
-        "LOAD_FROM": "بارگیری از درایو گوگل",
-        "LOAD_ON_STARTUP": "لود کردن اطلاعات ریموت موقع راه اندازی برنامه",
-        "NOTIFY": "اطلاع دادن هنگام همگام سازی",
-        "SYNC_FILE_NAME": "همگام سازی نام فایل",
-        "SYNC_INTERVAL": "فاصله زمانی همگام سازی",
-        "UPDATE_SYNC_FILE": "بروزرسانی همگام سازی فایل"
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: نام فایل همگام سازی به روز شده است"
       },
       "S_API": {
         "ERR": "خطای GoogleApi : {{errStr}}",
@@ -575,6 +512,57 @@
         "TYPE_STOPWATCH": "کرنومتر"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "شما در حال تلاش برای همگام سازی یک شی empty داده خالی هستید. آیا این اولین همگام سازی شما با یک برنامه (تقریبا) بکر است؟",
+        "FORCE_IMPORT": "به هر حال داده از راه دور وارد می شود؟",
+        "FORCE_UPLOAD": "به هر حال داده های محلی بارگذاری می شوند؟",
+        "FORCE_UPLOAD_AFTER_ERROR": "هنگام بارگذاری داده های محلی شما خطایی روی داد. سعی کنید به زودی بروزرسانی کنید؟",
+        "NO_REMOTE_DATA": "داده ای از راه دور یافت نشد محلی در Remote بارگذاری شود؟",
+        "TRY_LOAD_REMOTE_AGAIN": "سعی می کنید بار دیگر داده ها را از راه دور بارگیری کنید؟"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "آخرین تغییر:",
+        "LAST_SYNC": "آخرین همگام سازی:",
+        "LOCAL": "محلی",
+        "LOCAL_REMOTE": "محلی -> از راه دور",
+        "REMOTE": "از راه دور",
+        "TEXT": "<p>از Dropbox به روز کنید. به نظر می رسد که هر دو داده محلی و از راه دور اصلاح شده اند.</p>",
+        "TITLE": "Dropbox: داده های متضاد",
+        "USE_LOCAL": "از محلی استفاده کنید",
+        "USE_REMOTE": "از راه دور استفاده کنید"
+      },
+      "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "تولید توکن",
+          "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد Auth ارائه شده در قسمت ورودی را کپی کنید.",
+          "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)",
+          "L_AUTH_CODE": "کد تایید"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "فشرده سازی داده ها",
+          "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید"
+        },
+        "L_ENABLE_SYNCING": "همگام سازی را فعال کنید",
+        "L_SYNC_INTERVAL": "فاصله همگام سازی",
+        "L_SYNC_PROVIDER": "ارائه دهنده همگام سازی",
+        "TITLE": "همگام سازی",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>آزمایشی !!</strong> برای انجام این کار باید CORS را برای نمونه Nextcloud خود غیرفعال یا محدود کنید ، که این امر می تواند پیامدهای امنیتی منفی داشته باشد! لطفاً برای اطلاعات بیشتر <a href='https://github.com/nextcloud/server/issues/3131'>به این بخش مراجعه کنید</a> . با مسئولیت خود استفاده کنید!",
+          "L_BASE_URL": "آدرس پایگاه",
+          "L_PASSWORD": "کلمه عبور",
+          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
+          "L_USER_NAME": "نام کاربری"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "هنگام وارد کردن داده ها مشکلی پیش آمد. بازگشت به پشتیبان گیری محلی.",
+        "ERROR_INVALID_DATA": "خطا هنگام همگام سازی داده نامعتبر است",
+        "IMPORTING": "وارد کردن داده",
+        "SUCCESS": "داده وارد شد",
+        "UNKNOWN_ERROR": "خطای ناشناخته هنگام همگام سازی لطفا کنسول را بررسی کنید."
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "ایجاد برچسب",
@@ -749,6 +737,10 @@
         "ALREADY_DID": "قبلا انجام دادم",
         "SNOOZE": "تعویق {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "افزودن به Task",
+        "MSG": "شما برای {{time}}زمان پیگیری نکرده اید"
+      },
       "D_IDLE": {
         "BREAK": "استراحت",
         "CREATE_AND_TRACK": "<em>Create</em> and track to:",
@@ -757,6 +749,13 @@
         "TASK": "کار",
         "TASK_BREAK": "کار+استراحت",
         "TRACK_TO": "Track to:"
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em>ایجاد کنید</em> و پیگیری کنید",
+        "IDLE_FOR": "شما بیکار بوده اید:",
+        "TASK": "وظیفه",
+        "TRACK_TO": "پیگیری به:",
+        "UNTRACKED_TIME": "زمان ردیابی نشده:"
       }
     },
     "WORKLOG": {
@@ -854,10 +853,6 @@
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "TITLE": "ارزیابی ها و معیارها"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
-      "TITLE": "همگام سازی با درایو گوگل"
-    },
     "IDLE": {
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
@@ -932,6 +927,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "پروژه پیش فرض برای استفاده در کارها در صورت مشخص نبودن هیچ کدام",
+      "FIRST_DAY_OF_WEEK": "روز اول هفته",
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "برچسب امروز به صورت خودکار به کار بر روی وظایف اضافه کنید",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
@@ -974,6 +970,13 @@
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "تصویر انگیزشی (آدرس اینترنتی)",
       "TITLE": "یادآوری استراحت"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "در صورتی که فراموش نکنید ردیابی زمان را شروع کنید ، یک بنر را پیکربندی کنید تا در آن نشان داده شود.",
+      "L_IS_ENABLED": "فعال شده است",
+      "L_IS_SHOW_ON_MOBILE": "نمایش در برنامه تلفن همراه",
+      "L_MIN_TIME": "زمان انتظار قبل از نشان دادن بنر است",
+      "TITLE": "یادآوری ردیابی زمان"
     }
   },
   "GLOBAL_SNACK": {
@@ -993,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: بارگیری فایل ...",
     "GDRIVE_UPLOAD": "Google Drive: بارگذاری پرونده ...",
     "GITHUB_LOAD_ISSUE": "Github: بارگیری داده های شماره ...",
-    "JIRA_LOAD_ISSUE": "جیرا: بارگیری داده های شماره ..."
+    "JIRA_LOAD_ISSUE": "جیرا: بارگیری داده های شماره ...",
+    "UNKNOWN": "بارگیری داده های از راه دور"
   },
   "MH": {
     "ADD_NEW_TASK": "اضافه کردن کار جدید",
@@ -1090,14 +1094,6 @@
     "SYNC_EXPORT": "همگام سازی و صادرات",
     "TAG_SETTINGS": "تنظیمات خاص را برچسب گذاری کنید",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
-      "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
-      "IMPORTING": "Importing data",
-      "SUCCESS": "Data imported"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",

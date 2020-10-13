@@ -16,6 +16,12 @@
   "BL": {
     "NO_TASKS": "Actualmente no hay tareas en tu registro de trabajo"
   },
+  "CONFIRM": {
+    "AUTO_FIX": "Tus datos parecen estar dañados. ¿Quieres intentar solucionarlo automáticamente? Esto puede resultar en una pérdida parcial de datos.",
+    "DELETE_STRAY_BACKUP": "¿Quieres eliminar el reverso para evitar ver este diálogo?",
+    "RESTORE_FILE_BACKUP": "Parece que NO HAY DATOS, pero hay copias de seguridad disponibles en \"{{dir}}\". ¿Quiere restaurar la última copia de seguridad de {{from}}?",
+    "RESTORE_STRAY_BACKUP": "Durante la última sincronización puede que haya habido algún error. ¿Quieres restaurar la última copia de seguridad?"
+  },
   "DATETIME_INPUT": {
     "IN": "en {{time}}",
     "TOMORROW": "mañana {{time}}"
@@ -77,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "Estás intentando sincronizar un objeto de datos vacío. ¿Es esta tu primera sincronización de una aplicación (casi) virgen?",
-        "FORCE_IMPORT": "¿Importar datos remotos de todos modos?",
-        "FORCE_UPLOAD": "¿Subir datos locales de todos modos?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Se produjo un error al cargar sus datos locales. ¿Intentas forzar la actualización?",
-        "TRY_LOAD_REMOTE_AGAIN": "¿Intentar volver a cargar datos desde el control remoto?"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "ultimo cambio:",
-        "LAST_SYNC": "Última sincronización:",
-        "LOCAL": "Local",
-        "LOCAL_REMOTE": "local -> remoto",
-        "REMOTE": "remoto",
-        "TEXT": "<p>Actualización desde Dropbox. Los datos locales y remotos parecen estar modificados.</p>",
-        "TITLE": "Dropbox: datos en conflicto",
-        "USE_LOCAL": "Usar local",
-        "USE_REMOTE": "Usar control remoto"
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "Generar token",
-        "FOLLOW_LINK": "Abre el siguiente enlace y copia el código de autenticación proporcionado allí en el campo de entrada.",
-        "L_ACCESS_TOKEN": "Token de acceso (generado a partir del código de autenticación)",
-        "L_AUTH_CODE": "código de autenticación",
-        "L_ENABLE_SYNCING": "Habilitar sincronización de Dropbox",
-        "L_SYNC_INTERVAL": "Intervalo de sincronización",
-        "TITLE": "Sincronización a través de Dropbox (recomendado)"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: no se puede generar el token de acceso desde el código de autenticación",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Token de acceso generado a partir del código de autenticación",
@@ -205,51 +184,9 @@
         "CREATE_SYNC_FILE": "Google Drive: no se encontró ningún archivo con el nombre <strong>\"{{fileName}}\"</strong> . <strong>¿Crear</strong> como archivo de sincronización en Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>archivo</strong> existente <strong>\"{{fileName}}\"</strong> como archivo de sincronización? Si no es así, cambie el nombre del archivo de sincronización."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "Última modificación:",
-        "LAST_SYNC": "última sincronización",
-        "LOCAL": "Local",
-        "LOCAL_REMOTE": "local <=> remoto",
-        "OVERWRITE_LOCAL": "Sobrescribir datos locales",
-        "OVERWRITE_REMOTE": "Sobrescribir datos remotos",
-        "REMOTE": "remoto",
-        "TEXT": "<p>Actualización de la copia de seguridad de Google Drive. Los datos locales y remotos parecen estar modificados. ¿Desea sobrescribir los cambios locales no guardados? <strong>Todos los datos se perderán para siempre</strong>.</p>",
-        "TITLE": "¿Sobrescribir los datos locales con la actualización de GDrive?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "Última modificación:",
-        "LAST_SYNC": "última sincronización",
-        "LOCAL": "Local",
-        "LOCAL_REMOTE": "local <=> remoto",
-        "OVERWRITE_LOCAL": "Sobrescribir datos locales",
-        "OVERWRITE_REMOTE": "Sobrescribir datos remotos",
-        "REMOTE": "remoto",
-        "TEXT": "  <p>Parece que hay algunos cambios en Google Drive, que no tiene localmente. ¿Quieres sobrescribirlos de todos modos?</p>",
-        "TITLE": "¿Sobrescribir los datos no guardados en Google Drive?"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: ¡Hay una actualización remota! Descargando ...",
-        "ERROR": "Google Drive - Error:",
-        "ERROR_INITIAL_IMPORT": "Google Drive: error al intentar importar datos inicialmente",
-        "LOCAL_UP_TO_DATE": "Google Drive: datos locales ya actualizados",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Elimine todos menos uno o elija un nombre diferente.",
-        "NO_UPDATE_REQUIRED": "Google Drive: No se requiere actualización",
-        "REMOTE_UP_TO_DATE": "Google Drive: datos remotos ya actualizados",
-        "SUCCESS": "Google Drive: Copia de seguridad guardada con éxito",
-        "SYNCING": "Google Drive: sincronizando"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "Inicio de sesión automático al iniciar la aplicación",
-        "AUTO_SYNC": "Sincronización automática de datos con remoto",
-        "BACKUP_NOW": "Copia ahora",
-        "COMPRESS": "Comprimir datos",
-        "ENABLE": "Habilitar la sincronización a través de Google Drive",
-        "LOAD_FROM": "Cargar desde GDrive",
-        "LOAD_ON_STARTUP": "Cargar datos remotos en el inicio",
-        "NOTIFY": "Notificar cuando se sincroniza",
-        "SYNC_FILE_NAME": "Sincronizar nombre de archivo",
-        "SYNC_INTERVAL": "Intervalo de sincronización",
-        "UPDATE_SYNC_FILE": "Actualizar archivo de sincronización"
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: nombre de archivo de sincronización actualizado"
       },
       "S_API": {
         "ERR": "Error de GoogleApi: {{errStr}}",
@@ -575,6 +512,57 @@
         "TYPE_STOPWATCH": "Cronógrafo"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "Estás intentando sincronizar un objeto de datos vacío. ¿Es esta tu primera sincronización de una aplicación (casi) virgen?",
+        "FORCE_IMPORT": "¿Importar datos remotos de todos modos?",
+        "FORCE_UPLOAD": "¿Subir datos locales de todos modos?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Se produjo un error al cargar sus datos locales. ¿Intentas forzar la actualización?",
+        "NO_REMOTE_DATA": "No se encontraron datos remotos. ¿Subir local a remoto?",
+        "TRY_LOAD_REMOTE_AGAIN": "¿Intentar volver a cargar datos desde el control remoto?"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "ultimo cambio:",
+        "LAST_SYNC": "Última sincronización:",
+        "LOCAL": "Local",
+        "LOCAL_REMOTE": "local -> remoto",
+        "REMOTE": "remoto",
+        "TEXT": "<p>Actualización desde Dropbox. Los datos locales y remotos parecen estar modificados.</p>",
+        "TITLE": "Dropbox: datos en conflicto",
+        "USE_LOCAL": "Usar local",
+        "USE_REMOTE": "Usar control remoto"
+      },
+      "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Generar token",
+          "FOLLOW_LINK": "Abra el siguiente enlace y copie el código de autenticación proporcionado allí en el campo de entrada.",
+          "L_ACCESS_TOKEN": "Token de acceso (generado a partir del código de autenticación)",
+          "L_AUTH_CODE": "código de autenticación"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Comprimir datos",
+          "L_SYNC_FILE_NAME": "Sincronizar nombre de archivo"
+        },
+        "L_ENABLE_SYNCING": "Habilitar sincronización",
+        "L_SYNC_INTERVAL": "Intervalo de sincronización",
+        "L_SYNC_PROVIDER": "Proveedor de sincronización",
+        "TITLE": "Sincronizar",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>¡Experimental!</strong> Para que esto funcione, debe deshabilitar o limitar CORS para su instancia de Nextcloud, lo que puede tener implicaciones de seguridad negativas. <a href='https://github.com/nextcloud/server/issues/3131'>Consulte este hilo</a> para obtener más información. ¡Úselo bajo su propio riesgo!",
+          "L_BASE_URL": "URL base",
+          "L_PASSWORD": "Contraseña",
+          "L_SYNC_FILE_PATH": "Ruta del archivo de sincronización",
+          "L_USER_NAME": "Nombre de usuario"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
+        "ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
+        "IMPORTING": "Importando datos",
+        "SUCCESS": "Datos importados",
+        "UNKNOWN_ERROR": "Error desconocido durante la sincronización. Compruebe la consola."
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "Crear etiqueta",
@@ -749,6 +737,10 @@
         "ALREADY_DID": "Ya lo hice",
         "SNOOZE": "Posponer {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "Agregar a la tarea",
+        "MSG": "No ha realizado un seguimiento del tiempo durante {{time}}"
+      },
       "D_IDLE": {
         "BREAK": "Descanso",
         "CREATE_AND_TRACK": "<em>Crea</em> y sigue a:",
@@ -757,6 +749,13 @@
         "TASK": "Tarea",
         "TASK_BREAK": "Pausa + tarea",
         "TRACK_TO": "Seguimiento a:"
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em>Crear</em> y realizar un seguimiento de",
+        "IDLE_FOR": "Has estado inactivo por:",
+        "TASK": "Tarea",
+        "TRACK_TO": "Seguimiento a:",
+        "UNTRACKED_TIME": "Tiempo sin seguimiento:"
       }
     },
     "WORKLOG": {
@@ -854,10 +853,6 @@
       "IS_HIDE_EVALUATION_SHEET": "Ocultar hoja de evaluación en resumen diario",
       "TITLE": "Evaluación y métrica"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "Aquí puede configurar su aplicación para que se sincronice automáticamente hacia y desde un único archivo de Google Drive. Todos los datos se guardarán sin cifrar, así que asegúrese de no compartir accidentalmente este archivo con alguien.",
-      "TITLE": "Sincronización a través de Google Drive"
-    },
     "IDLE": {
       "HELP": "<div><p>Cuando se habilita el manejo del tiempo de inactividad, se abrirá un cuadro de diálogo después de un período de tiempo específico para verificar si y en qué tarea desea realizar un seguimiento de su tiempo, cuando ha estado inactivo.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Habilitar el manejo del tiempo de inactividad",
@@ -932,6 +927,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "Proyecto predeterminado a usar para las tareas si no se especifica ninguno",
+      "FIRST_DAY_OF_WEEK": "Primer dia de la semana",
       "HELP": "<p><strong>¿No se ven las notificaciones de escritorio?</strong> En Windows, puedes revisar en Sistema> Notificaciones y acciones, y verificar si se han habilitado las notificaciones requeridas.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Agregar automáticamente la etiqueta de hoy a las tareas completadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marcar la tarea principal como realizada, cuando se completen todas las subtareas",
@@ -977,9 +973,10 @@
     },
     "TRACKING_REMINDER": {
       "HELP": "Establecer un recordatorio para que aparezca en caso de que haya olvidado iniciar el seguimiento del tiempo.",
-      "TITLE": "Recordatorio de Seguimiento de Tiempo",
       "L_IS_ENABLED": "Activado",
-      "L_MIN_TIME": "Tiempo a esperar antes de que se mueste el recordatorio"
+      "L_IS_SHOW_ON_MOBILE": "Mostrar en la aplicación móvil",
+      "L_MIN_TIME": "Tiempo a esperar antes de que se mueste el recordatorio",
+      "TITLE": "Recordatorio de Seguimiento de Tiempo"
     }
   },
   "GLOBAL_SNACK": {
@@ -999,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Descargar archivo ...",
     "GDRIVE_UPLOAD": "Google Drive: Subir archivo ...",
     "GITHUB_LOAD_ISSUE": "Github: cargar datos de problemas ...",
-    "JIRA_LOAD_ISSUE": "Jira: cargar datos de problemas ..."
+    "JIRA_LOAD_ISSUE": "Jira: cargar datos de problemas ...",
+    "UNKNOWN": "Cargando datos remotos"
   },
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",
@@ -1096,14 +1094,6 @@
     "SYNC_EXPORT": "Sincronizar y Exportar",
     "TAG_SETTINGS": "Configuraciones específicas de etiqueta",
     "TOGGLE_DARK_MODE": "Cambiar a modo oscuro"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
-      "ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
-      "IMPORTING": "Importando datos",
-      "SUCCESS": "Datos importados"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",

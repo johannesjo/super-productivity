@@ -3,9 +3,9 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import {
   EvaluationConfig,
   GlobalConfigState,
-  GoogleDriveSyncConfig,
   IdleConfig,
-  MiscConfig, SoundConfig,
+  MiscConfig,
+  SoundConfig,
   TakeABreakConfig
 } from '../global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
@@ -18,7 +18,6 @@ export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>
 export const selectMiscConfig = createSelector(selectConfigFeatureState, (cfg): MiscConfig => cfg.misc);
 export const selectSoundConfig = createSelector(selectConfigFeatureState, (cfg): SoundConfig => cfg.sound);
 export const selectEvaluationConfig = createSelector(selectConfigFeatureState, (cfg): EvaluationConfig => cfg.evaluation);
-export const selectGoogleDriveSyncConfig = createSelector(selectConfigFeatureState, (cfg): GoogleDriveSyncConfig => cfg.googleDriveSync);
 export const selectIdleConfig = createSelector(selectConfigFeatureState, (cfg): IdleConfig => cfg.idle);
 export const selectTakeABreakConfig = createSelector(selectConfigFeatureState, (cfg): TakeABreakConfig => cfg.takeABreak);
 

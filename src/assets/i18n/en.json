@@ -19,8 +19,8 @@
   "CONFIRM": {
     "AUTO_FIX": "Your data seems to be damaged. Do you want to try to automatically fix it? This might result in partial data loss.",
     "DELETE_STRAY_BACKUP": "Do you want to delete the back to avoid seeing this dialog?",
-    "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?",
-    "RESTORE_FILE_BACKUP": "There seems to be NO DATA, but there are backups available at \"{{dir}}\". Do you want to restore the latest backup from {{from}}?"
+    "RESTORE_FILE_BACKUP": "There seems to be NO DATA, but there are backups available at \"{{dir}}\". Do you want to restore the latest backup from {{from}}?",
+    "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?"
   },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",
@@ -83,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "You're trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?",
-        "FORCE_IMPORT": "Import remote data anyway?",
-        "FORCE_UPLOAD": "Upload local data anyway?",
-        "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
-        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "last change:",
-        "LAST_SYNC": "last sync:",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local -> remote",
-        "REMOTE": "remote",
-        "TEXT": "<p>Update from Dropbox. Both local and remote data seem to be modified.</p>",
-        "TITLE": "Dropbox: Conflicting Data",
-        "USE_LOCAL": "Use local",
-        "USE_REMOTE": "Use remote"
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "Generate Token",
-        "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
-        "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
-        "L_AUTH_CODE": "Auth Code",
-        "L_ENABLE_SYNCING": "Enable Dropbox Syncing",
-        "L_SYNC_INTERVAL": "Sync Interval",
-        "TITLE": "Sync via Dropbox (recommended)"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Unable to generate Access Token from Auth Code",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
@@ -211,51 +184,9 @@
         "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "<p>Update from Google Drive Backup. Both local and remote data seem to be modified. Do you want to overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>",
-        "TITLE": "Overwrite local data with GDrive Update?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "last modification:",
-        "LAST_SYNC": "last sync",
-        "LOCAL": "local",
-        "LOCAL_REMOTE": "local <=> remote",
-        "OVERWRITE_LOCAL": "Overwrite local",
-        "OVERWRITE_REMOTE": "Overwrite remote",
-        "REMOTE": "remote",
-        "TEXT": "  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>",
-        "TITLE": "Overwrite unsaved data on Google Drive?"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
-        "ERROR": "Google Drive – Error: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
-        "LOCAL_UP_TO_DATE": "Google Drive: Local data already up to date",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "NO_UPDATE_REQUIRED": "Google Drive: No updated required",
-        "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
-        "SUCCESS": "Google Drive: Successfully saved backup",
-        "SYNCING": "Google Drive: Syncing"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "Auto login at when starting app",
-        "AUTO_SYNC": "Auto sync data to remote",
-        "BACKUP_NOW": "Backup now",
-        "COMPRESS": "Compress Data",
-        "ENABLE": "Enable syncing via Google Drive",
-        "LOAD_FROM": "Load From GDrive",
-        "LOAD_ON_STARTUP": "Load remote data on startup",
-        "NOTIFY": "Notify when syncing",
-        "SYNC_FILE_NAME": "Sync file name",
-        "SYNC_INTERVAL": "Sync interval",
-        "UPDATE_SYNC_FILE": "Update sync file"
+        "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
       },
       "S_API": {
         "ERR": "GoogleApi Error: {{errStr}}",
@@ -581,6 +512,57 @@
         "TYPE_STOPWATCH": "Stopwatch"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "You're trying to sync an empty data object. Is this your very first sync of a (almost) virgin app?",
+        "FORCE_IMPORT": "Import remote data anyway?",
+        "FORCE_UPLOAD": "Upload local data anyway?",
+        "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
+        "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
+        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "last change:",
+        "LAST_SYNC": "last sync:",
+        "LOCAL": "local",
+        "LOCAL_REMOTE": "local -> remote",
+        "REMOTE": "remote",
+        "TEXT": "<p>Update from remote. Both local and remote data seem to be modified.</p>",
+        "TITLE": "Sync: Conflicting Data",
+        "USE_LOCAL": "Use local",
+        "USE_REMOTE": "Use remote"
+      },
+      "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "Generate Token",
+          "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
+          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
+          "L_AUTH_CODE": "Auth Code"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "Compress data",
+          "L_SYNC_FILE_NAME": "Sync File Name"
+        },
+        "L_ENABLE_SYNCING": "Enable Syncing",
+        "L_SYNC_INTERVAL": "Sync Interval",
+        "L_SYNC_PROVIDER": "Sync Provider",
+        "TITLE": "Sync",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>Experimental!!</strong> In order to make this work for mobile or the browser you need to disable or limit CORS for your Nextcloud instance, which can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread</a> for more information. Use at your own risk!",
+          "L_BASE_URL": "Base Url",
+          "L_PASSWORD": "Password",
+          "L_SYNC_FILE_PATH": "Sync File Path",
+          "L_USER_NAME": "Username"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
+        "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
+        "IMPORTING": "Importing data",
+        "SUCCESS": "Data imported",
+        "UNKNOWN_ERROR": "Unknown error while syncing. Please check console."
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "Create Tag",
@@ -769,11 +751,11 @@
         "TRACK_TO": "Track to"
       },
       "D_TRACKING_REMINDER": {
-        "UNTRACKED_TIME": "Untracked time:",
-        "TRACK_TO": "Track to:",
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
-        "TASK": "Task"
+        "TASK": "Task",
+        "TRACK_TO": "Track to:",
+        "UNTRACKED_TIME": "Untracked time:"
       }
     },
     "WORKLOG": {
@@ -871,10 +853,6 @@
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "TITLE": "Evaluation & Metrics"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
-      "TITLE": "Sync via Google Drive"
-    },
     "IDLE": {
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
@@ -949,6 +927,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
+      "FIRST_DAY_OF_WEEK": "First day of the week",
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
@@ -959,8 +938,7 @@
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
-      "TITLE": "Misc Settings",
-      "FIRST_DAY_OF_WEEK": "First day of the week"
+      "TITLE": "Misc Settings"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -995,10 +973,10 @@
     },
     "TRACKING_REMINDER": {
       "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
-      "TITLE": "Time Tracking Reminder",
       "L_IS_ENABLED": "Enabled",
       "L_IS_SHOW_ON_MOBILE": "Show on mobile app",
-      "L_MIN_TIME": "Time to wait before showing Banner"
+      "L_MIN_TIME": "Time to wait before showing Banner",
+      "TITLE": "Time Tracking Reminder"
     }
   },
   "GLOBAL_SNACK": {
@@ -1018,7 +996,9 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
     "GDRIVE_UPLOAD": "Google Drive: Upload file...",
     "GITHUB_LOAD_ISSUE": "Github: Load issue data...",
-    "JIRA_LOAD_ISSUE": "Jira: Load issue data..."
+    "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
+    "UNKNOWN": "Loading remote data",
+    "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
@@ -1115,14 +1095,6 @@
     "SYNC_EXPORT": "Sync & Export",
     "TAG_SETTINGS": "Tag Specific Settings",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
-      "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
-      "IMPORTING": "Importing data",
-      "SUCCESS": "Data imported"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",

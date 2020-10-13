@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, EMPTY, fromEvent, merge, Observable, of, ReplaySubject, throwError } from 'rxjs';
+import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, throwError } from 'rxjs';
 import {
-  auditTime, catchError,
+  auditTime,
+  catchError,
   concatMap,
   debounceTime,
   distinctUntilChanged,
@@ -14,10 +15,11 @@ import {
   switchMap,
   take,
   tap,
-  throttleTime, timeout
+  throttleTime,
+  timeout
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { SyncProvider } from './sync-provider';
+import { SyncProvider } from './sync-provider.model';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -34,6 +36,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/ipc-events.const';
+import { GlobalConfigState } from '../../features/config/global-config.model';
 
 // TODO naming
 @Injectable({
@@ -104,23 +107,13 @@ export class SyncService {
     this._isOnlineTrigger$,
   );
   // ------------------------
+
   private _isInitialSyncEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    switchMap(() => combineLatest([
-        // GoogleDrive
-        this._globalConfigService.googleDriveSyncCfg$.pipe(
-          map(cfg => cfg && cfg.isEnabled && cfg.isLoadRemoteDataOnStartup && cfg.isAutoLogin),
-        ),
-        // Dropbox
-        this._globalConfigService.cfg$.pipe(
-          map(cfg => cfg.dropboxSync),
-          map(cfg => cfg && cfg.isEnabled && !!cfg.accessToken),
-        ),
-      ]).pipe(
-      map(all => all.includes(true)),
-      )
-    ),
+    switchMap(() => this._globalConfigService.cfg$),
+    map((cfg: GlobalConfigState) => cfg.sync.isEnabled),
     distinctUntilChanged(),
   );
+
   // keep it super simple for now
   private _isInitialSyncDoneManual$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
   private _isInitialSyncDone$: Observable<boolean> = this._isInitialSyncEnabled$.pipe(
@@ -129,7 +122,7 @@ export class SyncService {
         ? this._isInitialSyncDoneManual$.asObservable()
         : of(true);
     }),
-    startWith(false),
+    startWith(true),
   );
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
     filter(isDone => isDone),

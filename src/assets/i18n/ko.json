@@ -16,6 +16,12 @@
   "BL": {
     "NO_TASKS": "현재 백 로그에 작업이 없습니다."
   },
+  "CONFIRM": {
+    "AUTO_FIX": "데이터가 손상된 것 같습니다. 자동으로 수정 하시겠습니까? 이로 인해 데이터가 부분적으로 손실 될 수 있습니다.",
+    "DELETE_STRAY_BACKUP": "이 대화 상자가 표시되지 않도록 뒷면을 삭제 하시겠습니까?",
+    "RESTORE_FILE_BACKUP": "데이터가없는 것 같지만 \"{{dir}}\"에서 사용 가능한 백업이 있습니다. {{from}}에서 최신 백업을 복원 하시겠습니까?",
+    "RESTORE_STRAY_BACKUP": "마지막 동기화 중에 오류가 발생했을 수 있습니다. 마지막 백업을 복원 하시겠습니까?"
+  },
   "DATETIME_INPUT": {
     "IN": " {{time}}에",
     "TOMORROW": "내일 {{time}}"
@@ -77,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "빈 데이터 개체를 동기화하려고합니다. 이것이 (거의) 처녀 앱의 첫 번째 동기화입니까?",
-        "FORCE_IMPORT": "그래도 원격 데이터를 가져 오시겠습니까?",
-        "FORCE_UPLOAD": "그래도 로컬 데이터를 업로드 하시겠습니까?",
-        "FORCE_UPLOAD_AFTER_ERROR": "로컬 데이터를 업로드하는 동안 오류가 발생했습니다. 강제로 업데이트 하시겠습니까?",
-        "TRY_LOAD_REMOTE_AGAIN": "원격에서 데이터를 다시로드 하시겠습니까?"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "마지막 변경:",
-        "LAST_SYNC": "마지막 동기화 :",
-        "LOCAL": "노동 조합 지부",
-        "LOCAL_REMOTE": "로컬-> 원격",
-        "REMOTE": "먼",
-        "TEXT": "<p>Dropbox에서 업데이트. 로컬 및 원격 데이터가 모두 수정 된 것 같습니다.</p>",
-        "TITLE": "보관 용 계정 : 데이터 충돌",
-        "USE_LOCAL": "현지 사용",
-        "USE_REMOTE": "리모컨 사용"
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "토큰 생성",
-        "FOLLOW_LINK": "다음 링크를 열고 제공된 인증 코드를 입력 필드에 복사하십시오.",
-        "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)",
-        "L_AUTH_CODE": "인증 코드",
-        "L_ENABLE_SYNCING": "Dropbox 동기화 사용",
-        "L_SYNC_INTERVAL": "동기화 간격",
-        "TITLE": "Dropbox를 통한 동기화 (권장)"
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox : 인증 코드에서 액세스 토큰을 생성 할 수 없습니다",
         "ACCESS_TOKEN_GENERATED": "Dropbox : 인증 코드에서 생성 된 액세스 토큰",
@@ -205,51 +184,9 @@
         "CREATE_SYNC_FILE": "Google 드라이브 : <strong>\"{{fileName}}\"</strong> 이름의 파일이 없습니다. <strong>Google 드라이브의 동기화 파일로</strong> 파일을 만드시겠습니까?",
         "USE_EXISTING_SYNC_FILE": "Google 드라이브 : <strong>기존</strong> 파일 <strong>\"{{fileName}}\"</strong> 을 동기화 파일로 사용 하시겠습니까? 그렇지 않은 경우 동기화 파일 이름을 변경하십시오."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "마지막 수정 :",
-        "LAST_SYNC": "마지막 동기화",
-        "LOCAL": "노동 조합 지부",
-        "LOCAL_REMOTE": "로컬 <=> 원격",
-        "OVERWRITE_LOCAL": "로컬 데이터 덮어 쓰기",
-        "OVERWRITE_REMOTE": "원격 데이터 덮어 쓰기",
-        "REMOTE": "먼",
-        "TEXT": "<p>구글 드라이브 백업에서 업데이트. 로컬 데이터와 원격 데이터가 모두 수정된 것 같습니다. 저장되지 않은 로컬 변경 내용을 덮어쓰시겠습니까? <strong>모든 데이터는</strong>영원히 손실됩니다.</p>",
-        "TITLE": "GDrive Update로 로컬 데이터 덮어 쓰기?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "마지막 수정 :",
-        "LAST_SYNC": "마지막 동기화",
-        "LOCAL": "노동 조합 지부",
-        "LOCAL_REMOTE": "로컬 <=> 원격",
-        "OVERWRITE_LOCAL": "로컬 데이터 덮어 쓰기",
-        "OVERWRITE_REMOTE": "원격 데이터 덮어 쓰기",
-        "REMOTE": "먼",
-        "TEXT": "  <p>Google 드라이브에 로컬로 설치하지 않은 일부 변경 사항이있는 것 같습니다. 어쨌든 덮어 쓰시겠습니까?</p>",
-        "TITLE": "저장되지 않은 데이터를 Google 드라이브에 덮어 쓰시겠습니까?"
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "Google 드라이브 : 원격 업데이트가 있습니다! 다운로드 중 ...",
-        "ERROR": "Google 드라이브 - 오류 : {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google 드라이브 : 처음 데이터를 가져 오는 중에 오류가 발생했습니다.",
-        "LOCAL_UP_TO_DATE": "Google 드라이브 : 로컬 데이터가 이미 최신 상태입니다.",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "이름이 \"{{newFileName}}\"인 파일이 여러 개 있습니다. 하나만 제외하고 모두 삭제하거나 다른 이름을 선택하십시오.",
-        "NO_UPDATE_REQUIRED": "Google 드라이브 : 업데이트 필요 없음",
-        "REMOTE_UP_TO_DATE": "Google 드라이브 : 원격 데이터가 이미 최신 상태입니다.",
-        "SUCCESS": "Google 드라이브 : 백업을 저장했습니다.",
-        "SYNCING": "Google 드라이브 : 동기화 중"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "앱 시작시 자동 로그인",
-        "AUTO_SYNC": "데이터를 원격으로 자동 동기화",
-        "BACKUP_NOW": "백업 지금",
-        "COMPRESS": "데이터 압축",
-        "ENABLE": "Google 드라이브를 통한 동기화 사용",
-        "LOAD_FROM": "GDrive에서로드",
-        "LOAD_ON_STARTUP": "시작시 원격 데이터로드",
-        "NOTIFY": "동기화 할 때 알림",
-        "SYNC_FILE_NAME": "파일 이름 동기화",
-        "SYNC_INTERVAL": "동기화 간격",
-        "UPDATE_SYNC_FILE": "동기화 파일 업데이트"
+        "UPDATED_SYNC_FILE_NAME": "Google 드라이브 : 업데이트 된 동기화 파일 이름"
       },
       "S_API": {
         "ERR": "GoogleApi 오류 : {{errStr}}",
@@ -575,6 +512,57 @@
         "TYPE_STOPWATCH": "스톱워치"
       }
     },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "빈 데이터 개체를 동기화하려고합니다. 이것이 (거의) 처녀 앱의 첫 번째 동기화입니까?",
+        "FORCE_IMPORT": "그래도 원격 데이터를 가져 오시겠습니까?",
+        "FORCE_UPLOAD": "그래도 로컬 데이터를 업로드 하시겠습니까?",
+        "FORCE_UPLOAD_AFTER_ERROR": "로컬 데이터를 업로드하는 동안 오류가 발생했습니다. 강제로 업데이트 하시겠습니까?",
+        "NO_REMOTE_DATA": "원격 데이터가 없습니다. 원격에 로컬을 업로드 하시겠습니까?",
+        "TRY_LOAD_REMOTE_AGAIN": "원격에서 데이터를 다시로드 하시겠습니까?"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "마지막 변경:",
+        "LAST_SYNC": "마지막 동기화 :",
+        "LOCAL": "노동 조합 지부",
+        "LOCAL_REMOTE": "로컬-> 원격",
+        "REMOTE": "먼",
+        "TEXT": "<p>Dropbox에서 업데이트. 로컬 및 원격 데이터가 모두 수정 된 것 같습니다.</p>",
+        "TITLE": "보관 용 계정 : 데이터 충돌",
+        "USE_LOCAL": "현지 사용",
+        "USE_REMOTE": "리모컨 사용"
+      },
+      "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "토큰 생성",
+          "FOLLOW_LINK": "다음 링크를 열고 제공된 인증 코드를 입력 필드에 복사하십시오.",
+          "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)",
+          "L_AUTH_CODE": "인증 코드"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "데이터 압축",
+          "L_SYNC_FILE_NAME": "파일 이름 동기화"
+        },
+        "L_ENABLE_SYNCING": "동기화 활성화",
+        "L_SYNC_INTERVAL": "동기화 간격",
+        "L_SYNC_PROVIDER": "동기화 제공자",
+        "TITLE": "동조",
+        "WEB_DAV": {
+          "CORS_INFO": "<strong>실험적 !!</strong> 이 작업을 수행하려면 Nextcloud 인스턴스에 대한 CORS를 비활성화하거나 제한해야합니다. 이는 보안에 부정적인 영향을 미칠 수 있습니다. 자세한 내용은 <a href='https://github.com/nextcloud/server/issues/3131'>이 스레드</a> 를 참조하십시오. 자신의 책임하에 사용하십시오!",
+          "L_BASE_URL": "기본 URL",
+          "L_PASSWORD": "암호",
+          "L_SYNC_FILE_PATH": "동기화 파일 경로",
+          "L_USER_NAME": "사용자 이름"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "데이터를 가져 오는 중에 문제가 발생했습니다. 로컬 백업으로 되돌아갑니다.",
+        "ERROR_INVALID_DATA": "동기화하는 동안 오류가 발생했습니다. 유효하지 않은 데이터",
+        "IMPORTING": "데이터 가져 오기",
+        "SUCCESS": "가져온 데이터",
+        "UNKNOWN_ERROR": "동기화하는 동안 알 수없는 오류가 발생했습니다. 콘솔을 확인하십시오."
+      }
+    },
     "TAG": {
       "D_CREATE": {
         "CREATE": "태그 생성",
@@ -749,6 +737,10 @@
         "ALREADY_DID": "벌써 했어.",
         "SNOOZE": "다시 알림 {{time}}"
       },
+      "B_TTR": {
+        "ADD_TO_TASK": "작업에 추가",
+        "MSG": " {{time}}에 대한 시간을 추적하지 않았습니다."
+      },
       "D_IDLE": {
         "BREAK": "단절",
         "CREATE_AND_TRACK": "<em></em> 만들기 및 추적 :",
@@ -757,6 +749,13 @@
         "TASK": "태스크",
         "TASK_BREAK": "작업 나누기",
         "TRACK_TO": "추적 대상 :"
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em></em> 생성 및 추적",
+        "IDLE_FOR": "당신은 유휴 상태였습니다.",
+        "TASK": "태스크",
+        "TRACK_TO": "추적 대상 :",
+        "UNTRACKED_TIME": "추적되지 않은 시간 :"
       }
     },
     "WORKLOG": {
@@ -854,10 +853,6 @@
       "IS_HIDE_EVALUATION_SHEET": "일일 요약에서 평가 시트 숨기기",
       "TITLE": "평가 및 측정 항목"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "여기에서 하나의 Google 드라이브 파일간에 자동 동기화되도록 앱을 구성 할 수 있습니다. 모든 데이터는 암호화되지 않은 상태로 저장되므로 실수로이 파일을 누군가와 공유하지 않도록하십시오.",
-      "TITLE": "Google 드라이브를 통해 동기화"
-    },
     "IDLE": {
       "HELP": "<div><p>유휴 시간 처리가 활성화되면 유휴 상태 일 때 지정된 시간 후에 대화 상자가 열리고 시간을 추적하려는 작업이 있는지 여부를 확인합니다.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "유휴 시간 처리 사용",
@@ -932,6 +927,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "지정되지 않은 경우 작업에 사용할 기본 프로젝트",
+      "FIRST_DAY_OF_WEEK": "요일",
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "작업에 사용할 오늘 태그를 자동으로 추가",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
@@ -974,6 +970,13 @@
       "MIN_WORKING_TIME": "트리거가없는 X 작업 후 휴식 알림을받습니다.",
       "MOTIVATIONAL_IMG": "동기 부여 이미지 (웹 URL)",
       "TITLE": "휴식 알림"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "시간 추적을 시작하는 것을 잊은 경우 표시 할 배너를 구성하십시오.",
+      "L_IS_ENABLED": "사용",
+      "L_IS_SHOW_ON_MOBILE": "모바일 앱에 표시",
+      "L_MIN_TIME": "배너를 표시하기 전에 기다려야하는 시간",
+      "TITLE": "시간 추적 알림"
     }
   },
   "GLOBAL_SNACK": {
@@ -993,7 +996,8 @@
     "GDRIVE_DOWNLOAD": "Google 드라이브 : 파일 다운로드 ...",
     "GDRIVE_UPLOAD": "Google 드라이브 : 파일 업로드 ...",
     "GITHUB_LOAD_ISSUE": "Github : 이슈 데이터로드 ...",
-    "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ..."
+    "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ...",
+    "UNKNOWN": "원격 데이터로드"
   },
   "MH": {
     "ADD_NEW_TASK": "새 작업 추가",
@@ -1090,14 +1094,6 @@
     "SYNC_EXPORT": "동기화 및 내보내기",
     "TAG_SETTINGS": "태그 별 설정",
     "TOGGLE_DARK_MODE": "어두운 모드 전환"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "데이터를 가져 오는 중에 문제가 발생했습니다. 로컬 백업으로 되돌아갑니다.",
-      "ERROR_INVALID_DATA": "동기화하는 동안 오류가 발생했습니다. 유효하지 않은 데이터",
-      "IMPORTING": "데이터 가져 오기",
-      "SUCCESS": "가져온 데이터"
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",

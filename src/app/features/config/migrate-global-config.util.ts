@@ -2,8 +2,9 @@ import { GlobalConfigState, IdleConfig, TakeABreakConfig } from './global-config
 import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
+import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 1.3;
+const MODEL_VERSION = 2.0;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
   if (!isMigrateModel(globalConfigState, MODEL_VERSION, 'GlobalConfig')) {
@@ -15,6 +16,8 @@ export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): 
 
   // NOTE: needs to run before default stuff
   globalConfigState = _migrateUndefinedShortcutsToNull(globalConfigState);
+
+  globalConfigState = _migrateSyncCfg(globalConfigState);
 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
   globalConfigState = _extendConfigDefaults(globalConfigState);
@@ -100,6 +103,47 @@ const _migrateUndefinedShortcutsToNull = (config: GlobalConfigState): GlobalConf
   return {
     ...config,
     keyboard: keyboardCopy,
+  };
+};
+
+const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
+  if (config.sync) {
+    return config;
+  }
+
+  let prevProvider: SyncProvider | null = null;
+  let syncInterval: number = 0;
+  if ((config as any).dropboxSync.isEnabled) {
+    prevProvider = SyncProvider.Dropbox;
+    syncInterval = (config as any).dropboxSync.syncInterval;
+  }
+  if ((config as any).googleDriveSync.isEnabled) {
+    prevProvider = SyncProvider.GoogleDrive;
+    syncInterval = (config as any).googleDriveSync.syncInterval;
+  }
+
+  return {
+    ...config,
+    sync: !!prevProvider
+      ? {
+        isEnabled: true,
+        syncInterval,
+        syncProvider: prevProvider,
+        dropboxSync: {
+          accessToken:  (config as any).dropboxSync.accessToken,
+          authCode:  (config as any).dropboxSync.authCode,
+        },
+        googleDriveSync: {
+          ...(config as any).googleDriveSync,
+        },
+        webDav: {
+          password: null,
+          syncFilePath: null,
+          userName: null,
+          baseUrl: null,
+        }
+      }
+      : DEFAULT_GLOBAL_CONFIG.sync,
   };
 };
 

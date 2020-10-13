@@ -86,3 +86,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   taskArchive: createEmptyEntity(),
   taskRepeatCfg: initialTaskRepeatCfgState,
 };
+
+export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;
+
+export type SyncGetRevResult = 'NO_REMOTE_DATA' | 'UNKNOWN_ERROR' | 'AUTH_ERROR';

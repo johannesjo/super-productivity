@@ -7,7 +7,6 @@ import {
   GlobalConfigSectionKey,
   GlobalConfigState,
   GlobalSectionConfig,
-  GoogleDriveSyncConfig,
   IdleConfig,
   MiscConfig,
   SoundConfig,
@@ -16,7 +15,6 @@ import {
 import {
   selectConfigFeatureState,
   selectEvaluationConfig,
-  selectGoogleDriveSyncConfig,
   selectIdleConfig,
   selectMiscConfig,
   selectSoundConfig,
@@ -32,11 +30,6 @@ export class GlobalConfigService {
   cfg$: Observable<GlobalConfigState> = this._store.pipe(
     select(selectConfigFeatureState),
     distinctUntilChanged(distinctUntilChangedObject),
-    shareReplay(1),
-  );
-
-  googleDriveSyncCfg$: Observable<GoogleDriveSyncConfig> = this._store.pipe(
-    select(selectGoogleDriveSyncConfig),
     shareReplay(1),
   );
 

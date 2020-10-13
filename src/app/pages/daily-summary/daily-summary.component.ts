@@ -7,16 +7,15 @@ import { Observable, Subscription } from 'rxjs';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 import { filter, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import * as moment from 'moment';
 import { T } from '../../t.const';
 import { ElectronService } from '../../core/electron/electron.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { DropboxSyncService } from '../../features/dropbox/dropbox-sync.service';
 import { Task } from '../../features/tasks/task.model';
 import { ipcRenderer } from 'electron';
+import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -89,13 +88,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     public readonly configService: GlobalConfigService,
     public readonly workContextService: WorkContextService,
     private readonly _taskService: TaskService,
-    private readonly _googleDriveSync: GoogleDriveSyncService,
-    private readonly _dropboxSync: DropboxSyncService,
     private readonly _router: Router,
     private readonly _matDialog: MatDialog,
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
+    private readonly _syncProviderService: SyncProviderService,
   ) {
     this._taskService.setSelectedId(null);
   }
@@ -181,23 +179,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   private async _finishDayForGood(cb?: any) {
-    if (this.configService.cfg
-      && this.configService.cfg.googleDriveSync.isEnabled
-      && this.configService.cfg.googleDriveSync.isAutoSyncToRemote) {
-      // login in again, will hopefully prevent google errors
-      // this._googleApiService.login().then(() => {
-      this._googleDriveSync.saveForSync();
-      await this._googleDriveSync.onSaveEnd$.pipe(take(1)).toPromise();
-      this._initSuccessAnimation(cb);
-      // });
-    } else if (this.configService.cfg
-      && this.configService.cfg.dropboxSync
-      && this.configService.cfg.dropboxSync.isEnabled && this.configService.cfg.dropboxSync.accessToken) {
-      await this._dropboxSync.sync();
-      this._initSuccessAnimation(cb);
-    } else {
-      this._initSuccessAnimation(cb);
+    const syncCfg = this.configService.cfg?.sync;
+    if (syncCfg?.isEnabled) {
+      await this._syncProviderService.sync();
     }
+    this._initSuccessAnimation(cb);
   }
 
   private _initSuccessAnimation(cb?: any) {
