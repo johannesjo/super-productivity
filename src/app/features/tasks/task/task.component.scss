@@ -126,8 +126,6 @@
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
     border-radius: 12px !important;
-    bottom: -1px;
-    top: -1px;
     box-shadow: $task-active-shadow-light;
 
     @include mq(xs) {
