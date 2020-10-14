@@ -1,6 +1,7 @@
 <form (submit)="addTask()"
-      [class.mat-elevation-z1]="!isElevated"
-      [class.mat-elevation-z2]="isElevated"
+      [class.mat-elevation-z3]="!isElevated"
+      [class.mat-elevation-z4]="isElevated"
+      [class.isElevated]="isElevated"
       class="add-task-form">
   <div class="input-wrapper">
     <div *ngIf="(isLoading$|async)"

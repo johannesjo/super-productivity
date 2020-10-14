@@ -35,6 +35,7 @@ $short-syntax-bar-height: 28px;
   position: relative;
   color: #000000;
   border-radius: $card-border-radius;
+  overflow: hidden;
 
   @include darkTheme {
     color: #eeeeee;
@@ -62,10 +63,19 @@ $short-syntax-bar-height: 28px;
 
     color: #000000;
     background: #ffffff;
+  }
 
+  input {
+    @include darkTheme {
+      background-color: $dark-theme-bg-lighter;
+      color: $dark-theme-text-color-most-intense;
+    }
+  }
+
+  &.isElevated input {
     @include darkTheme {
       background-color: $dark-theme-bg-lightest;
-      color: #eeeeee;
+      color: $dark-theme-text-color-most-intense;
     }
   }
 }
