@@ -337,7 +337,7 @@
       background: $task-c-current-bg-dark;
     }
 
-    .sub-tasks.sub-tasks.sub-tasks ::ng-deep & {
+    :host-context(.isDarkTheme) .sub-tasks.sub-tasks ::ng-deep & {
       background: $sub-task-c-bg-dark;
     }
   }
