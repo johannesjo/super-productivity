@@ -21,6 +21,7 @@ body {
   }
 
   &:before {
+    transition: 1s opacity;
     content: '';
     position: absolute;
     top: 0;
@@ -28,6 +29,7 @@ body {
     right: 0;
     bottom: 0;
     pointer-events: none;
+    opacity: 0;
   }
 
 
@@ -39,6 +41,7 @@ body {
     }
 
     &:before {
+      opacity: 1;
       filter: saturate(0.8);
       background: linear-gradient(180deg, $c-primary-50 0, $c-primary-100 85%, $c-primary-200 100%);
     }
@@ -53,6 +56,7 @@ body {
     }
 
     &:before {
+      opacity: 1;
       filter: brightness(0.7) saturate(0.6);
       background: linear-gradient(180deg, $dark-theme-bg 0, $c-primary-900 20%, $c-primary-800 50%, $c-primary-700 100%);
       background: linear-gradient(180deg, $dark-theme-bg 0, $c-primary-900 20%, $c-primary-800 100%);

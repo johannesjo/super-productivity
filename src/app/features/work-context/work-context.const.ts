@@ -14,7 +14,7 @@ export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
 
 export const DEFAULT_PROJECT_COLOR = '#29a1aa';
 export const DEFAULT_TAG_COLOR = '#a05db1';
-export const DEFAULT_TODAY_TAG_COLOR = '#0b77d2';
+export const DEFAULT_TODAY_TAG_COLOR = '#6495ED';
 
 export const WORK_CONTEXT_DEFAULT_THEME: WorkContextThemeCfg = {
   isAutoContrast: true,
