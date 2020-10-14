@@ -461,6 +461,7 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
         "HELP": "Theme settings for your project.",
+        "L_BACKGROUND_IMAGE": "Background Image Url",
         "L_COLOR_ACCENT": "Accent Color",
         "L_COLOR_PRIMARY": "Primary Color",
         "L_COLOR_WARN": "Warn/Error Color",

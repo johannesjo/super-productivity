@@ -25,6 +25,7 @@ export const WORK_CONTEXT_DEFAULT_THEME: WorkContextThemeCfg = {
   hueAccent: '500',
   warn: '#e11826',
   hueWarn: '500',
+  backgroundImage: null,
 };
 
 export const WORK_CONTEXT_DEFAULT_COMMON: WorkContextCommon = {
@@ -131,6 +132,14 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
       type: 'checkbox',
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_IS_DISABLE_BACKGROUND_GRADIENT,
+      },
+    },
+    {
+      key: 'backgroundImage',
+      type: 'input',
+      templateOptions: {
+        label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE,
+        description: '* https://some/cool.jpg, file:///home/user/bg.png',
       },
     },
   ]

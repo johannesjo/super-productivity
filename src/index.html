@@ -58,6 +58,10 @@ TODO configure more restrictive Content-Security-Policy
         http-equiv="Content-Security-Policy">
   <base href="./">
   <style type="text/css">
+    body {
+      background-size: cover;
+      background-position: center;
+    }
     .loading-full-page-wrapper {
       position: absolute;
       top: 0;
@@ -201,6 +205,8 @@ TODO configure more restrictive Content-Security-Policy
   var randomIndex = Math.floor(Math.random() * productivityTips.length);
   document.getElementById('heading').innerText = productivityTips[randomIndex][0];
   document.getElementById('text').innerText = productivityTips[randomIndex][1];
+
+
 </script>
 </body>
 </html>

@@ -83,8 +83,9 @@ bookmark-bar {
   flex-direction: column;
 }
 
-mat-sidenav-container {
-  background: transparent !important;
+mat-sidenav-container.mat-sidenav-container {
+  background-size: cover !important;
+  background-position: center !important;
 }
 
 mat-sidenav,
