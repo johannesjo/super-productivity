@@ -185,6 +185,24 @@ describe('shortSyntax', () => {
       });
     });
 
+    it('should add new "asd #asd" tag', () => {
+      const t = {
+        ...TASK,
+        title: 'asd #asd',
+        tagIds: []
+      };
+      const r = shortSyntax(t, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: ['asd'],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'asd',
+        }
+      });
+    });
+
     it('should not add tags for sub tasks', () => {
       const t = {
         ...TASK,

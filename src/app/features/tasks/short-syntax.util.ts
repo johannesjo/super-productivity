@@ -126,7 +126,8 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChange
         .map(title => title.trim().replace(CH_TAG, ''))
         .filter(newTagTitle =>
           newTagTitle.length >= 1
-          && initialTitle.trim().indexOf(newTagTitle) > 4
+          // NOTE: we check this to not trigger for "#123 blasfs dfasdf"
+          && initialTitle.trim().lastIndexOf(newTagTitle) > 4
         );
 
       const tagIdsToAdd: string[] = [];
