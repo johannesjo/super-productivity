@@ -54,8 +54,8 @@ export const initIndicator = ({
       trayIcoFile = 'tray-icoTemplate.png';
     } else {
       trayIcoFile = nativeTheme.shouldUseDarkColors
-        ? 'tray-ico.png'
-        : 'tray-icoTemplate.png';
+        ? 'tray-ico-d.png'
+        : 'tray-ico-l.png';
     }
 
     tray = new Tray(ICONS_FOLDER + trayIcoFile);
