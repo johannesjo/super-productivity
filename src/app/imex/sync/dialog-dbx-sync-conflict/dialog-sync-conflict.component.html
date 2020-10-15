@@ -4,20 +4,23 @@
   <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT|translate"></div>
 
   <table>
-    <tr>
+    <tr [class.isHighlight]="isHighlightRemote">
       <td>{{T.F.SYNC.D_CONFLICT.REMOTE|translate}}</td>
       <td>{{T.F.SYNC.D_CONFLICT.LAST_CHANGE|translate}}</td>
-      <td>{{remote}}</td>
+      <td>{{remoteDate}}</td>
+      <td>{{remoteTime}}</td>
     </tr>
-    <tr>
+    <tr [class.isHighlight]="isHighlightLocal">
       <td>{{T.F.SYNC.D_CONFLICT.LOCAL|translate}}</td>
       <td>{{T.F.SYNC.D_CONFLICT.LAST_CHANGE|translate}}</td>
-      <td>{{local}}</td>
+      <td>{{localDate}}</td>
+      <td>{{localTime}}</td>
     </tr>
     <tr>
       <td>{{T.F.SYNC.D_CONFLICT.LOCAL_REMOTE|translate}}</td>
       <td>{{T.F.SYNC.D_CONFLICT.LAST_SYNC|translate}}</td>
-      <td>{{lastSync}}</td>
+      <td>{{lastDate}}</td>
+      <td>{{lastTime}}</td>
     </tr>
   </table>
 </mat-dialog-content>

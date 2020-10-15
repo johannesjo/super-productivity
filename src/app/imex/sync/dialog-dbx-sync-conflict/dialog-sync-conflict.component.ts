@@ -13,9 +13,16 @@ import { DialogConflictResolutionResult } from '../sync.model';
 export class DialogSyncConflictComponent {
   T: typeof T = T;
 
-  remote: string = this._formatDate(this.data.remote);
-  local: string = this._formatDate(this.data.local);
-  lastSync: string = this._formatDate(this.data.lastSync);
+  remoteDate: string = this._formatDate(this.data.remote);
+  localDate: string = this._formatDate(this.data.local);
+  lastDate: string = this._formatDate(this.data.lastSync);
+
+  remoteTime: string = this._formatTime(this.data.remote);
+  localTime: string = this._formatTime(this.data.local);
+  lastTime: string = this._formatTime(this.data.lastSync);
+
+  isHighlightRemote: boolean = this.data.remote >= this.data.local;
+  isHighlightLocal: boolean = this.data.local >= this.data.remote;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogSyncConflictComponent>,
@@ -33,6 +40,10 @@ export class DialogSyncConflictComponent {
   }
 
   private _formatDate(date: Date | string | number) {
-    return moment(date).format('DD-MM-YYYY --- hh:mm:ss');
+    return moment(date).format('DD-MM-YYYY');
+  }
+
+  private _formatTime(date: Date | string | number) {
+    return moment(date).format('hh:mm:ss');
   }
 }
