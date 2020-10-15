@@ -97,6 +97,9 @@
     transition: $transition-enter;
     transition-property: left, right, box-shadow;
     box-shadow: $task-selected-shadow-light;
+    // because of the shadow, this looks better
+    //bottom: 2px;
+
     @include darkTheme {
       box-shadow: $task-selected-shadow-dark;
     }
@@ -116,6 +119,9 @@
 
   @include isHostFocus('.inner-wrapper') {
     border-radius: $task-border-radius;
+    // because of the border, this looks better
+    //top: 2px;
+    //bottom: 2px;
 
     @include mq(xs) {
       // NOTE: somehow ng build messes up, if we don't include it like that
@@ -126,11 +132,15 @@
   }
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
-    border-radius: 12px !important;
-    box-shadow: $task-active-shadow-light;
+    border-radius: $task-border-radius !important;
+    box-shadow: $task-current-shadow-light;
+    // because of the shadow, this looks better
+    //bottom: 2px;
 
     @include mq(xs) {
-      transform: scale($task-current-task-zoom);
+      //transform: scale($task-current-task-zoom);
+      left: -1 * ($task-border-radius);
+      right: -1 * ($task-border-radius);
     }
   }
 
@@ -142,7 +152,7 @@
 
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
     background: $task-c-current-bg-dark;
-    box-shadow: $task-active-shadow-dark;
+    box-shadow: $task-current-shadow-dark;
   }
 
 
