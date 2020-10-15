@@ -10,6 +10,7 @@
 :host-context(.isDarkTheme) {
   color: $task-text-c-dark;
 }
+
 :host-context(.isDarkTheme.isSelected),
 :host-context(.isDarkTheme.isCurrent) {
   color: $dark-theme-text-color-most-intense;
@@ -339,6 +340,14 @@
 
     :host-context(.isDarkTheme) .sub-tasks.sub-tasks ::ng-deep & {
       background: $sub-task-c-bg-dark;
+    }
+
+    :host-context(.isDarkTheme) .sub-tasks.sub-tasks ::ng-deep .isSelected & {
+      background: $task-c-selected-bg-dark;
+    }
+
+    :host-context(.isDarkTheme) .sub-tasks.sub-tasks ::ng-deep .isCurrent & {
+      background: $task-c-current-bg-dark;
     }
   }
 
