@@ -46,6 +46,10 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
     ...taskChanges,
     ...changesForTag.taskChanges
   };
+  taskChanges = {
+    ...taskChanges,
+    ...parseTimeSpentChanges(taskChanges)
+  };
 
   // const changesForDue = parseDueChanges({...task, title: taskChanges.title || task.title});
   // if (changesForDue.remindAt) {

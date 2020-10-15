@@ -386,4 +386,33 @@ describe('shortSyntax', () => {
 
   describe('due:', () => {
   });
+
+  describe('combined', () => {
+    it('should work when time comes first', () => {
+      const projects = [
+        {
+          title: 'ProjectEasyShort',
+          id: 'ProjectEasyShortID'
+        },
+      ] as any;
+      const t = {
+        ...TASK,
+        title: 'Fun title 10m/1h +ProjectEasyShort'
+      };
+      const r = shortSyntax(t, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: 'ProjectEasyShortID',
+        taskChanges: {
+          title: 'Fun title',
+          // timeSpent: 7200000,
+          timeSpentOnDay: {
+            [getWorklogStr()]: 600000
+          },
+          timeEstimate: 3600000
+        },
+      });
+    });
+  });
 });
