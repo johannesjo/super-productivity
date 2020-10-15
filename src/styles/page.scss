@@ -97,6 +97,11 @@ body {
     max-width: $component-max-width;
   }
 
+  @include mq(lg) {
+    padding: 0 3*$s $s*9;
+    max-width: $component-max-width +100;
+  }
+
   improvement-banner + & {
     padding-top: 0;
   }
