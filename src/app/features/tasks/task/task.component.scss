@@ -11,8 +11,8 @@
   color: $task-text-c-dark;
 }
 
-:host-context(.isDarkTheme.isSelected),
-:host-context(.isDarkTheme.isCurrent) {
+:host-context(.isDarkTheme).isSelected,
+:host-context(.isDarkTheme).isCurrent {
   color: $dark-theme-text-color-most-intense;
 }
 
