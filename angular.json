@@ -45,6 +45,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "",
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -69,7 +70,6 @@
               "serviceWorker": false
             },
             "productionWeb": {
-              "baseHref": "",
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -94,6 +94,7 @@
               "serviceWorker": true
             },
             "stage": {
+              "baseHref": "",
               "budgets": [
                 {
                   "type": "anyComponentStyle",
