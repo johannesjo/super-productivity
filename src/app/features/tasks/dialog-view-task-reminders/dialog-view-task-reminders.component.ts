@@ -39,6 +39,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       )
     )),
   );
+  isSingleOnToday$: Observable<boolean> = this.tasks$.pipe(
+    map((tasks) => (tasks.length === 1) && tasks[0] && tasks[0].tagIds.includes(TODAY_TAG.id)),
+  );
   isMultiple$: Observable<boolean> = this.tasks$.pipe(
     map(tasks => tasks.length > 1),
     takeWhile(isMultiple => !isMultiple, true)

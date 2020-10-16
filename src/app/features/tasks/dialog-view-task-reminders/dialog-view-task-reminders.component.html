@@ -99,7 +99,8 @@
         : T.F.TASK.D_REMINDER_VIEW.SNOOZE)|translate }}
       </button>
 
-      <button (click)="addAllToToday()"
+      <button *ngIf="!(isSingleOnToday$|async)"
+              (click)="addAllToToday()"
               [disabled]="isDisableControls"
               color="primary"
               mat-stroked-button
@@ -111,7 +112,7 @@
       </button>
 
       <button (click)="play()"
-              *ngIf="!isMultiple"
+              *ngIf="!isMultiple||(isSingleOnToday$|async)"
               [disabled]="isDisableControls"
               color="primary"
               mat-stroked-button
