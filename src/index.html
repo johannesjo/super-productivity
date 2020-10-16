@@ -58,10 +58,29 @@ TODO configure more restrictive Content-Security-Policy
         http-equiv="Content-Security-Policy">
   <base href="./">
   <style type="text/css">
+    html,
     body {
-      background-size: cover;
-      background-position: center;
+      height: 100%;
     }
+    body {
+      background-position: center !important;
+      background-repeat: no-repeat;
+      background-size: cover !important;
+      background-image: url(./assets/bg/NIGHT_manuel-will.jpg);
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      color: #fff;
+    }
+
+    @media (prefers-color-scheme: light) {
+      body {
+        background: transparent;
+        background-image: none;
+        color: #000000;
+      }
+    }
+
     .loading-full-page-wrapper {
       position: absolute;
       top: 0;
@@ -131,6 +150,7 @@ TODO configure more restrictive Content-Security-Policy
       padding-bottom: 10px;
     }
 
+
     .app-loading .productivity-tip h2 {
       font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
       margin: 0 0 8px !important;
@@ -154,7 +174,7 @@ TODO configure more restrictive Content-Security-Policy
     }
   </style>
 </head>
-<body class="mat-typography blue">
+<body class="mat-typography">
 <app-root>
   <div class="loading-full-page-wrapper">
     <div class="app-loading">

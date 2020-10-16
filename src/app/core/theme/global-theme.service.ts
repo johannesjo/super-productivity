@@ -32,6 +32,8 @@ export class GlobalThemeService {
   }
 
   init() {
+    // This is here to make web page reloads on non work context pages at least usable
+    this._setBackgroundGradient(true);
     this._initIcons();
     this._initHandlersForInitialBodyClasses();
     this._initThemeWatchers();
@@ -59,10 +61,12 @@ export class GlobalThemeService {
     this._materialCssVarsService.setWarnColor(theme.warn);
   }
 
-  private _setBackgroundGradient(isOn: boolean) {
-    if (isOn) {
+  private _setBackgroundGradient(isDisableBackgroundGradient: boolean) {
+    if (isDisableBackgroundGradient) {
       this.document.body.classList.add(BodyClass.isDisableBackgroundGradient);
+      this.document.body.classList.remove(BodyClass.isEnabledBackgroundGradient);
     } else {
+      this.document.body.classList.add(BodyClass.isEnabledBackgroundGradient);
       this.document.body.classList.remove(BodyClass.isDisableBackgroundGradient);
     }
   }

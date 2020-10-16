@@ -5,8 +5,9 @@ import {
   WORK_CONTEXT_DEFAULT_COMMON,
   WORK_CONTEXT_DEFAULT_THEME
 } from '../work-context/work-context.const';
+import { IS_MAC } from '../../util/is-mac';
 
-const IS_DARK: boolean = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const IS_USE_DARK: boolean = !IS_MAC || !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 export const TODAY_TAG: Tag = {
   id: 'TODAY',
@@ -21,7 +22,7 @@ export const TODAY_TAG: Tag = {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,
 
-    ...(IS_DARK
+    ...(IS_USE_DARK
       ? {
         isDisableBackgroundGradient: true,
         backgroundImage: 'assets/bg/NIGHT_manuel-will.jpg'
