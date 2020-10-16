@@ -1,3 +1,7 @@
+# [6.0.0-rc.2](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.1...v6.0.0-rc.2) (2020-10-16)
+
+
+
 # [6.0.0-rc.1](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.0...v6.0.0-rc.1) (2020-10-16)
 
 
