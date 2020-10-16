@@ -25,7 +25,8 @@ export const WORK_CONTEXT_DEFAULT_THEME: WorkContextThemeCfg = {
   hueAccent: '500',
   warn: '#e11826',
   hueWarn: '500',
-  backgroundImage: null,
+  backgroundImageDark: null,
+  backgroundImageLight: null,
 };
 
 export const WORK_CONTEXT_DEFAULT_COMMON: WorkContextCommon = {
@@ -135,10 +136,18 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
       },
     },
     {
-      key: 'backgroundImage',
+      key: 'backgroundImageDark',
       type: 'input',
       templateOptions: {
-        label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE,
+        label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_DARK,
+        description: '* https://some/cool.jpg, file:///home/user/bg.png',
+      },
+    },
+    {
+      key: 'backgroundImageLight',
+      type: 'input',
+      templateOptions: {
+        label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_LIGHT,
         description: '* https://some/cool.jpg, file:///home/user/bg.png',
       },
     },

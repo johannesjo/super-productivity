@@ -6,6 +6,7 @@ import {
   WORK_CONTEXT_DEFAULT_THEME
 } from '../work-context/work-context.const';
 import { IS_MAC } from '../../util/is-mac';
+import { WorkContextThemeCfg } from '../work-context/work-context.model';
 
 const IS_USE_DARK: boolean = !IS_MAC || !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -24,10 +25,10 @@ export const TODAY_TAG: Tag = {
 
     ...(IS_USE_DARK
       ? {
-        isDisableBackgroundGradient: true,
-        backgroundImage: 'assets/bg/NIGHT_manuel-will.jpg'
+        isDisableBackgroundGradient: false,
+        backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg'
       }
-      : {}),
+      : {}) as Partial<WorkContextThemeCfg>,
   }
 };
 
