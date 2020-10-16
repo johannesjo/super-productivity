@@ -1,3 +1,15 @@
+# [6.0.0-rc.1](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.0...v6.0.0-rc.1) (2020-10-16)
+
+
+### Features
+
+* **backgroundImage:** add default for dark theme ([a07287f](https://github.com/johannesjo/super-productivity/commit/a07287f0c0d12dbdf93297cdceefbcc98f9a5b2e))
+* **backgroundImage:** be consistent with default dark or light ([139485f](https://github.com/johannesjo/super-productivity/commit/139485f84120dee4cf35a1a2ba2b1b625626a461))
+* **backgroundImage:** show on page load as well ([0bc58c7](https://github.com/johannesjo/super-productivity/commit/0bc58c76b0e8710facdd34ac90ba0fee465eeaef))
+* **backgroundImage:** split up in dark and light theme background image ([f03589e](https://github.com/johannesjo/super-productivity/commit/f03589edb2f0692c000efd27a095e1a4551c3063))
+
+
+
 # [6.0.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v5.9.15...v6.0.0-rc.0) (2020-10-15)
 
 
