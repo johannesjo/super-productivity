@@ -1,4 +1,7 @@
 import { GlobalConfigState } from './global-config.model';
+import { IS_MAC } from '../../util/is-mac';
+
+export const IS_USE_DARK_THEME_AS_DEFAULT: boolean = !IS_MAC || !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 const minute = 60 * 1000;
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
@@ -6,7 +9,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     lng: null
   },
   misc: {
-    isDarkMode: true,
+    isDarkMode: IS_USE_DARK_THEME_AS_DEFAULT,
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
     isAutMarkParentAsDone: false,
