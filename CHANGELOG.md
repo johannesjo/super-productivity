@@ -1,3 +1,19 @@
+# [6.0.0-rc.4](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.3...v6.0.0-rc.4) (2020-10-17)
+
+
+### Bug Fixes
+
+* reload not working ([afca335](https://github.com/johannesjo/super-productivity/commit/afca335102250ea47909fc3b3d40884eba3b8def))
+* tray icon for mac build ([aafc941](https://github.com/johannesjo/super-productivity/commit/aafc941572a00b3c45db4b2138103da85c80af18))
+
+
+### Features
+
+* improve notes markdown panel styling ([441561a](https://github.com/johannesjo/super-productivity/commit/441561ac5297cc04e25eb7a697a4b426161ecf0a))
+* **reminder:** slightly improve view task reminder dialog ([156edf2](https://github.com/johannesjo/super-productivity/commit/156edf286f25465cbc71d0e6d50f671b8354d23d))
+
+
+
 # [6.0.0-rc.3](https://github.com/johannesjo/super-productivity/compare/v5.9.15...v6.0.0-rc.3) (2020-10-16)
 
 
