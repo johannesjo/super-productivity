@@ -111,7 +111,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
       min-height: 60px;
       border-radius: $card-border-radius* 1;
       overflow: visible !important;
-      box-shadow: $whiteframe-shadow-2dp;
+      transition: $transition-standard;
 
       @include lightTheme {
         background: $light-theme-bg;
@@ -124,8 +124,12 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     }
 
     &.isFocused .markdown-wrapper {
-      box-shadow: $whiteframe-shadow-5dp !important;
+      box-shadow: $whiteframe-shadow-3dp !important;
       border-color: transparent;
+
+      @include darkTheme() {
+        background: $dark-theme-bg-lightest;
+      }
     }
 
     .markdown-unparsed,
