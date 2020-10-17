@@ -134,6 +134,7 @@ function initWinEventListeners(app: any) {
 
   // TODO refactor quiting mess
   appCloseHandler(app);
+  appMinimizeHandler(app);
 }
 
 function createMenu(quitApp) {
@@ -208,6 +209,10 @@ const appCloseHandler = (
         mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
       } else {
         getSettings(mainWin, (appCfg) => {
+          if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
+            mainWin.hide()
+            return
+          }
           if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
             dialog.showMessageBox(mainWin,
               {
@@ -231,3 +236,18 @@ const appCloseHandler = (
     }
   });
 };
+
+const appMinimizeHandler = (
+  app: App,
+) => {
+  if(!(app as any).isQuiting) {
+    mainWin.on('minimize', (event) => {
+      getSettings(mainWin, (appCfg) => {
+        if(appCfg.misc.isMinimizeToTray) {
+          event.preventDefault()
+          mainWin.hide()
+        }
+      })
+    })
+  }
+}

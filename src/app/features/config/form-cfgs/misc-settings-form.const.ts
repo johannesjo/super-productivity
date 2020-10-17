@@ -64,6 +64,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isMinimizeToTray',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_MINIMIZE_TO_TRAY,
+      },
+    },
+    {
       key: 'defaultProjectId',
       type: 'project-select',
       templateOptions: {

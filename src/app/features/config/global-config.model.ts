@@ -12,6 +12,7 @@ export type MiscConfig = Readonly<{
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTurnOffMarkdown: boolean;
   isAutoAddWorkedOnToToday: boolean;
+  isMinimizeToTray: boolean;
   isDisableInitialDialog: boolean;
   defaultProjectId: string | null;
   firstDayOfWeek: number;
