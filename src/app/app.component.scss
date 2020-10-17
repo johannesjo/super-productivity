@@ -38,6 +38,13 @@
     overflow-x: hidden;
     @include scrollY();
   }
+
+  > ::ng-deep {
+    tag-task-page,
+    project-task-page {
+      overflow: hidden;
+    }
+  }
 }
 
 .backdrop {
