@@ -11,12 +11,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
-import static android.webkit.WebSettings.FORCE_DARK_ON;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -31,8 +28,10 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // if your build is in debug mode, enable inspecting of web views
-        if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
-            WebView.setWebContentsDebuggingEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
         }
 
         Log.v("TW", "onCreate");
@@ -70,14 +69,26 @@ public class FullscreenActivity extends AppCompatActivity {
             WebSettings wSettings = wv.getSettings();
 
             wSettings.setJavaScriptEnabled(true);
-            wSettings.setDomStorageEnabled(true);
             wSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
             wSettings.setLoadsImagesAutomatically(true);
-            wSettings.setLoadWithOverviewMode(true);
-            wSettings.setDatabaseEnabled(true);
-            wSettings.setGeolocationEnabled(true);
-            wSettings.setAppCacheEnabled(true);
-            wSettings.setMediaPlaybackRequiresUserGesture(false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1) {
+                wSettings.setDomStorageEnabled(true);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1) {
+                wSettings.setLoadWithOverviewMode(true);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
+                wSettings.setDatabaseEnabled(true);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
+                wSettings.setGeolocationEnabled(true);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1) {
+                wSettings.setAppCacheEnabled(true);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                wSettings.setMediaPlaybackRequiresUserGesture(false);
+            }
             wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 //            wSettings.setForceDark(FORCE_DARK_ON);
 
@@ -85,9 +96,12 @@ public class FullscreenActivity extends AppCompatActivity {
             // allow google login
             // @see https://stackoverflow.com/questions/45863004/how-some-apps-are-able-to-perform-google-login-successfully-in-android-webview
             // Force links and redirects to open in the WebView instead of in a browser
-//        wv.setWebViewClient(new WebViewClient());
+//            wv.setWebViewClient(new WebViewClient());
             wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-//        wSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CUPCAKE) {
+                wSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36");
+            }
+//            wSettings.setUserAgentString("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:61.0) Gecko/20100101 Firefox/61.0");
 //        wSettings.setUserAgentString(wSettings.getUserAgentString().replace("; wv",""));
 
             wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
@@ -96,12 +110,12 @@ public class FullscreenActivity extends AppCompatActivity {
             wv.addJavascriptInterface(jsi, "SUPAndroid");
 
             // needs to come last for some settings to take effect
-            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT && 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
                 wv.loadUrl("https://test-app.super-productivity.com");
-//                wv.loadUrl("http://10.0.2.2:4200");
+                //                wv.loadUrl("http://10.0.2.2:4200");
             } else {
                 wv.loadUrl("https://app.super-productivity.com");
-//                wv.loadUrl("https://test-app.super-productivity.com");
+                //                wv.loadUrl("https://test-app.super-productivity.com");
             }
         }
     }
