@@ -1,4 +1,4 @@
-import { App, ipcMain, Menu, Tray, nativeTheme } from 'electron';
+import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
 import { existsSync, readFileSync } from 'fs';
 // const dbus = require('./dbus');
 import { errorHandler } from './error-handler';
@@ -49,14 +49,9 @@ export const initIndicator = ({
   } else {
     // otherwise create a regular tray icon
     // switch tray icon based on
-    let trayIcoFile;
-    if (IS_MAC) {
-      trayIcoFile = 'tray-icoTemplate.png';
-    } else {
-      trayIcoFile = nativeTheme.shouldUseDarkColors
-        ? 'tray-ico-d.png'
-        : 'tray-ico-l.png';
-    }
+    const trayIcoFile = nativeTheme.shouldUseDarkColors
+      ? 'tray-ico-d.png'
+      : 'tray-ico-l.png';
 
     tray = new Tray(ICONS_FOLDER + trayIcoFile);
 
