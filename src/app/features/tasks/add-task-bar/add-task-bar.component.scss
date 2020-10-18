@@ -29,6 +29,11 @@
   }
 }
 
+:host-context(.isTouchOnly).global {
+  top: auto;
+  bottom: $s;
+}
+
 $short-syntax-bar-height: 28px;
 .add-task-form {
   width: 100%;
