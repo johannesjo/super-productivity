@@ -53,7 +53,7 @@
           <!--            <mat-icon>flight</mat-icon>-->
           <!--          </button>-->
           <button (click)="remove(project.id)"
-                  [disabled]="project.id === (workContextService.activeWorkContextId$|async)"
+                  [disabled]="project.id === defaultId"
                   [title]="T.PP.DELETE_PROJECT|translate"
                   color="warn"
                   mat-icon-button>

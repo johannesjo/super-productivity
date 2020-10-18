@@ -15,6 +15,7 @@ import { THEME_COLOR_MAP } from '../../app.constants';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { withLatestFrom } from 'rxjs/operators';
 import { ExportedProject } from '../../features/project/project-archive.model';
+import { DEFAULT_PROJECT_ID } from '../../features/project/project.const'
 
 @Component({
   selector: 'project-page',
@@ -26,6 +27,7 @@ import { ExportedProject } from '../../features/project/project-archive.model';
 export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   private _subs: Subscription = new Subscription();
+  private defaultId: string = DEFAULT_PROJECT_ID;
 
   constructor(
     public readonly projectService: ProjectService,
@@ -127,6 +129,9 @@ export class ProjectOverviewPageComponent implements OnInit, OnDestroy {
   }
 
   remove(projectId: string) {
+    if (projectId === this.defaultId) {
+      return;
+    }
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
