@@ -42,6 +42,7 @@ testem.log
 chromedriver.log
 e2e-test-results
 n2e/screenshots
+package-lock.json
 
 # System Files
 .DS_Store
