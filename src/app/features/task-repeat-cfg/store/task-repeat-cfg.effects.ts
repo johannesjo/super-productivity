@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { concatMap, filter, map, mergeMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, delay, filter, map, mergeMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { Action, select, Store } from '@ngrx/store';
 import {
   AddTaskRepeatCfgToTask,
@@ -42,6 +42,7 @@ export class TaskRepeatCfgEffects {
   @Effect() createRepeatableTasks: any = this._actions$.pipe(
     ofType(setActiveWorkContext),
     concatMap((() => this._syncService.afterInitialSyncDoneAndDataLoadedInitially$)),
+    delay(1000),
     concatMap(() => this._taskRepeatCfgService.taskRepeatCfgs$.pipe(
       take(1),
     )),

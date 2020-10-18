@@ -5,7 +5,7 @@ import { NoteModule } from '../note/note.module';
 import { MatDialog } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../app.constants';
 import { TasksModule } from '../tasks/tasks.module';
-import { concatMap, filter, first } from 'rxjs/operators';
+import { concatMap, delay, filter, first } from 'rxjs/operators';
 import { Reminder } from './reminder.model';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { NotifyService } from '../../core/notify/notify.service';
@@ -13,10 +13,7 @@ import { DialogViewNoteReminderComponent } from '../note/dialog-view-note-remind
 import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { throttle } from 'helpful-decorators';
-import { merge, timer } from 'rxjs';
 import { SyncService } from '../../imex/sync/sync.service';
-
-const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 
 @NgModule({
   declarations: [],
@@ -39,11 +36,9 @@ export class ReminderModule {
     this._dataInitService.isAllDataLoadedInitially$.pipe(concatMap(() =>
 
       // we do this to wait for syncing and the like
-      merge(
-        this._syncService.afterInitialSyncDoneAndDataLoadedInitially$,
-        timer(MAX_WAIT_FOR_INITIAL_SYNC),
-      ).pipe(
+      this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
         first(),
+        delay(1000),
       )))
       .subscribe(async () => {
         _reminderService.init();

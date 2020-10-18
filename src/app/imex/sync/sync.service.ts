@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, throwError } from 'rxjs';
+import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, throwError, timer } from 'rxjs';
 import {
   auditTime,
   catchError,
@@ -37,6 +37,8 @@ import { ElectronService } from '../../core/electron/electron.service';
 import { IpcRenderer } from 'electron';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
+
+const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 
 // TODO naming
 @Injectable({
@@ -124,12 +126,19 @@ export class SyncService {
     }),
     startWith(true),
   );
-  afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
+  private _afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
     filter(isDone => isDone),
     take(1),
     // should normally be already loaded, but if there is NO initial sync we need to wait here
     concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
-    shareReplay(1),
+  );
+
+  afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = merge(
+    this._afterInitialSyncDoneAndDataLoadedInitially$,
+    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true),
+    ).pipe(
+      shareReplay(1),
+    )
   );
 
   constructor(
