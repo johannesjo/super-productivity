@@ -15,7 +15,7 @@ import { THEME_COLOR_MAP } from '../../app.constants';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { withLatestFrom } from 'rxjs/operators';
 import { ExportedProject } from '../../features/project/project-archive.model';
-import { DEFAULT_PROJECT_ID } from '../../features/project/project.const'
+import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 
 @Component({
   selector: 'project-page',
