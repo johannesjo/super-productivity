@@ -24,6 +24,7 @@ import { Update } from '@ngrx/entity/src/models';
 import { unique } from '../../../util/unique';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { TaskWithSubTasks } from '../../tasks/task.model';
+import { migrateTagState } from '../migrate-tag-state.util';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -89,7 +90,7 @@ const _reducer = createReducer<TagState>(
   // ------------
   on(loadAllData, (oldState, {appDataComplete}) => _addMyDayTagIfNecessary(
     appDataComplete.tag
-      ? {...appDataComplete.tag}
+      ? migrateTagState({...appDataComplete.tag})
       : oldState)
   ),
 

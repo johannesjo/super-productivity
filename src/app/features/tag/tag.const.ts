@@ -20,11 +20,11 @@ export const TODAY_TAG: Tag = {
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,
+    backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
 
     ...(IS_USE_DARK_THEME_AS_DEFAULT
       ? {
         isDisableBackgroundGradient: false,
-        backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg'
       }
       : {}) as Partial<WorkContextThemeCfg>,
   }
