@@ -19,9 +19,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { truncate } from '../../util/truncate';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
-import { LS_SYNC_LOCAL_LAST_SYNC_CHECK } from '../../core/persistence/ls-keys.const';
 
-// TODO naming
 @Injectable({
   providedIn: 'root',
 })
@@ -86,8 +84,6 @@ export class SyncProviderService {
     const localSyncMeta = await this._persistenceLocalService.load();
     const lastSync = localSyncMeta[cp.id].lastSync;
     const localRev = localSyncMeta[cp.id].rev;
-
-    this._updateLocalLastSyncCheck(cp);
 
     // PRE CHECK 1
     // check if remote data & file revision changed
@@ -289,18 +285,6 @@ export class SyncProviderService {
       [cp.id]: {
         rev,
         lastSync,
-      }
-    });
-  }
-
-  private async _updateLocalLastSyncCheck(cp: SyncProviderServiceInterface): Promise<unknown> {
-    localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC_CHECK + cp.id, Date.now().toString());
-    const localSyncMeta = await this._persistenceLocalService.load();
-    return this._persistenceLocalService.save({
-      ...localSyncMeta,
-      [cp.id]: {
-        ...localSyncMeta[cp.id],
-        lastSync: Date.now(),
       }
     });
   }
