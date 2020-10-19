@@ -1,3 +1,26 @@
+# [6.0.0-rc.5](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.4...v6.0.0-rc.5) (2020-10-19)
+
+
+### Bug Fixes
+
+* **sync:** lastSync being newer than local [#596](https://github.com/johannesjo/super-productivity/issues/596) ([622f9ab](https://github.com/johannesjo/super-productivity/commit/622f9ab656234663f81198ba3d9d2e6a0a0d55c6))
+* background image not being displayed ([2781448](https://github.com/johannesjo/super-productivity/commit/2781448b696091258c9ba566f1f46bedf1c1855c))
+* fullscreen textarea for firefox [#308](https://github.com/johannesjo/super-productivity/issues/308) ([1d0ad2e](https://github.com/johannesjo/super-productivity/commit/1d0ad2e055e9cd9a33472cdcc57120f876e87d81))
+* get rid of excess scrollbar ([f1799b7](https://github.com/johannesjo/super-productivity/commit/f1799b7c8609d7b57876cb8797985e044ac282e2))
+
+
+### Features
+
+* **sync:** use idb rather than localStorage to avoid issues with deleted ls after crash  [#596](https://github.com/johannesjo/super-productivity/issues/596) ([c8d4b09](https://github.com/johannesjo/super-productivity/commit/c8d4b094ed90c989230091e958e00b38cbdf56a1))
+* add minimize to tray [#376](https://github.com/johannesjo/super-productivity/issues/376) ([4a495f9](https://github.com/johannesjo/super-productivity/commit/4a495f96c5fdc79e20dbb0a6a1572a3a8835f342))
+* add new quote ([f5366c7](https://github.com/johannesjo/super-productivity/commit/f5366c7ea10e81f84e0acae9edbe34f4bd1230f0))
+* also show new background image for migrating users ([f953468](https://github.com/johannesjo/super-productivity/commit/f953468d694852d170c46fdb731e05b37020493a))
+* improve and unify waiting for initial sync ([d5a6dbc](https://github.com/johannesjo/super-productivity/commit/d5a6dbc78be1daeb06e5e3adf89b26ac94399ea9))
+* move add task bar to bottom for mobile ([fffe9a6](https://github.com/johannesjo/super-productivity/commit/fffe9a66583677e86e0fe791b9f76d896713f42c))
+* play done sound when selected on settings ([1171277](https://github.com/johannesjo/super-productivity/commit/1171277d4571f20e66f5c04297bf9ceb004a94fb))
+
+
+
 # [6.0.0-rc.4](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.3...v6.0.0-rc.4) (2020-10-17)
 
 
