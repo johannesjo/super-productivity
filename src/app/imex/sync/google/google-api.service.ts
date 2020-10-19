@@ -218,7 +218,7 @@ export class GoogleApiService {
         responseType: 'text',
       }).pipe(
         map((res) => {
-          console.log('GOOGLE RES', res);
+          // console.log('GOOGLE RES', res);
           return {
             backup: res,
             meta,

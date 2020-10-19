@@ -14,7 +14,6 @@ export const migrateTagState = (tagState: TagState): TagState => {
   const tagEntities: Dictionary<Tag> = ({...tagState.entities});
   Object.keys(tagEntities).forEach((key) => {
     if (key === TODAY_TAG.id) {
-      console.log(key);
       tagEntities[key] = _addBackgroundImageForDarkTheme(tagEntities[key] as TagCopy);
     }
     // tagEntities[key] = _addNewIssueFields(tagEntities[key] as TagCopy);
