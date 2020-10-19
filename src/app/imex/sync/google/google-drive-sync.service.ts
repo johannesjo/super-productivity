@@ -53,7 +53,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   async downloadAppData(): Promise<{ rev: string, data: AppDataComplete | undefined }> {
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const {backup, meta} = await this._googleApiService.loadFile$(cfg._backupDocId).pipe(first()).toPromise();
-    console.log(backup, meta);
+    // console.log(backup, meta);
 
     const data = !!backup
       ? await this._decodeAppDataIfNeeded(backup)
@@ -64,7 +64,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
     try {
       const cfg = await this.cfg$.pipe(first()).toPromise();
-      console.log(cfg, data);
+      // console.log(cfg, data);
       const uploadData = cfg.isCompressData
         ? await this._compressionService.compressUTF16(JSON.stringify(data))
         : JSON.stringify(data);

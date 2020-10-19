@@ -19,6 +19,7 @@ import { initialSimpleCounterState } from '../../features/simple-counter/store/s
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { initialTaskRepeatCfgState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { ProjectArchive } from '../../features/project/project-archive.model';
+import { SyncProvider } from './sync-provider.model';
 
 /** @deprecated */
 export interface TaskAttachmentState extends EntityState<TaskAttachment> {
@@ -38,6 +39,17 @@ export interface AppBaseData {
 
   /** @deprecated */
   taskAttachment?: TaskAttachmentState;
+}
+
+export interface LocalSyncMetaForProvider {
+  lastSync: number;
+  rev: string | null;
+}
+
+export interface LocalSyncMetaModel {
+  [SyncProvider.GoogleDrive]: LocalSyncMetaForProvider;
+  [SyncProvider.WebDAV]: LocalSyncMetaForProvider;
+  [SyncProvider.Dropbox]: LocalSyncMetaForProvider;
 }
 
 export type AppBaseDataEntityLikeStates =

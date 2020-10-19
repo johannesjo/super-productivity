@@ -3,6 +3,7 @@ import { DropboxFileMetadata } from './dropbox/dropbox.model';
 import { AppDataComplete, SyncGetRevResult } from './sync.model';
 import { GoogleDriveFileMeta } from './google/google-api.model';
 
+// NOTE: do not change!!
 export enum SyncProvider {
   'GoogleDrive' = 'GoogleDrive',
   'Dropbox' = 'Dropbox',

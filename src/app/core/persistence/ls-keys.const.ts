@@ -27,6 +27,10 @@ export const LS_METRIC_STATE: ProjectDataLsKey = 'METRIC_STATE';
 export const LS_IMPROVEMENT_STATE: ProjectDataLsKey = 'IMPROVEMENT_STATE';
 export const LS_OBSTRUCTION_STATE: ProjectDataLsKey = 'OBSTRUCTION_STATE';
 
+// LOCAL NON-SYNC
+// --------------
+export const LS_LOCAL_NON_SYNC = 'LOCAL_NON_SYNC';
+
 // REAL LS
 export const LS_LAST_LOCAL_SYNC_MODEL_CHANGE = LS_PREFIX + 'LAST_LOCAL_SYNC_MODEL_CHANGE';
 export const LS_LOCAL_UI_HELPER = LS_PREFIX + 'UI_HELPER';

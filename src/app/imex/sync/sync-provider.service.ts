@@ -13,16 +13,13 @@ import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-s
 import { TranslateService } from '@ngx-translate/core';
 import { SyncService } from './sync.service';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  LS_SYNC_LAST_LOCAL_REVISION,
-  LS_SYNC_LOCAL_LAST_SYNC,
-  LS_SYNC_LOCAL_LAST_SYNC_CHECK
-} from '../../core/persistence/ls-keys.const';
 import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { truncate } from '../../util/truncate';
+import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
+import { LS_SYNC_LOCAL_LAST_SYNC_CHECK } from '../../core/persistence/ls-keys.const';
 
 // TODO naming
 @Injectable({
@@ -67,6 +64,7 @@ export class SyncProviderService {
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _webDavSyncService: WebDavSyncService,
     private _globalConfigService: GlobalConfigService,
+    private _persistenceLocalService: PersistenceLocalService,
     private _translateService: TranslateService,
     private _syncService: SyncService,
     private _snackService: SnackService,
@@ -84,10 +82,11 @@ export class SyncProviderService {
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<unknown> {
     let local: AppDataComplete | undefined;
-
     await cp.isReadyForRequests$.toPromise();
-    const lastSync = this._getLocalLastSync(cp);
-    const localRev = this._getLocalRev(cp);
+    const localSyncMeta = await this._persistenceLocalService.load();
+    const lastSync = localSyncMeta[cp.id].lastSync;
+    const localRev = localSyncMeta[cp.id].rev;
+
     this._updateLocalLastSyncCheck(cp);
 
     // PRE CHECK 1
@@ -209,8 +208,7 @@ export class SyncProviderService {
 
       case UpdateCheckResult.LastSyncNotUpToDate: {
         this._log(cp, 'X Last Sync not up to date');
-        this._setLocalRevAndLastSync(cp, r.rev, local.lastLocalSyncModelChange);
-        return;
+        return this._setLocalRevAndLastSync(cp, r.rev, local.lastLocalSyncModelChange);
       }
 
       case UpdateCheckResult.ErrorInvalidTimeValues:
@@ -232,8 +230,8 @@ export class SyncProviderService {
 
   // WRAPPER
   // -------
-  private _downloadAppData(cp: SyncProviderServiceInterface): Promise<{ rev: string, data: AppDataComplete | undefined }> {
-    const rev = this._getLocalRev(cp);
+  private async _downloadAppData(cp: SyncProviderServiceInterface): Promise<{ rev: string, data: AppDataComplete | undefined }> {
+    const rev = await this._getLocalRev(cp);
     return cp.downloadAppData(rev);
   }
 
@@ -243,8 +241,7 @@ export class SyncProviderService {
       alert('The data you are trying to upload is invalid');
       throw new Error('The data you are trying to upload is invalid');
     }
-
-    const localRev = this._getLocalRev(cp);
+    const localRev = await this._getLocalRev(cp);
     const successRev = await cp.uploadAppData(data, localRev, isForceOverwrite);
     if (typeof successRev === 'string') {
       this._setLocalRevAndLastSync(cp, successRev, data.lastLocalSyncModelChange);
@@ -268,35 +265,44 @@ export class SyncProviderService {
     }
 
     await this._dataImportService.importCompleteSyncData(data);
-    this._setLocalRevAndLastSync(cp, rev, data.lastLocalSyncModelChange);
+    await this._setLocalRevAndLastSync(cp, rev, data.lastLocalSyncModelChange);
   }
 
   // LS HELPER
   // ---------
-  private _getLocalRev(cp: SyncProviderServiceInterface): string | null {
-    return localStorage.getItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id);
+  private async _getLocalRev(cp: SyncProviderServiceInterface): Promise<string | null> {
+    const localSyncMeta = await this._persistenceLocalService.load();
+    return localSyncMeta[cp.id].rev;
   }
 
-  private _setLocalRevAndLastSync(cp: SyncProviderServiceInterface, rev: string, localLastSync: number) {
+  // NOTE: last sync should always equal localLastChange
+  private async _setLocalRevAndLastSync(cp: SyncProviderServiceInterface, rev: string, lastSync: number): Promise<unknown> {
     if (!rev) {
       throw new Error('No rev given');
     }
-    if (typeof (localLastSync as any) !== 'number') {
+    if (typeof (lastSync as any) !== 'number') {
       throw new Error('No correct localLastSync given');
     }
-    localStorage.setItem(LS_SYNC_LAST_LOCAL_REVISION + cp.id, rev);
-    localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id, localLastSync.toString());
+    const localSyncMeta = await this._persistenceLocalService.load();
+    return this._persistenceLocalService.save({
+      ...localSyncMeta,
+      [cp.id]: {
+        rev,
+        lastSync,
+      }
+    });
   }
 
-  private _getLocalLastSync(cp: SyncProviderServiceInterface): number {
-    const it = +(localStorage.getItem(LS_SYNC_LOCAL_LAST_SYNC + cp.id) as any);
-    return isNaN(it)
-      ? 0
-      : it || 0;
-  }
-
-  private _updateLocalLastSyncCheck(cp: SyncProviderServiceInterface) {
+  private async _updateLocalLastSyncCheck(cp: SyncProviderServiceInterface): Promise<unknown> {
     localStorage.setItem(LS_SYNC_LOCAL_LAST_SYNC_CHECK + cp.id, Date.now().toString());
+    const localSyncMeta = await this._persistenceLocalService.load();
+    return this._persistenceLocalService.save({
+      ...localSyncMeta,
+      [cp.id]: {
+        ...localSyncMeta[cp.id],
+        lastSync: Date.now(),
+      }
+    });
   }
 
   // OTHER
