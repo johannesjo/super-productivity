@@ -18,7 +18,7 @@ import { SwUpdate } from '@angular/service-worker';
 import { BookmarkService } from './features/bookmark/bookmark.service';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
-import { Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { fadeAnimation } from './ui/animations/fade.ani';
 import { BannerService } from './core/banner/banner.service';
 import { SS_WEB_APP_INSTALL } from './core/persistence/ls-keys.const';
@@ -40,7 +40,7 @@ import { environment } from '../environments/environment';
 import { RouterOutlet } from '@angular/router';
 import { ipcRenderer } from 'electron';
 import { TrackingReminderService } from './features/time-tracking/tracking-reminder/tracking-reminder.service';
-import { first } from 'rxjs/operators';
+import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -58,6 +58,19 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {
+  backgroundImg$: Observable<string | null> = combineLatest([
+    this.workContextService.currentTheme$,
+    this._globalConfigService.misc$.pipe(
+      map(cfg => cfg?.isDarkMode),
+    ),
+  ]).pipe(
+    map(([theme, isDarkMode]) => isDarkMode
+      ? theme.backgroundImageDark
+      : theme.backgroundImageLight
+    ),
+    distinctUntilChanged()
+  );
+
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
@@ -69,7 +82,7 @@ export class AppComponent implements OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor(
-    private _configService: GlobalConfigService,
+    private _globalConfigService: GlobalConfigService,
     private _shortcutService: ShortcutService,
     private _bannerService: BannerService,
     private _electronService: ElectronService,
@@ -119,7 +132,7 @@ export class AppComponent implements OnDestroy {
       this._uiHelperService.initElectron();
 
       (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
+        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRANSFER_SETTINGS_TO_ELECTRON, this._globalConfigService.cfg);
       });
     } else {
       // WEB VERSION
@@ -136,7 +149,7 @@ export class AppComponent implements OnDestroy {
       this._chromeExtensionInterfaceService.init();
 
       window.addEventListener('beforeunload', (e) => {
-        const gCfg = this._configService.cfg;
+        const gCfg = this._globalConfigService.cfg;
         if (!gCfg) {
           throw new Error();
         }
