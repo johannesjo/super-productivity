@@ -36,9 +36,6 @@ export interface AppBaseData {
   simpleCounter: SimpleCounterState;
   taskArchive: TaskArchive;
   taskRepeatCfg: TaskRepeatCfgState;
-
-  /** @deprecated */
-  taskAttachment?: TaskAttachmentState;
 }
 
 export interface LocalSyncMetaForProvider {
