@@ -86,7 +86,7 @@ export class GitlabApiService {
 
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendRequest$({
-      url: `${this.apiLink(cfg)}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`
+      url: `${this.apiLink(cfg)}/issues?state=opened&order_by=updated_at&per_page=100&page=${pageNumber}`
     }, cfg).pipe(
       take(1),
       map((issues: GitlabOriginalIssue[]) => {
