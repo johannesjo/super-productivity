@@ -8,7 +8,7 @@ import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-respons
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_URL_REGEX, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
-import { catchError, filter, map, mergeMap, switchMap, take } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
@@ -42,10 +42,14 @@ export class GitlabApiService {
   }
 
   getById$(id: number, cfg: GitlabCfg): Observable<GitlabIssue> {
-    return this.getProjectData$(cfg)
-      .pipe(switchMap(issues => {
-        return issues.filter(issue => issue.id === id);
-      }));
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}/issues/${id}`
+    }, cfg).pipe(
+      mergeMap(
+        (issue: GitlabOriginalIssue) => {
+          return this.getIssueWithComments$(mapGitlabIssue(issue), cfg);
+        })
+    );
   }
 
   getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
