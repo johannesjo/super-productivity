@@ -61,27 +61,29 @@ export class GitlabApiService {
   }
 
   searchIssueInProject$(searchText: string, cfg: GitlabCfg): Observable<SearchResultItem[]> {
-    const filterFn = (issue: GitlabIssue) => {
-      try {
-        return issue.title.toLowerCase().match(searchText.toLowerCase())
-          || issue.body.toLowerCase().match(searchText.toLowerCase());
-      } catch (e) {
-        console.warn('RegEx Error', e);
-        return false;
-      }
-    };
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this.getProjectData$(cfg)
-      .pipe(
-        // a single request should suffice
-        share(),
-        map((issues: GitlabIssue[]) =>
-          issues.filter(filterFn)
-            .map(mapGitlabIssueToSearchResult)
-        ),
-      );
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}/issues?search=${searchText}&order_by=updated_at`
+    }, cfg).pipe(
+      map((issues: GitlabOriginalIssue[]) => {
+        return issues ? issues.map(mapGitlabIssue) : [];
+      }),
+      mergeMap(
+        (issues: GitlabIssue[]) => {
+          if (issues && issues.length) {
+            return forkJoin([
+              ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
+            ]);
+          } else {
+            return of([]);
+          }
+        }),
+      map((issues: GitlabIssue[]) => {
+        return issues ? issues.map(mapGitlabIssueToSearchResult) : [];
+      })
+    );
   }
 
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
