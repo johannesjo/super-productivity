@@ -8,7 +8,7 @@ import { T } from 'src/app/t.const';
   selector: 'owl-wrapper',
   templateUrl: './owl-wrapper.component.html',
   styleUrls: ['./owl-wrapper.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OwlWrapperComponent {
   @Input() now: Date = new Date();
@@ -46,8 +46,8 @@ export class OwlWrapperComponent {
 
   @Input('dateTime')
   set dateTimeSet(v: number) {
+    this.dateTime = v;
     if (v) {
-      this.dateTime = v;
       // NOTE: owl doesn't with undefined...
       this.date = new Date(v);
     }
