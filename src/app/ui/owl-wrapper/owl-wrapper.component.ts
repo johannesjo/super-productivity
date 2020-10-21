@@ -8,7 +8,7 @@ import { T } from 'src/app/t.const';
   selector: 'owl-wrapper',
   templateUrl: './owl-wrapper.component.html',
   styleUrls: ['./owl-wrapper.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class OwlWrapperComponent {
   @Input() now: Date = new Date();
@@ -23,7 +23,9 @@ export class OwlWrapperComponent {
   @Output()
   triggerSubmit: EventEmitter<number> = new EventEmitter();
   T: typeof T = T;
-  date: Date = new Date();
+
+  date?: Date;
+
   laterTodaySlots: string[] = [
     '9:00',
     '15:00',
@@ -44,9 +46,9 @@ export class OwlWrapperComponent {
 
   @Input('dateTime')
   set dateTimeSet(v: number) {
-    this.dateTime = v;
-    // NOTE: owl doesn't with undefined...
     if (v) {
+      this.dateTime = v;
+      // NOTE: owl doesn't with undefined...
       this.date = new Date(v);
     }
   }
