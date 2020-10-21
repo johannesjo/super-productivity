@@ -14,6 +14,7 @@ export type SyncFileMeta = DropboxFileMetadata | GoogleDriveFileMeta;
 
 export interface SyncProviderServiceInterface {
   id: SyncProvider;
+  isUploadForcePossible?: boolean;
   isReady$: Observable<boolean>;
   isReadyForRequests$: Observable<boolean>;
 

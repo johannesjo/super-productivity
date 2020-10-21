@@ -101,7 +101,7 @@ export class SyncProviderService {
       this._snackService.open({
         msg: T.F.SYNC.S.UNKNOWN_ERROR,
         translateParams: {
-          err: truncate(revRes.toString()),
+          err: truncate(revRes.toString(), 100),
         },
         type: 'ERROR'
       });
@@ -244,8 +244,16 @@ export class SyncProviderService {
       this._log(cp, '↑ Uploaded Data ↑ ✓');
     } else {
       this._log(cp, 'X Upload Request Error');
-      if (this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
-        return this._uploadAppData(cp, data, true);
+      if (cp.isUploadForcePossible && this._c(T.F.SYNC.C.FORCE_UPLOAD_AFTER_ERROR)) {
+        return await this._uploadAppData(cp, data, true);
+      } else {
+        this._snackService.open({
+          msg: T.F.SYNC.S.UPLOAD_ERROR,
+          translateParams: {
+            err: truncate(successRev.toString(), 100),
+          },
+          type: 'ERROR'
+        });
       }
     }
   }

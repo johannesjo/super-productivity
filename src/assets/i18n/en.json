@@ -563,7 +563,8 @@
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "IMPORTING": "Importing data",
         "SUCCESS": "Data imported",
-        "UNKNOWN_ERROR": "Unknown error while syncing. Please check console."
+        "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
+        "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
       }
     },
     "TAG": {
