@@ -19,7 +19,6 @@ export class LocalBackupEffects {
     ),
     take(1),
     tap(({appDataComplete}) => {
-      console.log(appDataComplete);
       this._checkForBackupIfEmpty(appDataComplete);
     })
   ), {dispatch: false});
@@ -33,12 +32,10 @@ export class LocalBackupEffects {
   }
 
   private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete) {
-    console.log(IS_ELECTRON, appDataComplete);
     if (IS_ELECTRON) {
       if (appDataComplete.task.ids.length === 0 && appDataComplete.taskArchive.ids.length === 0) {
         const backupMeta = await this._localBackupService.isBackupAvailable();
         if (backupMeta) {
-          console.log('backupMeta', backupMeta);
           if (confirm(this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
             dir: backupMeta.folder,
             from: this._formatDate(backupMeta.created),
