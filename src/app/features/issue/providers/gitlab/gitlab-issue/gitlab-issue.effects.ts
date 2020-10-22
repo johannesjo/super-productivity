@@ -45,8 +45,7 @@ export class GitlabIssueEffects {
           svgIco: 'gitlab',
           isSpinner: true,
         });
-        gitlabTasks.forEach((task) =>
-          this._issueService.refreshIssue(task, true, false));
+        this._issueService.refreshIssues(gitlabTasks, true, false);
       }
     }),
   );
