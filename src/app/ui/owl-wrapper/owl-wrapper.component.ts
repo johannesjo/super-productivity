@@ -23,7 +23,9 @@ export class OwlWrapperComponent {
   @Output()
   triggerSubmit: EventEmitter<number> = new EventEmitter();
   T: typeof T = T;
-  date: Date = new Date();
+
+  date?: Date;
+
   laterTodaySlots: string[] = [
     '9:00',
     '15:00',
@@ -45,8 +47,8 @@ export class OwlWrapperComponent {
   @Input('dateTime')
   set dateTimeSet(v: number) {
     this.dateTime = v;
-    // NOTE: owl doesn't with undefined...
     if (v) {
+      // NOTE: owl doesn't with undefined...
       this.date = new Date(v);
     }
   }

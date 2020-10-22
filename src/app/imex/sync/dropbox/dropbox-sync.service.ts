@@ -13,6 +13,7 @@ import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.mod
 @Injectable({providedIn: 'root'})
 export class DropboxSyncService implements SyncProviderServiceInterface {
   id: SyncProvider = SyncProvider.Dropbox;
+  isUploadForcePossible: boolean = true;
 
   isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => this._dropboxApiService.isTokenAvailable$),

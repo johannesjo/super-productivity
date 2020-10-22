@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Vários arquivos com o nome \"{{newFileName}}\" foram encontrados. Exclua todos, exceto um, ou escolha um nome diferente.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Erro ao criar arquivo de sincronização. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: nome do arquivo de sincronização atualizado"
       },
       "S_API": {
@@ -460,6 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Não será usado se o sistema suportar o modo escuro global.",
         "HELP": "Configurações do tema para o seu projeto.",
+        "L_BACKGROUND_IMAGE_DARK": "URL da imagem de fundo (tema escuro)",
+        "L_BACKGROUND_IMAGE_LIGHT": "URL da imagem de fundo (tema claro)",
         "L_COLOR_ACCENT": "Cor de destaque",
         "L_COLOR_PRIMARY": "Cor principal",
         "L_COLOR_WARN": "Cor de aviso / erro",
@@ -560,7 +563,8 @@
         "ERROR_INVALID_DATA": "Erro ao sincronizar. Dados inválidos",
         "IMPORTING": "Importando dados",
         "SUCCESS": "Dados importados",
-        "UNKNOWN_ERROR": "Erro desconhecido durante a sincronização. Verifique o console."
+        "UNKNOWN_ERROR": "Erro desconhecido durante a sincronização. Verifique o console.",
+        "UPLOAD_ERROR": "Erro de upload desconhecido (configurações corretas?): {{err}}"
       }
     },
     "TAG": {
@@ -936,6 +940,7 @@
       "IS_DARK_MODE": "Modo escuro",
       "IS_DISABLE_INITIAL_DIALOG": "Desativar a caixa de diálogo inicial de informações (você pode perder atualizações importantes!)",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
+      "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida",
       "IS_TURN_OFF_MARKDOWN": "Desativar a análise de markdown para anotações",
       "TITLE": "Configurações diversas"
@@ -997,7 +1002,9 @@
     "GDRIVE_UPLOAD": "Google Drive: Carregar arquivo ...",
     "GITHUB_LOAD_ISSUE": "Github: Carregar dados do problema ...",
     "JIRA_LOAD_ISSUE": "Jira: Carregar dados do problema ...",
-    "UNKNOWN": "Carregando dados remotos"
+    "UNKNOWN": "Carregando dados remotos",
+    "WEB_DAV_DOWNLOAD": "WebDAV: Baixando dados ...",
+    "WEB_DAV_UPLOAD": "WebDAV: Carregando dados ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Adicionar nova tarefa",

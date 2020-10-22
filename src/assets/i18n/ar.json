@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "تم العثور على ملفات متعددة بالاسم \"{{newFileName}}\". يرجى حذف الكل ما عدا واحدًا أو اختيار اسم مختلف.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: حدث خطأ أثناء إنشاء ملف المزامنة. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: تم تحديث اسم ملف المزامنة"
       },
       "S_API": {
@@ -460,6 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "لن تستخدم إذا كان النظام يدعم الوضع المظلم العالمي.",
         "HELP": "إعدادات السمة لمشروعك.",
+        "L_BACKGROUND_IMAGE_DARK": "رابط صورة الخلفية (مظهر داكن)",
+        "L_BACKGROUND_IMAGE_LIGHT": "رابط صورة الخلفية (مظهر فاتح)",
         "L_COLOR_ACCENT": "لهجة اللون",
         "L_COLOR_PRIMARY": "لون أصلي",
         "L_COLOR_WARN": "تحذير / خطأ اللون",
@@ -560,7 +563,8 @@
         "ERROR_INVALID_DATA": "خطأ أثناء المزامنة. بيانات غير صالحة",
         "IMPORTING": "استيراد البيانات",
         "SUCCESS": "البيانات المستوردة",
-        "UNKNOWN_ERROR": "خطأ غير معروف أثناء المزامنة. يرجى التحقق من وحدة التحكم."
+        "UNKNOWN_ERROR": "خطأ غير معروف أثناء المزامنة. يرجى التحقق من وحدة التحكم.",
+        "UPLOAD_ERROR": "خطأ غير معروف في التحميل (الإعدادات صحيحة؟): {{err}}"
       }
     },
     "TAG": {
@@ -936,6 +940,7 @@
       "IS_DARK_MODE": "وضع الظلام",
       "IS_DISABLE_INITIAL_DIALOG": "تعطيل مربع حوار المعلومات الأولية (قد تفوتك تحديثات مهمة!)",
       "IS_HIDE_NAV": "إخفاء التنقل حتى يتم تمرير الرأس الرئيسي (سطح المكتب فقط)",
+      "IS_MINIMIZE_TO_TRAY": "تصغير إلى درج (سطح المكتب فقط)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "يخطر عند تجاوز تقدير الوقت",
       "IS_TURN_OFF_MARKDOWN": "إيقاف تشغيل تخفيض السعر للملاحظات",
       "TITLE": "متفرقات الإعدادات"
@@ -997,7 +1002,9 @@
     "GDRIVE_UPLOAD": "Google Drive: تحميل ملف ...",
     "GITHUB_LOAD_ISSUE": "Github: تحميل بيانات العدد ...",
     "JIRA_LOAD_ISSUE": "Jira: تحميل بيانات العدد ...",
-    "UNKNOWN": "تحميل البيانات البعيدة"
+    "UNKNOWN": "تحميل البيانات البعيدة",
+    "WEB_DAV_DOWNLOAD": "WebDAV: جاري تنزيل البيانات ...",
+    "WEB_DAV_UPLOAD": "WebDAV: تحميل البيانات ..."
   },
   "MH": {
     "ADD_NEW_TASK": "إضافة مهمة جديدة",

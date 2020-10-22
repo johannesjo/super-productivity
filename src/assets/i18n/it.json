@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "File multipli con il nome \"{{newFileName}}\" trovati. Per favore rimuovili tutti tranne uno o scegli un nome diverso.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: errore durante la creazione del file di sincronizzazione. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: nome del file di sincronizzazione aggiornato"
       },
       "S_API": {
@@ -460,6 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Non verrà usato se il sistema supporta una modalità scura globale.",
         "HELP": "Impostazioni sul tema del tuo progetto.",
+        "L_BACKGROUND_IMAGE_DARK": "URL immagine di sfondo (tema scuro)",
+        "L_BACKGROUND_IMAGE_LIGHT": "URL immagine di sfondo (tema chiaro)",
         "L_COLOR_ACCENT": "Colore di accento",
         "L_COLOR_PRIMARY": "Colore primario",
         "L_COLOR_WARN": "Colore errori/avvertimenti",
@@ -560,7 +563,8 @@
         "ERROR_INVALID_DATA": "Errore durante la sincronizzazione. Dati non validi",
         "IMPORTING": "Importazione di dati",
         "SUCCESS": "Dati importati",
-        "UNKNOWN_ERROR": "Errore sconosciuto durante la sincronizzazione. Si prega di controllare la console."
+        "UNKNOWN_ERROR": "Errore sconosciuto durante la sincronizzazione. Si prega di controllare la console.",
+        "UPLOAD_ERROR": "Errore di caricamento sconosciuto (impostazioni corrette?): {{err}}"
       }
     },
     "TAG": {
@@ -936,6 +940,7 @@
       "IS_DARK_MODE": "Tema scuro",
       "IS_DISABLE_INITIAL_DIALOG": "Disabilita la finestra di dialogo delle informazioni iniziali (potresti perdere importanti aggiornamenti!)",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
+      "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "TITLE": "Impostazioni varie"
@@ -997,7 +1002,9 @@
     "GDRIVE_UPLOAD": "Google Drive: carica il file ...",
     "GITHUB_LOAD_ISSUE": "Github: caricamento dati problema ...",
     "JIRA_LOAD_ISSUE": "Jira: caricamento dati problema ...",
-    "UNKNOWN": "Caricamento dei dati remoti"
+    "UNKNOWN": "Caricamento dei dati remoti",
+    "WEB_DAV_DOWNLOAD": "WebDAV: Download dei dati ...",
+    "WEB_DAV_UPLOAD": "WebDAV: caricamento dei dati ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuovo task",

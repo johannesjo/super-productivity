@@ -461,7 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "システムがグローバルダークモードをサポートしている場合は使用しないでください。",
         "HELP": "プロジェクトのテーマ設定。",
-        "L_BACKGROUND_IMAGE": "背景画像のURL",
+        "L_BACKGROUND_IMAGE_DARK": "背景画像のURL（ダークテーマ）",
+        "L_BACKGROUND_IMAGE_LIGHT": "背景画像のURL（ライトテーマ）",
         "L_COLOR_ACCENT": "アクセントカラー",
         "L_COLOR_PRIMARY": "プライマリーカラー",
         "L_COLOR_WARN": "警告/エラーの色",
@@ -562,7 +563,8 @@
         "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
         "IMPORTING": "データをインポートする",
         "SUCCESS": "インポートされたデータ",
-        "UNKNOWN_ERROR": "同期中に不明なエラーが発生しました。コンソールを確認してください。"
+        "UNKNOWN_ERROR": "同期中に不明なエラーが発生しました。コンソールを確認してください。",
+        "UPLOAD_ERROR": "不明なアップロードエラー（設定は正しいですか？）： {{err}}"
       }
     },
     "TAG": {
@@ -938,6 +940,7 @@
       "IS_DARK_MODE": "ダークモード",
       "IS_DISABLE_INITIAL_DIALOG": "初期情報ダイアログを無効にする（重要な更新を見逃す可能性があります！）",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
+      "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
       "TITLE": "その他の設定"

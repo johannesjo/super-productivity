@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请进保留一个文件或选择其他名称。",
+        "SYNC_FILE_CREATION_ERROR": "Google云端硬盘：创建同步文件时出错。 {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google云端硬盘：更新的同步文件名"
       },
       "S_API": {
@@ -460,6 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "如果系统支持全局暗模式，则不会使用。",
         "HELP": "项目主题设置。",
+        "L_BACKGROUND_IMAGE_DARK": "背景图片网址（深色主题）",
+        "L_BACKGROUND_IMAGE_LIGHT": "背景图片网址（浅色主题）",
         "L_COLOR_ACCENT": "强调色",
         "L_COLOR_PRIMARY": "主体色",
         "L_COLOR_WARN": "警告/错误颜色",
@@ -560,7 +563,8 @@
         "ERROR_INVALID_DATA": "同步时出错。无效数据",
         "IMPORTING": "导入数据",
         "SUCCESS": "数据已导入",
-        "UNKNOWN_ERROR": "同步时发生未知错误。请检查控制台。"
+        "UNKNOWN_ERROR": "同步时发生未知错误。请检查控制台。",
+        "UPLOAD_ERROR": "未知的上载错误（设置正确吗？）： {{err}}"
       }
     },
     "TAG": {
@@ -936,6 +940,7 @@
       "IS_DARK_MODE": "暗模式",
       "IS_DISABLE_INITIAL_DIALOG": "禁用初始信息对话框（您可能会错过重要更新！）",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
+      "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
       "TITLE": "其他设置"
@@ -997,7 +1002,9 @@
     "GDRIVE_UPLOAD": "Google Drive：上传文件...",
     "GITHUB_LOAD_ISSUE": "Github：加载 Issue 数据...",
     "JIRA_LOAD_ISSUE": "Jira：加载 Issue 数据...",
-    "UNKNOWN": "加载远程数据"
+    "UNKNOWN": "加载远程数据",
+    "WEB_DAV_DOWNLOAD": "WebDAV：正在下载数据...",
+    "WEB_DAV_UPLOAD": "WebDAV：正在上传数据..."
   },
   "MH": {
     "ADD_NEW_TASK": "添加新任务",

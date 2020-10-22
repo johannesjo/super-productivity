@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Mehrere Dateien mit dem Namen \"{{newFileName}}\" gefunden. Bitte löschen Sie alle bis auf einen oder wählen Sie einen anderen Namen.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Fehler beim Erstellen der Synchronisierungsdatei. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: Der Name der Synchronisierungsdatei wurde aktualisiert"
       },
       "S_API": {
@@ -460,6 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Wird nicht verwendet, wenn das System den globalen Dunkelmodus unterstützt.",
         "HELP": "Theme-Einstellungen für Ihr Projekt.",
+        "L_BACKGROUND_IMAGE_DARK": "Hintergrundbild-URL (dunkles Thema)",
+        "L_BACKGROUND_IMAGE_LIGHT": "Hintergrundbild-URL (Lichtthema)",
         "L_COLOR_ACCENT": "Akzentfarbe",
         "L_COLOR_PRIMARY": "Primärfarbe",
         "L_COLOR_WARN": "Warn- / Fehlerfarbe",
@@ -560,7 +563,8 @@
         "ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
         "IMPORTING": "Daten importieren",
         "SUCCESS": "Daten importiert",
-        "UNKNOWN_ERROR": "Unbekannter Fehler beim Synchronisieren. Bitte überprüfen Sie die Konsole."
+        "UNKNOWN_ERROR": "Unbekannter Fehler beim Synchronisieren. Bitte überprüfen Sie die Konsole.",
+        "UPLOAD_ERROR": "Unbekannter Upload-Fehler (Einstellungen korrekt?): {{err}}"
       }
     },
     "TAG": {
@@ -936,9 +940,9 @@
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_INITIAL_DIALOG": "Deaktivieren Sie den anfänglichen Informationsdialog (möglicherweise verpassen Sie wichtige Updates!)",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
+      "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
-      "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "TITLE": "Verschiedene Einstellungen"
     },
     "POMODORO": {
@@ -998,7 +1002,9 @@
     "GDRIVE_UPLOAD": "Google Drive: Datei hochladen ...",
     "GITHUB_LOAD_ISSUE": "Github: Problemdaten laden ...",
     "JIRA_LOAD_ISSUE": "Jira: Problemdaten laden ...",
-    "UNKNOWN": "Remote-Daten laden"
+    "UNKNOWN": "Remote-Daten laden",
+    "WEB_DAV_DOWNLOAD": "WebDAV: Daten herunterladen ...",
+    "WEB_DAV_UPLOAD": "WebDAV: Daten hochladen ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",

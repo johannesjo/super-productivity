@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Meerdere bestanden met de naam \"{{newFileName}}\" gevonden. Verwijder alle op één na of kies een andere naam.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: fout bij het maken van een synchronisatiebestand. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: bijgewerkte naam van synchronisatiebestand"
       },
       "S_API": {
@@ -460,6 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Wordt niet gebruikt als het systeem de algemene donkere modus ondersteunt.",
         "HELP": "Thema-instellingen voor uw project.",
+        "L_BACKGROUND_IMAGE_DARK": "Achtergrondafbeelding-URL (donker thema)",
+        "L_BACKGROUND_IMAGE_LIGHT": "Achtergrondafbeelding-URL (licht thema)",
         "L_COLOR_ACCENT": "Accent kleur",
         "L_COLOR_PRIMARY": "Primaire kleur",
         "L_COLOR_WARN": "Kleur waarschuwen / fout",
@@ -560,7 +563,8 @@
         "ERROR_INVALID_DATA": "Fout tijdens het synchroniseren. Onjuiste data",
         "IMPORTING": "Gegevens importeren",
         "SUCCESS": "Gegevens geïmporteerd",
-        "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console."
+        "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console.",
+        "UPLOAD_ERROR": "Onbekende uploadfout (instellingen correct?): {{err}}"
       }
     },
     "TAG": {
@@ -936,6 +940,7 @@
       "IS_DARK_MODE": "Donkere modus",
       "IS_DISABLE_INITIAL_DIALOG": "Schakel het dialoogvenster met eerste informatie uit (u mist mogelijk belangrijke updates!)",
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
+      "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "TITLE": "Diverse instellingen"
@@ -997,7 +1002,9 @@
     "GDRIVE_UPLOAD": "Google Drive: bestand uploaden ...",
     "GITHUB_LOAD_ISSUE": "Github: Probleemgegevens laden ...",
     "JIRA_LOAD_ISSUE": "Jira: Probleemgegevens laden ...",
-    "UNKNOWN": "Externe gegevens laden"
+    "UNKNOWN": "Externe gegevens laden",
+    "WEB_DAV_DOWNLOAD": "WebDAV: gegevens downloaden ...",
+    "WEB_DAV_UPLOAD": "WebDAV: gegevens uploaden ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",

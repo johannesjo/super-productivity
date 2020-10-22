@@ -186,6 +186,7 @@
       },
       "S": {
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin.",
+        "SYNC_FILE_CREATION_ERROR": "Google Drive: Senkronizasyon dosyası oluşturulurken hata meydana geldi. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: Güncellenmiş senkronizasyon dosyası adı"
       },
       "S_API": {
@@ -460,6 +461,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Sistem global karanlık modunu destekliyorsa kullanılmaz.",
         "HELP": "Projeniz için tema ayarları.",
+        "L_BACKGROUND_IMAGE_DARK": "Arka Plan Resmi URL'si (Koyu Tema)",
+        "L_BACKGROUND_IMAGE_LIGHT": "Arka Plan Resmi URL'si (Açık Tema)",
         "L_COLOR_ACCENT": "Vurgu Rengi",
         "L_COLOR_PRIMARY": "Ana renk",
         "L_COLOR_WARN": "Uyar / Hata Rengi",
@@ -560,7 +563,8 @@
         "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
         "IMPORTING": "Veri alınıyor",
         "SUCCESS": "Alınan veri",
-        "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin."
+        "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin.",
+        "UPLOAD_ERROR": "Bilinmeyen Yükleme Hatası (Ayarlar doğru mu?): {{err}}"
       }
     },
     "TAG": {
@@ -936,6 +940,7 @@
       "IS_DARK_MODE": "Karanlık modu",
       "IS_DISABLE_INITIAL_DIALOG": "İlk bilgi iletişim kutusunu devre dışı bırak (önemli güncellemeleri kaçırabilirsiniz!)",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
+      "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
       "TITLE": "Diğer ayarlar"
@@ -997,7 +1002,9 @@
     "GDRIVE_UPLOAD": "Google Drive: Dosya yükle ...",
     "GITHUB_LOAD_ISSUE": "Github: Sorun verilerini yükle ...",
     "JIRA_LOAD_ISSUE": "Jira: Sorun verilerini yükle ...",
-    "UNKNOWN": "Uzak verileri yükleme"
+    "UNKNOWN": "Uzak verileri yükleme",
+    "WEB_DAV_DOWNLOAD": "WebDAV: Veriler indiriliyor ...",
+    "WEB_DAV_UPLOAD": "WebDAV: Veriler yükleniyor ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
