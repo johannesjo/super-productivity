@@ -8,7 +8,7 @@ import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-respons
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_URL_REGEX, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
-import { catchError, filter, map, mergeMap, share, switchMap, take } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
@@ -42,10 +42,41 @@ export class GitlabApiService {
   }
 
   getById$(id: number, cfg: GitlabCfg): Observable<GitlabIssue> {
-    return this.getProjectData$(cfg)
-      .pipe(switchMap(issues => {
-        return issues.filter(issue => issue.id === id);
-      }));
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}/issues/${id}`
+    }, cfg).pipe(
+      mergeMap(
+        (issue: GitlabOriginalIssue) => {
+          return this.getIssueWithComments$(mapGitlabIssue(issue), cfg);
+        })
+    );
+  }
+
+  getByIds$(ids: string[], cfg: GitlabCfg): Observable<GitlabIssue[]> {
+    let queryParams = 'iids[]=';
+    for (let i = 0; i < ids.length ; i++) {
+      if (i === ids.length - 1) {
+        queryParams += ids[i];
+      } else {
+        queryParams += `${ids[i]}&iids[]=`;
+      }
+    }
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}/issues?${queryParams}&per_page=100`
+    }, cfg).pipe(
+      map((issues: GitlabOriginalIssue[]) => {
+        return issues ? issues.map(mapGitlabIssue) : [];
+      }),
+      mergeMap((issues: GitlabIssue[]) => {
+        if (issues && issues.length) {
+          return forkJoin([
+            ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
+          ]);
+        } else {
+          return of([]);
+        }
+      })
+    );
   }
 
   getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
@@ -61,32 +92,34 @@ export class GitlabApiService {
   }
 
   searchIssueInProject$(searchText: string, cfg: GitlabCfg): Observable<SearchResultItem[]> {
-    const filterFn = (issue: GitlabIssue) => {
-      try {
-        return issue.title.toLowerCase().match(searchText.toLowerCase())
-          || issue.body.toLowerCase().match(searchText.toLowerCase());
-      } catch (e) {
-        console.warn('RegEx Error', e);
-        return false;
-      }
-    };
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this.getProjectData$(cfg)
-      .pipe(
-        // a single request should suffice
-        share(),
-        map((issues: GitlabIssue[]) =>
-          issues.filter(filterFn)
-            .map(mapGitlabIssueToSearchResult)
-        ),
-      );
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}/issues?search=${searchText}&order_by=updated_at`
+    }, cfg).pipe(
+      map((issues: GitlabOriginalIssue[]) => {
+        return issues ? issues.map(mapGitlabIssue) : [];
+      }),
+      mergeMap(
+        (issues: GitlabIssue[]) => {
+          if (issues && issues.length) {
+            return forkJoin([
+              ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
+            ]);
+          } else {
+            return of([]);
+          }
+        }),
+      map((issues: GitlabIssue[]) => {
+        return issues ? issues.map(mapGitlabIssueToSearchResult) : [];
+      })
+    );
   }
 
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendRequest$({
-      url: `${this.apiLink(cfg)}/issues?order_by=updated_at&per_page=100&page=${pageNumber}`
+      url: `${this.apiLink(cfg)}/issues?state=opened&order_by=updated_at&per_page=100&page=${pageNumber}`
     }, cfg).pipe(
       take(1),
       map((issues: GitlabOriginalIssue[]) => {

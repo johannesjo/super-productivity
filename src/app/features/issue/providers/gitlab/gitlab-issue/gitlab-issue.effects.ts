@@ -38,17 +38,16 @@ export class GitlabIssueEffects {
       )
       .map(({task}: { cfg: GitlabCfg, task: TaskWithSubTasks }) => task)
     ),
-    tap((gitlabTasks: TaskWithSubTasks[]) => gitlabTasks.forEach((gitlabTask) => {
+    tap((gitlabTasks: TaskWithSubTasks[]) => {
       if (gitlabTasks && gitlabTasks.length > 0) {
         this._snackService.open({
           msg: T.F.GITLAB.S.POLLING,
           svgIco: 'gitlab',
           isSpinner: true,
         });
-        gitlabTasks.forEach((task) =>
-          this._issueService.refreshIssue(task, true, false));
+        this._issueService.refreshIssues(gitlabTasks, true, false);
       }
-    })),
+    }),
   );
 
   private _pollTimer$: Observable<any> = timer(GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL);

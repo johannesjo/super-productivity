@@ -96,6 +96,50 @@ export class IssueService {
     }
   }
 
+  async refreshIssues(
+    tasks: Task[],
+    isNotifySuccess: boolean = true,
+    isNotifyNoUpdateRequired: boolean = false
+  ): Promise<void> {
+    // dynamic map that has a list of tasks for every entry where the entry is an issue type
+    const tasksIssueIdsByIssueType: any = {};
+    const tasksWithoutIssueId = [];
+    const tasksWithoutMethod = [];
+
+    for (const task of tasks) {
+      if (!task.issueId || !task.issueType) {
+        tasksWithoutIssueId.push(task);
+      } else if (!this.ISSUE_SERVICE_MAP[task.issueType].refreshIssues) {
+        tasksWithoutMethod.push(task);
+      }
+      else if (!tasksIssueIdsByIssueType[task.issueType]){
+        tasksIssueIdsByIssueType[task.issueType] = [];
+        tasksIssueIdsByIssueType[task.issueType].push(task);
+      } else {
+        tasksIssueIdsByIssueType[task.issueType].push(task);
+      }
+    }
+
+    for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
+      const updates = await (this.ISSUE_SERVICE_MAP[issuesType].refreshIssues as any)(tasksIssueIdsByIssueType[issuesType], isNotifySuccess, isNotifyNoUpdateRequired);
+      if (updates) {
+        for (const update of updates) {
+          if (this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId]) {
+            this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId].next(update.issue);
+          }
+          this._taskService.update(update.task.id, update.taskChanges);
+        }
+      }
+    }
+
+    for (const taskWithoutIssueId of tasksWithoutIssueId) {
+      throw new Error('No issue task ' + taskWithoutIssueId.id);
+    }
+    for (const taskWithoutMethod of tasksWithoutMethod) {
+        throw new Error('Issue method not available ' + taskWithoutMethod);
+    }
+  }
+
   async addTaskWithIssue(
     issueType: IssueProviderKey,
     issueIdOrData: string | number | IssueDataReduced,

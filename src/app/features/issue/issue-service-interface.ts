@@ -19,5 +19,13 @@ export interface IssueServiceInterface {
     issue: IssueData
   } | null>;
 
+  refreshIssues?(tasks: Task[],
+    isNotifySuccess: boolean,
+    isNotifyNoUpdateRequired: boolean): Promise<{
+      task: Task,
+      taskChanges: Partial<Task>,
+      issue: IssueData
+    }[]>;
+
   getMappedAttachments?(issueDataIN: IssueData): TaskAttachment[];
 }
