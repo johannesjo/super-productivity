@@ -8379,10 +8379,10 @@ ng2-dragula@^2.1.1:
     "@types/dragula" "^2.1.34"
     dragula "^3.7.2"
 
-ngx-date-time-picker-schedule@^9.4.11:
-  version "9.4.11"
-  resolved "https://registry.yarnpkg.com/ngx-date-time-picker-schedule/-/ngx-date-time-picker-schedule-9.4.11.tgz#125a0749cad032bb782f250988f198be77b45b82"
-  integrity sha512-yJYPEtcCWbZrNfnxB/5r8htciPHh9DFan9GzYvCG4DAOFx+/+XYhVhGW240DmJ4vz8byWgLARnbNPo934w1jIw==
+ngx-date-time-picker-schedule@^9.4.13:
+  version "9.4.13"
+  resolved "https://registry.yarnpkg.com/ngx-date-time-picker-schedule/-/ngx-date-time-picker-schedule-9.4.13.tgz#ccf7e152a95aa1ffa5e40e99fabd39973dd7171f"
+  integrity sha512-9Bbu2UgslOI64MmNtw3HfEkAYwTunC9Zj4QHZk8brGi1IXeb6Rb7An9biKFO7L9oo2kqw44jW9fXaFZZirTewg==
   dependencies:
     tslib "^1.10.0"
 
