@@ -52,6 +52,33 @@ export class GitlabApiService {
     );
   }
 
+  getByIds$(ids: string[], cfg: GitlabCfg): Observable<GitlabIssue[]> {
+    let queryParams = 'iids[]=';
+    for (let i = 0; i < ids.length ; i++) {
+      if (i === ids.length - 1) {
+        queryParams += ids[i];
+      } else {
+        queryParams += `${ids[i]}&iids[]=`;
+      }
+    }
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}/issues?${queryParams}&per_page=100`
+    }, cfg).pipe(
+      map((issues: GitlabOriginalIssue[]) => {
+        return issues ? issues.map(mapGitlabIssue) : [];
+      }),
+      mergeMap((issues: GitlabIssue[]) => {
+        if (issues && issues.length) {
+          return forkJoin([
+            ...issues.map(issue => this.getIssueWithComments$(issue, cfg))
+          ]);
+        } else {
+          return of([]);
+        }
+      })
+    );
+  }
+
   getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
     return this._getIssueComments$(issue.id, 1, cfg).pipe(
       map((comments) => {
