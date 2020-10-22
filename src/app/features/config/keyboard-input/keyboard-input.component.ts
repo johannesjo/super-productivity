@@ -27,7 +27,10 @@ export class KeyboardInputComponent extends FieldType {
 
     // focus out on escape
     if (keyCode === 27 || ev.key === 'Escape') {
-      // element.blur();
+      this.formControl.setValue(null);
+      if (ev.target instanceof HTMLElement) {
+        ev.target.blur();
+      }
     } else if (keyCode === 13 || ev.key === 'Enter') {
       // element.blur();
     } else if (keyCode === 16 || keyCode === 17 || keyCode === 18) {
