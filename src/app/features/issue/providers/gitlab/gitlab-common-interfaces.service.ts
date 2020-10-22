@@ -100,7 +100,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         taskChanges: {
           issueWasUpdated: true,
           issueLastUpdated: lastRemoteUpdate,
-          title: `#${issue.number} ${issue.title}`,
+          title: this._formatIssueTitle(issue.number, issue.title),
         },
         issue,
       };
