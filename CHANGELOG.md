@@ -1,3 +1,27 @@
+# [6.0.0](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.5...v6.0.0) (2020-10-23)
+
+
+### Bug Fixes
+
+* **sync:** error message not shown as it should ([9c4f8de](https://github.com/johannesjo/super-productivity/commit/9c4f8de66c4edcb938b83e7bdebcb8509b7fe4fc))
+* delete a keyboard shortcut ([3d977da](https://github.com/johannesjo/super-productivity/commit/3d977da4031182fb1db1af992bf127b789e5e37e))
+* **Gitlab:** importe opened issues only ([cf06455](https://github.com/johannesjo/super-productivity/commit/cf064556f5f32a8529db322de37cc0a9b51e3970))
+* **Gitlab:** improve search feature ([010fbd8](https://github.com/johannesjo/super-productivity/commit/010fbd84adc70324ec27fe9a1b1f6162fc4e7776))
+* **Gitlab:** send less requests to update issues ([e400189](https://github.com/johannesjo/super-productivity/commit/e400189d1bc5140f43ca4d22e8496741cd81b883))
+* **schedule:** day selection not switching time ([c67d44d](https://github.com/johannesjo/super-productivity/commit/c67d44d9783d094ca1f9fb9609c8510797e2e2a4))
+* **schedule:** default state ([dfb4490](https://github.com/johannesjo/super-productivity/commit/dfb449049672ca80f149ce2ae762b80de6033b50))
+
+
+### Features
+
+* **android:** hide google drive for fdroid ([a37fb6a](https://github.com/johannesjo/super-productivity/commit/a37fb6a67651d8f70ef57be369a6db1d58d4cdaf))
+* **docs:** add info on how to remove a shortcut ([31dce4f](https://github.com/johannesjo/super-productivity/commit/31dce4fbdc980229e63a7531d5e3ff64bd4f3076))
+* **Gitlab:** Bulk update issues ([f998429](https://github.com/johannesjo/super-productivity/commit/f998429f0eb0a10a209af477cac82827e7cf7475))
+* **i18n:** update all missing translations ([66af683](https://github.com/johannesjo/super-productivity/commit/66af683c255b1fadd80fc71b46541ae44e65feff))
+* **sync:** improve error handling [#599](https://github.com/johannesjo/super-productivity/issues/599) ([6aa0dae](https://github.com/johannesjo/super-productivity/commit/6aa0dae3f0ff1cc7025db266bf5f1c5d4a28490c))
+
+
+
 # [6.0.0-rc.5](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.4...v6.0.0-rc.5) (2020-10-19)
 
 
