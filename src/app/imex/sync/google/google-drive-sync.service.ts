@@ -8,6 +8,7 @@ import { AppDataComplete, SyncGetRevResult } from '../sync.model';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
 import { GoogleApiService } from './google-api.service';
 import { CompressionService } from '../../../core/compression/compression.service';
+import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
 
 @Injectable({
   providedIn: 'root',
@@ -39,6 +40,10 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   }
 
   async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
+    if (IS_F_DROID_APP) {
+      throw new Error('Google Drive Sync not supported on FDroid');
+    }
+
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const fileId = cfg._backupDocId;
     const r: any = await this._googleApiService.getFileInfo$(fileId).pipe(first()).toPromise();
@@ -51,6 +56,10 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   }
 
   async downloadAppData(): Promise<{ rev: string, data: AppDataComplete | undefined }> {
+    if (IS_F_DROID_APP) {
+      throw new Error('Google Drive Sync not supported on FDroid');
+    }
+
     const cfg = await this.cfg$.pipe(first()).toPromise();
     const {backup, meta} = await this._googleApiService.loadFile$(cfg._backupDocId).pipe(first()).toPromise();
     // console.log(backup, meta);
@@ -62,6 +71,10 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
   }
 
   async uploadAppData(data: AppDataComplete, localRev: string, isForceOverwrite: boolean = false): Promise<string | Error> {
+    if (IS_F_DROID_APP) {
+      throw new Error('Google Drive Sync not supported on FDroid');
+    }
+
     try {
       const cfg = await this.cfg$.pipe(first()).toPromise();
       // console.log(cfg, data);

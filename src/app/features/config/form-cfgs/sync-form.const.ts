@@ -3,6 +3,7 @@ import { T } from '../../../t.const';
 import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
 import { DROPBOX_AUTH_CODE_URL } from '../../../imex/sync/dropbox/dropbox.const';
+import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -33,7 +34,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         required: true,
         options: [
           {label: SyncProvider.Dropbox, value: SyncProvider.Dropbox},
-          {label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive},
+          ...( IS_F_DROID_APP ? [] : [{label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive}]),
           {label: SyncProvider.WebDAV, value: SyncProvider.WebDAV},
         ],
       },
