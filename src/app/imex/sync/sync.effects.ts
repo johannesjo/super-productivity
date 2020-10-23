@@ -28,6 +28,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { TaskService } from '../../features/tasks/task.service';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SyncProviderService } from './sync-provider.service';
+import { truncate } from '../../util/truncate';
 
 @Injectable()
 export class SyncEffects {
@@ -82,9 +83,18 @@ export class SyncEffects {
             this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
           }
         })
-        .catch((e: unknown) => {
-          console.error(e);
-          this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
+        .catch((err: unknown) => {
+          console.error(err);
+          const e: string = err && (err as any)?.toString
+            ? (err as any).toString()
+            : '???';
+          this._snackService.open({
+            msg: T.F.SYNC.S.UNKNOWN_ERROR,
+            translateParams: {
+              err: truncate(e.toString(), 100),
+            },
+            type: 'ERROR'
+          });
         });
     }),
   );

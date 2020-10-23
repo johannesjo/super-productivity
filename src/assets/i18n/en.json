@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
         "AUTH_ERROR": "Dropbox: Invalid access token provided",
         "OFFLINE": "Dropbox: Unable to sync, because offline",
-        "SYNC_ERROR": "Dropbox: Error while syncing",
-        "UNKNOWN_ERROR": "Dropbox: Unknown error: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: Error while syncing"
       }
     },
     "GITHUB": {
