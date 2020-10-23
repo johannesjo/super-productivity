@@ -20,7 +20,7 @@ import android.webkit.WebViewClient;
  * status bar and navigation/system bar) with user interaction.
  */
 public class FullscreenActivity extends AppCompatActivity {
-    JavaScriptInterface jsi;
+    CommonJavaScriptInterface jsi;
     WebView wv;
 
     @Override
@@ -108,6 +108,10 @@ public class FullscreenActivity extends AppCompatActivity {
 
             jsi = new JavaScriptInterface(this, wv);
             wv.addJavascriptInterface(jsi, "SUPAndroid");
+
+            if (BuildConfig.FLAVOR.equals("fdroid")) {
+                wv.addJavascriptInterface(jsi, "SUPFDroid");
+            }
 
             // needs to come last for some settings to take effect
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT && 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
