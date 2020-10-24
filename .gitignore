@@ -9,4 +9,7 @@
 /build
 /captures
 .externalNativeBuild
+
 /app/release
+/app/fdroid/release
+/app/play/release
