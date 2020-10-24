@@ -201,5 +201,18 @@ describe('isValidAppData()', () => {
         } as any,
       })).toThrowError(`No tagX`);
     });
+
+    it('should ', () => {
+      expect(() => isValidAppData({
+        ...mock,
+        task: {
+          ...mock.task,
+          ...fakeEntityStateFromArray<Task>([{
+            ...DEFAULT_TASK,
+            projectId: 'NON_EXISTENT'
+          }])
+        } as any,
+      })).toThrowError(`projectId NON_EXISTENT from task not existing`);
+    });
   });
 });

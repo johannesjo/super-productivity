@@ -36,10 +36,34 @@ export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateEr
       _isAllTasksAvailable(d)
       && _isNoLonelySubTasks(d)
     )
+    && _isAllProjectsAvailable(d)
 
     : typeof dAny === 'object'
   ;
   // console.timeEnd('time isValidAppData');
+
+  return isValid;
+};
+
+const _isAllProjectsAvailable = (data: AppDataComplete): boolean => {
+  let isValid: boolean = true;
+  const pids = data.project.ids as string[];
+  data.task.ids.forEach((id: string) => {
+    const t: Task = data.task.entities[id] as Task;
+    if (t.projectId && !pids.includes(t.projectId)) {
+      console.log(t);
+      devError(`projectId ${t.projectId} from task not existing`);
+      isValid = false;
+    }
+  });
+  data.taskArchive.ids.forEach((id: string) => {
+    const t: Task = data.taskArchive.entities[id] as Task;
+    if (t.projectId && !pids.includes(t.projectId)) {
+      console.log(t);
+      devError(`projectId ${t.projectId} from archive task not existing`);
+      isValid = false;
+    }
+  });
 
   return isValid;
 };
