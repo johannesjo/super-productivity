@@ -17,6 +17,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
+  dataOut = _removeNonExistentProjectIds(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
@@ -218,3 +219,26 @@ const _addOrphanedTasksToProjectLists = (data: AppDataComplete): AppDataComplete
   return data;
 };
 
+const _removeNonExistentProjectIds = (data: AppDataComplete): AppDataComplete => {
+  const {task, project, taskArchive} = data;
+  const projectIds: string[] = project.ids as string[];
+  const taskIds: string[] = task.ids;
+  const taskArchiveIds: string[] = taskArchive.ids as string[];
+  taskIds.forEach((id) => {
+    const t = task.entities[id] as TaskCopy;
+    if (t.projectId && !projectIds.includes(t.projectId)) {
+      console.log('Delete missing project id from task ' + t.projectId);
+      t.projectId = null;
+    }
+  });
+
+  taskArchiveIds.forEach((id) => {
+    const t = taskArchive.entities[id] as TaskCopy;
+    if (t.projectId && !projectIds.includes(t.projectId)) {
+      console.log('Delete missing project id from archive task ' + t.projectId);
+      t.projectId = null;
+    }
+  });
+
+  return data;
+};

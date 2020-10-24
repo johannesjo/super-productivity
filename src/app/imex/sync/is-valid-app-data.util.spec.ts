@@ -202,7 +202,7 @@ describe('isValidAppData()', () => {
       })).toThrowError(`No tagX`);
     });
 
-    it('should ', () => {
+    it('missing projectIds for task', () => {
       expect(() => isValidAppData({
         ...mock,
         task: {
@@ -213,6 +213,19 @@ describe('isValidAppData()', () => {
           }])
         } as any,
       })).toThrowError(`projectId NON_EXISTENT from task not existing`);
+    });
+
+    it('missing projectIds for taskArchive', () => {
+      expect(() => isValidAppData({
+        ...mock,
+        taskArchive: {
+          ...mock.taskArchive,
+          ...fakeEntityStateFromArray<Task>([{
+            ...DEFAULT_TASK,
+            projectId: 'NON_EXISTENT'
+          }])
+        } as any,
+      })).toThrowError(`projectId NON_EXISTENT from archive task not existing`);
     });
   });
 });

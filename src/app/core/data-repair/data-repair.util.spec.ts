@@ -525,4 +525,60 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should delete non-existent project ids for tasks in "task"', () => {
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'TEST',
+        title: 'TEST',
+        projectId: 'NON_EXISTENT'
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      task: taskState,
+    } as any)).toEqual({
+      ...mock,
+      task: {
+        ...taskState,
+        entities: {
+          TEST: {
+            ...taskState.entities.TEST,
+            projectId: null
+          }
+        }
+      },
+    });
+  });
+
+  it('should delete non-existent project ids for tasks in "taskArchive"', () => {
+    const taskArchiveState = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'TEST',
+        title: 'TEST',
+        projectId: 'NON_EXISTENT'
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      taskArchive: taskArchiveState,
+    } as any)).toEqual({
+      ...mock,
+      taskArchive: {
+        ...taskArchiveState,
+        entities: {
+          TEST: {
+            ...taskArchiveState.entities.TEST,
+            projectId: null
+          }
+        }
+      },
+    });
+  });
+
 });
