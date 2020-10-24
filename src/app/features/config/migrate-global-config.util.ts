@@ -1,10 +1,10 @@
-import { GlobalConfigState, IdleConfig, TakeABreakConfig } from './global-config.model';
+import { GlobalConfigState, IdleConfig, SyncConfig, TakeABreakConfig } from './global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 2.0;
+const MODEL_VERSION = 2;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
   if (!isMigrateModel(globalConfigState, MODEL_VERSION, 'GlobalConfig')) {
@@ -113,11 +113,11 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
 
   let prevProvider: SyncProvider | null = null;
   let syncInterval: number = 0;
-  if ((config as any).dropboxSync.isEnabled) {
+  if ((config as any).dropboxSync?.isEnabled) {
     prevProvider = SyncProvider.Dropbox;
     syncInterval = (config as any).dropboxSync.syncInterval;
   }
-  if ((config as any).googleDriveSync.isEnabled) {
+  if ((config as any).googleDriveSync?.isEnabled) {
     prevProvider = SyncProvider.GoogleDrive;
     syncInterval = (config as any).googleDriveSync.syncInterval;
   }
@@ -130,11 +130,13 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
         syncInterval,
         syncProvider: prevProvider,
         dropboxSync: {
-          accessToken:  (config as any).dropboxSync.accessToken,
-          authCode:  (config as any).dropboxSync.authCode,
+          ...DEFAULT_GLOBAL_CONFIG.sync.dropboxSync,
+          accessToken: (config as any).dropboxSync?.accessToken,
+          authCode: (config as any).dropboxSync?.authCode,
         },
         googleDriveSync: {
-          ...(config as any).googleDriveSync,
+          ...DEFAULT_GLOBAL_CONFIG.sync.googleDriveSync,
+          ...(config as any)?.googleDriveSync,
         },
         webDav: {
           password: null,
@@ -142,7 +144,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
           userName: null,
           baseUrl: null,
         }
-      }
+      } as SyncConfig
       : DEFAULT_GLOBAL_CONFIG.sync,
   };
 };

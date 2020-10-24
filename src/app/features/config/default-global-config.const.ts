@@ -118,12 +118,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     },
 
     googleDriveSync: {
-      // TODO remove / migrate
-      isAutoSyncToRemote: false,
-      isNotifyOnSync: false,
-      isLoadRemoteDataOnStartup: false,
-      isAutoLogin: false,
-
       isCompressData: true,
       syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
       _syncFileNameForBackupDocId: null,

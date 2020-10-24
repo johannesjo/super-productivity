@@ -56,11 +56,6 @@ export type PomodoroConfig = Readonly<{
 
 // NOTE: needs to be writable due to how we use it
 export interface GoogleDriveSyncConfig {
-  isAutoLogin: boolean;
-  isAutoSyncToRemote: boolean;
-  isNotifyOnSync: boolean;
-  isLoadRemoteDataOnStartup: boolean;
-
   isCompressData: boolean;
   syncFileName: string;
   _syncFileNameForBackupDocId: string | null;
