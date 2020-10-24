@@ -1,3 +1,18 @@
+## [6.0.1](https://github.com/johannesjo/super-productivity/compare/v6.0.0...v6.0.1) (2020-10-24)
+
+
+### Bug Fixes
+
+* broken sync migration for older data states [#605](https://github.com/johannesjo/super-productivity/issues/605) ([8064f20](https://github.com/johannesjo/super-productivity/commit/8064f2045f20212d8a74065698024b1979c26618))
+
+
+### Features
+
+* **autoRepair:** check data for missing projects ([09b7e30](https://github.com/johannesjo/super-productivity/commit/09b7e3065c095bc193830c40722d14acc3c48c5a))
+* **autoRepair:** make autofix missing projectId work ([afa66ae](https://github.com/johannesjo/super-productivity/commit/afa66ae7286eaef6b7a84c208f4086be42cd1124))
+
+
+
 # [6.0.0](https://github.com/johannesjo/super-productivity/compare/v6.0.0-rc.5...v6.0.0) (2020-10-23)
 
 
