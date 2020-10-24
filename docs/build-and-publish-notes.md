@@ -1,5 +1,7 @@
 # Publish notes
 
+Look for AppDataForScreenshots.json
+
 ## Mac Store Screenshots
 * Set Resolution: 1280*800 (use detached dev tools to check for size)
 * Press Cmd+Shift+4
