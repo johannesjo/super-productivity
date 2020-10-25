@@ -12,4 +12,4 @@ Helps you to <b>establish healthy habits</b>. A break timer reminds to you, when
 
 Stuck and procrastinating? No problem! Super Productivity's <b>anti procrastination</b> feature helps you to reconsider your options and a <b>pomodoro timer</b> is also always at hand.
 
-Super Productivity <b>does NOT collect any data</b> and there are no user accounts or registration. It's <b>free</b> and <b>open source</b> and always will be.
+Super Productivity <b>does NOT collect any data</b> and there are no user accounts or registration. It's <b>free</b> and <b>open-source</b> and always will be.
