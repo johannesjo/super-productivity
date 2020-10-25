@@ -1,6 +1,6 @@
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for multiple platforms.
 
-<b>Features</p>
+<h3>Features</h3>
 
 <b>Plan, track & summarize</b>. Create time sheets and work summaries in a breeze to easily export them to your companies time tracking system.
 
