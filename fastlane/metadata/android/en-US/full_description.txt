@@ -1,4 +1,4 @@
-Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetitive tasks and to provide you with a place to collect all the information you need to do your job.
+Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for multiple platforms.
 
 <b>Features</p>
 
