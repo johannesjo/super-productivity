@@ -1,5 +1,6 @@
 import { GlobalConfigState } from './global-config.model';
 import { IS_MAC } from '../../util/is-mac';
+import { IS_F_DROID_APP } from '../../util/is-android-web-view';
 
 export const IS_USE_DARK_THEME_AS_DEFAULT: boolean = !IS_MAC || !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -17,7 +18,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: false,
     isMinimizeToTray: false,
-    isDisableInitialDialog: false,
+    isDisableInitialDialog: IS_F_DROID_APP,
     defaultProjectId: null,
     firstDayOfWeek: 0,
   },
