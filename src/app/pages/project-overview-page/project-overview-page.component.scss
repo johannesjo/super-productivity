@@ -83,4 +83,8 @@ $project-color-width: $s*3;
 .add-new-project-wrapper {
   margin-top: $s*2;
   text-align: center;
+  
+  > button {
+    margin: 0 $s;
+  }
 }
