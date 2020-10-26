@@ -84,7 +84,7 @@ $project-color-width: $s*3;
   margin-top: $s*2;
   text-align: center;
   
-  > button:first-child {
-    margin-right: 2*$s;
+  > button {
+    margin: 0 2*$s;
   }
 }
