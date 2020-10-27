@@ -182,9 +182,14 @@ npm start
 ### Packaging the app
 Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `yarn dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also use the [command line interface of electron builder](https://www.electron.build/cli).
 
+## Run as Docker Container
+```
+docker run -d -p 80:80 johannesjo/super-productivity:latest
+```
 
-## Setup WebDAV Syncing
-When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
+
+## Custom WebDAV Syncing
+If using the integrated WebDAV Syncing is not working out for you, you can also try to sync all app files. When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder away and use the remaining path to sync via the cloud.
 
 ## Using a custom folder to save user data
 You can specify a custom folder for saving your data by starting the application with the `--user-data-dir` parameter like so:
