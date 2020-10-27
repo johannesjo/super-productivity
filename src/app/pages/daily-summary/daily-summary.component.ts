@@ -29,7 +29,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   T: typeof T = T;
 
   cfg: any = {
-    isBlockFinishDayUntilTimeTimeTracked: false
   };
 
   isTimeSheetExported: boolean = true;

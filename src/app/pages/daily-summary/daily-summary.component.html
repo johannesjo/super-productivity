@@ -121,7 +121,6 @@
       <div class="bottom-buttons">
         <button (click)="finishDay()"
                 *ngIf="isForToday"
-                [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
                 color="primary"
                 mat-flat-button>
           <mat-icon>wb_sunny</mat-icon>
@@ -129,7 +128,6 @@
         </button>
         <button (click)="finishDay()"
                 *ngIf="!isForToday"
-                [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
                 color="primary"
                 mat-flat-button>
           <mat-icon>wb_sunny</mat-icon>
