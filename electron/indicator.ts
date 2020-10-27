@@ -1,14 +1,12 @@
 import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
-import { existsSync, readFileSync } from 'fs';
 // const dbus = require('./dbus');
-import { errorHandler } from './error-handler';
 import { IPC } from './ipc-events.const';
-
-const GNOME_SHELL_EXT_MIN_VERSION = 2;
 
 let tray;
 let isIndicatorRunning = false;
-let isGnomeShellExtensionRunning = false;
+let DIR: string;
+
+const isGnomeShellExtensionRunning = false;
 
 export const initIndicator = ({
   IS_LINUX,
@@ -27,67 +25,24 @@ export const initIndicator = ({
   app: App;
   ICONS_FOLDER: string;
 }) => {
-
-  const isGnomeShellExtensionInstalled = isGnomeShellInstalled(IS_LINUX, IS_GNOME);
+  DIR = ICONS_FOLDER + 'indicator/';
 
   initAppListeners(app);
-  initListeners(isGnomeShellExtensionInstalled);
+  initListeners();
 
-  // if we have the gnome shell extension installed set up bus
-  if (IS_GNOME && isGnomeShellExtensionInstalled) {
-    // TODO
-    // dbus.init({
-    //  quitApp,
-    //  showApp,
-    // });
-    isGnomeShellExtensionRunning = true;
-    return;
-  } else if (IS_GNOME) {
-    // don't start anything on GNOME as the indicator might not be visible and
-    // the quiting behaviour confusing
-    return;
-  } else {
-    // otherwise create a regular tray icon
-    // switch tray icon based on
-    const trayIcoFile = nativeTheme.shouldUseDarkColors
-      ? 'tray-ico-d.png'
-      : 'tray-ico-l.png';
+  const suf = nativeTheme.shouldUseDarkColors
+    ? '-d.png'
+    : '-l.png';
+  tray = new Tray(DIR + `stopped${suf}`);
+  tray.setContextMenu(createContextMenu(showApp, quitApp));
 
-    tray = new Tray(ICONS_FOLDER + trayIcoFile);
-
-    tray.setContextMenu(createContextMenu(showApp, quitApp));
-
-    tray.on('click', () => {
-      showApp();
-    });
-    isIndicatorRunning = true;
-    return tray;
-  }
+  tray.on('click', () => {
+    showApp();
+  });
+  isIndicatorRunning = true;
+  return tray;
+  // }
 };
-
-function isGnomeShellInstalled(IS_LINUX, IS_GNOME) {
-  // check if shell extension is installed
-  let isGnomeShellExtInstalled = false;
-  if (IS_LINUX && IS_GNOME) {
-    // tslint:disable-next-line
-    const LINUX_HOME_DIR = process.env['HOME'];
-    const EXTENSION_PATH = LINUX_HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com';
-
-    if (existsSync(EXTENSION_PATH)) {
-      const metaData = readFileSync(EXTENSION_PATH + '/metadata.json').toString();
-      const version = JSON.parse(metaData).version;
-      if (version >= GNOME_SHELL_EXT_MIN_VERSION) {
-        isGnomeShellExtInstalled = true;
-      } else {
-        errorHandler('Indicator: Outdated version '
-          + version
-          + ' of Gnome Shell Extension installed. Please install at least version '
-          + GNOME_SHELL_EXT_MIN_VERSION + '.');
-      }
-    }
-  }
-  return isGnomeShellExtInstalled;
-}
 
 function initAppListeners(app) {
   if (tray) {
@@ -99,7 +54,7 @@ function initAppListeners(app) {
   }
 }
 
-function initListeners(isGnomeShellExtInstalled) {
+function initListeners() {
   ipcMain.on(IPC.CURRENT_TASK_UPDATED, (ev, params) => {
     const currentTask = params.current;
     // const lastActiveTaskTask = params.lastActiveTask;
@@ -109,25 +64,26 @@ function initListeners(isGnomeShellExtInstalled) {
     if (currentTask) {
       msg = createIndicatorStr(currentTask);
     }
+    console.log(currentTask);
 
-    // if (isGnomeShellExtInstalled) {
-    //  // gnome indicator handling
-    //  if (currentTask && currentTask.title) {
-    //    dbus.setTask(currentTask.id, msg);
-    //  } else if (!currentTask && lastActiveTaskTask && !lastActiveTaskTask.isDone) {
-    //    const msg = createIndicatorStr(lastActiveTaskTask);
-    //    dbus.setTask('PAUSED', msg);
-    //  } else {
-    //    dbus.setTask('NONE', 'NONE');
-    //  }
-    // } else
-    //
     if (tray) {
       // tray handling
       if (currentTask && currentTask.title) {
+        const suf = nativeTheme.shouldUseDarkColors
+          ? '-d'
+          : '-l';
+        const progress = currentTask.timeSpent / currentTask.timeEstimate;
+        const f = Math.min(Math.round(progress * 15), 15);
+        const t = DIR + `running-anim${suf}/${f || 0}@2x.png`;
+
         tray.setTitle(msg);
+        tray.setImage(t);
       } else {
         tray.setTitle('');
+        const suf = nativeTheme.shouldUseDarkColors
+          ? '-d.png'
+          : '-l.png';
+        tray.setImage(DIR + `stopped${suf}`);
       }
     }
   });

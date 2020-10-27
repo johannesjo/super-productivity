@@ -21,6 +21,8 @@ export class TaskElectronEffects {
   taskChangeElectron$: any = this._actions$.pipe(
     ofType(
       TaskActionTypes.SetCurrentTask,
+      TaskActionTypes.UnsetCurrentTask,
+      TaskActionTypes.AddTimeSpent,
     ),
     withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
     tap(([action, current]) => {
