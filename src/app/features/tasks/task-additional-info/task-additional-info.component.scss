@@ -72,6 +72,12 @@ progress-bar {
   }
 }
 
+.created {
+  padding: $s;
+  opacity: .65;
+  text-align: center;
+}
+
 
 .drag-over-msg {
   pointer-events: none;
