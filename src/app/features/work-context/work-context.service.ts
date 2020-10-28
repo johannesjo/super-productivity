@@ -67,7 +67,8 @@ export class WorkContextService {
 
   // CONTEXT LEVEL
   // -------------
-  activeWorkContextId$: Observable<string | null> = this._store$.pipe(
+  activeWorkContextId$: Observable<string | null> = this._isAllDataLoaded$.pipe(
+    switchMap(() => this._store$),
     select(selectActiveContextId),
     distinctUntilChanged(),
     shareReplay(1),
@@ -77,7 +78,8 @@ export class WorkContextService {
   activeWorkContextTypeAndId$: Observable<{
     activeId: string;
     activeType: WorkContextType;
-  }> = this._store$.pipe(
+  }> = this._isAllDataLoaded$.pipe(
+    switchMap(() => this._store$),
     select(selectActiveContextTypeAndId),
     distinctUntilChanged(distinctUntilChangedObject),
     shareReplay(1),
