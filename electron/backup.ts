@@ -5,7 +5,7 @@ import { answerRenderer } from './better-ipc';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import * as path from 'path';
 
-let BACKUP_DIR: string = `${app.getPath('userData')}/backups`;
+let BACKUP_DIR = `${app.getPath('userData')}/backups`;
 
 export function initBackupAdapter(backupDir: string) {
   BACKUP_DIR = backupDir;
