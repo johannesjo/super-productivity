@@ -7,7 +7,7 @@ export const getSettings = (win, cbIN) => {
   win.webContents.send(IPC.TRANSFER_SETTINGS_REQUESTED);
 };
 
-ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, getSettingsCb);
+ipcMain.once(IPC.TRANSFER_SETTINGS_TO_ELECTRON, getSettingsCb);
 
 function getSettingsCb(ev, settings) {
   cb(settings);
