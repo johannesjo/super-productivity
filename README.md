@@ -89,7 +89,7 @@ I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-g
 ## :globe_with_meridians: Web Version
 Check out the web version eventhough it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
 
-If you want the Jira Integration and idle time tracking to work you have also to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
+If you want the Jira integration and idle time tracking to work, you have to also download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
 ## :computer: Downloads & Install
 ### All Platforms
