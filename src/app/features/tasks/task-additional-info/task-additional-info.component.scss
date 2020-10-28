@@ -74,8 +74,12 @@ progress-bar {
 
 .created {
   padding: $s;
-  opacity: .65;
+  opacity: .5;
   text-align: center;
+  color: $light-theme-text-color-muted;
+  @include darkTheme() {
+    color: $dark-theme-text-color-muted;
+  }
 }
 
 
