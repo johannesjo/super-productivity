@@ -66,13 +66,13 @@
 
 
 
-Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetitive tasks and to provide you with a place to collect all the information you need to do your job.
+Organize your daily tasks in one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetitive tasks and to provide you with a place to collect all the information you need to do your job.
 
 <p align="center"><a href="http://super-productivity.com">:globe_with_meridians: Open Web App</a> or <a href="https://github.com/johannesjo/super-productivity/releases">:computer: Download</a></p>
 
 ## :heavy_check_mark: Features
-* **Plan, track & summarize**. Create time sheets and work summaries in a breeze to easily export them to your companies time tracking system.
-* Integrate with **Jira**, **Github** and **Gitlab**. Auto import tasks assigned to you, plan the details locally, automatically create worklogs and get notified right away, when something changes.
+* **Plan, track & summarize**. Create time sheets and work summaries in a breeze to easily export them to your company's time tracking system.
+* Integrate with **Jira**, **GitHub** and **GitLab**. Auto import tasks assigned to you, plan the details locally, automatically create worklogs and get notified right away, when something changes.
 * Organize your project's data. Create **notes**, attach **files** or create **bookmarks** for links, files and even commands and have it all out of the way, once you're ready for the weekend.
 * Helps you to **establish healthy habits**. A break timer reminds to you, when it's time to step away. You also can collect personal metrics for yourself to see, which of your work routines need adjustments.
 * Stuck and procrastinating? No problem! Super Productivity's **anti procrastination** feature helps you to reconsider your options and a **pomodoro timer** is also always at hand.
@@ -87,16 +87,16 @@ And much more!
 I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app. There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
 ## :globe_with_meridians: Web Version
-Check out the It is a little bit more limited: Time tracking only works if the app is open and idle time tracking is disabled if the chrome extension is not installed.
+Check out the web version eventhough it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
 
-If you want the Jira Integration and idle time tracking to work you have also to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
+If you want the Jira integration and idle time tracking to work, you have to also download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
 ## :computer: Downloads & Install
 ### All Platforms
 [Install from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
 ### Windows
-Due to certification issues it's recommended to download from the Microsoft Store:
+Due to certification issues it's recommended to download the app from the Microsoft Store:
 
 <a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png' alt='English badge' width="127" height="52"/></a>
 

@@ -71,6 +71,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isTrayShowCurrentTask',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_TRAY_SHOW_CURRENT_TASK,
+      },
+    },
+    {
       key: 'defaultProjectId',
       type: 'project-select',
       templateOptions: {
