@@ -14,6 +14,7 @@ import { join, normalize } from 'path';
 import { format } from 'url';
 import { IPC } from './ipc-events.const';
 import { getSettings } from './get-settings';
+import { readFileSync, stat } from 'fs';
 
 let mainWin: BrowserWindow;
 
@@ -96,7 +97,19 @@ export const createWindow = ({
         slashes: true,
       });
 
-  mainWin.loadURL(url);
+  mainWin.loadURL(url).then(() => {
+    // load custom stylesheet if any
+    const CSS_FILE_PATH = app.getPath('userData') + '/styles.css';
+    stat(app.getPath('userData') + '/styles.css', (err) => {
+      if (err) {
+        console.log('No custom styles detected at ' + CSS_FILE_PATH);
+      } else {
+        console.log('Loading custom styles from ' + CSS_FILE_PATH);
+        const styles = readFileSync(CSS_FILE_PATH, {encoding: 'utf8'});
+        mainWin.webContents.insertCSS(styles).then(console.log).catch(console.error);
+      }
+    });
+  });
 
   // show gracefully
   mainWin.once('ready-to-show', () => {
