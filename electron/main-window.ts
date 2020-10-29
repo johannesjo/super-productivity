@@ -1,5 +1,14 @@
 import * as windowStateKeeper from 'electron-window-state';
-import { App, BrowserWindow, dialog, ipcMain, Menu, MenuItemConstructorOptions, MessageBoxReturnValue, shell } from 'electron';
+import {
+  App,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  Menu,
+  MenuItemConstructorOptions,
+  MessageBoxReturnValue,
+  shell
+} from 'electron';
 import { errorHandler } from './error-handler';
 import { join, normalize } from 'path';
 import { format } from 'url';
@@ -210,8 +219,8 @@ const appCloseHandler = (
       } else {
         getSettings(mainWin, (appCfg) => {
           if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
-            mainWin.hide()
-            return
+            mainWin.hide();
+            return;
           }
           if (appCfg && appCfg.misc.isConfirmBeforeExit && !(app as any).isQuiting) {
             dialog.showMessageBox(mainWin,
@@ -240,14 +249,14 @@ const appCloseHandler = (
 const appMinimizeHandler = (
   app: App,
 ) => {
-  if(!(app as any).isQuiting) {
+  if (!(app as any).isQuiting) {
     mainWin.on('minimize', (event) => {
       getSettings(mainWin, (appCfg) => {
-        if(appCfg.misc.isMinimizeToTray) {
-          event.preventDefault()
-          mainWin.hide()
+        if (appCfg.misc.isMinimizeToTray) {
+          event.preventDefault();
+          mainWin.hide();
         }
-      })
-    })
+      });
+    });
   }
-}
+};

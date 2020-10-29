@@ -238,6 +238,8 @@
       </div>
     </ng-container>
   </task-additional-info-item>
+
+  <div class="created">Created on {{task?.created|date:'short'}}</div>
 </div>
 
 <div *ngIf="isDragOver"
