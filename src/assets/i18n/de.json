@@ -83,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "",
-        "FORCE_IMPORT": "",
-        "FORCE_UPLOAD": "",
-        "FORCE_UPLOAD_AFTER_ERROR": "",
-        "TRY_LOAD_REMOTE_AGAIN": ""
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": "",
-        "USE_LOCAL": "",
-        "USE_REMOTE": ""
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "",
-        "FOLLOW_LINK": "",
-        "L_ACCESS_TOKEN": "",
-        "L_AUTH_CODE": "",
-        "L_ENABLE_SYNCING": "",
-        "L_SYNC_INTERVAL": "",
-        "TITLE": ""
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Zugriffstoken aus Authentifizierungscode kann nicht generiert werden",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Aus Authentifizierungscode generiertes Zugriffstoken",
@@ -211,53 +184,10 @@
         "CREATE_SYNC_FILE": "Google Drive: Es wurde keine Datei mit dem Namen <strong>\"{{fileName}}\"</strong> gefunden. <strong>Erstelle</strong> es als Synchronisierungsdatei auf Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: <strong>vorhandene</strong> Datei <strong>\"{{fileName}}\"</strong> als Synchronisierungsdatei verwenden? Wenn nicht, ändern Sie bitte den Namen der Sync-Datei."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "OVERWRITE_LOCAL": "",
-        "OVERWRITE_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": ""
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "OVERWRITE_LOCAL": "",
-        "OVERWRITE_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": ""
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "",
-        "ERROR": "",
-        "ERROR_INITIAL_IMPORT": "",
-        "LOCAL_UP_TO_DATE": "",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Mehrere Dateien mit dem Namen \"{{newFileName}}\" gefunden. Bitte löschen Sie alle bis auf einen oder wählen Sie einen anderen Namen.",
-        "NO_UPDATE_REQUIRED": "",
-        "REMOTE_UP_TO_DATE": "",
-        "SUCCESS": "",
-        "SYNCING": "",
         "SYNC_FILE_CREATION_ERROR": "Google Drive: Fehler beim Erstellen der Synchronisierungsdatei. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: Der Name der Synchronisierungsdatei wurde aktualisiert"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "",
-        "AUTO_SYNC": "",
-        "BACKUP_NOW": "",
-        "COMPRESS": "",
-        "ENABLE": "",
-        "LOAD_FROM": "",
-        "LOAD_ON_STARTUP": "",
-        "NOTIFY": "",
-        "SYNC_FILE_NAME": "",
-        "SYNC_INTERVAL": "",
-        "UPDATE_SYNC_FILE": ""
       },
       "S_API": {
         "ERR": "GoogleApi-Fehler: {{errStr}}",
@@ -927,10 +857,6 @@
       "IS_HIDE_EVALUATION_SHEET": "Bewertungsbogen in der Tageszusammenfassung ausblenden",
       "TITLE": "Auswertung & Metriken"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "",
-      "TITLE": ""
-    },
     "IDLE": {
       "HELP": "<div><p>Wenn die Behandlung von Leerlaufzeiten aktiviert ist, wird nach einer festgelegten Zeit ein Dialogfeld geöffnet, in dem überprüft wird, ob und für welche Aufgabe Sie Ihre Zeit nachverfolgen möchten, wenn Sie im Leerlauf waren.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktivieren Sie das Leerlaufzeithandling",
@@ -1016,7 +942,6 @@
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Deskop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
       "TITLE": "Verschiedene Einstellungen"
     },
@@ -1176,14 +1101,6 @@
     "SYNC_EXPORT": "Synchronisieren und exportieren",
     "TAG_SETTINGS": "Tag-spezifische Einstellungen",
     "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "",
-      "ERROR_INVALID_DATA": "",
-      "IMPORTING": "",
-      "SUCCESS": ""
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",

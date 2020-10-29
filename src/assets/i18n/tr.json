@@ -83,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "",
-        "FORCE_IMPORT": "",
-        "FORCE_UPLOAD": "",
-        "FORCE_UPLOAD_AFTER_ERROR": "",
-        "TRY_LOAD_REMOTE_AGAIN": ""
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": "",
-        "USE_LOCAL": "",
-        "USE_REMOTE": ""
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "",
-        "FOLLOW_LINK": "",
-        "L_ACCESS_TOKEN": "",
-        "L_AUTH_CODE": "",
-        "L_ENABLE_SYNCING": "",
-        "L_SYNC_INTERVAL": "",
-        "TITLE": ""
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Yetkilendirme Kodundan Erişim Simgesi oluşturulamıyor",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Yetkilendirme Kodundan oluşturulan Erişim Simgesi",
@@ -211,53 +184,10 @@
         "CREATE_SYNC_FILE": "Google Drive: <strong>\"{{fileName}}\"</strong> adında bir dosya bulunamadı. <strong>Oluştur</strong> Google Drive’da senkronizasyon dosyası olarak?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Senkronizasyon dosyası olarak <strong>var olan</strong> dosyayı <strong>\"{{fileName}}\"</strong> kullanıyor musunuz? Değilse, lütfen Eşitleme dosya adını değiştirin."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "OVERWRITE_LOCAL": "",
-        "OVERWRITE_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": ""
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "OVERWRITE_LOCAL": "",
-        "OVERWRITE_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": ""
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "",
-        "ERROR": "",
-        "ERROR_INITIAL_IMPORT": "",
-        "LOCAL_UP_TO_DATE": "",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin.",
-        "NO_UPDATE_REQUIRED": "",
-        "REMOTE_UP_TO_DATE": "",
-        "SUCCESS": "",
-        "SYNCING": "",
         "SYNC_FILE_CREATION_ERROR": "Google Drive: Senkronizasyon dosyası oluşturulurken hata meydana geldi. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: Güncellenmiş senkronizasyon dosyası adı"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "",
-        "AUTO_SYNC": "",
-        "BACKUP_NOW": "",
-        "COMPRESS": "",
-        "ENABLE": "",
-        "LOAD_FROM": "",
-        "LOAD_ON_STARTUP": "",
-        "NOTIFY": "",
-        "SYNC_FILE_NAME": "",
-        "SYNC_INTERVAL": "",
-        "UPDATE_SYNC_FILE": ""
       },
       "S_API": {
         "ERR": "GoogleApi Hatası: {{errStr}}",
@@ -927,10 +857,6 @@
       "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
       "TITLE": "Değerlendirme ve Metrikler"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "",
-      "TITLE": ""
-    },
     "IDLE": {
       "HELP": "<div><p>Boşta kalma süresi işleme etkinleştirildiğinde, boşta olduğunuzda, hangi görevi ve zamanınızı izlemek istediğinizi kontrol etmek için belirli bir süre sonra bir iletişim kutusu açılır.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Boşta kalma süresini işlemeyi etkinleştir",
@@ -1016,7 +942,6 @@
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
       "TITLE": "Diğer ayarlar"
     },
@@ -1176,14 +1101,6 @@
     "SYNC_EXPORT": "Senkronize Et ve Dışa Aktar",
     "TAG_SETTINGS": "Etikete Özgü Ayarlar",
     "TOGGLE_DARK_MODE": "Koyu Modu Değiştir"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "",
-      "ERROR_INVALID_DATA": "",
-      "IMPORTING": "",
-      "SUCCESS": ""
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",

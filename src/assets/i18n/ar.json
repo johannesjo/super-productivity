@@ -83,33 +83,6 @@
       }
     },
     "DROPBOX": {
-      "C": {
-        "EMPTY_SYNC": "",
-        "FORCE_IMPORT": "",
-        "FORCE_UPLOAD": "",
-        "FORCE_UPLOAD_AFTER_ERROR": "",
-        "TRY_LOAD_REMOTE_AGAIN": ""
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": "",
-        "USE_LOCAL": "",
-        "USE_REMOTE": ""
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "",
-        "FOLLOW_LINK": "",
-        "L_ACCESS_TOKEN": "",
-        "L_AUTH_CODE": "",
-        "L_ENABLE_SYNCING": "",
-        "L_SYNC_INTERVAL": "",
-        "TITLE": ""
-      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: تعذر إنشاء رمز الدخول من كود المصادقة",
         "ACCESS_TOKEN_GENERATED": "Dropbox: رمز الدخول الذي تم إنشاؤه من كود المصادقة",
@@ -211,53 +184,10 @@
         "CREATE_SYNC_FILE": "Google Drive: لم يتم العثور على ملف يحمل الاسم <strong>\"{{fileName}}\"</strong> . <strong>إنشاء</strong> كملف مزامنة على Google Drive؟",
         "USE_EXISTING_SYNC_FILE": "Google Drive: استخدم <strong>ملف</strong> موجود <strong>\"{{fileName}}\"</strong> كملف مزامنة؟ إذا لم يكن الأمر كذلك ، يرجى تغيير اسم ملف المزامنة."
       },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "OVERWRITE_LOCAL": "",
-        "OVERWRITE_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": ""
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "",
-        "LAST_SYNC": "",
-        "LOCAL": "",
-        "LOCAL_REMOTE": "",
-        "OVERWRITE_LOCAL": "",
-        "OVERWRITE_REMOTE": "",
-        "REMOTE": "",
-        "TEXT": "",
-        "TITLE": ""
-      },
       "S": {
-        "DOWNLOADING_UPDATE": "",
-        "ERROR": "",
-        "ERROR_INITIAL_IMPORT": "",
-        "LOCAL_UP_TO_DATE": "",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "تم العثور على ملفات متعددة بالاسم \"{{newFileName}}\". يرجى حذف الكل ما عدا واحدًا أو اختيار اسم مختلف.",
-        "NO_UPDATE_REQUIRED": "",
-        "REMOTE_UP_TO_DATE": "",
-        "SUCCESS": "",
-        "SYNCING": "",
         "SYNC_FILE_CREATION_ERROR": "Google Drive: حدث خطأ أثناء إنشاء ملف المزامنة. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: تم تحديث اسم ملف المزامنة"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "",
-        "AUTO_SYNC": "",
-        "BACKUP_NOW": "",
-        "COMPRESS": "",
-        "ENABLE": "",
-        "LOAD_FROM": "",
-        "LOAD_ON_STARTUP": "",
-        "NOTIFY": "",
-        "SYNC_FILE_NAME": "",
-        "SYNC_INTERVAL": "",
-        "UPDATE_SYNC_FILE": ""
       },
       "S_API": {
         "ERR": "خطأ GoogleApi: {{errStr}}",
@@ -927,10 +857,6 @@
       "IS_HIDE_EVALUATION_SHEET": "إخفاء ورقة التقييم على الملخص اليومي",
       "TITLE": "التقييم والمقاييس"
     },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "",
-      "TITLE": ""
-    },
     "IDLE": {
       "HELP": "<div><p>عند تمكين معالجة وقت الخمول ، سيتم فتح مربع حوار بعد فترة زمنية محددة للتحقق مما إذا كانت المهمة التي ترغب في تتبع وقتك عليها ، وعندما تكون خاملة.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "تمكين معالجة وقت الخمول",
@@ -1016,7 +942,6 @@
       "IS_HIDE_NAV": "إخفاء التنقل حتى يتم تمرير الرأس الرئيسي (سطح المكتب فقط)",
       "IS_MINIMIZE_TO_TRAY": "تصغير إلى درج (سطح المكتب فقط)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "يخطر عند تجاوز تقدير الوقت",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
       "IS_TURN_OFF_MARKDOWN": "إيقاف تشغيل تخفيض السعر للملاحظات",
       "TITLE": "متفرقات الإعدادات"
     },
@@ -1176,14 +1101,6 @@
     "SYNC_EXPORT": "المزامنة والتصدير",
     "TAG_SETTINGS": "الإعدادات الخاصة بالعلامة",
     "TOGGLE_DARK_MODE": "تبديل الوضع الداكن"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "",
-      "ERROR_INVALID_DATA": "",
-      "IMPORTING": "",
-      "SUCCESS": ""
-    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "لا توجد مهام مجدولة حاليًا. يمكنك جدولة مهمة عن طريق اختيار \"جدولة مهمة\" في قائمة سياق المهمة. لفتحه ، انقر على النقاط الثلاثة الصغيرة الموجودة على يمين المهمة.",
