@@ -37,6 +37,7 @@ import { ipcRenderer, IpcRendererEvent } from 'electron';
 import { SS_JIRA_WONKY_COOKIE } from '../../../../core/persistence/ls-keys.const';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
+import { stripTrailing } from '../../../../util/strip-trailing';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -351,7 +352,7 @@ export class JiraApiService {
         const queryStr = jiraReqCfg.query
           ? `?${stringify(jiraReqCfg.query, {arrayFormat: 'comma'})}`
           : '';
-        const base = `${cfg.host}/rest/api/${API_VERSION}`;
+        const base = `${stripTrailing(cfg.host || 'null', '/')}/rest/api/${API_VERSION}`;
         const url = `${base}/${jiraReqCfg.pathname}${queryStr}`.trim();
 
         return this._sendRequestToExecutor$(requestId, url, requestInit, jiraReqCfg.transform, cfg);
