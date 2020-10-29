@@ -18,6 +18,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: false,
     isMinimizeToTray: false,
+    isTrayShowCurrentTask: true,
     isDisableInitialDialog: IS_F_DROID_APP,
     defaultProjectId: null,
     firstDayOfWeek: 0,

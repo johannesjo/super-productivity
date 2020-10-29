@@ -19,8 +19,8 @@
   "CONFIRM": {
     "AUTO_FIX": "Dataene dine ser ut til å være skadet. Vil du prøve å fikse det automatisk? Dette kan føre til delvis tap av data.",
     "DELETE_STRAY_BACKUP": "Vil du slette sikkerhetskopien for å unngå å se denne dialogen?",
-    "RESTORE_STRAY_BACKUP": "Under siste synkronisering kan det ha oppstått en feil. Vil du gjenopprette den siste sikkerhetskopien?",
-    "RESTORE_FILE_BACKUP": "Det ser ut til å være INGEN DATA, men det er sikkerhetskopier tilgjengelig på \"{{dir}}\". Vil du gjenopprette den siste sikkerhetskopien fra {{from}}?"
+    "RESTORE_FILE_BACKUP": "Det ser ut til å være INGEN DATA, men det er sikkerhetskopier tilgjengelig på \"{{dir}}\". Vil du gjenopprette den siste sikkerhetskopien fra {{from}}?",
+    "RESTORE_STRAY_BACKUP": "Under siste synkronisering kan det ha oppstått en feil. Vil du gjenopprette den siste sikkerhetskopien?"
   },
   "DATETIME_INPUT": {
     "IN": "om {{time}}",
@@ -242,7 +242,9 @@
         "NO_UPDATE_REQUIRED": "Google Drive: Ingen oppdatering nødvendig",
         "REMOTE_UP_TO_DATE": "Google Drive: Eksterne data er allerede oppdatert",
         "SUCCESS": "Google Drive: Lagret sikkerhetskopi",
-        "SYNCING": "Google Drive: Synkronisering"
+        "SYNCING": "Google Drive: Synkronisering",
+        "SYNC_FILE_CREATION_ERROR": "",
+        "UPDATED_SYNC_FILE_NAME": ""
       },
       "SYNC_CFG": {
         "AUTO_LOGIN": "Automatisk pålogging når du starter appen",
@@ -529,6 +531,8 @@
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Vil ikke brukes hvis systemet støtter global mørk modus.",
         "HELP": "Temainnstillinger for prosjektet ditt.",
+        "L_BACKGROUND_IMAGE_DARK": "",
+        "L_BACKGROUND_IMAGE_LIGHT": "",
         "L_COLOR_ACCENT": "Aksentfarge",
         "L_COLOR_PRIMARY": "Primærfarge",
         "L_COLOR_WARN": "Advarsel / feilfarge",
@@ -579,6 +583,58 @@
         "TITLE": "Enkle tellere",
         "TYPE_CLICK_COUNTER": "Klikk på teller",
         "TYPE_STOPWATCH": "Stoppeklokke"
+      }
+    },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "",
+        "FORCE_IMPORT": "",
+        "FORCE_UPLOAD": "",
+        "FORCE_UPLOAD_AFTER_ERROR": "",
+        "NO_REMOTE_DATA": "",
+        "TRY_LOAD_REMOTE_AGAIN": ""
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": "",
+        "USE_LOCAL": "",
+        "USE_REMOTE": ""
+      },
+      "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "",
+          "FOLLOW_LINK": "",
+          "L_ACCESS_TOKEN": "",
+          "L_AUTH_CODE": ""
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "",
+          "L_SYNC_FILE_NAME": ""
+        },
+        "L_ENABLE_SYNCING": "",
+        "L_SYNC_INTERVAL": "",
+        "L_SYNC_PROVIDER": "",
+        "TITLE": "",
+        "WEB_DAV": {
+          "CORS_INFO": "",
+          "L_BASE_URL": "",
+          "L_PASSWORD": "",
+          "L_SYNC_FILE_PATH": "",
+          "L_USER_NAME": ""
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "",
+        "ERROR_INVALID_DATA": "",
+        "IMPORTING": "",
+        "SUCCESS": "",
+        "UNKNOWN_ERROR": "",
+        "UPLOAD_ERROR": ""
       }
     },
     "TAG": {
@@ -769,11 +825,11 @@
         "TRACK_TO": "Spor til"
       },
       "D_TRACKING_REMINDER": {
-        "UNTRACKED_TIME": "Usporet tid:",
-        "TRACK_TO": "Spor til:",
         "CREATE_AND_TRACK": "<em>Opprette</em> og spore til",
         "IDLE_FOR": "Du har vært inaktiv for:",
-        "TASK": "Oppgave"
+        "TASK": "Oppgave",
+        "TRACK_TO": "Spor til:",
+        "UNTRACKED_TIME": "Usporet tid:"
       }
     },
     "WORKLOG": {
@@ -939,7 +995,7 @@
       "JA": "Japansk",
       "KO": "Koreansk",
       "LABEL": "Velg et språk",
-      "NB":"Norsk Bokmål",
+      "NB": "Norsk Bokmål",
       "NL": "Nederlandsk",
       "PT": "Portugisisk",
       "RU": "Russisk",
@@ -949,6 +1005,7 @@
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standard prosjekt som skal brukes til oppgaver hvis ingen er spesifisert",
+      "FIRST_DAY_OF_WEEK": "Første ukedag",
       "HELP": "<p><strong>Ser du ikke skrivebordsvarsler?</strong> For Windows vil du kanskje sjekke System&gt; Varsler og handlinger og sjekke om de nødvendige varslene er aktivert.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Legg til dagens tag automatisk for å jobbe med oppgaver",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Merk foreldreoppgaven som ferdig når alle underoppgaver er utført",
@@ -957,10 +1014,11 @@
       "IS_DARK_MODE": "Mørk modus",
       "IS_DISABLE_INITIAL_DIALOG": "Deaktiver innledende infodialog (du kan gå glipp av viktige oppdateringer!)",
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
+      "IS_MINIMIZE_TO_TRAY": "",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Gi beskjed når tidsestimatet ble overskredet",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
       "IS_TURN_OFF_MARKDOWN": "Slå av Markdown-parsering for notater",
-      "TITLE": "Diverse innstillinger",
-      "FIRST_DAY_OF_WEEK": "Første ukedag"
+      "TITLE": "Diverse innstillinger"
     },
     "POMODORO": {
       "BREAK_DURATION": "Varighet av korte pauser",
@@ -995,10 +1053,10 @@
     },
     "TRACKING_REMINDER": {
       "HELP": "Konfigurer et banner for å vises i tilfelle du glemte å starte tidssporing.",
-      "TITLE": "Påminnelse om tidssporing",
       "L_IS_ENABLED": "Aktivert",
       "L_IS_SHOW_ON_MOBILE": "Vis på mobilappen",
-      "L_MIN_TIME": "Tid til å vente før du viser Banner"
+      "L_MIN_TIME": "Tid til å vente før du viser Banner",
+      "TITLE": "Påminnelse om tidssporing"
     }
   },
   "GLOBAL_SNACK": {
@@ -1018,7 +1076,10 @@
     "GDRIVE_DOWNLOAD": "Google Drive: Last ned fil ...",
     "GDRIVE_UPLOAD": "Google Drive: Last opp fil ...",
     "GITHUB_LOAD_ISSUE": "Github: Last problemdata ...",
-    "JIRA_LOAD_ISSUE": "Jira: Last inn data ..."
+    "JIRA_LOAD_ISSUE": "Jira: Last inn data ...",
+    "UNKNOWN": "",
+    "WEB_DAV_DOWNLOAD": "",
+    "WEB_DAV_UPLOAD": ""
   },
   "MH": {
     "ADD_NEW_TASK": "Legg til ny oppgave",

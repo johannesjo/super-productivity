@@ -83,6 +83,33 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "",
+        "FORCE_IMPORT": "",
+        "FORCE_UPLOAD": "",
+        "FORCE_UPLOAD_AFTER_ERROR": "",
+        "TRY_LOAD_REMOTE_AGAIN": ""
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": "",
+        "USE_LOCAL": "",
+        "USE_REMOTE": ""
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "",
+        "FOLLOW_LINK": "",
+        "L_ACCESS_TOKEN": "",
+        "L_AUTH_CODE": "",
+        "L_ENABLE_SYNCING": "",
+        "L_SYNC_INTERVAL": "",
+        "TITLE": ""
+      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: impossibile generare il token di accesso dal codice di autenticazione",
         "ACCESS_TOKEN_GENERATED": "Dropbox: token di accesso generato dal codice di autenticazione",
@@ -184,10 +211,53 @@
         "CREATE_SYNC_FILE": "Google Drive: Nessun file con nome <strong>\"{{fileName}}\"</strong> è stato trovato. Vuoi <strong>crearlo</strong> come un file sincronizzato su Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: Usare il file <strong>esistente</strong> <strong>\"{{fileName}}\"</strong> come file sincronizzato? Se non lo desideri cambia il nome del file sincronizzato, per favore."
       },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "OVERWRITE_LOCAL": "",
+        "OVERWRITE_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": ""
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "OVERWRITE_LOCAL": "",
+        "OVERWRITE_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": ""
+      },
       "S": {
+        "DOWNLOADING_UPDATE": "",
+        "ERROR": "",
+        "ERROR_INITIAL_IMPORT": "",
+        "LOCAL_UP_TO_DATE": "",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "File multipli con il nome \"{{newFileName}}\" trovati. Per favore rimuovili tutti tranne uno o scegli un nome diverso.",
+        "NO_UPDATE_REQUIRED": "",
+        "REMOTE_UP_TO_DATE": "",
+        "SUCCESS": "",
+        "SYNCING": "",
         "SYNC_FILE_CREATION_ERROR": "Google Drive: errore durante la creazione del file di sincronizzazione. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: nome del file di sincronizzazione aggiornato"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "",
+        "AUTO_SYNC": "",
+        "BACKUP_NOW": "",
+        "COMPRESS": "",
+        "ENABLE": "",
+        "LOAD_FROM": "",
+        "LOAD_ON_STARTUP": "",
+        "NOTIFY": "",
+        "SYNC_FILE_NAME": "",
+        "SYNC_INTERVAL": "",
+        "UPDATE_SYNC_FILE": ""
       },
       "S_API": {
         "ERR": "GoogleApi Errore: {{errStr}}",
@@ -857,6 +927,10 @@
       "IS_HIDE_EVALUATION_SHEET": "Nascondi la scheda di valutazione nel riepilogo giornaliero",
       "TITLE": "Valutazione & Metriche"
     },
+    "GOOGLE_DRIVE_SYNC": {
+      "HELP": "",
+      "TITLE": ""
+    },
     "IDLE": {
       "HELP": "<div><p>Quando la gestione del tempo di inattività è abilitata, un finestra si aprirà dopo un periodo specifico di tempo per controllare se e su quale task vuoi tracciare il tuo tempo, nel periodo che sei stato inattivo.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Abilita la gestione del tempo di inattività",
@@ -942,6 +1016,7 @@
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "TITLE": "Impostazioni varie"
     },
@@ -1101,6 +1176,14 @@
     "SYNC_EXPORT": "Sincronizza ed esporta",
     "TAG_SETTINGS": "Impostazioni specifiche dell'etichetta",
     "TOGGLE_DARK_MODE": "Abilita/disabilita tema scuro"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "",
+      "ERROR_INVALID_DATA": "",
+      "IMPORTING": "",
+      "SUCCESS": ""
+    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Non ci sono task pianificati al momento. Puoi pianificare un task scegliendo \"Pianifica task\" nel menu di contesto. Per aprirlo clicca i tre puntini sulla destra dei task.",

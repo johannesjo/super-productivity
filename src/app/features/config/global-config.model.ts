@@ -13,6 +13,7 @@ export type MiscConfig = Readonly<{
   isTurnOffMarkdown: boolean;
   isAutoAddWorkedOnToToday: boolean;
   isMinimizeToTray: boolean;
+  isTrayShowCurrentTask: boolean;
   isDisableInitialDialog: boolean;
   defaultProjectId: string | null;
   firstDayOfWeek: number;

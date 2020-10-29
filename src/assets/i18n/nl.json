@@ -83,6 +83,33 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "",
+        "FORCE_IMPORT": "",
+        "FORCE_UPLOAD": "",
+        "FORCE_UPLOAD_AFTER_ERROR": "",
+        "TRY_LOAD_REMOTE_AGAIN": ""
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": "",
+        "USE_LOCAL": "",
+        "USE_REMOTE": ""
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "",
+        "FOLLOW_LINK": "",
+        "L_ACCESS_TOKEN": "",
+        "L_AUTH_CODE": "",
+        "L_ENABLE_SYNCING": "",
+        "L_SYNC_INTERVAL": "",
+        "TITLE": ""
+      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: Onmogelijk om een Access Token van Auth Code te genereren",
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
@@ -184,10 +211,53 @@
         "CREATE_SYNC_FILE": "Google Drive: er is geen bestand gevonden met de naam <strong>\"{{fileName}}\"</strong> . <strong>Maak</strong> het als synchronisatiebestand op Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: gebruik je <strong>bestaand</strong> bestand <strong>\"{{fileName}}\"</strong> als synchronisatiebestand? Zo niet, wijzig dan de naam van het synchronisatiebestand."
       },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "OVERWRITE_LOCAL": "",
+        "OVERWRITE_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": ""
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "OVERWRITE_LOCAL": "",
+        "OVERWRITE_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": ""
+      },
       "S": {
+        "DOWNLOADING_UPDATE": "",
+        "ERROR": "",
+        "ERROR_INITIAL_IMPORT": "",
+        "LOCAL_UP_TO_DATE": "",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Meerdere bestanden met de naam \"{{newFileName}}\" gevonden. Verwijder alle op één na of kies een andere naam.",
+        "NO_UPDATE_REQUIRED": "",
+        "REMOTE_UP_TO_DATE": "",
+        "SUCCESS": "",
+        "SYNCING": "",
         "SYNC_FILE_CREATION_ERROR": "Google Drive: fout bij het maken van een synchronisatiebestand. {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google Drive: bijgewerkte naam van synchronisatiebestand"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "",
+        "AUTO_SYNC": "",
+        "BACKUP_NOW": "",
+        "COMPRESS": "",
+        "ENABLE": "",
+        "LOAD_FROM": "",
+        "LOAD_ON_STARTUP": "",
+        "NOTIFY": "",
+        "SYNC_FILE_NAME": "",
+        "SYNC_INTERVAL": "",
+        "UPDATE_SYNC_FILE": ""
       },
       "S_API": {
         "ERR": "GoogleApi-fout: {{errStr}}",
@@ -857,6 +927,10 @@
       "IS_HIDE_EVALUATION_SHEET": "Evaluatieblad verbergen op dagelijkse samenvatting",
       "TITLE": "Evaluatie en statistieken"
     },
+    "GOOGLE_DRIVE_SYNC": {
+      "HELP": "",
+      "TITLE": ""
+    },
     "IDLE": {
       "HELP": "<div><p>Wanneer de verwerking van inactieve tijd is ingeschakeld, wordt na een bepaalde tijd een dialoogvenster geopend om te controleren of en voor welke taak u uw tijd wilt bijhouden, wanneer u inactief bent geweest.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Inactieve tijdafhandeling inschakelen",
@@ -942,6 +1016,7 @@
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "TITLE": "Diverse instellingen"
     },
@@ -1101,6 +1176,14 @@
     "SYNC_EXPORT": "Synchroniseren en exporteren",
     "TAG_SETTINGS": "Label specifieke instellingen",
     "TOGGLE_DARK_MODE": "Schakel de donkere modus in"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "",
+      "ERROR_INVALID_DATA": "",
+      "IMPORTING": "",
+      "SUCCESS": ""
+    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Er zijn momenteel geen geplande taken. U kunt een taak plannen door \"Taak plannen\" te kiezen in het taakcontextmenu. Klik op de 3 kleine puntjes rechts van een taak om deze te openen.",

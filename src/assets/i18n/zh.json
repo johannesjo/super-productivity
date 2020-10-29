@@ -83,6 +83,33 @@
       }
     },
     "DROPBOX": {
+      "C": {
+        "EMPTY_SYNC": "",
+        "FORCE_IMPORT": "",
+        "FORCE_UPLOAD": "",
+        "FORCE_UPLOAD_AFTER_ERROR": "",
+        "TRY_LOAD_REMOTE_AGAIN": ""
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": "",
+        "USE_LOCAL": "",
+        "USE_REMOTE": ""
+      },
+      "FORM": {
+        "B_GENERATE_TOKEN": "",
+        "FOLLOW_LINK": "",
+        "L_ACCESS_TOKEN": "",
+        "L_AUTH_CODE": "",
+        "L_ENABLE_SYNCING": "",
+        "L_SYNC_INTERVAL": "",
+        "TITLE": ""
+      },
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox：无法从身份验证代码生成访问令牌",
         "ACCESS_TOKEN_GENERATED": "Dropbox：根据验证码生成的访问令牌",
@@ -184,10 +211,53 @@
         "CREATE_SYNC_FILE": "Google Drive：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。是否在<strong>Google Drive</strong> 上将其创建为同步文件？",
         "USE_EXISTING_SYNC_FILE": "Google Drive：使用 <strong>现有</strong> 文件 <strong>“{{fileName}}”</strong> 作为同步文件？如果没有，请更改同步文件名。"
       },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "OVERWRITE_LOCAL": "",
+        "OVERWRITE_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": ""
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "",
+        "LAST_SYNC": "",
+        "LOCAL": "",
+        "LOCAL_REMOTE": "",
+        "OVERWRITE_LOCAL": "",
+        "OVERWRITE_REMOTE": "",
+        "REMOTE": "",
+        "TEXT": "",
+        "TITLE": ""
+      },
       "S": {
+        "DOWNLOADING_UPDATE": "",
+        "ERROR": "",
+        "ERROR_INITIAL_IMPORT": "",
+        "LOCAL_UP_TO_DATE": "",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名为“{{newFileName}}”的多个文件。请进保留一个文件或选择其他名称。",
+        "NO_UPDATE_REQUIRED": "",
+        "REMOTE_UP_TO_DATE": "",
+        "SUCCESS": "",
+        "SYNCING": "",
         "SYNC_FILE_CREATION_ERROR": "Google云端硬盘：创建同步文件时出错。 {{err}}",
         "UPDATED_SYNC_FILE_NAME": "Google云端硬盘：更新的同步文件名"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "",
+        "AUTO_SYNC": "",
+        "BACKUP_NOW": "",
+        "COMPRESS": "",
+        "ENABLE": "",
+        "LOAD_FROM": "",
+        "LOAD_ON_STARTUP": "",
+        "NOTIFY": "",
+        "SYNC_FILE_NAME": "",
+        "SYNC_INTERVAL": "",
+        "UPDATE_SYNC_FILE": ""
       },
       "S_API": {
         "ERR": "GoogleApi错误： {{errStr}}",
@@ -857,6 +927,10 @@
       "IS_HIDE_EVALUATION_SHEET": "隐藏每日摘要的评估表",
       "TITLE": "评估与指标"
     },
+    "GOOGLE_DRIVE_SYNC": {
+      "HELP": "",
+      "TITLE": ""
+    },
     "IDLE": {
       "HELP": "<div><p>启用空闲时间处理后，将在指定的时间后打开一个对话框，以检查您在空闲时是否以及在哪个任务上跟踪您的时间。</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "启用空闲时间处理",
@@ -942,6 +1016,7 @@
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
       "TITLE": "其他设置"
     },
@@ -1101,6 +1176,14 @@
     "SYNC_EXPORT": "同步导出",
     "TAG_SETTINGS": "标签特定设置",
     "TOGGLE_DARK_MODE": "切换暗模式"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "",
+      "ERROR_INVALID_DATA": "",
+      "IMPORTING": "",
+      "SUCCESS": ""
+    }
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",

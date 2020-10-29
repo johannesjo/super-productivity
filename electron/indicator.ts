@@ -1,10 +1,13 @@
 import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
 // const dbus = require('./dbus');
 import { IPC } from './ipc-events.const';
+import { getSettings } from './get-settings';
+import { getWin } from './main-window';
 
 let tray;
 let isIndicatorRunning = false;
 let DIR: string;
+let isTrayShowCurrentTask: boolean;
 
 const isGnomeShellExtensionRunning = false;
 
@@ -59,12 +62,15 @@ function initListeners() {
     const currentTask = params.current;
     // const lastActiveTaskTask = params.lastActiveTask;
 
-    let msg;
+    const mainWin = getWin();
+    getSettings(mainWin, (settings) => {
+      isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
+    });
 
-    if (currentTask) {
+    let msg = '';
+    if (isTrayShowCurrentTask && currentTask) {
       msg = createIndicatorStr(currentTask);
     }
-    console.log(currentTask);
 
     if (tray) {
       // tray handling
