@@ -1,14 +1,20 @@
 import { ipcMain } from 'electron';
 import { IPC } from './ipc-events.const';
 
-let cb;
+let cbs = [];
 export const getSettings = (win, cbIN) => {
-  cb = cbIN;
+  cbs.push(cbIN);
   win.webContents.send(IPC.TRANSFER_SETTINGS_REQUESTED);
 };
 
-ipcMain.once(IPC.TRANSFER_SETTINGS_TO_ELECTRON, getSettingsCb);
+ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, getSettingsCb);
 
 function getSettingsCb(ev, settings) {
-  cb(settings);
+  if (cbs.length) {
+    cbs.forEach((cb) => cb(settings));
+    cbs = [];
+  } else {
+    // NOTE: can happen, but is unlikely and unlikely to be a problem
+    console.warn('getSettingsCb no callbacks left');
+  }
 }
