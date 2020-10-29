@@ -187,13 +187,6 @@ const appCloseHandler = (
     mainWin.close();
   };
 
-  // ipcMain.on(IPC.APP_READY, () => isMainWinError = false);
-  // ipcMain.on(IPC.ERROR, (ev, error) => {
-  // HANDLED_ERROR_PROP_STR causes issues
-  //   if (!error || !error[HANDLED_ERROR_PROP_STR]) {
-  //     isMainWinError = true;
-  //   }
-  // });
   ipcMain.on(IPC.REGISTER_BEFORE_CLOSE, (ev, {id}) => {
     ids.push(id);
   });
@@ -204,7 +197,7 @@ const appCloseHandler = (
     ids = ids.filter(idIn => idIn !== id);
     console.log(IPC.BEFORE_CLOSE_DONE, id, ids);
     if (ids.length === 0) {
-      _quitApp();
+      mainWin.close();
     }
   });
 
