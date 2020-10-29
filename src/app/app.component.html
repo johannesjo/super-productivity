@@ -11,7 +11,7 @@
        class="backdrop"></div>
 
   <mat-sidenav-container
-    [style.background]="'url(' + (backgroundImg$|async) + ')'"
+    [style.background]="'url(' + (globalThemeService.backgroundImg$|async) + ')'"
     [dir]="isRTL ? 'rtl' : 'ltr'">
     <mat-sidenav (closedStart)="layoutService.hideSideNav()"
                  [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"

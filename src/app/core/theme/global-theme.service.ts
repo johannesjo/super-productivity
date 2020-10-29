@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
-import { take } from 'rxjs/operators';
+import { distinctUntilChanged, map, take } from 'rxjs/operators';
 import { isTouchOnly } from '../../util/is-touch';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { DOCUMENT } from '@angular/common';
@@ -10,14 +10,39 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ChromeExtensionInterfaceService } from '../chrome-extension-interface/chrome-extension-interface.service';
 import { ThemeService as NgChartThemeService } from 'ng2-charts';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { MiscConfig } from '../../features/config/global-config.model';
 import { ElectronService } from '../electron/electron.service';
 import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
+import { combineLatest, Observable } from 'rxjs';
 import { remote } from 'electron';
 
 @Injectable({providedIn: 'root'})
 export class GlobalThemeService {
+  isDarkTheme$: Observable<boolean> = (IS_ELECTRON && this._electronService.isMacOS)
+    ? new Observable(subscriber => {
+      subscriber.next((this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors);
+      (this._electronService.remote as typeof remote)
+        .systemPreferences
+        .subscribeNotification('AppleInterfaceThemeChangedNotification', () => subscriber.next(
+          (this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors)
+        );
+    })
+    : this._globalConfigService.misc$.pipe(
+      map(cfg => cfg.isDarkMode),
+      distinctUntilChanged()
+    );
+
+  backgroundImg$: Observable<string | null> = combineLatest([
+    this._workContextService.currentTheme$,
+    this.isDarkTheme$,
+  ]).pipe(
+    map(([theme, isDarkMode]) => isDarkMode
+      ? theme.backgroundImageDark
+      : theme.backgroundImageLight
+    ),
+    distinctUntilChanged()
+  );
+
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _materialCssVarsService: MaterialCssVarsService,
@@ -96,28 +121,7 @@ export class GlobalThemeService {
   private _initThemeWatchers() {
     // init theme watchers
     this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) => this._setColorTheme(theme));
-
-    // TODO beautify code here
-    if (IS_ELECTRON && this._electronService.isMacOS) {
-      this._setDarkTheme((this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors);
-      (this._electronService.remote as typeof remote).systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
-        this._globalConfigService.misc$.pipe(take(1)).subscribe((misc: MiscConfig) => {
-          const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
-            ? (this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors
-            : misc.isDarkMode;
-
-          this._setDarkTheme(isDarkTheme);
-        });
-      });
-    } else {
-      this._globalConfigService.misc$.subscribe((misc: MiscConfig) => {
-        const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
-          ? (this._electronService.remote as typeof remote).nativeTheme.shouldUseDarkColors
-          : misc.isDarkMode;
-
-        this._setDarkTheme(isDarkTheme);
-      });
-    }
+    this.isDarkTheme$.subscribe((isDarkTheme) => this._setDarkTheme(isDarkTheme));
   }
 
   private _initHandlersForInitialBodyClasses() {
