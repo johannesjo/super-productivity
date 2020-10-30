@@ -136,18 +136,18 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Richten Sie Gitlab für Project ein"
+        "TITLE": "Richten Sie GitLab für Project ein"
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Gitlab automatisch zum Backlog hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitLab automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "PROJECT": "Vollständiger Pfad oder Benutzername / Projekt",
         "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Hier können Sie SuperProductivity so konfigurieren, dass offene Gitlab-Probleme (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Bereich zur Aufgabenerstellung in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Problem sowie weitere Informationen dazu. </p> <p> Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren. </p>",
+        "HELP": "<p> Hier können Sie SuperProductivity so konfigurieren, dass offene GitLab-Probleme (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Bereich zur Aufgabenerstellung in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Problem sowie weitere Informationen dazu. </p> <p> Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren. </p>",
         "TITLE": "gitlab"
       },
       "ISSUE_CONTENT": {
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
-        "ERR_NOT_CONFIGURED": "Gitlab: Ist nicht richtig konfiguriert",
-        "ERR_UNKNOWN": "Gitlab: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: {{issuesLength}} neue Issues von Git in das Backlog importiert",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Kein Update erforderlich",
-        "ISSUE_UPDATE": "Gitlab: Aktualisierte Daten für \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Aktualisierte Daten für \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
-        "NEW_COMMENT": "Gitlab: Neuer Kommentar für \"{{issueText}}\"",
-        "POLLING": "Gitlab: Änderungen für Issues abrufen",
+        "ERR_NETWORK": "GitLab: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
+        "ERR_NOT_CONFIGURED": "GitLab: Ist nicht richtig konfiguriert",
+        "ERR_UNKNOWN": "GitLab: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: {{issuesLength}} neue Issues von Git in das Backlog importiert",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Kein Update erforderlich",
+        "ISSUE_UPDATE": "GitLab: Aktualisierte Daten für \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Aktualisierte Daten für \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
+        "NEW_COMMENT": "GitLab: Neuer Kommentar für \"{{issueText}}\"",
+        "POLLING": "GitLab: Änderungen für Issues abrufen",
         "SHOW_ISSUE_BTN": "Zeige mir"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
         "SETUP_GIT": "Einrichten der GitHub-Integration",
-        "SETUP_GITLAB": "Einrichten der Gitlab-Integration",
+        "SETUP_GITLAB": "Einrichten der GitLab-Integration",
         "SETUP_JIRA": "Jira-Integration einrichten"
       },
       "FORM_BASIC": {
@@ -1086,7 +1086,7 @@
     "EDIT_PROJECT": "Projekt bearbeiten",
     "EXPORT_PROJECT": "Projekt exportieren",
     "GITHUB_CONFIGURED": "GitHub-Integration konfiguriert",
-    "GITLAB_CONFIGURED": "Gitlab-Integration konfiguriert",
+    "GITLAB_CONFIGURED": "GitLab-Integration konfiguriert",
     "IMPORT_FROM_FILE": "Aus Datei importieren",
     "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
     "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",

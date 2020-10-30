@@ -136,18 +136,18 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "프로젝트를위한 Gitlab 설정"
+        "TITLE": "프로젝트를위한 GitLab 설정"
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Gitlab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_ADD_TO_BACKLOG": "GitLab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "PROJECT": "전체 경로 또는 사용자 이름 / 프로젝트",
         "TOKEN": "액세스 토큰"
       },
       "FORM_SECTION": {
-        "HELP": "<p> 일별 계획보기의 작업 생성 패널에서 특정 프로젝트에 대해 열린 Gitlab (온라인 버전 또는 자체 호스팅 인스턴스) 문제를 나열하도록 SuperProductivity를 구성 할 수 있습니다. 제안으로 표시되며 문제에 대한 자세한 정보뿐만 아니라 문제에 대한 링크를 제공합니다. </p> <p> 또한 열려있는 모든 문제를 작업 백 로그에 자동으로 추가하고 동기화 할 수 있습니다. </p>",
+        "HELP": "<p> 일별 계획보기의 작업 생성 패널에서 특정 프로젝트에 대해 열린 GitLab (온라인 버전 또는 자체 호스팅 인스턴스) 문제를 나열하도록 SuperProductivity를 구성 할 수 있습니다. 제안으로 표시되며 문제에 대한 자세한 정보뿐만 아니라 문제에 대한 링크를 제공합니다. </p> <p> 또한 열려있는 모든 문제를 작업 백 로그에 자동으로 추가하고 동기화 할 수 있습니다. </p>",
         "TITLE": "기둥"
       },
       "ISSUE_CONTENT": {
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "의견 쓰기"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
-        "ERR_NOT_CONFIGURED": "Gitlab : 제대로 구성되지 않았습니다.",
-        "ERR_UNKNOWN": "Gitlab : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab : 업데이트가 필요하지 않습니다",
-        "ISSUE_UPDATE": "Gitlab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MISSING_ISSUE_DATA": "Gitlab : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
-        "NEW_COMMENT": "Gitlab : \"{{issueText}}\"에 대한 새로운 설명",
-        "POLLING": "Gitlab : 문제에 대한 폴링 변경 사항",
+        "ERR_NETWORK": "GitLab : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
+        "ERR_NOT_CONFIGURED": "GitLab : 제대로 구성되지 않았습니다.",
+        "ERR_UNKNOWN": "GitLab : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
+        "IMPORTED_SINGLE_ISSUE": "GitLab : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab : 업데이트가 필요하지 않습니다",
+        "ISSUE_UPDATE": "GitLab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MISSING_ISSUE_DATA": "GitLab : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
+        "NEW_COMMENT": "GitLab : \"{{issueText}}\"에 대한 새로운 설명",
+        "POLLING": "GitLab : 문제에 대한 폴링 변경 사항",
         "SHOW_ISSUE_BTN": "보여줘"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "프로젝트 만들기",
         "EDIT": "프로젝트 수정",
         "SETUP_GIT": "GitHub 통합 설치",
-        "SETUP_GITLAB": "Gitlab 통합 설치",
+        "SETUP_GITLAB": "GitLab 통합 설치",
         "SETUP_JIRA": "Jira 통합 설정"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "프로젝트 수정",
     "EXPORT_PROJECT": "프로젝트 내보내기",
     "GITHUB_CONFIGURED": "GitHub 통합 구성",
-    "GITLAB_CONFIGURED": "Gitlab 통합 구성",
+    "GITLAB_CONFIGURED": "GitLab 통합 구성",
     "IMPORT_FROM_FILE": "파일에서 가져 오기",
     "JIRA_CONFIGURED": "Jira 통합 구성",
     "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",

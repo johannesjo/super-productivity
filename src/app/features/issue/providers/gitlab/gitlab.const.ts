@@ -81,7 +81,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
 ];
 
 export const GITLAB_CONFIG_FORM_SECTION: ConfigFormSection<GitlabCfg> = {
-  title: 'Gitlab',
+  title: 'GitLab',
   key: 'GITLAB',
   items: GITLAB_CONFIG_FORM,
   help: T.F.GITLAB.FORM_SECTION.HELP,

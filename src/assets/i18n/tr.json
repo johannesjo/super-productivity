@@ -136,19 +136,19 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Project için Gitlab Kurulumu"
+        "TITLE": "Project için GitLab Kurulumu"
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Gitlab'dan backlog'a ekle",
+        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak GitLab'dan backlog'a ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "PROJECT": "Tam yol veya kullanıcı adı / projesi",
         "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Burada SuperProductivity'yi günlük planlama görünümünde görev oluşturma panelinde belirli bir proje için açık Gitlab (çevrimiçi sürümü veya kendi kendine barındırılan bir örnek) sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Bunlar öneri olarak listelenecek ve sorunla ilgili bir bağlantı ve bununla ilgili daha fazla bilgi sağlayacaktır. </p> <p> Buna ek olarak, tüm açık sorunları otomatik olarak görev birikiminize ekleyebilir ve senkronize edebilirsiniz. </p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p> Burada SuperProductivity'yi günlük planlama görünümünde görev oluşturma panelinde belirli bir proje için açık GitLab (çevrimiçi sürümü veya kendi kendine barındırılan bir örnek) sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Bunlar öneri olarak listelenecek ve sorunla ilgili bir bağlantı ve bununla ilgili daha fazla bilgi sağlayacaktır. </p> <p> Buna ek olarak, tüm açık sorunları otomatik olarak görev birikiminize ekleyebilir ve senkronize edebilirsiniz. </p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "vekil",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
-        "ERR_NOT_CONFIGURED": "Gitlab: Düzgün yapılandırılmamış",
-        "ERR_UNKNOWN": "Gitlab: Bilinmeyen hata {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Git'ten backlog'a {{issuesLength}} yeni sayı alındı",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Git'ten backlog'a \"{{issueText}}\" sorunu alındı",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Sorun \"{{issueText}}\", halindeyken silinmiş veya kapatılmış görünüyor",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Güncelleme gerekmez",
-        "ISSUE_UPDATE": "Gitlab: \"{{issueText}}\" için güncellenmiş veriler",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: \"{{issueText}}\" için güncellenmiş veriler",
-        "MISSING_ISSUE_DATA": "Gitlab: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
-        "NEW_COMMENT": "Gitlab: \"{{issueText}}\" için yeni yorum",
-        "POLLING": "Gitlab: Sorunların Sorgulanması Değişiklikleri",
+        "ERR_NETWORK": "GitLab: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
+        "ERR_NOT_CONFIGURED": "GitLab: Düzgün yapılandırılmamış",
+        "ERR_UNKNOWN": "GitLab: Bilinmeyen hata {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Git'ten backlog'a {{issuesLength}} yeni sayı alındı",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Git'ten backlog'a \"{{issueText}}\" sorunu alındı",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Sorun \"{{issueText}}\", halindeyken silinmiş veya kapatılmış görünüyor",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Güncelleme gerekmez",
+        "ISSUE_UPDATE": "GitLab: \"{{issueText}}\" için güncellenmiş veriler",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: \"{{issueText}}\" için güncellenmiş veriler",
+        "MISSING_ISSUE_DATA": "GitLab: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
+        "NEW_COMMENT": "GitLab: \"{{issueText}}\" için yeni yorum",
+        "POLLING": "GitLab: Sorunların Sorgulanması Değişiklikleri",
         "SHOW_ISSUE_BTN": "Göster bana"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Proje Yarat",
         "EDIT": "Projeyi Düzenle",
         "SETUP_GIT": "GitHub Entegrasyonunu Ayarla",
-        "SETUP_GITLAB": "Gitlab Entegrasyonunu Ayarla",
+        "SETUP_GITLAB": "GitLab Entegrasyonunu Ayarla",
         "SETUP_JIRA": "Jira Entegrasyonunu Kur"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "Projeyi Düzenle",
     "EXPORT_PROJECT": "İhracat Projesi",
     "GITHUB_CONFIGURED": "GitHub Entegrasyonu Yapılandırıldı",
-    "GITLAB_CONFIGURED": "Gitlab Entegrasyonu Yapılandırıldı",
+    "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
     "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
     "S_INVALID_JSON": "Proje dosyası için geçersiz json",

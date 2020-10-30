@@ -136,19 +136,19 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configurar Gitlab para Projeto"
+        "TITLE": "Configurar GitLab para Projeto"
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do Gitlab para o backlog",
-        "IS_AUTO_POLL": "Obter automaticamente issues do Gitlab para alterações",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do Gitlab como sugestões qando adicionar novas tarefas",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitLab para o backlog",
+        "IS_AUTO_POLL": "Obter automaticamente issues do GitLab para alterações",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do GitLab como sugestões qando adicionar novas tarefas",
         "PROJECT": "Caminho completo ou nome de usuário / projeto",
         "TOKEN": "Token de acesso"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Aqui você pode configurar o SuperProductivity para listar problemas abertos do Gitlab (seja a versão on-line ou uma instância auto-hospedada) para um projeto específico no painel de criação de tarefas na exibição de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre o assunto. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no backlog de tarefas. </p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p> Aqui você pode configurar o SuperProductivity para listar problemas abertos do GitLab (seja a versão on-line ou uma instância auto-hospedada) para um projeto específico no painel de criação de tarefas na exibição de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre o assunto. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no backlog de tarefas. </p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsável",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: A solicitação falhou devido a um erro de rede do lado do cliente.",
-        "ERR_NOT_CONFIGURED": "Gitlab: Não está configurado corretamente",
-        "ERR_UNKNOWN": "Gitlab: Erro desconhecido {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importado {{issuesLength}} novas issues do git para o backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Importado issue \"{{issueText}}\" do git para o backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Nenhuma atualização necessária",
-        "ISSUE_UPDATE": "Gitlab: Dados atualizados para \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Dados atualizados para \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab:  Encontrado tarefa sem dados da issue. Recarregando.",
-        "NEW_COMMENT": "Gitlab: Novo comentário para \"{{issueText}}\"",
-        "POLLING": "Gitlab: Mudanças de sondagem para problemas",
+        "ERR_NETWORK": "GitLab: A solicitação falhou devido a um erro de rede do lado do cliente.",
+        "ERR_NOT_CONFIGURED": "GitLab: Não está configurado corretamente",
+        "ERR_UNKNOWN": "GitLab: Erro desconhecido {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Importado {{issuesLength}} novas issues do git para o backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Importado issue \"{{issueText}}\" do git para o backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Nenhuma atualização necessária",
+        "ISSUE_UPDATE": "GitLab: Dados atualizados para \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Dados atualizados para \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab:  Encontrado tarefa sem dados da issue. Recarregando.",
+        "NEW_COMMENT": "GitLab: Novo comentário para \"{{issueText}}\"",
+        "POLLING": "GitLab: Mudanças de sondagem para problemas",
         "SHOW_ISSUE_BTN": "Mostre-me"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Criar Projeto",
         "EDIT": "Editar Projeto",
         "SETUP_GIT": "Configurar integração com GitHub ",
-        "SETUP_GITLAB": "Configurar integração com Gitlab ",
+        "SETUP_GITLAB": "Configurar integração com GitLab ",
         "SETUP_JIRA": "Configurar integração com Jira "
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "Editar Projeto",
     "EXPORT_PROJECT": "Projeto de Exportação",
     "GITHUB_CONFIGURED": "Integração do GitHub configurada",
-    "GITLAB_CONFIGURED": "Integração do Gitlab configurada",
+    "GITLAB_CONFIGURED": "Integração do GitLab configurada",
     "IMPORT_FROM_FILE": "Importar do arquivo",
     "JIRA_CONFIGURED": "Integração Jira configurada",
     "S_INVALID_JSON": "Json inválido para o arquivo de projeto",

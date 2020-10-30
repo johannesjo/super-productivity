@@ -163,19 +163,19 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Sett opp Gitlab for Project"
+        "TITLE": "Sett opp GitLab for Project"
       },
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. For å filtrere ut endringer selv)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Legg automatisk uløste problemer fra Gitlab til backloggen",
+        "IS_AUTO_ADD_TO_BACKLOG": "Legg automatisk uløste problemer fra GitLab til backloggen",
         "IS_AUTO_POLL": "Poll automatisk importerte gitproblemer for endringer",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
         "PROJECT": "Full sti eller brukernavn / prosjekt",
         "TOKEN": "Tilgangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne Gitlab-problemer (enten den online-versjonen eller en selvstyrt forekomst) for et bestemt prosjekt i oppgavelagerpanelet i den daglige planvisningen. De vil bli oppført som forslag og vil gi en lenke til problemet, samt mer informasjon om det.</p><p> I tillegg kan du automatisk legge til og synkronisere alle åpne problemer i oppgaven din.</p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne GitLab-problemer (enten den online-versjonen eller en selvstyrt forekomst) for et bestemt prosjekt i oppgavelagerpanelet i den daglige planvisningen. De vil bli oppført som forslag og vil gi en lenke til problemet, samt mer informasjon om det.</p><p> I tillegg kan du automatisk legge til og synkronisere alle åpne problemer i oppgaven din.</p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Oppdragsgiver",
@@ -188,18 +188,18 @@
         "WRITE_A_COMMENT": "Skriv en kommentar"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: Forespørselen mislyktes på grunn av en nettverksfeil på klientsiden",
-        "ERR_NOT_CONFIGURED": "Gitlab: Er ikke riktig konfigurert",
-        "ERR_UNKNOWN": "Gitlab: Ukjent feil {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importerte {{issuesLength}} nye problemer fra git til backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Importert problem \"{{issueText}}\" fra git til backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Utgaven \"{{issueText}}\" ser ut til å være slettet eller lukket på git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Ingen oppdatering nødvendig",
-        "ISSUE_UPDATE": "Gitlab: Oppdaterte data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Oppdaterte data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: Oppgaver med manglende problemdata funnet. Laster om.",
-        "NEW_COMMENT": "Gitlab: Ny kommentar til \"{{issueText}}\"",
-        "POLLING": "Gitlab: Henter endringer for problemer",
+        "ERR_NETWORK": "GitLab: Forespørselen mislyktes på grunn av en nettverksfeil på klientsiden",
+        "ERR_NOT_CONFIGURED": "GitLab: Er ikke riktig konfigurert",
+        "ERR_UNKNOWN": "GitLab: Ukjent feil {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Importerte {{issuesLength}} nye problemer fra git til backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Importert problem \"{{issueText}}\" fra git til backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Utgaven \"{{issueText}}\" ser ut til å være slettet eller lukket på git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Ingen oppdatering nødvendig",
+        "ISSUE_UPDATE": "GitLab: Oppdaterte data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Oppdaterte data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: Oppgaver med manglende problemdata funnet. Laster om.",
+        "NEW_COMMENT": "GitLab: Ny kommentar til \"{{issueText}}\"",
+        "POLLING": "GitLab: Henter endringer for problemer",
         "SHOW_ISSUE_BTN": "Vis meg"
       }
     },
@@ -519,7 +519,7 @@
         "CREATE": "Lag prosjekt",
         "EDIT": "Rediger prosjekt",
         "SETUP_GIT": "Konfigurer Git-integrasjon",
-        "SETUP_GITLAB": "Konfigurer Gitlab-integrasjon",
+        "SETUP_GITLAB": "Konfigurer GitLab-integrasjon",
         "SETUP_JIRA": "Oppsett Jira Integration"
       },
       "FORM_BASIC": {
@@ -1099,7 +1099,7 @@
     "EDIT_PROJECT": "Rediger prosjekt",
     "EXPORT_PROJECT": "Eksporter prosjekt",
     "GITHUB_CONFIGURED": "GitHub-integrasjon konfigurert",
-    "GITLAB_CONFIGURED": "Gitlab-integrasjon konfigurert",
+    "GITLAB_CONFIGURED": "GitLab-integrasjon konfigurert",
     "IMPORT_FROM_FILE": "Importer fra fil",
     "JIRA_CONFIGURED": "Jira Integration konfigurert",
     "S_INVALID_JSON": "Ugyldig json for prosjektfilen",

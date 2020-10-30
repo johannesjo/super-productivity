@@ -147,7 +147,7 @@
         "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
-        "HELP": "<p> در اینجا می توانید SuperProductivity را تنظیم کنید تا لیست Gitlab باز (یا نسخه آنلاین آن یا یک نمونه خود میزبان) را برای یک پروژه خاص در پانل ایجاد کار در نمای برنامه ریزی روزانه تنظیم کنید. آنها به عنوان پیشنهادات ذکر شده اند و پیوندی به موضوع و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند. </p> <p> علاوه بر این می توانید به طور خودکار همه موارد باز را به بک گراند وظیفه خود اضافه کنید و همگام سازی کنید. </p>",
+        "HELP": "<p> در اینجا می توانید SuperProductivity را تنظیم کنید تا لیست GitLab باز (یا نسخه آنلاین آن یا یک نمونه خود میزبان) را برای یک پروژه خاص در پانل ایجاد کار در نمای برنامه ریزی روزانه تنظیم کنید. آنها به عنوان پیشنهادات ذکر شده اند و پیوندی به موضوع و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند. </p> <p> علاوه بر این می توانید به طور خودکار همه موارد باز را به بک گراند وظیفه خود اضافه کنید و همگام سازی کنید. </p>",
         "TITLE": "گیت لاب"
       },
       "ISSUE_CONTENT": {
@@ -163,16 +163,16 @@
       "S": {
         "ERR_NETWORK": "گیت لاب: به علت مشکل شبکه سمت کاربر درخواست انجام نشد",
         "ERR_NOT_CONFIGURED": "گیت لاب: به درستی پیکربندی نشده است",
-        "ERR_UNKNOWN": "Gitlab: خطای ناشناخته {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: به روزرسانی لازم نیست",
+        "ERR_UNKNOWN": "GitLab: خطای ناشناخته {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Imported issue \"{{issueText}}\" from git to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: به روزرسانی لازم نیست",
         "ISSUE_UPDATE": "گیت لاب: اطلاعات برای \"{{issueText}}\" بروزرسانی شد",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: Tasks with missing issue data found. Reloading.",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: Tasks with missing issue data found. Reloading.",
         "NEW_COMMENT": "گیت لاب: دیدگاه جدید برای \"{{issueText}}\"",
-        "POLLING": "Gitlab: Polling Changes for issues",
+        "POLLING": "GitLab: Polling Changes for issues",
         "SHOW_ISSUE_BTN": "به من نشان بده"
       }
     },
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "ویرایش پروژه",
     "EXPORT_PROJECT": "Export Project",
     "GITHUB_CONFIGURED": "GitHub Integration Configured",
-    "GITLAB_CONFIGURED": "Gitlab Integration Configured",
+    "GITLAB_CONFIGURED": "GitLab Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
     "JIRA_CONFIGURED": "Jira Integration Configured",
     "S_INVALID_JSON": "Invalid json for project file",

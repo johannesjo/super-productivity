@@ -136,19 +136,19 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Gitlab instellen voor Project"
+        "TITLE": "GitLab instellen voor Project"
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van Gitlab toe aan de achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitLab toe aan de achterstand",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "PROJECT": "Volledig pad of gebruikersnaam / project",
         "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Hier kunt u SuperProductivity configureren om open Gitlab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw taakachterstand. </p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p> Hier kunt u SuperProductivity configureren om open GitLab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw taakachterstand. </p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Toegewezen aan",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Schrijf een reactie"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
-        "ERR_NOT_CONFIGURED": "Gitlab: is niet correct geconfigureerd",
-        "ERR_UNKNOWN": "Gitlab: onbekende fout {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: geen update vereist",
-        "ISSUE_UPDATE": "Gitlab: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: taken met ontbrekende probleemgegevens gevonden. Herladen.",
-        "NEW_COMMENT": "Gitlab: nieuwe opmerking voor \"{{issueText}}\"",
-        "POLLING": "Gitlab: Polling-wijzigingen voor problemen",
+        "ERR_NETWORK": "GitLab: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
+        "ERR_NOT_CONFIGURED": "GitLab: is niet correct geconfigureerd",
+        "ERR_UNKNOWN": "GitLab: onbekende fout {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: geen update vereist",
+        "ISSUE_UPDATE": "GitLab: bijgewerkte gegevens voor \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: bijgewerkte gegevens voor \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: taken met ontbrekende probleemgegevens gevonden. Herladen.",
+        "NEW_COMMENT": "GitLab: nieuwe opmerking voor \"{{issueText}}\"",
+        "POLLING": "GitLab: Polling-wijzigingen voor problemen",
         "SHOW_ISSUE_BTN": "Laat het mij eens zien"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Project maken",
         "EDIT": "Project bewerken",
         "SETUP_GIT": "GitHub-integratie instellen",
-        "SETUP_GITLAB": "Gitlab-integratie instellen",
+        "SETUP_GITLAB": "GitLab-integratie instellen",
         "SETUP_JIRA": "Jira-integratie instellen"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "Project bewerken",
     "EXPORT_PROJECT": "Project exporteren",
     "GITHUB_CONFIGURED": "GitHub-integratie geconfigureerd",
-    "GITLAB_CONFIGURED": "Gitlab-integratie geconfigureerd",
+    "GITLAB_CONFIGURED": "GitLab-integratie geconfigureerd",
     "IMPORT_FROM_FILE": "Importeren uit bestand",
     "JIRA_CONFIGURED": "Jira-integratie geconfigureerd",
     "S_INVALID_JSON": "Ongeldige json voor projectbestand",

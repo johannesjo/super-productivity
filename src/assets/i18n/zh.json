@@ -136,19 +136,19 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "为项目设置 Gitlab"
+        "TITLE": "为项目设置 GitLab"
       },
       "FORM": {
         "FILTER_USER": "用户名（例如，自行过滤掉更改）",
-        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的 Issue 从 Gitlab 添加到待办事项",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的 Issue 从 GitLab 添加到待办事项",
         "IS_AUTO_POLL": "自动拉取导入的 git 的 Issue 以进行更改",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的 Issue 显示为建议",
-        "PROJECT": "Gitlab 完整路径或用户名/repo",
+        "PROJECT": "GitLab 完整路径或用户名/repo",
         "TOKEN": "访问令牌"
       },
       "FORM_SECTION": {
-        "HELP": "<p>在这里，您可以配置 Super Productivity 在日常计划视图的任务创建面板中列出特定项目的打开的 Gitlab Issue（在线版本或自托管实例）。它们将作为建议列出，并提供指向该 Issue 的链接以及有关此 Issue 的更多信息。</p> <p>此外，您可以自动将所有未解决的 Issue 添加并同步到待办事项。</p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p>在这里，您可以配置 Super Productivity 在日常计划视图的任务创建面板中列出特定项目的打开的 GitLab Issue（在线版本或自托管实例）。它们将作为建议列出，并提供指向该 Issue 的链接以及有关此 Issue 的更多信息。</p> <p>此外，您可以自动将所有未解决的 Issue 添加并同步到待办事项。</p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "代理人 Assignee",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "评论"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab：由于客户端网络错误，请求失败",
-        "ERR_NOT_CONFIGURED": "Gitlab：没有正确配置",
-        "ERR_UNKNOWN": "Gitlab：未知错误 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab：从git导入到待办事项  {{issuesLength}} 个新 Issue ",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab：从git导入 Issue “{{issueText}}”到积压",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab： Issue “{{issueText}}”似乎在git上被删除或关闭",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab：不需要更新",
-        "ISSUE_UPDATE": "Gitlab：更新了“{{issueText}}”的数据",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "Gitlab：发现缺少 Issue 数据的任务，重新加载。",
-        "NEW_COMMENT": "Gitlab：对“{{issueText}}”的新评论",
-        "POLLING": "Gitlab：自动拉取 Issue 的变化",
+        "ERR_NETWORK": "GitLab：由于客户端网络错误，请求失败",
+        "ERR_NOT_CONFIGURED": "GitLab：没有正确配置",
+        "ERR_UNKNOWN": "GitLab：未知错误 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab：从git导入到待办事项  {{issuesLength}} 个新 Issue ",
+        "IMPORTED_SINGLE_ISSUE": "GitLab：从git导入 Issue “{{issueText}}”到积压",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab： Issue “{{issueText}}”似乎在git上被删除或关闭",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab：不需要更新",
+        "ISSUE_UPDATE": "GitLab：更新了“{{issueText}}”的数据",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab：更新了“{{issueText}}”的数据",
+        "MISSING_ISSUE_DATA": "GitLab：发现缺少 Issue 数据的任务，重新加载。",
+        "NEW_COMMENT": "GitLab：对“{{issueText}}”的新评论",
+        "POLLING": "GitLab：自动拉取 Issue 的变化",
         "SHOW_ISSUE_BTN": "为我显示"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "创建项目",
         "EDIT": "编辑项目",
         "SETUP_GIT": "关联 GitHub",
-        "SETUP_GITLAB": "关联 Gitlab",
+        "SETUP_GITLAB": "关联 GitLab",
         "SETUP_JIRA": "关联 Jira"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "编辑项目",
     "EXPORT_PROJECT": "出口项目",
     "GITHUB_CONFIGURED": "配置GitHub集成",
-    "GITLAB_CONFIGURED": "配置Gitlab集成",
+    "GITLAB_CONFIGURED": "配置GitLab集成",
     "IMPORT_FROM_FILE": "从文件导入",
     "JIRA_CONFIGURED": "配置Jira集成",
     "S_INVALID_JSON": "项目文件的json无效",

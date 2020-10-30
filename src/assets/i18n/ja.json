@@ -136,19 +136,19 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "プロジェクト用Gitlabのセットアップ"
+        "TITLE": "プロジェクト用GitLabのセットアップ"
       },
       "FORM": {
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
-        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGitlabからバックログに自動的に追加",
+        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGitLabからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "PROJECT": "フルパスまたはユーザー名/プロジェクト",
         "TOKEN": "アクセストークン"
       },
       "FORM_SECTION": {
-        "HELP": "<p>ここでは、SuperProductivityを構成して、特定のプロジェクトの開いているGitlab（オンラインバージョンまたはセルフホストインスタンス）の課題を日次計画ビューのタスク作成パネルに一覧表示できます。それらは提案としてリストされ、課題へのリンクとそれに関する詳細情報を提供します。</p> <p>さらに、すべての未解決の課題をタスクバックログに自動的に追加して同期できます。</p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p>ここでは、SuperProductivityを構成して、特定のプロジェクトの開いているGitLab（オンラインバージョンまたはセルフホストインスタンス）の課題を日次計画ビューのタスク作成パネルに一覧表示できます。それらは提案としてリストされ、課題へのリンクとそれに関する詳細情報を提供します。</p> <p>さらに、すべての未解決の課題をタスクバックログに自動的に追加して同期できます。</p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "担当者",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "コメントを書く"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab：クライアント側のネットワークエラーが原因で要求が失敗しました",
-        "ERR_NOT_CONFIGURED": "Gitlab：正しく設定されていません",
-        "ERR_UNKNOWN": "Gitlab：不明なエラー {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab：gitからバックログに {{issuesLength}} 件の新しい課題をインポートしました",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab：gitからバックログへの課題 \"{{issueText}}\"のインポート",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab：更新は不要",
-        "ISSUE_UPDATE": "Gitlab： \"{{issueText}}\"のデータを更新しました",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab： \"{{issueText}}\"のデータを更新しました",
-        "MISSING_ISSUE_DATA": "Gitlab：課題データが見つからないタスクが見つかりました。再読み込みしています。",
-        "NEW_COMMENT": "Gitlab： \"{{issueText}}\"への新しいコメント",
-        "POLLING": "Gitlab：課題に対する投票の変更",
+        "ERR_NETWORK": "GitLab：クライアント側のネットワークエラーが原因で要求が失敗しました",
+        "ERR_NOT_CONFIGURED": "GitLab：正しく設定されていません",
+        "ERR_UNKNOWN": "GitLab：不明なエラー {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab：gitからバックログに {{issuesLength}} 件の新しい課題をインポートしました",
+        "IMPORTED_SINGLE_ISSUE": "GitLab：gitからバックログへの課題 \"{{issueText}}\"のインポート",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab：更新は不要",
+        "ISSUE_UPDATE": "GitLab： \"{{issueText}}\"のデータを更新しました",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab： \"{{issueText}}\"のデータを更新しました",
+        "MISSING_ISSUE_DATA": "GitLab：課題データが見つからないタスクが見つかりました。再読み込みしています。",
+        "NEW_COMMENT": "GitLab： \"{{issueText}}\"への新しいコメント",
+        "POLLING": "GitLab：課題に対する投票の変更",
         "SHOW_ISSUE_BTN": "見せて"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "プロジェクトを作成",
         "EDIT": "プロジェクトを編集",
         "SETUP_GIT": "GitHub連携のセットアップ",
-        "SETUP_GITLAB": "Gitlab連携のセットアップ",
+        "SETUP_GITLAB": "GitLab連携のセットアップ",
         "SETUP_JIRA": "Jira連携のセットアップ"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "プロジェクトを編集",
     "EXPORT_PROJECT": "プロジェクトをエクスポート",
     "GITHUB_CONFIGURED": "GitHub連携を設定済み",
-    "GITLAB_CONFIGURED": "Gitlab連携を設定済み",
+    "GITLAB_CONFIGURED": "GitLab連携を設定済み",
     "IMPORT_FROM_FILE": "ファイルからインポート",
     "JIRA_CONFIGURED": "Jira連携が設定されました",
     "S_INVALID_JSON": "プロジェクトファイルのjsonが無効です",

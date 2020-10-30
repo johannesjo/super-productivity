@@ -136,7 +136,7 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Настройка Gitlab для проекта"
+        "TITLE": "Настройка GitLab для проекта"
       },
       "FORM": {
         "FILTER_USER": "Имя пользователя (чтобы, например, самостоятельно отфильтровать изменения)",
@@ -147,8 +147,8 @@
         "TOKEN": "Токен доступа"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Здесь вы можете настроить SuperProductivity для отображения списка открытых проблем Gitlab (будь то онлайн-версия или автономный экземпляр) для конкретного проекта на панели создания задач в представлении ежедневного планирования. Они будут перечислены в качестве предложений и предоставят ссылку на проблему, а также дополнительную информацию о ней. </p> <p> Кроме того, вы можете автоматически добавлять и синхронизировать все открытые проблемы с резервом задач. </p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p> Здесь вы можете настроить SuperProductivity для отображения списка открытых проблем GitLab (будь то онлайн-версия или автономный экземпляр) для конкретного проекта на панели создания задач в представлении ежедневного планирования. Они будут перечислены в качестве предложений и предоставят ссылку на проблему, а также дополнительную информацию о ней. </p> <p> Кроме того, вы можете автоматически добавлять и синхронизировать все открытые проблемы с резервом задач. </p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Исполнитель",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: запрос не выполнен из-за ошибки сети на стороне клиента",
-        "ERR_NOT_CONFIGURED": "Gitlab: неправильно настроен",
-        "ERR_UNKNOWN": "Gitlab: неизвестная ошибка {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: импортировано {{issuesLength}} новых заданий из git в список задач",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: импортированная проблема \"{{issueText}}\" из git в список задач",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: обновление не требуется",
-        "ISSUE_UPDATE": "Gitlab: обновлены данные для \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: обновлены данные для \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
-        "NEW_COMMENT": "Gitlab: новый комментарий для \"{{issueText}}\"",
-        "POLLING": "Gitlab: Опрос Изменения для проблем",
+        "ERR_NETWORK": "GitLab: запрос не выполнен из-за ошибки сети на стороне клиента",
+        "ERR_NOT_CONFIGURED": "GitLab: неправильно настроен",
+        "ERR_UNKNOWN": "GitLab: неизвестная ошибка {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: импортировано {{issuesLength}} новых заданий из git в список задач",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: импортированная проблема \"{{issueText}}\" из git в список задач",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: обновление не требуется",
+        "ISSUE_UPDATE": "GitLab: обновлены данные для \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: обновлены данные для \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
+        "NEW_COMMENT": "GitLab: новый комментарий для \"{{issueText}}\"",
+        "POLLING": "GitLab: Опрос Изменения для проблем",
         "SHOW_ISSUE_BTN": "Покажи мне"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Создать проект",
         "EDIT": "Редактировать проект",
         "SETUP_GIT": "Настройка GitHub Интеграция",
-        "SETUP_GITLAB": "Настройка Gitlab Интеграция",
+        "SETUP_GITLAB": "Настройка GitLab Интеграция",
         "SETUP_JIRA": "Настройка интеграции Jira"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "Редактировать проект",
     "EXPORT_PROJECT": "Экспортировать проект",
     "GITHUB_CONFIGURED": "Интеграция GitHub настроена",
-    "GITLAB_CONFIGURED": "Интеграция Gitlab настроена",
+    "GITLAB_CONFIGURED": "Интеграция GitLab настроена",
     "IMPORT_FROM_FILE": "Импорт из файла",
     "JIRA_CONFIGURED": "Интеграция Jira настроена",
     "S_INVALID_JSON": "Неверный JSON для файла проекта",

@@ -136,18 +136,18 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configurar Gitlab para Proyecto"
+        "TITLE": "Configurar GitLab para Proyecto"
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Gitlab a la cola de tareas",
+        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde GitLab a la cola de tareas",
         "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "PROJECT": "Ruta completa o nombre de usuario / proyecto",
         "TOKEN": "Token de acceso"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Aquí puede configurar SuperProductividad para enumerar los problemas abiertos de Gitlab (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto. </p> <p> Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a la acumulación de tareas. </p>",
+        "HELP": "<p> Aquí puede configurar SuperProductividad para enumerar los problemas abiertos de GitLab (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto. </p> <p> Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a la acumulación de tareas. </p>",
         "TITLE": "gitlab"
       },
       "ISSUE_CONTENT": {
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Escribir un comentario"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: error en la solicitud debido a un error en la red del lado del cliente",
-        "ERR_NOT_CONFIGURED": "Gitlab: no está correctamente configurado",
-        "ERR_UNKNOWN": "Gitlab: error desconocido {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importado {{issuesLength}} nuevos problemas de gitlab al registro de trabajo",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: problema importado \"{{issueText}}\" de gitlab al registro de trabajo",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: el problema \"{{issueText}}\" parece que fue eliminado o cerrado en git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: no se requiere actualización",
-        "ISSUE_UPDATE": "Gitlab: Datos actualizados para \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Datos actualizados para \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: tareas con datos de problemas faltantes encontrados. Recarga",
-        "NEW_COMMENT": "Gitlab: Nuevo comentario para \"{{issueText}}\"",
-        "POLLING": "Gitlab: cambios de sondeo para problemas",
+        "ERR_NETWORK": "GitLab: error en la solicitud debido a un error en la red del lado del cliente",
+        "ERR_NOT_CONFIGURED": "GitLab: no está correctamente configurado",
+        "ERR_UNKNOWN": "GitLab: error desconocido {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Importado {{issuesLength}} nuevos problemas de gitlab al registro de trabajo",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: problema importado \"{{issueText}}\" de gitlab al registro de trabajo",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: el problema \"{{issueText}}\" parece que fue eliminado o cerrado en git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: no se requiere actualización",
+        "ISSUE_UPDATE": "GitLab: Datos actualizados para \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Datos actualizados para \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: tareas con datos de problemas faltantes encontrados. Recarga",
+        "NEW_COMMENT": "GitLab: Nuevo comentario para \"{{issueText}}\"",
+        "POLLING": "GitLab: cambios de sondeo para problemas",
         "SHOW_ISSUE_BTN": "Muéstrame"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Crear proyecto",
         "EDIT": "Editar proyecto",
         "SETUP_GIT": "Configurar la integración con GitHub",
-        "SETUP_GITLAB": "Configurar la integración con Gitlab",
+        "SETUP_GITLAB": "Configurar la integración con GitLab",
         "SETUP_JIRA": "Configurar la integración con Jira"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "Editar proyecto",
     "EXPORT_PROJECT": "Proyecto de exportación",
     "GITHUB_CONFIGURED": "Integración de GitHub configurada",
-    "GITLAB_CONFIGURED": "Integración de Gitlab configurada",
+    "GITLAB_CONFIGURED": "Integración de GitLab configurada",
     "IMPORT_FROM_FILE": "Importar desde archivo",
     "JIRA_CONFIGURED": "Integración de Jira Configurada",
     "S_INVALID_JSON": "Json no válido para el archivo de proyecto",

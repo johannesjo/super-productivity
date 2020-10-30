@@ -136,7 +136,7 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configura Gitlab per il progetto"
+        "TITLE": "Configura GitLab per il progetto"
       },
       "FORM": {
         "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
@@ -147,8 +147,8 @@
         "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Qui puoi configurare SuperProductivity per elencare i problemi di Gitlab aperti (sia la versione online o un'istanza ospitata autonomamente) per un progetto specifico nel pannello di creazione dell'attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un collegamento al problema, nonché ulteriori informazioni al riguardo. </p> <p> Inoltre puoi aggiungere e sincronizzare automaticamente tutti i problemi aperti nel tuo backlog delle attività. </p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p> Qui puoi configurare SuperProductivity per elencare i problemi di GitLab aperti (sia la versione online o un'istanza ospitata autonomamente) per un progetto specifico nel pannello di creazione dell'attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un collegamento al problema, nonché ulteriori informazioni al riguardo. </p> <p> Inoltre puoi aggiungere e sincronizzare automaticamente tutti i problemi aperti nel tuo backlog delle attività. </p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assegnatario",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Scrivi un commento"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: Richiesta fallita a causa di un erore di rete lato client",
-        "ERR_NOT_CONFIGURED": "Gitlab: Non è configurato correttamente",
-        "ERR_UNKNOWN": "Gitlab: Errore sconosciuto {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importati {{issuesLength}} nuovi issue da git al backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Importati gli issue \"{{issueText}}\" da git al backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Nessun aggiornamento necessario",
-        "ISSUE_UPDATE": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: Trovati task con dati mancanti. Ricarico.",
-        "NEW_COMMENT": "Gitlab: Nuovo commento per \"{{issueText}}\"",
-        "POLLING": "Gitlab: Sto facendo il polling dei cambiamenti per gli issue",
+        "ERR_NETWORK": "GitLab: Richiesta fallita a causa di un erore di rete lato client",
+        "ERR_NOT_CONFIGURED": "GitLab: Non è configurato correttamente",
+        "ERR_UNKNOWN": "GitLab: Errore sconosciuto {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Importati {{issuesLength}} nuovi issue da git al backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Importati gli issue \"{{issueText}}\" da git al backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Nessun aggiornamento necessario",
+        "ISSUE_UPDATE": "GitLab: Aggiornati dati per \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Aggiornati dati per \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: Trovati task con dati mancanti. Ricarico.",
+        "NEW_COMMENT": "GitLab: Nuovo commento per \"{{issueText}}\"",
+        "POLLING": "GitLab: Sto facendo il polling dei cambiamenti per gli issue",
         "SHOW_ISSUE_BTN": "Mostra"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Crea progetto",
         "EDIT": "Modifica progetto",
         "SETUP_GIT": "Configura integrazione Githun",
-        "SETUP_GITLAB": "Configura integrazione Gitlab",
+        "SETUP_GITLAB": "Configura integrazione GitLab",
         "SETUP_JIRA": "Configura integrazione Jira"
       },
       "FORM_BASIC": {
@@ -1085,7 +1085,7 @@
     "EDIT_PROJECT": "Modifica progetto",
     "EXPORT_PROJECT": "Esporta progetto",
     "GITHUB_CONFIGURED": "Integrazione GitHub configurata",
-    "GITLAB_CONFIGURED": "Integrazione Gitlab configurata",
+    "GITLAB_CONFIGURED": "Integrazione GitLab configurata",
     "IMPORT_FROM_FILE": "Importa da file",
     "JIRA_CONFIGURED": "Integrazione Jira configurata",
     "S_INVALID_JSON": "JSON non valido per file di progetto",
