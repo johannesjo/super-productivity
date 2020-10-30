@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configura Github per il progetto"
+        "TITLE": "Configura GitHub per il progetto"
       },
       "FORM": {
         "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da Github al backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare",
@@ -106,7 +106,7 @@
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione task nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti al backlog dei task.</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assegnatario",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "Scrivi un commento"
       },
       "S": {
-        "ERR_NETWORK": "Github: Richiesta fallita a causa di un erore di rete lato client",
-        "ERR_NOT_CONFIGURED": "Github: Non è configurato correttamente",
-        "ERR_UNKNOWN": "Github: Errore sconosciuto {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: Importati {{issuesLength}} nuovi issue da git al backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: Importati gli issue \"{{issueText}}\" da git al backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: Nessun aggiornamento necessario",
-        "ISSUE_UPDATE": "Github: Aggiornati dati per \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aggiornati dati per \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Trovati task con dati mancanti. Ricarico.",
-        "NEW_COMMENT": "Github: Nuovo commento per \"{{issueText}}\"",
-        "POLLING": "Github: Sto facendo il polling dei cambiamenti per gli issue",
+        "ERR_NETWORK": "GitHub: Richiesta fallita a causa di un erore di rete lato client",
+        "ERR_NOT_CONFIGURED": "GitHub: Non è configurato correttamente",
+        "ERR_UNKNOWN": "GitHub: Errore sconosciuto {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Importati {{issuesLength}} nuovi issue da git al backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: Importati gli issue \"{{issueText}}\" da git al backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Nessun aggiornamento necessario",
+        "ISSUE_UPDATE": "GitHub: Aggiornati dati per \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Aggiornati dati per \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: Trovati task con dati mancanti. Ricarico.",
+        "NEW_COMMENT": "GitHub: Nuovo commento per \"{{issueText}}\"",
+        "POLLING": "GitHub: Sto facendo il polling dei cambiamenti per gli issue",
         "SHOW_ISSUE_BTN": "Mostra"
       }
     },
@@ -140,7 +140,7 @@
       },
       "FORM": {
         "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da Github al backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "PROJECT": "Percorso completo o nome utente / progetto",
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox: carica file ...",
     "GDRIVE_DOWNLOAD": "Google Drive: scarica il file ...",
     "GDRIVE_UPLOAD": "Google Drive: carica il file ...",
-    "GITHUB_LOAD_ISSUE": "Github: caricamento dati problema ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: caricamento dati problema ...",
     "JIRA_LOAD_ISSUE": "Jira: caricamento dati problema ...",
     "UNKNOWN": "Caricamento dei dati remoti",
     "WEB_DAV_DOWNLOAD": "WebDAV: Download dei dati ...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "Modifica progetto",
     "EXPORT_PROJECT": "Esporta progetto",
-    "GITHUB_CONFIGURED": "Integrazione Github configurata",
+    "GITHUB_CONFIGURED": "Integrazione GitHub configurata",
     "GITLAB_CONFIGURED": "Integrazione Gitlab configurata",
     "IMPORT_FROM_FILE": "Importa da file",
     "JIRA_CONFIGURED": "Integrazione Jira configurata",

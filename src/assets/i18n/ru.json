@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Настройка Github для проекта"
+        "TITLE": "Настройка GitHub для проекта"
       },
       "FORM": {
         "FILTER_USER": "Имя пользователя (чтобы, например, самостоятельно отфильтровать изменения)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из Github в отставание",
+        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из GitHub в отставание",
         "IS_AUTO_POLL": "Автоматически проверять импортированные проблемы git на предмет изменений",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Показывать проблемы из git в качестве подсказок при добавлении новых задач",
         "REPO": "\"username / repositoryName\" для репозитория git, который вы хотите отслеживать",
@@ -106,7 +106,7 @@
       },
       "FORM_SECTION": {
         "HELP": "<p>Здесь вы можете настроить SuperProductivity для отображения списка открытых проблем GitHub для конкретного хранилища на панели создания задач в представлении ежедневного планирования. Они будут перечислены в качестве предложений и предоставят ссылку на проблему, а также дополнительную информацию о ней.</p> <p>Кроме того, вы можете автоматически добавлять и синхронизировать все открытые проблемы в своем задании.</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Исполнитель",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
-        "ERR_NETWORK": "Github: запрос не выполнен из-за ошибки сети на стороне клиента",
-        "ERR_NOT_CONFIGURED": "Github: неправильно настроен",
-        "ERR_UNKNOWN": "Github: неизвестная ошибка {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: импортировано {{issuesLength}} новых заданий из git в список задач",
-        "IMPORTED_SINGLE_ISSUE": "Github: импортированная проблема \"{{issueText}}\" из git в список задач",
-        "ISSUE_DELETED_OR_CLOSED": "Github: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: обновление не требуется",
-        "ISSUE_UPDATE": "Github: обновлены данные для \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: обновлены данные для \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
-        "NEW_COMMENT": "Github: новый комментарий для \"{{issueText}}\"",
-        "POLLING": "Github: Опрос Изменения для проблем",
+        "ERR_NETWORK": "GitHub: запрос не выполнен из-за ошибки сети на стороне клиента",
+        "ERR_NOT_CONFIGURED": "GitHub: неправильно настроен",
+        "ERR_UNKNOWN": "GitHub: неизвестная ошибка {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: импортировано {{issuesLength}} новых заданий из git в список задач",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: импортированная проблема \"{{issueText}}\" из git в список задач",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: обновление не требуется",
+        "ISSUE_UPDATE": "GitHub: обновлены данные для \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: обновлены данные для \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: найдены задачи с отсутствующими данными о проблеме. Перезагрузка.",
+        "NEW_COMMENT": "GitHub: новый комментарий для \"{{issueText}}\"",
+        "POLLING": "GitHub: Опрос Изменения для проблем",
         "SHOW_ISSUE_BTN": "Покажи мне"
       }
     },
@@ -140,7 +140,7 @@
       },
       "FORM": {
         "FILTER_USER": "Имя пользователя (чтобы, например, самостоятельно отфильтровать изменения)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из Github в отставание",
+        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из GitHub в отставание",
         "IS_AUTO_POLL": "Автоматически проверять импортированные проблемы git на предмет изменений",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Показывать проблемы из git в качестве подсказок при добавлении новых задач",
         "PROJECT": "Полный путь или имя пользователя / проект",
@@ -239,7 +239,7 @@
         "TITLE": "Jira: отправить рабочий журнал"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из Github в отставание",
+        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из GitHub в отставание",
         "IS_AUTO_POLL": "Автоматически проверять импортированные проблемы git на предмет изменений",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Показывать проблемы из git в качестве подсказок при добавлении новых задач",
         "REPO": "\"username / repositoryName\" для репозитория git, который вы хотите отслеживать"
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "Создать проект",
         "EDIT": "Редактировать проект",
-        "SETUP_GIT": "Настройка Github Интеграция",
+        "SETUP_GIT": "Настройка GitHub Интеграция",
         "SETUP_GITLAB": "Настройка Gitlab Интеграция",
         "SETUP_JIRA": "Настройка интеграции Jira"
       },
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox: Загрузить файл ...",
     "GDRIVE_DOWNLOAD": "Диск Google: скачать файл ...",
     "GDRIVE_UPLOAD": "Google Диск: Загрузить файл ...",
-    "GITHUB_LOAD_ISSUE": "Github: загрузить данные о проблеме ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: загрузить данные о проблеме ...",
     "JIRA_LOAD_ISSUE": "Jira: Загрузить данные о проблеме ...",
     "UNKNOWN": "Загрузка удаленных данных",
     "WEB_DAV_DOWNLOAD": "WebDAV: загрузка данных ...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "Редактировать проект",
     "EXPORT_PROJECT": "Экспортировать проект",
-    "GITHUB_CONFIGURED": "Интеграция Github настроена",
+    "GITHUB_CONFIGURED": "Интеграция GitHub настроена",
     "GITLAB_CONFIGURED": "Интеграция Gitlab настроена",
     "IMPORT_FROM_FILE": "Импорт из файла",
     "JIRA_CONFIGURED": "Интеграция Jira настроена",

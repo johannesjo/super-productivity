@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "为项目设置 Github"
+        "TITLE": "为项目设置 GitHub"
       },
       "FORM": {
         "FILTER_USER": "用户名（请输入您的用户名）",
-        "IS_AUTO_ADD_TO_BACKLOG": "自动将 Github 未解决的 Issue 添加到待办事项",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将 GitHub 未解决的 Issue 添加到待办事项",
         "IS_AUTO_POLL": "自动拉取导入的git Issue",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将 git 中的 Issue 显示为建议",
         "REPO": "GitHub：“username / repositoryName”",
@@ -106,7 +106,7 @@
       },
       "FORM_SECTION": {
         "HELP": "<p>您可以在此处配置 Super Productivity，以在日常计划视图的任务创建面板中列出特定存储库的打开 GitHub Issue。它们将被列为建议，并将提供该 Issue 的链接以及有关该 Issue 的更多信息。</p> <p>此外，您还可以自动将所有未解决的 Issue 添加并同步到任务待办事项中。</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "代理人 Assignee",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "评论"
       },
       "S": {
-        "ERR_NETWORK": "Github：由于客户端网络错误，请求失败",
-        "ERR_NOT_CONFIGURED": "Github：没有正确配置",
-        "ERR_UNKNOWN": "Github：未知错误 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github：从git导入到待办事项 {{issuesLength}} 个新 Issue ",
-        "IMPORTED_SINGLE_ISSUE": "Github：从git导入 Issue “{{issueText}}”到积压待办事项",
-        "ISSUE_DELETED_OR_CLOSED": "Github：Issue “{{issueText}}” 似乎在git上被删除或关闭",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github：不需要更新",
-        "ISSUE_UPDATE": "Github：更新了“{{issueText}}”的数据",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github：更新了“{{issueText}}”的数据",
-        "MISSING_ISSUE_DATA": "Github：发现缺少 Issue 数据的任务。正在重新加载。",
-        "NEW_COMMENT": "Github：对“{{issueText}}”的新评论",
-        "POLLING": "Github：拉取 Issue 的变更",
+        "ERR_NETWORK": "GitHub：由于客户端网络错误，请求失败",
+        "ERR_NOT_CONFIGURED": "GitHub：没有正确配置",
+        "ERR_UNKNOWN": "GitHub：未知错误 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub：从git导入到待办事项 {{issuesLength}} 个新 Issue ",
+        "IMPORTED_SINGLE_ISSUE": "GitHub：从git导入 Issue “{{issueText}}”到积压待办事项",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub：Issue “{{issueText}}” 似乎在git上被删除或关闭",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub：不需要更新",
+        "ISSUE_UPDATE": "GitHub：更新了“{{issueText}}”的数据",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub：更新了“{{issueText}}”的数据",
+        "MISSING_ISSUE_DATA": "GitHub：发现缺少 Issue 数据的任务。正在重新加载。",
+        "NEW_COMMENT": "GitHub：对“{{issueText}}”的新评论",
+        "POLLING": "GitHub：拉取 Issue 的变更",
         "SHOW_ISSUE_BTN": "为我显示"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira：提交工作日志Worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的 Issue 从Github添加到待办事项",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的 Issue 从GitHub添加到待办事项",
         "IS_AUTO_POLL": "自动拉取导入的git Issue 进行的更改",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的Issue显示为建议",
         "REPO": "您要跟踪的git存储库的“username / repositoryName”"
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "创建项目",
         "EDIT": "编辑项目",
-        "SETUP_GIT": "关联 Github",
+        "SETUP_GIT": "关联 GitHub",
         "SETUP_GITLAB": "关联 Gitlab",
         "SETUP_JIRA": "关联 Jira"
       },
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox：上传文件...",
     "GDRIVE_DOWNLOAD": "Google Drive：下载文件...",
     "GDRIVE_UPLOAD": "Google Drive：上传文件...",
-    "GITHUB_LOAD_ISSUE": "Github：加载 Issue 数据...",
+    "GITHUB_LOAD_ISSUE": "GitHub：加载 Issue 数据...",
     "JIRA_LOAD_ISSUE": "Jira：加载 Issue 数据...",
     "UNKNOWN": "加载远程数据",
     "WEB_DAV_DOWNLOAD": "WebDAV：正在下载数据...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "编辑项目",
     "EXPORT_PROJECT": "出口项目",
-    "GITHUB_CONFIGURED": "配置Github集成",
+    "GITHUB_CONFIGURED": "配置GitHub集成",
     "GITLAB_CONFIGURED": "配置Gitlab集成",
     "IMPORT_FROM_FILE": "从文件导入",
     "JIRA_CONFIGURED": "配置Jira集成",

@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "プロジェクト用Githubのセットアップ"
+        "TITLE": "プロジェクト用GitHubのセットアップ"
       },
       "FORM": {
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
-        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGithubからバックログに自動的に追加",
+        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGitHubからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "REPO": "追跡したいgitリポジトリの \"username/repositoryName\"",
@@ -106,7 +106,7 @@
       },
       "FORM_SECTION": {
         "HELP": "<p>ここでは、毎日の計画ビューのタスク作成パネルに、特定のリポジトリの未解決のGitHub issueを一覧表示するようにSuperProductivityを設定できます。それらは提案としてリストされ、課題へのリンクとそれに関する詳細情報を提供します。</p> <p>さらに、未解決の課題をすべて自動的にタスクバックログに追加して同期できます。</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "担当者",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "コメントを書く"
       },
       "S": {
-        "ERR_NETWORK": "Github：クライアント側のネットワークエラーが原因で要求が失敗しました",
-        "ERR_NOT_CONFIGURED": "Github：正しく設定されていません",
-        "ERR_UNKNOWN": "Github：不明なエラー {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github：gitからバックログに {{issuesLength}} 件の新しい課題をインポートしました",
-        "IMPORTED_SINGLE_ISSUE": "Github：gitからバックログへの課題 \"{{issueText}}\"のインポート",
-        "ISSUE_DELETED_OR_CLOSED": "Github：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github：更新は不要",
-        "ISSUE_UPDATE": "Github： \"{{issueText}}\"のデータを更新しました",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github： \"{{issueText}}\"のデータを更新しました",
-        "MISSING_ISSUE_DATA": "Github：課題データが見つからないタスクが見つかりました。再読み込みしています。",
-        "NEW_COMMENT": "Github： \"{{issueText}}\"への新しいコメント",
-        "POLLING": "Github：課題に対する投票の変更",
+        "ERR_NETWORK": "GitHub：クライアント側のネットワークエラーが原因で要求が失敗しました",
+        "ERR_NOT_CONFIGURED": "GitHub：正しく設定されていません",
+        "ERR_UNKNOWN": "GitHub：不明なエラー {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub：gitからバックログに {{issuesLength}} 件の新しい課題をインポートしました",
+        "IMPORTED_SINGLE_ISSUE": "GitHub：gitからバックログへの課題 \"{{issueText}}\"のインポート",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub：更新は不要",
+        "ISSUE_UPDATE": "GitHub： \"{{issueText}}\"のデータを更新しました",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub： \"{{issueText}}\"のデータを更新しました",
+        "MISSING_ISSUE_DATA": "GitHub：課題データが見つからないタスクが見つかりました。再読み込みしています。",
+        "NEW_COMMENT": "GitHub： \"{{issueText}}\"への新しいコメント",
+        "POLLING": "GitHub：課題に対する投票の変更",
         "SHOW_ISSUE_BTN": "見せて"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira：作業記録を提出する"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGithubからバックログに自動的に追加",
+        "IS_AUTO_ADD_TO_BACKLOG": "未解決の課題をGitHubからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "REPO": "追跡したいgitリポジトリの \"username / repositoryName\""
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "プロジェクトを作成",
         "EDIT": "プロジェクトを編集",
-        "SETUP_GIT": "Github連携のセットアップ",
+        "SETUP_GIT": "GitHub連携のセットアップ",
         "SETUP_GITLAB": "Gitlab連携のセットアップ",
         "SETUP_JIRA": "Jira連携のセットアップ"
       },
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox：ファイルをアップロード...",
     "GDRIVE_DOWNLOAD": "Googleドライブ：ファイルをダウンロード...",
     "GDRIVE_UPLOAD": "Googleドライブ：ファイルをアップロード...",
-    "GITHUB_LOAD_ISSUE": "Github：課題データをロード...",
+    "GITHUB_LOAD_ISSUE": "GitHub：課題データをロード...",
     "JIRA_LOAD_ISSUE": "Jira：課題データをロード...",
     "UNKNOWN": "リモートデータの読み込み",
     "WEB_DAV_DOWNLOAD": "WebDAV：データのダウンロード中...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "プロジェクトを編集",
     "EXPORT_PROJECT": "プロジェクトをエクスポート",
-    "GITHUB_CONFIGURED": "Github連携を設定済み",
+    "GITHUB_CONFIGURED": "GitHub連携を設定済み",
     "GITLAB_CONFIGURED": "Gitlab連携を設定済み",
     "IMPORT_FROM_FILE": "ファイルからインポート",
     "JIRA_CONFIGURED": "Jira連携が設定されました",

@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "프로젝트를위한 Github 설정"
+        "TITLE": "프로젝트를위한 GitHub 설정"
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_ADD_TO_BACKLOG": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\"",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "의견 쓰기"
       },
       "S": {
-        "ERR_NETWORK": "Github : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
-        "ERR_NOT_CONFIGURED": "Github : 제대로 구성되지 않았습니다.",
-        "ERR_UNKNOWN": "Github : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
-        "IMPORTED_SINGLE_ISSUE": "Github : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
-        "ISSUE_DELETED_OR_CLOSED": "Github : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github : 업데이트가 필요하지 않습니다",
-        "ISSUE_UPDATE": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MISSING_ISSUE_DATA": "Github : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
-        "NEW_COMMENT": "Github : \"{{issueText}}\"에 대한 새로운 설명",
-        "POLLING": "Github : 문제에 대한 폴링 변경 사항",
+        "ERR_NETWORK": "GitHub : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
+        "ERR_NOT_CONFIGURED": "GitHub : 제대로 구성되지 않았습니다.",
+        "ERR_UNKNOWN": "GitHub : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
+        "IMPORTED_SINGLE_ISSUE": "GitHub : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub : 업데이트가 필요하지 않습니다",
+        "ISSUE_UPDATE": "GitHub : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MISSING_ISSUE_DATA": "GitHub : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
+        "NEW_COMMENT": "GitHub : \"{{issueText}}\"에 대한 새로운 설명",
+        "POLLING": "GitHub : 문제에 대한 폴링 변경 사항",
         "SHOW_ISSUE_BTN": "보여줘"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira : 작업 로그 제출"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_ADD_TO_BACKLOG": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "프로젝트 만들기",
         "EDIT": "프로젝트 수정",
-        "SETUP_GIT": "Github 통합 설치",
+        "SETUP_GIT": "GitHub 통합 설치",
         "SETUP_GITLAB": "Gitlab 통합 설치",
         "SETUP_JIRA": "Jira 통합 설정"
       },
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "보관 용 계정 : 파일 업로드 ...",
     "GDRIVE_DOWNLOAD": "Google 드라이브 : 파일 다운로드 ...",
     "GDRIVE_UPLOAD": "Google 드라이브 : 파일 업로드 ...",
-    "GITHUB_LOAD_ISSUE": "Github : 이슈 데이터로드 ...",
+    "GITHUB_LOAD_ISSUE": "GitHub : 이슈 데이터로드 ...",
     "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ...",
     "UNKNOWN": "원격 데이터로드",
     "WEB_DAV_DOWNLOAD": "WebDAV : 데이터 다운로드 중 ...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "프로젝트 수정",
     "EXPORT_PROJECT": "프로젝트 내보내기",
-    "GITHUB_CONFIGURED": "Github 통합 구성",
+    "GITHUB_CONFIGURED": "GitHub 통합 구성",
     "GITLAB_CONFIGURED": "Gitlab 통합 구성",
     "IMPORT_FROM_FILE": "파일에서 가져 오기",
     "JIRA_CONFIGURED": "Jira 통합 구성",

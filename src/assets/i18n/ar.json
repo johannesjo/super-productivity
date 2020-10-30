@@ -98,7 +98,7 @@
       },
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Github إلى العمل المتراكم",
+        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا git المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "إظهار المشكلات من git كاقتراحات عند إضافة مهام جديدة",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه",
@@ -119,12 +119,12 @@
         "WRITE_A_COMMENT": "أكتب تعليقا"
       },
       "S": {
-        "ERR_NETWORK": "Github: فشل الطلب بسبب خطأ في شبكة جانب العميل",
+        "ERR_NETWORK": "GitHub: فشل الطلب بسبب خطأ في شبكة جانب العميل",
         "ERR_NOT_CONFIGURED": "جيثب: لم يتم تكوينه بشكل صحيح",
         "ERR_UNKNOWN": "جيثب: خطأ غير معروف {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "جيثب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
-        "IMPORTED_SINGLE_ISSUE": "Github: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
-        "ISSUE_DELETED_OR_CLOSED": "Github: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
         "ISSUE_NO_UPDATE_REQUIRED": "جيثب: لا يوجد تحديث مطلوب",
         "ISSUE_UPDATE": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
@@ -239,7 +239,7 @@
         "TITLE": "جيرا: إرسال العمل"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Github إلى العمل المتراكم",
+        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا git المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "إظهار المشكلات من git كاقتراحات عند إضافة مهام جديدة",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه"
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox: تحميل ملف ...",
     "GDRIVE_DOWNLOAD": "Google Drive: تنزيل الملف ...",
     "GDRIVE_UPLOAD": "Google Drive: تحميل ملف ...",
-    "GITHUB_LOAD_ISSUE": "Github: تحميل بيانات العدد ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: تحميل بيانات العدد ...",
     "JIRA_LOAD_ISSUE": "Jira: تحميل بيانات العدد ...",
     "UNKNOWN": "تحميل البيانات البعيدة",
     "WEB_DAV_DOWNLOAD": "WebDAV: جاري تنزيل البيانات ...",

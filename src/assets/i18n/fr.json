@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configurer Github pour le projet"
+        "TITLE": "Configurer GitHub pour le projet"
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de Github au backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de GitHub au backlog",
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
@@ -106,7 +106,7 @@
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues GitHub ouvertes pour un repository spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsable",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "Écrire un commentaire"
       },
       "S": {
-        "ERR_NETWORK": "Github : la requête a échouée à cause d'une erreur réseau côté client",
-        "ERR_NOT_CONFIGURED": "Github : n'est pas configuré correctement",
-        "ERR_UNKNOWN": "Github: erreur inconnue {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github : {{issuesLength}} nouvelles issues de git dans le backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github : Issue \"{{issueText}}\" importée de git dans le backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github : l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: aucune mise à jour requise",
-        "ISSUE_UPDATE": "Github : données mises à jour pour \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github : données mises à jour pour \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github : Tâches avec données d'issue manquantes trouvées. Rechargement.",
-        "NEW_COMMENT": "Github : Nouveau commentaire pour \"{{issueText}}\"",
-        "POLLING": "Github : Recherche de modification sur les issues",
+        "ERR_NETWORK": "GitHub : la requête a échouée à cause d'une erreur réseau côté client",
+        "ERR_NOT_CONFIGURED": "GitHub : n'est pas configuré correctement",
+        "ERR_UNKNOWN": "GitHub: erreur inconnue {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub : {{issuesLength}} nouvelles issues de git dans le backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitHub : Issue \"{{issueText}}\" importée de git dans le backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub : l'issue' \"{{issueText}}\" semble être supprimée ou fermé sur git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: aucune mise à jour requise",
+        "ISSUE_UPDATE": "GitHub : données mises à jour pour \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub : données mises à jour pour \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub : Tâches avec données d'issue manquantes trouvées. Rechargement.",
+        "NEW_COMMENT": "GitHub : Nouveau commentaire pour \"{{issueText}}\"",
+        "POLLING": "GitHub : Recherche de modification sur les issues",
         "SHOW_ISSUE_BTN": "Montre moi"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira: Soumettre le temps de travail"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les issues non résolus de Github au backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les issues non résolus de GitHub au backlog",
         "IS_AUTO_POLL": "Surveiller periodiquement les issues git importés pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre"
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "Créer un projet",
         "EDIT": "Modifier le projet",
-        "SETUP_GIT": "Configurer l'intégration de Github",
+        "SETUP_GIT": "Configurer l'intégration de GitHub",
         "SETUP_GITLAB": "Configurer l'intégration de Gitlab",
         "SETUP_JIRA": "Configurer l'intégration de Jira"
       },
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox: Importer un fichier ...",
     "GDRIVE_DOWNLOAD": "Google Drive: Télécharger le fichier ...",
     "GDRIVE_UPLOAD": "Google Drive: importer un fichier ...",
-    "GITHUB_LOAD_ISSUE": "Github: Charger les données de problème ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: Charger les données de problème ...",
     "JIRA_LOAD_ISSUE": "Jira: Charger les données du problème ...",
     "UNKNOWN": "Chargement des données à distance",
     "WEB_DAV_DOWNLOAD": "WebDAV: Téléchargement de données ...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "Modifier le projet",
     "EXPORT_PROJECT": "Exporter le projet",
-    "GITHUB_CONFIGURED": "Intégration Github configurée",
+    "GITHUB_CONFIGURED": "Intégration GitHub configurée",
     "GITLAB_CONFIGURED": "Intégration Gitlab configurée",
     "IMPORT_FROM_FILE": "Importer depuis un fichier",
     "JIRA_CONFIGURED": "Intégration Jira configurée",

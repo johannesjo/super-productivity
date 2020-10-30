@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Richten Sie Github für Project ein"
+        "TITLE": "Richten Sie GitHub für Project ein"
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "S": {
-        "ERR_NETWORK": "Github: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
-        "ERR_NOT_CONFIGURED": "Github: Ist nicht richtig konfiguriert",
-        "ERR_UNKNOWN": "Github: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} neue Issues von Git in das Backlog importiert",
-        "IMPORTED_SINGLE_ISSUE": "Github: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: Kein Update erforderlich",
-        "ISSUE_UPDATE": "Github: Aktualisierte Daten für \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aktualisierte Daten für \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
-        "NEW_COMMENT": "Github: Neuer Kommentar für \"{{issueText}}\"",
-        "POLLING": "Github: Änderungen für Issues abrufen",
+        "ERR_NETWORK": "GitHub: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
+        "ERR_NOT_CONFIGURED": "GitHub: Ist nicht richtig konfiguriert",
+        "ERR_UNKNOWN": "GitHub: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: {{issuesLength}} neue Issues von Git in das Backlog importiert",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Kein Update erforderlich",
+        "ISSUE_UPDATE": "GitHub: Aktualisierte Daten für \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Aktualisierte Daten für \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
+        "NEW_COMMENT": "GitHub: Neuer Kommentar für \"{{issueText}}\"",
+        "POLLING": "GitHub: Änderungen für Issues abrufen",
         "SHOW_ISSUE_BTN": "Zeige mir"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira: Worklog einreichen"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
-        "SETUP_GIT": "Einrichten der Github-Integration",
+        "SETUP_GIT": "Einrichten der GitHub-Integration",
         "SETUP_GITLAB": "Einrichten der Gitlab-Integration",
         "SETUP_JIRA": "Jira-Integration einrichten"
       },
@@ -1001,7 +1001,7 @@
     "DBX_UPLOAD": "Dropbox: Datei hochladen ...",
     "GDRIVE_DOWNLOAD": "Google Drive: Datei herunterladen ...",
     "GDRIVE_UPLOAD": "Google Drive: Datei hochladen ...",
-    "GITHUB_LOAD_ISSUE": "Github: Problemdaten laden ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: Problemdaten laden ...",
     "JIRA_LOAD_ISSUE": "Jira: Problemdaten laden ...",
     "UNKNOWN": "Remote-Daten laden",
     "WEB_DAV_DOWNLOAD": "WebDAV: Daten herunterladen ...",
@@ -1085,7 +1085,7 @@
     },
     "EDIT_PROJECT": "Projekt bearbeiten",
     "EXPORT_PROJECT": "Projekt exportieren",
-    "GITHUB_CONFIGURED": "Github-Integration konfiguriert",
+    "GITHUB_CONFIGURED": "GitHub-Integration konfiguriert",
     "GITLAB_CONFIGURED": "Gitlab-Integration konfiguriert",
     "IMPORT_FROM_FILE": "Aus Datei importieren",
     "JIRA_CONFIGURED": "Jira-Integration konfiguriert",

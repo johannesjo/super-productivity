@@ -94,11 +94,11 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configurar Github para Proyecto"
+        "TITLE": "Configurar GitHub para Proyecto"
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la cola de tareas",
+        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde GitHub a la cola de tareas",
         "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "Escribir un comentario"
       },
       "S": {
-        "ERR_NETWORK": "Github: error en la solicitud debido a un error en la red del lado del cliente",
-        "ERR_NOT_CONFIGURED": "Github: no está correctamente configurado",
-        "ERR_UNKNOWN": "Github: error desconocido {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: Importado {{issuesLength}} nuevos problemas de git al registro de trabajo",
-        "IMPORTED_SINGLE_ISSUE": "Github: problema importado \"{{issueText}}\" de git al registro de trabajo",
-        "ISSUE_DELETED_OR_CLOSED": "Github: el problema \"{{issueText}}\" parece que fue eliminado o cerrado en git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: no se requiere actualización",
-        "ISSUE_UPDATE": "Github: Datos actualizados para \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Datos actualizados para \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: tareas con datos de problemas faltantes encontrados. Recarga",
-        "NEW_COMMENT": "Github: Nuevo comentario para \"{{issueText}}\"",
-        "POLLING": "Github: cambios de sondeo para problemas",
+        "ERR_NETWORK": "GitHub: error en la solicitud debido a un error en la red del lado del cliente",
+        "ERR_NOT_CONFIGURED": "GitHub: no está correctamente configurado",
+        "ERR_UNKNOWN": "GitHub: error desconocido {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Importado {{issuesLength}} nuevos problemas de git al registro de trabajo",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: problema importado \"{{issueText}}\" de git al registro de trabajo",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: el problema \"{{issueText}}\" parece que fue eliminado o cerrado en git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: no se requiere actualización",
+        "ISSUE_UPDATE": "GitHub: Datos actualizados para \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Datos actualizados para \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: tareas con datos de problemas faltantes encontrados. Recarga",
+        "NEW_COMMENT": "GitHub: Nuevo comentario para \"{{issueText}}\"",
+        "POLLING": "GitHub: cambios de sondeo para problemas",
         "SHOW_ISSUE_BTN": "Muéstrame"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira: enviar registro de trabajo"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github al registro de trabajo",
+        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde GitHub al registro de trabajo",
         "IS_AUTO_POLL": "Comprobar automáticamente los problemas de git importados por cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "REPO": "\"username/repositoryName\" para el repositorio de git que desee seguir"
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "Crear proyecto",
         "EDIT": "Editar proyecto",
-        "SETUP_GIT": "Configurar la integración con Github",
+        "SETUP_GIT": "Configurar la integración con GitHub",
         "SETUP_GITLAB": "Configurar la integración con Gitlab",
         "SETUP_JIRA": "Configurar la integración con Jira"
       },
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox: Subir archivo ...",
     "GDRIVE_DOWNLOAD": "Google Drive: Descargar archivo ...",
     "GDRIVE_UPLOAD": "Google Drive: Subir archivo ...",
-    "GITHUB_LOAD_ISSUE": "Github: cargar datos de problemas ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: cargar datos de problemas ...",
     "JIRA_LOAD_ISSUE": "Jira: cargar datos de problemas ...",
     "UNKNOWN": "Cargando datos remotos",
     "WEB_DAV_DOWNLOAD": "WebDAV: Descargando datos ...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "Editar proyecto",
     "EXPORT_PROJECT": "Proyecto de exportación",
-    "GITHUB_CONFIGURED": "Integración de Github configurada",
+    "GITHUB_CONFIGURED": "Integración de GitHub configurada",
     "GITLAB_CONFIGURED": "Integración de Gitlab configurada",
     "IMPORT_FROM_FILE": "Importar desde archivo",
     "JIRA_CONFIGURED": "Integración de Jira Configurada",

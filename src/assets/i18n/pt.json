@@ -94,19 +94,19 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configurar Github para Projeto"
+        "TITLE": "Configurar GitHub para Projeto"
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do Github para o backlog",
-        "IS_AUTO_POLL": "Obter automaticamente issues do Github para alterações",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do Github como sugestões qando adicionar novas tarefas",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
+        "IS_AUTO_POLL": "Obter automaticamente issues do GitHub para alterações",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões qando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear",
         "TOKEN": "Token de acesso"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar os problemas abertos do GitHub para um repositório específico no painel de criação de tarefas na visualização de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre ele. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no seu log de tarefas.</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsável",
@@ -119,18 +119,18 @@
         "WRITE_A_COMMENT": "Comentar"
       },
       "S": {
-        "ERR_NETWORK": "Github: A solicitação falhou devido a um erro de rede do lado do cliente.",
-        "ERR_NOT_CONFIGURED": "Github: Não está configurado corretamente",
-        "ERR_UNKNOWN": "Github: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: Importado {{issuesLength}} novas issues do git para o backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: Importado issue \"{{issueText}}\" do git para o backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: Nenhuma atualização necessária",
-        "ISSUE_UPDATE": "Github: Dados atualizados para \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Dados atualizados para \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github:  Encontrado tarefa sem dados da issue. Recarregando.",
-        "NEW_COMMENT": "Github: Novo comentário para \"{{issueText}}\"",
-        "POLLING": "Github: Mudanças de sondagem para problemas",
+        "ERR_NETWORK": "GitHub: A solicitação falhou devido a um erro de rede do lado do cliente.",
+        "ERR_NOT_CONFIGURED": "GitHub: Não está configurado corretamente",
+        "ERR_UNKNOWN": "GitHub: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Importado {{issuesLength}} novas issues do git para o backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: Importado issue \"{{issueText}}\" do git para o backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: Issue \"{{issueText}}\" parece ter sido excluído ou fechado no git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Nenhuma atualização necessária",
+        "ISSUE_UPDATE": "GitHub: Dados atualizados para \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Dados atualizados para \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub:  Encontrado tarefa sem dados da issue. Recarregando.",
+        "NEW_COMMENT": "GitHub: Novo comentário para \"{{issueText}}\"",
+        "POLLING": "GitHub: Mudanças de sondagem para problemas",
         "SHOW_ISSUE_BTN": "Mostre-me"
       }
     },
@@ -239,9 +239,9 @@
         "TITLE": "Jira: Enviar log de trabalho"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do Github para o backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do Github como sugestões qando adicionar novas tarefas",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões qando adicionar novas tarefas",
         "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
       },
       "FORM_ADV": {
@@ -450,7 +450,7 @@
       "D_CREATE": {
         "CREATE": "Criar Projeto",
         "EDIT": "Editar Projeto",
-        "SETUP_GIT": "Configurar integração com Github ",
+        "SETUP_GIT": "Configurar integração com GitHub ",
         "SETUP_GITLAB": "Configurar integração com Gitlab ",
         "SETUP_JIRA": "Configurar integração com Jira "
       },
@@ -1000,7 +1000,7 @@
     "DBX_UPLOAD": "Dropbox: Carregar arquivo ...",
     "GDRIVE_DOWNLOAD": "Google Drive: baixar arquivo ...",
     "GDRIVE_UPLOAD": "Google Drive: Carregar arquivo ...",
-    "GITHUB_LOAD_ISSUE": "Github: Carregar dados do problema ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: Carregar dados do problema ...",
     "JIRA_LOAD_ISSUE": "Jira: Carregar dados do problema ...",
     "UNKNOWN": "Carregando dados remotos",
     "WEB_DAV_DOWNLOAD": "WebDAV: Baixando dados ...",
@@ -1084,7 +1084,7 @@
     },
     "EDIT_PROJECT": "Editar Projeto",
     "EXPORT_PROJECT": "Projeto de Exportação",
-    "GITHUB_CONFIGURED": "Integração do Github configurada",
+    "GITHUB_CONFIGURED": "Integração do GitHub configurada",
     "GITLAB_CONFIGURED": "Integração do Gitlab configurada",
     "IMPORT_FROM_FILE": "Importar do arquivo",
     "JIRA_CONFIGURED": "Integração Jira configurada",
