@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: Token de acceso generado a partir del código de autenticación",
         "AUTH_ERROR": "Dropbox: token de acceso no válido proporcionado",
         "OFFLINE": "Dropbox: no se puede sincronizar porque está desconectado",
-        "SYNC_ERROR": "Dropbox: error al sincronizar",
-        "UNKNOWN_ERROR": "Dropbox: error desconocido: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: error al sincronizar"
       }
     },
     "GITHUB": {
@@ -102,7 +101,8 @@
         "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir",
-        "TOKEN": "Token de acceso"
+        "TOKEN": "Token de acceso",
+        "TOKEN_DESCRIPTION": "Requerido para el acceso al repositorio privado"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de GitHub para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace sobre el encabezado principal (solo para escritorio)",
       "IS_MINIMIZE_TO_TRAY": "Minimizar a la bandeja (solo escritorio)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excede el tiempo estimado",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Mostrar la tarea actual en el menú de bandeja / estado (solo escritorio)",
       "IS_TURN_OFF_MARKDOWN": "Desactivar la sintaxis markdown para las notas",
       "TITLE": "Ajustes Variados"
     },

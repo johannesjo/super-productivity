@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: Aus Authentifizierungscode generiertes Zugriffstoken",
         "AUTH_ERROR": "Dropbox: Ungültiges Zugriffstoken bereitgestellt",
         "OFFLINE": "Dropbox: Synchronisierung nicht möglich, da offline",
-        "SYNC_ERROR": "Dropbox: Fehler beim Synchronisieren",
-        "UNKNOWN_ERROR": "Dropbox: Unbekannter Fehler: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: Fehler beim Synchronisieren"
       }
     },
     "GITHUB": {
@@ -102,7 +101,8 @@
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
-        "TOKEN": "Zugangstoken"
+        "TOKEN": "Zugangstoken",
+        "TOKEN_DESCRIPTION": "Erforderlich für den Zugriff auf private Repositories"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GitHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
@@ -551,7 +551,7 @@
         "L_SYNC_PROVIDER": "Anbieter synchronisieren",
         "TITLE": "Sync",
         "WEB_DAV": {
-          "CORS_INFO": "",
+          "CORS_INFO": "<p><strong>Experimental!!</strong> In order <strong>to make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance</strong>, which can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread</a> for more information. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Passwort",
           "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
@@ -942,7 +942,7 @@
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Deskop)",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
       "TITLE": "Verschiedene Einstellungen"
     },

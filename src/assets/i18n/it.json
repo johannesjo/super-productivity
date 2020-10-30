@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: token di accesso generato dal codice di autenticazione",
         "AUTH_ERROR": "Dropbox: token di accesso non valido fornito",
         "OFFLINE": "Dropbox: impossibile sincronizzare, perché offline",
-        "SYNC_ERROR": "Dropbox: errore durante la sincronizzazione",
-        "UNKNOWN_ERROR": "Dropbox: errore sconosciuto: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: errore durante la sincronizzazione"
       }
     },
     "GITHUB": {
@@ -102,7 +101,8 @@
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare",
-        "TOKEN": "Token di accesso"
+        "TOKEN": "Token di accesso",
+        "TOKEN_DESCRIPTION": "Richiesto per l'accesso al repository privato"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione task nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti al backlog dei task.</p>",
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Mostra l'attività corrente nella barra delle applicazioni / menu di stato (solo desktop)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "TITLE": "Impostazioni varie"
     },

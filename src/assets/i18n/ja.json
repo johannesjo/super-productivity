@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox：認証コードから生成されたアクセストークン",
         "AUTH_ERROR": "Dropbox：提供された無効なアクセストークン",
         "OFFLINE": "Dropbox：オフラインのため、同期できません",
-        "SYNC_ERROR": "Dropbox：同期中のエラー",
-        "UNKNOWN_ERROR": "Dropbox：不明なエラー： {{errorStr}}"
+        "SYNC_ERROR": "Dropbox：同期中のエラー"
       }
     },
     "GITHUB": {
@@ -102,7 +101,8 @@
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
         "REPO": "追跡したいgitリポジトリの \"username/repositoryName\"",
-        "TOKEN": "アクセストークン"
+        "TOKEN": "アクセストークン",
+        "TOKEN_DESCRIPTION": "プライベートリポジトリへのアクセスに必要"
       },
       "FORM_SECTION": {
         "HELP": "<p>ここでは、毎日の計画ビューのタスク作成パネルに、特定のリポジトリの未解決のGitHub issueを一覧表示するようにSuperProductivityを設定できます。それらは提案としてリストされ、課題へのリンクとそれに関する詳細情報を提供します。</p> <p>さらに、未解決の課題をすべて自動的にタスクバックログに追加して同期できます。</p>",
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
+      "IS_TRAY_SHOW_CURRENT_TASK": "トレイ/ステータスメニューに現在のタスクを表示する（デスクトップのみ）",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
       "TITLE": "その他の設定"
     },

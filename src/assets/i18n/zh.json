@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox：根据验证码生成的访问令牌",
         "AUTH_ERROR": "Dropbox：提供了无效的访问令牌",
         "OFFLINE": "Dropbox：已离线，无法同步",
-        "SYNC_ERROR": "Dropbox：同步时出错",
-        "UNKNOWN_ERROR": "Dropbox：未知错误： {{errorStr}}"
+        "SYNC_ERROR": "Dropbox：同步时出错"
       }
     },
     "GITHUB": {
@@ -102,7 +101,8 @@
         "IS_AUTO_POLL": "自动拉取导入的git Issue",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将 git 中的 Issue 显示为建议",
         "REPO": "GitHub：“username / repositoryName”",
-        "TOKEN": "访问令牌"
+        "TOKEN": "访问令牌",
+        "TOKEN_DESCRIPTION": "私有存储库访问所需"
       },
       "FORM_SECTION": {
         "HELP": "<p>您可以在此处配置 Super Productivity，以在日常计划视图的任务创建面板中列出特定存储库的打开 GitHub Issue。它们将被列为建议，并将提供该 Issue 的链接以及有关该 Issue 的更多信息。</p> <p>此外，您还可以自动将所有未解决的 Issue 添加并同步到任务待办事项中。</p>",
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
+      "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
       "TITLE": "其他设置"
     },

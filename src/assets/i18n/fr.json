@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: jeton d'accès généré à partir du code d'authentification",
         "AUTH_ERROR": "Dropbox: jeton d'accès non valide fourni",
         "OFFLINE": "Dropbox: impossible de synchroniser, car hors ligne",
-        "SYNC_ERROR": "Dropbox: erreur lors de la synchronisation",
-        "UNKNOWN_ERROR": "Dropbox: erreur inconnue: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: erreur lors de la synchronisation"
       }
     },
     "GITHUB": {
@@ -102,7 +101,8 @@
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
-        "TOKEN": "Jeton d'accès"
+        "TOKEN": "Jeton d'accès",
+        "TOKEN_DESCRIPTION": "Requis pour l'accès au référentiel privé"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les issues GitHub ouvertes pour un repository spécifique dans le panneau de création de tâches de la vue Planification quotidienne. Ils seront listés en tant que suggestions et fourniront un lien vers l'issue, ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez ajouter et synchroniser automatiquement toutes les issues ouvertes dans votre backlog.</p>",
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_MINIMIZE_TO_TRAY": "Réduire dans le bac (bureau uniquement)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Afficher la tâche en cours dans la barre d'état / menu d'état (bureau uniquement)",
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
       "TITLE": "Réglages divers"
     },
