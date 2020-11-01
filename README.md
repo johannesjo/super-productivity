@@ -112,6 +112,12 @@ sudo snap install superproductivity
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
 </a>
 
+#### Arch
+```bash 
+git clone https://aur.archlinux.org/superproductivity-bin.git
+makepkg -si
+```
+
 ### MacOS
 Install via [homebrew cask](https://github.com/caskroom/homebrew-cask):
 ```
