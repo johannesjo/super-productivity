@@ -115,6 +115,7 @@ sudo snap install superproductivity
 #### Arch
 ```bash 
 git clone https://aur.archlinux.org/superproductivity-bin.git
+cd superproductivity-bin
 makepkg -si
 ```
 
