@@ -28,7 +28,7 @@ import {
 } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
-import { Task, TaskWithSubTasks } from '../tasks/task.model';
+import { Task, TaskArchive, TaskWithSubTasks } from '../tasks/task.model';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
@@ -51,6 +51,7 @@ import {
 } from '../tag/store/tag.actions';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 import { isToday } from '../../util/is-today.util';
+import { PersistenceService } from '../../core/persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root',
@@ -228,6 +229,24 @@ export class WorkContextService {
     map(([today, backlog]) => [...today, ...backlog])
   );
 
+  allTasksIncludingArchiveForCurrentContext$: Observable<TaskWithSubTasks[]> = this.allTasksForCurrentContext$.pipe(
+    withLatestFrom(this.activeWorkContextTypeAndId$),
+    switchMap(async ([allTasks, {activeType, activeId}]) => {
+      const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+      const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
+      const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
+      if (activeType === WorkContextType.PROJECT) {
+        return [...allTasks, ...archiveTasks].filter(
+          (task) => ((task as Task).projectId === activeId)
+        ) as Task[];
+      } else {
+        return [...allTasks, ...archiveTasks].filter(
+          (task) => ((task as Task).tagIds.includes(activeId))
+        ) as Task[];
+      }
+    })
+  );
+
   startableTasks$: Observable<Task[]> = combineLatest([
     this.activeWorkContext$,
     this._store$.pipe(
@@ -301,6 +320,7 @@ export class WorkContextService {
     private _store$: Store<WorkContextState>,
     private _actions$: Actions,
     private _tagService: TagService,
+    private _persistenceService: PersistenceService,
     private _router: Router,
   ) {
     this.isToday$.subscribe((v) => this.isToday = v);
@@ -499,7 +519,7 @@ export class WorkContextService {
     const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
       || (t.isDone && (!t.doneOn || isToday((t.doneOn))));
 
-    return this.allNonArchiveTasks$.pipe(
+    return this.allTasksIncludingArchiveForCurrentContext$.pipe(
       map(tasks => {
         let flatTasks: Task[] = [];
         tasks.forEach(pt => {
