@@ -3,19 +3,23 @@ import { TaskService } from '../../features/tasks/task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, Subscription } from 'rxjs';
+import { combineLatest, from, merge, Observable, Subscription } from 'rxjs';
 import { IPC } from '../../../../electron/ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
+import { delay, filter, map, shareReplay, startWith, switchMap, take, withLatestFrom } from 'rxjs/operators';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import * as moment from 'moment';
 import { T } from '../../t.const';
 import { ElectronService } from '../../core/electron/electron.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { Task } from '../../features/tasks/task.model';
+import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { ipcRenderer } from 'electron';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
+import { isToday } from '../../util/is-today.util';
+import { WorklogService } from '../../features/worklog/worklog.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { WorkContextType } from '../../features/work-context/work-context.model';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -28,8 +32,7 @@ const SUCCESS_ANIMATION_DURATION = 500;
 export class DailySummaryComponent implements OnInit, OnDestroy {
   T: typeof T = T;
 
-  cfg: any = {
-  };
+  cfg: any = {};
 
   isTimeSheetExported: boolean = true;
   showSuccessAnimation: boolean = false;
@@ -52,7 +55,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   );
 
   tasksWorkedOnOrDoneOrRepeatableFlat$: Observable<Task[]> = this.dayStr$.pipe(
-    switchMap((dayStr) => this.workContextService.getDailySummaryTasksFlat$(dayStr)),
+    switchMap((dayStr) => this._getDailySummaryTasksFlat$(dayStr)),
     shareReplay(1),
   );
 
@@ -89,6 +92,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _taskService: TaskService,
     private readonly _router: Router,
     private readonly _matDialog: MatDialog,
+    private readonly _persistenceService: PersistenceService,
+    private readonly _worklogService: WorklogService,
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
@@ -195,5 +200,76 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         cb();
       }
     }, SUCCESS_ANIMATION_DURATION);
+  }
+
+  private _getDailySummaryTasksFlat$(dayStr: string): Observable<Task[]> {
+    return combineLatest([
+      this.workContextService.allRepeatableTasksFlat$,
+      this._getDailySummaryTasksFlatWithoutRepeatable$(dayStr)
+    ]).pipe(
+      map(([repeatableTasks, workedOnOrDoneTasks]) => [
+        ...repeatableTasks,
+        // NOTE: remove double tasks
+        ...workedOnOrDoneTasks.filter(
+          (task => !task.repeatCfgId)
+        ),
+      ]),
+    );
+  }
+
+  private _getDailySummaryTasksFlatWithoutRepeatable$(dayStr: string): Observable<Task[]> {
+    const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
+      || (t.isDone && (!t.doneOn || isToday((t.doneOn))));
+
+    const archiveTasks: Observable<TaskWithSubTasks[]> = merge(
+      from(this._persistenceService.taskArchive.loadState()),
+      this._worklogService.archiveUpdateManualTrigger$.pipe(
+        // hacky wait for save
+        delay(70),
+        switchMap(() => this._persistenceService.taskArchive.loadState())
+      )
+    ).pipe(
+      withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
+      switchMap(async ([archiveTaskState, {activeType, activeId}]) => {
+        const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
+        const archiveTasksI = ids.map(id => archiveTaskState.entities[id]);
+        const filteredTasks = (activeType === WorkContextType.PROJECT)
+          ? archiveTasksI.filter(
+            (task) => ((task as Task).projectId === activeId)
+          ) as Task[]
+          : archiveTasksI.filter(
+            (task) => ((task as Task).tagIds.includes(activeId))
+          ) as Task[];
+        return filteredTasks.map(task => task.subTaskIds.length
+          ? ({
+            ...task,
+            subTasks: task.subTaskIds.map(tid => archiveTaskState.entities[tid])
+          })
+          : task) as TaskWithSubTasks[];
+      }),
+    );
+
+    return combineLatest([
+      this.workContextService.allTasksForCurrentContext$,
+      archiveTasks,
+    ]).pipe(
+      map(([t1, t2]) => [...t1, ...t2]),
+      // map((tasks) => tasks.filter(_isWorkedOnOrDoneToday)),
+      map(tasks => {
+        let flatTasks: Task[] = [];
+        tasks.forEach((pt: TaskWithSubTasks) => {
+          if (pt.subTasks && pt.subTasks.length) {
+            const subTasks = pt.subTasks.filter(st => _isWorkedOnOrDoneToday(st));
+            if (subTasks.length) {
+              flatTasks.push(pt);
+              flatTasks = flatTasks.concat(subTasks);
+            }
+          } else if (_isWorkedOnOrDoneToday(pt)) {
+            flatTasks.push(pt);
+          }
+        });
+        return flatTasks;
+      }),
+    );
   }
 }

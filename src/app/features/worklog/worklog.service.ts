@@ -18,11 +18,11 @@ import { WorklogTask } from '../tasks/task.model';
 @Injectable({providedIn: 'root'})
 export class WorklogService {
   // treated as private but needs to be assigned first
-  _archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   _archiveUpdateTrigger$: Observable<any> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => merge(
       // this._workContextService.activeWorkContextOnceOnContextChange$,
-      this._archiveUpdateManualTrigger$,
+      this.archiveUpdateManualTrigger$,
       this._router.events.pipe(
         filter((event: any) => event instanceof NavigationEnd),
         filter(({urlAfterRedirects}: NavigationEnd) =>
@@ -103,7 +103,7 @@ export class WorklogService {
   }
 
   refreshWorklog() {
-    this._archiveUpdateManualTrigger$.next(true);
+    this.archiveUpdateManualTrigger$.next(true);
   }
 
   // TODO this is not waiting for worklog data
