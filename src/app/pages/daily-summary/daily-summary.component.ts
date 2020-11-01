@@ -218,8 +218,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   private _getDailySummaryTasksFlatWithoutRepeatable$(dayStr: string): Observable<Task[]> {
+    // TODO make more performant!!
     const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
-      || (t.isDone && (!t.doneOn || isToday((t.doneOn))));
+      || (t.isDone && t.doneOn && isToday((t.doneOn)));
 
     const archiveTasks: Observable<TaskWithSubTasks[]> = merge(
       from(this._persistenceService.taskArchive.loadState()),
