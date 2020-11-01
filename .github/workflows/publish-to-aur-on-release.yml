@@ -14,11 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - run: PACKAGE_VERSION=$(cat ./package.json | grep version | head -1 | sed 's/[^0-9.]*//g') && echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
+      - run: sed "s/PACKAGE_VERSION/${package_version}/g" build/linux/PKGBUILD | tee build/linux/PKGBUILD
+
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v2.2.3
         with:
           pkgname: superproductivity-bin
-          pkgbuild: ./build/linux/PKGBUILD
+          pkgbuild: build/linux/PKGBUILD
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
