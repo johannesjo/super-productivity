@@ -18,7 +18,7 @@ jobs:
         uses: KSXGitHub/github-actions-deploy-aur@v2.2.3
         with:
           pkgname: superproductivity-bin
-          pkgbuild: ./linux/PKGBUILD
+          pkgbuild: ./build/linux/PKGBUILD
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
