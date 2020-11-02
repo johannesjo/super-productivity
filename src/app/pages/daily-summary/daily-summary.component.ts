@@ -239,7 +239,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
             (task) => ((task as Task).projectId === activeId)
           ) as Task[]
           : archiveTasksI.filter(
-            (task) => ((task as Task).tagIds.includes(activeId))
+            (task) => !!(task as Task).parentId
+              ? (archiveTaskState.entities[(task as Task).parentId as string] as Task).tagIds.includes(activeId)
+              : (task as Task).tagIds.includes(activeId)
           ) as Task[];
         return filteredTasks.map(task => task.subTaskIds.length
           ? ({
