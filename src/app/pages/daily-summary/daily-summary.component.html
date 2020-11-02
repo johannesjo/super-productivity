@@ -1,10 +1,10 @@
+<div class="pyro">
+  <div class="before"></div>
+  <div class="after"></div>
+</div>
+
 <task-additional-info-wrapper [isAlwaysOver]="true">
   <div class="page-wrapper">
-    <div class="pyro">
-      <div class="before"></div>
-      <div class="after"></div>
-    </div>
-
     <div *ngIf="isForToday"
          style="text-align: center;">
       <a class="back-btn"
@@ -76,14 +76,22 @@
       : (T.PDS.TASK_LIST|translate)">
         <section class="tab-inner">
 
+
+          <ng-container *ngIf="(tasksWorkedOnOrDoneOrRepeatableFlat$|async) as tasks; else loading">
+            <task-summary-tables *ngIf="tasks?.length; else noTasks"
+                                 [flatTasks]="tasks"
+                                 [isForToday]="isForToday"
+                                 [dayStr]="dayStr"></task-summary-tables>
+          </ng-container>
+
+          <ng-template #loading>
+            <mat-spinner style="margin: auto;"></mat-spinner>
+          </ng-template>
+
           <ng-template #noTasks>
             <p>{{T.PDS.NO_TASKS|translate}}</p>
           </ng-template>
 
-          <task-summary-tables *ngIf="(hasTasksForToday$|async); else noTasks"
-                               [flatTasks]="tasksWorkedOnOrDoneOrRepeatableFlat$|async"
-                               [isForToday]="isForToday"
-                               [dayStr]="dayStr"></task-summary-tables>
         </section>
       </mat-tab>
 
