@@ -244,7 +244,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
             : (task as Task).tagIds.includes(activeId)
         ) as Task[];
       }
-      return filteredTasks.map(task => task.subTaskIds.length
+      // return filteredTasks;
+      // to order sub tasks after their parents
+      return filteredTasks
+        .filter(task => !task.parentId)
+        .map(task => task.subTaskIds.length
         ? ({
           ...task,
           subTasks: task.subTaskIds
@@ -252,6 +256,22 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
             .filter(t => t)
         })
         : task) as TaskWithSubTasks[];
+    };
+
+    const _mapFilterToFlatToday = (tasks: TaskWithSubTasks[]): Task[] => {
+      let flatTasks: Task[] = [];
+      tasks.forEach((pt: TaskWithSubTasks) => {
+        if (pt.subTasks && pt.subTasks.length) {
+          const subTasks = pt.subTasks.filter(st => _isWorkedOnOrDoneToday(st));
+          if (subTasks.length) {
+            flatTasks.push(pt);
+            flatTasks = flatTasks.concat(subTasks);
+          }
+        } else if (_isWorkedOnOrDoneToday(pt)) {
+          flatTasks.push(pt);
+        }
+      });
+      return flatTasks;
     };
 
     const archiveTasks: Observable<TaskWithSubTasks[]> = merge(
@@ -264,34 +284,20 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     ).pipe(
       withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
       map(_mapEntities),
+      map(_mapFilterToFlatToday),
     );
 
     const todayTasks: Observable<TaskWithSubTasks[]> = this._taskService.taskFeatureState$.pipe(
       withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
       map(_mapEntities),
+      map(_mapFilterToFlatToday),
     );
 
     return combineLatest([
       todayTasks,
       archiveTasks,
     ]).pipe(
-      map(([t1, t2]) => [...t1, ...t2]),
-      // map((tasks) => tasks.filter(_isWorkedOnOrDoneToday)),
-      map(tasks => {
-        let flatTasks: Task[] = [];
-        tasks.forEach((pt: TaskWithSubTasks) => {
-          if (pt.subTasks && pt.subTasks.length) {
-            const subTasks = pt.subTasks.filter(st => _isWorkedOnOrDoneToday(st));
-            if (subTasks.length) {
-              flatTasks.push(pt);
-              flatTasks = flatTasks.concat(subTasks);
-            }
-          } else if (_isWorkedOnOrDoneToday(pt)) {
-            flatTasks.push(pt);
-          }
-        });
-        return flatTasks;
-      }),
+      map(([t1, t2]) => t1.concat(t2)),
     );
   }
 }
