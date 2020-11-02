@@ -20,6 +20,8 @@ import { isToday } from '../../util/is-today.util';
 import { WorklogService } from '../../features/worklog/worklog.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
+import { EntityState } from '@ngrx/entity';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -222,6 +224,36 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
       || (t.isDone && t.doneOn && isToday((t.doneOn)));
 
+    const _mapEntities = ([taskState, {activeType, activeId}]: [EntityState<Task>, {
+      activeId: string;
+      activeType: WorkContextType;
+    }]): TaskWithSubTasks[] => {
+      const ids = taskState && taskState.ids as string[] || [];
+      const archiveTasksI = ids.map(id => taskState.entities[id]);
+      let filteredTasks;
+      if (activeId === TODAY_TAG.id) {
+        filteredTasks = archiveTasksI as Task[];
+      } else if (activeType === WorkContextType.PROJECT) {
+        filteredTasks = archiveTasksI.filter(
+          (task) => ((task as Task).projectId === activeId)
+        ) as Task[];
+      } else {
+        filteredTasks = archiveTasksI.filter(
+          (task) => !!(task as Task).parentId
+            ? (taskState.entities[(task as Task).parentId as string] as Task).tagIds.includes(activeId)
+            : (task as Task).tagIds.includes(activeId)
+        ) as Task[];
+      }
+      return filteredTasks.map(task => task.subTaskIds.length
+        ? ({
+          ...task,
+          subTasks: task.subTaskIds
+            .map(tid => taskState.entities[tid])
+            .filter(t => t)
+        })
+        : task) as TaskWithSubTasks[];
+    };
+
     const archiveTasks: Observable<TaskWithSubTasks[]> = merge(
       from(this._persistenceService.taskArchive.loadState()),
       this._worklogService.archiveUpdateManualTrigger$.pipe(
@@ -231,29 +263,16 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       )
     ).pipe(
       withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
-      switchMap(async ([archiveTaskState, {activeType, activeId}]) => {
-        const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
-        const archiveTasksI = ids.map(id => archiveTaskState.entities[id]);
-        const filteredTasks = (activeType === WorkContextType.PROJECT)
-          ? archiveTasksI.filter(
-            (task) => ((task as Task).projectId === activeId)
-          ) as Task[]
-          : archiveTasksI.filter(
-            (task) => !!(task as Task).parentId
-              ? (archiveTaskState.entities[(task as Task).parentId as string] as Task).tagIds.includes(activeId)
-              : (task as Task).tagIds.includes(activeId)
-          ) as Task[];
-        return filteredTasks.map(task => task.subTaskIds.length
-          ? ({
-            ...task,
-            subTasks: task.subTaskIds.map(tid => archiveTaskState.entities[tid])
-          })
-          : task) as TaskWithSubTasks[];
-      }),
+      map(_mapEntities),
+    );
+
+    const todayTasks: Observable<TaskWithSubTasks[]> = this._taskService.taskFeatureState$.pipe(
+      withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
+      map(_mapEntities),
     );
 
     return combineLatest([
-      this.workContextService.allTasksForCurrentContext$,
+      todayTasks,
       archiveTasks,
     ]).pipe(
       map(([t1, t2]) => [...t1, ...t2]),
