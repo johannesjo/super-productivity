@@ -1,0 +1,113 @@
+{
+  "defaultSeverity": "warning",
+  "plugins": [
+    "stylelint-value-no-unknown-custom-properties",
+    "stylelint-declaration-use-variable",
+    "stylelint-scss"
+  ],
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-recommended-scss"
+  ],
+  "rules": {
+    "csstools/value-no-unknown-custom-properties": [true, {
+      "importFrom": [
+        "src/_variables.scss"
+      ]
+    }],
+    "sh-waqar/declaration-use-variable": [
+      [
+        "/color/",
+        {
+          "ignoreValues": [
+            "transparent",
+            "inherit"
+          ]
+        }
+      ]
+    ],
+    "custom-property-empty-line-before": "never",
+    "block-closing-brace-empty-line-before": "never",
+    "property-case": "lower",
+    "color-no-invalid-hex": true,
+    "color-hex-case": "lower",
+    "color-hex-length": "short",
+    "selector-pseudo-element-case": "lower",
+    "selector-type-case": "lower",
+    "selector-pseudo-class-parentheses-space-inside": "never",
+    "function-parentheses-space-inside": "never",
+    "function-comma-newline-after": "never-multi-line",
+    "function-name-case": "lower",
+    "function-max-empty-lines": 0,
+    "max-empty-lines": 1,
+    "unit-case": "lower",
+    "selector-pseudo-class-case": "lower",
+    "value-keyword-case": "lower",
+    "selector-attribute-brackets-space-inside": "never",
+    "selector-attribute-quotes": "always",
+    "selector-combinator-space-after": "always",
+    "selector-combinator-space-before": "always",
+    "selector-descendant-combinator-no-non-space": true,
+    "comment-whitespace-inside": "always",
+    "indentation": 2,
+    "linebreaks": "unix",
+    "selector-max-specificity": "0,4,4",
+    "block-no-empty": true,
+    "declaration-colon-newline-after": null,
+    "declaration-empty-line-before": "never",
+    "number-leading-zero": "never",
+    "number-no-trailing-zeros": true,
+    "value-list-comma-newline-after": "never-multi-line",
+    "selector-list-comma-newline-after": "always",
+    "declaration-colon-space-before": "never",
+    "declaration-block-trailing-semicolon": "always",
+    "no-eol-whitespace": true,
+    "no-empty-first-line": true,
+    "no-missing-end-of-source-newline": true,
+    "block-opening-brace-newline-after": "always",
+    "block-closing-brace-newline-after": "always-multi-line",
+    "rule-empty-line-before": null,
+    "string-quotes": null,
+    "media-feature-colon-space-after": "always",
+    "media-feature-colon-space-before": "never",
+    "media-feature-parentheses-space-inside": "never",
+    "media-feature-range-operator-space-after": "always",
+    "media-feature-range-operator-space-before": "always",
+    "media-query-list-comma-newline-after": "never-multi-line",
+    "media-feature-name-case": "lower",
+    "font-family-no-missing-generic-family-keyword": true,
+    "font-family-name-quotes": "always-where-required",
+    "at-rule-empty-line-before": null,
+    "at-rule-name-newline-after": null,
+    "at-rule-semicolon-newline-after": null,
+    "at-rule-semicolon-space-before": "never",
+    "at-rule-name-space-after": "always",
+    "at-rule-name-case": "lower",
+    "function-url-quotes": "always",
+    "unit-no-unknown": true,
+    "property-no-unknown": true,
+    "no-duplicate-selectors": true,
+    "no-extra-semicolons": true,
+    "length-zero-no-unit": true,
+    "font-weight-notation": "numeric",
+    "number-max-precision": 3,
+    "selector-max-class": 4,
+    "selector-max-combinators": 3,
+    "selector-max-compound-selectors": 4,
+    "selector-max-pseudo-class": 2,
+    "selector-max-universal": 1,
+    "selector-no-vendor-prefix": true,
+    "selector-no-qualifying-type": null,
+    "max-nesting-depth": [ 3, { "ignore": ["blockless-at-rules", "pseudo-classes"] } ],
+    "declaration-block-no-duplicate-properties": true,
+    "no-unknown-animations": true,
+    "selector-pseudo-element-colon-notation": "double",
+    "shorthand-property-no-redundant-values": true,
+    "declaration-block-single-line-max-declarations": 1,
+    "declaration-property-unit-allowed-list": [{
+      "font-size": ["rem", "em", "px"],
+      "/^animation/": ["ms", "s"],
+      "line-height": ["px", "%", ""]
+    }]
+  }
+}
