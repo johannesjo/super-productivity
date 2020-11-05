@@ -46,6 +46,12 @@ export class DropboxApiService {
 
     return this._request({
       method: 'GET',
+      // circumvent:
+      // https://github.com/angular/angular/issues/37133
+      // https://github.com/johannesjo/super-productivity/issues/645
+      // params: {
+      //   'ngsw-bypass': 'true'
+      // },
       url: 'https://content.dropboxapi.com/2/files/download',
       headers: {
         'Dropbox-API-Arg': JSON.stringify({path}),
@@ -114,10 +120,9 @@ export class DropboxApiService {
   }): Promise<AxiosResponse> {
     await this._isReady$.toPromise();
     accessToken = accessToken || await this._accessToken$.pipe(first()).toPromise() || undefined;
-
     return axios.request({
       url: params
-        ? url + stringify(params)
+        ? `${url}?${stringify(params)}`
         : url,
       method,
       data,
