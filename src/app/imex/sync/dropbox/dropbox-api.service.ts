@@ -46,12 +46,6 @@ export class DropboxApiService {
 
     return this._request({
       method: 'GET',
-      // circumvent:
-      // https://github.com/angular/angular/issues/37133
-      // https://github.com/johannesjo/super-productivity/issues/645
-      // params: {
-      //   'ngsw-bypass': 'true'
-      // },
       url: 'https://content.dropboxapi.com/2/files/download',
       headers: {
         'Dropbox-API-Arg': JSON.stringify({path}),
@@ -59,7 +53,11 @@ export class DropboxApiService {
         // useful due to our pre meta checks and because data often changes after
         // we're checking it.
         // If it messes up => Check service worker!
-        ...(localRev ? {'If-None-Match': localRev} : {})
+        ...(localRev ? {'If-None-Match': localRev} : {}),
+        // circumvent:
+        // https://github.com/angular/angular/issues/37133
+        // https://github.com/johannesjo/super-productivity/issues/645
+        // 'ngsw-bypass': true
       },
     }).then((res) => {
       const meta = JSON.parse(res.headers['dropbox-api-result']);
@@ -110,7 +108,7 @@ export class DropboxApiService {
     }).then((res) => res.data);
   }
 
-  async _request({url, method = 'GET', data, headers = {}, params = {}, accessToken}: {
+  async _request({url, method = 'GET', data, headers = {}, params, accessToken}: {
     url: string;
     method?: Method;
     headers?: { [key: string]: any },
@@ -121,7 +119,7 @@ export class DropboxApiService {
     await this._isReady$.toPromise();
     accessToken = accessToken || await this._accessToken$.pipe(first()).toPromise() || undefined;
     return axios.request({
-      url: params
+      url: (params && Object.keys(params).length)
         ? `${url}?${stringify(params)}`
         : url,
       method,
