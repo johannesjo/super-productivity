@@ -78,12 +78,16 @@ function initListeners() {
         const suf = nativeTheme.shouldUseDarkColors
           ? '-d'
           : '-l';
-        const progress = currentTask.timeSpent / currentTask.timeEstimate;
-        const f = Math.min(Math.round(progress * 15), 15);
-        const t = DIR + `running-anim${suf}/${f || 0}@2x.png`;
-
         tray.setTitle(msg);
-        tray.setImage(t);
+        if (typeof currentTask.timeEstimate === 'number' && currentTask.timeEstimate > 0) {
+          const progress = currentTask.timeSpent / currentTask.timeEstimate;
+          const f = Math.min(Math.round(progress * 15), 15);
+          const t = DIR + `running-anim${suf}/${f || 0}.png`;
+          tray.setImage(t);
+        } else {
+          const t = DIR + `running${suf}.png`;
+          tray.setImage(t);
+        }
       } else {
         tray.setTitle('');
         const suf = nativeTheme.shouldUseDarkColors
