@@ -71,9 +71,31 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     map(tasks => tasks && tasks.length),
   );
 
-  estimatedOnTasksWorkedOn$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeEstimateForDay$(dayStr)));
+  estimatedOnTasksWorkedOn$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
+    withLatestFrom(this.dayStr$),
+    map(([tasks, dayStr]: [Task[], string]): number => tasks?.length && tasks.reduce((acc, task) => {
+        if (!task.timeSpentOnDay && !(task.timeSpentOnDay[dayStr] > 0)) {
+          return acc;
+        }
+        const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[dayStr]) - task.timeSpent;
+        return (remainingEstimate > 0)
+          ? acc + remainingEstimate
+          : acc;
+      }, 0
+    )),
+  );
 
-  timeWorked$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getTimeWorkedForDay$(dayStr)));
+  timeWorked$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
+    withLatestFrom(this.dayStr$),
+    map(([tasks, dayStr]: [Task[], string]): number => tasks?.length && tasks.reduce((acc, task) => {
+        return acc + (
+          (task.timeSpentOnDay && +task.timeSpentOnDay[dayStr])
+            ? +task.timeSpentOnDay[dayStr]
+            : 0
+        );
+      }, 0
+    )),
+  );
 
   started$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkStart$(dayStr)));
   end$: Observable<number> = this.dayStr$.pipe(switchMap((dayStr) => this.workContextService.getWorkEnd$(dayStr)));

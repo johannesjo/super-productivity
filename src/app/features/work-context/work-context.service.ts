@@ -353,25 +353,6 @@ export class WorkContextService {
     );
   }
 
-  // TODO could be done better
-  getTimeEstimateForDay$(day: string = getWorklogStr()): Observable<number> {
-    return this.todaysTasks$.pipe(
-      map((tasks) => {
-        return tasks && tasks.length && tasks.reduce((acc, task) => {
-            if (!task.timeSpentOnDay && !(task.timeSpentOnDay[day] > 0)) {
-              return acc;
-            }
-            const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[day]) - task.timeSpent;
-            return (remainingEstimate > 0)
-              ? acc + remainingEstimate
-              : acc;
-          }, 0
-        );
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
   getWorkStart$(day: string = getWorklogStr()): Observable<number> {
     return this.activeWorkContext$.pipe(
       map(ctx => ctx.workStart[day]),
