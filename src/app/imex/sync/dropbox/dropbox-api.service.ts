@@ -45,7 +45,7 @@ export class DropboxApiService {
     await this._isReady$.toPromise();
 
     return this._request({
-      method: 'GET',
+      method: 'POST',
       url: 'https://content.dropboxapi.com/2/files/download',
       headers: {
         'Dropbox-API-Arg': JSON.stringify({path}),
