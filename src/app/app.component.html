@@ -9,9 +9,7 @@
   <div *ngIf="(layoutService.isShowAddTaskBar$|async)"
        @fade
        class="backdrop"></div>
-
   <mat-sidenav-container
-    [style.background]="'url(' + (globalThemeService.backgroundImg$|async) + ')'"
     [dir]="isRTL ? 'rtl' : 'ltr'">
     <mat-sidenav (closedStart)="layoutService.hideSideNav()"
                  [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
@@ -27,6 +25,9 @@
     </mat-sidenav>
 
     <mat-sidenav-content>
+      <div class="bg-image"
+           *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
+           [style.background]="'url(' + bgImage + ')'"></div>
       <header [class.isNotScrolled]="!(layoutService.isScrolled$|async)"
               class="header-wrapper">
         <main-header></main-header>
