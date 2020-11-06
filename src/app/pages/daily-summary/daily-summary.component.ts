@@ -205,21 +205,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   private _getDailySummaryTasksFlat$(dayStr: string): Observable<Task[]> {
-    return combineLatest([
-      this.workContextService.allRepeatableTasksFlat$,
-      this._getDailySummaryTasksFlatWithoutRepeatable$(dayStr)
-    ]).pipe(
-      map(([repeatableTasks, workedOnOrDoneTasks]) => [
-        ...repeatableTasks,
-        // NOTE: remove double tasks
-        ...workedOnOrDoneTasks.filter(
-          (task => !task.repeatCfgId)
-        ),
-      ]),
-    );
-  }
-
-  private _getDailySummaryTasksFlatWithoutRepeatable$(dayStr: string): Observable<Task[]> {
     // TODO make more performant!!
     const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
       || (t.isDone && t.doneOn && isToday((t.doneOn)));
@@ -249,13 +234,13 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       return filteredTasks
         .filter(task => !task.parentId)
         .map(task => task.subTaskIds.length
-        ? ({
-          ...task,
-          subTasks: task.subTaskIds
-            .map(tid => taskState.entities[tid])
-            .filter(t => t)
-        })
-        : task) as TaskWithSubTasks[];
+          ? ({
+            ...task,
+            subTasks: task.subTaskIds
+              .map(tid => taskState.entities[tid])
+              .filter(t => t)
+          })
+          : task) as TaskWithSubTasks[];
     };
 
     const _mapFilterToFlatToday = (tasks: TaskWithSubTasks[]): Task[] => {
@@ -268,6 +253,22 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
             flatTasks = flatTasks.concat(subTasks);
           }
         } else if (_isWorkedOnOrDoneToday(pt)) {
+          flatTasks.push(pt);
+        }
+      });
+      return flatTasks;
+    };
+
+    const _mapFilterToFlatOrRepeatToday = (tasks: TaskWithSubTasks[]): Task[] => {
+      let flatTasks: Task[] = [];
+      tasks.forEach((pt: TaskWithSubTasks) => {
+        if (pt.subTasks && pt.subTasks.length) {
+          const subTasks = pt.subTasks.filter(st => _isWorkedOnOrDoneToday(st));
+          if (subTasks.length) {
+            flatTasks.push(pt);
+            flatTasks = flatTasks.concat(subTasks);
+          }
+        } else if (_isWorkedOnOrDoneToday(pt) || pt.repeatCfgId) {
           flatTasks.push(pt);
         }
       });
@@ -290,7 +291,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     const todayTasks: Observable<TaskWithSubTasks[]> = this._taskService.taskFeatureState$.pipe(
       withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
       map(_mapEntities),
-      map(_mapFilterToFlatToday),
+      map(_mapFilterToFlatOrRepeatToday),
     );
 
     return combineLatest([

@@ -267,15 +267,15 @@ export class WorkContextService {
     distinctUntilChanged(),
   );
 
-  allNonArchiveTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
-    this.todaysTasks$,
-    this.backlogTasks$
-  ]).pipe(
-    map(([today, backlog]) => ([
-      ...today,
-      ...backlog
-    ]))
-  );
+  // allNonArchiveTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
+  //   this.todaysTasks$,
+  //   this.backlogTasks$
+  // ]).pipe(
+  //   map(([today, backlog]) => ([
+  //     ...today,
+  //     ...backlog
+  //   ]))
+  // );
 
   flatDoneTodayNr$: Observable<number> = this.todaysTasks$.pipe(
     map(tasks => flattenTasks(tasks)),
@@ -283,11 +283,6 @@ export class WorkContextService {
       const done = tasks.filter(task => task.isDone);
       return done.length;
     })
-  );
-
-  allRepeatableTasksFlat$: Observable<TaskWithSubTasks[]> = this.allNonArchiveTasks$.pipe(
-    map((tasks) => (tasks.filter(task => !!task.repeatCfgId))),
-    map(tasks => flattenTasks(tasks)),
   );
 
   isToday: boolean = false;
