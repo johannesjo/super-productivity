@@ -90,6 +90,10 @@ bookmark-bar {
   flex-direction: column;
 }
 
+mat-sidenav-container.mat-sidenav-container {
+  background: transparent;
+}
+
 mat-sidenav,
 mat-sidenav-container {
   height: 100%;
