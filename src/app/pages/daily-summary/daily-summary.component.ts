@@ -74,7 +74,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   estimatedOnTasksWorkedOn$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
     withLatestFrom(this.dayStr$),
     map(([tasks, dayStr]: [Task[], string]): number => tasks?.length && tasks.reduce((acc, task) => {
-        if (!task.timeSpentOnDay && !(task.timeSpentOnDay[dayStr] > 0)) {
+        if (task.subTaskIds.length || (!task.timeSpentOnDay && !(task.timeSpentOnDay[dayStr] > 0))) {
           return acc;
         }
         const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[dayStr]) - task.timeSpent;
@@ -88,6 +88,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   timeWorked$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
     withLatestFrom(this.dayStr$),
     map(([tasks, dayStr]: [Task[], string]): number => tasks?.length && tasks.reduce((acc, task) => {
+        if (task.subTaskIds.length) {
+          return acc;
+        }
         return acc + (
           (task.timeSpentOnDay && +task.timeSpentOnDay[dayStr])
             ? +task.timeSpentOnDay[dayStr]
