@@ -1,3 +1,12 @@
+# [6.1.0-1](https://github.com/johannesjo/super-productivity/compare/v6.1.0-0...v6.1.0-1) (2020-11-07)
+
+
+### Bug Fixes
+
+* **allTasksForSummary:** calculation of timeEstimate & timeSpent ([4a85cf1](https://github.com/johannesjo/super-productivity/commit/4a85cf1aadcbb8e016755d0f116462dd46473882))
+
+
+
 # [6.1.0-0](https://github.com/johannesjo/super-productivity/compare/v6.0.1...v6.1.0-0) (2020-11-07)
 
 
