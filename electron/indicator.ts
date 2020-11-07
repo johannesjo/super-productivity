@@ -107,29 +107,28 @@ function initListeners() {
   // });
 }
 
-function createIndicatorStr(task) {
+function createIndicatorStr(task): string {
   if (task && task.title) {
     let title = task.title;
-    let timeStr = '';
-    let msg;
-
-    if (title.length > 50) {
-      title = title.substring(0, 47) + '...';
+    // let timeStr = '';
+    // let msg;
+    if (title.length > 40) {
+      title = title.substring(0, 37) + '...';
     }
+    return title;
 
-    // TODO replace with our format helpers once we have ts support
-    if (task.timeSpent) {
-      const timeSpentAsMinutes = Math.round(task.timeSpent / 60 / 1000);
-      timeStr += timeSpentAsMinutes.toString();
-    }
-    const timeEstimateAsMin = Math.round(task.timeEstimate / 60 / 1000);
-
-    if (task.timeEstimate && timeEstimateAsMin > 0) {
-      timeStr += '/' + timeEstimateAsMin;
-    }
-
-    msg = title + ' | ' + timeStr + 'm ';
-    return msg;
+    // if (task.timeSpent) {
+    //   const timeSpentAsMinutes = Math.round(task.timeSpent / 60 / 1000);
+    //   timeStr += timeSpentAsMinutes.toString();
+    // }
+    // const timeEstimateAsMin = Math.round(task.timeEstimate / 60 / 1000);
+    //
+    // if (task.timeEstimate && timeEstimateAsMin > 0) {
+    //   timeStr += '/' + timeEstimateAsMin;
+    // }
+    //
+    // msg = title + ' | ' + timeStr + 'm ';
+    // return msg;
   }
 }
 
