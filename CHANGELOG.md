@@ -1,3 +1,13 @@
+# [6.1.0-2](https://github.com/johannesjo/super-productivity/compare/v6.1.0-1...v6.1.0-2) (2020-11-08)
+
+
+### Bug Fixes
+
+* **jira:** attachment length error for older versions of jira [#652](https://github.com/johannesjo/super-productivity/issues/652) ([7671395](https://github.com/johannesjo/super-productivity/commit/767139540742bb4d394363d448af0b16ebdc17e0))
+* **noteReminder:** simply remove owl calendar for now from datetime input [#654](https://github.com/johannesjo/super-productivity/issues/654) ([231c59f](https://github.com/johannesjo/super-productivity/commit/231c59f72fa3f6fcb3bfadcbfb058a27c273b8cc))
+
+
+
 # [6.1.0-1](https://github.com/johannesjo/super-productivity/compare/v6.1.0-0...v6.1.0-1) (2020-11-07)
 
 
