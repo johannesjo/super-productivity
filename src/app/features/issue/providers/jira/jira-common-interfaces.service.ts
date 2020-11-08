@@ -86,7 +86,8 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
           title: `${issue.key} ${issue.summary}`,
           issueLastUpdated: newUpdated,
           issueWasUpdated: wasUpdated,
-          issueAttachmentNr: issue.attachments.length,
+          // circumvent errors for old jira versions #652
+          issueAttachmentNr: issue.attachments?.length,
           issuePoints: issue.storyPoints
         },
         issue,
