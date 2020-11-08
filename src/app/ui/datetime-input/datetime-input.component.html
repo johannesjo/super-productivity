@@ -10,15 +10,9 @@
            type="datetime-local">
     <input (ngModelChange)="updateFromInput($event)"
            [ngModel]="strValue"
-           [owlDateTime]="dt1"
            class="fake">
     <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
-    <mat-icon [owlDateTimeTrigger]="dt1"
-              matSuffix=""
-              style="cursor: pointer;">alarm
-    </mat-icon>
   </mat-form-field>
-  <owl-date-time #dt1></owl-date-time>
 
   <mat-chip-list>
     <mat-chip (click)="setCommonVal('15M')">{{T.DATETIME_INPUT.IN|translate:{time: '15m'} }}</mat-chip>
