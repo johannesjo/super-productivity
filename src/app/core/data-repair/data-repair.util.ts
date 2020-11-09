@@ -23,6 +23,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
   // dataOut = _setProjectIdAccordingToParent(dataOut);
   dataOut = _fixInconsistentProjectId(dataOut);
+  dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
 
   // console.timeEnd('dataRepair');
@@ -246,7 +247,6 @@ const _removeNonExistentProjectIds = (data: AppDataComplete): AppDataComplete =>
 };
 
 const _fixInconsistentProjectId = (data: AppDataComplete): AppDataComplete => {
-
   const projectIds: string[] = data.project.ids as string[];
   projectIds
     .map(id => data.project.entities[id])
@@ -267,6 +267,29 @@ const _fixInconsistentProjectId = (data: AppDataComplete): AppDataComplete => {
               // if the task has no project id at all, then move it to the project
               (task as TaskCopy).projectId = projectItem.id;
             }
+          }
+        });
+      }
+    );
+
+  return data;
+};
+
+const _fixInconsistentTagId = (data: AppDataComplete): AppDataComplete => {
+  const tagIds: string[] = data.tag.ids as string[];
+  tagIds
+    .map(id => data.tag.entities[id])
+    .forEach(tagItem => {
+        if (!tagItem) {
+          console.log(data.tag);
+          throw new Error('No tag');
+        }
+        tagItem.taskIds.forEach(tid => {
+          const task = data.task.entities[tid];
+          if (!task) {
+            throw new Error('No task found');
+          } else if (!task?.tagIds.includes(tagItem.id)) {
+            (task as TaskCopy).tagIds = [...task.tagIds, tagItem.id];
           }
         });
       }

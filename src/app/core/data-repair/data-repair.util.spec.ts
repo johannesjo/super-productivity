@@ -8,6 +8,7 @@ import { Tag, TagState } from '../../features/tag/tag.model';
 import { ProjectState } from '../../features/project/store/project.reducer';
 import { Project } from '../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
+import { DEFAULT_TAG } from '../../features/tag/tag.const';
 
 describe('dataRepair()', () => {
   let mock: AppDataComplete;
@@ -631,7 +632,6 @@ describe('dataRepair()', () => {
     });
   });
 
-
   it('should move to project if task has no projectId', () => {
     const project = {
       ...mock.project,
@@ -672,6 +672,51 @@ describe('dataRepair()', () => {
           ...DEFAULT_TASK,
           id: 't2',
           projectId: 'p1'
+        }])
+      } as any,
+    });
+  });
+
+  it('should add tagId to task if listed, but task does not contain it', () => {
+    const tag = {
+      ...mock.tag,
+      ...fakeEntityStateFromArray<Tag>([{
+        ...DEFAULT_TAG,
+        id: 'tag1',
+        taskIds: ['task1', 'task2']
+      }])
+    } as any;
+
+    const task = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'task1',
+        tagIds: ['tag1']
+      }, {
+        ...DEFAULT_TASK,
+        id: 'task2',
+        tagIds: []
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      tag,
+      task,
+    })).toEqual({
+      ...mock,
+      tag,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'task1',
+          tagIds: ['tag1']
+        }, {
+          ...DEFAULT_TASK,
+          id: 'task2',
+          tagIds: ['tag1']
         }])
       } as any,
     });
