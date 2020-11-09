@@ -1,0 +1,72 @@
+/* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity, selector-max-combinators, selector-max-compound-selectors */
+
+body,
+body.isDarkTheme,
+body.isLightTheme,
+body.isDarkTheme.isDisableBackgroundGradient,
+body.isLightTheme.isDisableBackgroundGradient,
+body.isMac.isEnabledBackgroundGradient,
+body.isWeb.isEnabledBackgroundGradient,
+body.isEnabledBackgroundGradient,
+body.isDisableBackgroundGradient {
+  // Body background
+  color: var(--color-foreground);
+  background: var(--color-background-main);
+
+  // Element text colors
+  .mat-drawer-container,
+  button {
+    color: var(--color-foreground);
+  }
+
+  // Reset background gradient
+  &::before {
+    display: none;
+  }
+
+  // Top banner
+  .mat-drawer-content .content-wrapper {
+    background: var(--color-background-banner);
+    color: var(--color-foreground);
+    border-color: var(--color-border-panels);
+  }
+
+  // Panels on settings
+  .page-settings.page-wrapper .section-wrapper .config-section {
+    background: var(--color-background-panels);
+    border-color: var(--color-border-panels);
+
+    // Settings header
+    .collapsible-header {
+      border-color: var(--color-border-panels);
+    }
+
+    // Buttons and help indicators
+    .mat-flat-button,
+    .mat-raised-button,
+    .mat-fab,
+    .mat-mini-fab {
+      background-color: var(--color-background-setting-buttons);
+      color: var(--color-foreground);
+    }
+
+    // Little labels above setting
+    .mat-form-field-appearance-legacy .mat-form-field-label {
+      color: var(--color-foreground);
+    }
+
+    // Unchecked checkbox
+    .mat-checkbox-frame {
+      border-color: var(--color-foreground);
+    }
+  }
+
+  // Accented radio buttons and such
+  .mat-slide-toggle-bar {
+    background: var(--color-background-slide-toggle-bar-disabled);
+  }
+
+  .mat-checkbox-checked .mat-checkbox-background {
+    background: var(--color-accent);
+  }
+}

@@ -1,3 +1,4 @@
+// Angular components
 @import "_variables";
 @import "styles/themes";
 @import "styles/font/material-icons";
@@ -5,5 +6,9 @@
 @import "styles/util";
 @import "styles/components/components";
 
-// New styles
-@import "styles/general"
+// General style improvements
+@import "styles/general";
+
+// Full UI themes
+@import "styles/ui-themes/dark-base/index";
+@import "styles/ui-themes/dracula/index";

@@ -10,9 +10,10 @@
     "stylelint-config-recommended-scss"
   ],
   "rules": {
-    "csstools/value-no-unknown-custom-properties": [true, {
+    "csstools/value-no-unknown-custom-properties": [false, {
       "importFrom": [
-        "src/_variables.scss"
+        "src/ui-themes/dark-base/helpers/_variables.scss",
+        "src/ui-themes/dracula/helpers/_variables.scss"
       ]
     }],
     "sh-waqar/declaration-use-variable": [
@@ -49,6 +50,7 @@
     "selector-combinator-space-before": "always",
     "selector-descendant-combinator-no-non-space": true,
     "comment-whitespace-inside": "always",
+    "no-descending-specificity": null,
     "indentation": 2,
     "linebreaks": "unix",
     "selector-max-specificity": "0,4,4",

@@ -1,0 +1,28 @@
+/* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity */
+
+// General side nav styles
+body,
+body.isDarkTheme,
+body.isLightTheme,
+body.isDarkTheme.isDisableBackgroundGradient,
+body.isLightTheme.isDisableBackgroundGradient,
+body.isMac.isEnabledBackgroundGradient,
+body.isWeb.isEnabledBackgroundGradient,
+body.isEnabledBackgroundGradient,
+body.isDisableBackgroundGradient {
+
+  // Sidebar
+  .mat-drawer,
+  .mat-drawer-container,
+  .mat-drawer-container.mat-sidenav-container .mat-drawer.mat-sidenav .mat-drawer-inner-container {
+    background: var(--color-background-sidebar);
+    color: var(--color-foreground);
+  }
+
+  // Foreground for elements
+  button,
+  .mat-menu-item .mat-icon-no-color,
+  .mat-menu-item-submenu-trigger::after {
+    color: var(--color-foreground);
+  }
+}
