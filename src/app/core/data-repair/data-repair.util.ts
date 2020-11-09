@@ -21,9 +21,9 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
-  // dataOut = _setProjectIdAccordingToParent(dataOut);
   dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _fixInconsistentTagId(dataOut);
+  dataOut = _setTaskProjectIdAccordingToParent(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
 
   // console.timeEnd('dataRepair');
@@ -308,6 +308,54 @@ const _fixInconsistentTagId = (data: AppDataComplete): AppDataComplete => {
         });
       }
     );
+
+  return data;
+};
+
+const _setTaskProjectIdAccordingToParent = (data: AppDataComplete): AppDataComplete => {
+  const taskIds: string[] = data.task.ids as string[];
+  taskIds
+    .map(id => data.task.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.task);
+        throw new Error('No task');
+      }
+      if (taskItem.subTaskIds) {
+        const parentProjectId = taskItem.projectId;
+        taskItem.subTaskIds.forEach((stid) => {
+          const subTask = data.task.entities[stid];
+          if (!subTask) {
+            throw new Error('Task data not found');
+          }
+          if (subTask.projectId !== parentProjectId) {
+            (subTask as TaskCopy).projectId = parentProjectId;
+          }
+        });
+      }
+    });
+
+  const archiveTaskIds: string[] = data.taskArchive.ids as string[];
+  archiveTaskIds
+    .map(id => data.taskArchive.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.taskArchive);
+        throw new Error('No archive task');
+      }
+      if (taskItem.subTaskIds) {
+        const parentProjectId = taskItem.projectId;
+        taskItem.subTaskIds.forEach((stid) => {
+          const subTask = data.taskArchive.entities[stid];
+          if (!subTask) {
+            throw new Error('Archived Task data not found');
+          }
+          if (subTask.projectId !== parentProjectId) {
+            (subTask as TaskCopy).projectId = parentProjectId;
+          }
+        });
+      }
+    });
 
   return data;
 };

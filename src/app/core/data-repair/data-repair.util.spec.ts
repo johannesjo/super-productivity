@@ -527,6 +527,72 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should assign task projectId according to parent', () => {
+    const project = {
+      ...mock.project,
+      ...fakeEntityStateFromArray<Project>([{
+        ...DEFAULT_PROJECT,
+        id: 'p1',
+      }])
+    } as any;
+
+    const taskStateBefore = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'subTask1',
+        title: 'subTask1',
+        projectId: null,
+        parentId: 'parent',
+      }, {
+        ...DEFAULT_TASK,
+        id: 'subTask2',
+        title: 'subTask2',
+        projectId: null,
+        parentId: 'parent',
+      }, {
+        ...DEFAULT_TASK,
+        id: 'parent',
+        title: 'parent',
+        parentId: null,
+        projectId: 'p1',
+        subTaskIds: ['subTask1', 'subTask2'],
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      project,
+      task: taskStateBefore,
+    })).toEqual({
+      ...mock,
+      project,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'subTask1',
+          title: 'subTask1',
+          parentId: 'parent',
+          projectId: 'p1',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'subTask2',
+          title: 'subTask2',
+          parentId: 'parent',
+          projectId: 'p1',
+        }, {
+          ...DEFAULT_TASK,
+          id: 'parent',
+          title: 'parent',
+          parentId: null,
+          subTaskIds: ['subTask1', 'subTask2'],
+          projectId: 'p1',
+        }])
+      } as any,
+    });
+  });
+
   it('should delete non-existent project ids for tasks in "task"', () => {
     const taskState = {
       ...mock.task,
