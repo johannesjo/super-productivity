@@ -21,6 +21,8 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
+  // dataOut = _setProjectIdAccordingToParent(dataOut);
+  dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
 
   // console.timeEnd('dataRepair');
@@ -239,6 +241,36 @@ const _removeNonExistentProjectIds = (data: AppDataComplete): AppDataComplete =>
       t.projectId = null;
     }
   });
+
+  return data;
+};
+
+const _fixInconsistentProjectId = (data: AppDataComplete): AppDataComplete => {
+
+  const projectIds: string[] = data.project.ids as string[];
+  projectIds
+    .map(id => data.project.entities[id])
+    .forEach(projectItem => {
+        if (!projectItem) {
+          console.log(data.project);
+          throw new Error('No project');
+        }
+        projectItem.taskIds.forEach(tid => {
+          const task = data.task.entities[tid];
+          if (!task) {
+            throw new Error('No task found');
+          } else if (task?.projectId !== projectItem.id) {
+            // if the task has another projectId leave it there and remove from list
+            if (task.projectId) {
+              (projectItem as ProjectCopy).taskIds = projectItem.taskIds.filter(cid => cid !== task.id);
+            } else {
+              // if the task has no project id at all, then move it to the project
+              (task as TaskCopy).projectId = projectItem.id;
+            }
+          }
+        });
+      }
+    );
 
   return data;
 };

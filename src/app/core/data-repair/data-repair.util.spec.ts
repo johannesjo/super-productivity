@@ -7,6 +7,7 @@ import { createEmptyEntity } from '../../util/create-empty-entity';
 import { Tag, TagState } from '../../features/tag/tag.model';
 import { ProjectState } from '../../features/project/store/project.reducer';
 import { Project } from '../../features/project/project.model';
+import { DEFAULT_PROJECT } from '../../features/project/project.const';
 
 describe('dataRepair()', () => {
   let mock: AppDataComplete;
@@ -581,4 +582,98 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should remove from project list if task has wrong project id', () => {
+    const project = {
+      ...mock.project,
+      ...fakeEntityStateFromArray<Project>([{
+        ...DEFAULT_PROJECT,
+        id: 'p1',
+        taskIds: ['t1', 't2']
+      }, {
+        ...DEFAULT_PROJECT,
+        id: 'p2',
+        taskIds: ['t1']
+      }])
+    } as any;
+
+    const task = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 't1',
+        projectId: 'p1'
+      }, {
+        ...DEFAULT_TASK,
+        id: 't2',
+        projectId: 'p1'
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      project,
+      task,
+    })).toEqual({
+      ...mock,
+      project: {
+        ...project,
+        ...fakeEntityStateFromArray<Project>([{
+          ...DEFAULT_PROJECT,
+          id: 'p1',
+          taskIds: ['t1', 't2']
+        }, {
+          ...DEFAULT_PROJECT,
+          id: 'p2',
+          taskIds: []
+        }])
+      },
+      task,
+    });
+  });
+
+
+  it('should move to project if task has no projectId', () => {
+    const project = {
+      ...mock.project,
+      ...fakeEntityStateFromArray<Project>([{
+        ...DEFAULT_PROJECT,
+        id: 'p1',
+        taskIds: ['t1', 't2']
+      }])
+    } as any;
+
+    const task = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 't1',
+        projectId: 'p1'
+      }, {
+        ...DEFAULT_TASK,
+        id: 't2',
+        projectId: null
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      project,
+      task,
+    })).toEqual({
+      ...mock,
+      project,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: 'p1'
+        }, {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: 'p1'
+        }])
+      } as any,
+    });
+  });
 });
