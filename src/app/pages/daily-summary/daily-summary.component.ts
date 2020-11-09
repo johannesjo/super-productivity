@@ -16,7 +16,7 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { ipcRenderer } from 'electron';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
-import { isToday } from '../../util/is-today.util';
+import { isToday, isYesterday } from '../../util/is-today.util';
 import { WorklogService } from '../../features/worklog/worklog.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
@@ -24,6 +24,7 @@ import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
+const MAGIC_YESTERDAY_MARGIN = 5 * 60 * 60 * 1000;
 
 @Component({
   selector: 'daily-summary',
@@ -230,9 +231,27 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   private _getDailySummaryTasksFlat$(dayStr: string): Observable<Task[]> {
+
     // TODO make more performant!!
-    const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
-      || (t.isDone && t.doneOn && isToday((t.doneOn)));
+    const _isWorkedOnOrDoneToday = (() => {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const isIncludeYesterday = (Date.now() - todayStart.getTime()) <= MAGIC_YESTERDAY_MARGIN;
+
+      if (isIncludeYesterday) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = getWorklogStr(yesterday);
+
+        return (t: Task) =>
+          (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
+          || (t.timeSpentOnDay && t.timeSpentOnDay[yesterdayStr] && t.timeSpentOnDay[yesterdayStr] > 0)
+          || (t.isDone && t.doneOn && (isToday(t.doneOn) || isYesterday(t.doneOn)));
+      } else {
+        return (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
+          || (t.isDone && t.doneOn && isToday((t.doneOn)));
+      }
+    })();
 
     const _mapEntities = ([taskState, {activeType, activeId}]: [EntityState<Task>, {
       activeId: string;
