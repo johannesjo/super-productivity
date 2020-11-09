@@ -24,7 +24,7 @@ import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
-const MAGIC_YESTERDAY_MARGIN = 5 * 60 * 60 * 1000;
+const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
 
 @Component({
   selector: 'daily-summary',
@@ -114,6 +114,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   // calc time spent on todays tasks today
   private _subs: Subscription = new Subscription();
 
+  private readonly _isIncludeYesterday: boolean;
+
   constructor(
     public readonly configService: GlobalConfigService,
     public readonly workContextService: WorkContextService,
@@ -128,6 +130,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _syncProviderService: SyncProviderService,
   ) {
     this._taskService.setSelectedId(null);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    this._isIncludeYesterday = (Date.now() - todayStart.getTime()) <= MAGIC_YESTERDAY_MARGIN;
   }
 
   ngOnInit() {
@@ -234,11 +239,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
     // TODO make more performant!!
     const _isWorkedOnOrDoneToday = (() => {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const isIncludeYesterday = (Date.now() - todayStart.getTime()) <= MAGIC_YESTERDAY_MARGIN;
-
-      if (isIncludeYesterday) {
+      if (this._isIncludeYesterday) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = getWorklogStr(yesterday);
