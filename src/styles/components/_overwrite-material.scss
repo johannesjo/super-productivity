@@ -6,6 +6,8 @@ body .mat-dialog-content {
 .big {
   height: auto;
   max-height: 100vh !important;
+  // mobile viewport bug fix
+  max-height: -webkit-fill-available;
   width: 100% !important;
   max-width: none !important;
   @include mq(xs) {

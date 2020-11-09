@@ -71,6 +71,8 @@ bookmark-bar {
   width: 40vw;
   max-width: 700px;
   min-height: 100vh;
+  // mobile viewport bug fix
+  min-height: -webkit-fill-available;
 
   .mat-drawer-over & {
     width: 80vw;
