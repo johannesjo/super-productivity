@@ -677,6 +677,51 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should move to project if backlogTask has no projectId', () => {
+    const project = {
+      ...mock.project,
+      ...fakeEntityStateFromArray<Project>([{
+        ...DEFAULT_PROJECT,
+        id: 'p1',
+        backlogTaskIds: ['t1', 't2']
+      }])
+    } as any;
+
+    const task = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 't1',
+        projectId: 'p1'
+      }, {
+        ...DEFAULT_TASK,
+        id: 't2',
+        projectId: null
+      }])
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      project,
+      task,
+    })).toEqual({
+      ...mock,
+      project,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: 'p1'
+        }, {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: 'p1'
+        }])
+      } as any,
+    });
+  });
+
   it('should add tagId to task if listed, but task does not contain it', () => {
     const tag = {
       ...mock.tag,
