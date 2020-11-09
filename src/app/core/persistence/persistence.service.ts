@@ -271,7 +271,7 @@ export class PersistenceService {
       ? la
       : +(la as string);
 
-    if (laParsed === null) {
+    if (laParsed === null || laParsed === 0) {
       return null;
     }
 
