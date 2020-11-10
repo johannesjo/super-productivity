@@ -99,6 +99,7 @@ const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean =
             devError('Missing task data (tid: ' + tid + ') for Project ' + project.title);
           } else if (task?.projectId !== project.id) {
             isInconsistentProjectId = true;
+            console.log({task});
             devError('Inconsistent task projectId');
           }
         });
