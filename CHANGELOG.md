@@ -1,3 +1,18 @@
+# [6.1.0-5](https://github.com/johannesjo/super-productivity/compare/v6.1.0-4...v6.1.0-5) (2020-11-10)
+
+
+### Bug Fixes
+
+* task not found race condition error [#651](https://github.com/johannesjo/super-productivity/issues/651) ([15fb93c](https://github.com/johannesjo/super-productivity/commit/15fb93c53e0575ae2c7408b99be3c04ae078fd54))
+
+
+### Features
+
+* add better error handling [#653](https://github.com/johannesjo/super-productivity/issues/653) ([eebfd55](https://github.com/johannesjo/super-productivity/commit/eebfd55d64907754cf3d2013a7422912ca721d99))
+* **autoRepair:** auto remove missing sub tasks for their parents ([7060588](https://github.com/johannesjo/super-productivity/commit/706058845f835cd6786bd259b16ddcebd29e5f6a))
+
+
+
 # [6.1.0-4](https://github.com/johannesjo/super-productivity/compare/v6.1.0-3...v6.1.0-4) (2020-11-10)
 
 
