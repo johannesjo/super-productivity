@@ -1,3 +1,27 @@
+# [6.1.0-3](https://github.com/johannesjo/super-productivity/compare/v6.1.0-2...v6.1.0-3) (2020-11-10)
+
+
+### Bug Fixes
+
+* error when creating task when there is no default project [#624](https://github.com/johannesjo/super-productivity/issues/624) ([742d581](https://github.com/johannesjo/super-productivity/commit/742d581170d3503c18189be4d5b6a7cd3d5fdc47))
+* **webApp:** full height for sidebar [#657](https://github.com/johannesjo/super-productivity/issues/657) ([c489dde](https://github.com/johannesjo/super-productivity/commit/c489ddeda60b52e0a5fdeaec4bb83e6390762e00))
+* remove unneccssary autofix scripts [#651](https://github.com/johannesjo/super-productivity/issues/651) ([9e95252](https://github.com/johannesjo/super-productivity/commit/9e952529dfe8156c5044c061663216a15878b3a3))
+
+
+### Features
+
+* **autoRepair:** autofix inconsistent projectId [#651](https://github.com/johannesjo/super-productivity/issues/651) ([bae18bb](https://github.com/johannesjo/super-productivity/commit/bae18bbceafbe5aca2caaa1be082b396f967af93))
+* **autoRepair:** autofix missing projectId for backlogTasks [#651](https://github.com/johannesjo/super-productivity/issues/651) ([88e4575](https://github.com/johannesjo/super-productivity/commit/88e45756c73ffb56c26e82ac630226cbb0dbd880))
+* **autoRepair:** autofix missing tagId for task [#651](https://github.com/johannesjo/super-productivity/issues/651) ([fdef18e](https://github.com/johannesjo/super-productivity/commit/fdef18e7541ff1cc2c166d78dc4f1e734a1dc930))
+* **autoRepair:** set projectId according to their parent [#651](https://github.com/johannesjo/super-productivity/issues/651) ([280ac10](https://github.com/johannesjo/super-productivity/commit/280ac1064c68b4ac25dc5bfc8c7a67cda76760d5))
+* **dailySummary:** make include yesterday work ([5fe17a7](https://github.com/johannesjo/super-productivity/commit/5fe17a7e67fc516258ea839a940cd0f884330752))
+* **dataCheck:** add check for inconsistent projectId and missing data [#651](https://github.com/johannesjo/super-productivity/issues/651) ([70cb3f3](https://github.com/johannesjo/super-productivity/commit/70cb3f38fd48e6c1cb2071a0b1a27b6e450c8af1))
+* **log:** add for shortSyntax ([19f9f94](https://github.com/johannesjo/super-productivity/commit/19f9f9440e57a1922fdf20277d699eb31e978d45))
+* add action logging for production ([b793950](https://github.com/johannesjo/super-productivity/commit/b793950444d7e0e70d0bf69dddab9a91514e9c3c))
+* improve local backup check [#637](https://github.com/johannesjo/super-productivity/issues/637) ([865c3f4](https://github.com/johannesjo/super-productivity/commit/865c3f4ccefdbfa1176786af3dd7ca32bbe0a766))
+
+
+
 # [6.1.0-2](https://github.com/johannesjo/super-productivity/compare/v6.1.0-1...v6.1.0-2) (2020-11-08)
 
 
