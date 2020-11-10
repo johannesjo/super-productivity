@@ -21,6 +21,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
+  dataOut = _cleanupOrphanedSubTasks(dataOut);
   dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
@@ -354,6 +355,54 @@ const _setTaskProjectIdAccordingToParent = (data: AppDataComplete): AppDataCompl
             (subTask as TaskCopy).projectId = parentProjectId;
           }
         });
+      }
+    });
+
+  return data;
+};
+
+const _cleanupOrphanedSubTasks = (data: AppDataComplete): AppDataComplete => {
+  const taskIds: string[] = data.task.ids as string[];
+  taskIds
+    .map(id => data.task.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.task);
+        throw new Error('No task');
+      }
+
+      if (taskItem.subTaskIds.length) {
+        let i = taskItem.subTaskIds.length - 1;
+        while (i >= 0) {
+          const sid = taskItem.subTaskIds[i];
+          if (!data.task.entities[sid]) {
+            console.log('Delete orphaned sub task for ', taskItem);
+            taskItem.subTaskIds.splice(i, 1);
+          }
+          i -= 1;
+        }
+      }
+    });
+
+  const archiveTaskIds: string[] = data.taskArchive.ids as string[];
+  archiveTaskIds
+    .map(id => data.taskArchive.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.taskArchive);
+        throw new Error('No archive task');
+      }
+
+      if (taskItem.subTaskIds.length) {
+        let i = taskItem.subTaskIds.length - 1;
+        while (i >= 0) {
+          const sid = taskItem.subTaskIds[i];
+          if (!data.taskArchive.entities[sid]) {
+            console.log('Delete orphaned archive sub task for ', taskItem);
+            taskItem.subTaskIds.splice(i, 1);
+          }
+          i -= 1;
+        }
       }
     });
 

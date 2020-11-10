@@ -241,8 +241,8 @@ describe('dataRepair()', () => {
         task: {
           ids: ['AAA, XXX', 'YYY'],
           entities: {
-            AAA: {},
-            CCC: {},
+            AAA: {...DEFAULT_TASK, id: 'AAA'},
+            CCC: {...DEFAULT_TASK, id: 'CCC'},
           }
         } as any,
       })).toEqual({
@@ -250,8 +250,8 @@ describe('dataRepair()', () => {
         task: {
           ids: ['AAA', 'CCC'],
           entities: {
-            AAA: {},
-            CCC: {},
+            AAA: {...DEFAULT_TASK, id: 'AAA'},
+            CCC: {...DEFAULT_TASK, id: 'CCC'},
           }
         } as any,
       });
@@ -262,8 +262,8 @@ describe('dataRepair()', () => {
         taskArchive: {
           ids: ['AAA, XXX', 'YYY'],
           entities: {
-            AAA: {},
-            CCC: {},
+            AAA: {...DEFAULT_TASK, id: 'AAA'},
+            CCC: {...DEFAULT_TASK, id: 'CCC'},
           }
         } as any,
       })).toEqual({
@@ -271,8 +271,8 @@ describe('dataRepair()', () => {
         taskArchive: {
           ids: ['AAA', 'CCC'],
           entities: {
-            AAA: {},
-            CCC: {},
+            AAA: {...DEFAULT_TASK, id: 'AAA'},
+            CCC: {...DEFAULT_TASK, id: 'CCC'},
           }
         } as any,
       });
@@ -830,6 +830,66 @@ describe('dataRepair()', () => {
           tagIds: ['tag1']
         }])
       } as any,
+    });
+  });
+
+  it('should cleanup orphaned sub tasks', () => {
+    const task = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'task1',
+        subTaskIds: ['s1', 's2GONE']
+      }, {
+        ...DEFAULT_TASK,
+        id: 's1',
+        parentId: 'task1',
+      }]),
+    } as any;
+
+    const taskArchive = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'archiveTask1',
+        subTaskIds: ['as1', 'as2GONE']
+      }, {
+        ...DEFAULT_TASK,
+        id: 'as1',
+        parentId: 'archiveTask1',
+      }]),
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      task,
+      taskArchive,
+    })).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'task1',
+          subTaskIds: ['s1']
+        }, {
+          ...DEFAULT_TASK,
+          id: 's1',
+          parentId: 'task1',
+        }]),
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'archiveTask1',
+          subTaskIds: ['as1']
+        }, {
+          ...DEFAULT_TASK,
+          id: 'as1',
+          parentId: 'archiveTask1',
+        }]),
+      } as any
     });
   });
 });
