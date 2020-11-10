@@ -447,6 +447,10 @@ export class TaskService {
 
     if (workContextType === WorkContextType.PROJECT) {
       task$.subscribe(task => {
+        if (!task) {
+          console.log({taskId, workContextType, workContextId, activeWCId: this._workContextService.activeWorkContextId});
+          throw new Error('Startable task not found');
+        }
         if (task.parentId) {
           this.moveToToday(task.parentId, true);
         } else {
