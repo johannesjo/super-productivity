@@ -50,6 +50,7 @@ import {
   updateWorkStartForTag
 } from '../tag/store/tag.actions';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -238,10 +239,11 @@ export class WorkContextService {
       activeContext.taskIds.forEach(id => {
         const task: Task | undefined = entities[id];
         if (!task) {
-          throw new Error('Task not found');
-        }
-
-        if (task.subTaskIds && task.subTaskIds.length) {
+          // NOTE: there is the rare chance that activeWorkContext$ and selectTaskEntities
+          // are out of sync, due to activeWorkContext taking an extra step, this is why we
+          // only use devError
+          devError('Task not found');
+        } else if (task.subTaskIds && task.subTaskIds.length) {
           startableTasks = startableTasks.concat(task.subTaskIds.map(sid => entities[sid] as Task));
         } else {
           startableTasks.push(task);
