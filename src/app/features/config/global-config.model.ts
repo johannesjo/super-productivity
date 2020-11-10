@@ -15,7 +15,8 @@ export type MiscConfig = Readonly<{
   isMinimizeToTray: boolean;
   isTrayShowCurrentTask: boolean;
   isDisableInitialDialog: boolean;
-  defaultProjectId: string | null;
+  // allow also false because of #569
+  defaultProjectId: string | null | false;
   firstDayOfWeek: number;
 }>;
 

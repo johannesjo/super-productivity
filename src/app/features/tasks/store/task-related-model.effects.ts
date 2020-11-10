@@ -118,7 +118,7 @@ export class TaskRelatedModelEffects {
     concatMap((act: AddTask) => this._globalConfigService.misc$.pipe(
       first(),
       // error handling
-      switchMap((miscConfig) => (miscConfig.defaultProjectId
+      switchMap((miscConfig) => (!!(miscConfig.defaultProjectId)
         ? this._projectService.getByIdOnce$(miscConfig.defaultProjectId).pipe(
           tap((project) => {
             if (!project) {
