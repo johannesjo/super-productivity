@@ -1,3 +1,12 @@
+# [6.1.0-4](https://github.com/johannesjo/super-productivity/compare/v6.1.0-3...v6.1.0-4) (2020-11-10)
+
+
+### Bug Fixes
+
+* error when creating task when there is no default project for existing settings [#624](https://github.com/johannesjo/super-productivity/issues/624) ([f0ebd29](https://github.com/johannesjo/super-productivity/commit/f0ebd29f9e10b2536f03dd3fd2ac50882ee2dda3))
+
+
+
 # [6.1.0-3](https://github.com/johannesjo/super-productivity/compare/v6.1.0-2...v6.1.0-3) (2020-11-10)
 
 
