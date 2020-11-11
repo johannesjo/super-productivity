@@ -81,6 +81,7 @@
             <task-summary-tables *ngIf="tasks?.length; else noTasks"
                                  [flatTasks]="tasks"
                                  [isForToday]="isForToday"
+                                 [isShowYesterday]="isForToday && isIncludeYesterday"
                                  [dayStr]="dayStr"></task-summary-tables>
           </ng-container>
 

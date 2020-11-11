@@ -37,6 +37,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   cfg: any = {};
 
+  readonly isIncludeYesterday: boolean;
   isTimeSheetExported: boolean = true;
   showSuccessAnimation: boolean = false;
   selectedTabIndex: number = 0;
@@ -114,8 +115,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   // calc time spent on todays tasks today
   private _subs: Subscription = new Subscription();
 
-  private readonly _isIncludeYesterday: boolean;
-
   constructor(
     public readonly configService: GlobalConfigService,
     public readonly workContextService: WorkContextService,
@@ -132,7 +131,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._taskService.setSelectedId(null);
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-    this._isIncludeYesterday = (Date.now() - todayStart.getTime()) <= MAGIC_YESTERDAY_MARGIN;
+    this.isIncludeYesterday = (Date.now() - todayStart.getTime()) <= MAGIC_YESTERDAY_MARGIN;
   }
 
   ngOnInit() {
@@ -239,7 +238,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
     // TODO make more performant!!
     const _isWorkedOnOrDoneToday = (() => {
-      if (this._isIncludeYesterday) {
+      if (this.isIncludeYesterday) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = getWorklogStr(yesterday);

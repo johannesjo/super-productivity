@@ -844,7 +844,8 @@
     "TITLE": "Title",
     "UNDO": "Undo",
     "UPDATE": "Update",
-    "WITHOUT_PROJECT": "Without Project"
+    "WITHOUT_PROJECT": "Without Project",
+    "YESTERDAY": "Yesterday"
   },
   "GCF": {
     "AUTO_BACKUPS": {
