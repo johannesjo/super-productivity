@@ -1,3 +1,13 @@
+# [6.1.0-6](https://github.com/johannesjo/super-productivity/compare/v6.1.0-5...v6.1.0-6) (2020-11-11)
+
+
+### Features
+
+* **dailySummary:** also show project total for yesterdays tasks ([05be64b](https://github.com/johannesjo/super-productivity/commit/05be64b7cefa95d7088b80d260808277080bc444))
+* improve logging ([772ef5d](https://github.com/johannesjo/super-productivity/commit/772ef5ddd5d27afaca58fe7e281b4ea53448f12a))
+
+
+
 # [6.1.0-5](https://github.com/johannesjo/super-productivity/compare/v6.1.0-4...v6.1.0-5) (2020-11-10)
 
 
