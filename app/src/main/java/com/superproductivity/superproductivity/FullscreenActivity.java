@@ -106,7 +106,9 @@ public class FullscreenActivity extends AppCompatActivity {
 
             wSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
-            jsi = new JavaScriptInterface(this, wv);
+            boolean IS_DEBUG = 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE);
+
+            jsi = new JavaScriptInterface(this, wv, IS_DEBUG);
             wv.addJavascriptInterface(jsi, "SUPAndroid");
 
             if (BuildConfig.FLAVOR.equals("fdroid")) {
@@ -114,7 +116,7 @@ public class FullscreenActivity extends AppCompatActivity {
             }
 
             // needs to come last for some settings to take effect
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT && 0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+            if (IS_DEBUG) {
                 wv.loadUrl("https://test-app.super-productivity.com");
                 //                wv.loadUrl("http://10.0.2.2:4200");
             } else {

@@ -15,14 +15,22 @@ import org.json.JSONException;
 
 public class Google {
     static final int RC_SIGN_IN = 1337;
+    private final String TOKEN;
 
-    private String CLIENT_ID_WEB = "37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com";
+
+    Google(boolean isDebug) {
+        if (isDebug) {
+            TOKEN = GoogleClientId.CLIENT_ID_WEB_PROD;
+        } else {
+            TOKEN = GoogleClientId.CLIENT_ID_WEB_DEBUG;
+        }
+    }
+
     private GoogleSignInClient googleSignInClient;
 
     GoogleSignInClient load(AppCompatActivity ctxIn) {
-
         GoogleSignInOptions.Builder googleSignInBuilder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(CLIENT_ID_WEB)
+                .requestIdToken(TOKEN)
                 .requestEmail();
 
         try {
