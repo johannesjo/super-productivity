@@ -14,6 +14,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -117,10 +118,11 @@ public class FullscreenActivity extends AppCompatActivity {
 
             // needs to come last for some settings to take effect
             if (IS_DEBUG) {
-                wv.loadUrl("https://test-app.super-productivity.com");
-//                wv.loadUrl("http://10.0.2.2:4200");
-//                wv.loadUrl("https://app.super-productivity.com");
-
+                String url = "https://test-app.super-productivity.com";
+//                String url = "http://10.0.2.2:4200";
+//                String url = "https://app.super-productivity.com";
+                wv.loadUrl(url);
+                Toast.makeText(this, "DEBUG: " + url, Toast.LENGTH_SHORT).show();
             } else {
                 wv.loadUrl("https://app.super-productivity.com");
                 //                wv.loadUrl("https://test-app.super-productivity.com");
