@@ -37,7 +37,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         Log.v("TW", "onCreate");
         if (savedInstanceState == null) {
-            Log.v("TW", "onCreate reeeeeeeeeeeeeeeeeekload");
+            Log.v("TW", "onCreate reeeeeeeeeeeeeeeeeeload");
             // hide action bar
             getSupportActionBar().hide();
 
@@ -118,8 +118,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
             // needs to come last for some settings to take effect
             if (IS_DEBUG) {
-                String url = "https://test-app.super-productivity.com";
-//                String url = "http://10.0.2.2:4200";
+//                String url = "https://test-app.super-productivity.com";
+                String url = "http://10.0.2.2:4200/#/config";
 //                String url = "https://app.super-productivity.com";
                 wv.loadUrl(url);
                 Toast.makeText(this, "DEBUG: " + url, Toast.LENGTH_SHORT).show();

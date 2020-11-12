@@ -12,6 +12,7 @@ import com.google.android.gms.common.api.Scope;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import android.util.Log;
 
 public class Google {
     static final int RC_SIGN_IN = 1337;
@@ -20,9 +21,9 @@ public class Google {
 
     Google(boolean isDebug) {
         if (isDebug) {
-            TOKEN = GoogleClientId.CLIENT_ID_PROD;
-        } else {
             TOKEN = GoogleClientId.CLIENT_ID_DEBUG;
+        } else {
+            TOKEN = GoogleClientId.CLIENT_ID_PROD;
         }
     }
 
@@ -44,6 +45,7 @@ public class Google {
             }
             googleSignInBuilder.requestScopes(firstScope, scopes);
         } catch (JSONException e) {
+            Log.v("GL_ERR", e.toString());
             e.printStackTrace();
         }
 
