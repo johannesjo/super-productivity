@@ -3,10 +3,12 @@ import { DBSchema, IDBPTransaction, openDB } from 'idb';
 import { IDBPDatabase } from 'idb/build/esm/entry';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
+import { devError } from '../../util/dev-error';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
 const VERSION = 2;
+const MAX_RETRY_COUNT = 3;
 
 interface MyDb extends DBSchema {
   [DB_MAIN_NAME]: any;
@@ -20,6 +22,8 @@ interface MyDb extends DBSchema {
 export class DatabaseService {
   db?: IDBPDatabase<MyDb>;
   isReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  private _retryCount: number = 0;
 
   private _afterReady$: Observable<boolean> = this.isReady$.pipe(
     filter(isReady => isReady),
@@ -56,7 +60,7 @@ export class DatabaseService {
     return await (this.db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
   }
 
-  private async _init() {
+  private async _init(): Promise<IDBPDatabase<MyDb>> {
     try {
       this.db = await openDB<MyDb>(DB_NAME, VERSION, {
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
@@ -77,6 +81,13 @@ export class DatabaseService {
     } catch (e) {
       console.error('Database initialization failed');
       console.error('_lastParams', this._lastParams);
+      devError('IndexedDB Error ' + this._retryCount);
+      if (this._retryCount < MAX_RETRY_COUNT) {
+        this._retryCount++;
+        console.error(e);
+        return this._init();
+      }
+
       alert('IndexedDB Error');
       throw new Error(e);
     }
