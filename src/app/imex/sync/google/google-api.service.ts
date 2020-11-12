@@ -103,7 +103,6 @@ export class GoogleApiService {
       });
     } else if (IS_ANDROID_WEB_VIEW) {
       return androidInterface.getGoogleToken().then((token) => {
-        console.log(token);
         this._saveToken({
           access_token: token,
           // TODO check if we can get a real value if existant
@@ -199,7 +198,7 @@ export class GoogleApiService {
   }
 
   // NOTE: file will always be returned as text (makes sense)
-  loadFile$(fileId: string | null): Observable<{backup: string|undefined, meta: GoogleDriveFileMeta}> {
+  loadFile$(fileId: string | null): Observable<{ backup: string | undefined, meta: GoogleDriveFileMeta }> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
@@ -390,7 +389,7 @@ export class GoogleApiService {
       concatMap((session) => {
         const isRefreshNecessary = !session.accessToken || this._isTokenExpired(session);
         if (isRefreshNecessary) {
-          return this.login(true);
+          return from(this.login(true));
         } else {
           return of(true);
         }
@@ -442,6 +441,9 @@ export class GoogleApiService {
             this._handleError('No response body');
           } else if (res && res.status === 401) {
             this._handleUnAuthenticated(res);
+            return throwError({
+              [HANDLED_ERROR_PROP_STR]: 'Auth Error ' + res.status + ': ' + res.message
+            });
           } else if (res && (res.status >= 300)) {
             this._handleError(res);
           } else if (res && (res.status >= 0)) {

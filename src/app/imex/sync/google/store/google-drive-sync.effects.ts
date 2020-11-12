@@ -163,6 +163,9 @@ export class GoogleDriveSyncEffects {
     if (err?.error?.message) {
       return err.error.message;
     }
+    if (err && err[HANDLED_ERROR_PROP_STR]) {
+      return err[HANDLED_ERROR_PROP_STR];
+    }
     return err.toString();
   }
 }
