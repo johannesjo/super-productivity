@@ -20,9 +20,9 @@ public class Google {
 
     Google(boolean isDebug) {
         if (isDebug) {
-            TOKEN = GoogleClientId.CLIENT_ID_WEB_PROD;
+            TOKEN = GoogleClientId.CLIENT_ID_PROD;
         } else {
-            TOKEN = GoogleClientId.CLIENT_ID_WEB_DEBUG;
+            TOKEN = GoogleClientId.CLIENT_ID_DEBUG;
         }
     }
 
