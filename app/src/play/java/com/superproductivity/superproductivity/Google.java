@@ -21,9 +21,9 @@ public class Google {
 
     Google(boolean isDebug) {
         if (isDebug) {
-            TOKEN = GoogleClientId.CLIENT_ID_DEBUG;
+            TOKEN = GoogleClientId.CLIENT_ID_WEB;
         } else {
-            TOKEN = GoogleClientId.CLIENT_ID_PROD;
+            TOKEN = GoogleClientId.CLIENT_ID_WEB;
         }
     }
 
@@ -33,6 +33,7 @@ public class Google {
         GoogleSignInOptions.Builder googleSignInBuilder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(TOKEN)
                 .requestEmail();
+        // TODO check if email is needed
 
         try {
             JSONArray scopeArray = new JSONArray();
