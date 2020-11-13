@@ -1,0 +1,57 @@
+/* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity, selector-max-combinators, selector-max-compound-selectors */
+
+body,
+body.isDarkTheme,
+body.isLightTheme,
+body.isDarkTheme.isDisableBackgroundGradient,
+body.isLightTheme.isDisableBackgroundGradient,
+body.isMac.isEnabledBackgroundGradient,
+body.isWeb.isEnabledBackgroundGradient,
+body.isEnabledBackgroundGradient,
+body.isDisableBackgroundGradient {
+  // Little labels above setting
+  .mat-form-field-appearance-legacy .mat-form-field-label {
+    color: var(--color-foreground);
+  }
+
+  // Settings header
+  .collapsible-header {
+    border-color: var(--color-border-panels);
+  }
+
+  // Buttons and help indicators
+  .mat-flat-button,
+  .mat-raised-button,
+  .mat-fab,
+  .mat-mini-fab {
+    background-color: var(--color-background-setting-buttons);
+    color: var(--color-foreground);
+  }
+
+  // Unchecked checkbox
+  .mat-checkbox-frame {
+    border-color: var(--color-foreground);
+  }
+
+  // Focus colors
+  *:focus {
+    // Override too specific styles
+    border-color: var(--color-accent) !important;
+
+    .input-item {
+      // Override too specific styles
+      border-color: var(--color-accent) !important;
+    }
+  }
+
+  // Input item icons
+  .input-item__value {
+    // Override too specific styles
+    color: var(--color-foreground) !important;
+  }
+
+  // Arrows
+  .mat-expansion-indicator::after {
+    border-color: var(--color-foreground) !important;
+  }
+}

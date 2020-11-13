@@ -1,0 +1,16 @@
+/* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity, selector-max-combinators, selector-max-compound-selectors */
+
+body,
+body.isDarkTheme,
+body.isLightTheme,
+body.isDarkTheme.isDisableBackgroundGradient,
+body.isLightTheme.isDisableBackgroundGradient,
+body.isMac.isEnabledBackgroundGradient,
+body.isWeb.isEnabledBackgroundGradient,
+body.isEnabledBackgroundGradient,
+body.isDisableBackgroundGradient {
+  .mat-dialog-container {
+    background: var(--color-background-setting-buttons);
+    color: var(--color-foreground);
+  }
+}
