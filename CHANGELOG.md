@@ -1,3 +1,21 @@
+# [6.1.0](https://github.com/johannesjo/super-productivity/compare/v6.1.0-6...v6.1.0) (2020-11-13)
+
+
+### Bug Fixes
+
+* height issue for older android ([bcb6389](https://github.com/johannesjo/super-productivity/commit/bcb63894772ec69276a657e949af743995acf785))
+* **android:** height ([b305d9b](https://github.com/johannesjo/super-productivity/commit/b305d9be5c288a6c3164cc803b3b00a20048b156))
+
+
+### Features
+
+* **db:** add retry to all database interactions [#658](https://github.com/johannesjo/super-productivity/issues/658) [#613](https://github.com/johannesjo/super-productivity/issues/613) [#607](https://github.com/johannesjo/super-productivity/issues/607) [#604](https://github.com/johannesjo/super-productivity/issues/604) [#553](https://github.com/johannesjo/super-productivity/issues/553) [#542](https://github.com/johannesjo/super-productivity/issues/542) [#541](https://github.com/johannesjo/super-productivity/issues/541) [#478](https://github.com/johannesjo/super-productivity/issues/478) [#461](https://github.com/johannesjo/super-productivity/issues/461) [#458](https://github.com/johannesjo/super-productivity/issues/458) [#455](https://github.com/johannesjo/super-productivity/issues/455) [#454](https://github.com/johannesjo/super-productivity/issues/454) [#452](https://github.com/johannesjo/super-productivity/issues/452) [#418](https://github.com/johannesjo/super-productivity/issues/418) ([6a856d4](https://github.com/johannesjo/super-productivity/commit/6a856d4e96bc25a5e64e2f282a6ea2e6870d0e73))
+* **db:** add retry to database init ([35e365c](https://github.com/johannesjo/super-productivity/commit/35e365c2b8377acc9a4e38fb3324c899b087bc32))
+* **google:** improve error message ([01e4051](https://github.com/johannesjo/super-productivity/commit/01e4051f0d8643df94565ad19190955fb3dd9bd3))
+* **google:** improve error message 2 ([3d24c8b](https://github.com/johannesjo/super-productivity/commit/3d24c8b35157c1154072e8239e99804cfd39aa1c))
+
+
+
 # [6.1.0-6](https://github.com/johannesjo/super-productivity/compare/v6.1.0-5...v6.1.0-6) (2020-11-11)
 
 
