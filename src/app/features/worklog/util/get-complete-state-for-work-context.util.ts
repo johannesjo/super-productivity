@@ -1,12 +1,26 @@
 import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
 import { Dictionary, EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 export const getCompleteStateForWorkContext = (workContext: WorkContext, taskState: EntityState<Task>, archive: EntityState<Task>): {
   completeStateForWorkContext: EntityState<Task>,
   unarchivedIds: string[]
 } => {
   const wid = workContext.id;
+
+  if (wid === TODAY_TAG.id) {
+    return {
+      completeStateForWorkContext: {
+        ids: [...taskState.ids as string[], ...archive.ids as string[]],
+        entities: {
+          ...archive.entities,
+          ...taskState.entities,
+        },
+      },
+      unarchivedIds: taskState.ids as string[],
+    };
+  }
 
   const unarchivedIds: string[] = (workContext.type === WorkContextType.TAG)
     ? _filterIdsForTag(taskState, wid)
