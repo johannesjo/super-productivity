@@ -615,7 +615,7 @@
         "START": "Druk nogmaals op Enter om te beginnen"
       },
       "B": {
-        "ADD_HALF_HOUR": "Voeg 1/2 hou toe",
+        "ADD_HALF_HOUR": "Voeg 1/2 uur toe",
         "ESTIMATE_EXCEEDED": "Geschatte tijd overschreden voor \"{{title}}\""
       },
       "CMP": {
@@ -629,9 +629,9 @@
         "EDIT_TAGS": "Bewerk-tags",
         "MARK_DONE": "Markeer als voltooid",
         "MARK_UNDONE": "Markeren als ongedaan gemaakt",
-        "MOVE_TO_BACKLOG": "Ga naar achterstand",
-        "MOVE_TO_OTHER_PROJECT": "Ga naar een ander project",
-        "MOVE_TO_TODAY": "Ga naar de lijst van vandaag",
+        "MOVE_TO_BACKLOG": "Verplaats naar backlog",
+        "MOVE_TO_OTHER_PROJECT": "Verplaats naar een ander project",
+        "MOVE_TO_TODAY": "Verplaats naar de lijst van vandaag",
         "OPEN_ATTACH": "Voeg bestand of link toe",
         "OPEN_ISSUE": "Open in de browser",
         "OPEN_TIME": "Tijd bijhouden",
