@@ -1,0 +1,50 @@
+/* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity, selector-max-combinators, selector-max-compound-selectors */
+
+body,
+body.isDarkTheme,
+body.isLightTheme,
+body.isDarkTheme.isDisableBackgroundGradient,
+body.isLightTheme.isDisableBackgroundGradient,
+body.isMac.isEnabledBackgroundGradient,
+body.isWeb.isEnabledBackgroundGradient,
+body.isEnabledBackgroundGradient,
+body.isDisableBackgroundGradient {
+  // Task
+  .task-list-wrapper .box {
+    background: var(--color-background-task);
+
+    // Fix offset on dark themes
+    top: 0;
+  }
+
+  // Project/tag title
+  .tag-title {
+    // Override inline style
+    color: var(--color-tag-title) !important;
+  }
+
+  // Task content
+  .title-and-tags-wrapper,
+  .task-title {
+    color: var(--color-foreground);
+    caret-color: var(--color-foreground);
+  }
+
+  .drag-handle {
+    color: var(--color-foreground);
+  }
+
+  .drag-handle::after {
+    box-shadow: none;
+  }
+
+  // Task actions on hover
+  .first-line:hover .hover-controls {
+    background: var(--color-background-task);
+
+    // We don't need border in dark theme
+    &::before {
+      display: none;
+    }
+  }
+}

@@ -3,7 +3,11 @@
 
 // Layout
 @import 'layout/base';
+@import 'layout/general';
+@import 'layout/top-panel';
 @import 'layout/side-nav';
-@import 'layout/main-content';
+@import 'layout/task';
 @import 'layout/dialogs';
+@import 'layout/panels';
 @import 'layout/forms';
+@import 'layout/stats';

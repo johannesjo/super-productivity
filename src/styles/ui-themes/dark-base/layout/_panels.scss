@@ -1,0 +1,45 @@
+/* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity, selector-max-combinators, selector-max-compound-selectors */
+
+body,
+body.isDarkTheme,
+body.isLightTheme,
+body.isDarkTheme.isDisableBackgroundGradient,
+body.isLightTheme.isDisableBackgroundGradient,
+body.isMac.isEnabledBackgroundGradient,
+body.isWeb.isEnabledBackgroundGradient,
+body.isEnabledBackgroundGradient,
+body.isDisableBackgroundGradient {
+  // Large panel areas
+  .isOpen .side,
+  .side,
+  .isSelected *,
+  .mat-drawer-container .isSelected .box {
+    // Override too specific styles
+    background: var(--color-large-toggle-panels) !important;
+  }
+
+  // Toggle panel inputs
+  .input-item,
+  .mat-expansion-panel,
+  .markdown-wrapper {
+    // Override too specific styles
+    background: var(--color-large-toggle-panels-inputs) !important;
+    border-color: var(--color-large-toggle-panels-inputs) !important;
+  }
+
+  // Toggle panel icons
+  .mat-expansion-panel-header-title {
+    color: var(--color-foreground);
+  }
+
+  // Right click menus
+  .mat-menu-panel {
+    background: var(--color-background-setting-buttons);
+  }
+
+  // Panels on settings
+  .page-settings.page-wrapper .section-wrapper .config-section {
+    background: var(--color-background-panels);
+    border-color: var(--color-border-panels);
+  }
+}

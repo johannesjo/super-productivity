@@ -54,4 +54,19 @@ body.isDisableBackgroundGradient {
   .mat-expansion-indicator::after {
     border-color: var(--color-foreground) !important;
   }
+
+  // Accented radio buttons and such
+  .mat-slide-toggle-bar {
+    background: var(--color-background-slide-toggle-bar-disabled);
+  }
+
+  .mat-checkbox-checked .mat-checkbox-background {
+    background: var(--color-accent);
+  }
+
+  // Inputs, e. g. new task input
+  .mat-expansion-panel-header:not(.mat-expanded),
+  .input-item {
+    background: var(--color-background-banner);
+  }
 }
