@@ -10,8 +10,19 @@ body.isWeb.isEnabledBackgroundGradient,
 body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
   // Project finished summaries
+  .mat-tab-label-content {
+    color: var(--color-foreground);
+  }
+
   .mat-table {
-    background: var(--color-background-task);
+    background-color: var(--color-background-task);
+
+    input:hover,
+    input:focus {
+      background-color: var(--color-background-task);
+      border-color: var(--color-accent);
+      color: var(--color-foreground);
+    }
 
     td,
     tr,

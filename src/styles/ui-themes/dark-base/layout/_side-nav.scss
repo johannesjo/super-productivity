@@ -15,7 +15,7 @@ body.isDisableBackgroundGradient {
   .mat-drawer,
   .mat-drawer-container,
   .mat-drawer-container.mat-sidenav-container .mat-drawer.mat-sidenav .mat-drawer-inner-container {
-    background: var(--color-background-sidebar);
+    background-color: var(--color-background-sidebar);
     color: var(--color-foreground);
   }
 

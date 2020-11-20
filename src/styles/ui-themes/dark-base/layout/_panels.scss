@@ -12,10 +12,11 @@ body.isDisableBackgroundGradient {
   // Large panel areas
   .isOpen .side,
   .side,
-  .isSelected *,
-  .mat-drawer-container .isSelected .box {
+  .mat-drawer-container .isSelected .box,
+  .hover-controls {
     // Override too specific styles
-    background: var(--color-large-toggle-panels) !important;
+    background-color: var(--color-large-toggle-panels) !important;
+    color: var(--color-foreground);
   }
 
   // Toggle panel inputs
@@ -23,7 +24,7 @@ body.isDisableBackgroundGradient {
   .mat-expansion-panel,
   .markdown-wrapper {
     // Override too specific styles
-    background: var(--color-large-toggle-panels-inputs) !important;
+    background-color: var(--color-large-toggle-panels-inputs) !important;
     border-color: var(--color-large-toggle-panels-inputs) !important;
   }
 
@@ -34,12 +35,24 @@ body.isDisableBackgroundGradient {
 
   // Right click menus
   .mat-menu-panel {
-    background: var(--color-background-setting-buttons);
+    background-color: var(--color-background-setting-buttons);
   }
 
   // Panels on settings
   .page-settings.page-wrapper .section-wrapper .config-section {
-    background: var(--color-background-panels);
+    background-color: var(--color-background-panels);
     border-color: var(--color-border-panels);
+  }
+
+  // Collapsible header borders
+  .page-settings .config-section .collapsible-header {
+    // Override too specific styles
+    border-color: var(--color-border-panels) !important;
+  }
+
+  // Selected values in settings
+  .mat-select-value {
+    // Override too specific styles
+    color: var(--color-foreground) !important;
   }
 }

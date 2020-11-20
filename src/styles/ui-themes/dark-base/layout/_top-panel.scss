@@ -14,11 +14,11 @@ body.isDisableBackgroundGradient {
   .mat-raised-button,
   .mat-fab,
   .mat-mini-fab {
-    background: var(--color-background-setting-buttons);
+    background-color: var(--color-background-setting-buttons);
   }
 
   // Current task title in top
   .current-task-title {
-    background: var(--color-background-setting-buttons);
+    background-color: var(--color-background-setting-buttons);
   }
 }

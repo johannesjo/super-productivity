@@ -9,8 +9,27 @@ body.isMac.isEnabledBackgroundGradient,
 body.isWeb.isEnabledBackgroundGradient,
 body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
-  .mat-dialog-container {
-    background: var(--color-background-setting-buttons);
+  .mat-dialog-container,
+  .owl-dt-schedule-item:focus,
+  .owl-dt-schedule-item:hover,
+  .owl-dt-timer-content .owl-dt-timer-input,
+  .owl-dt-calendar-table .owl-dt-calendar-cell,
+  .owl-dt-calendar-table .owl-dt-calendar-header,
+  .owl-dt-timer-divider,
+  .owl-dt-control-period-button .owl-dt-control-button-arrow {
+    background-color: var(--color-background-setting-buttons);
     color: var(--color-foreground);
+    border-color: var(--color-background-setting-buttons);
+    fill: var(--color-foreground);
+
+    &:focus,
+    &:hover {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+  }
+
+  .owl-dt-calendar-table .owl-dt-calendar-cell-disabled > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected) {
+    color: var(--color-disabled-dates);
   }
 }
