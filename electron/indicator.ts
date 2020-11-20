@@ -64,10 +64,10 @@ function initListeners() {
     if (typeof progress === 'number' && progress > 0 && isFinite(progress)) {
       const f = Math.min(Math.round(progress * 15), 15);
       const t = DIR + `running-anim${suf}/${f || 0}.png`;
-      tray.setImage(t);
+      setTrayIcon(tray, t);
     } else {
       const t = DIR + `running${suf}.png`;
-      tray.setImage(t);
+      setTrayIcon(tray, t);
     }
   });
 
@@ -91,7 +91,7 @@ function initListeners() {
           const suf = nativeTheme.shouldUseDarkColors
             ? '-d.png'
             : '-l.png';
-          tray.setImage(DIR + `stopped${suf}`);
+          setTrayIcon(tray, DIR + `stopped${suf}`);
         }
       }
     });
@@ -146,3 +146,11 @@ function createContextMenu(showApp, quitApp) {
 export const isRunning = () => {
   return isIndicatorRunning || isGnomeShellExtensionRunning;
 };
+
+let curIco: string;
+function setTrayIcon(tr: Tray, icoPath: string) {
+  if (icoPath !== curIco) {
+    curIco = icoPath;
+    tr.setImage(icoPath);
+  }
+}
