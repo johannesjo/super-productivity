@@ -1,3 +1,21 @@
+## [6.1.1](https://github.com/johannesjo/super-productivity/compare/v6.1.0...v6.1.1) (2020-11-20)
+
+
+### Bug Fixes
+
+* scheduled page throwing error after project deletion ([aa33cd1](https://github.com/johannesjo/super-productivity/commit/aa33cd120881236c60b3a9d7c9c363df806fd633))
+* update icon less often [#675](https://github.com/johannesjo/super-productivity/issues/675) ([36fcea6](https://github.com/johannesjo/super-productivity/commit/36fcea696395d37f00c9c7b8675bfecf232df654))
+
+
+### Features
+
+* add commandline-switch to allow for disabling to create the tray [#675](https://github.com/johannesjo/super-productivity/issues/675) ([eb14976](https://github.com/johannesjo/super-productivity/commit/eb149769b068f8af47ee450557b73edfc81a6775))
+* always show all tasks for today tag worklog ([0d23cbe](https://github.com/johannesjo/super-productivity/commit/0d23cbe51310a916bf4f72c2d84105b35051e9e8))
+* make background apply to whole page for better performance ([b437876](https://github.com/johannesjo/super-productivity/commit/b4378765abe71ab000f7a533792cd3702fd98958))
+* update logging for backup files ([a52b6a5](https://github.com/johannesjo/super-productivity/commit/a52b6a54e7a0090c8408081a77b2b5208b20caf5))
+
+
+
 # [6.1.0](https://github.com/johannesjo/super-productivity/compare/v6.1.0-6...v6.1.0) (2020-11-13)
 
 
