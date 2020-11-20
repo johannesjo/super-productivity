@@ -19,6 +19,21 @@ body.isDisableBackgroundGradient {
     color: var(--color-foreground);
   }
 
+  // Dividers
+  .app::after,
+  .main::after,
+  .tags::after {
+    // Override too specific styles
+    border-color: var(--color-border-divider-sidebar) !important;
+  }
+
+  // Sidebar border
+  .mat-sidenav,
+  .mat-sidenav:focus .mat-drawer-side,
+  .mat-drawer-side {
+    border-color: var(--color-border-sidebar);
+  }
+
   // Foreground for elements
   button,
   .mat-menu-item .mat-icon-no-color,

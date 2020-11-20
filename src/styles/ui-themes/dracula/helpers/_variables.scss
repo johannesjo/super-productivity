@@ -1,7 +1,8 @@
 // Vars
 :root {
-  --color-background: #282a36;
+  // Colors
   --color-current: #44475a;
+  --color-background: #282a36;
   --color-foreground: #f8f8f2;
   --color-comment: #6272a4;
   --color-cyan: #8be9fd;
@@ -11,4 +12,18 @@
   --color-purple: #bd93f9;
   --color-red: #f55;
   --color-yellow: #f1fa8c;
+  --color-background-main: #282a36;
+  --color-background-sidebar: #232830;
+  --color-border-sidebar: #232830;
+  --color-border-divider-sidebar: #232830;
+  --color-background-panels: darken(#282a36, 15%);
+  --color-border-panels: #232830;
+  --color-background-slide-toggle-bar-disabled: #444;
+  --color-background-setting-buttons: #6272a4;
+  --color-background-banner: lighten(#282a36, 18);
+  --color-background-task: darken(#282a36, 15%);
+  --color-tag-title: rgba(#fff, .5);
+  --color-large-toggle-panels: darken(#282a36, 15%);
+  --color-large-toggle-panels-inputs: darken(#282a36, 15%);
+  --color-accent: var(--color-purple);
 }

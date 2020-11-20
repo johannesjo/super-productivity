@@ -17,7 +17,11 @@ body.isDisableBackgroundGradient {
   .mat-flat-button,
   .mat-raised-button,
   .mat-fab,
-  .mat-mini-fab,
+  .mat-mini-fab {
+    background: var(--color-background-setting-buttons);
+  }
+
+  // Current task title in top
   .current-task-title {
     background: var(--color-background-setting-buttons);
   }
@@ -32,7 +36,7 @@ body.isDisableBackgroundGradient {
     color: var(--color-accent);
   }
 
-  // Backround-colorable accent
+  // Background-colorable accent
   .tag.isActiveContext .tag-color,
   .tag.isActiveContext .project-color,
   .tag:hover .tag-color,
@@ -55,6 +59,12 @@ body.isDisableBackgroundGradient {
 
     // Fix offset on dark themes
     top: 0;
+  }
+
+  // Project/tag title
+  .tag-title {
+    // Override inline style
+    color: var(--color-tag-title) !important;
   }
 
   // Task content
