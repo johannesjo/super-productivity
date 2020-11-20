@@ -17,7 +17,8 @@ body.isDisableBackgroundGradient {
   .mat-flat-button,
   .mat-raised-button,
   .mat-fab,
-  .mat-mini-fab {
+  .mat-mini-fab,
+  .current-task-title {
     background: var(--color-background-setting-buttons);
   }
 
