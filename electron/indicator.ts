@@ -11,17 +11,11 @@ let DIR: string;
 const isGnomeShellExtensionRunning = false;
 
 export const initIndicator = ({
-  IS_LINUX,
-  IS_GNOME,
-  IS_MAC,
   showApp,
   quitApp,
   app,
   ICONS_FOLDER,
 }: {
-  IS_LINUX: boolean;
-  IS_GNOME: boolean;
-  IS_MAC: boolean;
   showApp: () => void;
   quitApp: () => void;
   app: App;
