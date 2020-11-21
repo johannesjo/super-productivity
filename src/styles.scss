@@ -11,4 +11,7 @@
 
 // Full UI themes
 @import "styles/ui-themes/dark-base/index";
-@import "styles/ui-themes/dracula/index";
+
+// These themes depend on dark-base
+// @import "styles/ui-themes/dracula/index";
+@import "styles/ui-themes/nord-polar-night/index";
