@@ -1,21 +1,21 @@
 // Vars
 :root {
   // Colors
-  --color-background: #3b4252;
-  --color-foreground: #eceff4;
+  --color-background: #eceff4;
+  --color-foreground: #3b4252;
   --color-background-main: var(--color-background);
-  --color-background-sidebar: #2e3440;
+  --color-background-sidebar: #d8dee9;
   --color-border-sidebar: var(--color-background-sidebar);
   --color-border-divider-sidebar: var(--color-background-sidebar);
-  --color-background-panels: #434c5e;
+  --color-background-panels: #e5e9f0;
   --color-border-panels: var(--color-background-sidebar);
-  --color-background-slide-toggle-bar-disabled: #444;
-  --color-background-setting-buttons: #4c566a;
-  --color-background-banner: #4c566a;
+  --color-background-slide-toggle-bar-disabled: #bbb;
+  --color-background-setting-buttons: var(--color-background-panels);
+  --color-background-banner: var(--color-background-panels);
   --color-background-task: var(--color-background-panels);
-  --color-tag-title: rgba(255, 255, 255, .6);
+  --color-tag-title: rgba(59, 66, 82, .6);
   --color-large-toggle-panels: var(--color-background-panels);
   --color-large-toggle-panels-inputs: var(--color-background-panels);
-  --color-disabled-dates: rgba(255, 255, 255, .4);
-  --color-accent: #e5e9f0;
+  --color-disabled-dates: rgba(59, 66, 82, .4);
+  --color-accent: #2e3440;
 }
