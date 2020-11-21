@@ -17,6 +17,9 @@ body.isDisableBackgroundGradient {
     // Override too specific styles
     background-color: var(--color-large-toggle-panels) !important;
     color: var(--color-foreground);
+
+    // Remove box-shadow
+    box-shadow: none !important;
   }
 
   // Toggle panel inputs
@@ -51,7 +54,10 @@ body.isDisableBackgroundGradient {
   }
 
   // Selected values in settings
-  .mat-select-value {
+  .mat-select-value,
+  .created,
+  .time-wrapper,
+  .time {
     // Override too specific styles
     color: var(--color-foreground) !important;
   }
