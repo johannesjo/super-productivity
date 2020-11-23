@@ -14,8 +14,12 @@ body.isDisableBackgroundGradient {
     color: var(--color-foreground);
   }
 
+  // Tables
+  table.material-table,
+  div.material-table,
   .mat-table {
     background-color: var(--color-background-task);
+    box-shadow: none;
 
     input:hover,
     input:focus {
@@ -24,10 +28,12 @@ body.isDisableBackgroundGradient {
       color: var(--color-foreground);
     }
 
+    th,
     td,
     tr,
     * {
       color: var(--color-foreground);
+      border-color: var(--color-border-panels);
     }
   }
 }
