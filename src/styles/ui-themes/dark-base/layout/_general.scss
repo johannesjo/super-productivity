@@ -59,6 +59,10 @@ body.isDisableBackgroundGradient {
     }
   }
 
+  .bg-primary {
+    background: var(--color-accent) !important;
+  }
+
   // Element text colors and buttons
   .mat-drawer-container,
   button {

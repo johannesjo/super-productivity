@@ -36,7 +36,26 @@ body.isDisableBackgroundGradient {
     background-color: var(--color-background-setting-buttons) !important;
   }
 
+  // Calendar items
   .owl-dt-calendar-table .owl-dt-calendar-cell-disabled > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected) {
     color: var(--color-disabled-dates);
+  }
+
+  // Time spent / Estimates
+  .circle .inner-circle {
+    background: var(--color-background-setting-buttons);
+  }
+
+  .value-wrapper,
+  .dots {
+    color: var(--color-foreground);
+
+    label {
+      color: var(--color-foreground);
+    }
+  }
+
+  .handle::after {
+    background: var(--color-accent);
   }
 }
