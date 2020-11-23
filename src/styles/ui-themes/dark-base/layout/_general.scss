@@ -28,6 +28,14 @@ body.isDisableBackgroundGradient {
     text-decoration: none;
   }
 
+  // Accented borders
+  &.isNoTouchOnly:focus > .inner-wrapper > .box,
+  &.isNoTouchOnly *:focus > .inner-wrapper > .box,
+  *:focus > .inner-wrapper > .box {
+    // Override too specific styles
+    border-color: var(--color-accent) !important;
+  }
+
   // Background-colorable accent
   .tag.isActiveContext .tag-color,
   .tag.isActiveContext .project-color,
