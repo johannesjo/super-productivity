@@ -40,4 +40,10 @@ body.isDisableBackgroundGradient {
   .mat-menu-item-submenu-trigger::after {
     color: var(--color-foreground);
   }
+
+  // Fix side nav icon backgrounds
+  .mat-sidenav .mat-icon-no-color,
+  .mat-sidenav .drag-handle {
+    background: transparent;
+  }
 }

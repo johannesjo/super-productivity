@@ -15,14 +15,6 @@ body.isDisableBackgroundGradient {
 
   // Colorable accents
   .mat-drawer-container .mat-drawer-inner-container .route-link.isActiveRoute,
-  .mat-drawer-container .mat-drawer-inner-container .route-link.isActiveRoute mat-icon,
-  .mat-drawer-container .mat-drawer-inner-container .tag.isActiveContext mat-icon,
-  .mat-drawer-container .mat-drawer-inner-container .tag.isActiveContext button,
-  .mat-drawer-container .mat-drawer-inner-container .project.isActiveContext mat-icon,
-  .mat-drawer-container .mat-drawer-inner-container .project.isActiveContext button,
-  .mat-button.mat-primary,
-  .mat-icon-button.mat-primary,
-  .mat-stroked-button.mat-primary,
   a[href] {
     color: var(--color-accent);
     text-decoration: none;
@@ -58,8 +50,11 @@ body.isDisableBackgroundGradient {
   .route-link .tag-color,
   .route-link .project-color,
   .route-link.isActiveRoute::before {
-    // Override inline style
-    background-color: var(--color-accent) !important;
+
+    // Override inline style if is not styled
+    &:not([style]) {
+      background-color: var(--color-accent) !important;
+    }
   }
 
   // Element text colors and buttons
