@@ -10,13 +10,15 @@ body.isWeb.isEnabledBackgroundGradient,
 body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
   // Large panel areas
+  .content,
+  .textarea,
   .isOpen .side,
   .side,
   .mat-drawer-container .isSelected .box,
   .hover-controls {
     // Override too specific styles
     background-color: var(--color-large-toggle-panels) !important;
-    color: var(--color-foreground);
+    color: var(--color-foreground) !important;
 
     // Remove box-shadow
     box-shadow: none !important;
