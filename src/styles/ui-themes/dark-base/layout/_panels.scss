@@ -42,13 +42,15 @@ body.isDisableBackgroundGradient {
   }
 
   // Panels on settings
-  .page-settings.page-wrapper .section-wrapper .config-section {
+  .page-settings.page-wrapper .section-wrapper .config-section,
+  section.config-section {
     background-color: var(--color-background-panels);
     border-color: var(--color-border-panels);
   }
 
   // Collapsible header borders
-  .page-settings .config-section .collapsible-header {
+  .page-settings .config-section .collapsible-header,
+  section.config-section .collapsible-header {
     // Override too specific styles
     border-color: var(--color-border-panels) !important;
   }
@@ -57,7 +59,9 @@ body.isDisableBackgroundGradient {
   .mat-select-value,
   .created,
   .time-wrapper,
-  .time {
+  .time,
+  .mat-form-field-appearance-legacy .mat-hint,
+  .mat-hint {
     // Override too specific styles
     color: var(--color-foreground) !important;
   }
