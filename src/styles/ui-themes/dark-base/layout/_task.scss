@@ -62,6 +62,22 @@ body.isDisableBackgroundGradient {
     }
   }
 
+  // Rest of the icons
+  .mat-button.mat-primary.mat-button-disabled,
+  .mat-button.mat-accent.mat-button-disabled,
+  .mat-button.mat-warn.mat-button-disabled,
+  .mat-button.mat-button-disabled.mat-button-disabled,
+  .mat-icon-button.mat-primary.mat-button-disabled,
+  .mat-icon-button.mat-accent.mat-button-disabled,
+  .mat-icon-button.mat-warn.mat-button-disabled,
+  .mat-icon-button.mat-button-disabled.mat-button-disabled,
+  .mat-stroked-button.mat-primary.mat-button-disabled,
+  .mat-stroked-button.mat-accent.mat-button-disabled,
+  .mat-stroked-button.mat-warn.mat-button-disabled,
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled {
+    color: var(--color-foreground);
+  }
+
   // Improve opacity on selected task
   .drag-handle .drag-handle-ico {
     // Make it always this opacity, do not change it based on actions
