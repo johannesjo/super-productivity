@@ -23,6 +23,10 @@ body.isDisableBackgroundGradient {
   }
 
   // Toggle panel inputs
+  mat-expansion-panel .mat-expansion-panel-header:not(.mat-expanded):hover,
+  .mat-expansion-panel-header:not(.mat-expanded):focus,
+  .input-item:hover,
+  .input-item:focus,
   .input-item,
   .mat-expansion-panel,
   .markdown-wrapper {

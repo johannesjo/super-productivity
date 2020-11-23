@@ -23,7 +23,9 @@ body.isDisableBackgroundGradient {
   // Accented borders
   &.isNoTouchOnly:focus > .inner-wrapper > .box,
   &.isNoTouchOnly *:focus > .inner-wrapper > .box,
-  *:focus > .inner-wrapper > .box {
+  *:focus > .inner-wrapper > .box,
+  *:focus .input-item,
+  *:focus .mat-expansion-panel {
     // Override too specific styles
     border-color: var(--color-accent) !important;
   }
