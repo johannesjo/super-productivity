@@ -10,6 +10,7 @@ body.isWeb.isEnabledBackgroundGradient,
 body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
   // Task
+  .scheduled-task,
   .task-list-wrapper .box {
     background-color: var(--color-background-task);
 
@@ -30,7 +31,8 @@ body.isDisableBackgroundGradient {
     caret-color: var(--color-foreground);
   }
 
-  .drag-handle {
+  .drag-handle,
+  .mat-card {
     color: var(--color-foreground);
   }
 
