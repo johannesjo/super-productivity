@@ -14,13 +14,20 @@ body.isDisableBackgroundGradient {
     color: var(--color-foreground);
   }
 
-  // Selected metrics
+  // Selected worklog metrics
   .week table.week-table > tr.week-row:hover > td,
   .week table.week-table > tr.week-row.isExpanded > td,
   .week table.week-table > tbody > tr.week-row:hover > td,
   .week table.week-table > tbody > tr.week-row.isExpanded > td {
     // Override too specific styles
     background-color: var(--color-inputs-focused) !important;
+  }
+
+  // Worklog specific
+  .month,
+  .year {
+    // Override too specific styles
+    border-color: var(--color-background-main) !important;
   }
 
   // Metrics tables
