@@ -9,6 +9,7 @@ body.isMac.isEnabledBackgroundGradient,
 body.isWeb.isEnabledBackgroundGradient,
 body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
+  // Dialog items
   .mat-dialog-container,
   .owl-dt-schedule-item:focus,
   .owl-dt-schedule-item:hover,
@@ -27,6 +28,12 @@ body.isDisableBackgroundGradient {
       color: var(--color-accent);
       border-color: var(--color-accent);
     }
+  }
+
+  // Current date in calendar
+  .owl-dt-calendar-table .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected) {
+    // Override too specific styles
+    background-color: var(--color-background-setting-buttons) !important;
   }
 
   .owl-dt-calendar-table .owl-dt-calendar-cell-disabled > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected) {

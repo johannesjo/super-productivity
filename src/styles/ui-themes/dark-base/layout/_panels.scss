@@ -29,6 +29,7 @@ body.isDisableBackgroundGradient {
     // Override too specific styles
     background-color: var(--color-large-toggle-panels-inputs) !important;
     border-color: var(--color-large-toggle-panels-inputs) !important;
+    color: var(--color-foreground) !important;
   }
 
   // Toggle panel icons
