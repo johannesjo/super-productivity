@@ -10,6 +10,8 @@ body.isWeb.isEnabledBackgroundGradient,
 body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
   // Dialog items
+  .mat-stepper-horizontal,
+  .mat-stepper-vertical,
   .mat-dialog-container,
   .owl-dt-schedule-item:focus,
   .owl-dt-schedule-item:hover,

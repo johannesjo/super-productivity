@@ -10,12 +10,14 @@ body.isWeb.isEnabledBackgroundGradient,
 body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
   // Body background
-  color: var(--color-foreground);
   background-color: var(--color-background-main);
 
+  .page-wrapper {
+    color: var(--color-foreground);
+  }
+
   // Colorable accents
-  .mat-drawer-container .mat-drawer-inner-container .route-link.isActiveRoute,
-  a[href] {
+  .version-footer a[href] {
     color: var(--color-accent);
     text-decoration: none;
   }
@@ -59,7 +61,12 @@ body.isDisableBackgroundGradient {
     }
   }
 
-  .bg-primary {
+  .bg-primary,
+  .mat-form-field-appearance-legacy .mat-form-field-underline,
+  .mat-form-field-underline,
+  .mat-step-header .mat-step-icon-selected,
+  .mat-step-header .mat-step-icon-state-done,
+  .mat-step-header .mat-step-icon-state-edit {
     background: var(--color-accent) !important;
   }
 
