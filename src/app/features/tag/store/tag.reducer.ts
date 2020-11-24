@@ -64,12 +64,9 @@ export const selectTagsByIds = createSelector(
     }))
 );
 
-export const initialTagState: TagState = tagAdapter.getInitialState({
-  // additional entity state properties
-});
-
 const _addMyDayTagIfNecessary = (state: TagState): TagState => {
   const ids = state.ids as string[];
+  console.log(ids);
   if (ids && !ids.includes(TODAY_TAG.id)) {
     return {
       ...state,
@@ -82,6 +79,11 @@ const _addMyDayTagIfNecessary = (state: TagState): TagState => {
   }
   return state;
 };
+
+export const initialTagState: TagState = _addMyDayTagIfNecessary(tagAdapter.getInitialState({
+  // additional entity state properties
+}));
+
 
 const _reducer = createReducer<TagState>(
   initialTagState,
