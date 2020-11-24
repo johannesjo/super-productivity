@@ -120,6 +120,46 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should remove tasks with missing data from the project lists', () => {
+    const taskState = {
+      ...mock.task,
+      ids: ['EXISTING'],
+      entities: {
+        EXISTING: {...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_PROJECT'},
+        nullBacklog: null
+      }
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([{
+        title: 'TEST_PROJECT',
+        id: 'TEST_ID_PROJECT',
+        taskIds: ['EXISTING', 'goneProject', 'TEST', 'noneExisting'],
+        backlogTaskIds: ['noneExistingBacklog', 'nullBacklog'],
+      }] as Partial<Project> []),
+    };
+
+    expect(dataRepair({
+      ...mock,
+      project: projectState,
+      task: taskState,
+    })).toEqual({
+      ...mock,
+      task: taskState as any,
+      project: {
+        ...projectState,
+        entities: {
+          TEST_ID_PROJECT: {
+            title: 'TEST_PROJECT',
+            id: 'TEST_ID_PROJECT',
+            taskIds: ['EXISTING'],
+            backlogTaskIds: [],
+          },
+        } as any
+      }
+    });
+  });
+
   it('should delete missing tasks for projects backlog list', () => {
     const taskState = {
       ...mock.task,

@@ -188,7 +188,7 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (data: AppDataComplete)
 const _resetEntityIdsFromObjects = <T>(data: AppBaseDataEntityLikeStates): AppBaseDataEntityLikeStates => {
   return {
     ...data,
-    ids: Object.keys(data.entities)
+    ids: Object.keys(data.entities).filter(id => !!data.entities[id])
   };
 };
 
