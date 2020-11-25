@@ -160,6 +160,45 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should remove tasks archived sub tasks from any project lists', () => {
+    const taskArchiveState = {
+      ...mock.taskArchive,
+      ids: ['SUB_ID', 'PAR_ID'],
+      entities: {
+        SUB_ID: {...DEFAULT_TASK, id: 'SUB_ID', projectId: 'TEST_PROJECT', parentId: 'PAR_ID'},
+        PAR_ID: {...DEFAULT_TASK, id: 'PAR_ID', projectId: 'TEST_PROJECT'},
+      }
+    } as any;
+
+    const projectState: ProjectState = {
+      ...fakeEntityStateFromArray([{
+        title: 'TEST_PROJECT',
+        id: 'TEST_ID_PROJECT',
+        taskIds: [],
+        backlogTaskIds: ['SUB_ID'],
+      }] as Partial<Project> []),
+    };
+
+    expect(dataRepair({
+      ...mock,
+      project: projectState,
+      taskArchive: taskArchiveState,
+    })).toEqual({
+      ...mock,
+      project: {
+        ...projectState,
+        entities: {
+          TEST_ID_PROJECT: {
+            title: 'TEST_PROJECT',
+            id: 'TEST_ID_PROJECT',
+            taskIds: [],
+            backlogTaskIds: [],
+          },
+        } as any
+      }
+    });
+  });
+
   it('should delete missing tasks for projects backlog list', () => {
     const taskState = {
       ...mock.task,
