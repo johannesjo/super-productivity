@@ -163,7 +163,7 @@ describe('dataRepair()', () => {
   it('should remove tasks archived sub tasks from any project lists', () => {
     const taskArchiveState = {
       ...mock.taskArchive,
-      ids: ['SUB_ID', 'PAR_ID'],
+      ids: ['PAR_ID', 'SUB_ID'],
       entities: {
         SUB_ID: {...DEFAULT_TASK, id: 'SUB_ID', projectId: 'TEST_PROJECT', parentId: 'PAR_ID'},
         PAR_ID: {...DEFAULT_TASK, id: 'PAR_ID', projectId: 'TEST_PROJECT'},
@@ -185,6 +185,7 @@ describe('dataRepair()', () => {
       taskArchive: taskArchiveState,
     })).toEqual({
       ...mock,
+      taskArchive: taskArchiveState,
       project: {
         ...projectState,
         entities: {

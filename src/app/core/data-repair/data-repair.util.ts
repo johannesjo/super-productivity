@@ -22,6 +22,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
   dataOut = _cleanupOrphanedSubTasks(dataOut);
+  dataOut = _cleanupNonExistingTasksFromLists(dataOut);
   dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
@@ -244,6 +245,33 @@ const _removeNonExistentProjectIds = (data: AppDataComplete): AppDataComplete =>
     }
   });
 
+  return data;
+};
+
+const _cleanupNonExistingTasksFromLists = (data: AppDataComplete): AppDataComplete => {
+  const projectIds: string[] = data.project.ids as string[];
+  projectIds
+    .forEach(pid => {
+        const projectItem = data.project.entities[pid];
+        if (!projectItem) {
+          console.log(data.project);
+          throw new Error('No project');
+        }
+        (projectItem as ProjectCopy).taskIds = projectItem.taskIds.filter(tid => !!data.task.entities[tid]);
+        (projectItem as ProjectCopy).backlogTaskIds = projectItem.backlogTaskIds.filter(tid => !!data.task.entities[tid]);
+      }
+    );
+  const tagIds: string[] = data.tag.ids as string[];
+  tagIds
+    .map(id => data.tag.entities[id])
+    .forEach(tagItem => {
+        if (!tagItem) {
+          console.log(data.tag);
+          throw new Error('No tag');
+        }
+        (tagItem as TagCopy).taskIds = tagItem.taskIds.filter(tid => !!data.task.entities[tid]);
+      }
+    );
   return data;
 };
 
