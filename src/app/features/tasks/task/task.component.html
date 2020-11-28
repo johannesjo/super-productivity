@@ -238,30 +238,25 @@
           </button>
         </div>
 
-        <mat-menu #contextMenu="matMenu">
+        <mat-menu #contextMenu="matMenu"
+                  (close)="focusSelf()">
           <button (click)="startTask()"
-                  *ngIf="!task?.isDone && !isCurrent && !task?.subTasks?.length"
-                  class="show-only-on-touch-only"
-                  mat-menu-item
-                  tabindex="2">
+                  *ngIf="isTouchOnly && !task?.isDone && !isCurrent && !task?.subTasks?.length"
+                  mat-menu-item>
             <mat-icon class="play-icon"
                       svgIcon="play"></mat-icon>
             {{T.F.TASK.CMP.TRACK_TIME|translate}}
           </button>
           <button (click)="pauseTask()"
-                  *ngIf="!task?.isDone && isCurrent && !task?.subTasks?.length"
-                  class="show-only-on-touch-only"
-                  mat-menu-item
-                  tabindex="2">
+                  *ngIf="isTouchOnly && !task?.isDone && isCurrent && !task?.subTasks?.length"
+                  mat-menu-item>
             <mat-icon>pause</mat-icon>
             {{T.F.TASK.CMP.TRACK_TIME_STOP|translate}}
           </button>
 
           <button (click)="removeFromMyDay()"
-                  *ngIf="!task?.parentId && !task?.isDone && task?.tagIds.includes(TODAY_TAG_ID) && (task?.projectId || task?.tagIds?.length > 1)"
-                  class="show-only-on-touch-only"
-                  mat-menu-item
-                  tabindex="2">
+                  *ngIf="isTouchOnly && !task?.parentId && !task?.isDone && task?.tagIds.includes(TODAY_TAG_ID) && (task?.projectId || task?.tagIds?.length > 1)"
+                  mat-menu-item>
             <mat-icon svgIcon="remove_today"></mat-icon>
             {{T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate}}
           </button>
@@ -269,14 +264,16 @@
           <button (click)="estimateTime()"
                   *ngIf="!task?.subTasks?.length"
                   class="hide-xs"
-                  mat-menu-item>
+                  mat-menu-item
+                  tabindex="2">
             <mat-icon>timer</mat-icon>
             {{T.F.TASK.CMP.OPEN_TIME|translate}}
           </button>
 
           <button (click)="editReminder()"
                   *ngIf="!task?.repeatCfgId"
-                  mat-menu-item>
+                  mat-menu-item
+                  tabindex="2">
             <ng-container *ngIf="!task?.reminderId">
               <mat-icon>alarm_add</mat-icon>
               {{T.F.TASK.CMP.SCHEDULE|translate}}
@@ -348,7 +345,8 @@
 
           <button *ngIf="!task?.parentId && !task?.issueId && !task?.repeatCfgId"
                   [matMenuTriggerFor]="projectMenu"
-                  mat-menu-item>
+                  mat-menu-item
+                  tabindex="2">
             <mat-icon>forward</mat-icon>
             {{(task?.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT : T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
           </button>

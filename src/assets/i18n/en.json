@@ -897,6 +897,7 @@
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TITLE": "Edit Title",
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
+      "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
       "TASK_SCHEDULE": "Schedule Task",
       "TASK_SHORTCUTS": "Tasks",

@@ -627,6 +627,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       this.projectMenuTrigger.openMenu();
     }
+    if (checkKeyCombo(ev, keys.taskOpenContextMenu)) {
+      if (!this.contextMenu) {
+        throw new Error('No el');
+      }
+      this.contextMenu.openMenu();
+    }
 
     if (checkKeyCombo(ev, keys.togglePlay)) {
       if (this.isCurrent) {
