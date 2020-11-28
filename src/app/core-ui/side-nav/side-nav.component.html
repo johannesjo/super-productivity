@@ -1,6 +1,7 @@
 <section class="main">
   <div *ngFor="let context of (workContextService.mainWorkContexts$|async); trackBy: trackById; "
        [class.isActiveContext]="context.id===activeWorkContextId"
+       [class.hasTasks]="context.taskIds.length"
        class="tag">
     <div [style.background]="context.theme.primary"
          class="tag-color"></div>
@@ -49,6 +50,7 @@
        [dragula]="PROJECTS_SIDE_NAV">
     <div *ngFor="let project of projectList; trackBy: trackById;"
          [class.isActiveContext]="project.id===activeWorkContextId"
+         [class.hasTasks]="project.taskIds.length"
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
@@ -106,6 +108,7 @@
        [dragula]="TAG_SIDE_NAV">
     <div *ngFor="let tag of tagList; trackBy: trackById;"
          [class.isActiveContext]="tag.id===activeWorkContextId"
+         [class.hasTasks]="tag.taskIds.length"
          class="tag">
       <div [style.background]="tag?.theme.primary"
            class="tag-color"></div>

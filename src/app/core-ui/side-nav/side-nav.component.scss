@@ -80,19 +80,26 @@ section {
   align-items: stretch;
   justify-content: stretch;
 
-  button mat-icon {
-    margin-top: -10px;
+  button .badge {
+    display: none;
   }
 
-  button .badge {
-    z-index: 10;
-    position: absolute;
-    line-height: 1;
-    left: $s;
-    width: 40px;
-    text-align: center;
-    bottom: 1*$s;
-    font-size: 10px;
+  &.hasTasks {
+    button mat-icon {
+      margin-top: -14px;
+    }
+
+    button .badge {
+      display: block;
+      z-index: 10;
+      position: absolute;
+      line-height: 1;
+      left: $s;
+      width: 40px;
+      text-align: center;
+      bottom: .75*$s;
+      font-size: 10px;
+    }
   }
 
   button:first-of-type {
