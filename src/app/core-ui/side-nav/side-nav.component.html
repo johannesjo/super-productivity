@@ -7,6 +7,7 @@
     <button [routerLink]="['tag', context.id, 'tasks']"
             mat-menu-item
             routerLinkActive="isActiveRoute">
+      <span class="badge">{{context.taskIds.length}}</span>
       <mat-icon>{{context.icon}}</mat-icon>
       {{context.title}}
     </button>
@@ -53,6 +54,7 @@
            class="project-color"></div>
       <button [routerLink]="['project', project.id, 'tasks']"
               mat-menu-item>
+        <span class="badge">{{project.taskIds.length}}</span>
         <mat-icon class="drag-handle"
                   drag-handle>list
         </mat-icon>
@@ -109,6 +111,7 @@
            class="tag-color"></div>
       <button [routerLink]="['tag', tag.id, 'tasks']"
               mat-menu-item>
+        <span class="badge">{{tag.taskIds.length}}</span>
         <mat-icon class="drag-handle"
                   drag-handle>style
         </mat-icon>
