@@ -107,6 +107,7 @@ export class TrackingReminderService {
   private _openDialog() {
     this._matDialog.open(DialogTrackingReminderComponent, {
       data: {
+        disableClose: true,
         remindCounter$: this.remindCounter$,
       }
     }).afterClosed()

@@ -329,6 +329,7 @@ export class SyncProviderService {
   }): Observable<DialogConflictResolutionResult> {
     return this._matDialog.open(DialogSyncConflictComponent, {
       restoreFocus: true,
+      disableClose: true,
       data: {
         remote,
         local,

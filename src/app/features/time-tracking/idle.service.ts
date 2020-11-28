@@ -106,6 +106,7 @@ export class IdleService {
         this.initIdlePoll(idleTime);
         this._matDialog.open(DialogIdleComponent, {
           restoreFocus: true,
+          disableClose: true,
           data: {
             lastCurrentTaskId: this.lastCurrentTaskId,
             idleTime$: this.idleTime$,
