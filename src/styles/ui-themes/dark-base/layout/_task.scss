@@ -23,6 +23,18 @@ body.isDisableBackgroundGradient {
     top: 0;
   }
 
+  // Current task
+  &.isCurrent .box,
+  &.isCurrent.isCurrent.isCurrent.isCurrent .task-list-wrapper .box {
+    // Override existing !important
+    border-color: var(--color-accent) !important;
+  }
+
+  // Current play icon
+  .play-icon-indicator {
+    color: var(--color-accent) !important;
+  }
+
   // Project/tag title
   .tag-title {
     // Override inline style

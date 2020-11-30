@@ -11,10 +11,15 @@ body.isEnabledBackgroundGradient,
 body.isDisableBackgroundGradient {
   // Top panel
   .mat-flat-button,
-  .mat-raised-button,
+  .mat-button-base,
   .mat-fab,
+  .mat-raised-button,
   .mat-mini-fab {
     background-color: var(--color-background-setting-buttons);
+
+    &.mat-accent {
+      background-color: var(--color-accent);
+    }
   }
 
   // Current task title in top
