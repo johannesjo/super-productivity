@@ -1,5 +1,6 @@
 /* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity, selector-max-combinators, selector-max-compound-selectors */
 
+.isLightTheme,
 body,
 body.isDarkTheme,
 body.isLightTheme,
@@ -24,8 +25,15 @@ body.isDisableBackgroundGradient {
   }
 
   // Current task
-  &.isCurrent .box,
-  &.isCurrent.isCurrent.isCurrent.isCurrent .task-list-wrapper .box {
+  &.isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+  .isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box {
+    // Override existing !important
+    --palette-accent-500: var(--color-accent);
+    border-color: var(--color-accent) !important;
+  }
+
+  .header-wrapper .current-task-title,
+  &.isCurrent.isCurrent.isCurrent.isCurrent .header-wrapper .current-task-title {
     // Override existing !important
     border-color: var(--color-accent) !important;
   }
