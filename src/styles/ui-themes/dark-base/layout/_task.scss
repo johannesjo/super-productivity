@@ -14,6 +14,11 @@ body.isDisableBackgroundGradient {
   .task-list-wrapper .box {
     background-color: var(--color-background-task);
 
+    // Fix scheduled task panel
+    .content {
+      background-color: var(--color-background-task) !important;
+    }
+
     // Fix offset on dark themes
     top: 0;
   }
