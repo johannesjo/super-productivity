@@ -32,6 +32,11 @@ body.isDisableBackgroundGradient {
     border-color: var(--color-accent) !important;
   }
 
+  // Direct background accents
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+
   // Background-colorable accent
   .tag.isActiveContext .tag-color,
   .tag.isActiveContext .project-color,
