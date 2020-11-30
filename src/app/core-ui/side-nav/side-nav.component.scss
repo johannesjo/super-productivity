@@ -13,6 +13,10 @@ $spacer: $s;
   min-height: 100vh;
   // mobile viewport bug fix
   min-height: -webkit-fill-available;
+
+  ::ng-deep .mat-menu-item mat-icon {
+    margin-bottom: 2px;
+  }
 }
 
 :host {

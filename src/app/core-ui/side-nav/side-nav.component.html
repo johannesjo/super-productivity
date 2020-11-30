@@ -10,7 +10,7 @@
             routerLinkActive="isActiveRoute">
       <span class="badge">{{context.taskIds.length}}</span>
       <mat-icon>{{context.icon}}</mat-icon>
-      {{context.title}}
+      <span class="text">{{context.title}}</span>
     </button>
 
     <button [mat-menu-trigger-for]="tagMenu"
@@ -31,7 +31,7 @@
           routerLink="schedule"
           routerLinkActive="isActiveRoute">
     <mat-icon>access_alarms</mat-icon>
-    {{T.MH.SCHEDULED|translate}}
+    <span class="text">{{T.MH.SCHEDULED|translate}}</span>
   </button>
 </section>
 
@@ -60,7 +60,7 @@
         <mat-icon class="drag-handle"
                   drag-handle>list
         </mat-icon>
-        {{project.title}}
+        <span class="text">{{project.title}}</span>
       </button>
 
       <button [matMenuTriggerFor]="projectMenu"
@@ -81,14 +81,14 @@
           routerLink="project-overview"
           routerLinkActive="isActiveRoute">
     <mat-icon>format_list_numbered_rtl</mat-icon>
-    {{T.MH.MANAGE_PROJECTS|translate}}
+    <span class="text">{{T.MH.MANAGE_PROJECTS|translate}}</span>
   </button>
 
   <button (click)="addProject()"
           *ngIf="isProjectsExpanded"
           mat-menu-item>
     <mat-icon>add</mat-icon>
-    {{T.MH.CREATE_PROJECT|translate}}
+    <span class="text">{{T.MH.CREATE_PROJECT|translate}}</span>
   </button>
 </section>
 
@@ -118,7 +118,7 @@
         <mat-icon class="drag-handle"
                   drag-handle>style
         </mat-icon>
-        {{tag.title}}
+        <span class="text">{{tag.title}}</span>
       </button>
 
       <button [mat-menu-trigger-for]="tagMenu"
