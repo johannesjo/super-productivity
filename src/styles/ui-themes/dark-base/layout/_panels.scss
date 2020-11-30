@@ -24,6 +24,10 @@ body.isDisableBackgroundGradient {
     box-shadow: none !important;
   }
 
+  .mat-dialog-container .mat-dialog-content .content {
+    background: transparent !important;
+  }
+
   // Toggle panel inputs
   mat-expansion-panel .mat-expansion-panel-header:not(.mat-expanded):hover,
   .mat-expansion-panel-header:not(.mat-expanded):focus,
