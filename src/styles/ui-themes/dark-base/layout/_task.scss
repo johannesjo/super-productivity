@@ -91,8 +91,10 @@ body.isDisableBackgroundGradient {
   .mat-stroked-button.mat-primary.mat-button-disabled,
   .mat-stroked-button.mat-accent.mat-button-disabled,
   .mat-stroked-button.mat-warn.mat-button-disabled,
-  .mat-stroked-button.mat-button-disabled.mat-button-disabled {
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+  .mat-stroked-button:not(.mat-button-disabled) {
     color: var(--color-foreground);
+    border-color: var(--color-large-toggle-panels-inputs);
   }
 
   // Improve opacity on selected task
