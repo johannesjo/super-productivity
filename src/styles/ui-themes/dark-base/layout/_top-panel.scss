@@ -15,9 +15,14 @@ body.isDisableBackgroundGradient {
   .mat-raised-button,
   .mat-mini-fab {
     background-color: var(--color-background-setting-buttons);
+    color: var(--color-foreground);
 
     &.mat-accent {
       background-color: var(--color-accent);
+
+      .mat-icon-no-color {
+        color: var(--color-foreground);
+      }
     }
   }
 
