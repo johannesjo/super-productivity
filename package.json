@@ -129,7 +129,7 @@
     "angular2-promise-buttons": "^4.0.9",
     "axios": "^0.19.2",
     "chart.js": "^2.8.0",
-    "chromedriver": "^86.0.0",
+    "chromedriver": "^87.0.0",
     "clipboard": "^2.0.1",
     "codelyzer": "^6.0.0",
     "conventional-changelog-cli": "^2.0.21",
