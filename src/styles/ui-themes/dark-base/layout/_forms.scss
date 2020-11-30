@@ -14,6 +14,30 @@ body.isDisableBackgroundGradient {
     color: var(--color-foreground);
   }
 
+  // Add task dialog
+  .add-task-form,
+  .info-bar {
+    // Override too specific styles
+    background-color: var(--color-large-toggle-panels) !important;
+    box-shadow: none !important;
+    border-color: var(--color-border-panels);
+
+    input,
+    &.isElevated input {
+      // Override too specific styles
+      background-color: var(--color-large-toggle-panels) !important;
+      color: var(--color-foreground) !important;
+
+      &::placeholder {
+        color: var(--color-foreground) !important;
+      }
+    }
+  }
+
+  .info-bar {
+    color: var(--color-info-bar) !important;
+  }
+
   // Settings header
   .collapsible-header {
     border-color: var(--color-border-panels);
