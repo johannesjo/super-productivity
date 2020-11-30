@@ -56,7 +56,7 @@
            class="project-color"></div>
       <button [routerLink]="['project', project.id, 'tasks']"
               mat-menu-item>
-        <span class="badge">{{project.taskIds.length}}</span>
+        <span class="badge">{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span>
         <mat-icon class="drag-handle"
                   drag-handle>list
         </mat-icon>
