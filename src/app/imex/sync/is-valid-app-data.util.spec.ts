@@ -6,6 +6,7 @@ import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-arra
 import { Project } from '../../features/project/project.model';
 import { Tag } from '../../features/tag/tag.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
+import { DEFAULT_PROJECT } from '../../features/project/project.const';
 
 // const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
 //   'task',
@@ -83,7 +84,7 @@ describe('isValidAppData()', () => {
           }] as Partial<Project> []),
           [MODEL_VERSION_KEY]: 5
         },
-      })).toThrowError(`Inconsistent Task State: Missing task id gone for Project/Tag TEST_T`);
+      })).toThrowError(`Missing task data (tid: gone) for Project TEST_T`);
     });
 
     it('missing backlog task data for projects', () => {
@@ -100,7 +101,7 @@ describe('isValidAppData()', () => {
           }] as Partial<Project> []),
           [MODEL_VERSION_KEY]: 5
         },
-      })).toThrowError(`Inconsistent Task State: Missing task id goneBL for Project/Tag TEST_T`);
+      })).toThrowError(`Missing task data (tid: goneBL) for Project TEST_T`);
     });
 
     it('missing today task data for tags', () => {
@@ -215,7 +216,7 @@ describe('isValidAppData()', () => {
       })).toThrowError(`projectId NON_EXISTENT from task not existing`);
     });
 
-    it('missing projectIds for taskArchive', () => {
+    it('wrong projectIds for listed tasks', () => {
       expect(() => isValidAppData({
         ...mock,
         taskArchive: {
@@ -227,5 +228,65 @@ describe('isValidAppData()', () => {
         } as any,
       })).toThrowError(`projectId NON_EXISTENT from archive task not existing`);
     });
+  });
+
+  it('missing projectIds for task', () => {
+    expect(() => isValidAppData({
+      ...mock,
+      project: {
+        ...mock.project,
+        ...fakeEntityStateFromArray<Project>([{
+          ...DEFAULT_PROJECT,
+          id: 'p1',
+          taskIds: ['t1', 't2']
+        }, {
+          ...DEFAULT_PROJECT,
+          id: 'p2',
+          taskIds: ['t1']
+        }])
+      } as any,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: 'p1'
+        }, {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: 'p1'
+        }])
+      } as any,
+    })).toThrowError(`Inconsistent task projectId`);
+  });
+
+  it('missing task data', () => {
+    expect(() => isValidAppData({
+      ...mock,
+      project: {
+        ...mock.project,
+        ...fakeEntityStateFromArray<Project>([{
+          ...DEFAULT_PROJECT,
+          id: 'p1',
+          taskIds: ['t1', 't2']
+        }, {
+          ...DEFAULT_PROJECT,
+          id: 'p2',
+          taskIds: ['t1']
+        }])
+      } as any,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: 'p1'
+        }, {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: 'p1'
+        }])
+      } as any,
+    })).toThrowError(`Inconsistent task projectId`);
   });
 });

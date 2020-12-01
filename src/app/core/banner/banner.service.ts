@@ -88,4 +88,12 @@ export class BannerService {
       this._banners$.next(this._banners);
     }
   }
+
+  // usually not required, but when we want to be sure
+  dismissAll(bannerId: BannerId) {
+    if (this._banners.find(bannerIN => bannerIN.id === bannerId)) {
+      this._banners = this._banners.filter(banner => banner.id !== bannerId);
+      this._banners$.next(this._banners);
+    }
+  }
 }

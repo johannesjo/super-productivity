@@ -234,6 +234,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'taskOpenContextMenu',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_OPEN_CONTEXT_MENU
+      },
+    },
+    {
       key: 'selectPreviousTask',
       type: 'keyboard',
       templateOptions: {

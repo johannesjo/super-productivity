@@ -1,5 +1,9 @@
 <ng-container *ngIf="(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)">
 
+  <div class="bg-image"
+       *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
+       [style.background]="'url(' + bgImage + ')'"></div>
+
   <!--TODO move inside page container somehow -->
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
                 *ngIf="layoutService.isShowAddTaskBar$|async"
@@ -9,9 +13,7 @@
   <div *ngIf="(layoutService.isShowAddTaskBar$|async)"
        @fade
        class="backdrop"></div>
-
   <mat-sidenav-container
-    [style.background]="'url(' + (globalThemeService.backgroundImg$|async) + ')'"
     [dir]="isRTL ? 'rtl' : 'ltr'">
     <mat-sidenav (closedStart)="layoutService.hideSideNav()"
                  [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"

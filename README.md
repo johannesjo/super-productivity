@@ -112,6 +112,13 @@ sudo snap install superproductivity
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
 </a>
 
+#### Arch
+```bash 
+git clone https://aur.archlinux.org/superproductivity-bin.git
+cd superproductivity-bin
+makepkg -si
+```
+
 ### MacOS
 Install via [homebrew cask](https://github.com/caskroom/homebrew-cask):
 ```
@@ -198,5 +205,5 @@ superproductivity --user-data-dir=/path/to/my/data
 ```
 
 ## Automatic Backups
-For the desktop version automatic backups are stored per default. You can see the backup folder location printed out when you start the app from the command line. 
+For the desktop version automatic backups are stored per default. You can see the [backup folder location](https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname) printed out when you start the app from the command line. 
 Once you located a backup you can restore it on the settings page under`Sync & Export/Import/Export/Import from file`.

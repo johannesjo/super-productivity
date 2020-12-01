@@ -28,6 +28,8 @@ export class TaskSummaryTablesComponent {
 
   @Input() isForToday: boolean = true;
 
+  @Input() isShowYesterday: boolean = false;
+
   @Input('flatTasks') set flatTasksIn(v: Task[]) {
     this.flatTasks = v;
     const pids = unique(v.map(t => t.projectId).filter(pid => typeof pid === 'string')) as string[];
@@ -95,6 +97,13 @@ export class TaskSummaryTablesComponent {
   }
 
   private _mapToProjectWithTasks(project: Project | { id: string | null; title: string }): ProjectWithTasks {
-    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr);
+    let yesterdayStr: string | undefined;
+    if (this.isShowYesterday && this.isForToday) {
+      const t = new Date();
+      t.setDate(t.getDate() - 1);
+      yesterdayStr = getWorklogStr(t);
+    }
+
+    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr, yesterdayStr);
   }
 }

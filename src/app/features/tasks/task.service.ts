@@ -45,8 +45,6 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
-  selectAllRepeatableTaskWithSubTasks,
-  selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -128,14 +126,6 @@ export class TaskService {
   currentTaskOrCurrentParent$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectCurrentTaskOrParentWithData),
     // NOTE: we can't use share here, as we need the last emitted value
-  );
-
-  allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectAllRepeatableTaskWithSubTasks),
-  );
-
-  allRepeatableTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectAllRepeatableTaskWithSubTasksFlat),
   );
 
   isTaskDataLoaded$: Observable<boolean> = this._store.pipe(
@@ -457,6 +447,10 @@ export class TaskService {
 
     if (workContextType === WorkContextType.PROJECT) {
       task$.subscribe(task => {
+        if (!task) {
+          console.log({taskId, workContextType, workContextId, activeWCId: this._workContextService.activeWorkContextId});
+          throw new Error('Startable task not found');
+        }
         if (task.parentId) {
           this.moveToToday(task.parentId, true);
         } else {

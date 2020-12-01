@@ -88,25 +88,25 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
         "AUTH_ERROR": "Dropbox: Ongeldige access token opgegeven",
         "OFFLINE": "Dropbox: Kan niet worden gesynchroniseerd, vanwege offline",
-        "SYNC_ERROR": "Dropbox: Fout tijdens her synchroniseren",
-        "UNKNOWN_ERROR": "Dropbox: Onbekende fout: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: Fout tijdens her synchroniseren"
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Stel Github in voor Project"
+        "TITLE": "Stel GitHub in voor Project"
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van Github toe aan de achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de achterstand",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
-        "TOKEN": "Toegangstoken"
+        "TOKEN": "Toegangstoken",
+        "TOKEN_DESCRIPTION": "Vereist voor toegang tot privérepository"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om openstaande GitHub-problemen voor een specifieke repository weer te geven in het paneel voor het maken van taken in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar het probleem en meer informatie erover.</p> <p>Daarnaast kunt u automatisch alle openstaande problemen toevoegen en synchroniseren met uw taakachterstand.</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Toegewezen aan",
@@ -119,36 +119,36 @@
         "WRITE_A_COMMENT": "Schrijf een reactie"
       },
       "S": {
-        "ERR_NETWORK": "Github: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
-        "ERR_NOT_CONFIGURED": "Github: is niet correct geconfigureerd",
-        "ERR_UNKNOWN": "Github: onbekende fout {{statusCode}} {{errorMsg}}. API-limiet overschreden?",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: geen update vereist",
-        "ISSUE_UPDATE": "Github: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: taken met ontbrekende probleemgegevens gevonden. Herladen.",
-        "NEW_COMMENT": "Github: nieuwe opmerking voor \"{{issueText}}\"",
-        "POLLING": "Github: Polling-wijzigingen voor problemen",
+        "ERR_NETWORK": "GitHub: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
+        "ERR_NOT_CONFIGURED": "GitHub: is niet correct geconfigureerd",
+        "ERR_UNKNOWN": "GitHub: onbekende fout {{statusCode}} {{errorMsg}}. API-limiet overschreden?",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: geen update vereist",
+        "ISSUE_UPDATE": "GitHub: bijgewerkte gegevens voor \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: bijgewerkte gegevens voor \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: taken met ontbrekende probleemgegevens gevonden. Herladen.",
+        "NEW_COMMENT": "GitHub: nieuwe opmerking voor \"{{issueText}}\"",
+        "POLLING": "GitHub: Polling-wijzigingen voor problemen",
         "SHOW_ISSUE_BTN": "Laat het mij eens zien"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Gitlab instellen voor Project"
+        "TITLE": "GitLab instellen voor Project"
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van Gitlab toe aan de achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitLab toe aan de achterstand",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "PROJECT": "Volledig pad of gebruikersnaam / project",
         "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Hier kunt u SuperProductivity configureren om open Gitlab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw taakachterstand. </p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p> Hier kunt u SuperProductivity configureren om open GitLab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw taakachterstand. </p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Toegewezen aan",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Schrijf een reactie"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
-        "ERR_NOT_CONFIGURED": "Gitlab: is niet correct geconfigureerd",
-        "ERR_UNKNOWN": "Gitlab: onbekende fout {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: geen update vereist",
-        "ISSUE_UPDATE": "Gitlab: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: bijgewerkte gegevens voor \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: taken met ontbrekende probleemgegevens gevonden. Herladen.",
-        "NEW_COMMENT": "Gitlab: nieuwe opmerking voor \"{{issueText}}\"",
-        "POLLING": "Gitlab: Polling-wijzigingen voor problemen",
+        "ERR_NETWORK": "GitLab: verzoek mislukt vanwege een netwerkfout aan de clientzijde",
+        "ERR_NOT_CONFIGURED": "GitLab: is niet correct geconfigureerd",
+        "ERR_UNKNOWN": "GitLab: onbekende fout {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: geïmporteerd probleem \"{{issueText}}\" van git naar achterstand",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Probleem \"{{issueText}}\" lijkt te zijn verwijderd of gesloten op git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: geen update vereist",
+        "ISSUE_UPDATE": "GitLab: bijgewerkte gegevens voor \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: bijgewerkte gegevens voor \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: taken met ontbrekende probleemgegevens gevonden. Herladen.",
+        "NEW_COMMENT": "GitLab: nieuwe opmerking voor \"{{issueText}}\"",
+        "POLLING": "GitLab: Polling-wijzigingen voor problemen",
         "SHOW_ISSUE_BTN": "Laat het mij eens zien"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira: Werklogboek indienen"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van Github toe aan de achterstand",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitHub toe aan de achterstand",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen"
@@ -450,8 +450,8 @@
       "D_CREATE": {
         "CREATE": "Project maken",
         "EDIT": "Project bewerken",
-        "SETUP_GIT": "Github-integratie instellen",
-        "SETUP_GITLAB": "Gitlab-integratie instellen",
+        "SETUP_GIT": "GitHub-integratie instellen",
+        "SETUP_GITLAB": "GitLab-integratie instellen",
         "SETUP_JIRA": "Jira-integratie instellen"
       },
       "FORM_BASIC": {
@@ -615,7 +615,7 @@
         "START": "Druk nogmaals op Enter om te beginnen"
       },
       "B": {
-        "ADD_HALF_HOUR": "Voeg 1/2 hou toe",
+        "ADD_HALF_HOUR": "Voeg 1/2 uur toe",
         "ESTIMATE_EXCEEDED": "Geschatte tijd overschreden voor \"{{title}}\""
       },
       "CMP": {
@@ -629,9 +629,9 @@
         "EDIT_TAGS": "Bewerk-tags",
         "MARK_DONE": "Markeer als voltooid",
         "MARK_UNDONE": "Markeren als ongedaan gemaakt",
-        "MOVE_TO_BACKLOG": "Ga naar achterstand",
-        "MOVE_TO_OTHER_PROJECT": "Ga naar een ander project",
-        "MOVE_TO_TODAY": "Ga naar de lijst van vandaag",
+        "MOVE_TO_BACKLOG": "Verplaats naar backlog",
+        "MOVE_TO_OTHER_PROJECT": "Verplaats naar een ander project",
+        "MOVE_TO_TODAY": "Verplaats naar de lijst van vandaag",
         "OPEN_ATTACH": "Voeg bestand of link toe",
         "OPEN_ISSUE": "Open in de browser",
         "OPEN_TIME": "Tijd bijhouden",
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "TITLE": "Diverse instellingen"
     },
@@ -1000,7 +1001,7 @@
     "DBX_UPLOAD": "Dropbox: Upload bestand ...",
     "GDRIVE_DOWNLOAD": "Google Drive: bestand downloaden ...",
     "GDRIVE_UPLOAD": "Google Drive: bestand uploaden ...",
-    "GITHUB_LOAD_ISSUE": "Github: Probleemgegevens laden ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: Probleemgegevens laden ...",
     "JIRA_LOAD_ISSUE": "Jira: Probleemgegevens laden ...",
     "UNKNOWN": "Externe gegevens laden",
     "WEB_DAV_DOWNLOAD": "WebDAV: gegevens downloaden ...",
@@ -1084,8 +1085,8 @@
     },
     "EDIT_PROJECT": "Project bewerken",
     "EXPORT_PROJECT": "Project exporteren",
-    "GITHUB_CONFIGURED": "Github-integratie geconfigureerd",
-    "GITLAB_CONFIGURED": "Gitlab-integratie geconfigureerd",
+    "GITHUB_CONFIGURED": "GitHub-integratie geconfigureerd",
+    "GITLAB_CONFIGURED": "GitLab-integratie geconfigureerd",
     "IMPORT_FROM_FILE": "Importeren uit bestand",
     "JIRA_CONFIGURED": "Jira-integratie geconfigureerd",
     "S_INVALID_JSON": "Ongeldige json voor projectbestand",
@@ -1098,6 +1099,7 @@
     "PRIVATE_POLICY": "Privébeleid",
     "PRODUCTIVITY_HELPER": "Productiviteitshulp",
     "PROJECT_SETTINGS": "Projectspecifieke instellingen",
+    "PROVIDE_FEEDBACK": "Geef feedback",
     "SYNC_EXPORT": "Synchroniseren en exporteren",
     "TAG_SETTINGS": "Label specifieke instellingen",
     "TOGGLE_DARK_MODE": "Schakel de donkere modus in"

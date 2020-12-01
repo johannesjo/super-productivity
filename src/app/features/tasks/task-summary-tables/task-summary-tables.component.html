@@ -5,7 +5,14 @@
        [style.border-color]="project.color">
     <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
-    <div>{{project.timeSpentToday|msToString}}</div>
+
+    <div *ngIf="!isShowYesterday">{{project.timeSpentToday|msToString}}</div>
+
+    <div *ngIf="isShowYesterday">{{project.timeSpentToday > 0 ? (project.timeSpentToday|msToString) : ''}}
+      <ng-container *ngIf="project.timeSpentYesterday >0">
+        ({{project.timeSpentYesterday|msToString}} {{T.G.YESTERDAY|translate}})
+      </ng-container>
+    </div>
   </div>
 
   <task-summary-table (updated)="onTaskSummaryEdit()"

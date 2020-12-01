@@ -18,7 +18,7 @@ export class ScheduledTaskService {
         map((tasks) => tasks
           .filter((task) => {
             if (!task) {
-              console.log(reminders, tasks);
+              console.log({reminders, tasks});
               devError('Reminder without task data');
             }
             return !!task;
@@ -29,12 +29,15 @@ export class ScheduledTaskService {
               reminderData: reminders.find(reminder => reminder.relatedId === task.id)
             } as TaskWithReminderData)),
         ),
-        switchMap((tasks: TaskWithReminderData[]) => forkJoin(tasks.map(task => !!task.parentId
-          ? this._taskService.getByIdOnce$(task.parentId).pipe(map(parentData => ({
-            ...task,
-            parentData
-          })))
-          : of(task)))
+        // NOTE: task length check is required, because otherwise the observable won't trigger for empty array
+        switchMap((tasks: TaskWithReminderData[]) => tasks.length
+          ? forkJoin(tasks.map(task => !!task.parentId
+            ? this._taskService.getByIdOnce$(task.parentId).pipe(map(parentData => ({
+              ...task,
+              parentData
+            })))
+            : of(task)))
+          : of([])
         ),
       );
     }),

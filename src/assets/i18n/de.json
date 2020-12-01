@@ -88,21 +88,21 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: Aus Authentifizierungscode generiertes Zugriffstoken",
         "AUTH_ERROR": "Dropbox: Ungültiges Zugriffstoken bereitgestellt",
         "OFFLINE": "Dropbox: Synchronisierung nicht möglich, da offline",
-        "SYNC_ERROR": "Dropbox: Fehler beim Synchronisieren",
-        "UNKNOWN_ERROR": "Dropbox: Unbekannter Fehler: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: Fehler beim Synchronisieren"
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Richten Sie Github für Project ein"
+        "TITLE": "Richten Sie GitHub für Project ein"
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
-        "TOKEN": "Zugangstoken"
+        "TOKEN": "Zugangstoken",
+        "TOKEN_DESCRIPTION": "Erforderlich für den Zugriff auf private Repositories"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GitHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
@@ -119,35 +119,35 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "S": {
-        "ERR_NETWORK": "Github: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
-        "ERR_NOT_CONFIGURED": "Github: Ist nicht richtig konfiguriert",
-        "ERR_UNKNOWN": "Github: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} neue Issues von Git in das Backlog importiert",
-        "IMPORTED_SINGLE_ISSUE": "Github: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: Kein Update erforderlich",
-        "ISSUE_UPDATE": "Github: Aktualisierte Daten für \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aktualisierte Daten für \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
-        "NEW_COMMENT": "Github: Neuer Kommentar für \"{{issueText}}\"",
-        "POLLING": "Github: Änderungen für Issues abrufen",
+        "ERR_NETWORK": "GitHub: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
+        "ERR_NOT_CONFIGURED": "GitHub: Ist nicht richtig konfiguriert",
+        "ERR_UNKNOWN": "GitHub: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: {{issuesLength}} neue Issues von Git in das Backlog importiert",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Kein Update erforderlich",
+        "ISSUE_UPDATE": "GitHub: Aktualisierte Daten für \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Aktualisierte Daten für \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
+        "NEW_COMMENT": "GitHub: Neuer Kommentar für \"{{issueText}}\"",
+        "POLLING": "GitHub: Änderungen für Issues abrufen",
         "SHOW_ISSUE_BTN": "Zeige mir"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Richten Sie Gitlab für Project ein"
+        "TITLE": "Richten Sie GitLab für Project ein"
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Gitlab automatisch zum Backlog hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitLab automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "PROJECT": "Vollständiger Pfad oder Benutzername / Projekt",
         "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Hier können Sie SuperProductivity so konfigurieren, dass offene Gitlab-Probleme (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Bereich zur Aufgabenerstellung in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Problem sowie weitere Informationen dazu. </p> <p> Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren. </p>",
+        "HELP": "<p> Hier können Sie SuperProductivity so konfigurieren, dass offene GitLab-Probleme (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Bereich zur Aufgabenerstellung in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Problem sowie weitere Informationen dazu. </p> <p> Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren. </p>",
         "TITLE": "gitlab"
       },
       "ISSUE_CONTENT": {
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
-        "ERR_NOT_CONFIGURED": "Gitlab: Ist nicht richtig konfiguriert",
-        "ERR_UNKNOWN": "Gitlab: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: {{issuesLength}} neue Issues von Git in das Backlog importiert",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Kein Update erforderlich",
-        "ISSUE_UPDATE": "Gitlab: Aktualisierte Daten für \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Aktualisierte Daten für \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
-        "NEW_COMMENT": "Gitlab: Neuer Kommentar für \"{{issueText}}\"",
-        "POLLING": "Gitlab: Änderungen für Issues abrufen",
+        "ERR_NETWORK": "GitLab: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
+        "ERR_NOT_CONFIGURED": "GitLab: Ist nicht richtig konfiguriert",
+        "ERR_UNKNOWN": "GitLab: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: {{issuesLength}} neue Issues von Git in das Backlog importiert",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Kein Update erforderlich",
+        "ISSUE_UPDATE": "GitLab: Aktualisierte Daten für \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Aktualisierte Daten für \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
+        "NEW_COMMENT": "GitLab: Neuer Kommentar für \"{{issueText}}\"",
+        "POLLING": "GitLab: Änderungen für Issues abrufen",
         "SHOW_ISSUE_BTN": "Zeige mir"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira: Worklog einreichen"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus Github automatisch zum Backlog hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
@@ -450,8 +450,8 @@
       "D_CREATE": {
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
-        "SETUP_GIT": "Einrichten der Github-Integration",
-        "SETUP_GITLAB": "Einrichten der Gitlab-Integration",
+        "SETUP_GIT": "Einrichten der GitHub-Integration",
+        "SETUP_GITLAB": "Einrichten der GitLab-Integration",
         "SETUP_JIRA": "Jira-Integration einrichten"
       },
       "FORM_BASIC": {
@@ -551,7 +551,7 @@
         "L_SYNC_PROVIDER": "Anbieter synchronisieren",
         "TITLE": "Sync",
         "WEB_DAV": {
-          "CORS_INFO": "",
+          "CORS_INFO": "<p><strong>Experimental!!</strong> In order <strong>to make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance</strong>, which can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread</a> for more information. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Passwort",
           "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
@@ -942,7 +942,7 @@
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Deskop)",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
       "TITLE": "Verschiedene Einstellungen"
     },
@@ -1001,7 +1001,7 @@
     "DBX_UPLOAD": "Dropbox: Datei hochladen ...",
     "GDRIVE_DOWNLOAD": "Google Drive: Datei herunterladen ...",
     "GDRIVE_UPLOAD": "Google Drive: Datei hochladen ...",
-    "GITHUB_LOAD_ISSUE": "Github: Problemdaten laden ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: Problemdaten laden ...",
     "JIRA_LOAD_ISSUE": "Jira: Problemdaten laden ...",
     "UNKNOWN": "Remote-Daten laden",
     "WEB_DAV_DOWNLOAD": "WebDAV: Daten herunterladen ...",
@@ -1085,8 +1085,8 @@
     },
     "EDIT_PROJECT": "Projekt bearbeiten",
     "EXPORT_PROJECT": "Projekt exportieren",
-    "GITHUB_CONFIGURED": "Github-Integration konfiguriert",
-    "GITLAB_CONFIGURED": "Gitlab-Integration konfiguriert",
+    "GITHUB_CONFIGURED": "GitHub-Integration konfiguriert",
+    "GITLAB_CONFIGURED": "GitLab-Integration konfiguriert",
     "IMPORT_FROM_FILE": "Aus Datei importieren",
     "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
     "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",
@@ -1099,6 +1099,7 @@
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Produktivitäts-Helfer",
     "PROJECT_SETTINGS": "Projektspezifische Einstellungen",
+    "PROVIDE_FEEDBACK": "Rückmeldung geben",
     "SYNC_EXPORT": "Synchronisieren und exportieren",
     "TAG_SETTINGS": "Tag-spezifische Einstellungen",
     "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"

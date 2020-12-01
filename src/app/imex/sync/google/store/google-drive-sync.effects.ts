@@ -148,11 +148,23 @@ export class GoogleDriveSyncEffects {
   }
 
   private _getApiErrorString(err: any): string {
-    if (err && err.details) {
+    if (err?.details) {
       return err.details;
     }
     if (err && err[HANDLED_ERROR_PROP_STR]?.details) {
       return err[HANDLED_ERROR_PROP_STR].details;
+    }
+    if (err && err[HANDLED_ERROR_PROP_STR]?.message) {
+      return err[HANDLED_ERROR_PROP_STR].message;
+    }
+    if (err?.message) {
+      return err.message;
+    }
+    if (err?.error?.message) {
+      return err.error.message;
+    }
+    if (err && err[HANDLED_ERROR_PROP_STR]) {
+      return err[HANDLED_ERROR_PROP_STR];
     }
     return err.toString();
   }

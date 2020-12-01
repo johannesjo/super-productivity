@@ -93,19 +93,20 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Github for Project"
+        "TITLE": "Setup GitHub for Project"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track",
-        "TOKEN": "Access Token"
+        "TOKEN": "Access Token",
+        "TOKEN_DESCRIPTION": "Required for private repository access"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
-        "TITLE": "Github"
+        "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
@@ -118,36 +119,36 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
-        "ERR_NETWORK": "Github: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "Github: Is not properly configured",
-        "ERR_UNKNOWN": "Github: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: No update required",
-        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
-        "POLLING": "Github: Polling Changes for issues",
+        "ERR_NETWORK": "GitHub: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "GitHub: Is not properly configured",
+        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: Imported issue \"{{issueText}}\" from git to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: No update required",
+        "ISSUE_UPDATE": "GitHub: Updated data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: Tasks with missing issue data found. Reloading.",
+        "NEW_COMMENT": "GitHub: New comment for \"{{issueText}}\"",
+        "POLLING": "GitHub: Polling Changes for issues",
         "SHOW_ISSUE_BTN": "Show me"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Setup Gitlab for Project"
+        "TITLE": "Setup GitLab for Project"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Gitlab to backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitLab to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "Full path or user name/project",
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open Gitlab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
@@ -160,18 +161,18 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "Gitlab: Is not properly configured",
-        "ERR_UNKNOWN": "Gitlab: Unknown error {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: No update required",
-        "ISSUE_UPDATE": "Gitlab: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "Gitlab: New comment for \"{{issueText}}\"",
-        "POLLING": "Gitlab: Polling Changes for issues",
+        "ERR_NETWORK": "GitLab: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "GitLab: Is not properly configured",
+        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Imported issue \"{{issueText}}\" from git to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: No update required",
+        "ISSUE_UPDATE": "GitLab: Updated data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: Tasks with missing issue data found. Reloading.",
+        "NEW_COMMENT": "GitLab: New comment for \"{{issueText}}\"",
+        "POLLING": "GitLab: Polling Changes for issues",
         "SHOW_ISSUE_BTN": "Show me"
       }
     },
@@ -238,7 +239,7 @@
         "TITLE": "Jira: Submit Worklog"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
@@ -449,8 +450,8 @@
       "D_CREATE": {
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
-        "SETUP_GIT": "Setup Github Integration",
-        "SETUP_GITLAB": "Setup Gitlab Integration",
+        "SETUP_GIT": "Setup GitHub Integration",
+        "SETUP_GITLAB": "Setup GitLab Integration",
         "SETUP_JIRA": "Setup Jira Integration"
       },
       "FORM_BASIC": {
@@ -843,7 +844,8 @@
     "TITLE": "Title",
     "UNDO": "Undo",
     "UPDATE": "Update",
-    "WITHOUT_PROJECT": "Without Project"
+    "WITHOUT_PROJECT": "Without Project",
+    "YESTERDAY": "Yesterday"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -895,6 +897,7 @@
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TITLE": "Edit Title",
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
+      "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
       "TASK_SCHEDULE": "Schedule Task",
       "TASK_SHORTCUTS": "Tasks",
@@ -1000,7 +1003,7 @@
     "DBX_UPLOAD": "Dropbox: Upload file...",
     "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
     "GDRIVE_UPLOAD": "Google Drive: Upload file...",
-    "GITHUB_LOAD_ISSUE": "Github: Load issue data...",
+    "GITHUB_LOAD_ISSUE": "GitHub: Load issue data...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
     "UNKNOWN": "Loading remote data",
     "WEB_DAV_DOWNLOAD": "WebDAV: Downloading data...",
@@ -1084,8 +1087,8 @@
     },
     "EDIT_PROJECT": "Edit Project",
     "EXPORT_PROJECT": "Export Project",
-    "GITHUB_CONFIGURED": "Github Integration Configured",
-    "GITLAB_CONFIGURED": "Gitlab Integration Configured",
+    "GITHUB_CONFIGURED": "GitHub Integration Configured",
+    "GITLAB_CONFIGURED": "GitLab Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
     "JIRA_CONFIGURED": "Jira Integration Configured",
     "S_INVALID_JSON": "Invalid json for project file",
@@ -1098,6 +1101,7 @@
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Productivity Helper",
     "PROJECT_SETTINGS": "Project Specific Settings",
+    "PROVIDE_FEEDBACK": "Provide Feedback",
     "SYNC_EXPORT": "Sync & Export",
     "TAG_SETTINGS": "Tag Specific Settings",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"

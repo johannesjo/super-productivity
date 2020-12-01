@@ -17,7 +17,6 @@ import {
   delayWhen,
   distinctUntilChanged,
   filter,
-  first,
   map,
   mapTo,
   shareReplay,
@@ -50,7 +49,7 @@ import {
   updateWorkStartForTag
 } from '../tag/store/tag.actions';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
-import { isToday } from '../../util/is-today.util';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -144,10 +143,6 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-  activeWorkContextOnceOnContextChange$: Observable<WorkContext> = this.activeWorkContextId$.pipe(
-    switchMap(() => this.activeWorkContext$.pipe(first())),
-  );
-
   mainWorkContexts$: Observable<WorkContext[]> =
     this._isAllDataLoaded$.pipe(
       concatMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
@@ -239,10 +234,11 @@ export class WorkContextService {
       activeContext.taskIds.forEach(id => {
         const task: Task | undefined = entities[id];
         if (!task) {
-          throw new Error('Task not found');
-        }
-
-        if (task.subTaskIds && task.subTaskIds.length) {
+          // NOTE: there is the rare chance that activeWorkContext$ and selectTaskEntities
+          // are out of sync, due to activeWorkContext taking an extra step, this is why we
+          // only use devError
+          devError('Task not found');
+        } else if (task.subTaskIds && task.subTaskIds.length) {
           startableTasks = startableTasks.concat(task.subTaskIds.map(sid => entities[sid] as Task));
         } else {
           startableTasks.push(task);
@@ -268,15 +264,15 @@ export class WorkContextService {
     distinctUntilChanged(),
   );
 
-  allNonArchiveTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
-    this.todaysTasks$,
-    this.backlogTasks$
-  ]).pipe(
-    map(([today, backlog]) => ([
-      ...today,
-      ...backlog
-    ]))
-  );
+  // allNonArchiveTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
+  //   this.todaysTasks$,
+  //   this.backlogTasks$
+  // ]).pipe(
+  //   map(([today, backlog]) => ([
+  //     ...today,
+  //     ...backlog
+  //   ]))
+  // );
 
   flatDoneTodayNr$: Observable<number> = this.todaysTasks$.pipe(
     map(tasks => flattenTasks(tasks)),
@@ -284,11 +280,6 @@ export class WorkContextService {
       const done = tasks.filter(task => task.isDone);
       return done.length;
     })
-  );
-
-  allRepeatableTasksFlat$: Observable<TaskWithSubTasks[]> = this.allNonArchiveTasks$.pipe(
-    map((tasks) => (tasks.filter(task => !!task.repeatCfgId))),
-    map(tasks => flattenTasks(tasks)),
   );
 
   isToday: boolean = false;
@@ -356,40 +347,6 @@ export class WorkContextService {
         );
       }),
       distinctUntilChanged(),
-    );
-  }
-
-  // TODO could be done better
-  getTimeEstimateForDay$(day: string = getWorklogStr()): Observable<number> {
-    return this.todaysTasks$.pipe(
-      map((tasks) => {
-        return tasks && tasks.length && tasks.reduce((acc, task) => {
-            if (!task.timeSpentOnDay && !(task.timeSpentOnDay[day] > 0)) {
-              return acc;
-            }
-            const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[day]) - task.timeSpent;
-            return (remainingEstimate > 0)
-              ? acc + remainingEstimate
-              : acc;
-          }, 0
-        );
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
-  getDailySummaryTasksFlat$(dayStr: string): Observable<Task[]> {
-    return combineLatest([
-      this.allRepeatableTasksFlat$,
-      this._getDailySummaryTasksFlatWithoutRepeatable$(dayStr)
-    ]).pipe(
-      map(([repeatableTasks, workedOnOrDoneTasks]) => [
-        ...repeatableTasks,
-        // NOTE: remove double tasks
-        ...workedOnOrDoneTasks.filter(
-          (task => !task.repeatCfgId)
-        ),
-      ]),
     );
   }
 
@@ -495,26 +452,4 @@ export class WorkContextService {
     this._store$.dispatch(setActiveWorkContext({activeId, activeType}));
   }
 
-  private _getDailySummaryTasksFlatWithoutRepeatable$(dayStr: string): Observable<Task[]> {
-    const _isWorkedOnOrDoneToday = (t: Task) => (t.timeSpentOnDay && t.timeSpentOnDay[dayStr] && t.timeSpentOnDay[dayStr] > 0)
-      || (t.isDone && (!t.doneOn || isToday((t.doneOn))));
-
-    return this.allNonArchiveTasks$.pipe(
-      map(tasks => {
-        let flatTasks: Task[] = [];
-        tasks.forEach(pt => {
-          if (pt.subTasks && pt.subTasks.length) {
-            const subTasks = pt.subTasks.filter(st => _isWorkedOnOrDoneToday(st));
-            if (subTasks.length) {
-              flatTasks.push(pt);
-              flatTasks = flatTasks.concat(subTasks);
-            }
-          } else if (_isWorkedOnOrDoneToday(pt)) {
-            flatTasks.push(pt);
-          }
-        });
-        return flatTasks;
-      }),
-    );
-  }
 }

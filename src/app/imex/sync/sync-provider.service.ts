@@ -282,10 +282,11 @@ export class SyncProviderService {
   // NOTE: last sync should always equal localLastChange
   private async _setLocalRevAndLastSync(cp: SyncProviderServiceInterface, rev: string, lastSync: number): Promise<unknown> {
     if (!rev) {
+      console.log(cp, rev);
       throw new Error('No rev given');
     }
     if (typeof (lastSync as any) !== 'number') {
-      throw new Error('No correct localLastSync given');
+      throw new Error('No correct localLastSync given ' + lastSync);
     }
     const localSyncMeta = await this._persistenceLocalService.load();
     return this._persistenceLocalService.save({
@@ -328,6 +329,7 @@ export class SyncProviderService {
   }): Observable<DialogConflictResolutionResult> {
     return this._matDialog.open(DialogSyncConflictComponent, {
       restoreFocus: true,
+      disableClose: true,
       data: {
         remote,
         local,

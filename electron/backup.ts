@@ -32,7 +32,7 @@ export function initBackupAdapter(backupDir: string) {
     }));
 
     filesWithMeta.sort((a: LocalBackupMeta, b: LocalBackupMeta) => a.created - b.created);
-    console.log('Avilable Backup Files: ', filesWithMeta);
+    console.log('Avilable Backup Files: ', (filesWithMeta?.map && filesWithMeta.map(f => f.path)));
     return filesWithMeta.reverse()[0];
   });
 

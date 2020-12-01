@@ -36,6 +36,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     type: 'input',
     templateOptions: {
       label: T.F.GITHUB.FORM.TOKEN,
+      description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION
     },
   },
   {
@@ -69,7 +70,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
 ];
 
 export const GITHUB_CONFIG_FORM_SECTION: ConfigFormSection<GithubCfg> = {
-  title: 'Github',
+  title: 'GitHub',
   key: 'GITHUB',
   items: GITHUB_CONFIG_FORM,
   help: T.F.GITHUB.FORM_SECTION.HELP,

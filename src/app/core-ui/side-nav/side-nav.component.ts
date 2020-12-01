@@ -15,6 +15,8 @@ import { Tag } from '../../features/tag/tag.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 
+const IS_SHOW_INITIALLY = false;
+
 @Component({
   selector: 'side-nav',
   templateUrl: './side-nav.component.html',
@@ -25,8 +27,8 @@ import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 export class SideNavComponent implements OnDestroy {
   @Output() scrollToNotes: EventEmitter<void> = new EventEmitter();
 
-  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  isProjectsExpanded: boolean = false;
+  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
+  isProjectsExpanded: boolean = IS_SHOW_INITIALLY;
   projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.projectService.list$
@@ -39,8 +41,8 @@ export class SideNavComponent implements OnDestroy {
     )
   );
 
-  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  isTagsExpanded: boolean = false;
+  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
+  isTagsExpanded: boolean = IS_SHOW_INITIALLY;
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.tagService.tagsNoMyDay$

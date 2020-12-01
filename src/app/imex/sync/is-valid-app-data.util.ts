@@ -33,7 +33,7 @@ export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateEr
     && Array.isArray(d.reminders)
     && _isEntityStatesConsistent(d)
     && (isSkipInconsistentTaskStateError ||
-      _isAllTasksAvailable(d)
+      _isAllTasksAvailableAndListConsistent(d)
       && _isNoLonelySubTasks(d)
     )
     && _isAllProjectsAvailable(d)
@@ -68,8 +68,10 @@ const _isAllProjectsAvailable = (data: AppDataComplete): boolean => {
   return isValid;
 };
 
-const _isAllTasksAvailable = (data: AppDataComplete): boolean => {
+const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean => {
   let allIds: string [] = [];
+  let isInconsistentProjectId: boolean = false;
+  let isMissingTaskData: boolean = false;
 
   (data.tag.ids as string[])
     .map(id => data.tag.entities[id])
@@ -88,25 +90,37 @@ const _isAllTasksAvailable = (data: AppDataComplete): boolean => {
           console.log(data.project);
           throw new Error('No project');
         }
-        allIds = allIds
-          .concat(project.taskIds)
-          .concat(project.backlogTaskIds);
+        const allTaskIdsForProject: string[] = project.taskIds.concat(project.backlogTaskIds);
+        allIds = allIds.concat(allTaskIdsForProject);
+        allTaskIdsForProject.forEach(tid => {
+          const task = data.task.entities[tid];
+          if (!task) {
+            isMissingTaskData = true;
+            devError('Missing task data (tid: ' + tid + ') for Project ' + project.title);
+          } else if (task?.projectId !== project.id) {
+            isInconsistentProjectId = true;
+            console.log({task});
+            devError('Inconsistent task projectId');
+          }
+        });
       }
     );
 
-  const notFound = allIds.find(id => !(data.task.ids.includes(id)));
-  if (notFound) {
+  // check ids as well
+  const idNotFound = allIds.find(id => !(data.task.ids.includes(id)));
+  if (idNotFound) {
     const tag = (data.tag.ids as string[])
       .map(id => data.tag.entities[id])
-      .find(tagI => (tagI as Tag).taskIds.includes(notFound));
+      .find(tagI => (tagI as Tag).taskIds.includes(idNotFound));
 
     const project = (data.project.ids as string[])
       .map(id => data.project.entities[id])
-      .find(projectI => (projectI as Project).taskIds.includes(notFound) || (projectI as Project).backlogTaskIds.includes(notFound));
+      .find(projectI => (projectI as Project).taskIds.includes(idNotFound) || (projectI as Project).backlogTaskIds.includes(idNotFound));
 
-    devError('Inconsistent Task State: Missing task id ' + notFound + ' for Project/Tag ' + ((tag as Tag) || (project as Project)).title);
+    devError('Inconsistent Task State: Missing task id ' + idNotFound + ' for Project/Tag ' + ((tag as Tag) || (project as Project)).title);
   }
-  return !notFound;
+
+  return !idNotFound && !isInconsistentProjectId && !isMissingTaskData;
 };
 
 const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {

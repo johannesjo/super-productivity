@@ -26,6 +26,7 @@ import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
 import { shortSyntax } from '../short-syntax.util';
+import { environment } from '../../../../environments/environment';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -117,7 +118,7 @@ export class TaskRelatedModelEffects {
     concatMap((act: AddTask) => this._globalConfigService.misc$.pipe(
       first(),
       // error handling
-      switchMap((miscConfig) => (miscConfig.defaultProjectId
+      switchMap((miscConfig) => (!!(miscConfig.defaultProjectId)
         ? this._projectService.getByIdOnce$(miscConfig.defaultProjectId).pipe(
           tap((project) => {
             if (!project) {
@@ -165,6 +166,9 @@ export class TaskRelatedModelEffects {
     ),
     mergeMap(([task, tags, projects]) => {
       const r = shortSyntax(task, tags, projects);
+      if (environment.production) {
+        console.log('shortSyntax', r);
+      }
       if (!r) {
         return EMPTY;
       }

@@ -17,7 +17,8 @@ Please also make sure that there is no similar feature already opened up!
 A clear and concise description of what the problem is. E.g. I'm always frustrated when [...]
 -->
 
-## :grey_question: Possible Solution <!--
+## :grey_question: Possible Solution
+<!--
 A clear and concise description of what you want to happen.
 -->
 

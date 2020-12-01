@@ -238,7 +238,7 @@ export class AppComponent implements OnDestroy {
           msg: T.APP.B_OFFLINE,
         });
       } else {
-        this._bannerService.dismiss(BannerId.Offline);
+        this._bannerService.dismissAll(BannerId.Offline);
       }
     });
   }

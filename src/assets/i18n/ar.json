@@ -88,8 +88,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: رمز الدخول الذي تم إنشاؤه من كود المصادقة",
         "AUTH_ERROR": "Dropbox: تم توفير رمز دخول غير صالح",
         "OFFLINE": "Dropbox: غير قادر على المزامنة ، لأنك غير متصل بالإنترنت",
-        "SYNC_ERROR": "Dropbox: حدث خطأ أثناء المزامنة",
-        "UNKNOWN_ERROR": "Dropbox: خطأ غير معروف: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: حدث خطأ أثناء المزامنة"
       }
     },
     "GITHUB": {
@@ -98,11 +97,12 @@
       },
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Github إلى العمل المتراكم",
+        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا git المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "إظهار المشكلات من git كاقتراحات عند إضافة مهام جديدة",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه",
-        "TOKEN": "رمز الوصول"
+        "TOKEN": "رمز الوصول",
+        "TOKEN_DESCRIPTION": "مطلوب للوصول إلى المستودع الخاص"
       },
       "FORM_SECTION": {
         "HELP": "<p>هنا يمكنك تكوين SuperProductivity لسرد مشكلات GitHub المفتوحة لمستودع معين في لوحة إنشاء المهام في عرض التخطيط اليومي. سيتم إدراجها كاقتراحات وستوفر رابطًا للمشكلة بالإضافة إلى مزيد من المعلومات عنها.</p> <p>بالإضافة إلى ذلك ، يمكنك تلقائيًا إضافة جميع المشكلات المفتوحة ومزامنتها إلى تراكم المهام.</p>",
@@ -119,12 +119,12 @@
         "WRITE_A_COMMENT": "أكتب تعليقا"
       },
       "S": {
-        "ERR_NETWORK": "Github: فشل الطلب بسبب خطأ في شبكة جانب العميل",
+        "ERR_NETWORK": "GitHub: فشل الطلب بسبب خطأ في شبكة جانب العميل",
         "ERR_NOT_CONFIGURED": "جيثب: لم يتم تكوينه بشكل صحيح",
         "ERR_UNKNOWN": "جيثب: خطأ غير معروف {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "جيثب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
-        "IMPORTED_SINGLE_ISSUE": "Github: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
-        "ISSUE_DELETED_OR_CLOSED": "Github: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
         "ISSUE_NO_UPDATE_REQUIRED": "جيثب: لا يوجد تحديث مطلوب",
         "ISSUE_UPDATE": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
@@ -140,14 +140,14 @@
       },
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Gitlab إلى العمل المتراكم",
+        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitLab إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا gitlab المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "إظهار المشكلات من gitlab كاقتراحات عند إضافة مهام جديدة",
         "PROJECT": "المسار الكامل أو اسم المستخدم / المشروع",
         "TOKEN": "رمز الوصول"
       },
       "FORM_SECTION": {
-        "HELP": "<p> هنا يمكنك تهيئة SuperProductivity لإدراج مشكلات Gitlab المفتوحة (إما الإصدار عبر الإنترنت أو مثيل مستضاف ذاتيًا) لمشروع معين في لوحة إنشاء المهام في عرض التخطيط اليومي. سيتم إدراجها كاقتراحات وستوفر رابطًا للمشكلة بالإضافة إلى مزيد من المعلومات حولها. </p> <p> بالإضافة إلى ذلك ، يمكنك إضافة ومزامنة جميع المشكلات المفتوحة تلقائيًا إلى تراكم المهام. </p>",
+        "HELP": "<p> هنا يمكنك تهيئة SuperProductivity لإدراج مشكلات GitLab المفتوحة (إما الإصدار عبر الإنترنت أو مثيل مستضاف ذاتيًا) لمشروع معين في لوحة إنشاء المهام في عرض التخطيط اليومي. سيتم إدراجها كاقتراحات وستوفر رابطًا للمشكلة بالإضافة إلى مزيد من المعلومات حولها. </p> <p> بالإضافة إلى ذلك ، يمكنك إضافة ومزامنة جميع المشكلات المفتوحة تلقائيًا إلى تراكم المهام. </p>",
         "TITLE": "جيتلاب"
       },
       "ISSUE_CONTENT": {
@@ -161,12 +161,12 @@
         "WRITE_A_COMMENT": "أكتب تعليقا"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: فشل الطلب بسبب خطأ في شبكة جانب العميل",
+        "ERR_NETWORK": "GitLab: فشل الطلب بسبب خطأ في شبكة جانب العميل",
         "ERR_NOT_CONFIGURED": "جيتلاب: لم يتم تكوينه بشكل صحيح",
         "ERR_UNKNOWN": "جيتلاب: خطأ غير معروف {{statusCode}} {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "جيتلاب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
         "ISSUE_NO_UPDATE_REQUIRED": "جيتلاب: لا يوجد تحديث مطلوب",
         "ISSUE_UPDATE": "جيتلاب: بيانات محدثة لـ \"{{issueText}}\"",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "جيتلاب: بيانات محدثة لـ \"{{issueText}}\"",
@@ -239,7 +239,7 @@
         "TITLE": "جيرا: إرسال العمل"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Github إلى العمل المتراكم",
+        "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitHub إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا git المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "إظهار المشكلات من git كاقتراحات عند إضافة مهام جديدة",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه"
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "إخفاء التنقل حتى يتم تمرير الرأس الرئيسي (سطح المكتب فقط)",
       "IS_MINIMIZE_TO_TRAY": "تصغير إلى درج (سطح المكتب فقط)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "يخطر عند تجاوز تقدير الوقت",
+      "IS_TRAY_SHOW_CURRENT_TASK": "إظهار المهمة الحالية في الدرج / قائمة الحالة (سطح المكتب فقط)",
       "IS_TURN_OFF_MARKDOWN": "إيقاف تشغيل تخفيض السعر للملاحظات",
       "TITLE": "متفرقات الإعدادات"
     },
@@ -1000,7 +1001,7 @@
     "DBX_UPLOAD": "Dropbox: تحميل ملف ...",
     "GDRIVE_DOWNLOAD": "Google Drive: تنزيل الملف ...",
     "GDRIVE_UPLOAD": "Google Drive: تحميل ملف ...",
-    "GITHUB_LOAD_ISSUE": "Github: تحميل بيانات العدد ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: تحميل بيانات العدد ...",
     "JIRA_LOAD_ISSUE": "Jira: تحميل بيانات العدد ...",
     "UNKNOWN": "تحميل البيانات البعيدة",
     "WEB_DAV_DOWNLOAD": "WebDAV: جاري تنزيل البيانات ...",
@@ -1098,6 +1099,7 @@
     "PRIVATE_POLICY": "سياسة خاصة",
     "PRODUCTIVITY_HELPER": "مساعد الإنتاجية",
     "PROJECT_SETTINGS": "إعدادات المشروع",
+    "PROVIDE_FEEDBACK": "تقديم التغذية الراجعة",
     "SYNC_EXPORT": "المزامنة والتصدير",
     "TAG_SETTINGS": "الإعدادات الخاصة بالعلامة",
     "TOGGLE_DARK_MODE": "تبديل الوضع الداكن"

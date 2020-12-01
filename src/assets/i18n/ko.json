@@ -88,21 +88,21 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox : 인증 코드에서 생성 된 액세스 토큰",
         "AUTH_ERROR": "보관 용 계정 : 잘못된 액세스 토큰 제공",
         "OFFLINE": "보관 용 계정 : 오프라인 상태이므로 동기화 할 수 없습니다",
-        "SYNC_ERROR": "보관 용 계정 : 동기화 중 오류",
-        "UNKNOWN_ERROR": "보관함 : 알 수없는 오류 : {{errorStr}}"
+        "SYNC_ERROR": "보관 용 계정 : 동기화 중 오류"
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "프로젝트를위한 Github 설정"
+        "TITLE": "프로젝트를위한 GitHub 설정"
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_ADD_TO_BACKLOG": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\"",
-        "TOKEN": "액세스 토큰"
+        "TOKEN": "액세스 토큰",
+        "TOKEN_DESCRIPTION": "개인 저장소 액세스에 필요"
       },
       "FORM_SECTION": {
         "HELP": "<p>여기서는 일일 계획 보기의 작업 만들기 패널에서 특정 리포지토리에 대한 열린 GitHub 문제를 나열하도록 SuperProductivity를 구성할 수 있습니다. 제안으로 나열 되며 문제에 대 한 링크 뿐만 아니라 그것에 대 한 자세한 정보를 제공 합니다.</p> <p>또한 자동으로 추가하고 작업 백로그에 열려있는 모든 문제를 동기화 할 수 있습니다.</p>",
@@ -119,35 +119,35 @@
         "WRITE_A_COMMENT": "의견 쓰기"
       },
       "S": {
-        "ERR_NETWORK": "Github : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
-        "ERR_NOT_CONFIGURED": "Github : 제대로 구성되지 않았습니다.",
-        "ERR_UNKNOWN": "Github : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Github : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
-        "IMPORTED_SINGLE_ISSUE": "Github : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
-        "ISSUE_DELETED_OR_CLOSED": "Github : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github : 업데이트가 필요하지 않습니다",
-        "ISSUE_UPDATE": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MISSING_ISSUE_DATA": "Github : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
-        "NEW_COMMENT": "Github : \"{{issueText}}\"에 대한 새로운 설명",
-        "POLLING": "Github : 문제에 대한 폴링 변경 사항",
+        "ERR_NETWORK": "GitHub : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
+        "ERR_NOT_CONFIGURED": "GitHub : 제대로 구성되지 않았습니다.",
+        "ERR_UNKNOWN": "GitHub : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
+        "IMPORTED_SINGLE_ISSUE": "GitHub : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub : 업데이트가 필요하지 않습니다",
+        "ISSUE_UPDATE": "GitHub : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MISSING_ISSUE_DATA": "GitHub : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
+        "NEW_COMMENT": "GitHub : \"{{issueText}}\"에 대한 새로운 설명",
+        "POLLING": "GitHub : 문제에 대한 폴링 변경 사항",
         "SHOW_ISSUE_BTN": "보여줘"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "프로젝트를위한 Gitlab 설정"
+        "TITLE": "프로젝트를위한 GitLab 설정"
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Gitlab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_ADD_TO_BACKLOG": "GitLab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "PROJECT": "전체 경로 또는 사용자 이름 / 프로젝트",
         "TOKEN": "액세스 토큰"
       },
       "FORM_SECTION": {
-        "HELP": "<p> 일별 계획보기의 작업 생성 패널에서 특정 프로젝트에 대해 열린 Gitlab (온라인 버전 또는 자체 호스팅 인스턴스) 문제를 나열하도록 SuperProductivity를 구성 할 수 있습니다. 제안으로 표시되며 문제에 대한 자세한 정보뿐만 아니라 문제에 대한 링크를 제공합니다. </p> <p> 또한 열려있는 모든 문제를 작업 백 로그에 자동으로 추가하고 동기화 할 수 있습니다. </p>",
+        "HELP": "<p> 일별 계획보기의 작업 생성 패널에서 특정 프로젝트에 대해 열린 GitLab (온라인 버전 또는 자체 호스팅 인스턴스) 문제를 나열하도록 SuperProductivity를 구성 할 수 있습니다. 제안으로 표시되며 문제에 대한 자세한 정보뿐만 아니라 문제에 대한 링크를 제공합니다. </p> <p> 또한 열려있는 모든 문제를 작업 백 로그에 자동으로 추가하고 동기화 할 수 있습니다. </p>",
         "TITLE": "기둥"
       },
       "ISSUE_CONTENT": {
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "의견 쓰기"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
-        "ERR_NOT_CONFIGURED": "Gitlab : 제대로 구성되지 않았습니다.",
-        "ERR_UNKNOWN": "Gitlab : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab : 업데이트가 필요하지 않습니다",
-        "ISSUE_UPDATE": "Gitlab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
-        "MISSING_ISSUE_DATA": "Gitlab : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
-        "NEW_COMMENT": "Gitlab : \"{{issueText}}\"에 대한 새로운 설명",
-        "POLLING": "Gitlab : 문제에 대한 폴링 변경 사항",
+        "ERR_NETWORK": "GitLab : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
+        "ERR_NOT_CONFIGURED": "GitLab : 제대로 구성되지 않았습니다.",
+        "ERR_UNKNOWN": "GitLab : 알 수없는 오류 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
+        "IMPORTED_SINGLE_ISSUE": "GitLab : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab : 업데이트가 필요하지 않습니다",
+        "ISSUE_UPDATE": "GitLab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MISSING_ISSUE_DATA": "GitLab : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
+        "NEW_COMMENT": "GitLab : \"{{issueText}}\"에 대한 새로운 설명",
+        "POLLING": "GitLab : 문제에 대한 폴링 변경 사항",
         "SHOW_ISSUE_BTN": "보여줘"
       }
     },
@@ -239,7 +239,7 @@
         "TITLE": "Jira : 작업 로그 제출"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_ADD_TO_BACKLOG": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
@@ -450,8 +450,8 @@
       "D_CREATE": {
         "CREATE": "프로젝트 만들기",
         "EDIT": "프로젝트 수정",
-        "SETUP_GIT": "Github 통합 설치",
-        "SETUP_GITLAB": "Gitlab 통합 설치",
+        "SETUP_GIT": "GitHub 통합 설치",
+        "SETUP_GITLAB": "GitLab 통합 설치",
         "SETUP_JIRA": "Jira 통합 설정"
       },
       "FORM_BASIC": {
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑 만 해당)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
+      "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
       "TITLE": "기타 설정"
     },
@@ -1000,7 +1001,7 @@
     "DBX_UPLOAD": "보관 용 계정 : 파일 업로드 ...",
     "GDRIVE_DOWNLOAD": "Google 드라이브 : 파일 다운로드 ...",
     "GDRIVE_UPLOAD": "Google 드라이브 : 파일 업로드 ...",
-    "GITHUB_LOAD_ISSUE": "Github : 이슈 데이터로드 ...",
+    "GITHUB_LOAD_ISSUE": "GitHub : 이슈 데이터로드 ...",
     "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ...",
     "UNKNOWN": "원격 데이터로드",
     "WEB_DAV_DOWNLOAD": "WebDAV : 데이터 다운로드 중 ...",
@@ -1084,8 +1085,8 @@
     },
     "EDIT_PROJECT": "프로젝트 수정",
     "EXPORT_PROJECT": "프로젝트 내보내기",
-    "GITHUB_CONFIGURED": "Github 통합 구성",
-    "GITLAB_CONFIGURED": "Gitlab 통합 구성",
+    "GITHUB_CONFIGURED": "GitHub 통합 구성",
+    "GITLAB_CONFIGURED": "GitLab 통합 구성",
     "IMPORT_FROM_FILE": "파일에서 가져 오기",
     "JIRA_CONFIGURED": "Jira 통합 구성",
     "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
@@ -1098,6 +1099,7 @@
     "PRIVATE_POLICY": "개인 정책",
     "PRODUCTIVITY_HELPER": "생산성 도우미",
     "PROJECT_SETTINGS": "프로젝트 별 설정",
+    "PROVIDE_FEEDBACK": "피드백을 제공하다",
     "SYNC_EXPORT": "동기화 및 내보내기",
     "TAG_SETTINGS": "태그 별 설정",
     "TOGGLE_DARK_MODE": "어두운 모드 전환"

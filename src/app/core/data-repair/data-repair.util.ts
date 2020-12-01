@@ -21,6 +21,11 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
+  dataOut = _cleanupOrphanedSubTasks(dataOut);
+  dataOut = _cleanupNonExistingTasksFromLists(dataOut);
+  dataOut = _fixInconsistentProjectId(dataOut);
+  dataOut = _fixInconsistentTagId(dataOut);
+  dataOut = _setTaskProjectIdAccordingToParent(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
 
   // console.timeEnd('dataRepair');
@@ -184,7 +189,7 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (data: AppDataComplete)
 const _resetEntityIdsFromObjects = <T>(data: AppBaseDataEntityLikeStates): AppBaseDataEntityLikeStates => {
   return {
     ...data,
-    ids: Object.keys(data.entities)
+    ids: Object.keys(data.entities).filter(id => !!data.entities[id])
   };
 };
 
@@ -239,6 +244,195 @@ const _removeNonExistentProjectIds = (data: AppDataComplete): AppDataComplete =>
       t.projectId = null;
     }
   });
+
+  return data;
+};
+
+const _cleanupNonExistingTasksFromLists = (data: AppDataComplete): AppDataComplete => {
+  const projectIds: string[] = data.project.ids as string[];
+  projectIds
+    .forEach(pid => {
+        const projectItem = data.project.entities[pid];
+        if (!projectItem) {
+          console.log(data.project);
+          throw new Error('No project');
+        }
+        (projectItem as ProjectCopy).taskIds = projectItem.taskIds.filter(tid => !!data.task.entities[tid]);
+        (projectItem as ProjectCopy).backlogTaskIds = projectItem.backlogTaskIds.filter(tid => !!data.task.entities[tid]);
+      }
+    );
+  const tagIds: string[] = data.tag.ids as string[];
+  tagIds
+    .map(id => data.tag.entities[id])
+    .forEach(tagItem => {
+        if (!tagItem) {
+          console.log(data.tag);
+          throw new Error('No tag');
+        }
+        (tagItem as TagCopy).taskIds = tagItem.taskIds.filter(tid => !!data.task.entities[tid]);
+      }
+    );
+  return data;
+};
+
+const _fixInconsistentProjectId = (data: AppDataComplete): AppDataComplete => {
+  const projectIds: string[] = data.project.ids as string[];
+  projectIds
+    .map(id => data.project.entities[id])
+    .forEach(projectItem => {
+        if (!projectItem) {
+          console.log(data.project);
+          throw new Error('No project');
+        }
+        projectItem.taskIds.forEach(tid => {
+          const task = data.task.entities[tid];
+          if (!task) {
+            throw new Error('No task found');
+          } else if (task?.projectId !== projectItem.id) {
+            // if the task has another projectId leave it there and remove from list
+            if (task.projectId) {
+              (projectItem as ProjectCopy).taskIds = projectItem.taskIds.filter(cid => cid !== task.id);
+            } else {
+              // if the task has no project id at all, then move it to the project
+              (task as TaskCopy).projectId = projectItem.id;
+            }
+          }
+        });
+        projectItem.backlogTaskIds.forEach(tid => {
+          const task = data.task.entities[tid];
+          if (!task) {
+            throw new Error('No task found');
+          } else if (task?.projectId !== projectItem.id) {
+            // if the task has another projectId leave it there and remove from list
+            if (task.projectId) {
+              (projectItem as ProjectCopy).backlogTaskIds = projectItem.backlogTaskIds.filter(cid => cid !== task.id);
+            } else {
+              // if the task has no project id at all, then move it to the project
+              (task as TaskCopy).projectId = projectItem.id;
+            }
+          }
+        });
+      }
+    );
+
+  return data;
+};
+
+const _fixInconsistentTagId = (data: AppDataComplete): AppDataComplete => {
+  const tagIds: string[] = data.tag.ids as string[];
+  tagIds
+    .map(id => data.tag.entities[id])
+    .forEach(tagItem => {
+        if (!tagItem) {
+          console.log(data.tag);
+          throw new Error('No tag');
+        }
+        tagItem.taskIds.forEach(tid => {
+          const task = data.task.entities[tid];
+          if (!task) {
+            throw new Error('No task found');
+          } else if (!task?.tagIds.includes(tagItem.id)) {
+            (task as TaskCopy).tagIds = [...task.tagIds, tagItem.id];
+          }
+        });
+      }
+    );
+
+  return data;
+};
+
+const _setTaskProjectIdAccordingToParent = (data: AppDataComplete): AppDataComplete => {
+  const taskIds: string[] = data.task.ids as string[];
+  taskIds
+    .map(id => data.task.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.task);
+        throw new Error('No task');
+      }
+      if (taskItem.subTaskIds) {
+        const parentProjectId = taskItem.projectId;
+        taskItem.subTaskIds.forEach((stid) => {
+          const subTask = data.task.entities[stid];
+          if (!subTask) {
+            throw new Error('Task data not found');
+          }
+          if (subTask.projectId !== parentProjectId) {
+            (subTask as TaskCopy).projectId = parentProjectId;
+          }
+        });
+      }
+    });
+
+  const archiveTaskIds: string[] = data.taskArchive.ids as string[];
+  archiveTaskIds
+    .map(id => data.taskArchive.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.taskArchive);
+        throw new Error('No archive task');
+      }
+      if (taskItem.subTaskIds) {
+        const parentProjectId = taskItem.projectId;
+        taskItem.subTaskIds.forEach((stid) => {
+          const subTask = data.taskArchive.entities[stid];
+          if (!subTask) {
+            throw new Error('Archived Task data not found');
+          }
+          if (subTask.projectId !== parentProjectId) {
+            (subTask as TaskCopy).projectId = parentProjectId;
+          }
+        });
+      }
+    });
+
+  return data;
+};
+
+const _cleanupOrphanedSubTasks = (data: AppDataComplete): AppDataComplete => {
+  const taskIds: string[] = data.task.ids as string[];
+  taskIds
+    .map(id => data.task.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.task);
+        throw new Error('No task');
+      }
+
+      if (taskItem.subTaskIds.length) {
+        let i = taskItem.subTaskIds.length - 1;
+        while (i >= 0) {
+          const sid = taskItem.subTaskIds[i];
+          if (!data.task.entities[sid]) {
+            console.log('Delete orphaned sub task for ', taskItem);
+            taskItem.subTaskIds.splice(i, 1);
+          }
+          i -= 1;
+        }
+      }
+    });
+
+  const archiveTaskIds: string[] = data.taskArchive.ids as string[];
+  archiveTaskIds
+    .map(id => data.taskArchive.entities[id])
+    .forEach(taskItem => {
+      if (!taskItem) {
+        console.log(data.taskArchive);
+        throw new Error('No archive task');
+      }
+
+      if (taskItem.subTaskIds.length) {
+        let i = taskItem.subTaskIds.length - 1;
+        while (i >= 0) {
+          const sid = taskItem.subTaskIds[i];
+          if (!data.taskArchive.entities[sid]) {
+            console.log('Delete orphaned archive sub task for ', taskItem);
+            taskItem.subTaskIds.splice(i, 1);
+          }
+          i -= 1;
+        }
+      }
+    });
 
   return data;
 };

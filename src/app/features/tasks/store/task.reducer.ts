@@ -51,6 +51,7 @@ import { roundDurationVanilla } from '../../../util/round-duration';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateTaskState } from '../migrate-task-state.util';
+import { environment } from '../../../../environments/environment';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -73,6 +74,9 @@ export function taskReducer(
   state: TaskState = initialTaskState,
   action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions
 ): TaskState {
+  if (environment.production) {
+    console.log(action.type, (action as any)?.payload || action, state);
+  }
 
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {

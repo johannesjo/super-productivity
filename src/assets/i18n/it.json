@@ -88,25 +88,25 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: token di accesso generato dal codice di autenticazione",
         "AUTH_ERROR": "Dropbox: token di accesso non valido fornito",
         "OFFLINE": "Dropbox: impossibile sincronizzare, perché offline",
-        "SYNC_ERROR": "Dropbox: errore durante la sincronizzazione",
-        "UNKNOWN_ERROR": "Dropbox: errore sconosciuto: {{errorStr}}"
+        "SYNC_ERROR": "Dropbox: errore durante la sincronizzazione"
       }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configura Github per il progetto"
+        "TITLE": "Configura GitHub per il progetto"
       },
       "FORM": {
         "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da Github al backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare",
-        "TOKEN": "Token di accesso"
+        "TOKEN": "Token di accesso",
+        "TOKEN_DESCRIPTION": "Richiesto per l'accesso al repository privato"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione task nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti al backlog dei task.</p>",
-        "TITLE": "Github"
+        "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assegnatario",
@@ -119,36 +119,36 @@
         "WRITE_A_COMMENT": "Scrivi un commento"
       },
       "S": {
-        "ERR_NETWORK": "Github: Richiesta fallita a causa di un erore di rete lato client",
-        "ERR_NOT_CONFIGURED": "Github: Non è configurato correttamente",
-        "ERR_UNKNOWN": "Github: Errore sconosciuto {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
-        "IMPORTED_MULTIPLE_ISSUES": "Github: Importati {{issuesLength}} nuovi issue da git al backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: Importati gli issue \"{{issueText}}\" da git al backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Github: Nessun aggiornamento necessario",
-        "ISSUE_UPDATE": "Github: Aggiornati dati per \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aggiornati dati per \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Trovati task con dati mancanti. Ricarico.",
-        "NEW_COMMENT": "Github: Nuovo commento per \"{{issueText}}\"",
-        "POLLING": "Github: Sto facendo il polling dei cambiamenti per gli issue",
+        "ERR_NETWORK": "GitHub: Richiesta fallita a causa di un erore di rete lato client",
+        "ERR_NOT_CONFIGURED": "GitHub: Non è configurato correttamente",
+        "ERR_UNKNOWN": "GitHub: Errore sconosciuto {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Importati {{issuesLength}} nuovi issue da git al backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitHub: Importati gli issue \"{{issueText}}\" da git al backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Nessun aggiornamento necessario",
+        "ISSUE_UPDATE": "GitHub: Aggiornati dati per \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Aggiornati dati per \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitHub: Trovati task con dati mancanti. Ricarico.",
+        "NEW_COMMENT": "GitHub: Nuovo commento per \"{{issueText}}\"",
+        "POLLING": "GitHub: Sto facendo il polling dei cambiamenti per gli issue",
         "SHOW_ISSUE_BTN": "Mostra"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configura Gitlab per il progetto"
+        "TITLE": "Configura GitLab per il progetto"
       },
       "FORM": {
         "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da Github al backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
         "PROJECT": "Percorso completo o nome utente / progetto",
         "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
-        "HELP": "<p> Qui puoi configurare SuperProductivity per elencare i problemi di Gitlab aperti (sia la versione online o un'istanza ospitata autonomamente) per un progetto specifico nel pannello di creazione dell'attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un collegamento al problema, nonché ulteriori informazioni al riguardo. </p> <p> Inoltre puoi aggiungere e sincronizzare automaticamente tutti i problemi aperti nel tuo backlog delle attività. </p>",
-        "TITLE": "Gitlab"
+        "HELP": "<p> Qui puoi configurare SuperProductivity per elencare i problemi di GitLab aperti (sia la versione online o un'istanza ospitata autonomamente) per un progetto specifico nel pannello di creazione dell'attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un collegamento al problema, nonché ulteriori informazioni al riguardo. </p> <p> Inoltre puoi aggiungere e sincronizzare automaticamente tutti i problemi aperti nel tuo backlog delle attività. </p>",
+        "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assegnatario",
@@ -161,18 +161,18 @@
         "WRITE_A_COMMENT": "Scrivi un commento"
       },
       "S": {
-        "ERR_NETWORK": "Gitlab: Richiesta fallita a causa di un erore di rete lato client",
-        "ERR_NOT_CONFIGURED": "Gitlab: Non è configurato correttamente",
-        "ERR_UNKNOWN": "Gitlab: Errore sconosciuto {{statusCode}} {{errorMsg}}",
-        "IMPORTED_MULTIPLE_ISSUES": "Gitlab: Importati {{issuesLength}} nuovi issue da git al backlog",
-        "IMPORTED_SINGLE_ISSUE": "Gitlab: Importati gli issue \"{{issueText}}\" da git al backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Gitlab: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
-        "ISSUE_NO_UPDATE_REQUIRED": "Gitlab: Nessun aggiornamento necessario",
-        "ISSUE_UPDATE": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Gitlab: Aggiornati dati per \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Gitlab: Trovati task con dati mancanti. Ricarico.",
-        "NEW_COMMENT": "Gitlab: Nuovo commento per \"{{issueText}}\"",
-        "POLLING": "Gitlab: Sto facendo il polling dei cambiamenti per gli issue",
+        "ERR_NETWORK": "GitLab: Richiesta fallita a causa di un erore di rete lato client",
+        "ERR_NOT_CONFIGURED": "GitLab: Non è configurato correttamente",
+        "ERR_UNKNOWN": "GitLab: Errore sconosciuto {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Importati {{issuesLength}} nuovi issue da git al backlog",
+        "IMPORTED_SINGLE_ISSUE": "GitLab: Importati gli issue \"{{issueText}}\" da git al backlog",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab: L'issue \"{{issueText}}\" sembra essere stato chiuso o eliminato su git",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Nessun aggiornamento necessario",
+        "ISSUE_UPDATE": "GitLab: Aggiornati dati per \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Aggiornati dati per \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "GitLab: Trovati task con dati mancanti. Ricarico.",
+        "NEW_COMMENT": "GitLab: Nuovo commento per \"{{issueText}}\"",
+        "POLLING": "GitLab: Sto facendo il polling dei cambiamenti per gli issue",
         "SHOW_ISSUE_BTN": "Mostra"
       }
     },
@@ -451,7 +451,7 @@
         "CREATE": "Crea progetto",
         "EDIT": "Modifica progetto",
         "SETUP_GIT": "Configura integrazione Githun",
-        "SETUP_GITLAB": "Configura integrazione Gitlab",
+        "SETUP_GITLAB": "Configura integrazione GitLab",
         "SETUP_JIRA": "Configura integrazione Jira"
       },
       "FORM_BASIC": {
@@ -942,6 +942,7 @@
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Mostra l'attività corrente nella barra delle applicazioni / menu di stato (solo desktop)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "TITLE": "Impostazioni varie"
     },
@@ -1000,7 +1001,7 @@
     "DBX_UPLOAD": "Dropbox: carica file ...",
     "GDRIVE_DOWNLOAD": "Google Drive: scarica il file ...",
     "GDRIVE_UPLOAD": "Google Drive: carica il file ...",
-    "GITHUB_LOAD_ISSUE": "Github: caricamento dati problema ...",
+    "GITHUB_LOAD_ISSUE": "GitHub: caricamento dati problema ...",
     "JIRA_LOAD_ISSUE": "Jira: caricamento dati problema ...",
     "UNKNOWN": "Caricamento dei dati remoti",
     "WEB_DAV_DOWNLOAD": "WebDAV: Download dei dati ...",
@@ -1084,8 +1085,8 @@
     },
     "EDIT_PROJECT": "Modifica progetto",
     "EXPORT_PROJECT": "Esporta progetto",
-    "GITHUB_CONFIGURED": "Integrazione Github configurata",
-    "GITLAB_CONFIGURED": "Integrazione Gitlab configurata",
+    "GITHUB_CONFIGURED": "Integrazione GitHub configurata",
+    "GITLAB_CONFIGURED": "Integrazione GitLab configurata",
     "IMPORT_FROM_FILE": "Importa da file",
     "JIRA_CONFIGURED": "Integrazione Jira configurata",
     "S_INVALID_JSON": "JSON non valido per file di progetto",
@@ -1098,6 +1099,7 @@
     "PRIVATE_POLICY": "Private Policy",
     "PRODUCTIVITY_HELPER": "Aiuto produttività",
     "PROJECT_SETTINGS": "Impostazioni specifiche del progetto",
+    "PROVIDE_FEEDBACK": "Fornire un feedback",
     "SYNC_EXPORT": "Sincronizza ed esporta",
     "TAG_SETTINGS": "Impostazioni specifiche dell'etichetta",
     "TOGGLE_DARK_MODE": "Abilita/disabilita tema scuro"

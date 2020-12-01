@@ -29,6 +29,7 @@ const IS_DEV = process.env.NODE_ENV === 'DEV';
 
 let isShowDevTools: boolean = IS_DEV;
 let customUrl: string;
+let isDisableTray = false;
 
 if (IS_DEV) {
   console.log('Starting in DEV Mode!!!');
@@ -36,6 +37,11 @@ if (IS_DEV) {
 
 // NOTE: needs to be executed before everything else
 process.argv.forEach((val) => {
+  if (val && val.includes('--disable-tray')) {
+    isDisableTray = true;
+    console.log('Disable tray icon');
+  }
+
   if (val && val.includes('--user-data-dir=')) {
     const customUserDir = val.replace('--user-data-dir=', '').trim();
     console.log('Using custom directory for user data', customUserDir);
@@ -100,8 +106,10 @@ appIN.on('certificate-error', (event, webContents, url, error, certificate, call
 // APP EVENT LISTENERS
 // -------------------
 appIN.on('ready', createMainWin);
-appIN.on('ready', createIndicator);
 appIN.on('ready', () => initBackupAdapter(BACKUP_DIR));
+if (!isDisableTray) {
+  appIN.on('ready', createIndicator);
+}
 
 appIN.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
@@ -249,9 +257,6 @@ function createIndicator() {
     app,
     showApp,
     quitApp,
-    IS_MAC,
-    IS_LINUX,
-    IS_GNOME,
     ICONS_FOLDER,
   });
 }

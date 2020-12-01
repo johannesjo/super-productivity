@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { concatMap, delay, filter, first, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -50,9 +50,8 @@ import {
   moveTaskUpInBacklogList,
   moveTaskUpInTodayList
 } from '../../work-context/store/work-context-meta.actions';
-import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
+import { WorkContextType } from '../../work-context/work-context.model';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
-import { WorkContextService } from '../../work-context/work-context.service';
 import { Project } from '../project.model';
 import { TaskService } from '../../tasks/task.service';
 import { Task, TaskArchive, TaskState } from '../../tasks/task.model';
@@ -314,143 +313,146 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect({dispatch: false})
-  cleanupTaskListOfNonProjectTasks: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
-    .pipe(
-      filter(({activeType}) => activeType === WorkContextType.PROJECT),
-      delay(100),
-      switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
-        take(1),
-        map((tasks) => ({
-          allTasks: tasks,
-          wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
-          activeType,
-          activeId,
-        })),
-      )),
-      filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
-      tap((arg) => console.log('Error INFO Today:', arg)),
-      tap(({activeId, wrongProjectTasks, allTasks}) => {
-        const allIds = allTasks.map(t => t.id);
-        const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
-        const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
-        if (r) {
-          this._projectService.update(activeId, {
-            taskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
-          });
-          alert('Done!');
-        }
-      }),
-    );
-
-  @Effect({dispatch: false})
-  cleanupBacklogOfNonProjectTasks: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
-    .pipe(
-      filter(({activeType}) => activeType === WorkContextType.PROJECT),
-      delay(100),
-      switchMap(({activeType, activeId}) => this._workContextService.backlogTasks$.pipe(
-        take(1),
-        map((tasks) => ({
-          allTasks: tasks,
-          wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
-          activeType,
-          activeId,
-        })),
-      )),
-      filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
-      tap((arg) => console.log('Error INFO Backlog:', arg)),
-      tap(({activeId, wrongProjectTasks, allTasks}) => {
-        const allIds = allTasks.map(t => t.id);
-        const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
-        const r = confirm('Nooo! We found some backlog tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
-        if (r) {
-          this._projectService.update(activeId, {
-            backlogTaskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
-          });
-          alert('Done!');
-        }
-      }),
-    );
-
-  @Effect({dispatch: false})
-  cleanupNullTasksForTaskList: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
-    .pipe(
-      // only run in prod, because we want to debug this
-      // filter(() => environment.production),
-      filter(({activeType}) => activeType === WorkContextType.PROJECT),
-      switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
-        take(1),
-        map((tasks) => ({
-          allTasks: tasks,
-          nullTasks: tasks.filter(task => !task),
-          activeType,
-          activeId,
-        })),
-      )),
-      filter(({nullTasks}) => nullTasks.length > 0),
-      tap((arg) => console.log('Error INFO Today:', arg)),
-      tap(({activeId, allTasks}) => {
-        const allIds = allTasks.map(t => t && t.id);
-        const r = confirm('Nooo! We found some tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
-        if (r) {
-          this._projectService.update(activeId, {
-            taskIds: allIds.filter((id => !!id)),
-          });
-          alert('Done!');
-        }
-      }),
-    );
-
-  // NOTE: trigger needs to be id only otherwise we subscribe to every change
-  @Effect({dispatch: false})
-  fixWeirdUnlistedTasks: Observable<unknown> = this._workContextService.activeWorkContextId$.pipe(
-    switchMap(() => this._workContextService.activeWorkContext$),
-    // only run in prod, because we want to debug this
-    // filter(() => environment.production),
-    filter(({type, taskIds, backlogTaskIds}) => (type === WorkContextType.PROJECT
-      && taskIds.length === 0
-      && backlogTaskIds?.length === 0)),
-    withLatestFrom(this._taskService.allTasks$),
-    tap(([{id}, allTasks]: [WorkContext, Task[]]) => {
-      const unlistedParentTasks = allTasks.filter(task => !task.parentId && task.projectId === id);
-      if (unlistedParentTasks.length
-        && confirm('Nooo! We found some tasks that are not listed (but should be). Do you want to list them?')) {
-        const unlistedIds = unlistedParentTasks.map(task => task.id);
-        this._projectService.update(id, {
-          taskIds: unlistedIds
-        });
-      }
-    }),
-  );
-
-  @Effect({dispatch: false})
-  cleanupNullTasksForBacklog: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
-    .pipe(
-      // only run in prod, because we want to debug this
-      // filter(() => environment.production),
-      filter(({activeType}) => activeType === WorkContextType.PROJECT),
-      switchMap(({activeType, activeId}) => this._workContextService.backlogTasks$.pipe(
-        take(1),
-        map((tasks) => ({
-          allTasks: tasks,
-          nullTasks: tasks.filter(task => !task),
-          activeType,
-          activeId,
-        })),
-      )),
-      filter(({nullTasks}) => nullTasks.length > 0),
-      tap((arg) => console.log('Error INFO Today:', arg)),
-      tap(({activeId, allTasks}) => {
-        const allIds = allTasks.map(t => t && t.id);
-        const r = confirm('Nooo! We found some backlog tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
-        if (r) {
-          this._projectService.update(activeId, {
-            backlogTaskIds: allIds.filter((id => !!id)),
-          });
-          alert('Done!');
-        }
-      }),
-    );
+  // DATA FIXING EFFECTS
+  // -------------------
+  // @Effect({dispatch: false})
+  // cleanupTaskListOfNonProjectTasks: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
+  //   .pipe(
+  //     filter(({activeType}) => activeType === WorkContextType.PROJECT),
+  //     delay(100),
+  //     switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
+  //       take(1),
+  //       map((tasks) => ({
+  //         allTasks: tasks,
+  //         wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
+  //         activeType,
+  //         activeId,
+  //       })),
+  //     )),
+  //     filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
+  //     tap((arg) => console.log('Error INFO Today:', arg)),
+  //     tap(({activeId, wrongProjectTasks, allTasks}) => {
+  //       const allIds = allTasks.map(t => t.id);
+  //       const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
+  //       const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+  //       if (r) {
+  //         this._projectService.update(activeId, {
+  //           taskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
+  //         });
+  //         alert('Done!');
+  //       }
+  //     }),
+  //   );
+  //
+  // @Effect({dispatch: false})
+  // cleanupBacklogOfNonProjectTasks: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
+  //   .pipe(
+  //     filter(({activeType}) => activeType === WorkContextType.PROJECT),
+  //     delay(100),
+  //     switchMap(({activeType, activeId}) => this._workContextService.backlogTasks$.pipe(
+  //       take(1),
+  //       map((tasks) => ({
+  //         allTasks: tasks,
+  //         wrongProjectTasks: tasks.filter(task => task.projectId !== activeId),
+  //         activeType,
+  //         activeId,
+  //       })),
+  //     )),
+  //     filter(({wrongProjectTasks}) => wrongProjectTasks.length > 0),
+  //     tap((arg) => console.log('Error INFO Backlog:', arg)),
+  //     tap(({activeId, wrongProjectTasks, allTasks}) => {
+  //       const allIds = allTasks.map(t => t.id);
+  //       const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
+  // tslint:disable-next-line:max-line-length
+  //       const r = confirm('Nooo! We found some backlog tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+  //       if (r) {
+  //         this._projectService.update(activeId, {
+  //           backlogTaskIds: allIds.filter((id => !wrongProjectTaskIds.includes(id))),
+  //         });
+  //         alert('Done!');
+  //       }
+  //     }),
+  //   );
+  //
+  // @Effect({dispatch: false})
+  // cleanupNullTasksForTaskList: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
+  //   .pipe(
+  //     // only run in prod, because we want to debug this
+  //     // filter(() => environment.production),
+  //     filter(({activeType}) => activeType === WorkContextType.PROJECT),
+  //     switchMap(({activeType, activeId}) => this._workContextService.todaysTasks$.pipe(
+  //       take(1),
+  //       map((tasks) => ({
+  //         allTasks: tasks,
+  //         nullTasks: tasks.filter(task => !task),
+  //         activeType,
+  //         activeId,
+  //       })),
+  //     )),
+  //     filter(({nullTasks}) => nullTasks.length > 0),
+  //     tap((arg) => console.log('Error INFO Today:', arg)),
+  //     tap(({activeId, allTasks}) => {
+  //       const allIds = allTasks.map(t => t && t.id);
+  //       const r = confirm('Nooo! We found some tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+  //       if (r) {
+  //         this._projectService.update(activeId, {
+  //           taskIds: allIds.filter((id => !!id)),
+  //         });
+  //         alert('Done!');
+  //       }
+  //     }),
+  //   );
+  //
+  // // NOTE: trigger needs to be id only otherwise we subscribe to every change
+  // @Effect({dispatch: false})
+  // fixWeirdUnlistedTasks: Observable<unknown> = this._workContextService.activeWorkContextId$.pipe(
+  //   switchMap(() => this._workContextService.activeWorkContext$),
+  //   // only run in prod, because we want to debug this
+  //   // filter(() => environment.production),
+  //   filter(({type, taskIds, backlogTaskIds}) => (type === WorkContextType.PROJECT
+  //     && taskIds.length === 0
+  //     && backlogTaskIds?.length === 0)),
+  //   withLatestFrom(this._taskService.allTasks$),
+  //   tap(([{id}, allTasks]: [WorkContext, Task[]]) => {
+  //     const unlistedParentTasks = allTasks.filter(task => !task.parentId && task.projectId === id);
+  //     if (unlistedParentTasks.length
+  //       && confirm('Nooo! We found some tasks that are not listed (but should be). Do you want to list them?')) {
+  //       const unlistedIds = unlistedParentTasks.map(task => task.id);
+  //       this._projectService.update(id, {
+  //         taskIds: unlistedIds
+  //       });
+  //     }
+  //   }),
+  // );
+  //
+  // @Effect({dispatch: false})
+  // cleanupNullTasksForBacklog: Observable<unknown> = this._workContextService.activeWorkContextTypeAndId$
+  //   .pipe(
+  //     // only run in prod, because we want to debug this
+  //     // filter(() => environment.production),
+  //     filter(({activeType}) => activeType === WorkContextType.PROJECT),
+  //     switchMap(({activeType, activeId}) => this._workContextService.backlogTasks$.pipe(
+  //       take(1),
+  //       map((tasks) => ({
+  //         allTasks: tasks,
+  //         nullTasks: tasks.filter(task => !task),
+  //         activeType,
+  //         activeId,
+  //       })),
+  //     )),
+  //     filter(({nullTasks}) => nullTasks.length > 0),
+  //     tap((arg) => console.log('Error INFO Today:', arg)),
+  //     tap(({activeId, allTasks}) => {
+  //       const allIds = allTasks.map(t => t && t.id);
+  //       const r = confirm('Nooo! We found some backlog tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
+  //       if (r) {
+  //         this._projectService.update(activeId, {
+  //           backlogTaskIds: allIds.filter((id => !!id)),
+  //         });
+  //         alert('Done!');
+  //       }
+  //     }),
+  //   );
 
   @Effect()
   moveToTodayListOnAddTodayTag: Observable<unknown> = this._actions$.pipe(
@@ -508,7 +510,7 @@ export class ProjectEffects {
     private _metricService: MetricService,
     private _obstructionService: ObstructionService,
     private _improvementService: ImprovementService,
-    private _workContextService: WorkContextService,
+    // private _workContextService: WorkContextService,
     private _taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
   ) {

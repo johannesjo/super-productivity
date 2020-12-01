@@ -23,7 +23,7 @@ export class TaskSummaryTableComponent {
   }
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string) {
-    this._taskService.update(task.id, {
+    this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
         [this.day]: +newVal,
@@ -33,16 +33,19 @@ export class TaskSummaryTableComponent {
   }
 
   updateTaskTitle(task: Task, newVal: string) {
-    this._taskService.update(task.id, {
+    this._taskService.updateEverywhere(task.id, {
       title: newVal
     });
     this.updated.emit();
   }
 
   toggleTaskDone(task: Task) {
-    task.isDone
-      ? this._taskService.setUnDone(task.id)
-      : this._taskService.setDone(task.id);
+    this._taskService.updateEverywhere(task.id, {
+      isDone: !task.isDone,
+    });
+    // task.isDone
+    //   ? this._taskService.setUnDone(task.id)
+    //   : this._taskService.setDone(task.id);
     this.updated.emit();
   }
 }

@@ -23,6 +23,7 @@ export type KeyboardConfig = Readonly<{
   taskToggleDone: string | null,
   taskAddSubTask: string | null,
   taskMoveToProject: string | null,
+  taskOpenContextMenu: string | null,
   taskDelete: string | null,
   taskSchedule: string | null,
   selectPreviousTask: string | null,

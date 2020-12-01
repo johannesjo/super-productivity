@@ -3,6 +3,7 @@
 :host {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .header-wrapper {
@@ -71,6 +72,8 @@ bookmark-bar {
   width: 40vw;
   max-width: 700px;
   min-height: 100vh;
+  // mobile viewport bug fix
+  min-height: -webkit-fill-available;
 
   .mat-drawer-over & {
     width: 80vw;
@@ -91,8 +94,7 @@ bookmark-bar {
 }
 
 mat-sidenav-container.mat-sidenav-container {
-  background-size: cover !important;
-  background-position: center !important;
+  background: transparent;
 }
 
 mat-sidenav,
@@ -118,3 +120,16 @@ mat-sidenav {
   z-index: $z-side-nav;
 }
 
+.bg-image {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed;
+}

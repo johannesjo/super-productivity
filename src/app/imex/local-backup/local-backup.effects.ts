@@ -12,8 +12,7 @@ import * as moment from 'moment';
 
 @Injectable()
 export class LocalBackupEffects {
-
-  checkForBackupIfNoTasks$: any = createEffect(() => this._actions$.pipe(
+  checkForBackupIfNoTasks$: any = IS_ELECTRON && createEffect(() => this._actions$.pipe(
     ofType(
       loadAllData
     ),
@@ -33,7 +32,7 @@ export class LocalBackupEffects {
 
   private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete) {
     if (IS_ELECTRON) {
-      if (appDataComplete.task.ids.length === 0 && appDataComplete.taskArchive.ids.length === 0) {
+      if (appDataComplete.task.ids.length === 0 && appDataComplete.taskArchive.ids.length === 0 && !appDataComplete.lastLocalSyncModelChange) {
         const backupMeta = await this._localBackupService.isBackupAvailable();
         if (backupMeta) {
           if (confirm(this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {

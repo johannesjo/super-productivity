@@ -35,32 +35,5 @@
       }
     }
   ],
-  "dataGroups": [
-    {
-      "name": "issueProviderAndAssets",
-      "urls": [
-        "!//apis.google.com/**",
-        "!//content.googleapis.com/**",
-        "!//content.dropboxapi.com/**",
-        "!//api.dropboxapi.com/**"
-      ],
-      "cacheConfig": {
-        "maxSize": 4000,
-        "maxAge": "30d",
-        "timeout": "9s"
-      }
-    },
-    {
-      "name": "googleDrive",
-      "urls": [
-        "https://apis.google.com/**",
-        "https://content.googleapis.com/**"
-      ],
-      "cacheConfig": {
-        "maxSize": 0,
-        "maxAge": "0u",
-        "strategy": "freshness"
-      }
-    }
-  ]
+  "dataGroups": []
 }

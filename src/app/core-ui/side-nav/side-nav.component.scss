@@ -11,6 +11,12 @@ $spacer: $s;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  // mobile viewport bug fix
+  min-height: -webkit-fill-available;
+
+  ::ng-deep .mat-menu-item mat-icon {
+    margin-bottom: 2px;
+  }
 }
 
 :host {
@@ -77,6 +83,34 @@ section {
   position: relative;
   align-items: stretch;
   justify-content: stretch;
+
+  button .badge {
+    display: none;
+  }
+
+  &.hasTasks {
+    button .badge {
+      display: block;
+      z-index: 10;
+      position: absolute;
+      line-height: 1;
+      left: $s;
+      width: 40px;
+      text-align: center;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      padding: 1px 0 0;
+      border: 1px solid $light-theme-extra-border-color;
+      background: #fff;
+      border-radius: $card-border-radius;
+
+      @include darkTheme() {
+        border-color: $dark-theme-extra-border-color;
+        background: $dark-theme-bg-lighter;
+      }
+    }
+  }
 
   button:first-of-type {
     flex-grow: 1;

@@ -4,7 +4,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 2;
+const MODEL_VERSION = 2.1;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
   if (!isMigrateModel(globalConfigState, MODEL_VERSION, 'GlobalConfig')) {
@@ -18,6 +18,8 @@ export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): 
   globalConfigState = _migrateUndefinedShortcutsToNull(globalConfigState);
 
   globalConfigState = _migrateSyncCfg(globalConfigState);
+
+  globalConfigState = _fixDefaultProjectId(globalConfigState);
 
   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
   globalConfigState = _extendConfigDefaults(globalConfigState);
@@ -146,6 +148,22 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
         }
       } as SyncConfig
       : DEFAULT_GLOBAL_CONFIG.sync,
+  };
+};
+
+const _fixDefaultProjectId = (config: GlobalConfigState): GlobalConfigState => {
+  if (config.misc.defaultProjectId === 'G.NONE' || config.misc.defaultProjectId === '') {
+    return {
+      ...config,
+      misc: {
+        ...config.misc,
+        defaultProjectId: null,
+      }
+    };
+  }
+
+  return {
+    ...config,
   };
 };
 
