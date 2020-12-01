@@ -24,6 +24,15 @@ body.isDisableBackgroundGradient {
     box-shadow: none !important;
   }
 
+  // Selected task handle
+  .mat-drawer-container .isSelected {
+    .task-handle,
+    .handle-par {
+      // Override too specific styles
+      background-color: var(--color-large-toggle-panels) !important;
+    }
+  }
+
   .mat-dialog-container .mat-dialog-content .content {
     background: transparent !important;
   }
