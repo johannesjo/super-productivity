@@ -1,5 +1,10 @@
 /* stylelint-disable selector-type-no-unknown, selector-max-class, selector-max-specificity, selector-max-combinators, selector-max-compound-selectors */
 
+// Hide box-shadow everywhere
+* {
+  box-shadow: none !important;
+}
+
 body,
 body.isDarkTheme,
 body.isLightTheme,
