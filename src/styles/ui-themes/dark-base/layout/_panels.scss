@@ -14,8 +14,7 @@ body.isDisableBackgroundGradient {
   .textarea,
   .isOpen .side,
   .side,
-  .mat-drawer-container .isSelected .box,
-  .hover-controls {
+  .mat-drawer-container .isSelected .box {
     // Override too specific styles
     background-color: var(--color-large-toggle-panels) !important;
     color: var(--color-foreground) !important;
@@ -27,7 +26,8 @@ body.isDisableBackgroundGradient {
   // Selected task handle
   .mat-drawer-container .isSelected {
     .task-handle,
-    .handle-par {
+    .handle-par,
+    .hover-controls {
       // Override too specific styles
       background-color: var(--color-large-toggle-panels) !important;
     }
