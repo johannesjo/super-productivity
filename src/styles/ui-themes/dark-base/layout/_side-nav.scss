@@ -19,6 +19,15 @@ body.isDisableBackgroundGradient {
     color: var(--color-foreground);
   }
 
+  // Badges
+  .tag.hasTask .badge,
+  .badge {
+    // Override too specific styles
+    background-color: var(--color-border-sidebar) !important;
+    border-color: var(--color-border-sidebar) !important;
+    padding: 10px 0 !important;
+  }
+
   // Dividers
   .app::after,
   .main::after,
