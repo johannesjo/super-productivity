@@ -60,6 +60,7 @@ export class DataInitService {
           appDataComplete: fixedData,
           isOmitTokens,
         }));
+        await this._persistenceService.importComplete(fixedData);
       }
     }
   }
