@@ -112,6 +112,9 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/config']);
 
+    } else if (checkKeyCombo(ev, keys.goToScheduledView)) {
+      this._router.navigate(['/schedule']);
+
       // } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
       //   this._router.navigate(['/daily-agenda']);
       //
