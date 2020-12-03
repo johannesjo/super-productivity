@@ -1,3 +1,29 @@
+## [6.1.2](https://github.com/johannesjo/super-productivity/compare/v6.1.1...v6.1.2) (2020-12-03)
+
+
+### Bug Fixes
+
+* **autoRepair:** persist fixed data to database ([6973a95](https://github.com/johannesjo/super-productivity/commit/6973a9556b40b16dce07ab4232fe9bdf164af93c))
+* set disableClose right away to possibly prevent closing dialog [#699](https://github.com/johannesjo/super-productivity/issues/699) ([4025891](https://github.com/johannesjo/super-productivity/commit/4025891e360c13713a849ee7cc0b8489cfebd5d6))
+* sidenav icon alignment ([7f0914a](https://github.com/johannesjo/super-productivity/commit/7f0914ad84e887e92453c56477598f52cb322f3c))
+* today tag missing from initialTagState [#615](https://github.com/johannesjo/super-productivity/issues/615) ([3b31522](https://github.com/johannesjo/super-productivity/commit/3b31522fb44de9eece9a82c659c48badde2cc33d))
+
+
+### Features
+
+* add shortcut to go to scheduled tasks ([00e6032](https://github.com/johannesjo/super-productivity/commit/00e60329b94bff4c5c1347725c6e9f314bbe244e))
+* display number of tasks [#685](https://github.com/johannesjo/super-productivity/issues/685) ([3519878](https://github.com/johannesjo/super-productivity/commit/35198785a1cff44828dfa81f817a0cb86963cdeb))
+* end planning mode if new current task is selected ([75b7d78](https://github.com/johannesjo/super-productivity/commit/75b7d78caa2e9040a0e0e43d3ca42177b44e70bb))
+* improve data repair to support wrong archived sub tasks [#689](https://github.com/johannesjo/super-productivity/issues/689) ([2c09a9d](https://github.com/johannesjo/super-productivity/commit/2c09a9d1cc0289a7e6b007d4a60e6853929695e0))
+* improve logging for sync errors [#688](https://github.com/johannesjo/super-productivity/issues/688) ([7d36cbd](https://github.com/johannesjo/super-productivity/commit/7d36cbdd1c31b1614ea2cade6b4709362d978a08))
+* improve styling for tags [#685](https://github.com/johannesjo/super-productivity/issues/685) ([defd848](https://github.com/johannesjo/super-productivity/commit/defd848b72e7ff236bdd6d921c53ef2d322ff501))
+* improve styling for task count ([a9c9fa6](https://github.com/johannesjo/super-productivity/commit/a9c9fa6972113e619fb3864052c5b161611764ed))
+* **dataRepair:** remove null entities ([ebeee24](https://github.com/johannesjo/super-productivity/commit/ebeee242b0b2022e64b215b3b1d54a8207c70774))
+* **task:** make context menu accessible via keyboard ([28a8ede](https://github.com/johannesjo/super-productivity/commit/28a8edee0f28a98ab6112272c70a9a437f4332b1))
+* make sure offline banner is dismissed [#694](https://github.com/johannesjo/super-productivity/issues/694) ([cdb212a](https://github.com/johannesjo/super-productivity/commit/cdb212a6ec2c515f166d43195fa96cba270c6dfb))
+
+
+
 ## [6.1.1](https://github.com/johannesjo/super-productivity/compare/v6.1.0...v6.1.1) (2020-11-20)
 
 
