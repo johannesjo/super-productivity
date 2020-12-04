@@ -9,7 +9,7 @@
     "D_INITIAL": {
       "TITLE": "Willkommen bei v{{nr}}"
     },
-    "UPDATE_MAIN_MODEL": "Superproduktivität hat ein großes Update bekommen! Einige Migrationen für Ihre Daten sind erforderlich. Bitte beachten Sie, dass Ihre Daten dadurch nicht mit älteren Versionen der App kompatibel sind.",
+    "UPDATE_MAIN_MODEL": "Super Productivity hat ein großes Update bekommen! Einige Migrationen für Ihre Daten sind erforderlich. Bitte beachten Sie, dass Ihre Daten dadurch nicht mit älteren Versionen der App kompatibel sind.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Kein Modellupdate ausgewählt. Bitte beachten Sie, dass Sie entweder ein Downgrade auf die letzte Version durchführen müssen, wenn Sie das Modell-Upgrade nicht durchführen möchten.",
     "UPDATE_WEB_APP": "Neue Version verfügbar. Neue Version laden?"
   },
@@ -19,7 +19,7 @@
   "CONFIRM": {
     "AUTO_FIX": "Ihre Daten scheinen beschädigt zu sein. Möchten Sie versuchen, das Problem automatisch zu beheben? Dies kann zu einem teilweisen Datenverlust führen.",
     "DELETE_STRAY_BACKUP": "Möchten Sie die Rückseite löschen, um diesen Dialog nicht zu sehen?",
-    "RESTORE_FILE_BACKUP": "Es scheint KEINE DATEN zu geben, aber unter \"{{dir}}\" sind Backups verfügbar. Möchten Sie das neueste Backup von {{from}}wiederherstellen?",
+    "RESTORE_FILE_BACKUP": "Es scheint KEINE DATEN zu geben, aber unter \"{{dir}}\" sind Backups verfügbar. Möchten Sie das neueste Backup von {{from}} wiederherstellen?",
     "RESTORE_STRAY_BACKUP": "Bei der letzten Synchronisierung ist möglicherweise ein Fehler aufgetreten. Möchten Sie das letzte Backup wiederherstellen?"
   },
   "DATETIME_INPUT": {
@@ -84,8 +84,8 @@
     },
     "DROPBOX": {
       "S": {
-        "ACCESS_TOKEN_ERROR": "Dropbox: Zugriffstoken aus Authentifizierungscode kann nicht generiert werden",
-        "ACCESS_TOKEN_GENERATED": "Dropbox: Aus Authentifizierungscode generiertes Zugriffstoken",
+        "ACCESS_TOKEN_ERROR": "Dropbox: Zugriffstoken kann nicht aus dem Authentifizierungscode generiert werden",
+        "ACCESS_TOKEN_GENERATED": "Dropbox:  Zugriffstoken aus Authentifizierungscode generiert",
         "AUTH_ERROR": "Dropbox: Ungültiges Zugriffstoken bereitgestellt",
         "OFFLINE": "Dropbox: Synchronisierung nicht möglich, da offline",
         "SYNC_ERROR": "Dropbox: Fehler beim Synchronisieren"
@@ -93,7 +93,7 @@
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Richten Sie GitHub für Project ein"
+        "TITLE": "Richten Sie GitHub für das Projekt ein"
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
@@ -119,9 +119,9 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "S": {
-        "ERR_NETWORK": "GitHub: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
+        "ERR_NETWORK": "GitHub: Anfrage aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
         "ERR_NOT_CONFIGURED": "GitHub: Ist nicht richtig konfiguriert",
-        "ERR_UNKNOWN": "GitHub: Unbekannter Fehler {{statusCode}} {{errorMsg}}",
+        "ERR_UNKNOWN": "GitHub: Unbekannter Fehler {{statusCode}} {{errorMsg}}. Wurde das Api-Anfrage-Limit überschritten?",
         "IMPORTED_MULTIPLE_ISSUES": "GitHub: {{issuesLength}} neue Issues von Git in das Backlog importiert",
         "IMPORTED_SINGLE_ISSUE": "GitHub: Importiertes Issue \"{{issueText}}\" von Git zu Backlog",
         "ISSUE_DELETED_OR_CLOSED": "GitHub: Das Issue \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
@@ -136,7 +136,7 @@
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
-        "TITLE": "Richten Sie GitLab für Project ein"
+        "TITLE": "Richten Sie GitLab für das Projekt ein"
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
@@ -267,7 +267,7 @@
           "H1": "Grundlegende Einstellung",
           "H2": "Worklog-Einstellungen",
           "H3": "Standardübergänge",
-          "P1_1": "Bitte geben Sie einen Anmeldenamen (auf Ihrer Profilseite) und ein <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API-Token</a> oder Passwort an, falls Sie aus irgendeinem Grund keinen generieren können. Bitte nicht, dass neuere Versionen von jira manchmal nur mit dem Token funktionieren.",
+          "P1_1": "Bitte geben Sie einen Anmeldenamen (auf Ihrer Profilseite) und ein <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API-Token</a> oder Passwort an, falls Sie aus irgendeinem Grund keinen generieren können. Bitte beachte, dass neuere Versionen von jira manchmal nur mit dem Token funktionieren.",
           "P1_2": "Sie müssen auch eine JQL-Abfrage angeben, die für die Vorschläge zum Hinzufügen von Aufgaben aus Jira verwendet wird. Wenn Sie Hilfe benötigen, besuchen Sie diesen Link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Sie können auch konfigurieren, ob Sie automatisch (z. B. jedes Mal, wenn Sie die Planungsansicht aufrufen) alle neuen Aufgaben, die durch eine benutzerdefinierte JQL-Abfrage angegeben wurden, zum Backlog hinzufügen möchten.",
           "P1_4": "Eine weitere Option ist \"Überprüfen, ob das aktuelle Ticket dem aktuellen Benutzer zugewiesen ist\". Wenn aktiviert und Sie starten, wird geprüft, ob Sie diesem Ticket in Jira zugewiesen sind. Wenn dies nicht der Fall ist, wird ein Dialogfeld angezeigt, in dem Sie das Ticket selbst zuweisen können.",
@@ -282,7 +282,7 @@
         "AT": "beim",
         "ATTACHMENTS": "Anlagen",
         "CHANGED": "Geändert",
-        "COMMENTS": "Bemerkungen",
+        "COMMENTS": "Kommentare",
         "COMPONENTS": "Komponenten",
         "DESCRIPTION": "Beschreibung",
         "LIST_OF_CHANGES": "Liste der Änderungen",
@@ -295,7 +295,7 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "S": {
-        "ADDED_WORKLOG_FOR": "Jira: Worklog für {{issueKey}}hinzugefügt",
+        "ADDED_WORKLOG_FOR": "Jira: Worklog für {{issueKey}} hinzugefügt",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension nicht geladen. Das Neuladen der Seite könnte helfen",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} neue Issues von Jira in das Backlog importiert",
         "IMPORTED_SINGLE_ISSUE": "Jira: Importierte Ausgabe \"{{issueText}}\" von Jira in das Backlog",
@@ -429,7 +429,7 @@
         "L5": "Wie verändern sich die Empfindungen in Ihrem Körper, während Sie sich weiterhin darauf konzentrieren?",
         "TITLE": "Neugierde"
       },
-      "H1": "Schneiden Sie sich etwas lockerer!",
+      "H1": "Seien Sie nicht so streng!",
       "P1": "Zunächst einmal entspannen! Jeder tut es ab und zu. Und wenn Sie nicht das tun, was Sie sollten, sollten Sie es zumindest genießen! In den folgenden Abschnitten finden Sie hilfreiche Informationen.",
       "P2": "Wenn Sie hier mehr über die Wissenschaft erfahren möchten, kann ich Ihnen <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">diesen Artikel</a> empfehlen, aus dem einige der Übungen stammen.",
       "P3": "Denken Sie daran: Prokrastination ist ein Problem der Emotionsregulation, kein Problem des Zeitmanagements.",
@@ -521,19 +521,19 @@
         "FORCE_IMPORT": "Remote-Daten trotzdem importieren?",
         "FORCE_UPLOAD": "Lokale Daten trotzdem hochladen?",
         "FORCE_UPLOAD_AFTER_ERROR": "Beim Hochladen Ihrer lokalen Daten ist ein Fehler aufgetreten. Versuchen Sie das Update zu erzwingen?",
-        "NO_REMOTE_DATA": "Keine entfernten Daten gefunden. Lokal auf Remote hochladen?",
-        "TRY_LOAD_REMOTE_AGAIN": "Versuchen Sie erneut, Daten von der Fernbedienung neu zu laden?"
+        "NO_REMOTE_DATA": "Keine remote Daten gefunden. Lokal auf Remote hochladen?",
+        "TRY_LOAD_REMOTE_AGAIN": "Versuchen Sie erneut, Daten von Remote neu zu laden?"
       },
       "D_CONFLICT": {
         "LAST_CHANGE": "Letzte Änderung:",
         "LAST_SYNC": "letzte Synchronisierung:",
         "LOCAL": "Lokal",
-        "LOCAL_REMOTE": "lokal -> fern",
+        "LOCAL_REMOTE": "lokal -> remote",
         "REMOTE": "Remote",
-        "TEXT": "<p>Update von Dropbox. Sowohl lokale als auch entfernte Daten scheinen geändert zu sein.</p>",
+        "TEXT": "<p>Update von Dropbox. Sowohl lokale als auch remote Daten scheinen geändert zu sein.</p>",
         "TITLE": "Dropbox: Datenkonflikte",
         "USE_LOCAL": "Verwenden Sie local",
-        "USE_REMOTE": "Verwenden Sie die Fernbedienung"
+        "USE_REMOTE": "Verwenden Sie remote"
       },
       "FORM": {
         "DROPBOX": {
@@ -551,7 +551,7 @@
         "L_SYNC_PROVIDER": "Anbieter synchronisieren",
         "TITLE": "Sync",
         "WEB_DAV": {
-          "CORS_INFO": "<p><strong>Experimental!!</strong> In order <strong>to make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance</strong>, which can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread</a> for more information. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
+          "CORS_INFO": "<p><strong>Experimental!!</strong> <strong>Damit dies für Mobil oder den Browser funktioniert, müssen Sie Super Productivity für CORS-Anfragen bei Ihrer Nextcloud-Instanz auf die Whitelist setzen</strong>, dies kann negative Auswirkungen auf die Sicherheit haben! Bitte beziehen Sie sich <a href='https://github.com/nextcloud/server/issues/3131'>auf diesen Thread</a> für weitere Informationen. Ein Ansatz, um dies auch mobil zu ermöglichen, ist das Whitelisting \"https://app.super-productivity.com\" über die Nextcloud-App <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Benutzung auf eigene Gefahr!",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Passwort",
           "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
@@ -601,13 +601,13 @@
         "PARENT": "Elternteil",
         "REMINDER": "Erinnerung",
         "REPEAT": "Wiederholen",
-        "SCHEDULE_TASK": "Task planen",
+        "SCHEDULE_TASK": "Aufgabe planen",
         "SUB_TASKS": "Unteraufgaben ({{nr}})",
         "TIME": "Zeit"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Vorhandene Aufgabe hinzufügen \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Fügen Sie das Problem #{{issueNr}} von {{issueType}}hinzu",
+        "ADD_ISSUE_TASK": "Fügen Sie das Problem #{{issueNr}} von {{issueType}} hinzu",
         "ADD_TASK": "Aufgabe hinzufügen",
         "ADD_TASK_TO_BACKLOG": "Aufgabe zum Rückstand hinzufügen",
         "CREATE_TASK": "Neue Aufgabe erstellen",
@@ -636,8 +636,8 @@
         "OPEN_ISSUE": "Öffnen Sie das Issue in einem neuen Browser-Tab",
         "OPEN_TIME": "Zeit schätzen / Zeit hinzufügen",
         "REMOVE_FROM_MY_DAY": "Von meinem Tag entfernen",
-        "REPEAT_EDIT": "Bearbeiten Task wiederholen Konfig",
-        "SCHEDULE": "Task planen",
+        "REPEAT_EDIT": "Bearbeite Einstellung der Wiederholungssaufgabe",
+        "SCHEDULE": "Aufgabe planen",
         "SHOW_UPDATES": "Updates anzeigen",
         "TOGGLE_ADDITIONAL": "Zusätzliche Informationen ein- / ausblenden",
         "TOGGLE_ATTACHMENTS": "Anhänge ein- / ausblenden",
@@ -659,7 +659,7 @@
         "ADD_TO_TODAY": "Heute hinzufügen",
         "DISMISS": "Erinnerung verwerfen",
         "DISMISS_ALL": "Alle schließen",
-        "DUE_TASK": "Due Aufgabe",
+        "DUE_TASK": "Fällige Aufgabe",
         "DUE_TASKS": "Fällige Aufgaben",
         "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
         "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
@@ -680,7 +680,7 @@
         "TITLE": "Zeitaufwand / Schätzungen"
       },
       "D_TIME_FOR_DAY": {
-        "ADD_ENTRY_FOR": "Neuen Eintrag für {{date}}hinzufügen",
+        "ADD_ENTRY_FOR": "Neuen Eintrag für {{date}} hinzufügen",
         "DATE": "Datum für neuen Eintrag",
         "HELP": "Beispiele:<br> 30 m => 30 Minuten<br> 2 h => 2 Stunden<br> 2 h 30 m => 2 Stunden und 30 Minuten",
         "TINE_SPENT": "Zeitaufwand",
@@ -716,8 +716,8 @@
         "OK": "Vollständig entfernen"
       },
       "D_EDIT": {
-        "ADD": "Hinzufügen der Konfiguration für Wiederholungstask",
-        "EDIT": "Bearbeiten Task wiederholen Konfig",
+        "ADD": "Hinzufügen der Konfiguration für Wiederholungsaufgaben",
+        "EDIT": "Bearbeite Einstellung der Wiederholungssaufgaben",
         "HELP1": "Sich wiederholende Aufgaben sind für tägliche Aufgaben gedacht, z. B .: \"Organisation\", \"Tägliche Besprechung\", \"Codeüberprüfung\", \"Überprüfen von E-Mails\" oder ähnliche Aufgaben, die wahrscheinlich immer wieder auftreten.",
         "HELP2": "Einmal konfiguriert, wird eine sich wiederholende Aufgabe an jedem unten ausgewählten Tag neu erstellt, sobald Sie Ihr Projekt öffnen, und wird am Ende des Tages automatisch als erledigt markiert. Sie werden als unterschiedliche Instanzen behandelt. So können Sie Unteraufgaben usw. frei hinzufügen.",
         "HELP3": "Aus Jira oder Git importierte Aufgaben können nicht wiederholt werden. Alle Erinnerungen werden auch bei einer sich wiederholenden Aufgabe gelöscht.",
@@ -743,7 +743,7 @@
       },
       "B_TTR": {
         "ADD_TO_TASK": "Zur Aufgabe hinzufügen",
-        "MSG": "Sie haben die Zeit für {{time}}nicht verfolgt"
+        "MSG": "Sie haben die Zeit für {{time}} nicht verfolgt"
       },
       "D_IDLE": {
         "BREAK": "Pause",
@@ -1129,9 +1129,9 @@
   "V": {
     "E_1TO10": "Bitte geben Sie einen Wert zwischen 1 und 10 ein",
     "E_DATETIME": "Der eingegebene Wert ist keine Datums- / Uhrzeitangabe!",
-    "E_MAX": "Sollte nicht größer als {{val}}sein",
+    "E_MAX": "Sollte nicht größer als {{val}} sein",
     "E_MAX_LENGTH": "Darf maximal {{val}} Zeichen lang sein",
-    "E_MIN": "Sollte kleiner als {{val}}sein",
+    "E_MIN": "Sollte kleiner als {{val}} sein",
     "E_MIN_LENGTH": "Sollte mindestens {{val}} Zeichen lang sein",
     "E_PATTERN": "Ungültige Eingabe",
     "E_REQUIRED": "Dieses Feld wird benötigt"
