@@ -194,16 +194,30 @@ Packaging the app is done via [electron-builder](https://github.com/electron-use
 docker run -d -p 80:80 johannesjo/super-productivity:latest
 ```
 
+## Custom themes (desktop only)
+In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom css available to restyle everything. To load a custom theme you simply need put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
+
+There is a great set of [themes available for download in this repository](https://github.com/johannesjo/super-productivity-themes/tree/main/dist) as well as some [info on how to role out your own custom themes](https://github.com/johannesjo/super-productivity-themes).
+
 
 ## Custom WebDAV Syncing
-If using the integrated WebDAV Syncing is not working out for you, you can also try to sync all app files. When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder away and use the remaining path to sync via the cloud.
+If using the integrated WebDAV Syncing is not working out for you, you can also try to sync all app files, which are located in the [user data folder](#user-data-folder).
 
-## Using a custom folder to save user data
+## Automatic Backups
+For the desktop version automatic backups are stored per default in the `backup` sub folder of the [user data folder](#user-data-folder). Once you located a backup you can restore it on the settings page under `Sync & Export/Import/Export/Import from file`.
+
+## User Data Folder
+Where user data is stored differs from os to os. The most common locations are:
+Mac OS: `~/Library/Application Support/superProductivity/`
+Windows: `C:\Users\<YOUR_USER_NAME>\AppData\Local\superProductivity/`
+Linux: `~/.config/superProductivity/`
+
+The path should be shown when you go to the "Automatic Backups` section on the configuration page (minus the "backup" sub folder). You can also see it printed out when you start the app from the command line.
+
+For web browsers data is simply stored for the current user inside the browser storage.
+
+### Using a custom folder to save user data
 You can specify a custom folder for saving your data by starting the application with the `--user-data-dir` parameter like so:
 ```
 superproductivity --user-data-dir=/path/to/my/data
 ```
-
-## Automatic Backups
-For the desktop version automatic backups are stored per default. You can see the [backup folder location](https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname) printed out when you start the app from the command line. 
-Once you located a backup you can restore it on the settings page under`Sync & Export/Import/Export/Import from file`.
