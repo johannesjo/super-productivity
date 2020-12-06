@@ -195,7 +195,7 @@ docker run -d -p 80:80 johannesjo/super-productivity:latest
 ```
 
 ## Custom themes (desktop only)
-In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom css available to restyle everything. To load a custom theme you simply need put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
+In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom css to restyle everything. To load a custom theme you simply need put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
 
 There is a great set of [themes available for download in this repository](https://github.com/johannesjo/super-productivity-themes/tree/main/dist) as well as some [info on how to role out your own custom themes](https://github.com/johannesjo/super-productivity-themes).
 
