@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  HostListener,
+  OnDestroy,
+  Output,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
@@ -14,6 +23,9 @@ import { TagService } from '../../features/tag/tag.service';
 import { Tag } from '../../features/tag/tag.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
+import { FocusKeyManager } from '@angular/cdk/a11y';
+import { MatMenuItem } from '@angular/material/menu';
+import { LayoutService } from '../layout/layout.service';
 
 const IS_SHOW_INITIALLY = false;
 
@@ -26,6 +38,9 @@ const IS_SHOW_INITIALLY = false;
 })
 export class SideNavComponent implements OnDestroy {
   @Output() scrollToNotes: EventEmitter<void> = new EventEmitter();
+
+  @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
+  private keyManager?: FocusKeyManager<MatMenuItem>;
 
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
   isProjectsExpanded: boolean = IS_SHOW_INITIALLY;
@@ -63,13 +78,21 @@ export class SideNavComponent implements OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent) {
+    this.keyManager?.onKeydown(event);
+  }
+
   constructor(
     public readonly tagService: TagService,
     public readonly projectService: ProjectService,
+    public readonly layoutService: LayoutService,
     public readonly workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
     private readonly _dragulaService: DragulaService,
   ) {
+    console.log('I am here!');
+
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
       moves: (el, container, handle) => {
@@ -85,6 +108,18 @@ export class SideNavComponent implements OnDestroy {
         this.projectService.updateOrder(targetNewIds);
       })
     );
+
+    this._subs.add(this.layoutService.isShowSideNav$.subscribe((isShow) => {
+      console.log(this.navEntries, isShow);
+      if (this.navEntries && isShow) {
+        this.keyManager = new FocusKeyManager<MatMenuItem>(this.navEntries)
+          .withVerticalOrientation(true);
+        setTimeout(() => {
+          this.keyManager?.setFirstItemActive();
+        }, 100);
+        this.keyManager.change.subscribe((v) => console.log('this.keyManager.change', v));
+      }
+    }));
   }
 
   ngOnDestroy(): void {

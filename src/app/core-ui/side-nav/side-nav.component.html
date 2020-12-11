@@ -6,6 +6,7 @@
     <div [style.background]="context.theme.primary"
          class="tag-color"></div>
     <button [routerLink]="['tag', context.id, 'tasks']"
+            #menuEntry
             mat-menu-item
             routerLinkActive="isActiveRoute">
       <span class="badge">{{context.taskIds.length}}</span>
@@ -27,6 +28,7 @@
   </div>
 
   <button class="route-link"
+          #menuEntry
           mat-menu-item
           routerLink="schedule"
           routerLinkActive="isActiveRoute">
@@ -40,6 +42,7 @@
   <button (click)="toggleExpandProjects()"
           [class.isExpanded]="isProjectsExpanded"
           class="expand-btn"
+          #menuEntry
           mat-menu-item>
     <span class="title">{{T.MH.PROJECTS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
@@ -55,6 +58,7 @@
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
       <button [routerLink]="['project', project.id, 'tasks']"
+              #menuEntry
               mat-menu-item>
         <span class="badge">{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span>
         <mat-icon class="drag-handle"
@@ -77,6 +81,7 @@
   </div>
 
   <button *ngIf="isProjectsExpanded"
+          #menuEntry
           mat-menu-item
           routerLink="project-overview"
           routerLinkActive="isActiveRoute">
@@ -86,6 +91,7 @@
 
   <button (click)="addProject()"
           *ngIf="isProjectsExpanded"
+          #menuEntry
           mat-menu-item>
     <mat-icon>add</mat-icon>
     <span class="text">{{T.MH.CREATE_PROJECT|translate}}</span>
@@ -98,6 +104,7 @@
   <button (click)="toggleExpandTags()"
           [class.isExpanded]="isTagsExpanded"
           class="expand-btn"
+          #menuEntry
           mat-menu-item>
     <span class="title">{{T.MH.TAGS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
@@ -113,6 +120,7 @@
       <div [style.background]="tag?.theme.primary"
            class="tag-color"></div>
       <button [routerLink]="['tag', tag.id, 'tasks']"
+              #menuEntry
               mat-menu-item>
         <span class="badge">{{tag.taskIds.length}}</span>
         <mat-icon class="drag-handle"
@@ -136,7 +144,7 @@
   </div>
   <!--  <button (click)="addTag()"-->
   <!--          *ngIf="isTagsExpanded"-->
-  <!--          mat-menu-item>-->
+  <!--   #menuEntry mat-menu-item>-->
   <!--    <mat-icon>add</mat-icon>-->
   <!--    {{T.MH.CREATE_TAG|translate}}-->
   <!--  </button>-->
@@ -145,6 +153,7 @@
 
 <section class="app">
   <button class="route-link"
+          #menuEntry
           mat-menu-item
           routerLink="config"
           routerLinkActive="isActiveRoute">
@@ -156,6 +165,7 @@
           *ngIf="workContextService.isActiveWorkContextProject$|async"
           [@expandFade]
           class="route-link scroll-down-btn"
+          #menuEntry
           mat-menu-item>
     <mat-icon>notes</mat-icon>
     <span class="text">{{T.MH.NOTES|translate}}</span>
