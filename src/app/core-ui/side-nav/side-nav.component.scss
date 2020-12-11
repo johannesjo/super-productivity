@@ -129,6 +129,7 @@ section {
     }
   }
 
+  &:focus,
   &:hover {
     button:last-of-type {
       opacity: 1;
@@ -160,6 +161,7 @@ section {
   }
 
   &.isActiveContext,
+  &:focus,
   &:hover {
     .tag-color,
     .project-color {
@@ -174,6 +176,7 @@ section {
 .project-settings-btn,
 .project button:first-of-type,
 .route-link {
+  &:focus,
   &:hover {
     font-weight: bold;
 
@@ -218,6 +221,16 @@ section {
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
+
+  &:focus,
+  &:hover {
+    @include darkTheme {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    @include lightTheme {
+      background: rgba(var(--palette-background-hover), var(--palette-background-hover-alpha, 1));
+    }
+  }
 
   ::ng-deep mat-icon:last-of-type {
     margin-left: auto;
