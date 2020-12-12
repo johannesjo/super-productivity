@@ -4,7 +4,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 
-const MODEL_VERSION = 2.1;
+const MODEL_VERSION = 2.2;
 
 export const migrateGlobalConfigState = (globalConfigState: GlobalConfigState): GlobalConfigState => {
   if (!isMigrateModel(globalConfigState, MODEL_VERSION, 'GlobalConfig')) {
