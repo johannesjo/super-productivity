@@ -381,6 +381,13 @@ export class TaskService {
     }
   }
 
+  focusFirstTaskIfVisible() {
+    const tEl = document.getElementsByTagName('task');
+    if (tEl && tEl[0]) {
+      (tEl[0] as HTMLElement).focus();
+    }
+  }
+
   moveToToday(id: string, isMoveToTop: boolean = false) {
     const workContextId = this._workContextService.activeWorkContextId as string;
     const workContextType = this._workContextService.activeWorkContextType as WorkContextType;
@@ -448,7 +455,12 @@ export class TaskService {
     if (workContextType === WorkContextType.PROJECT) {
       task$.subscribe(task => {
         if (!task) {
-          console.log({taskId, workContextType, workContextId, activeWCId: this._workContextService.activeWorkContextId});
+          console.log({
+            taskId,
+            workContextType,
+            workContextId,
+            activeWCId: this._workContextService.activeWorkContextId
+          });
           throw new Error('Startable task not found');
         }
         if (task.parentId) {

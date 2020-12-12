@@ -26,6 +26,7 @@ import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { FocusKeyManager } from '@angular/cdk/a11y';
 import { MatMenuItem } from '@angular/material/menu';
 import { LayoutService } from '../layout/layout.service';
+import { TaskService } from '../../features/tasks/task.service';
 
 const IS_SHOW_INITIALLY = false;
 
@@ -41,6 +42,7 @@ export class SideNavComponent implements OnDestroy {
 
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
   private keyManager?: FocusKeyManager<MatMenuItem>;
+  keyboardFocusTimeout?: number;
 
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
   isProjectsExpanded: boolean = IS_SHOW_INITIALLY;
@@ -86,13 +88,12 @@ export class SideNavComponent implements OnDestroy {
   constructor(
     public readonly tagService: TagService,
     public readonly projectService: ProjectService,
-    public readonly layoutService: LayoutService,
     public readonly workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
+    private readonly _layoutService: LayoutService,
+    private readonly _taskService: TaskService,
     private readonly _dragulaService: DragulaService,
   ) {
-    console.log('I am here!');
-
     this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
       direction: 'vertical',
       moves: (el, container, handle) => {
@@ -109,15 +110,17 @@ export class SideNavComponent implements OnDestroy {
       })
     );
 
-    this._subs.add(this.layoutService.isShowSideNav$.subscribe((isShow) => {
-      console.log(this.navEntries, isShow);
+    this._subs.add(this._layoutService.isShowSideNav$.subscribe((isShow) => {
       if (this.navEntries && isShow) {
         this.keyManager = new FocusKeyManager<MatMenuItem>(this.navEntries)
           .withVerticalOrientation(true);
-        setTimeout(() => {
+        window.clearTimeout(this.keyboardFocusTimeout);
+        this.keyboardFocusTimeout = window.setTimeout(() => {
           this.keyManager?.setFirstItemActive();
-        }, 100);
-        this.keyManager.change.subscribe((v) => console.log('this.keyManager.change', v));
+        }, 50);
+        // this.keyManager.change.subscribe((v) => console.log('this.keyManager.change', v));
+      } else if (!isShow) {
+        this._taskService.focusFirstTaskIfVisible();
       }
     }));
   }
@@ -126,6 +129,7 @@ export class SideNavComponent implements OnDestroy {
     this._subs.unsubscribe();
     this._dragulaService.destroy(this.PROJECTS_SIDE_NAV);
     this._dragulaService.destroy(this.TAG_SIDE_NAV);
+    window.clearTimeout(this.keyboardFocusTimeout);
   }
 
   addProject() {
