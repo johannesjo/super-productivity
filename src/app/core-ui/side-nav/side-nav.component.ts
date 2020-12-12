@@ -159,9 +159,29 @@ export class SideNavComponent implements OnDestroy {
     this.isProjectsExpanded$.next(this.isProjectsExpanded);
   }
 
+  toggleExpandProjectsLeftRight(ev: KeyboardEvent) {
+    if ((ev.key === 'ArrowLeft' && this.isProjectsExpanded)) {
+      this.isProjectsExpanded = false;
+      this.isProjectsExpanded$.next(this.isProjectsExpanded);
+    } else if ((ev.key === 'ArrowRight') && !(this.isProjectsExpanded)) {
+      this.isProjectsExpanded = true;
+      this.isProjectsExpanded$.next(this.isProjectsExpanded);
+    }
+  }
+
   toggleExpandTags() {
     this.isTagsExpanded = !this.isTagsExpanded;
     this.isTagsExpanded$.next(this.isTagsExpanded);
+  }
+
+  toggleExpandTagsLeftRight(ev: KeyboardEvent) {
+    if ((ev.key === 'ArrowLeft' && this.isTagsExpanded)) {
+      this.isTagsExpanded = false;
+      this.isTagsExpanded$.next(this.isTagsExpanded);
+    } else if ((ev.key === 'ArrowRight') && !(this.isTagsExpanded)) {
+      this.isTagsExpanded = true;
+      this.isTagsExpanded$.next(this.isTagsExpanded);
+    }
   }
 
   // addTag() {

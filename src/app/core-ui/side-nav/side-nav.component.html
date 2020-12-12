@@ -41,6 +41,7 @@
          class="projects">
   <button (click)="toggleExpandProjects()"
           [class.isExpanded]="isProjectsExpanded"
+          (keydown)="toggleExpandProjectsLeftRight($event)"
           class="expand-btn"
           #menuEntry
           mat-menu-item>
@@ -103,6 +104,7 @@
          class="tags">
   <button (click)="toggleExpandTags()"
           [class.isExpanded]="isTagsExpanded"
+          (keydown)="toggleExpandTagsLeftRight($event)"
           class="expand-btn"
           #menuEntry
           mat-menu-item>
