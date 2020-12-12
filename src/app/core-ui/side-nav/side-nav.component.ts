@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   EventEmitter,
   HostListener,
   OnDestroy,
   Output,
   QueryList,
+  ViewChild,
   ViewChildren
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
@@ -44,6 +46,7 @@ export class SideNavComponent implements OnDestroy {
   private keyManager?: FocusKeyManager<MatMenuItem>;
   keyboardFocusTimeout?: number;
 
+  @ViewChild('projectExpandBtn', {read: ElementRef}) projectExpandBtn?: ElementRef;
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
   isProjectsExpanded: boolean = IS_SHOW_INITIALLY;
   projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
@@ -58,6 +61,7 @@ export class SideNavComponent implements OnDestroy {
     )
   );
 
+  @ViewChild('tagExpandBtn', {read: ElementRef}) tagExpandBtn?: ElementRef;
   isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
   isTagsExpanded: boolean = IS_SHOW_INITIALLY;
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
@@ -169,6 +173,18 @@ export class SideNavComponent implements OnDestroy {
     }
   }
 
+  checkFocusProject(ev: KeyboardEvent) {
+    if ((ev.key === 'ArrowLeft') && this.projectExpandBtn?.nativeElement) {
+      const targetIndex = this.navEntries?.toArray()
+        .findIndex((value) => {
+          return value._getHostElement() === this.projectExpandBtn?.nativeElement;
+        });
+      if (targetIndex) {
+        this.keyManager?.setActiveItem(targetIndex);
+      }
+    }
+  }
+
   toggleExpandTags() {
     this.isTagsExpanded = !this.isTagsExpanded;
     this.isTagsExpanded$.next(this.isTagsExpanded);
@@ -181,6 +197,18 @@ export class SideNavComponent implements OnDestroy {
     } else if ((ev.key === 'ArrowRight') && !(this.isTagsExpanded)) {
       this.isTagsExpanded = true;
       this.isTagsExpanded$.next(this.isTagsExpanded);
+    }
+  }
+
+  checkFocusTag(ev: KeyboardEvent) {
+    if ((ev.key === 'ArrowLeft') && this.tagExpandBtn?.nativeElement) {
+      const targetIndex = this.navEntries?.toArray()
+        .findIndex((value) => {
+          return value._getHostElement() === this.tagExpandBtn?.nativeElement;
+        });
+      if (targetIndex) {
+        this.keyManager?.setActiveItem(targetIndex);
+      }
     }
   }
 

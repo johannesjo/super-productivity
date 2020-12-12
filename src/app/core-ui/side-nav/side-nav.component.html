@@ -44,6 +44,7 @@
           (keydown)="toggleExpandProjectsLeftRight($event)"
           class="expand-btn"
           #menuEntry
+          #projectExpandBtn
           mat-menu-item>
     <span class="title">{{T.MH.PROJECTS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
@@ -54,6 +55,7 @@
        [dragula]="PROJECTS_SIDE_NAV">
     <div *ngFor="let project of projectList; trackBy: trackById;"
          [class.isActiveContext]="project.id===activeWorkContextId"
+         (keydown)="checkFocusProject($event)"
          [class.hasTasks]="project.taskIds.length"
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
@@ -106,6 +108,7 @@
           [class.isExpanded]="isTagsExpanded"
           (keydown)="toggleExpandTagsLeftRight($event)"
           class="expand-btn"
+          #tagExpandBtn
           #menuEntry
           mat-menu-item>
     <span class="title">{{T.MH.TAGS|translate}}</span>
@@ -116,6 +119,7 @@
        [dragulaModel]="tagList"
        [dragula]="TAG_SIDE_NAV">
     <div *ngFor="let tag of tagList; trackBy: trackById;"
+         (keydown)="checkFocusTag($event)"
          [class.isActiveContext]="tag.id===activeWorkContextId"
          [class.hasTasks]="tag.taskIds.length"
          class="tag">
