@@ -63,7 +63,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     addNewTask: 'Shift+A',
     addNewNote: 'n',
     openProjectNotes: 'Shift+N',
-    openDistractionPanel: 'Shift+D',
+    toggleSideNav: 'Shift+D',
     showHelp: '?',
     toggleBookmarks: 'Shift+V',
     toggleBacklog: 'b',

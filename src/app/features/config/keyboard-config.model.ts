@@ -12,9 +12,9 @@ export type KeyboardConfig = Readonly<{
   globalToggleTaskStart: string | null,
   showHelp: string | null,
   addNewNote: string | null,
+  toggleSideNav: string | null,
   openProjectNotes: string | null,
   toggleBookmarks: string | null;
-  openDistractionPanel: string | null,
   zoomIn: string | null,
   zoomOut: string | null,
   zoomDefault: string | null,

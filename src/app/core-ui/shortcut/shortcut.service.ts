@@ -83,13 +83,6 @@ export class ShortcutService {
       return;
     }
 
-    // if (checkKeyCombo(ev, cfg.keyboard.openDistractionPanel)) {
-    //   Dialogs('DISTRACTIONS', undefined, true);
-    // }
-    // if (checkKeyCombo(ev, cfg.keyboard.showHelp)) {
-    //   Dialogs('HELP', {template: 'PAGE'}, true);
-    // }
-    //
     if (checkKeyCombo(ev, keys.toggleBacklog)) {
       let backlogPos = 0;
       switch (this.backlogPos) {
@@ -120,6 +113,10 @@ export class ShortcutService {
       //
       // } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       //   this._router.navigate(['/focus-view']);
+
+    } else if (checkKeyCombo(ev, keys.toggleSideNav)) {
+      this._layoutService.toggleSideNav();
+      ev.preventDefault();
 
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();
