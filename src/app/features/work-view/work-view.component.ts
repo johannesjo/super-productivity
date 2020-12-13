@@ -139,7 +139,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   startWork() {
-    this.taskService.startFirstStartable();
     this.planningModeService.leavePlanningMode();
   }
 
