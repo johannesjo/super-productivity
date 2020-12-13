@@ -12,16 +12,16 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   misc: {
     isDarkMode: IS_USE_DARK_THEME_AS_DEFAULT,
     isConfirmBeforeExit: false,
-    isNotifyWhenTimeEstimateExceeded: false,
+    isNotifyWhenTimeEstimateExceeded: true,
     isAutMarkParentAsDone: false,
     isAutoStartNextTask: true,
     isTurnOffMarkdown: false,
-    isAutoAddWorkedOnToToday: false,
+    isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: true,
     isDisableInitialDialog: IS_F_DROID_APP,
     defaultProjectId: null,
-    firstDayOfWeek: 0,
+    firstDayOfWeek: 1,
   },
   evaluation: {
     isHideEvaluationSheet: false,
@@ -33,7 +33,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isUnTrackedIdleResetsBreakTimer: true,
   },
   takeABreak: {
-    isTakeABreakEnabled: false,
+    isTakeABreakEnabled: true,
     isLockScreen: false,
     isFocusWindow: false,
     /* tslint:disable-next-line */
@@ -81,7 +81,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskSchedule: 's',
     taskToggleDone: 'd',
     taskAddSubTask: 'a',
-    taskDelete: 'Delete',
+    taskDelete: 'Backspace',
     taskMoveToProject: 'e',
     taskOpenContextMenu: 'q',
     selectPreviousTask: 'k',
