@@ -105,6 +105,9 @@ section {
       background: #fff;
       border-radius: $card-border-radius;
 
+      // avoid affecting drag handle
+      pointer-events: none;
+
       @include darkTheme() {
         border-color: $dark-theme-extra-border-color;
         background: $dark-theme-bg-lighter;
