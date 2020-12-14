@@ -1,0 +1,9 @@
+@mixin grabCursor(){
+  cursor: grab;
+  cursor: move;
+  cursor: -moz-grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}

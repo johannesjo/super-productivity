@@ -681,7 +681,6 @@ progress-bar {
   height: 40px;
   min-width: 40px;
   z-index: $z-drag-handle;
-  cursor: grab;
   //display: flex;
   //justify-content: center;
   //align-items: center;
@@ -690,6 +689,8 @@ progress-bar {
 
   // fixes drag and drop on mobile
   touch-action: none;
+
+  @include grabCursor();
 
   > * {
     position: absolute;

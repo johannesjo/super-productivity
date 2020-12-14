@@ -258,13 +258,9 @@ section {
 }
 
 
-.drag-handle {
-  cursor: grab;
+.drag-handle { /* Firefox 1.5-26 */
   position: relative;
-
-  &:active {
-    cursor: grabbing;
-  }
+  @include grabCursor();
 
   &:after {
     content: '';

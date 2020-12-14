@@ -157,15 +157,12 @@ $bookmarkMinWidth: 56px;
     border-top-left-radius: $card-border-radius;
     border-bottom-left-radius: $card-border-radius;
     box-shadow: $whiteframe-shadow-3dp;
-    cursor: grab;
     max-width: 33%;
 
     // fixes drag and drop on mobile
     touch-action: none;
 
-    &:active {
-      cursor: grabbing;
-    }
+    @include grabCursor();
   }
 
   button {
