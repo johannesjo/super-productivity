@@ -116,9 +116,8 @@ export class TakeABreakService {
   timeWorkingWithoutABreak$: Observable<number> = merge(
     this._tick$,
     this._triggerReset$,
+    // of(9999999).pipe(delay(4000)),
   ).pipe(
-    // startWith(9999999),
-    // delay(4000),
     scan((acc, value) => {
       return (value > 0)
         ? acc + value

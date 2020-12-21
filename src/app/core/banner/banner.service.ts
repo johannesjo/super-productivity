@@ -83,8 +83,10 @@ export class BannerService {
   }
 
   dismiss(bannerId: BannerId) {
-    if (this._banners.find(bannerIN => bannerIN.id === bannerId)) {
-      this._banners.shift();
+    const bannerIndex = this._banners.findIndex(bannerIN => bannerIN.id === bannerId);
+    if (bannerIndex > -1) {
+      // NOTE splice mutates
+      this._banners.splice(bannerIndex, 1);
       this._banners$.next(this._banners);
     }
   }
