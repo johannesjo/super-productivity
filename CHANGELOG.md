@@ -1,3 +1,29 @@
+# [6.2.0-0](https://github.com/johannesjo/super-productivity/compare/v6.1.2...v6.2.0-0) (2020-12-21)
+
+
+### Bug Fixes
+
+* drag handle for projects being overlapped by badge ([ce66957](https://github.com/johannesjo/super-productivity/commit/ce6695797edb26766214f7dbc4b6aee38ed35741))
+* grab cursor everywhere ([eb4143b](https://github.com/johannesjo/super-productivity/commit/eb4143bff52ad3f889e4b56a46c1e54a15feb9ea))
+* **lang:** fix some typos, add missing translation ([bc06122](https://github.com/johannesjo/super-productivity/commit/bc0612289d18f3d1c827cf496b8520d8f8050321))
+
+
+### Features
+
+* adjust config defaults to be more sensible ([02051e7](https://github.com/johannesjo/super-productivity/commit/02051e7bef576e0b2a23b94fa2b0e5e5e632be89))
+* don't autostart task on ready to work ([0e0fd83](https://github.com/johannesjo/super-productivity/commit/0e0fd837d70bdd4c66ef817fc8808e6fad3eb552))
+* improve persistence not allowed handling ([be13288](https://github.com/johannesjo/super-productivity/commit/be132887bfc99d399c73daa888a02d37c4a3406d))
+* **sideNavKeyboard:** add keyboard shortcut ([097b101](https://github.com/johannesjo/super-productivity/commit/097b101e50c16b64a52750e0d24aba50b0c96543))
+* **sideNavKeyboard:** add new keyboard shortcut migration ([bf2e33d](https://github.com/johannesjo/super-productivity/commit/bf2e33d590ebf629001887eea0492a1844cc1012))
+* **sideNavKeyboard:** make left focuses parent work ([066735e](https://github.com/johannesjo/super-productivity/commit/066735ef3d71c57b3ea979b3bf2138512c5218c8))
+* **sideNavKeyboard:** make left right work for tags and projects ([75efddb](https://github.com/johannesjo/super-productivity/commit/75efddbc406fb21788dadaf3055d8d9ff873de0f))
+* **sideNavKeyboard:** make open and focus work ([f450c4a](https://github.com/johannesjo/super-productivity/commit/f450c4a93f02668a89278d0794f91ff6fec9ad74))
+* **sideNavKeyboard:** proof of concept ([a8a1a78](https://github.com/johannesjo/super-productivity/commit/a8a1a7833a3a594154f7092a7425e7cf6d994893))
+* **sideNavKeyboard:** wait longer before focusing nav item ([e59241b](https://github.com/johannesjo/super-productivity/commit/e59241b41e5099bcee7fcd74594a2cd73446f89e))
+* add missing focus styles for side-nav ([10e2b16](https://github.com/johannesjo/super-productivity/commit/10e2b168551d372e74c60d6816977744f538f34a))
+
+
+
 ## [6.1.2](https://github.com/johannesjo/super-productivity/compare/v6.1.1...v6.1.2) (2020-12-03)
 
 
