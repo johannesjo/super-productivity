@@ -179,5 +179,8 @@
     "utils-decorators": "^1.7.1",
     "webdav": "^3.5.0",
     "zone.js": "~0.11.1"
+  },
+  "resolutions": {
+    "webpack": "4.44.2"
   }
 }
