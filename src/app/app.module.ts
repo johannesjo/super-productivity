@@ -79,7 +79,7 @@ export function createTranslateLoader(http: HttpClient) {
     BrowserAnimationsModule,
     HttpClientModule,
     HammerModule,
-    RouterModule.forRoot(APP_ROUTES, {useHash: true}),
+    RouterModule.forRoot(APP_ROUTES, { useHash: true, relativeLinkResolution: 'legacy' }),
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers,
       {
