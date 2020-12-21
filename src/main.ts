@@ -17,11 +17,16 @@ platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
     console.log('Registering Service worker');
     return navigator.serviceWorker.register('ngsw-worker.js');
   } else if ('serviceWorker' in navigator && IS_ELECTRON) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (const registration of registrations) {
-        registration.unregister();
-      }
-    });
+    navigator.serviceWorker.getRegistrations()
+      .then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+        }
+      })
+      .catch((e) => {
+        console.error('ERROR when unregistering service worker');
+        console.error(e);
+      });
   }
   return;
 }).catch((err: any) => {
