@@ -1,3 +1,12 @@
+# [6.3.0-0](https://github.com/johannesjo/super-productivity/compare/v6.2.0-0...v6.3.0-0) (2020-12-21)
+
+
+### Bug Fixes
+
+* skipping service worker for elecron not working ([b855c8d](https://github.com/johannesjo/super-productivity/commit/b855c8d6e4128038302750b28c8738198bc0f869))
+
+
+
 # [6.2.0-0](https://github.com/johannesjo/super-productivity/compare/v6.1.2...v6.2.0-0) (2020-12-21)
 
 
