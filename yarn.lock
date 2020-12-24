@@ -2735,18 +2735,20 @@ alphanum-sort@^1.0.0:
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
 
-angular-material-css-vars@^1.0.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/angular-material-css-vars/-/angular-material-css-vars-1.1.0.tgz#4ebe60348bc80a62bdaa72ea08a5b899333e0f89"
-  integrity sha512-r99WNAV8Lx2UNJ7OBm3bQvU8TlmaXn3dAR8JFNAJB5IumG2jKSsMTrNNRRuI4gNybwsyCuZpbFPV2vpkt8W0Qw==
+angular-material-css-vars@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/angular-material-css-vars/-/angular-material-css-vars-1.1.2.tgz#911d4353283a4b796c9a37e628d5baa55d80fdb5"
+  integrity sha512-+F4+/lVtevVEYin6OrS6avmnVZ4OlLDbD+rQn8ozREO/hSTXvSDeYSQaCVz1yY5liJ+7V4sr8r+UAkIwoZ4fMw==
   dependencies:
     "@ctrl/tinycolor" "^2.6.0"
     tslib "^2.0.0"
 
-angular2-promise-buttons@^4.0.9:
-  version "4.0.9"
-  resolved "https://registry.yarnpkg.com/angular2-promise-buttons/-/angular2-promise-buttons-4.0.9.tgz#4c537a79afc905fb1f6a083885de20d7ad4e0432"
-  integrity sha512-VOE9Ad3zP66Dr/C280pd2APPY7dMwkme7UYH7r5ilQodvTngf1+ErVaSeXU43clNtZ7FNlkn1k3HxiZoxLuc8Q==
+angular2-promise-buttons@^4.0.10:
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/angular2-promise-buttons/-/angular2-promise-buttons-4.0.10.tgz#7f27905e31406274049235bcec143840f3a458c5"
+  integrity sha512-UPuH9V7HDoZ75SdYVr4/7dIllvZaSCJScU7JtbdQX6BmzX/8PV9OnHZyTgBPnAD+Tmj/HEOwqqCae3wmru0AuQ==
+  dependencies:
+    tslib "^2.0.0"
 
 ansi-align@^3.0.0:
   version "3.0.0"
