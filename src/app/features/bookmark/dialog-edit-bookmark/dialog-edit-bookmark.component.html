@@ -14,7 +14,7 @@
                autofocus="autofocus"
                matInput
                name="title"
-               tabindex="1"
+               tabindex="0"
                type="text">
       </mat-form-field>
       <mat-form-field>
@@ -23,7 +23,7 @@
                matInput
                name="path"
                required
-               tabindex="1"
+               tabindex="0"
                type="text">
       </mat-form-field>
 
@@ -32,7 +32,7 @@
                     [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
                     name="type"
                     required="true"
-                    tabindex="1">
+                    tabindex="0">
           <mat-option *ngFor="let type of types; trackBy: trackByIndex"
                       [innerHtml]="(type.title|translate)"
                       [value]="type.type">

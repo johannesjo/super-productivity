@@ -8,7 +8,7 @@
        [type]="isError[i] ? 'LINK': attachment?.type"
        class="attachment-link mat-elevation-z3 "
        draggable="false"
-       tabindex="1"
+       tabindex="0"
        target="_blank"
        taskAttachmentLink>
       <ng-container *ngIf="attachment?.type!=='IMG' || isError[i]">

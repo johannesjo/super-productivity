@@ -12,7 +12,7 @@
             [ngModel]="modelCopy"
             class="mat-body-1 markdown-unparsed"
             rows="1"
-            tabindex="1"></textarea>
+            tabindex="0"></textarea>
 
   <div #previewEl
        (click)="toggleShowEdit($event)"
@@ -22,7 +22,7 @@
        [hidden]="isShowEdit"
        class="mat-body-1 markdown-parsed"
        markdown
-       tabindex="1"></div>
+       tabindex="0"></div>
 </div>
 
 <div *ngIf="isShowControls"

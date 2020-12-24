@@ -71,13 +71,15 @@
 
           <div class="btn-wrapper">
             <button (click)="planMore()"
+                    tabindex="0"
                     color=""
                     mat-flat-button>
               <mat-icon>playlist_add</mat-icon>
               {{T.WW.ADD_MORE|translate}}
             </button>
 
-            <button color="primary"
+            <button tabindex="0"
+                    color="primary"
                     mat-flat-button
                     routerLink="/active/daily-summary">
               <mat-icon>done_all</mat-icon>
@@ -114,6 +116,7 @@
           <div class="finish-day-button-wrapper">
 
             <button color="primary"
+                    tabindex="0"
                     mat-flat-button
                     routerLink="/active/daily-summary">
               <mat-icon>done_all</mat-icon>
