@@ -104,6 +104,20 @@ body .mat-form-field {
   text-transform: uppercase;
 }
 
+// otherwise it's hard to see when an off-screen element gets focused via tab
+.mat-flat-button.mat-primary:focus {
+  &:after {
+    content: '';
+    position: absolute;
+    border: 2px solid $c-primary-300;
+    left: 0;
+    bottom: 0;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+  }
+}
+
 
 // CARD BG
 .isDarkTheme .mat-card {
