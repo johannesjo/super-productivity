@@ -256,9 +256,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.pauseCurrent();
   }
 
-  updateTaskTitleIfChanged(isChanged: boolean, newTitle: string) {
+  updateTaskTitleIfChanged({
+    isChanged,
+    newVal
+  }: { isChanged: boolean, newVal: string, $taskEl: HTMLElement | null, event: Event }) {
     if (isChanged) {
-      this._taskService.update(this.task.id, {title: newTitle});
+      this._taskService.update(this.task.id, {title: newVal});
     }
     this.focusSelf();
   }

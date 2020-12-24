@@ -94,7 +94,7 @@
       <div (click)="isTouchOnly && toggleShowAdditionalInfoOpen()"
            class="title-and-tags-wrapper">
         <div #contentEditableOnClickEl
-             (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
+             (editFinished)="updateTaskTitleIfChanged($event)"
              [isResetAfterEdit]="true"
              [value]="task?.title"
              class="task-title show-only-on-no-touch-only"
