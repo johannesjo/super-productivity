@@ -21,22 +21,26 @@
     <div class="buttons">
       <button (click)="dismiss(banner.id)"
               *ngIf="!banner.action2"
+              tabindex="1"
               color="primary"
               mat-button>{{T.G.DISMISS|translate}}
       </button>
 
       <button (click)="action(banner.id, banner.action)"
               *ngIf="banner.action"
+              tabindex="1"
               color="primary"
               mat-button>{{banner.action.label|translate:banner.translateParams}}
       </button>
       <button (click)="action(banner.id, banner.action2)"
               *ngIf="banner.action2"
+              tabindex="1"
               color="primary"
               mat-button>{{banner.action2.label|translate:banner.translateParams}}
       </button>
       <button (click)="action(banner.id, banner.action3)"
               *ngIf="banner.action3"
+              tabindex="1"
               color="primary"
               mat-button>{{banner.action3.label|translate:banner.translateParams}}
       </button>
