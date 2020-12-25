@@ -43,7 +43,7 @@ export class LanguageService {
       startWith(0),
     ).subscribe((_firstDayOfWeek: number) => {
       firstDayOfWeek = _firstDayOfWeek;
-     });
+    });
     this._dateAdapter.getFirstDayOfWeek = () => firstDayOfWeek;
   }
 

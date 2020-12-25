@@ -31,7 +31,7 @@
                     [placeholder]="(T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE|translate)"
                     name="type"
                     required="true"
-                    >
+        >
           <mat-option *ngFor="let type of types; trackBy:trackByIndex"
                       [innerHtml]="(type.title|translate)"
                       [value]="type.type">

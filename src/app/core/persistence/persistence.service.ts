@@ -400,7 +400,10 @@ export class PersistenceService {
       //   }
       //   return data;
       // },
-      saveState: (data: any, {isDataImport = false, isSyncModelChange}: { isDataImport?: boolean, isSyncModelChange: boolean }) => {
+      saveState: (data: any, {
+        isDataImport = false,
+        isSyncModelChange
+      }: { isDataImport?: boolean, isSyncModelChange: boolean }) => {
         if (data && data.ids && data.entities) {
           data = checkFixEntityStateConsistency(data, appDataKey);
         }
@@ -453,7 +456,10 @@ export class PersistenceService {
         projectId,
         legacyDBKey: this._makeProjectKey(projectId, lsKey)
       }).then(v => migrateFn(v, projectId)),
-      save: (projectId: string, data: any, {isDataImport = false, isSyncModelChange}: { isDataImport?: boolean, isSyncModelChange?: boolean }) => this._saveToDb({
+      save: (projectId: string, data: any, {
+        isDataImport = false,
+        isSyncModelChange
+      }: { isDataImport?: boolean, isSyncModelChange?: boolean }) => this._saveToDb({
         dbKey: appDataKey,
         data,
         isDataImport,

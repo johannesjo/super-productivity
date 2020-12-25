@@ -52,7 +52,7 @@
             [title]="T.F.TASK.CMP.TOGGLE_DONE|translate"
             class="check-done"
             mat-icon-button
-            >
+    >
       <mat-icon @swirl
                 class="undo">undo
       </mat-icon>
@@ -100,7 +100,7 @@
              class="task-title show-only-on-no-touch-only"
              contentEditableOnClick
              contenteditable="true"
-             ></div>
+        ></div>
 
         <div class="task-title show-only-on-touch-only">{{task?.title}}</div>
 
@@ -142,7 +142,7 @@
                   class="ico-btn start-task-btn"
                   color=""
                   mat-icon-button
-                  >
+          >
             <mat-icon class="play-icon"
                       svgIcon="play"></mat-icon>
           </button>
@@ -153,7 +153,7 @@
                   class="ico-btn"
                   color="accent"
                   mat-icon-button
-                  >
+          >
             <mat-icon>pause</mat-icon>
           </button>
 
@@ -163,7 +163,7 @@
                   class="ico-btn"
                   color=""
                   mat-icon-button
-                  >
+          >
             <mat-icon>wb_sunny</mat-icon>
           </button>
 
@@ -173,7 +173,7 @@
                   class="ico-btn"
                   color=""
                   mat-icon-button
-                  >
+          >
             <mat-icon svgIcon="remove_today"></mat-icon>
           </button>
 
@@ -182,7 +182,7 @@
                   class="ico-btn task-done-btn"
                   color=""
                   mat-icon-button
-                  >
+          >
             <mat-icon *ngIf="task?.isDone">undo</mat-icon>
             <mat-icon *ngIf="!task?.isDone">check</mat-icon>
           </button>
@@ -193,7 +193,7 @@
                   class="ico-btn show-additional-info-btn"
                   color=""
                   mat-icon-button
-                  >
+          >
             <mat-icon *ngIf="!task?.issueWasUpdated">chat_bubble_outline</mat-icon>
             <mat-icon *ngIf="task?.issueWasUpdated"
                       color="accent">update
@@ -207,7 +207,7 @@
                 class="ico-btn schedule-btn"
                 color=""
                 mat-icon-button
-                >
+        >
           <mat-icon>alarm</mat-icon>
         </button>
 
@@ -217,7 +217,7 @@
                 class="ico-btn attachment-btn"
                 color=""
                 mat-icon-button
-                >
+        >
           <mat-icon>attach_file</mat-icon>
         </button>
 
@@ -228,7 +228,7 @@
                   class="ico-btn show-additional-info-btn"
                   color=""
                   mat-icon-button
-                  >
+          >
             <mat-icon *ngIf="!task?.issueWasUpdated && !isSelected">chat</mat-icon>
             <mat-icon *ngIf="!task?.issueWasUpdated && isSelected">close</mat-icon>
             <mat-icon *ngIf="task?.issueWasUpdated"
@@ -265,7 +265,7 @@
                   *ngIf="!task?.subTasks?.length"
                   class="hide-xs"
                   mat-menu-item
-                  >
+          >
             <mat-icon>timer</mat-icon>
             {{T.F.TASK.CMP.OPEN_TIME|translate}}
           </button>
@@ -273,7 +273,7 @@
           <button (click)="editReminder()"
                   *ngIf="!task?.repeatCfgId"
                   mat-menu-item
-                  >
+          >
             <ng-container *ngIf="!task?.reminderId">
               <mat-icon>alarm_add</mat-icon>
               {{T.F.TASK.CMP.SCHEDULE|translate}}
@@ -287,7 +287,7 @@
           <button (click)="addSubTask();"
                   *ngIf="!task?.parentId&&!task?.isDone"
                   mat-menu-item
-                  >
+          >
             <mat-icon>playlist_add</mat-icon>
             {{T.F.TASK.CMP.ADD_SUB_TASK|translate}}
           </button>
@@ -295,7 +295,7 @@
           <button (click)="addAttachment();"
                   class="hide-xs"
                   mat-menu-item
-                  >
+          >
             <mat-icon>attachment</mat-icon>
             {{T.F.TASK.CMP.OPEN_ATTACH|translate}}
           </button>
@@ -314,7 +314,7 @@
           <button (click)="updateIssueData()"
                   *ngIf="task?.issueId"
                   mat-menu-item
-                  >
+          >
             <mat-icon>cloud_download</mat-icon>
             {{T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate}}
           </button>
@@ -322,7 +322,7 @@
           <button (click)="moveToBacklog();"
                   *ngIf="!task?.parentId && !isBacklog && (workContextService.isActiveWorkContextProject$|async)"
                   mat-menu-item
-                  >
+          >
             <mat-icon>arrow_downward</mat-icon>
             {{T.F.TASK.CMP.MOVE_TO_BACKLOG|translate}}
           </button>
@@ -330,7 +330,7 @@
           <button (click)="moveToToday();"
                   *ngIf="!task?.parentId && isBacklog && (workContextService.isActiveWorkContextProject$|async)"
                   mat-menu-item
-                  >
+          >
             <mat-icon>arrow_upward</mat-icon>
             {{T.F.TASK.CMP.MOVE_TO_TODAY|translate}}
           </button>
@@ -338,7 +338,7 @@
           <button (click)="editTags();"
                   *ngIf="!task?.parentId"
                   mat-menu-item
-                  >
+          >
             <mat-icon>style</mat-icon>
             {{T.F.TASK.CMP.EDIT_TAGS|translate}}
           </button>
@@ -346,7 +346,7 @@
           <button *ngIf="!task?.parentId && !task?.issueId && !task?.repeatCfgId"
                   [matMenuTriggerFor]="projectMenu"
                   mat-menu-item
-                  >
+          >
             <mat-icon>forward</mat-icon>
             {{(task?.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT : T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
           </button>
@@ -354,7 +354,7 @@
           <button (click)="deleteTask()"
                   class="color-warn"
                   mat-menu-item
-                  >
+          >
 
             <mat-icon class="color-warn-i">delete_forever</mat-icon>
             {{T.F.TASK.CMP.DELETE|translate}}
@@ -385,7 +385,7 @@
             class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
             color=""
             mat-mini-fab
-            >
+    >
       <mat-icon *ngIf="(task?._showSubTasksMode===ShowSubTasksMode.HideAll)">add
       </mat-icon>
       <mat-icon *ngIf="(task?._showSubTasksMode!==ShowSubTasksMode.HideAll)"

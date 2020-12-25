@@ -84,7 +84,6 @@ export const initialTagState: TagState = _addMyDayTagIfNecessary(tagAdapter.getI
   // additional entity state properties
 }));
 
-
 const _reducer = createReducer<TagState>(
   initialTagState,
 
@@ -121,7 +120,11 @@ const _reducer = createReducer<TagState>(
     }, state);
   }),
 
-  on(moveTaskUpInTodayList, (state: TagState, {taskId, workContextId, workContextType}) => (workContextType === WORK_CONTEXT_TYPE)
+  on(moveTaskUpInTodayList, (state: TagState, {
+      taskId,
+      workContextId,
+      workContextType
+    }) => (workContextType === WORK_CONTEXT_TYPE)
     ? tagAdapter.updateOne({
       id: workContextId,
       changes: {
@@ -131,7 +134,11 @@ const _reducer = createReducer<TagState>(
     : state
   ),
 
-  on(moveTaskDownInTodayList, (state: TagState, {taskId, workContextId, workContextType}) => (workContextType === WORK_CONTEXT_TYPE)
+  on(moveTaskDownInTodayList, (state: TagState, {
+      taskId,
+      workContextId,
+      workContextType
+    }) => (workContextType === WORK_CONTEXT_TYPE)
     ? tagAdapter.updateOne({
       id: workContextId,
       changes: {

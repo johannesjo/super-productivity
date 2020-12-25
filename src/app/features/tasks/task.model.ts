@@ -116,7 +116,6 @@ export const DEFAULT_TASK: Task = {
   issueWasUpdated: null,
 };
 
-
 export interface TaskState extends EntityState<Task> {
   // overwrite entity model to avoid problems with typing
   ids: string[];

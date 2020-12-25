@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { IssueFieldsForTask, Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, first, switchMap, map } from 'rxjs/operators';
+import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../project/project.service';
@@ -129,7 +129,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     let i = 0;
     while (i < tasks.length) {
       ids = [];
-      for (let j = 0; j < paramsCount && i < tasks.length ; j++, i++) {
+      for (let j = 0; j < paramsCount && i < tasks.length; j++, i++) {
         ids.push(tasks[i].issueId);
       }
       issues.push(...(await this._gitlabApiService.getByIds$(ids as string[], cfg).toPromise()));

@@ -6,7 +6,7 @@ import { SnackService } from 'src/app/core/snack/snack.service';
 import { GitlabCfg } from '../gitlab';
 import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
-import { GITLAB_API_BASE_URL, GITLAB_URL_REGEX, GITLAB_PROJECT_REGEX } from '../gitlab.const';
+import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX, GITLAB_URL_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
@@ -54,7 +54,7 @@ export class GitlabApiService {
 
   getByIds$(ids: string[], cfg: GitlabCfg): Observable<GitlabIssue[]> {
     let queryParams = 'iids[]=';
-    for (let i = 0; i < ids.length ; i++) {
+    for (let i = 0; i < ids.length; i++) {
       if (i === ids.length - 1) {
         queryParams += ids[i];
       } else {

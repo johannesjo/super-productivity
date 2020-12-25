@@ -111,8 +111,7 @@ export class IssueService {
         tasksWithoutIssueId.push(task);
       } else if (!this.ISSUE_SERVICE_MAP[task.issueType].refreshIssues) {
         tasksWithoutMethod.push(task);
-      }
-      else if (!tasksIssueIdsByIssueType[task.issueType]){
+      } else if (!tasksIssueIdsByIssueType[task.issueType]) {
         tasksIssueIdsByIssueType[task.issueType] = [];
         tasksIssueIdsByIssueType[task.issueType].push(task);
       } else {
@@ -136,7 +135,7 @@ export class IssueService {
       throw new Error('No issue task ' + taskWithoutIssueId.id);
     }
     for (const taskWithoutMethod of tasksWithoutMethod) {
-        throw new Error('Issue method not available ' + taskWithoutMethod);
+      throw new Error('Issue method not available ' + taskWithoutMethod);
     }
   }
 

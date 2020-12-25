@@ -1,5 +1,3 @@
-
-
 export type DropboxTimestamp = string;
 export type DropboxRev = string;
 

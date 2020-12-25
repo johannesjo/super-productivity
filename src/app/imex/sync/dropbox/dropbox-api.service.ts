@@ -41,7 +41,10 @@ export class DropboxApiService {
     }).then((res) => res.data);
   }
 
-  async download<T>({path, localRev}: { path: string; localRev?: string | null }): Promise<{ meta: DropboxFileMetadata, data: T }> {
+  async download<T>({
+    path,
+    localRev
+  }: { path: string; localRev?: string | null }): Promise<{ meta: DropboxFileMetadata, data: T }> {
     await this._isReady$.toPromise();
 
     return this._request({
