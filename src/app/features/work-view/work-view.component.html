@@ -71,14 +71,14 @@
 
           <div class="btn-wrapper">
             <button (click)="planMore()"
-                    tabindex="0"
+                    tabindex="1"
                     color=""
                     mat-flat-button>
               <mat-icon>playlist_add</mat-icon>
               {{T.WW.ADD_MORE|translate}}
             </button>
 
-            <button tabindex="0"
+            <button tabindex="1"
                     color="primary"
                     mat-flat-button
                     routerLink="/active/daily-summary">
@@ -95,6 +95,7 @@
                         [isAddToBottom]="true"
                         [isDoubleEnterMode]="true"></add-task-bar>
           <button (click)="startWork()"
+                  tabindex="1"
                   class="ready-to-work-btn"
                   color="primary"
                   mat-flat-button>
