@@ -147,7 +147,10 @@ export class WorklogService {
     const taskState = await this._taskService.taskFeatureState$.pipe(first()).toPromise() || createEmptyEntity();
 
     // console.time('calcTime');
-    const {completeStateForWorkContext, unarchivedIds} = getCompleteStateForWorkContext(workContext, taskState, archive);
+    const {
+      completeStateForWorkContext,
+      unarchivedIds
+    } = getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
     const startEnd = {

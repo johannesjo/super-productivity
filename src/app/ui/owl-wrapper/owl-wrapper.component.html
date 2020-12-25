@@ -1,5 +1,6 @@
 <owl-date-time-inline (doubleEnter)="submit()"
                       (ngModelChange)="updateDateFromCal($event)"
+                      [firstDayOfWeek]="(firstDayOfWeek$|async)"
                       [isNoMonthSquares]="true"
                       [laterTodaySlots]="laterTodaySlots"
                       [min]="now"
@@ -10,6 +11,5 @@
                       [sPlaceholder]="T.DATETIME_SCHEDULE.PLACEHOLDER|translate"
                       [sPressEnterToSubmit]="T.DATETIME_SCHEDULE.PRESS_ENTER_AGAIN|translate"
                       [sTomorrow]="T.DATETIME_SCHEDULE.TOMORROW|translate"
-                      [firstDayOfWeek]="(firstDayOfWeek$|async)"
                       name="owlDate"
                       ngDefaultControl></owl-date-time-inline>

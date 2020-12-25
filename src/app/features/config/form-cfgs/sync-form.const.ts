@@ -34,7 +34,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         required: true,
         options: [
           {label: SyncProvider.Dropbox, value: SyncProvider.Dropbox},
-          ...( IS_F_DROID_APP ? [] : [{label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive}]),
+          ...(IS_F_DROID_APP ? [] : [{label: SyncProvider.GoogleDrive, value: SyncProvider.GoogleDrive}]),
           {label: SyncProvider.WebDAV, value: SyncProvider.WebDAV},
         ],
       },

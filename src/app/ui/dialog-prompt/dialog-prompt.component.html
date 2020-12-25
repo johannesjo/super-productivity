@@ -2,10 +2,10 @@
   <div [innerHtml]="data.message|translate:data.translateParams"
        class="content"></div>
   <mat-form-field>
-    <input type="text"
+    <input [(ngModel)]="txtVal"
            [placeholder]="data.placeholder"
            matInput
-           [(ngModel)]="txtVal">
+           type="text">
   </mat-form-field>
 </mat-dialog-content>
 

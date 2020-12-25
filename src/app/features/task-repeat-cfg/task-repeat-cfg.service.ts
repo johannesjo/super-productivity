@@ -35,7 +35,8 @@ export class TaskRepeatCfgService {
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
     return this._store$.pipe(select(selectTaskRepeatCfgById, {id}));
   }
-  getTaskRepeatCfgByIdAllowUndefined$(id: string): Observable<TaskRepeatCfg|undefined> {
+
+  getTaskRepeatCfgByIdAllowUndefined$(id: string): Observable<TaskRepeatCfg | undefined> {
     return this._store$.pipe(select(selectTaskRepeatCfgByIdAllowUndefined, {id}));
   }
 

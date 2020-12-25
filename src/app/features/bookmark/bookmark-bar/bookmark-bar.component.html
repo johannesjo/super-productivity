@@ -17,13 +17,13 @@
               [matMenuTriggerFor]="menu"
               [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
               mat-stroked-button
-              >
+      >
         <mat-icon>more_vert</mat-icon>
       </button>
       <button (click)="isEditMode=false"
               *ngIf="isEditMode"
               mat-stroked-button
-              >
+      >
         <mat-icon>check</mat-icon>
       </button>
 
@@ -32,14 +32,14 @@
         <button (click)="openEditDialog()"
                 color=""
                 mat-menu-item
-                >
+        >
           <mat-icon>add</mat-icon>
           {{T.F.BOOKMARK.BAR.ADD|translate}}
         </button>
         <button (click)="isEditMode=!isEditMode"
                 color=""
                 mat-menu-item
-                >
+        >
           <mat-icon>edit</mat-icon>
           {{T.F.BOOKMARK.BAR.EDIT|translate}}
         </button>

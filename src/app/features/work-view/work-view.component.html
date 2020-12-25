@@ -71,17 +71,17 @@
 
           <div class="btn-wrapper">
             <button (click)="planMore()"
-                    tabindex="1"
                     color=""
-                    mat-flat-button>
+                    mat-flat-button
+                    tabindex="1">
               <mat-icon>playlist_add</mat-icon>
               {{T.WW.ADD_MORE|translate}}
             </button>
 
-            <button tabindex="1"
-                    color="primary"
+            <button color="primary"
                     mat-flat-button
-                    routerLink="/active/daily-summary">
+                    routerLink="/active/daily-summary"
+                    tabindex="1">
               <mat-icon>done_all</mat-icon>
               {{T.WW.FINISH_DAY|translate}}
             </button>
@@ -95,10 +95,10 @@
                         [isAddToBottom]="true"
                         [isDoubleEnterMode]="true"></add-task-bar>
           <button (click)="startWork()"
-                  tabindex="1"
                   class="ready-to-work-btn"
                   color="primary"
-                  mat-flat-button>
+                  mat-flat-button
+                  tabindex="1">
             <mat-icon>check</mat-icon>
             {{T.WW.READY_TO_WORK|translate}}
           </button>
@@ -118,9 +118,9 @@
 
             <!-- NOTE: tabindex is same as for tasks -->
             <button color="primary"
-                    tabindex="1"
                     mat-flat-button
-                    routerLink="/active/daily-summary">
+                    routerLink="/active/daily-summary"
+                    tabindex="1">
               <mat-icon>done_all</mat-icon>
               {{T.WW.FINISH_DAY|translate}}
             </button>

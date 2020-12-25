@@ -17,7 +17,6 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { devError } from '../../util/dev-error';
 import { WorkContextType } from '../work-context/work-context.model';
 
-
 @Injectable({
   providedIn: 'root',
 })

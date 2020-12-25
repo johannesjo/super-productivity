@@ -29,17 +29,8 @@ export class TaskSummaryTablesComponent {
   @Input() isForToday: boolean = true;
 
   @Input() isShowYesterday: boolean = false;
-
-  @Input('flatTasks') set flatTasksIn(v: Task[]) {
-    this.flatTasks = v;
-    const pids = unique(v.map(t => t.projectId).filter(pid => typeof pid === 'string')) as string[];
-    this.projectIds$.next(pids);
-  }
-
   flatTasks: Task[] = [];
-
   projectIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
-
   projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
     withLatestFrom(this._projectService.list$),
     map(([pids, projects]) => {
@@ -67,6 +58,12 @@ export class TaskSummaryTablesComponent {
     private readonly _worklogService: WorklogService,
     private readonly _projectService: ProjectService,
   ) {
+  }
+
+  @Input('flatTasks') set flatTasksIn(v: Task[]) {
+    this.flatTasks = v;
+    const pids = unique(v.map(t => t.projectId).filter(pid => typeof pid === 'string')) as string[];
+    this.projectIds$.next(pids);
   }
 
   onTaskSummaryEdit() {

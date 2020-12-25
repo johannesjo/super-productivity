@@ -42,7 +42,7 @@ export const SOUND_FORM_CFG: ConfigFormSection<SoundConfig> = {
         hideExpression: ((model: any) => {
           return !model.isPlayDoneSound;
         }),
-        change: ({ model }) => playDoneSound(model),
+        change: ({model}) => playDoneSound(model),
       },
     },
     {

@@ -70,7 +70,6 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 */
 // (window as any).__Zone_enable_cross_context_check = true;
 
-
 // import 'zone.js/dist/zone-mix';
 
 /***************************************************************************************************

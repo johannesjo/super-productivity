@@ -363,7 +363,7 @@ export function projectReducer(
 
       if (srcProjectId === targetProjectId) {
         devError('Moving task from same project to same project.');
-        return  state;
+        return state;
       }
 
       if (srcProjectId) {
@@ -472,7 +472,11 @@ export function projectReducer(
     }
 
     case ProjectActionTypes.UpdateProjectAdvancedCfg: {
-      const {projectId, sectionKey, data}: { projectId: string; sectionKey: WorkContextAdvancedCfgKey; data: any } = payload;
+      const {
+        projectId,
+        sectionKey,
+        data
+      }: { projectId: string; sectionKey: WorkContextAdvancedCfgKey; data: any } = payload;
       const currentProject = state.entities[projectId] as Project;
       const advancedCfg: WorkContextAdvancedCfg = Object.assign({}, currentProject.advancedCfg);
       return projectAdapter.updateOne({

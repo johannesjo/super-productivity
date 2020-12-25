@@ -49,8 +49,8 @@
               <mat-icon svgIcon="play"></mat-icon>
             </button>
 
-            <button *ngIf="task.parentId && task.parentData"
-                    (click)="toggleToday(task.parentData)"
+            <button (click)="toggleToday(task.parentData)"
+                    *ngIf="task.parentId && task.parentData"
                     [matTooltip]="(task.parentData.tagIds.includes(TODAY_TAG.id)
                     ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
                     :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
@@ -61,8 +61,8 @@
               <mat-icon *ngIf="!task.parentData.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>
             </button>
 
-            <button *ngIf="!task.parentId"
-                    (click)="toggleToday(task)"
+            <button (click)="toggleToday(task)"
+                    *ngIf="!task.parentId"
                     [matTooltip]="(task.tagIds.includes(TODAY_TAG.id)
                     ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
                     :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"

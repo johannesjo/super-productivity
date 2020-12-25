@@ -1,12 +1,12 @@
 <section class="main">
   <div *ngFor="let context of (workContextService.mainWorkContexts$|async); trackBy: trackById; "
-       [class.isActiveContext]="context.id===activeWorkContextId"
        [class.hasTasks]="context.taskIds.length"
+       [class.isActiveContext]="context.id===activeWorkContextId"
        class="tag">
     <div [style.background]="context.theme.primary"
          class="tag-color"></div>
-    <button [routerLink]="['tag', context.id, 'tasks']"
-            #menuEntry
+    <button #menuEntry
+            [routerLink]="['tag', context.id, 'tasks']"
             mat-menu-item
             routerLinkActive="isActiveRoute">
       <span class="badge">{{context.taskIds.length}}</span>
@@ -27,8 +27,8 @@
     </mat-menu>
   </div>
 
-  <button class="route-link"
-          #menuEntry
+  <button #menuEntry
+          class="route-link"
           mat-menu-item
           routerLink="schedule"
           routerLinkActive="isActiveRoute">
@@ -39,12 +39,12 @@
 
 <section *ngIf="projectList$|async as projectList"
          class="projects">
-  <button (click)="toggleExpandProjects()"
-          [class.isExpanded]="isProjectsExpanded"
-          (keydown)="toggleExpandProjectsLeftRight($event)"
-          class="expand-btn"
-          #menuEntry
+  <button #menuEntry
           #projectExpandBtn
+          (click)="toggleExpandProjects()"
+          (keydown)="toggleExpandProjectsLeftRight($event)"
+          [class.isExpanded]="isProjectsExpanded"
+          class="expand-btn"
           mat-menu-item>
     <span class="title">{{T.MH.PROJECTS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
@@ -53,15 +53,15 @@
   <div [@standardList]="projectList?.length"
        [dragulaModel]="projectList"
        [dragula]="PROJECTS_SIDE_NAV">
-    <div *ngFor="let project of projectList; trackBy: trackById;"
-         [class.isActiveContext]="project.id===activeWorkContextId"
-         (keydown)="checkFocusProject($event)"
+    <div (keydown)="checkFocusProject($event)"
+         *ngFor="let project of projectList; trackBy: trackById;"
          [class.hasTasks]="project.taskIds.length"
+         [class.isActiveContext]="project.id===activeWorkContextId"
          class="project">
       <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
            class="project-color"></div>
-      <button [routerLink]="['project', project.id, 'tasks']"
-              #menuEntry
+      <button #menuEntry
+              [routerLink]="['project', project.id, 'tasks']"
               mat-menu-item>
         <span class="badge">{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span>
         <mat-icon class="drag-handle"
@@ -83,8 +83,8 @@
     </div>
   </div>
 
-  <button *ngIf="isProjectsExpanded"
-          #menuEntry
+  <button #menuEntry
+          *ngIf="isProjectsExpanded"
           mat-menu-item
           routerLink="project-overview"
           routerLinkActive="isActiveRoute">
@@ -92,9 +92,9 @@
     <span class="text">{{T.MH.MANAGE_PROJECTS|translate}}</span>
   </button>
 
-  <button (click)="addProject()"
+  <button #menuEntry
+          (click)="addProject()"
           *ngIf="isProjectsExpanded"
-          #menuEntry
           mat-menu-item>
     <mat-icon>add</mat-icon>
     <span class="text">{{T.MH.CREATE_PROJECT|translate}}</span>
@@ -104,12 +104,12 @@
 
 <section *ngIf="(tagList$|async) as tagList"
          class="tags">
-  <button (click)="toggleExpandTags()"
-          [class.isExpanded]="isTagsExpanded"
-          (keydown)="toggleExpandTagsLeftRight($event)"
-          class="expand-btn"
+  <button #menuEntry
           #tagExpandBtn
-          #menuEntry
+          (click)="toggleExpandTags()"
+          (keydown)="toggleExpandTagsLeftRight($event)"
+          [class.isExpanded]="isTagsExpanded"
+          class="expand-btn"
           mat-menu-item>
     <span class="title">{{T.MH.TAGS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
@@ -118,15 +118,15 @@
   <div [@standardList]="tagList?.length"
        [dragulaModel]="tagList"
        [dragula]="TAG_SIDE_NAV">
-    <div *ngFor="let tag of tagList; trackBy: trackById;"
-         (keydown)="checkFocusTag($event)"
-         [class.isActiveContext]="tag.id===activeWorkContextId"
+    <div (keydown)="checkFocusTag($event)"
+         *ngFor="let tag of tagList; trackBy: trackById;"
          [class.hasTasks]="tag.taskIds.length"
+         [class.isActiveContext]="tag.id===activeWorkContextId"
          class="tag">
       <div [style.background]="tag?.theme.primary"
            class="tag-color"></div>
-      <button [routerLink]="['tag', tag.id, 'tasks']"
-              #menuEntry
+      <button #menuEntry
+              [routerLink]="['tag', tag.id, 'tasks']"
               mat-menu-item>
         <span class="badge">{{tag.taskIds.length}}</span>
         <mat-icon class="drag-handle"
@@ -158,8 +158,8 @@
 
 
 <section class="app">
-  <button class="route-link"
-          #menuEntry
+  <button #menuEntry
+          class="route-link"
           mat-menu-item
           routerLink="config"
           routerLinkActive="isActiveRoute">
@@ -167,11 +167,11 @@
     <span class="text">{{T.MH.SETTINGS|translate}}</span>
   </button>
 
-  <button (click)="onScrollToNotesClick()"
+  <button #menuEntry
+          (click)="onScrollToNotesClick()"
           *ngIf="workContextService.isActiveWorkContextProject$|async"
           [@expandFade]
           class="route-link scroll-down-btn"
-          #menuEntry
           mat-menu-item>
     <mat-icon>notes</mat-icon>
     <span class="text">{{T.MH.NOTES|translate}}</span>

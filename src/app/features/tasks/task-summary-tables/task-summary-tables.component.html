@@ -1,8 +1,8 @@
 <section *ngFor="let project of (projects$|async); trackBy: trackById"
          class="project-section">
   <div *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
-       class="project-title"
-       [style.border-color]="project.color">
+       [style.border-color]="project.color"
+       class="project-title">
     <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
 

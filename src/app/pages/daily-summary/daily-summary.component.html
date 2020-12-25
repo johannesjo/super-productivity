@@ -69,8 +69,8 @@
 
     <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
                    [selectedIndex]="selectedTabIndex"
-                   dynamicHeight
-                   class="tabs">
+                   class="tabs"
+                   dynamicHeight>
       <mat-tab [label]="(isForToday)
       ? (T.PDS.TODAY|translate)
       : (T.PDS.TASK_LIST|translate)">
@@ -79,10 +79,10 @@
 
           <ng-container *ngIf="(tasksWorkedOnOrDoneOrRepeatableFlat$|async) as tasks; else loading">
             <task-summary-tables *ngIf="tasks?.length; else noTasks"
+                                 [dayStr]="dayStr"
                                  [flatTasks]="tasks"
                                  [isForToday]="isForToday"
-                                 [isShowYesterday]="isForToday && isIncludeYesterday"
-                                 [dayStr]="dayStr"></task-summary-tables>
+                                 [isShowYesterday]="isForToday && isIncludeYesterday"></task-summary-tables>
           </ng-container>
 
           <ng-template #loading>

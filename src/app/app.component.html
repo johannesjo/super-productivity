@@ -1,8 +1,8 @@
 <ng-container *ngIf="(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)">
 
-  <div class="bg-image"
-       *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
-       [style.background]="'url(' + bgImage + ')'"></div>
+  <div *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
+       [style.background]="'url(' + bgImage + ')'"
+       class="bg-image"></div>
 
   <!--TODO move inside page container somehow -->
   <add-task-bar (blurred)="layoutService.hideAddTaskBar()"

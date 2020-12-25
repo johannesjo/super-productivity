@@ -32,6 +32,40 @@ import { truncate } from '../../util/truncate';
 
 @Injectable()
 export class SyncEffects {
+  @Effect({dispatch: false}) syncBeforeQuit$: any = !IS_ELECTRON
+    ? EMPTY
+    : this._dataInitService.isAllDataLoadedInitially$.pipe(
+      concatMap(() => this._syncProviderService.isEnabledAndReady$),
+      distinctUntilChanged(),
+      tap((isEnabled) => isEnabled
+        ? this._execBeforeCloseService.schedule(SYNC_BEFORE_CLOSE_ID)
+        : this._execBeforeCloseService.unschedule(SYNC_BEFORE_CLOSE_ID)
+      ),
+      switchMap((isEnabled) => isEnabled
+        ? this._execBeforeCloseService.onBeforeClose$
+        : EMPTY
+      ),
+      filter(ids => ids.includes(SYNC_BEFORE_CLOSE_ID)),
+      tap(() => {
+        this._taskService.setCurrentId(null);
+        this._simpleCounterService.turnOffAll();
+      }),
+      // minimally hacky delay to wait for inMemoryDatabase update...
+      delay(100),
+      switchMap(() => this._syncProviderService.sync()
+        .then(() => {
+          this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
+        })
+        .catch((e: unknown) => {
+          console.error(e);
+          this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
+          if (confirm('Sync failed. Close App anyway?')) {
+            this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
+          }
+        })
+      ),
+    );
+  // private _wasJustEnabled$: Observable<boolean> = of(false);
   private _wasJustEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     // NOTE: it is important that we don't use distinct until changed here
     switchMap(() => this._syncProviderService.isEnabledAndReady$),
@@ -40,8 +74,6 @@ export class SyncEffects {
     filter(wasJustEnabled => wasJustEnabled),
     shareReplay(),
   );
-  // private _wasJustEnabled$: Observable<boolean> = of(false);
-
   @Effect({dispatch: false}) triggerSync$: any = this._dataInitService.isAllDataLoadedInitially$.pipe(
     switchMap(() => merge(
       // dynamic
@@ -98,40 +130,6 @@ export class SyncEffects {
         });
     }),
   );
-
-  @Effect({dispatch: false}) syncBeforeQuit$: any = !IS_ELECTRON
-    ? EMPTY
-    : this._dataInitService.isAllDataLoadedInitially$.pipe(
-      concatMap(() => this._syncProviderService.isEnabledAndReady$),
-      distinctUntilChanged(),
-      tap((isEnabled) => isEnabled
-        ? this._execBeforeCloseService.schedule(SYNC_BEFORE_CLOSE_ID)
-        : this._execBeforeCloseService.unschedule(SYNC_BEFORE_CLOSE_ID)
-      ),
-      switchMap((isEnabled) => isEnabled
-        ? this._execBeforeCloseService.onBeforeClose$
-        : EMPTY
-      ),
-      filter(ids => ids.includes(SYNC_BEFORE_CLOSE_ID)),
-      tap(() => {
-        this._taskService.setCurrentId(null);
-        this._simpleCounterService.turnOffAll();
-      }),
-      // minimally hacky delay to wait for inMemoryDatabase update...
-      delay(100),
-      switchMap(() => this._syncProviderService.sync()
-        .then(() => {
-          this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
-        })
-        .catch((e: unknown) => {
-          console.error(e);
-          this._snackService.open({msg: T.F.DROPBOX.S.SYNC_ERROR, type: 'ERROR'});
-          if (confirm('Sync failed. Close App anyway?')) {
-            this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
-          }
-        })
-      ),
-    );
 
   constructor(
     private _syncProviderService: SyncProviderService,

@@ -202,27 +202,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     // this.issueData$.subscribe((v) => console.log('issueData$', v));
   }
 
-  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
-    this._dragEnterTarget = ev.target as HTMLElement;
-    ev.preventDefault();
-    ev.stopPropagation();
-    this.isDragOver = true;
-  }
-
-  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
-    if (this._dragEnterTarget === (ev.target as HTMLElement)) {
-      ev.preventDefault();
-      ev.stopPropagation();
-      this.isDragOver = false;
-    }
-  }
-
-  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
-    this._attachmentService.createFromDrop(ev, this.task.id);
-    ev.stopPropagation();
-    this.isDragOver = false;
-  }
-
   get task(): TaskWithSubTasks {
     return this._taskData as TaskWithSubTasks;
   }
@@ -263,6 +242,27 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
 
   get progress() {
     return this._taskData && this._taskData.timeEstimate && (this._taskData.timeSpent / this._taskData.timeEstimate) * 100;
+  }
+
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent) {
+    this._dragEnterTarget = ev.target as HTMLElement;
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent) {
+    if (this._dragEnterTarget === (ev.target as HTMLElement)) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      this.isDragOver = false;
+    }
+  }
+
+  @HostListener('drop', ['$event']) onDrop(ev: DragEvent) {
+    this._attachmentService.createFromDrop(ev, this.task.id);
+    ev.stopPropagation();
+    this.isDragOver = false;
   }
 
   ngAfterViewInit(): void {

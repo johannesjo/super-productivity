@@ -43,9 +43,7 @@ export class SideNavComponent implements OnDestroy {
   @Output() scrollToNotes: EventEmitter<void> = new EventEmitter();
 
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
-  private keyManager?: FocusKeyManager<MatMenuItem>;
   keyboardFocusTimeout?: number;
-
   @ViewChild('projectExpandBtn', {read: ElementRef}) projectExpandBtn?: ElementRef;
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
   isProjectsExpanded: boolean = IS_SHOW_INITIALLY;
@@ -60,7 +58,6 @@ export class SideNavComponent implements OnDestroy {
       )
     )
   );
-
   @ViewChild('tagExpandBtn', {read: ElementRef}) tagExpandBtn?: ElementRef;
   isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
   isTagsExpanded: boolean = IS_SHOW_INITIALLY;
@@ -75,19 +72,13 @@ export class SideNavComponent implements OnDestroy {
       )
     )
   );
-
   T: typeof T = T;
   readonly PROJECTS_SIDE_NAV: string = 'PROJECTS_SIDE_NAV';
   readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
   activeWorkContextId?: string | null;
   WorkContextType: typeof WorkContextType = WorkContextType;
-
+  private keyManager?: FocusKeyManager<MatMenuItem>;
   private _subs: Subscription = new Subscription();
-
-  @HostListener('keydown', ['$event'])
-  onKeydown(event: KeyboardEvent) {
-    this.keyManager?.onKeydown(event);
-  }
 
   constructor(
     public readonly tagService: TagService,
@@ -127,6 +118,11 @@ export class SideNavComponent implements OnDestroy {
         this._taskService.focusFirstTaskIfVisible();
       }
     }));
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent) {
+    this.keyManager?.onKeydown(event);
   }
 
   ngOnDestroy(): void {
