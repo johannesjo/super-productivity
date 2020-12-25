@@ -130,7 +130,6 @@
       <div class="bottom-buttons">
         <button (click)="finishDay()"
                 *ngIf="isForToday"
-                tabindex="0"
                 color="primary"
                 mat-flat-button>
           <mat-icon>wb_sunny</mat-icon>
@@ -138,7 +137,6 @@
         </button>
         <button (click)="finishDay()"
                 *ngIf="!isForToday"
-                tabindex="0"
                 color="primary"
                 mat-flat-button>
           <mat-icon>wb_sunny</mat-icon>
