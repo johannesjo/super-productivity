@@ -93,6 +93,7 @@
              class="planning-mode-content">
           <add-task-bar (done)="startWork()"
                         [isAddToBottom]="true"
+                        [tabindex]="1"
                         [isDoubleEnterMode]="true"></add-task-bar>
           <button (click)="startWork()"
                   class="ready-to-work-btn"

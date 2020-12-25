@@ -16,6 +16,7 @@
       <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
     </button>
     <input #inputEl
+           [tabindex]="tabindex"
            (blur)="onBlur($event)"
            [formControl]="taskSuggestionsCtrl"
            [matAutocomplete]="autoEl"

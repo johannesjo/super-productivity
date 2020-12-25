@@ -41,6 +41,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog: boolean = false;
+  @Input() tabindex: number = 0;
   @Input() isAddToBottom: boolean = false;
   @Input() isDoubleEnterMode: boolean = false;
   @Input() isElevated: boolean = false;
