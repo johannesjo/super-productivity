@@ -122,7 +122,7 @@ makepkg -si
 ### MacOS
 Install via [homebrew cask](https://github.com/caskroom/homebrew-cask):
 ```
-brew cask install superproductivity
+brew install --cask superproductivity
 ```
 <a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12' target="_blank">
   <img src='./screens/app-store-badge.svg'
