@@ -1,3 +1,12 @@
+## [6.3.1](https://github.com/johannesjo/super-productivity/compare/v6.3.0...v6.3.1) (2020-12-28)
+
+
+### Bug Fixes
+
+* failing unit test ([690daac](https://github.com/johannesjo/super-productivity/commit/690daac07e86fabf9d44444752f75bede5d85bec))
+
+
+
 # [6.3.0](https://github.com/johannesjo/super-productivity/compare/v6.3.0-0...v6.3.0) (2020-12-28)
 
 
