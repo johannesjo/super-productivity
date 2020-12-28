@@ -1,3 +1,23 @@
+# [6.3.0](https://github.com/johannesjo/super-productivity/compare/v6.3.0-0...v6.3.0) (2020-12-28)
+
+
+### Bug Fixes
+
+* finish day button not being focusable via tab ([4960c4a](https://github.com/johannesjo/super-productivity/commit/4960c4a80c565aed6053d750a71ba9a32d30cd7e))
+* **banner:** take a break banner not being cleared when clicking reset break button ([a6026be](https://github.com/johannesjo/super-productivity/commit/a6026bec8fa64c61d61f0fe1fdd80288ee06485f))
+
+
+### Features
+
+* add focus border to primary flat buttons ([9c08760](https://github.com/johannesjo/super-productivity/commit/9c087606d0602ba01835f71491b221ae5cb5bc98))
+* add tabindex to ready to work ([4f7127c](https://github.com/johannesjo/super-productivity/commit/4f7127c3164f55ba955dc6b0e7b5d8c616ec677b))
+* all tabindex to 0 ([113672c](https://github.com/johannesjo/super-productivity/commit/113672c2dab051dba5b87a8cb0b658a5fcb880dd))
+* also add tabindex to "ready for work" ([66a2d87](https://github.com/johannesjo/super-productivity/commit/66a2d870c286dc296b4cd4e68eb694d9d02067b7))
+* also show/hide task summary table checkmark on focus ([411324a](https://github.com/johannesjo/super-productivity/commit/411324a1903e8686533a12b7920257fe7d345b7f))
+* make banner reliably focusable ([426dafc](https://github.com/johannesjo/super-productivity/commit/426dafc5c37951d31fac19b575f1bbb167085a37))
+
+
+
 # [6.3.0-0](https://github.com/johannesjo/super-productivity/compare/v6.2.0-0...v6.3.0-0) (2020-12-21)
 
 
