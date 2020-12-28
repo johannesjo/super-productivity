@@ -1,15 +1,13 @@
 // NOTE: cuts off at month start and end per default
-import * as moment from 'moment';
-import { WeekDay } from '@angular/common';
 
 export const getDateRangeForWeek = (year: number, weekNr: number, month?: number): {
   rangeStart: Date,
   rangeEnd: Date,
 } => {
   // NOTE: using the constant here rather than string is important otherwise day might mess up
-  let rangeStart = moment().day(WeekDay.Monday).year(year).week(weekNr).toDate();
-  // TODO this might still mess up sometimes
-  let rangeEnd = moment().day(WeekDay.Sunday).year(year).week(weekNr + 1).toDate();
+  let rangeStart = getDateFromWeekNr(year, weekNr);
+  let rangeEnd = getDateFromWeekNr(year, weekNr + 1);
+  rangeEnd.setDate(rangeEnd.getDate() - 1);
 
   if (typeof month === 'number') {
     // firstDayOfMonth
@@ -36,6 +34,18 @@ export const rangeStartWithTime = (rs: Date): Date => {
   const d = new Date(rs);
   d.setHours(0, 0, 0, 0);
   return d;
+};
+
+export const getDateFromWeekNr = (year: number, week: number): Date => {
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay();
+  const ISOWeekStart = simple;
+  if (dow <= 4) {
+    ISOWeekStart.setDate(simple.getDate() - simple.getDay() + 1);
+  } else {
+    ISOWeekStart.setDate(simple.getDate() + 8 - simple.getDay());
+  }
+  return ISOWeekStart;
 };
 
 export const rangeEndWithTime = (rs: Date): Date => {
