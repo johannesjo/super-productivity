@@ -24,6 +24,7 @@ export class LanguageService {
     private _dateAdapter: DateAdapter<unknown>,
     private _globalConfigService: GlobalConfigService,
   ) {
+    this._initMonkeyPatchFirstDayOfWeek();
   }
 
   setLng(lng: LanguageCode) {
@@ -36,15 +37,6 @@ export class LanguageService {
 
   setDefault(lng: LanguageCode) {
     this._translateService.setDefaultLang(lng);
-
-    let firstDayOfWeek = DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
-    this._globalConfigService.misc$.pipe(
-      map(cfg => cfg.firstDayOfWeek),
-      startWith(0),
-    ).subscribe((_firstDayOfWeek: number) => {
-      firstDayOfWeek = _firstDayOfWeek;
-    });
-    this._dateAdapter.getFirstDayOfWeek = () => firstDayOfWeek;
   }
 
   setFromBrowserLngIfAutoSwitchLng() {
@@ -52,6 +44,21 @@ export class LanguageService {
     if (AUTO_SWITCH_LNGS.includes(browserLng)) {
       this._setFn(browserLng);
     }
+  }
+
+  private _initMonkeyPatchFirstDayOfWeek() {
+    let firstDayOfWeek = DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
+    this._globalConfigService.misc$.pipe(
+      map(cfg => cfg.firstDayOfWeek),
+      startWith(1),
+    ).subscribe((_firstDayOfWeek: number) => {
+      // default should be monday, if we have an invalid value for some reason
+      firstDayOfWeek = (typeof _firstDayOfWeek === 'number')
+        ? _firstDayOfWeek
+        : 1;
+    });
+    // overwrites default method to make this configurable
+    this._dateAdapter.getFirstDayOfWeek = () => firstDayOfWeek;
   }
 
   private _setFn(lng: LanguageCode) {
