@@ -53,7 +53,7 @@ export class LanguageService {
       startWith(1),
     ).subscribe((_firstDayOfWeek: number) => {
       // default should be monday, if we have an invalid value for some reason
-      firstDayOfWeek = (typeof _firstDayOfWeek === 'number')
+      firstDayOfWeek = (_firstDayOfWeek === 0 || _firstDayOfWeek > 0)
         ? _firstDayOfWeek
         : 1;
     });
