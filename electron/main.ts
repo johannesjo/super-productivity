@@ -30,6 +30,7 @@ const IS_DEV = process.env.NODE_ENV === 'DEV';
 let isShowDevTools: boolean = IS_DEV;
 let customUrl: string;
 let isDisableTray = false;
+let forceDarkTray = false;
 
 if (IS_DEV) {
   console.log('Starting in DEV Mode!!!');
@@ -40,6 +41,11 @@ process.argv.forEach((val) => {
   if (val && val.includes('--disable-tray')) {
     isDisableTray = true;
     console.log('Disable tray icon');
+  }
+
+  if (val && val.includes('--force-dark-tray')) {
+    forceDarkTray = true;
+    console.log('Force dark mode for tray icon');
   }
 
   if (val && val.includes('--user-data-dir=')) {
@@ -258,6 +264,7 @@ function createIndicator() {
     showApp,
     quitApp,
     ICONS_FOLDER,
+    forceDarkTray
   });
 }
 
