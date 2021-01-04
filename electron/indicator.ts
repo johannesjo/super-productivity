@@ -7,6 +7,7 @@ import { getWin } from './main-window';
 let tray;
 let isIndicatorRunning = false;
 let DIR: string;
+let shouldUseDarkColors : boolean;
 
 const isGnomeShellExtensionRunning = false;
 
@@ -15,18 +16,21 @@ export const initIndicator = ({
   quitApp,
   app,
   ICONS_FOLDER,
+  forceDarkTray
 }: {
   showApp: () => void;
   quitApp: () => void;
   app: App;
   ICONS_FOLDER: string;
+  forceDarkTray: boolean;
 }) => {
   DIR = ICONS_FOLDER + 'indicator/';
+  shouldUseDarkColors = forceDarkTray || nativeTheme.shouldUseDarkColors;
 
   initAppListeners(app);
   initListeners();
 
-  const suf = nativeTheme.shouldUseDarkColors
+  const suf = shouldUseDarkColors
     ? '-d.png'
     : '-l.png';
   tray = new Tray(DIR + `stopped${suf}`);
@@ -52,7 +56,7 @@ function initAppListeners(app) {
 
 function initListeners() {
   ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, {progress}) => {
-    const suf = nativeTheme.shouldUseDarkColors
+    const suf = shouldUseDarkColors
       ? '-d'
       : '-l';
     if (typeof progress === 'number' && progress > 0 && isFinite(progress)) {
@@ -82,7 +86,7 @@ function initListeners() {
           tray.setTitle(msg);
         } else {
           tray.setTitle('');
-          const suf = nativeTheme.shouldUseDarkColors
+          const suf = shouldUseDarkColors
             ? '-d.png'
             : '-l.png';
           setTrayIcon(tray, DIR + `stopped${suf}`);
