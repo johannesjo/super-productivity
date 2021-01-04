@@ -1,3 +1,21 @@
+## [6.3.3](https://github.com/johannesjo/super-productivity/compare/v6.3.2...v6.3.3) (2021-01-04)
+
+
+### Bug Fixes
+
+* add cmdline switch to force tray icons for dark mode [#741](https://github.com/johannesjo/super-productivity/issues/741) ([3e70233](https://github.com/johannesjo/super-productivity/commit/3e7023342a56a8e7cbfa85be9be6feeda23a91a1))
+* broken datepicker [#736](https://github.com/johannesjo/super-productivity/issues/736) [#576](https://github.com/johannesjo/super-productivity/issues/576) ([de6dc9c](https://github.com/johannesjo/super-productivity/commit/de6dc9cd03baf607439baa15e05ec36e12e5a076))
+* typing issue ([590f438](https://github.com/johannesjo/super-productivity/commit/590f438675e07091ad2b9a5221087d596f5a7ddc))
+
+
+### Features
+
+* bundle roboto ([17f4893](https://github.com/johannesjo/super-productivity/commit/17f4893e57777896bac2224f3569fd53ee6f6ab1))
+* name task notes "description" ([4c7a38a](https://github.com/johannesjo/super-productivity/commit/4c7a38a742682834b827e96cdec4dc7abf0df203))
+* **perf:** limit material icons to woff2 ([a9093cc](https://github.com/johannesjo/super-productivity/commit/a9093cc6ef5dd84e8e350d538010b6068a3b0993))
+
+
+
 ## [6.3.2](https://github.com/johannesjo/super-productivity/compare/v6.3.1...v6.3.2) (2020-12-28)
 
 
