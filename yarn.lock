@@ -10968,6 +10968,11 @@ roarr@^2.15.3:
     semver-compare "^1.0.0"
     sprintf-js "^1.1.2"
 
+roboto-fontface@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/roboto-fontface/-/roboto-fontface-0.10.0.tgz#7eee40cfa18b1f7e4e605eaf1a2740afb6fd71b0"
+  integrity sha512-OlwfYEgA2RdboZohpldlvJ1xngOins5d7ejqnIBWr9KaMxsnBqotpptRXTyfNRLnFpqzX6sTDt+X+a+6udnU8g==
+
 rollup@2.26.5:
   version "2.26.5"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.26.5.tgz#5562ec36fcba3eed65cfd630bd78e037ad0e0307"
