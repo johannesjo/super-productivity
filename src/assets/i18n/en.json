@@ -597,7 +597,7 @@
         "ATTACHMENTS": "Attachments ({{nr}})",
         "FROM_PARENT": "(from Parent)",
         "LOCAL_ATTACHMENTS": "Local Attachments",
-        "NOTES": "Notes",
+        "NOTES": "Description",
         "PARENT": "Parent",
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
