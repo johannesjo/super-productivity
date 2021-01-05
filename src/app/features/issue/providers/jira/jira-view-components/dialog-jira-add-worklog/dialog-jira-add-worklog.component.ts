@@ -7,6 +7,7 @@ import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 import { ProjectService } from '../../../../../project/project.service';
 import { first } from 'rxjs/operators';
+import * as moment from 'moment';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -62,9 +63,8 @@ export class DialogJiraAddWorklogComponent {
   }
 
   private _convertTimestamp(timestamp: number): string {
-    const date = new Date(timestamp);
-    date.setSeconds(0, 0);
-    const isoStr = date.toISOString();
-    return isoStr.substring(0, isoStr.length - 1);
+    const date = moment(timestamp);
+    const isoStr = date.seconds(0).local().format();
+    return isoStr.substring(0, 19);
   }
 }
