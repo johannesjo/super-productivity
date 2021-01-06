@@ -38,11 +38,14 @@ RUN ng build --output-path=dist
 # base image
 FROM nginx:1.16.0-alpine
 
+# environmental variables
+ENV PORT=80
+
 # copy artifact build from the 'build environment'
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# expose port 80
-EXPOSE 80
+# expose port: defaults to 80
+EXPOSE $PORT
 
 # run nginx
 CMD ["nginx", "-g", "daemon off;"]
