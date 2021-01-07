@@ -144,7 +144,7 @@
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "project ID or user name/project",
-        "GITLAB_BASE_URL": "Gitlab base URL",
+        "GITLAB_BASE_URL": "Custom GitLab base URL",
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
