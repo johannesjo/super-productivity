@@ -11,7 +11,7 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { T } from '../../../../t.const';
-import { GITLAB_BASE_URL } from './gitlab.const';
+import { flatMap } from 'rxjs/internal/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -26,14 +26,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => {
-        if (cfg.gitlabBaseUrl != null) {
-          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/) ? cfg.gitlabBaseUrl : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${cfg.project}issues/${issueId}`;
-        } else {
-          return `${GITLAB_BASE_URL}${cfg.project?.replace(/%2F/g, '/')}/issues/${issueId}`;
-        }
-      })
+      flatMap((cfg) =>
+        this._gitlabApiService.getById$(issueId, cfg).pipe(map(issue => issue.html_url))
+      )
     );
   }
 
