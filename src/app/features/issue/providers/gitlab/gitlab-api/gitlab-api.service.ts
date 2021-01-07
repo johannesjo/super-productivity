@@ -214,7 +214,7 @@ export class GitlabApiService {
   private apiLink(projectConfig: GitlabCfg): string {
     let apiURL: string = '';
     let projectURL: string = projectConfig.project ? projectConfig.project : '';
-    if (projectConfig.gitlabBaseUrl !== null) {
+    if (projectConfig.gitlabBaseUrl != null) {
       const fixedUrl = projectConfig.gitlabBaseUrl.match(/.*\/$/) ? projectConfig.gitlabBaseUrl : `${projectConfig.gitlabBaseUrl}/`;
       apiURL = fixedUrl + 'api/v4/projects/';
     } else {
