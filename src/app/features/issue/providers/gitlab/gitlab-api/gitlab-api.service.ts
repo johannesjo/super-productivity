@@ -6,7 +6,7 @@ import { SnackService } from 'src/app/core/snack/snack.service';
 import { GitlabCfg } from '../gitlab';
 import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
-import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX, GITLAB_URL_REGEX } from '../gitlab.const';
+import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
@@ -214,10 +214,9 @@ export class GitlabApiService {
   private apiLink(projectConfig: GitlabCfg): string {
     let apiURL: string = '';
     let projectURL: string = projectConfig.project ? projectConfig.project : '';
-    const hostURL = projectConfig.project?.match(GITLAB_URL_REGEX);
-    if (hostURL) {
-      apiURL = hostURL[0] + 'api/v4/projects/';
-      projectURL = projectURL.substring(hostURL[0].length);
+    if (projectConfig.gitlabBaseUrl != null) {
+      const fixedUrl = projectConfig.gitlabBaseUrl.match(/.*\/$/) ? projectConfig.gitlabBaseUrl : `${projectConfig.gitlabBaseUrl}/`;
+      apiURL = fixedUrl + 'api/v4/projects/';
     } else {
       apiURL = GITLAB_API_BASE_URL + '/';
     }
