@@ -4,21 +4,22 @@ import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import { filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import {filter, first, map, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL } from '../gitlab.const';
 import { IssueService } from '../../../issue.service';
-import { GITLAB_TYPE } from '../../../issue.const';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 import { GitlabCfg } from '../gitlab';
 import { T } from 'src/app/t.const';
-import { TaskWithSubTasks } from '../../../../tasks/task.model';
+import {TaskWithSubTasks} from '../../../../tasks/task.model';
 import { WorkContextService } from '../../../../work-context/work-context.service';
+import {GitBasedIssueEffects} from '../../common/gitbased/git-based-issue.effect';
+import {GITLAB_TYPE} from '../../../issue.const';
 
 const isGitlabEnabled = (gitlabCfg: GitlabCfg): boolean => !!gitlabCfg && !!gitlabCfg.project;
 
 @Injectable()
-export class GitlabIssueEffects {
+export class GitlabIssueEffects extends GitBasedIssueEffects {
   private _updateIssuesForCurrentContext$: Observable<any> = this._workContextService.allTasksForCurrentContext$.pipe(
     first(),
     switchMap((tasks) => {
@@ -61,7 +62,21 @@ export class GitlabIssueEffects {
         // NOTE: required otherwise timer stays alive for filtered actions
         takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
         tap(() => console.log('GITLAB!_POLL_BACKLOG_CHANGES')),
-        tap(() => this._importNewIssuesToBacklog(pId, gitlabCfg)),
+        withLatestFrom(
+          this._projectService.getByIdLive$(pId),
+          this._gitlabApiService.getCurrentUser$(gitlabCfg),
+          this._gitlabApiService.getProjectData$(gitlabCfg),
+          this._taskService.getAllTaskByIssueTypeForProject$(pId, GITLAB_TYPE),
+        ),
+        tap(([, project, user, issues, allTasks]) => this._exportChangesToBacklog(
+          project,
+          user,
+          issues,
+          allTasks,
+          GITLAB_TYPE,
+          T.F.GITLAB.S.IMPORTED_SINGLE_ISSUE,
+          T.F.GITLAB.S.IMPORTED_MULTIPLE_ISSUES)
+        )
       )),
     )),
   );
@@ -73,41 +88,14 @@ export class GitlabIssueEffects {
     );
 
   constructor(
-    private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
+    readonly _snackService: SnackService,
+    readonly _projectService: ProjectService,
     private readonly _gitlabApiService: GitlabApiService,
-    private readonly _issueService: IssueService,
-    private readonly _taskService: TaskService,
-    private readonly _workContextService: WorkContextService,
-    private readonly _issueEffectHelperService: IssueEffectHelperService,
+    readonly _issueService: IssueService,
+    readonly _taskService: TaskService,
+    readonly _workContextService: WorkContextService,
+    readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {
-  }
-
-  private async _importNewIssuesToBacklog(projectId: string, gitlabCfg: GitlabCfg) {
-    const issues = await this._gitlabApiService.getProjectData$(gitlabCfg).toPromise();
-    const allTaskGitlabIssueIds = await this._taskService.getAllIssueIdsForProject(projectId, GITLAB_TYPE) as number[];
-    const issuesToAdd = issues.filter(issue => !allTaskGitlabIssueIds.includes(issue.id));
-
-    issuesToAdd.forEach((issue) => {
-      this._issueService.addTaskWithIssue(GITLAB_TYPE, issue, projectId, true);
-    });
-
-    if (issuesToAdd.length === 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
-        },
-        msg: T.F.GITLAB.S.IMPORTED_SINGLE_ISSUE,
-      });
-    } else if (issuesToAdd.length > 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issuesLength: issuesToAdd.length
-        },
-        msg: T.F.GITLAB.S.IMPORTED_MULTIPLE_ISSUES,
-      });
-    }
+    super(_snackService, _projectService, _issueService, _taskService, _workContextService, _issueEffectHelperService);
   }
 }

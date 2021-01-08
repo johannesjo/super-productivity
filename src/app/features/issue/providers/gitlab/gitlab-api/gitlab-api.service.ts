@@ -9,7 +9,7 @@ import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
-import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
+import {GitlabIssue, GitlabUser} from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
 
@@ -23,6 +23,13 @@ export class GitlabApiService {
   ) {
   }
 
+  getCurrentUser$(cfg: GitlabCfg): Observable<GitlabUser> {
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}user`
+    }, cfg)
+      .pipe(
+      );
+  }
   getProjectData$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;

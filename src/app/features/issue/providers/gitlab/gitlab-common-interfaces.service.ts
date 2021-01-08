@@ -61,10 +61,11 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
+    const user = await this._gitlabApiService.getCurrentUser$(cfg).toPromise();
 
     const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
-      ? issue.comments.filter(comment => comment.author.username !== cfg.filterUsername)
+    const commentsByOthers = (user != null)
+      ? issue.comments.filter(comment => comment.author.id !== user.id)
       : issue.comments;
 
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
@@ -119,6 +120,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(projectId).toPromise();
+    const user = await this._gitlabApiService.getCurrentUser$(cfg).toPromise();
     const issues: GitlabIssue[] = [];
     const paramsCount = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
     let ids;
@@ -132,11 +134,10 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const updatedIssues: { task: Task, taskChanges: Partial<Task>, issue: GitlabIssue }[] = [];
-
     for (i = 0; i < tasks.length; i++) {
       const issueUpdate: number = new Date(issues[i].updated_at).getTime();
-      const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
-        ? issues[i].comments.filter(comment => comment.author.username !== cfg.filterUsername)
+      const commentsByOthers = (user != null)
+        ? issues[i].comments.filter(comment => comment.author.id !== user.id)
         : issues[i].comments;
 
       const updates: number[] = [

@@ -594,6 +594,12 @@ export class TaskService {
     ) as Task[];
   }
 
+  async getAllTaskByIssueTypeForProject$(projectId: string, issueProviderKey: IssueProviderKey): Promise<Task[]> {
+    const allTasks = await this.getAllTasksForProject(projectId);
+    return allTasks
+      .filter(task => task.issueType === issueProviderKey);
+  }
+
   async getAllIssueIdsForProject(projectId: string, issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
     const allTasks = await this.getAllTasksForProject(projectId);
     return allTasks

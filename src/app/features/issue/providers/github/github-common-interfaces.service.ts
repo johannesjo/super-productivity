@@ -58,11 +58,10 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
-
+    const user = await this._githubApiService.getCurrentUser$(cfg).toPromise();
     // const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
-    const commentsByOthers = (filterUserName && filterUserName.length > 1)
-      ? issue.comments.filter(comment => comment.user.login.toLowerCase() !== cfg.filterUsername)
+    const commentsByOthers = (user != null)
+      ? issue.comments.filter(comment => comment.user.id !== user.id)
       : issue.comments;
 
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
