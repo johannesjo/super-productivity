@@ -65,7 +65,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
         return this._githubApiService.getCurrentUser$(cfg).toPromise();
     });
     // const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const commentsByOthers = (user != null)
+    const commentsByOthers = (user)
       ? issue.comments.filter(comment => comment.user.id !== user.id)
       : issue.comments;
 

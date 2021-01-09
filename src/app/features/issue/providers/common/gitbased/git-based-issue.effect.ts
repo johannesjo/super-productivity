@@ -28,8 +28,8 @@ export class GitBasedIssueEffects {
     provider: IssueProviderKey,
     singleIssueMessage: string,
     multipleIssueMessage: string) {
-    const userOwnIssues = issues.filter(issue => issue.assignee != null && issue.assignee.id === user.id);
-    const backlogTasks = allTaskByType.filter(task => project.backlogTaskIds != null && project.backlogTaskIds.includes(task.id));
+    const userOwnIssues = issues.filter(issue => issue.assignee && issue.assignee.id === user.id);
+    const backlogTasks = allTaskByType.filter(task => project.backlogTaskIds && project.backlogTaskIds.includes(task.id));
     const removableTaskIdList = backlogTasks.filter(task => !userOwnIssues.some(ownIssue => task.issueId !== ownIssue.id.toString())).map(task => task.id);
     const remainingTaskIdList = project.backlogTaskIds.filter(oldBacklogTaskId => !removableTaskIdList.includes(oldBacklogTaskId));
     this._projectService.update(project.id, {
@@ -37,7 +37,7 @@ export class GitBasedIssueEffects {
     });
     this._taskService.removeMultipleMainTasks(removableTaskIdList);
 
-    const ownIssueIdList = allTaskByType.filter(task => task.issueId != null).map(task => Number(task.issueId));
+    const ownIssueIdList = allTaskByType.filter(task => task.issueId).map(task => Number(task.issueId));
     const issuesToAdd = userOwnIssues.filter(issue => !ownIssueIdList.some(existingId => existingId === issue.id));
 
     if (issuesToAdd?.length) {

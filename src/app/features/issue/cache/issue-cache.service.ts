@@ -17,8 +17,8 @@ class CacheContent<T> {
 export class IssueCacheService {
   async projectCache<T>(pId: string, type: string, expire: Duration, fetch: () => Promise<T>): Promise<T> {
     const key = `SUP_p_${type}_${pId}`;
-    let cachedContent = loadFromRealLs(key) as CacheContent<T>;
-    if (cachedContent == null || moment(cachedContent.expire).isBefore(moment())) {
+    let cachedContent: CacheContent<T> = loadFromRealLs(key) as CacheContent<T>;
+    if (!cachedContent || moment(cachedContent.expire).isBefore(moment())) {
       cachedContent = new CacheContent<T>(moment().add(expire).toDate(), await fetch());
       saveToRealLs(key, {...cachedContent});
     }
@@ -26,7 +26,7 @@ export class IssueCacheService {
     return realContent;
   }
 
-  async removeProjectCache(pId: string, type: string){
+  async removeProjectCache(pId: string, type: string) {
     const key = `SUP_p_${type}_${pId}`;
     removeFromRealLs(key);
   }

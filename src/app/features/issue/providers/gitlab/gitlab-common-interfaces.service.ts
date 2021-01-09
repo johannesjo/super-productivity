@@ -68,7 +68,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         return this._gitlabApiService.getCurrentUser$(cfg).toPromise();
     });
     const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const commentsByOthers = (user != null)
+    const commentsByOthers = (user)
       ? issue.comments.filter(comment => comment.author.id !== user.id)
       : issue.comments;
 
@@ -142,7 +142,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     const updatedIssues: { task: Task, taskChanges: Partial<Task>, issue: GitlabIssue }[] = [];
     for (i = 0; i < tasks.length; i++) {
       const issueUpdate: number = new Date(issues[i].updated_at).getTime();
-      const commentsByOthers = (user != null)
+      const commentsByOthers = (user)
         ? issues[i].comments.filter(comment => comment.author.id !== user.id)
         : issues[i].comments;
 
