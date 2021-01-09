@@ -8,10 +8,12 @@ import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
+import {GitlabIssue, GitlabUser} from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { T } from '../../../../t.const';
 import { flatMap } from 'rxjs/internal/operators';
+import {IssueCacheService} from '../../cache/issue-cache.service';
+import {duration} from 'moment';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +23,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
+    private readonly _issueCacheService: IssueCacheService,
   ) {
   }
 
@@ -61,8 +64,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
-    const user = await this._gitlabApiService.getCurrentUser$(cfg).toPromise();
-
+    const user = await this._issueCacheService.projectCache<GitlabUser>(task.projectId, 'GITLAB_USER', duration({days: 1}), () => {
+        return this._gitlabApiService.getCurrentUser$(cfg).toPromise();
+    });
     const issueUpdate: number = new Date(issue.updated_at).getTime();
     const commentsByOthers = (user != null)
       ? issue.comments.filter(comment => comment.author.id !== user.id)
@@ -120,7 +124,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(projectId).toPromise();
-    const user = await this._gitlabApiService.getCurrentUser$(cfg).toPromise();
+    const user = await this._issueCacheService.projectCache<GitlabUser>(projectId, 'GITLAB_USER', duration({days: 1}), () => {
+      return this._gitlabApiService.getCurrentUser$(cfg).toPromise();
+    });
     const issues: GitlabIssue[] = [];
     const paramsCount = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
     let ids;

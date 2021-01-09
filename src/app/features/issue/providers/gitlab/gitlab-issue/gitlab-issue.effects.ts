@@ -15,6 +15,9 @@ import {TaskWithSubTasks} from '../../../../tasks/task.model';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import {GitBasedIssueEffects} from '../../common/gitbased/git-based-issue.effect';
 import {GITLAB_TYPE} from '../../../issue.const';
+import {IssueCacheService} from '../../../cache/issue-cache.service';
+import {GitlabUser} from './gitlab-issue.model';
+import {duration} from 'moment';
 
 const isGitlabEnabled = (gitlabCfg: GitlabCfg): boolean => !!gitlabCfg && !!gitlabCfg.project;
 
@@ -64,7 +67,9 @@ export class GitlabIssueEffects extends GitBasedIssueEffects {
         tap(() => console.log('GITLAB!_POLL_BACKLOG_CHANGES')),
         withLatestFrom(
           this._projectService.getByIdLive$(pId),
-          this._gitlabApiService.getCurrentUser$(gitlabCfg),
+          this._issueCacheService.projectCache<GitlabUser>(pId, 'GITLAB_USER', duration({days: 1}), () => {
+            return this._gitlabApiService.getCurrentUser$(gitlabCfg).toPromise();
+          }),
           this._gitlabApiService.getProjectData$(gitlabCfg),
           this._taskService.getAllTaskByIssueTypeForProject$(pId, GITLAB_TYPE),
         ),
@@ -95,6 +100,7 @@ export class GitlabIssueEffects extends GitBasedIssueEffects {
     readonly _taskService: TaskService,
     readonly _workContextService: WorkContextService,
     readonly _issueEffectHelperService: IssueEffectHelperService,
+    private readonly _issueCacheService: IssueCacheService,
   ) {
     super(_snackService, _projectService, _issueService, _taskService, _workContextService, _issueEffectHelperService);
   }

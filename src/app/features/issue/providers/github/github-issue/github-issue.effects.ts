@@ -16,6 +16,9 @@ import { GithubCfg } from '../github.model';
 import { isGithubEnabled } from '../is-github-enabled.util';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 import {GitBasedIssueEffects} from '../../common/gitbased/git-based-issue.effect';
+import {IssueCacheService} from '../../../cache/issue-cache.service';
+import {GithubUser} from './github-issue.model';
+import {duration} from 'moment';
 
 @Injectable()
 export class GithubIssueEffects extends GitBasedIssueEffects {
@@ -32,10 +35,13 @@ export class GithubIssueEffects extends GitBasedIssueEffects {
         tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
         withLatestFrom(
           this._projectService.getByIdLive$(pId),
-          this._githubApiService.getCurrentUser$(githubCfg),
+          this._issueCacheService.projectCache<GithubUser>(pId, 'GITHUB_USER', duration({days: 1}), () => {
+            return this._githubApiService.getCurrentUser$(githubCfg).toPromise();
+          }),
           this._githubApiService.getLast100IssuesForRepo$(githubCfg),
           this._taskService.getAllTaskByIssueTypeForProject$(pId, GITHUB_TYPE) as Promise<Task[]>
         ),
+        tap((x) => console.log('GITHUB_POLL_BACKLOG_FETCH', x)),
         tap(([, project, user, issues, allTaskByType]) => this._exportChangesToBacklog(
           project,
           user,
@@ -82,6 +88,7 @@ export class GithubIssueEffects extends GitBasedIssueEffects {
     );
 
   constructor(
+    readonly _issueCacheService: IssueCacheService,
     readonly _snackService: SnackService,
     readonly _projectService: ProjectService,
     private readonly _githubApiService: GithubApiService,
