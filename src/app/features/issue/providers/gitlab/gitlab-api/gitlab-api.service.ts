@@ -239,6 +239,9 @@ export class GitlabApiService {
       // Should never enter here
       throwError('Gitlab Project URL');
     }
+    if (projectURL.match(/^\/?projects\//gi)) {
+      projectURL = projectURL.replace(/^\/?projects\/(.*)/gi, '$1');
+    }
     return `${apiURL}projects/${projectURL}`;
   }
 }
