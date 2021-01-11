@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
+import {EMPTY, forkJoin, from, Observable, ObservableInput, of, throwError} from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
 import { GitlabCfg } from '../gitlab';
@@ -12,6 +12,9 @@ import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
 import {GitlabIssue, GitlabUser} from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
+import {GitlabProject} from '../gitlab-project/gitlab-project.model';
+import {duration} from 'moment';
+import {IssueCacheService} from '../../../cache/issue-cache.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +22,7 @@ import { SearchResultItem } from '../../../issue.model';
 export class GitlabApiService {
   constructor(
     private _snackService: SnackService,
+    private _issueCacheService: IssueCacheService,
     private _http: HttpClient,
   ) {
   }
@@ -45,6 +49,21 @@ export class GitlabApiService {
             return of([]);
           }
         }),
+    );
+  }
+
+  getProjectInfo$(cfg: GitlabCfg): Observable<GitlabProject> {
+    return this._sendRequest$({
+      url: `${this.projectApiLink(cfg)}`
+    }, cfg).pipe(
+    );
+  }
+
+  getIssueLinkById$(projectId: string, issueId: number, cfg: GitlabCfg): Observable<string> {
+    return from(this._issueCacheService.projectCache(projectId, 'GITLAB_PROJECT', duration({days: 1}), () => {
+      return this.getProjectInfo$(cfg).toPromise();
+    })).pipe(
+      map( project => `${project.web_url}/issues/${issueId}`)
     );
   }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of} from 'rxjs';
 import { IssueFieldsForTask, Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
+import {catchError, concatMap, first, switchMap} from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../project/project.service';
@@ -29,9 +29,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
-      flatMap((cfg) =>
-        this._gitlabApiService.getById$(issueId, cfg).pipe(map(issue => issue.html_url))
-      )
+      flatMap(cfg => this._gitlabApiService.getIssueLinkById$(projectId, issueId, cfg))
     );
   }
 
