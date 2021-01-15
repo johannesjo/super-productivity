@@ -269,6 +269,7 @@ export type TaskActions
   | RemoveTaskReminder
   | RestoreTask
   | AddSubTask
+  | ConvertToMainTask
   | ToggleStart
   | RoundTimeSpentForDay
   | MoveToOtherProject

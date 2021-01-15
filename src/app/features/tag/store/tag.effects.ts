@@ -19,7 +19,7 @@ import {
 } from './tag.actions';
 import {
   AddTask,
-  AddTimeSpent,
+  AddTimeSpent, ConvertToMainTask,
   DeleteMainTasks,
   DeleteTask,
   MoveToArchive,
@@ -74,6 +74,7 @@ export class TagEffects {
   updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(() => this._actions$.pipe(
     ofType(
       TaskActionTypes.AddTask,
+      TaskActionTypes.ConvertToMainTask,
       TaskActionTypes.DeleteTask,
       TaskActionTypes.RestoreTask,
       TaskActionTypes.MoveToArchive,
@@ -92,6 +93,9 @@ export class TagEffects {
           break;
         case TaskActionTypes.RestoreTask:
           isChange = !!(a as RestoreTask).payload.task.tagIds.length;
+          break;
+        case TaskActionTypes.ConvertToMainTask:
+          isChange = !!(a as ConvertToMainTask).payload.parentTagIds.length;
           break;
       }
       return isChange

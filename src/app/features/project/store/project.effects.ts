@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { select, Store } from '@ngrx/store';
+import { Action, select, Store } from '@ngrx/store';
 import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 import {
   AddProject,
@@ -23,6 +23,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
   AddTask,
   AddTimeSpent,
+  ConvertToMainTask,
   DeleteMainTasks,
   DeleteTask,
   MoveToArchive,
@@ -108,8 +109,9 @@ export class ProjectEffects {
       TaskActionTypes.MoveToOtherProject,
       TaskActionTypes.RestoreTask,
       TaskActionTypes.MoveToArchive,
+      TaskActionTypes.ConvertToMainTask,
     ),
-    switchMap((a: AddTask | DeleteTask | MoveToOtherProject | MoveToArchive | RestoreTask) => {
+    switchMap((a: AddTask | DeleteTask | MoveToOtherProject | MoveToArchive | RestoreTask | ConvertToMainTask | Action) => {
       let isChange = false;
       switch (a.type) {
         case TaskActionTypes.AddTask:
@@ -126,6 +128,9 @@ export class ProjectEffects {
           break;
         case TaskActionTypes.RestoreTask:
           isChange = !!(a as RestoreTask).payload.task.projectId;
+          break;
+        case TaskActionTypes.ConvertToMainTask:
+          isChange = !!(a as ConvertToMainTask).payload.task.projectId;
           break;
       }
       return isChange
