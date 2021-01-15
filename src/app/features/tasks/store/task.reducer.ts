@@ -2,6 +2,7 @@ import {
   AddSubTask,
   AddTask,
   AddTimeSpent,
+  ConvertToMainTask,
   DeleteMainTasks,
   DeleteTask,
   MoveSubTask,
@@ -389,6 +390,27 @@ export function taskReducer(
           }
         }
       };
+    }
+
+    case TaskActionTypes.ConvertToMainTask: {
+      const {task} = (action as ConvertToMainTask).payload;
+      const par = state.entities[task.parentId as string];
+      if (!par) {
+        throw new Error('No parent for sub task');
+      }
+      const updates: Update<Task>[] = [{
+        id: task.id,
+        changes: {
+          parentId: null,
+          tagIds: [...par.tagIds],
+        }
+      }, {
+        id: task.parentId as string,
+        changes: {
+          subTaskIds: par.subTaskIds.filter(id => id !== task.id),
+        }
+      }];
+      return taskAdapter.updateMany(updates, state);
     }
 
     case TaskActionTypes.ToggleStart: {

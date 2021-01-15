@@ -12,6 +12,7 @@ import {
 } from '../../work-context/work-context.model';
 import {
   AddTask,
+  ConvertToMainTask,
   DeleteTask,
   MoveToArchive,
   MoveToOtherProject,
@@ -303,6 +304,23 @@ export function projectReducer(
                 ...affectedEntity[prop],
                 task.id,
               ]
+          }
+        }, state)
+        : state;
+    }
+
+    case TaskActionTypes.ConvertToMainTask: {
+      const a = action as ConvertToMainTask;
+      const {task} = a.payload;
+      const affectedEntity = task.projectId && state.entities[task.projectId];
+      return (affectedEntity)
+        ? projectAdapter.updateOne({
+          id: task.projectId as string,
+          changes: {
+            taskIds: [
+              task.id,
+              ...affectedEntity.taskIds,
+            ]
           }
         }, state)
         : state;

@@ -19,6 +19,7 @@ import {
   AddTask,
   AddTaskReminder,
   AddTimeSpent,
+  ConvertToMainTask,
   DeleteMainTasks,
   DeleteTask,
   MoveSubTask,
@@ -553,6 +554,10 @@ export class TaskService {
 
   hideSubTasks(id: string) {
     this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.HideAll});
+  }
+
+  convertToMainTask(task: Task) {
+    this._store.dispatch(new ConvertToMainTask({task}));
   }
 
   // GLOBAL TASK MODEL STUFF

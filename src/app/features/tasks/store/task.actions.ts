@@ -34,6 +34,7 @@ export enum TaskActionTypes {
 
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
+  ConvertToMainTask = '[Task] Convert SubTask to main task',
 
   // Other
   RestoreTask = '[Task] Restore Task',
@@ -209,6 +210,13 @@ export class AddSubTask implements Action {
   readonly type: string = TaskActionTypes.AddSubTask;
 
   constructor(public payload: { task: Task, parentId: string }) {
+  }
+}
+
+export class ConvertToMainTask implements Action {
+  readonly type: string = TaskActionTypes.ConvertToMainTask;
+
+  constructor(public payload: { task: Task }) {
   }
 }
 
