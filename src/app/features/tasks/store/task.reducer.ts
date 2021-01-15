@@ -31,6 +31,7 @@ import {
   getTaskById,
   reCalcTimesForParentIfParent,
   reCalcTimeSpentForParentIfParent,
+  removeTaskFromParentSideEffects,
   updateDoneOnForTask,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
@@ -398,19 +399,15 @@ export function taskReducer(
       if (!par) {
         throw new Error('No parent for sub task');
       }
-      const updates: Update<Task>[] = [{
+
+      const stateCopy = removeTaskFromParentSideEffects(state, task);
+      return taskAdapter.updateOne({
         id: task.id,
         changes: {
           parentId: null,
           tagIds: [...par.tagIds],
         }
-      }, {
-        id: task.parentId as string,
-        changes: {
-          subTaskIds: par.subTaskIds.filter(id => id !== task.id),
-        }
-      }];
-      return taskAdapter.updateMany(updates, state);
+      }, stateCopy);
     }
 
     case TaskActionTypes.ToggleStart: {

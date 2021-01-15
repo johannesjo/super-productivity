@@ -145,31 +145,7 @@ export const deleteTask = (state: TaskState,
   // PARENT TASK side effects
   // also delete from parent task if any
   if (taskToDelete.parentId) {
-    const parentTask = state.entities[taskToDelete.parentId] as Task;
-    const isWasLastSubTask = (parentTask.subTaskIds.length === 1);
-
-    stateCopy = taskAdapter.updateOne({
-      id: taskToDelete.parentId,
-      changes: {
-        subTaskIds: parentTask.subTaskIds.filter(filterOutId(taskToDelete.id)),
-
-        // copy over sub task time stuff if it was the last sub task
-        ...(
-          (isWasLastSubTask)
-            ? {
-              timeSpentOnDay: taskToDelete.timeSpentOnDay,
-              timeEstimate: taskToDelete.timeEstimate,
-            }
-            : {}
-        )
-      }
-    }, stateCopy);
-
-    // also update time spent for parent if it was not copied over from sub task
-    if (!isWasLastSubTask) {
-      stateCopy = reCalcTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
-      stateCopy = reCalcTimeEstimateForParentIfParent(taskToDelete.parentId, stateCopy);
-    }
+    stateCopy = removeTaskFromParentSideEffects(stateCopy, taskToDelete, true);
   }
 
   // SUB TASK side effects
@@ -188,3 +164,31 @@ export const deleteTask = (state: TaskState,
   };
 };
 
+export const removeTaskFromParentSideEffects = (state: TaskState, taskToRemove: Task, isCopyTimesAfterLast: boolean = false): TaskState => {
+  const parentId: string = taskToRemove.parentId as string;
+  const parentTask = state.entities[parentId] as Task;
+  const isWasLastSubTask = (parentTask.subTaskIds.length === 1);
+
+  let newState = taskAdapter.updateOne({
+    id: parentId,
+    changes: {
+      subTaskIds: parentTask.subTaskIds.filter(filterOutId(taskToRemove.id)),
+
+      // copy over sub task time stuff if it was the last sub task
+      ...(
+        (isWasLastSubTask && isCopyTimesAfterLast)
+          ? {
+            timeSpentOnDay: taskToRemove.timeSpentOnDay,
+            timeEstimate: taskToRemove.timeEstimate,
+          }
+          : {}
+      )
+    }
+  }, state);
+  // also update time spent for parent if it was not copied over from sub task
+  if (!isWasLastSubTask || !isCopyTimesAfterLast) {
+    newState = reCalcTimeSpentForParentIfParent(parentId, newState);
+    newState = reCalcTimeEstimateForParentIfParent(parentId, newState);
+  }
+  return newState;
+};
