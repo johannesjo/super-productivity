@@ -556,8 +556,9 @@ export class TaskService {
     this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.HideAll});
   }
 
-  convertToMainTask(task: Task) {
-    this._store.dispatch(new ConvertToMainTask({task}));
+  async convertToMainTask(task: Task) {
+    const parent = await this.getByIdOnce$(task.parentId as string).toPromise();
+    this._store.dispatch(new ConvertToMainTask({task, parentTagIds: parent.tagIds}));
   }
 
   // GLOBAL TASK MODEL STUFF

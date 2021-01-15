@@ -216,7 +216,7 @@ export class AddSubTask implements Action {
 export class ConvertToMainTask implements Action {
   readonly type: string = TaskActionTypes.ConvertToMainTask;
 
-  constructor(public payload: { task: Task }) {
+  constructor(public payload: { task: Task, parentTagIds: string[] }) {
   }
 }
 

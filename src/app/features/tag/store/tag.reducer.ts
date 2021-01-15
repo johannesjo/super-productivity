@@ -245,10 +245,10 @@ export function tagReducer(
 
     case TaskActionTypes.ConvertToMainTask: {
       const {payload} = action as ConvertToMainTask;
-      const {task} = payload;
+      const {task, parentTagIds} = payload;
       console.log(task);
 
-      const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
+      const updates: Update<Tag>[] = parentTagIds.map((tagId) => ({
         id: tagId,
         changes: {
           taskIds: [
