@@ -5,7 +5,7 @@ import 'hammerjs';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-// tslint:disable-next-line:no-bitwise
+// eslint-disable-next-line no-bitwise
 const DIRECTION_HORIZONTAL = DIRECTION_LEFT | DIRECTION_RIGHT;
 
 @Injectable({providedIn: 'root'})

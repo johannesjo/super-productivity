@@ -8,10 +8,10 @@ function handleData(msgData: any) {
     case 'DECOMPRESS':
       return LZString.decompress(msgData.strToHandle);
     case 'COMPRESS_UTF16':
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       return LZString['compressToUTF16'](msgData.strToHandle);
     case 'DECOMPRESS_UTF16':
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       return LZString['decompressFromUTF16'](msgData.strToHandle);
     default:
       throw new Error('Invalid type');

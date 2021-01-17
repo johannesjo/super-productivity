@@ -127,7 +127,7 @@ export function projectReducer(
   state: ProjectState = initialProjectState,
   action: ProjectActions | AddTask | DeleteTask | MoveToOtherProject | MoveToArchive | RestoreTask
 ): ProjectState {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   const payload = action['payload'];
 
   // TODO fix this hackyness once we use the new syntax everywhere

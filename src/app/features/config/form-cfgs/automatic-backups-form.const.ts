@@ -1,4 +1,4 @@
-// tslint:disable:max-line-length
+/* eslint-disable max-len */
 import { ConfigFormSection, LocalBackupConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 import { getElectron } from '../../../util/get-electron';

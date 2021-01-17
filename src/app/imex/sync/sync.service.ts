@@ -170,7 +170,7 @@ export class SyncService {
     );
   }
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   setInitialSyncDone(val: boolean, syncProvider: SyncProvider) {
     this._isInitialSyncDoneManual$.next(val);
   }

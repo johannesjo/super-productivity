@@ -92,12 +92,12 @@ const _updateThemeModel = (project: Project): Project => {
         ...project,
         theme: {
           ...WORK_CONTEXT_DEFAULT_THEME,
-          // tslint:disable-next-line
+          // eslint-disable-next-line
           primary: (project.themeColor)
-            // tslint:disable-next-line
+            // eslint-disable-next-line
             ? (THEME_COLOR_MAP as any)[project.themeColor]
             : WORK_CONTEXT_DEFAULT_THEME.primary,
-          // tslint:disable-next-line
+          // eslint-disable-next-line
         }
       };
 

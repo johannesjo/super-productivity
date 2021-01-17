@@ -368,7 +368,7 @@ export class ProjectEffects {
   //     tap(({activeId, wrongProjectTasks, allTasks}) => {
   //       const allIds = allTasks.map(t => t.id);
   //       const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
-  // tslint:disable-next-line:max-line-length
+  // eslint-disable-next-line max-len
   //       const r = confirm('Nooo! We found some backlog tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
   //       if (r) {
   //         this._projectService.update(activeId, {
