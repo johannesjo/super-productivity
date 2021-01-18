@@ -1,4 +1,4 @@
-// tslint:disable:max-line-length
+/* eslint-disable max-len */
 import { ConfigFormSection } from '../global-config.model';
 import { T } from '../../../t.const';
 

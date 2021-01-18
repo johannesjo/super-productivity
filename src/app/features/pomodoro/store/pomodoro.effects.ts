@@ -48,7 +48,7 @@ export class PomodoroEffects {
       || !cfg.isStopTrackingOnBreak
       || (isBreak && currentSessionTime <= 0 && action.type === TaskActionTypes.SetCurrentTask)),
     concatMap(([action, , isBreak, currentSessionTime]) => {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       const payload = (action as any)['payload'];
 
       if (payload && action.type !== TaskActionTypes.UnsetCurrentTask) {

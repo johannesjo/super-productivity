@@ -83,7 +83,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
     type: 'input',
     templateOptions: {
       type: 'url',
-      /* tslint:disable-next-line */
+      /* eslint-disable-next-line */
       pattern: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/i,
       required: true,
       label: T.F.JIRA.FORM_CRED.HOST,

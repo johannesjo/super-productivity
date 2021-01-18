@@ -29,7 +29,7 @@ const isEqualSimpleCounterCfg = (a: any, b: any): boolean => {
     }
     for (let i = 0; i < a.length; ++i) {
       if (a[i] !== b[i]) {
-        // tslint:disable-next-line:prefer-for-of
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let j = 0; j < FIELDS_TO_COMPARE.length; j++) {
           const field: any = FIELDS_TO_COMPARE[j];
           if (a[field] !== b[field]) {

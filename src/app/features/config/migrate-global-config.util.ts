@@ -36,13 +36,13 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     ? config.idle
     : {
       ...DEFAULT_GLOBAL_CONFIG.idle,
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       isOnlyOpenIdleWhenCurrentTask: (config.misc as any)['isOnlyOpenIdleWhenCurrentTask'],
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       isEnableIdleTimeTracking: (config.misc as any)['isEnableIdleTimeTracking'],
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       minIdleTime: (config.misc as any)['minIdleTime'],
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       isUnTrackedIdleResetsBreakTimer: (config.misc as any)['isUnTrackedIdleResetsBreakTimer'],
     };
 
@@ -50,11 +50,11 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     ? config.takeABreak
     : {
       ...DEFAULT_GLOBAL_CONFIG.takeABreak,
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       isTakeABreakEnabled: (config.misc as any)['isTakeABreakEnabled'],
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       takeABreakMessage: (config.misc as any)['takeABreakMessage'],
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       takeABreakMinWorkingTime: (config.misc as any)['takeABreakMinWorkingTime'],
     };
 

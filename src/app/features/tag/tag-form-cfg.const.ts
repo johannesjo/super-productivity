@@ -35,9 +35,9 @@ export const BASIC_TAG_CONFIG_FORM_CONFIG: ConfigFormSection<Tag> = {
 export const CREATE_TAG_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
   title: 'Tag Settings & Theme',
   key: 'basic',
-  /* tslint:disable */
+  /* eslint-disable */
   help: `Very basic settings for your project.`,
-  /* tslint:enable */
+  /* eslint-enable */
   items: [
     {
       key: 'title',
