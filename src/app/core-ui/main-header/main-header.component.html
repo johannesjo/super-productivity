@@ -23,6 +23,7 @@
 
     <mat-menu #activeWorkContextMenu="matMenu">
       <work-context-menu [contextId]="activeWorkContext?.id"
+                         [project]="activeWorkContext"
                          [contextType]="activeWorkContext?.type"></work-context-menu>
     </mat-menu>
   </ng-container>

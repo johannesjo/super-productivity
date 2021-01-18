@@ -78,6 +78,7 @@
       </button>
       <mat-menu #projectMenu="matMenu">
         <work-context-menu [contextId]="project.id"
+                           [project]="project"
                            [contextType]="WorkContextType.PROJECT"></work-context-menu>
       </mat-menu>
     </div>
