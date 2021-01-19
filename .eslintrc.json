@@ -33,13 +33,13 @@
           {
             "selector": "default",
             "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
-            "leadingUnderscore": "allow",
+            "leadingUnderscore": "allowSingleOrDouble",
             "trailingUnderscore": "allow"
           },
           {
             "selector": "variable",
             "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
-            "leadingUnderscore": "allow",
+            "leadingUnderscore": "allowSingleOrDouble",
             "trailingUnderscore": "allow"
           },
           {
