@@ -32,9 +32,23 @@
           "warn",
           {
             "selector": "default",
-            "leadingUnderscore": "allow",
-            "trailingUnderscore": "allow",
-            "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"]
+            "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
+            "leadingUnderscore": "allowSingleOrDouble",
+            "trailingUnderscore": "allow"
+          },
+          {
+            "selector": "variable",
+            "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
+            "leadingUnderscore": "allowSingleOrDouble",
+            "trailingUnderscore": "allow"
+          },
+          {
+            "selector": "enum",
+            "format": ["PascalCase", "UPPER_CASE"]
+          },
+          {
+            "selector": "typeLike",
+            "format": ["PascalCase"]
           }
         ],
 
