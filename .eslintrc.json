@@ -50,7 +50,8 @@
         ],
         "id-blacklist": "off",
         "@typescript-eslint/member-delimiter-style": "off",
-        "no-shadow": "off",
+        "no-shadow": "off", // must be disabled, no-shadow rule handled by the next line
+        "@typescript-eslint/no-shadow": "warn",
         "prefer-arrow/prefer-arrow-functions": "off",
         "@angular-eslint/directive-selector": [
           "off",

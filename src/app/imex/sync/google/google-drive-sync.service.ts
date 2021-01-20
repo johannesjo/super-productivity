@@ -108,9 +108,9 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
         try {
           const decompressedData = await this._compressionService.decompressUTF16(backupStr);
           backupData = JSON.parse(decompressedData) as AppDataComplete;
-        } catch (e) {
+        } catch (ex) {
           console.error('Drive Sync, invalid data');
-          console.warn(e);
+          console.warn(ex);
         }
       }
     }
