@@ -22,6 +22,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isDisableInitialDialog: IS_F_DROID_APP,
     defaultProjectId: null,
     firstDayOfWeek: 1,
+    taskNotesTpl: `**How can I best achieve it now?**
+
+**What do I want?**
+
+**Why do I want it?**
+`,
   },
   evaluation: {
     isHideEvaluationSheet: false,

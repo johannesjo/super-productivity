@@ -18,6 +18,7 @@ export type MiscConfig = Readonly<{
   // allow also false because of #569
   defaultProjectId: string | null | false;
   firstDayOfWeek: number;
+  taskNotesTpl: string;
 }>;
 
 export type EvaluationConfig = Readonly<{

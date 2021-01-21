@@ -161,7 +161,7 @@
                        (keyboardUnToggle)="focusItem(noteWrapperElRef)"
                        [isFocus]="isFocusNotes"
                        [isShowControls]="true"
-                       [model]="task.notes"></inline-markdown>
+                       [model]="task.notes|| defaultTaskNotes"></inline-markdown>
     </ng-container>
   </task-additional-info-item>
 

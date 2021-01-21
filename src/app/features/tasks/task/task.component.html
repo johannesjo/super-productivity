@@ -351,6 +351,14 @@
             {{(task?.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT : T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
           </button>
 
+          <button *ngIf="task?.parentId"
+                  (click)="convertToMainTask()"
+                  mat-menu-item
+          >
+            <mat-icon>subdirectory_arrow_left</mat-icon>
+            {{(T.F.TASK.CMP.CONVERT_TO_PARENT_TASK)|translate}}
+          </button>
+
           <button (click)="deleteTask()"
                   class="color-warn"
                   mat-menu-item

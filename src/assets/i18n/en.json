@@ -949,6 +949,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
+      "TASK_NOTES_TPL": "Task description template",
       "TITLE": "Misc Settings"
     },
     "POMODORO": {

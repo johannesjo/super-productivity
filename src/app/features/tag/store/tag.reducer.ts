@@ -4,6 +4,7 @@ import { Tag, TagState } from '../tag.model';
 import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
   AddTask,
+  ConvertToMainTask,
   DeleteMainTasks,
   DeleteTask,
   MoveToArchive,
@@ -237,6 +238,23 @@ export function tagReducer(
               task.id,
               ...(state.entities[tagId] as Tag).taskIds
             ]
+        }
+      }));
+      return tagAdapter.updateMany(updates, state);
+    }
+
+    case TaskActionTypes.ConvertToMainTask: {
+      const {payload} = action as ConvertToMainTask;
+      const {task, parentTagIds} = payload;
+      console.log(task);
+
+      const updates: Update<Tag>[] = parentTagIds.map((tagId) => ({
+        id: tagId,
+        changes: {
+          taskIds: [
+            task.id,
+            ...(state.entities[tagId] as Tag).taskIds
+          ]
         }
       }));
       return tagAdapter.updateMany(updates, state);

@@ -23,6 +23,7 @@ export class TaskDbEffects {
         TaskActionTypes.DeleteMainTasks,
         TaskActionTypes.UndoDeleteTask,
         TaskActionTypes.AddSubTask,
+        TaskActionTypes.ConvertToMainTask,
         // TaskActionTypes.SetCurrentTask,
         // TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
