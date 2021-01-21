@@ -75,7 +75,7 @@
             "style": "camelCase"
           }
         ],
-        "@typescript-eslint/ban-types": "off"
+        "@typescript-eslint/ban-types": "warn"
       }
     },
     {

@@ -148,7 +148,7 @@ export type JiraOriginalTransition = Readonly<{
   isGlobal: true,
   isInitial: false,
   isConditional: false,
-  fields: {}
+  fields: Record<string, unknown>
 }>;
 
 export type JiraIssueOriginal = Readonly<{

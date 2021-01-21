@@ -1,7 +1,7 @@
 // TODO implement recurring reminders
 import { WorkContextType } from '../work-context/work-context.model';
 
-export type RecurringConfig = Readonly<{}>;
+export type RecurringConfig = Readonly<Record<string, unknown>>;
 
 export type ReminderType = 'NOTE' | 'TASK';
 

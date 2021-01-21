@@ -15,7 +15,7 @@ import { exists } from '../../../util/exists';
 export class ConfigFormComponent {
 
   T: typeof T = T;
-  config?: {};
+  config?: Record<string, unknown>;
   @Input() sectionKey?: GlobalConfigSectionKey | ProjectCfgFormKey;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: unknown }> = new EventEmitter();
   fields?: FormlyFieldConfig[];
@@ -25,7 +25,7 @@ export class ConfigFormComponent {
   constructor() {
   }
 
-  @Input() set cfg(cfg: {}) {
+  @Input() set cfg(cfg: Record<string, unknown>) {
     this.config = {...cfg};
   }
 

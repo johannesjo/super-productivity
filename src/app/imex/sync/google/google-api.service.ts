@@ -227,7 +227,7 @@ export class GoogleApiService {
     );
   }
 
-  saveFile$(content: string, metadata: any = {}): Observable<{}> {
+  saveFile$(content: string, metadata: any = {}): Observable<any> {
     let path;
     let method;
 

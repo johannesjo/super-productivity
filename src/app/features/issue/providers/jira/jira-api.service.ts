@@ -61,7 +61,7 @@ interface JiraRequestCfg {
     [key: string]: string | boolean | number | string[];
   };
   transform?: (res: any, jiraCfg?: JiraCfg) => any;
-  body?: {};
+  body?: Record<string, unknown>;
 }
 
 @Injectable({
