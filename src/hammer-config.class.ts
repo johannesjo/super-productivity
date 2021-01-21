@@ -11,7 +11,7 @@ const DIRECTION_HORIZONTAL = DIRECTION_LEFT | DIRECTION_RIGHT;
 @Injectable({providedIn: 'root'})
 export class MyHammerConfig extends HammerGestureConfig {
   overrides: {
-    [key: string]: {};
+    [key: string]: Record<string, unknown>;
   } = {
     swipe: {direction: DIRECTION_HORIZONTAL},
     pan: {direction: 6},

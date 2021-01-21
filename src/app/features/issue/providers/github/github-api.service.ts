@@ -132,7 +132,7 @@ export class GithubApiService {
     );
   }
 
-  private _handleRequestError$(error: HttpErrorResponse, caught: Observable<object>): ObservableInput<{}> {
+  private _handleRequestError$(error: HttpErrorResponse, caught: Observable<unknown>): ObservableInput<unknown> {
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
