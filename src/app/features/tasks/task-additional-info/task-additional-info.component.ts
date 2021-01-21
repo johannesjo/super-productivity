@@ -48,6 +48,7 @@ import { ipcRenderer } from 'electron';
 import { devError } from '../../../util/dev-error';
 import { SS_JIRA_WONKY_COOKIE } from '../../../core/persistence/ls-keys.const';
 import { IS_MOBILE } from '../../../util/is-mobile';
+import { GlobalConfigService } from '../../config/global-config.service';
 
 interface IssueAndType {
   id: string | number | null;
@@ -152,6 +153,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
       : [])
   );
   IS_MOBILE: boolean = IS_MOBILE;
+  defaultTaskNotes: string = '';
 
   private _focusTimeout?: number;
   private _subs: Subscription = new Subscription();
@@ -161,6 +163,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
     public attachmentService: TaskAttachmentService,
     public taskService: TaskService,
     public layoutService: LayoutService,
+    private _globalConfigService: GlobalConfigService,
     private _issueService: IssueService,
     private _reminderService: ReminderService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
@@ -172,6 +175,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   ) {
     // NOTE: needs to be assigned here before any setter is called
     this._subs.add(this.issueAttachments$.subscribe((attachments) => this.issueAttachments = attachments));
+    this._subs.add(this._globalConfigService.misc$.subscribe((misc) => this.defaultTaskNotes = misc.taskNotesTpl));
     this._subs.add(this.issueData$.subscribe((issueData) => {
       this.issueData = issueData;
       this._cd.detectChanges();
@@ -291,7 +295,9 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   }
 
   changeTaskNotes($event: string) {
-    this.taskService.update(this.task.id, {notes: $event});
+    if (!this.defaultTaskNotes || ($event && $event.trim() !== this.defaultTaskNotes.trim())) {
+      this.taskService.update(this.task.id, {notes: $event});
+    }
   }
 
   close() {

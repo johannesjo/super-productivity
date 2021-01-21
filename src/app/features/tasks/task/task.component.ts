@@ -357,6 +357,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onTagsUpdated(this.task.tagIds.filter(tagId => tagId !== TODAY_TAG.id));
   }
 
+  convertToMainTask() {
+    this._taskService.convertToMainTask(this.task);
+  }
+
   focusPrevious(isFocusReverseIfNotPossible: boolean = false) {
     if (IS_TOUCH_ONLY) {
       return;

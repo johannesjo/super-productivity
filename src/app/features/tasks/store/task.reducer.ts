@@ -2,6 +2,7 @@ import {
   AddSubTask,
   AddTask,
   AddTimeSpent,
+  ConvertToMainTask,
   DeleteMainTasks,
   DeleteTask,
   MoveSubTask,
@@ -30,6 +31,7 @@ import {
   getTaskById,
   reCalcTimesForParentIfParent,
   reCalcTimeSpentForParentIfParent,
+  removeTaskFromParentSideEffects,
   updateDoneOnForTask,
   updateTimeEstimateForTask,
   updateTimeSpentForTask
@@ -389,6 +391,23 @@ export function taskReducer(
           }
         }
       };
+    }
+
+    case TaskActionTypes.ConvertToMainTask: {
+      const {task} = (action as ConvertToMainTask).payload;
+      const par = state.entities[task.parentId as string];
+      if (!par) {
+        throw new Error('No parent for sub task');
+      }
+
+      const stateCopy = removeTaskFromParentSideEffects(state, task);
+      return taskAdapter.updateOne({
+        id: task.id,
+        changes: {
+          parentId: null,
+          tagIds: [...par.tagIds],
+        }
+      }, stateCopy);
     }
 
     case TaskActionTypes.ToggleStart: {
