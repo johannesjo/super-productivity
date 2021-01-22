@@ -56,7 +56,7 @@ export class PomodoroService {
     this.isLongBreak$,
   ]).pipe(map(([isBreak, isLongBreak]) => isBreak && !isLongBreak));
 
-  _timer$: Observable<number> = interval(200).pipe(
+  _timer$: Observable<number> = interval(500).pipe(
     switchMap(() => of(Date.now())),
     pairwise(),
     map(([a, b]) => b - a),
