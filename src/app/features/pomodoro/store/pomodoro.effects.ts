@@ -24,10 +24,6 @@ import { ElectronService } from '../../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
 import { IPC } from '../../../../../electron/ipc-events.const';
 
-const isEnabled = ([action, cfg, ...v]: any[] | any): boolean => !!cfg && !!cfg.isEnabled;
-
-// TODO isEnabled handling should be more efficient for every function here
-
 @Injectable()
 export class PomodoroEffects {
   currentTaskId$: Observable<string | null> = this._store$.pipe(select(selectCurrentTaskId));
@@ -46,7 +42,6 @@ export class PomodoroEffects {
           this._pomodoroService.isBreak$,
           this._pomodoroService.currentSessionTime$,
         ),
-        filter(isEnabled),
         // don't update when on break and stop time tracking is active
         filter(([action, cfg, isBreak, currentSessionTime]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean, number]) =>
           !isBreak
@@ -81,12 +76,10 @@ export class PomodoroEffects {
           PomodoroActionTypes.SkipPomodoroBreak,
         ),
         withLatestFrom(
-          this._pomodoroService.cfg$,
           this._pomodoroService.isBreak$,
           this.currentTaskId$,
         ),
-        filter(isEnabled),
-        filter(([action, cfg, isBreak, currentTaskId]: [FinishPomodoroSession, PomodoroConfig, boolean, string]) =>
+        filter(([action, isBreak, currentTaskId]: [FinishPomodoroSession, boolean, string | null]) =>
           (!isBreak && !currentTaskId)
         ),
         mapTo(new ToggleStart()),
@@ -113,7 +106,6 @@ export class PomodoroEffects {
           this._pomodoroService.cfg$,
           this._pomodoroService.isBreak$,
         ),
-        filter(isEnabled),
         filter(([action, cfg, isBreak]: [FinishPomodoroSession, PomodoroConfig, boolean]) =>
           cfg.isStopTrackingOnBreak && isBreak),
         mapTo(new UnsetCurrentTask()),
@@ -134,7 +126,6 @@ export class PomodoroEffects {
           this._pomodoroService.cfg$,
           this._pomodoroService.isBreak$,
         ),
-        filter(isEnabled),
         filter(([action, cfg, isBreak]: [FinishPomodoroSession | PausePomodoro | SkipPomodoroBreak, PomodoroConfig, boolean]) => {
           return ((action.type === PomodoroActionTypes.FinishPomodoroSession || action.type === PomodoroActionTypes.SkipPomodoroBreak)
             && (cfg.isPlaySound && isBreak) || (cfg.isPlaySoundAfterBreak && !cfg.isManualContinue && !isBreak))
@@ -151,11 +142,9 @@ export class PomodoroEffects {
       : this._actions$.pipe(
         ofType(PomodoroActionTypes.PausePomodoro),
         withLatestFrom(
-          this._pomodoroService.cfg$,
           this.currentTaskId$,
         ),
-        filter(isEnabled),
-        filter(([act, cfg, currentTaskId]) => !!currentTaskId),
+        filter(([act, currentTaskId]) => !!currentTaskId),
         mapTo(new UnsetCurrentTask()),
       )),
   );

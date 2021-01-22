@@ -37,7 +37,10 @@ export class PomodoroService {
   onStop$: Observable<any> = this._actions$.pipe(ofType(PomodoroActionTypes.StopPomodoro));
 
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.pomodoro));
-  isEnabled$: Observable<boolean> = this.cfg$.pipe(map(cfg => cfg && cfg.isEnabled));
+  isEnabled$: Observable<boolean> = this.cfg$.pipe(
+    map(cfg => cfg && cfg.isEnabled),
+    shareReplay(1),
+  );
 
   isManualPause$: Observable<boolean> = this._store$.pipe(select(selectIsManualPause));
   isBreak$: Observable<boolean> = this._store$.pipe(select(selectIsBreak));
