@@ -559,16 +559,17 @@ export class ProjectEffects {
 
   private async _removeAllRepeatingTasksForProject(projectIdToDelete: string): Promise<any> {
     const taskRepeatCfgs: TaskRepeatCfg[] = await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(first()).toPromise();
+    const allCfgIdsForProject = taskRepeatCfgs.filter(cfg => cfg.projectId === projectIdToDelete);
 
-    const cfgsIdsToRemove: string[] = taskRepeatCfgs
-      .filter(cfg => cfg.projectId === projectIdToDelete && (!cfg.tagIds || cfg.tagIds.length === 0))
+    const cfgsIdsToRemove: string[] = allCfgIdsForProject
+      .filter(cfg => (!cfg.tagIds || cfg.tagIds.length === 0))
       .map(cfg => cfg.id as string);
     if (cfgsIdsToRemove.length > 0) {
       this._taskRepeatCfgService.deleteTaskRepeatCfgsNoTaskCleanup(cfgsIdsToRemove);
     }
 
-    const cfgsToUpdate: string[] = taskRepeatCfgs
-      .filter(cfg => cfg.projectId === projectIdToDelete && cfg.tagIds && cfg.tagIds.length > 0)
+    const cfgsToUpdate: string[] = allCfgIdsForProject
+      .filter(cfg => cfg.tagIds && cfg.tagIds.length > 0)
       .map(taskRepeatCfg => taskRepeatCfg.id as string);
     if (cfgsToUpdate.length > 0) {
       this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, {projectId: null});
