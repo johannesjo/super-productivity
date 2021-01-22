@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import {EMPTY, forkJoin, from, Observable, ObservableInput, of, throwError} from 'rxjs';
+import { EMPTY, forkJoin, from, Observable, ObservableInput, of, throwError } from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
 import { GitlabCfg } from '../gitlab';
@@ -9,12 +9,12 @@ import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
-import {GitlabIssue, GitlabUser} from '../gitlab-issue/gitlab-issue.model';
+import { GitlabIssue, GitlabUser } from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
-import {GitlabProject} from '../gitlab-project/gitlab-project.model';
-import {duration} from 'moment';
-import {IssueCacheService} from '../../../cache/issue-cache.service';
+import { GitlabProject } from '../gitlab-project/gitlab-project.model';
+import { duration } from 'moment';
+import { IssueCacheService } from '../../../cache/issue-cache.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +34,7 @@ export class GitlabApiService {
       .pipe(
       );
   }
+
   getProjectData$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
@@ -63,7 +64,7 @@ export class GitlabApiService {
     return from(this._issueCacheService.projectCache(projectId, 'GITLAB_PROJECT', duration({days: 1}), () => {
       return this.getProjectInfo$(cfg).toPromise();
     })).pipe(
-      map( project => `${project.web_url}/issues/${issueId}`)
+      map(project => `${project.web_url}/issues/${issueId}`)
     );
   }
 
@@ -236,11 +237,14 @@ export class GitlabApiService {
     }
     return throwError({[HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.'});
   }
+
   private apiLink(projectConfig: GitlabCfg): string {
     let apiURL: string = '';
 
     if (projectConfig.gitlabBaseUrl != null) {
-      const fixedUrl = projectConfig.gitlabBaseUrl.match(/.*\/$/) ? projectConfig.gitlabBaseUrl : `${projectConfig.gitlabBaseUrl}/`;
+      const fixedUrl = projectConfig.gitlabBaseUrl.match(/.*\/$/)
+        ? projectConfig.gitlabBaseUrl
+        : `${projectConfig.gitlabBaseUrl}/`;
       apiURL = fixedUrl + 'api/v4/';
     } else {
       apiURL = GITLAB_API_BASE_URL + '/';

@@ -21,7 +21,7 @@ export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 // export const GITLAB_POLL_INTERVAL = 15 * 1000;
 export const GITLAB_BASE_URL = 'https://gitlab.com/';
 
-export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4/projects`;
+export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4`;
 
 export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i;
 
