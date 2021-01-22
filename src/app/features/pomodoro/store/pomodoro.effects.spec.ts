@@ -21,12 +21,14 @@ describe('PomodoroEffects', () => {
   let cfg$: BehaviorSubject<PomodoroConfig>;
   let currentSessionTime$: BehaviorSubject<number>;
   let isBreak$: BehaviorSubject<boolean>;
+  let isEnabled$: BehaviorSubject<boolean>;
 
   beforeEach(() => {
     cfg$ = new BehaviorSubject<PomodoroConfig>({
       ...DEFAULT_GLOBAL_CONFIG.pomodoro,
       isEnabled: true,
     });
+    isEnabled$ = new BehaviorSubject<boolean>(true);
     currentSessionTime$ = new BehaviorSubject<number>(5000);
     isBreak$ = new BehaviorSubject<boolean>(false);
 
@@ -41,6 +43,7 @@ describe('PomodoroEffects', () => {
             cfg$,
             isBreak$,
             currentSessionTime$,
+            isEnabled$,
           },
         },
         {provide: MatDialog, useValue: {}},
