@@ -335,7 +335,7 @@ export function tagReducer(
       const addTo: Update<Tag>[] = addedTo.map(tagId => ({
         id: tagId,
         changes: {
-          taskIds: [...(state.entities[tagId] as Tag).taskIds, taskId],
+          taskIds: [taskId, ...(state.entities[tagId] as Tag).taskIds],
         }
       }));
       return tagAdapter.updateMany([...removeFrom, ...addTo], state);
