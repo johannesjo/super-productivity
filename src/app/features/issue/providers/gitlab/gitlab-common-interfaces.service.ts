@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
-import { Observable, of} from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { IssueFieldsForTask, Task } from 'src/app/features/tasks/task.model';
-import {catchError, concatMap, first, switchMap} from 'rxjs/operators';
+import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
 import { SnackService } from '../../../../core/snack/snack.service';
-import {GitlabIssue, GitlabUser} from './gitlab-issue/gitlab-issue.model';
+import { GitlabIssue, GitlabUser } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { T } from '../../../../t.const';
 import { flatMap } from 'rxjs/internal/operators';
-import {IssueCacheService} from '../../cache/issue-cache.service';
-import {duration} from 'moment';
+import { IssueCacheService } from '../../cache/issue-cache.service';
+import { duration } from 'moment';
 
 @Injectable({
   providedIn: 'root',
@@ -63,7 +63,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
     const user = await this._issueCacheService.projectCache<GitlabUser>(task.projectId, 'GITLAB_USER', duration({days: 1}), () => {
-        return this._gitlabApiService.getCurrentUser$(cfg).toPromise();
+      return this._gitlabApiService.getCurrentUser$(cfg).toPromise();
     });
     const issueUpdate: number = new Date(issue.updated_at).getTime();
     const commentsByOthers = (user)

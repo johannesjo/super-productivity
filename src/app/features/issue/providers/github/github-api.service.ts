@@ -7,7 +7,7 @@ import { Observable, ObservableInput, of, throwError } from 'rxjs';
 import { GithubIssueSearchResult, GithubOriginalIssue } from './github-api-responses';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { mapGithubIssue, mapGithubIssueToSearchResult } from './github-issue/github-issue-map.util';
-import {GithubComment, GithubIssue, GithubIssueReduced, GithubUser} from './github-issue/github-issue.model';
+import { GithubComment, GithubIssue, GithubIssueReduced, GithubUser } from './github-issue/github-issue.model';
 import { SearchResultItem } from '../../issue.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';

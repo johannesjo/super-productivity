@@ -4,20 +4,20 @@ import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import {filter, first, map, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
+import { filter, first, map, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL } from '../gitlab.const';
 import { IssueService } from '../../../issue.service';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
 import { GitlabCfg } from '../gitlab';
 import { T } from 'src/app/t.const';
-import {TaskWithSubTasks} from '../../../../tasks/task.model';
+import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { WorkContextService } from '../../../../work-context/work-context.service';
-import {GitBasedIssueEffects} from '../../common/gitbased/git-based-issue.effect';
-import {GITLAB_TYPE} from '../../../issue.const';
-import {IssueCacheService} from '../../../cache/issue-cache.service';
-import {GitlabUser} from './gitlab-issue.model';
-import {duration} from 'moment';
+import { GitBasedIssueEffects } from '../../common/gitbased/git-based-issue.effect';
+import { GITLAB_TYPE } from '../../../issue.const';
+import { IssueCacheService } from '../../../cache/issue-cache.service';
+import { GitlabUser } from './gitlab-issue.model';
+import { duration } from 'moment';
 
 const isGitlabEnabled = (gitlabCfg: GitlabCfg): boolean => !!gitlabCfg && !!gitlabCfg.project;
 

@@ -4,7 +4,7 @@ import {
   GitlabOriginalMilestone,
   GitlabOriginalUser,
 } from '../gitlab-api/gitlab-api-responses';
-import {GitBasedIssue} from '../../common/gitbased/git-based-issue.model';
+import { GitBasedIssue } from '../../common/gitbased/git-based-issue.model';
 
 export type GitlabState = GitlabOriginalIssueState;
 export type GitlabUser = GitlabOriginalUser;

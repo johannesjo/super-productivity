@@ -1,13 +1,13 @@
-import {SnackService} from '../../../../../core/snack/snack.service';
-import {ProjectService} from '../../../../project/project.service';
-import {IssueService} from '../../../issue.service';
-import {TaskService} from '../../../../tasks/task.service';
-import {WorkContextService} from '../../../../work-context/work-context.service';
-import {IssueEffectHelperService} from '../../../issue-effect-helper.service';
-import {Project} from '../../../../project/project.model';
-import {Task} from '../../../../tasks/task.model';
-import {IssueProviderKey} from '../../../issue.model';
-import {GitBasedIssue, GitBasedUser} from './git-based-issue.model';
+import { SnackService } from '../../../../../core/snack/snack.service';
+import { ProjectService } from '../../../../project/project.service';
+import { IssueService } from '../../../issue.service';
+import { TaskService } from '../../../../tasks/task.service';
+import { WorkContextService } from '../../../../work-context/work-context.service';
+import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
+import { Project } from '../../../../project/project.model';
+import { Task } from '../../../../tasks/task.model';
+import { IssueProviderKey } from '../../../issue.model';
+import { GitBasedIssue, GitBasedUser } from './git-based-issue.model';
 
 export class GitBasedIssueEffects {
   constructor(

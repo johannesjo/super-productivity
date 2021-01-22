@@ -8,17 +8,17 @@ import { filter, first, map, switchMap, takeUntil, tap, withLatestFrom } from 'r
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from '../github.const';
-import { TaskWithSubTasks, Task } from 'src/app/features/tasks/task.model';
+import { Task, TaskWithSubTasks } from 'src/app/features/tasks/task.model';
 import { T } from '../../../../../t.const';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { GITHUB_TYPE } from '../../../issue.const';
 import { GithubCfg } from '../github.model';
 import { isGithubEnabled } from '../is-github-enabled.util';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
-import {GitBasedIssueEffects} from '../../common/gitbased/git-based-issue.effect';
-import {IssueCacheService} from '../../../cache/issue-cache.service';
-import {GithubUser} from './github-issue.model';
-import {duration} from 'moment';
+import { GitBasedIssueEffects } from '../../common/gitbased/git-based-issue.effect';
+import { IssueCacheService } from '../../../cache/issue-cache.service';
+import { GithubUser } from './github-issue.model';
+import { duration } from 'moment';
 
 @Injectable()
 export class GithubIssueEffects extends GitBasedIssueEffects {
