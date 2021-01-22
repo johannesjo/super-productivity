@@ -68,10 +68,10 @@
         "@typescript-eslint/no-shadow": "warn",
         "prefer-arrow/prefer-arrow-functions": "off",
         "@angular-eslint/directive-selector": [
-          "off",
+          "warn",
           {
             "type": "attribute",
-            "prefix": "app",
+            "prefix": "",
             "style": "camelCase"
           }
         ],
