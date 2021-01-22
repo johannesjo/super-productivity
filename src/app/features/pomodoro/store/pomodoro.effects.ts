@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask } from '../../tasks/store/task.actions';
-import { concatMap, filter, mapTo, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, mapTo, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import { PomodoroConfig } from '../../config/global-config.model';
 import {
@@ -18,13 +18,15 @@ import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
 import { EMPTY, Observable, of } from 'rxjs';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { IS_ELECTRON } from '../../../app.constants';
-import { IPC } from '../../../../../electron/ipc-events.const';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ElectronService } from '../../../core/electron/electron.service';
 import { ipcRenderer } from 'electron';
+import { IPC } from '../../../../../electron/ipc-events.const';
 
 const isEnabled = ([action, cfg, ...v]: any[] | any): boolean => !!cfg && !!cfg.isEnabled;
+
+// TODO isEnabled handling should be more efficient for every function here
 
 @Injectable()
 export class PomodoroEffects {
@@ -180,14 +182,15 @@ export class PomodoroEffects {
 
   @Effect({dispatch: false})
   setTaskBarIconProgress$: Observable<unknown> = IS_ELECTRON
-    ? this._pomodoroService.sessionProgress$.pipe(
-      withLatestFrom(this._pomodoroService.cfg$),
+    ? this._pomodoroService.isEnabled$.pipe(
+      filter(isEnabledI => isEnabledI),
+      switchMap(() => this._pomodoroService.sessionProgress$),
       // we display pomodoro progress for pomodoro
-      filter(([progress, cfg]: [number, PomodoroConfig]) => cfg && cfg.isEnabled),
-      tap(([progress, cfg]) => {
+      tap((progress) => {
         (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.SET_PROGRESS_BAR, {progress});
       }),
-    ) : EMPTY;
+    )
+    : EMPTY;
 
   constructor(
     private _pomodoroService: PomodoroService,
