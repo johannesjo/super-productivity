@@ -11,7 +11,6 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isSearchIssuesFromGitlab: false,
   isAutoPoll: false,
   isAutoAddToBacklog: false,
-  filterUsername: null,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -80,13 +79,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_AUTO_ADD_TO_BACKLOG
-    },
-  },
-  {
-    key: 'filterUsername',
-    type: 'input',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.FILTER_USER
     },
   },
 ];

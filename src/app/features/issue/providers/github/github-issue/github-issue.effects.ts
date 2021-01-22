@@ -8,17 +8,20 @@ import { filter, first, map, switchMap, takeUntil, tap, withLatestFrom } from 'r
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from '../github.const';
-import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
+import { TaskWithSubTasks, Task } from 'src/app/features/tasks/task.model';
 import { T } from '../../../../../t.const';
 import { WorkContextService } from '../../../../work-context/work-context.service';
 import { GITHUB_TYPE } from '../../../issue.const';
 import { GithubCfg } from '../github.model';
 import { isGithubEnabled } from '../is-github-enabled.util';
-import { GithubIssueReduced } from './github-issue.model';
 import { IssueEffectHelperService } from '../../../issue-effect-helper.service';
+import {GitBasedIssueEffects} from '../../common/gitbased/git-based-issue.effect';
+import {IssueCacheService} from '../../../cache/issue-cache.service';
+import {GithubUser} from './github-issue.model';
+import {duration} from 'moment';
 
 @Injectable()
-export class GithubIssueEffects {
+export class GithubIssueEffects extends GitBasedIssueEffects {
 
   private _pollTimer$: Observable<any> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
   @Effect({dispatch: false})
@@ -31,16 +34,23 @@ export class GithubIssueEffects {
         takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
         tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
         withLatestFrom(
+          this._projectService.getByIdLive$(pId),
+          this._issueCacheService.projectCache<GithubUser>(pId, 'GITHUB_USER', duration({days: 1}), () => {
+            return this._githubApiService.getCurrentUser$(githubCfg).toPromise();
+          }),
           this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-          this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE) as Promise<number[]>
+          this._taskService.getAllTaskByIssueTypeForProject$(pId, GITHUB_TYPE) as Promise<Task[]>
         ),
-        tap(([, issues, allTaskGithubIssueIds]: [any, GithubIssueReduced[], number[]]) => {
-          const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
-          console.log('issuesToAdd', issuesToAdd);
-          if (issuesToAdd?.length) {
-            this._importNewIssuesToBacklog(pId, issuesToAdd);
-          }
-        })
+        tap((x) => console.log('GITHUB_POLL_BACKLOG_FETCH', x)),
+        tap(([, project, user, issues, allTaskByType]) => this._exportChangesToBacklog(
+          project,
+          user,
+          issues,
+          allTaskByType,
+          GITHUB_TYPE,
+          T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
+          T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES)
+        )
       )),
     )),
   );
@@ -78,14 +88,16 @@ export class GithubIssueEffects {
     );
 
   constructor(
-    private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
+    readonly _issueCacheService: IssueCacheService,
+    readonly _snackService: SnackService,
+    readonly _projectService: ProjectService,
     private readonly _githubApiService: GithubApiService,
-    private readonly _issueService: IssueService,
-    private readonly _taskService: TaskService,
-    private readonly _workContextService: WorkContextService,
-    private readonly _issueEffectHelperService: IssueEffectHelperService,
+    readonly _issueService: IssueService,
+    readonly _taskService: TaskService,
+    readonly _workContextService: WorkContextService,
+    readonly _issueEffectHelperService: IssueEffectHelperService,
   ) {
+    super(_snackService, _projectService, _issueService, _taskService, _workContextService, _issueEffectHelperService);
   }
 
   private _refreshIssues(githubTasks: TaskWithSubTasks[]) {
@@ -99,28 +111,5 @@ export class GithubIssueEffects {
     }
   }
 
-  private _importNewIssuesToBacklog(projectId: string, issuesToAdd: GithubIssueReduced[]) {
-    issuesToAdd.forEach((issue) => {
-      this._issueService.addTaskWithIssue(GITHUB_TYPE, issue, projectId, true);
-    });
-
-    if (issuesToAdd.length === 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
-        },
-        msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
-      });
-    } else if (issuesToAdd.length > 1) {
-      this._snackService.open({
-        ico: 'cloud_download',
-        translateParams: {
-          issuesLength: issuesToAdd.length
-        },
-        msg: T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES,
-      });
-    }
-  }
 }
 

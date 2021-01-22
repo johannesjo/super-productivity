@@ -6,6 +6,10 @@ export const loadFromRealLs = (key: string): unknown => {
   return JSON.parse(serializedState);
 };
 
+export const removeFromRealLs = (key: string) => {
+  localStorage.removeItem(key);
+};
+
 export const saveToRealLs = (key: string, state: { [key: string]: unknown } | unknown[]) => {
   const serializedState = JSON.stringify(state);
   localStorage.setItem(key, serializedState);

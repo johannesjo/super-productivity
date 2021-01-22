@@ -1,52 +1,33 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { getCacheId } from './get-cache-id';
-import { tap } from 'rxjs/operators';
-import { loadFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
+import {Injectable} from '@angular/core';
+import {loadFromRealLs, removeFromRealLs, saveToRealLs} from '../../../core/persistence/local-storage';
+import {Duration} from 'moment';
+import * as moment from 'moment';
 
-export interface CacheItem {
-  r: any;
-  e: number;
+class CacheContent<T> {
+  constructor(
+    public expire: Date,
+    public content: T
+  ) {
+  }
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueCacheService {
-  cache(url: string, requestInit: RequestInit, orgMethod: any, orgArguments: any[], minAlive: number = 25000): Observable<any> {
-    const cacheId = getCacheId(requestInit, url);
-
-    if (this._isUseCache(cacheId) && requestInit.method === 'GET') {
-      return of(this._loadResponseFromCache(cacheId));
-    } else {
-      return orgMethod(...orgArguments).pipe(
-        tap((res) => {
-          this._saveToCache(cacheId, res, minAlive);
-        })
-      );
+  async projectCache<T>(pId: string, type: string, expire: Duration, fetch: () => Promise<T>): Promise<T> {
+    const key = `SUP_p_${type}_${pId}`;
+    let cachedContent: CacheContent<T> = loadFromRealLs(key) as CacheContent<T>;
+    if (!cachedContent || moment(cachedContent.expire).isBefore(moment())) {
+      cachedContent = new CacheContent<T>(moment().add(expire).toDate(), await fetch());
+      saveToRealLs(key, {...cachedContent});
     }
+    const realContent: T = cachedContent.content;
+    return realContent;
   }
 
-  private _saveToCache(cacheId: string, response: any, minAlive: number) {
-    const item = {
-      e: minAlive ? (Date.now() + minAlive) : null,
-      r: response,
-    };
-    saveToRealLs(cacheId, item);
+  async removeProjectCache(pId: string, type: string) {
+    const key = `SUP_p_${type}_${pId}`;
+    removeFromRealLs(key);
   }
-
-  private _loadResponseFromCache(cacheId: string) {
-    const cacheItem = loadFromRealLs(cacheId);
-    return cacheItem && cacheItem.r;
-  }
-
-  private _loadResponseItemFromCache(cacheId: string): CacheItem {
-    return loadFromRealLs(cacheId);
-  }
-
-  private _isUseCache(cacheId: string) {
-    const item = this._loadResponseItemFromCache(cacheId);
-    return item && (item.e > Date.now() || !navigator.onLine);
-  }
-
 }
