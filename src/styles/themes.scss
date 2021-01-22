@@ -1,9 +1,10 @@
 @import '~angular-material-css-vars/public-util';
 @import '~angular-material-css-vars/main';
 
-// INIT THEMING
-@include init-material-css-vars();
-
+$custom-typography: mat-typography-config(
+  $font-family: null,
+);
+@include init-material-css-vars($typography-config: $custom-typography);
 
 .bg-card {
   background: #fff;
