@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
+import {EMPTY, forkJoin, from, Observable, ObservableInput, of, throwError} from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
 import { GitlabCfg } from '../gitlab';
@@ -9,9 +9,12 @@ import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import { catchError, filter, map, mergeMap, take } from 'rxjs/operators';
-import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
+import {GitlabIssue, GitlabUser} from '../gitlab-issue/gitlab-issue.model';
 import { mapGitlabIssue, mapGitlabIssueToSearchResult } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
+import {GitlabProject} from '../gitlab-project/gitlab-project.model';
+import {duration} from 'moment';
+import {IssueCacheService} from '../../../cache/issue-cache.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,10 +22,18 @@ import { SearchResultItem } from '../../../issue.model';
 export class GitlabApiService {
   constructor(
     private _snackService: SnackService,
+    private _issueCacheService: IssueCacheService,
     private _http: HttpClient,
   ) {
   }
 
+  getCurrentUser$(cfg: GitlabCfg): Observable<GitlabUser> {
+    return this._sendRequest$({
+      url: `${this.apiLink(cfg)}user`
+    }, cfg)
+      .pipe(
+      );
+  }
   getProjectData$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
@@ -41,9 +52,24 @@ export class GitlabApiService {
     );
   }
 
+  getProjectInfo$(cfg: GitlabCfg): Observable<GitlabProject> {
+    return this._sendRequest$({
+      url: `${this.projectApiLink(cfg)}`
+    }, cfg).pipe(
+    );
+  }
+
+  getIssueLinkById$(projectId: string, issueId: number, cfg: GitlabCfg): Observable<string> {
+    return from(this._issueCacheService.projectCache(projectId, 'GITLAB_PROJECT', duration({days: 1}), () => {
+      return this.getProjectInfo$(cfg).toPromise();
+    })).pipe(
+      map( project => `${project.web_url}/issues/${issueId}`)
+    );
+  }
+
   getById$(id: number, cfg: GitlabCfg): Observable<GitlabIssue> {
     return this._sendRequest$({
-      url: `${this.apiLink(cfg)}/issues/${id}`
+      url: `${this.projectApiLink(cfg)}/issues/${id}`
     }, cfg).pipe(
       mergeMap(
         (issue: GitlabOriginalIssue) => {
@@ -62,7 +88,7 @@ export class GitlabApiService {
       }
     }
     return this._sendRequest$({
-      url: `${this.apiLink(cfg)}/issues?${queryParams}&per_page=100`
+      url: `${this.projectApiLink(cfg)}/issues?${queryParams}&per_page=100`
     }, cfg).pipe(
       map((issues: GitlabOriginalIssue[]) => {
         return issues ? issues.map(mapGitlabIssue) : [];
@@ -96,7 +122,7 @@ export class GitlabApiService {
       return EMPTY;
     }
     return this._sendRequest$({
-      url: `${this.apiLink(cfg)}/issues?search=${searchText}&order_by=updated_at`
+      url: `${this.projectApiLink(cfg)}/issues?search=${searchText}&order_by=updated_at`
     }, cfg).pipe(
       map((issues: GitlabOriginalIssue[]) => {
         return issues ? issues.map(mapGitlabIssue) : [];
@@ -119,7 +145,7 @@ export class GitlabApiService {
 
   private _getProjectIssues$(pageNumber: number, cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendRequest$({
-      url: `${this.apiLink(cfg)}/issues?state=opened&order_by=updated_at&per_page=100&page=${pageNumber}`
+      url: `${this.projectApiLink(cfg)}/issues?state=opened&order_by=updated_at&per_page=100&page=${pageNumber}`
     }, cfg).pipe(
       take(1),
       map((issues: GitlabOriginalIssue[]) => {
@@ -133,7 +159,7 @@ export class GitlabApiService {
       return EMPTY;
     }
     return this._sendRequest$({
-      url: `${this.apiLink(cfg)}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
+      url: `${this.projectApiLink(cfg)}/issues/${issueid}/notes?per_page=100&page=${pageNumber}`,
     }, cfg).pipe(
       map((comments: GitlabOriginalComment[]) => {
         return comments ? comments : [];
@@ -210,16 +236,21 @@ export class GitlabApiService {
     }
     return throwError({[HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.'});
   }
-
   private apiLink(projectConfig: GitlabCfg): string {
     let apiURL: string = '';
-    let projectURL: string = projectConfig.project ? projectConfig.project : '';
+
     if (projectConfig.gitlabBaseUrl != null) {
       const fixedUrl = projectConfig.gitlabBaseUrl.match(/.*\/$/) ? projectConfig.gitlabBaseUrl : `${projectConfig.gitlabBaseUrl}/`;
-      apiURL = fixedUrl + 'api/v4/projects/';
+      apiURL = fixedUrl + 'api/v4/';
     } else {
       apiURL = GITLAB_API_BASE_URL + '/';
     }
+    return apiURL;
+  }
+
+  private projectApiLink(projectConfig: GitlabCfg): string {
+    const apiURL = this.apiLink(projectConfig);
+    let projectURL: string = projectConfig.project ? projectConfig.project : '';
     const projectPath = projectURL.match(GITLAB_PROJECT_REGEX);
     if (projectPath) {
       projectURL = projectURL.replace(/\//ig, '%2F');
@@ -227,7 +258,9 @@ export class GitlabApiService {
       // Should never enter here
       throwError('Gitlab Project URL');
     }
-    apiURL += projectURL;
-    return apiURL;
+    if (projectURL.match(/^\/?projects\//gi)) {
+      projectURL = projectURL.replace(/^\/?projects\/(.*)/gi, '$1');
+    }
+    return `${apiURL}projects/${projectURL}`;
   }
 }
