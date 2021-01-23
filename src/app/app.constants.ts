@@ -15,6 +15,7 @@ import '@angular/common/locales/global/ko';
 import '@angular/common/locales/global/ru';
 import '@angular/common/locales/global/tr';
 import '@angular/common/locales/global/zh';
+import '@angular/common/locales/global/zh-Hant';
 import '@angular/common/locales/global/it';
 import '@angular/common/locales/global/pt';
 import '@angular/common/locales/global/nl';
@@ -49,6 +50,7 @@ export enum LanguageCode {
   ru = 'ru',
   tr = 'tr',
   zh = 'zh',
+  zh_tw = 'zh_tw',
   it = 'it',
   pt = 'pt',
   nl = 'nl',
@@ -71,6 +73,7 @@ export enum LanguageCodeMomentMap {
   nl = 'nl',
   nb = 'nb',
   zh = 'zh-cn',
+  zh_tw = 'zh-tw',
 }
 
 export enum BodyClass {
@@ -103,6 +106,7 @@ export enum HelperClasses {
 // and as english offers most likely the best experience, we use it as default
 export const AUTO_SWITCH_LNGS: LanguageCode[] = [
   LanguageCode.zh,
+  LanguageCode.zh_tw,
   LanguageCode.ar,
   LanguageCode.fa,
   LanguageCode.ja,

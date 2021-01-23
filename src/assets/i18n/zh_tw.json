@@ -1,0 +1,1158 @@
+{
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "忽略",
+      "INSTALL": "安裝",
+      "MSG": "您想將 Super Productivity 安裝為漸進式 WEB 程式嗎？"
+    },
+    "B_OFFLINE": "您已斷開與網際網路的連接。同步和數據請求將失效。",
+    "D_INITIAL": {
+      "TITLE": "歡迎使用 v{{nr}} 版"
+    },
+    "UPDATE_MAIN_MODEL": "Super Productivity 有了重大更新！您的數據需要進行一些遷移。請注意，這會使您的數據與該應用的舊版本不相容。",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "未選擇模型更新。請注意，如果您不想執行模型升級，則必須降級到上一版本。",
+    "UPDATE_WEB_APP": "新版本可用，是否載入新版本？"
+  },
+  "BL": {
+    "NO_TASKS": "目前您的待辦事項中沒有任務"
+  },
+  "CONFIRM": {
+    "AUTO_FIX": "您的數據似乎已損壞。您想嘗試自動修複它嗎？這可能會導致部分數據丟失。",
+    "DELETE_STRAY_BACKUP": "是否要刪除背面以避免看到此對話框？",
+    "RESTORE_FILE_BACKUP": "似乎沒有數據，但是\"{{dir}}\"處有可用的備份。您是否要從 {{from}}恢復最新備份？",
+    "RESTORE_STRAY_BACKUP": "在上次同步期間，可能有一些錯誤。您要還原上一個備份嗎？"
+  },
+  "DATETIME_INPUT": {
+    "IN": "在 {{time}}",
+    "TOMORROW": "明天 {{time}}"
+  },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "今天晚些時候",
+    "NEXT_WEEK": "下周",
+    "PLACEHOLDER": "請選擇一個日期",
+    "PRESS_ENTER_AGAIN": "再次按 Enter 保存",
+    "TOMORROW": "明天"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "添加附件",
+        "EDIT_ATTACHMENT": "編輯附件",
+        "LABELS": {
+          "FILE": "文件路徑",
+          "IMG": "圖片",
+          "LINK": "網址"
+        },
+        "SELECT_TYPE": "選擇一種類型",
+        "TYPES": {
+          "FILE": "文件（打開系統預設應用程式）",
+          "IMG": "圖像（顯示為縮略圖）",
+          "LINK": "連結（在瀏覽器中打開）"
+        }
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "ADD": "添加書籤",
+        "DROP": "點擊此處添加書籤",
+        "EDIT": "編輯書籤",
+        "NO_BOOKMARKS": "您沒有項目書籤。通過拖放或單擊\"圖標\"添加一個。"
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "添加書籤",
+        "EDIT_BOOKMARK": "編輯書籤",
+        "LABELS": {
+          "COMMAND": "命令",
+          "FILE": "文件路徑",
+          "IMG": "圖片",
+          "LINK": "網址"
+        },
+        "SELECT_ICON": "選擇一個圖標",
+        "SELECT_TYPE": "選擇一種類型",
+        "TYPES": {
+          "COMMAND": "命令（自定義shell命令）",
+          "FILE": "文件（打開系統預設應用程式）",
+          "IMG": "圖像（顯示為縮略圖）",
+          "LINK": "連結（在瀏覽器中打開）"
+        }
+      }
+    },
+    "CONFIG": {
+      "S": {
+        "UPDATE_SECTION": "已更新<strong>{{sectionKey}}</strong>的設置"
+      }
+    },
+    "DROPBOX": {
+      "S": {
+        "ACCESS_TOKEN_ERROR": "Dropbox：無法從身份驗證代碼生成訪問令牌",
+        "ACCESS_TOKEN_GENERATED": "Dropbox：根據驗證碼生成的訪問令牌",
+        "AUTH_ERROR": "Dropbox：提供了無效的訪問令牌",
+        "OFFLINE": "Dropbox：已離線，無法同步",
+        "SYNC_ERROR": "Dropbox：同步時出錯"
+      }
+    },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "為項目設置 GitHub"
+      },
+      "FORM": {
+        "FILTER_USER": "用戶名（請輸入您的用戶名）",
+        "IS_AUTO_ADD_TO_BACKLOG": "自動將 GitHub 未解決的 Issue 添加到待辦事項",
+        "IS_AUTO_POLL": "自動拉取導入的git Issue",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任務時，將 git 中的 Issue 顯示為建議",
+        "REPO": "GitHub：\"username / repositoryName\"",
+        "TOKEN": "訪問令牌",
+        "TOKEN_DESCRIPTION": "私有存儲庫訪問所需"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>您可以在此處配置 Super Productivity，以在日常計劃視圖的任務創建面板中列出特定存儲庫的打開 GitHub Issue。它們將被列為建議，並將提供該 Issue 的連結以及有關該 Issue 的更多信息。</p> <p>此外，您還可以自動將所有未解決的 Issue 添加並同步到任務待辦事項中。</p><p>您可以提供訪問Token以此獲得使用限制並進行訪問， <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>更多信息，請參見此處</a>。",
+        "TITLE": "GitHub"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "代理人 Assignee",
+        "AT": "在",
+        "DESCRIPTION": "描述",
+        "LABELS": "標籤",
+        "MARK_AS_CHECKED": "將更新標記為已選中",
+        "STATUS": "狀態",
+        "SUMMARY": "總結",
+        "WRITE_A_COMMENT": "評論"
+      },
+      "S": {
+        "ERR_NETWORK": "GitHub：由于客戶端網路錯誤，請求失敗",
+        "ERR_NOT_CONFIGURED": "GitHub：沒有正確配置",
+        "ERR_UNKNOWN": "GitHub：未知錯誤 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitHub：從git導入到待辦事項 {{issuesLength}} 個新 Issue ",
+        "IMPORTED_SINGLE_ISSUE": "GitHub：從git導入 Issue \"{{issueText}}\"到積壓待辦事項",
+        "ISSUE_DELETED_OR_CLOSED": "GitHub：Issue \"{{issueText}}\" 似乎在git上被刪除或關閉",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitHub：不需要更新",
+        "ISSUE_UPDATE": "GitHub：更新了\"{{issueText}}\"的數據",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub：更新了\"{{issueText}}\"的數據",
+        "MISSING_ISSUE_DATA": "GitHub：發現缺少 Issue 數據的任務。正在重新載入。",
+        "NEW_COMMENT": "GitHub：對\"{{issueText}}\"的新評論",
+        "POLLING": "GitHub：拉取 Issue 的變更",
+        "SHOW_ISSUE_BTN": "為我顯示"
+      }
+    },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "為項目設置 GitLab"
+      },
+      "FORM": {
+        "FILTER_USER": "用戶名（例如，自行過濾掉更改）",
+        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從 GitLab 添加到待辦事項",
+        "IS_AUTO_POLL": "自動拉取導入的 git 的 Issue 以進行更改",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任務時，將git中的 Issue 顯示為建議",
+        "PROJECT": "GitLab 完整路徑或用戶名/repo",
+        "TOKEN": "訪問令牌"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>在這裡，您可以配置 Super Productivity 在日常計劃視圖的任務創建面板中列出特定項目的打開的 GitLab Issue（線上版本或自託管實例）。它們將作為建議列出，並提供指向該 Issue 的連結以及有關此 Issue 的更多信息。</p> <p>此外，您可以自動將所有未解決的 Issue 添加並同步到待辦事項。</p>",
+        "TITLE": "GitLab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "代理人 Assignee",
+        "AT": "在",
+        "DESCRIPTION": "描述",
+        "LABELS": "標籤",
+        "MARK_AS_CHECKED": "將更新標記為已選中",
+        "STATUS": "狀態",
+        "SUMMARY": "總結",
+        "WRITE_A_COMMENT": "評論"
+      },
+      "S": {
+        "ERR_NETWORK": "GitLab：由于客戶端網路錯誤，請求失敗",
+        "ERR_NOT_CONFIGURED": "GitLab：沒有正確配置",
+        "ERR_UNKNOWN": "GitLab：未知錯誤 {{statusCode}} {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "GitLab：從git導入到待辦事項  {{issuesLength}} 個新 Issue ",
+        "IMPORTED_SINGLE_ISSUE": "GitLab：從git導入 Issue \"{{issueText}}\"到積壓",
+        "ISSUE_DELETED_OR_CLOSED": "GitLab： Issue \"{{issueText}}\"似乎在git上被刪除或關閉",
+        "ISSUE_NO_UPDATE_REQUIRED": "GitLab：不需要更新",
+        "ISSUE_UPDATE": "GitLab：更新了\"{{issueText}}\"的數據",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab：更新了\"{{issueText}}\"的數據",
+        "MISSING_ISSUE_DATA": "GitLab：發現缺少 Issue 數據的任務，重新載入。",
+        "NEW_COMMENT": "GitLab：對\"{{issueText}}\"的新評論",
+        "POLLING": "GitLab：自動拉取 Issue 的變化",
+        "SHOW_ISSUE_BTN": "為我顯示"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi：無法驗證，請嘗試重新登錄！"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive：找不到名稱為<strong>\"{{fileName}}\"</strong> 的文件。是否在Google Drive 上將其創建為同步文件？",
+        "USE_EXISTING_SYNC_FILE": "Google Drive：使用</strong>現有</strong>文件 \"{{fileName}}\" 作為同步文件？如果沒有，請更改同步文件名。"
+      },
+      "S": {
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名為\"{{newFileName}}\"的多個文件。請進保留一個文件或選擇其他名稱。",
+        "SYNC_FILE_CREATION_ERROR": "Google雲端硬碟：創建同步文件時出錯。 {{err}}",
+        "UPDATED_SYNC_FILE_NAME": "Google雲端硬碟：更新的同步文件名"
+      },
+      "S_API": {
+        "ERR": "GoogleApi錯誤： {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi：未指定文件ID",
+        "ERR_NO_FILE_NAME": "GoogleApi：未指定文件名",
+        "SUCCESS_LOGIN": "GoogleApi：登錄成功"
+      }
+    },
+    "JIRA": {
+      "BANNER": {
+        "BLOCK_ACCESS_MSG": "Jira：為了防止api被拒絕，Super Productivity阻止了訪問。您可能應該檢查您的Jira設置！",
+        "BLOCK_ACCESS_UNBLOCK": "解除封鎖"
+      },
+      "CFG_CMP": {
+        "ALWAYS_ASK": "始終打開對話框",
+        "DONE": "已完成任務的狀態",
+        "DO_NOT": "禁用轉換",
+        "ENABLE": "啟用Jira",
+        "ENABLE_TRANSITIONS": "啟用過渡處理",
+        "IN_PROGRESS": "啟動任務的狀態",
+        "LOAD_SUGGESTIONS": "載入建議",
+        "MAP_CUSTOM_FIELDS": "映射自定義欄位",
+        "MAP_CUSTOM_FIELDS_INFO": "不幸的是，Jira的一些數據保存在自定義欄位下，每個安裝實例都有不同的欄位。如果要包含此數據，則需要為其選擇適當的自定義欄位。",
+        "OPEN": "已暫停任務的狀態",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "選擇 Issue 以載入可用的轉換",
+        "STORY_POINTS": "故事點"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "MSG": "<strong>{{summary}}</strong 目前已分配給 <strong>{{assignee}}</strong>。你想把它分配給自己嗎？",
+        "OK": "做吧！"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "為項目設置Jira"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "選擇要分配的狀態",
+        "CURRENT_ASSIGNEE": "現任 Assignee 受理人：",
+        "CURRENT_STATUS": "當前狀態：",
+        "TITLE": "Jira：更新狀態",
+        "UPDATE_STATUS": "更新狀態"
+      },
+      "DIALOG_WORKLOG": {
+        "CURRENTLY_LOGGED": "目前記錄的時間：",
+        "INVALID_DATE": "輸入的值不是日期！",
+        "SAVE_WORKLOG": "保存工作日誌",
+        "STARTED": "已開始入門",
+        "SUBMIT_WORKLOG_FOR": "將工作日誌提交給Jira",
+        "TIME_SPENT": "所花費的時間",
+        "TITLE": "Jira：提交工作日誌Worklog"
+      },
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "自動將未解決的 Issue 從GitHub添加到待辦事項",
+        "IS_AUTO_POLL": "自動拉取導入的git Issue 進行的更改",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任務時，將git中的Issue顯示為建議",
+        "REPO": "您要跟蹤的git存儲庫的\"username / repositoryName\""
+      },
+      "FORM_ADV": {
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用于自動向待辦事項添加任務",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任務完成後，打開對話框將工作日誌提交給Jira",
+        "IS_AUTO_ADD_TO_BACKLOG": "自動向Jira待辦事項添加 Issue ",
+        "IS_AUTO_POLL_TICKETS": "自動檢查導入的 Issue 以進行更改並通知",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "檢查當前處理的 Issue 是否已分配給當前用戶",
+        "IS_WORKLOG_ENABLED": "打開對話框，在任務完成時將工作日誌提交給jira",
+        "SEARCH_JQL_QUERY": "JQL Query用于限制搜索器任務"
+      },
+      "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "允許自簽名證書",
+        "HOST": "主機地址（例如：http://my-host.de:1234）",
+        "PASSWORD": "令牌/密碼",
+        "USER_NAME": "電子郵件/用戶名",
+        "WONKY_COOKIE_MODE": "Wonky Cookie後備身份驗證（僅桌面應用程式）"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "高級配置",
+        "CREDENTIALS": "證書",
+        "HELP_ARR": {
+          "H1": "基本配置",
+          "H2": "工作日誌設置",
+          "H3": "預設轉換",
+          "P1_1": "如果由于某種原因無法生成登錄名，請提供登錄名（可在您的個人資料頁面上找到）和<a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\"> API令牌</a>或密碼。請注意，較新版本的jira有時只能使用令牌。",
+          "P1_2": "您還需要指定一個JQL查詢，該查詢用于從Jira添加任務的建議。如果您需要幫助，請查看此連結 <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>。",
+          "P1_3": "如果要自動配置（例如，每次訪問計劃視圖時），還可以配置將自定義JQL查詢指定的所有新任務添加到待辦事項。",
+          "P1_4": "另一個選項是\"檢查當前票證是否分配給當前用戶\"。如果啟用並且您正在啟動，那麼如果您當前已在Jira上分配了該票證，則會進行檢查，如果沒有出現可以選擇將票證分配給您自己的對話框。",
+          "P2_1": "有幾個選項可以確定您何時以及如何提交工作日誌。啟用<em>'打開工作日誌對話框，在任務完成時向Jira添加工作日誌'</em>打開一個對話框，每次將Jira任務標記為已完成時添加工作日誌。所以請記住，工作日誌將添加到目前為止所跟蹤的所有內容之上。因此，如果您將任務標記為第二次完成，則可能不希望再次為該任務提交完整的工作時間。",
+          "P2_2": "<em>當子任務完成時打開工作日誌對話框而不是子任務本身的任務'</em>每次將Jira Issue 的子任務標記為已完成時打開工作日誌對話框。因為您已經通過子任務跟蹤了時間，所以一旦將Jira任務標記為已完成，就不會打開任何對話框。",
+          "P2_3": "<em>'在沒有對話框的情況下自動向工作日誌發送更新'</em>完成了它所說的內容。由于將任務標記為已完成多次會導致整個工作時間被跟蹤兩次，因此不建議這樣做。",
+          "P3_1": "在這裡，您可以重新配置預設轉換。 Jira支持廣泛的轉換配置，通常會在Jira Agile板上的不同列中生效，我們無法對轉換任務的位置和時間做出假設，您需要手動設置它。"
+        }
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "代理人 Assignee",
+        "AT": "在",
+        "ATTACHMENTS": "附件",
+        "CHANGED": "變化",
+        "COMMENTS": "評論",
+        "COMPONENTS": "組件",
+        "DESCRIPTION": "描述",
+        "LIST_OF_CHANGES": "變更清單",
+        "MARK_AS_CHECKED": "將更新標記為已選中",
+        "ON": "上",
+        "STATUS": "狀態",
+        "STORY_POINTS": "故事點",
+        "SUMMARY": "摘要",
+        "WORKLOG": "工作日誌",
+        "WRITE_A_COMMENT": "評論"
+      },
+      "S": {
+        "ADDED_WORKLOG_FOR": "Jira：為 {{issueKey}}添加了工作日誌",
+        "EXTENSION_NOT_LOADED": "Super Productivity擴展未載入。重新載入頁面可能會有所幫助",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira：從jira導入到待辦事項 {{issuesLength}} 個新 Issue",
+        "IMPORTED_SINGLE_ISSUE": "Jira：從jira導入 Issue e\"{{issueText}}\"到積壓",
+        "INSUFFICIENT_SETTINGS": "為Jira提供的設置不足",
+        "ISSUE_NO_UPDATE_REQUIRED": "Jira：\"{{issueText}}\"已經是最新的",
+        "ISSUE_UPDATE": "Jira：更新了\"{{issueText}}\"的數據",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira：更新了\"{{issueText}}\"的數據",
+        "MISSING_ISSUE_DATA": "Jira：發現缺少Issue數據的任務，重新載入。",
+        "NO_AUTO_IMPORT_JQL": "Jira：沒有為自動導入定義搜索查詢",
+        "NO_VALID_TRANSITION": "Jira：未配置有效轉換",
+        "POLLING": "Jira：自動拉取Issue的變化",
+        "TIMED_OUT": "Jira：請求超時",
+        "TRANSITION": "Jira：將 Issue \"{{issueKey}}\"設置為\"{{name}}\"",
+        "TRANSITIONS_LOADED": "Jira：載入過渡。使用下麵的選項分配它們",
+        "TRANSITION_SUCCESS": "Jira：將 Issue  {{issueKey}} 設置為<strong>{{chosenTransition}}</strong>",
+        "UNABLE_TO_REASSIGN": "Jira：無法為自己重新分配票證，因為您沒有指定用戶名。請訪問設置。"
+      },
+      "STEPPER": {
+        "CREDENTIALS": "證書",
+        "DONE": "你現在完成了。",
+        "LOGIN_SUCCESS": "登陸成功！",
+        "TEST_CREDENTIALS": "測試證書",
+        "WELCOME_USER": "歡迎 {{user}}！"
+      }
+    },
+    "METRIC": {
+      "BANNER": {
+        "CHECK": "已完成！"
+      },
+      "CMP": {
+        "AVG_BREAKS_PER_DAY": "平均休息次數",
+        "AVG_TASKS_PER_DAY_WORKED": "平均完成任務數",
+        "AVG_TIME_SPENT_ON_BREAKS": "平均休息時間",
+        "AVG_TIME_SPENT_PER_DAY": "平均花費時間",
+        "AVG_TIME_SPENT_PER_TASK": "平均任務花費時間",
+        "COUNTING_SUBTASKS": "（計算子任務）",
+        "DAYS_WORKED": "持續天數",
+        "IMPROVEMENT_SELECTION_COUNT": "選擇積極因數的次數",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "情緒和效率的時間變化",
+        "NO_ADDITIONAL_DATA_YET": "尚未收集其他數據，完成每日任務後通過添加\"評估\"來執行此操作。",
+        "OBSTRUCTION_SELECTION_COUNT": "選擇消極因數的次數",
+        "TASKS_DONE_CREATED": "任務數目（完成/創建）",
+        "TIME_ESTIMATED": "估計時間",
+        "TIME_SPENT": "花費時間"
+      },
+      "EVAL_FORM": {
+        "ADD_NOTE_FOR_TOMORROW": "為明天添加建議",
+        "DISABLE_REPEAT_EVERY_DAY": "禁用每日重複",
+        "ENABLE_REPEAT_EVERY_DAY": "每天重複",
+        "HELP_H1": "我為什麼要在乎？",
+        "HELP_LINK_TXT": "轉到指標部分",
+        "HELP_P1": "花時間進行自我評估！此處的答案已保存，併為您提供有關如何在指標部分工作的一些統計信息。此外，對明天的建議將在第二天出現在您的任務列表上方。",
+        "HELP_P2": "這不僅僅是為了計算精確的指標，或是提高效率，而是為了改善您對工作的看法。評估日常生活中的自己的不足可能會對進步有所幫助。對它的清晰認識有助于更好地掌握這些並改善你的能力。",
+        "IMPROVEMENTS": "什麼提高了你的效率生產力？",
+        "IMPROVEMENTS_TOMORROW": "你能做些什麼來讓明天更高效？",
+        "MOOD": "你覺得怎麼樣？",
+        "MOOD_HINT": "1：太可怕了 -  10：太棒了",
+        "NOTES": "明天的注意事項",
+        "OBSTRUCTIONS": "是什麼阻礙了你的生產力？",
+        "PRODUCTIVITY": "你的工作效率如何？",
+        "PRODUCTIVITY_HINT": "1：幾乎未開始工作 -  10：非常有效率"
+      },
+      "S": {
+        "SAVE_METRIC": "評估已保存"
+      }
+    },
+    "NOTE": {
+      "ADD_REMINDER": "添加提醒",
+      "D_ADD": {
+        "DATETIME_LABEL": "提醒日期時間（可選）",
+        "NOTE_LABEL": "請輸入提醒的內容..."
+      },
+      "D_ADD_REMINDER": {
+        "E_ENTER_TITLE": "請輸入標題",
+        "L_DATETIME": "提醒的日期時間",
+        "L_TITLE": "提醒的標題"
+      },
+      "D_VIEW_REMINDER": {
+        "SNOOZE": "暫停",
+        "TITLE": "注意"
+      },
+      "EDIT_FULLSCREEN": "全屏編輯",
+      "EDIT_REMINDER": "編輯提醒",
+      "NOTES_CMP": {
+        "ADD_BTN": "添加新筆記",
+        "DROP_TO_ADD": "拖動到此處以添加新筆記"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "禁用 Markdown",
+        "ENABLE_PARSE": "啟用 Markdown"
+      },
+      "REMOVE_REMINDER": "刪除提醒",
+      "S": {
+        "ADDED_REMINDER": "添加提醒筆記備註",
+        "DELETED_REMINDER": "已刪除筆記提醒",
+        "UPDATED_REMINDER": "更新了筆記的提醒"
+      },
+      "UPDATE_REMINDER": "更新提醒"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "繼續加油！",
+      "BREAK_IS_DONE": "休息已完成！",
+      "ENJOY_YOURSELF": "放鬆一會再繼續吧！",
+      "FINISH_SESSION_X": "您已成功完成會話 {{nr}}！",
+      "NOTIFICATION": {
+        "BREAK_X_START": "番茄鐘：休息 {{nr}} 開始了！",
+        "SESSION_X_START": "番茄鐘：會話 {{nr}} 開始了！"
+      },
+      "S": {
+        "SESSION_X_START": "番茄鐘：會話 {{nr}} 開始了！"
+      },
+      "SKIP_BREAK": "跳過休息"
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "繼續加油！",
+      "COMP": {
+        "INTRO": "適當的放鬆是一種不錯的方式，這樣可以提高你的自我體驗並且獲得良好的情緒，剋服拖延。做點運動放鬆下吧！",
+        "L1": "做點伸展運動放鬆一下吧，這會讓你變得平靜",
+        "L2": "傾聽你自己的內心",
+        "L3": "你是否以回應朋友的方式回應自己的想法？",
+        "L4": "如果答案是否定的，那就想象一下你朋友的情況。你會對他們說什麼？你會為他們做什麼？",
+        "OUTRO": "可以在<a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">此處</a>或<a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>找到更多練習 。",
+        "TITLE": "自我認可"
+      },
+      "CUR": {
+        "INTRO": "拖延會帶來短暫的快感，但是這樣不符合長期利益。",
+        "L1": "拖延給你的帶來怎樣的感受？",
+        "L2": "你是如何感受到拖延的快感？",
+        "L3": "拖延讓你想起了什麼？",
+        "L4": "當你發現自己的拖延時，這個念頭會發生什麼變化？加劇？減弱？導致其他情緒出現？",
+        "L5": "當你繼續保持對它們的認識時，你身體的感覺如何變化？",
+        "TITLE": "好奇心"
+      },
+      "H1": "減少鬆懈！",
+      "P1": "首先放鬆一下！每個人都會偶爾懈怠。如果你脫離了計劃，你至少應該享受這段時間！然後再繼續去做有意義的事情。",
+      "P2": "如果你想瞭解更多有關背後的科學知識，我可以推薦 <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">這篇文章</a>，其中有一些練習。",
+      "P3": "記住：拖延是一種情緒調節問題，而不是時間管理問題。",
+      "REFRAME": {
+        "INTRO": "考慮一下這個任務的積極意義（儘管存在一些消極的點）。",
+        "TITLE": "重新規劃",
+        "TL1": "它存在哪些吸引人的特點？",
+        "TL2": "如果你完成它會得到什麼？",
+        "TL3": "如果你完成它，你的感受會如何？"
+      },
+      "SPLIT_UP": {
+        "INTRO": "將任務分成儘可能多的小塊。",
+        "OUTRO": "完成了嗎？然後考慮一下。<i>如果</i>你開始從事這項任務，你會做的第一件事？考慮一下...",
+        "TITLE": "分割任務吧！"
+      }
+    },
+    "PROJECT": {
+      "D_CREATE": {
+        "CREATE": "創建項目",
+        "EDIT": "編輯項目",
+        "SETUP_GIT": "關聯 GitHub",
+        "SETUP_GITLAB": "關聯 GitLab",
+        "SETUP_JIRA": "關聯 Jira"
+      },
+      "FORM_BASIC": {
+        "L_TITLE": "項目名",
+        "TITLE": "基本設置"
+      },
+      "FORM_THEME": {
+        "D_IS_DARK_THEME": "如果系統支持全局暗模式，則不會使用。",
+        "HELP": "項目主題設置。",
+        "L_BACKGROUND_IMAGE_DARK": "背景圖片網址（深色主題）",
+        "L_BACKGROUND_IMAGE_LIGHT": "背景圖片網址（淺色主題）",
+        "L_COLOR_ACCENT": "強調色",
+        "L_COLOR_PRIMARY": "主體色",
+        "L_COLOR_WARN": "警告/錯誤顏色",
+        "L_HUE_ACCENT": "強調顏色背景上的暗文本的閾值",
+        "L_HUE_PRIMARY": "原色背景上的暗文本閾值",
+        "L_HUE_WARN": "警告顏色背景上的黑暗文本的閾值",
+        "L_IS_AUTO_CONTRAST": "自動設置文本顏色以獲得最佳可讀性",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "禁用彩色背景漸變",
+        "L_IS_REDUCED_THEME": "使用縮減的UI（任務周圍沒有框）",
+        "L_THEME_COLOR": "主題色",
+        "L_TITLE": "標題",
+        "TITLE": "主題"
+      },
+      "S": {
+        "ARCHIVED": "存檔項目",
+        "CREATED": "創建項目 <strong>{{title}}</strong>。您可以從左上角的菜單中選擇它。",
+        "DELETED": "刪除項目",
+        "E_EXISTS": "項目\"{{title}}\"已存在",
+        "E_INVALID_FILE": "項目文件的數據無效",
+        "ISSUE_PROVIDER_UPDATED": "更新了 <strong>{{issueProviderKey}}</strong>的項目設置",
+        "UNARCHIVED": "未歸檔的項目",
+        "UPDATED": "更新了項目設置"
+      }
+    },
+    "REMINDER": {
+      "S_REMINDER_ERR": "提醒界面出錯"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "刪除一個簡單的計數器，也會刪除所有過去跟蹤的數據。您確定要繼續嗎？",
+        "OK": "做吧！"
+      },
+      "D_EDIT": {
+        "L_COUNTER": "計數",
+        "TITLE": "編輯簡單計數器"
+      },
+      "FORM": {
+        "ADD_NEW": "添加簡單的計數器",
+        "HELP": "您可以在此處配置簡單的按鈕，這些按鈕將顯示在右上方。通過單擊它們，它們可以是計時器，也可以是簡單的計數器。",
+        "L_AUTO_COUNT_UP": "自動觸發計數",
+        "L_AUTO_SWITCH_OFF": "自動觸發關閉",
+        "L_AUTO_SWITCH_ON": "自動觸發開關打開",
+        "L_ICON": "圖標",
+        "L_ICON_ON": "切換後的圖標",
+        "L_IS_ENABLED": "啟用",
+        "L_TITLE": "標題",
+        "L_TYPE": "類型",
+        "TITLE": "簡單計數器",
+        "TYPE_CLICK_COUNTER": "點擊計數器",
+        "TYPE_STOPWATCH": "跑表"
+      }
+    },
+    "SYNC": {
+      "C": {
+        "EMPTY_SYNC": "您正在嘗試同步一個空的數據對象。這是您（幾乎）原始應用程式的第一次同步嗎？",
+        "FORCE_IMPORT": "反正導入遠程數據？",
+        "FORCE_UPLOAD": "仍要上傳本地數據嗎？",
+        "FORCE_UPLOAD_AFTER_ERROR": "上傳本地數據時發生錯誤。嘗試強制更新？",
+        "NO_REMOTE_DATA": "找不到遠程數據。本地上傳到遠程嗎？",
+        "TRY_LOAD_REMOTE_AGAIN": "嘗試再次從遠程重新載入數據？"
+      },
+      "D_CONFLICT": {
+        "LAST_CHANGE": "最後一次變更：",
+        "LAST_SYNC": "上次同步：",
+        "LOCAL": "本地",
+        "LOCAL_REMOTE": "本地->遠程",
+        "REMOTE": "遠程",
+        "TEXT": "<p>從Dropbox更新。本地和遠程數據似乎都被修改。</p>",
+        "TITLE": "Dropbox：衝突數據",
+        "USE_LOCAL": "使用本地",
+        "USE_REMOTE": "使用遙控器"
+      },
+      "FORM": {
+        "DROPBOX": {
+          "B_GENERATE_TOKEN": "生成令牌",
+          "FOLLOW_LINK": "請打開以下連結，並將提供的身份驗證代碼複製到輸入欄位中。",
+          "L_ACCESS_TOKEN": "訪問令牌（從身份驗證代碼生成）",
+          "L_AUTH_CODE": "授權碼"
+        },
+        "GOOGLE": {
+          "L_IS_COMPRESS_DATA": "壓縮數據",
+          "L_SYNC_FILE_NAME": "同步文件名"
+        },
+        "L_ENABLE_SYNCING": "啟用同步",
+        "L_SYNC_INTERVAL": "同步間隔",
+        "L_SYNC_PROVIDER": "同步提供者",
+        "TITLE": "同步",
+        "WEB_DAV": {
+          "CORS_INFO": "<p><strong>實驗！！</strong>為了<strong>完成這項工作，您需要為Nextcloud實例禁用或限制CORS</strong>，這可能會對安全性造成負面影響！請<a href='https://github.com/nextcloud/server/issues/3131'>參考該Issue</a>以獲取更多信息。使此功能在移動設備上起作用的一種方法是通過nextcloud應用程序<a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a> 將 \"https://app.super-roductivity.com\"列入白名單使用風險自負！",
+          "L_BASE_URL": "基本網址",
+          "L_PASSWORD": "密碼",
+          "L_SYNC_FILE_PATH": "同步文件路徑",
+          "L_USER_NAME": "用戶名"
+        }
+      },
+      "S": {
+        "ERROR_FALLBACK_TO_BACKUP": "導入數據時出錯了。回到本地備份。",
+        "ERROR_INVALID_DATA": "同步時出錯。無效數據",
+        "IMPORTING": "導入數據",
+        "SUCCESS": "數據已導入",
+        "UNKNOWN_ERROR": "同步時發生未知錯誤：{{err}}",
+        "UPLOAD_ERROR": "未知的上傳錯誤（設置正確嗎？）： {{err}}"
+      }
+    },
+    "TAG": {
+      "D_CREATE": {
+        "CREATE": "創建標籤",
+        "EDIT": "編輯標籤"
+      },
+      "D_DELETE": {
+        "CONFIRM_MSG": "您是否真的要刪除標籤 \"{{tagName}}\"？它將從所有任務中刪除。這不能被撤消。"
+      },
+      "D_EDIT": {
+        "ADD": "為\"{{title}}\"添加標籤",
+        "EDIT": "編輯\"{{title}}\"的標籤",
+        "LABEL": "標籤"
+      },
+      "FORM_BASIC": {
+        "L_COLOR": "顏色（預設使用主體色）",
+        "L_ICON": "圖標",
+        "L_TITLE": "標籤名稱",
+        "TITLE": "基本設置"
+      },
+      "S": {
+        "UPDATED": "標籤設置已更新"
+      }
+    },
+    "TASK": {
+      "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "添加附件",
+        "ADD_SUB_TASK": "添加子任務",
+        "ATTACHMENTS": "附件 {{nr}}",
+        "FROM_PARENT": "（來自父任務）",
+        "LOCAL_ATTACHMENTS": "本地附件",
+        "NOTES": "筆記",
+        "PARENT": "親",
+        "REMINDER": "提醒",
+        "REPEAT": "重複",
+        "SCHEDULE_TASK": "安排任務",
+        "SUB_TASKS": "子任務（{{nr}}）",
+        "TIME": "時間"
+      },
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "添加現有任務\"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "從 {{issueType}}添加問題#{{issueNr}} ",
+        "ADD_TASK": "添加任務",
+        "ADD_TASK_TO_BACKLOG": "將任務添加到待辦事項中",
+        "CREATE_TASK": "創建新任務",
+        "EXAMPLE": "示例：\"某些任務標題+ projectName #一些標籤 #一些其他標籤10m/3h\"",
+        "START": "再次按回車鍵開始"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "增加半小時",
+        "ESTIMATE_EXCEEDED": "已超過\"{{title}}\"的時間估計"
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "添加子任務",
+        "ADD_TO_MY_DAY": "添加到我的一天",
+        "ADD_TO_PROJECT": "添加到項目",
+        "CONVERT_TO_PARENT_TASK": "轉換為父任務",
+        "DELETE": "刪除任務",
+        "DROP_ATTACHMENT": "放在此處以附加到\"{{title}}\"",
+        "EDIT_REMINDER": "編輯提醒",
+        "EDIT_TAGS": "編輯標籤",
+        "MARK_DONE": "標為已完成",
+        "MARK_UNDONE": "標記為撤消",
+        "MOVE_TO_BACKLOG": "轉到待辦事項",
+        "MOVE_TO_OTHER_PROJECT": "轉到其他項目",
+        "MOVE_TO_TODAY": "轉到今天的列表",
+        "OPEN_ATTACH": "附加文件或連結",
+        "OPEN_ISSUE": "在新的瀏覽器選項卡中打開 Issue ",
+        "OPEN_TIME": "估計時間/增加花費的已用時間",
+        "REMOVE_FROM_MY_DAY": "從我的一天中刪除",
+        "REPEAT_EDIT": "編輯重複任務",
+        "SCHEDULE": "安排任務",
+        "SHOW_UPDATES": "顯示更新",
+        "TOGGLE_ADDITIONAL": "顯示/隱藏其他信息",
+        "TOGGLE_ATTACHMENTS": "顯示/隱藏附件",
+        "TOGGLE_DONE": "標記為已完成/未完成",
+        "TOGGLE_SUB_TASK_VISIBILITY": "切換子任務可見性",
+        "TRACK_TIME": "開始跟蹤時間",
+        "TRACK_TIME_STOP": "暫停跟蹤時間",
+        "UPDATE_ISSUE_DATA": "更新 Issue 數據"
+      },
+      "D_REMINDER_ADD": {
+        "DATETIME_FOR": "提醒的日期時間",
+        "EDIT": "編輯提醒",
+        "MOVE_TO_BACKLOG": "在計劃時間到來後將任務移至待辦事項",
+        "SCHEDULE": "計劃時間",
+        "UNSCHEDULE": "取消計劃"
+      },
+      "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "全部添加到今天",
+        "ADD_TO_TODAY": "添加到今天",
+        "DISMISS": "取消提醒",
+        "DISMISS_ALL": "關閉所有",
+        "DUE_TASK": "到期任務",
+        "DUE_TASKS": "到期任務",
+        "FOR_CURRENT": "任務到期了，你想開始工作嗎？",
+        "FOR_OTHER": "任務到期了。你想開始工作嗎？",
+        "FROM_PROJECT": "來自項目",
+        "FROM_TAG": "來自標籤：\"{{title}}\"",
+        "SNOOZE": "暫停",
+        "SNOOZE_ALL": "全部暫停",
+        "SNOOZE_UNTIL_TOMORROW": "明天重新開始",
+        "START": "開始任務",
+        "SWITCH_CONTEXT_START": "切換內容上下文並開始"
+      },
+      "D_TIME": {
+        "ADD_FOR_OTHER_DAY": "添加已花費的時間",
+        "DELETE_FOR": "刪除當天的條目",
+        "ESTIMATE": "估計",
+        "TIME_SPENT": "已花費的時間",
+        "TIME_SPENT_ON": "{{date}} 已花費的時間",
+        "TITLE": "已花費的時間/估計"
+      },
+      "D_TIME_FOR_DAY": {
+        "ADD_ENTRY_FOR": "為 {{date}}添加新條目",
+        "DATE": "新條目的日期",
+        "HELP": "範例：<br>30m => 30分鐘<br><br> 2h => 2小時<br><br> 2h 30m => 2小時30分鐘",
+        "TINE_SPENT": "所花費的時間",
+        "TITLE": "添加今天任務"
+      },
+      "N": {
+        "ESTIMATE_EXCEEDED": "超出預估時間！",
+        "ESTIMATE_EXCEEDED_BODY": "您超出了\"{{title}}\"的預計時間。"
+      },
+      "S": {
+        "DELETED": "已刪除任務\"{{title}}\"",
+        "FOUND_MOVE_FROM_BACKLOG": "將任務<strong>{{title}}</strong>移至今日任務列表",
+        "FOUND_MOVE_FROM_OTHER_LIST": "已將任務<strong>{{title}}</strong>從<strong>{{contextTitle}}</strong>添加到當前列表",
+        "FOUND_RESTORE_FROM_ARCHIVE": "已恢復的任務<strong>{{title}}</strong>與存檔 Issue 相關",
+        "LAST_TAG_DELETION_WARNING": "您正在嘗試刪除非項目任務的最後一個標籤。這是不允許的！",
+        "REMINDER_ADDED": "已計劃任務\"{{title}}\"",
+        "REMINDER_DELETED": "已刪除任務提醒",
+        "REMINDER_UPDATED": "更新了任務\"{{title}}\"的提醒",
+        "TASK_CREATED": "已創建任務\"{{title}}\""
+      },
+      "SELECT_OR_CREATE": "選擇或創建任務",
+      "SUMMARY_TABLE": {
+        "ESTIMATE": "估計",
+        "SPENT_TODAY": "今天用時",
+        "SPENT_TOTAL": "總計用時",
+        "TASK": "任務",
+        "TOGGLE_DONE": "取消標記/標記為已完成"
+      }
+    },
+    "TASK_REPEAT": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "刪除重複配置會將此任務的所有先前實例轉換為常規任務，是否繼續？",
+        "OK": "完全刪除"
+      },
+      "D_EDIT": {
+        "ADD": "添加重複任務配置",
+        "EDIT": "編輯重複任務配置",
+        "HELP1": "重複任務適用于日常瑣事，例如：\"每日會議\"，\"代碼審查\"，\"檢查電子郵件\"或可能一次又一次發生的類似任務。",
+        "HELP2": "配置完成後，一旦打開項目，將在選擇的每一天重新創建重複任務，併在一天結束時自動標記為已完成。它們將作為不同的實例處理。所以你可以自由添加子任務等。",
+        "HELP3": "從Jira或Git Issue 導入的任務不能重複。所有提醒也將在重複任務中刪除。",
+        "TAG_LABEL": "要添加的標籤"
+      },
+      "F": {
+        "DEFAULT_ESTIMATE": "預設預估用時",
+        "FRIDAY": "星期️五",
+        "IS_ADD_TO_BOTTOM": "將任務移到列表底部",
+        "MONDAY": "星期一",
+        "SATURDAY": "星期️六",
+        "SUNDAY": "星期️日",
+        "THURSDAY": "星期️四",
+        "TITLE": "任務標題",
+        "TUESDAY": "星期二",
+        "WEDNESDAY": "星期三"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "已完成",
+        "SNOOZE": "暫停 {{time}}"
+      },
+      "B_TTR": {
+        "ADD_TO_TASK": "添加到任務",
+        "MSG": "您尚未跟蹤 {{time}}的時間"
+      },
+      "D_IDLE": {
+        "BREAK": "休息",
+        "CREATE_AND_TRACK": "創建 並跟蹤到：",
+        "IDLE_FOR": "你一直未開始工作：",
+        "SKIP": "跳過",
+        "TASK": "任務",
+        "TASK_BREAK": "任務中斷",
+        "TRACK_TO": "追蹤到："
+      },
+      "D_TRACKING_REMINDER": {
+        "CREATE_AND_TRACK": "<em>創建</em>並跟蹤到",
+        "IDLE_FOR": "你一直閑著：",
+        "TASK": "任務",
+        "TRACK_TO": "追蹤到：",
+        "UNTRACKED_TIME": "未追蹤時間："
+      }
+    },
+    "WORKLOG": {
+      "CMP": {
+        "DAYS_WORKED": "工作日：",
+        "MONTH_WORKED": "工作月份：",
+        "REPEATING_TASK": "重複任務",
+        "RESTORE_TASK_FROM_ARCHIVE": "從存檔還原任務",
+        "TASKS": "任務",
+        "TOTAL_TIME": "總花費時間：",
+        "WEEK_NR": "{{nr}}周 ",
+        "WORKED": "已完成"
+      },
+      "D_CONFIRM_RESTORE": "您確定要將任務 <strong>\"{{title}}\"</strong>移動到今天的任務列表中嗎？",
+      "D_EXPORT_TITLE": "導出 {{start}} - {{end}}工作日誌",
+      "D_EXPORT_TITLE_SINGLE": "導出 {{day}}",
+      "EXPORT": {
+        "ADD_COL": "添加列",
+        "COPY_TO_CLIPBOARD": "複製到剪貼板",
+        "DONT_ROUND": "禁用取整",
+        "EDIT_COL": "編輯列",
+        "GROUP_BY": "分組依據",
+        "O": {
+          "DATE": "日期",
+          "ENDED_WORKING": "結束工作",
+          "ESTIMATE_AS_CLOCK": "估計 數字格式（例如5:23）",
+          "ESTIMATE_AS_MILLISECONDS": "估計為毫秒",
+          "ESTIMATE_AS_STRING": "估計 敘述格式（例如5h23m）",
+          "FULL_HALF_HOURS": "半小時",
+          "FULL_HOURS": "一小時",
+          "FULL_QUARTERS": "一刻鐘",
+          "PARENT_TASK": "父任務",
+          "PARENT_TASK_TITLES_ONLY": "僅限父任務標題",
+          "STARTED_WORKING": "開始工作",
+          "TASK_SUBTASK": "任務/子任務",
+          "TIME_AS_CLOCK": "用時 數字格式（例如5:23）",
+          "TIME_AS_MILLISECONDS": "時間為毫秒",
+          "TIME_AS_STRING": "用時 敘述格式（如 5h23m）",
+          "TITLES_AND_SUB_TASK_TITLES": "標題和子任務標題",
+          "WORKLOG": "工作日誌"
+        },
+        "OPTIONS": "選項",
+        "ROUND_END_TIME_TO": "結束時間取整到",
+        "ROUND_START_TIME_TO": "開始時間取整到",
+        "ROUND_TIME_WORKED_TO": "工作時間取整到",
+        "SAVE_TO_FILE": "保存到文件",
+        "SEPARATE_TASKS_BY": "任務分開依據",
+        "SHOW_AS_TEXT": "顯示為文字"
+      },
+      "WEEK": {
+        "EXPORT": "導出周數據",
+        "NO_DATA": "本周還沒有任務。",
+        "TITLE": "標題"
+      }
+    }
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "導出數據",
+    "IMPORT_FROM_FILE": "從文件導入",
+    "S_ERR_INVALID_DATA": "導入失敗：無效的JSON"
+  },
+  "G": {
+    "CANCEL": "取消",
+    "CLICK_TO_EDIT": "點擊編輯",
+    "CLOSE": "關",
+    "DELETE": "刪除",
+    "DISMISS": "取消",
+    "DO_IT": "開始吧！",
+    "EDIT": "編輯",
+    "EXTENSION_INFO": "請<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">下載Chrome擴展程式</a>，為了與Jira Api和閒置時間處理進行通信。請注意，這不適用于行動裝置。",
+    "LOGIN": "登錄",
+    "LOGOUT": "登出",
+    "MINUTES": "{{m}} 分鐘",
+    "NEXT": "下一個",
+    "NONE": "沒有",
+    "NO_CON": "您目前離線。請重新連接到網際網路。",
+    "OK": "好",
+    "PREVIOUS": "以前",
+    "REMOVE": "去掉",
+    "RESET": "重啟",
+    "SAVE": "保存",
+    "TITLE": "標題",
+    "UNDO": "解開",
+    "UPDATE": "更新",
+    "WITHOUT_PROJECT": "沒有專案"
+  },
+  "GCF": {
+    "AUTO_BACKUPS": {
+      "HELP": "自動將所有數據保存到您的應用程式文件夾，以防出現問題。",
+      "LABEL_IS_ENABLED": "啟用自動備份",
+      "LOCATION_INFO": "備份存儲到：",
+      "TITLE": "自動備份"
+    },
+    "EVALUATION": {
+      "IS_HIDE_EVALUATION_SHEET": "隱藏每日摘要的評估表",
+      "TITLE": "評估與指標"
+    },
+    "IDLE": {
+      "HELP": "啟用空閑時間處理後，將在指定的時間後打開一個對話框，以檢查您在空閑時是否以及在哪個任務上跟蹤您的時間。",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "啟用空閑時間處理",
+      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "僅在選擇當前任務時觸發空閑時間對話框",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未跟蹤的空閑時間重置需要休息計時器",
+      "MIN_IDLE_TIME": "觸發空閑的時間閾值",
+      "TITLE": "閑置處理"
+    },
+    "IMEX": {
+      "HELP": "<p>您可以在此處配置所有鍵盤快捷鍵。</p> <p>單擊文本輸入並輸入所需的鍵盤組合。按Enter鍵保存，Escape退出。</p><p> 有三種類型的捷徑：</p> <ul> <li> <strong>全局捷徑：</strong>當應用程式運行時，它將觸發其他所有應用程式的操作。 </li> <li> <strong>應用程式級捷徑： </strong>將從應用程式的每個螢幕觸發，但如果您當前正在編輯文本欄位則不會。 </li> <li> <strong> 任務級捷徑：</strong> 只有通過滑鼠或鍵盤選擇任務並且通常會觸發與該任務特定相關的操作時，它們才會觸發。  </li> </ul><p>可以 <strong>單擊 Escape移除鍵盤組合。</strong>",
+      "TITLE": "導入 / 導出"
+    },
+    "KEYBOARD": {
+      "ADD_NEW_NOTE": "添加新筆記",
+      "ADD_NEW_TASK": "添加新任務",
+      "APP_WIDE_SHORTCUTS": "全局快捷鍵",
+      "COLLAPSE_SUB_TASKS": "摺疊子任務",
+      "EXPAND_SUB_TASKS": "展開子任務",
+      "GLOBAL_ADD_NOTE": "添加新筆記",
+      "GLOBAL_ADD_TASK": "添加新任務",
+      "GLOBAL_SHOW_HIDE": "顯示/隱藏 Super Productivity",
+      "GLOBAL_TOGGLE_TASK_START": "切換上次活動任務進行時間跟蹤",
+      "GO_TO_DAILY_AGENDA": "轉到議程",
+      "GO_TO_FOCUS_MODE": "進入專注模式",
+      "GO_TO_SCHEDULED_VIEW": "前往計畫",
+      "GO_TO_SETTINGS": "前往設置",
+      "GO_TO_WORK_VIEW": "轉到工作視圖",
+      "HELP": "<p>您可以在此處配置所有鍵盤快捷鍵。</p> <p>單擊文本輸入並輸入所需的鍵盤組合。按Enter鍵保存，Escape退出。</p><p> 有三種類型的捷徑：</p> <ul> <li> <strong>全局捷徑：</strong>當應用程式運行時，它將觸發其他所有應用程式的操作。 </li> <li> <strong>應用程式級捷徑： </strong>將從應用程式的每個螢幕觸發，但如果您當前正在編輯文本欄位則不會。 </li> <li> <strong> 任務級捷徑：</strong> 只有通過滑鼠或鍵盤選擇任務並且通常會觸發與該任務特定相關的操作時，它們才會觸發。  </li> </ul><p>可以 <strong>單擊 Escape移除鍵盤組合。</strong>",
+      "MOVE_TASK_DOWN": "在列表中向下移動任務",
+      "MOVE_TASK_UP": "在列表中向上移動任務",
+      "MOVE_TO_BACKLOG": "將任務移動到任務待辦事項",
+      "MOVE_TO_TODAYS_TASKS": "將任務移動到今天的任務列表",
+      "OPEN_PROJECT_NOTES": "顯示/隱藏項目備註",
+      "SELECT_NEXT_TASK": "選擇下一個任務",
+      "SELECT_PREVIOUS_TASK": "選擇上一個任務",
+      "SYSTEM_SHORTCUTS": "全局捷徑（全系統）",
+      "TASK_ADD_SUB_TASK": "添加子任務",
+      "TASK_DELETE": "刪除任務",
+      "TASK_EDIT_TITLE": "編輯標題",
+      "TASK_MOVE_TO_PROJECT": "打開將任務移到項目菜單",
+      "TASK_OPEN_CONTEXT_MENU": "開啟任務選單",
+      "TASK_OPEN_ESTIMATION_DIALOG": "編輯估算/花費的時間",
+      "TASK_SCHEDULE": "安排任務",
+      "TASK_SHORTCUTS": "任務",
+      "TASK_SHORTCUTS_INFO": "以下捷徑適用于當前選定的任務（通過選項卡或滑鼠選擇）。",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "顯示/隱藏其他任務信息",
+      "TASK_TOGGLE_DONE": "切換完成",
+      "TITLE": "鍵盤快捷鍵",
+      "TOGGLE_BACKLOG": "顯示/隱藏待辦事項",
+      "TOGGLE_BOOKMARKS": "顯示/隱藏書籤欄",
+      "TOGGLE_PLAY": "啟動/停止任務",
+      "TOGGLE_SIDE_NAV": "顯示 & 專注/隱藏 Sidenav",
+      "ZOOM_DEFAULT": "縮放預設值（僅限桌面端）",
+      "ZOOM_IN": "放大（僅限桌面端）",
+      "ZOOM_OUT": "縮小（僅限桌面端）"
+    },
+    "LANG": {
+      "AR": "阿拉伯語",
+      "DE": "德語",
+      "EN": "英語",
+      "ES": "西班牙語",
+      "FA": "波斯語",
+      "FR": "法語",
+      "IT": "義大利語",
+      "JA": "日本語",
+      "KO": "北韓語",
+      "LABEL": "請選擇一種語言",
+      "NB": "挪威語",
+      "NL": "荷蘭語",
+      "PT": "葡萄牙語",
+      "RU": "俄語",
+      "TITLE": "語言",
+      "TR": "土耳其語",
+      "ZH": "中文(簡體)",
+      "ZH_TW": "中文(繁體)"
+    },
+    "MISC": {
+      "DEFAULT_PROJECT": "如果未指定，則用于任務的預設項目",
+      "FIRST_DAY_OF_WEEK": "一周的第一天",
+      "HELP": "<p><strong>沒有看到桌面通知？</strong>對於Windows，您可能需要檢查 系統 > 通知與動作 ，並檢查是否已啟用所需的通知。</p>",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自動添加今日標籤以處理任務",
+      "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任務後，將父任務標記為已完成",
+      "IS_AUTO_START_NEXT_TASK": "將當前標記為已完成時，開始跟蹤下一個任務",
+      "IS_CONFIRM_BEFORE_EXIT": "退出應用前確認",
+      "IS_DARK_MODE": "暗模式",
+      "IS_DISABLE_INITIAL_DIALOG": "禁用初始信息對話框（您可能會錯過重要更新！）",
+      "IS_HIDE_NAV": "隱藏導航，直到主標題懸停（僅限桌面版本）",
+      "IS_MINIMIZE_TO_TRAY": "縮小至工具列（僅限桌面版本）",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出時間估算時發送通知",
+      "IS_TRAY_SHOW_CURRENT_TASK": "在任務欄/狀態菜單中顯示當前任務（僅限桌面版本）",
+      "IS_TURN_OFF_MARKDOWN": "停止在任務備註中解析Markdown",
+      "TASK_NOTES_TPL": "任務描述模板",
+      "TITLE": "其他設置"
+    },
+    "POMODORO": {
+      "BREAK_DURATION": "短休息時長",
+      "CYCLES_BEFORE_LONGER_BREAK": "完成n個任務後，進行長休息",
+      "DURATION": "番茄時長",
+      "HELP": "<p>番茄鐘有一些可以設定的參數：任務時長、短休息時長、開始長休息之前的番茄數量，及長休息時長。 </p><p>您還可以設置是否要在番茄鐘休息時顯示您的分心情況。 </p> <p>設置\"暫停在進行番茄鐘休息時記錄時間\"會把您的休息時間也計入在任務上花費的工作時間。</p> <p>當您暫停任務時，啟用\"當沒有活動任務時暫停番茄鐘會話\"會一併暫停番茄鐘會話。</p>",
+      "IS_ENABLED": "啟用番茄鐘",
+      "IS_MANUAL_CONTINUE": "手動確認再開始下一個番茄鐘",
+      "IS_PLAY_SOUND": "會話完成後播放聲音",
+      "IS_PLAY_SOUND_AFTER_BREAK": "休息結束時播放聲音",
+      "IS_PLAY_TICK": "每秒播放滴答聲",
+      "IS_STOP_TRACKING_ON_BREAK": "休息時暫停記錄工作時長",
+      "LONGER_BREAK_DURATION": "長休息時長",
+      "TITLE": "番茄鐘"
+    },
+    "SOUND": {
+      "DONE_SOUND": "任務完成聲音",
+      "IS_INCREASE_DONE_PITCH": "為完成的每項任務增加音調",
+      "IS_PLAY_DONE_SOUND": "任務標記為完成時播放聲音",
+      "TITLE": "聲音",
+      "VOLUME": "體積"
+    },
+    "TAKE_A_BREAK": {
+      "HELP": "<div> <p>允許您在工作了指定的時間而不休息時配置重複提醒。 </p> <p>您可以修改顯示的消息。 ${duration}將被替換為連續工作時長。</p> </div>",
+      "IS_ENABLED": "啟用休息提醒",
+      "IS_FOCUS_WINDOW": "有提醒時激活本應用視窗（僅限桌面）",
+      "IS_LOCK_SCREEN": "休息時間到時鎖定螢幕（僅限桌面）",
+      "MESSAGE": "休息一下",
+      "MIN_WORKING_TIME": "觸發休息提醒的工作時長",
+      "MOTIVATIONAL_IMG": "勵志圖片（網址）",
+      "TITLE": "休息提醒"
+    },
+    "TRACKING_REMINDER": {
+      "HELP": "配置橫幅以在您忘記開始時間跟蹤的情況下顯示。",
+      "L_IS_ENABLED": "啟用",
+      "L_IS_SHOW_ON_MOBILE": "在移動應用上顯示",
+      "L_MIN_TIME": "等待顯示橫幅廣告的時間",
+      "TITLE": "時間跟蹤提醒"
+    }
+  },
+  "GLOBAL_SNACK": {
+    "COPY_TO_CLIPPBOARD": "複製到剪貼板",
+    "ERR_COMPRESSION": "壓縮界面出錯",
+    "PERSISTENCE_DISALLOWED": "數據將不會永久保存。請注意，這可能會導致數據丟失！！",
+    "RUNNING_X": "運行\"{{str}}\"。",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": " 按下了{{keyCombo}} ，但是打開書籤捷徑僅在項目上下文中可用。",
+    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": " 按下了{{keyCombo}} ，但是僅在項目上下文中，打開註釋捷徑才可用。"
+  },
+  "GPB": {
+    "ASSETS": "正在載入數據...",
+    "DBX_DOWNLOAD": "Dropbox：下載文件...",
+    "DBX_GEN_TOKEN": "Dropbox：生成令牌...",
+    "DBX_META": "Dropbox：獲取文件元數據...",
+    "DBX_UPLOAD": "Dropbox：上傳文件...",
+    "GDRIVE_DOWNLOAD": "Google Drive：下載文件...",
+    "GDRIVE_UPLOAD": "Google Drive：上傳文件...",
+    "GITHUB_LOAD_ISSUE": "GitHub：載入 Issue 數據...",
+    "UNKNOWN": "載入遠程數據",
+    "WEB_DAV_DOWNLOAD": "WebDAV：正在下載數據...",
+    "WEB_DAV_UPLOAD": "WebDAV：正在上傳數據..."
+  },
+  "MH": {
+    "ADD_NEW_TASK": "添加新任務",
+    "CREATE_PROJECT": "創建項目",
+    "CREATE_TAG": "創建標籤",
+    "DELETE_TAG": "刪除標籤",
+    "GO_TO_TASK_LIST": "轉到任務列表",
+    "MANAGE_PROJECTS": "管理項目",
+    "METRICS": "評估",
+    "NOTES": "筆記",
+    "PROCRASTINATE": "拖延",
+    "PROJECTS": "項目",
+    "PROJECT_MENU": "項目清單",
+    "PROJECT_SETTINGS": "項目設置",
+    "SCHEDULED": "計劃",
+    "SETTINGS": "設置",
+    "TAGS": "標籤",
+    "TASKS": "任務",
+    "TASK_LIST": "任務列表",
+    "TOGGLE_SHOW_BOOKMARKS": "顯示/隱藏書籤",
+    "TOGGLE_SHOW_NOTES": "顯示/隱藏項目備註",
+    "TOGGLE_TRACK_TIME": "開始/停止跟蹤時間",
+    "WORKLOG": "工作日誌"
+  },
+  "PDS": {
+    "BACK": "等等我忘記了什麼！",
+    "BREAK_LABEL": "休息（nr /時間）",
+    "CELEBRATE": "花一點時間來<i>慶祝！</i>",
+    "CLEAR_ALL_CONTINUE": "清除所有完成並繼續",
+    "D_CONFIRM_APP_CLOSE": {
+      "CANCEL": "不，只是清除任務",
+      "MSG": "你的工作已經完成！返回主界面",
+      "OK": "好的！結束程式！"
+    },
+    "EVALUATION": "評估",
+    "EXPORT_TASK_LIST": "導出任務列表",
+    "NO_TASKS": "今天沒有任務",
+    "PLAN": "計劃",
+    "ROUND_15M": "將所有任務舍入到15分鐘",
+    "ROUND_30M": "將所有任務舍入到30分鐘",
+    "ROUND_5M": "將所有任務舍入到5分鐘",
+    "ROUND_TIME_SPENT": "花了很長時間",
+    "ROUND_TIME_SPENT_TITLE": "花在所有任務上的時間。小心！你不能撤消這個！",
+    "ROUND_TIME_WARNING": "！小心這不能撤消！",
+    "ROUND_UP_15M": "將所有任務向上取整為15分鐘",
+    "ROUND_UP_30M": "將所有任務向上取整為30分鐘",
+    "ROUND_UP_5M": "將所有任務向上取整為5分鐘",
+    "SAVE_AND_GO_HOME": "保存並返回主界面",
+    "START_END": "開始 - 結束",
+    "SUMMARY_FOR": " {{dayStr}}的每日摘要",
+    "TASKS_COMPLETED": "任務已完成",
+    "TASK_LIST": "任務列表",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "花費時間/估計",
+    "TIME_SPENT_ESTIMATE_TITLE": "花費的時間：今天花費的總時間。存檔的任務不包括在內。 - 估計時間：今天工作的任務估計時間減去其他日子已經花費的時間。",
+    "TODAY": "今天",
+    "WEEK": "周"
+  },
+  "PM": {
+    "TITLE": "項目指標"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "存檔的項目",
+    "ARCHIVE_PROJECT": "存檔項目",
+    "CREATE_NEW": "創建新的",
+    "DELETE_PROJECT": "刪除項目",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "您確定要存檔此項目嗎？存檔的項目將不再顯示在菜單中，如果不恢復它們，您將無法訪問任何數據。建議您在執行此操作之前備份數據。",
+      "OK": "檔案"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "您確定要刪除此項目嗎？建議您在執行此操作之前備份數據。",
+      "OK": "刪除"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "您確定要取消歸檔此項目嗎？",
+      "OK": "取消封存"
+    },
+    "EDIT_PROJECT": "編輯項目",
+    "EXPORT_PROJECT": "出口項目",
+    "GITHUB_CONFIGURED": "配置GitHub集成",
+    "GITLAB_CONFIGURED": "配置GitLab集成",
+    "IMPORT_FROM_FILE": "從文件導入",
+    "JIRA_CONFIGURED": "配置Jira集成",
+    "S_INVALID_JSON": "項目文件的json無效",
+    "TITLE": "項目概況",
+    "UN_ARCHIVE_PROJECT": "Unarchive項目"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "全局設置",
+    "ISSUE_INTEGRATION": "問題整合",
+    "PRIVATE_POLICY": "私人政策",
+    "PRODUCTIVITY_HELPER": "生產力助手",
+    "PROJECT_SETTINGS": "項目特定設置",
+    "PROVIDE_FEEDBACK": "提供反饋意見",
+    "SYNC_EXPORT": "同步導出",
+    "TAG_SETTINGS": "標籤特定設置",
+    "TOGGLE_DARK_MODE": "切換深色模式"
+  },
+  "SCHEDULE": {
+    "NO_SCHEDULED": "目前沒有計劃任務。您可以通過在任務上下文菜單中選擇\"計劃任務\"來計劃任務。要打開它，請單擊任務右側的3個小點。",
+    "START_TASK": "立即開始任務並刪除提醒"
+  },
+  "THEMES": {
+    "SELECT_THEME": "選擇主題",
+    "amber": "琥珀色",
+    "blue": "藍色",
+    "blue-grey": "藍灰色",
+    "cyan": "青色",
+    "deep-orange": "深橙色",
+    "deep-purple": "深紫色",
+    "green": "綠色",
+    "indigo": "靛青",
+    "light-blue": "淺藍",
+    "light-green": "淺綠色",
+    "lime": "酸橙",
+    "pink": "粉",
+    "purple": "紫色",
+    "teal": "茶色",
+    "yellow": "黃色"
+  },
+  "V": {
+    "E_1TO10": "請輸入1到10之間的值",
+    "E_DATETIME": "輸入的值不是日期時間！",
+    "E_MAX": "不應大于 {{val}}",
+    "E_MAX_LENGTH": "最長應為 {{val}} 個字元",
+    "E_MIN": "應小于 {{val}}",
+    "E_MIN_LENGTH": "長度至少應為 {{val}} 個字元",
+    "E_PATTERN": "輸入無效",
+    "E_REQUIRED": "必填"
+  },
+  "WW": {
+    "ADD_MORE": "添加更多",
+    "ADD_SOME_TASKS": "添加一些任務來規劃你的一天！",
+    "COMPLETED_TASKS": "完成的任務",
+    "ESTIMATE_REMAINING": "預估剩餘時間：",
+    "FINISH_DAY": "完成日",
+    "HELP_PROCRASTINATION": "幫幫我！我在拖延！",
+    "NO_COMPLETED_TASKS": "目前還沒有完成的任務",
+    "NO_PLANNED_TASKS": "沒有計劃的任務",
+    "READY_TO_WORK": "準備好工作了！",
+    "RESET_BREAK_TIMER": "無需中斷計時器即可重置",
+    "TIME_ESTIMATED": "估計時間：",
+    "WITHOUT_BREAK": "持續工作時間：",
+    "WORKING_TODAY": "今天工作："
+  }
+}
