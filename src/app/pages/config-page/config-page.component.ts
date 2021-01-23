@@ -14,7 +14,6 @@ import {
 } from '../../features/config/global-config.model';
 import { Subscription } from 'rxjs';
 import { ProjectCfgFormKey } from '../../features/project/project.model';
-import { IS_ELECTRON } from '../../app.constants';
 import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
@@ -42,9 +41,9 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     public readonly configService: GlobalConfigService,
   ) {
     // somehow they are only unproblematic if assigned here
-    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
-    this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
-    this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
+    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;
+    this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG;
+    this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG;
   }
 
   ngOnInit() {
