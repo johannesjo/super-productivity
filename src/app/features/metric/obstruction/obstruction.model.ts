@@ -7,6 +7,4 @@ export interface ObstructionCopy {
 
 export type Obstruction = Readonly<ObstructionCopy>;
 
-export interface ObstructionState extends EntityState<Obstruction> {
-  // additional entities state properties
-}
+export type ObstructionState = EntityState<Obstruction>;

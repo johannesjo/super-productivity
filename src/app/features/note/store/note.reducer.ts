@@ -15,8 +15,7 @@ import {
 } from './note.actions';
 import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 
-export interface NoteState extends EntityState<Note> {
-}
+export type NoteState = EntityState<Note>;
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
