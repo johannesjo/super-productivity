@@ -1,7 +1,6 @@
 import { TaskWithSubTasks } from '../tasks/task.model';
 
 export const mapEstimateRemainingFromTasks = (tasks: TaskWithSubTasks[]): number => tasks && tasks.length && tasks.reduce((acc: number, task: TaskWithSubTasks): number => {
-  let isTrackVal;
   let estimateRemaining;
   if (task.subTasks && task.subTasks.length > 0) {
     estimateRemaining = task.subTasks.reduce((subAcc, subTask) => {
@@ -12,7 +11,7 @@ export const mapEstimateRemainingFromTasks = (tasks: TaskWithSubTasks[]): number
   } else {
     estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
   }
-  isTrackVal = ((estimateRemaining > 0) && !task.isDone);
+  const isTrackVal = ((estimateRemaining > 0) && !task.isDone);
   return acc + ((isTrackVal) ? estimateRemaining : 0);
 }, 0);
 

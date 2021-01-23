@@ -12,8 +12,7 @@ const arabicNumberMap = {
 };
 
 export function convertToWesternArabic(data: string): string {
-  let converted: string;
-  converted = _replaceHinduArabic(data);
+  const converted = _replaceHinduArabic(data);
   return converted;
 }
 

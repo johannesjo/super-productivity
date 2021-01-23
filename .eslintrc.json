@@ -53,7 +53,7 @@
         ],
 
         // TODO: enable gradually
-        "prefer-const": "off",
+        "prefer-const": "warn",
         "@typescript-eslint/no-unused-expressions": "off",
         "@typescript-eslint/no-empty-interface": "off",
         "max-len": [
@@ -68,10 +68,10 @@
         "@typescript-eslint/no-shadow": "warn",
         "prefer-arrow/prefer-arrow-functions": "off",
         "@angular-eslint/directive-selector": [
-          "off",
+          "warn",
           {
             "type": "attribute",
-            "prefix": "app",
+            "prefix": "",
             "style": "camelCase"
           }
         ],
