@@ -250,7 +250,9 @@ export class SyncProviderService {
         this._snackService.open({
           msg: T.F.SYNC.S.UPLOAD_ERROR,
           translateParams: {
-            err: truncate(successRev.toString(), 100),
+            err: truncate(successRev?.toString
+              ? successRev.toString()
+              : successRev as any, 100),
           },
           type: 'ERROR'
         });
