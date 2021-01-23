@@ -927,7 +927,8 @@
       "RU": "russe",
       "TITLE": "Langue",
       "TR": "Turc",
-      "ZH": "chinois"
+      "ZH": "Chinois simplifié",
+      "ZH_TW": "Chinois traditionnel"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Projet par défaut à utiliser pour les tâches si aucun n'est spécifié",

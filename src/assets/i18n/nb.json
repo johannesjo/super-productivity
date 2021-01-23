@@ -945,7 +945,8 @@
       "RU": "Russisk",
       "TITLE": "Språk",
       "TR": "Tyrkisk",
-      "ZH": "Kinesisk"
+      "ZH": "Kinesisk (forenklet)",
+      "ZH_TW": "Kinesisk (traditionelt)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standard prosjekt som skal brukes til oppgaver hvis ingen er spesifisert",

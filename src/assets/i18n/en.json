@@ -932,7 +932,8 @@
       "RU": "Russian",
       "TITLE": "Language",
       "TR": "Turkish",
-      "ZH": "Chinese"
+      "ZH": "Simplified Chinese",
+      "ZH_TW": "Traditional Chinese"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",

@@ -929,7 +929,8 @@
       "RU": "Russisch",
       "TITLE": "Taal",
       "TR": "Turks",
-      "ZH": "Chinees"
+      "ZH": "Chinees (vereenvoudigd)",
+      "ZH_TW": "Chinees (traditioneel)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standaardproject om te gebruiken voor taken als er geen is opgegeven",

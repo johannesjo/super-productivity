@@ -927,7 +927,8 @@
       "RU": "Russo",
       "TITLE": "Lingua",
       "TR": "Turco",
-      "ZH": "Cinese"
+      "ZH": "Cinese semplificato",
+      "ZH_TW": "Cinese tradizionale"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Progetto predefinito da utilizzare per le attività se non ne viene specificato nessuno",

@@ -932,7 +932,8 @@ const T = {
       RU: 'GCF.LANG.RU',
       TITLE: 'GCF.LANG.TITLE',
       TR: 'GCF.LANG.TR',
-      ZH: 'GCF.LANG.ZH'
+      ZH: 'GCF.LANG.ZH',
+      ZH_TW: 'GCF.LANG.ZH_TW',
     },
     MISC: {
       DEFAULT_PROJECT: 'GCF.MISC.DEFAULT_PROJECT',
