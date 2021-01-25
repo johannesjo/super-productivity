@@ -16,8 +16,7 @@ export interface MetricCopy {
 
 export type Metric = Readonly<MetricCopy>;
 
-export interface MetricState extends EntityState<Metric> {
-}
+export type MetricState = EntityState<Metric>;
 
 export interface PieChartData {
   labels: Label[];

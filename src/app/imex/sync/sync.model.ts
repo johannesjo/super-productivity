@@ -22,8 +22,7 @@ import { ProjectArchive } from '../../features/project/project-archive.model';
 import { SyncProvider } from './sync-provider.model';
 
 /** @deprecated */
-export interface TaskAttachmentState extends EntityState<TaskAttachment> {
-}
+export type TaskAttachmentState = EntityState<TaskAttachment>;
 
 export interface AppBaseData {
   project: ProjectState;
