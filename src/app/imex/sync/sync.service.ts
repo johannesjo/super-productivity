@@ -124,7 +124,6 @@ export class SyncService {
         ? this._isInitialSyncDoneManual$.asObservable()
         : of(true);
     }),
-    startWith(true),
   );
   private _afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = this._isInitialSyncDone$.pipe(
     filter(isDone => isDone),
