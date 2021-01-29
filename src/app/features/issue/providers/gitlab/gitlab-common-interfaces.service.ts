@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { IssueFieldsForTask, Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
+import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { GitlabIssue, GitlabUser } from './gitlab-issue/gitlab-issue.model';
+import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { T } from '../../../../t.const';
-import { flatMap } from 'rxjs/internal/operators';
-import { IssueCacheService } from '../../cache/issue-cache.service';
-import { duration } from 'moment';
+import { GITLAB_BASE_URL } from './gitlab.const';
 
 @Injectable({
   providedIn: 'root',
@@ -23,13 +21,19 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     private readonly _gitlabApiService: GitlabApiService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
-    private readonly _issueCacheService: IssueCacheService,
   ) {
   }
 
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
-      flatMap(cfg => this._gitlabApiService.getIssueLinkById$(projectId, issueId, cfg))
+      map((cfg) => {
+        if (cfg.gitlabBaseUrl != null) {
+          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/) ? cfg.gitlabBaseUrl : `${cfg.gitlabBaseUrl}/`;
+          return `${fixedUrl}${cfg.project}issues/${issueId}`;
+        } else {
+          return `${GITLAB_BASE_URL}${cfg.project?.replace(/%2F/g, '/')}/issues/${issueId}`;
+        }
+      })
     );
   }
 
@@ -62,12 +66,10 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._gitlabApiService.getById$(+task.issueId, cfg).toPromise();
-    const user = await this._issueCacheService.projectCache<GitlabUser>(task.projectId, 'GITLAB_USER', duration({days: 1}), () => {
-      return this._gitlabApiService.getCurrentUser$(cfg).toPromise();
-    });
+
     const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const commentsByOthers = (user)
-      ? issue.comments.filter(comment => comment.author.id !== user.id)
+    const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
+      ? issue.comments.filter(comment => comment.author.username !== cfg.filterUsername)
       : issue.comments;
 
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
@@ -122,9 +124,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(projectId).toPromise();
-    const user = await this._issueCacheService.projectCache<GitlabUser>(projectId, 'GITLAB_USER', duration({days: 1}), () => {
-      return this._gitlabApiService.getCurrentUser$(cfg).toPromise();
-    });
     const issues: GitlabIssue[] = [];
     const paramsCount = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
     let ids;
@@ -138,10 +137,11 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const updatedIssues: { task: Task, taskChanges: Partial<Task>, issue: GitlabIssue }[] = [];
+
     for (i = 0; i < tasks.length; i++) {
       const issueUpdate: number = new Date(issues[i].updated_at).getTime();
-      const commentsByOthers = (user)
-        ? issues[i].comments.filter(comment => comment.author.id !== user.id)
+      const commentsByOthers = (cfg.filterUsername && cfg.filterUsername.length > 1)
+        ? issues[i].comments.filter(comment => comment.author.username !== cfg.filterUsername)
         : issues[i].comments;
 
       const updates: number[] = [

@@ -11,6 +11,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isSearchIssuesFromGitlab: false,
   isAutoPoll: false,
   isAutoAddToBacklog: false,
+  filterUsername: null,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -21,7 +22,7 @@ export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 // export const GITLAB_POLL_INTERVAL = 15 * 1000;
 export const GITLAB_BASE_URL = 'https://gitlab.com/';
 
-export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4`;
+export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4/projects`;
 
 export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\w-?|\.-?)+((\/|%2F)(\w-?|\.-?)+)+$)/i;
 
@@ -79,6 +80,13 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_AUTO_ADD_TO_BACKLOG
+    },
+  },
+  {
+    key: 'filterUsername',
+    type: 'input',
+    templateOptions: {
+      label: T.F.GITLAB.FORM.FILTER_USER
     },
   },
 ];

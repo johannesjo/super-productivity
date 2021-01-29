@@ -9,6 +9,7 @@ export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isSearchIssuesFromGithub: false,
   isAutoPoll: false,
   isAutoAddToBacklog: false,
+  filterUsername: null,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -57,6 +58,13 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_AUTO_ADD_TO_BACKLOG
+    },
+  },
+  {
+    key: 'filterUsername',
+    type: 'input',
+    templateOptions: {
+      label: T.F.GITHUB.FORM.FILTER_USER
     },
   },
 ];

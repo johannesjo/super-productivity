@@ -8,11 +8,9 @@ import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { GithubCfg } from './github.model';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { GithubIssue, GithubIssueReduced, GithubUser } from './github-issue/github-issue.model';
+import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { T } from '../../../../t.const';
-import { IssueCacheService } from '../../cache/issue-cache.service';
-import { duration } from 'moment';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +20,6 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     private readonly _githubApiService: GithubApiService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
-    private readonly _issueCacheService: IssueCacheService,
   ) {
   }
 
@@ -61,12 +58,11 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
-    const user = await this._issueCacheService.projectCache<GithubUser>(task.projectId, 'GITHUB_USER', duration({days: 1}), () => {
-      return this._githubApiService.getCurrentUser$(cfg).toPromise();
-    });
+
     // const issueUpdate: number = new Date(issue.updated_at).getTime();
-    const commentsByOthers = (user)
-      ? issue.comments.filter(comment => comment.user.id !== user.id)
+    const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
+    const commentsByOthers = (filterUserName && filterUserName.length > 1)
+      ? issue.comments.filter(comment => comment.user.login.toLowerCase() !== cfg.filterUsername)
       : issue.comments;
 
     // TODO: we also need to handle the case when the user himself updated the issue, to also update the issue...
