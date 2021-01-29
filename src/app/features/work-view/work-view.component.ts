@@ -120,9 +120,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   ngAfterContentInit(): void {
     this._subs.add(
       this.upperContainerScroll$.subscribe(({target}) => {
-        ((target as HTMLElement).scrollTop !== 0)
-          ? this.layoutService.isScrolled$.next(true)
-          : this.layoutService.isScrolled$.next(false);
+        if ((target as HTMLElement).scrollTop !== 0) {
+          this.layoutService.isScrolled$.next(true);
+        } else {
+          this.layoutService.isScrolled$.next(false);
+        }
       })
     );
   }

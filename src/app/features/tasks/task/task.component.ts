@@ -306,9 +306,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.task.parentId) {
       this.focusNext(true);
     }
-    this.task.isDone
-      ? this._taskService.setUnDone(this.task.id)
-      : this._taskService.setDone(this.task.id);
+
+    if (this.task.isDone) {
+      this._taskService.setUnDone(this.task.id);
+    } else {
+      this._taskService.setDone(this.task.id);
+    }
   }
 
   showAdditionalInfos() {
@@ -322,9 +325,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleShowAdditionalInfoOpen() {
-    this.isSelected
-      ? this._taskService.setSelectedId(null)
-      : this._taskService.setSelectedId(this.task.id);
+    if (this.isSelected) {
+      this._taskService.setSelectedId(null);
+    } else {
+      this._taskService.setSelectedId(this.task.id);
+    }
     // this.focusSelf();
   }
 
