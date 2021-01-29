@@ -8,7 +8,6 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { SnackType } from '../../../core/snack/snack.model';
 import { catchError, concatMap, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { BehaviorSubject, EMPTY, from, merge, Observable, of, throwError, timer } from 'rxjs';
-import { IPC } from '../../../../../electron/ipc-events.const';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
@@ -17,7 +16,6 @@ import { isOnline } from '../../../util/is-online';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { androidInterface } from '../../../core/android/android-interface';
 import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-session';
-import { ipcRenderer } from 'electron';
 import { GoogleDriveFileMeta } from './google-api.model';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
@@ -84,23 +82,25 @@ export class GoogleApiService {
       const session = this._session;
       if (this.isLoggedIn && !this._isTokenExpired(session)) {
         return new Promise((resolve) => resolve(true));
+      } else {
+        return Promise.reject('No token');
       }
 
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
-      return new Promise((resolve, reject) => {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
-          this._updateSession({
-            accessToken: data.access_token,
-            expiresAt: data.expiry_date,
-            refreshToken: data.refresh_token,
-          });
-          showSuccessMsg();
-          resolve(data);
-        });
-        (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
-          reject(err);
-        });
-      });
+      // (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
+      // return new Promise((resolve, reject) => {
+      //   (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
+      //     this._updateSession({
+      //       accessToken: data.access_token,
+      //       expiresAt: data.expiry_date,
+      //       refreshToken: data.refresh_token,
+      //     });
+      //     showSuccessMsg();
+      //     resolve(data);
+      //   });
+      //   (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
+      //     reject(err);
+      //   });
+      // });
     } else if (IS_ANDROID_WEB_VIEW) {
       return androidInterface.getGoogleToken().then((token) => {
         this._saveToken({

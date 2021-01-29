@@ -1,7 +1,10 @@
 import { google } from 'googleapis';
-import { BrowserWindow, BrowserWindowConstructorOptions, ipcMain } from 'electron';
+import { ipcMain } from 'electron';
 import { getWin } from './main-window';
 import { IPC } from './ipc-events.const';
+import * as fs from 'fs';
+import { answerRenderer } from './better-ipc';
+import * as querystring from 'querystring';
 
 const A = {
   CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',
@@ -20,16 +23,6 @@ const SCOPES = [
   'https://www.googleapis.com/auth/drive.install',
 ];
 
-const POPUP_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36';
-const BROWSER_WINDOW_PARAMS: BrowserWindowConstructorOptions = {
-  center: true,
-  show: true,
-  resizable: false,
-  webPreferences: {
-    nodeIntegration: false,
-  },
-};
-
 /**
  * Create a new OAuth2 client with the configured keys.
  */
@@ -38,95 +31,55 @@ const oauth2Client = new google.auth.OAuth2(
   CLIENT_SECRET,
   'urn:ietf:wg:oauth:2.0:oob'
 );
+const TOKEN_PATH = 'google-token.json';
 
 google.options({auth: oauth2Client});
 
-async function authenticate(refreshToken) {
+async function authenticate(authCode) {
   return new Promise((resolve, reject) => {
-    const authorizeUrl = oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: SCOPES.join(' ')
-    });
-
-    const freshAuth = () => {
-      // open the browser window to the authorize url to start the workflow
-      openAuthWindow(authorizeUrl)
-        .then((code: any) => {
-          oauth2Client.getToken(code)
-            .then((res) => resolve(res.tokens))
-            .catch(reject);
-        })
-        .catch(reject);
-    };
-
-    // grab the url that will be used for authorization
-    if (refreshToken) {
-      // console.log('SETTING REFRESH TOKEN', refreshToken);
-      oauth2Client.setCredentials({
-        refresh_token: refreshToken
-      });
-      oauth2Client.getAccessToken()
-        .then((res) => {
-          if (!res || !res.res) {
-            reject(res);
-          }
-          // console.log('TOKEN REFRESH ', res.res.data);
-          resolve((res.res as any).data);
-        })
-        .catch((err) => {
-          console.log(err);
-          freshAuth();
+    // Check if we have previously stored a token.
+    fs.readFile(TOKEN_PATH, (err, savedToken) => {
+      if (!err) {
+        oauth2Client.setCredentials(JSON.parse(savedToken.toString()));
+        resolve(savedToken);
+      } else {
+        return getAccessToken(authCode).then((token) => {
+          oauth2Client.setCredentials(token);
+          fs.writeFile(TOKEN_PATH, JSON.stringify(token), (errI) => {
+            if (errI) {
+              console.error(errI);
+              return reject(err);
+            }
+            console.log('Token stored to', TOKEN_PATH);
+          });
         });
-    } else {
-      freshAuth();
-    }
+      }
+    });
   });
 }
 
-function openAuthWindow(url) {
+/**
+ * Get and store new token after prompting for user authorization, and then
+ * execute the given callback with the authorized OAuth2 client.
+ */
+function getAccessToken(authCode) {
   return new Promise((resolve, reject) => {
-    /* tslint:disable-next-line */
-    const win = new BrowserWindow(BROWSER_WINDOW_PARAMS);
-
-    win.loadURL(url, {userAgent: POPUP_USER_AGENT});
-
-    win.on('closed', () => {
-      reject(new Error('User closed the window'));
-    });
-
-    win.on('page-title-updated', () => {
-      setImmediate(() => {
-        const title = win.getTitle();
-        if (title.startsWith('Denied')) {
-          reject(new Error(title.split(/[ =]/)[2]));
-          win.removeAllListeners('closed');
-          win.close();
-        } else if (title.startsWith('Success')) {
-          console.log(title);
-
-          resolve(title.split(/[ =]/)[2]);
-          win.removeAllListeners('closed');
-          win.close();
-        }
-      });
+    oauth2Client.getToken(authCode, (err, token) => {
+      if (err) {
+        console.error('Error retrieving access token', err);
+        reject(err);
+      }
+      // Store the token to disk for later program executions
+      resolve(token);
     });
   });
 }
-
-// oauth2Client.on('tokens', (tokens) => {
-//   console.log('TOKENS');
-//   if (tokens.refresh_token) {
-//     // store the refresh_token in my database!
-//     console.log(tokens.refresh_token);
-//   }
-//   console.log(tokens.access_token);
-// });
 
 export const initGoogleAuth = () => {
-  ipcMain.on(IPC.TRIGGER_GOOGLE_AUTH, (ev, refreshToken) => {
-    console.log('refreshToken', (refreshToken && refreshToken.length));
+  ipcMain.on(IPC.TRIGGER_GOOGLE_AUTH, (ev, authCode) => {
+    console.log('authCode', (authCode && authCode.length));
     const mainWin = getWin();
-    authenticate(refreshToken).then((res: any) => {
+    authenticate(authCode).then((res: any) => {
       mainWin.webContents.send(IPC.GOOGLE_AUTH_TOKEN, res);
     }).catch((err) => {
       mainWin.webContents.send(IPC.GOOGLE_AUTH_TOKEN_ERROR);
@@ -134,5 +87,63 @@ export const initGoogleAuth = () => {
       console.log(err);
     });
   });
+
+  answerRenderer(IPC.GOOGLE_AUTH_GET_AUTH_URL, (): string => {
+    return oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: SCOPES,
+    });
+  });
 };
 
+function generateAuthUrl(opts = {}) {
+  // @ts-ignore
+  if (opts.code_challenge_method && !opts.code_challenge) {
+    throw new Error('If a code_challenge_method is provided, code_challenge must be included.');
+  }
+  // @ts-ignore
+  opts.response_type = opts.response_type || 'code';
+  // @ts-ignore
+  opts.client_id = opts.client_id || CLIENT_ID;
+  // @ts-ignore
+  opts.redirect_uri = opts.redirect_uri || 'urn:ietf:wg:oauth:2.0:oob';
+  // Allow scopes to be passed either as array or a string
+  // @ts-ignore
+  if (opts.scope instanceof Array) {
+    // @ts-ignore
+    opts.scope = opts.scope.join(' ');
+  }
+  const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+  return rootUrl + '?' + querystring.stringify(opts);
+}
+
+let url;
+
+url = generateAuthUrl({
+  access_type: 'offline',
+  scope: SCOPES,
+  redirect_uri: 'urn:ietf:wg:oauth:2.0:oob'
+});
+console.log(url);
+
+// url = generateAuthUrl({
+//   access_type: 'offline',
+//   scope: SCOPES,
+//   redirect_uri: 'https://app.super-productivity.com/'
+// });
+// console.log(url);
+//
+// url = generateAuthUrl({
+//   access_type: 'offline',
+//   scope: SCOPES,
+//   redirect_uri: 'https://super-productivity.com/'
+// });
+// console.log(url);
+//
+// url = generateAuthUrl({
+//   access_type: 'offline',
+//   scope: SCOPES,
+//   redirect_uri: 'postmessage'
+// });
+// console.log(url);
+//
