@@ -1,0 +1,16 @@
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          days-before-stale: 90
+          days-before-close: 14
+          stale-issue-message: 'This issue has not received any updates in 90 days. Please comment, if this still relevant!'
+          stale-pr-message: 'This PR has not received any updates in 90 days. Please comment, if this still relevant!'
+          days-before-pr-close: -1
