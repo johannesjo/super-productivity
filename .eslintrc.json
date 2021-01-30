@@ -1,0 +1,89 @@
+{
+  "root": true,
+  "ignorePatterns": ["projects/**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": ["tsconfig.json", "n2e/tsconfig.n2e.json"],
+        "createDefaultProgram": true
+      },
+      "extends": [
+        "plugin:@angular-eslint/ng-cli-compat",
+        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
+      "rules": {
+        "@angular-eslint/component-selector": ["off"],
+        "@typescript-eslint/explicit-member-accessibility": [
+          "off",
+          {
+            "accessibility": "explicit"
+          }
+        ],
+        "arrow-parens": ["off", "always"],
+        "import/order": "off",
+        "@typescript-eslint/member-ordering": "off",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "no-underscore-dangle": "off",
+        "arrow-body-style": "off",
+        "@angular-eslint/no-input-rename": "off",
+        "@typescript-eslint/naming-convention": [
+          "warn",
+          {
+            "selector": "default",
+            "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
+            "leadingUnderscore": "allowSingleOrDouble",
+            "trailingUnderscore": "allow"
+          },
+          {
+            "selector": "variable",
+            "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
+            "leadingUnderscore": "allowSingleOrDouble",
+            "trailingUnderscore": "allow"
+          },
+          {
+            "selector": "enum",
+            "format": ["PascalCase", "UPPER_CASE"]
+          },
+          {
+            "selector": "typeLike",
+            "format": ["PascalCase"]
+          }
+        ],
+
+        // TODO: enable gradually
+        "prefer-const": "warn",
+        "@typescript-eslint/no-unused-expressions": "warn",
+        "@typescript-eslint/no-empty-interface": "warn",
+        "max-len": [
+          "off",
+          {
+            "code": 150
+          }
+        ],
+        "id-blacklist": "off",
+        "@typescript-eslint/member-delimiter-style": "off",
+        "no-shadow": "off", // must be disabled, no-shadow rule handled by the next line
+        "@typescript-eslint/no-shadow": "warn",
+        "prefer-arrow/prefer-arrow-functions": "off",
+        "@angular-eslint/directive-selector": [
+          "warn",
+          {
+            "type": "attribute",
+            "prefix": "",
+            "style": "camelCase"
+          }
+        ],
+        "@typescript-eslint/ban-types": "warn"
+      }
+    },
+    {
+      "files": ["*.html"],
+      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "rules": {
+        "@angular-eslint/template/no-negated-async": "off"
+      }
+    }
+  ]
+}

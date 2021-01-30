@@ -115,7 +115,7 @@ export class DropboxApiService {
     url: string;
     method?: Method;
     headers?: { [key: string]: any },
-    data?: string | object
+    data?: string | Record<string, unknown>
     params?: { [key: string]: string },
     accessToken?: string
   }): Promise<AxiosResponse> {

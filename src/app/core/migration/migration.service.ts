@@ -135,7 +135,7 @@ export class MigrationService {
   private _addProjectIdToEntity(
     pids: string[],
     entityProjectStates: { [key: string]: EntityState<any> },
-    additionalChanges: {} = {}
+    additionalChanges: Record<string, unknown> = {}
   ): EntityState<any>[] {
     return pids.map((projectId) => {
       const state = entityProjectStates[projectId];

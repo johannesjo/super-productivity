@@ -5,13 +5,13 @@ import 'hammerjs';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-// tslint:disable-next-line:no-bitwise
+// eslint-disable-next-line no-bitwise
 const DIRECTION_HORIZONTAL = DIRECTION_LEFT | DIRECTION_RIGHT;
 
 @Injectable({providedIn: 'root'})
 export class MyHammerConfig extends HammerGestureConfig {
   overrides: {
-    [key: string]: {};
+    [key: string]: Record<string, unknown>;
   } = {
     swipe: {direction: DIRECTION_HORIZONTAL},
     pan: {direction: 6},

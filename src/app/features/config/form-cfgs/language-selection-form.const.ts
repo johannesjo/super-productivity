@@ -1,4 +1,4 @@
-// tslint:disable:max-line-length
+/* eslint-disable max-len */
 import { ConfigFormSection, LanguageConfig } from '../global-config.model';
 import { LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';

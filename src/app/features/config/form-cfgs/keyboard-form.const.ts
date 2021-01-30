@@ -1,4 +1,4 @@
-// tslint:disable:max-line-length
+/* eslint-disable max-len */
 import { ConfigFormSection, LimitedFormlyFieldConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 import { IS_ELECTRON } from '../../../app.constants';
@@ -312,4 +312,4 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
     },
   ]
 };
-// tslint:enable:max-line-length
+/* eslint-enable max-len */

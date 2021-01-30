@@ -22,7 +22,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   // TODO Cleanup this mess
   handleError(err: any) {
     const errStr = (typeof err === 'string') ? err : err.toString();
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     const simpleStack = err && err.stack;
     console.error('GLOBAL_ERROR_HANDLER', err);
 

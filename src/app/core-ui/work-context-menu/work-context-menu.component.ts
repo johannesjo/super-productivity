@@ -3,6 +3,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { from, Observable, of, Subscription } from 'rxjs';
+import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TagService } from '../../features/tag/tag.service';
@@ -10,6 +11,7 @@ import { concatMap, filter, first, switchMap, take, tap } from 'rxjs/operators';
 import { Tag } from '../../features/tag/tag.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Router } from '@angular/router';
+import { Project } from '../../features/project/project.model';
 
 @Component({
   selector: 'work-context-menu',
@@ -18,6 +20,7 @@ import { Router } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WorkContextMenuComponent implements OnDestroy {
+  @Input() project!: Project;
   @Input() contextId?: string;
   T: typeof T = T;
   TODAY_TAG_ID: string = TODAY_TAG.id as string;
@@ -58,6 +61,13 @@ export class WorkContextMenuComponent implements OnDestroy {
         this._tagService.removeTag(this.contextId);
       }
     }));
+  }
+
+  edit(project: Project) {
+    this._matDialog.open(DialogCreateProjectComponent, {
+      restoreFocus: true,
+      data: Object.assign({}, project),
+    });
   }
 
   private _confirmTagDelete(): Observable<boolean> {

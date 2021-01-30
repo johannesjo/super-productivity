@@ -1,3 +1,10 @@
+<button *ngIf="isForProject"
+        (click)="edit(project)"
+        mat-menu-item>
+  <mat-icon>edit</mat-icon>
+  <span class="text">{{T.PP.EDIT_PROJECT|translate}}</span>
+</button>
+
 <button [routerLink]="[base,contextId,'worklog']"
         mat-menu-item>
   <mat-icon>date_range</mat-icon>

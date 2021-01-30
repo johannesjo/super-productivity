@@ -55,7 +55,7 @@ const _removeOutdatedData = (project: Project): Project => {
   return copy;
 };
 
-const ___convertToWesternArabicDateKeys = (workStartEnd: {
+const __convertToWesternArabicDateKeys = (workStartEnd: {
   [key: string]: any;
 }): {
   [key: string]: any;
@@ -78,10 +78,10 @@ const ___convertToWesternArabicDateKeys = (workStartEnd: {
 const _convertToWesternArabicDateKeys = (project: Project) => {
   return {
     ...project,
-    workStart: ___convertToWesternArabicDateKeys(project.workStart),
-    workEnd: ___convertToWesternArabicDateKeys(project.workEnd),
-    breakNr: ___convertToWesternArabicDateKeys(project.breakNr),
-    breakTime: ___convertToWesternArabicDateKeys(project.breakTime),
+    workStart: __convertToWesternArabicDateKeys(project.workStart),
+    workEnd: __convertToWesternArabicDateKeys(project.workEnd),
+    breakNr: __convertToWesternArabicDateKeys(project.breakNr),
+    breakTime: __convertToWesternArabicDateKeys(project.breakTime),
   };
 };
 
@@ -92,12 +92,12 @@ const _updateThemeModel = (project: Project): Project => {
         ...project,
         theme: {
           ...WORK_CONTEXT_DEFAULT_THEME,
-          // tslint:disable-next-line
+          // eslint-disable-next-line
           primary: (project.themeColor)
-            // tslint:disable-next-line
+            // eslint-disable-next-line
             ? (THEME_COLOR_MAP as any)[project.themeColor]
             : WORK_CONTEXT_DEFAULT_THEME.primary,
-          // tslint:disable-next-line
+          // eslint-disable-next-line
         }
       };
 

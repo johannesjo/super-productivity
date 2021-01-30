@@ -273,7 +273,7 @@ export class LegacyPersistenceService {
     return Object.assign({}, ...forProjectsData);
   }
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   private async _loadForProjectIds(pids: any, getDataFn: Function): Promise<any> {
     return await pids.reduce(async (acc: any, projectId: any) => {
       const prevAcc = await acc;

@@ -227,7 +227,7 @@ export class GoogleApiService {
     );
   }
 
-  saveFile$(content: string, metadata: any = {}): Observable<{}> {
+  saveFile$(content: string, metadata: any = {}): Observable<any> {
     let path;
     let method;
 
@@ -302,7 +302,7 @@ export class GoogleApiService {
 
     return new Promise((resolve, reject) => {
       return this._loadJs().then(() => {
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         this._gapi = (window as any)['gapi'];
         this._gapi.load('client:auth2', () => {
           this.initClient()

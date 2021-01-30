@@ -8,7 +8,7 @@ import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/providers/jira/jira.model';
 import { CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
 import { IssueIntegrationCfgs } from '../../../issue/issue.model';
-// tslint:disable-next-line
+// eslint-disable-next-line
 import { DialogJiraInitialSetupComponent } from '../../../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import { SS_PROJECT_TMP } from '../../../../core/persistence/ls-keys.const';
 import { Subscription } from 'rxjs';

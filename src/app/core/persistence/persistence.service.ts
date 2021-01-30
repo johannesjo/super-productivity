@@ -489,7 +489,7 @@ export class PersistenceService {
     return Object.assign({}, ...forProjectsData);
   }
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   private async _loadForProjectIds(pids: string[], getDataFn: Function): Promise<any> {
     return await pids.reduce(async (acc, projectId) => {
       const prevAcc = await acc;
@@ -501,7 +501,7 @@ export class PersistenceService {
     }, Promise.resolve({}));
   }
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   private async _saveForProjectIds(data: any, projectModel: PersistenceForProjectModel<unknown, unknown>, isDataImport = false) {
     const promises: Promise<any>[] = [];
     Object.keys(data).forEach(projectId => {

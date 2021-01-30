@@ -52,7 +52,7 @@ export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
 
       // this fixes the bug where the text is not visible for some time
       // by triggering a redraw via el.offsetHeight
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       this._el.offsetHeight;
     });
 

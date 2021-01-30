@@ -88,14 +88,18 @@ export class BetterDrawerContainerComponent implements OnInit, AfterContentInit,
   ngAfterContentInit(): void {
     const containerEl = this._elementRef.nativeElement;
     this._subs.add(this.isSmallMainContainer$.subscribe(v => {
-      v
-        ? containerEl.classList.add(MainContainerClass.isSmallMainContainer)
-        : containerEl.classList.remove(MainContainerClass.isSmallMainContainer);
+      if (v) {
+        containerEl.classList.add(MainContainerClass.isSmallMainContainer);
+      } else {
+        containerEl.classList.remove(MainContainerClass.isSmallMainContainer);
+      }
     }));
     this._subs.add(this.isVerySmallMainContainer$.subscribe(v => {
-      v
-        ? containerEl.classList.add(MainContainerClass.isVerySmallMainContainer)
-        : containerEl.classList.remove(MainContainerClass.isVerySmallMainContainer);
+      if (v) {
+        containerEl.classList.add(MainContainerClass.isVerySmallMainContainer);
+      } else {
+        containerEl.classList.remove(MainContainerClass.isVerySmallMainContainer);
+      }
     }));
   }
 

@@ -1,4 +1,4 @@
-// tslint:disable:max-line-length
+/* eslint-disable max-len */
 import { ConfigFormSection, PomodoroConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 
@@ -81,4 +81,4 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     },
   ]
 };
-// tslint:enable:max-line-length
+/* eslint-enable max-len */

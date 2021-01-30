@@ -22,7 +22,7 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
 export class WorklogWeekComponent {
   visibility: boolean[] = [];
   T: typeof T = T;
-  keys: (o: object) => string[] = Object.keys;
+  keys: (o: Record<string, unknown>) => string[] = Object.keys;
 
   constructor(
     public readonly worklogService: WorklogService,

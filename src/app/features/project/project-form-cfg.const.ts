@@ -20,9 +20,9 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
 export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
   title: 'Project Settings & Theme',
   key: 'basic',
-  /* tslint:disable */
+  /* eslint-disable */
   help: `Very basic settings for your project.`,
-  /* tslint:enable */
+  /* eslint-enable */
   items: [
     {
       key: 'title',
