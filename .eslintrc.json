@@ -54,7 +54,7 @@
 
         // TODO: enable gradually
         "prefer-const": "warn",
-        "@typescript-eslint/no-unused-expressions": "off",
+        "@typescript-eslint/no-unused-expressions": "warn",
         "@typescript-eslint/no-empty-interface": "warn",
         "max-len": [
           "off",
