@@ -107,7 +107,10 @@ export class WorklogService {
   }
 
   // TODO this is not waiting for worklog data
-  getTaskListForRange$(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays: boolean = false, projectId?: string | null): Observable<WorklogTask[]> {
+  getTaskListForRange$(rangeStart: Date,
+    rangeEnd: Date,
+    isFilterOutTimeSpentOnOtherDays: boolean = false,
+    projectId?: string | null): Observable<WorklogTask[]> {
     const isProjectIdProvided: boolean = !!projectId || projectId === null;
 
     return this.worklogTasks$.pipe(

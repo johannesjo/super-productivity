@@ -41,11 +41,13 @@ export function registerTranslateExtension(translate: TranslateService): ConfigO
       {name: 'required', message: () => translate.stream(T.V.E_REQUIRED)},
       {
         name: 'minlength',
-        message: (err, field: FormlyFieldConfig) => translate.stream(T.V.E_MIN_LENGTH, {val: field.templateOptions ? field.templateOptions.minLength : null})
+        message: (err, field: FormlyFieldConfig) =>
+          translate.stream(T.V.E_MIN_LENGTH, {val: field.templateOptions ? field.templateOptions.minLength : null})
       },
       {
         name: 'maxlength',
-        message: (err, field: FormlyFieldConfig) => translate.stream(T.V.E_MAX_LENGTH, {val: field.templateOptions ? field.templateOptions.maxLength : null})
+        message: (err, field: FormlyFieldConfig) =>
+          translate.stream(T.V.E_MAX_LENGTH, {val: field.templateOptions ? field.templateOptions.maxLength : null})
       },
       {
         name: 'min',

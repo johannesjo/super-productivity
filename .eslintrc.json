@@ -51,14 +51,15 @@
             "format": ["PascalCase"]
           }
         ],
-
-        // TODO: enable gradually
         "prefer-const": "warn",
         "@typescript-eslint/no-unused-expressions": "warn",
         "@typescript-eslint/no-empty-interface": "warn",
         "max-len": [
-          "off",
+          "warn",
           {
+            "ignorePattern": "^import \\{.+;$", // exclude import statements
+            "ignoreRegExpLiterals": true,
+            "ignoreStrings": true,
             "code": 150
           }
         ],

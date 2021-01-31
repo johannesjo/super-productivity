@@ -120,7 +120,11 @@ export class IssueService {
     }
 
     for (const issuesType of Object.keys(tasksIssueIdsByIssueType)) {
-      const updates = await (this.ISSUE_SERVICE_MAP[issuesType].refreshIssues as any)(tasksIssueIdsByIssueType[issuesType], isNotifySuccess, isNotifyNoUpdateRequired);
+      const updates = await (this.ISSUE_SERVICE_MAP[issuesType].refreshIssues as any)(
+        tasksIssueIdsByIssueType[issuesType],
+        isNotifySuccess,
+        isNotifyNoUpdateRequired
+      );
       if (updates) {
         for (const update of updates) {
           if (this.ISSUE_REFRESH_MAP[issuesType][update.task.issueId]) {

@@ -623,7 +623,8 @@ export class TaskService {
       throw new Error('No project id');
     }
 
-    const findTaskFn = (task: Task | ArchiveTask | undefined) => task && task.issueId === issueId && task.issueType === issueProviderKey && task.projectId === projectId;
+    const findTaskFn = (task: Task | ArchiveTask | undefined) =>
+      task && task.issueId === issueId && task.issueType === issueProviderKey && task.projectId === projectId;
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise() as Task[];
     const taskWithSameIssue: Task = allTasks.find(findTaskFn) as Task;
 
