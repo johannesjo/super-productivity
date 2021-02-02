@@ -339,6 +339,7 @@ export class ProjectEffects {
   //     tap(({activeId, wrongProjectTasks, allTasks}) => {
   //       const allIds = allTasks.map(t => t.id);
   //       const wrongProjectTaskIds = wrongProjectTasks.map(t => t.id);
+  // eslint-disable-next-line max-len
   //       const r = confirm('Nooo! We found some tasks with the wrong project id. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
   //       if (r) {
   //         this._projectService.update(activeId, {
@@ -398,6 +399,7 @@ export class ProjectEffects {
   //     tap((arg) => console.log('Error INFO Today:', arg)),
   //     tap(({activeId, allTasks}) => {
   //       const allIds = allTasks.map(t => t && t.id);
+  // eslint-disable-next-line max-len
   //       const r = confirm('Nooo! We found some tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
   //       if (r) {
   //         this._projectService.update(activeId, {
@@ -449,6 +451,7 @@ export class ProjectEffects {
   //     tap((arg) => console.log('Error INFO Today:', arg)),
   //     tap(({activeId, allTasks}) => {
   //       const allIds = allTasks.map(t => t && t.id);
+  // eslint-disable-next-line max-len
   //       const r = confirm('Nooo! We found some backlog tasks with no data. It is strongly recommended to delete them to avoid further data corruption. Delete them now?');
   //       if (r) {
   //         this._projectService.update(activeId, {

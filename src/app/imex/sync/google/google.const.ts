@@ -8,6 +8,7 @@ export const GOOGLE_SCOPES = '' +
   ' https://www.googleapis.com/auth/drive.install' +
   ' https://www.googleapis.com/auth/drive';
 
-export const GOOGLE_DEFAULT_FIELDS_FOR_DRIVE = 'id,title,mimeType,md5Checksum,userPermission,editable,modifiedDate,shared,createdDate,fileSize,downloadUrl,exportLinks,webContentLink';
+export const GOOGLE_DEFAULT_FIELDS_FOR_DRIVE =
+  'id,title,mimeType,md5Checksum,userPermission,editable,modifiedDate,shared,createdDate,fileSize,downloadUrl,exportLinks,webContentLink';
 
 export const DEFAULT_SYNC_FILE_NAME = 'SUPER_PRODUCTIVITY_SYNC.json';
