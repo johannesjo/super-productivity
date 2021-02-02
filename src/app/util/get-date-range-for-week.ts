@@ -1,8 +1,8 @@
 // NOTE: cuts off at month start and end per default
 
 export const getDateRangeForWeek = (year: number, weekNr: number, month?: number): {
-  rangeStart: Date,
-  rangeEnd: Date,
+  rangeStart: Date;
+  rangeEnd: Date;
 } => {
   // NOTE: using the constant here rather than string is important otherwise day might mess up
   let rangeStart = getDateFromWeekNr(year, weekNr);

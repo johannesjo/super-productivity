@@ -259,7 +259,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   updateTaskTitleIfChanged({
     isChanged,
     newVal
-  }: { isChanged: boolean, newVal: string, $taskEl: HTMLElement | null, event: Event }) {
+  }: { isChanged: boolean; newVal: string; $taskEl: HTMLElement | null; event: Event }) {
     if (isChanged) {
       this._taskService.update(this.task.id, {title: newVal});
     }

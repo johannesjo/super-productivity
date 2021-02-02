@@ -25,10 +25,10 @@ export class GoogleDriveSyncEffects {
     filter(({payload}: UpdateGlobalConfigSection): boolean => payload.sectionKey === 'sync'),
     map(({payload}) => payload.sectionCfg as SyncConfig),
     switchMap((syncConfig: SyncConfig): Observable<{
-      syncFileName: string,
-      _backupDocId: string,
-      _syncFileNameForBackupDocId: string,
-      sync: SyncConfig
+      syncFileName: string;
+      _backupDocId: string;
+      _syncFileNameForBackupDocId: string;
+      sync: SyncConfig;
     } | never> => {
       const isChanged = (syncConfig.googleDriveSync.syncFileName !== syncConfig.googleDriveSync._syncFileNameForBackupDocId);
       if (syncConfig.syncProvider === SyncProvider.GoogleDrive
@@ -100,10 +100,10 @@ export class GoogleDriveSyncEffects {
       }), 200)
     ),
     map(({syncFileName, _backupDocId, _syncFileNameForBackupDocId, sync}: {
-      syncFileName: string,
-      _backupDocId: string,
-      _syncFileNameForBackupDocId: string,
-      sync: SyncConfig
+      syncFileName: string;
+      _backupDocId: string;
+      _syncFileNameForBackupDocId: string;
+      sync: SyncConfig;
     }) => new UpdateGlobalConfigSection({
       sectionKey: 'sync',
       sectionCfg: ({

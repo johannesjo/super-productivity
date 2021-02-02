@@ -428,7 +428,7 @@ export class TaskService {
   }
 
   roundTimeSpentForDay({day, taskIds, roundTo, isRoundUp = false, projectId}: {
-    day: string, taskIds: string[], roundTo: RoundTimeOption, isRoundUp: boolean, projectId?: string | null
+    day: string; taskIds: string[]; roundTo: RoundTimeOption; isRoundUp: boolean; projectId?: string | null;
   }) {
     this._store.dispatch(new RoundTimeSpentForDay({day, taskIds, roundTo, isRoundUp, projectId}));
   }
@@ -615,9 +615,9 @@ export class TaskService {
 
   // TODO check with new archive
   async checkForTaskWithIssueInProject(issueId: string | number, issueProviderKey: IssueProviderKey, projectId: string): Promise<{
-    task: Task,
-    subTasks: Task[] | null,
-    isFromArchive: boolean,
+    task: Task;
+    subTasks: Task[] | null;
+    isFromArchive: boolean;
   } | null> {
     if (!projectId) {
       throw new Error('No project id');

@@ -33,10 +33,10 @@ export class GitlabIssueEffects {
       );
     }),
     map((cos: any) => cos
-      .filter(({cfg, task}: { cfg: GitlabCfg, task: TaskWithSubTasks }) =>
+      .filter(({cfg, task}: { cfg: GitlabCfg; task: TaskWithSubTasks }) =>
         isGitlabEnabled(cfg) && cfg.isAutoPoll
       )
-      .map(({task}: { cfg: GitlabCfg, task: TaskWithSubTasks }) => task)
+      .map(({task}: { cfg: GitlabCfg; task: TaskWithSubTasks }) => task)
     ),
     tap((gitlabTasks: TaskWithSubTasks[]) => {
       if (gitlabTasks && gitlabTasks.length > 0) {

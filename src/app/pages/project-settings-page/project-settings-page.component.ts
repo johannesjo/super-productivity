@@ -84,7 +84,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     return section.key;
   }
 
-  saveProjectThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: WorkContextThemeCfg }) {
+  saveProjectThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: WorkContextThemeCfg }) {
     if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     } else {
@@ -96,7 +96,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: Project }) {
+  saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: Project }) {
     if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     } else {
@@ -106,7 +106,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveIssueProviderCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: IssueIntegrationCfg }) {
+  saveIssueProviderCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: IssueIntegrationCfg }) {
     if (!$event.config || !this.currentProject) {
       throw new Error('Not enough data');
     }

@@ -226,7 +226,7 @@ export class SyncProviderService {
 
   // WRAPPER
   // -------
-  private async _downloadAppData(cp: SyncProviderServiceInterface): Promise<{ rev: string, data: AppDataComplete | undefined }> {
+  private async _downloadAppData(cp: SyncProviderServiceInterface): Promise<{ rev: string; data: AppDataComplete | undefined }> {
     const rev = await this._getLocalRev(cp);
     return cp.downloadAppData(rev);
   }
@@ -327,7 +327,7 @@ export class SyncProviderService {
   private _openConflictDialog$({remote, local, lastSync}: {
     remote: number;
     local: number;
-    lastSync: number
+    lastSync: number;
   }): Observable<DialogConflictResolutionResult> {
     return this._matDialog.open(DialogSyncConflictComponent, {
       restoreFocus: true,

@@ -29,7 +29,7 @@ export class DatabaseService {
     shareReplay(1),
   );
 
-  private _lastParams?: { a: string; key?: string, data?: unknown };
+  private _lastParams?: { a: string; key?: string; data?: unknown };
 
   constructor() {
     this._init().then();

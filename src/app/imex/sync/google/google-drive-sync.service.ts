@@ -55,7 +55,7 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     };
   }
 
-  async downloadAppData(): Promise<{ rev: string, data: AppDataComplete | undefined }> {
+  async downloadAppData(): Promise<{ rev: string; data: AppDataComplete | undefined }> {
     if (IS_F_DROID_APP) {
       throw new Error('Google Drive Sync not supported on FDroid');
     }

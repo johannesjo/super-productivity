@@ -9,8 +9,8 @@ export class UpdateGlobalConfigSection implements Action {
   readonly type: string = GlobalConfigActionTypes.UpdateGlobalConfigSection;
 
   constructor(public payload: {
-    sectionKey: GlobalConfigSectionKey
-    sectionCfg: Partial<GlobalSectionConfig>,
+    sectionKey: GlobalConfigSectionKey;
+    sectionCfg: Partial<GlobalSectionConfig>;
   }) {
   }
 }

@@ -49,13 +49,13 @@ export class WebDavApiService {
   }
 
   async getMetaData(path: string): Promise<{
-    basename: string,
-    etag: string,
-    filename: string,
-    lastmod: string,
-    mime: string,
-    size: number
-    type: string,
+    basename: string;
+    etag: string;
+    filename: string;
+    lastmod: string;
+    mime: string;
+    size: number;
+    type: string;
   }> {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();

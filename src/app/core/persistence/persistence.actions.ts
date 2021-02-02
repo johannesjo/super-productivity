@@ -7,11 +7,11 @@ export const saveToDb = createAction(
 );
 export const removeFromDb = createAction(
   '[Persistence] Remove from DB',
-  props<{ dbKey: string; }>(),
+  props<{ dbKey: string }>(),
 );
 export const loadFromDb = createAction(
   '[Persistence] Load from DB',
-  props<{ dbKey: string; }>(),
+  props<{ dbKey: string }>(),
 );
 
 

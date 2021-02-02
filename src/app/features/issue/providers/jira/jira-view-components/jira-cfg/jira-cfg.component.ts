@@ -28,7 +28,7 @@ import { JIRA_TYPE } from '../../../../issue.const';
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<JiraCfg>;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: any }> = new EventEmitter();
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
   issueSuggestionsCtrl: FormControl = new FormControl();

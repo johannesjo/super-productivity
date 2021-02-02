@@ -18,7 +18,7 @@ export type GithubOriginalUser = Readonly<{
   events_url: string;
   received_events_url: string;
   type: 'User';
-  site_admin: boolean
+  site_admin: boolean;
 }>;
 export type GithubOriginalLabel = Readonly<{
   id: number;
@@ -27,7 +27,7 @@ export type GithubOriginalLabel = Readonly<{
   name: string;
   description: string;
   color: string;
-  default: boolean
+  default: boolean;
 }>;
 
 export type GithubOriginalMileStone = Readonly<{
@@ -59,7 +59,7 @@ export type GithubOriginalPullRequest = Readonly<{
 export type GithubOriginalPermissions = Readonly<{
   admin: boolean;
   push: boolean;
-  pull: boolean
+  pull: boolean;
 }>;
 
 export type GithubOriginalRepository = Readonly<{

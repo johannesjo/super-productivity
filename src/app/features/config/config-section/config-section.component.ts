@@ -31,7 +31,7 @@ import { exists } from '../../../util/exists';
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<{ [key: string]: any }>;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey; config: any }> = new EventEmitter();
   @ViewChild('customForm', {read: ViewContainerRef, static: true}) customFormRef?: ViewContainerRef;
   isExpanded: boolean = false;
   private _subs: Subscription = new Subscription();
@@ -91,7 +91,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSave($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: any }) {
+  onSave($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey; config: any }) {
     this.isExpanded = false;
     this.save.emit($event);
   }

@@ -198,7 +198,7 @@ export class GoogleApiService {
   }
 
   // NOTE: file will always be returned as text (makes sense)
-  loadFile$(fileId: string | null): Observable<{ backup: string | undefined, meta: GoogleDriveFileMeta }> {
+  loadFile$(fileId: string | null): Observable<{ backup: string | undefined; meta: GoogleDriveFileMeta }> {
     if (!fileId) {
       this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       return throwError({[HANDLED_ERROR_PROP_STR]: 'No file id given'});
@@ -324,7 +324,7 @@ export class GoogleApiService {
     Zi?: {
       access_token?: string;
       expires_at?: string | number;
-    }
+    };
   }) {
     const r: any = res;
     const accessToken = r.accessToken || r.access_token || r.Zi?.access_token;

@@ -78,21 +78,21 @@ export class UpdateProject implements Action {
 export class UpdateProjectWorkStart implements Action {
   readonly type: string = ProjectActionTypes.UpdateProjectWorkStart;
 
-  constructor(public payload: { id: string; date: string; newVal: number; }) {
+  constructor(public payload: { id: string; date: string; newVal: number }) {
   }
 }
 
 export class UpdateProjectWorkEnd implements Action {
   readonly type: string = ProjectActionTypes.UpdateProjectWorkEnd;
 
-  constructor(public payload: { id: string; date: string; newVal: number; }) {
+  constructor(public payload: { id: string; date: string; newVal: number }) {
   }
 }
 
 export class AddToProjectBreakTime implements Action {
   readonly type: string = ProjectActionTypes.AddToProjectBreakTime;
 
-  constructor(public payload: { id: string; date: string; valToAdd: number; }) {
+  constructor(public payload: { id: string; date: string; valToAdd: number }) {
   }
 }
 
@@ -109,8 +109,8 @@ export class UpdateProjectIssueProviderCfg implements Action {
   constructor(public payload: {
     projectId: string;
     issueProviderKey: IssueProviderKey;
-    providerCfg: Partial<IssueIntegrationCfg>,
-    isOverwrite: boolean
+    providerCfg: Partial<IssueIntegrationCfg>;
+    isOverwrite: boolean;
   }) {
   }
 }

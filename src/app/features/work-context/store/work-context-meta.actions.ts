@@ -38,12 +38,12 @@ export const moveTaskDownInBacklogList = createAction(
 
 export const moveTaskInBacklogList = createAction(
   '[WorkContextMeta] Move Task in Backlog',
-  props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
+  props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
 );
 
 export const moveTaskToBacklogList = createAction(
   '[WorkContextMeta] Move Task from today to backlog',
-  props<{ taskId: string; newOrderedIds: string[], workContextId: string }>(),
+  props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
 );
 
 export const moveTaskToTodayList = createAction(

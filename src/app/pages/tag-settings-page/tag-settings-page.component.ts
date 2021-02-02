@@ -58,7 +58,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  saveTagThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: WorkContextThemeCfg }) {
+  saveTagThemCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey; config: WorkContextThemeCfg }) {
     if (!$event.config || this.activeWorkContext === null) {
       throw new Error('Not enough data');
     } else {
@@ -70,7 +70,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey, config: Tag }) {
+  saveBasicSettings($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey; config: Tag }) {
     if (!$event.config || this.activeWorkContext === null) {
       throw new Error('Not enough data');
     } else {

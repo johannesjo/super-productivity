@@ -20,7 +20,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 export class SimpleCounterCfgComponent implements OnDestroy {
   @Input() section?: ConfigFormSection<SimpleCounterConfig>;
   @Input() cfg?: SimpleCounterConfig;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: any }> = new EventEmitter();
 
   T: typeof T = T;
   form: FormGroup = new FormGroup({});

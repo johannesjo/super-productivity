@@ -8,6 +8,6 @@ export const loadWorkContextState = createAction(
 
 export const setActiveWorkContext = createAction(
   '[WorkContext] Set Active Work Context',
-  props<{ activeId: string, activeType: WorkContextType }>(),
+  props<{ activeId: string; activeType: WorkContextType }>(),
 );
 

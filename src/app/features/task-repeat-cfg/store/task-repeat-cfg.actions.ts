@@ -14,7 +14,7 @@ export enum TaskRepeatCfgActionTypes {
 export class AddTaskRepeatCfgToTask implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask;
 
-  constructor(public payload: { taskId: string, taskRepeatCfg: TaskRepeatCfg }) {
+  constructor(public payload: { taskId: string; taskRepeatCfg: TaskRepeatCfg }) {
   }
 }
 
@@ -28,7 +28,7 @@ export class UpdateTaskRepeatCfg implements Action {
 export class UpdateTaskRepeatCfgs implements Action {
   readonly type: string = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfgs;
 
-  constructor(public payload: { ids: string[], changes: Partial<TaskRepeatCfg> }) {
+  constructor(public payload: { ids: string[]; changes: Partial<TaskRepeatCfg> }) {
   }
 }
 

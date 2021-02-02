@@ -76,15 +76,15 @@ export type GitlabOriginalIssue = Readonly<{
 }>;
 
 export type GitlabOriginalComment = Readonly<{
-  id: number,
-  body: string,
-  attachment: string,
-  author: GitlabOriginalUser,
-  created_at: string,
-  updated_at: string,
-  system: boolean,
-  noteable_id: number,
-  noteable_type: string,
-  noteable_iid: number,
-  resolvable: boolean
+  id: number;
+  body: string;
+  attachment: string;
+  author: GitlabOriginalUser;
+  created_at: string;
+  updated_at: string;
+  system: boolean;
+  noteable_id: number;
+  noteable_type: string;
+  noteable_iid: number;
+  resolvable: boolean;
 }>;

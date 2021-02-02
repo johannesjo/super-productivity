@@ -28,8 +28,8 @@ export class DialogJiraAddWorklogComponent {
     private _snackService: SnackService,
     private _projectService: ProjectService,
     @Inject(MAT_DIALOG_DATA) public data: {
-      issue: JiraIssue,
-      task: Task,
+      issue: JiraIssue;
+      task: Task;
     }
   ) {
     this.timeSpent = this.data.task.timeSpent;

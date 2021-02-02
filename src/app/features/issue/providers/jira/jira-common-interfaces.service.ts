@@ -46,7 +46,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false
-  ): Promise<{ taskChanges: Partial<Task>, issue: JiraIssue } | null> {
+  ): Promise<{ taskChanges: Partial<Task>; issue: JiraIssue } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }

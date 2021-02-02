@@ -88,11 +88,11 @@ export type JiraOriginalFields = Readonly<{
   timespent: number;
   description: string | null;
   comment?: {
-    comments: JiraOriginalComment[],
-    maxResults: number,
-    total: number,
-    startAt: number
-  }
+    comments: JiraOriginalComment[];
+    maxResults: number;
+    total: number;
+    startAt: number;
+  };
   assignee: JiraOriginalAuthor;
   updated: string;
   status: JiraOriginalStatus;
@@ -138,17 +138,17 @@ export type JiraOriginalTransition = Readonly<{
     id: string;
     statusCategory: {
       self: string;
-      id: 2,
+      id: 2;
       key: string;
       colorName: string;
       name: string;
-    }
-  },
-  hasScreen: false,
-  isGlobal: true,
-  isInitial: false,
-  isConditional: false,
-  fields: Record<string, unknown>
+    };
+  };
+  hasScreen: false;
+  isGlobal: true;
+  isInitial: false;
+  isConditional: false;
+  fields: Record<string, unknown>;
 }>;
 
 export type JiraIssueOriginal = Readonly<{

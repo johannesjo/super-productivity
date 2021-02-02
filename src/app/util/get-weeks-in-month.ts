@@ -2,7 +2,7 @@
 import { WeeksInMonth } from './get-week-in-month-model';
 
 export const getWeeksInMonth = (month: number, year: number): WeeksInMonth[] => {
-  const weeks: { start: number; end: number; }[] = [];
+  const weeks: { start: number; end: number }[] = [];
   const firstDate = new Date(year, month, 1);
   const lastDate = new Date(year, month + 1, 0);
 

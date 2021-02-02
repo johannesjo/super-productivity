@@ -48,7 +48,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
-  ): Promise<{ taskChanges: Partial<Task>, issue: GithubIssue } | null> {
+  ): Promise<{ taskChanges: Partial<Task>; issue: GithubIssue } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
