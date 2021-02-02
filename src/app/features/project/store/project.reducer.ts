@@ -35,7 +35,7 @@ import { moveItemInList, moveTaskForWorkContextLikeState } from '../../work-cont
 import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
 import { unique } from '../../../util/unique';
-import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../../issue/issue.const';
+import {CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE} from '../../issue/issue.const';
 import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
@@ -45,6 +45,7 @@ import { exists } from '../../../util/exists';
 import { Task } from '../../tasks/task.model';
 import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
 import { devError } from '../../../util/dev-error';
+import {CaldavCfg} from '../../issue/providers/caldav/caldav.model';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -93,6 +94,11 @@ export const selectGithubCfgByProjectId = createSelector(
 export const selectGitlabCfgByProjectId = createSelector(
   selectProjectById,
   (p: Project): GitlabCfg => p.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg
+);
+
+export const selectCaldavCfgByProjectId = createSelector(
+  selectProjectById,
+  (p: Project): CaldavCfg => p.issueIntegrationCfgs[CALDAV_TYPE] as CaldavCfg
 );
 
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(

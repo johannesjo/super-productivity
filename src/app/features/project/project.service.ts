@@ -6,7 +6,7 @@ import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
 import * as shortid from 'shortid';
 import {
-  selectArchivedProjects,
+  selectArchivedProjects, selectCaldavCfgByProjectId,
   selectGithubCfgByProjectId,
   selectGitlabCfgByProjectId,
   selectJiraCfgByProjectId,
@@ -29,6 +29,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue/issue.const';
 import { GitlabCfg } from '../issue/providers/gitlab/gitlab';
 import { ExportedProject } from './project-archive.model';
+import {CaldavCfg} from '../issue/providers/caldav/caldav.model';
 
 @Injectable({
   providedIn: 'root',
@@ -82,6 +83,10 @@ export class ProjectService {
 
   getGitlabCfgForProject$(projectId: string): Observable<GitlabCfg> {
     return this._store$.pipe(select(selectGitlabCfgByProjectId, {id: projectId}));
+  }
+
+  getCaldavCfgForProject$(projectId: string): Observable<CaldavCfg> {
+    return this._store$.pipe(select(selectCaldavCfgByProjectId, {id: projectId}));
   }
 
   getProjectsWithoutId$(projectId: string | null): Observable<Project[]> {

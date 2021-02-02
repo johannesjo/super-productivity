@@ -103,6 +103,7 @@ export class GlobalThemeService {
       ['github', 'assets/icons/github.svg'],
       ['gitlab', 'assets/icons/gitlab.svg'],
       ['jira', 'assets/icons/jira.svg'],
+      ['caldav', 'assets/icons/caldav.svg'],
       ['drag_handle', 'assets/icons/drag-handle.svg'],
       ['remove_today', 'assets/icons/remove-today-48px.svg'],
       ['estimate_remaining', 'assets/icons/estimate-remaining.svg'],
