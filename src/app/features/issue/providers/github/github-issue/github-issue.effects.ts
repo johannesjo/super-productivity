@@ -63,10 +63,10 @@ export class GithubIssueEffects {
       );
     }),
     map((cos) => cos
-      .filter(({cfg, task}: { cfg: GithubCfg, task: TaskWithSubTasks }): boolean =>
+      .filter(({cfg, task}: { cfg: GithubCfg; task: TaskWithSubTasks }): boolean =>
         isGithubEnabled(cfg) && cfg.isAutoPoll
       )
-      .map(({task}: { cfg: GithubCfg, task: TaskWithSubTasks }) => task)
+      .map(({task}: { cfg: GithubCfg; task: TaskWithSubTasks }) => task)
     ),
     tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
   );

@@ -56,7 +56,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     task: Task,
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false
-  ): Promise<{ taskChanges: Partial<Task>, issue: GitlabIssue } | null> {
+  ): Promise<{ taskChanges: Partial<Task>; issue: GitlabIssue } | null> {
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -113,7 +113,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     tasks: Task[],
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false
-  ): Promise<{ task: Task, taskChanges: Partial<Task>, issue: GitlabIssue }[]> {
+  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
     // so it makes the update check easier and faster
@@ -136,7 +136,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issues.push(...(await this._gitlabApiService.getByIds$(ids as string[], cfg).toPromise()));
     }
 
-    const updatedIssues: { task: Task, taskChanges: Partial<Task>, issue: GitlabIssue }[] = [];
+    const updatedIssues: { task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[] = [];
 
     for (i = 0; i < tasks.length; i++) {
       const issueUpdate: number = new Date(issues[i].updated_at).getTime();

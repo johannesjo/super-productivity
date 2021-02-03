@@ -63,7 +63,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadAppData(localRev: string): Promise<{ rev: string, data: AppDataComplete }> {
+  async downloadAppData(localRev: string): Promise<{ rev: string; data: AppDataComplete }> {
     this._globalProgressBarService.countUp(T.GPB.WEB_DAV_DOWNLOAD);
     const cfg = await this._cfg$.pipe(first()).toPromise();
     try {

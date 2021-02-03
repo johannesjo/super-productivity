@@ -60,7 +60,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     }
   }
 
-  async downloadAppData(localRev: string): Promise<{ rev: string, data: AppDataComplete }> {
+  async downloadAppData(localRev: string): Promise<{ rev: string; data: AppDataComplete }> {
     const r = await this._dropboxApiService.download<AppDataComplete>({
       path: DROPBOX_SYNC_FILE_PATH,
       localRev,

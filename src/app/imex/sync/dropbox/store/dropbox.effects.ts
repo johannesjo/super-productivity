@@ -52,7 +52,7 @@ export class DropboxEffects {
         msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED
       }), 200)
     ),
-    map(({accessToken, sync}: { accessToken: string, sync: SyncConfig }) => new UpdateGlobalConfigSection({
+    map(({accessToken, sync}: { accessToken: string; sync: SyncConfig }) => new UpdateGlobalConfigSection({
       sectionKey: 'sync',
       sectionCfg: ({
         ...sync,

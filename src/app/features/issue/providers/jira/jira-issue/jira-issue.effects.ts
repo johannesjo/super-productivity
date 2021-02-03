@@ -64,9 +64,9 @@ export class JiraIssueEffects {
     filter(({jiraCfg}) => isJiraEnabled(jiraCfg)),
     withLatestFrom(this._store$.pipe(select(selectTaskEntities))),
     tap(([{act, projectId, jiraCfg}, taskEntities]: [{
-      act: UpdateTask,
-      projectId: string | null,
-      jiraCfg: JiraCfg
+      act: UpdateTask;
+      projectId: string | null;
+      jiraCfg: JiraCfg;
     }, Dictionary<Task>]) => {
       const taskId = act.payload.task.id;
       const task = taskEntities[taskId];
@@ -273,10 +273,10 @@ export class JiraIssueEffects {
         ));
       }),
       map((cos) => cos
-        .filter(({cfg, task}: { cfg: JiraCfg, task: TaskWithSubTasks }) =>
+        .filter(({cfg, task}: { cfg: JiraCfg; task: TaskWithSubTasks }) =>
           isJiraEnabled(cfg) && cfg.isAutoPollTickets
         )
-        .map(({task}: { cfg: JiraCfg, task: TaskWithSubTasks }) => task)
+        .map(({task}: { cfg: JiraCfg; task: TaskWithSubTasks }) => task)
       ),
       tap((jiraTasks: TaskWithSubTasks[]) => {
         if (jiraTasks && jiraTasks.length > 0) {

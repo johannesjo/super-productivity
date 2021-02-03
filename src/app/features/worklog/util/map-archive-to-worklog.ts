@@ -26,7 +26,7 @@ const _getTimeSpentOnDay = (entities: any, task: Task): { [key: string]: number 
 export const mapArchiveToWorklog = (
   taskState: EntityState<Task>,
   noRestoreIds: string[] = [],
-  startEnd: { workStart: WorkStartEnd, workEnd: WorkStartEnd }): { worklog: Worklog, totalTimeSpent: number } => {
+  startEnd: { workStart: WorkStartEnd; workEnd: WorkStartEnd }): { worklog: Worklog; totalTimeSpent: number } => {
   const entities = taskState.entities;
   const worklog: Worklog = {};
   let totalTimeSpent = 0;

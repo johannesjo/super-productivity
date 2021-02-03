@@ -4,8 +4,8 @@ import { Task } from '../../tasks/task.model';
 import { TODAY_TAG } from '../../tag/tag.const';
 
 export const getCompleteStateForWorkContext = (workContext: WorkContext, taskState: EntityState<Task>, archive: EntityState<Task>): {
-  completeStateForWorkContext: EntityState<Task>,
-  unarchivedIds: string[]
+  completeStateForWorkContext: EntityState<Task>;
+  unarchivedIds: string[];
 } => {
   const wid = workContext.id;
 

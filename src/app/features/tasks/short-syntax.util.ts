@@ -17,10 +17,10 @@ export const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}]
 // export const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi');
 
 export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProjects?: Project[]): {
-  taskChanges: Partial<Task>,
-  newTagTitles: string[],
-  remindAt: number | null,
-  projectId: string | undefined,
+  taskChanges: Partial<Task>;
+  newTagTitles: string[];
+  remindAt: number | null;
+  projectId: string | undefined;
 } | undefined => {
   if (!task.title) {
     return;
@@ -73,8 +73,8 @@ export const shortSyntax = (task: Task | Partial<Task>, allTags?: Tag[], allProj
 };
 
 const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): {
-  title?: string,
-  projectId?: string,
+  title?: string;
+  projectId?: string;
 } => {
   // don't allow for issue tasks
   if (task.issueId) {
@@ -113,7 +113,7 @@ const parseProjectChanges = (task: Partial<TaskCopy>, allProjects?: Project[]): 
   return {};
 };
 
-const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChanges: Partial<TaskCopy>, newTagTitlesToCreate: string[] } => {
+const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): { taskChanges: Partial<TaskCopy>; newTagTitlesToCreate: string[] } => {
   const taskChanges: Partial<TaskCopy> = {};
 
   if (task.parentId) {

@@ -140,7 +140,7 @@ export class PersistenceService {
     'obstruction',
   );
 
-  onAfterSave$: Subject<{ appDataKey: AllowedDBKeys, data: unknown, isDataImport: boolean, isSyncModelChange: boolean, projectId?: string }>
+  onAfterSave$: Subject<{ appDataKey: AllowedDBKeys; data: unknown; isDataImport: boolean; isSyncModelChange: boolean; projectId?: string }>
     = new Subject();
   onAfterImport$: Subject<AppDataComplete> = new Subject();
 
@@ -404,7 +404,7 @@ export class PersistenceService {
       saveState: (data: any, {
         isDataImport = false,
         isSyncModelChange
-      }: { isDataImport?: boolean, isSyncModelChange: boolean }) => {
+      }: { isDataImport?: boolean; isSyncModelChange: boolean }) => {
         if (data && data.ids && data.entities) {
           data = checkFixEntityStateConsistency(data, appDataKey);
         }
@@ -460,7 +460,7 @@ export class PersistenceService {
       save: (projectId: string, data: any, {
         isDataImport = false,
         isSyncModelChange
-      }: { isDataImport?: boolean, isSyncModelChange?: boolean }) => this._saveToDb({
+      }: { isDataImport?: boolean; isSyncModelChange?: boolean }) => this._saveToDb({
         dbKey: appDataKey,
         data,
         isDataImport,
@@ -528,9 +528,9 @@ export class PersistenceService {
   private async _saveToDb({dbKey, data, isDataImport = false, projectId, isSyncModelChange = false}: {
     dbKey: AllowedDBKeys;
     data: any;
-    projectId?: string,
-    isDataImport?: boolean,
-    isSyncModelChange?: boolean,
+    projectId?: string;
+    isDataImport?: boolean;
+    isSyncModelChange?: boolean;
   }): Promise<any> {
     if (!this._isBlockSaving || isDataImport === true) {
       const idbKey = this._getIDBKey(dbKey, projectId);
@@ -557,8 +557,8 @@ export class PersistenceService {
 
   private async _removeFromDb({dbKey, isDataImport = false, projectId}: {
     dbKey: AllowedDBKeys;
-    projectId?: string,
-    isDataImport?: boolean,
+    projectId?: string;
+    isDataImport?: boolean;
   }): Promise<any> {
     const idbKey = this._getIDBKey(dbKey, projectId);
     if (!this._isBlockSaving || isDataImport === true) {
@@ -571,9 +571,9 @@ export class PersistenceService {
   }
 
   private async _loadFromDb({legacyDBKey, dbKey, projectId}: {
-    legacyDBKey: string,
-    dbKey: AllowedDBKeys,
-    projectId?: string,
+    legacyDBKey: string;
+    dbKey: AllowedDBKeys;
+    projectId?: string;
   }): Promise<any> {
     const idbKey = this._getIDBKey(dbKey, projectId);
     // NOTE: too much clutter
@@ -583,9 +583,9 @@ export class PersistenceService {
   }
 
   private _updateInMemory({appDataKey, projectId, data}: {
-    appDataKey: AllowedDBKeys,
-    projectId?: string,
-    data: any
+    appDataKey: AllowedDBKeys;
+    projectId?: string;
+    data: any;
   }) {
     if (!this._inMemoryComplete) {
       throw new Error('No in memory copy yet');
@@ -600,10 +600,10 @@ export class PersistenceService {
   }
 
   private _extendAppDataComplete({complete, appDataKey, projectId, data}: {
-    complete: AppDataComplete | AppDataCompleteOptionalSyncModelChange,
-    appDataKey: AllowedDBKeys,
-    projectId?: string,
-    data: any
+    complete: AppDataComplete | AppDataCompleteOptionalSyncModelChange;
+    appDataKey: AllowedDBKeys;
+    projectId?: string;
+    data: any;
   }): AppDataComplete | AppDataCompleteOptionalSyncModelChange {
     // console.log(appDataKey, data && data.ids && data.ids.length);
     return {

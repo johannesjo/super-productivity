@@ -213,9 +213,9 @@ export class AppComponent implements OnDestroy {
 
   private _initElectronErrorHandler() {
     (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.ERROR, (ev, data: {
-      error: any,
-      stack: any,
-      errorStr: string | unknown,
+      error: any;
+      stack: any;
+      errorStr: string | unknown;
     }) => {
       const errMsg = (typeof data.errorStr === 'string')
         ? data.errorStr

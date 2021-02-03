@@ -112,7 +112,7 @@ export class IdleService {
             idleTime$: this.idleTime$,
           }
         }).afterClosed()
-          .subscribe((res: { task: Task | string, isResetBreakTimer: boolean, isTrackAsBreak: boolean }) => {
+          .subscribe((res: { task: Task | string; isResetBreakTimer: boolean; isTrackAsBreak: boolean }) => {
             const {task, isResetBreakTimer, isTrackAsBreak} = res;
             const timeSpent = this._idleTime$.getValue();
 

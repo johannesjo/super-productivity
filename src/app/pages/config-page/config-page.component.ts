@@ -61,7 +61,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     return section.key;
   }
 
-  saveGlobalCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }) {
+  saveGlobalCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: any }) {
     const config = $event.config;
     const sectionKey = $event.sectionKey as GlobalConfigSectionKey;
 

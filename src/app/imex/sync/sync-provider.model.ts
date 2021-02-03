@@ -22,5 +22,5 @@ export interface SyncProviderServiceInterface {
 
   uploadAppData(data: AppDataComplete, localRev: string | null, isForceOverwrite?: boolean): Promise<string | Error>;
 
-  downloadAppData(localRev: string | null): Promise<{ rev: string, data: AppDataComplete | undefined }>;
+  downloadAppData(localRev: string | null): Promise<{ rev: string; data: AppDataComplete | undefined }>;
 }

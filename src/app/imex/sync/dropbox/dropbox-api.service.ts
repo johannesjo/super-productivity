@@ -44,7 +44,7 @@ export class DropboxApiService {
   async download<T>({
     path,
     localRev
-  }: { path: string; localRev?: string | null }): Promise<{ meta: DropboxFileMetadata, data: T }> {
+  }: { path: string; localRev?: string | null }): Promise<{ meta: DropboxFileMetadata; data: T }> {
     await this._isReady$.toPromise();
 
     return this._request({
@@ -114,10 +114,10 @@ export class DropboxApiService {
   async _request({url, method = 'GET', data, headers = {}, params, accessToken}: {
     url: string;
     method?: Method;
-    headers?: { [key: string]: any },
-    data?: string | Record<string, unknown>
-    params?: { [key: string]: string },
-    accessToken?: string
+    headers?: { [key: string]: any };
+    data?: string | Record<string, unknown>;
+    params?: { [key: string]: string };
+    accessToken?: string;
   }): Promise<AxiosResponse> {
     await this._isReady$.toPromise();
     accessToken = accessToken || await this._accessToken$.pipe(first()).toPromise() || undefined;

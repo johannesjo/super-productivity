@@ -515,8 +515,8 @@ export function projectReducer(
       const {projectId, providerCfg, issueProviderKey, isOverwrite}: {
         projectId: string;
         issueProviderKey: IssueProviderKey;
-        providerCfg: Partial<IssueIntegrationCfg>,
-        isOverwrite: boolean
+        providerCfg: Partial<IssueIntegrationCfg>;
+        isOverwrite: boolean;
       } = action.payload;
       const currentProject = state.entities[projectId] as Project;
       return projectAdapter.updateOne({

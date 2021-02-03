@@ -17,7 +17,7 @@ export class ConfigFormComponent {
   T: typeof T = T;
   config?: Record<string, unknown>;
   @Input() sectionKey?: GlobalConfigSectionKey | ProjectCfgFormKey;
-  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: unknown }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey; config: unknown }> = new EventEmitter();
   fields?: FormlyFieldConfig[];
   form: FormGroup = new FormGroup({});
   options: FormlyFormOptions = {};

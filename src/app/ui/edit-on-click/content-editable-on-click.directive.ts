@@ -8,7 +8,7 @@ import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output }
 })
 export class ContentEditableOnClickDirective implements OnInit, OnDestroy {
   @Input() isResetAfterEdit: boolean = false;
-  @Output() editFinished: EventEmitter<{ isChanged: boolean, newVal: string, $taskEl: HTMLElement | null, event: Event }> = new EventEmitter();
+  @Output() editFinished: EventEmitter<{ isChanged: boolean; newVal: string; $taskEl: HTMLElement | null; event: Event }> = new EventEmitter();
   private _lastDomValue: string | undefined;
   private _lastOutsideVal: string | undefined;
   private readonly _el: HTMLElement;

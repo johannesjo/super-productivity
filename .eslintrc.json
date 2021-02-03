@@ -64,7 +64,7 @@
           }
         ],
         "id-blacklist": "off",
-        "@typescript-eslint/member-delimiter-style": "off",
+        "@typescript-eslint/member-delimiter-style": "warn",
         "no-shadow": "off", // must be disabled, no-shadow rule handled by the next line
         "@typescript-eslint/no-shadow": "warn",
         "prefer-arrow/prefer-arrow-functions": "off",

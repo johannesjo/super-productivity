@@ -38,9 +38,9 @@ export class DialogJiraTransitionComponent {
     private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
     private _snackService: SnackService,
     @Inject(MAT_DIALOG_DATA) public data: {
-      issue: JiraIssueReduced,
-      localState: IssueLocalState,
-      task: Task,
+      issue: JiraIssueReduced;
+      localState: IssueLocalState;
+      task: Task;
     }
   ) {
     if (!this.data.task.projectId) {
