@@ -19,6 +19,7 @@ import '@angular/common/locales/global/zh-Hant';
 import '@angular/common/locales/global/it';
 import '@angular/common/locales/global/pt';
 import '@angular/common/locales/global/nl';
+import '@angular/common/locales/global/nb';
 
 export const ALL_THEMES = [
   'blue',
