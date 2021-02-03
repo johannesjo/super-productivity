@@ -32,8 +32,8 @@
                  class="due-date"
                  mat-ripple>
               <div class="date-and-time-left">
-                <div class="date hide-xs">{{task.reminderData.remindAt|date:'EE, d MMM, h:mm'}}</div>
-                <div class="date show-xs-only">{{task.reminderData.remindAt|date:'d MMM, h:mm'}}</div>
+                <div class="date hide-xs">{{task.reminderData.remindAt|date:'EE, d MMM, hh:mm'}}</div>
+                <div class="date show-xs-only">{{task.reminderData.remindAt|date:'d MMM, hh:mm'}}</div>
 
                 <div class="time-left">
                   ({{task.reminderData.remindAt|humanizeTimestamp}})
