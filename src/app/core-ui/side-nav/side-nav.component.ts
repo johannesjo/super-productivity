@@ -153,7 +153,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   get isProjectsExpanded() {
-    return (localStorage.getItem(LS_IS_PROJECT_LIST_EXPANDED) == "true");
+    return (localStorage.getItem(LS_IS_PROJECT_LIST_EXPANDED) === 'true');
   }
 
   set isProjectsExpanded(isExpanded: boolean) {
@@ -161,7 +161,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   get isTagsExpanded() {
-    return (localStorage.getItem(LS_IS_TAG_LIST_EXPANDED) == "true");
+    return (localStorage.getItem(LS_IS_TAG_LIST_EXPANDED) === 'true');
   }
 
   set isTagsExpanded(isExpanded: boolean) {
