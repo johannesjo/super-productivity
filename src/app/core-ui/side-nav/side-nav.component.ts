@@ -29,8 +29,8 @@ import { FocusKeyManager } from '@angular/cdk/a11y';
 import { MatMenuItem } from '@angular/material/menu';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
+import { LS_IS_PROJECT_LIST_EXPANDED, LS_IS_TAG_LIST_EXPANDED } from '../../core/persistence/ls-keys.const';
 
-const IS_SHOW_INITIALLY = false;
 
 @Component({
   selector: 'side-nav',
@@ -45,8 +45,7 @@ export class SideNavComponent implements OnDestroy {
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
   keyboardFocusTimeout?: number;
   @ViewChild('projectExpandBtn', {read: ElementRef}) projectExpandBtn?: ElementRef;
-  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
-  isProjectsExpanded: boolean = IS_SHOW_INITIALLY;
+  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(this.isProjectsExpanded);
   projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.projectService.list$
@@ -59,8 +58,7 @@ export class SideNavComponent implements OnDestroy {
     )
   );
   @ViewChild('tagExpandBtn', {read: ElementRef}) tagExpandBtn?: ElementRef;
-  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(IS_SHOW_INITIALLY);
-  isTagsExpanded: boolean = IS_SHOW_INITIALLY;
+  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(this.isTagsExpanded);
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
       ? this.tagService.tagsNoMyDay$
@@ -154,9 +152,26 @@ export class SideNavComponent implements OnDestroy {
     this.scrollToNotes.emit();
   }
 
+  get isProjectsExpanded() {
+    return (localStorage.getItem(LS_IS_PROJECT_LIST_EXPANDED) == "true");
+  }
+
+  set isProjectsExpanded(isExpanded: boolean) {
+    localStorage.setItem(LS_IS_PROJECT_LIST_EXPANDED, isExpanded.toString());
+  }
+
+  get isTagsExpanded() {
+    return (localStorage.getItem(LS_IS_TAG_LIST_EXPANDED) == "true");
+  }
+
+  set isTagsExpanded(isExpanded: boolean) {
+    localStorage.setItem(LS_IS_TAG_LIST_EXPANDED, isExpanded.toString());
+  }
+
   toggleExpandProjects() {
-    this.isProjectsExpanded = !this.isProjectsExpanded;
-    this.isProjectsExpanded$.next(this.isProjectsExpanded);
+    const newState: boolean = !this.isProjectsExpanded;
+    this.isProjectsExpanded = newState;
+    this.isProjectsExpanded$.next(newState);
   }
 
   toggleExpandProjectsLeftRight(ev: KeyboardEvent) {
@@ -182,8 +197,9 @@ export class SideNavComponent implements OnDestroy {
   }
 
   toggleExpandTags() {
-    this.isTagsExpanded = !this.isTagsExpanded;
-    this.isTagsExpanded$.next(this.isTagsExpanded);
+    const newState: boolean = !this.isTagsExpanded;
+    localStorage.setItem(LS_IS_TAG_LIST_EXPANDED, newState.toString());
+    this.isTagsExpanded$.next(newState);
   }
 
   toggleExpandTagsLeftRight(ev: KeyboardEvent) {
