@@ -16,7 +16,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { androidInterface } from '../../../core/android/android-interface';
 import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-session';
 import { GoogleDriveFileMeta } from './google-api.model';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import * as querystring from 'querystring';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
@@ -83,13 +83,28 @@ export class GoogleApiService {
       }
     };
 
+    // TODO cleanup later
     if (IS_ELECTRON) {
       const session = this._session;
       console.log(this.isLoggedIn && !this._isTokenExpired(session));
       if (this.isLoggedIn && !this._isTokenExpired(session)) {
         return new Promise((resolve) => resolve(true));
       } else if (session.refreshToken && (!this._session.accessToken || this._isTokenExpired(session))) {
-        throw new Error('HANDLE');
+        try {
+          const {data} = await this._getAccessTokenFromRefreshToken(session.refreshToken);
+          console.log({data});
+          if (data) {
+            this._updateSession({
+              accessToken: data.access_token,
+              expiresAt: data.expires_in + Date.now(),
+            });
+            return new Promise((resolve) => resolve(true));
+          }
+          throw new Error('No data');
+        } catch (e) {
+          console.error(e);
+          throw new Error('Token creation failed');
+        }
       } else {
         console.log('NO_TOKEN');
         const authCode = await this._matDialog.open(DialogGetAndEnterAuthCodeComponent, {
@@ -120,22 +135,6 @@ export class GoogleApiService {
         }
         throw new Error('No token');
       }
-
-      // (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
-      // return new Promise((resolve, reject) => {
-      //   (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN, (ev, data: any) => {
-      //     this._updateSession({
-      //       accessToken: data.access_token,
-      //       expiresAt: data.expiry_date,
-      //       refreshToken: data.refresh_token,
-      //     });
-      //     showSuccessMsg();
-      //     resolve(data);
-      //   });
-      //   (this._electronService.ipcRenderer as typeof ipcRenderer).on(IPC.GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
-      //     reject(err);
-      //   });
-      // });
     } else if (IS_ANDROID_WEB_VIEW) {
       return androidInterface.getGoogleToken().then((token) => {
         this._saveToken({
@@ -299,7 +298,13 @@ export class GoogleApiService {
     });
   }
 
-  private _getTokenFromAuthCode(code: string): Promise<any> {
+  private _getTokenFromAuthCode(code: string): Promise<AxiosResponse<{
+    access_token: string;
+    expires_in: number;
+    token_type: string;
+    scope: string;
+    refresh_token: string;
+  }>> {
     return axios.request({
       url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
         client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
@@ -309,6 +314,23 @@ export class GoogleApiService {
         redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
         // code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
         code,
+      }),
+      method: 'POST',
+    });
+  }
+
+  private _getAccessTokenFromRefreshToken(refreshToken: string): Promise<AxiosResponse<{
+    access_token: string;
+    expires_in: number;
+    token_type: string;
+    scope: string;
+  }>> {
+    return axios.request({
+      url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
+        client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
+        client_secret: 'Er6sAwgXCDKPgw7y8jSuQQTv',
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
       }),
       method: 'POST',
     });
