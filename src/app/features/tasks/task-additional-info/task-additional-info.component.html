@@ -2,10 +2,10 @@
      [@taskAdditionalInfoTaskChange]="task.id"
      class="wrapper">
 
-  <header *ngIf="(layoutService.isNotesOver$|async)"
+  <header *ngIf="IS_TOUCH_ONLY || (layoutService.isNotesOver$|async)"
           class="task-title-wrapper">
     <button (click)="close()"
-            *ngIf="layoutService.isScreenXs$|async"
+            *ngIf="(layoutService.isScreenXs$|async)"
             mat-icon-button>
       <mat-icon>arrow_back</mat-icon>
     </button>

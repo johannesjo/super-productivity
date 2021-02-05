@@ -1,4 +1,4 @@
-<ng-container *ngIf="isTouchOnly">
+<ng-container *ngIf="IS_TOUCH_ONLY">
   <div #blockLeftEl
        class="block-left bg-400">
     <mat-icon *ngIf="!task?.isDone">check</mat-icon>
@@ -91,7 +91,7 @@
         </div>
       </div>
 
-      <div (click)="isTouchOnly && toggleShowAdditionalInfoOpen()"
+      <div (click)="IS_TOUCH_ONLY && toggleShowAdditionalInfoOpen()"
            class="title-and-tags-wrapper">
         <div #contentEditableOnClickEl
              (editFinished)="updateTaskTitleIfChanged($event)"
@@ -241,21 +241,21 @@
         <mat-menu #contextMenu="matMenu"
                   (close)="focusSelf()">
           <button (click)="startTask()"
-                  *ngIf="isTouchOnly && !task?.isDone && !isCurrent && !task?.subTasks?.length"
+                  *ngIf="IS_TOUCH_ONLY && !task?.isDone && !isCurrent && !task?.subTasks?.length"
                   mat-menu-item>
             <mat-icon class="play-icon"
                       svgIcon="play"></mat-icon>
             {{T.F.TASK.CMP.TRACK_TIME|translate}}
           </button>
           <button (click)="pauseTask()"
-                  *ngIf="isTouchOnly && !task?.isDone && isCurrent && !task?.subTasks?.length"
+                  *ngIf="IS_TOUCH_ONLY && !task?.isDone && isCurrent && !task?.subTasks?.length"
                   mat-menu-item>
             <mat-icon>pause</mat-icon>
             {{T.F.TASK.CMP.TRACK_TIME_STOP|translate}}
           </button>
 
           <button (click)="removeFromMyDay()"
-                  *ngIf="isTouchOnly && !task?.parentId && !task?.isDone && task?.tagIds.includes(TODAY_TAG_ID) && (task?.projectId || task?.tagIds?.length > 1)"
+                  *ngIf="IS_TOUCH_ONLY && !task?.parentId && !task?.isDone && task?.tagIds.includes(TODAY_TAG_ID) && (task?.projectId || task?.tagIds?.length > 1)"
                   mat-menu-item>
             <mat-icon svgIcon="remove_today"></mat-icon>
             {{T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate}}

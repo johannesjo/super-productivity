@@ -24,7 +24,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
-import { isTouchOnly } from '../../../util/is-touch';
+import { isTouchOnly, IS_TOUCH_ONLY } from '../../../util/is-touch';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { ReminderCopy } from '../../reminder/reminder.model';
@@ -69,6 +69,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChildren(TaskAdditionalInfoItemComponent) itemEls?: QueryList<TaskAdditionalInfoItemComponent>;
   @ViewChild('attachmentPanelElRef') attachmentPanelElRef?: TaskAdditionalInfoItemComponent;
 
+  IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   selectedItemIndex: number = 0;
   isFocusNotes: boolean = false;

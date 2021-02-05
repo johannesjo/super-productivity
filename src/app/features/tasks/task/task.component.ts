@@ -51,7 +51,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   task!: TaskWithSubTasks;
   @Input() isBacklog: boolean = false;
   T: typeof T = T;
-  isTouchOnly: boolean = IS_TOUCH_ONLY;
+  IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   isDragOver: boolean = false;
   isLockPanLeft: boolean = false;
   isLockPanRight: boolean = false;
