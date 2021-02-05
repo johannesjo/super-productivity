@@ -59,7 +59,7 @@ export class SideNavComponent implements OnDestroy {
     )
   );
   @ViewChild('tagExpandBtn', {read: ElementRef}) tagExpandBtn?: ElementRef;
-  isTagsExpanded: boolean = this.fetchTagListState(LS_IS_TAG_LIST_EXPANDED);
+  isTagsExpanded: boolean = this.fetchTagListState();
   isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(this.isTagsExpanded);
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap(isExpanded => isExpanded
