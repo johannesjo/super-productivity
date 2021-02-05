@@ -31,6 +31,5 @@ export const getGoogleAuthUrl = (opts = {}) => _getGoogleAuthUrl({
   // code_challenge: codeChallenge,
 });
 
-
 export const GOOGLE_AUTH_URL = getGoogleAuthUrl();
 console.log(getGoogleAuthUrl());

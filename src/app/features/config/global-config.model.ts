@@ -133,6 +133,7 @@ export type GlobalSectionConfig
   | PomodoroConfig
   | DropboxSyncConfig
   | KeyboardConfig
+  | SyncConfig
   ;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
