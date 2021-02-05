@@ -19,6 +19,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { truncate } from '../../util/truncate';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
+import { getSyncErrorStr } from './get-sync-error-str';
 
 @Injectable({
   providedIn: 'root',
@@ -101,7 +102,7 @@ export class SyncProviderService {
       this._snackService.open({
         msg: T.F.SYNC.S.UNKNOWN_ERROR,
         translateParams: {
-          err: truncate(revRes.toString(), 100),
+          err: getSyncErrorStr(revRes),
         },
         type: 'ERROR'
       });

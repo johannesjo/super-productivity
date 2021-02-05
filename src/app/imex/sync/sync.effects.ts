@@ -28,7 +28,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { TaskService } from '../../features/tasks/task.service';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SyncProviderService } from './sync-provider.service';
-import { truncate } from '../../util/truncate';
+import { getSyncErrorStr } from './get-sync-error-str';
 
 @Injectable()
 export class SyncEffects {
@@ -116,14 +116,10 @@ export class SyncEffects {
           }
         })
         .catch((err: unknown) => {
-          console.error(err);
-          const e: string = err && (err as any)?.toString
-            ? (err as any).toString()
-            : '???';
           this._snackService.open({
             msg: T.F.SYNC.S.UNKNOWN_ERROR,
             translateParams: {
-              err: truncate(e.toString(), 100),
+              err: getSyncErrorStr(err),
             },
             type: 'ERROR'
           });
