@@ -6,7 +6,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/drive.install',
 ];
-const {codeVerifier} = generatePKCECodes();
+const {codeVerifier} = generatePKCECodes(80);
 export const GOOGLE_AUTH_CODE_VERIFIER = codeVerifier;
 
 const _getGoogleAuthUrl = (opts: any = {}) => {
@@ -28,8 +28,9 @@ export const getGoogleAuthUrl = (opts = {}) => _getGoogleAuthUrl({
   access_type: 'offline',
   scope: SCOPES,
   redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
+  // TODO make real code challenge work
   // code_challenge: codeChallenge,
+  code_challenge: codeVerifier,
 });
 
 export const GOOGLE_AUTH_URL = getGoogleAuthUrl();
-console.log(getGoogleAuthUrl());

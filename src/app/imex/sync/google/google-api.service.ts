@@ -20,7 +20,7 @@ import axios, { AxiosResponse } from 'axios';
 import * as querystring from 'querystring';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
-import { GOOGLE_AUTH_URL } from './get-google-auth-url';
+import { GOOGLE_AUTH_CODE_VERIFIER, GOOGLE_AUTH_URL } from './get-google-auth-url';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -310,9 +310,8 @@ export class GoogleApiService {
         client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
         client_secret: 'Er6sAwgXCDKPgw7y8jSuQQTv',
         grant_type: 'authorization_code',
-        // redirect_uri: 'urn:ietf:wg:oauth:2.0:oob:auto',
         redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
-        // code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
+        code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
         code,
       }),
       method: 'POST',
