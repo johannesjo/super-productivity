@@ -82,7 +82,7 @@ export class GoogleApiService {
     return getGoogleSession();
   }
 
-  async login(isSkipSuccessMsg: boolean = false): Promise<any> {
+  login(isSkipSuccessMsg: boolean = false): Promise<any> {
     const showSuccessMsg = () => {
       if (!(isSkipSuccessMsg)) {
         this._snackIt('SUCCESS', T.F.GOOGLE.S_API.SUCCESS_LOGIN);
@@ -91,56 +91,7 @@ export class GoogleApiService {
 
     // TODO cleanup later
     if (IS_ELECTRON) {
-      const session = this._session;
-      console.log(this.isLoggedIn && !this._isTokenExpired(session));
-      if (this.isLoggedIn && !this._isTokenExpired(session)) {
-        return new Promise((resolve) => resolve(true));
-      } else if (session.refreshToken && (!this._session.accessToken || this._isTokenExpired(session))) {
-        try {
-          const {data} = await this._getAccessTokenFromRefreshToken(session.refreshToken);
-          console.log({data});
-          if (data) {
-            this._updateSession({
-              accessToken: data.access_token,
-              expiresAt: data.expires_in + Date.now(),
-            });
-            return new Promise((resolve) => resolve(true));
-          }
-          throw new Error('No data');
-        } catch (e) {
-          console.error(e);
-          throw new Error('Token creation failed');
-        }
-      } else {
-        console.log('NO_TOKEN');
-        const authCode = await this._matDialog.open(DialogGetAndEnterAuthCodeComponent, {
-          restoreFocus: true,
-          data: {
-            providerName: 'Google Drive',
-            url: GOOGLE_AUTH_URL,
-          },
-        }).afterClosed().toPromise();
-        console.log({authCode});
-        if (authCode) {
-          try {
-            const {data} = await this._getTokenFromAuthCode(authCode);
-            console.log({data});
-            if (data) {
-              this._updateSession({
-                accessToken: data.access_token,
-                expiresAt: data.expires_in + Date.now(),
-                refreshToken: data.refresh_token,
-              });
-              return new Promise((resolve) => resolve(true));
-            }
-            throw new Error('No data');
-          } catch (e) {
-            console.error(e);
-            throw new Error('Token creation failed');
-          }
-        }
-        throw new Error('No token');
-      }
+      return this._loginElectron();
     } else if (IS_ANDROID_WEB_VIEW) {
       return androidInterface.getGoogleToken().then((token) => {
         this._saveToken({
@@ -302,6 +253,54 @@ export class GoogleApiService {
       },
       data: multipart.body
     });
+  }
+
+  private async _loginElectron(): Promise<any> {
+    const session = this._session;
+    if (this.isLoggedIn && !this._isTokenExpired(session)) {
+      return new Promise((resolve) => resolve(true));
+    } else if (session.refreshToken && (!this._session.accessToken || this._isTokenExpired(session))) {
+      try {
+        const {data} = await this._getAccessTokenFromRefreshToken(session.refreshToken);
+        if (data) {
+          this._updateSession({
+            accessToken: data.access_token,
+            expiresAt: data.expires_in + Date.now(),
+          });
+          return new Promise((resolve) => resolve(true));
+        }
+        return Promise.reject('No data - Token refresh failed');
+      } catch (e) {
+        console.error(e);
+        return Promise.reject('Token refresh failed');
+      }
+    } else {
+      const authCode = await this._matDialog.open(DialogGetAndEnterAuthCodeComponent, {
+        restoreFocus: true,
+        data: {
+          providerName: 'Google Drive',
+          url: GOOGLE_AUTH_URL,
+        },
+      }).afterClosed().toPromise();
+      if (authCode) {
+        try {
+          const {data} = await this._getTokenFromAuthCode(authCode);
+          if (data) {
+            this._updateSession({
+              accessToken: data.access_token,
+              expiresAt: data.expires_in + Date.now(),
+              refreshToken: data.refresh_token,
+            });
+            return new Promise((resolve) => resolve(true));
+          }
+          return Promise.reject('No data - Token creation failed');
+        } catch (e) {
+          console.error(e);
+          return Promise.reject('Token creation failed');
+        }
+      }
+      return Promise.reject('No token');
+    }
   }
 
   private _getTokenFromAuthCode(code: string): Promise<AxiosResponse<{
