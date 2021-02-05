@@ -17,7 +17,6 @@ import {
 } from 'rxjs/operators';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { SyncService } from '../../imex/sync/sync.service';
-import { SyncProvider } from './sync-provider.model';
 import { SYNC_BEFORE_CLOSE_ID, SYNC_INITIAL_SYNC_TRIGGER, SYNC_MIN_INTERVAL } from '../../imex/sync/sync.const';
 import { combineLatest, EMPTY, merge, Observable, of } from 'rxjs';
 import { isOnline$ } from '../../util/is-online';
@@ -104,7 +103,7 @@ export class SyncEffects {
       if (!isOnline) {
         // this._snackService.open({msg: T.F.DROPBOX.S.OFFLINE, type: 'ERROR'});
         if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
-          this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
+          this._syncService.setInitialSyncDone(true);
         }
         // we need to return something
         return of(null);
@@ -112,7 +111,7 @@ export class SyncEffects {
       return this._syncProviderService.sync()
         .then(() => {
           if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
-            this._syncService.setInitialSyncDone(true, SyncProvider.Dropbox);
+            this._syncService.setInitialSyncDone(true);
           }
         })
         .catch((err: unknown) => {
