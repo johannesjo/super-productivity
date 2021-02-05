@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
-import { GoogleDriveSyncConfig, SyncConfig } from '../../../features/config/global-config.model';
+import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { AppDataComplete, SyncGetRevResult } from '../sync.model';
 import { SyncProvider, SyncProviderServiceInterface } from '../sync-provider.model';
@@ -37,28 +37,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     private _dataInitService: DataInitService,
     private _compressionService: CompressionService,
   ) {
-
-    this._globalConfigService.cfg$.pipe(
-      map(syncCfg => syncCfg.sync),
-      tap(console.log),
-      distinctUntilChanged((a: SyncConfig, b: SyncConfig) => {
-        console.log(a.googleDriveSync.authCode, b.googleDriveSync.authCode);
-        return a.googleDriveSync.authCode === b.googleDriveSync.authCode;
-      }),
-    ).subscribe((syncCfg: SyncConfig) => {
-      console.log('BEFORE', syncCfg);
-      if (syncCfg.googleDriveSync.authCode) {
-        console.log('I am here!');
-        this._globalConfigService.updateSection('sync', {
-          ...syncCfg,
-          googleDriveSync: {
-            ...syncCfg.googleDriveSync,
-            authCode: null,
-          }
-        });  this._googleApiService.getTokenFromAuthCode(syncCfg.googleDriveSync.authCode).then(console.log);
-      }
-    });
-
     // setInterval(() => {
     //   console.log('REQUEST!!!');
     //   if (IS_ELECTRON) {

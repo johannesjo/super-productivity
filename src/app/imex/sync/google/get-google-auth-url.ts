@@ -6,7 +6,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/drive.install',
 ];
-const {codeVerifier, codeChallenge} = generatePKCECodes();
+const {codeVerifier} = generatePKCECodes();
 export const GOOGLE_AUTH_CODE_VERIFIER = codeVerifier;
 
 const _getGoogleAuthUrl = (opts: any = {}) => {

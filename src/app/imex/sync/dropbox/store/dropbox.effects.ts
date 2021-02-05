@@ -23,7 +23,7 @@ export class DropboxEffects {
     shareReplay(),
   );
 
-  @Effect() generateAccessCode$: any = this._actions$.pipe(
+  @Effect() getAuthTokenFromAccessCode: any = this._actions$.pipe(
     ofType(
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),

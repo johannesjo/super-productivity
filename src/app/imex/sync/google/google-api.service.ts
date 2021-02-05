@@ -18,7 +18,6 @@ import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-s
 import { GoogleDriveFileMeta } from './google-api.model';
 import axios from 'axios';
 import * as querystring from 'querystring';
-import { GOOGLE_AUTH_CODE_VERIFIER } from './get-google-auth-url';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -86,7 +85,10 @@ export class GoogleApiService {
 
       if (this.isLoggedIn && !this._isTokenExpired(session)) {
         return new Promise((resolve) => resolve(true));
+      } else if (session.refreshToken) {
+        throw new Error('HANDLE');
       } else {
+        console.log('NO_TOKEN');
         return Promise.reject('No token');
       }
 
@@ -268,7 +270,7 @@ export class GoogleApiService {
     });
   }
 
-  getTokenFromAuthCode(code: string) {
+  getAndSetTokenFromAuthCode(code: string) {
     return axios.request({
       url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
         client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
@@ -280,6 +282,12 @@ export class GoogleApiService {
         code,
       }),
       method: 'POST',
+    }).then(({data}) => {
+      this._updateSession({
+        accessToken: data.access_token,
+        expiresAt: data.expiry_date,
+        refreshToken: data.refresh_token,
+      });
     });
   }
 
@@ -338,6 +346,7 @@ export class GoogleApiService {
     [key: string]: any;
     accessToken?: string;
     access_token?: string;
+    expires_in?: number;
     expires_at?: string | number;
     expiresAt?: string | number;
     Zi?: {
@@ -347,7 +356,7 @@ export class GoogleApiService {
   }) {
     const r: any = res;
     const accessToken = r.accessToken || r.access_token || r.Zi?.access_token;
-    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi?.expires_at);
+    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi?.expires_at || Date.now() + r.expire_in);
 
     if (!accessToken) {
       console.log(res);
