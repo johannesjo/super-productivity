@@ -4,6 +4,8 @@ import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-conf
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
 import { DROPBOX_AUTH_CODE_URL } from '../../../imex/sync/dropbox/dropbox.const';
 import { IS_F_DROID_APP } from '../../../util/is-android-web-view';
+import { IS_ELECTRON } from '../../../app.constants';
+import { GOOGLE_AUTH_URL } from '../../../imex/sync/google/get-google-auth-url';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -52,7 +54,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             // text: `<p>Please open the following link and copy the auth code provided there</p>`,
             text: T.F.SYNC.FORM.DROPBOX.FOLLOW_LINK,
           },
-        }, {
+        },
+        {
           type: 'tpl',
           templateOptions: {
             tag: 'p',
@@ -90,6 +93,22 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       key: 'googleDriveSync',
       // templateOptions: {label: 'Address'},
       fieldGroup: [
+        ...(IS_ELECTRON
+          ? [{
+            type: 'tpl',
+            templateOptions: {
+              tag: 'p',
+              // text: `<p>Please open the following link and copy the auth code provided there</p>`,
+              text: T.F.SYNC.FORM.DROPBOX.FOLLOW_LINK,
+            },
+          }, {
+            type: 'tpl',
+            templateOptions: {
+              tag: 'p',
+              text: `<a href="${GOOGLE_AUTH_URL}" target="_blank">https://accounts.google.com/o/oauth2/approval/v2/approvalnativeapp</a>`,
+            },
+          }]
+          : []),
         {
           key: 'syncFileName',
           type: 'input',

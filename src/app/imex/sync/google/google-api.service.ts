@@ -11,7 +11,6 @@ import { BehaviorSubject, EMPTY, from, merge, Observable, of, throwError, timer 
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { isOnline } from '../../../util/is-online';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { androidInterface } from '../../../core/android/android-interface';
@@ -60,7 +59,7 @@ export class GoogleApiService {
 
   constructor(
     private readonly _http: HttpClient,
-    private readonly _electronService: ElectronService,
+    // private readonly _electronService: ElectronService,
     private readonly _snackService: SnackService,
     private readonly _bannerService: BannerService,
   ) {

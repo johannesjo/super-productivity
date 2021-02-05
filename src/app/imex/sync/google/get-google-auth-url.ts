@@ -1,15 +1,14 @@
-import querystring from 'querystring';
+import * as querystring from 'querystring';
 
-const CLIENT_ID = '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com';
+const CLIENT_ID = '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com';
 const SCOPES = [
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/drive.install',
 ];
 // const {codeVerifier, codeChallenge} = generatePKCECodes();
-// <
 // export const DROPBOX_CODE_VERIFIER = codeVerifier;
 
-const _getGoogleAuthUrl = (opts = {}) => {
+const _getGoogleAuthUrl = (opts: any = {}) => {
   if (opts.code_challenge_method && !opts.code_challenge) {
     throw new Error('If a code_challenge_method is provided, code_challenge must be included.');
   }
@@ -30,4 +29,6 @@ export const getGoogleAuthUrl = (opts = {}) => _getGoogleAuthUrl({
   redirect_uri: 'urn:ietf:wg:oauth:2.0:oob'
 });
 
+
+export const GOOGLE_AUTH_URL = getGoogleAuthUrl();
 console.log(getGoogleAuthUrl());
