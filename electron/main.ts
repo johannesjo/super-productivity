@@ -10,7 +10,6 @@ import { createWindow } from './main-window';
 
 import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
 import { getGitLog } from './git-log';
-import { initGoogleAuth } from './google-auth';
 import { errorHandler } from './error-handler';
 import { initDebug } from './debug';
 import { IPC } from './ipc-events.const';
@@ -240,7 +239,7 @@ ipcMain.on(IPC.REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
   registerShowAppShortCuts(cfg);
 });
 
-ipcMain.on(IPC.JIRA_SETUP_IMG_HEADERS, (ev, {jiraCfg, wonkyCookie}: { jiraCfg: JiraCfg, wonkyCookie?: string }) => {
+ipcMain.on(IPC.JIRA_SETUP_IMG_HEADERS, (ev, {jiraCfg, wonkyCookie}: { jiraCfg: JiraCfg; wonkyCookie?: string }) => {
   setupRequestHeadersForImages(jiraCfg, wonkyCookie);
 });
 
@@ -277,7 +276,6 @@ function createMainWin() {
     quitApp,
     customUrl,
   });
-  initGoogleAuth();
 }
 
 function registerShowAppShortCuts(cfg: KeyboardConfig) {

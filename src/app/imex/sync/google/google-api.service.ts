@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { GOOGLE_DEFAULT_FIELDS_FOR_DRIVE, GOOGLE_DISCOVERY_DOCS, GOOGLE_SCOPES, GOOGLE_SETTINGS } from './google.const';
+import {
+  GOOGLE_API_SCOPES,
+  GOOGLE_DEFAULT_FIELDS_FOR_DRIVE,
+  GOOGLE_DISCOVERY_DOCS,
+  GOOGLE_SETTINGS_ELECTRON,
+  GOOGLE_SETTINGS_WEB
+} from './google.const';
 import * as moment from 'moment';
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../../app.constants';
 import { MultiPartBuilder } from './util/multi-part-builder';
@@ -207,7 +213,7 @@ export class GoogleApiService {
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
-        key: GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS_WEB.API_KEY,
         supportsTeamDrives: true,
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
@@ -224,7 +230,7 @@ export class GoogleApiService {
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files`,
       params: {
-        key: GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS_WEB.API_KEY,
         // should be called name officially instead of title
         q: `title='${fileName}' and trashed=false`,
       },
@@ -244,7 +250,7 @@ export class GoogleApiService {
         // workaround for: https://issuetracker.google.com/issues/149891169
         url: `https://www.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
         params: {
-          key: GOOGLE_SETTINGS.API_KEY,
+          key: GOOGLE_SETTINGS_WEB.API_KEY,
           supportsTeamDrives: true,
           alt: 'media',
         },
@@ -286,7 +292,7 @@ export class GoogleApiService {
       method,
       url: `https://content.googleapis.com${path}`,
       params: {
-        key: GOOGLE_SETTINGS.API_KEY,
+        key: GOOGLE_SETTINGS_WEB.API_KEY,
         uploadType: 'multipart',
         supportsTeamDrives: true,
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
@@ -307,8 +313,8 @@ export class GoogleApiService {
   }>> {
     return axios.request({
       url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
-        client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
-        client_secret: 'Er6sAwgXCDKPgw7y8jSuQQTv',
+        client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
+        client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
         grant_type: 'authorization_code',
         redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
         code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
@@ -326,8 +332,8 @@ export class GoogleApiService {
   }>> {
     return axios.request({
       url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
-        client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
-        client_secret: 'Er6sAwgXCDKPgw7y8jSuQQTv',
+        client_id: GOOGLE_SETTINGS_ELECTRON.CLIENT_ID,
+        client_secret: GOOGLE_SETTINGS_ELECTRON.API_KEY,
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
       }),
@@ -345,10 +351,10 @@ export class GoogleApiService {
 
   private initClient() {
     return this._gapi.client.init({
-      apiKey: GOOGLE_SETTINGS.API_KEY,
-      clientId: GOOGLE_SETTINGS.CLIENT_ID,
+      apiKey: GOOGLE_SETTINGS_WEB.API_KEY,
+      clientId: GOOGLE_SETTINGS_WEB.CLIENT_ID,
       discoveryDocs: GOOGLE_DISCOVERY_DOCS,
-      scope: GOOGLE_SCOPES
+      scope: GOOGLE_API_SCOPES
     });
   }
 
