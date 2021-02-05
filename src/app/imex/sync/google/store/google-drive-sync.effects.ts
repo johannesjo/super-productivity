@@ -1,16 +1,6 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, from, Observable, of, throwError } from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  filter,
-  map,
-  pairwise,
-  shareReplay,
-  switchMap,
-  tap,
-  withLatestFrom
-} from 'rxjs/operators';
+import { EMPTY, Observable, of, throwError } from 'rxjs';
+import { catchError, concatMap, filter, map, switchMap, tap } from 'rxjs/operators';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import {
   GlobalConfigActionTypes,
@@ -25,8 +15,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
 import { SyncProvider } from '../../sync-provider.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
-import { GlobalConfigService } from '../../../../features/config/global-config.service';
-import { DataInitService } from '../../../../core/data-init/data-init.service';
 
 // this._globalConfigService.cfg$.pipe(
 //   map(syncCfg => syncCfg.sync),
@@ -51,16 +39,6 @@ import { DataInitService } from '../../../../core/data-init/data-init.service';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
-  private _isChangedAuthCode$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    // NOTE: it is important that we don't use distinct until changed here
-    switchMap(() => this._globalConfigService.cfg$),
-    map((cfg) => cfg.sync.googleDriveSync.authCode),
-    pairwise(),
-    map(([a, b]) => a !== b),
-    filter(authCode => !!authCode),
-    shareReplay(),
-  );
-
   @Effect() createSyncFile$: any = this._actions$.pipe(
     ofType(
       GlobalConfigActionTypes.UpdateGlobalConfigSection,
@@ -161,50 +139,10 @@ export class GoogleDriveSyncEffects {
     })),
   );
 
-  @Effect({dispatch: false}) getAuthTokenFromAccessCode: any = this._actions$.pipe(
-    ofType(
-      GlobalConfigActionTypes.UpdateGlobalConfigSection,
-    ),
-    filter(({payload}: UpdateGlobalConfigSection): boolean => payload.sectionKey === 'sync'),
-    map(({payload}) => payload.sectionCfg as SyncConfig),
-    filter(syncConfig => syncConfig.syncProvider === SyncProvider.GoogleDrive),
-    withLatestFrom(this._isChangedAuthCode$),
-    switchMap(([syncConfig, isChanged]: [SyncConfig, boolean]) => {
-      if (isChanged && typeof syncConfig.googleDriveSync.authCode === 'string') {
-        return from(this._googleApiService.getAndSetTokenFromAuthCode(syncConfig.googleDriveSync.authCode)).pipe(
-          // NOTE: catch needs to be limited to request only, otherwise we break the chain
-          catchError((e) => {
-            console.error(e);
-            this._snackService.open({type: 'ERROR', msg: T.F.DROPBOX.S.ACCESS_TOKEN_ERROR});
-            // filter
-            return EMPTY;
-          }),
-          // we only need it once so we unset it afterwards
-          tap(() => this._globalConfigService.updateSection('sync', {
-            ...syncConfig,
-            googleDriveSync: {
-              ...syncConfig.googleDriveSync,
-              authCode: null,
-            }
-          })),
-        );
-      } else {
-        return EMPTY;
-      }
-    }),
-    tap((): any => setTimeout(() => this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.DROPBOX.S.ACCESS_TOKEN_GENERATED
-      }), 200)
-    ),
-  );
-
   constructor(
     private _actions$: Actions,
     private _snackService: SnackService,
     private _googleApiService: GoogleApiService,
-    private _globalConfigService: GlobalConfigService,
-    private _dataInitService: DataInitService,
     private _matDialog: MatDialog,
   ) {
 

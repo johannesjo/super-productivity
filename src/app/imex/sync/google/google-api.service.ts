@@ -18,6 +18,9 @@ import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-s
 import { GoogleDriveFileMeta } from './google-api.model';
 import axios from 'axios';
 import * as querystring from 'querystring';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
+import { GOOGLE_AUTH_URL } from './get-google-auth-url';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -64,6 +67,7 @@ export class GoogleApiService {
     // private readonly _electronService: ElectronService,
     private readonly _snackService: SnackService,
     private readonly _bannerService: BannerService,
+    private readonly _matDialog: MatDialog,
   ) {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
@@ -72,7 +76,7 @@ export class GoogleApiService {
     return getGoogleSession();
   }
 
-  login(isSkipSuccessMsg: boolean = false): Promise<any> {
+  async login(isSkipSuccessMsg: boolean = false): Promise<any> {
     const showSuccessMsg = () => {
       if (!(isSkipSuccessMsg)) {
         this._snackIt('SUCCESS', T.F.GOOGLE.S_API.SUCCESS_LOGIN);
@@ -82,14 +86,39 @@ export class GoogleApiService {
     if (IS_ELECTRON) {
       const session = this._session;
       console.log(this.isLoggedIn && !this._isTokenExpired(session));
-
       if (this.isLoggedIn && !this._isTokenExpired(session)) {
         return new Promise((resolve) => resolve(true));
-      } else if (session.refreshToken) {
+      } else if (session.refreshToken && (!this._session.accessToken || this._isTokenExpired(session))) {
         throw new Error('HANDLE');
       } else {
         console.log('NO_TOKEN');
-        return Promise.reject('No token');
+        const authCode = await this._matDialog.open(DialogGetAndEnterAuthCodeComponent, {
+          restoreFocus: true,
+          data: {
+            providerName: 'Google Drive',
+            url: GOOGLE_AUTH_URL,
+          },
+        }).afterClosed().toPromise();
+        console.log({authCode});
+        if (authCode) {
+          try {
+            const {data} = await this._getTokenFromAuthCode(authCode);
+            console.log({data});
+            if (data) {
+              this._updateSession({
+                accessToken: data.access_token,
+                expiresAt: data.expires_in + Date.now(),
+                refreshToken: data.refresh_token,
+              });
+              return new Promise((resolve) => resolve(true));
+            }
+            throw new Error('No data');
+          } catch (e) {
+            console.error(e);
+            throw new Error('Token creation failed');
+          }
+        }
+        throw new Error('No token');
       }
 
       // (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.TRIGGER_GOOGLE_AUTH, session.refreshToken);
@@ -270,7 +299,7 @@ export class GoogleApiService {
     });
   }
 
-  getAndSetTokenFromAuthCode(code: string) {
+  private _getTokenFromAuthCode(code: string): Promise<any> {
     return axios.request({
       url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
         client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
@@ -282,12 +311,6 @@ export class GoogleApiService {
         code,
       }),
       method: 'POST',
-    }).then(({data}) => {
-      this._updateSession({
-        accessToken: data.access_token,
-        expiresAt: data.expiry_date,
-        refreshToken: data.refresh_token,
-      });
     });
   }
 

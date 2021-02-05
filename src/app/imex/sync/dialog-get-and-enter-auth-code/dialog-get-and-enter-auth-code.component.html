@@ -1,0 +1,34 @@
+<h1 mat-dialog-title>{{T.F.SYNC.D_CONFLICT.TITLE|translate}}</h1>
+
+<mat-dialog-content>
+  <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT|translate"></div>
+  <a mat-button
+     target="_blank"
+     [href]="data.url">GET TOKEN From this Url</a>
+  <mat-form-field>
+    <mat-label>Enter token here</mat-label>
+    <mat-icon matPrefix>timer</mat-icon>
+    <input matInput
+         [(ngModel)]="token">
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button (click)="close()"
+            color="primary"
+            mat-button>
+      {{T.G.CANCEL|translate}}
+    </button>
+    <button (click)="close(token)"
+            [disabled]="!token"
+            color="primary"
+            mat-stroked-button>
+      <mat-icon>save</mat-icon>
+      {{T.G.SAVE|translate}}
+    </button>
+  </div>
+</mat-dialog-actions>
+
+
+
