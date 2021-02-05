@@ -89,8 +89,18 @@ export class SyncEffects {
       // initial after starting app
       this._syncProviderService.isEnabledAndReady$.pipe(
         take(1),
-        filter((isEnabledAndReady: boolean) => isEnabledAndReady),
-        mapTo(SYNC_INITIAL_SYNC_TRIGGER),
+        switchMap((isEnabledAndReady) => {
+          if (isEnabledAndReady) {
+            return of(SYNC_INITIAL_SYNC_TRIGGER);
+          } else {
+            this._syncService.setInitialSyncDone(true);
+            this._snackService.open({
+              msg: T.F.SYNC.S.INITIAL_SYNC_ERROR,
+              type: 'ERROR'
+            });
+            return EMPTY;
+          }
+        }),
       ),
 
       // initial after enabling it,
@@ -115,6 +125,7 @@ export class SyncEffects {
           }
         })
         .catch((err: unknown) => {
+          this._syncService.setInitialSyncDone(true);
           this._snackService.open({
             msg: T.F.SYNC.S.UNKNOWN_ERROR,
             translateParams: {

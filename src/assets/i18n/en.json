@@ -569,6 +569,7 @@
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "IMPORTING": "Importing data",
+        "INITIAL_SYNC_ERROR": "Initial Sync failed",
         "SUCCESS": "Data imported",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
