@@ -16,6 +16,9 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { androidInterface } from '../../../core/android/android-interface';
 import { getGoogleSession, GoogleSession, updateGoogleSession } from './google-session';
 import { GoogleDriveFileMeta } from './google-api.model';
+import axios from 'axios';
+import * as querystring from 'querystring';
+import { GOOGLE_AUTH_CODE_VERIFIER } from './get-google-auth-url';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -260,6 +263,20 @@ export class GoogleApiService {
         'Content-Type': multipart.type
       },
       data: multipart.body
+    });
+  }
+
+  getTokenFromAuthCode(code: string) {
+    return axios.request({
+      url: 'https://oauth2.googleapis.com/token?' + querystring.stringify({
+        client_id: '37646582031-qo0kc0p6amaukfd5ub16hhp6f8smrk1n.apps.googleusercontent.com',
+        client_secret: 'Er6sAwgXCDKPgw7y8jSuQQTv',
+        grant_type: 'authorization_code',
+        redirect_uri: 'urn:ietf:wg:oauth:2.0:oob:auto',
+        // code_verifier: GOOGLE_AUTH_CODE_VERIFIER,
+        code,
+      }),
+      method: 'POST',
     });
   }
 

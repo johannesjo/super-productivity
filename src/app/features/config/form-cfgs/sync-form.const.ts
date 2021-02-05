@@ -107,7 +107,14 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               tag: 'p',
               text: `<a href="${GOOGLE_AUTH_URL}" target="_blank">https://accounts.google.com/o/oauth2/approval/v2/approvalnativeapp</a>`,
             },
-          }]
+          },
+            {
+              key: 'authCode',
+              type: 'input',
+              templateOptions: {
+                label: T.F.SYNC.FORM.DROPBOX.L_AUTH_CODE,
+              },
+            },]
           : []),
         {
           key: 'syncFileName',

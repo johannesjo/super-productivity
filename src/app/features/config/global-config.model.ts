@@ -61,6 +61,7 @@ export type PomodoroConfig = Readonly<{
 export interface GoogleDriveSyncConfig {
   isCompressData: boolean;
   syncFileName: string;
+  authCode: string | null;
   _syncFileNameForBackupDocId: string | null;
   _backupDocId: string | null;
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators';
+import { concatMap, distinctUntilChanged, first, map, skip, tap } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
@@ -37,6 +37,25 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
     private _dataInitService: DataInitService,
     private _compressionService: CompressionService,
   ) {
+
+    this.cfg$.pipe(
+      map(cfg => cfg.authCode),
+      tap(console.log),
+      distinctUntilChanged(),
+      skip(2),
+    ).subscribe((v) => {
+      if (v) {
+        console.log('I am here!');
+        this._googleApiService.getTokenFromAuthCode('4/1AY0e-g5VzXdhKCIs7JuBXdEidHwU0EgS7cwjlA-MEMofHfhB-y_mLeoGufE').then(console.log);
+      }
+    });
+
+    // setInterval(() => {
+    //   console.log('REQUEST!!!');
+    //   if (IS_ELECTRON) {
+    //   }
+    // }, 45 * 1000);
+
   }
 
   async getRevAndLastClientUpdate(localRev: string): Promise<{ rev: string; clientUpdate: number } | SyncGetRevResult> {
