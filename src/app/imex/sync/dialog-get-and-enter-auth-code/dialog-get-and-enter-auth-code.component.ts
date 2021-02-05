@@ -20,7 +20,6 @@ export class DialogGetAndEnterAuthCodeComponent {
       url: string;
     }
   ) {
-    // _matDialogRef.disableClose = true;
   }
 
   close(token?: string) {

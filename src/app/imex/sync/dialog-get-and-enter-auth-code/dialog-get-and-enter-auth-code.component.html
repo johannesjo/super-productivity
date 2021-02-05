@@ -1,15 +1,18 @@
-<h1 mat-dialog-title>{{T.F.SYNC.D_CONFLICT.TITLE|translate}}</h1>
+<h1 mat-dialog-title>{{T.F.SYNC.D_AUTH_CODE.TITLE|translate:{provider: data.providerName} }}</h1>
 
 <mat-dialog-content>
-  <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT|translate"></div>
+  <p>{{T.F.SYNC.D_AUTH_CODE.FOLLOW_LINK|translate}}</p>
   <a mat-button
      target="_blank"
-     [href]="data.url">GET TOKEN From this Url</a>
+     mat-stroked-button
+     [href]="data.url">{{T.F.SYNC.D_AUTH_CODE.GET_AUTH_CODE|translate}}</a>
+  <br>
+  <br>
   <mat-form-field>
-    <mat-label>Enter token here</mat-label>
-    <mat-icon matPrefix>timer</mat-icon>
+    <mat-label>{{T.F.SYNC.D_AUTH_CODE.L_AUTH_CODE|translate}}</mat-label>
+    <mat-icon matPrefix>vpn_key</mat-icon>
     <input matInput
-         [(ngModel)]="token">
+           [(ngModel)]="token">
   </mat-form-field>
 </mat-dialog-content>
 

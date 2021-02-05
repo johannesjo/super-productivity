@@ -525,6 +525,12 @@
         "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
         "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
       },
+      "D_AUTH_CODE": {
+        "TITLE": "Login: {{provider}}",
+        "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field below.",
+        "GET_AUTH_CODE": "Get Authorization Code",
+        "L_AUTH_CODE": "Enter Auth Code"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "Last Change:",
         "LAST_SYNC": "Last Sync:",
