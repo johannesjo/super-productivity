@@ -29,6 +29,7 @@ import { distinctUntilChangedObject } from '../../../util/distinct-until-changed
 import { WorkContextAdvancedCfg, WorkStartEnd } from '../../work-context/work-context.model';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { ProjectService } from '../../project/project.service';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -47,6 +48,7 @@ interface RowItem {
   titles?: string[];
   titlesWithSub?: string[];
   notes: string[];
+  projects: string[];
 }
 
 @Component({
@@ -87,6 +89,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     {id: 'TITLES', title: T.F.WORKLOG.EXPORT.O.PARENT_TASK_TITLES_ONLY},
     {id: 'TITLES_INCLUDING_SUB', title: T.F.WORKLOG.EXPORT.O.TITLES_AND_SUB_TASK_TITLES},
     {id: 'NOTES', title: T.F.WORKLOG.EXPORT.O.NOTES},
+    {id: 'PROJECTS', title: T.F.WORKLOG.EXPORT.O.PROJECTS},
     {id: 'TIME_MS', title: T.F.WORKLOG.EXPORT.O.TIME_AS_MILLISECONDS},
     {id: 'TIME_STR', title: T.F.WORKLOG.EXPORT.O.TIME_AS_STRING},
     {id: 'TIME_CLOCK', title: T.F.WORKLOG.EXPORT.O.TIME_AS_CLOCK},
@@ -109,6 +112,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     private _worklogService: WorklogService,
     private _workContextService: WorkContextService,
     private _changeDetectorRef: ChangeDetectorRef,
+    private _projectService: ProjectService
   ) {
   }
 
@@ -173,6 +177,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
                 return 'Titles';
               case 'NOTES':
                 return 'Descriptions';
+              case 'PROJECTS':
+                return 'Projects';
               case 'TIME_MS':
               case 'TIME_STR':
               case 'TIME_CLOCK':
@@ -236,6 +242,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           titlesWithSub: [],
           titles: [],
           notes: [],
+          projects: [],
           workStart: undefined,
           workEnd: undefined,
         };
@@ -260,6 +267,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
               dates: [day],
               tasks: [task],
               notes: [task.notes],
+              projects: [task.projectId || ''],
               workStart: startTimes[day],
               workEnd: endTimes[day],
               timeSpent: 0,
@@ -276,6 +284,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           taskGroups[task.id] = createEmptyGroup();
           taskGroups[task.id].tasks = [task];
           taskGroups[task.id].notes = [task.notes];
+          taskGroups[task.id].projects = [task.projectId || ''];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
           taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
@@ -286,6 +295,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             taskGroups[groupKey] = createEmptyGroup();
             taskGroups[groupKey].tasks = [task];
             taskGroups[groupKey].notes = [task.notes];
+            taskGroups[groupKey].projects = [task.projectId || ''];
             taskGroups[groupKey].dates = [day];
             taskGroups[groupKey].workStart = startTimes[day];
             taskGroups[groupKey].workEnd = endTimes[day];
@@ -304,6 +314,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         if (groups[groupKey]) {
           groups[groupKey].tasks.push(...taskGroups[groupKey].tasks);
           groups[groupKey].notes.push(...taskGroups[groupKey].notes);
+          groups[groupKey].projects.push(...taskGroups[groupKey].projects);
           groups[groupKey].dates.push(...taskGroups[groupKey].dates);
           if (taskGroups[groupKey].workStart !== undefined) {
             // TODO check if this works as intended
@@ -349,6 +360,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       for (let i = 0; i < group.notes.length; i++) {
         group.notes[i] = group.notes[i].replace(/\n/g, ' - ');
       }
+
+      group.projects = unique(group.projects).filter((projectId: string) => !!projectId);
+      for (let i = 0; i < group.projects.length; i++) {
+        this._projectService.getByIdOnce$(group.projects[i]).subscribe(project => {
+          group.projects[i] = project.title;
+        });
+      };
 
       rows.push(group);
     }));
@@ -411,7 +429,9 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           case 'TITLES_INCLUDING_SUB':
             return row.titlesWithSub.join(this.options.separateTasksBy || '<br>');
           case 'NOTES':
-            return (row.notes.length !== 0) ? row.notes.join(' | ') : EMPTY_VAL;
+            return (row.notes.length !== 0) ? row.notes.join(this.options.separateTasksBy) : EMPTY_VAL;
+          case 'PROJECTS':
+            return (row.projects.length !== 0) ? row.projects.join(this.options.separateTasksBy) : EMPTY_VAL;
           case 'TIME_MS':
             return timeSpent;
           case 'TIME_STR':
