@@ -46,6 +46,7 @@ interface RowItem {
   tasks: TaskWithParentTitle[];
   titles?: string[];
   titlesWithSub?: string[];
+  notes: string[];
 }
 
 @Component({
@@ -85,6 +86,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     {id: 'END', title: T.F.WORKLOG.EXPORT.O.ENDED_WORKING},
     {id: 'TITLES', title: T.F.WORKLOG.EXPORT.O.PARENT_TASK_TITLES_ONLY},
     {id: 'TITLES_INCLUDING_SUB', title: T.F.WORKLOG.EXPORT.O.TITLES_AND_SUB_TASK_TITLES},
+    {id: 'NOTES', title: T.F.WORKLOG.EXPORT.O.NOTES},
     {id: 'TIME_MS', title: T.F.WORKLOG.EXPORT.O.TIME_AS_MILLISECONDS},
     {id: 'TIME_STR', title: T.F.WORKLOG.EXPORT.O.TIME_AS_STRING},
     {id: 'TIME_CLOCK', title: T.F.WORKLOG.EXPORT.O.TIME_AS_CLOCK},
@@ -169,6 +171,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
                 return 'Titles';
               case 'TITLES_INCLUDING_SUB':
                 return 'Titles';
+              case 'NOTES':
+                return 'Descriptions';
               case 'TIME_MS':
               case 'TIME_STR':
               case 'TIME_CLOCK':
@@ -178,7 +182,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
               case 'ESTIMATE_CLOCK':
                 return 'Estimate';
               default:
-                return 'INVALI COL';
+                return 'INVALID COL';
             }
           });
 
@@ -231,6 +235,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           tasks: [],
           titlesWithSub: [],
           titles: [],
+          notes: [],
           workStart: undefined,
           workEnd: undefined,
         };
@@ -254,6 +259,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             taskGroups[day] = {
               dates: [day],
               tasks: [task],
+              notes: [task.notes],
               workStart: startTimes[day],
               workEnd: endTimes[day],
               timeSpent: 0,
@@ -269,6 +275,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         case WorklogGrouping.TASK:
           taskGroups[task.id] = createEmptyGroup();
           taskGroups[task.id].tasks = [task];
+          taskGroups[task.id].notes = [task.notes];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
           taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
@@ -278,6 +285,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             const groupKey = task.id + '_' + day;
             taskGroups[groupKey] = createEmptyGroup();
             taskGroups[groupKey].tasks = [task];
+            taskGroups[groupKey].notes = [task.notes];
             taskGroups[groupKey].dates = [day];
             taskGroups[groupKey].workStart = startTimes[day];
             taskGroups[groupKey].workEnd = endTimes[day];
@@ -295,6 +303,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       Object.keys(taskGroups).forEach(groupKey => {
         if (groups[groupKey]) {
           groups[groupKey].tasks.push(...taskGroups[groupKey].tasks);
+          groups[groupKey].notes.push(...taskGroups[groupKey].notes);
           groups[groupKey].dates.push(...taskGroups[groupKey].dates);
           if (taskGroups[groupKey].workStart !== undefined) {
             // TODO check if this works as intended
@@ -335,6 +344,11 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         }
         return 1;
       });
+
+      group.notes = group.notes.filter((note: string) => !!note);
+      for (let i = 0; i < group.notes.length; i++) {
+        group.notes[i] = group.notes[i].replace(/\n/g, ' - ');
+      }
 
       rows.push(group);
     }));
@@ -393,10 +407,11 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
               ).format('HH:mm')
               : EMPTY_VAL;
           case 'TITLES':
-            return row.titles.join(
-              this.options.separateTasksBy || '<br>');
+            return row.titles.join(this.options.separateTasksBy || '<br>');
           case 'TITLES_INCLUDING_SUB':
             return row.titlesWithSub.join(this.options.separateTasksBy || '<br>');
+          case 'NOTES':
+            return (row.notes.length !== 0) ? row.notes.join(' | ') : EMPTY_VAL;
           case 'TIME_MS':
             return timeSpent;
           case 'TIME_STR':

@@ -57,6 +57,7 @@ export type WorklogColTypes =
   | 'END'
   | 'TITLES'
   | 'TITLES_INCLUDING_SUB'
+  | 'NOTES'
   | 'TIME_MS'
   | 'TIME_STR'
   | 'TIME_CLOCK'
