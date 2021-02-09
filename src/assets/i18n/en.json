@@ -809,6 +809,7 @@
           "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
           "NOTES": "Task Descriptions",
           "PROJECTS": "Project Names",
+          "TAGS": "Tags",
           "WORKLOG": "Worklog"
         },
         "OPTIONS": "Options",
