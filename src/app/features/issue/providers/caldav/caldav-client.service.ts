@@ -3,6 +3,8 @@ import {CaldavCfg} from './caldav.model';
 // @ts-ignore
 import DavClient, {namespaces as NS} from 'cdav-library';
 // @ts-ignore
+import Calendar from 'cdav-library/models/calendar';
+// @ts-ignore
 import ICAL from 'ical.js';
 
 import {from, Observable, throwError} from 'rxjs';
@@ -15,10 +17,18 @@ import {catchError} from 'rxjs/operators';
 import {HANDLED_ERROR_PROP_STR} from '../../../../app.constants';
 
 
+interface ClientCache {
+  client: DavClient;
+  calendars: Map<string, Calendar>;
+}
+
 @Injectable({
               providedIn: 'root',
             })
 export class CaldavClientService {
+
+  private _clientCache = new Map<string, ClientCache>();
+
   constructor(
     private readonly _snackService: SnackService
   ) {
@@ -30,10 +40,10 @@ export class CaldavClientService {
       const oldOpen = xhr.open;
 
       // override open() method to add headers
-      xhr.open = function(){
+      xhr.open = function() {
         // @ts-ignore
         const result = oldOpen.apply(this, arguments);
-          // @ts-ignore
+        // @ts-ignore
         xhr.setRequestHeader('X-Requested-With', 'SuperProductivity');
         xhr.setRequestHeader('Authorization', 'Basic ' + btoa(cfg.username + ':' + cfg.password));
         return result;
@@ -60,18 +70,44 @@ export class CaldavClientService {
     return url.substring(url.lastIndexOf('/') + 1);
   }
 
+  async _get_client(cfg: CaldavCfg): Promise<ClientCache> {
+    const client_key = `${cfg.caldavUrl}|${cfg.username}|${cfg.password}`;
+
+    if (this._clientCache.has(client_key)) {
+      return this._clientCache.get(client_key) as ClientCache;
+    } else {
+      const client = new DavClient({
+                                     rootUrl: cfg.caldavUrl
+                                   }, this._getXhrProvider(cfg));
+
+      await client.connect({enableCalDAV: true}).catch((err: any) => this._handleNetErr(err));
+
+      const cache = {
+        client,
+        calendars: new Map()
+      };
+      this._clientCache.set(client_key, cache);
+
+      return cache;
+    }
+  }
+
+
   async _getCalendar(cfg: CaldavCfg) {
-    const client = new DavClient({
-                                   rootUrl: cfg.caldavUrl
-                                 }, this._getXhrProvider(cfg));
+    const clientCache = await this._get_client(cfg);
+    const resource = cfg.resourceName as string;
 
+    if (clientCache.calendars.has(resource)) {
+      return clientCache.calendars.get(resource);
+    }
 
-    await client.connect({enableCalDAV: true}).catch((err: any) => this._handleNetErr(err));
-    const calendars = await client.calendarHomes[0].findAllCalendars().catch((err: any) => this._handleNetErr(err));
+    const calendars = await clientCache.client.calendarHomes[0].findAllCalendars()
+      .catch((err: any) => this._handleNetErr(err));
 
-    const calendar = calendars.find((item: any) => (item.displayname || CaldavClientService._getCalendarUriFromUrl(item.url)) === cfg.resourceName);
+    const calendar = calendars.find((item: Calendar) => (item.displayname || CaldavClientService._getCalendarUriFromUrl(item.url)) === resource);
 
     if (calendar !== undefined) {
+      clientCache.calendars.set(resource, calendar);
       return calendar;
     }
 

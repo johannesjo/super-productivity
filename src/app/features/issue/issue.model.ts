@@ -21,7 +21,7 @@ export interface IssueIntegrationCfgs {
   JIRA?: JiraCfg;
   GITHUB?: GithubCfg;
   GITLAB?: GitlabCfg;
-  CALDAV?: CaldavCfg
+  CALDAV?: CaldavCfg;
 }
 
 export type IssueData = JiraIssue | GithubIssue | GitlabIssue | CaldavIssue;

@@ -38,7 +38,11 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return of('');
   }
 
-  async refreshIssue(task: Task, isNotifySuccess: boolean, isNotifyNoUpdateRequired: boolean): Promise<{ taskChanges: Partial<Task>; issue: CaldavIssue } | null> {
+  async refreshIssue(task: Task,
+                     isNotifySuccess: boolean,
+                     isNotifyNoUpdateRequired: boolean):
+    Promise<{ taskChanges: Partial<Task>; issue: CaldavIssue } | null> {
+
     if (!task.projectId) {
       throw new Error('No projectId');
     }
@@ -84,7 +88,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     tasks: Task[],
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false
-  ): Promise<{ task: Task, taskChanges: Partial<Task>, issue: CaldavIssue }[]> {
+  ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: CaldavIssue }[]> {
     // First sort the tasks by the issueId
     // because the API returns it in a desc order by issue iid(issueId)
     // so it makes the update check easier and faster

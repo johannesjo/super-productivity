@@ -65,10 +65,10 @@ export class CaldavIssueEffects {
       );
     }),
     map((cos) => cos
-      .filter(({cfg, task}: { cfg: CaldavCfg, task: TaskWithSubTasks }): boolean =>
+      .filter(({cfg, task}: { cfg: CaldavCfg; task: TaskWithSubTasks }): boolean =>
                 isCaldavEnabled(cfg) && cfg.isAutoPoll
       )
-      .map(({task}: { cfg: CaldavCfg, task: TaskWithSubTasks }) => task)
+      .map(({task}: { cfg: CaldavCfg; task: TaskWithSubTasks }) => task)
     ),
     tap((caldavTasks: TaskWithSubTasks[]) => this._refreshIssues(caldavTasks)),
   );
