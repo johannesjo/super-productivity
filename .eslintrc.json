@@ -63,7 +63,7 @@
             "code": 150
           }
         ],
-        "id-blacklist": "off",
+        "id-blacklist": "warn",
         "@typescript-eslint/member-delimiter-style": "warn",
         "no-shadow": "off", // must be disabled, no-shadow rule handled by the next line
         "@typescript-eslint/no-shadow": "warn",

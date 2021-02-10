@@ -20,6 +20,7 @@ export type GithubIssueReduced = Readonly<{
   comments_url: string;
   events_url: string;
   html_url: string;
+  // eslint-disable-next-line id-blacklist
   number: number;
   state: GithubState;
   title: string;

@@ -5,6 +5,7 @@ import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
 export const mapGitlabIssue = (issue: GitlabOriginalIssue): GitlabIssue => {
   return {
     html_url: issue.web_url,
+    // eslint-disable-next-line id-blacklist
     number: issue.iid,
     state: issue.state,
     title: issue.title,
