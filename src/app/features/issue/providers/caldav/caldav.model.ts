@@ -6,4 +6,5 @@ export interface CaldavCfg {
   isAutoAddToBacklog: boolean;
   isAutoPoll: boolean;
   isSearchIssuesFromCaldav: boolean;
+  isTransitionIssuesEnabled: boolean;
 }

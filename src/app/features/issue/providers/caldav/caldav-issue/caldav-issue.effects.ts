@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
-import {Effect} from '@ngrx/effects';
+import {Actions, Effect, ofType} from '@ngrx/effects';
 import {SnackService} from '../../../../../core/snack/snack.service';
 import {TaskService} from '../../../../tasks/task.service';
 import {ProjectService} from '../../../../project/project.service';
-import {filter, first, map, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, first, map, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs/operators';
 import {IssueService} from '../../../issue.service';
 import {forkJoin, Observable, timer} from 'rxjs';
-import {TaskWithSubTasks} from 'src/app/features/tasks/task.model';
+import {Task, TaskWithSubTasks} from 'src/app/features/tasks/task.model';
 import {T} from '../../../../../t.const';
 import {WorkContextService} from '../../../../work-context/work-context.service';
 import {CALDAV_TYPE} from '../../../issue.const';
@@ -16,6 +16,7 @@ import {isCaldavEnabled} from '../is-caldav-enabled.util';
 import {CaldavClientService} from '../caldav-client.service';
 import {CaldavIssueReduced} from './caldav-issue.model';
 import {CaldavCfg} from '../caldav.model';
+import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
 
 @Injectable()
 export class CaldavIssueEffects {
@@ -80,7 +81,32 @@ export class CaldavIssueEffects {
       switchMap(() => this._updateIssuesForCurrentContext$),
     );
 
+
+  @Effect({dispatch: false})
+  checkForDoneTransition$: Observable<any> = this._actions$
+    .pipe(
+      ofType(TaskActionTypes.UpdateTask),
+      filter((a: UpdateTask): boolean => 'isDone' in a.payload.task.changes),
+      concatMap((a: UpdateTask) => this._taskService.getByIdOnce$(a.payload.task.id as string)),
+      filter((task: Task) => (task && task.issueType === CALDAV_TYPE)),
+      concatMap((task: Task) => {
+        if (!task.projectId) {
+          throw new Error('No projectId for task');
+        }
+        return this._getCfgOnce$(task.projectId).pipe(
+          map((caldavCfg) => ({caldavCfg, task})),
+        );
+      }),
+      filter(({caldavCfg: caldavCfg, task}) =>
+               isCaldavEnabled(caldavCfg) && caldavCfg.isTransitionIssuesEnabled
+      ),
+      concatMap(({caldavCfg: caldavCfg, task}) => {
+        return this._handleTransitionForIssue$(caldavCfg, task);
+      })
+    );
+
   constructor(
+    private readonly _actions$: Actions,
     private readonly _snackService: SnackService,
     private readonly _projectService: ProjectService,
     private readonly _caldavClientService: CaldavClientService,
@@ -124,6 +150,15 @@ export class CaldavIssueEffects {
                                 msg: T.F.CALDAV.S.IMPORTED_MULTIPLE_ISSUES,
                               });
     }
+  }
+
+  private _handleTransitionForIssue$(caldavCfg: CaldavCfg, task: Task): Observable<any> {
+    return this._caldavClientService.updateCompletedState$(caldavCfg, task.issueId as string, task.isDone)
+      .pipe(concatMap(() => this._issueService.refreshIssue(task, true)));
+  }
+
+  private _getCfgOnce$(projectId: string): Observable<CaldavCfg> {
+    return this._projectService.getCaldavCfgForProject$(projectId).pipe(first());
   }
 }
 

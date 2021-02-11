@@ -223,6 +223,52 @@ export class CaldavClientService {
     return CaldavClientService._mapTask(task[0]);
   }
 
+  private async _updateCompletedState(cfg: CaldavCfg, uid: string, completed: boolean) {
+    const cal = await this._getCalendar(cfg);
+
+    if (cal.readOnly) {
+      this._snackService.open({
+                                type: 'ERROR',
+                                msg: T.F.CALDAV.S.CALENDAR_READ_ONLY
+                              });
+      throw new Error('CALENDAR READ ONLY: ' + cfg.resourceName);
+    }
+
+    const tasks = await CaldavClientService._findTaskByUid(cal, uid).catch((err: any) => this._handleNetErr(err));
+
+    if (tasks.length < 1) {
+      this._snackService.open({
+                                type: 'ERROR',
+                                msg: T.F.CALDAV.S.ISSUE_NOT_FOUND
+                              });
+      throw new Error('ISSUE NOT FOUND: ' + uid);
+    }
+
+    const task = tasks[0];
+    const jCal = ICAL.parse(task.data);
+    const comp = new ICAL.Component(jCal);
+    const todo = comp.getFirstSubcomponent('vtodo');
+
+    const oldCompleted = !!todo.getFirstPropertyValue('completed');
+
+    if (completed === oldCompleted) {
+      return;
+    }
+
+    const now = ICAL.Time.now();
+    if (completed) {
+      todo.updatePropertyWithValue('completed', now);
+    } else {
+      todo.removeProperty('completed');
+    }
+    todo.updatePropertyWithValue('last-modified', now);
+    todo.updatePropertyWithValue('dtstamp', now);
+
+    task.data = ICAL.stringify(jCal);
+    await task.update().catch((err: any) => this._handleNetErr(err));
+
+  }
+
   getOpenTasks$(cfg: CaldavCfg): Observable<CaldavIssue[]> {
     return from(this._getTasks(cfg, true)).pipe(
       catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
@@ -259,4 +305,8 @@ export class CaldavClientService {
       catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
   }
 
+  updateCompletedState$(caldavCfg: CaldavCfg, issueId: string, completed: boolean): Observable<any> {
+    return from(this._updateCompletedState(caldavCfg, issueId, completed)).pipe(
+      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
+  }
 }

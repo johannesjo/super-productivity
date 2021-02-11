@@ -10,6 +10,7 @@ export const DEFAULT_CALDAV_CFG: CaldavCfg = {
   isAutoAddToBacklog: false,
   isAutoPoll: false,
   isSearchIssuesFromCaldav: true,
+  isTransitionIssuesEnabled: false,
 };
 
 export const CALDAV_POLL_INTERVAL = 10 * 60 * 1000;
@@ -77,6 +78,13 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_AUTO_ADD_TO_BACKLOG
+    },
+  },
+  {
+    key: 'isTransitionIssuesEnabled',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED
     },
   },
 ];
