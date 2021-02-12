@@ -12,7 +12,7 @@ import {CaldavCfg} from '../caldav.model';
              styleUrls: ['./dialog-caldav-initial-setup.component.scss'],
              changeDetection: ChangeDetectionStrategy.OnPush
            })
-export class DialogCaldavInitialSetupComponent implements OnInit {
+export class DialogCaldavInitialSetupComponent {
   T: typeof T = T;
   caldavCfg: CaldavCfg;
   formGroup: FormGroup = new FormGroup({});
@@ -25,8 +25,6 @@ export class DialogCaldavInitialSetupComponent implements OnInit {
     this.caldavCfg = this.data.caldavCfg || DEFAULT_CALDAV_CFG;
   }
 
-  ngOnInit() {
-  }
 
   saveCaldavCfg(caldavCfg: CaldavCfg) {
     this._matDialogRef.close(caldavCfg);
