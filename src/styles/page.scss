@@ -79,7 +79,10 @@ body {
 }
 
 .page-wrapper {
-  padding: $s 2*$s $s*9;
+  padding: $s $s $s*9;
+  @include mq(xs) {
+    padding: $s 2*$s $s*9;
+  }
 }
 
 .component-wrapper {
