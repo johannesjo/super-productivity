@@ -137,10 +137,9 @@
 }
 
 .action-btn {
-  display: none;
+  display: block;
 
-  @include mq(xs) {
-    display: block;
+  :host-context(.isNoTouchOnly) & {
     opacity: .7;
 
     &:hover {
