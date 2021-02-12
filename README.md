@@ -44,8 +44,8 @@
        align="center"
        height="50">
 </a>
-<a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge' target="_blank">
-  <img src='https://assets.windowsphone.com/85864462-9c82-451e-9355-a3d5f874397a/English_get-it-from-MS_InvariantCulture_Default.png'
+<a href='//www.microsoft.com/store/apps/9NHFVG8361TW?cid=storebadge&ocid=badge' target="_blank">
+  <img src='https://developer.microsoft.com/store/badges/images/English_get-it-from-MS.png'
        align="center"
        alt='English badge'
        height="50" />
