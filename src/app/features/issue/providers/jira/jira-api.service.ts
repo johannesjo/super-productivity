@@ -110,7 +110,6 @@ export class JiraApiService {
 
   issuePicker$(searchTerm: string, cfg: JiraCfg): Observable<SearchResultItem[]> {
     const searchStr = `${searchTerm}`;
-    const jql = (cfg.searchJqlQuery ? `${encodeURIComponent(cfg.searchJqlQuery)}` : '');
 
     return this._sendRequest$({
       jiraReqCfg: {
@@ -120,7 +119,7 @@ export class JiraApiService {
           showSubTasks: true,
           showSubTaskParent: true,
           query: searchStr,
-          currentJQL: jql
+          currentJQL: cfg.searchJqlQuery
         },
         transform: mapToSearchResults
         // NOTE: we pass the cfg as well to avoid race conditions
