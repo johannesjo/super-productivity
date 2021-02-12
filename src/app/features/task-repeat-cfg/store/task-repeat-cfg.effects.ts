@@ -21,6 +21,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncService } from '../../../imex/sync/sync.service';
 import { WorkContextType } from '../../work-context/work-context.model';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -76,6 +77,8 @@ export class TaskRepeatCfgEffects {
               throw new Error('No taskRepeatCfg.id');
             }
 
+            const isAddToTodayAsFallback = !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
+
             return from([
               ...moveToArchiveActions,
               ...(isCreateNew
@@ -86,8 +89,10 @@ export class TaskRepeatCfgEffects {
                         additional: {
                           repeatCfgId: taskRepeatCfg.id,
                           timeEstimate: taskRepeatCfg.defaultEstimate,
-                          tagIds: taskRepeatCfg.tagIds || [],
                           projectId: taskRepeatCfg.projectId,
+                          tagIds: isAddToTodayAsFallback
+                            ? [TODAY_TAG.id]
+                            : taskRepeatCfg.tagIds || [],
                         }
                       }),
                       workContextType: this._workContextService.activeWorkContextType as WorkContextType,
