@@ -381,7 +381,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
       group.notes = group.notes.map((note) => {
         return note.replace(/\n/g, ' - ');
-      })
+      });
 
       group.projects = unique(group.projects);
       group.projects = group.projects.map((pId: string) => {
