@@ -278,8 +278,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             taskGroups[day] = {
               dates: [day],
               tasks: [task],
-              notes: [task.notes],
-              projects: [task.projectId || ''],
+              notes: (task.notes) ? [task.notes] : [],
+              projects: (task.projectId) ? [task.projectId] : [],
               tags: task.tagIds,
               workStart: startTimes[day],
               workEnd: endTimes[day],
@@ -304,8 +304,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           }
 
           taskGroups[task.id].tasks = [task];
-          taskGroups[task.id].notes = [task.notes];
-          taskGroups[task.id].projects = [task.projectId || ''];
+          taskGroups[task.id].notes = (task.notes) ? [task.notes] : [];
+          taskGroups[task.id].projects =  (task.projectId) ? [task.projectId] : [];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
           taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
@@ -315,8 +315,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             const groupKey = task.id + '_' + day;
             taskGroups[groupKey] = createEmptyGroup();
             taskGroups[groupKey].tasks = [task];
-            taskGroups[groupKey].notes = [task.notes];
-            taskGroups[groupKey].projects = [task.projectId || ''];
+            taskGroups[groupKey].notes = (task.notes) ? [task.notes] : [];
+            taskGroups[groupKey].projects = (task.projectId) ? [task.projectId] : [];
             taskGroups[groupKey].tags = task.tagIds;
             taskGroups[groupKey].dates = [day];
             taskGroups[groupKey].workStart = startTimes[day];
@@ -379,17 +379,16 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         return 1;
       });
 
-      group.notes = group.notes.filter((note: string) => !!note);
-      for (let i = 0; i < group.notes.length; i++) {
-        group.notes[i] = group.notes[i].replace(/\n/g, ' - ');
-      }
+      group.notes = group.notes.map((note) => {
+        return note.replace(/\n/g, ' - ');
+      })
 
-      group.projects = unique(group.projects).filter((project: string) => !!project);
+      group.projects = unique(group.projects);
       group.projects = group.projects.map((pId: string) => {
         return (allProjects.find(project => project.id === pId) as ProjectCopy).title;
       });
 
-      group.tags = unique(group.tags).filter((tags: string) => !!tags);
+      group.tags = unique(group.tags);
       group.tags = group.tags.map((tId: string) => {
         return (allTags.find(tag => tag.id === tId) as TagCopy).title;
       });
