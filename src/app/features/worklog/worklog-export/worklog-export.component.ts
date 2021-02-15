@@ -24,13 +24,15 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { WorklogService } from '../worklog.service';
 import { WorklogColTypes, WorklogExportSettingsCopy, WorklogGrouping } from '../worklog.model';
 import { T } from '../../../t.const';
-import { distinctUntilChanged, take } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
 import { WorkContextAdvancedCfg, WorkStartEnd } from '../../work-context/work-context.model';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
+import { Project, ProjectCopy } from '../../project/project.model';
 import { TagService } from '../../tag/tag.service';
+import { Tag, TagCopy } from '../../tag/tag.model';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -159,11 +161,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       combineLatest([
         this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true, this.projectId),
         this._workContextService.activeWorkContext$,
+        this._projectService.list$,
+        this._tagService.tags$
       ])
         .pipe(
-        ).subscribe(([tasks, ac]) => {
+        ).subscribe(([tasks, ac, allProjects, allTags]) => {
         if (tasks) {
-          const rows = this._createRows(tasks, ac.workStart, ac.workEnd, this.options.groupBy);
+          const rows = this._createRows(tasks, ac.workStart, ac.workEnd, this.options.groupBy, allProjects, allTags);
           this.formattedRows = this._formatRows(rows);
           // TODO format to csv
 
@@ -235,7 +239,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     return i;
   }
 
-  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: WorklogGrouping): RowItem[] {
+  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd,
+                      groupBy: WorklogGrouping, allProjects: Project[], allTags: Tag[]): RowItem[] {
 
     const _mapToGroups = (task: WorklogTask) => {
       const taskGroups: { [key: string]: RowItem } = {};
@@ -290,10 +295,17 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         case WorklogGrouping.PARENT:
         case WorklogGrouping.TASK:
           taskGroups[task.id] = createEmptyGroup();
+
+          // by design subtasks don't have tags, so we must set its parent's tags
+          if (task.parentId !== null) {
+            taskGroups[task.id].tags = (tasks.find(t => t.id === task.parentId) as TaskCopy).tagIds;
+          } else {
+            taskGroups[task.id].tags = task.tagIds;
+          }
+
           taskGroups[task.id].tasks = [task];
           taskGroups[task.id].notes = [task.notes];
           taskGroups[task.id].projects = [task.projectId || ''];
-          taskGroups[task.id].tags = task.tagIds;
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
           taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
@@ -373,18 +385,14 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       }
 
       group.projects = unique(group.projects).filter((project: string) => !!project);
-      for (let i = 0; i < group.projects.length; i++) {
-        this._projectService.getByIdOnce$(group.projects[i]).subscribe(project => {
-          group.projects[i] = project.title;
-        });
-      };
+      group.projects = group.projects.map((pId: string) => {
+        return (allProjects.find(project => project.id === pId) as ProjectCopy).title;
+      });
 
       group.tags = unique(group.tags).filter((tags: string) => !!tags);
-      for (let i = 0; i < group.tags.length; i++) {
-        this._tagService.getTagById$(group.tags[i]).pipe(take(1)).subscribe(tag => {
-          group.tags[i] = tag.title;
-        });
-      };
+      group.tags = group.tags.map((tId: string) => {
+        return (allTags.find(tag => tag.id === tId) as TagCopy).title;
+      });
 
       rows.push(group);
     }));
