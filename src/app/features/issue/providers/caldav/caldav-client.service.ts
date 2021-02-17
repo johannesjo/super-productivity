@@ -15,6 +15,7 @@ import {SnackService} from '../../../../core/snack/snack.service';
 import {T} from '../../../../t.const';
 import {catchError} from 'rxjs/operators';
 import {HANDLED_ERROR_PROP_STR} from '../../../../app.constants';
+import {throwHandledError} from '../../../../util/throw-handled-error';
 
 
 interface ClientCache {
@@ -62,6 +63,24 @@ export class CaldavClientService {
     throw new Error('CALDAV NETWORK ERROR: ' + err);
   }
 
+  private _checkSettings(cfg: CaldavCfg) {
+    if (!CaldavClientService._isValidSettings(cfg)) {
+      this._snackService.open({
+                                type: 'ERROR',
+                                msg: T.F.CALDAV.S.ERR_NOT_CONFIGURED
+                              });
+      throwHandledError('CalDav: Not enough settings');
+    }
+  }
+
+  private static _isValidSettings(cfg: CaldavCfg): boolean {
+    return !!cfg
+      && !!cfg.caldavUrl && cfg.caldavUrl.length > 0
+      && !!cfg.resourceName && cfg.resourceName.length > 0
+      && !!cfg.username && cfg.username.length > 0
+      && !!cfg.password && cfg.password.length > 0;
+  }
+
   private static _getCalendarUriFromUrl(url: string) {
     if (url.endsWith('/')) {
       url = url.substring(0, url.length - 1);
@@ -71,6 +90,8 @@ export class CaldavClientService {
   }
 
   async _get_client(cfg: CaldavCfg): Promise<ClientCache> {
+    this._checkSettings(cfg);
+
     const client_key = `${cfg.caldavUrl}|${cfg.username}|${cfg.password}`;
 
     if (this._clientCache.has(client_key)) {
