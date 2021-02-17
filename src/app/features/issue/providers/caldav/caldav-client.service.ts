@@ -113,6 +113,9 @@ export class CaldavClientService {
 
     this._snackService.open({
                               type: 'ERROR',
+                              translateParams: {
+                                calendarName: cfg.resourceName as string
+                              },
                               msg: T.F.CALDAV.S.CALENDAR_NOT_FOUND
                             });
     throw new Error('CALENDAR NOT FOUND: ' + cfg.resourceName);
@@ -229,6 +232,9 @@ export class CaldavClientService {
     if (cal.readOnly) {
       this._snackService.open({
                                 type: 'ERROR',
+                                translateParams: {
+                                  calendarName: cfg.resourceName as string
+                                },
                                 msg: T.F.CALDAV.S.CALENDAR_READ_ONLY
                               });
       throw new Error('CALENDAR READ ONLY: ' + cfg.resourceName);
@@ -239,6 +245,9 @@ export class CaldavClientService {
     if (tasks.length < 1) {
       this._snackService.open({
                                 type: 'ERROR',
+                                translateParams: {
+                                  issueId: uid
+                                },
                                 msg: T.F.CALDAV.S.ISSUE_NOT_FOUND
                               });
       throw new Error('ISSUE NOT FOUND: ' + uid);
