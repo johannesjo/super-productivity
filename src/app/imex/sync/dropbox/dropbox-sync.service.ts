@@ -21,7 +21,11 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   );
 
   isReadyForRequests$: Observable<boolean> = this.isReady$.pipe(
-    tap((isReady) => !isReady && new Error('Dropbox Sync not ready')),
+    tap((isReady) => {
+      if (!isReady) {
+        throw new Error('Dropbox Sync not ready');
+      }
+    }),
     first(),
   );
 
