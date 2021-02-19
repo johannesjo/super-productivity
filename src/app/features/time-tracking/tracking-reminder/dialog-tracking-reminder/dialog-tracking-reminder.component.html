@@ -5,6 +5,7 @@
     <div class="time">{{data.remindCounter$|async|msToString:true}}</div>
 
     <select-task (taskChange)="onTaskChange($event)"
+                 [isLimitToProject]="true"
                  [initialTask]="selectedTask"></select-task>
 
     <div class="track-to-label">

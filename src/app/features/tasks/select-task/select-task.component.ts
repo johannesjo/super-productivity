@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnI
 import { FormControl } from '@angular/forms';
 import { Task } from '../task.model';
 import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { TaskService } from '../task.service';
 
 @Component({
   selector: 'select-task',
@@ -18,10 +19,12 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   filteredTasks: Task[] = [];
   isCreate: boolean = false;
   @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
+  @Input() isLimitToProject: boolean = false;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     private _workContextService: WorkContextService,
+    private _taskService: TaskService,
   ) {
   }
 
@@ -33,9 +36,13 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    const tasks$: Observable<Task[]> = this.isLimitToProject
+      ? this._workContextService.startableTasksForActiveContext$
+      : this._taskService.allStartableTasks$;
+
     this.taskSelectCtrl.valueChanges.pipe(
       startWith(''),
-      withLatestFrom(this._workContextService.startableTasks$),
+      withLatestFrom(tasks$),
       map(([str, tasks]) =>
         typeof str === 'string'
           ? tasks.filter(task => task.title.toLowerCase().includes(str.toLowerCase()))

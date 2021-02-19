@@ -223,7 +223,7 @@ export class WorkContextService {
     map(([today, backlog]) => [...today, ...backlog])
   );
 
-  startableTasks$: Observable<Task[]> = combineLatest([
+  startableTasksForActiveContext$: Observable<Task[]> = combineLatest([
     this.activeWorkContext$,
     this._store$.pipe(
       select(selectTaskEntities),

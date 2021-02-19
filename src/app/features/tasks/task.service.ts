@@ -54,7 +54,7 @@ import {
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
   selectSelectedTask,
-  selectSelectedTaskId,
+  selectSelectedTaskId, selectStartableTasks,
   selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
@@ -141,6 +141,10 @@ export class TaskService {
     select(selectAllTasks),
   );
 
+  allStartableTasks$: Observable<Task[]> = this._store.pipe(
+    select(selectStartableTasks),
+  );
+
   // META FIELDS
   // -----------
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
@@ -194,7 +198,7 @@ export class TaskService {
   }
 
   startFirstStartable() {
-    this._workContextService.startableTasks$.pipe(take(1)).subscribe(tasks => {
+    this._workContextService.startableTasksForActiveContext$.pipe(take(1)).subscribe(tasks => {
       if (tasks[0] && !this.currentTaskId) {
         this.setCurrentId(tasks[0].id);
       }

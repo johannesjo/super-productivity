@@ -69,6 +69,13 @@ export const selectCurrentTaskOrParentWithData = createSelector(
     return mapSubTasksToTask(t as Task, s);
   });
 
+export const selectStartableTasks = createSelector(
+  selectTaskFeatureState,
+  (s): Task[] => {
+    return s.ids.map(id => s.entities[id] as Task)
+      .filter(task => !task.isDone && (!!task.parentId || task.subTaskIds.length === 0));
+  });
+
 // export const selectJiraTasks = createSelector(
 //   selectTaskFeatureState,
 //   (s): Task[] => {
