@@ -16,7 +16,6 @@ export interface SyncProviderServiceInterface {
   id: SyncProvider;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean>;
-  isReadyForRequests$: Observable<boolean>;
 
   getRevAndLastClientUpdate(localRev: string | null): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
 

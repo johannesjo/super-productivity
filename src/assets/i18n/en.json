@@ -570,6 +570,7 @@
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "IMPORTING": "Importing data",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
+        "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "SUCCESS": "Data imported",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"

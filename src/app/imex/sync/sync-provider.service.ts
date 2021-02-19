@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { distinctUntilChanged, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { GoogleDriveSyncService } from './google/google-drive-sync.service';
 import { AppDataComplete, DialogConflictResolutionResult } from './sync.model';
@@ -81,7 +81,16 @@ export class SyncProviderService {
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<unknown> {
     let local: AppDataComplete | undefined;
-    await cp.isReadyForRequests$.toPromise();
+
+    const isReady = await cp.isReady$.pipe(first()).toPromise();
+    if (!isReady) {
+      this._snackService.open({
+        msg: T.F.SYNC.S.INCOMPLETE_CFG,
+        type: 'ERROR'
+      });
+      return;
+    }
+
     const localSyncMeta = await this._persistenceLocalService.load();
     const lastSync = localSyncMeta[cp.id].lastSync;
     const localRev = localSyncMeta[cp.id].rev;

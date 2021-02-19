@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { concatMap, distinctUntilChanged, first, map, tap } from 'rxjs/operators';
+import { concatMap, distinctUntilChanged, first, map } from 'rxjs/operators';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { GoogleDriveSyncConfig } from '../../../features/config/global-config.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
@@ -24,11 +24,6 @@ export class GoogleDriveSyncService implements SyncProviderServiceInterface {
       map(cfg => cfg.syncFileName === cfg._syncFileNameForBackupDocId && !!cfg._backupDocId)),
     ),
     distinctUntilChanged(),
-  );
-
-  isReadyForRequests$: Observable<boolean> = this.isReady$.pipe(
-    tap((isReady) => !isReady && new Error('Google Drive Sync not ready')),
-    first(),
   );
 
   constructor(
