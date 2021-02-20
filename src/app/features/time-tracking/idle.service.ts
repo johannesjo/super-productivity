@@ -64,9 +64,9 @@ export class IdleService {
       });
     }
 
-    window.setTimeout(() => {
-      this.handleIdle(800000);
-    }, 700);
+    // window.setTimeout(() => {
+    //   this.handleIdle(800000);
+    // }, 700);
   }
 
   handleIdle(idleTime: number) {
