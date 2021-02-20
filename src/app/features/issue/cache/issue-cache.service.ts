@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {loadFromRealLs, removeFromRealLs, saveToRealLs} from '../../../core/persistence/local-storage';
-import {Duration} from 'moment';
+import { Injectable } from '@angular/core';
+import { loadFromRealLs, removeFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
 import * as moment from 'moment';
+import { Duration } from 'moment';
 
 class CacheContent<T> {
   constructor(

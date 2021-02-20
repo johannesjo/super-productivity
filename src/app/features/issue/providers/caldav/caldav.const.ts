@@ -1,6 +1,6 @@
-import {CaldavCfg} from './caldav.model';
-import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../../config/global-config.model';
-import {T} from '../../../../t.const';
+import { CaldavCfg } from './caldav.model';
+import { ConfigFormSection, LimitedFormlyFieldConfig } from '../../../config/global-config.model';
+import { T } from '../../../../t.const';
 
 export const DEFAULT_CALDAV_CFG: CaldavCfg = {
   caldavUrl: null,

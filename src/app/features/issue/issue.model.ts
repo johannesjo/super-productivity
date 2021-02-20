@@ -4,8 +4,8 @@ import { GithubCfg } from './providers/github/github.model';
 import { GithubIssue, GithubIssueReduced } from './providers/github/github-issue/github-issue.model';
 import { GitlabCfg } from './providers/gitlab/gitlab';
 import { GitlabIssue } from './providers/gitlab/gitlab-issue/gitlab-issue.model';
-import {CaldavIssue, CaldavIssueReduced} from './providers/caldav/caldav-issue/caldav-issue.model';
-import {CaldavCfg} from './providers/caldav/caldav.model';
+import { CaldavIssue, CaldavIssueReduced } from './providers/caldav/caldav-issue/caldav-issue.model';
+import { CaldavCfg } from './providers/caldav/caldav.model';
 
 export type IssueProviderKey = 'JIRA' | 'GITHUB' | 'GITLAB' | 'CALDAV';
 export type IssueIntegrationCfg = JiraCfg | GithubCfg | GitlabCfg;

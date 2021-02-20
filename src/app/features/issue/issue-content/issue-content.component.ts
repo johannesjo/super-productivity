@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
-import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE, CALDAV_TYPE } from '../issue.const';
+import { CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from '../issue.const';
 import { IssueData } from '../issue.model';
 
 @Component({

@@ -3,7 +3,7 @@ import { DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION } from './providers/jira/jir
 import { IssueProviderKey } from './issue.model';
 import { DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM_SECTION } from './providers/github/github.const';
 import { DEFAULT_GITLAB_CFG, GITLAB_CONFIG_FORM_SECTION } from './providers/gitlab/gitlab.const';
-import {CALDAV_CONFIG_FORM_SECTION, DEFAULT_CALDAV_CFG} from './providers/caldav/caldav.const';
+import { CALDAV_CONFIG_FORM_SECTION, DEFAULT_CALDAV_CFG } from './providers/caldav/caldav.const';
 
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
@@ -24,7 +24,7 @@ export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [JIRA_TYPE]: DEFAULT_JIRA_CFG,
   [GITHUB_TYPE]: DEFAULT_GITHUB_CFG,
   [GITLAB_TYPE]: DEFAULT_GITLAB_CFG,
-  [CALDAV_TYPE]:  DEFAULT_CALDAV_CFG
+  [CALDAV_TYPE]: DEFAULT_CALDAV_CFG
 };
 
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [

@@ -1,27 +1,30 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {Task} from 'src/app/features/tasks/task.model';
-import {IssueServiceInterface} from '../../issue-service-interface';
-import {SearchResultItem} from '../../issue.model';
-import {CaldavIssue, CaldavIssueReduced} from './caldav-issue/caldav-issue.model';
-import {CaldavClientService} from './caldav-client.service';
-import {CaldavCfg} from './caldav.model';
-import {catchError, concatMap, first, switchMap} from 'rxjs/operators';
-import {ProjectService} from '../../../project/project.service';
-import {SnackService} from '../../../../core/snack/snack.service';
-import {truncate} from '../../../../util/truncate';
-import {T} from '../../../../t.const';
-
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { Task } from 'src/app/features/tasks/task.model';
+import { IssueServiceInterface } from '../../issue-service-interface';
+import { SearchResultItem } from '../../issue.model';
+import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
+import { CaldavClientService } from './caldav-client.service';
+import { CaldavCfg } from './caldav.model';
+import { catchError, concatMap, first, switchMap } from 'rxjs/operators';
+import { ProjectService } from '../../../project/project.service';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { truncate } from '../../../../util/truncate';
+import { T } from '../../../../t.const';
 
 @Injectable({
-              providedIn: 'root',
-            })
+  providedIn: 'root',
+})
 export class CaldavCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _projectService: ProjectService,
     private readonly _caldavClientService: CaldavClientService,
     private readonly _snackService: SnackService,
   ) {
+  }
+
+  private static _formatIssueTitleForSnack(title: string): string {
+    return truncate(title);
   }
 
   getAddTaskData(issueData: CaldavIssueReduced): { title: string; additionalFields: Partial<Task> } {
@@ -39,8 +42,8 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
   }
 
   async refreshIssue(task: Task,
-                     isNotifySuccess: boolean,
-                     isNotifyNoUpdateRequired: boolean):
+    isNotifySuccess: boolean,
+    isNotifyNoUpdateRequired: boolean):
     Promise<{ taskChanges: Partial<Task>; issue: CaldavIssue } | null> {
 
     if (!task.projectId) {
@@ -57,17 +60,17 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
     if (wasUpdated && isNotifySuccess) {
       this._snackService.open({
-                                ico: 'cloud_download',
-                                translateParams: {
-                                  issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(issue.summary)
-                                },
-                                msg: T.F.CALDAV.S.ISSUE_UPDATE,
-                              });
+        ico: 'cloud_download',
+        translateParams: {
+          issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(issue.summary)
+        },
+        msg: T.F.CALDAV.S.ISSUE_UPDATE,
+      });
     } else if (isNotifyNoUpdateRequired) {
       this._snackService.open({
-                                msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
-                                ico: 'cloud_download',
-                              });
+        msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
+        ico: 'cloud_download',
+      });
     }
 
     if (wasUpdated) {
@@ -82,7 +85,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     }
     return null;
   }
-
 
   async refreshIssues(
     tasks: Task[],
@@ -104,9 +106,9 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     if (isNotifyNoUpdateRequired) {
       tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.last_modified === task.issueLastUpdated)
         .forEach(_ => this._snackService.open({
-                                                msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
-                                                ico: 'cloud_download',
-                                              }));
+          msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
+          ico: 'cloud_download',
+        }));
     }
 
     return tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.last_modified !== task.issueLastUpdated)
@@ -114,12 +116,12 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
         const issue = issueMap.get(task.id) as CaldavIssue;
         if (isNotifySuccess) {
           this._snackService.open({
-                                    ico: 'cloud_download',
-                                    translateParams: {
-                                      issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(issue.summary)
-                                    },
-                                    msg: T.F.CALDAV.S.ISSUE_UPDATE,
-                                  });
+            ico: 'cloud_download',
+            translateParams: {
+              issueText: CaldavCommonInterfacesService._formatIssueTitleForSnack(issue.summary)
+            },
+            msg: T.F.CALDAV.S.ISSUE_UPDATE,
+          });
         }
         return {
           task,
@@ -144,10 +146,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
   private _getCfgOnce$(projectId: string): Observable<CaldavCfg> {
     return this._projectService.getCaldavCfgForProject$(projectId).pipe(first());
-  }
-
-  private static _formatIssueTitleForSnack(title: string): string {
-    return truncate(title);
   }
 
 }

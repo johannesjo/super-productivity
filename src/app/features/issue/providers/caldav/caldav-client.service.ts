@@ -1,22 +1,21 @@
-import {Injectable} from '@angular/core';
-import {CaldavCfg} from './caldav.model';
+import { Injectable } from '@angular/core';
+import { CaldavCfg } from './caldav.model';
 // @ts-ignore
-import DavClient, {namespaces as NS} from 'cdav-library';
+import DavClient, { namespaces as NS } from 'cdav-library';
 // @ts-ignore
 import Calendar from 'cdav-library/models/calendar';
 // @ts-ignore
 import ICAL from 'ical.js';
 
-import {from, Observable, throwError} from 'rxjs';
-import {CaldavIssue} from './caldav-issue/caldav-issue.model';
-import {CALDAV_TYPE} from '../../issue.const';
-import {SearchResultItem} from '../../issue.model';
-import {SnackService} from '../../../../core/snack/snack.service';
-import {T} from '../../../../t.const';
-import {catchError} from 'rxjs/operators';
-import {HANDLED_ERROR_PROP_STR} from '../../../../app.constants';
-import {throwHandledError} from '../../../../util/throw-handled-error';
-
+import { from, Observable, throwError } from 'rxjs';
+import { CaldavIssue } from './caldav-issue/caldav-issue.model';
+import { CALDAV_TYPE } from '../../issue.const';
+import { SearchResultItem } from '../../issue.model';
+import { SnackService } from '../../../../core/snack/snack.service';
+import { T } from '../../../../t.const';
+import { catchError } from 'rxjs/operators';
+import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
+import { throwHandledError } from '../../../../util/throw-handled-error';
 
 interface ClientCache {
   client: DavClient;
@@ -24,8 +23,8 @@ interface ClientCache {
 }
 
 @Injectable({
-              providedIn: 'root',
-            })
+  providedIn: 'root',
+})
 export class CaldavClientService {
 
   private _clientCache = new Map<string, ClientCache>();
@@ -33,44 +32,6 @@ export class CaldavClientService {
   constructor(
     private readonly _snackService: SnackService
   ) {
-  }
-
-  private _getXhrProvider(cfg: CaldavCfg) {
-    function xhrProvider(): XMLHttpRequest {
-      const xhr = new XMLHttpRequest();
-      const oldOpen = xhr.open;
-
-      // override open() method to add headers
-      xhr.open = function() {
-        // @ts-ignore
-        const result = oldOpen.apply(this, arguments);
-        // @ts-ignore
-        xhr.setRequestHeader('X-Requested-With', 'SuperProductivity');
-        xhr.setRequestHeader('Authorization', 'Basic ' + btoa(cfg.username + ':' + cfg.password));
-        return result;
-      };
-      return xhr;
-    }
-
-    return xhrProvider;
-  }
-
-  private _handleNetErr(err: any) {
-    this._snackService.open({
-                              type: 'ERROR',
-                              msg: T.F.CALDAV.S.ERR_NETWORK
-                            });
-    throw new Error('CALDAV NETWORK ERROR: ' + err);
-  }
-
-  private _checkSettings(cfg: CaldavCfg) {
-    if (!CaldavClientService._isValidSettings(cfg)) {
-      this._snackService.open({
-                                type: 'ERROR',
-                                msg: T.F.CALDAV.S.ERR_NOT_CONFIGURED
-                              });
-      throwHandledError('CalDav: Not enough settings');
-    }
   }
 
   private static _isValidSettings(cfg: CaldavCfg): boolean {
@@ -87,59 +48,6 @@ export class CaldavClientService {
     }
 
     return url.substring(url.lastIndexOf('/') + 1);
-  }
-
-  async _get_client(cfg: CaldavCfg): Promise<ClientCache> {
-    this._checkSettings(cfg);
-
-    const client_key = `${cfg.caldavUrl}|${cfg.username}|${cfg.password}`;
-
-    if (this._clientCache.has(client_key)) {
-      return this._clientCache.get(client_key) as ClientCache;
-    } else {
-      const client = new DavClient({
-                                     rootUrl: cfg.caldavUrl
-                                   }, this._getXhrProvider(cfg));
-
-      await client.connect({enableCalDAV: true}).catch((err: any) => this._handleNetErr(err));
-
-      const cache = {
-        client,
-        calendars: new Map()
-      };
-      this._clientCache.set(client_key, cache);
-
-      return cache;
-    }
-  }
-
-
-  async _getCalendar(cfg: CaldavCfg) {
-    const clientCache = await this._get_client(cfg);
-    const resource = cfg.resourceName as string;
-
-    if (clientCache.calendars.has(resource)) {
-      return clientCache.calendars.get(resource);
-    }
-
-    const calendars = await clientCache.client.calendarHomes[0].findAllCalendars()
-      .catch((err: any) => this._handleNetErr(err));
-
-    const calendar = calendars.find((item: Calendar) => (item.displayname || CaldavClientService._getCalendarUriFromUrl(item.url)) === resource);
-
-    if (calendar !== undefined) {
-      clientCache.calendars.set(resource, calendar);
-      return calendar;
-    }
-
-    this._snackService.open({
-                              type: 'ERROR',
-                              translateParams: {
-                                calendarName: cfg.resourceName as string
-                              },
-                              msg: T.F.CALDAV.S.CALENDAR_NOT_FOUND
-                            });
-    throw new Error('CALENDAR NOT FOUND: ' + cfg.resourceName);
   }
 
   private static async _getAllTodos(calendar: any, filterOpen: boolean) {
@@ -198,7 +106,6 @@ export class CaldavClientService {
     return await calendar.calendarQuery([query]);
   }
 
-
   private static _mapTask(task: any): CaldavIssue {
     const jCal = ICAL.parse(task.data);
     const comp = new ICAL.Component(jCal);
@@ -226,6 +133,137 @@ export class CaldavClientService {
     };
   }
 
+  async _get_client(cfg: CaldavCfg): Promise<ClientCache> {
+    this._checkSettings(cfg);
+
+    const client_key = `${cfg.caldavUrl}|${cfg.username}|${cfg.password}`;
+
+    if (this._clientCache.has(client_key)) {
+      return this._clientCache.get(client_key) as ClientCache;
+    } else {
+      const client = new DavClient({
+        rootUrl: cfg.caldavUrl
+      }, this._getXhrProvider(cfg));
+
+      await client.connect({enableCalDAV: true}).catch((err: any) => this._handleNetErr(err));
+
+      const cache = {
+        client,
+        calendars: new Map()
+      };
+      this._clientCache.set(client_key, cache);
+
+      return cache;
+    }
+  }
+
+  async _getCalendar(cfg: CaldavCfg) {
+    const clientCache = await this._get_client(cfg);
+    const resource = cfg.resourceName as string;
+
+    if (clientCache.calendars.has(resource)) {
+      return clientCache.calendars.get(resource);
+    }
+
+    const calendars = await clientCache.client.calendarHomes[0].findAllCalendars()
+      .catch((err: any) => this._handleNetErr(err));
+
+    const calendar = calendars.find((item: Calendar) => (item.displayname || CaldavClientService._getCalendarUriFromUrl(item.url)) === resource);
+
+    if (calendar !== undefined) {
+      clientCache.calendars.set(resource, calendar);
+      return calendar;
+    }
+
+    this._snackService.open({
+      type: 'ERROR',
+      translateParams: {
+        calendarName: cfg.resourceName as string
+      },
+      msg: T.F.CALDAV.S.CALENDAR_NOT_FOUND
+    });
+    throw new Error('CALENDAR NOT FOUND: ' + cfg.resourceName);
+  }
+
+  getOpenTasks$(cfg: CaldavCfg): Observable<CaldavIssue[]> {
+    return from(this._getTasks(cfg, true)).pipe(
+      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
+  }
+
+  searchOpenTasks$(text: string, cfg: CaldavCfg): Observable<SearchResultItem[]> {
+    return from(this._getTasks(cfg, true)
+      .then(tasks =>
+        tasks.filter(todo => todo.summary.includes(text))
+          .map(todo => {
+            return {
+              title: todo.summary,
+              issueType: CALDAV_TYPE,
+              issueData: todo,
+            };
+          })
+      )).pipe(
+      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
+  }
+
+  getById$(id: string | number, caldavCfg: CaldavCfg): Observable<CaldavIssue> {
+    console.log(id);
+    if (typeof id === 'number') {
+      id = id.toString(10);
+    }
+    return from(this._getTask(caldavCfg, id)).pipe(
+      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
+  }
+
+  getByIds$(ids: string[], cfg: CaldavCfg): Observable<CaldavIssue[]> {
+    return from(this._getTasks(cfg, false)
+      .then(tasks => tasks
+        .filter(task => task.id in ids))).pipe(
+      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
+  }
+
+  updateCompletedState$(caldavCfg: CaldavCfg, issueId: string, completed: boolean): Observable<any> {
+    return from(this._updateCompletedState(caldavCfg, issueId, completed)).pipe(
+      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
+  }
+
+  private _getXhrProvider(cfg: CaldavCfg) {
+    function xhrProvider(): XMLHttpRequest {
+      const xhr = new XMLHttpRequest();
+      const oldOpen = xhr.open;
+
+      // override open() method to add headers
+      xhr.open = function() {
+        // @ts-ignore
+        const result = oldOpen.apply(this, arguments);
+        // @ts-ignore
+        xhr.setRequestHeader('X-Requested-With', 'SuperProductivity');
+        xhr.setRequestHeader('Authorization', 'Basic ' + btoa(cfg.username + ':' + cfg.password));
+        return result;
+      };
+      return xhr;
+    }
+
+    return xhrProvider;
+  }
+
+  private _handleNetErr(err: any) {
+    this._snackService.open({
+      type: 'ERROR',
+      msg: T.F.CALDAV.S.ERR_NETWORK
+    });
+    throw new Error('CALDAV NETWORK ERROR: ' + err);
+  }
+
+  private _checkSettings(cfg: CaldavCfg) {
+    if (!CaldavClientService._isValidSettings(cfg)) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.CALDAV.S.ERR_NOT_CONFIGURED
+      });
+      throwHandledError('CalDav: Not enough settings');
+    }
+  }
+
   private async _getTasks(cfg: CaldavCfg, filterOpen: boolean): Promise<CaldavIssue[]> {
     const cal = await this._getCalendar(cfg);
     const tasks = await CaldavClientService._getAllTodos(cal, filterOpen).catch((err: any) => this._handleNetErr(err));
@@ -238,9 +276,9 @@ export class CaldavClientService {
 
     if (task.length < 1) {
       this._snackService.open({
-                                type: 'ERROR',
-                                msg: T.F.CALDAV.S.ISSUE_NOT_FOUND
-                              });
+        type: 'ERROR',
+        msg: T.F.CALDAV.S.ISSUE_NOT_FOUND
+      });
       throw new Error('ISSUE NOT FOUND: ' + uid);
     }
 
@@ -252,12 +290,12 @@ export class CaldavClientService {
 
     if (cal.readOnly) {
       this._snackService.open({
-                                type: 'ERROR',
-                                translateParams: {
-                                  calendarName: cfg.resourceName as string
-                                },
-                                msg: T.F.CALDAV.S.CALENDAR_READ_ONLY
-                              });
+        type: 'ERROR',
+        translateParams: {
+          calendarName: cfg.resourceName as string
+        },
+        msg: T.F.CALDAV.S.CALENDAR_READ_ONLY
+      });
       throw new Error('CALENDAR READ ONLY: ' + cfg.resourceName);
     }
 
@@ -265,12 +303,12 @@ export class CaldavClientService {
 
     if (tasks.length < 1) {
       this._snackService.open({
-                                type: 'ERROR',
-                                translateParams: {
-                                  issueId: uid
-                                },
-                                msg: T.F.CALDAV.S.ISSUE_NOT_FOUND
-                              });
+        type: 'ERROR',
+        translateParams: {
+          issueId: uid
+        },
+        msg: T.F.CALDAV.S.ISSUE_NOT_FOUND
+      });
       throw new Error('ISSUE NOT FOUND: ' + uid);
     }
 
@@ -297,46 +335,5 @@ export class CaldavClientService {
     task.data = ICAL.stringify(jCal);
     await task.update().catch((err: any) => this._handleNetErr(err));
 
-  }
-
-  getOpenTasks$(cfg: CaldavCfg): Observable<CaldavIssue[]> {
-    return from(this._getTasks(cfg, true)).pipe(
-      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
-  }
-
-  searchOpenTasks$(text: string, cfg: CaldavCfg): Observable<SearchResultItem[]> {
-    return from(this._getTasks(cfg, true)
-                  .then(tasks =>
-                          tasks.filter(todo => todo.summary.includes(text))
-                            .map(todo => {
-                              return {
-                                title: todo.summary,
-                                issueType: CALDAV_TYPE,
-                                issueData: todo,
-                              };
-                            })
-                  )).pipe(
-      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
-  }
-
-  getById$(id: string | number, caldavCfg: CaldavCfg): Observable<CaldavIssue> {
-    console.log(id);
-    if (typeof id === 'number') {
-      id = id.toString(10);
-    }
-    return from(this._getTask(caldavCfg, id)).pipe(
-      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
-  }
-
-  getByIds$(ids: string[], cfg: CaldavCfg): Observable<CaldavIssue[]> {
-    return from(this._getTasks(cfg, false)
-                  .then(tasks => tasks
-                    .filter(task => task.id in ids))).pipe(
-      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
-  }
-
-  updateCompletedState$(caldavCfg: CaldavCfg, issueId: string, completed: boolean): Observable<any> {
-    return from(this._updateCompletedState(caldavCfg, issueId, completed)).pipe(
-      catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
   }
 }
