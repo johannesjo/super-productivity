@@ -50,6 +50,16 @@
           <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_GITLAB|translate}}</span>
         </button>
       </div>
+      <div class="item">
+        <button (click)="openCaldavCfg()"
+                color="primary"
+                mat-button
+                type="button">
+          <mat-icon *ngIf="!caldavCfg?.resourceName" svgIcon="caldav"></mat-icon>
+          <mat-icon *ngIf="caldavCfg?.resourceName">checkmark</mat-icon>
+          <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_CALDAV|translate}}</span>
+        </button>
+      </div>
       <!--<div class="item">-->
       <!--<button mat-raised-button color=primary-->
       <!--type="button">-->

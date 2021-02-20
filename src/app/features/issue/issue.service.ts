@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { IssueData, IssueDataReduced, IssueProviderKey, SearchResultItem } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 import { from, merge, Observable, of, Subject, zip } from 'rxjs';
-import { GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from './issue.const';
+import { CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE, JIRA_TYPE } from './issue.const';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
@@ -10,6 +10,7 @@ import { JiraCommonInterfacesService } from './providers/jira/jira-common-interf
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
 import { switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
+import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,14 +19,16 @@ export class IssueService {
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
     [GITLAB_TYPE]: this._gitlabCommonInterfacesService,
     [GITHUB_TYPE]: this._githubCommonInterfacesService,
-    [JIRA_TYPE]: this._jiraCommonInterfacesService
+    [JIRA_TYPE]: this._jiraCommonInterfacesService,
+    [CALDAV_TYPE]: this._caldavCommonInterfaceService,
   };
 
   // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
   ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
     [GITLAB_TYPE]: {},
     [GITHUB_TYPE]: {},
-    [JIRA_TYPE]: {}
+    [JIRA_TYPE]: {},
+    [CALDAV_TYPE]: {}
   };
 
   constructor(
@@ -33,6 +36,7 @@ export class IssueService {
     private _jiraCommonInterfacesService: JiraCommonInterfacesService,
     private _githubCommonInterfacesService: GithubCommonInterfacesService,
     private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
+    private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
   ) {
   }
 

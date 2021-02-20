@@ -30,4 +30,4 @@ export const FIRST_PROJECT: Project = {
   workEnd: {},
 };
 
-export const PROJECT_MODEL_VERSION = 5.1;
+export const PROJECT_MODEL_VERSION = 5.2;

@@ -1,0 +1,43 @@
+<ng-container>
+  <div *ngIf="task?.issueWasUpdated"
+       @expand
+       style="text-align: center;">
+    <button (click)="hideUpdates()"
+            color="accent"
+            mat-raised-button>
+      {{T.F.CALDAV.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="issue-table">
+      <tr>
+        <th>{{T.F.CALDAV.ISSUE_CONTENT.SUMMARY|translate}}</th>
+        <td><strong>{{issue?.summary}}</strong></td>
+      </tr>
+      <tr>
+        <th>{{T.F.CALDAV.ISSUE_CONTENT.STATUS|translate}}</th>
+        <td>{{issue?.completed}}</td>
+      </tr>
+      <tr *ngIf="issue?.labels?.length">
+        <th>{{T.F.CALDAV.ISSUE_CONTENT.LABELS|translate}}</th>
+        <td>
+          <mat-chip-list>
+            <mat-chip *ngFor="let label of issue?.labels"
+                      [title]="label">{{label}}
+            </mat-chip>
+          </mat-chip-list>
+        </td>
+      </tr>
+      <tr *ngIf="issue?.note">
+        <th>{{T.F.CALDAV.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
+        <td class="issue-description">
+          <div [data]="issue?.note"
+               class="description markdown"
+               markdown></div>
+        </td>
+      </tr>
+    </table>
+
+  </div>
+</ng-container>

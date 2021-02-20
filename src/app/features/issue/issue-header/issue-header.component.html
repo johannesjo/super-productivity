@@ -9,3 +9,7 @@
 <ng-container *ngIf="task?.issueType===GITLAB_TYPE">
   <gitlab-issue-header [task]="task"></gitlab-issue-header>
 </ng-container>
+
+<ng-container *ngIf="task?.issueType===CALDAV_TYPE">
+  <caldav-issue-header [task]="task"></caldav-issue-header>
+</ng-container>
