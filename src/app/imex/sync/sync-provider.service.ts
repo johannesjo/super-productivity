@@ -135,7 +135,7 @@ export class SyncProviderService {
     // if not defined yet
     local = local || await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
 
-    if (local.lastLocalSyncModelChange === 0) {
+    if (!local.lastLocalSyncModelChange || local.lastLocalSyncModelChange === 0) {
       if (!(this._c(T.F.SYNC.C.EMPTY_SYNC))) {
         this._log(cp, 'PRE2: Abort');
         return;
@@ -143,13 +143,13 @@ export class SyncProviderService {
     }
 
     // PRE CHECK 3
-    // simple check based on local meta
+    // simple check if lastLocalSyncModelChange
     // ------------------------------------
     if (!local.lastLocalSyncModelChange) {
       throw new Error('No lastLocalSyncModelChange');
     }
 
-    // PRE CHECK 4
+    // PRE CHECK 3
     // simple check based on file meta data
     // ------------------------------------
     // NOTE: missing milliseconds for dropbox :(
@@ -162,20 +162,20 @@ export class SyncProviderService {
       && remoteClientUpdate === Math.floor(lastSync / 1000)
       && lastSync < local.lastLocalSyncModelChange
     ) {
-      this._log(cp, 'PRE4: ↑ Update Remote');
+      this._log(cp, 'PRE3: ↑ Update Remote');
       return await this._uploadAppData(cp, local);
     }
 
     // DOWNLOAD OF REMOTE
     const r = (await this._downloadAppData(cp));
 
-    // PRE CHECK 5
+    // PRE CHECK 4
     // check if there is no data or no valid remote data
     // -------------------------------------------------
     const remote = r.data;
     if (!remote || !remote.lastLocalSyncModelChange) {
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
-        this._log(cp, '↑ PRE5: Update Remote');
+        this._log(cp, '↑ PRE4: Update Remote');
         return await this._uploadAppData(cp, local);
       }
       return;
