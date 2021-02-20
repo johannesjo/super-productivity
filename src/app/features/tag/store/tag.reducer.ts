@@ -67,7 +67,6 @@ export const selectTagsByIds = createSelector(
 
 const _addMyDayTagIfNecessary = (state: TagState): TagState => {
   const ids = state.ids as string[];
-  console.log(ids);
   if (ids && !ids.includes(TODAY_TAG.id)) {
     return {
       ...state,

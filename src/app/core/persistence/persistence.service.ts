@@ -546,7 +546,6 @@ export class PersistenceService {
         data
       });
 
-      console.log({isSyncModelChange});
       if (isSyncModelChange) {
         this.updateLastLocalSyncModelChange();
       }
