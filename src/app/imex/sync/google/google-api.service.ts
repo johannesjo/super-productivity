@@ -404,8 +404,8 @@ export class GoogleApiService {
     };
   }) {
     const r: any = res;
-    const accessToken = r.accessToken || r.access_token || r.Zi?.access_token;
-    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi?.expires_at || Date.now() + r.expire_in);
+    const accessToken = r.accessToken || r.access_token || r.Zi?.access_token || r.uc?.access_token;
+    const expiresAt = +(r.expiresAt || r.expires_at || r.Zi?.expires_at || r.uc?.expires_at || Date.now() + r.expire_in);
 
     if (!accessToken) {
       console.log(res);
