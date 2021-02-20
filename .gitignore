@@ -41,7 +41,7 @@ testem.log
 /typings
 chromedriver.log
 e2e-test-results
-n2e/screenshots
+e2e/screenshots
 package-lock.json
 
 # System Files
