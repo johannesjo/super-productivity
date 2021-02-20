@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
 import { GithubCfg } from '../../../issue/providers/github/github.model';
 import { DialogGithubInitialSetupComponent } from '../../../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import { GITHUB_TYPE, GITLAB_TYPE } from '../../../issue/issue.const';
+import {CALDAV_TYPE, GITHUB_TYPE, GITLAB_TYPE} from '../../../issue/issue.const';
 import { T } from '../../../../t.const';
 import { DEFAULT_JIRA_CFG } from '../../../issue/providers/jira/jira.const';
 import { DEFAULT_GITHUB_CFG } from '../../../issue/providers/github/github.const';
@@ -22,6 +22,9 @@ import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../../work-context/wor
 import { GitlabCfg } from 'src/app/features/issue/providers/gitlab/gitlab';
 import { DEFAULT_GITLAB_CFG } from 'src/app/features/issue/providers/gitlab/gitlab.const';
 import { DialogGitlabInitialSetupComponent } from 'src/app/features/issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.component';
+import {CaldavCfg} from 'src/app/features/issue/providers/caldav/caldav.model';
+import {DEFAULT_CALDAV_CFG} from 'src/app/features/issue/providers/caldav/caldav.const';
+import {DialogCaldavInitialSetupComponent} from 'src/app/features/issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.component';
 
 @Component({
   selector: 'dialog-create-project',
@@ -35,6 +38,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   jiraCfg?: JiraCfg;
   githubCfg?: GithubCfg;
   gitlabCfg?: GitlabCfg;
+  caldavCfg?: CaldavCfg;
 
   formBasic: FormGroup = new FormGroup({});
   formTheme: FormGroup = new FormGroup({});
@@ -89,6 +93,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           JIRA: this.jiraCfg,
           GITHUB: this.githubCfg,
           GITLAB: this.gitlabCfg,
+          CALDAV: this.caldavCfg,
         };
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -110,6 +115,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (this.projectData.issueIntegrationCfgs.GITLAB) {
         this.gitlabCfg = this.projectData.issueIntegrationCfgs.GITLAB;
       }
+      if (this.projectData.issueIntegrationCfgs.CALDAV) {
+        this.caldavCfg = this.projectData.issueIntegrationCfgs.CALDAV;
+      }
     }
   }
 
@@ -123,6 +131,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       JIRA: this.jiraCfg || DEFAULT_JIRA_CFG,
       GITHUB: this.githubCfg || DEFAULT_GITHUB_CFG,
       GITLAB: this.gitlabCfg || DEFAULT_GITLAB_CFG,
+      CALDAV: this.caldavCfg || DEFAULT_CALDAV_CFG,
     };
 
     const projectDataToSave: Project | Partial<Project> = {
@@ -187,6 +196,20 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }));
   }
 
+  openCaldavCfg() {
+    this._subs.add(this._matDialog.open(DialogCaldavInitialSetupComponent, {
+      restoreFocus: true,
+      data: {
+        caldavCfg: this.caldavCfg,
+      }
+    }).afterClosed().subscribe((caldavCfg: CaldavCfg) => {
+
+      if (caldavCfg) {
+        this._saveCaldavCfg(caldavCfg);
+      }
+    }));
+  }
+
   private _saveJiraCfg(jiraCfg: JiraCfg) {
     this.jiraCfg = jiraCfg;
     this._cd.markForCheck();
@@ -214,6 +237,16 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     // if we're editing save right away
     if (this.projectData.id) {
       this._projectService.updateIssueProviderConfig(this.projectData.id, GITLAB_TYPE, this.gitlabCfg);
+    }
+  }
+
+  private _saveCaldavCfg(caldavCfg: CaldavCfg) {
+    this.caldavCfg = caldavCfg;
+    this._cd.markForCheck();
+
+    // if we're editing save right away
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(this.projectData.id, CALDAV_TYPE, this.caldavCfg);
     }
   }
 }

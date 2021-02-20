@@ -10,6 +10,7 @@ import { UiModule } from '../../ui/ui.module';
 import { JiraViewComponentsModule } from '../issue/providers/jira/jira-view-components/jira-view-components.module';
 import { GithubViewComponentsModule } from '../issue/providers/github/github-view-components/github-view-components.module';
 import { DialogGitlabInitialSetupModule } from '../issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.module';
+import {DialogCaldavInitialSetupModule} from '../issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.module';
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import { DialogGitlabInitialSetupModule } from '../issue/providers/gitlab/dialog
     JiraViewComponentsModule,
     GithubViewComponentsModule,
     DialogGitlabInitialSetupModule,
+    DialogCaldavInitialSetupModule,
   ],
   declarations: [
     DialogCreateProjectComponent,

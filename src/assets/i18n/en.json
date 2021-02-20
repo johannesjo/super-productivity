@@ -77,6 +77,44 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup CalDav for Project"
+      },
+      "FORM": {
+        "CALDAV_URL": "CalDav URL (the base URL)",
+        "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
+        "CALDAV_USER": "Your CalDav username",
+        "CALDAV_PASSWORD": "Your CalDav password",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add uncompleted CalDav todos to your backlog",
+        "IS_AUTO_POLL": "Automatically poll imported tasks for changes",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Show uncompleted CalDav todos as suggestion when adding new tasks",
+        "IS_TRANSITION_ISSUES_ENABLED": "Automatically complete CalDav todos on task completion"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Description",
+        "LABELS": "Categories",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
+        "CALENDAR_READ_ONLY": "CalDav: Calendar \"{{calendarName}}\" is readonly",
+        "ERR_NETWORK": "CalDav: Request failed because of a client side network error",
+        "ERR_NOT_CONFIGURED": "CalDav: Not properly configured",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: Imported issue \"{{issueText}}\" from to backlog",
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: No update required.",
+        "ISSUE_UPDATE": "Caldav: Uodated data for \"{{issueText}}\"",
+        "POLLING": "Caldav: Polling changes for todos"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
@@ -453,7 +491,8 @@
         "EDIT": "Edit Project",
         "SETUP_GIT": "Setup GitHub Integration",
         "SETUP_GITLAB": "Setup GitLab Integration",
-        "SETUP_JIRA": "Setup Jira Integration"
+        "SETUP_JIRA": "Setup Jira Integration",
+        "SETUP_CALDAV": "Setup Caldav Integration"
       },
       "FORM_BASIC": {
         "L_TITLE": "Project Name",
