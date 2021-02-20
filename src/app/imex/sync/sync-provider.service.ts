@@ -102,8 +102,8 @@ export class SyncProviderService {
     if (typeof revRes === 'string') {
       if (revRes === 'NO_REMOTE_DATA' && this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getRevAndLastClientUpdate()');
-        local = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
-        return await this._uploadAppData(cp, local);
+        const localLocal = await this._syncService.inMemoryComplete$.pipe(take(1)).toPromise();
+        return await this._uploadAppData(cp, localLocal);
       }
       // NOTE: includes HANDLED_ERROR
       return;
