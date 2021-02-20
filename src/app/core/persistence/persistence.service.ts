@@ -164,6 +164,9 @@ export class PersistenceService {
     private _compressionService: CompressionService,
     private _store: Store<any>,
   ) {
+    // NOTE: we actually need to subscribe to this, otherwise onAfterSave$ won't always be taken
+    // into consideration for inMemoryComplete$ and we won't always have the latest data
+    this.inMemoryComplete$.subscribe();
     // this.inMemoryComplete$.subscribe((v) => console.log('inMemoryComplete$', v));
   }
 
@@ -543,6 +546,7 @@ export class PersistenceService {
         data
       });
 
+      console.log({isSyncModelChange});
       if (isSyncModelChange) {
         this.updateLastLocalSyncModelChange();
       }
