@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { SnackService } from '../snack/snack.service';
 import { DatabaseService } from './database.service';
 import { CompressionService } from '../compression/compression.service';
@@ -64,7 +64,7 @@ describe('PersistenceService', () => {
       });
     });
 
-    it('should refresh onAfterSave$', (done) => {
+    it('should refresh onAfterSave$', fakeAsync((done) => {
       const service: PersistenceService = TestBed.inject(PersistenceService);
       let ll: any;
       let i = 0;
@@ -88,7 +88,8 @@ describe('PersistenceService', () => {
       setTimeout(() => {
         service.onAfterSave$.next('' as any);
       }, 1);
-    });
+      tick(51);
+    }));
 
     // it('should refresh onAfterSave$', () => {
     //   testScheduler.run(({expectObservable}) => {
