@@ -11,6 +11,7 @@ export const DEFAULT_CALDAV_CFG: CaldavCfg = {
   isAutoPoll: false,
   isSearchIssuesFromCaldav: true,
   isTransitionIssuesEnabled: false,
+  categoryFilter: null,
 };
 
 export const CALDAV_POLL_INTERVAL = 10 * 60 * 1000;
@@ -85,6 +86,14 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<CaldavCfg>[] = [
     type: 'checkbox',
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED
+    },
+  },
+  {
+    key: 'categoryFilter',
+    type: 'input',
+    templateOptions: {
+      label: T.F.CALDAV.FORM.CALDAV_CATEGORY_FILTER,
+      type: 'text',
     },
   },
 ];

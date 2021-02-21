@@ -86,6 +86,7 @@
         "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
         "CALDAV_USER": "Your CalDav username",
         "CALDAV_PASSWORD": "Your CalDav password",
+        "CALDAV_CATEGORY_FILTER": "Category to filter issues for (leave empty for none)",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add uncompleted CalDav todos to your backlog",
         "IS_AUTO_POLL": "Automatically poll imported tasks for changes",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Show uncompleted CalDav todos as suggestion when adding new tasks",
