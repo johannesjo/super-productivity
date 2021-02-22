@@ -186,12 +186,12 @@ export class CaldavClientService {
   }
 
   getOpenTasks$(cfg: CaldavCfg): Observable<CaldavIssue[]> {
-    return from(this._getTasks(cfg, true)).pipe(
+    return from(this._getTasks(cfg, true, true)).pipe(
       catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
   }
 
   searchOpenTasks$(text: string, cfg: CaldavCfg): Observable<SearchResultItem[]> {
-    return from(this._getTasks(cfg, true)
+    return from(this._getTasks(cfg, true, true)
       .then(tasks =>
         tasks.filter(todo => todo.summary.includes(text))
           .map(todo => {
@@ -215,7 +215,7 @@ export class CaldavClientService {
   }
 
   getByIds$(ids: string[], cfg: CaldavCfg): Observable<CaldavIssue[]> {
-    return from(this._getTasks(cfg, false)
+    return from(this._getTasks(cfg, false, false)
       .then(tasks => tasks
         .filter(task => task.id in ids))).pipe(
       catchError((err) => throwError({[HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err})));
@@ -264,10 +264,11 @@ export class CaldavClientService {
     }
   }
 
-  private async _getTasks(cfg: CaldavCfg, filterOpen: boolean): Promise<CaldavIssue[]> {
+  private async _getTasks(cfg: CaldavCfg, filterOpen: boolean, filterCategory: boolean): Promise<CaldavIssue[]> {
     const cal = await this._getCalendar(cfg);
     const tasks = await CaldavClientService._getAllTodos(cal, filterOpen).catch((err: any) => this._handleNetErr(err));
-    return tasks.map((t: any) => CaldavClientService._mapTask(t));
+    return tasks.map((t: any) => CaldavClientService._mapTask(t))
+      .filter((t: CaldavIssue) => !filterCategory || !cfg.categoryFilter || (t.labels.includes(cfg.categoryFilter)));
   }
 
   private async _getTask(cfg: CaldavCfg, uid: string): Promise<CaldavIssue> {

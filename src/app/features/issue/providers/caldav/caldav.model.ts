@@ -7,4 +7,5 @@ export interface CaldavCfg {
   isAutoPoll: boolean;
   isSearchIssuesFromCaldav: boolean;
   isTransitionIssuesEnabled: boolean;
+  categoryFilter: string | null;
 }
