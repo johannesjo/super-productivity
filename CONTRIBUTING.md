@@ -22,4 +22,6 @@ In case you want to contribute, but you wouldn't know how, here are some suggest
 
 4. **Contribute**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love. 
 
+5. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
+
 :hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: 

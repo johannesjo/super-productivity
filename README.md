@@ -154,6 +154,7 @@ There are several ways to help.
 
 4. **Contribute**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love. 
 
+5. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
 
 ### Pull Requests 
 **Pull requests** are of course very welcome! Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
