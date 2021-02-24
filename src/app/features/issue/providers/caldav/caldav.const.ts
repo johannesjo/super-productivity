@@ -9,7 +9,7 @@ export const DEFAULT_CALDAV_CFG: CaldavCfg = {
   password: null,
   isAutoAddToBacklog: false,
   isAutoPoll: false,
-  isSearchIssuesFromCaldav: true,
+  isSearchIssuesFromCaldav: false,
   isTransitionIssuesEnabled: false,
   categoryFilter: null,
 };
