@@ -27,7 +27,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   issueLink$(issueId: number, projectId: string): Observable<string> {
     return this._getCfgOnce$(projectId).pipe(
       map((cfg) => {
-        if (cfg.gitlabBaseUrl != null) {
+        if (cfg.gitlabBaseUrl) {
           const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/) ? cfg.gitlabBaseUrl : `${cfg.gitlabBaseUrl}/`;
           return `${fixedUrl}${cfg.project}issues/${issueId}`;
         } else {
