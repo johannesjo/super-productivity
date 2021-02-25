@@ -13,19 +13,9 @@
        src="https://img.shields.io/github/downloads/johannesjo/super-productivity/total"
        align="center">
 </a>
-<a href="https://www.reddit.com/r/selfhosted/comments/by7bcu/super_productivity_is_an_open_source_todo_list/?ref=readnext">
-  <img alt="On reddit"
-       src="https://img.shields.io/badge/on-reddit-orange.svg?style=flat-square"
-       align="center">
-</a>
 <a href="https://www.producthunt.com/posts/super-productivity">
   <img alt="On product hunt"
        src="https://img.shields.io/badge/on-product%20hunt-blue.svg?style=flat-square"
-       align="center">
-</a>
-<a href="https://www.indiehackers.com/product/super-productivity">
-  <img alt="On Indie Hackers"
-       src="https://img.shields.io/badge/on-indie%20hackers-blue?style=flat-square"
        align="center">
 </a>
 <a href="https://twitter.com/intent/tweet?text=Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com">
