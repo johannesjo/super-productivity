@@ -1,3 +1,45 @@
+# [6.5.0](https://github.com/johannesjo/super-productivity/compare/v6.4.0...v6.5.0) (2021-03-05)
+
+
+### Bug Fixes
+
+* **issues:** Disable caldav issue search by default ([5252f8f](https://github.com/johannesjo/super-productivity/commit/5252f8ffcd65809b047f251332b5b3102b0010a5))
+* missing tag error ([8a01982](https://github.com/johannesjo/super-productivity/commit/8a01982135df41baecc0dfe60078f830ac00ce39))
+* **dbx:** config error not thrown ([41ce6b6](https://github.com/johannesjo/super-productivity/commit/41ce6b6d106848310b88012162e39686368535b7))
+* **google:** browser login not being up to date any more ([471126b](https://github.com/johannesjo/super-productivity/commit/471126b48ea3a953718102df10cee143b86ae791))
+* **issue:** error due to missing migration to new model ([a79c5d7](https://github.com/johannesjo/super-productivity/commit/a79c5d77a6c6453a4a417f3dd07864bb73d555e5))
+* **issues:** Apply changes made by yarn int ([2ea18c6](https://github.com/johannesjo/super-productivity/commit/2ea18c627bda4059d8afbd9a8b7036894daa66f1))
+* **issues:** apply review-suggested changes ([acb654f](https://github.com/johannesjo/super-productivity/commit/acb654f447117db9190ae3d59a851ad63c4fa76b))
+* **issues:** remove unused caldav translation constants ([052f908](https://github.com/johannesjo/super-productivity/commit/052f908be8db4fcd582167616c9b85ed146c1c6f))
+* **issues:** remove unused import ([f1e5857](https://github.com/johannesjo/super-productivity/commit/f1e58579f051406322e3ccd897e29b422e15338b))
+* **jira:** jql for search not working [#833](https://github.com/johannesjo/super-productivity/issues/833) ([0cfb7af](https://github.com/johannesjo/super-productivity/commit/0cfb7af2e40ff43cc7e8188c62ea3eb7fb5a7cc2))
+* **sync:** invalid data check [#720](https://github.com/johannesjo/super-productivity/issues/720) ([3c85b70](https://github.com/johannesjo/super-productivity/commit/3c85b70f4f246f5004a93950d45f18ec6d25d5e8))
+* **sync:** make sure the latest data is synced [#720](https://github.com/johannesjo/super-productivity/issues/720) ([9287105](https://github.com/johannesjo/super-productivity/commit/9287105d0c093c02a79c168360efb03c2fc02367))
+* add today tag as fallback [#843](https://github.com/johannesjo/super-productivity/issues/843) ([13b9313](https://github.com/johannesjo/super-productivity/commit/13b9313a516658325f1183ff49e3c40ce868e718))
+* remove dev code ([04daa1e](https://github.com/johannesjo/super-productivity/commit/04daa1e41bae62b7f0bb02f9e526dfc6fa3770f6))
+
+
+### Features
+
+* **issues:** Add ability to filter caldav issues by category. ([af96d28](https://github.com/johannesjo/super-productivity/commit/af96d28d090ab607fe1d3f043f70cced646643ac))
+* **sync:** improve error handling [#720](https://github.com/johannesjo/super-productivity/issues/720) ([de5a47d](https://github.com/johannesjo/super-productivity/commit/de5a47dab93ce35763c7eff404fc5d7fc7963952))
+* **sync:** improve handling for invalid config data [#907](https://github.com/johannesjo/super-productivity/issues/907) ([3430f23](https://github.com/johannesjo/super-productivity/commit/3430f23e56ad8a75102a5e3660a1bbd2747d020b))
+* don't limit idle dialog to current project, but allow all tasks ([e1219fa](https://github.com/johannesjo/super-productivity/commit/e1219fa805b89522724e771a677057cabc44a5fd))
+* **eslint:** enable id-blacklist rule and fix errors ([8db6a65](https://github.com/johannesjo/super-productivity/commit/8db6a6563253d70accfb6ae6552354b2020789a7))
+* **issues:** check settings before initialize caldav client ([bd64f45](https://github.com/johannesjo/super-productivity/commit/bd64f45538439a2ab99ccf75e018c7c10187c667))
+* **issues:** Implement basic issue provider for caldav ([840f610](https://github.com/johannesjo/super-productivity/commit/840f6102bfd383dc21bc7f3894172a35f0e955e7))
+* **issues:** provide context information in the caldav client snacks ([1ece18d](https://github.com/johannesjo/super-productivity/commit/1ece18d938ba819ae982e9304ae1cad66149f933))
+* **issues:** provide english translation texts for caldav ([8dd2d87](https://github.com/johannesjo/super-productivity/commit/8dd2d8707e771a133f78a32be5b4da3ac8399630))
+* **issues:** reuse caldav client instances. ([8b5eb0f](https://github.com/johannesjo/super-productivity/commit/8b5eb0f5da3e967d516382297607666b3a48f8f3))
+* **issues:** synchronize task-done state to caldav. ([abca948](https://github.com/johannesjo/super-productivity/commit/abca948e29886a6815d1d8ed5bf6264b65a426af))
+* **schedule:** allow adding and removing tasks from today for mobile ([c56188a](https://github.com/johannesjo/super-productivity/commit/c56188a236d6b70dee43f34b4b3bd75a8b61743c))
+* make ms badge work again ([1a6e7be](https://github.com/johannesjo/super-productivity/commit/1a6e7be9d6d0a452405b63b76158ee53f9ed7a23))
+* make ms badge work again 2 ([80373db](https://github.com/johannesjo/super-productivity/commit/80373dbc0f7b768e4700fdd63a0eca1d850f1b6f))
+* reduce left right padding for mobile ([97c9947](https://github.com/johannesjo/super-productivity/commit/97c99475990cb81e408bd93b3b8d2f34b7b6670e))
+* **worklog-export:** add description column [#795](https://github.com/johannesjo/super-productivity/issues/795) ([52c7eb3](https://github.com/johannesjo/super-productivity/commit/52c7eb3e7cde2ed59cd99ad376261f83bf52d72d))
+
+
+
 # [6.4.0](https://github.com/johannesjo/super-productivity/compare/v6.3.3...v6.4.0) (2021-02-07)
 
 
