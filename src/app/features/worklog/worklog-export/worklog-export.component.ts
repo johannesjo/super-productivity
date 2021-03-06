@@ -29,6 +29,10 @@ import { distinctUntilChangedObject } from '../../../util/distinct-until-changed
 import { WorkContextAdvancedCfg, WorkStartEnd } from '../../work-context/work-context.model';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { ProjectService } from '../../project/project.service';
+import { Project, ProjectCopy } from '../../project/project.model';
+import { TagService } from '../../tag/tag.service';
+import { Tag, TagCopy } from '../../tag/tag.model';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -47,6 +51,8 @@ interface RowItem {
   titles?: string[];
   titlesWithSub?: string[];
   notes: string[];
+  projects: string[];
+  tags: string[];
 }
 
 @Component({
@@ -87,6 +93,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     {id: 'TITLES', title: T.F.WORKLOG.EXPORT.O.PARENT_TASK_TITLES_ONLY},
     {id: 'TITLES_INCLUDING_SUB', title: T.F.WORKLOG.EXPORT.O.TITLES_AND_SUB_TASK_TITLES},
     {id: 'NOTES', title: T.F.WORKLOG.EXPORT.O.NOTES},
+    {id: 'PROJECTS', title: T.F.WORKLOG.EXPORT.O.PROJECTS},
+    {id: 'TAGS', title: T.F.WORKLOG.EXPORT.O.TAGS},
     {id: 'TIME_MS', title: T.F.WORKLOG.EXPORT.O.TIME_AS_MILLISECONDS},
     {id: 'TIME_STR', title: T.F.WORKLOG.EXPORT.O.TIME_AS_STRING},
     {id: 'TIME_CLOCK', title: T.F.WORKLOG.EXPORT.O.TIME_AS_CLOCK},
@@ -109,6 +117,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     private _worklogService: WorklogService,
     private _workContextService: WorkContextService,
     private _changeDetectorRef: ChangeDetectorRef,
+    private _projectService: ProjectService,
+    private _tagService: TagService
   ) {
   }
 
@@ -151,11 +161,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       combineLatest([
         this._worklogService.getTaskListForRange$(this.rangeStart, this.rangeEnd, true, this.projectId),
         this._workContextService.activeWorkContext$,
+        this._projectService.list$,
+        this._tagService.tags$
       ])
         .pipe(
-        ).subscribe(([tasks, ac]) => {
+        ).subscribe(([tasks, ac, allProjects, allTags]) => {
         if (tasks) {
-          const rows = this._createRows(tasks, ac.workStart, ac.workEnd, this.options.groupBy);
+          const rows = this._createRows(tasks, ac.workStart, ac.workEnd, this.options.groupBy, allProjects, allTags);
           this.formattedRows = this._formatRows(rows);
           // TODO format to csv
 
@@ -173,6 +185,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
                 return 'Titles';
               case 'NOTES':
                 return 'Descriptions';
+              case 'PROJECTS':
+                return 'Projects';
+              case 'TAGS':
+                return 'Tags';
               case 'TIME_MS':
               case 'TIME_STR':
               case 'TIME_CLOCK':
@@ -223,7 +239,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     return i;
   }
 
-  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: WorklogGrouping): RowItem[] {
+  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd,
+                      groupBy: WorklogGrouping, allProjects: Project[], allTags: Tag[]): RowItem[] {
 
     const _mapToGroups = (task: WorklogTask) => {
       const taskGroups: { [key: string]: RowItem } = {};
@@ -236,6 +253,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           titlesWithSub: [],
           titles: [],
           notes: [],
+          projects: [],
+          tags: [],
           workStart: undefined,
           workEnd: undefined,
         };
@@ -259,7 +278,9 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             taskGroups[day] = {
               dates: [day],
               tasks: [task],
-              notes: [task.notes],
+              notes: (task.notes) ? [task.notes] : [],
+              projects: (task.projectId) ? [task.projectId] : [],
+              tags: task.tagIds,
               workStart: startTimes[day],
               workEnd: endTimes[day],
               timeSpent: 0,
@@ -274,8 +295,17 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         case WorklogGrouping.PARENT:
         case WorklogGrouping.TASK:
           taskGroups[task.id] = createEmptyGroup();
+
+          // by design subtasks don't have tags, so we must set its parent's tags
+          if (task.parentId !== null) {
+            taskGroups[task.id].tags = (tasks.find(t => t.id === task.parentId) as TaskCopy).tagIds;
+          } else {
+            taskGroups[task.id].tags = task.tagIds;
+          }
+
           taskGroups[task.id].tasks = [task];
-          taskGroups[task.id].notes = [task.notes];
+          taskGroups[task.id].notes = (task.notes) ? [task.notes] : [];
+          taskGroups[task.id].projects =  (task.projectId) ? [task.projectId] : [];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
           taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
@@ -285,7 +315,9 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             const groupKey = task.id + '_' + day;
             taskGroups[groupKey] = createEmptyGroup();
             taskGroups[groupKey].tasks = [task];
-            taskGroups[groupKey].notes = [task.notes];
+            taskGroups[groupKey].notes = (task.notes) ? [task.notes] : [];
+            taskGroups[groupKey].projects = (task.projectId) ? [task.projectId] : [];
+            taskGroups[groupKey].tags = task.tagIds;
             taskGroups[groupKey].dates = [day];
             taskGroups[groupKey].workStart = startTimes[day];
             taskGroups[groupKey].workEnd = endTimes[day];
@@ -304,6 +336,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         if (groups[groupKey]) {
           groups[groupKey].tasks.push(...taskGroups[groupKey].tasks);
           groups[groupKey].notes.push(...taskGroups[groupKey].notes);
+          groups[groupKey].projects.push(...taskGroups[groupKey].projects);
+          groups[groupKey].tags = groups[groupKey].tags.concat(taskGroups[groupKey].tags);
           groups[groupKey].dates.push(...taskGroups[groupKey].dates);
           if (taskGroups[groupKey].workStart !== undefined) {
             // TODO check if this works as intended
@@ -345,10 +379,19 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         return 1;
       });
 
-      group.notes = group.notes.filter((note: string) => !!note);
-      for (let i = 0; i < group.notes.length; i++) {
-        group.notes[i] = group.notes[i].replace(/\n/g, ' - ');
-      }
+      group.notes = group.notes.map((note) => {
+        return note.replace(/\n/g, ' - ');
+      });
+
+      group.projects = unique(group.projects);
+      group.projects = group.projects.map((pId: string) => {
+        return (allProjects.find(project => project.id === pId) as ProjectCopy).title;
+      });
+
+      group.tags = unique(group.tags);
+      group.tags = group.tags.map((tId: string) => {
+        return (allTags.find(tag => tag.id === tId) as TagCopy).title;
+      });
 
       rows.push(group);
     }));
@@ -411,7 +454,11 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           case 'TITLES_INCLUDING_SUB':
             return row.titlesWithSub.join(this.options.separateTasksBy || '<br>');
           case 'NOTES':
-            return (row.notes.length !== 0) ? row.notes.join(' | ') : EMPTY_VAL;
+            return (row.notes.length !== 0) ? row.notes.join(this.options.separateTasksBy) : EMPTY_VAL;
+          case 'PROJECTS':
+            return (row.projects.length !== 0) ? row.projects.join(this.options.separateTasksBy) : EMPTY_VAL;
+          case 'TAGS':
+                return (row.tags.length !== 0) ? row.tags.join(this.options.separateTasksBy) : EMPTY_VAL;
           case 'TIME_MS':
             return timeSpent;
           case 'TIME_STR':
