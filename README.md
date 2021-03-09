@@ -74,7 +74,7 @@ And much more!
 <a href="https://youtu.be/_mvMXWLsL-8"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
 
 ## :question: How to use it
-I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app. There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
+I wrote [a little article](https://dev.to/johannesjo/super-productivity-how-to-grow-fond-of-time-tracking-and-task-management-22ee) on how I use the app - and [another one](https://dev.to/johannesjo/the-prioritising-scheme-how-to-eat-the-frog-with-super-productivity-mlk) on how I implement the 'eat the frog' prioritizing scheme in the app . There is also [a youtube video available](https://www.youtube.com/watch?v=VoF2_RSdNXA).
 
 ## :globe_with_meridians: Web Version
 Check out the web version eventhough it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension has to be installed.
