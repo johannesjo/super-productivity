@@ -127,10 +127,26 @@ export class CaldavClientService {
       summary: todo.getFirstPropertyValue('summary') || '',
       due: todo.getFirstPropertyValue('due') || '',
       start: todo.getFirstPropertyValue('dtstart') || '',
-      last_modified: todo.getFirstPropertyValue('last-modified').toUnixTime(),
       labels: categories,
-      note: todo.getFirstPropertyValue('description') || ''
+      note: todo.getFirstPropertyValue('description') || '',
+      etag_hash: this._hashEtag(task.etag),
     };
+  }
+
+  private static _hashEtag(etag: string): number {
+    let hash = 0;
+    let i;
+    let chr;
+    if (etag.length === 0) {
+      return hash;
+    }
+    for (i = 0; i < this.length; i++) {
+      chr = etag.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr; //eslint-disable-line no-bitwise
+      // Convert to 32bit integer
+      hash |= 0; //eslint-disable-line no-bitwise
+    }
+    return hash;
   }
 
   async _get_client(cfg: CaldavCfg): Promise<ClientCache> {
