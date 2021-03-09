@@ -6,7 +6,7 @@ export type CaldavIssueReduced = Readonly<{
   due: string;
   start: string;
   labels: string[];
-  last_modified: number;
+  etag_hash: number;
 }>;
 
 export type CaldavIssue = CaldavIssueReduced & Readonly<{
