@@ -28,7 +28,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
   }
 
   getAddTaskData(issueData: CaldavIssueReduced): { title: string; additionalFields: Partial<Task> } {
-    return {additionalFields: {issueLastUpdated: issueData.last_modified}, title: issueData.summary};
+    return {additionalFields: {issueLastUpdated: issueData.etag_hash}, title: issueData.summary};
   }
 
   getById$(id: string | number, projectId: string): Observable<CaldavIssue> {
@@ -56,7 +56,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     const cfg = await this._getCfgOnce$(task.projectId).toPromise();
     const issue = await this._caldavClientService.getById$(task.issueId, cfg).toPromise();
 
-    const wasUpdated = issue.last_modified !== task.issueLastUpdated;
+    const wasUpdated = issue.etag_hash !== task.issueLastUpdated;
 
     if (wasUpdated && isNotifySuccess) {
       this._snackService.open({
@@ -77,7 +77,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       return {
         taskChanges: {
           issueWasUpdated: true,
-          issueLastUpdated: issue.last_modified,
+          issueLastUpdated: issue.etag_hash,
           title: issue.summary,
         },
         issue,
@@ -104,14 +104,14 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     const issueMap = new Map(issues.map(item => [item.id, item]));
 
     if (isNotifyNoUpdateRequired) {
-      tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.last_modified === task.issueLastUpdated)
+      tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.etag_hash === task.issueLastUpdated)
         .forEach(_ => this._snackService.open({
           msg: T.F.CALDAV.S.ISSUE_NO_UPDATE_REQUIRED,
           ico: 'cloud_download',
         }));
     }
 
-    return tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.last_modified !== task.issueLastUpdated)
+    return tasks.filter(task => issueMap.has(task.id) && issueMap.get(task.id)?.etag_hash !== task.issueLastUpdated)
       .map(task => {
         const issue = issueMap.get(task.id) as CaldavIssue;
         if (isNotifySuccess) {
@@ -127,7 +127,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
           task,
           taskChanges: {
             issueWasUpdated: true,
-            issueLastUpdated: issue.last_modified,
+            issueLastUpdated: issue.etag_hash,
             title: issue.summary,
           },
           issue,
