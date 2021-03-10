@@ -39,28 +39,48 @@ export class DatabaseService {
   async load(key: string): Promise<unknown> {
     this._lastParams = {a: 'load', key};
     await this._afterReady();
-    return await (this.db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
+    try {
+      return await (this.db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
+    } catch (e) {
+      console.warn('DB Load Error: Last Params,', this._lastParams);
+      throw new Error(e);
+    }
   }
 
   @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
   async save(key: string, data: unknown): Promise<unknown> {
     this._lastParams = {a: 'save', key, data};
     await this._afterReady();
-    return await (this.db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
+    try {
+      return await (this.db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
+    } catch (e) {
+      console.warn('DB Save Error: Last Params,', this._lastParams);
+      throw new Error(e);
+    }
   }
 
   @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
   async remove(key: string): Promise<unknown> {
     this._lastParams = {a: 'remove', key};
     await this._afterReady();
-    return await (this.db as IDBPDatabase<MyDb>).delete(DB_MAIN_NAME, key);
+    try {
+      return await (this.db as IDBPDatabase<MyDb>).delete(DB_MAIN_NAME, key);
+    } catch (e) {
+      console.warn('DB Remove Error: Last Params,', this._lastParams);
+      throw new Error(e);
+    }
   }
 
   @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
   async clearDatabase(): Promise<unknown> {
     this._lastParams = {a: 'clearDatabase'};
     await this._afterReady();
-    return await (this.db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
+    try {
+      return await (this.db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
+    } catch (e) {
+      console.warn('DB Clear Error: Last Params,', this._lastParams);
+      throw new Error(e);
+    }
   }
 
   @retry({retries: MAX_RETRY_COUNT, delay: RETRY_DELAY})
@@ -93,7 +113,12 @@ export class DatabaseService {
     return this.db;
   }
 
-  private _afterReady(): Promise<boolean> {
-    return this._afterReady$.pipe(take(1)).toPromise();
+  private async _afterReady(): Promise<boolean> {
+    try {
+      return await this._afterReady$.pipe(take(1)).toPromise();
+    } catch (e) {
+      console.warn('DB After Ready Error: Last Params,', this._lastParams);
+      throw new Error(e);
+    }
   }
 }
