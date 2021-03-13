@@ -147,7 +147,7 @@ export class PomodoroService {
       filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
       map(([val]) => val),
       distinctUntilChanged(),
-      withLatestFrom(this.soundConfig$)
+      withLatestFrom(this.soundConfig$),
     ).subscribe(([val, soundConfig]) => {
       this._playTickSound(soundConfig.volume);
     });
