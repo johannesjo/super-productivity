@@ -11,7 +11,7 @@ import {
   switchMap,
   withLatestFrom
 } from 'rxjs/operators';
-import { PomodoroConfig } from '../config/global-config.model';
+import {PomodoroConfig, SoundConfig} from '../config/global-config.model';
 import { select, Store } from '@ngrx/store';
 import {
   FinishPomodoroSession,
@@ -37,6 +37,7 @@ export class PomodoroService {
   onStop$: Observable<any> = this._actions$.pipe(ofType(PomodoroActionTypes.StopPomodoro));
 
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.pomodoro));
+  soundConfig$: Observable<SoundConfig> = this._configService.cfg$.pipe(map (cfg => cfg && cfg.sound));
   isEnabled$: Observable<boolean> = this.cfg$.pipe(
     map(cfg => cfg && cfg.isEnabled),
     shareReplay(1),
@@ -146,8 +147,9 @@ export class PomodoroService {
       filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
       map(([val]) => val),
       distinctUntilChanged(),
-    ).subscribe(() => {
-      this._playTickSound();
+      withLatestFrom(this.soundConfig$)
+    ).subscribe(([val, soundConfig]) => {
+      this._playTickSound(soundConfig.volume);
     });
   }
 
@@ -176,7 +178,9 @@ export class PomodoroService {
     new Audio(DEFAULT_SOUND).play();
   }
 
-  private _playTickSound() {
-    new Audio(DEFAULT_TICK_SOUND).play();
+  private _playTickSound(volume: number) {
+    const tickAudio = new Audio(DEFAULT_TICK_SOUND);
+    tickAudio.volume = volume / 100;
+    tickAudio.play();
   }
 }
