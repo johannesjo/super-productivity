@@ -1,3 +1,12 @@
+## [6.5.2](https://github.com/johannesjo/super-productivity/compare/v6.5.1...v6.5.2) (2021-03-19)
+
+
+### Bug Fixes
+
+* cannot read property id of undefined [#978](https://github.com/johannesjo/super-productivity/issues/978) ([9729c50](https://github.com/johannesjo/super-productivity/commit/9729c500d7ee4549dc5716c6bbe6d69883b3e58d))
+
+
+
 ## [6.5.1](https://github.com/johannesjo/super-productivity/compare/v6.5.0...v6.5.1) (2021-03-19)
 
 
