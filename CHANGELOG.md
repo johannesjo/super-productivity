@@ -1,3 +1,22 @@
+## [6.5.1](https://github.com/johannesjo/super-productivity/compare/v6.5.0...v6.5.1) (2021-03-19)
+
+
+### Bug Fixes
+
+* **issues:** do not rely on caldav last-changed ([63ccccf](https://github.com/johannesjo/super-productivity/commit/63ccccf6a7b05e5dbd5609a89af97e3e2c96a2b3)), closes [#952](https://github.com/johannesjo/super-productivity/issues/952)
+* lint ([392f35a](https://github.com/johannesjo/super-productivity/commit/392f35a33000d72c87c5bd47536d8e8ced90cff4))
+* remove async code from _createRows ([bc6653f](https://github.com/johannesjo/super-productivity/commit/bc6653fe13516bd2d9c5b3f592df5519b340774f))
+
+
+### Features
+
+* improve idb error handling ([88cd49b](https://github.com/johannesjo/super-productivity/commit/88cd49bbb8b50f0db5d899e2b79667e5333c6bc6))
+* update web dav info text ([7988dfa](https://github.com/johannesjo/super-productivity/commit/7988dfa715519017bfbbcb5adeca1f9ab2fd1525))
+* **worklog-export:** add project column [#616](https://github.com/johannesjo/super-productivity/issues/616) ([e85017c](https://github.com/johannesjo/super-productivity/commit/e85017c20f71462bac8a937d4135b51b14869642))
+* **worklog-export:** add tag column [#616](https://github.com/johannesjo/super-productivity/issues/616) ([9a4347f](https://github.com/johannesjo/super-productivity/commit/9a4347fe8cf7855828694e8c61ca3b0d7ab5b411))
+
+
+
 # [6.5.0](https://github.com/johannesjo/super-productivity/compare/v6.4.0...v6.5.0) (2021-03-05)
 
 
