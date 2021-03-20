@@ -357,7 +357,7 @@ const _addTodayTagIfNoProjectIdOrTagId = (data: AppDataComplete): AppDataComplet
 
   const archivedTaskIds: string[] = data.taskArchive.ids as string[];
   archivedTaskIds
-    .map(id => data.task.entities[id])
+    .map(id => data.taskArchive.entities[id])
     .forEach(task => {
       if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
         (task as any).tagIds = [TODAY_TAG.id];

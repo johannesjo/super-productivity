@@ -310,14 +310,17 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'DUPE',
             title: 'DUPE',
+            projectId: FAKE_PROJECT_ID,
           }, {
             ...DEFAULT_TASK,
             id: 'DUPE',
             title: 'DUPE',
+            projectId: FAKE_PROJECT_ID,
           }, {
             ...DEFAULT_TASK,
             id: 'NO_DUPE',
             title: 'NO_DUPE',
+            projectId: FAKE_PROJECT_ID,
           }])
         } as any,
       })).toEqual({
@@ -328,10 +331,12 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'DUPE',
             title: 'DUPE',
+            projectId: FAKE_PROJECT_ID,
           }, {
             ...DEFAULT_TASK,
             id: 'NO_DUPE',
             title: 'NO_DUPE',
+            projectId: FAKE_PROJECT_ID,
           }])
         } as any,
       });
@@ -366,8 +371,8 @@ describe('dataRepair()', () => {
         taskArchive: {
           ids: ['AAA, XXX', 'YYY'],
           entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA'},
-            CCC: {...DEFAULT_TASK, id: 'CCC'},
+            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
+            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
           }
         } as any,
       })).toEqual({
@@ -375,8 +380,8 @@ describe('dataRepair()', () => {
         taskArchive: {
           ids: ['AAA', 'CCC'],
           entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA'},
-            CCC: {...DEFAULT_TASK, id: 'CCC'},
+            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
+            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
           }
         } as any,
       });
@@ -600,7 +605,8 @@ describe('dataRepair()', () => {
         id: 'parent',
         title: 'parent',
         parentId: null,
-        subTaskIds: ['subTaskArchived']
+        subTaskIds: ['subTaskArchived'],
+        projectId: FAKE_PROJECT_ID,
       }])
     } as any;
 
@@ -621,17 +627,20 @@ describe('dataRepair()', () => {
           id: 'subTaskArchived',
           title: 'subTaskArchived',
           parentId: 'parent',
+          projectId: FAKE_PROJECT_ID,
         }, {
           ...DEFAULT_TASK,
           id: 'parent',
           title: 'parent',
           parentId: null,
-          subTaskIds: ['subTaskArchived', 'subTaskUnarchived']
+          subTaskIds: ['subTaskArchived', 'subTaskUnarchived'],
+          projectId: FAKE_PROJECT_ID,
         }, {
           ...DEFAULT_TASK,
           id: 'subTaskUnarchived',
           title: 'subTaskUnarchived',
           parentId: 'parent',
+          projectId: FAKE_PROJECT_ID,
         }])
       } as any,
     });
@@ -1006,6 +1015,66 @@ describe('dataRepair()', () => {
           id: 'as1',
           parentId: 'archiveTask1',
           projectId: FAKE_PROJECT_ID,
+        }]),
+      } as any
+    });
+  });
+
+  it('should add today tag if no projectId or no tags', () => {
+    const task = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'task1',
+        subTaskIds: ['sub_task']
+      }, {
+        ...DEFAULT_TASK,
+        id: 'task2',
+        projectId: FAKE_PROJECT_ID,
+      }, {
+        ...DEFAULT_TASK,
+        id: 'sub_task',
+        parentId: 'task1'
+      }]),
+    } as any;
+
+    const taskArchive = {
+      ...mock.taskArchive,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'archiveTask1',
+      }]),
+    } as any;
+
+    expect(dataRepair({
+      ...mock,
+      task,
+      taskArchive,
+    })).toEqual({
+      ...mock,
+      task: {
+        ...mock.task,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'task1',
+          tagIds: [TODAY_TAG.id],
+          subTaskIds: ['sub_task']
+        }, {
+          ...DEFAULT_TASK,
+          id: 'task2',
+          projectId: FAKE_PROJECT_ID,
+        }, {
+          ...DEFAULT_TASK,
+          id: 'sub_task',
+          parentId: 'task1'
+        }]),
+      } as any,
+      taskArchive: {
+        ...mock.taskArchive,
+        ...fakeEntityStateFromArray<Task>([{
+          ...DEFAULT_TASK,
+          id: 'archiveTask1',
+          tagIds: [TODAY_TAG.id],
         }]),
       } as any
     });
