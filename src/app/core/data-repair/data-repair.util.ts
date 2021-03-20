@@ -4,6 +4,7 @@ import { ProjectCopy } from '../../features/project/project.model';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
 import { TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
 import { unique } from '../../util/unique';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 const ENTITY_STATE_KEYS: (keyof AppDataComplete)[] = ['task', 'taskArchive', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'];
 
@@ -18,6 +19,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
   dataOut = _removeNonExistentProjectIds(dataOut);
+  dataOut = _addTodayTagIfNoProjectIdOrTagId(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
@@ -337,6 +339,37 @@ const _fixInconsistentTagId = (data: AppDataComplete): AppDataComplete => {
         });
       }
     );
+
+  return data;
+};
+
+const _addTodayTagIfNoProjectIdOrTagId = (data: AppDataComplete): AppDataComplete => {
+  const taskIds: string[] = data.task.ids as string[];
+  taskIds
+    .map(id => data.task.entities[id])
+    .forEach(task => {
+      if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
+        const tag = data.tag.entities[TODAY_TAG.id];
+        if (!tag) {
+          throw new Error('No today tag');
+        }
+        (task as any).tagIds = [TODAY_TAG.id];
+        (tag as any).taskIds = [...tag.taskIds, task.id];
+      }
+    });
+
+  const archivedTaskIds: string[] = data.taskArchive.ids as string[];
+  archivedTaskIds
+    .map(id => data.task.entities[id])
+    .forEach(task => {
+      if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
+        const tag = data.tag.entities[TODAY_TAG.id];
+        if (!tag) {
+          throw new Error('No today tag');
+        }
+        (task as any).tagIds = [TODAY_TAG.id];
+      }
+    });
 
   return data;
 };

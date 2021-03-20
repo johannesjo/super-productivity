@@ -37,6 +37,7 @@ export const isValidAppData = (d: AppDataComplete, isSkipInconsistentTaskStateEr
       && _isNoLonelySubTasks(d)
     )
     && _isAllProjectsAvailable(d)
+    && _isAllTasksHaveAProjectOrTag(d)
 
     : typeof dAny === 'object'
   ;
@@ -65,6 +66,18 @@ const _isAllProjectsAvailable = (data: AppDataComplete): boolean => {
     }
   });
 
+  return isValid;
+};
+
+const _isAllTasksHaveAProjectOrTag = (data: AppDataComplete): boolean => {
+  let isValid: boolean = true;
+  data.task.ids.forEach((id: string) => {
+    const t: Task = data.task.entities[id] as Task;
+    if (!t.parentId && !t.projectId && !t.tagIds.length) {
+      // devError(`Task without project or tag`);
+      isValid = false;
+    }
+  });
   return isValid;
 };
 
