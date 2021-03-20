@@ -289,4 +289,22 @@ describe('isValidAppData()', () => {
       } as any,
     })).toThrowError(`Inconsistent task projectId`);
   });
+
+  it('task without neither tagId nor projectId', () => {
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([{
+        ...DEFAULT_TASK,
+        id: 'parent',
+        title: 'parent',
+        parentId: null,
+      }])
+    } as any;
+
+    expect(() => isValidAppData({
+      ...mock,
+      // NOTE: it's empty
+      task: taskState,
+    })).toThrowError(`Task without project or tag`);
+  });
 });

@@ -1,5 +1,5 @@
 import { AppBaseDataEntityLikeStates, AppDataComplete } from '../../imex/sync/sync.model';
-import { TagCopy } from '../../features/tag/tag.model';
+import { Tag, TagCopy } from '../../features/tag/tag.model';
 import { ProjectCopy } from '../../features/project/project.model';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
 import { TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
@@ -19,7 +19,6 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
   dataOut = _removeNonExistentProjectIds(dataOut);
-  dataOut = _addTodayTagIfNoProjectIdOrTagId(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
@@ -28,6 +27,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
+  dataOut = _addTodayTagIfNoProjectIdOrTagId(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
 
   // console.timeEnd('dataRepair');
@@ -349,10 +349,7 @@ const _addTodayTagIfNoProjectIdOrTagId = (data: AppDataComplete): AppDataComplet
     .map(id => data.task.entities[id])
     .forEach(task => {
       if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
-        const tag = data.tag.entities[TODAY_TAG.id];
-        if (!tag) {
-          throw new Error('No today tag');
-        }
+        const tag = data.tag.entities[TODAY_TAG.id] as Tag;
         (task as any).tagIds = [TODAY_TAG.id];
         (tag as any).taskIds = [...tag.taskIds, task.id];
       }
@@ -363,10 +360,6 @@ const _addTodayTagIfNoProjectIdOrTagId = (data: AppDataComplete): AppDataComplet
     .map(id => data.task.entities[id])
     .forEach(task => {
       if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
-        const tag = data.tag.entities[TODAY_TAG.id];
-        if (!tag) {
-          throw new Error('No today tag');
-        }
         (task as any).tagIds = [TODAY_TAG.id];
       }
     });

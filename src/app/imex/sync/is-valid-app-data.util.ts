@@ -74,7 +74,7 @@ const _isAllTasksHaveAProjectOrTag = (data: AppDataComplete): boolean => {
   data.task.ids.forEach((id: string) => {
     const t: Task = data.task.entities[id] as Task;
     if (!t.parentId && !t.projectId && !t.tagIds.length) {
-      // devError(`Task without project or tag`);
+      devError(`Task without project or tag`);
       isValid = false;
     }
   });

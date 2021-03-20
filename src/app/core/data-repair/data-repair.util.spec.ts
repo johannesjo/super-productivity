@@ -8,12 +8,27 @@ import { Tag, TagState } from '../../features/tag/tag.model';
 import { ProjectState } from '../../features/project/store/project.reducer';
 import { Project } from '../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
-import { DEFAULT_TAG } from '../../features/tag/tag.const';
+import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 
+const FAKE_PROJECT_ID = 'FAKE_PROJECT_ID';
 describe('dataRepair()', () => {
   let mock: AppDataComplete;
   beforeEach(() => {
     mock = createAppDataCompleteMock();
+    mock.project = {
+      ...fakeEntityStateFromArray([{
+        title: 'FAKE_PROJECT',
+        id: FAKE_PROJECT_ID,
+        taskIds: [],
+        backlogTaskIds: [],
+      }] as Partial<Project> [])
+    };
+
+    mock.tag = {
+      ...fakeEntityStateFromArray([{
+        ...TODAY_TAG,
+      }] as Partial<Tag> [])
+    };
   });
 
   it('should delete tasks with same id in "task" and "taskArchive" from taskArchive', () => {
@@ -23,6 +38,7 @@ describe('dataRepair()', () => {
         ...DEFAULT_TASK,
         id: 'TEST',
         title: 'TEST',
+        projectId: FAKE_PROJECT_ID,
       }])
     } as any;
     expect(dataRepair({
@@ -32,6 +48,7 @@ describe('dataRepair()', () => {
         ...DEFAULT_TASK,
         id: 'TEST',
         title: 'TEST',
+        projectId: FAKE_PROJECT_ID,
       }]),
     } as any)).toEqual({
       ...mock,
@@ -49,6 +66,7 @@ describe('dataRepair()', () => {
         ...DEFAULT_TASK,
         id: 'TEST',
         title: 'TEST',
+        projectId: FAKE_PROJECT_ID,
       }])
     } as any;
 
@@ -87,6 +105,7 @@ describe('dataRepair()', () => {
         ...DEFAULT_TASK,
         id: 'TEST',
         title: 'TEST',
+        projectId: 'TEST_ID_PROJECT',
       }])
     } as any;
 
@@ -250,14 +269,17 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'DUPE',
             title: 'DUPE',
+            projectId: FAKE_PROJECT_ID,
           }, {
             ...DEFAULT_TASK,
             id: 'DUPE',
             title: 'DUPE',
+            projectId: FAKE_PROJECT_ID,
           }, {
             ...DEFAULT_TASK,
             id: 'NO_DUPE',
             title: 'NO_DUPE',
+            projectId: FAKE_PROJECT_ID,
           }])
         } as any,
       })).toEqual({
@@ -268,10 +290,12 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'DUPE',
             title: 'DUPE',
+            projectId: FAKE_PROJECT_ID,
           }, {
             ...DEFAULT_TASK,
             id: 'NO_DUPE',
             title: 'NO_DUPE',
+            projectId: FAKE_PROJECT_ID,
           }])
         } as any,
       });
@@ -321,8 +345,8 @@ describe('dataRepair()', () => {
         task: {
           ids: ['AAA, XXX', 'YYY'],
           entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA'},
-            CCC: {...DEFAULT_TASK, id: 'CCC'},
+            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
+            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
           }
         } as any,
       })).toEqual({
@@ -330,8 +354,8 @@ describe('dataRepair()', () => {
         task: {
           ids: ['AAA', 'CCC'],
           entities: {
-            AAA: {...DEFAULT_TASK, id: 'AAA'},
-            CCC: {...DEFAULT_TASK, id: 'CCC'},
+            AAA: {...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID},
+            CCC: {...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID},
           }
         } as any,
       });
@@ -495,12 +519,14 @@ describe('dataRepair()', () => {
         id: 'subTaskUnarchived',
         title: 'subTaskUnarchived',
         parentId: 'parent',
+        projectId: FAKE_PROJECT_ID,
       }, {
         ...DEFAULT_TASK,
         id: 'parent',
         title: 'parent',
         parentId: null,
-        subTaskIds: ['subTaskUnarchived']
+        subTaskIds: ['subTaskUnarchived'],
+        projectId: FAKE_PROJECT_ID,
       }])
     } as any;
 
@@ -511,6 +537,7 @@ describe('dataRepair()', () => {
         id: 'subTaskArchived',
         title: 'subTaskArchived',
         parentId: 'parent',
+        projectId: FAKE_PROJECT_ID,
       }])
     } as any;
 
@@ -527,17 +554,20 @@ describe('dataRepair()', () => {
           id: 'subTaskUnarchived',
           title: 'subTaskUnarchived',
           parentId: 'parent',
+          projectId: FAKE_PROJECT_ID,
         }, {
           ...DEFAULT_TASK,
           id: 'parent',
           title: 'parent',
           parentId: null,
           subTaskIds: ['subTaskUnarchived', 'subTaskArchived'],
+          projectId: FAKE_PROJECT_ID,
         }, {
           ...DEFAULT_TASK,
           id: 'subTaskArchived',
           title: 'subTaskArchived',
           parentId: 'parent',
+          projectId: FAKE_PROJECT_ID,
         }])
       } as any,
       taskArchive: {
@@ -919,11 +949,13 @@ describe('dataRepair()', () => {
       ...fakeEntityStateFromArray<Task>([{
         ...DEFAULT_TASK,
         id: 'task1',
-        subTaskIds: ['s1', 's2GONE']
+        subTaskIds: ['s1', 's2GONE'],
+        projectId: FAKE_PROJECT_ID,
       }, {
         ...DEFAULT_TASK,
         id: 's1',
         parentId: 'task1',
+        projectId: FAKE_PROJECT_ID,
       }]),
     } as any;
 
@@ -932,11 +964,13 @@ describe('dataRepair()', () => {
       ...fakeEntityStateFromArray<Task>([{
         ...DEFAULT_TASK,
         id: 'archiveTask1',
-        subTaskIds: ['as1', 'as2GONE']
+        subTaskIds: ['as1', 'as2GONE'],
+        projectId: FAKE_PROJECT_ID,
       }, {
         ...DEFAULT_TASK,
         id: 'as1',
         parentId: 'archiveTask1',
+        projectId: FAKE_PROJECT_ID,
       }]),
     } as any;
 
@@ -951,11 +985,13 @@ describe('dataRepair()', () => {
         ...fakeEntityStateFromArray<Task>([{
           ...DEFAULT_TASK,
           id: 'task1',
-          subTaskIds: ['s1']
+          subTaskIds: ['s1'],
+          projectId: FAKE_PROJECT_ID,
         }, {
           ...DEFAULT_TASK,
           id: 's1',
           parentId: 'task1',
+          projectId: FAKE_PROJECT_ID,
         }]),
       } as any,
       taskArchive: {
@@ -963,11 +999,13 @@ describe('dataRepair()', () => {
         ...fakeEntityStateFromArray<Task>([{
           ...DEFAULT_TASK,
           id: 'archiveTask1',
-          subTaskIds: ['as1']
+          subTaskIds: ['as1'],
+          projectId: FAKE_PROJECT_ID,
         }, {
           ...DEFAULT_TASK,
           id: 'as1',
           parentId: 'archiveTask1',
+          projectId: FAKE_PROJECT_ID,
         }]),
       } as any
     });
