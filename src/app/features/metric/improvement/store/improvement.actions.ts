@@ -1,9 +1,8 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Improvement, ImprovementState } from '../improvement.model';
+import { Improvement } from '../improvement.model';
 
 export enum ImprovementActionTypes {
-  LoadImprovementState = '[Improvement] Load Improvement State',
   AddImprovement = '[Improvement] Add Improvement',
   UpdateImprovement = '[Improvement] Update Improvement',
   DeleteImprovement = '[Improvement] Delete Improvement',
@@ -13,13 +12,6 @@ export enum ImprovementActionTypes {
   DisableImprovementRepeat = '[Improvement] Disable Improvement Repeat',
   ClearHiddenImprovements = '[Improvement] Clear Hidden Improvements',
   AddImprovementCheckedDay = '[Improvement] Add checked day',
-}
-
-export class LoadImprovementState implements Action {
-  readonly type: string = ImprovementActionTypes.LoadImprovementState;
-
-  constructor(public payload: { state: ImprovementState }) {
-  }
 }
 
 export class AddImprovement implements Action {
@@ -83,8 +75,7 @@ export class ClearHiddenImprovements implements Action {
 }
 
 export type ImprovementActions =
-  LoadImprovementState
-  | AddImprovement
+  AddImprovement
   | UpdateImprovement
   | DeleteImprovement
   | DeleteImprovements

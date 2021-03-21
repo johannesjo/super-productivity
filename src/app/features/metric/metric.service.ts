@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { initialMetricState } from './store/metric.reducer';
-import { AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric } from './store/metric.actions';
-import { combineLatest, EMPTY, from, merge, Observable, of, timer } from 'rxjs';
+import { AddMetric, DeleteMetric, UpdateMetric, UpsertMetric } from './store/metric.actions';
+import { combineLatest, EMPTY, from, Observable, of } from 'rxjs';
 import { LineChartData, Metric, MetricState, PieChartData, SimpleMetrics } from './metric.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import {
   selectImprovementCountsPieChartData,
@@ -13,7 +11,7 @@ import {
   selectObstructionCountsPieChartData,
   selectProductivityHappinessLineChartData
 } from './store/metric.selectors';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { WorklogService } from '../worklog/worklog.service';
 import { ProjectService } from '../project/project.service';
@@ -63,16 +61,7 @@ export class MetricService {
     private _projectService: ProjectService,
     private _worklogService: WorklogService,
     private _workContextService: WorkContextService,
-    private _persistenceService: PersistenceService,
   ) {
-  }
-
-  async loadStateForProject() {
-    const lsMetricState = await this._persistenceService.metric.loadState();
-    this._loadState({
-      ...initialMetricState,
-      ...lsMetricState
-    } || initialMetricState);
   }
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
@@ -83,36 +72,24 @@ export class MetricService {
   // }
 
   getMetricForDayOrDefaultWithCheckedImprovements$(day: string = getWorklogStr()): Observable<Metric> {
-    return this._workContextService.activeWorkContextIdIfProject$.pipe(
-      switchMap(() => merge(
-        this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
-          // required because otherwise there might be trouble
-          filter((isLoaded): boolean => isLoaded),
-        ),
-        // TODO fix this dirty hack
-        timer(500).pipe(take(1)),
-      )),
-
-      take(1),
-      switchMap(() => this._store$.pipe(select(selectMetricById, {id: day})).pipe(
-        switchMap((metric) => {
-          return metric
-            ? of(metric)
-            : combineLatest([
-              this._store$.pipe(select(selectCheckedImprovementIdsForDay, {day})),
-              this._store$.pipe(select(selectRepeatedImprovementIds)),
-            ]).pipe(
-              map(([checkedImprovementIds, repeatedImprovementIds]) => {
-                return {
-                  id: day,
-                  ...DEFAULT_METRIC_FOR_DAY,
-                  improvements: checkedImprovementIds || [],
-                  improvementsTomorrow: repeatedImprovementIds || [],
-                };
-              })
-            );
-        }),
-      ))
+    return this._store$.pipe(select(selectMetricById, {id: day})).pipe(
+      switchMap((metric) => {
+        return metric
+          ? of(metric)
+          : combineLatest([
+            this._store$.pipe(select(selectCheckedImprovementIdsForDay, {day})),
+            this._store$.pipe(select(selectRepeatedImprovementIds)),
+          ]).pipe(
+            map(([checkedImprovementIds, repeatedImprovementIds]) => {
+              return {
+                id: day,
+                ...DEFAULT_METRIC_FOR_DAY,
+                improvements: checkedImprovementIds || [],
+                improvementsTomorrow: repeatedImprovementIds || [],
+              };
+            })
+          );
+      }),
     );
   }
 
@@ -150,10 +127,6 @@ export class MetricService {
   // STATISTICS
   getProductivityHappinessChartData$(howMany: number = 20): Observable<LineChartData> {
     return this._store$.pipe(select(selectProductivityHappinessLineChartData, {howMany}));
-  }
-
-  private _loadState(state: MetricState) {
-    this._store$.dispatch(new LoadMetricState({state}));
   }
 
 }

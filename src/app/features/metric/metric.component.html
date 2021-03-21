@@ -58,6 +58,7 @@
 
   <section *ngIf="(metricService.hasData$|async)"
            class="metric-metrics">
+    <h1>{{T.F.METRIC.CMP.GLOBAL_METRICS|translate}}</h1>
     <section class="pie-charts">
       <section *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts">
         <h3>{{T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT|translate}}</h3>

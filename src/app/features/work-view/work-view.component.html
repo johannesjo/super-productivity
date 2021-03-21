@@ -60,7 +60,7 @@
         </div>
       </header>
 
-      <improvement-banner *ngIf="(workContextService.isActiveWorkContextProject$|async) && (improvementService.hasLastTrackedImprovements$|async)"
+      <improvement-banner *ngIf="(improvementService.hasLastTrackedImprovements$|async)"
                           [@expandFade]></improvement-banner>
 
       <div class="task-list-wrapper">

@@ -1,20 +1,12 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Metric, MetricState } from '../metric.model';
+import { Metric } from '../metric.model';
 
 export enum MetricActionTypes {
-  LoadMetricState = '[Metric] Load Metric State',
   AddMetric = '[Metric] Add Metric',
   UpdateMetric = '[Metric] Update Metric',
   UpsertMetric = '[Metric] Upsert Metric',
   DeleteMetric = '[Metric] Delete Metric',
-}
-
-export class LoadMetricState implements Action {
-  readonly type: string = MetricActionTypes.LoadMetricState;
-
-  constructor(public payload: { state: MetricState }) {
-  }
 }
 
 export class AddMetric implements Action {
@@ -46,8 +38,7 @@ export class DeleteMetric implements Action {
 }
 
 export type MetricActions =
-  LoadMetricState
-  | AddMetric
+  AddMetric
   | UpdateMetric
   | DeleteMetric
   | UpsertMetric

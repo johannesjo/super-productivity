@@ -1,20 +1,12 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Obstruction, ObstructionState } from '../obstruction.model';
+import { Obstruction } from '../obstruction.model';
 
 export enum ObstructionActionTypes {
-  LoadObstructionState = '[Obstruction] Load Obstruction State',
   AddObstruction = '[Obstruction] Add Obstruction',
   UpdateObstruction = '[Obstruction] Update Obstruction',
   DeleteObstruction = '[Obstruction] Delete Obstruction',
   DeleteObstructions = '[Obstruction] Delete multiple Obstructions',
-}
-
-export class LoadObstructionState implements Action {
-  readonly type: string = ObstructionActionTypes.LoadObstructionState;
-
-  constructor(public payload: { state: ObstructionState }) {
-  }
 }
 
 export class AddObstruction implements Action {
@@ -46,8 +38,7 @@ export class DeleteObstructions implements Action {
 }
 
 export type ObstructionActions =
-  LoadObstructionState
-  | AddObstruction
+  AddObstruction
   | UpdateObstruction
   | DeleteObstruction
   | DeleteObstructions

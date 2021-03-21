@@ -3,13 +3,14 @@ import {
   AddObstruction,
   DeleteObstruction,
   DeleteObstructions,
-  LoadObstructionState,
   ObstructionActions,
   ObstructionActionTypes,
   UpdateObstruction
 } from './obstruction.actions';
 import { Obstruction, ObstructionState } from '../obstruction.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { AppDataComplete } from '../../../../imex/sync/sync.model';
 
 export const OBSTRUCTION_FEATURE_NAME = 'obstruction';
 
@@ -27,6 +28,15 @@ export function obstructionReducer(
   state: ObstructionState = initialObstructionState,
   action: ObstructionActions
 ): ObstructionState {
+
+  // TODO fix this hackyness once we use the new syntax everywhere
+  if ((action.type as string) === loadAllData.type) {
+    const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
+    return appDataComplete.obstruction
+      ? appDataComplete.obstruction
+      : state;
+  }
+
   switch (action.type) {
     case ObstructionActionTypes.AddObstruction: {
       return adapter.addOne((action as AddObstruction).payload.obstruction, state);
@@ -43,9 +53,6 @@ export function obstructionReducer(
     case ObstructionActionTypes.DeleteObstructions: {
       return adapter.removeMany((action as DeleteObstructions).payload.ids, state);
     }
-
-    case ObstructionActionTypes.LoadObstructionState:
-      return {...(action as LoadObstructionState).payload.state};
 
     default: {
       return state;

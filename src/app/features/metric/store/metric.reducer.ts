@@ -2,13 +2,14 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import {
   AddMetric,
   DeleteMetric,
-  LoadMetricState,
   MetricActions,
   MetricActionTypes,
   UpdateMetric,
   UpsertMetric
 } from './metric.actions';
 import { Metric, MetricState } from '../metric.model';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { AppDataComplete } from '../../../imex/sync/sync.model';
 
 export const METRIC_FEATURE_NAME = 'metric';
 export const metricAdapter: EntityAdapter<Metric> = createEntityAdapter<Metric>();
@@ -21,6 +22,14 @@ export function metricReducer(
   state: MetricState = initialMetricState,
   action: MetricActions
 ): MetricState {
+
+  // TODO fix this hackyness once we use the new syntax everywhere
+  if ((action.type as string) === loadAllData.type) {
+    const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
+    return appDataComplete.metric
+      ? appDataComplete.metric
+      : state;
+  }
 
   switch (action.type) {
     case MetricActionTypes.AddMetric: {
@@ -38,9 +47,6 @@ export function metricReducer(
     case MetricActionTypes.DeleteMetric: {
       return metricAdapter.removeOne((action as DeleteMetric).payload.id, state);
     }
-
-    case MetricActionTypes.LoadMetricState:
-      return {...(action as LoadMetricState).payload.state};
 
     default: {
       return state;

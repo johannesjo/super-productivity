@@ -7,13 +7,14 @@ import {
   HideImprovement,
   ImprovementActions,
   ImprovementActionTypes,
-  LoadImprovementState,
   ToggleImprovementRepeat,
   UpdateImprovement
 } from './improvement.actions';
 import { Improvement, ImprovementState } from '../improvement.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { AppDataComplete } from '../../../../imex/sync/sync.model';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 
@@ -48,6 +49,14 @@ export function improvementReducer(
   state: ImprovementState = initialImprovementState,
   action: ImprovementActions
 ): ImprovementState {
+  // TODO fix this hackyness once we use the new syntax everywhere
+  if ((action.type as string) === loadAllData.type) {
+    const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
+    return appDataComplete.improvement
+      ? appDataComplete.improvement
+      : state;
+  }
+
   switch (action.type) {
     case ImprovementActionTypes.AddImprovement: {
       return adapter.addOne((action as AddImprovement).payload.improvement, state);
@@ -64,9 +73,6 @@ export function improvementReducer(
     // case ImprovementActionTypes.DeleteImprovements: {
     //   return adapter.removeMany((action as AddImprovement).payload.ids, state);
     // }
-
-    case ImprovementActionTypes.LoadImprovementState:
-      return {...(action as LoadImprovementState).payload.state};
 
     case ImprovementActionTypes.HideImprovement:
       const items = state.hiddenImprovementBannerItems || [];
