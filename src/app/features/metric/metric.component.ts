@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { LineChartData } from './metric.model';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
+import { ProjectMetricsService } from './project-metrics.service';
 
 @Component({
   selector: 'metric',
@@ -38,6 +39,7 @@ export class MetricComponent {
 
   constructor(
     public metricService: MetricService,
+    public projectMetricsService: ProjectMetricsService,
   ) {
   }
 }
