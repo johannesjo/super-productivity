@@ -1,0 +1,52 @@
+name: Win Store File on Release
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs: null
+
+jobs:
+  snap-release:
+    runs-on: ubuntu-latest
+
+    if: "!github.event.release.prerelease"
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modulesTWO-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Yarn Packages
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test Unit
+        run: yarn test
+
+      - name: Test E2E
+        run: yarn e2e
+
+      - name: Build Frontend & Electron
+        run: yarn build
+
+      - name: Build/Release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          build_script_name: empty
+          github_token: ${{ secrets.github_token }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+        with:
+          # Log in to Snap Store
+          snapcraft_token: ${{ secrets.snapcraft_token }}
+
+      - run: snapcraft push app-builds/superProductivity*.snap --release stable
