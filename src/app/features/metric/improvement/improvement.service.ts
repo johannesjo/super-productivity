@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import {
-  initialImprovementState,
-  selectAllImprovements,
-  selectRepeatedImprovementIds
-} from './store/improvement.reducer';
+import { selectAllImprovements, selectRepeatedImprovementIds } from './store/improvement.reducer';
 import {
   AddImprovement,
   AddImprovementCheckedDay,
@@ -13,14 +9,12 @@ import {
   DeleteImprovements,
   DisableImprovementRepeat,
   HideImprovement,
-  LoadImprovementState,
   ToggleImprovementRepeat,
   UpdateImprovement
 } from './store/improvement.actions';
 import { Observable } from 'rxjs';
 import { Improvement, ImprovementState } from './improvement.model';
 import * as shortid from 'shortid';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectHasLastTrackedImprovements, selectImprovementBannerImprovements } from '../store/metric.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
@@ -35,17 +29,7 @@ export class ImprovementService {
 
   constructor(
     private _store$: Store<ImprovementState>,
-    private _persistenceService: PersistenceService,
   ) {
-  }
-
-  async loadStateForProject(projectId: string) {
-    const lsImprovementState = await this._persistenceService.improvement.load(projectId);
-    this.loadState(lsImprovementState || initialImprovementState);
-  }
-
-  loadState(state: ImprovementState) {
-    this._store$.dispatch(new LoadImprovementState({state}));
   }
 
   addImprovement(title: string): string {

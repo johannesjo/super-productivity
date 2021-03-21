@@ -20,6 +20,9 @@ import { createEmptyEntity } from '../../util/create-empty-entity';
 import { initialTaskRepeatCfgState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { ProjectArchive } from '../../features/project/project-archive.model';
 import { SyncProvider } from './sync-provider.model';
+import { initialMetricState } from '../../features/metric/store/metric.reducer';
+import { initialImprovementState } from '../../features/metric/improvement/store/improvement.reducer';
+import { initialObstructionState } from '../../features/metric/obstruction/store/obstruction.reducer';
 
 /** @deprecated */
 export type TaskAttachmentState = EntityState<TaskAttachment>;
@@ -29,6 +32,11 @@ export interface AppBaseData {
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfigState;
   reminders: Reminder[];
+
+  // Metric models
+  metric: MetricState;
+  improvement: ImprovementState;
+  obstruction: ObstructionState;
 
   task: TaskState;
   tag: TagState;
@@ -63,15 +71,6 @@ export interface AppDataForProjects {
   bookmark: {
     [key: string]: BookmarkState;
   };
-  metric: {
-    [key: string]: MetricState;
-  };
-  improvement: {
-    [key: string]: ImprovementState;
-  };
-  obstruction: {
-    [key: string]: ObstructionState;
-  };
 }
 
 export interface AppDataCompleteOptionalSyncModelChange extends AppBaseData, AppDataForProjects {
@@ -93,6 +92,11 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   simpleCounter: initialSimpleCounterState,
   taskArchive: createEmptyEntity(),
   taskRepeatCfg: initialTaskRepeatCfgState,
+
+  // metric
+  metric: initialMetricState,
+  improvement: initialImprovementState,
+  obstruction: initialObstructionState,
 };
 
 export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;

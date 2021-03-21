@@ -144,13 +144,13 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     'tag',
     'project',
     'simpleCounter',
+    'metric',
+    'improvement',
+    'obstruction',
   ];
   const projectStateKeys: (keyof AppDataForProjects)[] = [
     'note',
     'bookmark',
-    'metric',
-    'improvement',
-    'obstruction',
   ];
 
   const brokenItem =

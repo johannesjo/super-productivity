@@ -67,16 +67,12 @@ export class MetricService {
   ) {
   }
 
-  async loadStateForProject(projectId: string) {
-    const lsMetricState = await this._persistenceService.metric.load(projectId);
-    this.loadState({
+  async loadStateForProject() {
+    const lsMetricState = await this._persistenceService.metric.loadState();
+    this._loadState({
       ...initialMetricState,
       ...lsMetricState
     } || initialMetricState);
-  }
-
-  loadState(state: MetricState) {
-    this._store$.dispatch(new LoadMetricState({state}));
   }
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
@@ -154,6 +150,10 @@ export class MetricService {
   // STATISTICS
   getProductivityHappinessChartData$(howMany: number = 20): Observable<LineChartData> {
     return this._store$.pipe(select(selectProductivityHappinessLineChartData, {howMany}));
+  }
+
+  private _loadState(state: MetricState) {
+    this._store$.dispatch(new LoadMetricState({state}));
   }
 
 }

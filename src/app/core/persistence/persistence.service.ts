@@ -66,6 +66,9 @@ import { concatMap, debounceTime, shareReplay, skipWhile } from 'rxjs/operators'
 import { devError } from '../../util/dev-error';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { removeFromDb, saveToDb } from './persistence.actions';
+import { metricReducer } from '../../features/metric/store/metric.reducer';
+import { improvementReducer } from '../../features/metric/improvement/store/improvement.reducer';
+import { obstructionReducer } from '../../features/metric/obstruction/store/obstruction.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -98,6 +101,23 @@ export class PersistenceService {
     simpleCounterReducer,
   );
 
+  // METRIC MODELS
+  metric: PersistenceBaseEntityModel<MetricState, Metric> = this._cmBaseEntity<MetricState, Metric>(
+    LS_METRIC_STATE,
+    'metric',
+    metricReducer as any,
+  );
+  improvement: PersistenceBaseEntityModel<ImprovementState, Improvement> = this._cmBaseEntity<ImprovementState, Improvement>(
+    LS_IMPROVEMENT_STATE,
+    'improvement',
+    improvementReducer,
+  );
+  obstruction: PersistenceBaseEntityModel<ObstructionState, Obstruction> = this._cmBaseEntity<ObstructionState, Obstruction>(
+    LS_OBSTRUCTION_STATE,
+    'obstruction',
+    obstructionReducer as any,
+  );
+
   // MAIN TASK MODELS
   task: PersistenceBaseEntityModel<TaskState, Task> = this._cmBaseEntity<TaskState, Task>(
     LS_TASK_STATE,
@@ -126,18 +146,6 @@ export class PersistenceService {
   note: PersistenceForProjectModel<NoteState, Note> = this._cmProject<NoteState, Note>(
     LS_NOTE_STATE,
     'note',
-  );
-  metric: PersistenceForProjectModel<MetricState, Metric> = this._cmProject<MetricState, Metric>(
-    LS_METRIC_STATE,
-    'metric',
-  );
-  improvement: PersistenceForProjectModel<ImprovementState, Improvement> = this._cmProject<ImprovementState, Improvement>(
-    LS_IMPROVEMENT_STATE,
-    'improvement',
-  );
-  obstruction: PersistenceForProjectModel<ObstructionState, Obstruction> = this._cmProject<ObstructionState, Obstruction>(
-    LS_OBSTRUCTION_STATE,
-    'obstruction',
   );
 
   onAfterSave$: Subject<{ appDataKey: AllowedDBKeys; data: unknown; isDataImport: boolean; isSyncModelChange: boolean; projectId?: string }>

@@ -5,8 +5,6 @@ import { select, Store } from '@ngrx/store';
 import { MetricActionTypes } from './metric.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectMetricFeatureState } from './metric.selectors';
-import { WorkContextService } from '../../work-context/work-context.service';
-import { combineLatest } from 'rxjs';
 import { MetricState } from '../metric.model';
 
 @Injectable()
@@ -20,11 +18,8 @@ export class MetricEffects {
         MetricActionTypes.DeleteMetric,
         MetricActionTypes.UpsertMetric,
       ),
-      switchMap(() => combineLatest([
-        this._workContextService.activeWorkContextIdIfProject$,
-        this._store$.pipe(select(selectMetricFeatureState)),
-      ]).pipe(first())),
-      tap(([projectId, state]) => this._saveToLs(projectId, state)),
+      switchMap(() => this._store$.pipe(select(selectMetricFeatureState)).pipe(first())),
+      tap((state) => this._saveToLs(state)),
     );
 
   // @Effect({dispatch: false}) saveMetrics$: any = this._actions$
@@ -44,16 +39,11 @@ export class MetricEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _workContextService: WorkContextService,
   ) {
   }
 
-  private _saveToLs(currentProjectId: string, metricState: MetricState) {
-    if (currentProjectId) {
-      this._persistenceService.metric.save(currentProjectId, metricState, {isSyncModelChange: true});
-    } else {
-      throw new Error('No current project id');
-    }
+  private _saveToLs(metricState: MetricState) {
+    this._persistenceService.metric.saveState(metricState, {isSyncModelChange: true});
   }
 
 }

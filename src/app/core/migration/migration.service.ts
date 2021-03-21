@@ -18,6 +18,9 @@ import { Project } from '../../features/project/project.model';
 import { concatMap, map } from 'rxjs/operators';
 import { migrateTaskState } from '../../features/tasks/migrate-task-state.util';
 import { initialSimpleCounterState } from '../../features/simple-counter/store/simple-counter.reducer';
+import { initialMetricState } from '../../features/metric/store/metric.reducer';
+import { initialImprovementState } from '../../features/metric/improvement/store/improvement.reducer';
+import { initialObstructionState } from '../../features/metric/obstruction/store/obstruction.reducer';
 
 const EMTPY_ENTITY = () => ({ids: [], entities: {}});
 
@@ -72,6 +75,9 @@ export class MigrationService {
       // new
       tag: initialTagState,
       simpleCounter: initialSimpleCounterState,
+      metric: initialMetricState,
+      improvement: initialImprovementState,
+      obstruction: initialObstructionState,
 
       // migrated
       project: {
@@ -85,9 +91,6 @@ export class MigrationService {
 
       // NEW PROJECT MODELS
       note: {},
-      metric: {},
-      improvement: {},
-      obstruction: {},
       bookmark: {},
     };
 

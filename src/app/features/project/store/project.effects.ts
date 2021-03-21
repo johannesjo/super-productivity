@@ -33,9 +33,6 @@ import {
   UpdateTaskTags
 } from '../../tasks/store/task.actions';
 import { ReminderService } from '../../reminder/reminder.service';
-import { MetricService } from '../../metric/metric.service';
-import { ObstructionService } from '../../metric/obstruction/obstruction.service';
-import { ImprovementService } from '../../metric/improvement/improvement.service';
 import { ProjectService } from '../project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
@@ -191,9 +188,6 @@ export class ProjectEffects {
         return Promise.all([
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
-          this._metricService.loadStateForProject(projectId),
-          this._improvementService.loadStateForProject(projectId),
-          this._obstructionService.loadStateForProject(projectId),
         ]).then(() => projectId);
       }),
       map(projectId => {
@@ -515,9 +509,6 @@ export class ProjectEffects {
     private _noteService: NoteService,
     private _globalConfigService: GlobalConfigService,
     private _reminderService: ReminderService,
-    private _metricService: MetricService,
-    private _obstructionService: ObstructionService,
-    private _improvementService: ImprovementService,
     // private _workContextService: WorkContextService,
     private _taskService: TaskService,
     private _taskRepeatCfgService: TaskRepeatCfgService,

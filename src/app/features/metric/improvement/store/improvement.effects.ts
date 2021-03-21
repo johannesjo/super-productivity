@@ -8,8 +8,6 @@ import { PersistenceService } from '../../../../core/persistence/persistence.ser
 import { selectUnusedImprovementIds } from '../../store/metric.selectors';
 import { ProjectActionTypes } from '../../../project/store/project.actions';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
-import { combineLatest } from 'rxjs';
-import { WorkContextService } from '../../../work-context/work-context.service';
 import { ImprovementState } from '../improvement.model';
 
 @Injectable()
@@ -26,11 +24,8 @@ export class ImprovementEffects {
         ImprovementActionTypes.DeleteImprovement,
         ImprovementActionTypes.AddImprovementCheckedDay,
       ),
-      switchMap(() => combineLatest([
-        this._workContextService.activeWorkContextIdIfProject$,
-        this._store$.pipe(select(selectImprovementFeatureState)),
-      ]).pipe(first())),
-      tap(([projectId, state]) => this._saveToLs(projectId, state)),
+      switchMap(() => this._store$.pipe(select(selectImprovementFeatureState)).pipe(first())),
+      tap((state) => this._saveToLs(state)),
     );
 
   @Effect() clearImprovements$: any = this._actions$
@@ -58,15 +53,10 @@ export class ImprovementEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _workContextService: WorkContextService,
   ) {
   }
 
-  private _saveToLs(currentProjectId: string, improvementState: ImprovementState) {
-    if (currentProjectId) {
-      this._persistenceService.improvement.save(currentProjectId, improvementState, {isSyncModelChange: true});
-    } else {
-      throw new Error('No current project id');
-    }
+  private _saveToLs(improvementState: ImprovementState) {
+    this._persistenceService.improvement.saveState(improvementState, {isSyncModelChange: true});
   }
 }
