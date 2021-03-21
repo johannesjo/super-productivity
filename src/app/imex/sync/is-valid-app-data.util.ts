@@ -144,9 +144,11 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     'tag',
     'project',
     'simpleCounter',
-    'metric',
-    'improvement',
-    'obstruction',
+
+    // TODO include later after everybody is migrated
+    // 'metric',
+    // 'improvement',
+    // 'obstruction',
   ];
   const projectStateKeys: (keyof AppDataForProjects)[] = [
     'note',

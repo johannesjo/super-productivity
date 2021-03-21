@@ -15,6 +15,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../../imex/sync/sync.model';
+import { migrateImprovementState } from '../../migrate-metric-states';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 
@@ -52,9 +53,9 @@ export function improvementReducer(
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.improvement
+    return appDataComplete.improvement?.ids
       ? appDataComplete.improvement
-      : state;
+      : migrateImprovementState(state);
   }
 
   switch (action.type) {

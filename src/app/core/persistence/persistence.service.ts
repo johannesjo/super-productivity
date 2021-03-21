@@ -69,6 +69,11 @@ import { removeFromDb, saveToDb } from './persistence.actions';
 import { metricReducer } from '../../features/metric/store/metric.reducer';
 import { improvementReducer } from '../../features/metric/improvement/store/improvement.reducer';
 import { obstructionReducer } from '../../features/metric/obstruction/store/obstruction.reducer';
+import {
+  migrateImprovementState,
+  migrateMetricState,
+  migrateObstructionState
+} from '../../features/metric/migrate-metric-states';
 
 @Injectable({
   providedIn: 'root',
@@ -106,16 +111,19 @@ export class PersistenceService {
     LS_METRIC_STATE,
     'metric',
     metricReducer as any,
+    migrateMetricState,
   );
   improvement: PersistenceBaseEntityModel<ImprovementState, Improvement> = this._cmBaseEntity<ImprovementState, Improvement>(
     LS_IMPROVEMENT_STATE,
     'improvement',
     improvementReducer,
+    migrateImprovementState,
   );
   obstruction: PersistenceBaseEntityModel<ObstructionState, Obstruction> = this._cmBaseEntity<ObstructionState, Obstruction>(
     LS_OBSTRUCTION_STATE,
     'obstruction',
     obstructionReducer as any,
+    migrateObstructionState,
   );
 
   // MAIN TASK MODELS

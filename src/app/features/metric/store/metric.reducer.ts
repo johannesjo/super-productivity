@@ -10,6 +10,7 @@ import {
 import { Metric, MetricState } from '../metric.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
+import { migrateMetricState } from '../migrate-metric-states';
 
 export const METRIC_FEATURE_NAME = 'metric';
 export const metricAdapter: EntityAdapter<Metric> = createEntityAdapter<Metric>();
@@ -26,9 +27,9 @@ export function metricReducer(
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.metric
+    return (appDataComplete.metric?.ids)
       ? appDataComplete.metric
-      : state;
+      : migrateMetricState(state);
   }
 
   switch (action.type) {

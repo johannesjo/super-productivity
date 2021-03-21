@@ -11,6 +11,7 @@ import { Obstruction, ObstructionState } from '../obstruction.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../../imex/sync/sync.model';
+import { migrateObstructionState } from '../../migrate-metric-states';
 
 export const OBSTRUCTION_FEATURE_NAME = 'obstruction';
 
@@ -32,9 +33,9 @@ export function obstructionReducer(
   // TODO fix this hackyness once we use the new syntax everywhere
   if ((action.type as string) === loadAllData.type) {
     const {appDataComplete}: { appDataComplete: AppDataComplete } = action as any;
-    return appDataComplete.obstruction
+    return appDataComplete.obstruction?.ids
       ? appDataComplete.obstruction
-      : state;
+      : migrateObstructionState(state);
   }
 
   switch (action.type) {
