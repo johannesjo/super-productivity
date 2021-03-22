@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { MetricService } from './metric.service';
-import { first } from 'rxjs/operators';
+import { concatMap, first } from 'rxjs/operators';
 import { EntityState } from '@ngrx/entity';
 import { MetricCopy, MetricState } from './metric.model';
 import { initialMetricState } from './store/metric.reducer';
@@ -11,6 +11,7 @@ import { ImprovementState } from './improvement/improvement.model';
 import { DataImportService } from '../../imex/sync/data-import.service';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { METRIC_MODEL_VERSION } from './metric.const';
+import { SyncService } from '../../imex/sync/sync.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,17 +22,27 @@ export class MigrateMetricService {
     private _metricService: MetricService,
     private _persistenceService: PersistenceService,
     private _dataImportService: DataImportService,
+    private _syncService: SyncService,
   ) {
 
   }
 
   checkMigrate() {
     // TODO check for model version number instead
-    this._metricService.state$.pipe(first()).subscribe(async (metricState: MetricState) => {
-      console.log({metricState});
-
+    this._syncService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
+      first(),
+      concatMap(() => this._metricService.state$),
+      first(),
+    ).subscribe(async (metricState: MetricState) => {
+      console.log('Migrating Legacy Metric State to new model');
+      console.log(metricState [MODEL_VERSION_KEY], {metricState});
       if (!metricState [MODEL_VERSION_KEY]) {
         const projectState = await this._persistenceService.project.loadState();
+        // For new instances
+        if (!projectState?.ids?.length) {
+          return;
+        }
+
         console.log(projectState);
         let newM = initialMetricState;
         let newI = initialImprovementState;
@@ -99,35 +110,4 @@ export class MigrateMetricService {
       }
     };
   }
-
-  // private _mergeAllIntoOne(projectStates: { [key: string]: EntityState<any> }): EntityState<any> {
-  //   let allIds: string[] = [];
-  //   const allEntities: any = {};
-  //
-  //   if (projectStates.ids && projectStates.entities) {
-  //     console.log('No migration necessary');
-  //     return projectStates as any;
-  //   }
-  //   alert('MIGRATEION SCRIPT TRGGERED FOR METRICS');
-  //
-  //   Object.keys(projectStates).forEach((pid: string) => {
-  //     if (projectStates[pid] && Array.isArray(projectStates[pid].ids)) {
-  //       const idsForProject = projectStates[pid].ids as string[];
-  //       allIds = [...allIds, ...idsForProject];
-  //       idsForProject.forEach(entityId => {
-  //         allEntities[entityId] = projectStates[pid].entities[entityId];
-  //       });
-  //     }
-  //   });
-  //
-  //   console.log('MERGED_METRICS', {projectStates}, {
-  //     ids: allIds,
-  //     entities: allEntities,
-  //   });
-  //
-  //   return {
-  //     ids: allIds,
-  //     entities: allEntities,
-  //   };
-  // }
 }
