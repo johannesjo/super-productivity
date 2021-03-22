@@ -41,6 +41,7 @@ function mergeAllIntoOne(projectStates: { [key: string]: EntityState<any> }): En
     console.log('No migration necessary');
     return projectStates as any;
   }
+  alert('MIGRATEION SCRIPT TRGGERED FOR METRICS');
 
   Object.keys(projectStates).forEach((pid: string) => {
     if (projectStates[pid] && Array.isArray(projectStates[pid].ids)) {

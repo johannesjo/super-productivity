@@ -13,6 +13,7 @@ import { ObstructionModule } from './obstruction/obstruction.module';
 import { ImprovementModule } from './improvement/improvement.module';
 import { ChartsModule } from 'ng2-charts';
 import { RouterModule } from '@angular/router';
+import { MigrateMetricService } from './migrate-metric.service';
 
 @NgModule({
   imports: [
@@ -38,6 +39,9 @@ import { RouterModule } from '@angular/router';
   ],
 })
 export class MetricModule {
+  constructor(private _migrateMetricService: MigrateMetricService) {
+    this._migrateMetricService.checkMigrate();
+  }
 
   // constructor(
   //   private _metricsService: MetricService,

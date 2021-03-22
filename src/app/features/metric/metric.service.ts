@@ -6,7 +6,7 @@ import { LineChartData, Metric, MetricState, PieChartData } from './metric.model
 import { getWorklogStr } from '../../util/get-work-log-str';
 import {
   selectImprovementCountsPieChartData,
-  selectMetricById,
+  selectMetricById, selectMetricFeatureState,
   selectMetricHasData,
   selectObstructionCountsPieChartData,
   selectProductivityHappinessLineChartData
@@ -24,6 +24,7 @@ import {
 export class MetricService {
   // metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
   hasData$: Observable<boolean> = this._store$.pipe(select(selectMetricHasData));
+  state$: Observable<MetricState> = this._store$.pipe(select(selectMetricFeatureState));
   // lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
   improvementCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(select(selectImprovementCountsPieChartData));
   obstructionCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(select(selectObstructionCountsPieChartData));

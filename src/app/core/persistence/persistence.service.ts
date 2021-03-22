@@ -156,6 +156,20 @@ export class PersistenceService {
     'note',
   );
 
+  // LEGACY PROJECT MODELS
+  legacyMetric: PersistenceForProjectModel<MetricState, Metric> = this._cmProjectLegacy<MetricState, Metric>(
+    LS_METRIC_STATE,
+    'metric' as any,
+  );
+  legacyImprovement: PersistenceForProjectModel<ImprovementState, Improvement> = this._cmProjectLegacy<ImprovementState, Improvement>(
+    LS_IMPROVEMENT_STATE,
+    'improvement' as any,
+  );
+  legacyObstruction: PersistenceForProjectModel<ObstructionState, Obstruction> = this._cmProjectLegacy<ObstructionState, Obstruction>(
+    LS_OBSTRUCTION_STATE,
+    'obstruction' as any,
+  );
+
   onAfterSave$: Subject<{ appDataKey: AllowedDBKeys; data: unknown; isDataImport: boolean; isSyncModelChange: boolean; projectId?: string }>
     = new Subject();
   onAfterImport$: Subject<AppDataComplete> = new Subject();
@@ -471,6 +485,21 @@ export class PersistenceService {
     appDataKey: keyof AppDataForProjects,
     migrateFn: (state: S, projectId: string) => S = (v) => v,
   ): PersistenceForProjectModel<S, M> {
+    const model = this._cmProjectLegacy<S, M>(
+      lsKey,
+      appDataKey,
+      migrateFn,
+    );
+    this._projectModels.push(model);
+    return model;
+  }
+
+  // TODO maybe find a way to exec effects here as well
+  private _cmProjectLegacy<S, M>(
+    lsKey: string,
+    appDataKey: keyof AppDataForProjects,
+    migrateFn: (state: S, projectId: string) => S = (v) => v,
+  ): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
       load: (projectId: string): Promise<S> => this._loadFromDb({
@@ -496,8 +525,6 @@ export class PersistenceService {
         },
       },
     };
-
-    this._projectModels.push(model);
     return model;
   }
 
