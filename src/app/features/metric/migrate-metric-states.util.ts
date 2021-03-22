@@ -1,65 +1,23 @@
 import { METRIC_MODEL_VERSION } from './metric.const';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { MetricState } from './metric.model';
 import { ObstructionState } from './obstruction/obstruction.model';
 import { ImprovementState } from './improvement/improvement.model';
-import { EntityState } from '@ngrx/entity';
+import { MODEL_VERSION_KEY } from '../../app.constants';
 
 const MODEL_VERSION = METRIC_MODEL_VERSION;
 
-const migrateMetricStatesUtil = (modelName: string, defaultState: any) => (metricState: any): any => {
+const migrateMetricStatesUtil = (modelName: string) => (metricState: any): any => {
   if (!isMigrateModel(metricState, MODEL_VERSION, modelName)) {
     return metricState;
   }
   return {
-    ...defaultState,
-    ...mergeAllIntoOne(metricState),
+    ...metricState,
     // Update model version after all migrations ran successfully
     [MODEL_VERSION_KEY]: MODEL_VERSION,
   };
 };
 
-export const migrateMetricState: (metricState: MetricState) => MetricState = migrateMetricStatesUtil('Metric', {
-  ids: [],
-  entities: {}
-});
-export const migrateImprovementState: (improvementState: ImprovementState) => ImprovementState = migrateMetricStatesUtil('Improvement', {
-  ids: [],
-  entities: {}
-});
-export const migrateObstructionState: (obstructionState: ObstructionState) => ObstructionState = migrateMetricStatesUtil('Obstruction', {
-  ids: [],
-  entities: {}
-});
-
-function mergeAllIntoOne(projectStates: { [key: string]: EntityState<any> }): EntityState<any> {
-  let allIds: string[] = [];
-  const allEntities: any = {};
-
-  if (projectStates.ids && projectStates.entities) {
-    console.log('No migration necessary');
-    return projectStates as any;
-  }
-  alert('MIGRATEION SCRIPT TRGGERED FOR METRICS');
-
-  Object.keys(projectStates).forEach((pid: string) => {
-    if (projectStates[pid] && Array.isArray(projectStates[pid].ids)) {
-      const idsForProject = projectStates[pid].ids as string[];
-      allIds = [...allIds, ...idsForProject];
-      idsForProject.forEach(entityId => {
-        allEntities[entityId] = projectStates[pid].entities[entityId];
-      });
-    }
-  });
-
-  console.log('MERGED_METRICS', {projectStates}, {
-    ids: allIds,
-    entities: allEntities,
-  });
-
-  return {
-    ids: allIds,
-    entities: allEntities,
-  };
-}
+export const migrateMetricState: (metricState: MetricState) => MetricState = migrateMetricStatesUtil('Metric');
+export const migrateImprovementState: (improvementState: ImprovementState) => ImprovementState = migrateMetricStatesUtil('Improvement');
+export const migrateObstructionState: (obstructionState: ObstructionState) => ObstructionState = migrateMetricStatesUtil('Obstruction');
