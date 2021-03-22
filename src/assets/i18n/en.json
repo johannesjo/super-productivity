@@ -82,11 +82,11 @@
         "TITLE": "Setup CalDav for Project"
       },
       "FORM": {
-        "CALDAV_URL": "CalDav URL (the base URL)",
-        "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
-        "CALDAV_USER": "Your CalDav username",
-        "CALDAV_PASSWORD": "Your CalDav password",
         "CALDAV_CATEGORY_FILTER": "Category to filter issues for (leave empty for none)",
+        "CALDAV_PASSWORD": "Your CalDav password",
+        "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
+        "CALDAV_URL": "CalDav URL (the base URL)",
+        "CALDAV_USER": "Your CalDav username",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add uncompleted CalDav todos to your backlog",
         "IS_AUTO_POLL": "Automatically poll imported tasks for changes",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Show uncompleted CalDav todos as suggestion when adding new tasks",
@@ -179,11 +179,11 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "GITLAB_BASE_URL": "Custom GitLab base URL",
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from GitLab to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "project ID or user name/project",
-        "GITLAB_BASE_URL": "Custom GitLab base URL",
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
@@ -373,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Avg. time spent per task",
         "COUNTING_SUBTASKS": "(counting subtasks)",
         "DAYS_WORKED": "Days worked",
+        "GLOBAL_METRICS": "Global Metrics",
         "IMPROVEMENT_SELECTION_COUNT": "Number of times an improvement factor was selected",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
@@ -490,10 +491,10 @@
       "D_CREATE": {
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
+        "SETUP_CALDAV": "Setup Caldav Integration",
         "SETUP_GIT": "Setup GitHub Integration",
         "SETUP_GITLAB": "Setup GitLab Integration",
-        "SETUP_JIRA": "Setup Jira Integration",
-        "SETUP_CALDAV": "Setup Caldav Integration"
+        "SETUP_JIRA": "Setup Jira Integration"
       },
       "FORM_BASIC": {
         "L_TITLE": "Project Name",
@@ -566,10 +567,10 @@
         "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?"
       },
       "D_AUTH_CODE": {
-        "TITLE": "Login: {{provider}}",
         "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field below.",
         "GET_AUTH_CODE": "Get Authorization Code",
-        "L_AUTH_CODE": "Enter Auth Code"
+        "L_AUTH_CODE": "Enter Auth Code",
+        "TITLE": "Login: {{provider}}"
       },
       "D_CONFLICT": {
         "LAST_CHANGE": "Last Change:",
@@ -609,8 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "IMPORTING": "Importing data",
-        "INITIAL_SYNC_ERROR": "Initial Sync failed",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
+        "INITIAL_SYNC_ERROR": "Initial Sync failed",
         "SUCCESS": "Data imported",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
@@ -840,17 +841,17 @@
           "FULL_HALF_HOURS": "full half hours",
           "FULL_HOURS": "full hours",
           "FULL_QUARTERS": "full quarters",
+          "NOTES": "Task Descriptions",
           "PARENT_TASK": "Parent Task",
           "PARENT_TASK_TITLES_ONLY": "Parent Task Titles only",
+          "PROJECTS": "Project Names",
           "STARTED_WORKING": "Started Working",
+          "TAGS": "Tags",
           "TASK_SUBTASK": "Task/Subtask",
           "TIME_AS_CLOCK": "Time as clock (e.g. 5:23)",
           "TIME_AS_MILLISECONDS": "Time as milliseconds",
           "TIME_AS_STRING": "Time as string (e.g. 5h 23m)",
           "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
-          "NOTES": "Task Descriptions",
-          "PROJECTS": "Project Names",
-          "TAGS": "Tags",
           "WORKLOG": "Worklog"
         },
         "OPTIONS": "Options",
@@ -1077,6 +1078,7 @@
     "PROCRASTINATE": "Procrastinate",
     "PROJECTS": "Projects",
     "PROJECT_MENU": "Project Menu",
+    "PROJECT_SETTINGS": "Project Settings",
     "SCHEDULED": "Scheduled",
     "SETTINGS": "Settings",
     "TAGS": "Tags",

@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "CalDav را برای پروژه راه اندازی کنید"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "دسته ای برای فیلتر کردن مسائل برای (خالی گذاشتن برای هیچ کس)",
+        "CALDAV_PASSWORD": "رمز ورود CalDav شما",
+        "CALDAV_RESOURCE": "نام منبع CalDav (تقویم)",
+        "CALDAV_URL": "CalDav URL (URL پایه)",
+        "CALDAV_USER": "نام کاربری CalDav شما",
+        "IS_AUTO_ADD_TO_BACKLOG": "به طور خودکار موارد خاموش CalDav را به پرونده خود اضافه کنید",
+        "IS_AUTO_POLL": "وظایف وارد شده را به طور خودکار برای تغییرات نظرسنجی کنید",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "هنگام اضافه کردن کارهای جدید ، تالارهای CalDav ناقص را به عنوان پیشنهاد نشان دهید",
+        "IS_TRANSITION_ISSUES_ENABLED": "در پایان کار به طور خودکار تالارهای CalDav را تکمیل کنید"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>در اینجا می توانید SuperProductivity را پیکربندی کنید تا لیست های انجام نشده CalDav را برای یک پروژه خاص در صفحه ایجاد کار در نمای برنامه ریزی روزانه لیست کنید. آنها به عنوان پیشنهادها لیست می شوند و پیوندی به این کار و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند.</p> <p>علاوه بر این شما می توانید به طور خودکار تمام موارد خاتمه یافته ناقص را به پرونده کار خود اضافه و همگام سازی کنید.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "شرح",
+        "LABELS": "دسته بندی ها",
+        "MARK_AS_CHECKED": "به روزرسانی ها را به عنوان علامت گذاری شده علامت گذاری کنید",
+        "STATUS": "وضعیت",
+        "SUMMARY": "خلاصه"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: تقویم \"{{calendarName}}\" یافت نشد",
+        "CALENDAR_READ_ONLY": "CalDav: تقویم \"{{calendarName}}\" فقط خواندنی است",
+        "ERR_NETWORK": "CalDav: درخواست به دلیل خطای شبکه سمت مشتری انجام نشد",
+        "ERR_NOT_CONFIGURED": "CalDav: به درستی پیکربندی نشده است",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: {{issuesLength}} شماره جدید از git به موارد عقب مانده وارد شده است",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: شماره \"{{issueText}}\" را از موارد موجود وارد کرد",
+        "ISSUE_NOT_FOUND": "CalDav: به نظر می رسد Todo \"{{issueId}}\" در سرور حذف شده است.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: نیازی به بروزرسانی نیست.",
+        "ISSUE_UPDATE": "Caldav: داده های دارای کد برای \"{{issueText}}\"",
+        "POLLING": "Caldav: نظرسنجی برای todos تغییر می کند"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "تنظیمات برای <strong>{{sectionKey}}</strong> بروز رسانی شد"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
+        "GITLAB_BASE_URL": "URL پایه GitLab سفارشی",
         "IS_AUTO_ADD_TO_BACKLOG": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Avg. time spent per task",
         "COUNTING_SUBTASKS": "(counting subtasks)",
         "DAYS_WORKED": "Days worked",
+        "GLOBAL_METRICS": "معیارهای جهانی",
         "IMPROVEMENT_SELECTION_COUNT": "Number of times an improvement factor was selected",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "ایجاد پروژه",
         "EDIT": "ویرایش پروژه",
+        "SETUP_CALDAV": "ادغام Caldav را تنظیم کنید",
         "SETUP_GIT": "راه اندازی ارتباط با گیت",
         "SETUP_GITLAB": "راه اندازی ارتباط با گیت لاب",
         "SETUP_JIRA": "راه اندازی ارتباط با جیرا"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "داده ای از راه دور یافت نشد محلی در Remote بارگذاری شود؟",
         "TRY_LOAD_REMOTE_AGAIN": "سعی می کنید بار دیگر داده ها را از راه دور بارگیری کنید؟"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد تأیید موجود را در قسمت ورودی زیر کپی کنید.",
+        "GET_AUTH_CODE": "دریافت کد دسترسی",
+        "L_AUTH_CODE": "کد تایید را وارد کنید",
+        "TITLE": "ورود به سیستم: {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "آخرین تغییر:",
         "LAST_SYNC": "آخرین همگام سازی:",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "هنگام وارد کردن داده ها مشکلی پیش آمد. بازگشت به پشتیبان گیری محلی.",
         "ERROR_INVALID_DATA": "خطا هنگام همگام سازی داده نامعتبر است",
         "IMPORTING": "وارد کردن داده",
+        "INCOMPLETE_CFG": "احراز هویت برای همگام سازی انجام نشد. لطفا پیکربندی خود را بررسی کنید!",
+        "INITIAL_SYNC_ERROR": "همگام سازی اولیه انجام نشد",
         "SUCCESS": "داده وارد شد",
         "UNKNOWN_ERROR": "خطای ناشناخته هنگام همگام سازی لطفا کنسول را بررسی کنید.",
         "UPLOAD_ERROR": "خطای بارگذاری ناشناخته (تنظیمات درست است؟): {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "نیم ساعت کامل",
           "FULL_HOURS": "ساعات کامل",
           "FULL_QUARTERS": "ربع کامل",
+          "NOTES": "شرح وظایف",
           "PARENT_TASK": "کار اصلی",
           "PARENT_TASK_TITLES_ONLY": "فقط عنوان کار اصلی",
+          "PROJECTS": "نام پروژه ها",
           "STARTED_WORKING": "کار شروع شد",
+          "TAGS": "برچسب ها",
           "TASK_SUBTASK": "کار/کار فرعی",
           "TIME_AS_CLOCK": "ساعت (مثلا 5:23)",
           "TIME_AS_MILLISECONDS": "زمان برحسب میلی ثانیه",
@@ -844,7 +897,8 @@
     "TITLE": "عنوان",
     "UNDO": "Undo",
     "UPDATE": "بروز رسانی",
-    "WITHOUT_PROJECT": "بدون پروژه"
+    "WITHOUT_PROJECT": "بدون پروژه",
+    "YESTERDAY": "دیروز"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
       "GO_TO_FOCUS_MODE": "رفتن به حالت تمرکز",
+      "GO_TO_SCHEDULED_VIEW": "رفتن به وظایف برنامه ریزی شده",
       "GO_TO_SETTINGS": "رفتن به تنظیمات",
       "GO_TO_WORK_VIEW": "رفتن به نمای کار",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "حذف کار",
       "TASK_EDIT_TITLE": "ویرایش عنوان",
       "TASK_MOVE_TO_PROJECT": "وظیفه حرکت را به منوی پروژه باز کنید",
+      "TASK_OPEN_CONTEXT_MENU": "منوی زمینه کار را باز کنید",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
       "TASK_SCHEDULE": "کار برنامه ریزی شده",
       "TASK_SHORTCUTS": "کارها",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
       "TOGGLE_PLAY": "شروع/توقت کار",
+      "TOGGLE_SIDE_NAV": "نمایش و تمرکز / مخفی کردن Sidenav",
       "ZOOM_DEFAULT": "بزرگنمایی پیش فرض (فقط دسکتاپ)",
       "ZOOM_IN": "بزرگنمایی (فقط دسکتاپ)",
       "ZOOM_OUT": "کوچک نمایی (فقط دسکتاپ)"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "نمایش وظیفه فعلی در منوی سینی / وضعیت (فقط دسک تاپ)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
+      "TASK_NOTES_TPL": "الگوی شرح کار",
       "TITLE": "Misc Settings"
     },
     "POMODORO": {

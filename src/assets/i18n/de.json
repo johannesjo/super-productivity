@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Richten Sie CalDav für Project ein"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "Kategorie, nach der Probleme gefiltert werden sollen (für keine leer lassen)",
+        "CALDAV_PASSWORD": "Ihr CalDav-Passwort",
+        "CALDAV_RESOURCE": "Der Name der CalDav-Ressource (der Kalender)",
+        "CALDAV_URL": "CalDav-URL (die Basis-URL)",
+        "CALDAV_USER": "Ihr CalDav-Benutzername",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie Ihrem Backlog automatisch unvollständige CalDav-Aufgaben hinzu",
+        "IS_AUTO_POLL": "Importierte Aufgaben werden automatisch nach Änderungen abgefragt",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Zeigen Sie unvollständige CalDav-Aufgaben als Vorschlag an, wenn Sie neue Aufgaben hinzufügen",
+        "IS_TRANSITION_ISSUES_ENABLED": "Führen Sie CalDav-Aufgaben nach Abschluss der Aufgabe automatisch aus"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass unvollständige CalDav-Aufgaben für ein bestimmtes Projekt im Aufgabenerstellungsfenster in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zur Aufgabe sowie weitere Informationen dazu.</p> <p>Außerdem können Sie automatisch alle nicht abgeschlossenen Aufgaben zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beschreibung",
+        "LABELS": "Kategorien",
+        "MARK_AS_CHECKED": "Markiere Updates als markiert",
+        "STATUS": "Status",
+        "SUMMARY": "Zusammenfassung"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: Kalender \"{{calendarName}}\" nicht gefunden",
+        "CALENDAR_READ_ONLY": "CalDav: Kalender \"{{calendarName}}\" ist schreibgeschützt",
+        "ERR_NETWORK": "CalDav: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
+        "ERR_NOT_CONFIGURED": "CalDav: Nicht richtig konfiguriert",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: {{issuesLength}} neue Probleme von git in den Rückstand importiert",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: Importiertes Problem \"{{issueText}}\" von in den Rückstand",
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" scheint auf dem Server gelöscht zu sein.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: Kein Update erforderlich.",
+        "ISSUE_UPDATE": "Caldav: Uodierte Daten für \"{{issueText}}\"",
+        "POLLING": "Caldav: Polling-Änderungen für Aufgaben"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Aktualisierte Einstellungen für <strong>{{sectionKey}}</strong>"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
+        "GITLAB_BASE_URL": "Benutzerdefinierte GitLab-Basis-URL",
         "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Issues aus GitLab automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Durchschn. Zeitaufwand pro Aufgabe",
         "COUNTING_SUBTASKS": "(Zählen von Unteraufgaben)",
         "DAYS_WORKED": "Tage gearbeitet",
+        "GLOBAL_METRICS": "Globale Metriken",
         "IMPROVEMENT_SELECTION_COUNT": "Häufigkeit, mit der ein Verbesserungsfaktor ausgewählt wurde",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Stimmung und Produktivität im Laufe der Zeit",
         "NO_ADDITIONAL_DATA_YET": "Es wurden noch keine zusätzlichen Daten gesammelt. Verwenden Sie dazu das Formular in der täglichen Zusammenfassung \"Bewertung\".",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
+        "SETUP_CALDAV": "Richten Sie die Caldav-Integration ein",
         "SETUP_GIT": "Einrichten der GitHub-Integration",
         "SETUP_GITLAB": "Einrichten der GitLab-Integration",
         "SETUP_JIRA": "Jira-Integration einrichten"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "Keine remote Daten gefunden. Lokal auf Remote hochladen?",
         "TRY_LOAD_REMOTE_AGAIN": "Versuchen Sie erneut, Daten von Remote neu zu laden?"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "Bitte öffnen Sie den folgenden Link und kopieren Sie den dort angegebenen Authentifizierungscode in das unten stehende Eingabefeld.",
+        "GET_AUTH_CODE": "Autorisierungscode anfordern",
+        "L_AUTH_CODE": "Geben Sie den Auth-Code ein",
+        "TITLE": "Login: {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "Letzte Änderung:",
         "LAST_SYNC": "letzte Synchronisierung:",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Zurückgreifen auf lokales Backup.",
         "ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
         "IMPORTING": "Daten importieren",
+        "INCOMPLETE_CFG": "Die Authentifizierung für die Synchronisierung ist fehlgeschlagen. Bitte überprüfen Sie Ihre Konfiguration!",
+        "INITIAL_SYNC_ERROR": "Die anfängliche Synchronisierung ist fehlgeschlagen",
         "SUCCESS": "Daten importiert",
         "UNKNOWN_ERROR": "Unbekannter Fehler beim Synchronisieren. Bitte überprüfen Sie die Konsole.",
         "UPLOAD_ERROR": "Unbekannter Upload-Fehler (Einstellungen korrekt?): {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "Volle halbe Stunden",
           "FULL_HOURS": "Volle Stunden",
           "FULL_QUARTERS": "Volle viertel Stunde",
+          "NOTES": "Aufgabenbeschreibungen",
           "PARENT_TASK": "Übergeordnete Aufgabe",
           "PARENT_TASK_TITLES_ONLY": "Nur übergeordnete Aufgabentitel",
+          "PROJECTS": "Projektnamen",
           "STARTED_WORKING": "Angefangen zu arbeiten",
+          "TAGS": "Stichworte",
           "TASK_SUBTASK": "Aufgabe / Unteraufgabe",
           "TIME_AS_CLOCK": "Aufgewandte Zeit im Uhrzeit Format (z. B. 5:23)",
           "TIME_AS_MILLISECONDS": "Aufgewandte Zeit in Millisekunden",
@@ -844,7 +897,8 @@
     "TITLE": "Titel",
     "UNDO": "Rückgängig machen",
     "UPDATE": "Aktualisieren",
-    "WITHOUT_PROJECT": "Ohne Projekt"
+    "WITHOUT_PROJECT": "Ohne Projekt",
+    "YESTERDAY": "Gestern"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "Schaltet die Zeiterfassung für die zuletzt aktive Aufgabe um",
       "GO_TO_DAILY_AGENDA": "Gehe zur Agenda",
       "GO_TO_FOCUS_MODE": "Wechseln Sie in den Fokusmodus",
+      "GO_TO_SCHEDULED_VIEW": "Gehen Sie zu geplanten Aufgaben",
       "GO_TO_SETTINGS": "Gehe zu den Einstellungen",
       "GO_TO_WORK_VIEW": "Gehen Sie zur Arbeitsansicht",
       "HELP": "<p>Hier können Sie alle Tastaturkürzel konfigurieren.</p> <p>Klicken Sie auf die Texteingabe und geben Sie die gewünschte Tastaturkombination ein. Drücken Sie die Eingabetaste, um zu speichern, und die Escape-Taste, um den Vorgang abzubrechen.</p> <p>Es gibt drei Arten von Verknüpfungen:</p> <ul> <li> <strong>Globale Verknüpfungen:</strong> Wenn die App ausgeführt wird, wird die Aktion von jeder anderen Anwendung ausgelöst. </li> <li> <strong>Verknüpfungen auf Anwendungsebene:</strong> Wird von jedem Bildschirm der Anwendung ausgelöst, jedoch nicht, wenn Sie gerade ein Textfeld bearbeiten. </li> <li> <strong>Schnellzugriffe auf Aufgabenebene:</strong> Sie werden nur ausgelöst, wenn Sie eine Aufgabe mit der Maus oder der Tastatur ausgewählt haben und normalerweise eine Aktion auslösen, die sich speziell auf diese eine Aufgabe bezieht. </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "Aufgabe löschen",
       "TASK_EDIT_TITLE": "Titel bearbeiten",
       "TASK_MOVE_TO_PROJECT": "Öffnen Sie die Aufgabe zum Verschieben in das Projektmenü",
+      "TASK_OPEN_CONTEXT_MENU": "Öffnen Sie das Aufgabenkontextmenü",
       "TASK_OPEN_ESTIMATION_DIALOG": "Schätzung / Zeitaufwand bearbeiten",
       "TASK_SCHEDULE": "Task planen",
       "TASK_SHORTCUTS": "Aufgaben",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "Task-Backlog anzeigen / ausblenden",
       "TOGGLE_BOOKMARKS": "Lesezeichenleiste ein- / ausblenden",
       "TOGGLE_PLAY": "Task starten / stoppen",
+      "TOGGLE_SIDE_NAV": "Show & Focus / Hide Sidenav",
       "ZOOM_DEFAULT": "Zoom Standard (nur Desktop)",
       "ZOOM_IN": "Vergrößern (nur Desktop)",
       "ZOOM_OUT": "Verkleinern (nur Desktop)"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
+      "TASK_NOTES_TPL": "Aufgabenbeschreibungsvorlage",
       "TITLE": "Verschiedene Einstellungen"
     },
     "POMODORO": {

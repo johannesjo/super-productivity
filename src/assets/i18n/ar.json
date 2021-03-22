@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "إعداد CalDav للمشروع"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "فئة لتصفية المشكلات من أجل (اتركها خالية من أي شيء)",
+        "CALDAV_PASSWORD": "كلمة مرور CalDav الخاصة بك",
+        "CALDAV_RESOURCE": "اسم مورد CalDav (التقويم)",
+        "CALDAV_URL": "عنوان URL لـ CalDav (عنوان URL الأساسي)",
+        "CALDAV_USER": "اسم مستخدم CalDav الخاص بك",
+        "IS_AUTO_ADD_TO_BACKLOG": "قم تلقائيًا بإضافة مهام CalDav غير المكتملة إلى الأعمال المتأخرة",
+        "IS_AUTO_POLL": "استقصاء المهام المستوردة تلقائيًا للتغييرات",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "عرض CalDav todos غير المكتمل كاقتراح عند إضافة مهام جديدة",
+        "IS_TRANSITION_ISSUES_ENABLED": "أكمل CalDav todos تلقائيًا عند اكتمال المهمة"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>هنا يمكنك تكوين SuperProductivity لسرد CalDav todos غير المكتمل لمشروع معين في لوحة إنشاء المهام في عرض التخطيط اليومي. سيتم إدراجها كاقتراحات وستوفر رابطًا إلى المهام بالإضافة إلى مزيد من المعلومات عنها.</p> <p>بالإضافة إلى ذلك ، يمكنك إضافة ومزامنة جميع المهام غير المكتملة تلقائيًا إلى تراكم المهام.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "وصف",
+        "LABELS": "الاقسام",
+        "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
+        "STATUS": "الحالة",
+        "SUMMARY": "ملخص"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: التقويم \"{{calendarName}}\" غير موجود",
+        "CALENDAR_READ_ONLY": "CalDav: التقويم \"{{calendarName}}\" للقراءة فقط",
+        "ERR_NETWORK": "CalDav: فشل الطلب بسبب خطأ في الشبكة من جانب العميل",
+        "ERR_NOT_CONFIGURED": "CalDav: لم يتم تكوينه بشكل صحيح",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: تم استيراد {{issuesLength}} من الإصدارات الجديدة من git إلى backlog",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: تم استيراد الإصدار \"{{issueText}}\" من إلى backlog",
+        "ISSUE_NOT_FOUND": "CalDav: يبدو أن Todo \"{{issueId}}\" محذوفة على الخادم.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: لا يوجد تحديث مطلوب.",
+        "ISSUE_UPDATE": "Caldav: بيانات Uodated لـ \"{{issueText}}\"",
+        "POLLING": "Caldav: استطلاعات الرأي التغييرات لـ todos"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "الإعدادات المحدثة لـ <strong>{{sectionKey}}</strong>"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
+        "GITLAB_BASE_URL": "عنوان URL الأساسي المخصص لـ GitLab",
         "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من GitLab إلى العمل المتراكم",
         "IS_AUTO_POLL": "الاستطلاع تلقائيًا لقضايا gitlab المستوردة للتغييرات",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "إظهار المشكلات من gitlab كاقتراحات عند إضافة مهام جديدة",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "متوسط الوقت الذي يقضيه في المهمة",
         "COUNTING_SUBTASKS": "(عد المهام الفرعية)",
         "DAYS_WORKED": "أيام عمل",
+        "GLOBAL_METRICS": "المقاييس العالمية",
         "IMPROVEMENT_SELECTION_COUNT": "عدد مرات اختيار عامل التحسين",
         "MOOD_PRODUCTIVITY_OVER_TIME": "المزاج والإنتاجية مع مرور الوقت",
         "NO_ADDITIONAL_DATA_YET": "لا توجد بيانات إضافية تم جمعها حتى الآن. استخدم النموذج الموجود في لوحة \"التقييم\" الملخص اليومية للقيام بذلك.",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "إنشاء مشروع",
         "EDIT": "تحرير المشروع",
+        "SETUP_CALDAV": "إعداد تكامل Caldav",
         "SETUP_GIT": "إعداد جيثب التكامل",
         "SETUP_GITLAB": "إعداد جيتلاب التكامل",
         "SETUP_JIRA": "إعداد جيرا التكامل"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "لم يتم العثور على بيانات بعيدة. تحميل محلي إلى بعيد؟",
         "TRY_LOAD_REMOTE_AGAIN": "حاول إعادة تحميل البيانات من جهاز التحكم عن بعد مرة أخرى؟"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "يرجى فتح الرابط التالي ونسخ رمز المصادقة المقدم هناك في حقل الإدخال أدناه.",
+        "GET_AUTH_CODE": "احصل على رمز التفعيل",
+        "L_AUTH_CODE": "ادخل رمز التصديق",
+        "TITLE": "تسجيل الدخول: {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "اخر تغير:",
         "LAST_SYNC": "المزامنة الأخيرة:",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "حدث خطأ ما أثناء استيراد البيانات. العودة إلى النسخ الاحتياطي المحلي.",
         "ERROR_INVALID_DATA": "خطأ أثناء المزامنة. بيانات غير صالحة",
         "IMPORTING": "استيراد البيانات",
+        "INCOMPLETE_CFG": "فشلت مصادقة المزامنة. يرجى التحقق من التكوين الخاص بك!",
+        "INITIAL_SYNC_ERROR": "فشلت المزامنة الأولية",
         "SUCCESS": "البيانات المستوردة",
         "UNKNOWN_ERROR": "خطأ غير معروف أثناء المزامنة. يرجى التحقق من وحدة التحكم.",
         "UPLOAD_ERROR": "خطأ غير معروف في التحميل (الإعدادات صحيحة؟): {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "نصف ساعة كاملة",
           "FULL_HOURS": "ساعات كاملة",
           "FULL_QUARTERS": "أرباع كاملة",
+          "NOTES": "أوصاف المهام",
           "PARENT_TASK": "المهمة الأم",
           "PARENT_TASK_TITLES_ONLY": "عناوين مهمة الوالد فقط",
+          "PROJECTS": "أسماء المشروع",
           "STARTED_WORKING": "بدأت بالعمل",
+          "TAGS": "الكلمات",
           "TASK_SUBTASK": "العمل / فرعية",
           "TIME_AS_CLOCK": "الوقت حسب الساعة (على سبيل المثال ، 5:23)",
           "TIME_AS_MILLISECONDS": "الوقت كما ميلي ثانية",
@@ -844,7 +897,8 @@
     "TITLE": "عنوان",
     "UNDO": "فك",
     "UPDATE": "تحديث",
-    "WITHOUT_PROJECT": "بدون مشروع"
+    "WITHOUT_PROJECT": "بدون مشروع",
+    "YESTERDAY": "في الامس"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "تبديل تتبع الوقت لآخر مهمة نشطة",
       "GO_TO_DAILY_AGENDA": "انتقل إلى جدول الأعمال",
       "GO_TO_FOCUS_MODE": "الذهاب إلى وضع التركيز",
+      "GO_TO_SCHEDULED_VIEW": "انتقل إلى المهام المجدولة",
       "GO_TO_SETTINGS": "اذهب للاعدادات",
       "GO_TO_WORK_VIEW": "انتقل إلى عرض العمل",
       "HELP": "<p>هنا يمكنك تكوين جميع اختصارات لوحة المفاتيح.</p> <p>انقر على إدخال النص وأدخل مجموعة لوحة المفاتيح المطلوبة. اضغط على Enter للحفظ والهروب للإجهاض.</p> <p>هناك ثلاثة أنواع من الاختصارات:</p> <ul> <li> <strong>الاختصارات العامة:</strong> عندما يتم تشغيل التطبيق ، سيؤدي ذلك إلى تفعيل الإجراء من كل تطبيق آخر. </li> <li> <strong>اختصارات مستوى التطبيق:</strong> سيتم تشغيلها من كل شاشة للتطبيق ، ولكن ليس إذا كنت تقوم حاليًا بتحرير حقل نصي. </li> <li> <strong>اختصارات مستوى المهمة:</strong> لن يتم تشغيلها إلا إذا قمت بتحديد مهمة عن طريق الماوس أو لوحة المفاتيح وعادةً ما تقوم بتنفيذ إجراء يتعلق بهذه المهمة على وجه التحديد. </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "حذف المهمة",
       "TASK_EDIT_TITLE": "تحرير العنوان",
       "TASK_MOVE_TO_PROJECT": "افتح مهمة النقل لقائمة المشروع",
+      "TASK_OPEN_CONTEXT_MENU": "افتح قائمة سياق المهمة",
       "TASK_OPEN_ESTIMATION_DIALOG": "تعديل التقدير / الوقت المستغرق",
       "TASK_SCHEDULE": "جدولة مهمة",
       "TASK_SHORTCUTS": "مهام",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "إظهار / إخفاء تراكم المهام",
       "TOGGLE_BOOKMARKS": "إظهار / إخفاء شريط الإشارات المرجعية",
       "TOGGLE_PLAY": "بدء / إيقاف المهمة",
+      "TOGGLE_SIDE_NAV": "إظهار والتركيز / إخفاء Sidenav",
       "ZOOM_DEFAULT": "التكبير الافتراضي (سطح المكتب فقط)",
       "ZOOM_IN": "تكبير (سطح المكتب فقط)",
       "ZOOM_OUT": "التصغير (سطح المكتب فقط)"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "يخطر عند تجاوز تقدير الوقت",
       "IS_TRAY_SHOW_CURRENT_TASK": "إظهار المهمة الحالية في الدرج / قائمة الحالة (سطح المكتب فقط)",
       "IS_TURN_OFF_MARKDOWN": "إيقاف تشغيل تخفيض السعر للملاحظات",
+      "TASK_NOTES_TPL": "قالب وصف المهمة",
       "TITLE": "متفرقات الإعدادات"
     },
     "POMODORO": {

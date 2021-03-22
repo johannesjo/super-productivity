@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurer CalDav pour le projet"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "Catégorie pour laquelle filtrer les problèmes (laissez vide pour aucun)",
+        "CALDAV_PASSWORD": "Votre mot de passe CalDav",
+        "CALDAV_RESOURCE": "Le nom de la ressource CalDav (le calendrier)",
+        "CALDAV_URL": "URL CalDav (l'URL de base)",
+        "CALDAV_USER": "Votre nom d'utilisateur CalDav",
+        "IS_AUTO_ADD_TO_BACKLOG": "Ajoutez automatiquement les tâches CalDav incomplètes à votre backlog",
+        "IS_AUTO_POLL": "Interroger automatiquement les tâches importées pour les modifications",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Afficher les tâches CalDav incomplètes comme suggestion lors de l'ajout de nouvelles tâches",
+        "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tâches CalDav inachevées pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. Ils seront listés comme des suggestions et fourniront un lien vers le todo ainsi que plus d'informations à ce sujet.</p> <p>En outre, vous pouvez automatiquement ajouter et synchroniser toutes les tâches inachevées dans votre backlog de tâches.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "La description",
+        "LABELS": "catégories",
+        "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
+        "STATUS": "Statut",
+        "SUMMARY": "Résumé"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: calendrier \"{{calendarName}}\" introuvable",
+        "CALENDAR_READ_ONLY": "CalDav: l'agenda \"{{calendarName}}\" est en lecture seule",
+        "ERR_NETWORK": "CalDav: la demande a échoué en raison d'une erreur réseau côté client",
+        "ERR_NOT_CONFIGURED": "CalDav: pas correctement configuré",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: importation de {{issuesLength}} nouveaux problèmes de git dans le backlog",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: problème importé \"{{issueText}}\" depuis le backlog",
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" semble être supprimé sur le serveur.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: aucune mise à jour requise.",
+        "ISSUE_UPDATE": "Caldav: données actualisées pour \"{{issueText}}\"",
+        "POLLING": "Caldav: Changements d'interrogation pour todos"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Paramètres mis à jour pour <strong>{{sectionKey}}</strong>"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
+        "GITLAB_BASE_URL": "URL de base GitLab personnalisée",
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les Issues non résolus de GitLab au backlog",
         "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Moy. temps passé par tâche",
         "COUNTING_SUBTASKS": "(compter les sous-tâches)",
         "DAYS_WORKED": "Jours travaillés",
+        "GLOBAL_METRICS": "Mesures globales",
         "IMPROVEMENT_SELECTION_COUNT": "Nombre de fois qu'un facteur d'amélioration a été sélectionné",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Humeur et productivité dans le temps",
         "NO_ADDITIONAL_DATA_YET": "Aucune donnée supplémentaire collectée pour l'instant. Utilisez le formulaire du panneau \"Evaluation\" du résumé quotidien pour le faire.",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "Créer un projet",
         "EDIT": "Modifier le projet",
+        "SETUP_CALDAV": "Configurer l'intégration Caldav",
         "SETUP_GIT": "Configurer l'intégration de GitHub",
         "SETUP_GITLAB": "Configurer l'intégration de GitLab",
         "SETUP_JIRA": "Configurer l'intégration de Jira"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "Aucune donnée distante trouvée. Télécharger local vers distant?",
         "TRY_LOAD_REMOTE_AGAIN": "Essayez à nouveau de recharger les données depuis la télécommande?"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification qui y est fourni dans le champ de saisie ci-dessous.",
+        "GET_AUTH_CODE": "Obtenir le code d'autorisation",
+        "L_AUTH_CODE": "Entrer le code d'authentification",
+        "TITLE": "Connexion: {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "dernier changement:",
         "LAST_SYNC": "Dernière synchronisation:",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "Quelque chose s'est mal passé lors de l'importation des données. Retour à la sauvegarde locale.",
         "ERROR_INVALID_DATA": "Erreur lors de la synchronisation. Données invalides",
         "IMPORTING": "Importer des données",
+        "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration!",
+        "INITIAL_SYNC_ERROR": "Échec de la synchronisation initiale",
         "SUCCESS": "Données importées",
         "UNKNOWN_ERROR": "Erreur inconnue lors de la synchronisation. Veuillez vérifier la console.",
         "UPLOAD_ERROR": "Erreur de téléversement inconnue (paramètres corrects?): {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "demi heures pleines",
           "FULL_HOURS": "heures pleines",
           "FULL_QUARTERS": "quarts d'heure complets",
+          "NOTES": "Descriptions des tâches",
           "PARENT_TASK": "Tâche parente",
           "PARENT_TASK_TITLES_ONLY": "Titres de tâches parentes uniquement",
+          "PROJECTS": "Noms de projet",
           "STARTED_WORKING": "Commencé à travailler",
+          "TAGS": "Mots clés",
           "TASK_SUBTASK": "Tâche / Sous-tâche",
           "TIME_AS_CLOCK": "Heure format horaire (par exemple 5:23)",
           "TIME_AS_MILLISECONDS": "Temps en millisecondes",
@@ -844,7 +897,8 @@
     "TITLE": "Titre",
     "UNDO": "annuler",
     "UPDATE": "Mettre à jour",
-    "WITHOUT_PROJECT": "Sans projet"
+    "WITHOUT_PROJECT": "Sans projet",
+    "YESTERDAY": "Hier"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "Basculer le suivi du temps pour la dernière tâche active",
       "GO_TO_DAILY_AGENDA": "Aller à l'agenda",
       "GO_TO_FOCUS_MODE": "Aller au mode Concentration",
+      "GO_TO_SCHEDULED_VIEW": "Accéder aux tâches planifiées",
       "GO_TO_SETTINGS": "Aller aux paramètres",
       "GO_TO_WORK_VIEW": "Aller à la vue de travail",
       "HELP": "<p>Vous pouvez configurer ici tous les raccourcis clavier.</p> <p>Cliquez sur le champ texte et entrez la combinaison de touches souhaitée. Appuyez sur Entrée pour enregistrer et sur Échap pour annuler.</p> <p>Il existe trois types de raccourcis:</p> <ul> <li> <strong>Raccourcis globaux:</strong> lorsque l'application est en cours d'exécution, elle déclenche l'action depuis n'importe quelle autre applications. </li> <li> <strong>Raccourcis au niveau de l'application:</strong> se déclenchera à partir de n'importe quel écran de l'application, mais pas si vous modifiez actuellement un champ de texte. </li> <li> <strong>Raccourcis au niveau des tâches:</strong> ils ne se déclenchent que si vous avez sélectionné une tâche à l'aide de la souris ou du clavier et déclenchent généralement une action spécifiquement liée à cette tâche. </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "Supprimer la tâche",
       "TASK_EDIT_TITLE": "Modifier le titre",
       "TASK_MOVE_TO_PROJECT": "Ouvrir la tâche de déplacement vers le menu du projet",
+      "TASK_OPEN_CONTEXT_MENU": "Ouvrir le menu contextuel de la tâche",
       "TASK_OPEN_ESTIMATION_DIALOG": "Modifier l'estimation / le temps passé",
       "TASK_SCHEDULE": "Planifier une tâche",
       "TASK_SHORTCUTS": "Tâches",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "Afficher / masquer le backlog",
       "TOGGLE_BOOKMARKS": "Afficher / masquer la barre de favoris",
       "TOGGLE_PLAY": "Démarrer / Arrêter la tâche",
+      "TOGGLE_SIDE_NAV": "Afficher et mettre au point / masquer Sidenav",
       "ZOOM_DEFAULT": "Zoom par défaut (bureau uniquement)",
       "ZOOM_IN": "Zoom avant (bureau uniquement)",
       "ZOOM_OUT": "Zoom arrière (bureau uniquement)"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé",
       "IS_TRAY_SHOW_CURRENT_TASK": "Afficher la tâche en cours dans la barre d'état / menu d'état (bureau uniquement)",
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
+      "TASK_NOTES_TPL": "Modèle de description de tâche",
       "TITLE": "Réglages divers"
     },
     "POMODORO": {

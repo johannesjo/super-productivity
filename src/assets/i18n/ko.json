@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "프로젝트 용 CalDav 설정"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "문제를 필터링 할 카테고리 (없으면 비워 둡니다)",
+        "CALDAV_PASSWORD": "CalDav 비밀번호",
+        "CALDAV_RESOURCE": "CalDav 리소스의 이름 (캘린더)",
+        "CALDAV_URL": "CalDav URL (기본 URL)",
+        "CALDAV_USER": "CalDav 사용자 이름",
+        "IS_AUTO_ADD_TO_BACKLOG": "완료되지 않은 CalDav 할 일을 백 로그에 자동으로 추가",
+        "IS_AUTO_POLL": "가져온 작업을 자동으로 폴링하여 변경 사항을 확인합니다.",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "새 작업을 추가 할 때 완료되지 않은 CalDav 할 일을 제안으로 표시",
+        "IS_TRANSITION_ISSUES_ENABLED": "작업 완료시 CalDav 할 일을 자동으로 완료"
+      },
+      "FORM_SECTION": {
+        "HELP": "",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "기술",
+        "LABELS": "카테고리",
+        "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
+        "STATUS": "지위",
+        "SUMMARY": "개요"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav : 캘린더 \"{{calendarName}}\"을 (를) 찾을 수 없음",
+        "CALENDAR_READ_ONLY": "CalDav : 캘린더 \"{{calendarName}}\"은 (는) 읽기 전용입니다.",
+        "ERR_NETWORK": "CalDav : 클라이언트 측 네트워크 오류로 인해 요청이 실패했습니다.",
+        "ERR_NOT_CONFIGURED": "CalDav : 제대로 구성되지 않음",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav : git에서 백 로그로 새 문제 {{issuesLength}} 개 가져옴",
+        "IMPORTED_SINGLE_ISSUE": "CalDav : 백 로그에서 \"{{issueText}}\"문제를 가져옴",
+        "ISSUE_NOT_FOUND": "CalDav : 서버에서 할 일 \"{{issueId}}\"이 (가) 삭제 된 것 같습니다.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav : 업데이트가 필요하지 않습니다.",
+        "ISSUE_UPDATE": "Caldav : \"{{issueText}}\"에 대한 Uodated 데이터",
+        "POLLING": "Caldav : 할 일에 대한 폴링 변경"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}의 업데이트 된 설정</strong>"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
+        "GITLAB_BASE_URL": "맞춤 GitLab 기본 URL",
         "IS_AUTO_ADD_TO_BACKLOG": "GitLab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "평균 과제 당 소비 된 시간",
         "COUNTING_SUBTASKS": "(하위 작업 수 계산)",
         "DAYS_WORKED": "근무일",
+        "GLOBAL_METRICS": "글로벌 지표",
         "IMPROVEMENT_SELECTION_COUNT": "개선 계수가 선택된 횟수",
         "MOOD_PRODUCTIVITY_OVER_TIME": "시간 경과에 따른 기분과 생산성",
         "NO_ADDITIONAL_DATA_YET": "추가로 수집 된 데이터가 없습니다. 일일 요약 '평가'패널에있는 양식을 사용하십시오.",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "프로젝트 만들기",
         "EDIT": "프로젝트 수정",
+        "SETUP_CALDAV": "Caldav 통합 설정",
         "SETUP_GIT": "GitHub 통합 설치",
         "SETUP_GITLAB": "GitLab 통합 설치",
         "SETUP_JIRA": "Jira 통합 설정"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "원격 데이터가 없습니다. 원격에 로컬을 업로드 하시겠습니까?",
         "TRY_LOAD_REMOTE_AGAIN": "원격에서 데이터를 다시로드 하시겠습니까?"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "다음 링크를 열고 제공된 인증 코드를 아래 입력 필드에 복사하십시오.",
+        "GET_AUTH_CODE": "인증 코드 받기",
+        "L_AUTH_CODE": "인증 코드를 입력",
+        "TITLE": "로그인 : {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "마지막 변경:",
         "LAST_SYNC": "마지막 동기화 :",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "데이터를 가져 오는 중에 문제가 발생했습니다. 로컬 백업으로 되돌아갑니다.",
         "ERROR_INVALID_DATA": "동기화하는 동안 오류가 발생했습니다. 유효하지 않은 데이터",
         "IMPORTING": "데이터 가져 오기",
+        "INCOMPLETE_CFG": "동기화 인증에 실패했습니다. 구성을 확인하십시오!",
+        "INITIAL_SYNC_ERROR": "초기 동기화 실패",
         "SUCCESS": "가져온 데이터",
         "UNKNOWN_ERROR": "동기화하는 동안 알 수없는 오류가 발생했습니다. 콘솔을 확인하십시오.",
         "UPLOAD_ERROR": "알 수없는 업로드 오류 (설정이 맞습니까?) : {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "반 시간 반",
           "FULL_HOURS": "1 시간 내내",
           "FULL_QUARTERS": "전체 분기",
+          "NOTES": "작업 설명",
           "PARENT_TASK": "학부모 과제",
           "PARENT_TASK_TITLES_ONLY": "상위 작업 제목 만",
+          "PROJECTS": "프로젝트 이름",
           "STARTED_WORKING": "작업 시작",
+          "TAGS": "태그",
           "TASK_SUBTASK": "작업 / 하위 작업",
           "TIME_AS_CLOCK": "시계와 시간 (예 : 5:23)",
           "TIME_AS_MILLISECONDS": "시간 (밀리 초)",
@@ -844,7 +897,8 @@
     "TITLE": "표제",
     "UNDO": "끄르다",
     "UPDATE": "최신 정보",
-    "WITHOUT_PROJECT": "프로젝트없이"
+    "WITHOUT_PROJECT": "프로젝트없이",
+    "YESTERDAY": "어제"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "마지막 활성 작업에 대한 시간 추적 토글",
       "GO_TO_DAILY_AGENDA": "일정 목록으로 이동",
       "GO_TO_FOCUS_MODE": "초점 모드로 이동",
+      "GO_TO_SCHEDULED_VIEW": "예약 된 작업으로 이동",
       "GO_TO_SETTINGS": "설정으로 바로 가기",
       "GO_TO_WORK_VIEW": "작업보기로 이동",
       "HELP": "<p>여기에서 모든 키보드 단축키를 구성 할 수 있습니다.</p> <p>텍스트 입력을 클릭하고 원하는 키보드 조합을 입력하십시오. 저장하려면 Enter 키를 누르고 중단하려면 Esc 키를 누르십시오.</p> <p>바로 가기에는 세 가지 유형이 있습니다.</p> <ul> <li> <strong>전역 바로 가기 :</strong> 앱이 실행 중일 때 다른 모든 애플리케이션에서 동작을 트리거합니다. </li> <li> <strong>응용 프로그램 수준 바로 가기 :</strong> 응용 프로그램의 모든 화면에서 트리거하지만 현재 텍스트 필드를 편집하는 경우에는 트리거하지 않습니다. </li> <li> <strong>작업 수준 바로 가기 :</strong> 마우스 또는 키보드를 통해 작업을 선택하고 일반적으로 해당 작업과 관련된 작업을 트리거하는 경우에만 트리거됩니다. </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "작업 삭제",
       "TASK_EDIT_TITLE": "제목 수정",
       "TASK_MOVE_TO_PROJECT": "프로젝트 메뉴로 이동 작업 열기",
+      "TASK_OPEN_CONTEXT_MENU": "작업 상황에 맞는 메뉴 열기",
       "TASK_OPEN_ESTIMATION_DIALOG": "견적 / 소요 시간 수정",
       "TASK_SCHEDULE": "작업 예약",
       "TASK_SHORTCUTS": "할 일 목록",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "작업 백 로그 표시 / 숨기기",
       "TOGGLE_BOOKMARKS": "북마크 바 표시 / 숨기기",
       "TOGGLE_PLAY": "작업 시작 / 중지",
+      "TOGGLE_SIDE_NAV": "사이드 내비게이션 표시 및 초점 / 숨기기",
       "ZOOM_DEFAULT": "확대 / 축소 기본값 (데스크톱 만 해당)",
       "ZOOM_IN": "확대 (데스크톱에만 해당)",
       "ZOOM_OUT": "축소 (데스크톱에만 해당)"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
+      "TASK_NOTES_TPL": "작업 설명 템플릿",
       "TITLE": "기타 설정"
     },
     "POMODORO": {

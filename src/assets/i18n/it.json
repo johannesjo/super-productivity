@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Imposta CalDav per il progetto"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "Categoria per cui filtrare i problemi (lasciare vuoto per nessuno)",
+        "CALDAV_PASSWORD": "La tua password CalDav",
+        "CALDAV_RESOURCE": "Il nome della risorsa CalDav (il calendario)",
+        "CALDAV_URL": "URL CalDav (l'URL di base)",
+        "CALDAV_USER": "Il tuo nome utente CalDav",
+        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente le cose da fare CalDav non completate al tuo backlog",
+        "IS_AUTO_POLL": "Esegui automaticamente il polling delle attività importate per le modifiche",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostra le attività di CalDav non completate come suggerimento quando si aggiungono nuove attività",
+        "IS_TRANSITION_ISSUES_ENABLED": "Completa automaticamente le attività di CalDav al completamento dell'attività"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Qui puoi configurare SuperProductivity per elencare le cose da fare CalDav non completate per un progetto specifico nel pannello di creazione dell'attività nella visualizzazione della pianificazione giornaliera. Verranno elencati come suggerimenti e forniranno un collegamento alla cosa da fare, nonché ulteriori informazioni a riguardo.</p> <p>Inoltre, è possibile aggiungere e sincronizzare automaticamente tutte le attività non completate al backlog delle attività.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Descrizione",
+        "LABELS": "categorie",
+        "MARK_AS_CHECKED": "Contrassegna gli aggiornamenti come controllati",
+        "STATUS": "stato",
+        "SUMMARY": "sommario"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: calendario \"{{calendarName}}\" non trovato",
+        "CALENDAR_READ_ONLY": "CalDav: il calendario \"{{calendarName}}\" è di sola lettura",
+        "ERR_NETWORK": "CalDav: richiesta non riuscita a causa di un errore di rete lato client",
+        "ERR_NOT_CONFIGURED": "CalDav: non configurato correttamente",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: importati {{issuesLength}} nuovi problemi da git a backlog",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: problema importato \"{{issueText}}\" da a backlog",
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" sembra essere stato eliminato sul server.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: nessun aggiornamento richiesto.",
+        "ISSUE_UPDATE": "Caldav: dati aggiornati per \"{{issueText}}\"",
+        "POLLING": "Caldav: modifiche al polling per gli oggetti"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Aggiornate impostazioni per <strong>{{sectionKey}}</strong>"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
+        "GITLAB_BASE_URL": "URL di base GitLab personalizzato",
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Tempo medio impiegato per task",
         "COUNTING_SUBTASKS": "(contando i sotto-task)",
         "DAYS_WORKED": "Giorni lavorati",
+        "GLOBAL_METRICS": "Metriche globali",
         "IMPROVEMENT_SELECTION_COUNT": "Numero di volte in cui è stato selezionato un fattore di miglioramento",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Umore e produttività nel tempo",
         "NO_ADDITIONAL_DATA_YET": "Nessun dato aggiuntivo raccolto. Usa il form nel pannello riepilogo giornaliero \"Valutazione\" per aggiungerlo.",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "Crea progetto",
         "EDIT": "Modifica progetto",
+        "SETUP_CALDAV": "Configurazione integrazione Caldav",
         "SETUP_GIT": "Configura integrazione Githun",
         "SETUP_GITLAB": "Configura integrazione GitLab",
         "SETUP_JIRA": "Configura integrazione Jira"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "Nessun dato remoto trovato. Carica locale su remoto?",
         "TRY_LOAD_REMOTE_AGAIN": "Vuoi provare a ricaricare i dati da remoto ancora una volta?"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "Apri il seguente link e copia il codice di autorizzazione fornito nel campo di immissione sottostante.",
+        "GET_AUTH_CODE": "Ottieni codice di autorizzazione",
+        "L_AUTH_CODE": "inserire codice di autorizzazione",
+        "TITLE": "Accesso: {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "Ultima modifica:",
         "LAST_SYNC": "ultima sincronizzazione:",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "Qualcosa è andato storto durante l'importazione dei dati. Tornando al backup locale.",
         "ERROR_INVALID_DATA": "Errore durante la sincronizzazione. Dati non validi",
         "IMPORTING": "Importazione di dati",
+        "INCOMPLETE_CFG": "Autenticazione per la sincronizzazione non riuscita. Per favore controlla la tua configurazione!",
+        "INITIAL_SYNC_ERROR": "Sincronizzazione iniziale non riuscita",
         "SUCCESS": "Dati importati",
         "UNKNOWN_ERROR": "Errore sconosciuto durante la sincronizzazione. Si prega di controllare la console.",
         "UPLOAD_ERROR": "Errore di caricamento sconosciuto (impostazioni corrette?): {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "mezzore piene",
           "FULL_HOURS": "ore piene",
           "FULL_QUARTERS": "quarti d'ora pieni",
+          "NOTES": "Descrizioni delle attività",
           "PARENT_TASK": "Task padre",
           "PARENT_TASK_TITLES_ONLY": "Titoli solo dei task padri",
+          "PROJECTS": "Nomi dei progetti",
           "STARTED_WORKING": "Iniziato a lavorare",
+          "TAGS": "tag",
           "TASK_SUBTASK": "Task/Sotto-task",
           "TIME_AS_CLOCK": "Tempo di orologio (es 5:23)",
           "TIME_AS_MILLISECONDS": "Tempo in millisecondi",
@@ -844,7 +897,8 @@
     "TITLE": "Titolo",
     "UNDO": "Annulla",
     "UPDATE": "Aggiorna",
-    "WITHOUT_PROJECT": "Senza progetto"
+    "WITHOUT_PROJECT": "Senza progetto",
+    "YESTERDAY": "Ieri"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "Abilita/disabilita il tracciamento del tempo per l'ultimo task attivo",
       "GO_TO_DAILY_AGENDA": "Vai all'agenda",
       "GO_TO_FOCUS_MODE": "Vai alla modalità evidenza",
+      "GO_TO_SCHEDULED_VIEW": "Vai alle attività pianificate",
       "GO_TO_SETTINGS": "Vai alle impostazioni",
       "GO_TO_WORK_VIEW": "Vai alla vista lavoro",
       "HELP": "<p>Qui puoi configurare tutte le scorciatoie per la tastiera.</p> <p>Clicca sull'area di testo ed inserisci la combinazione di tasti desiderata. Premi invio per salvare e Esc per annullare.</p> <p>Ci sono 3 tipi di scorciatoie:</p> <ul> <li> <strong>Scorciatoie globali:</strong>Mentre l'applicazione è attiva, innescheranno l'azione da qualsiasi altra applicazione. </li> <li> <strong>Scorciatoie a livello di applicazione:</strong>Si innescherà da ogni pagina dell'applicazione, ma non se stai editando un campo di testo. </li> <li> <strong>Scorciatoie a livello di task:</strong>Si innescheranno solo se hai selezionato un task tramite mouse o tastiera, e solitamente innescheranno un'azione specificatamente relativa a quel task. </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "Cancella task",
       "TASK_EDIT_TITLE": "Modifica titolo",
       "TASK_MOVE_TO_PROJECT": "Apri sposta attività nel menu progetto",
+      "TASK_OPEN_CONTEXT_MENU": "Apri il menu contestuale dell'attività",
       "TASK_OPEN_ESTIMATION_DIALOG": "Modifica stima / tempo impiegato",
       "TASK_SCHEDULE": "Pianifica task",
       "TASK_SHORTCUTS": "Task",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "Mostra/nascondi backlog dei task",
       "TOGGLE_BOOKMARKS": "Mostra/nascondi barra dei segnalibri",
       "TOGGLE_PLAY": "Inizia/Interrompi task",
+      "TOGGLE_SIDE_NAV": "Mostra & metti a fuoco / Nascondi Sidenav",
       "ZOOM_DEFAULT": "Zoom default (solo Desktop)",
       "ZOOM_IN": "Zoom in (solo Desktop)",
       "ZOOM_OUT": "Zoom out (solo Desktop)"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra l'attività corrente nella barra delle applicazioni / menu di stato (solo desktop)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
+      "TASK_NOTES_TPL": "Modello di descrizione dell'attività",
       "TITLE": "Impostazioni varie"
     },
     "POMODORO": {

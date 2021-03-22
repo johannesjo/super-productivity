@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "为项目设置CalDav"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "要过滤问题的类别（不留任何空白）",
+        "CALDAV_PASSWORD": "您的CalDav密码",
+        "CALDAV_RESOURCE": "CalDav资源的名称（日历）",
+        "CALDAV_URL": "CalDav URL（基本URL）",
+        "CALDAV_USER": "您的CalDav用户名",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将未完成的CalDav待办事项添加到您的待办事项中",
+        "IS_AUTO_POLL": "自动轮询导入的任务以进行更改",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "添加新任务时，显示未完成的CalDav待办事项作为建议",
+        "IS_TRANSITION_ISSUES_ENABLED": "完成任务后自动完成CalDav待办事项"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>在这里，您可以配置SuperProductivity在每日计划视图的任务创建面板中列出特定项目的未完成的CalDav待办事项。它们将被列为建议，并提供指向待办事项的链接以及有关此事项的更多信息。</p> <p>另外，您可以自动将所有未完成的待办事项添加并同步到任务积压中。</p>",
+        "TITLE": "卡尔达夫"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "描述",
+        "LABELS": "分类",
+        "MARK_AS_CHECKED": "将更新标记为已选中",
+        "STATUS": "状态",
+        "SUMMARY": "摘要"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav：未找到日历“{{calendarName}}”",
+        "CALENDAR_READ_ONLY": "CalDav：日历“{{calendarName}}”是只读的",
+        "ERR_NETWORK": "CalDav：由于客户端网络错误，请求失败",
+        "ERR_NOT_CONFIGURED": "CalDav：配置不正确",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav：从git导入 {{issuesLength}} 个新问题到积压",
+        "IMPORTED_SINGLE_ISSUE": "CalDav：导入的问题“{{issueText}}”从到积压",
+        "ISSUE_NOT_FOUND": "CalDav：待办事项“{{issueId}}”似乎已在服务器上删除。",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav：不需要更新。",
+        "ISSUE_UPDATE": "卡尔达夫：“{{issueText}}”的原始数据",
+        "POLLING": "卡尔达夫：轮询待办事项"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong> 的设置"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "用户名（例如，自行过滤掉更改）",
+        "GITLAB_BASE_URL": "自定义GitLab基本URL",
         "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的 Issue 从 GitLab 添加到待办事项",
         "IS_AUTO_POLL": "自动拉取导入的 git 的 Issue 以进行更改",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的 Issue 显示为建议",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "平均任务花费时间",
         "COUNTING_SUBTASKS": "（计算子任务）",
         "DAYS_WORKED": "持续天数",
+        "GLOBAL_METRICS": "全局指标",
         "IMPROVEMENT_SELECTION_COUNT": "选择积极因子的次数",
         "MOOD_PRODUCTIVITY_OVER_TIME": "情绪和效率的时间变化",
         "NO_ADDITIONAL_DATA_YET": "尚未收集其他数据，完成每日任务后通过添加“评估”来执行此操作。",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "创建项目",
         "EDIT": "编辑项目",
+        "SETUP_CALDAV": "设置Caldav集成",
         "SETUP_GIT": "关联 GitHub",
         "SETUP_GITLAB": "关联 GitLab",
         "SETUP_JIRA": "关联 Jira"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "找不到远程数据。本地上传到远程吗？",
         "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "请打开以下链接，并将此处提供的身份验证代码复制到下面的输入字段中。",
+        "GET_AUTH_CODE": "获取授权码",
+        "L_AUTH_CODE": "输入验证码",
+        "TITLE": "登录名： {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "最后一次变更：",
         "LAST_SYNC": "上次同步：",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "导入数据时出错了。回到本地备份。",
         "ERROR_INVALID_DATA": "同步时出错。无效数据",
         "IMPORTING": "导入数据",
+        "INCOMPLETE_CFG": "同步身份验证失败。请检查您的配置！",
+        "INITIAL_SYNC_ERROR": "初始同步失败",
         "SUCCESS": "数据已导入",
         "UNKNOWN_ERROR": "同步时发生未知错误。请检查控制台。",
         "UPLOAD_ERROR": "未知的上载错误（设置正确吗？）： {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "半小时",
           "FULL_HOURS": "一小时",
           "FULL_QUARTERS": "一刻钟",
+          "NOTES": "任务说明",
           "PARENT_TASK": "父任务",
           "PARENT_TASK_TITLES_ONLY": "仅限父任务标题",
+          "PROJECTS": "项目名称",
           "STARTED_WORKING": "开始工作",
+          "TAGS": "标签",
           "TASK_SUBTASK": "任务/子任务",
           "TIME_AS_CLOCK": "用时 数字格式（例如5:23）",
           "TIME_AS_MILLISECONDS": "时间为毫秒",
@@ -844,7 +897,8 @@
     "TITLE": "标题",
     "UNDO": "解开",
     "UPDATE": "更新",
-    "WITHOUT_PROJECT": "没有专案"
+    "WITHOUT_PROJECT": "没有专案",
+    "YESTERDAY": "昨天"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "切换上次活动任务进行时间跟踪",
       "GO_TO_DAILY_AGENDA": "转到议程",
       "GO_TO_FOCUS_MODE": "进入专注模式",
+      "GO_TO_SCHEDULED_VIEW": "转到计划的任务",
       "GO_TO_SETTINGS": "前往设置",
       "GO_TO_WORK_VIEW": "转到工作视图",
       "HELP": "<p>您可以在此处配置所有键盘快捷键。</p> <p>单击文本输入并输入所需的键盘组合。按Enter键保存，Escape退出。</p> <p>有三种类型的快捷方式：</p> <ul> <li> <strong>全局快捷方式：</strong> 当应用程序运行时，它将触发其他所有应用程序的操作。 </li> <li> <strong>应用程序级快捷方式：</strong> 将从应用程序的每个屏幕触发，但如果您当前正在编辑文本字段则不会。 </li> <li> <strong>任务级快捷方式：</strong> 只有通过鼠标或键盘选择任务并且通常会触发与该任务特定相关的操作时，它们才会触发。 </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "删除任务",
       "TASK_EDIT_TITLE": "编辑标题",
       "TASK_MOVE_TO_PROJECT": "打开将任务移到项目菜单",
+      "TASK_OPEN_CONTEXT_MENU": "打开任务上下文菜单",
       "TASK_OPEN_ESTIMATION_DIALOG": "编辑估算/花费的时间",
       "TASK_SCHEDULE": "安排任务",
       "TASK_SHORTCUTS": "任务",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "显示/隐藏待办事项",
       "TOGGLE_BOOKMARKS": "显示/隐藏书签栏",
       "TOGGLE_PLAY": "启动/停止任务",
+      "TOGGLE_SIDE_NAV": "显示和聚焦/隐藏Sidenav",
       "ZOOM_DEFAULT": "缩放默认值（仅限桌面端）",
       "ZOOM_IN": "放大（仅限桌面端）",
       "ZOOM_OUT": "缩小（仅限桌面端）"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
+      "TASK_NOTES_TPL": "任务描述模板",
       "TITLE": "其他设置"
     },
     "POMODORO": {

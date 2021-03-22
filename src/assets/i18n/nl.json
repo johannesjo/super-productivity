@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Stel CalDav in voor Project"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "Categorie om problemen op te filteren (leeg laten voor geen)",
+        "CALDAV_PASSWORD": "Uw CalDav-wachtwoord",
+        "CALDAV_RESOURCE": "De naam van de CalDav-resource (de kalender)",
+        "CALDAV_URL": "CalDav-URL (de basis-URL)",
+        "CALDAV_USER": "Uw CalDav-gebruikersnaam",
+        "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch niet-voltooide CalDav-taken toe aan uw backlog",
+        "IS_AUTO_POLL": "Controleer geïmporteerde taken automatisch op wijzigingen",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Toon onvoltooide CalDav-taken als suggestie bij het toevoegen van nieuwe taken",
+        "IS_TRANSITION_ISSUES_ENABLED": "Voltooi automatisch CalDav-taken na voltooiing van de taak"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Hier kunt u SuperProductivity configureren om niet-voltooide CalDav-taken voor een specifiek project weer te geven in het taakaanmaakpaneel in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar de taak en meer informatie erover.</p> <p>Bovendien kunt u automatisch alle niet-voltooide taken toevoegen aan en synchroniseren met uw taakachterstand.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Omschrijving",
+        "LABELS": "Categorieën",
+        "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
+        "STATUS": "staat",
+        "SUMMARY": "Samenvatting"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: agenda \"{{calendarName}}\" niet gevonden",
+        "CALENDAR_READ_ONLY": "CalDav: Agenda \"{{calendarName}}\" is alleen-lezen",
+        "ERR_NETWORK": "CalDav: verzoek is mislukt vanwege een netwerkfout aan de clientzijde",
+        "ERR_NOT_CONFIGURED": "CalDav: niet correct geconfigureerd",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: {{issuesLength}} nieuwe problemen geïmporteerd van git naar backlog",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: geïmporteerd probleem \"{{issueText}}\" van naar backlog",
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" lijkt te zijn verwijderd op de server.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: geen update vereist.",
+        "ISSUE_UPDATE": "Caldav: geupdate gegevens voor \"{{issueText}}\"",
+        "POLLING": "Caldav: Polling-wijzigingen voor todos"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Bijgewerkte instellingen voor <strong>{{sectionKey}}</strong>"
@@ -140,11 +179,11 @@
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
+        "GITLAB_BASE_URL": "Aangepaste GitLab base URL",
         "IS_AUTO_ADD_TO_BACKLOG": "Voeg automatisch onopgeloste problemen van GitLab toe aan de achterstand",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
-		"PROJECT": "Volledig pad of gebruikersnaam / project",
-		"GITLAB_BASE_URL": "Aangepaste GitLab base URL",
+        "PROJECT": "Volledig pad of gebruikersnaam / project",
         "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
@@ -334,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Gem. tijd besteed per taak",
         "COUNTING_SUBTASKS": "(subtaken tellen)",
         "DAYS_WORKED": "Dagen werkten",
+        "GLOBAL_METRICS": "Wereldwijde statistieken",
         "IMPROVEMENT_SELECTION_COUNT": "Aantal keren dat een verbeteringsfactor is gekozen",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Stemming en productiviteit in de tijd",
         "NO_ADDITIONAL_DATA_YET": "Nog geen aanvullende gegevens verzameld. Gebruik hiervoor het formulier in het dagoverzicht \"Evaluatie\" -paneel.",
@@ -451,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "Project maken",
         "EDIT": "Project bewerken",
+        "SETUP_CALDAV": "Stel Caldav-integratie in",
         "SETUP_GIT": "GitHub-integratie instellen",
         "SETUP_GITLAB": "GitLab-integratie instellen",
         "SETUP_JIRA": "Jira-integratie instellen"
@@ -525,6 +566,12 @@
         "NO_REMOTE_DATA": "Geen externe gegevens gevonden. Lokaal uploaden naar Remote?",
         "TRY_LOAD_REMOTE_AGAIN": "Wilt u nogmaals gegevens van de afstandsbediening opnieuw laden?"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "Open de volgende link en kopieer de daar verstrekte auth-code in het onderstaande invoerveld.",
+        "GET_AUTH_CODE": "Krijg de autorisatiecode",
+        "L_AUTH_CODE": "Voer de authenticatiecode in",
+        "TITLE": "Inloggen: {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "laatste wijziging:",
         "LAST_SYNC": "laatste synchronisatie:",
@@ -563,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "Er is iets misgegaan tijdens het importeren van de gegevens. Terugvallen op lokale back-up.",
         "ERROR_INVALID_DATA": "Fout tijdens het synchroniseren. Onjuiste data",
         "IMPORTING": "Gegevens importeren",
+        "INCOMPLETE_CFG": "Verificatie voor synchronisatie is mislukt. Controleer uw configuratie!",
+        "INITIAL_SYNC_ERROR": "Initiële synchronisatie mislukt",
         "SUCCESS": "Gegevens geïmporteerd",
         "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console.",
         "UPLOAD_ERROR": "Onbekende uploadfout (instellingen correct?): {{err}}"
@@ -792,9 +841,12 @@
           "FULL_HALF_HOURS": "volle half uur",
           "FULL_HOURS": "hele uren",
           "FULL_QUARTERS": "volledige kwartalen",
+          "NOTES": "Taakbeschrijvingen",
           "PARENT_TASK": "Bovenliggende taak",
           "PARENT_TASK_TITLES_ONLY": "Alleen bovenliggende taaktitels",
+          "PROJECTS": "Projectnamen",
           "STARTED_WORKING": "Begon met werken",
+          "TAGS": "labels",
           "TASK_SUBTASK": "Taak / subtaak",
           "TIME_AS_CLOCK": "Tijd als klok (bijv.5: 23)",
           "TIME_AS_MILLISECONDS": "Tijd als milliseconden",
@@ -845,8 +897,8 @@
     "TITLE": "Titel",
     "UNDO": "Ongedaan maken",
     "UPDATE": "Bijwerken",
-	"WITHOUT_PROJECT": "Zonder project",
-	"YESTERDAY": "Gisteren"
+    "WITHOUT_PROJECT": "Zonder project",
+    "YESTERDAY": "Gisteren"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -883,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "Schakel tijdregistratie in voor de laatste actieve taak",
       "GO_TO_DAILY_AGENDA": "Ga naar Agenda",
       "GO_TO_FOCUS_MODE": "Ga naar Focus Mode",
+      "GO_TO_SCHEDULED_VIEW": "Ga naar geplande taken",
       "GO_TO_SETTINGS": "Ga naar Instellingen",
       "GO_TO_WORK_VIEW": "Ga naar Work View",
       "HELP": "<p>Hier kunt u alle sneltoetsen configureren.</p> <p>Klik op de tekstinvoer en voer de gewenste toetsenbordcombinatie in. Druk op enter om op te slaan en op Escape om af te breken.</p> <p>Er zijn drie soorten sneltoetsen:</p> <ul> <li><strong>Wereldwijde snelkoppelingen:</strong> wanneer de app wordt uitgevoerd, wordt de actie vanuit elke andere app geactiveerd.</li> <li><strong>Sneltoetsen op applicatieniveau:</strong> wordt geactiveerd vanuit elk scherm van de applicatie, maar niet als u momenteel een tekstveld bewerkt.</li> <li><strong>Sneltoetsen op taakniveau:</strong> Ze worden alleen geactiveerd als u een taak via muis of toetsenbord hebt geselecteerd en activeren meestal een actie die specifiek betrekking heeft op die ene taak.</li> </ul>",
@@ -898,6 +951,7 @@
       "TASK_DELETE": "Taak verwijderen",
       "TASK_EDIT_TITLE": "Titel bewerken",
       "TASK_MOVE_TO_PROJECT": "Verplaats taak naar projectmenu openen",
+      "TASK_OPEN_CONTEXT_MENU": "Open het contextmenu van de taak",
       "TASK_OPEN_ESTIMATION_DIALOG": "Bewerk schatting / bestede tijd",
       "TASK_SCHEDULE": "Taak plannen",
       "TASK_SHORTCUTS": "Taken",
@@ -908,6 +962,7 @@
       "TOGGLE_BACKLOG": "Taakachterstand weergeven / verbergen",
       "TOGGLE_BOOKMARKS": "Bladwijzerbalk tonen / verbergen",
       "TOGGLE_PLAY": "Taak starten / stoppen",
+      "TOGGLE_SIDE_NAV": "Show & Focus / Hide Sidenav",
       "ZOOM_DEFAULT": "Zoomstandaard (alleen desktop)",
       "ZOOM_IN": "Inzoomen (alleen desktop)",
       "ZOOM_OUT": "Uitzoomen (alleen desktop)"
@@ -946,8 +1001,8 @@
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
-	  "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
-	  "TASK_NOTES_TPL": "Taak omschrijving template",
+      "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
+      "TASK_NOTES_TPL": "Taak omschrijving template",
       "TITLE": "Diverse instellingen"
     },
     "POMODORO": {
@@ -1023,6 +1078,7 @@
     "PROCRASTINATE": "Talmen",
     "PROJECTS": "Projecten",
     "PROJECT_MENU": "Project Menu",
+    "PROJECT_SETTINGS": "",
     "SCHEDULED": "Gepland",
     "SETTINGS": "Instellingen",
     "TAGS": "Tags",

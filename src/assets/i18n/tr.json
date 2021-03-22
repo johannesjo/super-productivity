@@ -77,6 +77,45 @@
         }
       }
     },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Project için CalDav Kurulumu"
+      },
+      "FORM": {
+        "CALDAV_CATEGORY_FILTER": "Sorunların filtreleneceği kategori (hiçbiri için boş bırakın)",
+        "CALDAV_PASSWORD": "CalDav şifreniz",
+        "CALDAV_RESOURCE": "CalDav kaynağının adı (takvim)",
+        "CALDAV_URL": "CalDav URL'si (temel URL)",
+        "CALDAV_USER": "CalDav kullanıcı adınız",
+        "IS_AUTO_ADD_TO_BACKLOG": "Tamamlanmamış CalDav todos'larını birikiminize otomatik olarak ekleyin",
+        "IS_AUTO_POLL": "Değişiklikler için içe aktarılan görevleri otomatik olarak yoklayın",
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Yeni görevler eklerken tamamlanmamış CalDav işlemlerini öneri olarak göster",
+        "IS_TRANSITION_ISSUES_ENABLED": "Görev tamamlandığında CalDav todos'unu otomatik olarak tamamlayın"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Burada, SuperProductivity'yi günlük planlama görünümündeki görev oluşturma panelinde belirli bir proje için tamamlanmamış CalDav yapılacak işleri listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve yapılacaklar için bir bağlantı ve bununla ilgili daha fazla bilgi sağlayacaklar.</p> <p>Ek olarak, tamamlanmamış tüm görevleri görev birikiminize otomatik olarak ekleyebilir ve senkronize edebilirsiniz.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Açıklama",
+        "LABELS": "Kategoriler",
+        "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
+        "STATUS": "durum",
+        "SUMMARY": "özet"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: \"{{calendarName}}\" takvimi bulunamadı",
+        "CALENDAR_READ_ONLY": "CalDav: \"{{calendarName}}\" takvimi salt okunur",
+        "ERR_NETWORK": "CalDav: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
+        "ERR_NOT_CONFIGURED": "CalDav: Düzgün yapılandırılmamış",
+        "IMPORTED_MULTIPLE_ISSUES": "calDav: Git'ten biriktirme listesine {{issuesLength}} yeni sorun aktarıldı",
+        "IMPORTED_SINGLE_ISSUE": "CalDav: \"{{issueText}}\" sorunu biriktirme listesine aktarıldı",
+        "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucuda silinmiş görünüyor.",
+        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: Güncelleme gerekmez.",
+        "ISSUE_UPDATE": "Caldav: \"{{issueText}}\" için değiştirilmiş veriler",
+        "POLLING": "Caldav: Todos için yoklama değişiklikleri"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
@@ -140,6 +179,7 @@
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
+        "GITLAB_BASE_URL": "Özel GitLab temel URL'si",
         "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak GitLab'dan backlog'a ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
         "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
@@ -333,6 +373,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Ort. görev başına harcanan zaman",
         "COUNTING_SUBTASKS": "(alt görevler sayılıyor)",
         "DAYS_WORKED": "Günler çalıştı",
+        "GLOBAL_METRICS": "Global Metrikler",
         "IMPROVEMENT_SELECTION_COUNT": "Bir iyileştirme faktörü seçilme sayısı",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Zaman içinde ruh hali ve verimlilik",
         "NO_ADDITIONAL_DATA_YET": "Henüz ek veri toplanmadı. Bunu yapmak için günlük değerlendirme \"Değerlendirme\" panelindeki formu kullanın.",
@@ -450,6 +491,7 @@
       "D_CREATE": {
         "CREATE": "Proje Yarat",
         "EDIT": "Projeyi Düzenle",
+        "SETUP_CALDAV": "Caldav Entegrasyonunu Kurun",
         "SETUP_GIT": "GitHub Entegrasyonunu Ayarla",
         "SETUP_GITLAB": "GitLab Entegrasyonunu Ayarla",
         "SETUP_JIRA": "Jira Entegrasyonunu Kur"
@@ -524,6 +566,12 @@
         "NO_REMOTE_DATA": "Uzak veri bulunamadı. Uzak'a yerel yüklensin mi?",
         "TRY_LOAD_REMOTE_AGAIN": "Verileri bir kez daha uzaktan kumandadan yeniden yüklemeyi mi deneyin?"
       },
+      "D_AUTH_CODE": {
+        "FOLLOW_LINK": "Lütfen aşağıdaki bağlantıyı açın ve orada verilen kimlik doğrulama kodunu aşağıdaki giriş alanına kopyalayın.",
+        "GET_AUTH_CODE": "Onay Kodu Al",
+        "L_AUTH_CODE": "Yetki Kodunu Girin",
+        "TITLE": "Giriş: {{provider}}"
+      },
       "D_CONFLICT": {
         "LAST_CHANGE": "son değişiklik:",
         "LAST_SYNC": "son senkronizasyon:",
@@ -562,6 +610,8 @@
         "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
         "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
         "IMPORTING": "Veri alınıyor",
+        "INCOMPLETE_CFG": "Senkronizasyon için kimlik doğrulama başarısız oldu. Lütfen Yapılandırmanızı kontrol edin!",
+        "INITIAL_SYNC_ERROR": "İlk Senkronizasyon başarısız oldu",
         "SUCCESS": "Alınan veri",
         "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin.",
         "UPLOAD_ERROR": "Bilinmeyen Yükleme Hatası (Ayarlar doğru mu?): {{err}}"
@@ -791,9 +841,12 @@
           "FULL_HALF_HOURS": "tam yarım saat",
           "FULL_HOURS": "tam saatler",
           "FULL_QUARTERS": "tam çeyrek",
+          "NOTES": "Görev Açıklamaları",
           "PARENT_TASK": "Ana Görev",
           "PARENT_TASK_TITLES_ONLY": "Yalnızca üst Görev Başlıkları",
+          "PROJECTS": "Proje İsimleri",
           "STARTED_WORKING": "Çalışmaya başladım",
+          "TAGS": "Etiketler",
           "TASK_SUBTASK": "Görev / alt görev",
           "TIME_AS_CLOCK": "Saat olarak zaman (ör. 5:23)",
           "TIME_AS_MILLISECONDS": "Milisaniye olarak zaman",
@@ -844,7 +897,8 @@
     "TITLE": "Başlık",
     "UNDO": "Geri alma",
     "UPDATE": "Güncelleştirme",
-    "WITHOUT_PROJECT": "Proje Olmadan"
+    "WITHOUT_PROJECT": "Proje Olmadan",
+    "YESTERDAY": "Dün"
   },
   "GCF": {
     "AUTO_BACKUPS": {
@@ -881,6 +935,7 @@
       "GLOBAL_TOGGLE_TASK_START": "Son etkin görev için zaman izlemesini değiştir",
       "GO_TO_DAILY_AGENDA": "Gündeme Git",
       "GO_TO_FOCUS_MODE": "Odak Moduna Git",
+      "GO_TO_SCHEDULED_VIEW": "Planlanmış Görevlere git",
       "GO_TO_SETTINGS": "Ayarlara git",
       "GO_TO_WORK_VIEW": "İş Görünümüne Git",
       "HELP": "<p>Burada tüm klavye kısayollarını yapılandırabilirsiniz.</p> <p>Metin girişine tıklayın ve istediğiniz klavye kombinasyonunu girin. Kaydetmek için Enter'a, iptal etmek için Escape'e basın.</p> <p>Üç tür kısayol vardır:</p> <ul> <li> <strong>Genel kısayollar:</strong> Uygulama çalışırken, uygulama diğer tüm uygulamalardan eylemi tetikler. </li> <li> <strong>Uygulama düzeyinde kısayollar:</strong> Uygulamanın her ekranından tetiklenir, ancak şu anda bir metin alanı düzenliyorsanız değil. </li> <li> <strong>Görev seviyesi kısayolları:</strong> Yalnızca fare veya klavye yoluyla bir görev seçtiyseniz tetiklenirler ve genellikle bu görevle ilgili bir eylemi tetiklerler. </li> </ul>",
@@ -896,6 +951,7 @@
       "TASK_DELETE": "Görevi Sil",
       "TASK_EDIT_TITLE": "Başlığı Düzenle",
       "TASK_MOVE_TO_PROJECT": "Görevi proje menüsüne taşı",
+      "TASK_OPEN_CONTEXT_MENU": "Görev bağlam menüsünü aç",
       "TASK_OPEN_ESTIMATION_DIALOG": "Tahmini / harcanan zamanı düzenle",
       "TASK_SCHEDULE": "Görev Takvimi",
       "TASK_SHORTCUTS": "Görevler",
@@ -906,6 +962,7 @@
       "TOGGLE_BACKLOG": "Görev Listesini Göster / Gizle",
       "TOGGLE_BOOKMARKS": "Yer İşareti Çubuğunu Göster / Gizle",
       "TOGGLE_PLAY": "Görevi Başlat / Durdur",
+      "TOGGLE_SIDE_NAV": "Göster ve Odaklan / Sidenav'ı Gizle",
       "ZOOM_DEFAULT": "Varsayılan yakınlaştırma (Yalnızca masaüstü)",
       "ZOOM_IN": "Yakınlaştır (Yalnızca masaüstü)",
       "ZOOM_OUT": "Uzaklaştır (Yalnızca masaüstü)"
@@ -945,6 +1002,7 @@
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / durum menüsünde göster (yalnızca masaüstü)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
+      "TASK_NOTES_TPL": "Görev açıklama şablonu",
       "TITLE": "Diğer ayarlar"
     },
     "POMODORO": {
