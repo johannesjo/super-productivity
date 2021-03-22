@@ -10,7 +10,7 @@ import {
 import { Metric, MetricState } from '../metric.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
-import { migrateMetricState } from '../migrate-metric-states';
+import { migrateMetricState } from '../migrate-metric-states.util';
 
 export const METRIC_FEATURE_NAME = 'metric';
 export const metricAdapter: EntityAdapter<Metric> = createEntityAdapter<Metric>();

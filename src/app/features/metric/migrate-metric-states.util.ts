@@ -8,7 +8,7 @@ import { EntityState } from '@ngrx/entity';
 
 const MODEL_VERSION = METRIC_MODEL_VERSION;
 
-const migrateMetricStates = (modelName: string, defaultState: any) => (metricState: any): any => {
+const migrateMetricStatesUtil = (modelName: string, defaultState: any) => (metricState: any): any => {
   if (!isMigrateModel(metricState, MODEL_VERSION, modelName)) {
     return metricState;
   }
@@ -20,15 +20,15 @@ const migrateMetricStates = (modelName: string, defaultState: any) => (metricSta
   };
 };
 
-export const migrateMetricState: (metricState: MetricState) => MetricState = migrateMetricStates('Metric', {
+export const migrateMetricState: (metricState: MetricState) => MetricState = migrateMetricStatesUtil('Metric', {
   ids: [],
   entities: {}
 });
-export const migrateImprovementState: (improvementState: ImprovementState) => ImprovementState = migrateMetricStates('Improvement', {
+export const migrateImprovementState: (improvementState: ImprovementState) => ImprovementState = migrateMetricStatesUtil('Improvement', {
   ids: [],
   entities: {}
 });
-export const migrateObstructionState: (obstructionState: ObstructionState) => ObstructionState = migrateMetricStates('Obstruction', {
+export const migrateObstructionState: (obstructionState: ObstructionState) => ObstructionState = migrateMetricStatesUtil('Obstruction', {
   ids: [],
   entities: {}
 });

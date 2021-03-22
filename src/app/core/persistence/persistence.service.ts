@@ -73,7 +73,7 @@ import {
   migrateImprovementState,
   migrateMetricState,
   migrateObstructionState
-} from '../../features/metric/migrate-metric-states';
+} from '../../features/metric/migrate-metric-states.util';
 
 @Injectable({
   providedIn: 'root',

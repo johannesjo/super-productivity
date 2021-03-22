@@ -15,7 +15,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../../imex/sync/sync.model';
-import { migrateImprovementState } from '../../migrate-metric-states';
+import { migrateImprovementState } from '../../migrate-metric-states.util';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 

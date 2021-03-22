@@ -11,7 +11,7 @@ import { Obstruction, ObstructionState } from '../obstruction.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../../../imex/sync/sync.model';
-import { migrateObstructionState } from '../../migrate-metric-states';
+import { migrateObstructionState } from '../../migrate-metric-states.util';
 
 export const OBSTRUCTION_FEATURE_NAME = 'obstruction';
 
