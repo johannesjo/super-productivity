@@ -33,7 +33,7 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
   reminders: [],
   note: {},
   bookmark: {},
-  metric: {},
-  improvement: {},
-  obstruction: {},
+  metric: createEmptyEntity(),
+  improvement: createEmptyEntity() as any,
+  obstruction: createEmptyEntity(),
 });
