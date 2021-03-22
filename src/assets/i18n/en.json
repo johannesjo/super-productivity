@@ -959,6 +959,7 @@
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
       "TOGGLE_PLAY": "Start/Stop Task",
+      "TASK_EDIT_TAGS": "Edit Tags",
       "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",

@@ -331,6 +331,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this._taskService.setSelectedId(this.task.id);
     }
     // this.focusSelf();
+    this._matDialog.open(DialogEditTagsForTaskComponent, {
+      data: {
+        task: this.task
+      }
+    })
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => this.focusSelf());
   }
 
   toggleShowAttachments() {
@@ -653,7 +661,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         this.startTask();
       }
     }
-
+    if (checkKeyCombo(ev, keys.taskEditTags)) {
+      this.editTags();
+    }
     if (checkKeyCombo(ev, keys.taskDelete)) {
       this.deleteTask();
     }
