@@ -331,14 +331,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this._taskService.setSelectedId(this.task.id);
     }
     // this.focusSelf();
-    this._matDialog.open(DialogEditTagsForTaskComponent, {
-      data: {
-        task: this.task
-      }
-    })
-      .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusSelf());
   }
 
   toggleShowAttachments() {
