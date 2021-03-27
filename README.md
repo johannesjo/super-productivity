@@ -151,7 +151,7 @@ There are several ways to help.
 
 
 ### Running the development server
-To run the development server you need to have node installed at least in the version 10. Go to https://nodejs.org for installation instructions.
+To run the development server you need to have node installed at least in the version 12. Go to https://nodejs.org for installation instructions. You also need [to install yarn](https://classic.yarnpkg.com/en/docs/install) which is used for dependency management.
 
 **Clone repo**
 ```
@@ -160,8 +160,8 @@ git clone https://github.com/johannesjo/super-productivity.git
 **Install dependencies**
 ```
 cd super-productivity
-npm install
-npm install -g @angular/cli
+yarn
+yarn global add @angular/cli
 ```
 **Run the dev server**
 ```
@@ -174,7 +174,7 @@ If you want to run the app standalone do the following:
 ng serve
 
 # in a new console tab
-npm start
+yarn start
 ```
 
 ### Packaging the app
