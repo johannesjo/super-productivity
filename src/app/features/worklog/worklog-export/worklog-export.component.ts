@@ -8,7 +8,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { TaskCopy, WorklogTask } from '../../tasks/task.model';
+import { WorklogTask } from '../../tasks/task.model';
 import { combineLatest, Subscription } from 'rxjs';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import * as moment from 'moment';
@@ -37,17 +37,13 @@ import { Tag, TagCopy } from '../../tag/tag.model';
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
 
-interface TaskWithParentTitle extends TaskCopy {
-  parentTitle?: string;
-}
-
 interface RowItem {
   dates: string[];
   workStart: number | undefined;
   workEnd: number | undefined;
   timeSpent: number;
   timeEstimate: number;
-  tasks: TaskWithParentTitle[];
+  tasks: WorklogTask[];
   titles?: string[];
   titlesWithSub?: string[];
   notes: string[];
@@ -298,7 +294,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
           // by design subtasks don't have tags, so we must set its parent's tags
           if (task.parentId !== null) {
-            taskGroups[task.id].tags = (tasks.find(t => t.id === task.parentId) as TaskCopy).tagIds;
+            taskGroups[task.id].tags = (tasks.find(t => t.id === task.parentId) as WorklogTask).tagIds;
           } else {
             taskGroups[task.id].tags = task.tagIds;
           }
@@ -363,8 +359,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       group.titlesWithSub = unique(group.tasks.map(t => t.title));
       // TODO check all the typing
       group.titles = unique<any>(
-        group.tasks.map((t: TaskWithParentTitle) => (
-            t.parentId && (tasks.find(ptIN => ptIN.id === t.parentId) as TaskCopy).title
+        group.tasks.map((t: WorklogTask) => (
+            t.parentId && (tasks.find(ptIN => ptIN.id === t.parentId) as WorklogTask).title
           ) || (!t.parentId && t.title)
         )
       ).filter((title: string) => !!title);
