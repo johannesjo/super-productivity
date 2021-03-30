@@ -310,6 +310,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
         label: T.GCF.KEYBOARD.TOGGLE_PLAY
       },
     },
+    {
+      key: 'taskEditTags',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_EDIT_TAGS
+      },
+    },
   ]
 };
 /* eslint-enable max-len */

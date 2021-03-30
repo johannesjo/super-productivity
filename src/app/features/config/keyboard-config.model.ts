@@ -36,4 +36,5 @@ export type KeyboardConfig = Readonly<{
   expandSubTasks: string | null;
   collapseSubTasks: string | null;
   togglePlay: string | null;
+  taskEditTags: string | null;
 }>;

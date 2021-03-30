@@ -653,7 +653,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         this.startTask();
       }
     }
-
+    if (checkKeyCombo(ev, keys.taskEditTags)) {
+      this.editTags();
+    }
     if (checkKeyCombo(ev, keys.taskDelete)) {
       this.deleteTask();
     }
