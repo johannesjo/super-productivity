@@ -75,75 +75,82 @@ export const createRows = (data: WorklogExportData, groupBy: WorklogGrouping): R
   return rows;
 };
 
-const mapToGroups = (task: WorklogTask, groupBy: WorklogGrouping, data: WorklogExportData) => {
-  const taskGroups: { [key: string]: RowItem } = {};
+const handleDateGroup = (task: WorklogTask, data: WorklogExportData): { [key: string]: RowItem } => {
+  if (!task.timeSpentOnDay) { return {}; }
 
-  // If we're grouping by parent task ignore subtasks
-  // If we're grouping by task ignore parent tasks
-  if ((groupBy === WorklogGrouping.PARENT && task.parentId !== null)
-    || (groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0)
-  ) {
-    return taskGroups;
+  const taskGroups: { [key: string]: RowItem } = {};
+  const numDays = Object.keys(task.timeSpentOnDay).length;
+  Object.keys(task.timeSpentOnDay).forEach(day => {
+    taskGroups[day] = {
+      dates: [day],
+      tasks: [task],
+      notes: (task.notes) ? [task.notes] : [],
+      projects: (task.projectId) ? [task.projectId] : [],
+      tags: task.tagIds,
+      workStart: data.workTimes.start[day],
+      workEnd: data.workTimes.end[day],
+      timeSpent: 0,
+      timeEstimate: 0
+    };
+    if (!task.subTaskIds || task.subTaskIds.length === 0) {
+      taskGroups[day].timeSpent = task.timeSpentOnDay[day];
+      taskGroups[day].timeEstimate = task.timeEstimate / numDays;
+    }
+  });
+  return taskGroups;
+};
+
+const handleTaskGroup = (task: WorklogTask, data: WorklogExportData): { [key: string]: RowItem } => {
+  const taskGroups: { [key: string]: RowItem } = {};
+  taskGroups[task.id] = createEmptyGroup();
+
+  // by design subtasks don't have tags, so we must set its parent's tags
+  if (task.parentId !== null) {
+    taskGroups[task.id].tags = (data.tasks.find(t => t.id === task.parentId) as WorklogTask).tagIds;
+  } else {
+    taskGroups[task.id].tags = task.tagIds;
   }
 
+  taskGroups[task.id].tasks = [task];
+  taskGroups[task.id].notes = (task.notes) ? [task.notes] : [];
+  taskGroups[task.id].projects = (task.projectId) ? [task.projectId] : [];
+  taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
+  taskGroups[task.id].timeEstimate = task.timeEstimate;
+  taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
+  return taskGroups;
+};
+
+const handleWorklogGroup = (task: WorklogTask, data: WorklogExportData): { [key: string]: RowItem } => {
+  const taskGroups: { [key: string]: RowItem } = {};
+  Object.keys(task.timeSpentOnDay).forEach(day => {
+    const groupKey = task.id + '_' + day;
+    taskGroups[groupKey] = createEmptyGroup();
+    taskGroups[groupKey].tasks = [task];
+    taskGroups[groupKey].notes = (task.notes) ? [task.notes] : [];
+    taskGroups[groupKey].projects = (task.projectId) ? [task.projectId] : [];
+    taskGroups[groupKey].tags = task.tagIds;
+    taskGroups[groupKey].dates = [day];
+    taskGroups[groupKey].workStart = data.workTimes.start[day];
+    taskGroups[groupKey].workEnd = data.workTimes.end[day];
+    taskGroups[groupKey].timeEstimate = task.subTaskIds.length > 0 ? 0 : task.timeEstimate;
+    taskGroups[groupKey].timeSpent = task.subTaskIds.length > 0 ? 0 : task.timeSpentOnDay[day];
+  });
+  return taskGroups;
+};
+
+const mapToGroups = (task: WorklogTask, groupBy: WorklogGrouping, data: WorklogExportData) => {
   switch (groupBy) {
     case WorklogGrouping.DATE:
-      if (!task.timeSpentOnDay) {
-        return {};
-      }
-      const numDays = Object.keys(task.timeSpentOnDay).length;
-      Object.keys(task.timeSpentOnDay).forEach(day => {
-        taskGroups[day] = {
-          dates: [day],
-          tasks: [task],
-          notes: (task.notes) ? [task.notes] : [],
-          projects: (task.projectId) ? [task.projectId] : [],
-          tags: task.tagIds,
-          workStart: data.workTimes.start[day],
-          workEnd: data.workTimes.end[day],
-          timeSpent: 0,
-          timeEstimate: 0
-        };
-        if (!task.subTaskIds || task.subTaskIds.length === 0) {
-          taskGroups[day].timeSpent = task.timeSpentOnDay[day];
-          taskGroups[day].timeEstimate = task.timeEstimate / numDays;
-        }
-      });
-      break;
+      return handleDateGroup(task, data);
     case WorklogGrouping.PARENT:
+      if (task.parentId !== null) { return {}; } // ignore subtasks
+      return handleTaskGroup(task, data);
     case WorklogGrouping.TASK:
-      taskGroups[task.id] = createEmptyGroup();
-
-      // by design subtasks don't have tags, so we must set its parent's tags
-      if (task.parentId !== null) {
-        taskGroups[task.id].tags = (data.tasks.find(t => t.id === task.parentId) as WorklogTask).tagIds;
-      } else {
-        taskGroups[task.id].tags = task.tagIds;
-      }
-
-      taskGroups[task.id].tasks = [task];
-      taskGroups[task.id].notes = (task.notes) ? [task.notes] : [];
-      taskGroups[task.id].projects = (task.projectId) ? [task.projectId] : [];
-      taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
-      taskGroups[task.id].timeEstimate = task.timeEstimate;
-      taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
-      break;
+      if (task.subTaskIds.length > 0) { return {}; } // ignore parent tasks
+      return handleTaskGroup(task, data);
     default: // group by work log (don't group at all)
-      Object.keys(task.timeSpentOnDay).forEach(day => {
-        const groupKey = task.id + '_' + day;
-        taskGroups[groupKey] = createEmptyGroup();
-        taskGroups[groupKey].tasks = [task];
-        taskGroups[groupKey].notes = (task.notes) ? [task.notes] : [];
-        taskGroups[groupKey].projects = (task.projectId) ? [task.projectId] : [];
-        taskGroups[groupKey].tags = task.tagIds;
-        taskGroups[groupKey].dates = [day];
-        taskGroups[groupKey].workStart = data.workTimes.start[day];
-        taskGroups[groupKey].workEnd = data.workTimes.end[day];
-        taskGroups[groupKey].timeEstimate = task.subTaskIds.length > 0 ? 0 : task.timeEstimate;
-        taskGroups[groupKey].timeSpent = task.subTaskIds.length > 0 ? 0 : task.timeSpentOnDay[day];
-      });
+      return handleWorklogGroup(task, data);
   }
-  return taskGroups;
 };
 
 const createEmptyGroup = (): RowItem => {
