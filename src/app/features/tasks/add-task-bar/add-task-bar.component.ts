@@ -31,6 +31,7 @@ import { Project } from '../../project/project.model';
 import { shortSyntaxToTags } from './short-syntax-to-tags.util';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { SS_TODO_TMP } from '../../../core/persistence/ls-keys.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -114,6 +115,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _blurTimeout?: number;
   private _autofocusTimeout?: number;
   private _attachKeyDownHandlerTimeout?: number;
+  private _saveTmpTodoTimeout?: number;
   private _lastAddedTaskId?: string;
   private _subs: Subscription = new Subscription();
 
@@ -149,6 +151,16 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         }
       });
     });
+
+    const savedTodo = sessionStorage.getItem(SS_TODO_TMP) || '';
+    if (savedTodo) {
+      sessionStorage.setItem(SS_TODO_TMP, '');
+      this.taskSuggestionsCtrl.setValue(savedTodo);
+      this._saveTmpTodoTimeout = window.setTimeout(() => {
+        (this.inputEl as ElementRef).nativeElement.value = savedTodo;
+        (this.inputEl as ElementRef).nativeElement.select();
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -160,6 +172,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
     if (this._autofocusTimeout) {
       window.clearTimeout(this._autofocusTimeout);
+    }
+    if (this._saveTmpTodoTimeout) {
+      window.clearTimeout(this._saveTmpTodoTimeout);
     }
 
     if (this._lastAddedTaskId) {
@@ -177,6 +192,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   onBlur(ev: FocusEvent) {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
+    if (!relatedTarget || (relatedTarget &&
+      !relatedTarget.className.includes('close-btn') &&
+      !relatedTarget.className.includes('switch-add-to-btn'))) {
+      sessionStorage.setItem(SS_TODO_TMP, (this.inputEl as ElementRef).nativeElement.value);
+    }
     if (relatedTarget && relatedTarget.className.includes('switch-add-to-btn')) {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else if (relatedTarget && relatedTarget.className.includes('mat-option')) {
