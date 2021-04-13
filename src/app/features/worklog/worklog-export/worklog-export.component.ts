@@ -136,9 +136,11 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         this._tagService.tags$
       ])
         .pipe(
-        ).subscribe(([tasks, ac, allProjects, allTags]) => {
+        ).subscribe(([tasks, ac, projects, tags]) => {
         if (tasks) {
-          const rows = createRows(tasks, ac.workStart, ac.workEnd, this.options.groupBy, allProjects, allTags);
+          const workTimes = { start: ac.workStart, end: ac.workEnd };
+          const data = { tasks, projects, tags, workTimes };
+          const rows = createRows(data, this.options.groupBy);
           this.formattedRows = formatRows(rows, this.options);
           // TODO format to csv
 
