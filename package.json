@@ -143,7 +143,7 @@
     "conventional-changelog-cli": "^2.0.21",
     "cross-env": "^7.0.3",
     "electron": "^10.2.0",
-    "electron-builder": "^22.9.1",
+    "electron-builder": "^22.10.5",
     "electron-builder-notarize": "^1.2.0",
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.2.5",
