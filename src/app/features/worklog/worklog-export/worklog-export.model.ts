@@ -3,20 +3,6 @@ import { Tag } from '../../tag/tag.model';
 import { WorklogTask } from '../../tasks/task.model';
 import { WorkStartEnd } from '../../work-context/work-context.model';
 
-export interface RowItem {
-  dates: string[];
-  workStart: number | undefined;
-  workEnd: number | undefined;
-  timeSpent: number;
-  timeEstimate: number;
-  tasks: WorklogTask[];
-  titles?: string[];
-  titlesWithSub?: string[];
-  notes: string[];
-  projects: string[];
-  tags: string[];
-}
-
 export interface WorklogExportData {
   tasks: WorklogTask[];
   projects: Project[];
@@ -27,4 +13,27 @@ export interface WorklogExportData {
 export interface WorkTimes {
   start: WorkStartEnd;
   end: WorkStartEnd;
+}
+
+export type TimeFields = {
+  dates: string[];
+  timeSpent: number;
+  timeEstimate: number;
+  workStart: number;
+  workEnd: number;
+};
+
+export type TaskFields = {
+  tasks: WorklogTask[];
+  titles: string[];
+  titlesWithSub: string[];
+  notes: string[];
+  projects: string[];
+  tags: string[];
+};
+
+export type RowItem = TimeFields & TaskFields;
+
+export interface ItemsByKey<T> {
+  [key: string]: T;
 }
