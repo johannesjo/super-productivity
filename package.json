@@ -154,7 +154,7 @@
     "file-saver": "^2.0.2",
     "hammerjs": "^2.0.8",
     "helpful-decorators": "^2.1.0",
-    "husky": "^4.2.5",
+    "husky": "^6.0.0",
     "ical.js": "^1.4.0",
     "idb": "^5.0.6",
     "jasmine-core": "^3.4.0",
