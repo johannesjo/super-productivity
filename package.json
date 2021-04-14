@@ -187,7 +187,7 @@
     "shortid": "^2.2.15",
     "start-server-and-test": "^1.11.0",
     "ts-node": "~9.0.0",
-    "tslib": "^2.0.0",
+    "tslib": "^2.2.0",
     "typescript": "~4.0.2",
     "utils-decorators": "^1.7.1",
     "webdav": "^3.5.0",
