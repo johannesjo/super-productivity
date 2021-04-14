@@ -182,7 +182,7 @@
     "pkce-challenge": "2.1.0",
     "query-string": "^6.11.0",
     "roboto-fontface": "^0.10.0",
-    "rxjs": "^6.6.0",
+    "rxjs": "^6.6.7",
     "semver": "^7.3.2",
     "shortid": "^2.2.15",
     "start-server-and-test": "^1.11.0",
