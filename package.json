@@ -120,7 +120,7 @@
     "@ngx-translate/core": "^13.0.0",
     "@ngx-translate/http-loader": "^6.0.0",
     "@schematics/angular": "^10.0.6",
-    "@types/file-saver": "^2.0.1",
+    "@types/file-saver": "^2.0.2",
     "@types/hammerjs": "^2.0.36",
     "@types/jasmine": "^3.5.11",
     "@types/jasminewd2": "~2.0.3",
