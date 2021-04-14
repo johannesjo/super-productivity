@@ -52,24 +52,19 @@ const createProject = (projectId: string, ...tasks: WorklogTask[]): Project => {
   return { ...DEFAULT_PROJECT, id: projectId, taskIds, title: projectId };
 };
 
-let data: WorklogExportData;
-const resetData = () => {
-  data = { tasks: [], tags: [], projects: [], workTimes: { start: {}, end: {} } };
+const createWorklogData = (partialData: Partial<WorklogExportData>): WorklogExportData => {
+  return { tasks: [], tags: [], projects: [], workTimes: { start: {}, end: {} }, ...partialData };
 };
 
 describe('createRows', () => {
   describe('time', () => {
-    beforeEach(() => {
-      resetData();
-    });
-
     it('should have correct time fields', () => {
       const tasks = [
         createTask({ id: 'T1', timeSpentOnDay: { [dateKey1]: oneHour }, timeEstimate: twoHours }),
         createTask({ id: 'T2', timeSpentOnDay: { [dateKey1]: oneHour }, timeEstimate: twoHours }),
         createTask({ id: 'T3', timeSpentOnDay: { [dateKey1]: oneHour }, timeEstimate: twoHours })
       ];
-      data.tasks = tasks;
+      const data = createWorklogData({ tasks });
       const rows = createRows(data, WorklogGrouping.DATE);
       expect(rows.length).toBe(1);
       expect(rows[0].timeSpent).toBe(oneHour*3);
@@ -82,8 +77,7 @@ describe('createRows', () => {
         createTask({ id: 'T2' }),
         createTask({ id: 'T3', timeSpentOnDay: { [dateKey2]: oneHour }})
       ];
-      data.tasks = tasks;
-      data.workTimes = workTimes;
+      const data = createWorklogData({ tasks, workTimes });
       const rows = createRows(data, WorklogGrouping.DATE);
       expect(rows.length).toBe(2);
       expect(rows[0].workStart).toBe(workTimes.start[dateKey1]);
@@ -94,30 +88,28 @@ describe('createRows', () => {
   });
 
   describe('date', () => {
-    beforeEach(() => {
-      resetData();
-    });
-
     it('should sort date fields', () => {
       const tasks = [
         createTask({ id: 'T1', timeSpentOnDay: { [dateKey1]: oneHour, '2021-02-20': oneHour, [dateKey2]: oneHour} }),
       ];
-      data.tasks = tasks;
+      const data = createWorklogData({ tasks });
       const rows = createRows(data, WorklogGrouping.TASK);
       expect(rows.length).toBe(1);
       expect(rows[0].dates).toEqual([ dateKey1, dateKey2, '2021-02-20']);
     });
   });
 
-  describe('subtasks', () => {
+  describe('titles', () => {
     const parentTaskId = 'PT1', subTaskId1 = 'S2', subTaskId2 = 'S3', otherTaskId = 'T4';
     const task1 = createTask({ id:parentTaskId });
     const task2 = createSubTask({ id:subTaskId1 }, task1);
     const task3 = createSubTask({ id:subTaskId2 }, task1);
     const task4 = createTask({ id:otherTaskId });
+    const tasks = [ task1, task2, task3, task4 ];
+
+    let data: WorklogExportData;
     beforeEach(() => {
-      resetData();
-      data.tasks = [ task1, task2, task3, task4 ];
+      data = createWorklogData({ tasks });
     });
 
     it('should have correct titles when grouping by parent', () => {
@@ -139,6 +131,13 @@ describe('createRows', () => {
       expect(rows[1].titlesWithSub).toEqual([ subTaskId2 ]);
       expect(rows[2].titlesWithSub).toEqual([ otherTaskId ]);
     });
+
+    it('should have correct titles when grouping by date', () => {
+      const rows = createRows(data, WorklogGrouping.DATE);
+      expect(rows.length).toBe(1);
+      expect(rows[0].titles).toEqual([ parentTaskId, otherTaskId ]);
+      expect(rows[0].titlesWithSub).toEqual([ parentTaskId, subTaskId1, subTaskId2, otherTaskId ]);
+    });
   });
 
   describe('projects', () => {
@@ -148,12 +147,14 @@ describe('createRows', () => {
     const task2 = createTask({ id:task2P1 });
     const task3 = createTask({ id:parentTaskP2 });
     const task4 = createSubTask({ id:subTask }, task3);
+    const tasks = [ task1, task2, task3, task4 ];
     const p1 = createProject(project1, task1, task2);
     const p2 = createProject(project2, task3, task4);
+    const projects = [ p1, p2 ];
+
+    let data: WorklogExportData;
     beforeEach(() => {
-      resetData();
-      data.tasks = [ task1, task2, task3, task4 ];
-      data.projects = [ p1, p2 ];
+      data = createWorklogData({ tasks, projects });
     });
 
     it('should not duplicate', () => {
@@ -177,18 +178,20 @@ describe('createRows', () => {
     const parentTask = createTask({ id: parentTaskId });
     const subTask = createSubTask({ id: subTaskId }, parentTask);
     const otherTask = createTask({ id: otherTaskId });
+    const tasks = [ parentTask, subTask, otherTask ];
     const tag1 = createTag(tagId1, parentTask);
     const tag2 = createTag(tagId2, parentTask, otherTask);
+    const tags = [ tag1, tag2 ];
+
+    let data: WorklogExportData;
     beforeEach(() => {
-      resetData();
-      data.tasks = [ parentTask, subTask, otherTask ];
-      data.tags = [ tag1, tag2 ];
+      data = createWorklogData({ tasks, tags });
     });
 
     it('should not duplicate tags when grouping by date', () => {
       const rows = createRows(data, WorklogGrouping.DATE);
       expect(rows.length).toBe(1);
-      expect(rows[0].tags).toEqual([tagId1, tagId2]);
+      expect(rows[0].tags).toEqual([ tagId1, tagId2 ]);
     });
 
     it('should not duplicate tags when grouping by parent', () => {
@@ -198,20 +201,29 @@ describe('createRows', () => {
       expect(rows[1].tags).toEqual([ tagId2 ]);
     });
 
-    it('should use the tags of the parent task', () => {
+    it('should use tags of the parent task when grouping by task', () => {
       const rows = createRows(data, WorklogGrouping.TASK);
       expect(rows.length).toBe(2);
       expect(rows[0].tags).toEqual([ tagId1, tagId2 ]);
       expect(rows[1].tags).toEqual([ tagId2 ]);
     });
 
+    it('should use tags of the parent task when grouping by worklog', () => {
+      const rows = createRows(data, WorklogGrouping.WORKLOG);
+      expect(rows.length).toBe(3);
+      expect(rows[0].tags).toEqual([ tagId1, tagId2 ]);
+      expect(rows[1].tags).toEqual([ tagId1, tagId2 ]);
+      expect(rows[2].tags).toEqual([ tagId2 ]);
+    });
+
     it('should have today tags', () => {
       const todayTaskId = 'T1', todayTagId = 'Tag1';
-      data.tasks = [ createTask({ id: todayTaskId }) ];
-      data.tags = [ createTag(todayTagId, data.tasks[0]) ];
+      const todayTask = createTask({ id: todayTaskId });
+      const todayTag = createTag(todayTagId, todayTask);
+      data = createWorklogData({ tasks: [ todayTask ], tags: [ todayTag ]});
       const rows = createRows(data, WorklogGrouping.DATE);
       expect(rows.length).toBe(1);
-      expect(rows[0].tags).toEqual([todayTagId]);
+      expect(rows[0].tags).toEqual([ todayTagId ]);
     });
   });
 
@@ -219,39 +231,40 @@ describe('createRows', () => {
     const note1 = 'N1', note2 = 'N2';
     const task1 = createTask({ id: 'T1', notes: note1, timeSpentOnDay: { [dateKey1]: oneHour, [dateKey2]: oneHour }});
     const task2 = createTask({ id: 'T2', notes: note2 });
+
+    let data: WorklogExportData;
     beforeEach(() => {
-      resetData();
-      data.tasks = [ task1, task2 ];
+      data = createWorklogData({ tasks: [ task1, task2 ] });
     });
 
     it('should not duplicate notes when grouping by date', () => {
       const rows = createRows(data, WorklogGrouping.DATE);
       expect(rows.length).toBe(2);
-      expect(rows[0].notes).toEqual([note1, note2]);
-      expect(rows[1].notes).toEqual([note1]);
+      expect(rows[0].notes).toEqual([ note1, note2 ]);
+      expect(rows[1].notes).toEqual([ note1 ]);
     });
 
     it('should not duplicate notes when grouping by task', () => {
       const rows = createRows(data, WorklogGrouping.TASK);
       expect(rows.length).toBe(2);
-      expect(rows[0].notes).toEqual([note1]);
-      expect(rows[1].notes).toEqual([note2]);
+      expect(rows[0].notes).toEqual([ note1 ]);
+      expect(rows[1].notes).toEqual([ note2 ]);
     });
 
     it('should show correct notes of sub/parent tasks', () => {
       const parentTaskId = 'P1', subTaskId = 'ST1';
       const t1 = createTask({ id: parentTaskId, notes: note1 });
       const t2 = createSubTask({ id: subTaskId, notes: note2 }, t1);
-      data.tasks = [ t1, t2 ];
+      data = createWorklogData({ tasks: [ t1, t2 ] });
       const rows = createRows(data, WorklogGrouping.DATE);
       expect(rows.length).toBe(1);
-      expect(rows[0].notes).toEqual([note1, note2]);
+      expect(rows[0].notes).toEqual([ note1, note2 ]);
     });
 
     it('should replace \\n with dashes', () => {
       const noteWithNewLine = 'N1\nN1', expectedNote = 'N1 - N1';
       const t1 = createTask({ id: 'T1', notes: noteWithNewLine });
-      data.tasks = [ t1 ];
+      data = createWorklogData({ tasks: [ t1 ] });
       const rows = createRows(data, WorklogGrouping.DATE);
       expect(rows.length).toBe(1);
       expect(rows[0].notes).toEqual([expectedNote]);
@@ -260,18 +273,15 @@ describe('createRows', () => {
 
   describe('group by worklog', () => {
     const taskId1 = 'T1', taskId2 = 'T2';
-    beforeEach(() => {
-      resetData();
-      const task1 = createTask({ id:taskId1 });
-      const task2 = createTask({ id:taskId2, timeSpentOnDay: { [dateKey1]: oneHour, [dateKey2]: oneHour } });
-      data.tasks = [ task1, task2 ];
-    });
+    const task1 = createTask({ id:taskId1 });
+    const task2 = createTask({ id:taskId2, timeSpentOnDay: { [dateKey1]: oneHour, [dateKey2]: oneHour } });
+    const data = createWorklogData({ tasks: [ task1, task2 ] });
 
     it('should list all tasks and not group by task/date', () => {
       const rows = createRows(data, WorklogGrouping.WORKLOG);
       expect(rows.length).toBe(3);
       expect(rows[0].titlesWithSub).toEqual([ taskId1 ]);
-      expect(rows[0].dates).toEqual([ dateKey1]);
+      expect(rows[0].dates).toEqual([ dateKey1 ]);
       expect(rows[1].titlesWithSub).toEqual([ taskId2 ]);
       expect(rows[1].dates).toEqual([ dateKey1 ]);
       expect(rows[2].titlesWithSub).toEqual([ taskId2 ]);
