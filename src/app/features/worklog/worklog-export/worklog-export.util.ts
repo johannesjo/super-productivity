@@ -14,7 +14,7 @@ const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
 
 /**
- * Depending on groupBy it gets a map of RowItems by groupKeys (date, task.id, task.id+date).
+ * Depending on groupBy it gets a map of RowItems by groupKeys (date, task.id, date_task.id).
  * Then it sorts and reiterates on groupKey and converts the map into a simple array of RowItems.
  */
 export const createRows = (data: WorklogExportData, groupBy: WorklogGrouping): RowItem[] => {
@@ -131,7 +131,7 @@ const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
   const taskGroups: ItemsByKey<RowItem> = {};
   for (const task of data.tasks) {
     Object.keys(task.timeSpentOnDay).forEach(day => {
-      const groupKey = task.id + '_' + day;
+      const groupKey = day + '_' + task.id;
       const taskFields = getTaskFields(task, data);
       taskGroups[groupKey] = {
         dates: [day],
@@ -151,19 +151,19 @@ const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
  */
 const getTaskFields = (task: WorklogTask, data: WorklogExportData): TaskFields => {
   const titlesWithSub = [task.title];
-  const titles = task.parentId ?
-    [(data.tasks.find(ptIN => ptIN.id === task.parentId) as WorklogTask).title] :
-    [task.title];
+  const titles = task.parentId
+    ? [(data.tasks.find(ptIN => ptIN.id === task.parentId) as WorklogTask).title]
+    : [task.title];
 
   const notes = task.notes ? [task.notes.replace(/\n/g, ' - ')] : [];
-  const projects = task.projectId ?
-    [(data.projects.find(project => project.id === task.projectId) as ProjectCopy).title] :
-    [];
+  const projects = task.projectId
+    ? [(data.projects.find(project => project.id === task.projectId) as ProjectCopy).title]
+    : [];
 
   // by design subtasks don't have tags, so we must set its parent's tags
-  let tags = task.parentId !== null ?
-    (data.tasks.find(t => t.id === task.parentId) as WorklogTask).tagIds :
-    task.tagIds;
+  let tags = task.parentId !== null
+    ? (data.tasks.find(t => t.id === task.parentId) as WorklogTask).tagIds
+    : task.tagIds;
   tags = tags.map( tagId => (data.tags.find(tag => tag.id === tagId) as TagCopy).title);
 
   const tasks = [ task ];
@@ -264,6 +264,9 @@ export const formatRows = (rows: RowItem[], options: WorklogExportSettingsCopy):
   });
 };
 
+/**
+ * Prepares the csv for export
+ */
 export const formatText = (headlineCols: string[], rows: (string | number | undefined)[][]): string => {
   let txt = '';
   txt += headlineCols.join(';') + LINE_SEPARATOR;
