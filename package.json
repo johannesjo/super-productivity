@@ -80,7 +80,7 @@
     "electron-localshortcut": "^3.1.0",
     "electron-log": "^4.2.4",
     "electron-window-state": "^5.0.3",
-    "googleapis": "^61.0.0",
+    "googleapis": "^71.0.0",
     "node-fetch": "^2.6.1",
     "stacktrace-js": "^2.0.1"
   },
