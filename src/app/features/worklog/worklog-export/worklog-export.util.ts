@@ -13,6 +13,10 @@ import { ItemsByKey, RowItem, TaskFields, WorklogExportData } from './worklog-ex
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
 
+/**
+ * Depending on groupBy it gets a map of RowItems by groupKeys (date, task.id, task.id+date).
+ * Then it sorts and reiterates on groupKey and converts the map into a simple array of RowItems.
+ */
 export const createRows = (data: WorklogExportData, groupBy: WorklogGrouping): RowItem[] => {
   let groups: ItemsByKey<RowItem> = {};
 
@@ -35,6 +39,10 @@ export const createRows = (data: WorklogExportData, groupBy: WorklogGrouping): R
   return rows;
 };
 
+/**
+ * For each task it sets taskFields and iterates over timeSpentOnDay.
+ * For each timeSpentOnDay it sets timeFields and either creates a new taskGroup or pushes to a previous one.
+ */
 const handleDateGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
   const taskGroups: ItemsByKey<RowItem> = {};
   for (const task of data.tasks) {
@@ -93,6 +101,10 @@ const skipTask = (task: WorklogTask, groupBy: WorklogGrouping): boolean => {
   || (groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0);
 };
 
+/**
+ * For each task creates a new rowItem without needing to push to previous taskGroups, unlike handleDateGroup.
+ * We're still creating a map since we will use the key for sorting in the next step.
+ */
 const handleTaskGroup = (data: WorklogExportData, groupBy: WorklogGrouping): ItemsByKey<RowItem> => {
   const taskGroups: ItemsByKey<RowItem> = {};
   for (const task of data.tasks) {
@@ -111,6 +123,10 @@ const handleTaskGroup = (data: WorklogExportData, groupBy: WorklogGrouping): Ite
   return taskGroups;
 };
 
+/**
+ * For each task creates a new rowItem without needing to push to previous taskGroups, unlike handleDateGroup.
+ * We're still creating a map since we will use the key for sorting in the next step.
+ */
 const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
   const taskGroups: ItemsByKey<RowItem> = {};
   for (const task of data.tasks) {
@@ -130,6 +146,9 @@ const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
   return taskGroups;
 };
 
+/**
+ * Unfolds task into taskFields while mapping id's to titles, and minor formatting
+ */
 const getTaskFields = (task: WorklogTask, data: WorklogExportData): TaskFields => {
   const titlesWithSub = [task.title];
   const titles = task.parentId ?
@@ -164,6 +183,9 @@ const sortDateStrings = (dates: string[]): string[] => {
   });
 };
 
+/**
+ * Reiterates cell by cell and applies formatting based on requested Column Type
+ */
 export const formatRows = (rows: RowItem[], options: WorklogExportSettingsCopy): (string | number | undefined)[][] => {
   return rows.map((row: RowItem) => {
     return options.cols.map(col => {
