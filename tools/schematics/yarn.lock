@@ -13,7 +13,7 @@
     rxjs "6.6.3"
     source-map "0.7.3"
 
-"@angular-devkit/core@11.2.9", "@angular-devkit/core@^11.2.8":
+"@angular-devkit/core@11.2.9", "@angular-devkit/core@^11.2.9":
   version "11.2.9"
   resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-11.2.9.tgz#c00cd6e3a6d7803eab85476063f296cd93e6004d"
   integrity sha512-TqihgUEKjX4C1hSd8RgUyCwuezFRdput9Ctcq8c4VgOcseEnXq3BkCSJbXtUh4Fln8WPxM7WHM8HClcWya/41g==
