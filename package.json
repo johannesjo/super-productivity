@@ -76,7 +76,7 @@
     }
   ],
   "dependencies": {
-    "electron-dl": "^3.0.2",
+    "electron-dl": "^3.2.1",
     "electron-localshortcut": "^3.1.0",
     "electron-log": "^4.2.4",
     "electron-window-state": "^5.0.3",
