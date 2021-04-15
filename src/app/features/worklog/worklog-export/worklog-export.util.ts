@@ -4,190 +4,188 @@ import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { roundDuration } from '../../../util/round-duration';
 import { roundTime } from '../../../util/round-time';
 import { unique } from '../../../util/unique';
-import { Project, ProjectCopy } from '../../project/project.model';
-import { Tag, TagCopy } from '../../tag/tag.model';
+import { ProjectCopy } from '../../project/project.model';
+import { TagCopy } from '../../tag/tag.model';
 import { WorklogTask } from '../../tasks/task.model';
-import { WorkStartEnd } from '../../work-context/work-context.model';
 import { WorklogExportSettingsCopy, WorklogGrouping } from '../worklog.model';
+import { ItemsByKey, RowItem, TaskFields, WorklogExportData } from './worklog-export.model';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
 
-interface RowItem {
-  dates: string[];
-  workStart: number | undefined;
-  workEnd: number | undefined;
-  timeSpent: number;
-  timeEstimate: number;
-  tasks: WorklogTask[];
-  titles?: string[];
-  titlesWithSub?: string[];
-  notes: string[];
-  projects: string[];
-  tags: string[];
-}
+/**
+ * Depending on groupBy it gets a map of RowItems by groupKeys (date, task.id, date_task.id).
+ * Then it sorts and reiterates on groupKey and converts the map into a simple array of RowItems.
+ */
+export const createRows = (data: WorklogExportData, groupBy: WorklogGrouping): RowItem[] => {
+  let groups: ItemsByKey<RowItem> = {};
 
-export const createRows = (tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd,
-  groupBy: WorklogGrouping, allProjects: Project[], allTags: Tag[]): RowItem[] => {
-
-  const mapToGroups = (task: WorklogTask) => {
-    const taskGroups: { [key: string]: RowItem } = {};
-    const createEmptyGroup = (): RowItem => {
-      return {
-        dates: [],
-        timeSpent: 0,
-        timeEstimate: 0,
-        tasks: [],
-        titlesWithSub: [],
-        titles: [],
-        notes: [],
-        projects: [],
-        tags: [],
-        workStart: undefined,
-        workEnd: undefined,
-      };
-    };
-
-    // If we're grouping by parent task ignore subtasks
-    // If we're grouping by task ignore parent tasks
-    if ((groupBy === WorklogGrouping.PARENT && task.parentId !== null)
-      || (groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0)
-    ) {
-      return taskGroups;
-    }
-
-    switch (groupBy) {
-      case WorklogGrouping.DATE:
-        if (!task.timeSpentOnDay) {
-          return {};
-        }
-        const numDays = Object.keys(task.timeSpentOnDay).length;
-        Object.keys(task.timeSpentOnDay).forEach(day => {
-          taskGroups[day] = {
-            dates: [day],
-            tasks: [task],
-            notes: (task.notes) ? [task.notes] : [],
-            projects: (task.projectId) ? [task.projectId] : [],
-            tags: task.tagIds,
-            workStart: startTimes[day],
-            workEnd: endTimes[day],
-            timeSpent: 0,
-            timeEstimate: 0
-          };
-          if (!task.subTaskIds || task.subTaskIds.length === 0) {
-            taskGroups[day].timeSpent = task.timeSpentOnDay[day];
-            taskGroups[day].timeEstimate = task.timeEstimate / numDays;
-          }
-        });
-        break;
-      case WorklogGrouping.PARENT:
-      case WorklogGrouping.TASK:
-        taskGroups[task.id] = createEmptyGroup();
-
-        // by design subtasks don't have tags, so we must set its parent's tags
-        if (task.parentId !== null) {
-          taskGroups[task.id].tags = (tasks.find(t => t.id === task.parentId) as WorklogTask).tagIds;
-        } else {
-          taskGroups[task.id].tags = task.tagIds;
-        }
-
-        taskGroups[task.id].tasks = [task];
-        taskGroups[task.id].notes = (task.notes) ? [task.notes] : [];
-        taskGroups[task.id].projects = (task.projectId) ? [task.projectId] : [];
-        taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
-        taskGroups[task.id].timeEstimate = task.timeEstimate;
-        taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
-        break;
-      default: // group by work log (don't group at all)
-        Object.keys(task.timeSpentOnDay).forEach(day => {
-          const groupKey = task.id + '_' + day;
-          taskGroups[groupKey] = createEmptyGroup();
-          taskGroups[groupKey].tasks = [task];
-          taskGroups[groupKey].notes = (task.notes) ? [task.notes] : [];
-          taskGroups[groupKey].projects = (task.projectId) ? [task.projectId] : [];
-          taskGroups[groupKey].tags = task.tagIds;
-          taskGroups[groupKey].dates = [day];
-          taskGroups[groupKey].workStart = startTimes[day];
-          taskGroups[groupKey].workEnd = endTimes[day];
-          taskGroups[groupKey].timeEstimate = task.subTaskIds.length > 0 ? 0 : task.timeEstimate;
-          taskGroups[groupKey].timeSpent = task.subTaskIds.length > 0 ? 0 : task.timeSpentOnDay[day];
-        });
-    }
-    return taskGroups;
-  };
-
-  const groups: { [key: string]: RowItem } = {};
-
-  tasks.forEach((task: WorklogTask) => {
-    const taskGroups = mapToGroups(task);
-    Object.keys(taskGroups).forEach(groupKey => {
-      if (groups[groupKey]) {
-        groups[groupKey].tasks.push(...taskGroups[groupKey].tasks);
-        groups[groupKey].notes.push(...taskGroups[groupKey].notes);
-        groups[groupKey].projects.push(...taskGroups[groupKey].projects);
-        groups[groupKey].tags = groups[groupKey].tags.concat(taskGroups[groupKey].tags);
-        groups[groupKey].dates.push(...taskGroups[groupKey].dates);
-        if (taskGroups[groupKey].workStart !== undefined) {
-          // TODO check if this works as intended
-          groups[groupKey].workStart = Math.min(groups[groupKey].workStart as number, taskGroups[groupKey].workStart as number);
-        }
-        if (taskGroups[groupKey].workEnd !== undefined) {
-          // TODO check if this works as intended
-          groups[groupKey].workEnd = Math.min(groups[groupKey].workEnd as number, taskGroups[groupKey].workEnd as number);
-        }
-        groups[groupKey].timeEstimate += taskGroups[groupKey].timeEstimate;
-        groups[groupKey].timeSpent += taskGroups[groupKey].timeSpent;
-      } else {
-        groups[groupKey] = taskGroups[groupKey];
-      }
-    });
-
-  });
+  switch (groupBy) {
+    case WorklogGrouping.DATE:
+      groups = handleDateGroup(data);
+      break;
+    case WorklogGrouping.WORKLOG: // don't group at all
+      groups = handleWorklogGroup(data);
+      break;
+    default: // group by TASK/PARENT
+      groups = handleTaskGroup(data, groupBy);
+  }
 
   const rows: RowItem[] = [];
   Object.keys(groups).sort().forEach((key => {
-    const group = groups[key];
-
-    group.titlesWithSub = unique(group.tasks.map(t => t.title));
-    // TODO check all the typing
-    group.titles = unique<any>(
-      group.tasks.map((t: WorklogTask) => (
-        t.parentId && (tasks.find(ptIN => ptIN.id === t.parentId) as WorklogTask).title
-      ) || (!t.parentId && t.title)
-      )
-    ).filter((title: string) => !!title);
-    group.dates = unique(group.dates).sort((a: string, b: string) => {
-      const dateA: number = new Date(a).getTime();
-      const dateB: number = new Date(b).getTime();
-      if (dateA === dateB) {
-        return 0;
-      } else if (dateA < dateB) {
-        return -1;
-      }
-      return 1;
-    });
-
-    group.notes = group.notes.map((note) => {
-      return note.replace(/\n/g, ' - ');
-    });
-
-    group.projects = unique(group.projects);
-    group.projects = group.projects.map((pId: string) => {
-      return (allProjects.find(project => project.id === pId) as ProjectCopy).title;
-    });
-
-    group.tags = unique(group.tags);
-    group.tags = group.tags.map((tId: string) => {
-      return (allTags.find(tag => tag.id === tId) as TagCopy).title;
-    });
-
-    rows.push(group);
+    rows.push(groups[key]);
   }));
 
   return rows;
-
 };
 
+/**
+ * For each task it sets taskFields and iterates over timeSpentOnDay.
+ * For each timeSpentOnDay it sets timeFields and either creates a new taskGroup or pushes to a previous one.
+ */
+const handleDateGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
+  const taskGroups: ItemsByKey<RowItem> = {};
+  for (const task of data.tasks) {
+    if (!task.timeSpentOnDay) { continue; }
+
+    const taskFields = getTaskFields(task, data);
+    const numDays = Object.keys(task.timeSpentOnDay).length;
+    let timeEstimate = 0;
+    let timeSpent = 0;
+    Object.keys(task.timeSpentOnDay).forEach(day => {
+      if (!task.subTaskIds || task.subTaskIds.length === 0) {
+        timeSpent = task.timeSpentOnDay[day];
+        timeEstimate = task.timeEstimate / numDays;
+      }
+
+      const rowItem: RowItem = {
+          dates: [day],
+          workStart: data.workTimes.start[day],
+          workEnd: data.workTimes.end[day],
+          timeSpent,
+          timeEstimate,
+          ...taskFields
+      };
+
+      if (!taskGroups[day]) {
+        taskGroups[day] = rowItem;
+      } else {
+        taskGroups[day].titles = unique([ ...taskGroups[day].titles, ...rowItem.titles ]);
+        taskGroups[day].titlesWithSub = [ ...taskGroups[day].titlesWithSub, ...rowItem.titlesWithSub ];
+        taskGroups[day].tasks = [ ...taskGroups[day].tasks, ...rowItem.tasks ];
+        taskGroups[day].notes = [ ...taskGroups[day].notes, ...rowItem.notes ];
+        taskGroups[day].projects = unique([ ...taskGroups[day].projects, ...rowItem.projects ]);
+        taskGroups[day].tags = unique([ ...taskGroups[day].tags, ...rowItem.tags ]);
+        if (taskGroups[day].workStart !== undefined) {
+          // TODO check if this works as intended
+          taskGroups[day].workStart = Math.min(taskGroups[day].workStart as number, rowItem.workStart as number);
+        }
+        if (taskGroups[day].workEnd !== undefined) {
+          // TODO check if this works as intended
+          taskGroups[day].workEnd = Math.min(taskGroups[day].workEnd as number, rowItem.workEnd as number);
+        }
+        taskGroups[day].timeEstimate += rowItem.timeEstimate;
+        taskGroups[day].timeSpent += rowItem.timeSpent;
+      }
+    });
+  }
+  return taskGroups;
+};
+
+/**
+ * If we're grouping by parent task ignore subtasks
+ * If we're grouping by task ignore parent tasks
+ */
+const skipTask = (task: WorklogTask, groupBy: WorklogGrouping): boolean => {
+  return (groupBy === WorklogGrouping.PARENT && task.parentId !== null)
+  || (groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0);
+};
+
+/**
+ * For each task creates a new rowItem without needing to push to previous taskGroups, unlike handleDateGroup.
+ * We're still creating a map since we will use the key for sorting in the next step.
+ */
+const handleTaskGroup = (data: WorklogExportData, groupBy: WorklogGrouping): ItemsByKey<RowItem> => {
+  const taskGroups: ItemsByKey<RowItem> = {};
+  for (const task of data.tasks) {
+    if (skipTask(task, groupBy)) { continue; };
+    const taskFields = getTaskFields(task, data);
+    const dates = sortDateStrings(Object.keys(task.timeSpentOnDay));
+    taskGroups[task.id] = {
+      dates,
+      timeEstimate: task.timeEstimate,
+      timeSpent: Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0),
+      workStart: 0,
+      workEnd: 0,
+      ...taskFields
+    };
+  }
+  return taskGroups;
+};
+
+/**
+ * For each task creates a new rowItem without needing to push to previous taskGroups, unlike handleDateGroup.
+ * We're still creating a map since we will use the key for sorting in the next step.
+ */
+const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
+  const taskGroups: ItemsByKey<RowItem> = {};
+  for (const task of data.tasks) {
+    Object.keys(task.timeSpentOnDay).forEach(day => {
+      const groupKey = day + '_' + task.id;
+      const taskFields = getTaskFields(task, data);
+      taskGroups[groupKey] = {
+        dates: [day],
+        timeEstimate: task.subTaskIds.length > 0 ? 0 : task.timeEstimate,
+        timeSpent: task.subTaskIds.length > 0 ? 0 : task.timeSpentOnDay[day],
+        workStart: data.workTimes.start[day],
+        workEnd: data.workTimes.end[day],
+        ...taskFields
+      };
+    });
+  }
+  return taskGroups;
+};
+
+/**
+ * Unfolds task into taskFields while mapping id's to titles, and minor formatting
+ */
+const getTaskFields = (task: WorklogTask, data: WorklogExportData): TaskFields => {
+  const titlesWithSub = [task.title];
+  const titles = task.parentId
+    ? [(data.tasks.find(ptIN => ptIN.id === task.parentId) as WorklogTask).title]
+    : [task.title];
+
+  const notes = task.notes ? [task.notes.replace(/\n/g, ' - ')] : [];
+  const projects = task.projectId
+    ? [(data.projects.find(project => project.id === task.projectId) as ProjectCopy).title]
+    : [];
+
+  // by design subtasks don't have tags, so we must set its parent's tags
+  let tags = task.parentId !== null
+    ? (data.tasks.find(t => t.id === task.parentId) as WorklogTask).tagIds
+    : task.tagIds;
+  tags = tags.map( tagId => (data.tags.find(tag => tag.id === tagId) as TagCopy).title);
+
+  const tasks = [ task ];
+  return { tasks, titlesWithSub, titles, notes, projects, tags };
+};
+
+const sortDateStrings = (dates: string[]): string[] => {
+  return dates.sort((a: string, b: string) => {
+    const dateA: number = new Date(a).getTime();
+    const dateB: number = new Date(b).getTime();
+    if (dateA === dateB) {
+      return 0;
+    } else if (dateA < dateB) {
+      return -1;
+    }
+    return 1;
+  });
+};
+
+/**
+ * Reiterates cell by cell and applies formatting based on requested Column Type
+ */
 export const formatRows = (rows: RowItem[], options: WorklogExportSettingsCopy): (string | number | undefined)[][] => {
   return rows.map((row: RowItem) => {
     return options.cols.map(col => {
@@ -266,6 +264,9 @@ export const formatRows = (rows: RowItem[], options: WorklogExportSettingsCopy):
   });
 };
 
+/**
+ * Prepares the csv for export
+ */
 export const formatText = (headlineCols: string[], rows: (string | number | undefined)[][]): string => {
   let txt = '';
   txt += headlineCols.join(';') + LINE_SEPARATOR;
