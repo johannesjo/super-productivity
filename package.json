@@ -138,7 +138,7 @@
     "cdav-library": "nextcloud/cdav-library",
     "chart.js": "^2.8.0",
     "chromedriver": "^89.0.0",
-    "clipboard": "^2.0.1",
+    "clipboard": "^2.0.8",
     "codelyzer": "^6.0.0",
     "conventional-changelog-cli": "^2.0.21",
     "cross-env": "^7.0.3",
