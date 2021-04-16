@@ -12,6 +12,7 @@ import { DataImportService } from '../../imex/sync/data-import.service';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { METRIC_MODEL_VERSION } from './metric.const';
 import { SyncService } from '../../imex/sync/sync.service';
+import { unique } from '../../util/unique';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +36,7 @@ export class MigrateMetricService {
       first(),
     ).subscribe(async (metricState: MetricState) => {
       console.log('Migrating Legacy Metric State to new model');
-      console.log(metricState [MODEL_VERSION_KEY], {metricState});
+      console.log('metricMigration:', metricState [MODEL_VERSION_KEY], {metricState});
       if (!metricState [MODEL_VERSION_KEY]) {
         const projectState = await this._persistenceService.project.loadState();
         // For new instances
@@ -49,17 +50,21 @@ export class MigrateMetricService {
         let newO = initialObstructionState;
 
         for (const id of (projectState.ids as string[])) {
-          const m = await this._persistenceService.legacyMetric.load(id);
-          const i = await this._persistenceService.legacyImprovement.load(id);
-          const o = await this._persistenceService.legacyObstruction.load(id);
-          if (m && (o || i)) {
-            console.log({m, i, o});
-            newM = this._mergeMetricsState(newM, m);
-            newI = this._mergeIntoState(newI, i) as ImprovementState;
-            newO = this._mergeIntoState(newO, o);
+          const mForProject = await this._persistenceService.legacyMetric.load(id);
+          const iForProject = await this._persistenceService.legacyImprovement.load(id);
+          const oForProject = await this._persistenceService.legacyObstruction.load(id);
+          if (mForProject && (oForProject || iForProject)) {
+            console.log('metricMigration:', {mForProject, iForProject, oForProject});
+            newM = this._mergeMetricsState(newM, mForProject);
+            if (iForProject) {
+              newI = this._mergeIntoState(newI, iForProject) as ImprovementState;
+            }
+            if (oForProject) {
+              newO = this._mergeIntoState(newO, oForProject);
+            }
           }
         }
-        console.log({newM, newI, newO});
+        console.log('metricMigration:', {newM, newI, newO});
 
         await this._persistenceService.improvement.saveState(newI, {isSyncModelChange: false});
         await this._persistenceService.obstruction.saveState(newO, {isSyncModelChange: false});
@@ -77,7 +82,8 @@ export class MigrateMetricService {
     const s = {
       ...completeState,
       ...newState,
-      ids: [...completeState.ids as string[], ...newState.ids as string[]],
+      // NOTE: we need to make them unique, because we're possibly merging multiple entities into one
+      ids: unique([...completeState.ids as string[], ...newState.ids as string[]]),
       entities: {
         ...completeState.entities,
         ...newState.entities,
@@ -87,6 +93,7 @@ export class MigrateMetricService {
     Object.keys(newState.entities).forEach(dayStr => {
       const mOld = completeState.entities[dayStr] as MetricCopy;
       const mNew = newState.entities[dayStr] as MetricCopy;
+      // merge same entry into one
       if (mOld && mNew) {
         s.entities[dayStr] = {
           ...mOld,
