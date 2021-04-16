@@ -76,7 +76,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
       if (this.section && this.section.customSection && this.customFormRef && this.section.customSection) {
         this.customFormRef.clear();
         // dirty trick to make sure data is actually there
-        this._viewDestroyTimeout = setTimeout(() => {
+        this._viewDestroyTimeout = window.setTimeout(() => {
           this._loadCustomSection((this.section as any).customSection);
           this._cd.detectChanges();
         });
