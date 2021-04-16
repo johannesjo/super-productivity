@@ -1823,20 +1823,15 @@
   resolved "https://registry.yarnpkg.com/@types/nightwatch/-/nightwatch-1.3.2.tgz#dd3e8f7e067b3574d0868faefb96c5f75b7790f5"
   integrity sha512-1c8qFnbWj6DUweZOHkp2opUQqTsqA4E30UARZUuIZNQzjXHaEK57HWYlxm1fEpbZK30Gh2AbJoEh6XnFVm3Hxg==
 
-"@types/node@*":
-  version "14.14.22"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.22.tgz#0d29f382472c4ccf3bd96ff0ce47daf5b7b84b18"
-  integrity sha512-g+f/qj/cNcqKkc3tFqlXOYjrmZA+jNBiDzbP3kH+B+otKFqAdPgVTGP1IeKRdMml/aE69as5S4FqtxAbl+LaMw==
+"@types/node@*", "@types/node@>=10.0.0", "@types/node@^14.6.2":
+  version "14.14.41"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.41.tgz#d0b939d94c1d7bd53d04824af45f1139b8c45615"
+  integrity sha512-dueRKfaJL4RTtSa7bWeTK1M+VH+Gns73oCgzvYfHZywRCoPSd8EkXBL0mZ9unPTveBn+D9phZBaxuzpwjWkW0g==
 
-"@types/node@12", "@types/node@^12.0.12":
+"@types/node@12":
   version "12.19.15"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.19.15.tgz#0de7e978fb43db62da369db18ea088a63673c182"
   integrity sha512-lowukE3GUI+VSYSu6VcBXl14d61Rp5hA1D+61r16qnwC0lYNSqdxcvRh0pswejorHfS+HgwBasM8jLXz0/aOsw==
-
-"@types/node@>=10.0.0":
-  version "14.14.37"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.37.tgz#a3dd8da4eb84a996c36e331df98d82abd76b516e"
-  integrity sha512-XYmBiy+ohOR4Lh5jE379fV2IU+6Jn4g5qASinhitfyO71b/sCo6MKsMLF5tc7Zf2CE8hViVQyYSobJNke8OvUw==
 
 "@types/node@^8.0.31":
   version "8.10.66"
@@ -5191,13 +5186,13 @@ electron-window-state@^5.0.3:
     jsonfile "^4.0.0"
     mkdirp "^0.5.1"
 
-electron@^10.2.0:
-  version "10.3.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-10.3.1.tgz#9a182af5f9c6745dbddec0bd39ef760f453ae96f"
-  integrity sha512-Up61+JHeFWGPVNW3q00HDdsPYGDFR2Rwqezis5mGVNNRLwqLH5XcoluavoEBlTtdUR6IYyYU7cwZdZTsygwZGg==
+electron@^12.0.4:
+  version "12.0.4"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-12.0.4.tgz#c2ca4710d0e4da7db6d31c4f55777b08bfcb08e5"
+  integrity sha512-A8Lq3YMZ1CaO1z5z5nsyFxIwkgwXLHUwL2pf9MVUHpq7fv3XUewCMD98EnLL3DdtiyCvw5KMkeT1WGsZh8qFug==
   dependencies:
     "@electron/get" "^1.0.1"
-    "@types/node" "^12.0.12"
+    "@types/node" "^14.6.2"
     extract-zip "^1.0.3"
 
 elliptic@^6.5.3:
