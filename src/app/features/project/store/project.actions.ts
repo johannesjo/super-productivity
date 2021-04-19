@@ -5,25 +5,25 @@ import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 
 export enum ProjectActionTypes {
-  LoadProjectRelatedDataSuccess = '[Project] Load Project related Data Success',
-  SetCurrentProject = '[Project] SetCurrentProject',
+  'LoadProjectRelatedDataSuccess' = '[Project] Load Project related Data Success',
+  'SetCurrentProject' = '[Project] SetCurrentProject',
 
   // Project Actions
-  LoadProjects = '[Project] Load Projects',
-  AddProject = '[Project] Add Project',
-  AddProjects = '[Project] Add Projects',
-  UpsertProject = '[Project] Upsert Project',
-  UpdateProject = '[Project] Update Project',
-  UpdateProjectWorkStart = '[Project] Update Work Start',
-  UpdateProjectWorkEnd = '[Project] Update Work End',
-  AddToProjectBreakTime = '[Project] Add to Break Time',
-  UpdateProjectAdvancedCfg = '[Project] Update Project Advanced Cfg',
-  UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
-  DeleteProject = '[Project] Delete Project',
-  DeleteProjects = '[Project] Delete Projects',
-  ArchiveProject = '[Project] Archive Project',
-  UnarchiveProject = '[Project] Unarchive Project',
-  UpdateProjectOrder = '[Project] Update Project Order',
+  'LoadProjects' = '[Project] Load Projects',
+  'AddProject' = '[Project] Add Project',
+  'AddProjects' = '[Project] Add Projects',
+  'UpsertProject' = '[Project] Upsert Project',
+  'UpdateProject' = '[Project] Update Project',
+  'UpdateProjectWorkStart' = '[Project] Update Work Start',
+  'UpdateProjectWorkEnd' = '[Project] Update Work End',
+  'AddToProjectBreakTime' = '[Project] Add to Break Time',
+  'UpdateProjectAdvancedCfg' = '[Project] Update Project Advanced Cfg',
+  'UpdateProjectIssueProviderCfg' = '[Project] Update Project Issue Provider Cfg',
+  'DeleteProject' = '[Project] Delete Project',
+  'DeleteProjects' = '[Project] Delete Projects',
+  'ArchiveProject' = '[Project] Archive Project',
+  'UnarchiveProject' = '[Project] Unarchive Project',
+  'UpdateProjectOrder' = '[Project] Update Project Order',
 }
 
 export class LoadProjectRelatedDataSuccess implements Action {

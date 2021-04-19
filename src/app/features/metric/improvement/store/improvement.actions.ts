@@ -3,15 +3,15 @@ import { Update } from '@ngrx/entity';
 import { Improvement } from '../improvement.model';
 
 export enum ImprovementActionTypes {
-  AddImprovement = '[Improvement] Add Improvement',
-  UpdateImprovement = '[Improvement] Update Improvement',
-  DeleteImprovement = '[Improvement] Delete Improvement',
-  DeleteImprovements = '[Improvement] Delete multiple Improvements',
-  HideImprovement = '[Improvement] Hide Improvement',
-  ToggleImprovementRepeat = '[Improvement] Toggle Improvement Repeat',
-  DisableImprovementRepeat = '[Improvement] Disable Improvement Repeat',
-  ClearHiddenImprovements = '[Improvement] Clear Hidden Improvements',
-  AddImprovementCheckedDay = '[Improvement] Add checked day',
+  'AddImprovement' = '[Improvement] Add Improvement',
+  'UpdateImprovement' = '[Improvement] Update Improvement',
+  'DeleteImprovement' = '[Improvement] Delete Improvement',
+  'DeleteImprovements' = '[Improvement] Delete multiple Improvements',
+  'HideImprovement' = '[Improvement] Hide Improvement',
+  'ToggleImprovementRepeat' = '[Improvement] Toggle Improvement Repeat',
+  'DisableImprovementRepeat' = '[Improvement] Disable Improvement Repeat',
+  'ClearHiddenImprovements' = '[Improvement] Clear Hidden Improvements',
+  'AddImprovementCheckedDay' = '[Improvement] Add checked day',
 }
 
 export class AddImprovement implements Action {

@@ -3,10 +3,10 @@ import { Update } from '@ngrx/entity';
 import { Obstruction } from '../obstruction.model';
 
 export enum ObstructionActionTypes {
-  AddObstruction = '[Obstruction] Add Obstruction',
-  UpdateObstruction = '[Obstruction] Update Obstruction',
-  DeleteObstruction = '[Obstruction] Delete Obstruction',
-  DeleteObstructions = '[Obstruction] Delete multiple Obstructions',
+  'AddObstruction' = '[Obstruction] Add Obstruction',
+  'UpdateObstruction' = '[Obstruction] Update Obstruction',
+  'DeleteObstruction' = '[Obstruction] Delete Obstruction',
+  'DeleteObstructions' = '[Obstruction] Delete multiple Obstructions',
 }
 
 export class AddObstruction implements Action {

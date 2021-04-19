@@ -4,15 +4,15 @@ import { Bookmark } from '../bookmark.model';
 import { BookmarkState } from './bookmark.reducer';
 
 export enum BookmarkActionTypes {
-  LoadBookmarkState = '[Bookmark] Load Bookmark State',
-  AddBookmark = '[Bookmark] Add Bookmark',
-  UpdateBookmark = '[Bookmark] Update Bookmark',
-  DeleteBookmark = '[Bookmark] Delete Bookmark',
+  'LoadBookmarkState' = '[Bookmark] Load Bookmark State',
+  'AddBookmark' = '[Bookmark] Add Bookmark',
+  'UpdateBookmark' = '[Bookmark] Update Bookmark',
+  'DeleteBookmark' = '[Bookmark] Delete Bookmark',
 
-  ShowBookmarks = '[Bookmark] Show Bookmarks',
-  HideBookmarks = '[Bookmark] Hide Bookmarks',
-  ToggleBookmarks = '[Bookmark] Toggle Bookmarks',
-  ReorderBookmarks = '[Bookmark] Reorder Bookmarks',
+  'ShowBookmarks' = '[Bookmark] Show Bookmarks',
+  'HideBookmarks' = '[Bookmark] Hide Bookmarks',
+  'ToggleBookmarks' = '[Bookmark] Toggle Bookmarks',
+  'ReorderBookmarks' = '[Bookmark] Reorder Bookmarks',
 }
 
 export class LoadBookmarkState implements Action {

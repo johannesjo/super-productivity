@@ -41,7 +41,7 @@
         "arrow-body-style": "off",
         "@angular-eslint/no-input-rename": "off",
         "@typescript-eslint/naming-convention": [
-          "warn",
+          "error",
           {
             "selector": "default",
             "format": [
@@ -78,11 +78,11 @@
             ]
           }
         ],
-        "prefer-const": "warn",
-        "@typescript-eslint/no-unused-expressions": "warn",
-        "@typescript-eslint/no-empty-interface": "warn",
+        "prefer-const": "error",
+        "@typescript-eslint/no-unused-expressions": "error",
+        "@typescript-eslint/no-empty-interface": "error",
         "max-len": [
-          "warn",
+          "error",
           {
             "ignorePattern": "^import \\{.+;$",
             "ignoreRegExpLiterals": true,
@@ -90,20 +90,20 @@
             "code": 150
           }
         ],
-        "id-blacklist": "warn",
-        "@typescript-eslint/member-delimiter-style": "warn",
+        "id-blacklist": "error",
+        "@typescript-eslint/member-delimiter-style": "error",
         "no-shadow": "off",
-        "@typescript-eslint/no-shadow": "warn",
+        "@typescript-eslint/no-shadow": ["error"],
         "prefer-arrow/prefer-arrow-functions": "off",
         "@angular-eslint/directive-selector": [
-          "warn",
+          "error",
           {
             "type": "attribute",
             "prefix": "",
             "style": "camelCase"
           }
         ],
-        "@typescript-eslint/ban-types": "warn"
+        "@typescript-eslint/ban-types": "error"
       }
     },
     {

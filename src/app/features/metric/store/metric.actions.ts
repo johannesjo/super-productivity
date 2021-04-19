@@ -3,10 +3,10 @@ import { Update } from '@ngrx/entity';
 import { Metric } from '../metric.model';
 
 export enum MetricActionTypes {
-  AddMetric = '[Metric] Add Metric',
-  UpdateMetric = '[Metric] Update Metric',
-  UpsertMetric = '[Metric] Upsert Metric',
-  DeleteMetric = '[Metric] Delete Metric',
+  'AddMetric' = '[Metric] Add Metric',
+  'UpdateMetric' = '[Metric] Update Metric',
+  'UpsertMetric' = '[Metric] Upsert Metric',
+  'DeleteMetric' = '[Metric] Delete Metric',
 }
 
 export class AddMetric implements Action {

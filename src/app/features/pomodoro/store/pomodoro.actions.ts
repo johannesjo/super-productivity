@@ -1,11 +1,11 @@
 import { Action } from '@ngrx/store';
 
 export enum PomodoroActionTypes {
-  StartPomodoro = '[Pomodoro] Start Pomodoro',
-  PausePomodoro = '[Pomodoro] Pause Pomodoro',
-  StopPomodoro = '[Pomodoro] Stop Pomodoro',
-  FinishPomodoroSession = '[Pomodoro] Finish Pomodoro Session',
-  SkipPomodoroBreak = '[Pomodoro] Skip Break',
+  'StartPomodoro' = '[Pomodoro] Start Pomodoro',
+  'PausePomodoro' = '[Pomodoro] Pause Pomodoro',
+  'StopPomodoro' = '[Pomodoro] Stop Pomodoro',
+  'FinishPomodoroSession' = '[Pomodoro] Finish Pomodoro Session',
+  'SkipPomodoroBreak' = '[Pomodoro] Skip Break',
 }
 
 export class StartPomodoro implements Action {

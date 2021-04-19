@@ -3,12 +3,12 @@ import { Update } from '@ngrx/entity';
 import { TaskRepeatCfg } from '../task-repeat-cfg.model';
 
 export enum TaskRepeatCfgActionTypes {
-  AddTaskRepeatCfgToTask = '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
-  UpdateTaskRepeatCfg = '[TaskRepeatCfg] Update TaskRepeatCfg',
-  UpdateTaskRepeatCfgs = '[TaskRepeatCfg] Update multiple TaskRepeatCfgs',
-  UpsertTaskRepeatCfg = '[TaskRepeatCfg] Upsert TaskRepeatCfg',
-  DeleteTaskRepeatCfg = '[TaskRepeatCfg] Delete TaskRepeatCfg',
-  DeleteTaskRepeatCfgs = '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
+  'AddTaskRepeatCfgToTask' = '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
+  'UpdateTaskRepeatCfg' = '[TaskRepeatCfg] Update TaskRepeatCfg',
+  'UpdateTaskRepeatCfgs' = '[TaskRepeatCfg] Update multiple TaskRepeatCfgs',
+  'UpsertTaskRepeatCfg' = '[TaskRepeatCfg] Upsert TaskRepeatCfg',
+  'DeleteTaskRepeatCfg' = '[TaskRepeatCfg] Delete TaskRepeatCfg',
+  'DeleteTaskRepeatCfgs' = '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
 }
 
 export class AddTaskRepeatCfgToTask implements Action {

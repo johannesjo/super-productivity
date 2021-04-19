@@ -6,42 +6,42 @@ import { RoundTimeOption } from '../../project/project.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 
 export enum TaskActionTypes {
-  SetCurrentTask = '[Task] SetCurrentTask',
-  SetSelectedTask = '[Task] SetSelectedTask',
-  UnsetCurrentTask = '[Task] UnsetCurrentTask',
+  'SetCurrentTask' = '[Task] SetCurrentTask',
+  'SetSelectedTask' = '[Task] SetSelectedTask',
+  'UnsetCurrentTask' = '[Task] UnsetCurrentTask',
 
   // Task Actions
-  AddTask = '[Task][Issue] Add Task',
-  UpdateTaskUi = '[Task] Update Task Ui',
-  UpdateTaskTags = '[Task] Update Task Tags',
-  RemoveTagsForAllTasks = '[Task] Remove Tags from all Tasks',
-  ToggleTaskShowSubTasks = '[Task] Toggle Show Sub Tasks',
-  UpdateTask = '[Task] Update Task',
-  UpdateTasks = '[Task] Update Tasks',
-  DeleteTask = '[Task] Delete Task',
-  DeleteMainTasks = '[Task] Delete Main Tasks',
-  UndoDeleteTask = '[Task] Undo Delete Task',
-  MoveSubTask = '[Task] Move sub task',
-  MoveSubTaskUp = '[Task] Move up',
-  MoveSubTaskDown = '[Task] Move down',
-  AddTimeSpent = '[Task] Add time spent',
-  RemoveTimeSpent = '[Task] Remove time spent',
+  'AddTask' = '[Task][Issue] Add Task',
+  'UpdateTaskUi' = '[Task] Update Task Ui',
+  'UpdateTaskTags' = '[Task] Update Task Tags',
+  'RemoveTagsForAllTasks' = '[Task] Remove Tags from all Tasks',
+  'ToggleTaskShowSubTasks' = '[Task] Toggle Show Sub Tasks',
+  'UpdateTask' = '[Task] Update Task',
+  'UpdateTasks' = '[Task] Update Tasks',
+  'DeleteTask' = '[Task] Delete Task',
+  'DeleteMainTasks' = '[Task] Delete Main Tasks',
+  'UndoDeleteTask' = '[Task] Undo Delete Task',
+  'MoveSubTask' = '[Task] Move sub task',
+  'MoveSubTaskUp' = '[Task] Move up',
+  'MoveSubTaskDown' = '[Task] Move down',
+  'AddTimeSpent' = '[Task] Add time spent',
+  'RemoveTimeSpent' = '[Task] Remove time spent',
 
   // Reminders
-  AddTaskReminder = '[Task] Add reminder',
-  UpdateTaskReminder = '[Task] Update reminder',
-  RemoveTaskReminder = '[Task] Remove reminder',
+  'AddTaskReminder' = '[Task] Add reminder',
+  'UpdateTaskReminder' = '[Task] Update reminder',
+  'RemoveTaskReminder' = '[Task] Remove reminder',
 
   // Sub Task Actions
-  AddSubTask = '[Task] Add SubTask',
-  ConvertToMainTask = '[Task] Convert SubTask to main task',
+  'AddSubTask' = '[Task] Add SubTask',
+  'ConvertToMainTask' = '[Task] Convert SubTask to main task',
 
   // Other
-  RestoreTask = '[Task] Restore Task',
-  MoveToArchive = '[Task] Move to archive',
-  MoveToOtherProject = '[Task] Move tasks to other project',
-  ToggleStart = '[Task] Toggle start',
-  RoundTimeSpentForDay = '[Task] RoundTimeSpentForDay',
+  'RestoreTask' = '[Task] Restore Task',
+  'MoveToArchive' = '[Task] Move to archive',
+  'MoveToOtherProject' = '[Task] Move tasks to other project',
+  'ToggleStart' = '[Task] Toggle start',
+  'RoundTimeSpentForDay' = '[Task] RoundTimeSpentForDay',
 
 }
 

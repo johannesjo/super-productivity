@@ -4,9 +4,9 @@ import { TaskAttachment } from './task-attachment.model';
 
 // NOTE: all is handled in task reducer too
 export enum TaskAttachmentActionTypes {
-  AddTaskAttachment = '[TaskAttachment] Add TaskAttachment',
-  UpdateTaskAttachment = '[TaskAttachment] Update TaskAttachment',
-  DeleteTaskAttachment = '[TaskAttachment] Delete TaskAttachment',
+  'AddTaskAttachment' = '[TaskAttachment] Add TaskAttachment',
+  'UpdateTaskAttachment' = '[TaskAttachment] Update TaskAttachment',
+  'DeleteTaskAttachment' = '[TaskAttachment] Delete TaskAttachment',
 }
 
 export class AddTaskAttachment implements Action {
