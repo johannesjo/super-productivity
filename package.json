@@ -108,7 +108,7 @@
     "@angular/platform-server": "^11.2.10",
     "@angular/router": "^11.2.10",
     "@angular/service-worker": "^11.2.10",
-    "@biesbjerg/ngx-translate-extract": "^2.3.4",
+    "@biesbjerg/ngx-translate-extract": "^7.0.4",
     "@ngrx/data": "^11.1.0",
     "@ngrx/effects": "^11.1.0",
     "@ngrx/entity": "^11.1.0",
