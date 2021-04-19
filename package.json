@@ -178,7 +178,7 @@
     "ngx-date-time-picker-schedule": "^9.4.15",
     "ngx-markdown": "^10.0.0",
     "nightwatch": "^1.3.6",
-    "p-throttle": "^3.1.0",
+    "p-throttle": "^4.1.1",
     "pkce-challenge": "2.1.0",
     "query-string": "^7.0.0",
     "roboto-fontface": "^0.10.0",
