@@ -191,7 +191,7 @@
     "typescript": "~4.1.5",
     "utils-decorators": "^1.7.1",
     "webdav": "^3.5.0",
-    "zone.js": "~0.11.1"
+    "zone.js": "~0.11.4"
   },
   "resolutions": {
     "webpack": "4.44.2"
