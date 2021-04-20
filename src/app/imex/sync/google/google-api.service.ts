@@ -132,7 +132,7 @@ export class GoogleApiService {
 
   // Other interaction
 
-  logout() {
+  logout(): Promise<void> {
     this._updateSession({
       accessToken: null,
       expiresAt: null,
@@ -531,18 +531,18 @@ export class GoogleApiService {
       );
   }
 
-  private _loadJs(): Promise<any> {
+  private _loadJs(): Promise<unknown> {
     return new Promise((resolve, reject) => {
       if (this._isScriptLoaded) {
-        resolve();
+        resolve(undefined);
       }
 
       const loadFunction = () => {
         if (this._isScriptLoaded) {
-          resolve();
+          resolve(undefined);
         }
         this._isScriptLoaded = true;
-        resolve();
+        resolve(undefined);
       };
 
       const errorFunction = (e: unknown) => {
