@@ -304,10 +304,10 @@
     "@angular-devkit/core" "7.3.10"
     rxjs "6.3.3"
 
-"@angular-eslint/builder@^2.0.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@angular-eslint/builder/-/builder-2.1.0.tgz#79b35e653bcdd2c919aa9d2459545023990c67b2"
-  integrity sha512-FYKbZPTxj0gyzPikNBJa/Pi/aznj+/rQ1KeSnQH/b+NEXyEHNOUc8mzPDBRL1De6Lvla/infQh6vbo95bFdXVg==
+"@angular-eslint/builder@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@angular-eslint/builder/-/builder-4.0.0.tgz#ffc8b57a8c7f1567ac711c5f28047f4cc2b4ad0e"
+  integrity sha512-XzNHqxardo06wp2mNuP2Gghx6d+1NXhEO15jpD3mONSCPTjay56o05fOtlmu5dbgKkEEtpiBRB40E8CI4k1vkw==
 
 "@angular-eslint/eslint-plugin-template@4.0.0":
   version "4.0.0"
