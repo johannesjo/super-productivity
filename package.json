@@ -157,7 +157,7 @@
     "husky": "^4.2.5",
     "ical.js": "^1.4.0",
     "idb": "^5.0.6",
-    "jasmine-core": "^3.4.0",
+    "jasmine-core": "^3.7.1",
     "jasmine-marbles": "^0.8.1",
     "jasmine-spec-reporter": "~5.0.0",
     "jira2md": "git+https://github.com/johannesjo/J2M.git",
