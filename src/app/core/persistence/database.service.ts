@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DBSchema, IDBPTransaction, openDB } from 'idb';
+import { DBSchema, openDB } from 'idb';
 import { IDBPDatabase } from 'idb/build/esm/entry';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
@@ -87,8 +87,8 @@ export class DatabaseService {
   private async _init(): Promise<IDBPDatabase<MyDb>> {
     try {
       this.db = await openDB<MyDb>(DB_NAME, VERSION, {
-        upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
-          // …
+        // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
+        upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
           console.log('IDB UPGRADE', oldVersion, newVersion);
           db.createObjectStore(DB_MAIN_NAME);
         },
