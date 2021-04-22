@@ -119,7 +119,7 @@
     "@ngx-formly/material": "5.10.3",
     "@ngx-translate/core": "^13.0.0",
     "@ngx-translate/http-loader": "^6.0.0",
-    "@schematics/angular": "^10.0.6",
+    "@schematics/angular": "^11.2.10",
     "@types/file-saver": "^2.0.2",
     "@types/hammerjs": "^2.0.39",
     "@types/jasmine": "^3.5.11",
