@@ -15,7 +15,7 @@
   "schematics": "./src/collection.json",
   "devDependencies": {
     "@angular-devkit/core": "^11.2.9",
-    "@angular-devkit/schematics": "^11.2.9",
+    "@angular-devkit/schematics": "^11.2.10",
     "@schematics/angular": "^11.2.9",
     "@types/jasmine": "^3.6.9",
     "@types/node": "^14.14.41",
