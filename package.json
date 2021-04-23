@@ -159,7 +159,7 @@
     "idb": "^6.0.0",
     "jasmine-core": "^3.7.1",
     "jasmine-marbles": "^0.8.1",
-    "jasmine-spec-reporter": "~5.0.0",
+    "jasmine-spec-reporter": "~7.0.0",
     "jira2md": "git+https://github.com/johannesjo/J2M.git",
     "jo": "file:./tools/schematics",
     "karma": "~6.3.2",
