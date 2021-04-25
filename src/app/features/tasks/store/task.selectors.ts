@@ -3,6 +3,7 @@ import { TASK_FEATURE_NAME } from './task.reducer';
 import { Task, TaskState, TaskWithSubTasks } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 // TODO fix null stuff here
 
@@ -118,6 +119,31 @@ export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeature
   // @ts-ignore
   || s.entities[s.currentTaskId]
 );
+
+export const selectPlannedTasks = createSelector(selectTaskFeatureState, (s): Task[] => {
+  const allTasks: Task[] = [];
+  const allParent = s.ids
+    .map(id => s.entities[id] as Task)
+    .filter(task => !task.parentId && (task.plannedAt || task.tagIds.includes(TODAY_TAG.id)));
+
+  allParent.forEach((pt) => {
+    if (pt.subTaskIds.length) {
+      pt.subTaskIds.forEach(subId => {
+        const st = s.entities[subId] as Task;
+        // const par: Task = s.entities[st.parentId as string] as Task;
+        allTasks.push({
+          ...st,
+          plannedAt: st.plannedAt || (!st.isDone
+            ? (s.entities[st.parentId as string] as Task).plannedAt
+            : null)
+        });
+      });
+    } else {
+      allTasks.push(pt);
+    }
+  });
+  return allTasks;
+});
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) => tasks.filter(task => task.reminderId));

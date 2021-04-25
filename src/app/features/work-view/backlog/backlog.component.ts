@@ -39,7 +39,7 @@ export class BacklogComponent {
     if (!task.reminderId) {
       throw new Error('Task without reminder');
     }
-    this.taskService.removeReminder(task.id, task.reminderId);
+    this.taskService.unScheduleTask(task.id, task.reminderId);
   }
 
 }

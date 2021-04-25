@@ -1,21 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import {
-  AddTaskReminder,
   DeleteTask,
-  RemoveTaskReminder,
+  ReScheduleTask,
+  ScheduleTask,
   TaskActionTypes,
+  UnScheduleTask,
   UpdateTask,
-  UpdateTaskReminder,
   UpdateTaskTags
 } from './task.actions';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
 import { truncate } from '../../../util/truncate';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { moveTaskToBacklogListAuto } from '../../work-context/store/work-context-meta.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { EMPTY } from 'rxjs';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -23,9 +24,9 @@ export class TaskReminderEffects {
   @Effect()
   addTaskReminder$: any = this._actions$.pipe(
     ofType(
-      TaskActionTypes.AddTaskReminder,
+      TaskActionTypes.ScheduleTask,
     ),
-    tap((a: AddTaskReminder) => this._snackService.open({
+    tap((a: ScheduleTask) => this._snackService.open({
       type: 'SUCCESS',
       translateParams: {
         title: truncate(a.payload.task.title)
@@ -33,10 +34,15 @@ export class TaskReminderEffects {
       msg: T.F.TASK.S.REMINDER_ADDED,
       ico: 'schedule',
     })),
-    mergeMap((a: AddTaskReminder) => {
+    mergeMap((a: ScheduleTask) => {
+      console.log(a);
+
       const {task, remindAt, isMoveToBacklog} = a.payload;
       if (isMoveToBacklog && !task.projectId) {
         throw new Error('Move to backlog not possible for non project tasks');
+      }
+      if (typeof remindAt !== 'number') {
+        return EMPTY;
       }
 
       const reminderId = this._reminderService.addReminder('TASK', task.id, truncate(task.title), remindAt);
@@ -68,16 +74,18 @@ export class TaskReminderEffects {
   @Effect({dispatch: false})
   updateTaskReminder$: any = this._actions$.pipe(
     ofType(
-      TaskActionTypes.UpdateTaskReminder,
+      TaskActionTypes.ReScheduleTask,
     ),
-    tap((a: UpdateTaskReminder) => {
+    filter(({payload}: ReScheduleTask) => typeof payload.remindAt === 'number' && !!payload.reminderId),
+    tap((a: ReScheduleTask) => {
+      console.log(a);
       const {title, remindAt, reminderId} = a.payload;
-      this._reminderService.updateReminder(reminderId, {
+      this._reminderService.updateReminder(reminderId as string, {
         remindAt,
         title,
       });
     }),
-    tap((a: UpdateTaskReminder) => this._snackService.open({
+    tap((a: ReScheduleTask) => this._snackService.open({
       type: 'SUCCESS',
       translateParams: {
         title: truncate(a.payload.title)
@@ -90,11 +98,12 @@ export class TaskReminderEffects {
   @Effect()
   removeTaskReminder$: any = this._actions$.pipe(
     ofType(
-      TaskActionTypes.RemoveTaskReminder,
+      TaskActionTypes.UnScheduleTask,
     ),
-    map((a: RemoveTaskReminder) => {
+    filter(({payload}: UnScheduleTask) => !!payload.reminderId),
+    map((a: UnScheduleTask) => {
       const {id, reminderId} = a.payload;
-      this._reminderService.removeReminder(reminderId);
+      this._reminderService.removeReminder(reminderId as string);
 
       return new UpdateTask({
         task: {

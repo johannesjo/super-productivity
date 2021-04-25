@@ -106,7 +106,7 @@ export class ShortcutService {
       this._router.navigate(['/config']);
 
     } else if (checkKeyCombo(ev, keys.goToScheduledView)) {
-      this._router.navigate(['/schedule']);
+      this._router.navigate(['/active/calendar']);
 
       // } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
       //   this._router.navigate(['/daily-agenda']);

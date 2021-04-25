@@ -66,6 +66,7 @@ import { concatMap, debounceTime, shareReplay, skipWhile } from 'rxjs/operators'
 import { devError } from '../../util/dev-error';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { removeFromDb, saveToDb } from './persistence.actions';
+import { crossModelMigrations } from './cross-model-migrations';
 import { metricReducer } from '../../features/metric/store/metric.reducer';
 import { improvementReducer } from '../../features/metric/improvement/store/improvement.reducer';
 import { obstructionReducer } from '../../features/metric/obstruction/store/obstruction.reducer';
@@ -340,10 +341,10 @@ export class PersistenceService {
         throw new Error('Project State is broken');
       }
 
-      r = {
+      r = crossModelMigrations({
         ...(await this._loadAppDataForProjects(pids)),
         ...(await this._loadAppBaseData()),
-      };
+      } as AppDataComplete);
       this._inMemoryComplete = r;
     } else {
       r = this._inMemoryComplete;

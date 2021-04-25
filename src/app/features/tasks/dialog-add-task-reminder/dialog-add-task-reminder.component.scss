@@ -1,3 +1,5 @@
+@import '../../../../variables';
+
 :host {
   display: flex;
   flex-direction: column;
@@ -50,6 +52,21 @@
       padding-bottom: 0;
       line-height: 36px;
     }
+  }
+
+  .additional-controls {
+    padding-top: $s;
+    // same as $owl-divider-color
+    border-top: 1px solid rgba(0, 0, 0, .12);
+    @include darkTheme(true) {
+      // same as $owl-dark-divider-color
+      border-color: rgba(255, 255, 255, .12);
+    }
+  }
+
+  .move-to-backlog-wrapper,
+  mat-form-field {
+    margin: 0 $s;
   }
 }
 

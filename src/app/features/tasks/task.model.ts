@@ -17,6 +17,20 @@ export enum TaskAdditionalInfoTargetPanel {
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
+export enum TaskReminderOptionId {
+  DoNotRemind = 'DoNotRemind',
+  AtStart = 'AtStart',
+  m5 = 'm5',
+  m10 = 'm10',
+  m15 = 'm15',
+  m30 = 'm30',
+  h1 = 'h1',
+}
+export interface TaskReminderOption {
+  id: TaskReminderOptionId;
+  title: string;
+}
+
 export interface TimeSpentOnDayCopy {
   [key: string]: number;
 }
@@ -52,6 +66,8 @@ export interface TaskCopy extends IssueFieldsForTask {
   created: number;
   isDone: boolean;
   doneOn: number | null;
+  plannedAt: number | null;
+  // remindCfg: TaskReminderOptionId;
 
   notes: string;
 
@@ -103,6 +119,7 @@ export const DEFAULT_TASK: Task = {
   reminderId: null,
   created: Date.now(),
   repeatCfgId: null,
+  plannedAt: null,
 
   _showSubTasksMode: ShowSubTasksMode.Show,
 

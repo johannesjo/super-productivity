@@ -27,10 +27,10 @@ export enum TaskActionTypes {
   'AddTimeSpent' = '[Task] Add time spent',
   'RemoveTimeSpent' = '[Task] Remove time spent',
 
-  // Reminders
-  'AddTaskReminder' = '[Task] Add reminder',
-  'UpdateTaskReminder' = '[Task] Update reminder',
-  'RemoveTaskReminder' = '[Task] Remove reminder',
+  // Reminders & StartAt
+  'ScheduleTask' = '[Task] Schedule',
+  'UnScheduleTask' = '[Task] UnSchedule',
+  'ReScheduleTask' = '[Task] ReSchedule',
 
   // Sub Task Actions
   'AddSubTask' = '[Task] Add SubTask',
@@ -178,24 +178,24 @@ export class RemoveTimeSpent implements Action {
 }
 
 // Reminder Actions
-export class AddTaskReminder implements Action {
-  readonly type: string = TaskActionTypes.AddTaskReminder;
+export class ScheduleTask implements Action {
+  readonly type: string = TaskActionTypes.ScheduleTask;
 
-  constructor(public payload: { task: Task; remindAt: number; isMoveToBacklog: boolean }) {
+  constructor(public payload: { task: Task; plannedAt: number; remindAt?: number; isMoveToBacklog: boolean }) {
   }
 }
 
-export class UpdateTaskReminder implements Action {
-  readonly type: string = TaskActionTypes.UpdateTaskReminder;
+export class ReScheduleTask implements Action {
+  readonly type: string = TaskActionTypes.ReScheduleTask;
 
-  constructor(public payload: { id: string; title: string; reminderId: string; remindAt: number }) {
+  constructor(public payload: { id: string; title: string; plannedAt: number; reminderId?: string; remindAt?: number }) {
   }
 }
 
-export class RemoveTaskReminder implements Action {
-  readonly type: string = TaskActionTypes.RemoveTaskReminder;
+export class UnScheduleTask implements Action {
+  readonly type: string = TaskActionTypes.UnScheduleTask;
 
-  constructor(public payload: { id: string; reminderId: string }) {
+  constructor(public payload: { id: string; reminderId?: string }) {
   }
 }
 
@@ -264,9 +264,9 @@ export type TaskActions
   | MoveSubTaskDown
   | AddTimeSpent
   | RemoveTimeSpent
-  | AddTaskReminder
-  | UpdateTaskReminder
-  | RemoveTaskReminder
+  | ScheduleTask
+  | ReScheduleTask
+  | UnScheduleTask
   | RestoreTask
   | AddSubTask
   | ConvertToMainTask

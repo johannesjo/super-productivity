@@ -10,6 +10,7 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
+  TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks
 } from './task.model';
@@ -17,7 +18,6 @@ import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
   AddTask,
-  AddTaskReminder,
   AddTimeSpent,
   ConvertToMainTask,
   DeleteMainTasks,
@@ -28,17 +28,18 @@ import {
   MoveToArchive,
   MoveToOtherProject,
   RemoveTagsForAllTasks,
-  RemoveTaskReminder,
   RemoveTimeSpent,
+  ReScheduleTask,
   RestoreTask,
   RoundTimeSpentForDay,
+  ScheduleTask,
   SetCurrentTask,
   SetSelectedTask,
   ToggleStart,
   ToggleTaskShowSubTasks,
+  UnScheduleTask,
   UnsetCurrentTask,
   UpdateTask,
-  UpdateTaskReminder,
   UpdateTaskTags,
   UpdateTaskUi
 } from './store/task.actions';
@@ -53,8 +54,10 @@ import {
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
+  selectPlannedTasks,
   selectSelectedTask,
-  selectSelectedTaskId, selectStartableTasks,
+  selectSelectedTaskId,
+  selectStartableTasks,
   selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
@@ -87,6 +90,7 @@ import { unique } from '../../util/unique';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 
 @Injectable({
   providedIn: 'root',
@@ -143,6 +147,10 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(
     select(selectStartableTasks),
+  );
+
+  plannedTasks$: Observable<Task[]> = this._store.pipe(
+    select(selectPlannedTasks),
   );
 
   // META FIELDS
@@ -488,19 +496,46 @@ export class TaskService {
 
   // REMINDER
   // --------
-  addReminder(task: Task | TaskWithSubTasks, remindAt: number, isMoveToBacklog: boolean = false) {
-    this._store.dispatch(new AddTaskReminder({task, remindAt, isMoveToBacklog}));
+  scheduleTask(task: Task | TaskWithSubTasks, plannedAt: number, remindCfg: TaskReminderOptionId, isMoveToBacklog: boolean = false) {
+    console.log(remindOptionToMilliseconds(plannedAt, remindCfg), plannedAt);
+    console.log(remindOptionToMilliseconds(plannedAt, remindCfg) as number - plannedAt);
+    console.log({
+      plannedAt,
+      remindCfg,
+    });
+    this._store.dispatch(new ScheduleTask({
+      task,
+      plannedAt,
+      remindAt: remindOptionToMilliseconds(plannedAt, remindCfg),
+      isMoveToBacklog
+    }));
+
   }
 
-  updateReminder(taskId: string, reminderId: string, remindAt: number, title: string) {
-    this._store.dispatch(new UpdateTaskReminder({id: taskId, reminderId, remindAt, title}));
+  reScheduleTask({
+    taskId,
+    plannedAt,
+    reminderId,
+    remindCfg,
+    title
+  }: { taskId: string; plannedAt: number; title: string; reminderId?: string; remindCfg: TaskReminderOptionId }) {
+
+    this._store.dispatch(new ReScheduleTask({
+      id: taskId,
+      plannedAt,
+      reminderId,
+      remindAt: remindOptionToMilliseconds(plannedAt, remindCfg),
+      title
+    }));
   }
 
-  removeReminder(taskId: string, reminderId: string) {
-    if (!reminderId || !taskId) {
-      throw new Error('No reminder or task id');
+  unScheduleTask(taskId: string, reminderId?: string) {
+    console.log('unschedzle', {reminderId});
+
+    if (!taskId) {
+      throw new Error('No task id');
     }
-    this._store.dispatch(new RemoveTaskReminder({id: taskId, reminderId}));
+    this._store.dispatch(new UnScheduleTask({id: taskId, reminderId}));
   }
 
   // HELPER

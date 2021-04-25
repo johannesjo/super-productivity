@@ -54,7 +54,7 @@ export class SchedulePageComponent {
 
   removeReminder(task: TaskWithReminderData) {
     if (task.reminderId) {
-      this._taskService.removeReminder(task.id, task.reminderId);
+      this._taskService.unScheduleTask(task.id, task.reminderId);
     }
 
   }
@@ -84,7 +84,7 @@ export class SchedulePageComponent {
       this._taskService.moveToToday(task.id, true);
     }
     if (!!task.reminderId) {
-      this._taskService.removeReminder(task.id, task.reminderId);
+      this._taskService.unScheduleTask(task.id, task.reminderId);
     }
     this._taskService.setCurrentId(task.id);
     this._router.navigate(['/active/tasks']);

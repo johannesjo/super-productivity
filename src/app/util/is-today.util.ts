@@ -1,4 +1,4 @@
-export const isToday = (date: number): boolean => {
+export const isToday = (date: number | Date): boolean => {
   const d = new Date(date);
   const isValid = d.getTime() > 0;
   if (!isValid) {

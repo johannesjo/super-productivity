@@ -6,7 +6,8 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { T } from '../../../t.const';
 import { AddTaskReminderInterface } from './add-task-reminder-interface';
 import { throttle } from 'helpful-decorators';
-import { Task } from '../task.model';
+import { Task, TaskReminderOption, TaskReminderOptionId } from '../task.model';
+import { millisecondsDiffToRemindOption } from '../util/remind-option-to-milliseconds';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -22,9 +23,33 @@ export class DialogAddTaskReminderComponent {
     : undefined;
   isEdit: boolean = !!(this.reminder && this.reminder.id);
 
-  dateTime?: number = this.reminder && this.reminder.remindAt;
+  dateTime?: number = this.task.plannedAt || undefined;
   isShowMoveToBacklog: boolean = (!this.isEdit && !!this.task.projectId && this.task.parentId === null);
   isMoveToBacklog: boolean = (this.isShowMoveToBacklog);
+  // TODO make translatable
+  remindAvailableOptions: TaskReminderOption[] = [{
+    id: TaskReminderOptionId.DoNotRemind,
+    title: 'Dont show reminder',
+  }, {
+    id: TaskReminderOptionId.AtStart,
+    title: 'when it starts',
+  }, {
+    id: TaskReminderOptionId.m5,
+    title: '5 minutes before it starts',
+  }, {
+    id: TaskReminderOptionId.m10,
+    title: '10 minutes before it starts',
+  }, {
+    id: TaskReminderOptionId.m15,
+    title: '15 minutes before it starts',
+  }, {
+    id: TaskReminderOptionId.m30,
+    title: '30 minutes before it starts',
+  }, {
+    id: TaskReminderOptionId.h1,
+    title: '1 hour before it starts',
+  }];
+  reminderCfgId: TaskReminderOptionId;
 
   constructor(
     private _taskService: TaskService,
@@ -32,6 +57,11 @@ export class DialogAddTaskReminderComponent {
     private _matDialogRef: MatDialogRef<DialogAddTaskReminderComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddTaskReminderInterface,
   ) {
+    if (this.isEdit) {
+      this.reminderCfgId = millisecondsDiffToRemindOption(this.task.plannedAt as number, this.reminder?.remindAt);
+    } else {
+      this.reminderCfgId = TaskReminderOptionId.AtStart;
+    }
   }
 
   // NOTE: throttle is used as quick way to prevent multiple submits
@@ -44,17 +74,19 @@ export class DialogAddTaskReminderComponent {
     }
 
     if (this.isEdit && this.reminder) {
-      this._taskService.updateReminder(
-        this.task.id,
-        this.reminder.id,
-        timestamp,
-        this.task.title,
-      );
+      this._taskService.reScheduleTask({
+        taskId: this.task.id,
+        reminderId: this.task.reminderId as string,
+        plannedAt: timestamp,
+        remindCfg: this.reminderCfgId,
+        title: this.task.title,
+      });
       this.close();
     } else {
-      this._taskService.addReminder(
+      this._taskService.scheduleTask(
         this.task,
         timestamp,
+        this.reminderCfgId,
         this.isMoveToBacklog,
       );
       this.close();
@@ -68,12 +100,16 @@ export class DialogAddTaskReminderComponent {
       console.log(this.reminder, this.task);
       throw new Error('No reminder or id');
     }
-    this._taskService.removeReminder(this.task.id, this.reminder.id);
+    this._taskService.unScheduleTask(this.task.id, this.reminder.id);
     this.close();
   }
 
   close() {
     this._matDialogRef.close();
+  }
+
+  trackByIndex(i: number, p: any) {
+    return i;
   }
 }
 

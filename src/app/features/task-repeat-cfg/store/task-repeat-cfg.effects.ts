@@ -11,7 +11,7 @@ import {
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskWithSubTasks } from '../../tasks/task.model';
-import { AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask } from '../../tasks/store/task.actions';
+import { AddTask, MoveToArchive, UnScheduleTask, UpdateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
@@ -150,7 +150,7 @@ export class TaskRepeatCfgEffects {
     ),
     concatMap((a: AddTaskRepeatCfgToTask) => this._taskService.getByIdOnce$(a.payload.taskId).pipe(take(1))),
     filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
-    map((task: TaskWithSubTasks) => new RemoveTaskReminder({
+    map((task: TaskWithSubTasks) => new UnScheduleTask({
       id: task.id,
       reminderId: task.reminderId as string
     })),

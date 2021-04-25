@@ -3,15 +3,29 @@
     <owl-wrapper (triggerSubmit)="save()"
                  [(dateTime)]="dateTime"></owl-wrapper>
 
-    <div *ngIf="isShowMoveToBacklog"
-         style="margin: 16px">
-      <mat-checkbox [(ngModel)]="isMoveToBacklog"
-                    name="isListSubTasks">
-        <div class="text-wrap"
-             style="max-width: 280px">
-          {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
-        </div>
-      </mat-checkbox>
+    <div class="additional-controls">
+      <mat-form-field>
+        <mat-select [(ngModel)]="reminderCfgId"
+                    [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
+                    name="type"
+                    required="true">
+          <mat-option *ngFor="let remindOption of remindAvailableOptions; trackBy: trackByIndex"
+                      [innerHtml]="(remindOption.title|translate)"
+                      [value]="remindOption.id">
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div *ngIf="isShowMoveToBacklog"
+           class="move-to-backlog-wrapper">
+        <mat-checkbox [(ngModel)]="isMoveToBacklog"
+                      name="isListSubTasks">
+          <div class="text-wrap"
+               style="max-width: 280px">
+            {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
+          </div>
+        </mat-checkbox>
+      </div>
     </div>
   </div>
 </mat-dialog-content>
