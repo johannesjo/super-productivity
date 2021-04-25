@@ -10,6 +10,7 @@ import { WorklogPageModule } from './worklog-page/worklog-page.module';
 import { ProjectSettingsPageModule } from './project-settings-page/project-settings-page.module';
 import { TagTaskPageModule } from './tag-task-page/tag-task-page.module';
 import { TagSettingsPageModule } from './tag-settings-page/tag-settings-page.module';
+import { TimelinePageModule } from './timeline-page/timeline-page.module';
 
 @NgModule({
   imports: [
@@ -24,6 +25,7 @@ import { TagSettingsPageModule } from './tag-settings-page/tag-settings-page.mod
     SchedulePageModule,
     TagTaskPageModule,
     TagSettingsPageModule,
+    TimelinePageModule,
   ],
   declarations: [],
 })

@@ -16,6 +16,7 @@ import {
 } from './app.guard';
 import { TagSettingsPageComponent } from './pages/tag-settings-page/tag-settings-page.component';
 import { TODAY_TAG } from './features/tag/tag.const';
+import { TimelinePageComponent } from './pages/timeline-page/timeline-page.component';
 
 export const APP_ROUTES: Routes = [
   { path: 'config', component: ConfigPageComponent, data: { page: 'config' } },
@@ -26,6 +27,11 @@ export const APP_ROUTES: Routes = [
     data: { page: 'procrastination' },
   },
 
+  {
+    path: 'timeline',
+    component: TimelinePageComponent,
+    data: {page: 'timeline'},
+  },
   {
     path: 'tag/:id/tasks',
     component: TagTaskPageComponent,
