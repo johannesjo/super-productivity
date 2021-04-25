@@ -21,6 +21,7 @@ const TASK: TaskCopy = {
   reminderId: null,
   created: Date.now(),
   repeatCfgId: null,
+  plannedAt: null,
 
   _showSubTasksMode: ShowSubTasksMode.Show,
 
