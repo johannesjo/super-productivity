@@ -786,6 +786,9 @@
         "WEDNESDAY": "Wednesday"
       }
     },
+    "TIMELINE": {
+      "MENU_TITLE": "Timeline"
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "I already did",
