@@ -12,6 +12,7 @@
   flex-wrap: wrap;
   align-items: stretch;
   justify-content: center;
+  padding-bottom: $s;
 }
 
 .timeline-row,
@@ -20,6 +21,7 @@
 }
 
 .timeline-col {
+  min-height: 40px;
 
   &.time {
     display: flex;
@@ -29,6 +31,8 @@
     position: relative;
     min-width: 80px;
     text-align: center;
+    margin-top: -$s;
+    margin-bottom: 0;
 
     &:after {
       display: block;

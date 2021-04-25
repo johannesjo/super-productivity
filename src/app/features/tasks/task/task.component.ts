@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  Attribute,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -13,7 +14,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { EMPTY, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   ShowSubTasksMode,
   TaskAdditionalInfoTargetPanel,
@@ -54,6 +55,7 @@ import { throttle } from 'helpful-decorators';
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   task!: TaskWithSubTasks;
   @Input() isBacklog: boolean = false;
+
   T: typeof T = T;
   IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   isDragOver: boolean = false;
@@ -96,6 +98,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
+
+  parentTitle$: Observable<string> = this.showParentTitle
+    ? this._task$.pipe(
+        take(1),
+        switchMap((task) => this._taskService.getByIdLive$(task.parentId as string)),
+        map((task) => task.title),
+      )
+    : EMPTY;
+
   private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout?: number;
@@ -112,6 +123,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
+    @Attribute('showParentTitle') public showParentTitle: string,
   ) {}
 
   @Input('task') set taskSet(v: TaskWithSubTasks) {

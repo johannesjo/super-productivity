@@ -906,3 +906,10 @@ $min-badge-size: $s*2.25;
   text-align: center;
 }
 
+.parent-title {
+  font-size: 10px;
+  padding-top: $s/2;
+  padding-left: $s;
+  margin-bottom: -2px;
+  text-overflow: ellipsis;
+}

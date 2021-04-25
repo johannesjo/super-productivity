@@ -12,7 +12,8 @@ import { map } from 'rxjs/operators';
 })
 export class TimelineComponent {
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
-  timelineEntries$ = this._workContextService.todaysTasks$.pipe(
+  // timelineEntries$ = this._workContextService.todaysTasks$.pipe(
+  timelineEntries$ = this._workContextService.startableTasksForActiveContext$.pipe(
     map(tasks => this.mapToViewEntries(tasks))
   );
   // timelineEntries$ = new BehaviorSubject([

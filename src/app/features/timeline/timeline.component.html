@@ -7,6 +7,7 @@
     <div class="timeline-col right"
          [ngSwitch]="row.type">
       <task *ngSwitchCase="TimelineViewEntryType.TaskFull"
+            showParentTitle="true"
             [task]="row.data"></task>
       <div *ngSwitchDefault></div>
     </div>
