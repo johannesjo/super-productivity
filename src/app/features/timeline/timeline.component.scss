@@ -34,7 +34,7 @@
     margin-top: -$s;
     margin-bottom: 0;
 
-    &:after {
+    &.hasTime:after {
       display: block;
       content: '';
       width: 11px;
@@ -52,4 +52,10 @@
     padding-left: $s*2;
     flex: 1;
   }
+}
+
+.timeline-text {
+  display: inline-block;
+  vertical-align: -webkit-baseline-middle;
+  padding-left: $s*5;
 }

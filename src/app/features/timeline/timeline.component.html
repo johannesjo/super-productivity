@@ -1,7 +1,8 @@
 <div *ngIf="timelineEntries$|async as timelineEntries">
   <div class="timeline-row"
        *ngFor="let row of timelineEntries; trackBy: trackByFn">
-    <div class="timeline-col time">
+    <div class="timeline-col time"
+         [class.hasTime]="row.time">
       <div *ngIf="row.time">{{row.time|date:'HH:mm'}}</div>
     </div>
     <div class="timeline-col right"
@@ -9,7 +10,9 @@
       <task *ngSwitchCase="TimelineViewEntryType.TaskFull"
             showParentTitle="true"
             [task]="row.data"></task>
-      <div *ngSwitchDefault></div>
+      <div *ngSwitchCase="TimelineViewEntryType.Text"
+           class="timeline-text">{{row.data}}</div>
+      <div *ngSwitchDefault>------------------</div>
     </div>
   </div>
 </div>

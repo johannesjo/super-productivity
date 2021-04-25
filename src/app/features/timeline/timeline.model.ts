@@ -14,4 +14,5 @@ export enum TimelineViewEntryType {
   Break,
   Now,
   WorkdayEnd,
+  Text,
 }
