@@ -28,9 +28,9 @@ export class DialogAddTaskReminderComponent {
   isMoveToBacklog: boolean = (this.isShowMoveToBacklog);
   // TODO make translatable
   remindAvailableOptions: TaskReminderOption[] = [{
-    id: TaskReminderOptionId.DoNotRemind,
-    title: 'Dont show reminder',
-  }, {
+    // id: TaskReminderOptionId.DoNotRemind,
+    // title: 'Dont show reminder',
+    // }, {
     id: TaskReminderOptionId.AtStart,
     title: 'when it starts',
   }, {
