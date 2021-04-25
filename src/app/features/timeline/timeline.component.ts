@@ -3,6 +3,8 @@ import { TimelineViewEntryType } from './timeline.model';
 import { Task } from '../tasks/task.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { map } from 'rxjs/operators';
+import { TaskService } from '../tasks/task.service';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'timeline',
@@ -13,8 +15,11 @@ import { map } from 'rxjs/operators';
 export class TimelineComponent {
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
   // timelineEntries$ = this._workContextService.todaysTasks$.pipe(
-  timelineEntries$ = this._workContextService.startableTasksForActiveContext$.pipe(
-    map(tasks => this.mapToViewEntries(tasks))
+  timelineEntries$ = combineLatest([
+    this._workContextService.startableTasksForActiveContext$,
+    this._taskService.currentTaskId$,
+  ]).pipe(
+    map(([tasks, currentId]) => this.mapToViewEntries(tasks, currentId))
   );
   // timelineEntries$ = new BehaviorSubject([
   //   {
@@ -46,19 +51,28 @@ export class TimelineComponent {
 
   constructor(
     private _workContextService: WorkContextService,
+    private _taskService: TaskService,
   ) {
   }
 
-  private mapToViewEntries(tasks: Task[]): any {
+  private mapToViewEntries(tasks: Task[], currentId: string | null): any {
     // TODO make current always the first task
     const viewEntries: any[] = [];
     const scheduledTasks: any[] = [];
 
     let lastTime: any;
     let prev: any;
-    console.log(tasks);
+    let sortedTasks: Task[] = tasks;
+    console.log(sortedTasks);
 
-    tasks.forEach((task, index, arr) => {
+    if (currentId) {
+      const currentTask = tasks.find(t => t.id === currentId);
+      if (currentTask) {
+        sortedTasks = [currentTask, ...tasks.filter(t => t.id !== currentId)] as Task[];
+      }
+    }
+
+    sortedTasks.forEach((task, index, arr) => {
       // TODO replace with plannedAt
       if (task.reminderId && task.plannedAt) {
         scheduledTasks.push(task);
@@ -107,24 +121,29 @@ export class TimelineComponent {
       scheduledTasks.forEach((scheduledTask, i) => {
         const firstEntryBeforeIndex = viewEntries.findIndex(viewEntry => viewEntry.time !== 0 && viewEntry.time >= scheduledTask.plannedAt);
 
-        const splitTask = viewEntries[firstEntryBeforeIndex - 1].data;
+        const splitTask = viewEntries[firstEntryBeforeIndex - 1]?.data;
         const scheduledTaskDuration = Math.max(0, scheduledTask.timeEstimate - scheduledTask.timeSpent);
 
-        viewEntries.splice(firstEntryBeforeIndex, 0, {
+        viewEntries.splice(firstEntryBeforeIndex || 0, 0, {
           id: scheduledTask.id,
           time: scheduledTask.plannedAt,
           type: TimelineViewEntryType.TaskFull,
           data: scheduledTask,
         });
-        viewEntries.splice(firstEntryBeforeIndex + 1, 0, {
-          id: splitTask.id,
-          time: scheduledTask.plannedAt + scheduledTaskDuration,
-          type: TimelineViewEntryType.Text,
-          data: '... ' + splitTask.title,
-        });
 
+        const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
+        if (isAddSplitTask) {
+          viewEntries.splice(firstEntryBeforeIndex + 1, 0, {
+            id: splitTask.id,
+            time: scheduledTask.plannedAt + scheduledTaskDuration,
+            type: TimelineViewEntryType.Text,
+            data: '... ' + splitTask.title,
+          });
+        }
+
+        const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let j = firstEntryBeforeIndex + 2; j < viewEntries.length; j++) {
+        for (let j = startIndexOfFollowing; j < viewEntries.length; j++) {
           const viewEntry = viewEntries[j];
           if (viewEntry.time) {
             viewEntry.time = viewEntry.time + scheduledTaskDuration;
