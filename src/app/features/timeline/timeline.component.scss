@@ -1,0 +1,51 @@
+@import '../../../variables';
+
+
+:host {
+  display: block;
+  max-width: $component-max-width;
+  margin: auto;
+}
+
+.timeline-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.timeline-row,
+.timeline-col {
+  //border: 1px dashed rgba(0, 0, 0, .5)
+}
+
+.timeline-col {
+
+  &.time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 2px solid $dark-theme-separator-color;
+    position: relative;
+    min-width: 80px;
+    text-align: center;
+
+    &:after {
+      display: block;
+      content: '';
+      width: 11px;
+      height: 2px;
+      right: -6px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: $dark-theme-text-color;
+      //border-radius: 50%;
+    }
+  }
+
+  &.right {
+    padding-left: $s*2;
+    flex: 1;
+  }
+}

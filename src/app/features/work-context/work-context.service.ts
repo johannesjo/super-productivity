@@ -328,6 +328,8 @@ export class WorkContextService {
           this._setActiveContext(id, WorkContextType.TAG);
         } else if (urlAfterRedirects.match(/project\/.+/)) {
           this._setActiveContext(id, WorkContextType.PROJECT);
+        } else if (urlAfterRedirects.match(/timeline/)) {
+          this._setActiveContext(TODAY_TAG.id, WorkContextType.TAG);
         }
       });
   }

@@ -1,1 +1,14 @@
-<p>timeline works!</p>
+<div *ngIf="timelineEntries$|async as timelineEntries">
+  <div class="timeline-row"
+       *ngFor="let row of timelineEntries">
+    <div class="timeline-col time">
+      <div *ngIf="row.time">{{row.time|date:'HH:mm'}}</div>
+    </div>
+    <div class="timeline-col right"
+         [ngSwitch]="row.type">
+      <task *ngSwitchCase="TimelineViewEntryType.TaskFull"
+            [task]="row.data"></task>
+      <div *ngSwitchDefault></div>
+    </div>
+  </div>
+</div>
