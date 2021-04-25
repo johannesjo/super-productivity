@@ -15,7 +15,7 @@ export const updateNoteOrder = createAction(
 
 export const addNote = createAction(
   '[Note] Add Note',
-  props<{ note: Note; isPreventFocus?: boolean; remindAt: number | null }>(),
+  props<{ note: Note; isPreventFocus?: boolean }>(),
 );
 
 export const upsertNote = createAction(
@@ -55,19 +55,4 @@ export const deleteNotes = createAction(
 
 export const clearNotes = createAction(
   '[Note] Clear Notes',
-);
-// Reminder Actions
-export const addNoteReminder = createAction(
-  '[Note] Add reminder',
-  props<{ id: string; title: string; remindAt: number }>(),
-);
-
-export const updateNoteReminder = createAction(
-  '[Note] Update reminder',
-  props<{ id: string; title: string; reminderId: string; remindAt: number }>(),
-);
-
-export const removeNoteReminder = createAction(
-  '[Note] Remove reminder',
-  props<{ id: string; reminderId: string }>(),
 );

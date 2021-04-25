@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, Input, ViewChild } from '@angular/c
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogAddNoteReminderComponent } from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 
@@ -45,25 +44,6 @@ export class NoteComponent {
       throw new Error('No note');
     }
     this._noteService.remove(this.note.id);
-  }
-
-  editReminder() {
-    this._matDialog.open(DialogAddNoteReminderComponent, {
-      restoreFocus: true,
-      data: {
-        note: this.note,
-      }
-    });
-  }
-
-  removeReminder() {
-    if (!this.note) {
-      throw new Error('No note');
-    }
-    if (!this.note.reminderId) {
-      throw new Error('No note reminder');
-    }
-    this._noteService.removeReminder(this.note.id, this.note.reminderId);
   }
 
   editFullscreen() {

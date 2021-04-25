@@ -8,9 +8,7 @@ import { NoteEffects } from './store/note.effects';
 import { NotesComponent } from './notes/notes.component';
 import { NoteComponent } from './note/note.component';
 import { UiModule } from '../../ui/ui.module';
-import { DialogAddNoteReminderComponent } from './dialog-add-note-reminder/dialog-add-note-reminder.component';
 import { FormsModule } from '@angular/forms';
-import { DialogViewNoteReminderComponent } from './dialog-view-note-reminder/dialog-view-note-reminder.component';
 import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.component';
 
 @NgModule({
@@ -24,8 +22,6 @@ import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.compon
   declarations: [
     NotesComponent,
     NoteComponent,
-    DialogAddNoteReminderComponent,
-    DialogViewNoteReminderComponent,
     DialogAddNoteComponent
   ],
   exports: [NotesComponent],

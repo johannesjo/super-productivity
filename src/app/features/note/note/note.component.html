@@ -1,5 +1,4 @@
 <div *ngIf="note"
-     [class.hasReminder]="note.reminderId"
      [class.isFocused]="isFocus"
      [class.isImg]="note.imgUrl"
      class="note">
@@ -23,38 +22,14 @@
             class="handle-drag mat-elevation-z2"
             color=""
             mat-mini-fab>
-      <mat-icon *ngIf="!note.reminderId"
-                class="handle-drag">more_vert
-      </mat-icon>
-      <mat-icon *ngIf="note.reminderId"
-                class="handle-drag">alarm
-      </mat-icon>
+      <mat-icon class="handle-drag">more_vert</mat-icon>
     </button>
 
     <mat-menu #menu="matMenu">
-      <button (click)="editReminder()"
-              mat-menu-item>
-        <ng-container *ngIf="!note.reminderId">
-          <mat-icon>alarm_add</mat-icon>
-          {{T.F.NOTE.ADD_REMINDER|translate}}
-        </ng-container>
-        <ng-container *ngIf="note.reminderId">
-          <mat-icon>alarm</mat-icon>
-          {{T.F.NOTE.EDIT_REMINDER|translate}}
-        </ng-container>
-      </button>
-
       <button (click)="editFullscreen()"
               mat-menu-item>
         <mat-icon>fullscreen</mat-icon>
         {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
-      </button>
-
-      <button (click)="removeReminder()"
-              *ngIf="note.reminderId"
-              mat-menu-item>
-        <mat-icon style="color:#e15d63;">alarm_off</mat-icon>
-        {{T.F.NOTE.REMOVE_REMINDER|translate}}
       </button>
 
       <button (click)="toggleLock()"

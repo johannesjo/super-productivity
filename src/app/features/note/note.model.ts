@@ -6,5 +6,4 @@ export interface Note {
   backgroundColor?: string;
   created: number;
   modified: number;
-  reminderId?: string | null;
 }

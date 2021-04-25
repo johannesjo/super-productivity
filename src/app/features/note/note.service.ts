@@ -2,16 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note } from './note.model';
 import { select, Store } from '@ngrx/store';
-import {
-  addNote,
-  addNoteReminder,
-  deleteNote,
-  loadNoteState,
-  removeNoteReminder,
-  updateNote,
-  updateNoteOrder,
-  updateNoteReminder
-} from './store/note.actions';
+import { addNote, deleteNote, loadNoteState, updateNote, updateNoteOrder } from './store/note.actions';
 import * as shortid from 'shortid';
 import { initialNoteState, NoteState, selectAllNotes, selectNoteById } from './store/note.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -49,7 +40,7 @@ export class NoteService {
     this._store$.dispatch(loadNoteState({state}));
   }
 
-  public add(note: Partial<Note> = {}, remindAt: number | null = null, isPreventFocus: boolean = false) {
+  public add(note: Partial<Note> = {}, isPreventFocus: boolean = false) {
     const id = shortid();
 
     this._store$.dispatch(addNote({
@@ -61,7 +52,6 @@ export class NoteService {
         ...note,
       },
       isPreventFocus,
-      remindAt,
     }));
   }
 
@@ -95,18 +85,6 @@ export class NoteService {
 
   // REMINDER
   // --------
-  addReminder(noteId: string, remindAt: number, title: string) {
-    this._store$.dispatch(addNoteReminder({id: noteId, remindAt, title}));
-  }
-
-  updateReminder(noteId: string, reminderId: string, remindAt: number, title: string) {
-    this._store$.dispatch(updateNoteReminder({id: noteId, reminderId, remindAt, title}));
-  }
-
-  removeReminder(noteId: string, reminderId: string) {
-    this._store$.dispatch(removeNoteReminder({id: noteId, reminderId}));
-  }
-
   createFromDrop(ev: DragEvent) {
     this._handleInput(createFromDrop(ev) as DropPasteInput, ev);
   }

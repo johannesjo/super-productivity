@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { NoteService } from '../note.service';
-import { Reminder } from '../../reminder/reminder.model';
 import { SS_NOTE_TMP } from '../../../core/persistence/ls-keys.const';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -18,7 +17,6 @@ import { map } from 'rxjs/operators';
 export class DialogAddNoteComponent {
   T: typeof T = T;
   noteContent: string;
-  reminderDate?: number;
   isSubmitted: boolean = false;
   isInProjectContext$: Observable<boolean> = this._workContextService.activeWorkContextTypeAndId$.pipe(
     map(({activeType}) => activeType === WorkContextType.PROJECT)
@@ -28,7 +26,6 @@ export class DialogAddNoteComponent {
     private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
     private _noteService: NoteService,
     private _workContextService: WorkContextService,
-    @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this.noteContent = sessionStorage.getItem(SS_NOTE_TMP) || '';
   }
@@ -40,14 +37,10 @@ export class DialogAddNoteComponent {
   }
 
   submit() {
-    const remindAt = this.reminderDate;
-
     if (!this.isSubmitted
-      && (this.noteContent && this.noteContent.trim().length > 0
-        || remindAt)) {
+      && (this.noteContent && this.noteContent.trim().length > 0)) {
       this._noteService.add(
         {content: this.noteContent},
-        remindAt,
         true,
       );
 

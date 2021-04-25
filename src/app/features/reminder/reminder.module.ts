@@ -9,7 +9,6 @@ import { concatMap, delay, filter, first } from 'rxjs/operators';
 import { Reminder } from './reminder.model';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { NotifyService } from '../../core/notify/notify.service';
-import { DialogViewNoteReminderComponent } from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
 import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { throttle } from 'helpful-decorators';
@@ -56,15 +55,7 @@ export class ReminderModule {
       this._showNotification(reminders);
 
       const oldest = reminders[0];
-      if (oldest.type === 'NOTE') {
-        this._matDialog.open(DialogViewNoteReminderComponent, {
-          autoFocus: false,
-          restoreFocus: true,
-          data: {
-            reminder: oldest,
-          }
-        });
-      } else if (oldest.type === 'TASK') {
+      if (oldest.type === 'TASK') {
         this._matDialog.open(DialogViewTaskRemindersComponent, {
           autoFocus: false,
           restoreFocus: true,

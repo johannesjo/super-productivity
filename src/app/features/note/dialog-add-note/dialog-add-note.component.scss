@@ -9,7 +9,7 @@ textarea {
   width: 100%;
   max-width: 100%;
   @include noteStyle;
-  margin-bottom: $s*2;
+  margin-bottom: 0;
   padding: $s;
   min-height: $s*5;
 
