@@ -73,6 +73,7 @@ export class TimelineComponent {
       console.log(time, lastTime);
 
       viewEntries.push({
+        id: task.id,
         type: TimelineViewEntryType.TaskFull,
         time: (time === lastTime)
           ? 0
@@ -88,6 +89,7 @@ export class TimelineComponent {
     if (lastEntry && lastEntry.type === TimelineViewEntryType.TaskFull) {
       const task = lastEntry.data;
       viewEntries.push({
+        id: 'END',
         type: TimelineViewEntryType.WorkdayEnd,
         time: lastTime + Math.max(0, task.timeEstimate - task.timeSpent)
       });
@@ -104,4 +106,7 @@ export class TimelineComponent {
     //   },
   }
 
+  trackByFn(i: number, item: any) {
+    return item.id;
+  }
 }

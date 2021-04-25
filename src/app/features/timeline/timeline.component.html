@@ -1,6 +1,6 @@
 <div *ngIf="timelineEntries$|async as timelineEntries">
   <div class="timeline-row"
-       *ngFor="let row of timelineEntries">
+       *ngFor="let row of timelineEntries; trackBy: trackByFn">
     <div class="timeline-col time">
       <div *ngIf="row.time">{{row.time|date:'HH:mm'}}</div>
     </div>
