@@ -78,7 +78,7 @@
   "dependencies": {
     "electron-dl": "^3.2.1",
     "electron-localshortcut": "^3.1.0",
-    "electron-log": "^4.2.4",
+    "electron-log": "^4.3.4",
     "electron-window-state": "^5.0.3",
     "googleapis": "^72.0.0",
     "node-fetch": "^2.6.1",
