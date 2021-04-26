@@ -1,5 +1,6 @@
 import { Task } from '../tasks/task.model';
 import { TimelineViewEntry, TimelineViewEntryType } from './timeline.model';
+import { msToString } from '../../ui/duration/ms-to-string.pipe';
 
 export const mapToViewEntries = (tasks: Task[], currentId: string | null, startTime: number = Date.now()): TimelineViewEntry[] => {
   const viewEntries: TimelineViewEntry[] = [];
@@ -28,24 +29,23 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, startT
 
     if (lastTime) {
       if (prev) {
-        time = lastTime + Math.max(0, prev.timeEstimate - prev.timeSpent);
+        time = lastTime + getTimeForTask(prev);
       } else {
-        time = lastTime;
+        throw new Error('Something weird happened');
       }
     } else {
       time = startTime;
     }
 
-    // console.log(time, lastTime);
-
     viewEntries.push({
       id: task.id,
       type: TimelineViewEntryType.TaskFull,
-      time: (time === lastTime)
-        ? 0
-        : time,
+      time,
       data: task,
+      // TODO add isSameTimeAsPrevious at the very end
+      isSameTimeAsPrevious: (time === lastTime),
     });
+
     lastTime = time;
   });
 
@@ -72,22 +72,26 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, startT
 
       // TODO check once we have more different
       const splitTask: Task | undefined = viewEntries[firstEntryBeforeIndex - 1]?.data as Task;
-      const scheduledTaskDuration = Math.max(0, scheduledTask.timeEstimate - scheduledTask.timeSpent);
+      const scheduledTaskDuration = getTimeForTask(scheduledTask);
 
       viewEntries.splice(firstEntryBeforeIndex || 0, 0, {
         id: scheduledTask.id,
         time: scheduledTask.plannedAt,
         type: TimelineViewEntryType.TaskFull,
         data: scheduledTask,
+        isSameTimeAsPrevious: false,
       });
 
       const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
       if (isAddSplitTask) {
+        const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
+        const splitStr = msToString(splitTime);
         viewEntries.splice(firstEntryBeforeIndex + 1, 0, {
           id: (splitTask as Task).id,
           time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
           type: TimelineViewEntryType.Text,
-          data: '... ' + (splitTask as Task).title,
+          data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
+          isSameTimeAsPrevious: true,
         });
       }
 
@@ -113,4 +117,8 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, startT
   //       title: 'SomeTask',
   //     }
   //   },
+};
+
+const getTimeForTask = (task: Task): number => {
+  return Math.max(0, task.timeEstimate - task.timeSpent) || 0;
 };
