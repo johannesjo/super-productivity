@@ -2,7 +2,22 @@
 
 
 :host {
+  overflow: hidden !important;
+}
+
+.wrapper {
+  padding-top: $s*2;
   display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow-x: hidden;
+  @include scrollYImportant();
+}
+
+.inner-wrapper {
   max-width: $component-max-width;
   margin: auto;
 }
@@ -50,6 +65,7 @@
 
   &.right {
     padding-left: $s*2;
+    padding-right: $s;
     flex: 1;
   }
 }

@@ -1,18 +1,23 @@
-<div *ngIf="timelineEntries$|async as timelineEntries">
-  <div class="timeline-row"
-       *ngFor="let row of timelineEntries; trackBy: trackByFn">
-    <div class="timeline-col time"
-         [class.hasTime]="!row.isSameTimeAsPrevious">
-      <div *ngIf="!row.isSameTimeAsPrevious">{{row.time|date:'HH:mm'}}</div>
-    </div>
-    <div class="timeline-col right"
-         [ngSwitch]="row.type">
-      <task *ngSwitchCase="TimelineViewEntryType.TaskFull"
-            showParentTitle="true"
-            [task]="row.data"></task>
-      <div *ngSwitchCase="TimelineViewEntryType.Text"
-           class="timeline-text">{{row.data}}</div>
-      <div *ngSwitchDefault>------------------</div>
+<task-additional-info-wrapper>
+  <div *ngIf="timelineEntries$|async as timelineEntries"
+       class="wrapper">
+    <div class="inner-wrapper">
+      <div class="timeline-row"
+           *ngFor="let row of timelineEntries; trackBy: trackByFn">
+        <div class="timeline-col time"
+             [class.hasTime]="!row.isSameTimeAsPrevious">
+          <div *ngIf="!row.isSameTimeAsPrevious">{{row.time|date:'HH:mm'}}</div>
+        </div>
+        <div class="timeline-col right"
+             [ngSwitch]="row.type">
+          <task *ngSwitchCase="TimelineViewEntryType.TaskFull"
+                showParentTitle="true"
+                [task]="row.data"></task>
+          <div *ngSwitchCase="TimelineViewEntryType.Text"
+               class="timeline-text">{{row.data}}</div>
+          <div *ngSwitchDefault>------------------</div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</task-additional-info-wrapper>
