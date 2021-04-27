@@ -107,14 +107,14 @@
   }
 }
 
+$split-border-radius: 24px;
+
 .task-continued {
   padding-left: $s*5;
   padding-top: $s;
   padding-bottom: $s;
-  //border-bottom-left-radius: $task-border-radius;
-  //border-bottom-right-radius: $task-border-radius;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
+  border-bottom-left-radius: $split-border-radius;
+  border-bottom-right-radius: $split-border-radius;
 
   @include lightTheme {
     background: $task-c-bg-light;
@@ -123,4 +123,9 @@
   @include darkTheme {
     background: $task-c-bg-dark;
   }
+}
+
+.split-task::ng-deep .box {
+  border-top-left-radius: $split-border-radius !important;
+  border-top-right-radius: $split-border-radius !important;
 }

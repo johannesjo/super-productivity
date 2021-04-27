@@ -94,7 +94,9 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
     );
 
     // TODO check once we have more different
-    const splitTask: Task | undefined = newViewEntries[firstEntryBeforeIndex - 1]?.data as Task;
+    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
+    const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
+
     const scheduledTaskDuration = getTimeForTask(scheduledTask);
 
     newViewEntries.splice(firstEntryBeforeIndex || 0, 0, {
@@ -109,12 +111,13 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
     if (isAddSplitTask) {
       // const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
       // const splitStr = msToString(splitTime);
+      viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
         id: (splitTask as Task).id,
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
-        type: TimelineViewEntryType.TaskContinued,
+        type: TimelineViewEntryType.SplitTaskContinued,
         // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
-        data: '... ' + (splitTask as Task).title + ' (2)',
+        data: '... ' + (splitTask as Task).title + ' (continued)',
         isSameTimeAsPrevious: true,
       });
     }

@@ -15,13 +15,17 @@
              [ngSwitch]="row.type">
 
           <task *ngSwitchCase="TimelineViewEntryType.Task"
-                showParentTitle="true"
+                showParentTitle="yes"
                 [task]="row.data"></task>
           <task *ngSwitchCase="TimelineViewEntryType.ScheduledTask"
-                showParentTitle="true"
+                showParentTitle="yes"
+                [task]="row.data"></task>
+          <task *ngSwitchCase="TimelineViewEntryType.SplitTask"
+                showParentTitle="yes"
+                class="split-task"
                 [task]="row.data"></task>
 
-          <div *ngSwitchCase="TimelineViewEntryType.TaskContinued"
+          <div *ngSwitchCase="TimelineViewEntryType.SplitTaskContinued"
                class="task-continued">{{row.data}}</div>
 
           <div *ngSwitchDefault>------------------</div>

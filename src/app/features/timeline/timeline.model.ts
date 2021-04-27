@@ -10,7 +10,8 @@ import { TaskCopy } from '../tasks/task.model';
 export enum TimelineViewEntryType {
   Task,
   ScheduledTask,
-  TaskContinued,
+  SplitTask,
+  SplitTaskContinued,
   CustomEvent,
   WorkdayEnd,
 }
@@ -23,12 +24,12 @@ interface TimelineViewEntryBase {
 }
 
 interface TimelineViewEntryTask extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.Task | TimelineViewEntryType.ScheduledTask;
+  type: TimelineViewEntryType.Task | TimelineViewEntryType.ScheduledTask | TimelineViewEntryType.SplitTask;
   data: TaskCopy;
 }
 
-interface TimelineViewEntryText extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.TaskContinued;
+interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.SplitTaskContinued;
   data: string;
 }
 
@@ -42,4 +43,7 @@ interface TimelineViewEntryCustomEvent extends TimelineViewEntryBase {
   data: CustomEvent;
 }
 
-export type TimelineViewEntry = TimelineViewEntryTask | TimelineViewEntryText | TimelineViewEntryCustomEvent;
+export type TimelineViewEntry =
+  TimelineViewEntryTask
+  | TimelineViewEntrySplitTaskContinued
+  | TimelineViewEntryCustomEvent;
