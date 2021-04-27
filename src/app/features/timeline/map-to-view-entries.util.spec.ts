@@ -21,13 +21,13 @@ describe('mapToViewEntries()', () => {
     const r = mapToViewEntries(fakeTasks, null, startTime);
     expect(r).toEqual([{
       id: fakeTasks[0].id,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: startTime,
       data: fakeTasks[0],
       isSameTimeAsPrevious: false,
     }, {
       id: fakeTasks[1].id,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: 5033,
       data: fakeTasks[1],
       isSameTimeAsPrevious: false,
@@ -47,37 +47,37 @@ describe('mapToViewEntries()', () => {
     const r = mapToViewEntries(fakeTasks, null, startTime);
     expect(r).toEqual([{
       id: FID,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: startTime,
       data: fakeTasks[0],
       isSameTimeAsPrevious: false,
     }, {
       id: FID,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: 5044,
       data: fakeTasks[1],
       isSameTimeAsPrevious: false,
     }, {
       id: FID,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: 13044,
       data: fakeTasks[2],
       isSameTimeAsPrevious: false,
     }, {
       id: FID,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: 13044,
       data: fakeTasks[3],
       isSameTimeAsPrevious: true,
     }, {
       id: FID,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: 13044,
       data: fakeTasks[4],
       isSameTimeAsPrevious: true,
     }, {
       id: FID,
-      type: TimelineViewEntryType.TaskFull,
+      type: TimelineViewEntryType.Task,
       time: 15044,
       data: fakeTasks[5],
       isSameTimeAsPrevious: false,

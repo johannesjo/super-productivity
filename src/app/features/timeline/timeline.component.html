@@ -13,11 +13,17 @@
         </div>
         <div class="timeline-col right"
              [ngSwitch]="row.type">
-          <task *ngSwitchCase="TimelineViewEntryType.TaskFull"
+
+          <task *ngSwitchCase="TimelineViewEntryType.Task"
                 showParentTitle="true"
                 [task]="row.data"></task>
+          <task *ngSwitchCase="TimelineViewEntryType.ScheduledTask"
+                showParentTitle="true"
+                [task]="row.data"></task>
+
           <div *ngSwitchCase="TimelineViewEntryType.Text"
                class="timeline-text">{{row.data}}</div>
+
           <div *ngSwitchDefault>------------------</div>
         </div>
       </div>
