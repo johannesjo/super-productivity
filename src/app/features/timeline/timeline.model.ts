@@ -10,8 +10,8 @@ import { TaskCopy } from '../tasks/task.model';
 export enum TimelineViewEntryType {
   Task,
   ScheduledTask,
+  TaskContinued,
   CustomEvent,
-  Text,
   WorkdayEnd,
 }
 
@@ -28,7 +28,7 @@ interface TimelineViewEntryTask extends TimelineViewEntryBase {
 }
 
 interface TimelineViewEntryText extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.Text;
+  type: TimelineViewEntryType.TaskContinued;
   data: string;
 }
 

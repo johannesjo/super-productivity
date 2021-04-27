@@ -1,6 +1,5 @@
 import { Task } from '../tasks/task.model';
 import { TimelineViewEntry, TimelineViewEntryType } from './timeline.model';
-import { msToString } from '../../ui/duration/ms-to-string.pipe';
 
 // const FAKE_TIMELINE_EVENTS: CustomEvent[] = [{}];
 
@@ -108,13 +107,14 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
 
     const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
     if (isAddSplitTask) {
-      const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
-      const splitStr = msToString(splitTime);
+      // const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
+      // const splitStr = msToString(splitTime);
       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
         id: (splitTask as Task).id,
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
-        type: TimelineViewEntryType.Text,
-        data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
+        type: TimelineViewEntryType.TaskContinued,
+        // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
+        data: '... ' + (splitTask as Task).title + ' (2)',
         isSameTimeAsPrevious: true,
       });
     }

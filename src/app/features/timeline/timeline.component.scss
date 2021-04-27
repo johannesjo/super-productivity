@@ -1,4 +1,5 @@
 @import '../../../variables';
+@import '../tasks/task/task.component.mixins';
 
 
 :host {
@@ -23,7 +24,7 @@
   margin: auto;
 }
 
-.timeline-row {
+.row {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
@@ -38,12 +39,12 @@
   //}
 }
 
-.timeline-row,
-.timeline-col {
+.row,
+.col {
   //border: 1px dashed rgba(0, 0, 0, .5)
 }
 
-.timeline-col {
+.col {
   min-height: 40px;
 
   &.time {
@@ -70,7 +71,7 @@
       //border-radius: 50%;
     }
 
-    .timeline-row:first-child & {
+    .row:first-child & {
       &:before {
         background: $dark-theme-separator-color;
         //display: none;
@@ -84,7 +85,7 @@
       }
     }
 
-    .timeline-row:last-child & {
+    .row:last-child & {
       &:before {
         color: $dark-theme-separator-color;
         content: "ᐯ";
@@ -106,8 +107,20 @@
   }
 }
 
-.timeline-text {
-  display: inline-block;
-  vertical-align: -webkit-baseline-middle;
+.task-continued {
   padding-left: $s*5;
+  padding-top: $s;
+  padding-bottom: $s;
+  //border-bottom-left-radius: $task-border-radius;
+  //border-bottom-right-radius: $task-border-radius;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+
+  @include lightTheme {
+    background: $task-c-bg-light;
+  }
+
+  @include darkTheme {
+    background: $task-c-bg-dark;
+  }
 }

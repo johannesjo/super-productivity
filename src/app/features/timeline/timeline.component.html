@@ -3,15 +3,15 @@
        class="wrapper">
     <div class="inner-wrapper"
          [@standardList]="timelineEntries.length">
-      <div class="timeline-row"
+      <div class="row"
            *ngFor="let row of timelineEntries; let isFirst = first; trackBy: trackByFn">
-        <div class="timeline-col time"
+        <div class="col time"
              [class.hasTime]="!row.isSameTimeAsPrevious">
           <div *ngIf="!row.isSameTimeAsPrevious">{{ isFirst
             ? (T.F.TIMELINE.NOW|translate)
             : (row.time|date:'HH:mm')}}</div>
         </div>
-        <div class="timeline-col right"
+        <div class="col right"
              [ngSwitch]="row.type">
 
           <task *ngSwitchCase="TimelineViewEntryType.Task"
@@ -21,8 +21,8 @@
                 showParentTitle="true"
                 [task]="row.data"></task>
 
-          <div *ngSwitchCase="TimelineViewEntryType.Text"
-               class="timeline-text">{{row.data}}</div>
+          <div *ngSwitchCase="TimelineViewEntryType.TaskContinued"
+               class="task-continued">{{row.data}}</div>
 
           <div *ngSwitchDefault>------------------</div>
         </div>
