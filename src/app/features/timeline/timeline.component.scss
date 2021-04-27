@@ -7,6 +7,7 @@
 
 .wrapper {
   padding-top: $s*2;
+  padding-bottom: $s*2;
   display: block;
   position: absolute;
   top: 0;
@@ -60,6 +61,24 @@
       transform: translateY(-50%);
       background: $dark-theme-text-color;
       //border-radius: 50%;
+    }
+
+    .timeline-row:first-child & {
+      &:before {
+        background: $dark-theme-text-color;
+        //display: none;
+        content: '';
+        position: absolute;
+        top: 0;
+        transform: none;
+        width: 21px;
+        height: 2px;
+        right: -12px;
+      }
+
+      div {
+        //visibility: hidden;
+      }
     }
   }
 

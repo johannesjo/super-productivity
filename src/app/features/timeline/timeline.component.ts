@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable } from 'rxjs';
 import { mapToViewEntries } from './map-to-view-entries.util';
+import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'timeline',
@@ -13,6 +14,7 @@ import { mapToViewEntries } from './map-to-view-entries.util';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TimelineComponent {
+  T: typeof T = T;
   TimelineViewEntryType: typeof TimelineViewEntryType = TimelineViewEntryType;
   // timelineEntries$ = this._workContextService.todaysTasks$.pipe(
   timelineEntries$: Observable<TimelineViewEntry[]> = combineLatest([

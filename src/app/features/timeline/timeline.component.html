@@ -3,10 +3,12 @@
        class="wrapper">
     <div class="inner-wrapper">
       <div class="timeline-row"
-           *ngFor="let row of timelineEntries; trackBy: trackByFn">
+           *ngFor="let row of timelineEntries; let isFirst = first; trackBy: trackByFn">
         <div class="timeline-col time"
              [class.hasTime]="!row.isSameTimeAsPrevious">
-          <div *ngIf="!row.isSameTimeAsPrevious">{{row.time|date:'HH:mm'}}</div>
+          <div *ngIf="!row.isSameTimeAsPrevious">{{ isFirst
+            ? (T.F.TIMELINE.NOW|translate)
+            : (row.time|date:'HH:mm')}}</div>
         </div>
         <div class="timeline-col right"
              [ngSwitch]="row.type">

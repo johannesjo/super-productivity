@@ -787,7 +787,8 @@
       }
     },
     "TIMELINE": {
-      "MENU_TITLE": "Timeline"
+      "MENU_TITLE": "Timeline",
+      "NOW": "Now"
     },
     "TIME_TRACKING": {
       "B": {
