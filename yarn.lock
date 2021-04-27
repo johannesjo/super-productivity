@@ -454,10 +454,10 @@
   dependencies:
     tslib "^2.0.0"
 
-"@angular/language-service@^11.2.10":
-  version "11.2.10"
-  resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-11.2.10.tgz#6464c7ca682a31124016e0dbf32ce058a7490d15"
-  integrity sha512-foBArCVLW1csJhAyPJoIF5gYhSm4SJjsu9QbTaBsHdt3igPayZekEkYAKfwj4pu1Desk+87gZn5NLgdBXcorUw==
+"@angular/language-service@^11.2.11":
+  version "11.2.11"
+  resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-11.2.11.tgz#fa35745fc1248a53f434c868ef8ab2170ba848fc"
+  integrity sha512-k8qaG6z/jcobNiwwPhNz4x60qhexTAdWxrQuDK0CK10WQ5zAkjjau6+LriLpwTfXeRBIyjyc/2TbmIP4Yy5v8w==
 
 "@angular/material-moment-adapter@^11.2.9":
   version "11.2.9"
