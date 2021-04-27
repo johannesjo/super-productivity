@@ -1,7 +1,8 @@
 <task-additional-info-wrapper>
   <div *ngIf="timelineEntries$|async as timelineEntries"
        class="wrapper">
-    <div class="inner-wrapper">
+    <div class="inner-wrapper"
+         [@standardList]="timelineEntries.length">
       <div class="timeline-row"
            *ngFor="let row of timelineEntries; let isFirst = first; trackBy: trackByFn">
         <div class="timeline-col time"

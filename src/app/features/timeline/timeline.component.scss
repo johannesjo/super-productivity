@@ -29,6 +29,13 @@
   align-items: stretch;
   justify-content: center;
   padding-bottom: $s;
+
+  // TODO check if we might want this
+  //&:first-child {
+  //  top: 0;
+  //  position: sticky;
+  //  z-index: 44;
+  //}
 }
 
 .timeline-row,
@@ -65,7 +72,7 @@
 
     .timeline-row:first-child & {
       &:before {
-        background: $dark-theme-text-color;
+        background: $dark-theme-separator-color;
         //display: none;
         content: '';
         position: absolute;

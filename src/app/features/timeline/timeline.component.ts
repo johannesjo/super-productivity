@@ -6,12 +6,14 @@ import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable } from 'rxjs';
 import { mapToViewEntries } from './map-to-view-entries.util';
 import { T } from 'src/app/t.const';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'timeline',
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation],
 })
 export class TimelineComponent {
   T: typeof T = T;
