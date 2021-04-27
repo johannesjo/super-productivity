@@ -75,9 +75,19 @@
         height: 2px;
         right: -12px;
       }
+    }
 
-      div {
-        //visibility: hidden;
+    .timeline-row:last-child & {
+      &:before {
+        color: $dark-theme-separator-color;
+        content: "ᐯ";
+        position: absolute;
+        top: 100%;
+        margin-top: -10px;
+        transform: none;
+        width: 21px;
+        font-size: 13px;
+        right: -12px;
       }
     }
   }
