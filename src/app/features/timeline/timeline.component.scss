@@ -68,9 +68,9 @@
     &.hasTime:after {
       display: block;
       content: '';
-      width: 11px;
+      width: 8px;
       height: 2px;
-      right: -6px;
+      right: -5px;
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
@@ -90,9 +90,9 @@
         position: absolute;
         top: 0;
         transform: none;
-        width: 21px;
+        width: 16px;
         height: 2px;
-        right: -12px;
+        right: -9px;
 
         @include lightTheme() {
           background: $light-theme-separator-color;
@@ -113,6 +113,7 @@
         transform: none;
         width: 21px;
         font-size: 13px;
+        text-align: center;
         right: -12px;
         @include lightTheme() {
           color: $light-theme-separator-color;
