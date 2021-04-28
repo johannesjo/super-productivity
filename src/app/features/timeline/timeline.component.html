@@ -9,7 +9,7 @@
              [class.hasTime]="!row.isSameTimeAsPrevious">
           <div *ngIf="!row.isSameTimeAsPrevious">{{ isFirst
             ? (T.F.TIMELINE.NOW|translate)
-            : (row.time|date:'HH:mm')}}</div>
+            : (row.time|roundDuration|date:'HH:mm')}}</div>
         </div>
         <div class="col right"
              [ngSwitch]="row.type">
