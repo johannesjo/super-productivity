@@ -51,12 +51,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 2px solid $dark-theme-separator-color;
+    border-right: 2px solid;
     position: relative;
     min-width: 80px;
     text-align: center;
     margin-top: -$s;
     margin-bottom: 0;
+
+    @include lightTheme() {
+      border-color: $light-theme-separator-color;
+    }
+    @include darkTheme() {
+      border-color: $dark-theme-separator-color;
+    }
 
     &.hasTime:after {
       display: block;
@@ -67,14 +74,18 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: $dark-theme-text-color;
       //border-radius: 50%;
+
+      @include lightTheme() {
+        background: $light-theme-separator-color;
+      }
+      @include darkTheme() {
+        background: $dark-theme-text-color;
+      }
     }
 
     .row:first-child & {
       &:before {
-        background: $dark-theme-separator-color;
-        //display: none;
         content: '';
         position: absolute;
         top: 0;
@@ -82,6 +93,13 @@
         width: 21px;
         height: 2px;
         right: -12px;
+
+        @include lightTheme() {
+          background: $light-theme-separator-color;
+        }
+        @include darkTheme() {
+          background: $dark-theme-separator-color;
+        }
       }
     }
 
@@ -96,6 +114,12 @@
         width: 21px;
         font-size: 13px;
         right: -12px;
+        @include lightTheme() {
+          color: $light-theme-separator-color;
+        }
+        @include darkTheme() {
+          color: $dark-theme-separator-color;
+        }
       }
     }
   }
