@@ -17,8 +17,8 @@
     "NO_TASKS": "Non ci sono task nel tuo backlog"
   },
   "CONFIRM": {
-    "AUTO_FIX": "I tuoi dati sembrano essere danneggiati. Vuoi provare a risolverlo automaticamente? Ciò potrebbe causare una parziale perdita di dati.",
-    "DELETE_STRAY_BACKUP": "Vuoi eliminare il retro per evitare di vedere questa finestra di dialogo?",
+    "AUTO_FIX": "I tuoi dati sembrano essere danneggiati. Vuoi provare a risolvere il problema automaticamente? Ciò potrebbe causare una parziale perdita dei dati.",
+    "DELETE_STRAY_BACKUP": "Vuoi eliminare il backup per evitare di vedere questa finestra di dialogo?",
     "RESTORE_FILE_BACKUP": "Sembra che NON ci siano DATI, ma sono disponibili backup in \"{{dir}}\". Vuoi ripristinare l'ultimo backup da {{from}}?",
     "RESTORE_STRAY_BACKUP": "Durante l'ultima sincronizzazione potrebbe essersi verificato un errore. Vuoi ripristinare l'ultimo backup?"
   },
@@ -31,7 +31,7 @@
     "NEXT_WEEK": "La prossima settimana",
     "PLACEHOLDER": "Seleziona una data",
     "PRESS_ENTER_AGAIN": "Premere di nuovo Invio per salvare",
-    "TOMORROW": "domani"
+    "TOMORROW": "Domani"
   },
   "F": {
     "ATTACHMENT": {
@@ -56,7 +56,7 @@
         "ADD": "Aggiungi segnalibro",
         "DROP": "Trascina qui per aggiungere un segnalibro",
         "EDIT": "Modifica segnalibro",
-        "NO_BOOKMARKS": "Non hai segnalibri nel progetto. Aggiungine uno tramite drag-and-drop oppure cliccando il pulsante 'più'."
+        "NO_BOOKMARKS": "Non hai segnalibri nel progetto. Aggiungine uno tramite drag-and-drop oppure facendo clic sul pulsante 'più'."
       },
       "DIALOG_EDIT": {
         "ADD_BOOKMARK": "Aggiungi segnalibro",
@@ -87,7 +87,7 @@
         "CALDAV_RESOURCE": "Il nome della risorsa CalDav (il calendario)",
         "CALDAV_URL": "URL CalDav (l'URL di base)",
         "CALDAV_USER": "Il tuo nome utente CalDav",
-        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente le cose da fare CalDav non completate al tuo backlog",
+        "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente le attività CalDav non completate al tuo backlog",
         "IS_AUTO_POLL": "Esegui automaticamente il polling delle attività importate per le modifiche",
         "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostra le attività di CalDav non completate come suggerimento quando si aggiungono nuove attività",
         "IS_TRANSITION_ISSUES_ENABLED": "Completa automaticamente le attività di CalDav al completamento dell'attività"
@@ -98,19 +98,19 @@
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Descrizione",
-        "LABELS": "categorie",
+        "LABELS": "Categorie",
         "MARK_AS_CHECKED": "Contrassegna gli aggiornamenti come controllati",
-        "STATUS": "stato",
-        "SUMMARY": "sommario"
+        "STATUS": "Stato",
+        "SUMMARY": "Sommario"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: calendario \"{{calendarName}}\" non trovato",
         "CALENDAR_READ_ONLY": "CalDav: il calendario \"{{calendarName}}\" è di sola lettura",
         "ERR_NETWORK": "CalDav: richiesta non riuscita a causa di un errore di rete lato client",
         "ERR_NOT_CONFIGURED": "CalDav: non configurato correttamente",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: importati {{issuesLength}} nuovi problemi da git a backlog",
+        "IMPORTED_MULTIPLE_ISSUES": "CalDav: importati {{issuesLength}} nuovi problemi da git a backlog",
         "IMPORTED_SINGLE_ISSUE": "CalDav: problema importato \"{{issueText}}\" da a backlog",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" sembra essere stato eliminato sul server.",
+        "ISSUE_NOT_FOUND": "CalDav: Attività \"{{issueId}}\" sembra essere stato eliminato sul server.",
         "ISSUE_NO_UPDATE_REQUIRED": "CalDav: nessun aggiornamento richiesto.",
         "ISSUE_UPDATE": "Caldav: dati aggiornati per \"{{issueText}}\"",
         "POLLING": "Caldav: modifiche al polling per gli oggetti"
@@ -135,7 +135,7 @@
         "TITLE": "Configura GitHub per il progetto"
       },
       "FORM": {
-        "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
+        "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi un nuovo task",
@@ -178,7 +178,7 @@
         "TITLE": "Configura GitLab per il progetto"
       },
       "FORM": {
-        "FILTER_USER": "Username (es. per filtrare le modifiche fatte da te)",
+        "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
         "GITLAB_BASE_URL": "URL di base GitLab personalizzato",
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da GitHub al backlog",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
@@ -249,8 +249,8 @@
         "ENABLE_TRANSITIONS": "Abilita la gestione delle transizioni",
         "IN_PROGRESS": "Stato di inizio del task",
         "LOAD_SUGGESTIONS": "Carica suggerimenti",
-        "MAP_CUSTOM_FIELDS": "Mappa campi custom",
-        "MAP_CUSTOM_FIELDS_INFO": "Sfortunatamente alcuni dei dati di Jira sono salvati sotto campi custom che sono diversi per ogni installazione. Se vuoi includere questi dati devi selezionare il giusto campo custom.",
+        "MAP_CUSTOM_FIELDS": "Mappa campi personalizzati",
+        "MAP_CUSTOM_FIELDS_INFO": "Sfortunatamente alcuni dei dati di Jira sono salvati sotto campi personalizzati che sono diversi per ogni installazione. Se vuoi includere questi dati devi selezionare il giusto campo personalizzato.",
         "OPEN": "Stato di pausa task",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Seleziona issue per caricare le transizioni disponibili",
         "STORY_POINTS": "Punti storia"
@@ -270,13 +270,13 @@
         "UPDATE_STATUS": "Aggiorna stato"
       },
       "DIALOG_WORKLOG": {
-        "CURRENTLY_LOGGED": "Tempo loggato al momento: ",
+        "CURRENTLY_LOGGED": "Tempo connesso al momento: ",
         "INVALID_DATE": "Il valore inserito non è una data!",
         "SAVE_WORKLOG": "Salva worklog",
         "STARTED": "Iniziato",
-        "SUBMIT_WORKLOG_FOR": "Sottometti un worklog su Jira per",
+        "SUBMIT_WORKLOG_FOR": "Invia un worklog su Jira per",
         "TIME_SPENT": "Tempo impiegato",
-        "TITLE": "Jira: Sottometti worklog"
+        "TITLE": "Jira: Invia worklog"
       },
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue non risolti da git al backlog",
@@ -285,8 +285,8 @@
         "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare"
       },
       "FORM_ADV": {
-        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usato per aggiungere task automaticamente al tuo backlog",
-        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Apri una finestra per sottomettere il worklog su jira quando un sotto-task è completato",
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usato per aggiungere automaticamente task al tuo backlog",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Apri una finestra per inviare il worklog su jira quando un sotto-task è completato",
         "IS_AUTO_ADD_TO_BACKLOG": "Aggiungi automaticamente gli issue al backlog di Jira",
         "IS_AUTO_POLL_TICKETS": "Controlla automaticamente le modifiche sugli issue importati e notificamelo",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controlla se l'issue sul quale correntemente si sta lavorando è assegnato all'utente corrente",
@@ -297,7 +297,7 @@
         "ALLOW_SELF_SIGNED": "Consenti certificato autofirmato",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username",
+        "USER_NAME": "Email / Nome utente",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (solo app desktop)"
       },
       "FORM_SECTION": {
@@ -307,7 +307,7 @@
           "H1": "Configurazione base",
           "H2": "Impostazioni del worklog",
           "H3": "Transizioni di default",
-          "P1_1": "Per favore indica un nome per la login (lo trovi nella tua pagina profilo) e un <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> o una password se per qualche motivo non ne puoi generare uno. Per favore nota che le nuove versioni di jira potrebbero funzionare solo con il token. ",
+          "P1_1": "Per favore indica un nome per il login (lo trovi nella tua pagina profilo) e un <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> o una password se per qualche motivo non ne puoi generare uno. Per favore nota che le nuove versioni di jira potrebbero funzionare solo con il token. ",
           "P1_2": "Devi anche specificare una query JQL che è usata dai suggerimenti per aggiungere task a jira. Se hai bisogno di aiuto vai a questo link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Puoi anche configurare, se vuoi aggiungere automaticamente (es. ogni volta che visiti la vista di pianificazione) nuovi tasks specificati in una query JQL custom al backlog.",
           "P1_4": "Un'altra opzione è di \"Controllare se il ticket corrente è assegnato ad un altro utente\". Se abilitato e stai iniziando, un controllo satà fatto per controllare se sei assegnato a quel ticket su Jira, se non lo sei appparirà una finestra nella quale puoi scegliere di assegnarti quel ticket.",
@@ -458,7 +458,7 @@
         "L2": "Prova ad ascoltare i tuoi pensieri e le emozioni che ne scaturiscono",
         "L3": "Rispondi a te stesso nello stesso modo in cui risponderesti ad un amico?",
         "L4": "Se la risposta è no, immagina un tuo amico nella tua situazione. Cosa gli diresti? Cosa faresti per loro?",
-        "OUTRO": "Altro esercizi <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">li trovi qui</a> oppure su <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
+        "OUTRO": "Altri esercizi <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">li trovi qui</a> oppure su <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
         "TITLE": "Auto compassione"
       },
       "CUR": {
@@ -581,7 +581,7 @@
         "TEXT": "<p>Aggiornamento da Dropbox. I dati sia locali che remoti sembrano essere modificati.</p>",
         "TITLE": "Dropbox: dati in conflitto",
         "USE_LOCAL": "Usa locale",
-        "USE_REMOTE": "Usa il telecomando"
+        "USE_REMOTE": "Usa remoto"
       },
       "FORM": {
         "DROPBOX": {
@@ -601,7 +601,7 @@
         "WEB_DAV": {
           "CORS_INFO": "<strong>Sperimentale !!</strong> Per fare in modo che funzioni, devi disabilitare o limitare CORS per la tua istanza Nextcloud, che può avere implicazioni negative per la sicurezza! Per ulteriori informazioni, <a href='https://github.com/nextcloud/server/issues/3131'>fai riferimento a questo thread</a> . Utilizzare a proprio rischio!",
           "L_BASE_URL": "URL di base",
-          "L_PASSWORD": "Parola d'ordine",
+          "L_PASSWORD": "Password",
           "L_SYNC_FILE_PATH": "Sincronizza percorso file",
           "L_USER_NAME": "Nome utente"
         }
@@ -628,7 +628,7 @@
       "D_EDIT": {
         "ADD": "Aggiunti etichette per \"{{title}}\"",
         "EDIT": "Modifica etichette per \"{{title}}\"",
-        "LABEL": "etichette"
+        "LABEL": "Etichette"
       },
       "FORM_BASIC": {
         "L_COLOR": "Colore (se non definito, verrà usato il colore primario del tema)",
@@ -1118,7 +1118,7 @@
     "TASKS_COMPLETED": "Task completati",
     "TASK_LIST": "Lista dei task",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo impiegato /  stimato",
-    "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
+    "TIME_SPENT_ESTIMATE_TITLE": "Tempo Impiegato: Tempo totale impiegato oggi. Task archiviati non inclusi. – Tempo stimato: Tempo stimato per le attività fatte oggi meno il tempo già speso in queste attività negli altri giorni.",
     "TODAY": "Oggi",
     "WEEK": "Settimana"
   },
