@@ -907,9 +907,21 @@ $min-badge-size: $s*2.25;
 }
 
 .parent-title {
-  font-size: 12px;
-  padding-top: $s/2;
+  display: flex;
+  align-items: center;
   padding-left: $s;
+  padding-top: $s/2;
   margin-bottom: -2px;
-  text-overflow: ellipsis;
+
+  .dot {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    margin-right: $s/2;
+  }
+
+  .title {
+    font-size: 12px;
+    text-overflow: ellipsis;
+  }
 }

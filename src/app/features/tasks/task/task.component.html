@@ -88,7 +88,11 @@
         (click)="IS_TOUCH_ONLY && toggleShowAdditionalInfoOpen()"
            class="title-and-tags-wrapper">
         <div class="parent-title"
-             *ngIf="showParentTitle && task.parentId">{{parentTitle$|async}}
+             *ngIf="showParentTitle && task.parentId">
+          <div class="dot"
+               *ngIf="(projectColor$|async) as projectColor"
+               [style.backgroundColor]="projectColor"></div>
+          <div class="title">{{parentTitle$|async}}</div>
         </div>
 
         <div #contentEditableOnClickEl

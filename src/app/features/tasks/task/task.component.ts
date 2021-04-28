@@ -107,6 +107,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       )
     : EMPTY;
 
+  projectColor$: Observable<string> = this.showParentTitle
+    ? this._task$.pipe(
+      take(1),
+      switchMap((task) => task.projectId
+        ? this._projectService.getByIdOnce$(task.projectId)
+        : EMPTY),
+      map(project => project.theme.primary),
+    )
+    : EMPTY;
+
   private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout?: number;
