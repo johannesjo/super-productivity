@@ -94,7 +94,7 @@
     "@angular-eslint/template-parser": "^4.0.0",
     "@angular/animations": "^11.2.10",
     "@angular/cdk": "^11.2.9",
-    "@angular/cli": "^11.2.10",
+    "@angular/cli": "^11.2.11",
     "@angular/common": "^11.2.10",
     "@angular/compiler": "^11.2.10",
     "@angular/compiler-cli": "^11.2.10",
