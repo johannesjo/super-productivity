@@ -3167,9 +3167,10 @@ caseless@~0.12.0:
 
 cdav-library@nextcloud/cdav-library:
   version "0.0.1"
-  resolved "https://codeload.github.com/nextcloud/cdav-library/tar.gz/0fed7aea9eeaaa2a4c862b922ebc0bf15585ceea"
+  uid "051904cc2ba254ef8e517932ccaed663e5d2638d"
+  resolved "https://codeload.github.com/nextcloud/cdav-library/tar.gz/051904cc2ba254ef8e517932ccaed663e5d2638d"
   dependencies:
-    core-js "^3.8.3"
+    core-js "^3.11.0"
     regenerator-runtime "^0.13.7"
 
 chai-nightwatch@^0.4.0:
@@ -3969,10 +3970,10 @@ core-js@3.8.3:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.8.3.tgz#c21906e1f14f3689f93abcc6e26883550dd92dd0"
   integrity sha512-KPYXeVZYemC2TkNEkX/01I+7yd+nX3KddKwZ1Ww7SKWdI2wQprSgLmrTddT8nw92AjEklTsPBoSdQBhbI1bQ6Q==
 
-core-js@^3.6.5, core-js@^3.8.3:
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.10.1.tgz#e683963978b6806dcc6c0a4a8bd4ab0bdaf3f21a"
-  integrity sha512-pwCxEXnj27XG47mu7SXAwhLP3L5CrlvCB91ANUkIz40P27kUcvNfSdvyZJ9CLHiVoKSp+TTChMQMSKQEH/IQxA==
+core-js@^3.11.0, core-js@^3.6.5:
+  version "3.11.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.11.1.tgz#f920392bf8ed63a0ec8e4e729857bfa3d121c525"
+  integrity sha512-k93Isqg7e4txZWMGNYwevZL9MiogLk8pd1PtwrmFmi8IBq4GXqUaVW/a33Llt6amSI36uSjd0GWwc9pTT9ALlQ==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
