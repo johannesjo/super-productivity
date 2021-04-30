@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { TimelineComponent } from './timeline.component';
 import { TasksModule } from '../tasks/tasks.module';
 import { UiModule } from '../../ui/ui.module';
+import { TimelineCustomEventComponent } from './timeline-custom-event/timeline-custom-event.component';
 
 @NgModule({
   declarations: [
-    TimelineComponent
+    TimelineComponent,
+    TimelineCustomEventComponent
   ],
   exports:[
     TimelineComponent,

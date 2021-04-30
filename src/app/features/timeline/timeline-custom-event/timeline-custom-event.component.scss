@@ -1,0 +1,20 @@
+@import '../../../../variables';
+@import '../../tasks/task/task.component.mixins';
+
+:host {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding-top: $s*.5;
+  padding-bottom: $s*.5;
+  padding-left: $s;
+
+  mat-icon {
+    margin-left: $s;
+    margin-right: $s*1.5;
+  }
+}
+
+.custom-event-title {
+}

@@ -45,8 +45,6 @@
 }
 
 .col {
-  min-height: 40px;
-
   &.time {
     display: flex;
     align-items: center;
@@ -55,8 +53,8 @@
     position: relative;
     min-width: 80px;
     text-align: center;
-    margin-top: -$s;
-    margin-bottom: 0;
+    margin-top: -$s*.5;
+    margin-bottom: -$s*.5;
 
     @include lightTheme() {
       border-color: $light-theme-separator-color;
@@ -129,12 +127,20 @@
     padding-left: $s*2;
     padding-right: $s;
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
+
+    > * {
+      flex: 1;
+    }
   }
 }
 
 $split-border-radius: 24px;
 
 .task-continued {
+  align-self: flex-start;
   padding-left: $s*5;
   padding-top: $s;
   padding-bottom: $s;
@@ -154,3 +160,4 @@ $split-border-radius: 24px;
   border-top-left-radius: $split-border-radius !important;
   border-top-right-radius: $split-border-radius !important;
 }
+

@@ -1,7 +1,20 @@
 import { Task } from '../tasks/task.model';
-import { TimelineViewEntry, TimelineViewEntryType } from './timeline.model';
+import { TimelineCustomEvent, TimelineViewEntry, TimelineViewEntryType } from './timeline.model';
 
-// const FAKE_TIMELINE_EVENTS: CustomEvent[] = [{}];
+const d = new Date();
+d.setTime(13);
+const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
+  title: 'Mittagspause',
+  duration: 60000 * 60,
+  start: d.getTime(),
+  icon: 'restaurant'
+// }, {
+//   title: 'Spazieren am Nachmittag',
+//   duration: 60000 * 60 * .25,
+//   start: Date.now() + 60000 * 60 * 2,
+//   icon: 'nature',
+}];
+// const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [];
 
 export const mapToViewEntries = (tasks: Task[], currentId: string | null, startTime: number = Date.now()): TimelineViewEntry[] => {
 
@@ -11,8 +24,8 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, startT
 
   const [viewEntries, scheduledTasks] = createViewEntriesForNormalTasks(startTime, initialTasks);
 
-  return addViewEntriesForScheduled(scheduledTasks, viewEntries);
-
+  const viewEntriesWithScheduled = addViewEntriesForScheduled(scheduledTasks, viewEntries);
+  const viewEntriesWithCustomEvents = addViewEntriesForCustomEvents(FAKE_TIMELINE_EVENTS, viewEntriesWithScheduled);
   // const lastEntry = viewEntries && viewEntries[viewEntries.length - 1];
   // console.log({lastEntry});
   //
@@ -24,7 +37,7 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, startT
   //     time: lastTime + Math.max(0, task.timeEstimate - task.timeSpent)
   //   });
   // }
-
+  return viewEntriesWithCustomEvents;
 };
 
 const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] => {
@@ -137,4 +150,62 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
 
 const getTimeForTask = (task: Task): number => {
   return Math.max(0, task.timeEstimate - task.timeSpent) || 0;
+};
+
+const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], viewEntries: TimelineViewEntry[]): TimelineViewEntry [] => {
+  if (!customEvents.length) {
+    return viewEntries;
+  }
+  const newViewEntries: TimelineViewEntry[] = viewEntries.slice(0);
+
+  customEvents.forEach((customEvent, i) => {
+    if ((customEvent.start + customEvent.duration) <= Date.now()) {
+      return;
+    }
+
+    const firstEntryBeforeIndex = newViewEntries.findIndex(
+      viewEntry =>
+        viewEntry.time
+        && viewEntry.time !== 0
+        && viewEntry.time >= (customEvent.start as number)
+    );
+
+    // TODO check once we have more different
+    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
+    const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
+
+    newViewEntries.splice(firstEntryBeforeIndex || 0, 0, {
+      id: customEvent.title,
+      time: customEvent.start,
+      type: TimelineViewEntryType.CustomEvent,
+      data: customEvent,
+      isSameTimeAsPrevious: false,
+    });
+
+    const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
+    if (isAddSplitTask) {
+      // const splitTime = getTimeForTask(splitTask) - customEvent.duration;
+      // const splitStr = msToString(splitTime);
+      viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
+      newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
+        id: (splitTask as Task).id,
+        time: customEvent.start + customEvent.duration,
+        type: TimelineViewEntryType.SplitTaskContinued,
+        // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
+        data: '... ' + (splitTask as Task).title + ' (continued)',
+        isSameTimeAsPrevious: true,
+      });
+    }
+
+    const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let j = startIndexOfFollowing; j < newViewEntries.length; j++) {
+      const viewEntry = newViewEntries[j];
+      if (viewEntry.time) {
+        viewEntry.time = viewEntry.time + customEvent.duration;
+      }
+    }
+  });
+
+  return newViewEntries;
 };

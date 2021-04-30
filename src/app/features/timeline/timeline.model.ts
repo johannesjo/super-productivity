@@ -33,14 +33,16 @@ interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
   data: string;
 }
 
-export interface CustomEvent {
-  starts: number;
+export interface TimelineCustomEvent {
+  title: string;
+  start: number;
   duration: number;
+  icon: string;
 }
 
 interface TimelineViewEntryCustomEvent extends TimelineViewEntryBase {
   type: TimelineViewEntryType.CustomEvent;
-  data: CustomEvent;
+  data: TimelineCustomEvent;
 }
 
 export type TimelineViewEntry =
