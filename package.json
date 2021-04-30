@@ -149,7 +149,7 @@
     "electron-reload": "^1.2.5",
     "eslint": "^7.25.0",
     "eslint-plugin-import": "2.22.1",
-    "eslint-plugin-jsdoc": "32.3.3",
+    "eslint-plugin-jsdoc": "33.0.0",
     "eslint-plugin-prefer-arrow": "1.2.3",
     "file-saver": "^2.0.2",
     "hammerjs": "^2.0.8",
