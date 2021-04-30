@@ -23,6 +23,7 @@ assignees: ''
 <!--- Tell us what happens instead of the expected behavior -->
 
 ### Steps to Reproduce (for bugs)
+<!--- Does the error happen once or are you able to reproduce it reliably? --->
 <!--- Provide a link to a live example or an unambiguous set of steps to -->
 <!--- reproduce this bug. Include code to reproduce, if relevant -->
 1.
