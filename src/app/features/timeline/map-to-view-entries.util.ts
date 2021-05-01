@@ -130,7 +130,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
         type: TimelineViewEntryType.SplitTaskContinued,
         // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
-        data: '... ' + (splitTask as Task).title + ' (continued)',
+        data: '... ' + (splitTask as Task).title,
         isSameTimeAsPrevious: true,
       });
     }

@@ -26,7 +26,7 @@
                 [task]="row.data"></task>
 
           <div *ngSwitchCase="TimelineViewEntryType.SplitTaskContinued"
-               class="task-continued">{{row.data}}</div>
+               class="task-continued">{{row.data}} <em>(continued)</em></div>
 
           <timeline-custom-event *ngSwitchCase="TimelineViewEntryType.CustomEvent"
                                  [event]="row.data"></timeline-custom-event>
