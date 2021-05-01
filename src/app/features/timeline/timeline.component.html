@@ -25,11 +25,17 @@
                 class="split-task"
                 [task]="row.data"></task>
 
-          <div *ngSwitchCase="TimelineViewEntryType.SplitTaskContinued"
-               class="task-continued">{{row.data}} <em>(continued)</em></div>
 
           <timeline-custom-event *ngSwitchCase="TimelineViewEntryType.CustomEvent"
                                  [event]="row.data"></timeline-custom-event>
+
+
+          <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart"
+               class="work-start">Work Start at 9:00
+          </div>
+
+          <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd"
+               class="work-end">Work End for {{row.time|date}}</div>
 
           <div *ngSwitchDefault>------------------</div>
         </div>

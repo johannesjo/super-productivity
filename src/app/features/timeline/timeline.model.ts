@@ -13,6 +13,7 @@ export enum TimelineViewEntryType {
   SplitTask,
   SplitTaskContinued,
   CustomEvent,
+  WorkdayStart,
   WorkdayEnd,
 }
 
@@ -45,7 +46,28 @@ interface TimelineViewEntryCustomEvent extends TimelineViewEntryBase {
   data: TimelineCustomEvent;
 }
 
+
+export interface TimelineWorkStartEnd {
+  startTime: string;
+  endTime: string;
+}
+
+interface TimelineViewEntryWorkStart extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.WorkdayStart;
+  data: TimelineWorkStartEnd;
+}
+
+interface TimelineViewEntryWorkEnd extends TimelineViewEntryBase {
+  type: TimelineViewEntryType.WorkdayEnd;
+  data: TimelineWorkStartEnd;
+}
+
 export type TimelineViewEntry =
   TimelineViewEntryTask
   | TimelineViewEntrySplitTaskContinued
-  | TimelineViewEntryCustomEvent;
+  | TimelineViewEntryCustomEvent
+  | TimelineViewEntryWorkStart
+  | TimelineViewEntryWorkEnd
+  ;
+
+
