@@ -9,6 +9,15 @@
   padding-top: $s*.5;
   padding-bottom: $s*.5;
   padding-left: $s;
+  border: 1px solid $dark-theme-separator-color;
+  border-radius: $task-border-radius;
+
+  @include lightTheme {
+    border-color: $light-theme-separator-color;
+  }
+  @include darkTheme {
+    border-color: $dark-theme-separator-color;
+  }
 
   mat-icon {
     margin-left: $s;
