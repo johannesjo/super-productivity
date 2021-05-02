@@ -30,6 +30,8 @@ export const mapToViewEntries = (
   now: number = Date.now(),
 ): TimelineViewEntry[] => {
   let startTime = now;
+  const params: any = {tasks, currentId, workStartEndCfg, now};
+  console.log('mapToViewEntries', params, {asString: JSON.stringify(params)});
 
   if (workStartEndCfg) {
     const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
@@ -124,8 +126,7 @@ export const mapToViewEntries = (
     }
   }
 
-  console.log(newViewEntries);
-
+  console.log('mapToViewEntriesE', newViewEntries, {asString: JSON.stringify(newViewEntries)});
   return newViewEntries;
 };
 
