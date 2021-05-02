@@ -33,9 +33,6 @@ export const mapToViewEntries = (
 
   if (workStartEndCfg) {
     const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
-    // const endTimeToday = getDateTimeFromClockString(workStartEndCfg.endTime);
-    console.log(startTimeToday > now);
-
     if (startTimeToday > now && !currentId) {
       startTime = startTimeToday;
     }
@@ -49,17 +46,6 @@ export const mapToViewEntries = (
   // TODO refactor as we don't need to pretend to have pure functions here
   const viewEntriesWithScheduled = addViewEntriesForScheduled(scheduledTasks, viewEntries);
   const viewEntriesWithCustomEvents = addViewEntriesForCustomEvents(FAKE_TIMELINE_EVENTS, viewEntriesWithScheduled);
-  // const lastEntry = viewEntries && viewEntries[viewEntries.length - 1];
-  // console.log({lastEntry});
-  //
-  // if (lastEntry && lastEntry.type === TimelineViewEntryType.TaskFull) {
-  //   const task = lastEntry.data;
-  //   viewEntries.push({
-  //     id: 'END',
-  //     type: TimelineViewEntryType.WorkdayEnd,
-  //     time: lastTime + Math.max(0, task.timeEstimate - task.timeSpent)
-  //   });
-  // }
 
   const newViewEntries: TimelineViewEntry[] = viewEntriesWithCustomEvents.slice(0);
 
@@ -72,8 +58,6 @@ export const mapToViewEntries = (
     let daySwitchIndex: number = -1;
 
     viewEntriesWithCustomEvents.forEach((entry, index) => {
-      // TODO insert entry
-      // TODO split logic
       const timeEndForEntry = (entry.time && entry.type === TimelineViewEntryType.Task)
         ? entry.time + getTimeForTask(entry.data)
         : entry.time;
@@ -98,7 +82,6 @@ export const mapToViewEntries = (
           const splitInsertIndex = daySwitchIndex;
 
           const splitTask = entry.data;
-          console.log(new Date(startTimeTomorrow), startTimeTomorrow);
 
           newViewEntries.splice(splitInsertIndex, 0, {
             id: (splitTask as Task).id + '__' + splitInsertIndex,
@@ -110,9 +93,7 @@ export const mapToViewEntries = (
             },
             isHideTime: false,
           });
-          // firstDifference = startTimeTomorrow - entry.time;
         }
-
       }
     });
 
