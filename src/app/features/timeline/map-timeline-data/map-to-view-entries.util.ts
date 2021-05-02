@@ -1,26 +1,21 @@
 import { Task } from '../../tasks/task.model';
-import {
-  TimelineCustomEvent,
-  TimelineViewEntry,
-  TimelineViewEntryType,
-  TimelineWorkStartEndCfg
-} from '../timeline.model';
+import { TimelineViewEntry, TimelineViewEntryType, TimelineWorkStartEndCfg } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { getTomorrow } from '../../../util/get-tomorrow';
 
-const d = new Date();
-d.setTime(13);
-const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
-  title: 'Mittagspause',
-  duration: 60000 * 60,
-  start: d.getTime(),
-  icon: 'restaurant'
+// const d = new Date();
+// d.setTime(13);
+// const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
+//   title: 'Mittagspause',
+//   duration: 60000 * 60,
+//   start: d.getTime(),
+//   icon: 'restaurant'
 // }, {
 //   title: 'Spazieren am Nachmittag',
 //   duration: 60000 * 60 * .25,
 //   start: Date.now() + 60000 * 60 * 2,
 //   icon: 'nature',
-}];
+// }];
 
 export const mapToViewEntries = (
   tasks: Task[],
@@ -45,8 +40,12 @@ export const mapToViewEntries = (
   const [viewEntries, scheduledTasks] = createViewEntriesForNormalTasks(startTime, initialTasks);
 
   addVEForScheduled(scheduledTasks, viewEntries);
-  addVEForCustomEvents(FAKE_TIMELINE_EVENTS, viewEntries);
+  // addVEForCustomEvents(FAKE_TIMELINE_EVENTS, viewEntries);
+
+  viewEntries.sort((a, b) => a.time - b.time);
+
   addVEForDayStartEnd(viewEntries, now, currentId, workStartEndCfg);
+  // viewEntries.sort((a, b) => a.time - b.time);
 
   console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
   return viewEntries;
@@ -205,7 +204,7 @@ const addVEForScheduled = (scheduledTasks: Task[], viewEntries: TimelineViewEntr
 
     viewEntries.splice(firstEntryBeforeIndex || 0, 0, {
       id: scheduledTask.id,
-      time: scheduledTask.plannedAt,
+      time: scheduledTask.plannedAt as number,
       type: TimelineViewEntryType.ScheduledTask,
       data: scheduledTask,
       isHideTime: false,
@@ -232,11 +231,14 @@ const addVEForScheduled = (scheduledTasks: Task[], viewEntries: TimelineViewEntr
       });
     }
 
-    const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
+    const startIndexOfFollowing = firstEntryBeforeIndex === -1
+      // TODO check
+      ? 0 + (isAddSplitTask ? 3 : 2)
+      : firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let j = startIndexOfFollowing; j < viewEntries.length; j++) {
       const viewEntry = viewEntries[j];
-      if (viewEntry.time) {
+      if (viewEntry.type === TimelineViewEntryType.Task) {
         viewEntry.time = viewEntry.time + scheduledTaskDuration;
       }
     }
@@ -247,59 +249,59 @@ const getTimeLeftForTask = (task: Task): number => {
   return Math.max(0, task.timeEstimate - task.timeSpent) || 0;
 };
 
-const addVEForCustomEvents = (customEvents: TimelineCustomEvent[], viewEntries: TimelineViewEntry[]) => {
-  if (!customEvents.length) {
-    return;
-  }
-
-  customEvents.forEach((customEvent, i) => {
-    if ((customEvent.start + customEvent.duration) <= Date.now()) {
-      return;
-    }
-
-    const firstEntryBeforeIndex = viewEntries.findIndex(
-      viewEntry =>
-        viewEntry.time
-        && viewEntry.time !== 0
-        && viewEntry.time >= (customEvent.start as number)
-    );
-
-    viewEntries.splice(firstEntryBeforeIndex || 0, 0, {
-      id: customEvent.title,
-      time: customEvent.start,
-      type: TimelineViewEntryType.CustomEvent,
-      data: customEvent,
-      isHideTime: false,
-    });
-
-    const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntries[firstEntryBeforeIndex - 1];
-    const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
-    const isAddSplitTask = (splitTask && (getTimeLeftForTask(splitTask) > 0));
-    if (viewEntryForSplitTask && isAddSplitTask) {
-      const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
-      const timePlannedForSplitTaskBefore = (customEvent).start as number - (viewEntryForSplitTask as any).time as number;
-      const timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
-
-      viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
-      viewEntries.splice(firstEntryBeforeIndex + 1, 0, {
-        id: (splitTask as Task).id,
-        time: customEvent.start + customEvent.duration,
-        type: TimelineViewEntryType.SplitTaskContinued,
-        data: {
-          title: (splitTask as Task).title,
-          timeToGo: timePlannedForSplitTaskContinued,
-        },
-        isHideTime: true,
-      });
-    }
-
-    const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let j = startIndexOfFollowing; j < viewEntries.length; j++) {
-      const viewEntry = viewEntries[j];
-      if (viewEntry.time) {
-        viewEntry.time = viewEntry.time + customEvent.duration;
-      }
-    }
-  });
-};
+// const addVEForCustomEvents = (customEvents: TimelineCustomEvent[], viewEntries: TimelineViewEntry[]) => {
+//   if (!customEvents.length) {
+//     return;
+//   }
+//
+//   customEvents.forEach((customEvent, i) => {
+//     if ((customEvent.start + customEvent.duration) <= Date.now()) {
+//       return;
+//     }
+//
+//     const firstEntryBeforeIndex = viewEntries.findIndex(
+//       viewEntry =>
+//         viewEntry.time
+//         && viewEntry.time !== 0
+//         && viewEntry.time >= (customEvent.start as number)
+//     );
+//
+//     viewEntries.splice(firstEntryBeforeIndex || 0, 0, {
+//       id: customEvent.title,
+//       time: customEvent.start,
+//       type: TimelineViewEntryType.CustomEvent,
+//       data: customEvent,
+//       isHideTime: false,
+//     });
+//
+//     const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntries[firstEntryBeforeIndex - 1];
+//     const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
+//     const isAddSplitTask = (splitTask && (getTimeLeftForTask(splitTask) > 0));
+//     if (viewEntryForSplitTask && isAddSplitTask) {
+//       const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
+//       const timePlannedForSplitTaskBefore = (customEvent).start as number - (viewEntryForSplitTask as any).time as number;
+//       const timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
+//
+//       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
+//       viewEntries.splice(firstEntryBeforeIndex + 1, 0, {
+//         id: (splitTask as Task).id,
+//         time: customEvent.start + customEvent.duration,
+//         type: TimelineViewEntryType.SplitTaskContinued,
+//         data: {
+//           title: (splitTask as Task).title,
+//           timeToGo: timePlannedForSplitTaskContinued,
+//         },
+//         isHideTime: true,
+//       });
+//     }
+//
+//     const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
+//     // eslint-disable-next-line @typescript-eslint/prefer-for-of
+//     for (let j = startIndexOfFollowing; j < viewEntries.length; j++) {
+//       const viewEntry = viewEntries[j];
+//       if (viewEntry.time) {
+//         viewEntry.time = viewEntry.time + customEvent.duration;
+//       }
+//     }
+//   });
+// };

@@ -137,10 +137,33 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
       }]);
     });
+
+    it('should work for simple task list 4', () => {
+      // const now = getDateTimeFromClockString('7:23', 0);
+      const now = 1619983090852;
+      const fakeTasks = [
+        {...FAKE_TASK, timeSpent: 21014, timeEstimate: 900000,},
+        {...FAKE_TASK, timeEstimate: 1800000, timeSpent: 148998},
+      ];
+      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      expect(r).toEqual([{
+        id: FID,
+        type: TimelineViewEntryType.Task,
+        time: now,
+        data: fakeTasks[0],
+        isHideTime: false,
+      }, {
+        id: FID,
+        type: TimelineViewEntryType.Task,
+        time: 1619983969838,
+        data: fakeTasks[1],
+        isHideTime: false,
+      }]);
+    });
   });
 
   describe('scheduledTasks', () => {
-    it('should work for scheduled tasks', () => {
+    it('should split tasks as required', () => {
       const now = getDateTimeFromClockString('9:20', 0);
       const plannedTaskStartTime = getDateTimeFromClockString('10:25', 0);
       const fakeTasks = [
@@ -181,7 +204,7 @@ describe('mapToViewEntries()', () => {
         id: '0_FAKE_TASK_ID',
         isHideTime: false,
         time: 37500000,
-        type: 3
+        type: TimelineViewEntryType.SplitTaskContinued
       }, {
         id: FID,
         type: TimelineViewEntryType.Task,
@@ -202,6 +225,65 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
       }]);
     });
+
+    it('should work for non ordered scheduled tasks', () => {
+      const now = getDateTimeFromClockString('9:30', 0);
+      // const plannedTaskStartTime = getDateTimeFromClockString('12:25', 25 * 60 * 60 * 1000);
+      const plannedTaskStartTime = getDateTimeFromClockString('12:26', 0);
+
+      const fakeTasks = [
+        {
+          ...FAKE_TASK,
+          id: 'ScheduledTask:ID',
+          timeEstimate: hours(0.5),
+          reminderId: 'R:ID',
+          plannedAt: plannedTaskStartTime
+        },
+        {...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID'},
+      ];
+      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+
+      expect(r[0]).toEqual({
+        id: 'OTHER_TASK_ID',
+        type: TimelineViewEntryType.Task,
+        time: now,
+        data: fakeTasks.find(t => t.id === 'OTHER_TASK_ID') as any,
+        isHideTime: false,
+      });
+      expect(r[1]).toEqual({
+        id: 'ScheduledTask:ID',
+        type: TimelineViewEntryType.ScheduledTask,
+        time: plannedTaskStartTime,
+        data: fakeTasks.find(t => t.id === 'ScheduledTask:ID') as any,
+        isHideTime: false,
+      });
+    });
+
+    it('should work for far away planned tasks', () => {
+      const now = getDateTimeFromClockString('9:20', 0);
+      const plannedTaskStartTime = getDateTimeFromClockString('12:25', 25 * 60 * 60 * 1000);
+      const fakeTasks = [
+        {
+          ...FAKE_TASK,
+          id: 'ScheduledTask:ID',
+          timeEstimate: hours(1),
+          reminderId: 'R:ID',
+          plannedAt: plannedTaskStartTime
+        },
+        {...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID'},
+        {...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(.5)},
+        {...FAKE_TASK},
+      ];
+      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      expect(r[0]).toEqual({
+        id: 'OTHER_TASK_ID',
+        type: TimelineViewEntryType.Task,
+        time: now,
+        data: fakeTasks.find(t => t.id === 'OTHER_TASK_ID') as any,
+        isHideTime: false,
+      });
+    });
+
   });
 
   describe('workStartEnd', () => {

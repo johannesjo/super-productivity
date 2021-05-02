@@ -7,12 +7,14 @@ import { combineLatest, Observable } from 'rxjs';
 import { mapToViewEntries } from './map-timeline-data/map-to-view-entries.util';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
+
 // const FAKE_WORK_START_END: TimelineWorkStartEndCfg = {
 //   // startTime: '9:00',
 //   // endTime: '17:00',
 //   startTime: '9:00',
 //   endTime: '17:00',
 // };
+
 @Component({
   selector: 'timeline',
   templateUrl: './timeline.component.html',
