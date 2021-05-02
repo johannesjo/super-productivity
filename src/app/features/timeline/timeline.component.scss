@@ -169,19 +169,29 @@ $split-border-radius: 24px;
 .work-start,
 .work-end {
   text-align: center;
-  border-bottom: 1px dashed;
+  //border-bottom: 1px dashed;
   padding-top: $s;
   padding-bottom: $s;
-
-  @include lightTheme() {
-    border-color: $light-theme-separator-color;
-  }
-  @include darkTheme() {
-    border-color: $dark-theme-separator-color;
-  }
 }
 
 .work-end {
-  border-top: 1px dashed;
+  //border-top: 1px dashed;
   border-bottom: 0;
+  position: relative;
+
+  &:after {
+    position: absolute;
+    left: -2 * $s;
+    right: -1 * $s;
+    bottom: -6px;
+    border-bottom: 2px dashed;
+    content: '';
+
+    @include lightTheme() {
+      border-color: $light-theme-separator-color;
+    }
+    @include darkTheme() {
+      border-color: $dark-theme-separator-color;
+    }
+  }
 }
