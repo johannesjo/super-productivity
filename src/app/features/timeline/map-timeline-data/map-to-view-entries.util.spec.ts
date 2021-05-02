@@ -1,7 +1,7 @@
 import { mapToViewEntries } from './map-to-view-entries.util';
-import { TaskCopy } from '../tasks/task.model';
-import { TimelineViewEntryType, TimelineWorkStartEndCfg } from './timeline.model';
-import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
+import { TaskCopy } from '../../tasks/task.model';
+import { TimelineViewEntryType, TimelineWorkStartEndCfg } from '../timeline.model';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 const FID = 'FAKE_TASK_ID';
 const FAKE_TASK: TaskCopy = {

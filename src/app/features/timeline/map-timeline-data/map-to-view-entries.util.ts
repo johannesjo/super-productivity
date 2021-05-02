@@ -1,12 +1,12 @@
-import { Task } from '../tasks/task.model';
+import { Task } from '../../tasks/task.model';
 import {
   TimelineCustomEvent,
   TimelineViewEntry,
   TimelineViewEntryType,
   TimelineWorkStartEndCfg
-} from './timeline.model';
-import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
-import { getTomorrow } from '../../util/get-tomorrow';
+} from '../timeline.model';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { getTomorrow } from '../../../util/get-tomorrow';
 
 const d = new Date();
 d.setTime(13);

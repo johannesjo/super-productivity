@@ -4,7 +4,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { map } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable } from 'rxjs';
-import { mapToViewEntries } from './map-to-view-entries.util';
+import { mapToViewEntries } from './map-timeline-data/map-to-view-entries.util';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 // const FAKE_WORK_START_END: TimelineWorkStartEndCfg = {
