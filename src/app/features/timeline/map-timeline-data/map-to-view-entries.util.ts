@@ -21,7 +21,6 @@ const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
 //   start: Date.now() + 60000 * 60 * 2,
 //   icon: 'nature',
 }];
-// const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [];
 
 export const mapToViewEntries = (
   tasks: Task[],
@@ -45,89 +44,96 @@ export const mapToViewEntries = (
 
   const [viewEntries, scheduledTasks] = createViewEntriesForNormalTasks(startTime, initialTasks);
 
-  // TODO refactor as we don't need to pretend to have pure functions here
-  const viewEntriesWithScheduled = addViewEntriesForScheduled(scheduledTasks, viewEntries);
-  const viewEntriesWithCustomEvents = addViewEntriesForCustomEvents(FAKE_TIMELINE_EVENTS, viewEntriesWithScheduled);
+  addVEForScheduled(scheduledTasks, viewEntries);
+  addVEForCustomEvents(FAKE_TIMELINE_EVENTS, viewEntries);
+  addVEForDayStartEnd(viewEntries, now, currentId, workStartEndCfg);
 
-  const newViewEntries: TimelineViewEntry[] = viewEntriesWithCustomEvents.slice(0);
+  console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
+  return viewEntries;
+};
 
-  if (workStartEndCfg) {
-    const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
-    const startTimeTomorrow = getDateTimeFromClockString(workStartEndCfg.startTime, getTomorrow());
-    const endTimeToday = getDateTimeFromClockString(workStartEndCfg.endTime, now);
-
-    let firstDifference: number;
-    let daySwitchIndex: number = -1;
-
-    viewEntriesWithCustomEvents.forEach((entry, index) => {
-      const timeEndForEntry = (entry.time && entry.type === TimelineViewEntryType.Task)
-        ? entry.time + getTimeLeftForTask(entry.data)
-        : entry.time;
-
-      if (entry.time && timeEndForEntry && timeEndForEntry >= endTimeToday) {
-        if (entry.time >= endTimeToday) {
-          if (!firstDifference) {
-            firstDifference = startTimeTomorrow - entry.time;
-            daySwitchIndex = index;
-          }
-          entry.time = entry.time + firstDifference;
-        } else {
-          // // split task
-          const timeToGoAfterWorkEnd = (timeEndForEntry - endTimeToday);
-          const timeDoneBeforeWorkEnd = getTimeLeftForTask(entry.data as Task) - timeToGoAfterWorkEnd;
-
-          if (!firstDifference) {
-            firstDifference = startTimeTomorrow - entry.time - timeDoneBeforeWorkEnd;
-            daySwitchIndex = index + 1;
-          }
-          entry.type = TimelineViewEntryType.SplitTask;
-          const splitInsertIndex = daySwitchIndex;
-
-          const splitTask = entry.data;
-
-          newViewEntries.splice(splitInsertIndex, 0, {
-            id: (splitTask as Task).id + '__' + splitInsertIndex,
-            time: startTimeTomorrow,
-            type: TimelineViewEntryType.SplitTaskContinued,
-            data: {
-              title: (splitTask as Task).title,
-              timeToGo: timeToGoAfterWorkEnd,
-            },
-            isHideTime: false,
-          });
-        }
-      }
-    });
-
-    if (daySwitchIndex > -1) {
-      newViewEntries.splice(daySwitchIndex, 0, {
-        id: 'START_TOMORROW',
-        time: startTimeTomorrow,
-        type: TimelineViewEntryType.WorkdayStart,
-        data: workStartEndCfg,
-        isHideTime: true,
-      });
-      newViewEntries.splice(daySwitchIndex, 0, {
-        id: 'END_TODAY',
-        time: endTimeToday,
-        type: TimelineViewEntryType.WorkdayEnd,
-        data: workStartEndCfg,
-        isHideTime: true,
-      });
-    }
-    if (startTimeToday > now && !currentId) {
-      newViewEntries.unshift({
-        id: 'START_TODAY',
-        time: startTimeToday,
-        type: TimelineViewEntryType.WorkdayStart,
-        data: workStartEndCfg,
-        isHideTime: true,
-      });
-    }
+const addVEForDayStartEnd = (
+  viewEntries: TimelineViewEntry[],
+  now: number,
+  currentId: null | string,
+  workStartEndCfg?: TimelineWorkStartEndCfg,
+) => {
+  if (!workStartEndCfg) {
+    return;
   }
+  const viewEntriesBefore: TimelineViewEntry[] = viewEntries.slice(0);
+  const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
+  const startTimeTomorrow = getDateTimeFromClockString(workStartEndCfg.startTime, getTomorrow());
+  const endTimeToday = getDateTimeFromClockString(workStartEndCfg.endTime, now);
 
-  console.log('mapToViewEntriesE', newViewEntries, {asString: JSON.stringify(newViewEntries)});
-  return newViewEntries;
+  let firstDifference: number;
+  let daySwitchIndex: number = -1;
+
+  viewEntriesBefore.forEach((entry, index) => {
+    const timeEndForEntry = (entry.time && entry.type === TimelineViewEntryType.Task)
+      ? entry.time + getTimeLeftForTask(entry.data)
+      : entry.time;
+
+    if (entry.time && timeEndForEntry && timeEndForEntry >= endTimeToday) {
+      if (entry.time >= endTimeToday) {
+        if (!firstDifference) {
+          firstDifference = startTimeTomorrow - entry.time;
+          daySwitchIndex = index;
+        }
+        entry.time = entry.time + firstDifference;
+      } else {
+        // // split task
+        const timeToGoAfterWorkEnd = (timeEndForEntry - endTimeToday);
+        const timeDoneBeforeWorkEnd = getTimeLeftForTask(entry.data as Task) - timeToGoAfterWorkEnd;
+
+        if (!firstDifference) {
+          firstDifference = startTimeTomorrow - entry.time - timeDoneBeforeWorkEnd;
+          daySwitchIndex = index + 1;
+        }
+        entry.type = TimelineViewEntryType.SplitTask;
+        const splitInsertIndex = daySwitchIndex;
+
+        const splitTask = entry.data;
+
+        viewEntries.splice(splitInsertIndex, 0, {
+          id: (splitTask as Task).id + '__' + splitInsertIndex,
+          time: startTimeTomorrow,
+          type: TimelineViewEntryType.SplitTaskContinued,
+          data: {
+            title: (splitTask as Task).title,
+            timeToGo: timeToGoAfterWorkEnd,
+          },
+          isHideTime: false,
+        });
+      }
+    }
+  });
+
+  if (daySwitchIndex > -1) {
+    viewEntries.splice(daySwitchIndex, 0, {
+      id: 'START_TOMORROW',
+      time: startTimeTomorrow,
+      type: TimelineViewEntryType.WorkdayStart,
+      data: workStartEndCfg,
+      isHideTime: true,
+    });
+    viewEntries.splice(daySwitchIndex, 0, {
+      id: 'END_TODAY',
+      time: endTimeToday,
+      type: TimelineViewEntryType.WorkdayEnd,
+      data: workStartEndCfg,
+      isHideTime: true,
+    });
+  }
+  if (startTimeToday > now && !currentId) {
+    viewEntries.unshift({
+      id: 'START_TODAY',
+      time: startTimeToday,
+      type: TimelineViewEntryType.WorkdayStart,
+      data: workStartEndCfg,
+      isHideTime: true,
+    });
+  }
 };
 
 const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] => {
@@ -182,14 +188,13 @@ const createViewEntriesForNormalTasks = (startTime: number, tasks: Task[]): [Tim
   return [viewEntries, scheduledTasks];
 };
 
-const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: TimelineViewEntry[]): TimelineViewEntry[] => {
+const addVEForScheduled = (scheduledTasks: Task[], viewEntries: TimelineViewEntry[]) => {
   if (!scheduledTasks.length) {
-    return viewEntries;
+    return;
   }
-  const newViewEntries: TimelineViewEntry[] = viewEntries.slice(0);
 
   scheduledTasks.forEach((scheduledTask, i) => {
-    const firstEntryBeforeIndex = newViewEntries.findIndex(
+    const firstEntryBeforeIndex = viewEntries.findIndex(
       viewEntry =>
         viewEntry.time
         && viewEntry.time !== 0
@@ -198,7 +203,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
 
     const scheduledTaskDuration = getTimeLeftForTask(scheduledTask);
 
-    newViewEntries.splice(firstEntryBeforeIndex || 0, 0, {
+    viewEntries.splice(firstEntryBeforeIndex || 0, 0, {
       id: scheduledTask.id,
       time: scheduledTask.plannedAt,
       type: TimelineViewEntryType.ScheduledTask,
@@ -206,7 +211,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
       isHideTime: false,
     });
 
-    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
+    const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntries[firstEntryBeforeIndex - 1];
     const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
     const isAddSplitTask = (splitTask && (getTimeLeftForTask(splitTask) > 0));
     if (viewEntryForSplitTask && isAddSplitTask) {
@@ -215,7 +220,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
       const timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
 
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
-      newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
+      viewEntries.splice(firstEntryBeforeIndex + 1, 0, {
         id: i + '_' + (splitTask as Task).id,
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
         type: TimelineViewEntryType.SplitTaskContinued,
@@ -229,40 +234,37 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
 
     const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let j = startIndexOfFollowing; j < newViewEntries.length; j++) {
-      const viewEntry = newViewEntries[j];
+    for (let j = startIndexOfFollowing; j < viewEntries.length; j++) {
+      const viewEntry = viewEntries[j];
       if (viewEntry.time) {
         viewEntry.time = viewEntry.time + scheduledTaskDuration;
       }
     }
   });
-
-  return newViewEntries;
 };
 
 const getTimeLeftForTask = (task: Task): number => {
   return Math.max(0, task.timeEstimate - task.timeSpent) || 0;
 };
 
-const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], viewEntries: TimelineViewEntry[]): TimelineViewEntry [] => {
+const addVEForCustomEvents = (customEvents: TimelineCustomEvent[], viewEntries: TimelineViewEntry[]) => {
   if (!customEvents.length) {
-    return viewEntries;
+    return;
   }
-  const newViewEntries: TimelineViewEntry[] = viewEntries.slice(0);
 
   customEvents.forEach((customEvent, i) => {
     if ((customEvent.start + customEvent.duration) <= Date.now()) {
       return;
     }
 
-    const firstEntryBeforeIndex = newViewEntries.findIndex(
+    const firstEntryBeforeIndex = viewEntries.findIndex(
       viewEntry =>
         viewEntry.time
         && viewEntry.time !== 0
         && viewEntry.time >= (customEvent.start as number)
     );
 
-    newViewEntries.splice(firstEntryBeforeIndex || 0, 0, {
+    viewEntries.splice(firstEntryBeforeIndex || 0, 0, {
       id: customEvent.title,
       time: customEvent.start,
       type: TimelineViewEntryType.CustomEvent,
@@ -270,7 +272,7 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
       isHideTime: false,
     });
 
-    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
+    const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntries[firstEntryBeforeIndex - 1];
     const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
     const isAddSplitTask = (splitTask && (getTimeLeftForTask(splitTask) > 0));
     if (viewEntryForSplitTask && isAddSplitTask) {
@@ -279,7 +281,7 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
       const timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
 
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
-      newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
+      viewEntries.splice(firstEntryBeforeIndex + 1, 0, {
         id: (splitTask as Task).id,
         time: customEvent.start + customEvent.duration,
         type: TimelineViewEntryType.SplitTaskContinued,
@@ -293,13 +295,11 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
 
     const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let j = startIndexOfFollowing; j < newViewEntries.length; j++) {
-      const viewEntry = newViewEntries[j];
+    for (let j = startIndexOfFollowing; j < viewEntries.length; j++) {
+      const viewEntry = viewEntries[j];
       if (viewEntry.time) {
         viewEntry.time = viewEntry.time + customEvent.duration;
       }
     }
   });
-
-  return newViewEntries;
 };
