@@ -34,11 +34,11 @@
 
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart"
-               class="work-start">Workday ({{row.time|date:'shortDate'}}) starts at {{row.time|date:'shortTime'}}
+               class="work-start">{{row.time|date:'shortTime'}} start ({{row.time|date:'shortDate'}})
           </div>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd"
-               class="work-end">Workday ({{row.time|date:'shortDate'}}) ends at {{row.time|date:'shortTime'}}</div>
+               class="work-end">{{row.time|date:'shortTime'}} end ({{row.time|date:'shortDate'}})</div>
 
           <div *ngSwitchDefault>------------------</div>
         </div>
