@@ -6,14 +6,13 @@
       <div class="row"
            *ngFor="let row of timelineEntries; let isFirst = first; trackBy: trackByFn">
         <div class="col time"
-             [class.hasTime]="!row.isSameTimeAsPrevious">
-          <div *ngIf="!row.isSameTimeAsPrevious">{{ isFirst
+             [class.hasTime]="!row.isHideTime && row.type!==TimelineViewEntryType.WorkdayStart">
+          <div *ngIf="!row.isHideTime && row.type!==TimelineViewEntryType.WorkdayStart">{{ isFirst
             ? (T.F.TIMELINE.NOW|translate)
             : (row.time|roundDuration|date:'HH:mm')}}</div>
         </div>
         <div class="col right"
              [ngSwitch]="row.type">
-
           <task *ngSwitchCase="TimelineViewEntryType.Task"
                 showParentTitle="yes"
                 [task]="row.data"></task>
@@ -31,11 +30,11 @@
 
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart"
-               class="work-start">Work Start at 9:00
+               class="work-start">Workday ({{row.time|date:'shortDate'}}) starts at {{row.data.startTime}}
           </div>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd"
-               class="work-end">Work End for {{row.time|date}}</div>
+               class="work-end">Workday ({{row.time|date:'shortDate'}}) ends at {{row.time|date:'shortTime'}}</div>
 
           <div *ngSwitchDefault>------------------</div>
         </div>

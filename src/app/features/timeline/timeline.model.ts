@@ -21,7 +21,7 @@ interface TimelineViewEntryBase {
   id: string;
   type: TimelineViewEntryType;
   time: number | null;
-  isSameTimeAsPrevious: boolean;
+  isHideTime: boolean;
 }
 
 interface TimelineViewEntryTask extends TimelineViewEntryBase {

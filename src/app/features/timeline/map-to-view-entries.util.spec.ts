@@ -24,13 +24,13 @@ describe('mapToViewEntries()', () => {
       type: TimelineViewEntryType.Task,
       time: startTime,
       data: fakeTasks[0],
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     }, {
       id: fakeTasks[1].id,
       type: TimelineViewEntryType.Task,
       time: 5033,
       data: fakeTasks[1],
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     }]);
   });
 
@@ -50,37 +50,37 @@ describe('mapToViewEntries()', () => {
       type: TimelineViewEntryType.Task,
       time: startTime,
       data: fakeTasks[0],
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     }, {
       id: FID,
       type: TimelineViewEntryType.Task,
       time: 5044,
       data: fakeTasks[1],
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     }, {
       id: FID,
       type: TimelineViewEntryType.Task,
       time: 13044,
       data: fakeTasks[2],
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     }, {
       id: FID,
       type: TimelineViewEntryType.Task,
       time: 13044,
       data: fakeTasks[3],
-      isSameTimeAsPrevious: true,
+      isHideTime: true,
     }, {
       id: FID,
       type: TimelineViewEntryType.Task,
       time: 13044,
       data: fakeTasks[4],
-      isSameTimeAsPrevious: true,
+      isHideTime: true,
     }, {
       id: FID,
       type: TimelineViewEntryType.Task,
       time: 15044,
       data: fakeTasks[5],
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     }]);
   });
 });

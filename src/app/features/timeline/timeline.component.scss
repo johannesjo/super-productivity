@@ -168,7 +168,6 @@ $split-border-radius: 24px;
   border-bottom: 1px dashed;
   padding-top: $s;
   padding-bottom: $s;
-  margin-bottom: $s;
 
   @include lightTheme() {
     border-color: $light-theme-separator-color;
@@ -176,4 +175,9 @@ $split-border-radius: 24px;
   @include darkTheme() {
     border-color: $dark-theme-separator-color;
   }
+}
+
+.work-end {
+  border-top: 1px dashed;
+  border-bottom: 0;
 }

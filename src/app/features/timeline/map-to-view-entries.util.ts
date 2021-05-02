@@ -21,7 +21,7 @@ const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
 const FAKE_WORK_START_END: TimelineWorkStartEnd = {
   // startTime: '9:00',
   // endTime: '17:00',
-  startTime: '9:00',
+  startTime: '13:00',
   endTime: '17:00',
 };
 
@@ -57,6 +57,7 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
   //     time: lastTime + Math.max(0, task.timeEstimate - task.timeSpent)
   //   });
   // }
+
   if (FAKE_WORK_START_END) {
     const startTimeToday = getDateTimeFromClockString(FAKE_WORK_START_END.startTime);
     const startTimeTomorrow = getDateTimeFromClockString(FAKE_WORK_START_END.startTime, getTomorrow());
@@ -77,22 +78,32 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
           firstDifference = startTimeTomorrow - entry.time;
           daySwitchIndex = index;
         }
-        console.log(new Date(startTimeTomorrow));
+        if (entry.time >= endTimeToday) {
+          entry.time = entry.time + firstDifference;
+        } else {
+          // split task
+          daySwitchIndex = index + 1;
 
-        console.log(firstDifference, 8 * 60 * 60 * 1000, firstDifference > 8 * 60 * 60 * 1000);
+        }
 
-        entry.time = entry.time + firstDifference;
       }
     });
 
     if (daySwitchIndex > -1) {
       startTime = startTimeToday;
       viewEntriesWithCustomEvents.splice(daySwitchIndex, 0, {
+        id: 'START_TOMORROW',
+        time: startTimeTomorrow,
+        type: TimelineViewEntryType.WorkdayStart,
+        data: FAKE_WORK_START_END,
+        isHideTime: true,
+      });
+      viewEntriesWithCustomEvents.splice(daySwitchIndex, 0, {
         id: 'END_TODAY',
         time: endTimeToday,
         type: TimelineViewEntryType.WorkdayEnd,
         data: FAKE_WORK_START_END,
-        isSameTimeAsPrevious: false,
+        isHideTime: true,
       });
     }
     if (startTimeToday > now && !currentId) {
@@ -102,7 +113,7 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
         time: startTime,
         type: TimelineViewEntryType.WorkdayStart,
         data: FAKE_WORK_START_END,
-        isSameTimeAsPrevious: false,
+        isHideTime: true,
       });
     }
   }
@@ -215,7 +226,7 @@ const createViewEntriesForNormalTasks = (startTime: number, tasks: Task[]): [Tim
       time,
       data: task,
       // TODO add isSameTimeAsPrevious at the very end
-      isSameTimeAsPrevious: (time === lastTime),
+      isHideTime: (time === lastTime),
     });
 
     lastTime = time;
@@ -249,7 +260,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
       time: scheduledTask.plannedAt,
       type: TimelineViewEntryType.ScheduledTask,
       data: scheduledTask,
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     });
 
     const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
@@ -263,7 +274,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
         type: TimelineViewEntryType.SplitTaskContinued,
         // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
         data: '... ' + (splitTask as Task).title,
-        isSameTimeAsPrevious: true,
+        isHideTime: true,
       });
     }
 
@@ -311,7 +322,7 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
       time: customEvent.start,
       type: TimelineViewEntryType.CustomEvent,
       data: customEvent,
-      isSameTimeAsPrevious: false,
+      isHideTime: false,
     });
 
     const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
@@ -325,7 +336,7 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
         type: TimelineViewEntryType.SplitTaskContinued,
         // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
         data: '... ' + (splitTask as Task).title + ' (continued)',
-        isSameTimeAsPrevious: true,
+        isHideTime: true,
       });
     }
 

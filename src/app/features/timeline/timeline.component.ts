@@ -25,6 +25,7 @@ export class TimelineComponent {
   ]).pipe(
     map(([tasks, currentId]) => mapToViewEntries(tasks, currentId))
   );
+
   // timelineEntries$ = new BehaviorSubject([
   //   {
   //     type: TimelineViewEntryType.TaskFull,
