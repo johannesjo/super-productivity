@@ -83,7 +83,19 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
         } else {
           // split task
           daySwitchIndex = index + 1;
-
+          // const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
+          // const splitStr = msToString(splitTime);
+          entry.type = TimelineViewEntryType.SplitTask;
+          const splitInsertIndex = daySwitchIndex;
+          const splitTask = entry.data;
+          viewEntriesWithCustomEvents.splice(splitInsertIndex, 0, {
+            id: index + '__' + (splitTask as Task).id,
+            time: startTimeTomorrow,
+            type: TimelineViewEntryType.SplitTaskContinued,
+            // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
+            data: '... ' + (splitTask as Task).title,
+            isHideTime: true,
+          });
         }
 
       }
@@ -120,68 +132,6 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
 
   return viewEntriesWithCustomEvents;
 };
-
-// const addViewEntriesForWorkStartEnd = (workStartConfig: TimelineWorkStartEnd, viewEntries: TimelineViewEntry[], startTime: number): TimelineViewEntry [] => {
-//   if (!workStartConfig.length) {
-//     return viewEntries;
-//   }
-//   const newViewEntries: TimelineViewEntry[] = viewEntries.slice(0);
-//   workStartEndEntries.forEach(startEnd => {
-//     const startTimeToday = getDateTimeFromClockString(startEnd.startTime);
-//     const endTimeToday = getDateTimeFromClockString(startEnd.endTime);
-//
-//     if(startTimeToday > startTime) {
-//
-//     }
-//
-//     const firstEntryBeforeIndex = newViewEntries.findIndex(
-//       viewEntry =>
-//         viewEntry.time
-//         && viewEntry.time !== 0
-//         && viewEntry.time >= (scheduledTask.plannedAt as number)
-//     );
-//
-//     // TODO check once we have more different
-//     const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
-//     const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
-//
-//     const scheduledTaskDuration = getTimeForTask(scheduledTask);
-//
-//     newViewEntries.splice(firstEntryBeforeIndex || 0, 0, {
-//       id: scheduledTask.id,
-//       time: scheduledTask.plannedAt,
-//       type: TimelineViewEntryType.ScheduledTask,
-//       data: scheduledTask,
-//       isSameTimeAsPrevious: false,
-//     });
-//
-//     const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
-//     if (isAddSplitTask) {
-//       // const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
-//       // const splitStr = msToString(splitTime);
-//       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
-//       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
-//         id: (splitTask as Task).id,
-//         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
-//         type: TimelineViewEntryType.SplitTaskContinued,
-//         // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
-//         data: '... ' + (splitTask as Task).title,
-//         isSameTimeAsPrevious: true,
-//       });
-//     }
-//
-//     const startIndexOfFollowing = firstEntryBeforeIndex + (isAddSplitTask ? 2 : 1);
-//     // eslint-disable-next-line @typescript-eslint/prefer-for-of
-//     for (let j = startIndexOfFollowing; j < newViewEntries.length; j++) {
-//       const viewEntry = newViewEntries[j];
-//       if (viewEntry.time) {
-//         viewEntry.time = viewEntry.time + scheduledTaskDuration;
-//       }
-//     }
-//   });
-//
-//   return newViewEntries;
-// };
 
 const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] => {
   let newTasks = tasks;
@@ -269,7 +219,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
       // const splitStr = msToString(splitTime);
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
-        id: (splitTask as Task).id,
+        id: i + '_' + (splitTask as Task).id,
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
         type: TimelineViewEntryType.SplitTaskContinued,
         // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
