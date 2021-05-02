@@ -11,7 +11,8 @@ const FAKE_TASK: TaskCopy = {
   plannedAt: null,
   reminderId: null,
 } as any;
-const hours = (n: number): number => n * 60 * 60 * 1000;
+const minutes = (n: number): number => n * 60 * 1000;
+const hours = (n: number): number => 60 * minutes(n);
 
 describe('mapToViewEntries()', () => {
   describe('basic', () => {
@@ -140,10 +141,17 @@ describe('mapToViewEntries()', () => {
 
   describe('scheduledTasks', () => {
     it('should work for scheduled tasks', () => {
-      const now = getDateTimeFromClockString('7:23', 0);
+      const now = getDateTimeFromClockString('9:20', 0);
+      const plannedTaskStartTime = getDateTimeFromClockString('10:25', 0);
       const fakeTasks = [
         {...FAKE_TASK, timeEstimate: hours(1)},
-        {...FAKE_TASK, timeEstimate: hours(1)},
+        {
+          ...FAKE_TASK,
+          id: 'S_ID',
+          timeEstimate: hours(1),
+          reminderId: 'R:ID',
+          plannedAt: plannedTaskStartTime
+        },
         {...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(.5)},
         {...FAKE_TASK},
         {...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(.25)},
@@ -158,16 +166,22 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
       }, {
         id: FID,
-        type: TimelineViewEntryType.Task,
+        type: TimelineViewEntryType.SplitTask,
         time: now + hours(1),
+        data: fakeTasks[2],
+        isHideTime: false,
+      }, {
+        id: 'S_ID',
+        type: TimelineViewEntryType.ScheduledTask,
+        time: plannedTaskStartTime,
         data: fakeTasks[1],
         isHideTime: false,
       }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(2),
-        data: fakeTasks[2],
+        data: {timeToGo: minutes(25), title: undefined} as any,
+        id: '0_FAKE_TASK_ID',
         isHideTime: false,
+        time: 37500000,
+        type: 3
       }, {
         id: FID,
         type: TimelineViewEntryType.Task,

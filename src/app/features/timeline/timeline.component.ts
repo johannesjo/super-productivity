@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TimelineViewEntry, TimelineViewEntryType, TimelineWorkStartEndCfg } from './timeline.model';
+import { TimelineViewEntry, TimelineViewEntryType } from './timeline.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { map } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
@@ -7,12 +7,12 @@ import { combineLatest, Observable } from 'rxjs';
 import { mapToViewEntries } from './map-to-view-entries.util';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
-const FAKE_WORK_START_END: TimelineWorkStartEndCfg = {
-  // startTime: '9:00',
-  // endTime: '17:00',
-  startTime: '9:00',
-  endTime: '17:00',
-};
+// const FAKE_WORK_START_END: TimelineWorkStartEndCfg = {
+//   // startTime: '9:00',
+//   // endTime: '17:00',
+//   startTime: '9:00',
+//   endTime: '17:00',
+// };
 @Component({
   selector: 'timeline',
   templateUrl: './timeline.component.html',
@@ -28,7 +28,7 @@ export class TimelineComponent {
     this._workContextService.startableTasksForActiveContext$,
     this._taskService.currentTaskId$,
   ]).pipe(
-    map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, FAKE_WORK_START_END))
+    map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, undefined))
   );
 
   // timelineEntries$ = new BehaviorSubject([

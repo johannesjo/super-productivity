@@ -59,7 +59,7 @@ export const mapToViewEntries = (
 
     viewEntriesWithCustomEvents.forEach((entry, index) => {
       const timeEndForEntry = (entry.time && entry.type === TimelineViewEntryType.Task)
-        ? entry.time + getTimeForTask(entry.data)
+        ? entry.time + getTimeLeftForTask(entry.data)
         : entry.time;
 
       if (entry.time && timeEndForEntry && timeEndForEntry >= endTimeToday) {
@@ -72,7 +72,7 @@ export const mapToViewEntries = (
         } else {
           // // split task
           const timeToGoAfterWorkEnd = (timeEndForEntry - endTimeToday);
-          const timeDoneBeforeWorkEnd = getTimeForTask(entry.data as Task) - timeToGoAfterWorkEnd;
+          const timeDoneBeforeWorkEnd = getTimeLeftForTask(entry.data as Task) - timeToGoAfterWorkEnd;
 
           if (!firstDifference) {
             firstDifference = startTimeTomorrow - entry.time - timeDoneBeforeWorkEnd;
@@ -158,7 +158,7 @@ const createViewEntriesForNormalTasks = (startTime: number, tasks: Task[]): [Tim
 
     if (lastTime) {
       if (prev) {
-        time = lastTime + getTimeForTask(prev);
+        time = lastTime + getTimeLeftForTask(prev);
       } else {
         throw new Error('Something weird happened');
       }
@@ -195,11 +195,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
         && viewEntry.time >= (scheduledTask.plannedAt as number)
     );
 
-    // TODO check once we have more different
-    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
-    const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
-
-    const scheduledTaskDuration = getTimeForTask(scheduledTask);
+    const scheduledTaskDuration = getTimeLeftForTask(scheduledTask);
 
     newViewEntries.splice(firstEntryBeforeIndex || 0, 0, {
       id: scheduledTask.id,
@@ -209,21 +205,24 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
       isHideTime: false,
     });
 
-    const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
-    if (isAddSplitTask) {
-      const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
-      // const splitStr = msToString(splitTime);
+    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
+    const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
+    const isAddSplitTask = (splitTask && (getTimeLeftForTask(splitTask) > 0));
+    if (viewEntryForSplitTask && isAddSplitTask) {
+      const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
+      const timePlannedForSplitTaskBefore = (scheduledTask as Task).plannedAt as number - (viewEntryForSplitTask as any).time as number;
+      const timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
+
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
         id: i + '_' + (splitTask as Task).id,
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
         type: TimelineViewEntryType.SplitTaskContinued,
-        // data:  (splitTask as Task).title + ' (' + splitStr + ')',
         data: {
           title: (splitTask as Task).title,
-          timeToGo: splitTime,
+          timeToGo: timePlannedForSplitTaskContinued,
         },
-        isHideTime: true,
+        isHideTime: false,
       });
     }
 
@@ -240,7 +239,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
   return newViewEntries;
 };
 
-const getTimeForTask = (task: Task): number => {
+const getTimeLeftForTask = (task: Task): number => {
   return Math.max(0, task.timeEstimate - task.timeSpent) || 0;
 };
 
@@ -262,10 +261,6 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
         && viewEntry.time >= (customEvent.start as number)
     );
 
-    // TODO check once we have more different
-    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
-    const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
-
     newViewEntries.splice(firstEntryBeforeIndex || 0, 0, {
       id: customEvent.title,
       time: customEvent.start,
@@ -274,10 +269,14 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
       isHideTime: false,
     });
 
-    const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
-    if (isAddSplitTask) {
-      const splitTime = getTimeForTask(splitTask) - customEvent.duration;
-      // const splitStr = msToString(splitTime);
+    const viewEntryForSplitTask: TimelineViewEntry | undefined = newViewEntries[firstEntryBeforeIndex - 1];
+    const splitTask: Task | undefined = viewEntryForSplitTask?.data as Task;
+    const isAddSplitTask = (splitTask && (getTimeLeftForTask(splitTask) > 0));
+    if (viewEntryForSplitTask && isAddSplitTask) {
+      const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
+      const timePlannedForSplitTaskBefore = (customEvent).start as number - (viewEntryForSplitTask as any).time as number;
+      const timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
+
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
         id: (splitTask as Task).id,
@@ -285,7 +284,7 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
         type: TimelineViewEntryType.SplitTaskContinued,
         data: {
           title: (splitTask as Task).title,
-          timeToGo: splitTime,
+          timeToGo: timePlannedForSplitTaskContinued,
         },
         isHideTime: true,
       });
