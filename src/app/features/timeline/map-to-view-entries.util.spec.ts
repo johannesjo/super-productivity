@@ -11,6 +11,7 @@ const FAKE_TASK: TaskCopy = {
   plannedAt: null,
   reminderId: null,
 } as any;
+const hours = (n: number): number => n * 60 * 60 * 1000;
 
 describe('mapToViewEntries()', () => {
   it('should work for simple task list', () => {
@@ -146,5 +147,57 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
       }]);
     });
+
+    it('should not add work end entry if tasks take longer than that', () => {
+      const now = getDateTimeFromClockString('16:23', 0);
+      const workEndTimeString = '18:00';
+      const fakeTasks = [
+        {...FAKE_TASK, timeEstimate: hours(2), title: 'Some task title'},
+        {...FAKE_TASK},
+      ];
+      const workStartEndCfg: TimelineWorkStartEndCfg = {
+        startTime: '9:00',
+        endTime: workEndTimeString,
+      };
+      const r = mapToViewEntries(fakeTasks, null, workStartEndCfg, now);
+      expect(r).toEqual([
+        {
+          data: fakeTasks[0],
+          id: 'FAKE_TASK_ID',
+          isHideTime: false,
+          time: 55380000,
+          type: TimelineViewEntryType.SplitTask
+        },
+        {
+          data: workStartEndCfg,
+          id: 'END_TODAY',
+          isHideTime: true,
+          time: 61200000,
+          type: TimelineViewEntryType.WorkdayEnd
+        },
+        {
+          data: workStartEndCfg,
+          id: 'START_TOMORROW',
+          isHideTime: true,
+          time: 1620025200000,
+          type: TimelineViewEntryType.WorkdayStart
+        },
+        {
+          data: {timeToGo: 1380000, title: 'Some task title'},
+          id: 'FAKE_TASK_ID__1',
+          isHideTime: false,
+          time: 1620025200000,
+          type: TimelineViewEntryType.SplitTaskContinued
+        } as any,
+        {
+          data: fakeTasks[1],
+          id: 'FAKE_TASK_ID',
+          isHideTime: false,
+          time: 1620026580000,
+          type: TimelineViewEntryType.Task
+        },
+      ]);
+    });
+
   });
 });

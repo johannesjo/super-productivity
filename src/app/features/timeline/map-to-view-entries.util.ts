@@ -1,5 +1,10 @@
 import { Task } from '../tasks/task.model';
-import { TimelineCustomEvent, TimelineViewEntry, TimelineViewEntryType, TimelineWorkStartEndCfg } from './timeline.model';
+import {
+  TimelineCustomEvent,
+  TimelineViewEntry,
+  TimelineViewEntryType,
+  TimelineWorkStartEndCfg
+} from './timeline.model';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { getTomorrow } from '../../util/get-tomorrow';
 
@@ -17,8 +22,6 @@ const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
 //   icon: 'nature',
 }];
 // const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [];
-
-
 
 export const mapToViewEntries = (
   tasks: Task[],
@@ -98,7 +101,7 @@ export const mapToViewEntries = (
           console.log(new Date(startTimeTomorrow), startTimeTomorrow);
 
           newViewEntries.splice(splitInsertIndex, 0, {
-            id: index + '__' + (splitTask as Task).id,
+            id: (splitTask as Task).id + '__' + splitInsertIndex,
             time: startTimeTomorrow,
             type: TimelineViewEntryType.SplitTaskContinued,
             data: {
