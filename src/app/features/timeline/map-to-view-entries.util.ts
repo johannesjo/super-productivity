@@ -58,6 +58,8 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
   //   });
   // }
 
+  const newViewEntries: TimelineViewEntry[] = viewEntriesWithCustomEvents.slice(0);
+
   if (FAKE_WORK_START_END) {
     const startTimeToday = getDateTimeFromClockString(FAKE_WORK_START_END.startTime);
     const startTimeTomorrow = getDateTimeFromClockString(FAKE_WORK_START_END.startTime, getTomorrow());
@@ -74,43 +76,49 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
         : entry.time;
 
       if (entry.time && timeEndForEntry && timeEndForEntry >= endTimeToday) {
-        if (!firstDifference) {
-          firstDifference = startTimeTomorrow - entry.time;
-          daySwitchIndex = index;
-        }
         if (entry.time >= endTimeToday) {
+          if (!firstDifference) {
+            firstDifference = startTimeTomorrow - entry.time;
+            daySwitchIndex = index;
+          }
           entry.time = entry.time + firstDifference;
         } else {
-          // split task
-          daySwitchIndex = index + 1;
-          // const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
-          // const splitStr = msToString(splitTime);
+          // // split task
+          const timeToGoAfterWorkEnd = (timeEndForEntry - endTimeToday);
+          const timeDoneBeforeWorkEnd = getTimeForTask(entry.data as Task) - timeToGoAfterWorkEnd;
+
+          if (!firstDifference) {
+            firstDifference = startTimeTomorrow - entry.time - timeDoneBeforeWorkEnd;
+            daySwitchIndex = index + 1;
+          }
           entry.type = TimelineViewEntryType.SplitTask;
           const splitInsertIndex = daySwitchIndex;
+
           const splitTask = entry.data;
-          viewEntriesWithCustomEvents.splice(splitInsertIndex, 0, {
+          console.log(new Date(startTimeTomorrow), startTimeTomorrow);
+
+          newViewEntries.splice(splitInsertIndex, 0, {
             id: index + '__' + (splitTask as Task).id,
             time: startTimeTomorrow,
             type: TimelineViewEntryType.SplitTaskContinued,
-            // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
-            data: '... ' + (splitTask as Task).title,
+            data: (splitTask as Task).title,
             isHideTime: true,
           });
+          // firstDifference = startTimeTomorrow - entry.time;
         }
 
       }
     });
 
     if (daySwitchIndex > -1) {
-      startTime = startTimeToday;
-      viewEntriesWithCustomEvents.splice(daySwitchIndex, 0, {
+      newViewEntries.splice(daySwitchIndex, 0, {
         id: 'START_TOMORROW',
         time: startTimeTomorrow,
         type: TimelineViewEntryType.WorkdayStart,
         data: FAKE_WORK_START_END,
         isHideTime: true,
       });
-      viewEntriesWithCustomEvents.splice(daySwitchIndex, 0, {
+      newViewEntries.splice(daySwitchIndex, 0, {
         id: 'END_TODAY',
         time: endTimeToday,
         type: TimelineViewEntryType.WorkdayEnd,
@@ -119,10 +127,9 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
       });
     }
     if (startTimeToday > now && !currentId) {
-      startTime = startTimeToday;
-      viewEntriesWithCustomEvents.unshift({
+      newViewEntries.unshift({
         id: 'START_TODAY',
-        time: startTime,
+        time: startTimeToday,
         type: TimelineViewEntryType.WorkdayStart,
         data: FAKE_WORK_START_END,
         isHideTime: true,
@@ -130,7 +137,9 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
     }
   }
 
-  return viewEntriesWithCustomEvents;
+  console.log(newViewEntries);
+
+  return newViewEntries;
 };
 
 const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] => {
@@ -222,7 +231,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
         id: i + '_' + (splitTask as Task).id,
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
         type: TimelineViewEntryType.SplitTaskContinued,
-        // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
+        // data:  (splitTask as Task).title + ' (' + splitStr + ')',
         data: '... ' + (splitTask as Task).title,
         isHideTime: true,
       });
@@ -284,8 +293,7 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
         id: (splitTask as Task).id,
         time: customEvent.start + customEvent.duration,
         type: TimelineViewEntryType.SplitTaskContinued,
-        // data: '... ' + (splitTask as Task).title + ' (' + splitStr + ')',
-        data: '... ' + (splitTask as Task).title + ' (continued)',
+        data: (splitTask as Task).title,
         isHideTime: true,
       });
     }
