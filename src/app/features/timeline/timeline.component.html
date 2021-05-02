@@ -25,8 +25,11 @@
                 [task]="row.data"></task>
 
           <div *ngSwitchCase="TimelineViewEntryType.SplitTaskContinued"
-               class="task-continued">{{row.data.title}} <em>(continued, ~{{row.data.timeToGo|roundDuration|msToString}}
-            left)</em></div>
+               class="task-continued">
+            <div class="title">{{row.data.title}} </div>
+            <div class="time-to-go">continued ~{{row.data.timeToGo|roundDuration|msToString}}
+            </div>
+          </div>
 
 
           <timeline-custom-event *ngSwitchCase="TimelineViewEntryType.CustomEvent"
@@ -38,7 +41,8 @@
           </div>
 
           <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd"
-               class="work-end">{{row.time|date:'shortTime'}} end ({{row.time|date:'shortDate'}})</div>
+               class="work-end">{{row.time|date:'shortTime'}} end ({{row.time|date:'shortDate'}})
+          </div>
 
           <div *ngSwitchDefault>------------------</div>
         </div>

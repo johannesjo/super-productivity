@@ -147,6 +147,7 @@ $split-border-radius: 24px;
   border-radius: $task-border-radius;
   border-bottom-left-radius: $split-border-radius;
   border-bottom-right-radius: $split-border-radius;
+  display: flex;
 
   @include lightTheme {
     background: $task-c-bg-light;
@@ -156,8 +157,18 @@ $split-border-radius: 24px;
     background: $task-c-bg-dark;
   }
 
-  em {
-    margin-left: $s*2;
+  .title {
+    flex: 1;
+  }
+
+  .time-to-go {
+    margin-left: auto;
+    padding-left: $s;
+    padding-right: $s*2;
+    font-style: italic;
+    opacity: 0.5;
+    font-size: 14px;
+    font-weight: 300;
   }
 }
 
