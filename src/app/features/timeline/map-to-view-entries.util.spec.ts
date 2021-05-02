@@ -18,7 +18,7 @@ describe('mapToViewEntries()', () => {
       {...FAKE_TASK, timeEstimate: 5000},
       {...FAKE_TASK},
     ];
-    const r = mapToViewEntries(fakeTasks, null, startTime);
+    const r = mapToViewEntries(fakeTasks, null, undefined, startTime);
     expect(r).toEqual([{
       id: fakeTasks[0].id,
       type: TimelineViewEntryType.Task,
@@ -44,7 +44,7 @@ describe('mapToViewEntries()', () => {
       {...FAKE_TASK, timeEstimate: 3000, timeSpent: 1000},
       {...FAKE_TASK},
     ];
-    const r = mapToViewEntries(fakeTasks, null, startTime);
+    const r = mapToViewEntries(fakeTasks, null, undefined, startTime);
     expect(r).toEqual([{
       id: FID,
       type: TimelineViewEntryType.Task,
@@ -82,5 +82,33 @@ describe('mapToViewEntries()', () => {
       data: fakeTasks[5],
       isHideTime: false,
     }]);
+  });
+
+  xdescribe('workStartEnd', () => {
+    it('should add work start and end entries', () => {
+      const startTime = 33;
+      const fakeTasks = [
+        {...FAKE_TASK, timeEstimate: 5000},
+        {...FAKE_TASK},
+      ];
+      // const workStartEnd: TimelineWorkStartEndCfg = {
+      //   startTime: '13:00',
+      //   endTime: '17:00',
+      // };
+      const r = mapToViewEntries(fakeTasks, null, undefined, startTime);
+      expect(r).toEqual([{
+        id: fakeTasks[0].id,
+        type: TimelineViewEntryType.Task,
+        time: startTime,
+        data: fakeTasks[0],
+        isHideTime: false,
+      }, {
+        id: fakeTasks[1].id,
+        type: TimelineViewEntryType.Task,
+        time: 5033,
+        data: fakeTasks[1],
+        isHideTime: false,
+      }]);
+    });
   });
 });

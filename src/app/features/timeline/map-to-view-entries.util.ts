@@ -1,5 +1,5 @@
 import { Task } from '../tasks/task.model';
-import { TimelineCustomEvent, TimelineViewEntry, TimelineViewEntryType, TimelineWorkStartEnd } from './timeline.model';
+import { TimelineCustomEvent, TimelineViewEntry, TimelineViewEntryType, TimelineWorkStartEndCfg } from './timeline.model';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { getTomorrow } from '../../util/get-tomorrow';
 
@@ -18,19 +18,19 @@ const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
 }];
 // const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [];
 
-const FAKE_WORK_START_END: TimelineWorkStartEnd = {
-  // startTime: '9:00',
-  // endTime: '17:00',
-  startTime: '13:00',
-  endTime: '17:00',
-};
 
-export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: number = Date.now()): TimelineViewEntry[] => {
+
+export const mapToViewEntries = (
+  tasks: Task[],
+  currentId: string | null,
+  workStartEndCfg?: TimelineWorkStartEndCfg,
+  now: number = Date.now(),
+): TimelineViewEntry[] => {
   let startTime = now;
 
-  if (FAKE_WORK_START_END) {
-    const startTimeToday = getDateTimeFromClockString(FAKE_WORK_START_END.startTime);
-    // const endTimeToday = getDateTimeFromClockString(FAKE_WORK_START_END.endTime);
+  if (workStartEndCfg) {
+    const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
+    // const endTimeToday = getDateTimeFromClockString(workStartEndCfg.endTime);
     console.log(startTimeToday > now);
 
     if (startTimeToday > now && !currentId) {
@@ -60,10 +60,10 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
 
   const newViewEntries: TimelineViewEntry[] = viewEntriesWithCustomEvents.slice(0);
 
-  if (FAKE_WORK_START_END) {
-    const startTimeToday = getDateTimeFromClockString(FAKE_WORK_START_END.startTime);
-    const startTimeTomorrow = getDateTimeFromClockString(FAKE_WORK_START_END.startTime, getTomorrow());
-    const endTimeToday = getDateTimeFromClockString(FAKE_WORK_START_END.endTime);
+  if (workStartEndCfg) {
+    const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
+    const startTimeTomorrow = getDateTimeFromClockString(workStartEndCfg.startTime, getTomorrow());
+    const endTimeToday = getDateTimeFromClockString(workStartEndCfg.endTime, now);
 
     let firstDifference: number;
     let daySwitchIndex: number = -1;
@@ -118,14 +118,14 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
         id: 'START_TOMORROW',
         time: startTimeTomorrow,
         type: TimelineViewEntryType.WorkdayStart,
-        data: FAKE_WORK_START_END,
+        data: workStartEndCfg,
         isHideTime: true,
       });
       newViewEntries.splice(daySwitchIndex, 0, {
         id: 'END_TODAY',
         time: endTimeToday,
         type: TimelineViewEntryType.WorkdayEnd,
-        data: FAKE_WORK_START_END,
+        data: workStartEndCfg,
         isHideTime: true,
       });
     }
@@ -134,7 +134,7 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
         id: 'START_TODAY',
         time: startTimeToday,
         type: TimelineViewEntryType.WorkdayStart,
-        data: FAKE_WORK_START_END,
+        data: workStartEndCfg,
         isHideTime: true,
       });
     }

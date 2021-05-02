@@ -50,19 +50,19 @@ interface TimelineViewEntryCustomEvent extends TimelineViewEntryBase {
 }
 
 
-export interface TimelineWorkStartEnd {
+export interface TimelineWorkStartEndCfg {
   startTime: string;
   endTime: string;
 }
 
 interface TimelineViewEntryWorkStart extends TimelineViewEntryBase {
   type: TimelineViewEntryType.WorkdayStart;
-  data: TimelineWorkStartEnd;
+  data: TimelineWorkStartEndCfg;
 }
 
 interface TimelineViewEntryWorkEnd extends TimelineViewEntryBase {
   type: TimelineViewEntryType.WorkdayEnd;
-  data: TimelineWorkStartEnd;
+  data: TimelineWorkStartEndCfg;
 }
 
 export type TimelineViewEntry =
