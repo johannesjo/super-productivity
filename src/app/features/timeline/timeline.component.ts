@@ -10,7 +10,7 @@ import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 const FAKE_WORK_START_END: TimelineWorkStartEndCfg = {
   // startTime: '9:00',
   // endTime: '17:00',
-  startTime: '13:00',
+  startTime: '9:00',
   endTime: '17:00',
 };
 @Component({

@@ -105,7 +105,7 @@ export const mapToViewEntries = (
               title: (splitTask as Task).title,
               timeToGo: timeToGoAfterWorkEnd,
             },
-            isHideTime: true,
+            isHideTime: false,
           });
           // firstDifference = startTimeTomorrow - entry.time;
         }
