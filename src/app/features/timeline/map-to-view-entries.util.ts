@@ -101,7 +101,10 @@ export const mapToViewEntries = (tasks: Task[], currentId: string | null, now: n
             id: index + '__' + (splitTask as Task).id,
             time: startTimeTomorrow,
             type: TimelineViewEntryType.SplitTaskContinued,
-            data: (splitTask as Task).title,
+            data: {
+              title: (splitTask as Task).title,
+              timeToGo: timeToGoAfterWorkEnd,
+            },
             isHideTime: true,
           });
           // firstDifference = startTimeTomorrow - entry.time;
@@ -224,7 +227,7 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
 
     const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
     if (isAddSplitTask) {
-      // const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
+      const splitTime = getTimeForTask(splitTask) - scheduledTaskDuration;
       // const splitStr = msToString(splitTime);
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
@@ -232,7 +235,10 @@ const addViewEntriesForScheduled = (scheduledTasks: Task[], viewEntries: Timelin
         time: (scheduledTask.plannedAt as number) + scheduledTaskDuration,
         type: TimelineViewEntryType.SplitTaskContinued,
         // data:  (splitTask as Task).title + ' (' + splitStr + ')',
-        data: '... ' + (splitTask as Task).title,
+        data: {
+          title: (splitTask as Task).title,
+          timeToGo: splitTime,
+        },
         isHideTime: true,
       });
     }
@@ -286,14 +292,17 @@ const addViewEntriesForCustomEvents = (customEvents: TimelineCustomEvent[], view
 
     const isAddSplitTask = (splitTask && (splitTask.timeEstimate - splitTask.timeSpent > 0));
     if (isAddSplitTask) {
-      // const splitTime = getTimeForTask(splitTask) - customEvent.duration;
+      const splitTime = getTimeForTask(splitTask) - customEvent.duration;
       // const splitStr = msToString(splitTime);
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
       newViewEntries.splice(firstEntryBeforeIndex + 1, 0, {
         id: (splitTask as Task).id,
         time: customEvent.start + customEvent.duration,
         type: TimelineViewEntryType.SplitTaskContinued,
-        data: (splitTask as Task).title,
+        data: {
+          title: (splitTask as Task).title,
+          timeToGo: splitTime,
+        },
         isHideTime: true,
       });
     }
