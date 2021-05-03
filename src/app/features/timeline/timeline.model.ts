@@ -1,4 +1,4 @@
-import { TaskCopy } from '../tasks/task.model';
+import { TaskCopy, TaskWithReminder } from '../tasks/task.model';
 
 // export enum TimelineEntryType {
 //   Task,
@@ -8,13 +8,13 @@ import { TaskCopy } from '../tasks/task.model';
 // }
 
 export enum TimelineViewEntryType {
-  Task,
-  ScheduledTask,
-  SplitTask,
-  SplitTaskContinued,
-  CustomEvent,
-  WorkdayStart,
-  WorkdayEnd,
+  Task = 'Task',
+  ScheduledTask = 'ScheduledTask',
+  SplitTask = 'SplitTask',
+  SplitTaskContinued = 'SplitTaskContinued',
+  CustomEvent = 'CustomEvent',
+  WorkdayStart = 'WorkdayStart',
+  WorkdayEnd = 'WorkdayEnd',
 }
 
 interface TimelineViewEntryBase {
@@ -49,7 +49,6 @@ interface TimelineViewEntryCustomEvent extends TimelineViewEntryBase {
   data: TimelineCustomEvent;
 }
 
-
 export interface TimelineWorkStartEndCfg {
   startTime: string;
   endTime: string;
@@ -73,4 +72,34 @@ export type TimelineViewEntry =
   | TimelineViewEntryWorkEnd
   ;
 
+// -----------------
+// BlockedBlocks
+export enum BlockedBlockType {
+  ScheduledTask = 'ScheduledTask',
+  WorkdayStartEnd = 'WorkdayStartEnd',
+}
+
+export interface BlockedBlockEntryScheduledTask {
+  start: number;
+  end: number;
+  type: BlockedBlockType.ScheduledTask;
+  data: TaskWithReminder;
+}
+
+export interface BlockedBlockEntryWorkdayStartEnd {
+  start: number;
+  end: number;
+  type: BlockedBlockType.WorkdayStartEnd;
+  data: TimelineWorkStartEndCfg;
+}
+
+export type BlockedBlockEntry =
+  BlockedBlockEntryScheduledTask
+  | BlockedBlockEntryWorkdayStartEnd;
+
+export interface BlockedBlock {
+  start: number;
+  end: number;
+  entries: BlockedBlockEntry[];
+}
 

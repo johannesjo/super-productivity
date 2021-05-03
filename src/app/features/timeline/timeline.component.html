@@ -7,9 +7,10 @@
            *ngFor="let row of timelineEntries; let isFirst = first; trackBy: trackByFn">
         <div class="col time"
              [class.hasTime]="!row.isHideTime && row.type!==TimelineViewEntryType.WorkdayStart">
-          <div *ngIf="!row.isHideTime && row.type!==TimelineViewEntryType.WorkdayStart">{{ isFirst
-            ? (T.F.TIMELINE.NOW|translate)
-            : (row.time|roundDuration|date:'HH:mm')}}</div>
+          <!--          <div *ngIf="!row.isHideTime && row.type!==TimelineViewEntryType.WorkdayStart">{{ isFirst-->
+          <!--            ? (T.F.TIMELINE.NOW|translate)-->
+          <!--            : (row.time|roundDuration|date:'HH:mm')}}</div>-->
+          <div>{{ (row.time|date:'HH:mm dd')}}</div>
         </div>
         <div class="col right"
              [ngSwitch]="row.type">
@@ -27,7 +28,7 @@
           <div *ngSwitchCase="TimelineViewEntryType.SplitTaskContinued"
                class="task-continued">
             <div class="title">{{row.data.title}} </div>
-            <div class="time-to-go">continued ~{{row.data.timeToGo|roundDuration|msToString}}
+            <div class="time-to-go">continued ~{{row.data.timeToGo|msToString}}
             </div>
           </div>
 
