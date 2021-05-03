@@ -5,6 +5,13 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 const minutes = (n: number): number => n * 60 * 1000;
 const hours = (n: number): number => 60 * minutes(n);
 
+const BASE_REMINDER_TASK = (startTime: string, note?: string): any => ({
+  timeSpent: 0,
+  reminderId: 'xxx',
+  plannedAt: getDateTimeFromClockString(startTime, 0),
+  title: startTime + ' ' + (note ? note : ' – reminderTask'),
+});
+
 describe('createBlockerBlocks()', () => {
   it('should merge into single block if all overlapping', () => {
     const fakeTasks: TaskWithReminder[] = [
@@ -124,6 +131,147 @@ describe('createBlockerBlocks()', () => {
     expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
   });
 
+  it('should merge multiple times', () => {
+    const fakeTasks: TaskWithReminder[] = [
+      {
+        ...BASE_REMINDER_TASK('16:00', 'no duration'),
+        timeEstimate: 0,
+      },
+      {
+        ...BASE_REMINDER_TASK('17:00'),
+        timeEstimate: hours(2),
+      },
+      {
+        ...BASE_REMINDER_TASK('23:00', 'standalone'),
+        timeEstimate: hours(1),
+      },
+      {
+        ...BASE_REMINDER_TASK('15:00'),
+        timeEstimate: hours(1),
+      },
+      {
+        ...BASE_REMINDER_TASK('15:30'),
+        timeEstimate: hours(2.5),
+      }
+    ] as any;
+
+    const r = createBlockerBlocks(fakeTasks);
+
+    expect(r.length).toEqual(2);
+    expect(r).toEqual([{
+      start: getDateTimeFromClockString('15:00', 0),
+      end: getDateTimeFromClockString('19:00', 0),
+      entries: [{
+        data:
+          {
+            plannedAt: 54000000,
+            reminderId: 'xxx',
+            timeEstimate: 0,
+            timeSpent: 0,
+            title: '16:00 no duration'
+          },
+        end: 54000000,
+        start: 54000000,
+        type: 'ScheduledTask'
+      }, {
+        data:
+          {
+            plannedAt: 50400000,
+            reminderId: 'xxx',
+            timeEstimate: 3600000,
+            timeSpent: 0,
+            title: '15:00  – reminderTask'
+          },
+        end: 54000000,
+        start: 50400000,
+        type: 'ScheduledTask'
+      }, {
+        data:
+          {
+            plannedAt: 52200000,
+            reminderId: 'xxx',
+            timeEstimate: 9000000,
+            timeSpent: 0,
+            title: '15:30  – reminderTask'
+          },
+        end: 61200000,
+        start: 52200000,
+        type: 'ScheduledTask'
+      }, {
+        data:
+          {
+            plannedAt: 57600000,
+            reminderId: 'xxx',
+            timeEstimate: 7200000,
+            timeSpent: 0,
+            title: '17:00  – reminderTask'
+          },
+        end: 64800000,
+        start: 57600000,
+        type: 'ScheduledTask'
+      }],
+    }, {
+      start: getDateTimeFromClockString('23:00', 0),
+      end: getDateTimeFromClockString('23:00', 0) + hours(1),
+      entries: [{
+        data:
+          {
+            plannedAt: 79200000,
+            reminderId: 'xxx',
+            timeEstimate: hours(1),
+            timeSpent: 0,
+            title: '23:00 standalone'
+          },
+        end: 82800000,
+        start: 79200000,
+        type: 'ScheduledTask'
+      }],
+
+    }] as any);
+  });
+
+  it('should work with far future entries', () => {
+    const fakeTasks: TaskWithReminder[] = [
+      {
+        ...BASE_REMINDER_TASK('16:00', 'no duration'),
+        timeEstimate: 0,
+      },
+      {
+        ...BASE_REMINDER_TASK('17:00'),
+        timeEstimate: hours(2),
+      },
+      {
+        ...BASE_REMINDER_TASK('23:00', 'standalone'),
+        timeEstimate: hours(1),
+      },
+      {
+        ...BASE_REMINDER_TASK('15:00'),
+        timeEstimate: hours(2),
+      },
+      {
+        ...BASE_REMINDER_TASK('15:30', 'TOMORROW'),
+        plannedAt: getDateTimeFromClockString('15:30', hours(24)),
+        timeEstimate: hours(2.5),
+      }
+    ] as any;
+
+    const r = createBlockerBlocks(fakeTasks);
+
+    expect(r.length).toEqual(3);
+
+    expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', 0));
+    expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
+    expect(r[0].entries.length).toEqual(3);
+
+    expect(r[1].start).toEqual(getDateTimeFromClockString('23:00', 0));
+    expect(r[1].end).toEqual(getDateTimeFromClockString('23:00', 0) + hours(1));
+    expect(r[1].entries.length).toEqual(1);
+
+    expect(r[2].start).toEqual(getDateTimeFromClockString('15:30', hours(24)));
+    expect(r[2].end).toEqual(getDateTimeFromClockString('15:30', hours(24)) + hours(2.5));
+    expect(r[2].entries.length).toEqual(1);
+  });
+
   it('should work for advanced scenario', () => {
     const fakeTasks: TaskWithReminder[] = [{
       id: '0LtuSnH8s',
@@ -202,7 +350,6 @@ describe('createBlockerBlocks()', () => {
       issueWasUpdated: null
     }] as any;
     const r = createBlockerBlocks(fakeTasks);
-    console.log(r);
 
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', new Date(1620048600000)));
