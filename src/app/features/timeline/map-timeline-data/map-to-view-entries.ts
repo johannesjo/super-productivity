@@ -86,7 +86,16 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
   }
 
   const viewEntriesBefore = viewEntries.slice(0);
-  console.log(blockedBlocks);
+  console.log(viewEntries.map(viewEntry => ({
+    ...viewEntry,
+    timeD: new Date(viewEntry.time),
+    durationH: getTimeLeftForTask(viewEntry.data as any) / 60000 / 60,
+  })));
+  console.log(blockedBlocks.map(block => ({
+    ...block,
+    startD: new Date(block.start),
+    endD: new Date(block.end),
+  })));
 
   blockedBlocks.forEach((blockedBlock, i) => {
     const firstEntryAfterBlockStartIndex = viewEntries.findIndex(

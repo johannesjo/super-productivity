@@ -259,6 +259,10 @@ describe('mapToViewEntries()', () => {
       });
     });
 
+    it('should work for scheduled task after a single normal task', () => {
+
+    });
+
     it('should work for far away planned tasks', () => {
       const now = getDateTimeFromClockString('9:20', 0);
       const plannedTaskStartTime = getDateTimeFromClockString('12:25', 25 * 60 * 60 * 1000);
