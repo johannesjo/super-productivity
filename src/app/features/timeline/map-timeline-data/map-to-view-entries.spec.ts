@@ -1,4 +1,4 @@
-import { mapToViewEntries } from './map-to-view-entries.util';
+import { mapToViewEntries } from './map-to-view-entries';
 import { TaskCopy } from '../../tasks/task.model';
 import { TimelineViewEntryType } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
