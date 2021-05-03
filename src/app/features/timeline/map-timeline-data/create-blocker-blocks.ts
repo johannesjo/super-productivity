@@ -29,6 +29,7 @@ export const createBlockerBlocks = (
         break;
       }
     }
+
     if (!wasMerged) {
       blockedBlocks.push({
         start,
@@ -43,6 +44,27 @@ export const createBlockerBlocks = (
     }
   });
 
+  return mergeBlocksRecursively(blockedBlocks);
+};
+
+const mergeBlocksRecursively = (blockedBlocks: BlockedBlock[]): BlockedBlock[] => {
+  for (const blockedBlock of blockedBlocks) {
+    // let wasMergedInner = false;
+    for (const blockedBlockInner of blockedBlocks) {
+      if (blockedBlockInner !== blockedBlock && isOverlappingBlock(blockedBlockInner, blockedBlock)) {
+        blockedBlock.start = Math.min(blockedBlockInner.start, blockedBlock.start);
+        blockedBlock.end = Math.max(blockedBlockInner.end, blockedBlock.end);
+        blockedBlock.entries = blockedBlock.entries.concat(blockedBlockInner.entries);
+        // blockedBlock.entries = [...blockedBlock.entries, ...blockedBlockInner.entries];
+        blockedBlocks.splice(blockedBlocks.indexOf(blockedBlockInner), 1);
+        // wasMergedInner = true;
+        break;
+      }
+    }
+    // if (wasMergedInner) {
+    //   break;
+    // }
+  }
   return blockedBlocks;
 };
 
