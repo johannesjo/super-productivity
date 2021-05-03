@@ -1,6 +1,6 @@
 import { mapToViewEntries } from './map-to-view-entries.util';
 import { TaskCopy } from '../../tasks/task.model';
-import { TimelineViewEntryType, TimelineWorkStartEndCfg } from '../timeline.model';
+import { TimelineViewEntryType } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 const FID = 'FAKE_TASK_ID';
@@ -282,6 +282,79 @@ describe('mapToViewEntries()', () => {
         data: fakeTasks.find(t => t.id === 'OTHER_TASK_ID') as any,
         isHideTime: false,
       });
+    });
+
+    it('should work for sophisticated scenarios', () => {
+      const now = getDateTimeFromClockString('11:00', 0);
+      const fakeTasks: TaskCopy[] = [
+        {
+          id: 'S4_NO_DURATION',
+          timeSpent: 0,
+          timeEstimate: 0,
+          title: 'Scheduled 4 (no duration) 16:00',
+          reminderId: 'xxx',
+          plannedAt: getDateTimeFromClockString('16:00', 0),
+        },
+        {
+          id: 'S3',
+          timeSpent: 0,
+          timeEstimate: hours(2),
+          title: 'Scheduled 3 17:00',
+          reminderId: 'xxx',
+          plannedAt: getDateTimeFromClockString('17:00', 0),
+        },
+        {
+          id: 'S_NO_OVERLAP',
+          timeSpent: 0,
+          timeEstimate: hours(1),
+          title: 'Scheduled 5 no overlap 23:00',
+          reminderId: 'xxx',
+          plannedAt: getDateTimeFromClockString('23:00', 0),
+        },
+        {
+          id: 'SOME_TASK_1_ID',
+          timeSpent: 0,
+          timeEstimate: hours(4),
+          title: 'Some task 1',
+          reminderId: null,
+          plannedAt: null,
+        },
+        {
+          id: 'SOME_TASK_2_ID',
+          timeSpent: 0,
+          timeEstimate: hours(2),
+          title: 'Some task 2',
+          reminderId: null,
+          plannedAt: null,
+        },
+        {
+          id: 'S1',
+          timeSpent: 0,
+          timeEstimate: hours(1),
+          title: 'Scheduled 1 15:00',
+          reminderId: 'xxx',
+          plannedAt: 1620046800000,
+        },
+        {
+          id: 'S2',
+          timeSpent: 0,
+          timeEstimate: hours(2.5),
+          title: 'Scheduled 2 15:30',
+          reminderId: 'xxx',
+          plannedAt: getDateTimeFromClockString('15:30', 0),
+        }
+      ] as any;
+      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      expect(r[0]).toEqual({
+        id: 'SOME_TASK_1_ID',
+        type: TimelineViewEntryType.SplitTask,
+        time: now,
+        data: fakeTasks.find(t => t.id === 'SOME_TASK_1_ID') as any,
+        isHideTime: false,
+      });
+      expect(r[4].type).toEqual(TimelineViewEntryType.ScheduledTask);
+      console.log(r);
+
     });
 
   });

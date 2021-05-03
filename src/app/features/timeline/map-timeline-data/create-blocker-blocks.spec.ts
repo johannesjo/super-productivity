@@ -124,7 +124,7 @@ describe('createBlockerBlocks()', () => {
     expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
   });
 
-  fit('should work for advanced scenario', () => {
+  it('should work for advanced scenario', () => {
     const fakeTasks: TaskWithReminder[] = [{
       id: '0LtuSnH8s',
       projectId: null,
