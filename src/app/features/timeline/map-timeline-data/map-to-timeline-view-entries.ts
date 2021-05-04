@@ -12,7 +12,6 @@ import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
 import * as moment from 'moment';
 
-
 export const mapToTimelineViewEntries = (
   tasks: Task[],
   currentId: string | null,
@@ -20,6 +19,10 @@ export const mapToTimelineViewEntries = (
   now: number = Date.now(),
 ): TimelineViewEntry[] => {
   let startTime = now;
+  if (!tasks.length) {
+    return [];
+  }
+
   const params: any = {tasks, currentId, workStartEndCfg, now};
   console.log('mapToViewEntries', params, {asString: JSON.stringify(params)});
 
@@ -69,9 +72,12 @@ export const mapToTimelineViewEntries = (
 
   let isWorkdayTypeLast = true;
   while (isWorkdayTypeLast) {
-    const last = viewEntries[viewEntries.length];
+    const last = viewEntries[viewEntries.length - 1];
+    if (viewEntries.length <= 2) {
+      isWorkdayTypeLast = false;
+    }
     if (last && (last.type === TimelineViewEntryType.WorkdayEnd || last.type === TimelineViewEntryType.WorkdayStart)) {
-      viewEntries.splice(viewEntries.length, 1);
+      viewEntries.splice(viewEntries.length - 1, 1);
     } else {
       isWorkdayTypeLast = false;
     }
@@ -122,7 +128,7 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         time: entry.end,
         type: TimelineViewEntryType.WorkdayStart,
         data: workdayCfg,
-        isHideTime: false,
+        isHideTime: true,
       });
     }
   });
