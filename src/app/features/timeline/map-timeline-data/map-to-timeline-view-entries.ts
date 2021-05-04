@@ -26,7 +26,7 @@ import * as moment from 'moment';
 //   icon: 'nature',
 // }];
 
-export const mapToViewEntries = (
+export const mapToTimelineViewEntries = (
   tasks: Task[],
   currentId: string | null,
   workStartEndCfg?: TimelineWorkStartEndCfg,

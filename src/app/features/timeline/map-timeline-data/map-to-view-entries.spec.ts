@@ -1,4 +1,4 @@
-import { mapToViewEntries } from './map-to-view-entries';
+import { mapToTimelineViewEntries } from './map-to-timeline-view-entries';
 import { TaskCopy } from '../../tasks/task.model';
 import { TimelineViewEntryType } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -22,7 +22,7 @@ describe('mapToViewEntries()', () => {
         {...FAKE_TASK, timeEstimate: 5000},
         {...FAKE_TASK},
       ];
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r).toEqual([{
         id: fakeTasks[0].id,
         type: TimelineViewEntryType.Task,
@@ -48,7 +48,7 @@ describe('mapToViewEntries()', () => {
         {...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(.25)},
         {...FAKE_TASK},
       ];
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r).toEqual([{
         id: FID,
         type: TimelineViewEntryType.Task,
@@ -98,7 +98,7 @@ describe('mapToViewEntries()', () => {
         {...FAKE_TASK, timeEstimate: 3000, timeSpent: 1000},
         {...FAKE_TASK},
       ];
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r).toEqual([{
         id: FID,
         type: TimelineViewEntryType.Task,
@@ -145,7 +145,7 @@ describe('mapToViewEntries()', () => {
         {...FAKE_TASK, timeSpent: 21014, timeEstimate: 900000,},
         {...FAKE_TASK, timeEstimate: 1800000, timeSpent: 148998},
       ];
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r).toEqual([{
         id: FID,
         type: TimelineViewEntryType.Task,
@@ -180,7 +180,7 @@ describe('mapToViewEntries()', () => {
         {...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(.25)},
         {...FAKE_TASK},
       ];
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r).toEqual([{
         id: FID,
         type: TimelineViewEntryType.Task,
@@ -240,7 +240,7 @@ describe('mapToViewEntries()', () => {
         },
         {...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID'},
       ];
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
 
       expect(r[0]).toEqual({
         id: 'OTHER_TASK_ID',
@@ -277,7 +277,7 @@ describe('mapToViewEntries()', () => {
         {...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(.5)},
         {...FAKE_TASK},
       ];
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r[0]).toEqual({
         id: 'OTHER_TASK_ID',
         type: TimelineViewEntryType.Task,
@@ -347,7 +347,7 @@ describe('mapToViewEntries()', () => {
           plannedAt: getDateTimeFromClockString('15:30', 0),
         }
       ] as any;
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r[0]).toEqual({
         id: 'SOME_TASK_1_ID',
         type: TimelineViewEntryType.Task,
@@ -445,7 +445,7 @@ describe('mapToViewEntries()', () => {
           plannedAt: null,
         }
       ] as any;
-      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r).toEqual([{
         data:
           {

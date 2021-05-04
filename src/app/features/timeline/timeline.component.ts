@@ -4,7 +4,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { map } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable } from 'rxjs';
-import { mapToViewEntries } from './map-timeline-data/map-to-view-entries';
+import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 
@@ -24,7 +24,7 @@ export class TimelineComponent {
     this._taskService.currentTaskId$,
   ]).pipe(
     // map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, undefined))
-    map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, {
+    map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, {
       startTime: '9:00',
       endTime: '17:00',
     }))
