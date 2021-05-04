@@ -7,24 +7,11 @@ import {
   TimelineWorkStartEndCfg
 } from '../timeline.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { createBlockerBlocks } from './create-blocker-blocks';
+import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
 import * as moment from 'moment';
 
-// const d = new Date();
-// d.setTime(13);
-// const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
-//   title: 'Mittagspause',
-//   duration: 60000 * 60,
-//   start: d.getTime(),
-//   icon: 'restaurant'
-// }, {
-//   title: 'Spazieren am Nachmittag',
-//   duration: 60000 * 60 * .25,
-//   start: Date.now() + 60000 * 60 * 2,
-//   icon: 'nature',
-// }];
 
 export const mapToTimelineViewEntries = (
   tasks: Task[],
@@ -50,11 +37,12 @@ export const mapToTimelineViewEntries = (
   const [scheduledTasks, nonScheduledTasks] = createSplitScheduledAndNotScheduled(initialTasks);
   const viewEntries = createTimelineViewEntriesForNormalTasks(startTime, nonScheduledTasks);
 
-  const blockedBlocks = createBlockerBlocks(scheduledTasks, workStartEndCfg, now);
+  const blockedBlocks = createSortedBlockerBlocks(scheduledTasks, workStartEndCfg, now);
 
   insertBlockedBlocksViewEntries(viewEntries, blockedBlocks, now);
 
   // CLEANUP
+  // -------
   viewEntries.sort((a, b) => {
     if ((a.time - b.time) === 0) {
       switch (a.type) {
@@ -67,8 +55,6 @@ export const mapToTimelineViewEntries = (
     return a.time - b.time;
   });
 
-  console.log(viewEntries[0]);
-
   // Move current always first and let it appear as now
   if (currentId) {
     const currentIndex = viewEntries.findIndex(ve => ve.id === currentId);
@@ -80,9 +66,6 @@ export const mapToTimelineViewEntries = (
   if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
     viewEntries.splice(0, 1);
   }
-  // if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayStart && viewEntries[0]?.time < now) {
-  //   viewEntries.splice(0, 1);
-  // }
 
   let isWorkdayTypeLast = true;
   while (isWorkdayTypeLast) {
@@ -165,7 +148,6 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
   //   endD: moment(block.end).format('H:mm'),
   // })));
 
-  blockedBlocks.sort((a, b) => a.start - b.start);
   blockedBlocks.forEach((blockedBlock, i) => {
     const viewEntriesToAdd: TimelineViewEntry[] = createViewEntriesForBlock(blockedBlock);
     if (blockedBlock.start <= now) {
@@ -221,94 +203,6 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
   });
 };
 
-// const isTaskSplittableTaskType = (viewEntry: TimelineViewEntry): boolean => {
-//   return viewEntry.type === TimelineViewEntryType.Task || viewEntry.type === TimelineViewEntryType.SplitTaskContinued;
-// };
-
-// const addVEForDayStartEnd = (
-//   viewEntries: TimelineViewEntry[],
-//   now: number,
-//   currentId: null | string,
-//   workStartEndCfg?: TimelineWorkStartEndCfg,
-// ) => {
-//   if (!workStartEndCfg) {
-//     return;
-//   }
-//   const viewEntriesBefore: TimelineViewEntry[] = viewEntries.slice(0);
-//   const startTimeToday = getDateTimeFromClockString(workStartEndCfg.startTime, now);
-//   const startTimeTomorrow = getDateTimeFromClockString(workStartEndCfg.startTime, getTomorrow());
-//   const endTimeToday = getDateTimeFromClockString(workStartEndCfg.endTime, now);
-//
-//   let firstDifference: number;
-//   let daySwitchIndex: number = -1;
-//
-//   viewEntriesBefore.forEach((entry, index) => {
-//     const timeEndForEntry = (entry.time && entry.type === TimelineViewEntryType.Task)
-//       ? entry.time + getTimeLeftForTask(entry.data)
-//       : entry.time;
-//
-//     if (entry.time && timeEndForEntry && timeEndForEntry >= endTimeToday) {
-//       if (entry.time >= endTimeToday) {
-//         if (!firstDifference) {
-//           firstDifference = startTimeTomorrow - entry.time;
-//           daySwitchIndex = index;
-//         }
-//         entry.time = entry.time + firstDifference;
-//       } else {
-//         // // split task
-//         const timeToGoAfterWorkEnd = (timeEndForEntry - endTimeToday);
-//         const timeDoneBeforeWorkEnd = getTimeLeftForTask(entry.data as Task) - timeToGoAfterWorkEnd;
-//
-//         if (!firstDifference) {
-//           firstDifference = startTimeTomorrow - entry.time - timeDoneBeforeWorkEnd;
-//           daySwitchIndex = index + 1;
-//         }
-//         entry.type = TimelineViewEntryType.SplitTask;
-//         const splitInsertIndex = daySwitchIndex;
-//
-//         const splitTask = entry.data;
-//
-//         viewEntries.splice(splitInsertIndex, 0, {
-//           id: (splitTask as Task).id + '__' + splitInsertIndex,
-//           time: startTimeTomorrow,
-//           type: TimelineViewEntryType.SplitTaskContinued,
-//           data: {
-//             title: (splitTask as Task).title,
-//             timeToGo: timeToGoAfterWorkEnd,
-//           },
-//           isHideTime: false,
-//         });
-//       }
-//     }
-//   });
-//
-//   if (daySwitchIndex > -1) {
-//     viewEntries.splice(daySwitchIndex, 0, {
-//       id: 'START_TOMORROW',
-//       time: startTimeTomorrow,
-//       type: TimelineViewEntryType.WorkdayStart,
-//       data: workStartEndCfg,
-//       isHideTime: true,
-//     });
-//     viewEntries.splice(daySwitchIndex, 0, {
-//       id: 'END_TODAY',
-//       time: endTimeToday,
-//       type: TimelineViewEntryType.WorkdayEnd,
-//       data: workStartEndCfg,
-//       isHideTime: true,
-//     });
-//   }
-//   if (startTimeToday > now && !currentId) {
-//     viewEntries.unshift({
-//       id: 'START_TODAY',
-//       time: startTimeToday,
-//       type: TimelineViewEntryType.WorkdayStart,
-//       data: workStartEndCfg,
-//       isHideTime: true,
-//     });
-//   }
-// };
-
 const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] => {
   let newTasks = tasks;
   const currentTask = tasks.find(t => t.id === currentId);
@@ -317,4 +211,8 @@ const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] =
   }
   return newTasks;
 };
+
+// const isTaskSplittableTaskType = (viewEntry: TimelineViewEntry): boolean => {
+//   return viewEntry.type === TimelineViewEntryType.Task || viewEntry.type === TimelineViewEntryType.SplitTaskContinued;
+// };
 

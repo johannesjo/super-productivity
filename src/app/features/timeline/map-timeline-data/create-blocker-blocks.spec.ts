@@ -1,4 +1,4 @@
-import { createBlockerBlocks } from './create-blocker-blocks';
+import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
 import { TaskWithReminder } from '../../tasks/task.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
@@ -40,7 +40,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('12:30', 0),
       }
     ] as any;
-    const r = createBlockerBlocks(fakeTasks);
+    const r = createSortedBlockerBlocks(fakeTasks);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:30', 0));
@@ -89,7 +89,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:30', 0),
       }
     ] as any;
-    const r = createBlockerBlocks(fakeTasks);
+    const r = createSortedBlockerBlocks(fakeTasks);
     expect(r.length).toEqual(2);
     expect(r[0].start).toEqual(getDateTimeFromClockString('9:20', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('14:00', 0));
@@ -125,7 +125,7 @@ describe('createBlockerBlocks()', () => {
         plannedAt: getDateTimeFromClockString('17:00', 0),
       },
     ] as any;
-    const r = createBlockerBlocks(fakeTasks);
+    const r = createSortedBlockerBlocks(fakeTasks);
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', 0));
     expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', 0));
@@ -155,7 +155,7 @@ describe('createBlockerBlocks()', () => {
       }
     ] as any;
 
-    const r = createBlockerBlocks(fakeTasks);
+    const r = createSortedBlockerBlocks(fakeTasks);
 
     expect(r.length).toEqual(2);
     expect(r).toEqual([{
@@ -255,7 +255,7 @@ describe('createBlockerBlocks()', () => {
       }
     ] as any;
 
-    const r = createBlockerBlocks(fakeTasks);
+    const r = createSortedBlockerBlocks(fakeTasks);
 
     expect(r.length).toEqual(3);
 
@@ -349,7 +349,7 @@ describe('createBlockerBlocks()', () => {
       issueLastUpdated: null,
       issueWasUpdated: null
     }] as any;
-    const r = createBlockerBlocks(fakeTasks);
+    const r = createSortedBlockerBlocks(fakeTasks);
 
     expect(r.length).toEqual(1);
     expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', new Date(1620048600000)));

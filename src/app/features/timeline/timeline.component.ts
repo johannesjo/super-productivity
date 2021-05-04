@@ -8,6 +8,20 @@ import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-vi
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 
+// const d = new Date();
+// d.setTime(13);
+// const FAKE_TIMELINE_EVENTS: TimelineCustomEvent[] = [{
+//   title: 'Mittagspause',
+//   duration: 60000 * 60,
+//   start: d.getTime(),
+//   icon: 'restaurant'
+// }, {
+//   title: 'Spazieren am Nachmittag',
+//   duration: 60000 * 60 * .25,
+//   start: Date.now() + 60000 * 60 * 2,
+//   icon: 'nature',
+// }];
+
 @Component({
   selector: 'timeline',
   templateUrl: './timeline.component.html',

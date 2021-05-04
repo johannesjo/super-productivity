@@ -3,18 +3,20 @@ import { BlockedBlock, BlockedBlockType, TimelineWorkStartEndCfg } from '../time
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
-export const createBlockerBlocks = (
+export const createSortedBlockerBlocks = (
   scheduledTasks: TaskWithReminder[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
   now?: number,
 ): BlockedBlock[] => {
 
-  const blockedBlocks: BlockedBlock[] = [
+  let blockedBlocks: BlockedBlock[] = [
     ...createBlockerBlocksForScheduledTasks(scheduledTasks),
     ...createBlockerBlocksForWorkStartEnd(now as number, workStartEndCfg),
   ];
 
-  return mergeBlocksRecursively(blockedBlocks);
+  blockedBlocks = mergeBlocksRecursively(blockedBlocks);
+  blockedBlocks.sort((a, b) => a.start - b.start);
+  return blockedBlocks;
 };
 
 const createBlockerBlocksForWorkStartEnd = (now: number, workStartEndCfg?: TimelineWorkStartEndCfg) => {
