@@ -228,7 +228,6 @@ describe('mapToViewEntries()', () => {
 
     it('should work for non ordered scheduled tasks', () => {
       const now = getDateTimeFromClockString('9:30', 0);
-      // const plannedTaskStartTime = getDateTimeFromClockString('12:25', 25 * 60 * 60 * 1000);
       const plannedTaskStartTime = getDateTimeFromClockString('12:26', 0);
 
       const fakeTasks = [
@@ -326,7 +325,7 @@ describe('mapToViewEntries()', () => {
         {
           id: 'SOME_TASK_2_ID',
           timeSpent: 0,
-          timeEstimate: hours(2),
+          timeEstimate: hours(3),
           title: 'Some task 2',
           reminderId: null,
           plannedAt: null,
@@ -351,14 +350,33 @@ describe('mapToViewEntries()', () => {
       const r = mapToViewEntries(fakeTasks, null, undefined, now);
       expect(r[0]).toEqual({
         id: 'SOME_TASK_1_ID',
-        type: TimelineViewEntryType.SplitTask,
+        type: TimelineViewEntryType.Task,
         time: now,
         data: fakeTasks.find(t => t.id === 'SOME_TASK_1_ID') as any,
         isHideTime: false,
       });
+      expect(r[1]).toEqual({
+        id: 'SOME_TASK_2_ID',
+        type: TimelineViewEntryType.SplitTask,
+        time: now + hours(4),
+        data: fakeTasks.find(t => t.id === 'SOME_TASK_2_ID') as any,
+        isHideTime: false,
+      });
       expect(r[4].type).toEqual(TimelineViewEntryType.ScheduledTask);
-      console.log(r);
+    });
 
+    it('should ', () => {
+      // const fakeTasks = [
+      //   {...FAKE_TASK, timeEstimate: hours(1), id: 'T1'},
+      //   {
+      //     ...FAKE_TASK,
+      //     id: 'S_ID2',
+      //     timeEstimate: 0,
+      //     reminderId: 'R:ID',
+      //     plannedAt: getDateTimeFromClockString('12:26', 0)
+      //   },
+      //   {...FAKE_TASK, timeEstimate: hours(2), id: 'T2'},
+      // ] as TaskCopy[];
     });
 
   });

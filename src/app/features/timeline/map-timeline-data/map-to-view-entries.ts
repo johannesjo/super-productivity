@@ -1,4 +1,4 @@
-import { Task, TaskWithReminder } from '../../tasks/task.model';
+import { Task, TaskWithoutReminder, TaskWithReminder } from '../../tasks/task.model';
 import {
   BlockedBlock,
   BlockedBlockType,
@@ -9,6 +9,8 @@ import {
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { createBlockerBlocks } from './create-blocker-blocks';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
+import { createTimelineViewEntriesForNormalTasks } from './create-timeline-view-entries-for-normal-tasks';
+import * as moment from 'moment';
 
 // const d = new Date();
 // d.setTime(13);
@@ -40,24 +42,34 @@ export const mapToViewEntries = (
       startTime = startTimeToday;
     }
   }
+  // TODO check for scheduled is current
   const initialTasks: Task[] = currentId
     ? resortTasksWithCurrentFirst(currentId, tasks)
     : tasks;
 
-  const [viewEntries, scheduledTasks] = createViewEntriesForNormalTasks(startTime, initialTasks);
-  // const scheduledTasks = tasks.filter(task => task.plannedAt && task.reminderId) as TaskWithReminder[];
+  const [scheduledTasks, nonScheduledTasks] = createSplitScheduledAndNotScheduled(initialTasks);
+  const viewEntries = createTimelineViewEntriesForNormalTasks(startTime, nonScheduledTasks);
   const blockedBlocks = createBlockerBlocks(scheduledTasks, workStartEndCfg);
 
-  insertBlockedBlocksViewEntries(viewEntries, blockedBlocks);
+  insertBlockedBlocksViewEntries(viewEntries, blockedBlocks, now);
+
   viewEntries.sort((a, b) => a.time - b.time);
 
-
-  // viewEntries.sort((a, b) => a.time - b.time);
-
-  // addVEForDayStartEnd(viewEntries, now, currentId, workStartEndCfg);
-  // viewEntries.sort((a, b) => a.time - b.time);
   // console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
   return viewEntries;
+};
+
+const createSplitScheduledAndNotScheduled = (tasks: Task[]): [TaskWithReminder[], TaskWithoutReminder[]] => {
+  const scheduledTasks: TaskWithReminder[] = [];
+  const nonScheduledTasks: TaskWithoutReminder[] = [];
+  tasks.forEach((task, index, arr) => {
+    if (task.reminderId && task.plannedAt) {
+      scheduledTasks.push(task as TaskWithReminder);
+    } else {
+      nonScheduledTasks.push(task as TaskWithoutReminder);
+    }
+  });
+  return [scheduledTasks, nonScheduledTasks];
 };
 
 const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntry[] => {
@@ -80,48 +92,36 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
   return viewEntriesForBock;
 };
 
-const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blockedBlocks: BlockedBlock[]) => {
+const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blockedBlocks: BlockedBlock[], now: number) => {
   if (!blockedBlocks.length) {
     return;
   }
+  const viewEntriesForUnScheduled = viewEntries.slice(0);
 
-  const viewEntriesBefore = viewEntries.slice(0);
   console.log(viewEntries.map(viewEntry => ({
-    ...viewEntry,
-    timeD: new Date(viewEntry.time),
+    viewEntry,
+    timeD: moment(viewEntry.time).format('H:mm'),
     durationH: getTimeLeftForTask(viewEntry.data as any) / 60000 / 60,
   })));
-  console.log(blockedBlocks.map(block => ({
-    ...block,
-    startD: new Date(block.start),
-    endD: new Date(block.end),
-  })));
+  // console.log(blockedBlocks.map(block => ({
+  //   block,
+  //   startD: moment(block.start).format('H:mm'),
+  //   endD: moment(block.end).format('H:mm'),
+  // })));
 
+  blockedBlocks.sort((a, b) => a.start - b.start);
   blockedBlocks.forEach((blockedBlock, i) => {
-    const firstEntryAfterBlockStartIndex = viewEntries.findIndex(
+    // TODO fix special case when entries are scheduled in the past
+    const viewEntriesToAdd: TimelineViewEntry[] = createViewEntriesForBlock(blockedBlock);
+    const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntriesForUnScheduled.find(
       viewEntry =>
-        viewEntry.time
-        && viewEntry.time !== 0
-        && viewEntry.time >= (blockedBlock.start)
+        viewEntry.time !== 0 &&
+        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >= blockedBlock.start
     );
 
-    const viewEntriesForBlock = createViewEntriesForBlock(blockedBlock);
-    const viewEntriesToAdd: TimelineViewEntry[] = viewEntriesForBlock;
-
-    const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntries[firstEntryAfterBlockStartIndex - 1];
-    const splitTask: Task | undefined = viewEntryForSplitTask?.type === TimelineViewEntryType.Task
-      ? viewEntryForSplitTask.data
-      : undefined;
-    const isAddSplitTask: boolean = (() => {
-      if (splitTask) {
-        return true;
-        // return (viewEntryForSplitTask.time > b);
-      }
-      return false;
-    })();
-
-    let timePlannedForSplitTaskContinued = 0;
-    if (isAddSplitTask && splitTask) {
+    if (viewEntryForSplitTask) {
+      const splitTask: TaskWithoutReminder = viewEntryForSplitTask.data as TaskWithoutReminder;
+      let timePlannedForSplitTaskContinued = 0;
       const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
 
       const timePlannedForSplitTaskBefore = blockedBlock.start - viewEntryForSplitTask.time;
@@ -129,39 +129,35 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
 
       viewEntriesToAdd.push({
-        id: i + '_' + (splitTask as Task).id,
+        id: i + '_' + (splitTask as TaskWithoutReminder).id,
         time: blockedBlock.end,
         type: TimelineViewEntryType.SplitTaskContinued,
         data: {
-          title: (splitTask as Task).title,
+          title: (splitTask as TaskWithoutReminder).title,
           timeToGo: timePlannedForSplitTaskContinued,
         },
         isHideTime: false,
       });
     }
 
-    // move all following tasks
-    const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
-    const iBefore = firstEntryAfterBlockStartIndex - 1;
-    const insertIndex = (iBefore >= 0)
-      ? iBefore
-      : 0;
-
-    if (firstEntryAfterBlockStartIndex) {
-      // eslint-disable-next-line @typescript-eslint/prefer-for-of
-      for (let j = insertIndex; j < viewEntriesBefore.length; j++) {
-        const viewEntry = viewEntriesBefore[j];
-
-        if (viewEntry.type === TimelineViewEntryType.Task) {
+    if (viewEntryForSplitTask) {
+      const blockedBlockDuration = blockedBlock.end - blockedBlock.start;
+      viewEntriesForUnScheduled.forEach(viewEntry => {
+        if (viewEntry.time > blockedBlock.start && viewEntry !== viewEntryForSplitTask) {
           viewEntry.time = viewEntry.time + blockedBlockDuration;
         }
-      }
+      });
     }
 
     // add entries
-    viewEntries.splice(insertIndex, 0, ...viewEntriesToAdd);
+    viewEntries.splice(viewEntries.length, 0, ...viewEntriesToAdd);
+
   });
 };
+
+// const isTaskSplittableTaskType = (viewEntry: TimelineViewEntry): boolean => {
+//   return viewEntry.type === TimelineViewEntryType.Task || viewEntry.type === TimelineViewEntryType.SplitTaskContinued;
+// };
 
 // const addVEForDayStartEnd = (
 //   viewEntries: TimelineViewEntry[],
@@ -254,50 +250,6 @@ const resortTasksWithCurrentFirst = (currentId: string, tasks: Task[]): Task[] =
     newTasks = [currentTask, ...tasks.filter(t => t.id !== currentId)] as Task[];
   }
   return newTasks;
-};
-
-const createViewEntriesForNormalTasks = (startTime: number, tasks: Task[]): [TimelineViewEntry[], TaskWithReminder[]] => {
-  let lastTime: any;
-  let prev: any;
-
-  const sortedTasks: Task[] = tasks;
-  const scheduledTasks: TaskWithReminder[] = [];
-  const viewEntries: TimelineViewEntry[] = [];
-
-  sortedTasks.forEach((task, index, arr) => {
-    // NOTE: not pretty but performant
-    if (task.reminderId && task.plannedAt) {
-      scheduledTasks.push(task as TaskWithReminder);
-      return;
-    }
-
-    prev = arr[index - 1];
-    let time;
-
-    if (lastTime) {
-      if (prev) {
-        time = lastTime + getTimeLeftForTask(prev);
-      } else {
-        throw new Error('Something weird happened');
-      }
-    } else {
-      time = startTime;
-    }
-
-    viewEntries.push({
-      id: task.id,
-      type: TimelineViewEntryType.Task,
-      time,
-      data: task,
-      // TODO add isSameTimeAsPrevious at the very end
-      isHideTime: (time === lastTime),
-    });
-
-    lastTime = time;
-  });
-  viewEntries.sort((a, b) => a.time - b.time);
-
-  return [viewEntries, scheduledTasks];
 };
 
 // const addVEForScheduled = (scheduledTasks: Task[], viewEntries: TimelineViewEntry[]) => {

@@ -105,6 +105,11 @@ export interface TaskWithReminder extends Task {
   plannedAt: number;
 }
 
+export interface TaskWithoutReminder extends Task {
+  reminderId: null;
+  plannedAt: null;
+}
+
 export interface TaskWithSubTasks extends Task {
   readonly subTasks?: Task[];
 }
