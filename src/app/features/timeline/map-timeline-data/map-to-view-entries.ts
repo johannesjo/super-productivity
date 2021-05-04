@@ -50,11 +50,38 @@ export const mapToViewEntries = (
   const [scheduledTasks, nonScheduledTasks] = createSplitScheduledAndNotScheduled(initialTasks);
   const viewEntries = createTimelineViewEntriesForNormalTasks(startTime, nonScheduledTasks);
 
-  const blockedBlocks = createBlockerBlocks(scheduledTasks, workStartEndCfg);
+  const blockedBlocks = createBlockerBlocks(scheduledTasks, workStartEndCfg, now);
 
   insertBlockedBlocksViewEntries(viewEntries, blockedBlocks, now);
 
-  viewEntries.sort((a, b) => a.time - b.time);
+  // CLEANUP
+  viewEntries.sort((a, b) => {
+    if ((a.time - b.time) === 0) {
+      switch (a.type) {
+        case TimelineViewEntryType.WorkdayEnd:
+          return 1;
+        case TimelineViewEntryType.WorkdayStart:
+          return -1;
+      }
+    }
+    return a.time - b.time;
+  });
+
+  console.log(viewEntries[0]);
+
+  if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
+    viewEntries.splice(0, 1);
+  }
+
+  let isWorkdayTypeLast = true;
+  while (isWorkdayTypeLast) {
+    const last = viewEntries[viewEntries.length];
+    if (last && (last.type === TimelineViewEntryType.WorkdayEnd || last.type === TimelineViewEntryType.WorkdayStart)) {
+      viewEntries.splice(viewEntries.length, 1);
+    } else {
+      isWorkdayTypeLast = false;
+    }
+  }
 
   // console.log('mapToViewEntriesE', viewEntries, {asString: JSON.stringify(viewEntries)});
   return viewEntries;
@@ -84,6 +111,23 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         time: scheduledTask.plannedAt,
         type: TimelineViewEntryType.ScheduledTask,
         data: scheduledTask,
+        isHideTime: false,
+      });
+    } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
+      // arr.push(...items);
+      const workdayCfg = entry.data;
+      viewEntriesForBock.push({
+        id: 'DAY_END_ID',
+        time: entry.start,
+        type: TimelineViewEntryType.WorkdayEnd,
+        data: workdayCfg,
+        isHideTime: false,
+      });
+      viewEntriesForBock.push({
+        id: 'DAY_Start_ID',
+        time: entry.end,
+        type: TimelineViewEntryType.WorkdayStart,
+        data: workdayCfg,
         isHideTime: false,
       });
     }
@@ -163,7 +207,6 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
 
     // add entries
     viewEntries.splice(viewEntries.length, 0, ...viewEntriesToAdd);
-
   });
 };
 

@@ -8,13 +8,6 @@ import { mapToViewEntries } from './map-timeline-data/map-to-view-entries';
 import { T } from 'src/app/t.const';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 
-// const FAKE_WORK_START_END: TimelineWorkStartEndCfg = {
-//   // startTime: '9:00',
-//   // endTime: '17:00',
-//   startTime: '9:00',
-//   endTime: '17:00',
-// };
-
 @Component({
   selector: 'timeline',
   templateUrl: './timeline.component.html',
@@ -30,7 +23,11 @@ export class TimelineComponent {
     this._workContextService.startableTasksForActiveContext$,
     this._taskService.currentTaskId$,
   ]).pipe(
-    map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, undefined))
+    // map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, undefined))
+    map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, {
+      startTime: '9:00',
+      endTime: '17:00',
+    }))
   );
 
   // timelineEntries$ = new BehaviorSubject([

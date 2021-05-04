@@ -1,17 +1,47 @@
 import { TaskWithReminder } from '../../tasks/task.model';
 import { BlockedBlock, BlockedBlockType, TimelineWorkStartEndCfg } from '../timeline.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 export const createBlockerBlocks = (
   scheduledTasks: TaskWithReminder[],
   workStartEndCfg?: TimelineWorkStartEndCfg,
+  now?: number,
 ): BlockedBlock[] => {
 
   const blockedBlocks: BlockedBlock[] = [
     ...createBlockerBlocksForScheduledTasks(scheduledTasks),
+    ...createBlockerBlocksForWorkStartEnd(now as number, workStartEndCfg),
   ];
 
   return mergeBlocksRecursively(blockedBlocks);
+};
+
+const createBlockerBlocksForWorkStartEnd = (now: number, workStartEndCfg?: TimelineWorkStartEndCfg) => {
+  const blockedBlocks: BlockedBlock[] = [];
+
+  if (!workStartEndCfg) {
+    return blockedBlocks;
+  }
+  const daysAmount = 2;
+  let i: number = 0;
+  while (i < daysAmount) {
+    const start = getDateTimeFromClockString(workStartEndCfg.endTime, now + (i * 24 * 60 * 60 * 1000));
+    const end = getDateTimeFromClockString(workStartEndCfg.startTime, now + ((i + 1) * 24 * 60 * 60 * 1000));
+    blockedBlocks.push({
+      start,
+      end,
+      entries: [{
+        type: BlockedBlockType.WorkdayStartEnd,
+        data: workStartEndCfg,
+        start,
+        end,
+      }]
+    });
+    i++;
+  }
+
+  return blockedBlocks;
 };
 
 const createBlockerBlocksForScheduledTasks = (scheduledTasks: TaskWithReminder[]) => {
