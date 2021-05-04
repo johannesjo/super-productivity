@@ -365,18 +365,231 @@ describe('mapToViewEntries()', () => {
       expect(r[4].type).toEqual(TimelineViewEntryType.ScheduledTask);
     });
 
-    it('should ', () => {
-      // const fakeTasks = [
-      //   {...FAKE_TASK, timeEstimate: hours(1), id: 'T1'},
-      //   {
-      //     ...FAKE_TASK,
-      //     id: 'S_ID2',
-      //     timeEstimate: 0,
-      //     reminderId: 'R:ID',
-      //     plannedAt: getDateTimeFromClockString('12:26', 0)
-      //   },
-      //   {...FAKE_TASK, timeEstimate: hours(2), id: 'T2'},
-      // ] as TaskCopy[];
+    it('should work for super sophisticated scenarios', () => {
+      const now = 1620125839764;
+      const fakeTasks: TaskCopy[] = [
+        {
+          id: 'X6NWaoxQ-',
+          timeSpent: 0,
+          timeEstimate: 1980000,
+          title: 'Scheduled before now',
+          reminderId: 'oejJdRc3Y',
+          plannedAt: 1620125601000,
+        },
+        {
+          id: '2nkBPQEny',
+          timeSpent: 0,
+          timeEstimate: 0,
+          title: 'Sched no overlap 23:00',
+          reminderId: 'K-1LvnNU5',
+          plannedAt: 1620162000000,
+        },
+        {
+          id: 'uDGzrv9JO',
+          timeSpentOnDay: {
+            '2021-05-03': 0
+          },
+          timeSpent: 0,
+          timeEstimate: 3600000,
+          title: 'Some task 1',
+          reminderId: null,
+          plannedAt: null,
+        },
+        {
+          id: '0LtuSnH8s',
+          timeSpent: 0,
+          timeEstimate: 7200000,
+          title: 'Scheduled 3 17:00',
+          reminderId: 'NnqlBieeB',
+          plannedAt: 1620140400000,
+          _showSubTasksMode: 2,
+        },
+        {
+          id: '68K0kYJ2s',
+          timeSpent: 0,
+          timeEstimate: 7200000,
+          title: 'Scheduled 1 15:00',
+          reminderId: 'SrgAGy8OX',
+          plannedAt: 1620133200000,
+        },
+        {
+          id: '9JTnZa-VW',
+          timeSpent: 0,
+          timeEstimate: 9000000,
+          title: 'Scheduled 2 16:00',
+          reminderId: 'avWZ5dKrW',
+          plannedAt: 1620136800000,
+        },
+        {
+          id: 'EYLy6C5_m',
+          timeSpent: 0,
+          timeEstimate: 0,
+          title: 'Scheduled 4 (no duration) 18:00',
+          reminderId: 'BNaRpF_SX',
+          plannedAt: 1620144000000,
+        },
+        {
+          id: 'mhsGdyzc_',
+          timeSpent: 0,
+          timeEstimate: 7200000,
+          title: 'Some task 2',
+          reminderId: null,
+          plannedAt: null,
+        },
+        {
+          id: 'xgYNyslWC',
+          timeSpent: 0,
+          timeEstimate: 7200000,
+          title: 'Sched  no overlap 9:00 (10.)',
+          reminderId: null,
+          plannedAt: null,
+        }
+      ] as any;
+      const r = mapToViewEntries(fakeTasks, null, undefined, now);
+      expect(r).toEqual([{
+        data:
+          {
+            id: 'X6NWaoxQ-',
+            plannedAt: 1620125601000,
+            reminderId: 'oejJdRc3Y',
+            timeEstimate: 1980000,
+            timeSpent: 0,
+            title: 'Scheduled before now'
+          },
+        id: 'X6NWaoxQ-',
+        isHideTime: false,
+        time: 1620125601000,
+        type: 'ScheduledTask'
+      },
+        {
+          data:
+            {
+              id: 'uDGzrv9JO',
+              plannedAt: null,
+              reminderId: null,
+              timeEstimate: 3600000,
+              timeSpent: 0,
+              timeSpentOnDay: {'2021-05-03': 0},
+              title: 'Some task 1'
+            },
+          id: 'uDGzrv9JO',
+          isHideTime: false,
+          time: 1620127581000,
+          type: 'Task'
+        },
+        {
+          data:
+            {
+              id: 'mhsGdyzc_',
+              plannedAt: null,
+              reminderId: null,
+              timeEstimate: 7200000,
+              timeSpent: 0,
+              title: 'Some task 2'
+            },
+          id: 'mhsGdyzc_',
+          isHideTime: false,
+          time: 1620131181000,
+          type: 'SplitTask'
+        },
+        {
+          data:
+            {
+              id: '68K0kYJ2s',
+              plannedAt: 1620133200000,
+              reminderId: 'SrgAGy8OX',
+              timeEstimate: 7200000,
+              timeSpent: 0,
+              title: 'Scheduled 1 15:00'
+            },
+          id: '68K0kYJ2s',
+          isHideTime: false,
+          time: 1620133200000,
+          type: 'ScheduledTask'
+        },
+        {
+          data:
+            {
+              id: '9JTnZa-VW',
+              plannedAt: 1620136800000,
+              reminderId: 'avWZ5dKrW',
+              timeEstimate: 9000000,
+              timeSpent: 0,
+              title: 'Scheduled 2 16:00'
+            },
+          id: '9JTnZa-VW',
+          isHideTime: false,
+          time: 1620136800000,
+          type: 'ScheduledTask'
+        },
+        {
+          data:
+            {
+              _showSubTasksMode: 2,
+              id: '0LtuSnH8s',
+              plannedAt: 1620140400000,
+              reminderId: 'NnqlBieeB',
+              timeEstimate: 7200000,
+              timeSpent: 0,
+              title: 'Scheduled 3 17:00'
+            },
+          id: '0LtuSnH8s',
+          isHideTime: false,
+          time: 1620140400000,
+          type: 'ScheduledTask'
+        },
+        {
+          data:
+            {
+              id: 'EYLy6C5_m',
+              plannedAt: 1620144000000,
+              reminderId: 'BNaRpF_SX',
+              timeEstimate: 0,
+              timeSpent: 0,
+              title: 'Scheduled 4 (no duration) 18:00'
+            },
+          id: 'EYLy6C5_m',
+          isHideTime: false,
+          time: 1620144000000,
+          type: 'ScheduledTask'
+        },
+        {
+          data: {timeToGo: 5181000, title: 'Some task 2'},
+          id: '1_mhsGdyzc_',
+          isHideTime: false,
+          time: 1620147600000,
+          type: 'SplitTaskContinued'
+        },
+        {
+          data:
+            {
+              id: 'xgYNyslWC',
+              plannedAt: null,
+              reminderId: null,
+              timeEstimate: 7200000,
+              timeSpent: 0,
+              title: 'Sched  no overlap 9:00 (10.)'
+            },
+          id: 'xgYNyslWC',
+          isHideTime: false,
+          time: 1620152781000,
+          type: 'Task'
+        },
+        {
+          data:
+            {
+              id: '2nkBPQEny',
+              plannedAt: 1620162000000,
+              reminderId: 'K-1LvnNU5',
+              timeEstimate: 0,
+              timeSpent: 0,
+              title: 'Sched no overlap 23:00'
+            },
+          id: '2nkBPQEny',
+          isHideTime: false,
+          time: 1620162000000,
+          type: 'ScheduledTask'
+        }] as any);
     });
 
   });

@@ -111,12 +111,23 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
 
   blockedBlocks.sort((a, b) => a.start - b.start);
   blockedBlocks.forEach((blockedBlock, i) => {
-    // TODO fix special case when entries are scheduled in the past
     const viewEntriesToAdd: TimelineViewEntry[] = createViewEntriesForBlock(blockedBlock);
+    if (blockedBlock.start <= now) {
+      const timeToGoForBlock = blockedBlock.end - now;
+      viewEntriesForUnScheduled.forEach(viewEntry => {
+        viewEntry.time = viewEntry.time + timeToGoForBlock;
+      });
+
+      // add entries
+      viewEntries.splice(viewEntries.length, 0, ...viewEntriesToAdd);
+      return;
+    }
+
     const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntriesForUnScheduled.find(
       viewEntry =>
         viewEntry.time !== 0 &&
-        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >= blockedBlock.start
+        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >= blockedBlock.start &&
+        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) <= blockedBlock.end
     );
 
     if (viewEntryForSplitTask) {
