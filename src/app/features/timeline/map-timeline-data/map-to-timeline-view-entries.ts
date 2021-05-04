@@ -72,6 +72,9 @@ export const mapToTimelineViewEntries = (
   if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
     viewEntries.splice(0, 1);
   }
+  // if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayStart && viewEntries[0]?.time < now) {
+  //   viewEntries.splice(0, 1);
+  // }
 
   let isWorkdayTypeLast = true;
   while (isWorkdayTypeLast) {
@@ -104,7 +107,6 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
   const viewEntriesForBock: TimelineViewEntry[] = [];
   blockedBlock.entries.forEach(entry => {
     if (entry.type === BlockedBlockType.ScheduledTask) {
-      // arr.push(...items);
       const scheduledTask = entry.data;
       viewEntriesForBock.push({
         id: scheduledTask.id,
@@ -114,17 +116,18 @@ const createViewEntriesForBlock = (blockedBlock: BlockedBlock): TimelineViewEntr
         isHideTime: false,
       });
     } else if (entry.type === BlockedBlockType.WorkdayStartEnd) {
-      // arr.push(...items);
+      // NOTE: day start and end are mixed up, because it is the opposite as the blocked range
+
       const workdayCfg = entry.data;
       viewEntriesForBock.push({
-        id: 'DAY_END_ID',
+        id: 'DAY_END_' + entry.start,
         time: entry.start,
         type: TimelineViewEntryType.WorkdayEnd,
         data: workdayCfg,
         isHideTime: false,
       });
       viewEntriesForBock.push({
-        id: 'DAY_Start_ID',
+        id: 'DAY_START_' + entry.end,
         time: entry.end,
         type: TimelineViewEntryType.WorkdayStart,
         data: workdayCfg,
