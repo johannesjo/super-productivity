@@ -7,8 +7,15 @@ export const createBlockerBlocks = (
   workStartEndCfg?: TimelineWorkStartEndCfg,
 ): BlockedBlock[] => {
 
-  const blockedBlocks: BlockedBlock[] = [];
+  const blockedBlocks: BlockedBlock[] = [
+    ...createBlockerBlocksForScheduledTasks(scheduledTasks),
+  ];
 
+  return mergeBlocksRecursively(blockedBlocks);
+};
+
+const createBlockerBlocksForScheduledTasks = (scheduledTasks: TaskWithReminder[]) => {
+  const blockedBlocks: BlockedBlock[] = [];
   scheduledTasks.forEach(task => {
     const start = task.plannedAt;
     // const end = task.plannedAt + Math.max(getTimeLeftForTask(task), 1);
@@ -44,7 +51,7 @@ export const createBlockerBlocks = (
     }
   });
 
-  return mergeBlocksRecursively(blockedBlocks);
+  return blockedBlocks;
 };
 
 const mergeBlocksRecursively = (blockedBlocks: BlockedBlock[]): BlockedBlock[] => {
