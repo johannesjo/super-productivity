@@ -107,10 +107,12 @@ export class ShortcutService {
       });
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/active/tasks']);
+    } else if (checkKeyCombo(ev, keys.goToTimeline)) {
+      this._router.navigate(['/timeline']);
     } else if (checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/config']);
     } else if (checkKeyCombo(ev, keys.goToScheduledView)) {
-      this._router.navigate(['/active/calendar']);
+      this._router.navigate(['/schedule']);
 
       // } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
       //   this._router.navigate(['/daily-agenda']);

@@ -4,6 +4,7 @@ export type KeyboardConfig = Readonly<{
   globalAddTask: string | null;
   toggleBacklog: string | null;
   goToWorkView: string | null;
+  goToTimeline: string | null;
   goToScheduledView: string | null;
   // goToFocusMode: string|null,
   // goToDailyAgenda: string|null,
