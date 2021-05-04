@@ -69,6 +69,14 @@ export const mapToTimelineViewEntries = (
 
   console.log(viewEntries[0]);
 
+  // Move current always first and let it appear as now
+  if (currentId) {
+    const currentIndex = viewEntries.findIndex(ve => ve.id === currentId);
+    viewEntries[currentIndex].time = now - 600000;
+    viewEntries.splice(0, 0, viewEntries[currentIndex]);
+    viewEntries.splice(currentIndex + 1, 1);
+  }
+
   if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
     viewEntries.splice(0, 1);
   }

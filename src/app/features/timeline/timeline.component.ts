@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TimelineViewEntry, TimelineViewEntryType } from './timeline.model';
 import { WorkContextService } from '../work-context/work-context.service';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { combineLatest, Observable } from 'rxjs';
 import { mapToTimelineViewEntries } from './map-timeline-data/map-to-timeline-view-entries';
@@ -23,40 +23,15 @@ export class TimelineComponent {
     this._workContextService.startableTasksForActiveContext$,
     this._taskService.currentTaskId$,
   ]).pipe(
-    // map(([tasks, currentId]) => mapToViewEntries(tasks, currentId, undefined))
+    // map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, undefined)),
     map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, {
       startTime: '9:00',
       endTime: '17:00',
-    }))
+    })),
+    // NOTE: this doesn't require cd.detect changes because view is already re-checked with obs
+    tap(() => this.now = Date.now())
   );
-
-  // timelineEntries$ = new BehaviorSubject([
-  //   {
-  //     type: TimelineViewEntryType.TaskFull,
-  //     time: Date.now(),
-  //     data: {
-  //       ...DEFAULT_TASK,
-  //       title: 'SomeTask',
-  //     }
-  //   },
-  //   {
-  //     type: TimelineViewEntryType.TaskFull,
-  //     time: Date.now() + 60000 * 60,
-  //     data: {
-  //       ...DEFAULT_TASK,
-  //       title: 'Some other task',
-  //     }
-  //   },
-  //   {
-  //     type: TimelineViewEntryType.TaskFull,
-  //     time: Date.now() + 60000 * 60 * 2,
-  //     data: {
-  //       ...DEFAULT_TASK,
-  //       title: 'Some event',
-  //       isEvent: true,
-  //     }
-  //   },
-  // ]);
+  now = Date.now();
 
   constructor(
     private _workContextService: WorkContextService,
