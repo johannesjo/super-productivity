@@ -6,6 +6,17 @@
   overflow: hidden !important;
 }
 
+:host ::ng-deep task {
+  .drag-handle {
+    pointer-events: none;
+
+    .drag-handle-ico {
+      visibility: hidden !important;
+    }
+  }
+}
+
+
 .wrapper {
   padding-top: $s*2;
   padding-bottom: $s*2;
