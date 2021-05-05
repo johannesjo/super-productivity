@@ -12,6 +12,7 @@ export enum TimelineViewEntryType {
   ScheduledTask = 'ScheduledTask',
   SplitTask = 'SplitTask',
   SplitTaskContinued = 'SplitTaskContinued',
+  SplitTaskContinuedLast = 'SplitTaskContinuedLast',
   CustomEvent = 'CustomEvent',
   WorkdayStart = 'WorkdayStart',
   WorkdayEnd = 'WorkdayEnd',
@@ -30,7 +31,7 @@ interface TimelineViewEntryTask extends TimelineViewEntryBase {
 }
 
 interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.SplitTaskContinued;
+  type: TimelineViewEntryType.SplitTaskContinued | TimelineViewEntryType.SplitTaskContinuedLast;
   data: {
     title: string;
     timeToGo: number;

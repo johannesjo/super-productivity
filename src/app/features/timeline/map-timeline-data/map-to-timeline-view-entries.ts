@@ -183,7 +183,7 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
       const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
 
       const timePlannedForSplitTaskBefore = blockedBlock.start - viewEntryForSplitTask.time;
-      const timePlannedForSplitTaskContinued = (viewEntryForSplitTask.type === TimelineViewEntryType.SplitTaskContinued)
+      const timePlannedForSplitTaskContinued = (viewEntryForSplitTask.type === TimelineViewEntryType.SplitTaskContinuedLast)
         ? timeLeftForCompleteSplitTask
         : timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
 
@@ -192,15 +192,17 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
 
       const splitInstances = viewEntries.filter(
         entry =>
-          entry.type === TimelineViewEntryType.SplitTaskContinued
+          (entry.type === TimelineViewEntryType.SplitTaskContinuedLast
+            || entry.type === TimelineViewEntryType.SplitTaskContinued)
           && entry.data.taskId === splitTask.id
       );
+      splitInstances.forEach(splitInstance => splitInstance.type = TimelineViewEntryType.SplitTaskContinued);
 
       const splitIndex = splitInstances.length;
       const splitContinuedEntry: TimelineViewEntry = {
         id: `${splitTask.id}__${splitIndex}`,
         time: blockedBlock.end,
-        type: TimelineViewEntryType.SplitTaskContinued,
+        type: TimelineViewEntryType.SplitTaskContinuedLast,
         data: {
           title: (splitTask as TaskWithoutReminder).title,
           timeToGo: timePlannedForSplitTaskContinued,

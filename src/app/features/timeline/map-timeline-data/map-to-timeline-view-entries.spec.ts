@@ -204,7 +204,7 @@ describe('mapToViewEntries()', () => {
         id: 'FAKE_TASK_ID__0',
         isHideTime: false,
         time: 37500000,
-        type: TimelineViewEntryType.SplitTaskContinued
+        type: TimelineViewEntryType.SplitTaskContinuedLast
       }, {
         id: FID,
         type: TimelineViewEntryType.Task,
@@ -563,7 +563,7 @@ describe('mapToViewEntries()', () => {
           id: 'mhsGdyzc___0',
           isHideTime: false,
           time: 1620147600000,
-          type: 'SplitTaskContinued'
+          type: 'SplitTaskContinuedLast'
         },
         {
           data:
@@ -628,7 +628,7 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
       }, {
         id: normalTask.id + '__0',
-        type: TimelineViewEntryType.SplitTaskContinued,
+        type: TimelineViewEntryType.SplitTaskContinuedLast,
         time: now + hours(2),
         data: {
           taskId: normalTask.id,
@@ -693,7 +693,7 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
       }, {
         id: normalTask.id + '__1',
-        type: TimelineViewEntryType.SplitTaskContinued,
+        type: TimelineViewEntryType.SplitTaskContinuedLast,
         time: getDateTimeFromClockString('13:00', 0),
         data: {
           title: normalTask.title,
