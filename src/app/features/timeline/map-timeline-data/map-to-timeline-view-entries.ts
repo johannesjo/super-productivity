@@ -170,9 +170,13 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
     const viewEntryForSplitTask: TimelineViewEntry | undefined = viewEntriesForUnScheduled.find(
       viewEntry =>
         viewEntry.time !== 0 &&
-        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >= blockedBlock.start &&
-        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) <= blockedBlock.end
+        viewEntry.time + getTimeLeftForTask(viewEntry.data as TaskWithoutReminder) >= blockedBlock.start
     );
+    // console.log(blockedBlock.start);
+    // console.log(blockedBlock.end);
+    // console.log(viewEntriesForUnScheduled[0].time);
+    // console.log(viewEntriesForUnScheduled[0].time + getTimeLeftForTask(viewEntriesForUnScheduled[0].data as any));
+    // console.log(viewEntryForSplitTask);
 
     if (viewEntryForSplitTask) {
       const splitTask: TaskWithoutReminder = viewEntryForSplitTask.data as TaskWithoutReminder;
@@ -183,14 +187,15 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
       timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
 
+      const splitContinuedId = (splitTask as TaskWithoutReminder).id + '_1' ;
       viewEntriesToAdd.push({
-        id: i + '_' + (splitTask as TaskWithoutReminder).id,
+        id: splitContinuedId,
         time: blockedBlock.end,
         type: TimelineViewEntryType.SplitTaskContinued,
         data: {
           title: (splitTask as TaskWithoutReminder).title,
           timeToGo: timePlannedForSplitTaskContinued,
-        },
+      },
         isHideTime: false,
       });
     }

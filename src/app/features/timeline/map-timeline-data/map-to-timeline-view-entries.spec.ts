@@ -201,7 +201,7 @@ describe('mapToViewEntries()', () => {
         isHideTime: false,
       }, {
         data: {timeToGo: minutes(25), title: undefined} as any,
-        id: '0_FAKE_TASK_ID',
+        id: 'FAKE_TASK_ID_1',
         isHideTime: false,
         time: 37500000,
         type: TimelineViewEntryType.SplitTaskContinued
@@ -555,7 +555,7 @@ describe('mapToViewEntries()', () => {
         },
         {
           data: {timeToGo: 5181000, title: 'Some task 2'},
-          id: '1_mhsGdyzc_',
+          id: 'mhsGdyzc__1',
           isHideTime: false,
           time: 1620147600000,
           type: 'SplitTaskContinued'
@@ -591,7 +591,47 @@ describe('mapToViewEntries()', () => {
           type: 'ScheduledTask'
         }] as any);
     });
+  });
 
+  describe('splitTasks', () => {
+    it('should work for a simple task', () => {
+      const now = getDateTimeFromClockString('9:00', 0);
+      const normalTask = {...FAKE_TASK, timeEstimate: hours(3)};
+      const scheduledTask = {
+        ...FAKE_TASK,
+        timeEstimate: hours(1),
+        reminderId: 'X',
+        plannedAt: getDateTimeFromClockString('10:00', 0),
+      };
+      const fakeTasks = [
+        normalTask,
+        scheduledTask,
+      ];
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      expect(r.length).toEqual(3);
+      expect(r).toEqual([{
+        id: normalTask.id,
+        type: TimelineViewEntryType.SplitTask,
+        time: now,
+        data: normalTask,
+        isHideTime: false,
+      }, {
+        id: scheduledTask.id,
+        type: TimelineViewEntryType.ScheduledTask,
+        time: scheduledTask.plannedAt,
+        data: scheduledTask,
+        isHideTime: false,
+      }, {
+        id: normalTask.id + '_1',
+        type: TimelineViewEntryType.SplitTaskContinued,
+        time: now + hours(2),
+        data: {
+          title: normalTask.title,
+          timeToGo: hours(2)
+        },
+        isHideTime: false,
+      }]);
+    });
   });
 
   // describe('workStartEnd', () => {
