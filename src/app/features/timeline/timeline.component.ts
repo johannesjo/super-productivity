@@ -37,11 +37,11 @@ export class TimelineComponent {
     this._workContextService.startableTasksForActiveContext$,
     this._taskService.currentTaskId$,
   ]).pipe(
-    // map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, undefined)),
-    map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, {
-      startTime: '9:00',
-      endTime: '17:00',
-    })),
+    map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, undefined)),
+    // map(([tasks, currentId]) => mapToTimelineViewEntries(tasks, currentId, {
+    //   startTime: '9:00',
+    //   endTime: '17:00',
+    // })),
     // NOTE: this doesn't require cd.detect changes because view is already re-checked with obs
     tap(() => this.now = Date.now())
   );

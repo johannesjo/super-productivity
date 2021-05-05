@@ -180,24 +180,37 @@ const insertBlockedBlocksViewEntries = (viewEntries: TimelineViewEntry[], blocke
 
     if (viewEntryForSplitTask) {
       const splitTask: TaskWithoutReminder = viewEntryForSplitTask.data as TaskWithoutReminder;
-      let timePlannedForSplitTaskContinued = 0;
       const timeLeftForCompleteSplitTask = getTimeLeftForTask(splitTask);
 
       const timePlannedForSplitTaskBefore = blockedBlock.start - viewEntryForSplitTask.time;
-      timePlannedForSplitTaskContinued = timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
+      const timePlannedForSplitTaskContinued = (viewEntryForSplitTask.type === TimelineViewEntryType.SplitTaskContinued)
+        ? timeLeftForCompleteSplitTask
+        : timeLeftForCompleteSplitTask - timePlannedForSplitTaskBefore;
+
+      // update type
       viewEntryForSplitTask.type = TimelineViewEntryType.SplitTask;
 
-      const splitContinuedId = (splitTask as TaskWithoutReminder).id + '_1' ;
-      viewEntriesToAdd.push({
-        id: splitContinuedId,
+      const splitInstances = viewEntries.filter(
+        entry =>
+          entry.type === TimelineViewEntryType.SplitTaskContinued
+          && entry.data.taskId === splitTask.id
+      );
+
+      const splitIndex = splitInstances.length;
+      const splitContinuedEntry: TimelineViewEntry = {
+        id: `${splitTask.id}__${splitIndex}`,
         time: blockedBlock.end,
         type: TimelineViewEntryType.SplitTaskContinued,
         data: {
           title: (splitTask as TaskWithoutReminder).title,
           timeToGo: timePlannedForSplitTaskContinued,
-      },
+          taskId: splitTask.id,
+          index: splitIndex,
+        },
         isHideTime: false,
-      });
+      };
+
+      viewEntriesToAdd.push(splitContinuedEntry);
     }
 
     if (viewEntryForSplitTask) {

@@ -34,6 +34,8 @@ interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
   data: {
     title: string;
     timeToGo: number;
+    taskId: string;
+    index: number;
   };
 }
 

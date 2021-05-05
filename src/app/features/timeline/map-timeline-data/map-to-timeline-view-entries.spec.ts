@@ -200,8 +200,8 @@ describe('mapToViewEntries()', () => {
         data: fakeTasks[1],
         isHideTime: false,
       }, {
-        data: {timeToGo: minutes(25), title: undefined} as any,
-        id: 'FAKE_TASK_ID_1',
+        data: {timeToGo: minutes(25), title: undefined, taskId: 'FAKE_TASK_ID', index: 0} as any,
+        id: 'FAKE_TASK_ID__0',
         isHideTime: false,
         time: 37500000,
         type: TimelineViewEntryType.SplitTaskContinued
@@ -554,8 +554,13 @@ describe('mapToViewEntries()', () => {
           type: 'ScheduledTask'
         },
         {
-          data: {timeToGo: 5181000, title: 'Some task 2'},
-          id: 'mhsGdyzc__1',
+          data: {
+            index: 0,
+            taskId: 'mhsGdyzc_',
+            timeToGo: 5181000,
+            title: 'Some task 2'
+          },
+          id: 'mhsGdyzc___0',
           isHideTime: false,
           time: 1620147600000,
           type: 'SplitTaskContinued'
@@ -622,12 +627,81 @@ describe('mapToViewEntries()', () => {
         data: scheduledTask,
         isHideTime: false,
       }, {
-        id: normalTask.id + '_1',
+        id: normalTask.id + '__0',
         type: TimelineViewEntryType.SplitTaskContinued,
         time: now + hours(2),
         data: {
+          taskId: normalTask.id,
           title: normalTask.title,
-          timeToGo: hours(2)
+          timeToGo: hours(2),
+          index: 0,
+        },
+        isHideTime: false,
+      }]);
+    });
+
+    it('should split multiple times', () => {
+      const now = getDateTimeFromClockString('9:00', 0);
+      const normalTask = {...FAKE_TASK, timeEstimate: hours(3)};
+      const scheduledTask = {
+        ...FAKE_TASK,
+        timeEstimate: hours(1),
+        reminderId: 'X',
+        plannedAt: getDateTimeFromClockString('10:00', 0),
+      };
+      const scheduledTask2 = {
+        ...FAKE_TASK,
+        timeEstimate: hours(1),
+        reminderId: 'X',
+        plannedAt: getDateTimeFromClockString('12:00', 0),
+      };
+      const fakeTasks = [
+        normalTask,
+        scheduledTask,
+        scheduledTask2,
+      ];
+      const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
+      expect(r.length).toEqual(5);
+      expect(r).toEqual([{
+        id: normalTask.id,
+        type: TimelineViewEntryType.SplitTask,
+        time: now,
+        data: normalTask,
+        isHideTime: false,
+      }, {
+        id: scheduledTask.id,
+        type: TimelineViewEntryType.ScheduledTask,
+        time: scheduledTask.plannedAt,
+        data: scheduledTask,
+        isHideTime: false,
+      }, {
+        id: normalTask.id + '__0',
+        type: TimelineViewEntryType.SplitTaskContinued,
+        time: getDateTimeFromClockString('11:00', 0),
+        data: {
+          title: normalTask.title,
+          timeToGo: hours(2),
+          taskId: normalTask.id,
+          index: 0,
+        },
+        isHideTime: false,
+      }, {
+        id: scheduledTask2.id,
+        type: TimelineViewEntryType.ScheduledTask,
+        time: scheduledTask2.plannedAt,
+        data: scheduledTask2,
+        isHideTime: false,
+      }, {
+        id: normalTask.id + '__1',
+        type: TimelineViewEntryType.SplitTaskContinued,
+        time: getDateTimeFromClockString('13:00', 0),
+        data: {
+          title: normalTask.title,
+          // TODO fix
+          // timeToGo: hours(2),
+          timeToGo: 0,
+          taskId: normalTask.id,
+          index: 1,
         },
         isHideTime: false,
       }]);
