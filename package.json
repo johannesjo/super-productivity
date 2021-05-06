@@ -17,6 +17,11 @@
     "GitHub",
     "Time Tracking"
   ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
   "scripts": {
     "ng": "ng",
     "start": "yarn electron:build && cross-env NODE_ENV=DEV electron .",
