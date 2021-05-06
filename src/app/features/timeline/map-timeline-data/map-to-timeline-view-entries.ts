@@ -61,15 +61,15 @@ export const mapToTimelineViewEntries = (
   // Move current always first and let it appear as now
   if (currentId) {
     const currentIndex = viewEntries.findIndex(ve => ve.id === currentId);
-    if(!viewEntries[currentIndex]) {
+    // NOTE: might not always be available here
+    if(currentIndex !== -1) {
+      viewEntries[currentIndex].time = now - 600000;
+      viewEntries.splice(0, 0, viewEntries[currentIndex]);
+      viewEntries.splice(currentIndex + 1, 1);
+    } else{
       console.log(viewEntries);
       console.warn('View Entry for current not available');
-      return viewEntries;
     }
-
-    viewEntries[currentIndex].time = now - 600000;
-    viewEntries.splice(0, 0, viewEntries[currentIndex]);
-    viewEntries.splice(currentIndex + 1, 1);
   }
 
   if (viewEntries[0]?.type === TimelineViewEntryType.WorkdayEnd) {
