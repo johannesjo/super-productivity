@@ -18,7 +18,8 @@
       "extends": [
         "plugin:@angular-eslint/ng-cli-compat",
         "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
-        "plugin:@angular-eslint/template/process-inline-templates"
+        "plugin:@angular-eslint/template/process-inline-templates",
+        "prettier"
       ],
       "rules": {
         "@angular-eslint/component-selector": [
@@ -93,7 +94,9 @@
         "id-blacklist": "error",
         "@typescript-eslint/member-delimiter-style": "error",
         "no-shadow": "off",
-        "@typescript-eslint/no-shadow": ["error"],
+        "@typescript-eslint/no-shadow": [
+          "error"
+        ],
         "prefer-arrow/prefer-arrow-functions": "off",
         "@angular-eslint/directive-selector": [
           "error",
@@ -111,10 +114,13 @@
         "*.html"
       ],
       "extends": [
-        "plugin:@angular-eslint/template/recommended"
+        "plugin:@angular-eslint/template/recommended",
+        "prettier"
       ],
+      "plugins": ["prettier"],
       "rules": {
-        "@angular-eslint/template/no-negated-async": "off"
+        "@angular-eslint/template/no-negated-async": "off",
+        "prettier/prettier": "error"
       }
     }
   ]
