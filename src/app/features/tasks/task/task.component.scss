@@ -131,7 +131,7 @@
   }
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
-    border-radius: $task-border-radius !important;
+    border-radius: $task-border-radius;
     box-shadow: $task-current-shadow-light;
     // because of the shadow, this looks better
     //bottom: 2px;

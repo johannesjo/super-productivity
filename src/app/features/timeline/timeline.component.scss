@@ -150,6 +150,11 @@
 
 $split-border-radius: 28px;
 
+.split-task::ng-deep .box {
+  border-top-left-radius: $split-border-radius !important;
+  border-top-right-radius: $split-border-radius !important;
+}
+
 .task-continued {
   align-self: flex-start;
   padding-left: 56px;
@@ -202,10 +207,6 @@ $split-border-radius: 28px;
   }
 }
 
-.split-task::ng-deep .box {
-  border-top-left-radius: $split-border-radius !important;
-  border-top-right-radius: $split-border-radius !important;
-}
 
 .work-start,
 .work-end {
