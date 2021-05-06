@@ -5,8 +5,7 @@
     [class.isActiveContext]="context.id===activeWorkContextId"
     class="tag"
   >
-    <div [style.background]="context.theme.primary"
-         class="tag-color"></div>
+    <div [style.background]="context.theme.primary" class="tag-color"></div>
     <button
       #menuEntry
       [routerLink]="['tag', context.id, 'tasks']"
@@ -58,8 +57,7 @@
   </button>
 </section>
 
-<section *ngIf="projectList$|async as projectList"
-         class="projects">
+<section *ngIf="projectList$|async as projectList" class="projects">
   <button
     #menuEntry
     #projectExpandBtn
@@ -89,15 +87,11 @@
         [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
         class="project-color"
       ></div>
-      <button #menuEntry
-              [routerLink]="['project', project.id, 'tasks']"
-              mat-menu-item>
+      <button #menuEntry [routerLink]="['project', project.id, 'tasks']" mat-menu-item>
         <span class="badge"
-        >{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span
+          >{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span
         >
-        <mat-icon class="drag-handle"
-                  drag-handle>list
-        </mat-icon>
+        <mat-icon class="drag-handle" drag-handle>list </mat-icon>
         <span class="text">{{project.title}}</span>
       </button>
 
@@ -130,17 +124,13 @@
     <span class="text">{{T.MH.MANAGE_PROJECTS|translate}}</span>
   </button>
 
-  <button #menuEntry
-          (click)="addProject()"
-          *ngIf="isProjectsExpanded"
-          mat-menu-item>
+  <button #menuEntry (click)="addProject()" *ngIf="isProjectsExpanded" mat-menu-item>
     <mat-icon>add</mat-icon>
     <span class="text">{{T.MH.CREATE_PROJECT|translate}}</span>
   </button>
 </section>
 
-<section *ngIf="(tagList$|async) as tagList"
-         class="tags">
+<section *ngIf="(tagList$|async) as tagList" class="tags">
   <button
     #menuEntry
     #tagExpandBtn
@@ -166,15 +156,10 @@
       [class.isActiveContext]="tag.id===activeWorkContextId"
       class="tag"
     >
-      <div [style.background]="tag?.theme.primary"
-           class="tag-color"></div>
-      <button #menuEntry
-              [routerLink]="['tag', tag.id, 'tasks']"
-              mat-menu-item>
+      <div [style.background]="tag?.theme.primary" class="tag-color"></div>
+      <button #menuEntry [routerLink]="['tag', tag.id, 'tasks']" mat-menu-item>
         <span class="badge">{{tag.taskIds.length}}</span>
-        <mat-icon class="drag-handle"
-                  drag-handle>style
-        </mat-icon>
+        <mat-icon class="drag-handle" drag-handle>style </mat-icon>
         <span class="text">{{tag.title}}</span>
       </button>
 

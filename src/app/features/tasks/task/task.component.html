@@ -86,22 +86,25 @@
 
       <div
         (click)="IS_TOUCH_ONLY && toggleShowAdditionalInfoOpen()"
-           class="title-and-tags-wrapper">
-        <div class="parent-title"
-             *ngIf="showParentTitle && task.parentId">
-          <div class="dot"
-               *ngIf="(projectColor$|async) as projectColor"
-               [style.backgroundColor]="projectColor"></div>
+        class="title-and-tags-wrapper"
+      >
+        <div class="parent-title" *ngIf="showParentTitle && task.parentId">
+          <div
+            class="dot"
+            *ngIf="(projectColor$|async) as projectColor"
+            [style.backgroundColor]="projectColor"
+          ></div>
           <div class="title">{{parentTitle$|async}}</div>
         </div>
 
-        <div #contentEditableOnClickEl
-             (editFinished)="updateTaskTitleIfChanged($event)"
-             [isResetAfterEdit]="true"
-             [value]="task?.title"
-             class="task-title show-only-on-no-touch-only"
-             contentEditableOnClick
-             contenteditable="true"
+        <div
+          #contentEditableOnClickEl
+          (editFinished)="updateTaskTitleIfChanged($event)"
+          [isResetAfterEdit]="true"
+          [value]="task?.title"
+          class="task-title show-only-on-no-touch-only"
+          contentEditableOnClick
+          contenteditable="true"
         ></div>
 
         <div class="task-title show-only-on-touch-only">{{task?.title}}</div>
