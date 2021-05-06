@@ -4,7 +4,7 @@ import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 
 export const createTimelineViewEntriesForNormalTasks = (
   startTime: number,
-  tasks: TaskWithoutReminder[]
+  tasks: TaskWithoutReminder[],
 ): TimelineViewEntry[] => {
   let lastTime: number;
   let prevTask: TaskWithoutReminder;
@@ -30,7 +30,7 @@ export const createTimelineViewEntriesForNormalTasks = (
       type: TimelineViewEntryType.Task,
       time,
       data: task,
-      isHideTime: (time === lastTime),
+      isHideTime: time === lastTime,
     });
 
     lastTime = time;

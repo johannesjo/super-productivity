@@ -17,11 +17,11 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
   it('should work', () => {
     const now = getDateTimeFromClockString('9:20', 0);
     const fakeTasks = [
-      {...FAKE_TASK, timeEstimate: hours(1)},
-      {...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(.5)},
-      {...FAKE_TASK},
-      {...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(.25)},
-      {...FAKE_TASK},
+      { ...FAKE_TASK, timeEstimate: hours(1) },
+      { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
+      { ...FAKE_TASK },
+      { ...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(0.25) },
+      { ...FAKE_TASK },
     ] as TaskWithoutReminder[];
     const r = createTimelineViewEntriesForNormalTasks(now, fakeTasks);
     expect(r).toEqual([
@@ -31,12 +31,12 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: 3600000,
-          timeSpent: 0
+          timeSpent: 0,
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
         time: 30000000,
-        type: 'Task'
+        type: 'Task',
       },
       {
         data: {
@@ -44,12 +44,12 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: 3600000,
-          timeSpent: 1800000
+          timeSpent: 1800000,
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
         time: 33600000,
-        type: 'Task'
+        type: 'Task',
       },
       {
         data: {
@@ -57,12 +57,12 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: 0,
-          timeSpent: 0
+          timeSpent: 0,
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
         time: 35400000,
-        type: 'Task'
+        type: 'Task',
       },
       {
         data: {
@@ -70,12 +70,12 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: 5400000,
-          timeSpent: 900000
+          timeSpent: 900000,
         },
         id: 'FAKE_TASK_ID',
         isHideTime: true,
         time: 35400000,
-        type: 'Task'
+        type: 'Task',
       },
       {
         data: {
@@ -83,20 +83,20 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: 0,
-          timeSpent: 0
+          timeSpent: 0,
         },
         id: 'FAKE_TASK_ID',
         isHideTime: false,
         time: 39900000,
-        type: 'Task'
-      }
+        type: 'Task',
+      },
     ] as any);
   });
 
   it('should work for non ordered scheduled tasks', () => {
     const now = getDateTimeFromClockString('9:30', 0);
     const fakeTasks = [
-      {...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID'},
+      { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
     ] as TaskWithoutReminder[];
     const r = createTimelineViewEntriesForNormalTasks(now, fakeTasks);
     expect(r).toEqual([
@@ -106,14 +106,13 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: hours(1),
-          timeSpent: 0
+          timeSpent: 0,
         },
         id: 'OTHER_TASK_ID',
         isHideTime: false,
         time: now,
-        type: 'Task'
-      }
-
+        type: 'Task',
+      },
     ] as any);
   });
 
@@ -121,8 +120,8 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
     const now = getDateTimeFromClockString('9:30', 0);
 
     const fakeTasks = [
-      {...FAKE_TASK, timeEstimate: hours(1), id: 'T1'},
-      {...FAKE_TASK, timeEstimate: hours(2), id: 'T2'},
+      { ...FAKE_TASK, timeEstimate: hours(1), id: 'T1' },
+      { ...FAKE_TASK, timeEstimate: hours(2), id: 'T2' },
     ] as TaskWithoutReminder[];
     const r = createTimelineViewEntriesForNormalTasks(now, fakeTasks);
     expect(r).toEqual([
@@ -132,12 +131,12 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: 3600000,
-          timeSpent: 0
+          timeSpent: 0,
         },
         id: 'T1',
         isHideTime: false,
         time: now,
-        type: 'Task'
+        type: 'Task',
       },
       {
         data: {
@@ -145,13 +144,13 @@ describe('createTimelineViewEntriesForNormalTasks()', () => {
           plannedAt: null,
           reminderId: null,
           timeEstimate: 7200000,
-          timeSpent: 0
+          timeSpent: 0,
         },
         id: 'T2',
         isHideTime: false,
         time: now + hours(1),
-        type: 'Task'
-      }
+        type: 'Task',
+      },
     ] as any);
   });
 });

@@ -1,54 +1,62 @@
 <task-additional-info-wrapper>
-  <div *ngIf="timelineEntries$|async as timelineEntries"
-       class="wrapper">
-    <div class="inner-wrapper"
-         [@standardList]="timelineEntries.length">
-      <div class="row"
-           *ngFor="let row of timelineEntries; trackBy: trackByFn">
-        <div class="col time"
-             [class.hasTime]="!row.isHideTime">
-          <div *ngIf="!row.isHideTime">{{ row.time <= now
-            ? (T.F.TIMELINE.NOW|translate)
-            : (row.time|roundDuration|date:'HH:mm')}}</div>
+  <div *ngIf="timelineEntries$|async as timelineEntries" class="wrapper">
+    <div class="inner-wrapper" [@standardList]="timelineEntries.length">
+      <div class="row" *ngFor="let row of timelineEntries; trackBy: trackByFn">
+        <div class="col time" [class.hasTime]="!row.isHideTime">
+          <div *ngIf="!row.isHideTime">
+            {{ row.time <= now ? (T.F.TIMELINE.NOW|translate) :
+            (row.time|roundDuration|date:'HH:mm')}}
+          </div>
         </div>
-        <div class="col right"
-             [ngSwitch]="row.type">
-          <task *ngSwitchCase="TimelineViewEntryType.Task"
-                showParentTitle="yes"
-                [task]="row.data"></task>
-          <task *ngSwitchCase="TimelineViewEntryType.ScheduledTask"
-                showParentTitle="yes"
-                [task]="row.data"></task>
-          <task *ngSwitchCase="TimelineViewEntryType.SplitTask"
-                showParentTitle="yes"
-                class="split-task"
-                [task]="row.data"></task>
+        <div class="col right" [ngSwitch]="row.type">
+          <task
+            *ngSwitchCase="TimelineViewEntryType.Task"
+            showParentTitle="yes"
+            [task]="row.data"
+          ></task>
+          <task
+            *ngSwitchCase="TimelineViewEntryType.ScheduledTask"
+            showParentTitle="yes"
+            [task]="row.data"
+          ></task>
+          <task
+            *ngSwitchCase="TimelineViewEntryType.SplitTask"
+            showParentTitle="yes"
+            class="split-task"
+            [task]="row.data"
+          ></task>
 
-          <div *ngSwitchCase="TimelineViewEntryType.SplitTaskContinuedLast"
-               class="task-continued last">
-            <div class="title">{{row.data.title}} ({{row.data.index +2}})</div>
-            <div class="time-to-go">continued ~{{row.data.timeToGo|roundDuration|msToString}}
+          <div
+            *ngSwitchCase="TimelineViewEntryType.SplitTaskContinuedLast"
+            class="task-continued last"
+          >
+            <div class="title">{{row.data.title}} ({{row.data.index + 2}})</div>
+            <div class="time-to-go">
+              continued ~{{row.data.timeToGo|roundDuration|msToString}}
             </div>
           </div>
 
-          <div *ngSwitchCase="TimelineViewEntryType.SplitTaskContinued"
-               class="task-continued">
-            <div class="title">{{row.data.title}} ({{row.data.index +2}})</div>
-            <div class="time-to-go">continued ~{{row.data.timeToGo|roundDuration|msToString}}
+          <div
+            *ngSwitchCase="TimelineViewEntryType.SplitTaskContinued"
+            class="task-continued"
+          >
+            <div class="title">{{row.data.title}} ({{row.data.index + 2}})</div>
+            <div class="time-to-go">
+              continued ~{{row.data.timeToGo|roundDuration|msToString}}
             </div>
           </div>
 
+          <timeline-custom-event
+            *ngSwitchCase="TimelineViewEntryType.CustomEvent"
+            [event]="row.data"
+          ></timeline-custom-event>
 
-          <timeline-custom-event *ngSwitchCase="TimelineViewEntryType.CustomEvent"
-                                 [event]="row.data"></timeline-custom-event>
-
-
-          <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart"
-               class="work-start">{{row.time|date:'shortTime'}} start ({{row.time|date:'shortDate'}})
+          <div *ngSwitchCase="TimelineViewEntryType.WorkdayStart" class="work-start">
+            {{row.time|date:'shortTime'}} start ({{row.time|date:'shortDate'}})
           </div>
 
-          <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd"
-               class="work-end">{{row.time|date:'shortTime'}} end ({{row.time|date:'shortDate'}})
+          <div *ngSwitchCase="TimelineViewEntryType.WorkdayEnd" class="work-end">
+            {{row.time|date:'shortTime'}} end ({{row.time|date:'shortDate'}})
           </div>
 
           <div *ngSwitchDefault>------------------</div>

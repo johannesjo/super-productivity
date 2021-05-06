@@ -5,20 +5,17 @@ import { TimelineCustomEvent } from '../timeline.model';
   selector: 'timeline-custom-event',
   templateUrl: './timeline-custom-event.component.html',
   styleUrls: ['./timeline-custom-event.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimelineCustomEventComponent implements OnInit {
   @Input() event: TimelineCustomEvent = {
     title: '',
     icon: '',
     start: 0,
-    duration: 0
+    duration: 0,
   };
 
-  constructor() {
-  }
+  constructor() {}
 
-  ngOnInit(): void {
-  }
-
+  ngOnInit(): void {}
 }

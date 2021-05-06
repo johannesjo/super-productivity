@@ -43,15 +43,14 @@ export class TimelineComponent {
     //   endTime: '17:00',
     // })),
     // NOTE: this doesn't require cd.detect changes because view is already re-checked with obs
-    tap(() => this.now = Date.now())
+    tap(() => (this.now = Date.now())),
   );
   now = Date.now();
 
   constructor(
     private _workContextService: WorkContextService,
     private _taskService: TaskService,
-  ) {
-  }
+  ) {}
 
   trackByFn(i: number, item: any) {
     return item.id;

@@ -6,18 +6,8 @@ import { UiModule } from '../../ui/ui.module';
 import { TimelineCustomEventComponent } from './timeline-custom-event/timeline-custom-event.component';
 
 @NgModule({
-  declarations: [
-    TimelineComponent,
-    TimelineCustomEventComponent
-  ],
-  exports:[
-    TimelineComponent,
-  ],
-  imports: [
-    CommonModule,
-    UiModule,
-    TasksModule,
-  ]
+  declarations: [TimelineComponent, TimelineCustomEventComponent],
+  exports: [TimelineComponent],
+  imports: [CommonModule, UiModule, TasksModule],
 })
-export class TimelineModule {
-}
+export class TimelineModule {}

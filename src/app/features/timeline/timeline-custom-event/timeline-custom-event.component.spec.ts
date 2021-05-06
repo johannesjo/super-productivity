@@ -8,9 +8,8 @@ describe('TimelineCustomEventComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TimelineCustomEventComponent ]
-    })
-    .compileComponents();
+      declarations: [TimelineCustomEventComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

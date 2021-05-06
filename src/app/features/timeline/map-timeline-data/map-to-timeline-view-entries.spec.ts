@@ -18,147 +18,164 @@ describe('mapToViewEntries()', () => {
   describe('basic', () => {
     it('should work for simple task list', () => {
       const now = 33;
-      const fakeTasks = [
-        {...FAKE_TASK, timeEstimate: 5000},
-        {...FAKE_TASK},
-      ];
+      const fakeTasks = [{ ...FAKE_TASK, timeEstimate: 5000 }, { ...FAKE_TASK }];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
-      expect(r).toEqual([{
-        id: fakeTasks[0].id,
-        type: TimelineViewEntryType.Task,
-        time: now,
-        data: fakeTasks[0],
-        isHideTime: false,
-      }, {
-        id: fakeTasks[1].id,
-        type: TimelineViewEntryType.Task,
-        time: 5033,
-        data: fakeTasks[1],
-        isHideTime: false,
-      }]);
+      expect(r).toEqual([
+        {
+          id: fakeTasks[0].id,
+          type: TimelineViewEntryType.Task,
+          time: now,
+          data: fakeTasks[0],
+          isHideTime: false,
+        },
+        {
+          id: fakeTasks[1].id,
+          type: TimelineViewEntryType.Task,
+          time: 5033,
+          data: fakeTasks[1],
+          isHideTime: false,
+        },
+      ]);
     });
 
     it('should work for simple task list 2', () => {
       const now = getDateTimeFromClockString('7:23', 0);
       const fakeTasks = [
-        {...FAKE_TASK, timeEstimate: hours(1)},
-        {...FAKE_TASK, timeEstimate: hours(1)},
-        {...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(.5)},
-        {...FAKE_TASK},
-        {...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(.25)},
-        {...FAKE_TASK},
+        { ...FAKE_TASK, timeEstimate: hours(1) },
+        { ...FAKE_TASK, timeEstimate: hours(1) },
+        { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
+        { ...FAKE_TASK },
+        { ...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(0.25) },
+        { ...FAKE_TASK },
       ];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
-      expect(r).toEqual([{
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now,
-        data: fakeTasks[0],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(1),
-        data: fakeTasks[1],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(2),
-        data: fakeTasks[2],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(2.5),
-        data: fakeTasks[3],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(2.5),
-        data: fakeTasks[4],
-        isHideTime: true,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(3.75),
-        data: fakeTasks[5],
-        isHideTime: false,
-      }]);
+      expect(r).toEqual([
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now,
+          data: fakeTasks[0],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(1),
+          data: fakeTasks[1],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(2),
+          data: fakeTasks[2],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(2.5),
+          data: fakeTasks[3],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(2.5),
+          data: fakeTasks[4],
+          isHideTime: true,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(3.75),
+          data: fakeTasks[5],
+          isHideTime: false,
+        },
+      ]);
     });
 
     it('should work for simple task list 3', () => {
       const now = getDateTimeFromClockString('7:23', 0);
       const fakeTasks = [
-        {...FAKE_TASK, timeEstimate: 5000},
-        {...FAKE_TASK, timeEstimate: 8000},
-        {...FAKE_TASK, timeEstimate: 5000, timeSpent: 5000},
-        {...FAKE_TASK},
-        {...FAKE_TASK, timeEstimate: 3000, timeSpent: 1000},
-        {...FAKE_TASK},
+        { ...FAKE_TASK, timeEstimate: 5000 },
+        { ...FAKE_TASK, timeEstimate: 8000 },
+        { ...FAKE_TASK, timeEstimate: 5000, timeSpent: 5000 },
+        { ...FAKE_TASK },
+        { ...FAKE_TASK, timeEstimate: 3000, timeSpent: 1000 },
+        { ...FAKE_TASK },
       ];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
-      expect(r).toEqual([{
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now,
-        data: fakeTasks[0],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + 5000,
-        data: fakeTasks[1],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + 13000,
-        data: fakeTasks[2],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + 13000,
-        data: fakeTasks[3],
-        isHideTime: true,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + 13000,
-        data: fakeTasks[4],
-        isHideTime: true,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + 15000,
-        data: fakeTasks[5],
-        isHideTime: false,
-      }]);
+      expect(r).toEqual([
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now,
+          data: fakeTasks[0],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + 5000,
+          data: fakeTasks[1],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + 13000,
+          data: fakeTasks[2],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + 13000,
+          data: fakeTasks[3],
+          isHideTime: true,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + 13000,
+          data: fakeTasks[4],
+          isHideTime: true,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + 15000,
+          data: fakeTasks[5],
+          isHideTime: false,
+        },
+      ]);
     });
 
     it('should work for simple task list 4', () => {
       // const now = getDateTimeFromClockString('7:23', 0);
       const now = 1619983090852;
       const fakeTasks = [
-        {...FAKE_TASK, timeSpent: 21014, timeEstimate: 900000,},
-        {...FAKE_TASK, timeEstimate: 1800000, timeSpent: 148998},
+        { ...FAKE_TASK, timeSpent: 21014, timeEstimate: 900000 },
+        { ...FAKE_TASK, timeEstimate: 1800000, timeSpent: 148998 },
       ];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
-      expect(r).toEqual([{
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now,
-        data: fakeTasks[0],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: 1619983969838,
-        data: fakeTasks[1],
-        isHideTime: false,
-      }]);
+      expect(r).toEqual([
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now,
+          data: fakeTasks[0],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: 1619983969838,
+          data: fakeTasks[1],
+          isHideTime: false,
+        },
+      ]);
     });
   });
 
@@ -167,63 +184,76 @@ describe('mapToViewEntries()', () => {
       const now = getDateTimeFromClockString('9:20', 0);
       const plannedTaskStartTime = getDateTimeFromClockString('10:25', 0);
       const fakeTasks = [
-        {...FAKE_TASK, timeEstimate: hours(1)},
+        { ...FAKE_TASK, timeEstimate: hours(1) },
         {
           ...FAKE_TASK,
           id: 'S_ID',
           timeEstimate: hours(1),
           reminderId: 'R:ID',
-          plannedAt: plannedTaskStartTime
+          plannedAt: plannedTaskStartTime,
         },
-        {...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(.5)},
-        {...FAKE_TASK},
-        {...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(.25)},
-        {...FAKE_TASK},
+        { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
+        { ...FAKE_TASK },
+        { ...FAKE_TASK, timeEstimate: hours(1.5), timeSpent: hours(0.25) },
+        { ...FAKE_TASK },
       ];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
-      expect(r).toEqual([{
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now,
-        data: fakeTasks[0],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.SplitTask,
-        time: now + hours(1),
-        data: fakeTasks[2],
-        isHideTime: false,
-      }, {
-        id: 'S_ID',
-        type: TimelineViewEntryType.ScheduledTask,
-        time: plannedTaskStartTime,
-        data: fakeTasks[1],
-        isHideTime: false,
-      }, {
-        data: {timeToGo: minutes(25), title: undefined, taskId: 'FAKE_TASK_ID', index: 0} as any,
-        id: 'FAKE_TASK_ID__0',
-        isHideTime: false,
-        time: 37500000,
-        type: TimelineViewEntryType.SplitTaskContinuedLast
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(2.5),
-        data: fakeTasks[3],
-        isHideTime: false,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(2.5),
-        data: fakeTasks[4],
-        isHideTime: true,
-      }, {
-        id: FID,
-        type: TimelineViewEntryType.Task,
-        time: now + hours(3.75),
-        data: fakeTasks[5],
-        isHideTime: false,
-      }]);
+      expect(r).toEqual([
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now,
+          data: fakeTasks[0],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.SplitTask,
+          time: now + hours(1),
+          data: fakeTasks[2],
+          isHideTime: false,
+        },
+        {
+          id: 'S_ID',
+          type: TimelineViewEntryType.ScheduledTask,
+          time: plannedTaskStartTime,
+          data: fakeTasks[1],
+          isHideTime: false,
+        },
+        {
+          data: {
+            timeToGo: minutes(25),
+            title: undefined,
+            taskId: 'FAKE_TASK_ID',
+            index: 0,
+          } as any,
+          id: 'FAKE_TASK_ID__0',
+          isHideTime: false,
+          time: 37500000,
+          type: TimelineViewEntryType.SplitTaskContinuedLast,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(2.5),
+          data: fakeTasks[3],
+          isHideTime: false,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(2.5),
+          data: fakeTasks[4],
+          isHideTime: true,
+        },
+        {
+          id: FID,
+          type: TimelineViewEntryType.Task,
+          time: now + hours(3.75),
+          data: fakeTasks[5],
+          isHideTime: false,
+        },
+      ]);
     });
 
     it('should work for non ordered scheduled tasks', () => {
@@ -236,9 +266,9 @@ describe('mapToViewEntries()', () => {
           id: 'ScheduledTask:ID',
           timeEstimate: hours(0.5),
           reminderId: 'R:ID',
-          plannedAt: plannedTaskStartTime
+          plannedAt: plannedTaskStartTime,
         },
-        {...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID'},
+        { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
       ];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
 
@@ -246,43 +276,44 @@ describe('mapToViewEntries()', () => {
         id: 'OTHER_TASK_ID',
         type: TimelineViewEntryType.Task,
         time: now,
-        data: fakeTasks.find(t => t.id === 'OTHER_TASK_ID') as any,
+        data: fakeTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
         isHideTime: false,
       });
       expect(r[1]).toEqual({
         id: 'ScheduledTask:ID',
         type: TimelineViewEntryType.ScheduledTask,
         time: plannedTaskStartTime,
-        data: fakeTasks.find(t => t.id === 'ScheduledTask:ID') as any,
+        data: fakeTasks.find((t) => t.id === 'ScheduledTask:ID') as any,
         isHideTime: false,
       });
     });
 
-    it('should work for scheduled task after a single normal task', () => {
-
-    });
+    it('should work for scheduled task after a single normal task', () => {});
 
     it('should work for far away planned tasks', () => {
       const now = getDateTimeFromClockString('9:20', 0);
-      const plannedTaskStartTime = getDateTimeFromClockString('12:25', 25 * 60 * 60 * 1000);
+      const plannedTaskStartTime = getDateTimeFromClockString(
+        '12:25',
+        25 * 60 * 60 * 1000,
+      );
       const fakeTasks = [
         {
           ...FAKE_TASK,
           id: 'ScheduledTask:ID',
           timeEstimate: hours(1),
           reminderId: 'R:ID',
-          plannedAt: plannedTaskStartTime
+          plannedAt: plannedTaskStartTime,
         },
-        {...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID'},
-        {...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(.5)},
-        {...FAKE_TASK},
+        { ...FAKE_TASK, timeEstimate: hours(1), id: 'OTHER_TASK_ID' },
+        { ...FAKE_TASK, timeEstimate: hours(1), timeSpent: hours(0.5) },
+        { ...FAKE_TASK },
       ];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r[0]).toEqual({
         id: 'OTHER_TASK_ID',
         type: TimelineViewEntryType.Task,
         time: now,
-        data: fakeTasks.find(t => t.id === 'OTHER_TASK_ID') as any,
+        data: fakeTasks.find((t) => t.id === 'OTHER_TASK_ID') as any,
         isHideTime: false,
       });
     });
@@ -345,21 +376,21 @@ describe('mapToViewEntries()', () => {
           title: 'Scheduled 2 15:30',
           reminderId: 'xxx',
           plannedAt: getDateTimeFromClockString('15:30', 0),
-        }
+        },
       ] as any;
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r[0]).toEqual({
         id: 'SOME_TASK_1_ID',
         type: TimelineViewEntryType.Task,
         time: now,
-        data: fakeTasks.find(t => t.id === 'SOME_TASK_1_ID') as any,
+        data: fakeTasks.find((t) => t.id === 'SOME_TASK_1_ID') as any,
         isHideTime: false,
       });
       expect(r[1]).toEqual({
         id: 'SOME_TASK_2_ID',
         type: TimelineViewEntryType.SplitTask,
         time: now + hours(4),
-        data: fakeTasks.find(t => t.id === 'SOME_TASK_2_ID') as any,
+        data: fakeTasks.find((t) => t.id === 'SOME_TASK_2_ID') as any,
         isHideTime: false,
       });
       expect(r[4].type).toEqual(TimelineViewEntryType.ScheduledTask);
@@ -387,7 +418,7 @@ describe('mapToViewEntries()', () => {
         {
           id: 'uDGzrv9JO',
           timeSpentOnDay: {
-            '2021-05-03': 0
+            '2021-05-03': 0,
           },
           timeSpent: 0,
           timeEstimate: 3600000,
@@ -443,206 +474,200 @@ describe('mapToViewEntries()', () => {
           title: 'Sched  no overlap 9:00 (10.)',
           reminderId: null,
           plannedAt: null,
-        }
+        },
       ] as any;
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
-      expect(r).toEqual([{
-        data:
-          {
+      expect(r).toEqual([
+        {
+          data: {
             id: 'X6NWaoxQ-',
             plannedAt: 1620125601000,
             reminderId: 'oejJdRc3Y',
             timeEstimate: 1980000,
             timeSpent: 0,
-            title: 'Scheduled before now'
+            title: 'Scheduled before now',
           },
-        id: 'X6NWaoxQ-',
-        isHideTime: false,
-        time: 1620125601000,
-        type: 'ScheduledTask'
-      },
+          id: 'X6NWaoxQ-',
+          isHideTime: false,
+          time: 1620125601000,
+          type: 'ScheduledTask',
+        },
         {
-          data:
-            {
-              id: 'uDGzrv9JO',
-              plannedAt: null,
-              reminderId: null,
-              timeEstimate: 3600000,
-              timeSpent: 0,
-              timeSpentOnDay: {'2021-05-03': 0},
-              title: 'Some task 1'
-            },
+          data: {
+            id: 'uDGzrv9JO',
+            plannedAt: null,
+            reminderId: null,
+            timeEstimate: 3600000,
+            timeSpent: 0,
+            timeSpentOnDay: { '2021-05-03': 0 },
+            title: 'Some task 1',
+          },
           id: 'uDGzrv9JO',
           isHideTime: false,
           time: 1620127581000,
-          type: 'Task'
+          type: 'Task',
         },
         {
-          data:
-            {
-              id: 'mhsGdyzc_',
-              plannedAt: null,
-              reminderId: null,
-              timeEstimate: 7200000,
-              timeSpent: 0,
-              title: 'Some task 2'
-            },
+          data: {
+            id: 'mhsGdyzc_',
+            plannedAt: null,
+            reminderId: null,
+            timeEstimate: 7200000,
+            timeSpent: 0,
+            title: 'Some task 2',
+          },
           id: 'mhsGdyzc_',
           isHideTime: false,
           time: 1620131181000,
-          type: 'SplitTask'
+          type: 'SplitTask',
         },
         {
-          data:
-            {
-              id: '68K0kYJ2s',
-              plannedAt: 1620133200000,
-              reminderId: 'SrgAGy8OX',
-              timeEstimate: 7200000,
-              timeSpent: 0,
-              title: 'Scheduled 1 15:00'
-            },
+          data: {
+            id: '68K0kYJ2s',
+            plannedAt: 1620133200000,
+            reminderId: 'SrgAGy8OX',
+            timeEstimate: 7200000,
+            timeSpent: 0,
+            title: 'Scheduled 1 15:00',
+          },
           id: '68K0kYJ2s',
           isHideTime: false,
           time: 1620133200000,
-          type: 'ScheduledTask'
+          type: 'ScheduledTask',
         },
         {
-          data:
-            {
-              id: '9JTnZa-VW',
-              plannedAt: 1620136800000,
-              reminderId: 'avWZ5dKrW',
-              timeEstimate: 9000000,
-              timeSpent: 0,
-              title: 'Scheduled 2 16:00'
-            },
+          data: {
+            id: '9JTnZa-VW',
+            plannedAt: 1620136800000,
+            reminderId: 'avWZ5dKrW',
+            timeEstimate: 9000000,
+            timeSpent: 0,
+            title: 'Scheduled 2 16:00',
+          },
           id: '9JTnZa-VW',
           isHideTime: false,
           time: 1620136800000,
-          type: 'ScheduledTask'
+          type: 'ScheduledTask',
         },
         {
-          data:
-            {
-              _showSubTasksMode: 2,
-              id: '0LtuSnH8s',
-              plannedAt: 1620140400000,
-              reminderId: 'NnqlBieeB',
-              timeEstimate: 7200000,
-              timeSpent: 0,
-              title: 'Scheduled 3 17:00'
-            },
+          data: {
+            _showSubTasksMode: 2,
+            id: '0LtuSnH8s',
+            plannedAt: 1620140400000,
+            reminderId: 'NnqlBieeB',
+            timeEstimate: 7200000,
+            timeSpent: 0,
+            title: 'Scheduled 3 17:00',
+          },
           id: '0LtuSnH8s',
           isHideTime: false,
           time: 1620140400000,
-          type: 'ScheduledTask'
+          type: 'ScheduledTask',
         },
         {
-          data:
-            {
-              id: 'EYLy6C5_m',
-              plannedAt: 1620144000000,
-              reminderId: 'BNaRpF_SX',
-              timeEstimate: 0,
-              timeSpent: 0,
-              title: 'Scheduled 4 (no duration) 18:00'
-            },
+          data: {
+            id: 'EYLy6C5_m',
+            plannedAt: 1620144000000,
+            reminderId: 'BNaRpF_SX',
+            timeEstimate: 0,
+            timeSpent: 0,
+            title: 'Scheduled 4 (no duration) 18:00',
+          },
           id: 'EYLy6C5_m',
           isHideTime: false,
           time: 1620144000000,
-          type: 'ScheduledTask'
+          type: 'ScheduledTask',
         },
         {
           data: {
             index: 0,
             taskId: 'mhsGdyzc_',
             timeToGo: 5181000,
-            title: 'Some task 2'
+            title: 'Some task 2',
           },
           id: 'mhsGdyzc___0',
           isHideTime: false,
           time: 1620147600000,
-          type: 'SplitTaskContinuedLast'
+          type: 'SplitTaskContinuedLast',
         },
         {
-          data:
-            {
-              id: 'xgYNyslWC',
-              plannedAt: null,
-              reminderId: null,
-              timeEstimate: 7200000,
-              timeSpent: 0,
-              title: 'Sched  no overlap 9:00 (10.)'
-            },
+          data: {
+            id: 'xgYNyslWC',
+            plannedAt: null,
+            reminderId: null,
+            timeEstimate: 7200000,
+            timeSpent: 0,
+            title: 'Sched  no overlap 9:00 (10.)',
+          },
           id: 'xgYNyslWC',
           isHideTime: false,
           time: 1620152781000,
-          type: 'Task'
+          type: 'Task',
         },
         {
-          data:
-            {
-              id: '2nkBPQEny',
-              plannedAt: 1620162000000,
-              reminderId: 'K-1LvnNU5',
-              timeEstimate: 0,
-              timeSpent: 0,
-              title: 'Sched no overlap 23:00'
-            },
+          data: {
+            id: '2nkBPQEny',
+            plannedAt: 1620162000000,
+            reminderId: 'K-1LvnNU5',
+            timeEstimate: 0,
+            timeSpent: 0,
+            title: 'Sched no overlap 23:00',
+          },
           id: '2nkBPQEny',
           isHideTime: false,
           time: 1620162000000,
-          type: 'ScheduledTask'
-        }] as any);
+          type: 'ScheduledTask',
+        },
+      ] as any);
     });
   });
 
   describe('splitTasks', () => {
     it('should work for a simple task', () => {
       const now = getDateTimeFromClockString('9:00', 0);
-      const normalTask = {...FAKE_TASK, timeEstimate: hours(3)};
+      const normalTask = { ...FAKE_TASK, timeEstimate: hours(3) };
       const scheduledTask = {
         ...FAKE_TASK,
         timeEstimate: hours(1),
         reminderId: 'X',
         plannedAt: getDateTimeFromClockString('10:00', 0),
       };
-      const fakeTasks = [
-        normalTask,
-        scheduledTask,
-      ];
+      const fakeTasks = [normalTask, scheduledTask];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r.length).toEqual(3);
-      expect(r).toEqual([{
-        id: normalTask.id,
-        type: TimelineViewEntryType.SplitTask,
-        time: now,
-        data: normalTask,
-        isHideTime: false,
-      }, {
-        id: scheduledTask.id,
-        type: TimelineViewEntryType.ScheduledTask,
-        time: scheduledTask.plannedAt,
-        data: scheduledTask,
-        isHideTime: false,
-      }, {
-        id: normalTask.id + '__0',
-        type: TimelineViewEntryType.SplitTaskContinuedLast,
-        time: now + hours(2),
-        data: {
-          taskId: normalTask.id,
-          title: normalTask.title,
-          timeToGo: hours(2),
-          index: 0,
+      expect(r).toEqual([
+        {
+          id: normalTask.id,
+          type: TimelineViewEntryType.SplitTask,
+          time: now,
+          data: normalTask,
+          isHideTime: false,
         },
-        isHideTime: false,
-      }]);
+        {
+          id: scheduledTask.id,
+          type: TimelineViewEntryType.ScheduledTask,
+          time: scheduledTask.plannedAt,
+          data: scheduledTask,
+          isHideTime: false,
+        },
+        {
+          id: normalTask.id + '__0',
+          type: TimelineViewEntryType.SplitTaskContinuedLast,
+          time: now + hours(2),
+          data: {
+            taskId: normalTask.id,
+            title: normalTask.title,
+            timeToGo: hours(2),
+            index: 0,
+          },
+          isHideTime: false,
+        },
+      ]);
     });
 
     it('should split multiple times', () => {
       const now = getDateTimeFromClockString('9:00', 0);
-      const normalTask = {...FAKE_TASK, timeEstimate: hours(3)};
+      const normalTask = { ...FAKE_TASK, timeEstimate: hours(3) };
       const scheduledTask = {
         ...FAKE_TASK,
         timeEstimate: hours(1),
@@ -655,56 +680,58 @@ describe('mapToViewEntries()', () => {
         reminderId: 'X',
         plannedAt: getDateTimeFromClockString('12:00', 0),
       };
-      const fakeTasks = [
-        normalTask,
-        scheduledTask,
-        scheduledTask2,
-      ];
+      const fakeTasks = [normalTask, scheduledTask, scheduledTask2];
       const r = mapToTimelineViewEntries(fakeTasks, null, undefined, now);
       expect(r.length).toEqual(5);
-      expect(r).toEqual([{
-        id: normalTask.id,
-        type: TimelineViewEntryType.SplitTask,
-        time: now,
-        data: normalTask,
-        isHideTime: false,
-      }, {
-        id: scheduledTask.id,
-        type: TimelineViewEntryType.ScheduledTask,
-        time: scheduledTask.plannedAt,
-        data: scheduledTask,
-        isHideTime: false,
-      }, {
-        id: normalTask.id + '__0',
-        type: TimelineViewEntryType.SplitTaskContinued,
-        time: getDateTimeFromClockString('11:00', 0),
-        data: {
-          title: normalTask.title,
-          timeToGo: hours(2),
-          taskId: normalTask.id,
-          index: 0,
+      expect(r).toEqual([
+        {
+          id: normalTask.id,
+          type: TimelineViewEntryType.SplitTask,
+          time: now,
+          data: normalTask,
+          isHideTime: false,
         },
-        isHideTime: false,
-      }, {
-        id: scheduledTask2.id,
-        type: TimelineViewEntryType.ScheduledTask,
-        time: scheduledTask2.plannedAt,
-        data: scheduledTask2,
-        isHideTime: false,
-      }, {
-        id: normalTask.id + '__1',
-        type: TimelineViewEntryType.SplitTaskContinuedLast,
-        time: getDateTimeFromClockString('13:00', 0),
-        data: {
-          title: normalTask.title,
-          // TODO fix
-          // timeToGo: hours(2),
-          timeToGo: 0,
-          taskId: normalTask.id,
-          index: 1,
+        {
+          id: scheduledTask.id,
+          type: TimelineViewEntryType.ScheduledTask,
+          time: scheduledTask.plannedAt,
+          data: scheduledTask,
+          isHideTime: false,
         },
-        isHideTime: false,
-      }]);
+        {
+          id: normalTask.id + '__0',
+          type: TimelineViewEntryType.SplitTaskContinued,
+          time: getDateTimeFromClockString('11:00', 0),
+          data: {
+            title: normalTask.title,
+            timeToGo: hours(2),
+            taskId: normalTask.id,
+            index: 0,
+          },
+          isHideTime: false,
+        },
+        {
+          id: scheduledTask2.id,
+          type: TimelineViewEntryType.ScheduledTask,
+          time: scheduledTask2.plannedAt,
+          data: scheduledTask2,
+          isHideTime: false,
+        },
+        {
+          id: normalTask.id + '__1',
+          type: TimelineViewEntryType.SplitTaskContinuedLast,
+          time: getDateTimeFromClockString('13:00', 0),
+          data: {
+            title: normalTask.title,
+            // TODO fix
+            // timeToGo: hours(2),
+            timeToGo: 0,
+            taskId: normalTask.id,
+            index: 1,
+          },
+          isHideTime: false,
+        },
+      ]);
     });
   });
 

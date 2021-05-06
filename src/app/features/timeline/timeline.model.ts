@@ -26,12 +26,17 @@ interface TimelineViewEntryBase {
 }
 
 interface TimelineViewEntryTask extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.Task | TimelineViewEntryType.ScheduledTask | TimelineViewEntryType.SplitTask;
+  type:
+    | TimelineViewEntryType.Task
+    | TimelineViewEntryType.ScheduledTask
+    | TimelineViewEntryType.SplitTask;
   data: TaskCopy;
 }
 
 interface TimelineViewEntrySplitTaskContinued extends TimelineViewEntryBase {
-  type: TimelineViewEntryType.SplitTaskContinued | TimelineViewEntryType.SplitTaskContinuedLast;
+  type:
+    | TimelineViewEntryType.SplitTaskContinued
+    | TimelineViewEntryType.SplitTaskContinuedLast;
   data: {
     title: string;
     timeToGo: number;
@@ -68,12 +73,11 @@ interface TimelineViewEntryWorkEnd extends TimelineViewEntryBase {
 }
 
 export type TimelineViewEntry =
-  TimelineViewEntryTask
+  | TimelineViewEntryTask
   | TimelineViewEntrySplitTaskContinued
   | TimelineViewEntryCustomEvent
   | TimelineViewEntryWorkStart
-  | TimelineViewEntryWorkEnd
-  ;
+  | TimelineViewEntryWorkEnd;
 
 // -----------------
 // BlockedBlocks
@@ -97,7 +101,7 @@ export interface BlockedBlockEntryWorkdayStartEnd {
 }
 
 export type BlockedBlockEntry =
-  BlockedBlockEntryScheduledTask
+  | BlockedBlockEntryScheduledTask
   | BlockedBlockEntryWorkdayStartEnd;
 
 export interface BlockedBlock {
@@ -105,4 +109,3 @@ export interface BlockedBlock {
   end: number;
   entries: BlockedBlockEntry[];
 }
-

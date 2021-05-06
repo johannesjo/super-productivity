@@ -38,7 +38,7 @@ describe('createBlockerBlocks()', () => {
         title: 'Scheduled 2 15:30',
         reminderId: 'xlg47DKt6',
         plannedAt: getDateTimeFromClockString('12:30', 0),
-      }
+      },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks);
     expect(r.length).toEqual(1);
@@ -87,7 +87,7 @@ describe('createBlockerBlocks()', () => {
         title: 'Scheduled 2 17:30',
         reminderId: 'xlg47DKt6',
         plannedAt: getDateTimeFromClockString('17:30', 0),
-      }
+      },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks);
     expect(r.length).toEqual(2);
@@ -152,82 +152,86 @@ describe('createBlockerBlocks()', () => {
       {
         ...BASE_REMINDER_TASK('15:30'),
         timeEstimate: hours(2.5),
-      }
+      },
     ] as any;
 
     const r = createSortedBlockerBlocks(fakeTasks);
 
     expect(r.length).toEqual(2);
-    expect(r).toEqual([{
-      start: getDateTimeFromClockString('15:00', 0),
-      end: getDateTimeFromClockString('19:00', 0),
-      entries: [{
-        data:
+    expect(r).toEqual([
+      {
+        start: getDateTimeFromClockString('15:00', 0),
+        end: getDateTimeFromClockString('19:00', 0),
+        entries: [
           {
-            plannedAt: 54000000,
-            reminderId: 'xxx',
-            timeEstimate: 0,
-            timeSpent: 0,
-            title: '16:00 no duration'
+            data: {
+              plannedAt: 54000000,
+              reminderId: 'xxx',
+              timeEstimate: 0,
+              timeSpent: 0,
+              title: '16:00 no duration',
+            },
+            end: 54000000,
+            start: 54000000,
+            type: 'ScheduledTask',
           },
-        end: 54000000,
-        start: 54000000,
-        type: 'ScheduledTask'
-      }, {
-        data:
           {
-            plannedAt: 50400000,
-            reminderId: 'xxx',
-            timeEstimate: 3600000,
-            timeSpent: 0,
-            title: '15:00  – reminderTask'
+            data: {
+              plannedAt: 50400000,
+              reminderId: 'xxx',
+              timeEstimate: 3600000,
+              timeSpent: 0,
+              title: '15:00  – reminderTask',
+            },
+            end: 54000000,
+            start: 50400000,
+            type: 'ScheduledTask',
           },
-        end: 54000000,
-        start: 50400000,
-        type: 'ScheduledTask'
-      }, {
-        data:
           {
-            plannedAt: 52200000,
-            reminderId: 'xxx',
-            timeEstimate: 9000000,
-            timeSpent: 0,
-            title: '15:30  – reminderTask'
+            data: {
+              plannedAt: 52200000,
+              reminderId: 'xxx',
+              timeEstimate: 9000000,
+              timeSpent: 0,
+              title: '15:30  – reminderTask',
+            },
+            end: 61200000,
+            start: 52200000,
+            type: 'ScheduledTask',
           },
-        end: 61200000,
-        start: 52200000,
-        type: 'ScheduledTask'
-      }, {
-        data:
           {
-            plannedAt: 57600000,
-            reminderId: 'xxx',
-            timeEstimate: 7200000,
-            timeSpent: 0,
-            title: '17:00  – reminderTask'
+            data: {
+              plannedAt: 57600000,
+              reminderId: 'xxx',
+              timeEstimate: 7200000,
+              timeSpent: 0,
+              title: '17:00  – reminderTask',
+            },
+            end: 64800000,
+            start: 57600000,
+            type: 'ScheduledTask',
           },
-        end: 64800000,
-        start: 57600000,
-        type: 'ScheduledTask'
-      }],
-    }, {
-      start: getDateTimeFromClockString('23:00', 0),
-      end: getDateTimeFromClockString('23:00', 0) + hours(1),
-      entries: [{
-        data:
+        ],
+      },
+      {
+        start: getDateTimeFromClockString('23:00', 0),
+        end: getDateTimeFromClockString('23:00', 0) + hours(1),
+        entries: [
           {
-            plannedAt: 79200000,
-            reminderId: 'xxx',
-            timeEstimate: hours(1),
-            timeSpent: 0,
-            title: '23:00 standalone'
+            data: {
+              plannedAt: 79200000,
+              reminderId: 'xxx',
+              timeEstimate: hours(1),
+              timeSpent: 0,
+              title: '23:00 standalone',
+            },
+            end: 82800000,
+            start: 79200000,
+            type: 'ScheduledTask',
           },
-        end: 82800000,
-        start: 79200000,
-        type: 'ScheduledTask'
-      }],
-
-    }] as any);
+        ],
+      },
+    ] as any);
   });
 
   it('should work with far future entries', () => {
@@ -252,7 +256,7 @@ describe('createBlockerBlocks()', () => {
         ...BASE_REMINDER_TASK('15:30', 'TOMORROW'),
         plannedAt: getDateTimeFromClockString('15:30', hours(24)),
         timeEstimate: hours(2.5),
-      }
+      },
     ] as any;
 
     const r = createSortedBlockerBlocks(fakeTasks);
@@ -273,86 +277,94 @@ describe('createBlockerBlocks()', () => {
   });
 
   it('should work for advanced scenario', () => {
-    const fakeTasks: TaskWithReminder[] = [{
-      id: '0LtuSnH8s',
-      projectId: null,
-      subTaskIds: [],
-      timeSpentOnDay: {},
-      timeSpent: 0,
-      timeEstimate: 7200000,
-      isDone: false,
-      doneOn: null,
-      title: 'Scheduled 3 17:00',
-      notes: '',
-      tagIds: ['TODAY'],
-      parentId: null,
-      reminderId: 'FeKPSsB_L',
-      created: 1620028156706,
-      repeatCfgId: null,
-      plannedAt: 1620054000000,
-      _showSubTasksMode: 2,
-      attachments: [],
-      issueId: null,
-      issuePoints: null,
-      issueType: null,
-      issueAttachmentNr: null,
-      issueLastUpdated: null,
-      issueWasUpdated: null
-    }, {
-      id: '68K0kYJ2s',
-      projectId: null,
-      subTaskIds: [],
-      timeSpentOnDay: {},
-      timeSpent: 0,
-      timeEstimate: 3600000,
-      isDone: false,
-      doneOn: null,
-      title: 'Scheduled 1 15:00',
-      notes: '',
-      tagIds: ['TODAY'],
-      parentId: null,
-      reminderId: 'rhCi_JJyP',
-      created: 1619985034709,
-      repeatCfgId: null,
-      plannedAt: 1620046800000,
-      _showSubTasksMode: 2,
-      attachments: [],
-      issueId: null,
-      issuePoints: null,
-      issueType: null,
-      issueAttachmentNr: null,
-      issueLastUpdated: null,
-      issueWasUpdated: null
-    }, {
-      id: '9JTnZa-VW',
-      projectId: null,
-      subTaskIds: [],
-      timeSpentOnDay: {},
-      timeSpent: 0,
-      timeEstimate: 9000000,
-      isDone: false,
-      doneOn: null,
-      title: 'Scheduled 2 15:30',
-      notes: '',
-      tagIds: ['TODAY'],
-      parentId: null,
-      reminderId: 'xlg47DKt6',
-      created: 1620027763328,
-      repeatCfgId: null,
-      plannedAt: 1620048600000,
-      _showSubTasksMode: 2,
-      attachments: [],
-      issueId: null,
-      issuePoints: null,
-      issueType: null,
-      issueAttachmentNr: null,
-      issueLastUpdated: null,
-      issueWasUpdated: null
-    }] as any;
+    const fakeTasks: TaskWithReminder[] = [
+      {
+        id: '0LtuSnH8s',
+        projectId: null,
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 7200000,
+        isDone: false,
+        doneOn: null,
+        title: 'Scheduled 3 17:00',
+        notes: '',
+        tagIds: ['TODAY'],
+        parentId: null,
+        reminderId: 'FeKPSsB_L',
+        created: 1620028156706,
+        repeatCfgId: null,
+        plannedAt: 1620054000000,
+        _showSubTasksMode: 2,
+        attachments: [],
+        issueId: null,
+        issuePoints: null,
+        issueType: null,
+        issueAttachmentNr: null,
+        issueLastUpdated: null,
+        issueWasUpdated: null,
+      },
+      {
+        id: '68K0kYJ2s',
+        projectId: null,
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 3600000,
+        isDone: false,
+        doneOn: null,
+        title: 'Scheduled 1 15:00',
+        notes: '',
+        tagIds: ['TODAY'],
+        parentId: null,
+        reminderId: 'rhCi_JJyP',
+        created: 1619985034709,
+        repeatCfgId: null,
+        plannedAt: 1620046800000,
+        _showSubTasksMode: 2,
+        attachments: [],
+        issueId: null,
+        issuePoints: null,
+        issueType: null,
+        issueAttachmentNr: null,
+        issueLastUpdated: null,
+        issueWasUpdated: null,
+      },
+      {
+        id: '9JTnZa-VW',
+        projectId: null,
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 9000000,
+        isDone: false,
+        doneOn: null,
+        title: 'Scheduled 2 15:30',
+        notes: '',
+        tagIds: ['TODAY'],
+        parentId: null,
+        reminderId: 'xlg47DKt6',
+        created: 1620027763328,
+        repeatCfgId: null,
+        plannedAt: 1620048600000,
+        _showSubTasksMode: 2,
+        attachments: [],
+        issueId: null,
+        issuePoints: null,
+        issueType: null,
+        issueAttachmentNr: null,
+        issueLastUpdated: null,
+        issueWasUpdated: null,
+      },
+    ] as any;
     const r = createSortedBlockerBlocks(fakeTasks);
 
     expect(r.length).toEqual(1);
-    expect(r[0].start).toEqual(getDateTimeFromClockString('15:00', new Date(1620048600000)));
-    expect(r[0].end).toEqual(getDateTimeFromClockString('19:00', new Date(1620048600000)));
+    expect(r[0].start).toEqual(
+      getDateTimeFromClockString('15:00', new Date(1620048600000)),
+    );
+    expect(r[0].end).toEqual(
+      getDateTimeFromClockString('19:00', new Date(1620048600000)),
+    );
   });
 });
