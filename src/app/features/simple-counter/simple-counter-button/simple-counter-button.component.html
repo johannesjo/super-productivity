@@ -1,30 +1,35 @@
-<div *ngIf="simpleCounter"
-     class="wrapper">
+<div *ngIf="simpleCounter" class="wrapper">
   <ng-container *ngIf="simpleCounter.type===SimpleCounterType.StopWatch">
-    <button (click)="toggleStopwatch()"
-            (contextmenu)="edit($event)"
-            (longPress)="edit()"
-            [color]="simpleCounter.isOn? 'accent': ''"
-            class="main-btn stopwatch"
-            mat-mini-fab>
+    <button
+      (click)="toggleStopwatch()"
+      (contextmenu)="edit($event)"
+      (longPress)="edit()"
+      [color]="simpleCounter.isOn? 'accent': ''"
+      class="main-btn stopwatch"
+      mat-mini-fab
+    >
       <mat-icon *ngIf="!simpleCounter.isOn">{{simpleCounter.icon}}</mat-icon>
       <mat-icon *ngIf="simpleCounter.isOn">{{simpleCounter.iconOn}}</mat-icon>
     </button>
-    <div *ngIf="simpleCounter.countOnDay[todayStr]"
-         class="label">{{simpleCounter.countOnDay[todayStr]|msToMinuteClockString}}</div>
+    <div *ngIf="simpleCounter.countOnDay[todayStr]" class="label">
+      {{simpleCounter.countOnDay[todayStr]|msToMinuteClockString}}
+    </div>
   </ng-container>
 
   <ng-container *ngIf="simpleCounter.type===SimpleCounterType.ClickCounter">
-    <button (click)="toggleCounter()"
-            (contextmenu)="edit($event)"
-            (longPress)="edit()"
-            class="main-btn"
-            color=""
-            mat-mini-fab>
+    <button
+      (click)="toggleCounter()"
+      (contextmenu)="edit($event)"
+      (longPress)="edit()"
+      class="main-btn"
+      color=""
+      mat-mini-fab
+    >
       <mat-icon>{{simpleCounter.icon}}</mat-icon>
     </button>
-    <div *ngIf="simpleCounter.countOnDay[todayStr]"
-         class="label">{{simpleCounter.countOnDay[todayStr]}}</div>
+    <div *ngIf="simpleCounter.countOnDay[todayStr]" class="label">
+      {{simpleCounter.countOnDay[todayStr]}}
+    </div>
   </ng-container>
 
   <!--  <div class="controls">-->

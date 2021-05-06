@@ -1,24 +1,21 @@
 <mat-form-field>
-  <input [formControl]="taskSelectCtrl"
-         [matAutocomplete]="auto"
-         [placeholder]="T.F.TASK.SELECT_OR_CREATE|translate"
-         matInput
-         required>
-  <mat-icon *ngIf="!isCreate"
-            matSuffix="">track_changes
-  </mat-icon>
-  <mat-icon *ngIf="isCreate"
-            matSuffix="">add
-  </mat-icon>
+  <input
+    [formControl]="taskSelectCtrl"
+    [matAutocomplete]="auto"
+    [placeholder]="T.F.TASK.SELECT_OR_CREATE|translate"
+    matInput
+    required
+  />
+  <mat-icon *ngIf="!isCreate" matSuffix="">track_changes </mat-icon>
+  <mat-icon *ngIf="isCreate" matSuffix="">add </mat-icon>
 
-  <mat-autocomplete #auto="matAutocomplete"
-                    [autoActiveFirstOption]="true"
-                    [displayWith]="displayWith">
-    <mat-option *ngFor="let task of filteredTasks; trackBy:trackById"
-                [value]="task">
+  <mat-autocomplete
+    #auto="matAutocomplete"
+    [autoActiveFirstOption]="true"
+    [displayWith]="displayWith"
+  >
+    <mat-option *ngFor="let task of filteredTasks; trackBy:trackById" [value]="task">
       <span>{{ task?.title}}</span>
     </mat-option>
-
   </mat-autocomplete>
 </mat-form-field>
-

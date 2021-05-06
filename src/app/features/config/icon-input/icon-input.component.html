@@ -1,16 +1,19 @@
 <!-- TODO make this work -->
 <!--<mat-icon matSuffix="">{{formControl.value}}</mat-icon>-->
 
-<input [formControl]="formControl"
-       [formlyAttributes]="field"
-       [matAutocomplete]="auto"
-       matInput
-       type="text">
+<input
+  [formControl]="formControl"
+  [formlyAttributes]="field"
+  [matAutocomplete]="auto"
+  matInput
+  type="text"
+/>
 
-<mat-autocomplete #auto="matAutocomplete"
-                  [autoActiveFirstOption]="false">
-  <mat-option *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
-              [value]="icon">
+<mat-autocomplete #auto="matAutocomplete" [autoActiveFirstOption]="false">
+  <mat-option
+    *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
+    [value]="icon"
+  >
     <mat-icon>{{icon}}</mat-icon>
     <span>{{icon}}</span>
   </mat-option>

@@ -1,40 +1,44 @@
-<form #form="ngForm"
-      (submit)="submit()">
-  <h1 mat-dialog-title>{{ (attachmentCopy.id ?
-    (T.F.ATTACHMENT.DIALOG_EDIT.EDIT_ATTACHMENT) :
-    (T.F.ATTACHMENT.DIALOG_EDIT.ADD_ATTACHMENT))
-    |translate }}</h1>
+<form #form="ngForm" (submit)="submit()">
+  <h1 mat-dialog-title>
+    {{ (attachmentCopy.id ? (T.F.ATTACHMENT.DIALOG_EDIT.EDIT_ATTACHMENT) :
+    (T.F.ATTACHMENT.DIALOG_EDIT.ADD_ATTACHMENT)) |translate }}
+  </h1>
 
   <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field>
-        <input [(ngModel)]="attachmentCopy.path"
-               [placeholder]="mapTypeToLabel(attachmentCopy.type)|translate"
-               matInput
-               name="path"
-               required
-
-               type="text">
+        <input
+          [(ngModel)]="attachmentCopy.path"
+          [placeholder]="mapTypeToLabel(attachmentCopy.type)|translate"
+          matInput
+          name="path"
+          required
+          type="text"
+        />
       </mat-form-field>
       <mat-form-field>
-        <input [(ngModel)]="attachmentCopy.title"
-               [placeholder]="(T.G.TITLE|translate)"
-               autofocus="autofocus"
-               matInput
-               name="title"
-
-               type="text">
+        <input
+          [(ngModel)]="attachmentCopy.title"
+          [placeholder]="(T.G.TITLE|translate)"
+          autofocus="autofocus"
+          matInput
+          name="title"
+          type="text"
+        />
       </mat-form-field>
 
       <mat-form-field>
-        <mat-select [(ngModel)]="attachmentCopy.type"
-                    [placeholder]="(T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE|translate)"
-                    name="type"
-                    required="true"
+        <mat-select
+          [(ngModel)]="attachmentCopy.type"
+          [placeholder]="(T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE|translate)"
+          name="type"
+          required="true"
         >
-          <mat-option *ngFor="let type of types; trackBy:trackByIndex"
-                      [innerHtml]="(type.title|translate)"
-                      [value]="type.type">
+          <mat-option
+            *ngFor="let type of types; trackBy:trackByIndex"
+            [innerHtml]="(type.title|translate)"
+            [value]="type.type"
+          >
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -42,17 +46,11 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button (click)="close()"
-            color="primary"
-            mat-button
-            type="button">
+    <button (click)="close()" color="primary" mat-button type="button">
       {{T.G.CANCEL|translate}}
     </button>
 
-    <button [disabled]="!form.valid"
-            color="primary"
-            mat-stroked-button
-            type="submit">
+    <button [disabled]="!form.valid" color="primary" mat-stroked-button type="submit">
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}
     </button>

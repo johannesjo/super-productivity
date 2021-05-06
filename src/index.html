@@ -1,232 +1,281 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Super Productivity</title>
+  <head>
+    <meta charset="utf-8" />
+    <title>Super Productivity</title>
 
-  <meta content="width=device-width, initial-scale=1"
-        name="viewport">
-  <link href="favicon.ico"
-        rel="shortcut icon"
-        type="image/x-icon">
-  <link href="assets/icons/apple-touch-icon.png"
-        rel="apple-touch-icon"
-        sizes="180x180">
-  <link href="assets/icons/favicon-16x16.png"
-        rel="icon"
-        sizes="16x16"
-        type="image/png">
-  <link href="assets/icons/favicon-32x32.png"
-        rel="icon"
-        sizes="32x32"
-        type="image/png">
-  <link href="assets/icons/favicon-192x192.png"
-        rel="icon"
-        sizes="192x192"
-        type="image/png">
-  <link color="#5bbad5"
-        href="assets/icons/safari-pinned-tab.svg"
-        rel="mask-icon">
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link
+      href="assets/icons/apple-touch-icon.png"
+      rel="apple-touch-icon"
+      sizes="180x180"
+    />
+    <link
+      href="assets/icons/favicon-16x16.png"
+      rel="icon"
+      sizes="16x16"
+      type="image/png"
+    />
+    <link
+      href="assets/icons/favicon-32x32.png"
+      rel="icon"
+      sizes="32x32"
+      type="image/png"
+    />
+    <link
+      href="assets/icons/favicon-192x192.png"
+      rel="icon"
+      sizes="192x192"
+      type="image/png"
+    />
+    <link color="#5bbad5" href="assets/icons/safari-pinned-tab.svg" rel="mask-icon" />
 
-  <meta content="assets/icons/s/mstile-150x150.png"
-        name="msapplication-TileImage">
-  <meta content="#0b77d2"
-        name="msapplication-TileColor">
+    <meta content="assets/icons/s/mstile-150x150.png" name="msapplication-TileImage" />
+    <meta content="#0b77d2" name="msapplication-TileColor" />
 
-  <link href="manifest.json"
-        rel="manifest">
-  <meta content="#0b77d2"
-        name="theme-color">
-  <meta content="yes"
-        name="mobile-web-app-capable">
-  <meta content="#2b5797"
-        name="msapplication-TileColor">
-  <meta content="assets/icons/browserconfig.xml"
-        name="msapplication-config" />
-  <!-- Enable all requests and inline styles for painless development.
+    <link href="manifest.json" rel="manifest" />
+    <meta content="#0b77d2" name="theme-color" />
+    <meta content="yes" name="mobile-web-app-capable" />
+    <meta content="#2b5797" name="msapplication-TileColor" />
+    <meta content="assets/icons/browserconfig.xml" name="msapplication-config" />
+    <!-- Enable all requests and inline styles for painless development.
 TODO configure more restrictive Content-Security-Policy
 @see http://content-security-policy.com/
 @see http://www.html5rocks.com/en/tutorials/security/content-security-policy/ -->
-  <meta content="default-src *;
+    <meta
+      content="default-src *;
           frame-src * data:;
           font-src * data:;
           img-src * data: filesystem: file:;
           style-src * 'unsafe-inline' ;
           script-src * 'self' 'unsafe-inline' 'unsafe-eval'"
-        http-equiv="Content-Security-Policy">
-  <base href="./">
-  <style type="text/css">
-    html,
-    body {
-      height: 100%;
-    }
-
-    body {
-      background-position: center !important;
-      background-repeat: no-repeat;
-      background-size: cover !important;
-      background-image: url(./assets/bg/NIGHT_manuel-will.jpg);
-      height: 100%;
-      padding: 0;
-      margin: 0;
-      color: #fff;
-    }
-
-    @media (prefers-color-scheme: light) {
+      http-equiv="Content-Security-Policy"
+    />
+    <base href="./" />
+    <style type="text/css">
+      html,
       body {
-        background: transparent;
-        background-image: none;
-        color: #000000;
+        height: 100%;
       }
-    }
 
-    .loading-full-page-wrapper {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      cursor: grab;
-      -webkit-app-region: drag;
-    }
-
-    .loading-full-page-wrapper:active {
-      cursor: grabbing;
-    }
-
-    .app-loading {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .app-loading .logo {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 90px;
-      height: 90px;
-    }
-
-    .app-loading .spinner {
-      width: 140px;
-      height: 140px;
-
-      position: relative;
-      margin: 100px auto;
-    }
-
-    .app-loading .double-bounce1,
-    .app-loading .double-bounce2 {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background-color: #6495ED;
-      opacity: 0.6;
-      position: absolute;
-      top: 0;
-      left: 0;
-
-      -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
-      animation: sk-bounce 2.0s infinite ease-in-out;
-    }
-
-    .app-loading .double-bounce2 {
-      -webkit-animation-delay: -1.0s;
-      animation-delay: -1.0s;
-    }
-
-    .productivity-tip {
-      text-align: center;
-      position: absolute;
-      width: 400px;
-      max-width: 80vw;
-      left: 50%;
-      transform: translate(-50%);
-      bottom: 70%;
-      padding-bottom: 10px;
-    }
-
-
-    .app-loading .productivity-tip h2 {
-      font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
-      margin: 0 0 8px !important;
-    }
-
-    .app-loading .productivity-tip p {
-      font: 400 14px/20px Roboto, "Helvetica Neue", sans-serif;
-      margin: 0 0 8px !important;
-    }
-
-
-    @keyframes sk-bounce {
-      0%, 100% {
-        transform: scale(0.0);
-        -webkit-transform: scale(0.0);
+      body {
+        background-position: center !important;
+        background-repeat: no-repeat;
+        background-size: cover !important;
+        background-image: url(./assets/bg/NIGHT_manuel-will.jpg);
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        color: #fff;
       }
-      50% {
-        transform: scale(1.0);
-        -webkit-transform: scale(1.0);
+
+      @media (prefers-color-scheme: light) {
+        body {
+          background: transparent;
+          background-image: none;
+          color: #000000;
+        }
       }
-    }
-  </style>
-</head>
-<body class="mat-typography">
-<app-root>
-  <div class="loading-full-page-wrapper">
-    <div class="app-loading">
-      <div class="productivity-tip">
-        <h2 id="heading">Heading</h2>
-        <p id="text">Text</p>
-      </div>
 
-      <div class="spinner">
-        <div class="double-bounce1"></div>
-        <div class="double-bounce2"></div>
-      </div>
+      .loading-full-page-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        cursor: grab;
+        -webkit-app-region: drag;
+      }
 
-      <svg class="logo"
-           viewBox="0 0 64 64">
-        <path d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+      .loading-full-page-wrapper:active {
+        cursor: grabbing;
+      }
+
+      .app-loading {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .app-loading .logo {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 90px;
+        height: 90px;
+      }
+
+      .app-loading .spinner {
+        width: 140px;
+        height: 140px;
+
+        position: relative;
+        margin: 100px auto;
+      }
+
+      .app-loading .double-bounce1,
+      .app-loading .double-bounce2 {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #6495ed;
+        opacity: 0.6;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        -webkit-animation: sk-bounce 2s infinite ease-in-out;
+        animation: sk-bounce 2s infinite ease-in-out;
+      }
+
+      .app-loading .double-bounce2 {
+        -webkit-animation-delay: -1s;
+        animation-delay: -1s;
+      }
+
+      .productivity-tip {
+        text-align: center;
+        position: absolute;
+        width: 400px;
+        max-width: 80vw;
+        left: 50%;
+        transform: translate(-50%);
+        bottom: 70%;
+        padding-bottom: 10px;
+      }
+
+      .app-loading .productivity-tip h2 {
+        font: 500 20px/32px Roboto, 'Helvetica Neue', sans-serif;
+        margin: 0 0 8px !important;
+      }
+
+      .app-loading .productivity-tip p {
+        font: 400 14px/20px Roboto, 'Helvetica Neue', sans-serif;
+        margin: 0 0 8px !important;
+      }
+
+      @keyframes sk-bounce {
+        0%,
+        100% {
+          transform: scale(0);
+          -webkit-transform: scale(0);
+        }
+        50% {
+          transform: scale(1);
+          -webkit-transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body class="mat-typography">
+    <app-root>
+      <div class="loading-full-page-wrapper">
+        <div class="app-loading">
+          <div class="productivity-tip">
+            <h2 id="heading">Heading</h2>
+            <p id="text">Text</p>
+          </div>
+
+          <div class="spinner">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+          </div>
+
+          <svg class="logo" viewBox="0 0 64 64">
+            <path
+              d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
               id="path3395"
-              style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1" />
-      </svg>
-    </div>
-  </div>
-</app-root>
-<noscript>Please enable JavaScript to continue using this application.</noscript>
-<script>
-  var productivityTips = [
-    ['2 Step Super Productivity', '1. Physically get in your work position. 2. Do one small thing.'],
-    ['Prioritize', 'Do first things first.'],
-    ['Procrastination', 'Procrastination is an emotion regulation problem, not a time management problem.'],
-    ['π', 'When in doubt use the magic programmers estimation factor to calculate time estimates. Programmers estimate times π.'],
-    ['Be realistic', 'Almost everything will take longer than you think.'],
-    ['Good is good enough', 'Don`t aim for perfection. Focus on the important things.'],
-    ['Distractions', 'If something is distracting you, get rid of it. If you can`t get it out of your head and you can deal with it later, write it down.'],
-    ['Fun things first', 'The dopamine can get you through the rest.'],
-    ['Celebrate!', 'After completing a task, don`t rush to the next! Give yourself some time to feel good about yourself.'],
-    ['Establish Routines', 'Decisions cost time. So establishing routines can be very helpful.'],
-    ['Take breaks', 'They help you clear your mind and make you almost always more productive in the long run. Go! Take a walk!'],
-    ['Mess creates stress', 'Clean up your desk!'],
-    ['Focus on a single task', 'Multi-tasking is the worst.'],
-    ['Set your goals', 'Having a goal to aim for (or even some smaller ones) increases motivation and focus. Remind yourself why you are doing something.'],
-    ['Try to get it right the first time', 'This can help you to avoid dragging a task on forever.'],
-    ['We are what we repeatedly do.', 'Excellence, then, is not an act, but a habit. – Aristotle'],
-    ['You don’t learn to walk by following rules.', 'You learn by doing, and by falling over. – Richard Branson'],
-    ['A problem well-put is half-solved', '― John Dewey'],
-    ['Wisdom is learning what to overlook', '― William James'],
-    ['It is not that I’m so smart', 'But I stay with the questions much longer – Albert Einstein'],
-    ['No problem can withstand the assault of sustained thinking', '― Voltaire'],
-    ['I have not failed. I\'ve just found 10,000 ways that won\'t work.', '― Thomas A. Edison'],
-  ];
-  var randomIndex = Math.floor(Math.random() * productivityTips.length);
-  document.getElementById('heading').innerText = productivityTips[randomIndex][0];
-  document.getElementById('text').innerText = productivityTips[randomIndex][1];
-
-
-</script>
-</body>
+              style="
+                fill: #000000;
+                fill-opacity: 1;
+                fill-rule: evenodd;
+                stroke: none;
+                stroke-width: 1.46761858;
+                stroke-linecap: butt;
+                stroke-linejoin: bevel;
+                stroke-miterlimit: 13.80000019;
+                stroke-dasharray: none;
+                stroke-opacity: 1;
+              "
+            />
+          </svg>
+        </div>
+      </div>
+    </app-root>
+    <noscript>Please enable JavaScript to continue using this application.</noscript>
+    <script>
+      var productivityTips = [
+        [
+          '2 Step Super Productivity',
+          '1. Physically get in your work position. 2. Do one small thing.',
+        ],
+        ['Prioritize', 'Do first things first.'],
+        [
+          'Procrastination',
+          'Procrastination is an emotion regulation problem, not a time management problem.',
+        ],
+        [
+          'π',
+          'When in doubt use the magic programmers estimation factor to calculate time estimates. Programmers estimate times π.',
+        ],
+        ['Be realistic', 'Almost everything will take longer than you think.'],
+        [
+          'Good is good enough',
+          'Don`t aim for perfection. Focus on the important things.',
+        ],
+        [
+          'Distractions',
+          'If something is distracting you, get rid of it. If you can`t get it out of your head and you can deal with it later, write it down.',
+        ],
+        ['Fun things first', 'The dopamine can get you through the rest.'],
+        [
+          'Celebrate!',
+          'After completing a task, don`t rush to the next! Give yourself some time to feel good about yourself.',
+        ],
+        [
+          'Establish Routines',
+          'Decisions cost time. So establishing routines can be very helpful.',
+        ],
+        [
+          'Take breaks',
+          'They help you clear your mind and make you almost always more productive in the long run. Go! Take a walk!',
+        ],
+        ['Mess creates stress', 'Clean up your desk!'],
+        ['Focus on a single task', 'Multi-tasking is the worst.'],
+        [
+          'Set your goals',
+          'Having a goal to aim for (or even some smaller ones) increases motivation and focus. Remind yourself why you are doing something.',
+        ],
+        [
+          'Try to get it right the first time',
+          'This can help you to avoid dragging a task on forever.',
+        ],
+        [
+          'We are what we repeatedly do.',
+          'Excellence, then, is not an act, but a habit. – Aristotle',
+        ],
+        [
+          'You don’t learn to walk by following rules.',
+          'You learn by doing, and by falling over. – Richard Branson',
+        ],
+        ['A problem well-put is half-solved', '― John Dewey'],
+        ['Wisdom is learning what to overlook', '― William James'],
+        [
+          'It is not that I’m so smart',
+          'But I stay with the questions much longer – Albert Einstein',
+        ],
+        ['No problem can withstand the assault of sustained thinking', '― Voltaire'],
+        [
+          "I have not failed. I've just found 10,000 ways that won't work.",
+          '― Thomas A. Edison',
+        ],
+      ];
+      var randomIndex = Math.floor(Math.random() * productivityTips.length);
+      document.getElementById('heading').innerText = productivityTips[randomIndex][0];
+      document.getElementById('text').innerText = productivityTips[randomIndex][1];
+    </script>
+  </body>
 </html>

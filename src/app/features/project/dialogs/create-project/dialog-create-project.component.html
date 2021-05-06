@@ -3,62 +3,52 @@
   <span *ngIf="!projectData.id">{{T.F.PROJECT.D_CREATE.CREATE|translate}}</span>
 </h1>
 
-
-<form (ngSubmit)="submit()"
-      [formGroup]="formTheme">
+<form (ngSubmit)="submit()" [formGroup]="formTheme">
   <mat-dialog-content>
-
-    <formly-form (modelChange)="projectData = $event"
-                 [fields]="basicSettingsFormCfg"
-                 [form]="formBasic"
-                 [model]="projectData"
-                 [options]="formOptionsBasic">
+    <formly-form
+      (modelChange)="projectData = $event"
+      [fields]="basicSettingsFormCfg"
+      [form]="formBasic"
+      [model]="projectData"
+      [options]="formOptionsBasic"
+    >
     </formly-form>
-
 
     <div class="issue-provider-cfg">
       <div class="item">
-        <button (click)="openJiraCfg()"
-                color="primary"
-                mat-button
-                type="button">
-          <mat-icon *ngIf="!jiraCfg?.isEnabled"
-                    svgIcon="jira"></mat-icon>
+        <button (click)="openJiraCfg()" color="primary" mat-button type="button">
+          <mat-icon *ngIf="!jiraCfg?.isEnabled" svgIcon="jira"></mat-icon>
           <mat-icon *ngIf="jiraCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_JIRA|translate}}</span>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_JIRA|translate}}</span
+          >
         </button>
       </div>
       <div class="item">
-        <button (click)="openGithubCfg()"
-                color="primary"
-                mat-button
-                type="button">
-          <mat-icon *ngIf="!githubCfg?.repo"
-                    svgIcon="github"></mat-icon>
+        <button (click)="openGithubCfg()" color="primary" mat-button type="button">
+          <mat-icon *ngIf="!githubCfg?.repo" svgIcon="github"></mat-icon>
           <mat-icon *ngIf="githubCfg?.repo">checkmark</mat-icon>
-          <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_GIT|translate}}</span>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_GIT|translate}}</span
+          >
         </button>
       </div>
       <div class="item">
-        <button (click)="openGitlabCfg()"
-                color="primary"
-                mat-button
-                type="button">
-          <mat-icon *ngIf="!gitlabCfg?.project"
-                    svgIcon="gitlab"></mat-icon>
+        <button (click)="openGitlabCfg()" color="primary" mat-button type="button">
+          <mat-icon *ngIf="!gitlabCfg?.project" svgIcon="gitlab"></mat-icon>
           <mat-icon *ngIf="gitlabCfg?.project">checkmark</mat-icon>
-          <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_GITLAB|translate}}</span>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_GITLAB|translate}}</span
+          >
         </button>
       </div>
       <div class="item">
-        <button (click)="openCaldavCfg()"
-                color="primary"
-                mat-button
-                type="button">
-          <mat-icon *ngIf="!caldavCfg?.resourceName"
-                    svgIcon="caldav"></mat-icon>
+        <button (click)="openCaldavCfg()" color="primary" mat-button type="button">
+          <mat-icon *ngIf="!caldavCfg?.resourceName" svgIcon="caldav"></mat-icon>
           <mat-icon *ngIf="caldavCfg?.resourceName">checkmark</mat-icon>
-          <span style="padding-left: 8px;">{{T.F.PROJECT.D_CREATE.SETUP_CALDAV|translate}}</span>
+          <span style="padding-left: 8px"
+            >{{T.F.PROJECT.D_CREATE.SETUP_CALDAV|translate}}</span
+          >
         </button>
       </div>
       <!--<div class="item">-->
@@ -72,21 +62,24 @@
     </div>
   </mat-dialog-content>
 
-
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button (click)="cancelEdit()"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-button
-              type="button">
+      <button
+        (click)="cancelEdit()"
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-button
+        type="button"
+      >
         {{T.G.CANCEL|translate}}
       </button>
-      <button [disabled]="!formBasic.valid"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-stroked-button
-              type="submit">
+      <button
+        [disabled]="!formBasic.valid"
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-stroked-button
+        type="submit"
+      >
         {{T.G.SAVE|translate}}
       </button>
     </div>

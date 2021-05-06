@@ -2,55 +2,68 @@
   <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>
 </div>
 
-<mat-slide-toggle (ngModelChange)="toggleEnabled($event)"
-                  [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
-                  [ngModel]="cfg.isEnabled"
-                  name="isEnabled"
-                  style="margin-bottom: 8px;">
+<mat-slide-toggle
+  (ngModelChange)="toggleEnabled($event)"
+  [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
+  [ngModel]="cfg.isEnabled"
+  name="isEnabled"
+  style="margin-bottom: 8px"
+>
   {{T.F.JIRA.CFG_CMP.ENABLE|translate}}
 </mat-slide-toggle>
 
-<form (ngSubmit)="submit()"
-      [formGroup]="form"
-      [ngClass]="HelperClasses.isHideForNoAdvancedFeatures">
-
+<form
+  (ngSubmit)="submit()"
+  [formGroup]="form"
+  [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
+>
   <div *ngIf="cfg.isEnabled">
-    <formly-form (modelChange)="cfg=$event"
-                 [fields]="section?.items"
-                 [form]="form"
-                 [model]="cfg"
-                 [options]="options">
+    <formly-form
+      (modelChange)="cfg=$event"
+      [fields]="section?.items"
+      [form]="form"
+      [model]="cfg"
+      [options]="options"
+    >
     </formly-form>
 
     <h3 class="sub-section-heading">Transition Handling</h3>
-    <mat-slide-toggle [(ngModel)]="cfg.isTransitionIssuesEnabled"
-                      [ngModelOptions]="{standalone: true}"
-                      name="isTransitionIssuesEnabled"
-                      style="margin-bottom: 8px;">
+    <mat-slide-toggle
+      [(ngModel)]="cfg.isTransitionIssuesEnabled"
+      [ngModelOptions]="{standalone: true}"
+      name="isTransitionIssuesEnabled"
+      style="margin-bottom: 8px"
+    >
       {{T.F.JIRA.CFG_CMP.ENABLE_TRANSITIONS|translate}}
     </mat-slide-toggle>
 
-
-    <section *ngIf="cfg.isTransitionIssuesEnabled"
-             @expand>
+    <section *ngIf="cfg.isTransitionIssuesEnabled" @expand>
       <mat-form-field>
-        <input [formControl]="issueSuggestionsCtrl"
-               [matAutocomplete]="autoEl"
-               [placeholder]="T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate"
-               class="border-color-primary"
-               matInput>
+        <input
+          [formControl]="issueSuggestionsCtrl"
+          [matAutocomplete]="autoEl"
+          [placeholder]="T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate"
+          class="border-color-primary"
+          matInput
+        />
 
-        <mat-autocomplete #autoEl="matAutocomplete"
-                          (optionSelected)="updateTransitionOptions()"
-                          [autoActiveFirstOption]="true"
-                          [displayWith]="displayIssueWith">
-          <mat-option *ngIf="(isLoading$|async)"
-                      [value]="issueSuggestionsCtrl.value"
-                      class="is-loading">
+        <mat-autocomplete
+          #autoEl="matAutocomplete"
+          (optionSelected)="updateTransitionOptions()"
+          [autoActiveFirstOption]="true"
+          [displayWith]="displayIssueWith"
+        >
+          <mat-option
+            *ngIf="(isLoading$|async)"
+            [value]="issueSuggestionsCtrl.value"
+            class="is-loading"
+          >
             <mat-spinner diameter="50"></mat-spinner>
           </mat-option>
-          <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async); trackBy:trackByIssueId;"
-                      [value]="issue"><span>{{issue?.title}}</span>
+          <mat-option
+            *ngFor="let issue of (filteredIssueSuggestions$|async); trackBy:trackByIssueId;"
+            [value]="issue"
+            ><span>{{issue?.title}}</span>
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
@@ -58,18 +71,26 @@
       <div *ngFor="let opt of transitionConfigOpts">
         <mat-form-field>
           <label *ngIf="opt.key==='OPEN'">{{T.F.JIRA.CFG_CMP.OPEN|translate}}</label>
-          <label *ngIf="opt.key==='IN_PROGRESS'">{{T.F.JIRA.CFG_CMP.IN_PROGRESS|translate}}</label>
+          <label *ngIf="opt.key==='IN_PROGRESS'"
+            >{{T.F.JIRA.CFG_CMP.IN_PROGRESS|translate}}</label
+          >
           <label *ngIf="opt.key==='DONE'">{{T.F.JIRA.CFG_CMP.DONE|translate}}</label>
 
           <!-- TODO check for a better way to do this -->
           <!--          <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"-->
-          <mat-select (ngModelChange)="setTransition(opt.key, $event)"
-                      [ngModelOptions]="{standalone: true}"
-                      [ngModel]="getTransition(opt.key)">
+          <mat-select
+            (ngModelChange)="setTransition(opt.key, $event)"
+            [ngModelOptions]="{standalone: true}"
+            [ngModel]="getTransition(opt.key)"
+          >
             <mat-option value="DO_NOT">{{T.F.JIRA.CFG_CMP.DO_NOT|translate}}</mat-option>
-            <mat-option value="ALWAYS_ASK">{{T.F.JIRA.CFG_CMP.ALWAYS_ASK|translate}}</mat-option>
-            <mat-option *ngFor="let transition of cfg.availableTransitions"
-                        [value]="transition">
+            <mat-option value="ALWAYS_ASK"
+              >{{T.F.JIRA.CFG_CMP.ALWAYS_ASK|translate}}</mat-option
+            >
+            <mat-option
+              *ngFor="let transition of cfg.availableTransitions"
+              [value]="transition"
+            >
               {{transition.name}}
             </mat-option>
           </mat-select>
@@ -78,32 +99,42 @@
     </section>
 
     <section>
-      <h3 class="sub-section-heading">{{T.F.JIRA.CFG_CMP.MAP_CUSTOM_FIELDS|translate}}</h3>
+      <h3 class="sub-section-heading">
+        {{T.F.JIRA.CFG_CMP.MAP_CUSTOM_FIELDS|translate}}
+      </h3>
       <p>{{T.F.JIRA.CFG_CMP.MAP_CUSTOM_FIELDS_INFO|translate}}</p>
 
       <div>
-        <button (click)="loadCustomFields()"
-                [promiseBtn]="customFieldsPromise"
-                mat-raised-button
-                type="button">
+        <button
+          (click)="loadCustomFields()"
+          [promiseBtn]="customFieldsPromise"
+          mat-raised-button
+          type="button"
+        >
           {{T.F.JIRA.CFG_CMP.LOAD_SUGGESTIONS|translate}}
         </button>
-        <br>
-        <br>
+        <br />
+        <br />
       </div>
 
       <mat-form-field>
-        <input [(ngModel)]="cfg.storyPointFieldId"
-               [formControl]="customFieldSuggestionsCtrl"
-               [matAutocomplete]="storyPointAutoEl"
-               [placeholder]="T.F.JIRA.CFG_CMP.STORY_POINTS|translate"
-               class="border-color-primary"
-               matInput>
+        <input
+          [(ngModel)]="cfg.storyPointFieldId"
+          [formControl]="customFieldSuggestionsCtrl"
+          [matAutocomplete]="storyPointAutoEl"
+          [placeholder]="T.F.JIRA.CFG_CMP.STORY_POINTS|translate"
+          class="border-color-primary"
+          matInput
+        />
 
-        <mat-autocomplete #storyPointAutoEl="matAutocomplete"
-                          [autoActiveFirstOption]="true">
-          <mat-option *ngFor="let field of (filteredCustomFieldSuggestions$|async); trackBy:trackByCustomFieldId;"
-                      [value]="field.id"><span>{{field?.id}}: {{field?.name}}</span>
+        <mat-autocomplete
+          #storyPointAutoEl="matAutocomplete"
+          [autoActiveFirstOption]="true"
+        >
+          <mat-option
+            *ngFor="let field of (filteredCustomFieldSuggestions$|async); trackBy:trackByCustomFieldId;"
+            [value]="field.id"
+            ><span>{{field?.id}}: {{field?.name}}</span>
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
@@ -111,11 +142,13 @@
   </div>
 
   <div class="controls">
-    <button [disabled]="!form.valid && cfg.isEnabled"
-            class="btn btn-primary submit-button"
-            color="primary"
-            mat-raised-button
-            type="submit">
+    <button
+      [disabled]="!form.valid && cfg.isEnabled"
+      class="btn btn-primary submit-button"
+      color="primary"
+      mat-raised-button
+      type="submit"
+    >
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}
     </button>

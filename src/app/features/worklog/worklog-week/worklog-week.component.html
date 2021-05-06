@@ -2,68 +2,74 @@
 
 <div *ngIf="(worklogService.currentWeek$|async) as currentWeek else noData">
   <div class="days">
-    <div *ngFor="let day of currentWeek?.ent|keyvalue:sortDays trackBy: trackByDay; let i = index;"
-         class="day">
+    <div
+      *ngFor="let day of currentWeek?.ent|keyvalue:sortDays trackBy: trackByDay; let i = index;"
+      class="day"
+    >
       <div class="material-table">
-        <div (click)="visibility[i]=!visibility[i];"
-             class="caption"
-             mat-ripple>
-          <div><span *ngIf="visibility[i]"
-                     [@fade]>{{T.F.WORKLOG.WEEK.TITLE|translate}}</span></div>
+        <div (click)="visibility[i]=!visibility[i];" class="caption" mat-ripple>
+          <div>
+            <span *ngIf="visibility[i]" [@fade]
+              >{{T.F.WORKLOG.WEEK.TITLE|translate}}</span
+            >
+          </div>
           <div class="center-box">
             <div class="title">
               <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-              <div *ngIf="!visibility[i]"
-                   [@expandFade]
-                   class="icon-indicator-bar">
+              <div *ngIf="!visibility[i]" [@expandFade] class="icon-indicator-bar">
                 <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
                 &nbsp;
                 <mat-icon>list</mat-icon>
                 <strong>{{day.value.logEntries.length}}</strong>
-                <em *ngIf="day.value.workStart"><span class="spacer"></span>{{day.value.workStart|momentFormat:'HH:mm'}}
-                  - {{day.value.workEnd|momentFormat:'HH:mm'}}</em>
+                <em *ngIf="day.value.workStart"
+                  ><span class="spacer"></span
+                  >{{day.value.workStart|momentFormat:'HH:mm'}} -
+                  {{day.value.workEnd|momentFormat:'HH:mm'}}</em
+                >
 
                 <div class="simple-counter-items">
-                  <div *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"
-                       class="simple-counter-item">
+                  <div
+                    *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"
+                    class="simple-counter-item"
+                  >
                     <mat-icon inline="true">{{sc.iconOn || sc.icon}}</mat-icon>
-                    <div *ngIf="sc.type==='ClickCounter'"
-                         class="count">{{sc.countOnDay[day.value.dateStr] || 0}}</div>
-                    <div *ngIf="sc.type==='StopWatch'"
-                         class="count">{{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}</div>
+                    <div *ngIf="sc.type==='ClickCounter'" class="count">
+                      {{sc.countOnDay[day.value.dateStr] || 0}}
+                    </div>
+                    <div *ngIf="sc.type==='StopWatch'" class="count">
+                      {{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="with-icon">
-            <mat-icon *ngIf="visibility[i]"
-                      [@fade]>timer
-            </mat-icon>
+            <mat-icon *ngIf="visibility[i]" [@fade]>timer </mat-icon>
           </div>
         </div>
 
-        <table *ngIf="visibility[i]"
-               [@expandFade]
-               class="task-summary-table">
+        <table *ngIf="visibility[i]" [@expandFade] class="task-summary-table">
           <tr *ngFor="let logEntry of day.value.logEntries; trackBy: trackByLogEntry;">
-            <td [class.isSubTask]="logEntry.task.parentId"
-                class="title"
-                colspan>
+            <td [class.isSubTask]="logEntry.task.parentId" class="title" colspan>
               <span class="task-title">{{logEntry.task.title}}</span>
             </td>
             <td class="worked">
-              <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑ {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</span>
-              <inline-input (changed)="updateTimeSpentTodayForTask(logEntry.task,day.value.dateStr, $event)"
-                            *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
-                            [displayValue]="logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString"
-                            [type]="'duration'"
-                            [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]">
+              <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0"
+                >∑
+                {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</span
+              >
+              <inline-input
+                (changed)="updateTimeSpentTodayForTask(logEntry.task,day.value.dateStr, $event)"
+                *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
+                [displayValue]="logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString"
+                [type]="'duration'"
+                [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]"
+              >
               </inline-input>
             </td>
           </tr>
         </table>
-
 
         <!--        <div class="simple-counter-items">-->
         <!--          <div *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"-->
@@ -79,11 +85,8 @@
     </div>
   </div>
 
-
-  <div style="text-align: center; margin-top: 12px;">
-    <button (click)="exportData()"
-            color=""
-            mat-button>
+  <div style="text-align: center; margin-top: 12px">
+    <button (click)="exportData()" color="" mat-button>
       <mat-icon>call_made</mat-icon>
       {{T.F.WORKLOG.WEEK.EXPORT|translate}}
     </button>

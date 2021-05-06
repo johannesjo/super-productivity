@@ -2,38 +2,49 @@
   <full-page-spinner></full-page-spinner>
 </ng-template>
 
-<div *ngIf="(reminderService.isRemindersLoaded$|async); else spinner"
-     class="component-wrapper page-wrapper"
-     style="margin-top: 24px;">
-  <p *ngIf="!(scheduledTaskService.allScheduledTasks$|async)?.length"
-     class="no-scheduled-tasks">
+<div
+  *ngIf="(reminderService.isRemindersLoaded$|async); else spinner"
+  class="component-wrapper page-wrapper"
+  style="margin-top: 24px"
+>
+  <p
+    *ngIf="!(scheduledTaskService.allScheduledTasks$|async)?.length"
+    class="no-scheduled-tasks"
+  >
     {{T.SCHEDULE.NO_SCHEDULED|translate}}
   </p>
 
-  <div [@standardList]="(scheduledTaskService.allScheduledTasks$|async)?.length"
-       class="tasks">
+  <div
+    [@standardList]="(scheduledTaskService.allScheduledTasks$|async)?.length"
+    class="tasks"
+  >
     <mat-card
       *ngFor="let task of (scheduledTaskService.allScheduledTasks$|async); trackBy: trackByFn;"
-      class="scheduled-task">
+      class="scheduled-task"
+    >
       <mat-card-content>
         <div class="content">
-
           <div class="task-info">
             <div class="title">
-              <div (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal, task)"
-                   class="task-title"
-                   contentEditableOnClick
-                   contenteditable="true">{{task.title}}</div>
-              <tag-list [isShowProjectTagAlways]="true"
-                        [task]="task"></tag-list>
+              <div
+                (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal, task)"
+                class="task-title"
+                contentEditableOnClick
+                contenteditable="true"
+              >
+                {{task.title}}
+              </div>
+              <tag-list [isShowProjectTagAlways]="true" [task]="task"></tag-list>
             </div>
 
-            <div (click)="editReminder(task)"
-                 class="due-date"
-                 mat-ripple>
+            <div (click)="editReminder(task)" class="due-date" mat-ripple>
               <div class="date-and-time-left">
-                <div class="date hide-xs">{{task.reminderData.remindAt|date:'EE, d MMM, hh:mm'}}</div>
-                <div class="date show-xs-only">{{task.reminderData.remindAt|date:'d MMM, hh:mm'}}</div>
+                <div class="date hide-xs">
+                  {{task.reminderData.remindAt|date:'EE, d MMM, hh:mm'}}
+                </div>
+                <div class="date show-xs-only">
+                  {{task.reminderData.remindAt|date:'d MMM, hh:mm'}}
+                </div>
 
                 <div class="time-left">
                   ({{task.reminderData.remindAt|humanizeTimestamp}})
@@ -42,42 +53,51 @@
               <mat-icon>alarm</mat-icon>
             </div>
 
-            <button (click)="startTask(task)"
-                    [matTooltip]="T.SCHEDULE.START_TASK|translate"
-                    class="action-btn hide-xs"
-                    mat-icon-button>
+            <button
+              (click)="startTask(task)"
+              [matTooltip]="T.SCHEDULE.START_TASK|translate"
+              class="action-btn hide-xs"
+              mat-icon-button
+            >
               <mat-icon svgIcon="play"></mat-icon>
             </button>
 
-            <button (click)="toggleToday(task.parentData)"
-                    *ngIf="task.parentId && task.parentData"
-                    [matTooltip]="(task.parentData.tagIds.includes(TODAY_TAG.id)
+            <button
+              (click)="toggleToday(task.parentData)"
+              *ngIf="task.parentId && task.parentData"
+              [matTooltip]="(task.parentData.tagIds.includes(TODAY_TAG.id)
                     ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
                     :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
-                    class="action-btn"
-                    mat-icon-button>
-              <mat-icon *ngIf="task.parentData.tagIds.includes(TODAY_TAG.id)"
-                        svgIcon="remove_today"></mat-icon>
-              <mat-icon *ngIf="!task.parentData.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>
+              class="action-btn"
+              mat-icon-button
+            >
+              <mat-icon
+                *ngIf="task.parentData.tagIds.includes(TODAY_TAG.id)"
+                svgIcon="remove_today"
+              ></mat-icon>
+              <mat-icon *ngIf="!task.parentData.tagIds.includes(TODAY_TAG.id)"
+                >wb_sunny</mat-icon
+              >
             </button>
 
-            <button (click)="toggleToday(task)"
-                    *ngIf="!task.parentId"
-                    [matTooltip]="(task.tagIds.includes(TODAY_TAG.id)
+            <button
+              (click)="toggleToday(task)"
+              *ngIf="!task.parentId"
+              [matTooltip]="(task.tagIds.includes(TODAY_TAG.id)
                     ?T.F.TASK.CMP.REMOVE_FROM_MY_DAY
                     :T.F.TASK.CMP.ADD_TO_MY_DAY)|translate"
-                    class="action-btn"
-                    mat-icon-button>
-              <mat-icon *ngIf="task.tagIds.includes(TODAY_TAG.id)"
-                        svgIcon="remove_today"></mat-icon>
+              class="action-btn"
+              mat-icon-button
+            >
+              <mat-icon
+                *ngIf="task.tagIds.includes(TODAY_TAG.id)"
+                svgIcon="remove_today"
+              ></mat-icon>
               <mat-icon *ngIf="!task.tagIds.includes(TODAY_TAG.id)">wb_sunny</mat-icon>
             </button>
-
           </div>
         </div>
-
       </mat-card-content>
     </mat-card>
   </div>
-
 </div>

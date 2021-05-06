@@ -1,53 +1,72 @@
 <div class="page-settings page-wrapper">
-
   <div *ngIf="globalCfg">
-
     <div class="section-wrapper component-wrapper">
       <h1 class="mat-h1">{{T.PS.GLOBAL_SETTINGS|translate}}</h1>
 
       <div class="dark-mode-toggle">
         <mat-slide-toggle
           (change)="toggleDarkMode($event)"
-          [checked]="(configService.misc$|async)?.isDarkMode">
+          [checked]="(configService.misc$|async)?.isDarkMode"
+        >
           {{T.PS.TOGGLE_DARK_MODE|translate}}
         </mat-slide-toggle>
       </div>
 
-      <section *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;"
-               class="config-section ">
-        <config-section (save)="saveGlobalCfg($event)"
-                        [cfg]="getGlobalCfgSection(section.key)"
-                        [section]="section"></config-section>
+      <section
+        *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;"
+        class="config-section"
+      >
+        <config-section
+          (save)="saveGlobalCfg($event)"
+          [cfg]="getGlobalCfgSection(section.key)"
+          [section]="section"
+        ></config-section>
       </section>
 
-
-      <h2 class="mat-h2"
-          style="margin-top: 32px;">{{T.PS.PRODUCTIVITY_HELPER|translate}}</h2>
-      <section *ngFor="let section of globalProductivityConfigFormCfg; trackBy:trackBySectionKey;"
-               class="config-section ">
-        <config-section (save)="saveGlobalCfg($event)"
-                        [cfg]="getGlobalCfgSection(section.key)"
-                        [section]="section"></config-section>
+      <h2 class="mat-h2" style="margin-top: 32px">
+        {{T.PS.PRODUCTIVITY_HELPER|translate}}
+      </h2>
+      <section
+        *ngFor="let section of globalProductivityConfigFormCfg; trackBy:trackBySectionKey;"
+        class="config-section"
+      >
+        <config-section
+          (save)="saveGlobalCfg($event)"
+          [cfg]="getGlobalCfgSection(section.key)"
+          [section]="section"
+        ></config-section>
       </section>
 
-
-      <h2 class="mat-h2"
-          style="margin-top: 32px;">{{T.PS.SYNC_EXPORT|translate}}</h2>
-      <section *ngFor="let section of globalSyncProviderFormCfg; trackBy:trackBySectionKey;"
-               class="config-section ">
-        <config-section (save)="saveGlobalCfg($event)"
-                        [cfg]="getGlobalCfgSection(section.key)"
-                        [section]="section"></config-section>
+      <h2 class="mat-h2" style="margin-top: 32px">{{T.PS.SYNC_EXPORT|translate}}</h2>
+      <section
+        *ngFor="let section of globalSyncProviderFormCfg; trackBy:trackBySectionKey;"
+        class="config-section"
+      >
+        <config-section
+          (save)="saveGlobalCfg($event)"
+          [cfg]="getGlobalCfgSection(section.key)"
+          [section]="section"
+        ></config-section>
       </section>
     </div>
   </div>
 </div>
 
 <footer class="version-footer">
-  Super Productivity <a href="https://github.com/johannesjo/super-productivity/blob/master/CHANGELOG.md"
-                        target="_blank">{{appVersion}}</a> –
-  <a href="https://super-productivity.com/private-policy"
-     target="_blank">{{T.PS.PRIVACY_POLICY|translate}}</a> –
-  <a href="https://github.com/johannesjo/super-productivity/discussions/new"
-     target="_blank">{{T.PS.PROVIDE_FEEDBACK|translate}}</a>
+  Super Productivity
+  <a
+    href="https://github.com/johannesjo/super-productivity/blob/master/CHANGELOG.md"
+    target="_blank"
+    >{{appVersion}}</a
+  >
+  –
+  <a href="https://super-productivity.com/private-policy" target="_blank"
+    >{{T.PS.PRIVACY_POLICY|translate}}</a
+  >
+  –
+  <a
+    href="https://github.com/johannesjo/super-productivity/discussions/new"
+    target="_blank"
+    >{{T.PS.PROVIDE_FEEDBACK|translate}}</a
+  >
 </footer>

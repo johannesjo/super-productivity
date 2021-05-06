@@ -1,100 +1,98 @@
-<div #bookmarkBar
-     *ngIf="bookmarkService.isShowBookmarks$|async"
-     [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}"
-     class="global-bookmark-list-outer">
-  <div *ngIf="isDragOver"
-       @fade
-       class="bgc-accent drag-over-msg">
+<div
+  #bookmarkBar
+  *ngIf="bookmarkService.isShowBookmarks$|async"
+  [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}"
+  class="global-bookmark-list-outer"
+>
+  <div *ngIf="isDragOver" @fade class="bgc-accent drag-over-msg">
     <mat-icon>add</mat-icon>
     {{T.F.BOOKMARK.BAR.DROP|translate}}
   </div>
 
   <div class="controls-and-list-wrapper">
     <div class="list-controls">
-      <button (menuClosed)="isContextMenuDisabled = false"
-              (menuOpened)="isContextMenuDisabled = true"
-              *ngIf="!isEditMode"
-              [matMenuTriggerFor]="menu"
-              [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
-              mat-stroked-button
+      <button
+        (menuClosed)="isContextMenuDisabled = false"
+        (menuOpened)="isContextMenuDisabled = true"
+        *ngIf="!isEditMode"
+        [matMenuTriggerFor]="menu"
+        [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
+        mat-stroked-button
       >
         <mat-icon>more_vert</mat-icon>
       </button>
-      <button (click)="isEditMode=false"
-              *ngIf="isEditMode"
-              mat-stroked-button
-      >
+      <button (click)="isEditMode=false" *ngIf="isEditMode" mat-stroked-button>
         <mat-icon>check</mat-icon>
       </button>
 
       <mat-menu #menu="matMenu">
-
-        <button (click)="openEditDialog()"
-                color=""
-                mat-menu-item
-        >
+        <button (click)="openEditDialog()" color="" mat-menu-item>
           <mat-icon>add</mat-icon>
           {{T.F.BOOKMARK.BAR.ADD|translate}}
         </button>
-        <button (click)="isEditMode=!isEditMode"
-                color=""
-                mat-menu-item
-        >
+        <button (click)="isEditMode=!isEditMode" color="" mat-menu-item>
           <mat-icon>edit</mat-icon>
           {{T.F.BOOKMARK.BAR.EDIT|translate}}
         </button>
       </mat-menu>
     </div>
 
-    <div [class.isEditMode]="isEditMode"
-         [dragulaModel]="(bookmarkService.bookmarks$|async)"
-         [dragula]="LIST_ID"
-         class="global-bookmark-list-inner">
-
-      <div *ngIf="!(bookmarkService.bookmarks$|async)?.length"
-           class="msg">
+    <div
+      [class.isEditMode]="isEditMode"
+      [dragulaModel]="(bookmarkService.bookmarks$|async)"
+      [dragula]="LIST_ID"
+      class="global-bookmark-list-inner"
+    >
+      <div *ngIf="!(bookmarkService.bookmarks$|async)?.length" class="msg">
         {{T.F.BOOKMARK.BAR.NO_BOOKMARKS|translate}}
       </div>
 
-      <div *ngFor="let bookmark of (bookmarkService.bookmarks$|async); trackBy: trackByFn"
-           class="global-bookmark"
-           draggable="false">
-        <a [enlargeImg]="bookmark.type==='IMG'&& bookmark.path"
-           [href]="bookmark.path"
-           [style.background-image]="bookmark.type==='IMG'&& 'url('+bookmark.path+')'"
-           [title]="bookmark.path"
-           aria-label="open global bookmark"
-           bookmarkLink
-           color=""
-           draggable="false"
-           mat-stroked-button
-
-           target="_blank"
-           type="{{bookmark.type}}">
-          <mat-icon *ngIf="bookmark.icon">{{bookmark.icon}}
-          </mat-icon>
+      <div
+        *ngFor="let bookmark of (bookmarkService.bookmarks$|async); trackBy: trackByFn"
+        class="global-bookmark"
+        draggable="false"
+      >
+        <a
+          [enlargeImg]="bookmark.type==='IMG'&& bookmark.path"
+          [href]="bookmark.path"
+          [style.background-image]="bookmark.type==='IMG'&& 'url('+bookmark.path+')'"
+          [title]="bookmark.path"
+          aria-label="open global bookmark"
+          bookmarkLink
+          color=""
+          draggable="false"
+          mat-stroked-button
+          target="_blank"
+          type="{{bookmark.type}}"
+        >
+          <mat-icon *ngIf="bookmark.icon">{{bookmark.icon}} </mat-icon>
           {{bookmark.title}}
         </a>
 
-        <div *ngIf="isEditMode"
-             class="controls">
-          <mat-icon *ngIf="isEditMode"
-                    @fade
-                    class="drag-handle bgc-400"
-                    svgIcon="drag_handle"></mat-icon>
+        <div *ngIf="isEditMode" class="controls">
+          <mat-icon
+            *ngIf="isEditMode"
+            @fade
+            class="drag-handle bgc-400"
+            svgIcon="drag_handle"
+          ></mat-icon>
 
-          <button (click)="openEditDialog(bookmark)"
-                  aria-label="open edit dialog"
-                  class="edit-btn"
-                  color="primary"
-                  mat-raised-button>
+          <button
+            (click)="openEditDialog(bookmark)"
+            aria-label="open edit dialog"
+            class="edit-btn"
+            color="primary"
+            mat-raised-button
+          >
             <mat-icon>edit</mat-icon>
           </button>
-          <button (click)="remove(bookmark.id)"
-                  aria-label="remove bookmark"
-                  class="trash-btn"
-                  color="warn"
-                  mat-raised-button>
+          <button
+            (click)="remove(bookmark.id)"
+            aria-label="remove bookmark"
+            class="trash-btn"
+            color="warn"
+            mat-raised-button
+          >
             <mat-icon>delete_forever</mat-icon>
           </button>
         </div>

@@ -1,9 +1,10 @@
 <div class="page-wrapper component-wrapper">
-  <h1 style="margin-top: 16px; text-align: center;">{{T.F.PROCRASTINATION.H1|translate}}</h1>
+  <h1 style="margin-top: 16px; text-align: center">
+    {{T.F.PROCRASTINATION.H1|translate}}
+  </h1>
   <p>{{T.F.PROCRASTINATION.P1|translate}}</p>
   <p [innerHTML]="T.F.PROCRASTINATION.P2|translate"></p>
   <p>{{T.F.PROCRASTINATION.P3|translate}}</p>
-
 
   <mat-tab-group dynamicHeight>
     <mat-tab [label]="T.F.PROCRASTINATION.CUR.TITLE|translate">
@@ -44,7 +45,6 @@
       </section>
     </mat-tab>
 
-
     <mat-tab [label]="T.F.PROCRASTINATION.COMP.TITLE|translate">
       <section class="tab-inner">
         <p>{{T.F.PROCRASTINATION.COMP.INTRO|translate}}</p>
@@ -59,44 +59,50 @@
       </section>
     </mat-tab>
 
-
     <mat-tab [label]="T.F.PROCRASTINATION.REFRAME.TITLE|translate">
       <section class="tab-inner">
         <p>{{T.F.PROCRASTINATION.REFRAME.INTRO|translate}}</p>
 
         <mat-form-field>
-          <textarea [placeholder]="T.F.PROCRASTINATION.REFRAME.TL1|translate"
-                    matInput></textarea>
+          <textarea
+            [placeholder]="T.F.PROCRASTINATION.REFRAME.TL1|translate"
+            matInput
+          ></textarea>
         </mat-form-field>
         <mat-form-field>
-          <textarea [placeholder]="T.F.PROCRASTINATION.REFRAME.TL2|translate"
-                    matInput></textarea>
+          <textarea
+            [placeholder]="T.F.PROCRASTINATION.REFRAME.TL2|translate"
+            matInput
+          ></textarea>
         </mat-form-field>
         <mat-form-field>
-          <textarea [placeholder]="T.F.PROCRASTINATION.REFRAME.TL3|translate"
-                    matInput></textarea>
+          <textarea
+            [placeholder]="T.F.PROCRASTINATION.REFRAME.TL3|translate"
+            matInput
+          ></textarea>
         </mat-form-field>
       </section>
     </mat-tab>
 
-
-    <mat-tab *ngIf="(taskService.currentTaskOrCurrentParent$|async) as currentTask"
-             [label]="T.F.PROCRASTINATION.SPLIT_UP.TITLE|translate">
+    <mat-tab
+      *ngIf="(taskService.currentTaskOrCurrentParent$|async) as currentTask"
+      [label]="T.F.PROCRASTINATION.SPLIT_UP.TITLE|translate"
+    >
       <section class="tab-inner no-box">
         <p>{{T.F.PROCRASTINATION.SPLIT_UP.INTRO|translate}}</p>
 
         <task [task]="currentTask"></task>
 
-        <p [innerHTML]="T.F.PROCRASTINATION.SPLIT_UP.OUTRO|translate"
-           style="margin-top: 16px;"></p>
+        <p
+          [innerHTML]="T.F.PROCRASTINATION.SPLIT_UP.OUTRO|translate"
+          style="margin-top: 16px"
+        ></p>
       </section>
     </mat-tab>
   </mat-tab-group>
 
-  <div style="text-align: center; margin-top: 32px;">
-    <button color="primary"
-            mat-flat-button
-            routerLink="/work-view">
+  <div style="text-align: center; margin-top: 32px">
+    <button color="primary" mat-flat-button routerLink="/work-view">
       {{T.F.PROCRASTINATION.BACK_TO_WORK|translate}}
     </button>
   </div>

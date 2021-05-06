@@ -7,23 +7,22 @@
     <p>{{T.F.METRIC.EVAL_FORM.HELP_P2|translate}}</p>
   </help-section>
 
-  <form #f="ngForm"
-        *ngIf="metricForDay"
-        name="form"
-        novalidate>
+  <form #f="ngForm" *ngIf="metricForDay" name="form" novalidate>
     <div class="row">
       <mat-form-field>
-        <input #mood="ngModel"
-               (ngModelChange)="updateMood($event)"
-               [ngModel]="metricForDay.mood"
-               [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
-               matInput
-               max="10"
-               maxLength="2"
-               min="1"
-               name="mood"
-               required
-               type="number">
+        <input
+          #mood="ngModel"
+          (ngModelChange)="updateMood($event)"
+          [ngModel]="metricForDay.mood"
+          [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
+          matInput
+          max="10"
+          maxlength="2"
+          min="1"
+          name="mood"
+          required
+          type="number"
+        />
         <mat-hint>{{T.F.METRIC.EVAL_FORM.MOOD_HINT|translate}}</mat-hint>
         <mat-error *ngIf="mood.invalid && (mood.dirty || mood.touched)">
           {{T.V.E_1TO10|translate}}
@@ -31,54 +30,63 @@
       </mat-form-field>
 
       <mat-form-field>
-        <input #productivity="ngModel"
-               (ngModelChange)="updateProductivity($event)"
-               [ngModel]="metricForDay.productivity"
-               [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
-               matInput
-               max="10"
-               maxLength="2"
-               min="1"
-               name="productivity"
-               required
-               type="number">
+        <input
+          #productivity="ngModel"
+          (ngModelChange)="updateProductivity($event)"
+          [ngModel]="metricForDay.productivity"
+          [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
+          matInput
+          max="10"
+          maxlength="2"
+          min="1"
+          name="productivity"
+          required
+          type="number"
+        />
         <mat-hint>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT|translate}}</mat-hint>
-        <mat-error *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)">
+        <mat-error
+          *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)"
+        >
           {{T.V.E_1TO10|translate}}
         </mat-error>
       </mat-form-field>
     </div>
 
-    <chip-list-input (addItem)="addImprovement($event)"
-                     (addNewItem)="addNewImprovement($event)"
-                     (removeItem)="removeImprovement($event)"
-                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"
-                     [model]="metricForDay.improvements"
-                     [suggestions]="(improvementService.improvements$|async)"></chip-list-input>
+    <chip-list-input
+      (addItem)="addImprovement($event)"
+      (addNewItem)="addNewImprovement($event)"
+      (removeItem)="removeImprovement($event)"
+      [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"
+      [model]="metricForDay.improvements"
+      [suggestions]="(improvementService.improvements$|async)"
+    ></chip-list-input>
 
-    <chip-list-input (addItem)="addObstruction($event)"
-                     (addNewItem)="addNewObstruction($event)"
-                     (removeItem)="removeObstruction($event)"
-                     [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"
-                     [model]="metricForDay.obstructions"
-                     [suggestions]="(obstructionService.obstructions$|async)"></chip-list-input>
+    <chip-list-input
+      (addItem)="addObstruction($event)"
+      (addNewItem)="addNewObstruction($event)"
+      (removeItem)="removeObstruction($event)"
+      [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"
+      [model]="metricForDay.obstructions"
+      [suggestions]="(obstructionService.obstructions$|async)"
+    ></chip-list-input>
 
-    <chip-list-input (addItem)="addImprovementTomorrow($event)"
-                     (addNewItem)="addNewImprovementTomorrow($event)"
-                     (additionalAction)="toggleImprovementRepeat($event)"
-                     (removeItem)="removeImprovementTomorrow($event)"
-                     [additionalActionTooltipUnToggle]="T.F.METRIC.EVAL_FORM.DISABLE_REPEAT_EVERY_DAY|translate"
-                     [additionalActionTooltip]="T.F.METRIC.EVAL_FORM.ENABLE_REPEAT_EVERY_DAY|translate"
-                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW|translate"
-                     [model]="metricForDay.improvementsTomorrow"
-                     [suggestions]="(improvementService.improvements$|async)"
-                     [toggledItems]="improvementService.repeatedImprovementIds$|async"
-                     additionalActionIcon="repeat"></chip-list-input>
+    <chip-list-input
+      (addItem)="addImprovementTomorrow($event)"
+      (addNewItem)="addNewImprovementTomorrow($event)"
+      (additionalAction)="toggleImprovementRepeat($event)"
+      (removeItem)="removeImprovementTomorrow($event)"
+      [additionalActionTooltipUnToggle]="T.F.METRIC.EVAL_FORM.DISABLE_REPEAT_EVERY_DAY|translate"
+      [additionalActionTooltip]="T.F.METRIC.EVAL_FORM.ENABLE_REPEAT_EVERY_DAY|translate"
+      [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW|translate"
+      [model]="metricForDay.improvementsTomorrow"
+      [suggestions]="(improvementService.improvements$|async)"
+      [toggledItems]="improvementService.repeatedImprovementIds$|async"
+      additionalActionIcon="repeat"
+    ></chip-list-input>
   </form>
 </div>
-<div style="text-align: center; margin-top: 8px;margin-bottom: 16px;">
-  <button (click)="addNote()"
-          mat-button>
+<div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
+  <button (click)="addNote()" mat-button>
     <mat-icon>add</mat-icon>
     {{T.F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW|translate}}
   </button>

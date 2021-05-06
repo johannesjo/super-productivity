@@ -1,19 +1,10 @@
-<a (click)="downloadBackup()"
-   color="primary"
-   mat-stroked-button>
+<a (click)="downloadBackup()" color="primary" mat-stroked-button>
   <mat-icon>file_upload</mat-icon>
   {{T.FILE_IMEX.EXPORT_DATA|translate}}
 </a>
 
-<button (click)="fileInput.click()"
-        color="primary"
-        mat-stroked-button
-        type="button">
+<button (click)="fileInput.click()" color="primary" mat-stroked-button type="button">
   <mat-icon>file_download</mat-icon>
   {{T.FILE_IMEX.IMPORT_FROM_FILE|translate}}
 </button>
-<input #fileInput
-       (change)="handleFileInput($event)"
-       hidden
-       id="file"
-       type="file">
+<input #fileInput (change)="handleFileInput($event)" hidden id="file" type="file" />

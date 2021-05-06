@@ -4,40 +4,47 @@
   <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.ClickCounter">
-        <input (ngModelChange)="onModelChange($event)"
-               [ngModel]="val"
-               [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-               matInput
-               name="count"
-               type="number">
+        <input
+          (ngModelChange)="onModelChange($event)"
+          [ngModel]="val"
+          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
+          matInput
+          name="count"
+          type="number"
+        />
       </mat-form-field>
       <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.StopWatch">
-        <input (ngModelChange)="onModelChange($event)"
-               [ngModel]="val"
-               [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-               inputDuration="optional"
-               matInput
-               name="count"
-               type="text">
+        <input
+          (ngModelChange)="onModelChange($event)"
+          [ngModel]="val"
+          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
+          inputDuration="optional"
+          matInput
+          name="count"
+          type="text"
+        />
         <mat-icon matPrefix>timer</mat-icon>
       </mat-form-field>
-
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button (click)="close()"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-button
-              type="button">
+      <button
+        (click)="close()"
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-button
+        type="button"
+      >
         {{T.G.CANCEL|translate}}
       </button>
-      <button class="btn btn-primary submit-button"
-              color="primary"
-              mat-stroked-button
-              type="submit">
+      <button
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-stroked-button
+        type="submit"
+      >
         <mat-icon>save</mat-icon>
         {{T.G.SAVE|translate}}
       </button>

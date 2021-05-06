@@ -1,19 +1,15 @@
 <ng-container *ngIf="task?.issueType===JIRA_TYPE">
-  <jira-issue-content [issue]="issueData"
-                      [task]="task"></jira-issue-content>
+  <jira-issue-content [issue]="issueData" [task]="task"></jira-issue-content>
 </ng-container>
 
 <ng-container *ngIf="task?.issueType===GITHUB_TYPE">
-  <github-issue-content [issue]="issueData"
-                        [task]="task"></github-issue-content>
+  <github-issue-content [issue]="issueData" [task]="task"></github-issue-content>
 </ng-container>
 
 <ng-container *ngIf="task?.issueType===GITLAB_TYPE">
-  <gitlab-issue-content [issue]="issueData"
-                        [task]="task"></gitlab-issue-content>
+  <gitlab-issue-content [issue]="issueData" [task]="task"></gitlab-issue-content>
 </ng-container>
 
 <ng-container *ngIf="task?.issueType===CALDAV_TYPE">
-  <caldav-issue-content [issue]="issueData"
-                        [task]="task"></caldav-issue-content>
+  <caldav-issue-content [issue]="issueData" [task]="task"></caldav-issue-content>
 </ng-container>

@@ -1,34 +1,33 @@
-<div #wrapperEl
-     [class.isHideOverflow]="isHideOverflow"
-     class="markdown-wrapper">
-  <textarea #textareaEl
-            (blur)="untoggleShowEdit(); setBlur($event)"
-            (focus)="setFocus($event)"
-            (input)="resizeTextareaToFit()"
-            (keydown)="keypressHandler($event)"
-            (keypress)="keypressHandler($event)"
-            *ngIf="isShowEdit || (isTurnOffMarkdownParsing$|async)"
-            [@fade]
-            [ngModel]="modelCopy"
-            class="mat-body-1 markdown-unparsed"
-            rows="1"
+<div #wrapperEl [class.isHideOverflow]="isHideOverflow" class="markdown-wrapper">
+  <textarea
+    #textareaEl
+    (blur)="untoggleShowEdit(); setBlur($event)"
+    (focus)="setFocus($event)"
+    (input)="resizeTextareaToFit()"
+    (keydown)="keypressHandler($event)"
+    (keypress)="keypressHandler($event)"
+    *ngIf="isShowEdit || (isTurnOffMarkdownParsing$|async)"
+    [@fade]
+    [ngModel]="modelCopy"
+    class="mat-body-1 markdown-unparsed"
+    rows="1"
   ></textarea>
 
-  <div #previewEl
-       (click)="toggleShowEdit($event)"
-       (focus)="toggleShowEdit($event)"
-       *ngIf="!(isTurnOffMarkdownParsing$|async)"
-       [data]="model"
-       [hidden]="isShowEdit"
-       class="mat-body-1 markdown-parsed"
-       markdown
-       tabindex="0"></div>
+  <div
+    #previewEl
+    (click)="toggleShowEdit($event)"
+    (focus)="toggleShowEdit($event)"
+    *ngIf="!(isTurnOffMarkdownParsing$|async)"
+    [data]="model"
+    [hidden]="isShowEdit"
+    class="mat-body-1 markdown-parsed"
+    markdown
+    tabindex="0"
+  ></div>
 </div>
 
-<div *ngIf="isShowControls"
-     class="controls">
-  <button (click)="openFullScreen()"
-          mat-icon-button>
+<div *ngIf="isShowControls" class="controls">
+  <button (click)="openFullScreen()" mat-icon-button>
     <mat-icon>fullscreen</mat-icon>
   </button>
 </div>

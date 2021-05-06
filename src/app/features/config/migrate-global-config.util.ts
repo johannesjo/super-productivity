@@ -44,17 +44,14 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     : {
         ...DEFAULT_GLOBAL_CONFIG.idle,
         // eslint-disable-next-line
-        isOnlyOpenIdleWhenCurrentTask: (config.misc as any)[
-          'isOnlyOpenIdleWhenCurrentTask'
-        ],
+        isOnlyOpenIdleWhenCurrentTask: (config.misc as any).isOnlyOpenIdleWhenCurrentTask,
         // eslint-disable-next-line
         isEnableIdleTimeTracking: (config.misc as any)['isEnableIdleTimeTracking'],
         // eslint-disable-next-line
         minIdleTime: (config.misc as any)['minIdleTime'],
         // eslint-disable-next-line
-        isUnTrackedIdleResetsBreakTimer: (config.misc as any)[
-          'isUnTrackedIdleResetsBreakTimer'
-        ],
+        isUnTrackedIdleResetsBreakTimer: (config.misc as any)
+          .isUnTrackedIdleResetsBreakTimer,
       };
 
   const takeABreak: TakeABreakConfig = !!config.takeABreak

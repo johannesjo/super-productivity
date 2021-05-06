@@ -1,8 +1,8 @@
-<form (submit)="save()"
-      class="dialog-help-wrapper">
-  <h1 mat-dialog-title>{{isEdit
-    ? (T.F.TASK_REPEAT.D_EDIT.EDIT|translate)
-    : (T.F.TASK_REPEAT.D_EDIT.ADD|translate)}}</h1>
+<form (submit)="save()" class="dialog-help-wrapper">
+  <h1 mat-dialog-title>
+    {{isEdit ? (T.F.TASK_REPEAT.D_EDIT.EDIT|translate) :
+    (T.F.TASK_REPEAT.D_EDIT.ADD|translate)}}
+  </h1>
 
   <mat-dialog-content>
     <!--    <h3 class="mat-h3">{{task.title}}</h3>-->
@@ -13,43 +13,43 @@
     </help-section>
 
     <div class="form-wrapper">
-      <formly-form (modelChange)="taskRepeatCfg=$event"
-                   [fields]="fields"
-                   [form]="form"
-                   [model]="taskRepeatCfg"
-                   [options]="options">
+      <formly-form
+        (modelChange)="taskRepeatCfg=$event"
+        [fields]="fields"
+        [form]="form"
+        [model]="taskRepeatCfg"
+        [options]="options"
+      >
       </formly-form>
 
-      <chip-list-input (addItem)="addTag($event)"
-                       (addNewItem)="addNewTag($event)"
-                       (removeItem)="removeTag($event)"
-                       [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL|translate"
-                       [model]="taskRepeatCfg.tagIds"
-                       [suggestions]="(tagSuggestions$|async)"></chip-list-input>
+      <chip-list-input
+        (addItem)="addTag($event)"
+        (addNewItem)="addNewTag($event)"
+        (removeItem)="removeTag($event)"
+        [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL|translate"
+        [model]="taskRepeatCfg.tagIds"
+        [suggestions]="(tagSuggestions$|async)"
+      ></chip-list-input>
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button (click)="close()"
-            color="primary"
-            mat-button
-            type="button">
+    <button (click)="close()" color="primary" mat-button type="button">
       {{T.G.CANCEL|translate}}
     </button>
 
-    <button (click)="remove()"
-            *ngIf="isEdit"
-            color="primary"
-            mat-stroked-button
-            type="button">
+    <button
+      (click)="remove()"
+      *ngIf="isEdit"
+      color="primary"
+      mat-stroked-button
+      type="button"
+    >
       <mat-icon>delete_forever</mat-icon>
       {{T.G.REMOVE|translate}}
     </button>
 
-    <button [disabled]="!form.valid"
-            color="primary"
-            mat-stroked-button
-            type="submit">
+    <button [disabled]="!form.valid" color="primary" mat-stroked-button type="submit">
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}
     </button>

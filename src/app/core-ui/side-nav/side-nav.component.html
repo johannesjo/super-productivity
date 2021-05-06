@@ -1,151 +1,171 @@
 <section class="main">
-  <div *ngFor="let context of (workContextService.mainWorkContexts$|async); trackBy: trackById; "
-       [class.hasTasks]="context.taskIds.length"
-       [class.isActiveContext]="context.id===activeWorkContextId"
-       class="tag">
-    <div [style.background]="context.theme.primary"
-         class="tag-color"></div>
-    <button #menuEntry
-            [routerLink]="['tag', context.id, 'tasks']"
-            mat-menu-item
-            routerLinkActive="isActiveRoute">
+  <div
+    *ngFor="let context of (workContextService.mainWorkContexts$|async); trackBy: trackById; "
+    [class.hasTasks]="context.taskIds.length"
+    [class.isActiveContext]="context.id===activeWorkContextId"
+    class="tag"
+  >
+    <div [style.background]="context.theme.primary" class="tag-color"></div>
+    <button
+      #menuEntry
+      [routerLink]="['tag', context.id, 'tasks']"
+      mat-menu-item
+      routerLinkActive="isActiveRoute"
+    >
       <span class="badge">{{context.taskIds.length}}</span>
       <mat-icon>{{context.icon}}</mat-icon>
       <span class="text">{{context.title}}</span>
     </button>
 
-    <button [mat-menu-trigger-for]="tagMenu"
-            class="tag-settings-btn"
-            mat-icon-button
-            routerLinkActive="isActiveRoute">
+    <button
+      [mat-menu-trigger-for]="tagMenu"
+      class="tag-settings-btn"
+      mat-icon-button
+      routerLinkActive="isActiveRoute"
+    >
       <mat-icon>more_vert</mat-icon>
     </button>
 
     <mat-menu #tagMenu="matMenu">
-      <work-context-menu [contextId]="context.id"
-                         [contextType]="context.type"></work-context-menu>
+      <work-context-menu
+        [contextId]="context.id"
+        [contextType]="context.type"
+      ></work-context-menu>
     </mat-menu>
   </div>
 
-  <button #menuEntry
-          class="route-link"
-          mat-menu-item
-          routerLink="schedule"
-          routerLinkActive="isActiveRoute">
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="schedule"
+    routerLinkActive="isActiveRoute"
+  >
     <mat-icon>access_alarms</mat-icon>
     <span class="text">{{T.MH.SCHEDULED|translate}}</span>
   </button>
 </section>
 
-<section *ngIf="projectList$|async as projectList"
-         class="projects">
-  <button #menuEntry
-          #projectExpandBtn
-          (click)="toggleExpandProjects()"
-          (keydown)="toggleExpandProjectsLeftRight($event)"
-          [class.isExpanded]="isProjectsExpanded"
-          class="expand-btn"
-          mat-menu-item>
+<section *ngIf="projectList$|async as projectList" class="projects">
+  <button
+    #menuEntry
+    #projectExpandBtn
+    (click)="toggleExpandProjects()"
+    (keydown)="toggleExpandProjectsLeftRight($event)"
+    [class.isExpanded]="isProjectsExpanded"
+    class="expand-btn"
+    mat-menu-item
+  >
     <span class="title">{{T.MH.PROJECTS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
 
-  <div [@standardList]="projectList?.length"
-       [dragulaModel]="projectList"
-       [dragula]="PROJECTS_SIDE_NAV">
-    <div (keydown)="checkFocusProject($event)"
-         *ngFor="let project of projectList; trackBy: trackById;"
-         [class.hasTasks]="project.taskIds.length"
-         [class.isActiveContext]="project.id===activeWorkContextId"
-         class="project">
-      <div [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
-           class="project-color"></div>
-      <button #menuEntry
-              [routerLink]="['project', project.id, 'tasks']"
-              mat-menu-item>
-        <span class="badge">{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span>
-        <mat-icon class="drag-handle"
-                  drag-handle>list
-        </mat-icon>
+  <div
+    [@standardList]="projectList?.length"
+    [dragulaModel]="projectList"
+    [dragula]="PROJECTS_SIDE_NAV"
+  >
+    <div
+      (keydown)="checkFocusProject($event)"
+      *ngFor="let project of projectList; trackBy: trackById;"
+      [class.hasTasks]="project.taskIds.length"
+      [class.isActiveContext]="project.id===activeWorkContextId"
+      class="project"
+    >
+      <div
+        [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
+        class="project-color"
+      ></div>
+      <button #menuEntry [routerLink]="['project', project.id, 'tasks']" mat-menu-item>
+        <span class="badge"
+          >{{project.taskIds.length}}/{{project.backlogTaskIds.length}}</span
+        >
+        <mat-icon class="drag-handle" drag-handle>list </mat-icon>
         <span class="text">{{project.title}}</span>
       </button>
 
-      <button [matMenuTriggerFor]="projectMenu"
-              class="project-settings-btn"
-              mat-icon-button
-              routerLinkActive="isActiveRoute">
+      <button
+        [matMenuTriggerFor]="projectMenu"
+        class="project-settings-btn"
+        mat-icon-button
+        routerLinkActive="isActiveRoute"
+      >
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #projectMenu="matMenu">
-        <work-context-menu [contextId]="project.id"
-                           [project]="project"
-                           [contextType]="WorkContextType.PROJECT"></work-context-menu>
+        <work-context-menu
+          [contextId]="project.id"
+          [project]="project"
+          [contextType]="WorkContextType.PROJECT"
+        ></work-context-menu>
       </mat-menu>
     </div>
   </div>
 
-  <button #menuEntry
-          *ngIf="isProjectsExpanded"
-          mat-menu-item
-          routerLink="project-overview"
-          routerLinkActive="isActiveRoute">
+  <button
+    #menuEntry
+    *ngIf="isProjectsExpanded"
+    mat-menu-item
+    routerLink="project-overview"
+    routerLinkActive="isActiveRoute"
+  >
     <mat-icon>format_list_numbered_rtl</mat-icon>
     <span class="text">{{T.MH.MANAGE_PROJECTS|translate}}</span>
   </button>
 
-  <button #menuEntry
-          (click)="addProject()"
-          *ngIf="isProjectsExpanded"
-          mat-menu-item>
+  <button #menuEntry (click)="addProject()" *ngIf="isProjectsExpanded" mat-menu-item>
     <mat-icon>add</mat-icon>
     <span class="text">{{T.MH.CREATE_PROJECT|translate}}</span>
   </button>
 </section>
 
-
-<section *ngIf="(tagList$|async) as tagList"
-         class="tags">
-  <button #menuEntry
-          #tagExpandBtn
-          (click)="toggleExpandTags()"
-          (keydown)="toggleExpandTagsLeftRight($event)"
-          [class.isExpanded]="isTagsExpanded"
-          class="expand-btn"
-          mat-menu-item>
+<section *ngIf="(tagList$|async) as tagList" class="tags">
+  <button
+    #menuEntry
+    #tagExpandBtn
+    (click)="toggleExpandTags()"
+    (keydown)="toggleExpandTagsLeftRight($event)"
+    [class.isExpanded]="isTagsExpanded"
+    class="expand-btn"
+    mat-menu-item
+  >
     <span class="title">{{T.MH.TAGS|translate}}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
 
-  <div [@standardList]="tagList?.length"
-       [dragulaModel]="tagList"
-       [dragula]="TAG_SIDE_NAV">
-    <div (keydown)="checkFocusTag($event)"
-         *ngFor="let tag of tagList; trackBy: trackById;"
-         [class.hasTasks]="tag.taskIds.length"
-         [class.isActiveContext]="tag.id===activeWorkContextId"
-         class="tag">
-      <div [style.background]="tag?.theme.primary"
-           class="tag-color"></div>
-      <button #menuEntry
-              [routerLink]="['tag', tag.id, 'tasks']"
-              mat-menu-item>
+  <div
+    [@standardList]="tagList?.length"
+    [dragulaModel]="tagList"
+    [dragula]="TAG_SIDE_NAV"
+  >
+    <div
+      (keydown)="checkFocusTag($event)"
+      *ngFor="let tag of tagList; trackBy: trackById;"
+      [class.hasTasks]="tag.taskIds.length"
+      [class.isActiveContext]="tag.id===activeWorkContextId"
+      class="tag"
+    >
+      <div [style.background]="tag?.theme.primary" class="tag-color"></div>
+      <button #menuEntry [routerLink]="['tag', tag.id, 'tasks']" mat-menu-item>
         <span class="badge">{{tag.taskIds.length}}</span>
-        <mat-icon class="drag-handle"
-                  drag-handle>style
-        </mat-icon>
+        <mat-icon class="drag-handle" drag-handle>style </mat-icon>
         <span class="text">{{tag.title}}</span>
       </button>
 
-      <button [mat-menu-trigger-for]="tagMenu"
-              class="tag-settings-btn"
-              mat-icon-button
-              routerLinkActive="isActiveRoute">
+      <button
+        [mat-menu-trigger-for]="tagMenu"
+        class="tag-settings-btn"
+        mat-icon-button
+        routerLinkActive="isActiveRoute"
+      >
         <mat-icon>more_vert</mat-icon>
       </button>
 
       <mat-menu #tagMenu="matMenu">
-        <work-context-menu [contextId]="tag.id"
-                           [contextType]="WorkContextType.TAG"></work-context-menu>
+        <work-context-menu
+          [contextId]="tag.id"
+          [contextType]="WorkContextType.TAG"
+        ></work-context-menu>
       </mat-menu>
     </div>
   </div>
@@ -157,29 +177,31 @@
   <!--  </button>-->
 </section>
 
-
 <section class="app">
-  <button #menuEntry
-          class="route-link"
-          mat-menu-item
-          routerLink="config"
-          routerLinkActive="isActiveRoute">
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="config"
+    routerLinkActive="isActiveRoute"
+  >
     <mat-icon>settings_applications</mat-icon>
     <span class="text">{{T.MH.SETTINGS|translate}}</span>
   </button>
 
-  <button #menuEntry
-          (click)="onScrollToNotesClick()"
-          *ngIf="workContextService.isActiveWorkContextProject$|async"
-          [@expandFade]
-          class="route-link scroll-down-btn"
-          mat-menu-item>
+  <button
+    #menuEntry
+    (click)="onScrollToNotesClick()"
+    *ngIf="workContextService.isActiveWorkContextProject$|async"
+    [@expandFade]
+    class="route-link scroll-down-btn"
+    mat-menu-item
+  >
     <mat-icon>notes</mat-icon>
     <span class="text">{{T.MH.NOTES|translate}}</span>
     <mat-icon>arrow_downwards</mat-icon>
   </button>
 </section>
-
 
 <!-- NOTE: needs to be here for mat menu styles always to be loaded -->
 <mat-menu></mat-menu>

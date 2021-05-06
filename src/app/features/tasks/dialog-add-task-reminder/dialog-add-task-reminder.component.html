@@ -1,27 +1,27 @@
 <mat-dialog-content>
   <div class="form-wrapper">
-    <owl-wrapper (triggerSubmit)="save()"
-                 [(dateTime)]="dateTime"></owl-wrapper>
+    <owl-wrapper (triggerSubmit)="save()" [(dateTime)]="dateTime"></owl-wrapper>
 
     <div class="additional-controls">
       <mat-form-field>
-        <mat-select [(ngModel)]="reminderCfgId"
-                    [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
-                    name="type"
-                    required="true">
-          <mat-option *ngFor="let remindOption of remindAvailableOptions; trackBy: trackByIndex"
-                      [innerHtml]="(remindOption.title|translate)"
-                      [value]="remindOption.id">
+        <mat-select
+          [(ngModel)]="reminderCfgId"
+          [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
+          name="type"
+          required="true"
+        >
+          <mat-option
+            *ngFor="let remindOption of remindAvailableOptions; trackBy: trackByIndex"
+            [innerHtml]="(remindOption.title|translate)"
+            [value]="remindOption.id"
+          >
           </mat-option>
         </mat-select>
       </mat-form-field>
 
-      <div *ngIf="isShowMoveToBacklog"
-           class="move-to-backlog-wrapper">
-        <mat-checkbox [(ngModel)]="isMoveToBacklog"
-                      name="isListSubTasks">
-          <div class="text-wrap"
-               style="max-width: 280px">
+      <div *ngIf="isShowMoveToBacklog" class="move-to-backlog-wrapper">
+        <mat-checkbox [(ngModel)]="isMoveToBacklog" name="isListSubTasks">
+          <div class="text-wrap" style="max-width: 280px">
             {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
           </div>
         </mat-checkbox>
@@ -32,31 +32,37 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button (click)="close()"
-            [title]="T.G.CANCEL|translate"
-            color="primary"
-            mat-button
-            type="button">
+    <button
+      (click)="close()"
+      [title]="T.G.CANCEL|translate"
+      color="primary"
+      mat-button
+      type="button"
+    >
       <mat-icon>close</mat-icon>
     </button>
 
-    <button (click)="remove()"
-            *ngIf="isEdit"
-            [title]="T.F.TASK.D_REMINDER_ADD.UNSCHEDULE|translate"
-            color="primary"
-            mat-stroked-button
-            type="button">
+    <button
+      (click)="remove()"
+      *ngIf="isEdit"
+      [title]="T.F.TASK.D_REMINDER_ADD.UNSCHEDULE|translate"
+      color="primary"
+      mat-stroked-button
+      type="button"
+    >
       <mat-icon>alarm_off</mat-icon>
     </button>
 
-    <button (click)="save()"
-            [disabled]="!dateTime"
-            [title]="(reminder
+    <button
+      (click)="save()"
+      [disabled]="!dateTime"
+      [title]="(reminder
             ?T.F.TASK.D_REMINDER_ADD.SCHEDULE
             :T.G.UPDATE)|translate"
-            color="primary"
-            mat-stroked-button
-            type="submit">
+      color="primary"
+      mat-stroked-button
+      type="submit"
+    >
       <mat-icon *ngIf="!reminder">alarm_add</mat-icon>
       <mat-icon *ngIf="reminder">alarm</mat-icon>
     </button>

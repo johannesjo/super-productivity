@@ -1,66 +1,76 @@
-<form (submit)="submitWorklog()"
-      class="mat-body"
-      name="time-estimate-form">
-
+<form (submit)="submitWorklog()" class="mat-body" name="time-estimate-form">
   <h1 mat-dialog-title>
-    <mat-icon class="dialog-header-icon"
-              svgIcon="jira"></mat-icon>
+    <mat-icon class="dialog-header-icon" svgIcon="jira"></mat-icon>
     <span>{{T.F.JIRA.DIALOG_WORKLOG.TITLE|translate}}</span>
   </h1>
 
   <mat-dialog-content>
-    <p>{{T.F.JIRA.DIALOG_WORKLOG.SUBMIT_WORKLOG_FOR|translate}} <strong>{{issue.key}} {{issue.summary}}</strong>.</p>
-    <p>{{T.F.JIRA.DIALOG_WORKLOG.CURRENTLY_LOGGED|translate}} <strong>{{(issue.timespent * 1000)|msToString}}</strong>
+    <p>
+      {{T.F.JIRA.DIALOG_WORKLOG.SUBMIT_WORKLOG_FOR|translate}}
+      <strong>{{issue.key}} {{issue.summary}}</strong>.
+    </p>
+    <p>
+      {{T.F.JIRA.DIALOG_WORKLOG.CURRENTLY_LOGGED|translate}}
+      <strong>{{(issue.timespent * 1000)|msToString}}</strong>
     </p>
 
     <div class="form-wrapper">
       <mat-form-field>
-        <input [(ngModel)]="timeSpent"
-               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate"
-               inputDuration="optional"
-               matInput
-               name="timeSpent"
-               required
-               type="text">
+        <input
+          [(ngModel)]="timeSpent"
+          [placeholder]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate"
+          inputDuration="optional"
+          matInput
+          name="timeSpent"
+          required
+          type="text"
+        />
 
         <mat-icon matPrefix>timer</mat-icon>
       </mat-form-field>
 
       <mat-form-field>
-        <input [(ngModel)]="started"
-               [placeholder]="T.F.JIRA.DIALOG_WORKLOG.STARTED|translate "
-               matInput
-               name="date"
-               required
-               type="datetime-local">
+        <input
+          [(ngModel)]="started"
+          [placeholder]="T.F.JIRA.DIALOG_WORKLOG.STARTED|translate "
+          matInput
+          name="date"
+          required
+          type="datetime-local"
+        />
         <mat-error>{{T.F.JIRA.DIALOG_WORKLOG.INVALID_DATE|translate}}</mat-error>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Comment</mat-label>
-        <textarea [(ngModel)]="comment"
-                  cdkAutosizeMaxRows="5"
-                  cdkAutosizeMinRows="2"
-                  cdkTextareaAutosize
-                  matInput
-                  name="comment"></textarea>
+        <textarea
+          [(ngModel)]="comment"
+          cdkAutosizeMaxRows="5"
+          cdkAutosizeMinRows="2"
+          cdkTextareaAutosize
+          matInput
+          name="comment"
+        ></textarea>
       </mat-form-field>
     </div>
-
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button (click)="close()"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-button
-              type="button">
+      <button
+        (click)="close()"
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-button
+        type="button"
+      >
         {{T.G.CANCEL|translate}}
       </button>
-      <button class="btn btn-primary submit-button"
-              color="primary"
-              mat-stroked-button
-              type="submit">
+      <button
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-stroked-button
+        type="submit"
+      >
         <mat-icon>save</mat-icon>
         {{T.F.JIRA.DIALOG_WORKLOG.SAVE_WORKLOG|translate}}
       </button>

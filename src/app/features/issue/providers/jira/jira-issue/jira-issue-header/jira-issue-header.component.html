@@ -1,17 +1,12 @@
 <ng-container *ngIf="(isOnline$|async) else offline">
-  <mat-icon *ngIf="task?.issueWasUpdated"
-            color="accent"
-            style="margin-right: 8px;">update
+  <mat-icon *ngIf="task?.issueWasUpdated" color="accent" style="margin-right: 8px"
+    >update
   </mat-icon>
-  <mat-icon *ngIf="!task?.issueWasUpdated"
-            style="margin-right: 8px;"
-            svgIcon="jira">
+  <mat-icon *ngIf="!task?.issueWasUpdated" style="margin-right: 8px" svgIcon="jira">
   </mat-icon>
 </ng-container>
 <span class="tab-label-text">Jira</span>
 
 <ng-template #offline>
-  <mat-icon [matTooltip]="'No internet!'"
-            style="margin-right: 8px;">cloud_off
-  </mat-icon>
+  <mat-icon [matTooltip]="'No internet!'" style="margin-right: 8px">cloud_off </mat-icon>
 </ng-template>

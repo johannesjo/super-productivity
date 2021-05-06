@@ -1,10 +1,6 @@
 <ng-container>
-  <div *ngIf="task?.issueWasUpdated"
-       @expand
-       style="text-align: center;">
-    <button (click)="hideUpdates()"
-            color="accent"
-            mat-raised-button>
+  <div *ngIf="task?.issueWasUpdated" @expand style="text-align: center">
+    <button (click)="hideUpdates()" color="accent" mat-raised-button>
       {{T.F.GITLAB.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
   </div>
@@ -13,8 +9,11 @@
     <table class="issue-table">
       <tr>
         <th>{{T.F.GITLAB.ISSUE_CONTENT.SUMMARY|translate}}</th>
-        <td><a [href]="issue?.html_url"
-               target="_blank"><strong>{{issue?.title}} #{{issue?.number}}</strong></a></td>
+        <td>
+          <a [href]="issue?.html_url" target="_blank"
+            ><strong>{{issue?.title}} #{{issue?.number}}</strong></a
+          >
+        </td>
       </tr>
       <tr>
         <th>{{T.F.GITLAB.ISSUE_CONTENT.STATUS|translate}}</th>
@@ -22,15 +21,18 @@
       </tr>
       <tr *ngIf="issue?.assignee?.web_url">
         <th>{{T.F.GITLAB.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
-        <td><a [href]="issue?.assignee?.web_url"
-               target="_blank">{{issue?.assignee?.username}}</a></td>
+        <td>
+          <a [href]="issue?.assignee?.web_url" target="_blank"
+            >{{issue?.assignee?.username}}</a
+          >
+        </td>
       </tr>
       <tr *ngIf="issue?.labels?.length">
         <th>{{T.F.GITLAB.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
           <mat-chip-list>
-            <mat-chip *ngFor="let label of issue?.labels"
-                      [title]="label">{{label}}
+            <mat-chip *ngFor="let label of issue?.labels" [title]="label"
+              >{{label}}
             </mat-chip>
           </mat-chip-list>
         </td>
@@ -38,37 +40,44 @@
       <tr *ngIf="issue?.body">
         <th>{{T.F.GITLAB.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
-          <div [data]="issue?.body"
-               class="description markdown"
-               markdown></div>
+          <div [data]="issue?.body" class="description markdown" markdown></div>
         </td>
       </tr>
     </table>
 
     <div *ngIf="issue?.comments">
-      <div *ngFor="let comment of (issue?.comments|sort:'created_at'); trackBy: trackByIndex"
-           class="comment">
+      <div
+        *ngFor="let comment of (issue?.comments|sort:'created_at'); trackBy: trackByIndex"
+        class="comment"
+      >
         <div class="name-and-comment-content">
-          <div><span class="author-name">{{comment.author?.username}}</span>
-            <span class="when">{{T.F.GITLAB.ISSUE_CONTENT.AT|translate}} {{comment.created_at|date:'short'}}</span>
+          <div>
+            <span class="author-name">{{comment.author?.username}}</span>
+            <span class="when"
+              >{{T.F.GITLAB.ISSUE_CONTENT.AT|translate}}
+              {{comment.created_at|date:'short'}}</span
+            >
           </div>
-          <div *ngIf="comment.body"
-               [innerHTML]="comment?.body|markdown"
-               class="markdown"></div>
+          <div
+            *ngIf="comment.body"
+            [innerHTML]="comment?.body|markdown"
+            class="markdown"
+          ></div>
         </div>
       </div>
     </div>
 
     <div style="text-align: center">
-      <a [href]="issue?.url"
-         class="write-a-comment"
-         color="primary"
-         mat-stroked-button
-         target="_blank">
+      <a
+        [href]="issue?.url"
+        class="write-a-comment"
+        color="primary"
+        mat-stroked-button
+        target="_blank"
+      >
         <mat-icon>textsms</mat-icon>
         {{T.F.GITLAB.ISSUE_CONTENT.WRITE_A_COMMENT|translate}}
       </a>
     </div>
-
   </div>
 </ng-container>

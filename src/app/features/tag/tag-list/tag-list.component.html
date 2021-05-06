@@ -1,14 +1,19 @@
-<div *ngIf="(tags && tags.length) || (projectTag)"
-     @expandFade
-     [class.isDisableEdit]="isDisableEdit"
-     class="tags-container">
-  <div [@standardList]="tags.length"
-       class="tags">
-    <tag (click)="editTags()"
-         *ngIf="(projectTag$|async) as projectTag"
-         [tag]="projectTag"></tag>
-    <tag (click)="editTags()"
-         *ngFor="let tag of tags; trackBy: trackByFn"
-         [tag]="tag"></tag>
+<div
+  *ngIf="(tags && tags.length) || (projectTag)"
+  @expandFade
+  [class.isDisableEdit]="isDisableEdit"
+  class="tags-container"
+>
+  <div [@standardList]="tags.length" class="tags">
+    <tag
+      (click)="editTags()"
+      *ngIf="(projectTag$|async) as projectTag"
+      [tag]="projectTag"
+    ></tag>
+    <tag
+      (click)="editTags()"
+      *ngFor="let tag of tags; trackBy: trackByFn"
+      [tag]="tag"
+    ></tag>
   </div>
 </div>

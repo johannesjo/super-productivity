@@ -82,7 +82,7 @@ export class GlobalConfigEffects {
     // eslint-disable-next-line
     filter(
       (action: UpdateGlobalConfigSection) =>
-        action.payload.sectionCfg && (action.payload.sectionCfg as any)['lng'],
+        action.payload.sectionCfg && (action.payload.sectionCfg as any).lng,
     ),
     tap((action: UpdateGlobalConfigSection) => {
       // eslint-disable-next-line

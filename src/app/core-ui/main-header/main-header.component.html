@@ -1,48 +1,60 @@
 <!--<div class="wrapper ">-->
 <div class="wrapper">
-  <button (click)="layoutService.toggleSideNav()"
-          *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
-          class="burger-trigger"
-          mat-icon-button>
+  <button
+    (click)="layoutService.toggleSideNav()"
+    *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
+    class="burger-trigger"
+    mat-icon-button
+  >
     <mat-icon>menu</mat-icon>
   </button>
 
-
   <ng-container *ngIf="workContextService.activeWorkContext$|async as activeWorkContext">
-    <div [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
-         class="current-work-context-title"
-         mat-ripple
-         routerLink="/active/tasks">{{activeWorkContext?.title}}</div>
+    <div
+      [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
+      class="current-work-context-title"
+      mat-ripple
+      routerLink="/active/tasks"
+    >
+      {{activeWorkContext?.title}}
+    </div>
 
-    <button [mat-menu-trigger-for]="activeWorkContextMenu"
-            [matTooltip]="T.MH.PROJECT_MENU|translate"
-            class="project-settings-btn"
-            mat-icon-button>
+    <button
+      [mat-menu-trigger-for]="activeWorkContextMenu"
+      [matTooltip]="T.MH.PROJECT_MENU|translate"
+      class="project-settings-btn"
+      mat-icon-button
+    >
       <mat-icon>more_vert</mat-icon>
     </button>
 
     <mat-menu #activeWorkContextMenu="matMenu">
-      <work-context-menu [contextId]="activeWorkContext?.id"
-                         [project]="projectService.currentProject$|async"
-                         [contextType]="activeWorkContext?.type"></work-context-menu>
+      <work-context-menu
+        [contextId]="activeWorkContext?.id"
+        [project]="projectService.currentProject$|async"
+        [contextType]="activeWorkContext?.type"
+      ></work-context-menu>
     </mat-menu>
   </ng-container>
 
-
   <nav class="action-nav">
-    <button (click)="layoutService.showAddTaskBar()"
-            [matTooltip]="T.MH.ADD_NEW_TASK|translate"
-            class="hide-xs"
-            mat-icon-button>
+    <button
+      (click)="layoutService.showAddTaskBar()"
+      [matTooltip]="T.MH.ADD_NEW_TASK|translate"
+      class="hide-xs"
+      mat-icon-button
+    >
       <mat-icon>add</mat-icon>
     </button>
 
-    <button (click)="bookmarkService.toggleBookmarks()"
-            *ngIf="(workContextService.isActiveWorkContextProject$|async)"
-            [class.isOpen]="bookmarkService.isShowBookmarks$|async"
-            [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate"
-            class="bookmark-btn"
-            mat-icon-button>
+    <button
+      (click)="bookmarkService.toggleBookmarks()"
+      *ngIf="(workContextService.isActiveWorkContextProject$|async)"
+      [class.isOpen]="bookmarkService.isShowBookmarks$|async"
+      [matTooltip]="T.MH.TOGGLE_SHOW_BOOKMARKS|translate"
+      class="bookmark-btn"
+      mat-icon-button
+    >
       <mat-icon>bookmark</mat-icon>
     </button>
 
@@ -55,28 +67,36 @@
     <!--      </mat-icon>-->
     <!--    </button>-->
 
-    <button [matTooltip]="T.WW.HELP_PROCRASTINATION|translate"
-            class="hide-xs"
-            mat-icon-button
-            routerLink="/procrastination">
+    <button
+      [matTooltip]="T.WW.HELP_PROCRASTINATION|translate"
+      class="hide-xs"
+      mat-icon-button
+      routerLink="/procrastination"
+    >
       <mat-icon>flash_on</mat-icon>
     </button>
 
     <div class="play-btn-wrapper">
-      <div *ngIf="(taskService.currentTask$|async) as currentTask"
-           @fade
-           class="current-task-title">
+      <div
+        *ngIf="(taskService.currentTask$|async) as currentTask"
+        @fade
+        class="current-task-title"
+      >
         <div class="title">{{currentTask.title}}</div>
-        <tag *ngIf="(currentTaskContext$|async) as currentTaskContext"
-             @expandFadeHorizontal
-             [tag]="currentTaskContext"
-             class="project"></tag>
+        <tag
+          *ngIf="(currentTaskContext$|async) as currentTaskContext"
+          @expandFadeHorizontal
+          [tag]="currentTaskContext"
+          class="project"
+        ></tag>
       </div>
-      <button (click)="taskService.toggleStartTask()"
-              [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
-              [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
-              class="play-btn mat-elevation-z3"
-              mat-mini-fab>
+      <button
+        (click)="taskService.toggleStartTask()"
+        [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
+        [matTooltip]="T.MH.TOGGLE_TRACK_TIME|translate"
+        class="play-btn mat-elevation-z3"
+        mat-mini-fab
+      >
         <ng-container *ngIf="(pomodoroService.isEnabled$|async)">
           <mat-icon *ngIf="(pomodoroService.isBreak$|async)">free_breakfast</mat-icon>
           <ng-container *ngIf="!(pomodoroService.isBreak$|async)">
@@ -90,43 +110,49 @@
           <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
         </ng-container>
 
-        <svg class="circle-svg"
-             focusable="false"
-             height="40"
-             width="40">
-          <circle #circleSvg
-                  cx="50%"
-                  cy="50%"
-                  fill="none"
-                  r="10"
-                  stroke="#000"
-                  stroke-dasharray="81.6814089933"
-                  stroke-dashoffset="-81.6814089933"
-                  stroke-width="20"></circle>
+        <svg class="circle-svg" focusable="false" height="40" width="40">
+          <circle
+            #circleSvg
+            cx="50%"
+            cy="50%"
+            fill="none"
+            r="10"
+            stroke="#000"
+            stroke-dasharray="81.6814089933"
+            stroke-dashoffset="-81.6814089933"
+            stroke-width="20"
+          ></circle>
         </svg>
       </button>
 
       <ng-container *ngIf="(pomodoroService.cfg$|async)?.isEnabled">
-        <div class="pomodoro-label">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
+        <div class="pomodoro-label">
+          {{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
         </div>
         <div class="pomodoro-controls">
-          <button (click)="pomodoroService.finishPomodoroSession()"
-                  class="pomodoro-btn"
-                  color=""
-                  mat-mini-fab>
+          <button
+            (click)="pomodoroService.finishPomodoroSession()"
+            class="pomodoro-btn"
+            color=""
+            mat-mini-fab
+          >
             <mat-icon>skip_next</mat-icon>
           </button>
-          <button (click)="pomodoroService.stop()"
-                  class="pomodoro-btn"
-                  color=""
-                  mat-mini-fab>
+          <button
+            (click)="pomodoroService.stop()"
+            class="pomodoro-btn"
+            color=""
+            mat-mini-fab
+          >
             <mat-icon>stop</mat-icon>
           </button>
         </div>
       </ng-container>
     </div>
 
-    <simple-counter-button *ngFor="let simpleCounter of (simpleCounterService.enabledSimpleCounters$|async); trackBy: trackById"
-                           [simpleCounter]="simpleCounter"></simple-counter-button>
+    <simple-counter-button
+      *ngFor="let simpleCounter of (simpleCounterService.enabledSimpleCounters$|async); trackBy: trackById"
+      [simpleCounter]="simpleCounter"
+    ></simple-counter-button>
   </nav>
 </div>

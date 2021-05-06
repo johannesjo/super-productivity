@@ -1,23 +1,28 @@
-<div [@improvementBanner]="improvements.length"
-     class="improvements">
-  <div *ngFor="let improvement of improvements; trackBy: trackById"
-       class="improvement"
-       mat-ripple>
-    <button (click)="dismiss(improvement)"
-            [matTooltip]="T.G.DISMISS|translate"
-            class="dismiss"
-            disableRipple
-            mat-icon-button>
+<div [@improvementBanner]="improvements.length" class="improvements">
+  <div
+    *ngFor="let improvement of improvements; trackBy: trackById"
+    class="improvement"
+    mat-ripple
+  >
+    <button
+      (click)="dismiss(improvement)"
+      [matTooltip]="T.G.DISMISS|translate"
+      class="dismiss"
+      disableRipple
+      mat-icon-button
+    >
       <mat-icon>close</mat-icon>
     </button>
 
     <div class="title">{{improvement?.title}}</div>
 
-    <button (click)="check(improvement)"
-            [matTooltip]="T.F.METRIC.BANNER.CHECK|translate"
-            class="check"
-            disableRipple
-            mat-icon-button>
+    <button
+      (click)="check(improvement)"
+      [matTooltip]="T.F.METRIC.BANNER.CHECK|translate"
+      class="check"
+      disableRipple
+      mat-icon-button
+    >
       <mat-icon>check</mat-icon>
     </button>
   </div>

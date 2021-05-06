@@ -1,22 +1,16 @@
 <h2 mat-dialog-title>{{T.APP.D_INITIAL.TITLE|translate:{nr: version} }}</h2>
 
 <mat-dialog-content>
-  <div [innerHTML]="data.content"
-       class="content"></div>
+  <div [innerHTML]="data.content" class="content"></div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <a *ngIf="data.btnUrl && data.btnTxt"
-     [href]="data.btnUrl"
-     mat-button
-     target="_blank">
+  <a *ngIf="data.btnUrl && data.btnTxt" [href]="data.btnUrl" mat-button target="_blank">
     <mat-icon>open_in_new</mat-icon>
     {{(data.btnTxt)|translate}}
   </a>
 
-  <button (click)="close()"
-          color="primary"
-          mat-stroked-button>
+  <button (click)="close()" color="primary" mat-stroked-button>
     <mat-icon>close</mat-icon>
     {{(T.G.CLOSE)|translate}}
   </button>

@@ -1,41 +1,36 @@
-<div (click)="!data.actionStr && close()"
-     [class.error]="data.type==='ERROR'"
-     [class.success]="data.type==='SUCCESS'"
-     class="wrapper"
+<div
+  (click)="!data.actionStr && close()"
+  [class.error]="data.type==='ERROR'"
+  [class.success]="data.type==='SUCCESS'"
+  class="wrapper"
 >
   <ng-container *ngIf="!data.ico">
-    <mat-icon *ngIf="data.type==='SUCCESS'"
-              class="snack-icon">check_circle
-    </mat-icon>
-    <mat-icon *ngIf="data.type==='ERROR'"
-              class="snack-icon">error
-    </mat-icon>
+    <mat-icon *ngIf="data.type==='SUCCESS'" class="snack-icon">check_circle </mat-icon>
+    <mat-icon *ngIf="data.type==='ERROR'" class="snack-icon">error </mat-icon>
   </ng-container>
-  <mat-icon *ngIf="data.ico"
-            class="snack-icon">{{data.ico}}</mat-icon>
-  <mat-icon *ngIf="data.svgIco"
-            [svgIcon]="data.svgIco"
-            class="snack-icon"></mat-icon>
+  <mat-icon *ngIf="data.ico" class="snack-icon">{{data.ico}}</mat-icon>
+  <mat-icon *ngIf="data.svgIco" [svgIcon]="data.svgIco" class="snack-icon"></mat-icon>
 
-  <span [innerHtml]="data.msg"
-        class="message"></span>
+  <span [innerHtml]="data.msg" class="message"></span>
 
   <div class="button-wrapper">
-    <button (click)="actionClick()"
-            *ngIf="data.actionStr"
-            class="action"
-            color="accent"
-            mat-button>
+    <button
+      (click)="actionClick()"
+      *ngIf="data.actionStr"
+      class="action"
+      color="accent"
+      mat-button
+    >
       {{data.actionStr|translate}}
     </button>
   </div>
 
-  <button *ngIf="!data.actionStr"
-          class="close-btn"
-          mat-icon-button>
+  <button *ngIf="!data.actionStr" class="close-btn" mat-icon-button>
     <mat-icon>close</mat-icon>
   </button>
 
-  <mat-progress-bar *ngIf="data.promise||data.showWhile$||data.isSpinner"
-                    mode="indeterminate"></mat-progress-bar>
+  <mat-progress-bar
+    *ngIf="data.promise||data.showWhile$||data.isSpinner"
+    mode="indeterminate"
+  ></mat-progress-bar>
 </div>

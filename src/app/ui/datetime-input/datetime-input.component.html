@@ -1,26 +1,34 @@
-<div class="wrapper"
-     style="position: relative;">
+<div class="wrapper" style="position: relative">
   <mat-form-field>
-    <input (ngModelChange)="updateFromInput($event)"
-           [name]="name"
-           [ngModel]="strValue"
-           [placeholder]="placeholder"
-           [required]="required"
-           matInput
-           type="datetime-local">
-    <input (ngModelChange)="updateFromInput($event)"
-           [ngModel]="strValue"
-           class="fake">
+    <input
+      (ngModelChange)="updateFromInput($event)"
+      [name]="name"
+      [ngModel]="strValue"
+      [placeholder]="placeholder"
+      [required]="required"
+      matInput
+      type="datetime-local"
+    />
+    <input (ngModelChange)="updateFromInput($event)" [ngModel]="strValue" class="fake" />
     <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
   </mat-form-field>
 
   <mat-chip-list>
-    <mat-chip (click)="setCommonVal('15M')">{{T.DATETIME_INPUT.IN|translate:{time: '15m'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('1H')">{{T.DATETIME_INPUT.IN|translate:{time: '1h'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('2H')">{{T.DATETIME_INPUT.IN|translate:{time: '2h'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('5H')">{{T.DATETIME_INPUT.IN|translate:{time: '5h'} }}</mat-chip>
-    <mat-chip (click)="setCommonVal('TOMORROW_11')">{{T.DATETIME_INPUT.TOMORROW|translate:{time: '11:00'} }}</mat-chip>
-    <mat-chip (click)="setLastVal()"
-              *ngIf="lastVal">{{lastVal|date:'short'}}</mat-chip>
+    <mat-chip (click)="setCommonVal('15M')"
+      >{{T.DATETIME_INPUT.IN|translate:{time: '15m'} }}</mat-chip
+    >
+    <mat-chip (click)="setCommonVal('1H')"
+      >{{T.DATETIME_INPUT.IN|translate:{time: '1h'} }}</mat-chip
+    >
+    <mat-chip (click)="setCommonVal('2H')"
+      >{{T.DATETIME_INPUT.IN|translate:{time: '2h'} }}</mat-chip
+    >
+    <mat-chip (click)="setCommonVal('5H')"
+      >{{T.DATETIME_INPUT.IN|translate:{time: '5h'} }}</mat-chip
+    >
+    <mat-chip (click)="setCommonVal('TOMORROW_11')"
+      >{{T.DATETIME_INPUT.TOMORROW|translate:{time: '11:00'} }}</mat-chip
+    >
+    <mat-chip (click)="setLastVal()" *ngIf="lastVal">{{lastVal|date:'short'}}</mat-chip>
   </mat-chip-list>
 </div>

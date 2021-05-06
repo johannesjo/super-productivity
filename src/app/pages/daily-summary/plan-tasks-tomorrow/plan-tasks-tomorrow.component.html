@@ -1,10 +1,11 @@
 <div class="task-list-wrapper">
   <section class="add-task-bar-wrapper">
-    <add-task-bar [isAddToBottom]="true"
-                  [isDisableAutoFocus]="true"></add-task-bar>
+    <add-task-bar [isAddToBottom]="true" [isDisableAutoFocus]="true"></add-task-bar>
   </section>
 
-  <task-list [tasks]="workContextService.undoneTasks$|async"
-             listId="PARENT"
-             listModelId="UNDONE"></task-list>
+  <task-list
+    [tasks]="workContextService.undoneTasks$|async"
+    listId="PARENT"
+    listModelId="UNDONE"
+  ></task-list>
 </div>

@@ -27,25 +27,14 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button (click)="close()"
-            color="primary"
-            mat-button>
-      {{T.G.CANCEL|translate}}
-    </button>
-    <button (click)="close('USE_REMOTE')"
-            color="primary"
-            mat-stroked-button>
+    <button (click)="close()" color="primary" mat-button>{{T.G.CANCEL|translate}}</button>
+    <button (click)="close('USE_REMOTE')" color="primary" mat-stroked-button>
       <mat-icon>file_download</mat-icon>
       {{T.F.SYNC.D_CONFLICT.USE_REMOTE|translate}}
     </button>
-    <button (click)="close('USE_LOCAL')"
-            color="primary"
-            mat-stroked-button>
+    <button (click)="close('USE_LOCAL')" color="primary" mat-stroked-button>
       <mat-icon>file_upload</mat-icon>
       {{T.F.SYNC.D_CONFLICT.USE_LOCAL|translate}}
     </button>
   </div>
 </mat-dialog-actions>
-
-
-

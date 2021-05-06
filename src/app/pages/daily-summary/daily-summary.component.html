@@ -5,12 +5,8 @@
 
 <task-additional-info-wrapper [isAlwaysOver]="true">
   <div class="page-wrapper">
-    <div *ngIf="isForToday"
-         style="text-align: center;">
-      <a class="back-btn"
-         color="primary"
-         mat-button
-         routerLink="/active/tasks">
+    <div *ngIf="isForToday" style="text-align: center">
+      <a class="back-btn" color="primary" mat-button routerLink="/active/tasks">
         <mat-icon>chevron_left</mat-icon>
         {{T.PDS.BACK|translate}}
         <!--<mat-icon>playlist_play</mat-icon>-->
@@ -18,127 +14,129 @@
     </div>
 
     <h1 class="done-headline mat-headline">
-    <span *ngIf="isForToday"
-          [innerHTML]="T.PDS.CELEBRATE|translate"></span>
+      <span *ngIf="isForToday" [innerHTML]="T.PDS.CELEBRATE|translate"></span>
       <span *ngIf="!isForToday">{{T.PDS.SUMMARY_FOR|translate:{dayStr: dayStr} }}</span>
     </h1>
     <div class="daily-summary-summary">
       <div class="summary-point">
         <mat-icon>schedule</mat-icon>
-        <div class="summary-text">{{T.PDS.START_END|translate}}
+        <div class="summary-text">
+          {{T.PDS.START_END|translate}}
           <div class="summary-val">
-            <inline-input (changed)="updateWorkStart($event)"
-                          [type]="'time'"
-                          [value]="started$|async|momentFormat:'HH:mm'">
+            <inline-input
+              (changed)="updateWorkStart($event)"
+              [type]="'time'"
+              [value]="started$|async|momentFormat:'HH:mm'"
+            >
             </inline-input>
             –
-            <inline-input (changed)="updateWorkEnd($event)"
-                          [type]="'time'"
-                          [value]="end$|async|momentFormat:'HH:mm'">
+            <inline-input
+              (changed)="updateWorkEnd($event)"
+              [type]="'time'"
+              [value]="end$|async|momentFormat:'HH:mm'"
+            >
             </inline-input>
           </div>
         </div>
       </div>
       <div class="summary-point">
         <mat-icon>check</mat-icon>
-        <div class="summary-text">{{T.PDS.TASKS_COMPLETED|translate}}
+        <div class="summary-text">
+          {{T.PDS.TASKS_COMPLETED|translate}}
           <div class="summary-val">
-            <span [innerHtml]="(nrOfDoneTasks$|async)"></span> / <span
-            [innerHtml]="(totalNrOfTasks$|async)"></span>
+            <span [innerHtml]="(nrOfDoneTasks$|async)"></span> /
+            <span [innerHtml]="(totalNrOfTasks$|async)"></span>
           </div>
         </div>
       </div>
-      <div [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE|translate"
-           class="summary-point">
+      <div [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE|translate" class="summary-point">
         <mat-icon>timer</mat-icon>
-        <div class="summary-text">{{T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL|translate}}
-          <div class="summary-val">{{timeWorked$|async|msToClockString}}
-            / {{estimatedOnTasksWorkedOn$|async|msToClockString}}</div>
+        <div class="summary-text">
+          {{T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL|translate}}
+          <div class="summary-val">
+            {{timeWorked$|async|msToClockString}} /
+            {{estimatedOnTasksWorkedOn$|async|msToClockString}}
+          </div>
         </div>
       </div>
 
-      <div *ngIf="(isBreakTrackingSupport$|async)"
-           class="summary-point">
+      <div *ngIf="(isBreakTrackingSupport$|async)" class="summary-point">
         <mat-icon>free_breakfast</mat-icon>
-        <div class="summary-text">{{T.PDS.BREAK_LABEL|translate}}
-          <div class="summary-val">{{breakNr$|async}} / {{breakTime$|async|msToClockString}}</div>
+        <div class="summary-text">
+          {{T.PDS.BREAK_LABEL|translate}}
+          <div class="summary-val">
+            {{breakNr$|async}} / {{breakTime$|async|msToClockString}}
+          </div>
         </div>
       </div>
     </div>
 
-
-    <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
-                   [selectedIndex]="selectedTabIndex"
-                   class="tabs"
-                   dynamicHeight>
-      <mat-tab [label]="(isForToday)
+    <mat-tab-group
+      (selectedIndexChange)="onTabIndexChange($event)"
+      [selectedIndex]="selectedTabIndex"
+      class="tabs"
+      dynamicHeight
+    >
+      <mat-tab
+        [label]="(isForToday)
       ? (T.PDS.TODAY|translate)
-      : (T.PDS.TASK_LIST|translate)">
+      : (T.PDS.TASK_LIST|translate)"
+      >
         <section class="tab-inner">
-
-
-          <ng-container *ngIf="(tasksWorkedOnOrDoneOrRepeatableFlat$|async) as tasks; else loading">
-            <task-summary-tables *ngIf="tasks?.length; else noTasks"
-                                 [dayStr]="dayStr"
-                                 [flatTasks]="tasks"
-                                 [isForToday]="isForToday"
-                                 [isShowYesterday]="isForToday && isIncludeYesterday"></task-summary-tables>
+          <ng-container
+            *ngIf="(tasksWorkedOnOrDoneOrRepeatableFlat$|async) as tasks; else loading"
+          >
+            <task-summary-tables
+              *ngIf="tasks?.length; else noTasks"
+              [dayStr]="dayStr"
+              [flatTasks]="tasks"
+              [isForToday]="isForToday"
+              [isShowYesterday]="isForToday && isIncludeYesterday"
+            ></task-summary-tables>
           </ng-container>
 
           <ng-template #loading>
-            <mat-spinner style="margin: auto;"></mat-spinner>
+            <mat-spinner style="margin: auto"></mat-spinner>
           </ng-template>
 
           <ng-template #noTasks>
             <p>{{T.PDS.NO_TASKS|translate}}</p>
           </ng-template>
-
         </section>
       </mat-tab>
 
-
-      <mat-tab *ngIf="!(configService.evaluation$|async)?.isHideEvaluationSheet"
-               [label]="T.PDS.EVALUATION|translate">
-        <section class="tab-inner"
-                 style="max-width: 600px">
-          <evaluation-sheet (save)="onEvaluationSave()"
-                            [day]="(dayStr$|async)"></evaluation-sheet>
+      <mat-tab
+        *ngIf="!(configService.evaluation$|async)?.isHideEvaluationSheet"
+        [label]="T.PDS.EVALUATION|translate"
+      >
+        <section class="tab-inner" style="max-width: 600px">
+          <evaluation-sheet
+            (save)="onEvaluationSave()"
+            [day]="(dayStr$|async)"
+          ></evaluation-sheet>
         </section>
       </mat-tab>
 
-
-      <mat-tab *ngIf="isForToday"
-               [label]="T.PDS.PLAN|translate">
+      <mat-tab *ngIf="isForToday" [label]="T.PDS.PLAN|translate">
         <section class="tab-inner">
           <plan-tasks-tomorrow></plan-tasks-tomorrow>
         </section>
       </mat-tab>
 
-
-      <mat-tab *ngIf="isForToday"
-               [label]="T.PDS.WEEK|translate">
+      <mat-tab *ngIf="isForToday" [label]="T.PDS.WEEK|translate">
         <section class="tab-inner full-width">
           <worklog-week></worklog-week>
         </section>
       </mat-tab>
-
-
     </mat-tab-group>
-
 
     <section class="daily-summary-actions">
       <div class="bottom-buttons">
-        <button (click)="finishDay()"
-                *ngIf="isForToday"
-                color="primary"
-                mat-flat-button>
+        <button (click)="finishDay()" *ngIf="isForToday" color="primary" mat-flat-button>
           <mat-icon>wb_sunny</mat-icon>
           {{T.PDS.SAVE_AND_GO_HOME|translate}}
         </button>
-        <button (click)="finishDay()"
-                *ngIf="!isForToday"
-                color="primary"
-                mat-flat-button>
+        <button (click)="finishDay()" *ngIf="!isForToday" color="primary" mat-flat-button>
           <mat-icon>wb_sunny</mat-icon>
           {{T.PDS.CLEAR_ALL_CONTINUE|translate}}
         </button>
@@ -146,13 +144,10 @@
     </section>
   </div>
 
-
-  <div *ngIf="showSuccessAnimation"
-       class="success-animation-wrapper">
+  <div *ngIf="showSuccessAnimation" class="success-animation-wrapper">
     <mat-icon>wb_sunny</mat-icon>
     <div class="unicorn-wrapper">
-      <img class="unicorn"
-           src="assets/unicorn.png">
+      <img class="unicorn" src="assets/unicorn.png" />
     </div>
   </div>
 </task-additional-info-wrapper>

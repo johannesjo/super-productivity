@@ -1,64 +1,64 @@
-<section *ngFor="let project of (projects$|async); trackBy: trackById"
-         class="project-section">
-  <div *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
-       [style.border-color]="project.color"
-       class="project-title">
+<section
+  *ngFor="let project of (projects$|async); trackBy: trackById"
+  class="project-section"
+>
+  <div
+    *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
+    [style.border-color]="project.color"
+    class="project-title"
+  >
     <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
 
     <div *ngIf="!isShowYesterday">{{project.timeSpentToday|msToString}}</div>
 
-    <div *ngIf="isShowYesterday">{{project.timeSpentToday > 0 ? (project.timeSpentToday|msToString) : ''}}
+    <div *ngIf="isShowYesterday">
+      {{project.timeSpentToday > 0 ? (project.timeSpentToday|msToString) : ''}}
       <ng-container *ngIf="project.timeSpentYesterday >0">
         ({{project.timeSpentYesterday|msToString}} {{T.G.YESTERDAY|translate}})
       </ng-container>
     </div>
   </div>
 
-  <task-summary-table (updated)="onTaskSummaryEdit()"
-                      [day]="dayStr"
-                      [flatTasks]="project.tasks"></task-summary-table>
-  <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
-    <button [matMenuTriggerFor]="roundTimeActions"
-            [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate"
-            mat-button>
+  <task-summary-table
+    (updated)="onTaskSummaryEdit()"
+    [day]="dayStr"
+    [flatTasks]="project.tasks"
+  ></task-summary-table>
+  <div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
+    <button
+      [matMenuTriggerFor]="roundTimeActions"
+      [title]="T.PDS.ROUND_TIME_SPENT_TITLE|translate"
+      mat-button
+    >
       <mat-icon>restore</mat-icon>
       {{T.PDS.ROUND_TIME_SPENT|translate}}
     </button>
-    <button (click)="showExportModal(project.id)"
-            *ngIf="isForToday"
-            mat-button>
+    <button (click)="showExportModal(project.id)" *ngIf="isForToday" mat-button>
       <mat-icon>call_made</mat-icon>
       {{T.PDS.EXPORT_TASK_LIST|translate}}
     </button>
 
     <mat-menu #roundTimeActions="matMenu">
-      <button mat-menu-item
-              style="color: red;">
+      <button mat-menu-item style="color: red">
         {{T.PDS.ROUND_TIME_WARNING|translate}}
       </button>
-      <button (click)="roundTimeForTasks(project.id,'5M')"
-              mat-menu-item>
+      <button (click)="roundTimeForTasks(project.id,'5M')" mat-menu-item>
         {{T.PDS.ROUND_5M|translate}}
       </button>
-      <button (click)="roundTimeForTasks(project.id,'5M', true)"
-              mat-menu-item>
+      <button (click)="roundTimeForTasks(project.id,'5M', true)" mat-menu-item>
         {{T.PDS.ROUND_UP_5M|translate}}
       </button>
-      <button (click)="roundTimeForTasks(project.id,'QUARTER')"
-              mat-menu-item>
+      <button (click)="roundTimeForTasks(project.id,'QUARTER')" mat-menu-item>
         {{T.PDS.ROUND_15M|translate}}
       </button>
-      <button (click)="roundTimeForTasks(project.id,'QUARTER', true)"
-              mat-menu-item>
+      <button (click)="roundTimeForTasks(project.id,'QUARTER', true)" mat-menu-item>
         {{T.PDS.ROUND_UP_15M|translate}}
       </button>
-      <button (click)="roundTimeForTasks(project.id,'HALF')"
-              mat-menu-item>
+      <button (click)="roundTimeForTasks(project.id,'HALF')" mat-menu-item>
         {{T.PDS.ROUND_30M|translate}}
       </button>
-      <button (click)="roundTimeForTasks(project.id,'HALF', true)"
-              mat-menu-item>
+      <button (click)="roundTimeForTasks(project.id,'HALF', true)" mat-menu-item>
         {{T.PDS.ROUND_UP_30M|translate}}
       </button>
     </mat-menu>

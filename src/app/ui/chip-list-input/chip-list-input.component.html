@@ -3,22 +3,21 @@
     <mat-chip
       (removed)="remove(modelItem.id)"
       *ngFor="let modelItem of modelItems; trackBy:trackById"
-      [removable]="true">
-
+      [removable]="true"
+    >
       {{ modelItem.title}}
 
-      <mat-icon [matTooltip]="T.G.REMOVE|translate"
-                matChipRemove>cancel
-      </mat-icon>
+      <mat-icon [matTooltip]="T.G.REMOVE|translate" matChipRemove>cancel </mat-icon>
 
-      <button (click)="additionalAction.emit(modelItem.id)"
-              *ngIf="additionalActionIcon"
-              [class.isToggled]="isToggled(modelItem.id)"
-              [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle: additionalActionTooltip"
-              class="additional"
-              mat-icon-button>
-        <mat-icon style="transform: rotate(45deg)">{{additionalActionIcon}}
-        </mat-icon>
+      <button
+        (click)="additionalAction.emit(modelItem.id)"
+        *ngIf="additionalActionIcon"
+        [class.isToggled]="isToggled(modelItem.id)"
+        [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle: additionalActionTooltip"
+        class="additional"
+        mat-icon-button
+      >
+        <mat-icon style="transform: rotate(45deg)">{{additionalActionIcon}} </mat-icon>
       </button>
     </mat-chip>
 
@@ -31,12 +30,14 @@
       [matChipInputAddOnBlur]="true"
       [matChipInputFor]="chipListElRef"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-      [placeholder]="label">
+      [placeholder]="label"
+    />
   </mat-chip-list>
-  <mat-autocomplete #autoElRef="matAutocomplete"
-                    (optionSelected)="selected($event)">
-    <mat-option *ngFor="let suggestion of (filteredSuggestions | async); trackBy:trackById"
-                [value]="suggestion.id">
+  <mat-autocomplete #autoElRef="matAutocomplete" (optionSelected)="selected($event)">
+    <mat-option
+      *ngFor="let suggestion of (filteredSuggestions | async); trackBy:trackById"
+      [value]="suggestion.id"
+    >
       {{suggestion.title}}
     </mat-option>
   </mat-autocomplete>

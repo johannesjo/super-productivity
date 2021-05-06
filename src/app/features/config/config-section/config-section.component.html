@@ -1,25 +1,20 @@
-<collapsible [isExpanded]="isExpanded"
-             [isIconBefore]="true"
-             [title]="(section?.title|translate)">
+<collapsible
+  [isExpanded]="isExpanded"
+  [isIconBefore]="true"
+  [title]="(section?.title|translate)"
+>
   <!--[icon]="section?.icon"-->
 
   <help-section *ngIf="section?.help||section?.helpArr">
-    <div *ngIf="section?.help"
-         [innerHtml]="section?.help|translate"></div>
+    <div *ngIf="section?.help" [innerHtml]="section?.help|translate"></div>
     <ng-container *ngIf="section?.helpArr">
       <ng-container *ngFor="let helpSection of section?.helpArr; trackBy: trackByIndex">
-        <div *ngIf="helpSection.h"
-             class="mat-caption">{{helpSection.h|translate}}</div>
-        <p *ngIf="helpSection.p"
-           [innerHTML]="helpSection.p|translate"></p>
-        <p *ngIf="helpSection.p2"
-           [innerHTML]="helpSection.p2|translate"></p>
-        <p *ngIf="helpSection.p3"
-           [innerHTML]="helpSection.p3|translate"></p>
-        <p *ngIf="helpSection.p4"
-           [innerHTML]="helpSection.p4|translate"></p>
+        <div *ngIf="helpSection.h" class="mat-caption">{{helpSection.h|translate}}</div>
+        <p *ngIf="helpSection.p" [innerHTML]="helpSection.p|translate"></p>
+        <p *ngIf="helpSection.p2" [innerHTML]="helpSection.p2|translate"></p>
+        <p *ngIf="helpSection.p3" [innerHTML]="helpSection.p3|translate"></p>
+        <p *ngIf="helpSection.p4" [innerHTML]="helpSection.p4|translate"></p>
       </ng-container>
-
     </ng-container>
   </help-section>
   <div class="form-wrapper {{section?.key}}">
@@ -28,9 +23,9 @@
       *ngIf="section?.items && !section?.customSection"
       [cfg]="cfg"
       [formCfg]="section?.items"
-      [sectionKey]="section?.key"></config-form>
+      [sectionKey]="section?.key"
+    ></config-form>
 
-    <ng-template #customForm
-                 class="custom-form"></ng-template>
+    <ng-template #customForm class="custom-form"></ng-template>
   </div>
 </collapsible>

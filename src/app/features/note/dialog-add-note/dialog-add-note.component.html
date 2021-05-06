@@ -1,30 +1,35 @@
-<form (submit)="submit()"
-      *ngIf="(isInProjectContext$|async)">
+<form (submit)="submit()" *ngIf="(isInProjectContext$|async)">
   <div class="form-wrapper">
     <div class="textarea-wrapper">
-      <textarea (keydown)="keydownHandler($event)"
-                (ngModelChange)="saveTmp()"
-                [(ngModel)]="noteContent"
-                [placeholder]="T.F.NOTE.D_ADD.NOTE_LABEL|translate"
-                matTextareaAutosize
-                name="noteContent"
-                rows="6"></textarea>
+      <textarea
+        (keydown)="keydownHandler($event)"
+        (ngModelChange)="saveTmp()"
+        [(ngModel)]="noteContent"
+        [placeholder]="T.F.NOTE.D_ADD.NOTE_LABEL|translate"
+        matTextareaAutosize
+        name="noteContent"
+        rows="6"
+      ></textarea>
     </div>
   </div>
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button (click)="close()"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-button
-              type="button">
+      <button
+        (click)="close()"
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-button
+        type="button"
+      >
         {{T.G.CANCEL|translate}}
       </button>
-      <button class="btn btn-primary submit-button"
-              color="primary"
-              mat-stroked-button
-              type="submit">
+      <button
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-stroked-button
+        type="submit"
+      >
         <mat-icon>save</mat-icon>
         {{T.G.SAVE|translate}}
       </button>
@@ -33,16 +38,21 @@
 </form>
 
 <div *ngIf="!(isInProjectContext$|async)">
-  <p>You're trying to add a Note via the global shortcut. Currently Notes can only be added when in project context.</p>
+  <p>
+    You're trying to add a Note via the global shortcut. Currently Notes can only be added
+    when in project context.
+  </p>
   <p>Sorry, I know this sucks, but this will change at some point!</p>
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button (click)="close()"
-              class="btn btn-primary submit-button"
-              color="primary"
-              mat-button
-              type="button">
+      <button
+        (click)="close()"
+        class="btn btn-primary submit-button"
+        color="primary"
+        mat-button
+        type="button"
+      >
         {{T.G.CLOSE|translate}}
       </button>
     </div>

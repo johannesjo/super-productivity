@@ -1,51 +1,48 @@
-<div *ngIf="note"
-     [class.isFocused]="isFocus"
-     [class.isImg]="note.imgUrl"
-     class="note">
-  <img *ngIf="note.imgUrl"
-       [enlargeImg]="note.imgUrl"
-       [src]="note.imgUrl"
-       class="note-img">
+<div *ngIf="note" [class.isFocused]="isFocus" [class.isImg]="note.imgUrl" class="note">
+  <img
+    *ngIf="note.imgUrl"
+    [enlargeImg]="note.imgUrl"
+    [src]="note.imgUrl"
+    class="note-img"
+  />
 
-  <div *ngIf="!note.imgUrl"
-       class="content">
-    <inline-markdown #markdownEl
-                     (blurred)="isFocus=false"
-                     (changed)="updateContent($event)"
-                     (focused)="isFocus=true"
-                     [isLock]="note.isLock"
-                     [model]="note.content"></inline-markdown>
+  <div *ngIf="!note.imgUrl" class="content">
+    <inline-markdown
+      #markdownEl
+      (blurred)="isFocus=false"
+      (changed)="updateContent($event)"
+      (focused)="isFocus=true"
+      [isLock]="note.isLock"
+      [model]="note.content"
+    ></inline-markdown>
   </div>
 
   <div class="controls handle-drag">
-    <button [matMenuTriggerFor]="menu"
-            class="handle-drag mat-elevation-z2"
-            color=""
-            mat-mini-fab>
+    <button
+      [matMenuTriggerFor]="menu"
+      class="handle-drag mat-elevation-z2"
+      color=""
+      mat-mini-fab
+    >
       <mat-icon class="handle-drag">more_vert</mat-icon>
     </button>
 
     <mat-menu #menu="matMenu">
-      <button (click)="editFullscreen()"
-              mat-menu-item>
+      <button (click)="editFullscreen()" mat-menu-item>
         <mat-icon>fullscreen</mat-icon>
         {{T.F.NOTE.EDIT_FULLSCREEN|translate}}
       </button>
 
-      <button (click)="toggleLock()"
-              *ngIf="!note.imgUrl"
-              mat-menu-item>
+      <button (click)="toggleLock()" *ngIf="!note.imgUrl" mat-menu-item>
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
 
-        {{note.isLock
-        ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate)
-        : (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
+        {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) :
+        (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
       </button>
 
-      <button (click)="removeNote()"
-              mat-menu-item>
-        <mat-icon style="color:#e15d63;">delete_forever</mat-icon>
+      <button (click)="removeNote()" mat-menu-item>
+        <mat-icon style="color: #e15d63">delete_forever</mat-icon>
         {{T.G.DELETE|translate}}
       </button>
     </mat-menu>

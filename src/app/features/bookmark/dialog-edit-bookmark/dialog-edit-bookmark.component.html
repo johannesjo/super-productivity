@@ -1,58 +1,64 @@
-<form #form="ngForm"
-      (submit)="submit()"
-      *ngIf="bookmarkCopy">
-  <h1 mat-dialog-title>{{ (bookmarkCopy.id ?
-    (T.F.BOOKMARK.DIALOG_EDIT.EDIT_BOOKMARK) :
-    (T.F.BOOKMARK.DIALOG_EDIT.ADD_BOOKMARK))
-    |translate }}</h1>
+<form #form="ngForm" (submit)="submit()" *ngIf="bookmarkCopy">
+  <h1 mat-dialog-title>
+    {{ (bookmarkCopy.id ? (T.F.BOOKMARK.DIALOG_EDIT.EDIT_BOOKMARK) :
+    (T.F.BOOKMARK.DIALOG_EDIT.ADD_BOOKMARK)) |translate }}
+  </h1>
 
   <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field>
-        <input [(ngModel)]="bookmarkCopy.title"
-               [placeholder]="(T.G.TITLE|translate)"
-               autofocus="autofocus"
-               matInput
-               name="title"
-
-               type="text">
+        <input
+          [(ngModel)]="bookmarkCopy.title"
+          [placeholder]="(T.G.TITLE|translate)"
+          autofocus="autofocus"
+          matInput
+          name="title"
+          type="text"
+        />
       </mat-form-field>
       <mat-form-field>
-        <input [(ngModel)]="bookmarkCopy.path"
-               [placeholder]="mapTypeToLabel(bookmarkCopy.type)|translate"
-               matInput
-               name="path"
-               required
-
-               type="text">
+        <input
+          [(ngModel)]="bookmarkCopy.path"
+          [placeholder]="mapTypeToLabel(bookmarkCopy.type)|translate"
+          matInput
+          name="path"
+          required
+          type="text"
+        />
       </mat-form-field>
 
       <mat-form-field>
-        <mat-select [(ngModel)]="bookmarkCopy.type"
-                    [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
-                    name="type"
-                    required="true"
+        <mat-select
+          [(ngModel)]="bookmarkCopy.type"
+          [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
+          name="type"
+          required="true"
         >
-          <mat-option *ngFor="let type of types; trackBy: trackByIndex"
-                      [innerHtml]="(type.title|translate)"
-                      [value]="type.type">
+          <mat-option
+            *ngFor="let type of types; trackBy: trackByIndex"
+            [innerHtml]="(type.title|translate)"
+            [value]="type.type"
+          >
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <div class="custom-icon-wrapper">
         <mat-form-field class="example-full-width">
-          <input [(ngModel)]="bookmarkCopy.icon"
-                 [formControl]="iconControl"
-                 [matAutocomplete]="auto"
-                 [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_ICON|translate)"
-                 matInput
-                 type="text">
+          <input
+            [(ngModel)]="bookmarkCopy.icon"
+            [formControl]="iconControl"
+            [matAutocomplete]="auto"
+            [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_ICON|translate)"
+            matInput
+            type="text"
+          />
           <mat-icon matPrefix="">{{bookmarkCopy.icon}}</mat-icon>
-          <mat-autocomplete #auto="matAutocomplete"
-                            [autoActiveFirstOption]="true">
-            <mat-option *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
-                        [value]="icon">
+          <mat-autocomplete #auto="matAutocomplete" [autoActiveFirstOption]="true">
+            <mat-option
+              *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
+              [value]="icon"
+            >
               <mat-icon>{{icon}}</mat-icon>
               <span>{{icon}}</span>
             </mat-option>
@@ -63,17 +69,11 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button (click)="close()"
-            color="primary"
-            mat-button
-            type="button">
+    <button (click)="close()" color="primary" mat-button type="button">
       {{T.G.CANCEL|translate}}
     </button>
 
-    <button [disabled]="!form.valid"
-            color="primary"
-            mat-stroked-button
-            type="submit">
+    <button [disabled]="!form.valid" color="primary" mat-stroked-button type="submit">
       <mat-icon>save</mat-icon>
       {{T.G.SAVE|translate}}
     </button>

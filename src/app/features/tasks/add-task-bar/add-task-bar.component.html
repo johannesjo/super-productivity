@@ -1,60 +1,71 @@
-<form (submit)="addTask()"
-      [class.isElevated]="isElevated"
-      [class.mat-elevation-z3]="!isElevated"
-      [class.mat-elevation-z4]="isElevated"
-      class="add-task-form">
+<form
+  (submit)="addTask()"
+  [class.isElevated]="isElevated"
+  [class.mat-elevation-z3]="!isElevated"
+  [class.mat-elevation-z4]="isElevated"
+  class="add-task-form"
+>
   <div class="input-wrapper">
-    <div *ngIf="(isLoading$|async)"
-         class="spinner">
+    <div *ngIf="(isLoading$|async)" class="spinner">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
-    <button (click)="isAddToBacklog=!isAddToBacklog"
-            class="switch-add-to-btn"
-            mat-icon-button
-            type="button">
+    <button
+      (click)="isAddToBacklog=!isAddToBacklog"
+      class="switch-add-to-btn"
+      mat-icon-button
+      type="button"
+    >
       <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
       <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
     </button>
-    <input #inputEl
-           [tabindex]="tabindex"
-           (blur)="onBlur($event)"
-           [formControl]="taskSuggestionsCtrl"
-           [matAutocomplete]="autoEl"
-           [placeholder]="(doubleEnterCount > 0)
+    <input
+      #inputEl
+      [tabindex]="tabindex"
+      (blur)="onBlur($event)"
+      [formControl]="taskSuggestionsCtrl"
+      [matAutocomplete]="autoEl"
+      [placeholder]="(doubleEnterCount > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)
          : isAddToBacklog
            ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BACKLOG|translate)
            : (T.F.TASK.ADD_TASK_BAR.ADD_TASK|translate)"
-           matInput>
+      matInput
+    />
 
-    <button (click)="closeBtnClose($event)"
-            *ngIf="isElevated"
-            class="close-btn"
-            mat-icon-button
-            type="button">
+    <button
+      (click)="closeBtnClose($event)"
+      *ngIf="isElevated"
+      class="close-btn"
+      mat-icon-button
+      type="button"
+    >
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-
   <div class="info-bar">
     <ng-container *ngIf="inputVal.length > 0">
-      <div *ngIf="!activatedIssueTask && !shortSyntaxTags.length"
-           class="info-text">{{T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate}}</div>
+      <div *ngIf="!activatedIssueTask && !shortSyntaxTags.length" class="info-text">
+        {{T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate}}
+      </div>
 
       <ng-container *ngIf="activatedIssueTask">
-        <div *ngIf="activatedIssueTask.issueType"
-             class="info-text">{{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{
-          issueType: activatedIssueTask.issueType,
-          issueNr: activatedIssueTask.taskIssueId || activatedIssueTask.issueData?.id
-        } }}</div>
-        <div *ngIf="activatedIssueTask.issueType=== undefined"
-             class="info-text">{{T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: {taskTitle: activatedIssueTask.title} }}</div>
+        <div *ngIf="activatedIssueTask.issueType" class="info-text">
+          {{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{ issueType:
+          activatedIssueTask.issueType, issueNr: activatedIssueTask.taskIssueId ||
+          activatedIssueTask.issueData?.id } }}
+        </div>
+        <div *ngIf="activatedIssueTask.issueType=== undefined" class="info-text">
+          {{T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: {taskTitle:
+          activatedIssueTask.title} }}
+        </div>
       </ng-container>
 
       <ng-container *ngIf="!activatedIssueTask && shortSyntaxTags.length">
-        <tag *ngFor="let shortSyntaxTag of shortSyntaxTags; trackBy: trackById"
-             [tag]="shortSyntaxTag"></tag>
+        <tag
+          *ngFor="let shortSyntaxTag of shortSyntaxTags; trackBy: trackById"
+          [tag]="shortSyntaxTag"
+        ></tag>
       </ng-container>
     </ng-container>
 
@@ -63,23 +74,22 @@
     </ng-container>
   </div>
 
-
   <!-- NOTE: [autoActiveFirstOption]="taskSuggestionsCtrl.value?.length <= 3"
   causes optionActivated not to be fired :(--->
-  <mat-autocomplete #autoEl="matAutocomplete"
-                    (optionActivated)="onOptionActivated($event?.option?.value)"
-                    (optionSelected)="addTask()"
-                    [displayWith]="displayWith">
-    <mat-option *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
-                [value]="item">
-      <mat-icon *ngIf="item.issueType"
-                [svgIcon]="item.issueType|issueIcon"></mat-icon>
+  <mat-autocomplete
+    #autoEl="matAutocomplete"
+    (optionActivated)="onOptionActivated($event?.option?.value)"
+    (optionSelected)="addTask()"
+    [displayWith]="displayWith"
+  >
+    <mat-option
+      *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
+      [value]="item"
+    >
+      <mat-icon *ngIf="item.issueType" [svgIcon]="item.issueType|issueIcon"></mat-icon>
       <mat-icon *ngIf="!item.issueType && !item.ctx">library_books</mat-icon>
-      <tag *ngIf="item.ctx"
-           [tag]="item.ctx"></tag>
+      <tag *ngIf="item.ctx" [tag]="item.ctx"></tag>
       <span [innerHTML]="item?.titleHighlighted||item?.title"></span>
     </mat-option>
-
   </mat-autocomplete>
-
 </form>

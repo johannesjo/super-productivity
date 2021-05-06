@@ -1,56 +1,60 @@
-<ng-container *ngIf="(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)">
-
-  <div *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
-       [style.background]="'url(' + bgImage + ')'"
-       class="bg-image"></div>
+<ng-container
+  *ngIf="(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) && !(imexMetaService.isDataImportInProgress$|async)"
+>
+  <div
+    *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
+    [style.background]="'url(' + bgImage + ')'"
+    class="bg-image"
+  ></div>
 
   <!--TODO move inside page container somehow -->
-  <add-task-bar (blurred)="layoutService.hideAddTaskBar()"
-                *ngIf="layoutService.isShowAddTaskBar$|async"
-                [@blendInOut]
-                [isElevated]="true"
-                class="global"></add-task-bar>
-  <div *ngIf="(layoutService.isShowAddTaskBar$|async)"
-       @fade
-       class="backdrop"></div>
-  <mat-sidenav-container
-    [dir]="isRTL ? 'rtl' : 'ltr'">
-    <mat-sidenav (closedStart)="layoutService.hideSideNav()"
-                 [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
-                 [opened]="(layoutService.isShowSideNav$|async)"
-                 position="start">
-      <side-nav #sideNavElRef
-                (scrollToNotes)="scrollToNotes()"></side-nav>
+  <add-task-bar
+    (blurred)="layoutService.hideAddTaskBar()"
+    *ngIf="layoutService.isShowAddTaskBar$|async"
+    [@blendInOut]
+    [isElevated]="true"
+    class="global"
+  ></add-task-bar>
+  <div *ngIf="(layoutService.isShowAddTaskBar$|async)" @fade class="backdrop"></div>
+  <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
+    <mat-sidenav
+      (closedStart)="layoutService.hideSideNav()"
+      [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
+      [opened]="(layoutService.isShowSideNav$|async)"
+      position="start"
+    >
+      <side-nav #sideNavElRef (scrollToNotes)="scrollToNotes()"></side-nav>
       <ng-container *ngIf="workContextService.isActiveWorkContextProject$|async">
-        <hr>
-        <notes #notesElRef
-               (scrollToSidenav)="scrollToSidenav()"></notes>
+        <hr />
+        <notes #notesElRef (scrollToSidenav)="scrollToSidenav()"></notes>
       </ng-container>
     </mat-sidenav>
 
     <mat-sidenav-content>
-      <header [class.isNotScrolled]="!(layoutService.isScrolled$|async)"
-              class="header-wrapper">
+      <header
+        [class.isNotScrolled]="!(layoutService.isScrolled$|async)"
+        class="header-wrapper"
+      >
         <main-header></main-header>
-        <bookmark-bar *ngIf="(workContextService.isActiveWorkContextProject$|async)"></bookmark-bar>
+        <bookmark-bar
+          *ngIf="(workContextService.isActiveWorkContextProject$|async)"
+        ></bookmark-bar>
         <banner></banner>
       </header>
 
-      <div #routeWrapper
-           [@warpRoute]="getPage(o)"
-           class="route-wrapper">
+      <div #routeWrapper [@warpRoute]="getPage(o)" class="route-wrapper">
         <router-outlet #o="outlet"></router-outlet>
       </div>
       <global-progress-bar></global-progress-bar>
-
     </mat-sidenav-content>
   </mat-sidenav-container>
 </ng-container>
 
-<div *ngIf="!(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) || (imexMetaService.isDataImportInProgress$|async)"
-     class="loading-full-page-wrapper">
+<div
+  *ngIf="!(syncService.afterInitialSyncDoneAndDataLoadedInitially$|async) || (imexMetaService.isDataImportInProgress$|async)"
+  class="loading-full-page-wrapper"
+>
   <global-progress-bar></global-progress-bar>
-
 
   <div class="app-loading">
     <div class="productivity-tip">
@@ -63,11 +67,23 @@
       <div class="double-bounce2"></div>
     </div>
 
-    <svg class="logo"
-         viewBox="0 0 64 64">
-      <path d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
-            id="path3395"
-            style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1" />
+    <svg class="logo" viewBox="0 0 64 64">
+      <path
+        d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+        id="path3395"
+        style="
+          fill: #000000;
+          fill-opacity: 1;
+          fill-rule: evenodd;
+          stroke: none;
+          stroke-width: 1.46761858;
+          stroke-linecap: butt;
+          stroke-linejoin: bevel;
+          stroke-miterlimit: 13.80000019;
+          stroke-dasharray: none;
+          stroke-opacity: 1;
+        "
+      />
     </svg>
   </div>
 </div>

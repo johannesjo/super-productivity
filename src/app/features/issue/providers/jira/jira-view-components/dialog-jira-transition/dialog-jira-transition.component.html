@@ -1,6 +1,5 @@
 <h1 mat-dialog-title>
-  <mat-icon class="dialog-header-icon"
-            svgIcon="jira"></mat-icon>
+  <mat-icon class="dialog-header-icon" svgIcon="jira"></mat-icon>
   <span>{{T.F.JIRA.DIALOG_TRANSITION.TITLE|translate}}</span>
 </h1>
 
@@ -21,29 +20,34 @@
     <mat-select [(ngModel)]="chosenTransition">
       <!--<mat-option value="DO_NOT">Don't transition</mat-option>-->
       <!--<mat-option value="ALWAYS_ASK">Always open dialog</mat-option>-->
-      <mat-option *ngFor="let transition of (availableTransitions$|async); trackBy: trackByIndex"
-                  [value]="transition">
+      <mat-option
+        *ngFor="let transition of (availableTransitions$|async); trackBy: trackByIndex"
+        [value]="transition"
+      >
         <!--<img [src]="transition.to.iconUrl">-->
         {{transition.name}}
       </mat-option>
     </mat-select>
   </mat-form-field>
-
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button (click)="close()"
-            class="btn btn-primary submit-button"
-            color="primary"
-            mat-button
-            type="button">
+    <button
+      (click)="close()"
+      class="btn btn-primary submit-button"
+      color="primary"
+      mat-button
+      type="button"
+    >
       {{T.G.CANCEL|translate}}
     </button>
-    <button (click)="transitionIssue()"
-            class="btn btn-primary submit-button"
-            color="primary"
-            mat-stroked-button>
+    <button
+      (click)="transitionIssue()"
+      class="btn btn-primary submit-button"
+      color="primary"
+      mat-stroked-button
+    >
       {{T.F.JIRA.DIALOG_TRANSITION.TITLE|translate}}
     </button>
   </div>

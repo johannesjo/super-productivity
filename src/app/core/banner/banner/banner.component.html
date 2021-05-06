@@ -1,48 +1,62 @@
-<div #wrapperEl
-     *ngIf="(activeBanner$|async) as banner"
-     [@slide]="{value:'*',params:{elHeight:height}}"
-     [class.isError]="banner.type==='ERROR'"
-     class="content-wrapper">
+<div
+  #wrapperEl
+  *ngIf="(activeBanner$|async) as banner"
+  [@slide]="{value:'*',params:{elHeight:height}}"
+  [class.isError]="banner.type==='ERROR'"
+  class="content-wrapper"
+>
   <div class="inner-content-wrapper">
-    <div *ngIf="banner.img"
-         class="motivational-img-wrapper">
-      <img [src]="banner.img">
+    <div *ngIf="banner.img" class="motivational-img-wrapper">
+      <img [src]="banner.img" />
     </div>
 
     <div class="message-wrapper">
       <mat-icon *ngIf="banner.ico">{{banner.ico}}</mat-icon>
-      <mat-icon *ngIf="banner.svgIco"
-                [svgIcon]="banner.svgIco"></mat-icon>
+      <mat-icon *ngIf="banner.svgIco" [svgIcon]="banner.svgIco"></mat-icon>
 
-      <div [innerHTML]="banner.msg|translate:banner.translateParams"
-           class="message"></div>
+      <div
+        [innerHTML]="banner.msg|translate:banner.translateParams"
+        class="message"
+      ></div>
     </div>
 
     <div class="buttons">
-      <button (click)="dismiss(banner.id)"
-              *ngIf="!banner.action2"
-              color="primary"
-              mat-button
-              tabindex="1">{{T.G.DISMISS|translate}}
+      <button
+        (click)="dismiss(banner.id)"
+        *ngIf="!banner.action2"
+        color="primary"
+        mat-button
+        tabindex="1"
+      >
+        {{T.G.DISMISS|translate}}
       </button>
 
-      <button (click)="action(banner.id, banner.action)"
-              *ngIf="banner.action"
-              color="primary"
-              mat-button
-              tabindex="1">{{banner.action.label|translate:banner.translateParams}}
+      <button
+        (click)="action(banner.id, banner.action)"
+        *ngIf="banner.action"
+        color="primary"
+        mat-button
+        tabindex="1"
+      >
+        {{banner.action.label|translate:banner.translateParams}}
       </button>
-      <button (click)="action(banner.id, banner.action2)"
-              *ngIf="banner.action2"
-              color="primary"
-              mat-button
-              tabindex="1">{{banner.action2.label|translate:banner.translateParams}}
+      <button
+        (click)="action(banner.id, banner.action2)"
+        *ngIf="banner.action2"
+        color="primary"
+        mat-button
+        tabindex="1"
+      >
+        {{banner.action2.label|translate:banner.translateParams}}
       </button>
-      <button (click)="action(banner.id, banner.action3)"
-              *ngIf="banner.action3"
-              color="primary"
-              mat-button
-              tabindex="1">{{banner.action3.label|translate:banner.translateParams}}
+      <button
+        (click)="action(banner.id, banner.action3)"
+        *ngIf="banner.action3"
+        color="primary"
+        mat-button
+        tabindex="1"
+      >
+        {{banner.action3.label|translate:banner.translateParams}}
       </button>
     </div>
   </div>

@@ -1,11 +1,7 @@
 <div class="wrapper">
-  <div *ngIf="task?.issueWasUpdated"
-       [@expand]
-       class="updates">
+  <div *ngIf="task?.issueWasUpdated" [@expand] class="updates">
     <div>
-      <button (click)="hideUpdates()"
-              color="accent"
-              mat-raised-button>
+      <button (click)="hideUpdates()" color="accent" mat-raised-button>
         {{T.F.JIRA.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
       </button>
     </div>
@@ -16,8 +12,7 @@
         <em *ngIf="entry.author">{{entry.author.displayName}}</em>
         {{T.F.JIRA.ISSUE_CONTENT.CHANGED|translate}}
         <strong>{{entry.field}}</strong>
-        {{T.F.JIRA.ISSUE_CONTENT.ON|translate}}
-        {{entry.created|date:'short'}}
+        {{T.F.JIRA.ISSUE_CONTENT.ON|translate}} {{entry.created|date:'short'}}
       </li>
     </ul>
   </div>
@@ -25,15 +20,21 @@
   <table class="issue-table">
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.SUMMARY|translate}}</th>
-      <td class="summary"><strong><a [href]="issueUrl$|async"
-                                     target="_blank">{{issue?.key}} {{issue?.summary}}</a></strong></td>
+      <td class="summary">
+        <strong
+          ><a [href]="issueUrl$|async" target="_blank"
+            >{{issue?.key}} {{issue?.summary}}</a
+          ></strong
+        >
+      </td>
     </tr>
     <tr>
       <th>{{T.F.JIRA.ISSUE_CONTENT.STATUS|translate}}</th>
       <td>
         <!--<img [src]="issue?.status?.iconUrl"-->
         <!--*ngIf="issue?.status?.iconUrl">-->
-        {{issue?.status?.name}}</td>
+        {{issue?.status?.name}}
+      </td>
     </tr>
     <tr *ngIf="issue?.storyPoints">
       <th>{{T.F.JIRA.ISSUE_CONTENT.STORY_POINTS|translate}}</th>
@@ -45,26 +46,32 @@
     </tr>
     <tr *ngIf="issue?.timespent || issue?.timeestimate">
       <th>{{T.F.JIRA.ISSUE_CONTENT.WORKLOG|translate}}</th>
-      <td>{{(issue?.timespent * 1000)|msToString}} / {{(issue?.timeestimate * 1000)|msToString}}</td>
+      <td>
+        {{(issue?.timespent * 1000)|msToString}} / {{(issue?.timeestimate *
+        1000)|msToString}}
+      </td>
     </tr>
     <tr *ngIf="issue?.components?.length">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMPONENTS|translate}}</th>
       <td>
         <mat-chip-list>
-          <mat-chip *ngFor="let component of issue?.components; trackBy: trackByIndex"
-                    [title]="component.description">{{component.name}}
+          <mat-chip
+            *ngFor="let component of issue?.components; trackBy: trackByIndex"
+            [title]="component.description"
+            >{{component.name}}
           </mat-chip>
         </mat-chip-list>
       </td>
     </tr>
-    <tr *ngIf="issue?.description"
-        class="description-row">
+    <tr *ngIf="issue?.description" class="description-row">
       <th>{{T.F.JIRA.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
       <td>
-        <div *ngIf="description"
-             [data]="description"
-             class="issue-description markdown"
-             markdown></div>
+        <div
+          *ngIf="description"
+          [data]="description"
+          class="issue-description markdown"
+          markdown
+        ></div>
       </td>
     </tr>
     <!--    <tr *ngIf="attachments?.length">-->
@@ -80,27 +87,31 @@
     <tr *ngIf="issue?.comments">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMMENTS|translate}}</th>
       <td>
-        <div *ngFor="let comment of (issue?.comments|sort:'created'); trackBy: trackByIndex"
-             class="comment">
-
-          <img [src]="comment.author.avatarUrl"
-               class="author-avatar">
+        <div
+          *ngFor="let comment of (issue?.comments|sort:'created'); trackBy: trackByIndex"
+          class="comment"
+        >
+          <img [src]="comment.author.avatarUrl" class="author-avatar" />
           <div class="name-and-comment-content">
-            <div><span class="author-name">{{comment.author.displayName}}</span>
-              <span class="when">{{T.F.JIRA.ISSUE_CONTENT.AT|translate}}
-                {{comment.created|date:'short'}}</span>
+            <div>
+              <span class="author-name">{{comment.author.displayName}}</span>
+              <span class="when"
+                >{{T.F.JIRA.ISSUE_CONTENT.AT|translate}}
+                {{comment.created|date:'short'}}</span
+              >
             </div>
-            <div *ngIf="comment.body"
-                 [innerHTML]="comment.body|jiraToMarkdown|markdown"
-                 class="markdown"></div>
+            <div
+              *ngIf="comment.body"
+              [innerHTML]="comment.body|jiraToMarkdown|markdown"
+              class="markdown"
+            ></div>
           </div>
         </div>
 
-        <a [href]="issueUrl$|async"
-           mat-stroked-button
-           target="_blank">
+        <a [href]="issueUrl$|async" mat-stroked-button target="_blank">
           <mat-icon>textsms</mat-icon>
-          {{T.F.JIRA.ISSUE_CONTENT.WRITE_A_COMMENT|translate}}</a>
+          {{T.F.JIRA.ISSUE_CONTENT.WRITE_A_COMMENT|translate}}</a
+        >
       </td>
     </tr>
   </table>

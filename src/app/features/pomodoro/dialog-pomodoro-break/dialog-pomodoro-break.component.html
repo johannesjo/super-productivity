@@ -1,6 +1,8 @@
 <div mat-dialog-content>
   <div *ngIf="!(isBreakDone$|async)">
-    <p [innerHTML]="T.F.POMODORO.FINISH_SESSION_X|translate:{nr: (currentCycle$|async)}"></p>
+    <p
+      [innerHTML]="T.F.POMODORO.FINISH_SESSION_X|translate:{nr: (currentCycle$|async)}"
+    ></p>
     <p>{{T.F.POMODORO.ENJOY_YOURSELF|translate}}</p>
   </div>
 
@@ -11,30 +13,23 @@
   <div class="timer">{{currentTime$|async|msToMinuteClockString}}</div>
 </div>
 
+<div align="center" mat-dialog-actions>
+  <button (click)="close()" color="primary" mat-button>{{T.G.CLOSE|translate}}</button>
 
-<div align="center"
-     mat-dialog-actions>
-  <button (click)="close()"
-          color="primary"
-          mat-button>
-    {{T.G.CLOSE|translate}}
-  </button>
-
-  <button (click)="nextSession(true)"
-          *ngIf="!(isBreakDone$|async)"
-          color="primary"
-          mat-stroked-button>
+  <button
+    (click)="nextSession(true)"
+    *ngIf="!(isBreakDone$|async)"
+    color="primary"
+    mat-stroked-button
+  >
     <mat-icon>skip_next</mat-icon>
     <span>{{T.F.POMODORO.SKIP_BREAK|translate}}</span>
   </button>
 
   <ng-container *ngIf="(isBreakDone$|async)">
-    <button (click)="nextSession()"
-            color="primary"
-            mat-stroked-button>
+    <button (click)="nextSession()" color="primary" mat-stroked-button>
       <mat-icon>play_arrow</mat-icon>
       {{T.F.POMODORO.BACK_TO_WORK|translate}}
     </button>
-
   </ng-container>
 </div>
